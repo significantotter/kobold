@@ -1,0 +1,288 @@
+{
+    "data": {
+        "displayEmbeds": {
+            "welcome": {
+                "title": "Thank you for using {{COM:bot.name}}!",
+                "description": ["{{REF:bot.description}}"],
+                "fields": [
+                    {
+                        "name": "Important {{REF:fields.commands}}",
+                        "value": ["**/{{REF:chatCommands.help}}** - {{REF:commandDescs.help}}"]
+                    },
+                    {
+                        "name": "{{REF:fields.links}}",
+                        "value": ["{{REF:links.docsEmbed}}", "{{REF:links.supportEmbed}}"]
+                    }
+                ]
+            },
+            "commands": {
+                "title": "{{COM:bot.name}} - Commands",
+                "description": [
+                    "**/{{REF:chatCommands.test}}** - {{REF:commandDescs.test}}",
+                    "**/{{REF:chatCommands.info}}** - {{REF:commandDescs.info}}"
+                ],
+                "fields": [
+                    {
+                        "name": "{{REF:fields.links}}",
+                        "value": ["{{REF:links.docsEmbed}}", "{{REF:links.supportEmbed}}"]
+                    }
+                ]
+            },
+            "permissions": {
+                "title": "{{COM:bot.name}} - Permissions",
+                "description": "Want to restrict commands to certain roles, users, or channels? Set up permissions under the bot's **Integration** page in the Server Settings (or simply right-click the bot and select **Manage Integration**).",
+                "fields": [
+                    {
+                        "name": "{{REF:fields.links}}",
+                        "value": ["{{REF:links.docsEmbed}}", "{{REF:links.supportEmbed}}"]
+                    }
+                ]
+            },
+            "faq": {
+                "title": "{{COM:bot.name}} - FAQ",
+                "description": [
+                    "Frequently Asked Questions about {{COM:bot.name}}.",
+                    "",
+                    "**How do I restrict who can run the commands?**",
+                    "Slash command permissions can be configured in the Server Settings. See \"/{{REF:chatCommands.help}} {{REF:arguments.option}}:{{REF:helpOptions.permissions}}\" for more information."
+                ],
+                "fields": [
+                    {
+                        "name": "{{REF:fields.links}}",
+                        "value": ["{{REF:links.docsEmbed}}", "{{REF:links.supportEmbed}}"]
+                    }
+                ]
+            },
+            "test": {
+                "description": "Test command works!"
+            },
+            "viewDateJoined": {
+                "description": "{{TARGET}} joined on {{DATE}}!"
+            },
+            "viewDateSent": {
+                "description": "This message was sent on {{DATE}}!"
+            },
+            "about": {
+                "title": "{{COM:bot.name}} - About",
+                "description": "{{REF:bot.description}}",
+                "fields": [
+                    { "name": "Author", "value": "{{REF:links.authorEmbed}}" },
+                    {
+                        "name": "{{REF:fields.links}}",
+                        "value": [
+                            "{{REF:links.sourceEmbed}}",
+                            "{{REF:links.docsEmbed}}",
+                            "{{REF:links.voteEmbed}}",
+                            "{{REF:links.donateEmbed}}",
+                            "{{REF:links.supportEmbed}}",
+                            "{{REF:links.inviteEmbed}}"
+                        ]
+                    },
+                    {
+                        "name": "Created With",
+                        "value": ["{{REF:links.templateEmbed}}"]
+                    }
+                ]
+            },
+            "translate": {
+                "title": "{{COM:bot.name}} - Translations",
+                "description": "Thank you to our translators who have made it possible for {{COM:bot.name}} to be used in the following languages. If you are interested in providing a translation, please contact the staff in our [support server]({{COM:links.support}})."
+            },
+            "dev": {
+                "title": "{{COM:bot.name}} - Developer Info",
+                "fields": [
+                    {
+                        "name": "Versions",
+                        "value": [
+                            "**Node.js**: {{NODE_VERSION}}",
+                            "**TypeScript**: {{TS_VERSION}}",
+                            "**ECMAScript**: {{ES_VERSION}}",
+                            "**discord.js**: {{DJS_VERSION}}"
+                        ]
+                    },
+                    {
+                        "name": "Stats",
+                        "value": [
+                            "**Shards**: {{SHARD_COUNT}}",
+                            "**Servers**: {{SERVER_COUNT}} ({{SERVER_COUNT_PER_SHARD}}/Shard)"
+                        ]
+                    },
+                    {
+                        "name": "Memory",
+                        "value": [
+                            "**RSS**: {{RSS_SIZE}} ({{RSS_SIZE_PER_SERVER}}/Server)",
+                            "**Heap**: {{HEAP_TOTAL_SIZE}} ({{HEAP_TOTAL_SIZE_PER_SERVER}}/Server)",
+                            "**Used**: {{HEAP_USED_SIZE}} ({{HEAP_USED_SIZE_PER_SERVER}}/Server)"
+                        ]
+                    },
+                    {
+                        "name": "IDs",
+                        "value": [
+                            "**Hostname**: {{HOSTNAME}}",
+                            "**Shard ID**: {{SHARD_ID}}",
+                            "**Server ID**: {{SERVER_ID}}",
+                            "**Bot ID**: {{BOT_ID}}",
+                            "**User ID**: {{USER_ID}}"
+                        ]
+                    }
+                ]
+            }
+        },
+        "validationEmbeds": {
+            "cooldownHit": {
+                "description": "You can only run this command {{AMOUNT}} time(s) every {{INTERVAL}}. Please wait before attempting this command again.",
+                "color": "{{COM:colors.warning}}"
+            },
+            "devOnly": {
+                "description": "This action can only be done by developers.",
+                "color": "{{COM:colors.warning}}"
+            },
+            "missingClientPerms": {
+                "description": [
+                    "I don't have all permissions required to run that command here! Please check the server and channel permissions to make sure I have the following permissions.",
+                    "",
+                    "Required permissions: {{PERMISSIONS}}"
+                ],
+                "color": "{{COM:colors.warning}}"
+            }
+        },
+        "errorEmbeds": {
+            "command": {
+                "description": "Something went wrong!",
+                "fields": [
+                    {
+                        "name": "Error code",
+                        "value": "{{ERROR_CODE}}"
+                    },
+                    {
+                        "name": "Server ID",
+                        "value": "{{GUILD_ID}}"
+                    },
+                    {
+                        "name": "Shard ID",
+                        "value": "{{SHARD_ID}}"
+                    },
+                    {
+                        "name": "Contact support",
+                        "value": "{{COM:links.support}}"
+                    }
+                ],
+                "color": "{{COM:colors.error}}"
+            },
+            "startupInProcess": {
+                "description": "{{COM:bot.name}} is still starting up. Try again later.",
+                "color": "{{COM:colors.warning}}"
+            },
+            "notImplemented": {
+                "description": "This feature has not been implemented yet!",
+                "color": "{{COM:colors.warning}}"
+            }
+        },
+        "channelRegexes": {
+            "bot": "/bot|command|cmd/i"
+        }
+    },
+    "refs": {
+        "meta": {
+            "translators": "[TranslatorName#1234](https://github.com/)"
+        },
+        "bot": {
+            "description": "{{REF:links.templateEmbed}} helps give developers a starting point for new Discord bots, so that much of the initial setup can be avoided and developers can instead focus on meaningful bot features."
+        },
+        "chatCommands": {
+            "help": "help",
+            "info": "info",
+            "test": "test"
+        },
+        "userCommands": {
+            "viewDateJoined": "View Date Joined"
+        },
+        "messageCommands": {
+            "viewDateSent": "View Date Sent"
+        },
+        "arguments": {
+            "option": "option"
+        },
+        "commandDescs": {
+            "help": "Get help with commands, permissions, FAQ, etc.",
+            "info": "View bot info.",
+            "test": "Run the test command."
+        },
+        "argDescs": {
+            "helpOption": "Option.",
+            "infoOption": "Option."
+        },
+        "fields": {
+            "commands": "Commands",
+            "links": "Links"
+        },
+        "permissions": {
+            "ADD_REACTIONS": "Add Reactions",
+            "ADMINISTRATOR": "Administrator",
+            "ATTACH_FILES": "Attach Files",
+            "BAN_MEMBERS": "Ban Members",
+            "CHANGE_NICKNAME": "Change Nickname",
+            "CONNECT": "Connect",
+            "CREATE_INSTANT_INVITE": "Create Invite",
+            "CREATE_PRIVATE_THREADS": "Create Private Threads",
+            "CREATE_PUBLIC_THREADS": "Create Public Threads",
+            "DEAFEN_MEMBERS": "Deafen Members",
+            "EMBED_LINKS": "Embed Links",
+            "KICK_MEMBERS": "Kick Members",
+            "MANAGE_CHANNELS": "Manage Channel(s)",
+            "MANAGE_EMOJIS_AND_STICKERS": "Manage Emojis and Stickers",
+            "MANAGE_EVENTS": "Manage Events",
+            "MANAGE_GUILD": "Manage Server",
+            "MANAGE_MESSAGES": "Manage Messages",
+            "MANAGE_NICKNAMES": "Manage Nicknames",
+            "MANAGE_ROLES": "Manage Roles / Permissions",
+            "MANAGE_THREADS": "Manage Threads",
+            "MANAGE_WEBHOOKS": "Manage Webhooks",
+            "MENTION_EVERYONE": "Mention Everyone, Here, and All Roles",
+            "MODERATE_MEMBERS": "Timeout Members",
+            "MOVE_MEMBERS": "Move Members",
+            "MUTE_MEMBERS": "Mute Members",
+            "PRIORITY_SPEAKER": "Priority Speaker",
+            "READ_MESSAGE_HISTORY": "Read Message History",
+            "REQUEST_TO_SPEAK": "Request to Speak",
+            "SEND_MESSAGES": "Send Messages",
+            "SEND_MESSAGES_IN_THREADS": "Send Messages in Threads",
+            "SEND_TTS_MESSAGES": "Send Text-to-Speech Messages",
+            "SPEAK": "Speak",
+            "START_EMBEDDED_ACTIVITIES": "Start Activities",
+            "STREAM": "Video",
+            "USE_APPLICATION_COMMANDS": "Use Application Commands",
+            "USE_EXTERNAL_EMOJIS": "Use External Emoji",
+            "USE_EXTERNAL_STICKERS": "Use External Stickers",
+            "USE_PRIVATE_THREADS": "Use Private Threads",
+            "USE_PUBLIC_THREADS": "Use Public Threads",
+            "USE_VAD": "Use Voice Activity",
+            "VIEW_AUDIT_LOG": "View Audit Log",
+            "VIEW_CHANNEL": "View Channel(s)",
+            "VIEW_GUILD_INSIGHTS": "View Server Insights"
+        },
+        "helpOptions": {
+            "commands": "Commands",
+            "permissions": "Permissions",
+            "faq": "FAQ"
+        },
+        "infoOptions": {
+            "about": "About",
+            "translate": "Translate",
+            "dev": "Dev"
+        },
+        "other": {
+            "na": "N/A"
+        },
+        "links": {
+            "authorEmbed": "[{{COM:bot.author}}]({{COM:links.author}})",
+            "docsEmbed": "[View Documentation]({{COM:links.docs}})",
+            "donateEmbed": "[Donate via PayPal]({{COM:links.donate}})",
+            "inviteEmbed": "[Invite {{COM:bot.name}} to a Server!]({{COM:links.invite}})",
+            "sourceEmbed": "[View Source Code]({{COM:links.source}})",
+            "supportEmbed": "[Join Support Server]({{COM:links.support}})",
+            "templateEmbed": "[Discord Bot TypeScript Template]({{COM:links.template}})",
+            "voteEmbed": "[Vote for {{COM:bot.name}}!]({{COM:links.vote}})"
+        }
+    }
+}
