@@ -6,7 +6,7 @@ import { GuildsController, RootController, ShardsController } from './controller
 import { Job, UpdateServerCountJob } from './jobs/index.js';
 import { Api } from './models/api.js';
 import { Manager } from './models/manager.js';
-import { HttpService, JobService, Logger, MasterApiService } from './services/index.js';
+import { DBModel, HttpService, JobService, Logger, MasterApiService } from './services/index.js';
 import { MathUtils, ShardUtils } from './utils/index.js';
 
 const require = createRequire(import.meta.url);
@@ -16,6 +16,7 @@ let Logs = require('../lang/logs.json');
 
 async function start(): Promise<void> {
     Logger.info(Logs.info.appStarted);
+    DBModel.init(Config.database.url);
 
     // Dependencies
     let httpService = new HttpService();

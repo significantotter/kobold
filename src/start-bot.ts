@@ -20,7 +20,7 @@ import { CustomClient } from './extensions/index.js';
 import { Job } from './jobs/index.js';
 import { Bot } from './models/bot.js';
 import { Reaction } from './reactions/index.js';
-import { CommandRegistrationService, JobService, Logger } from './services/index.js';
+import { CommandRegistrationService, DBModel, JobService, Logger } from './services/index.js';
 import { Trigger } from './triggers/index.js';
 
 const require = createRequire(import.meta.url);
@@ -28,6 +28,8 @@ let Config = require('../config/config.json');
 let Logs = require('../lang/logs.json');
 
 async function start(): Promise<void> {
+    DBModel.init(Config.database.url);
+
     // Client
     let client = new CustomClient({
         intents: Config.client.intents,
