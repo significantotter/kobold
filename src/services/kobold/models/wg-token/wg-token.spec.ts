@@ -18,6 +18,10 @@ describe('WG Token', () => {
 		const valid = ajv.validate(WgTokenSchema, createdToken);
 		expect(valid).toBe(true);
 	});
+	test('builds a token with a fake id', async () => {
+		const builtToken = WgTokenFactory.withFakeId().build();
+		expect(builtToken).toHaveProperty('id');
+	});
 	test('Model successfully inserts and retrieves a created token', async () => {
 		const builtToken = WgTokenFactory.build();
 		await WgToken.query().insert(builtToken);
