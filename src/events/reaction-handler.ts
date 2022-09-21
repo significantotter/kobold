@@ -4,7 +4,7 @@ import { RateLimiter } from 'discord.js-rate-limiter';
 import { EventData } from '../models/internal-models.js';
 import { Reaction } from '../reactions/index.js';
 import { EventHandler } from './index.js';
-import Config from './../config/config.json' assert { type: 'json' };
+import Config from './../config/config.json';
 
 export class ReactionHandler implements EventHandler {
 	private rateLimiter = new RateLimiter(

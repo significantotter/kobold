@@ -1,5 +1,5 @@
 import type { Knex } from 'knex';
-import Config from './src/config/config.json' assert { type: 'json' };
+import Config from './src/config/config.json';
 
 // Update with your config settings.
 

@@ -1,6 +1,6 @@
 import objection from 'objection';
 import { DBModel } from './src/services/db-model.js';
-import Config from './src/config/config.json' assert { type: 'json' };
+import Config from './src/config/config.json';
 
 DBModel.init(Config.database.testUrl);
 const knex = DBModel.knex;

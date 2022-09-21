@@ -4,7 +4,7 @@ import { Language } from '../models/enum-helpers/index.js';
 import { Lang, Logger } from '../services/index.js';
 import { ClientUtils, MessageUtils } from '../utils/index.js';
 import { EventHandler } from './index.js';
-import Logs from './../config/lang/logs.json' assert { type: 'json' };
+import Logs from './../config/lang/logs.json';
 
 export class GuildJoinHandler implements EventHandler {
 	public async process(guild: Guild): Promise<void> {

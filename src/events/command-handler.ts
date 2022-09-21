@@ -12,8 +12,8 @@ import { EventData } from '../models/internal-models.js';
 import { Lang, Logger } from '../services/index.js';
 import { CommandUtils, InteractionUtils } from '../utils/index.js';
 import { EventHandler } from './index.js';
-import Config from './../config/config.json' assert { type: 'json' };
-import Logs from './../config/lang/logs.json' assert { type: 'json' };
+import Config from './../config/config.json';
+import Logs from './../config/lang/logs.json';
 
 export class CommandHandler implements EventHandler {
 	private rateLimiter = new RateLimiter(

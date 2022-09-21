@@ -4,7 +4,7 @@ import router from 'express-promise-router';
 
 import { GetGuildsResponse } from '../models/cluster-api/index.js';
 import { Controller } from './index.js';
-import Config from './../config/config.json' assert { type: 'json' };
+import Config from './../config/config.json';
 
 export class GuildsController implements Controller {
 	public path = '/guilds';

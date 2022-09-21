@@ -8,8 +8,8 @@ import {
 } from 'discord-api-types/v10';
 
 import { Logger } from './logger.js';
-import Config from './../config/config.json' assert { type: 'json' };
-import Logs from './../config/lang/logs.json' assert { type: 'json' };
+import Config from './../config/config.json';
+import Logs from './../config/lang/logs.json';
 
 export class CommandRegistrationService {
 	constructor(private rest: REST) {}

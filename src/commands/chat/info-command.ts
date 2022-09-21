@@ -14,7 +14,7 @@ import { EventData } from '../../models/internal-models.js';
 import { Lang } from '../../services/index.js';
 import { InteractionUtils, ShardUtils } from '../../utils/index.js';
 import { Command, CommandDeferType } from '../index.js';
-import Config from './../../config/config.json' assert { type: 'json' };
+import Config from './../../config/config.json';
 
 export class InfoCommand implements Command {
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {

@@ -21,8 +21,8 @@ import { Bot } from './models/bot.js';
 import { Reaction } from './reactions/index.js';
 import { CommandRegistrationService, DBModel, JobService, Logger } from './services/index.js';
 import { Trigger } from './triggers/index.js';
-import Config from './config/config.json' assert { type: 'json' };
-import Logs from './config/lang/logs.json' assert { type: 'json' };
+import Config from './config/config.json';
+import Logs from './config/lang/logs.json';
 
 async function start(): Promise<void> {
 	DBModel.init(Config.database.url);

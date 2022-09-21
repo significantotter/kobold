@@ -1,7 +1,7 @@
 import type WgTokenTypes from './wg-token.schema.js';
 import { JSONSchema7 } from 'json-schema';
 import { BaseModel } from '../../lib/base-model.js';
-import WgTokenSchema from './wg-token.schema.json' assert { type: 'json' };
+import WgTokenSchema from './wg-token.schema.json';
 
 export interface WgToken extends WgTokenTypes.WgToken {}
 export class WgToken extends BaseModel {

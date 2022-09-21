@@ -12,8 +12,8 @@ import {
 } from '../models/cluster-api/index.js';
 import { Logger } from '../services/index.js';
 import { Controller } from './index.js';
-import Config from './../config/config.json' assert { type: 'json' };
-import Logs from './../config/lang/logs.json' assert { type: 'json' };
+import Config from './../config/config.json';
+import Logs from './../config/lang/logs.json';
 
 export class ShardsController implements Controller {
 	public path = '/shards';

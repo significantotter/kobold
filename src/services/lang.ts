@@ -7,10 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { Language } from '../models/enum-helpers/index.js';
 
 export class Lang {
-	private static linguini = new Linguini(
-		path.resolve(dirname(fileURLToPath(import.meta.url)), '../config/lang'),
-		'lang'
-	);
+	private static linguini = new Linguini(path.resolve(process.cwd(), 'src/config/lang'), 'lang');
 
 	public static getEmbed(
 		location: string,

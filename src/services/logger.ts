@@ -1,7 +1,7 @@
 import { DiscordAPIError } from 'discord.js';
 import { Response } from 'node-fetch';
 import pino from 'pino';
-import Config from './../config/config.json' assert { type: 'json' };
+import Config from './../config/config.json';
 
 let logger = pino(
 	{

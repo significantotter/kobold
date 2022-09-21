@@ -1,7 +1,7 @@
-import Glob from 'glob';
-import path from 'path';
-import fs from 'fs';
-import { compile } from 'json-schema-to-typescript';
+const Glob = require('glob');
+const path = require('path');
+const fs = require('fs');
+const compile = require('json-schema-to-typescript').compile;
 
 const files = Glob.sync('src/**/*.schema.json');
 

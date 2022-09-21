@@ -7,9 +7,9 @@ import { Api } from './models/api.js';
 import { Manager } from './models/manager.js';
 import { DBModel, HttpService, JobService, Logger, MasterApiService } from './services/index.js';
 import { MathUtils, ShardUtils } from './utils/index.js';
-import Config from './config/config.json' assert { type: 'json' };
-import Debug from './config/debug.json' assert { type: 'json' };
-import Logs from './config/lang/logs.json' assert { type: 'json' };
+import Config from './config/config.json';
+import Debug from './config/debug.json';
+import Logs from './config/lang/logs.json';
 
 async function start(): Promise<void> {
 	Logger.info(Logs.info.appStarted);

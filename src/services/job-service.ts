@@ -2,7 +2,7 @@ import schedule from 'node-schedule';
 
 import { Job } from '../jobs/index.js';
 import { Logger } from './index.js';
-import Logs from './../config/lang/logs.json' assert { type: 'json' };
+import Logs from './../config/lang/logs.json';
 
 export class JobService {
 	constructor(private jobs: Job[]) {}
