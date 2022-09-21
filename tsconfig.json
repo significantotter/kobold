@@ -1,14 +1,14 @@
 {
 	"compilerOptions": {
 		"target": "es2021",
-		"module": "es2022",
+		"module": "esnext",
+		"moduleResolution": "Node",
 		"lib": ["es2021"],
 		"declaration": true,
 		"sourceMap": true,
 		"outDir": "./dist",
 		"rootDir": "./src",
 		"strict": false,
-		"moduleResolution": "node",
 		"resolveJsonModule": true,
 		"esModuleInterop": true,
 		"experimentalDecorators": true,
@@ -16,5 +16,14 @@
 		"skipLibCheck": true,
 		"forceConsistentCasingInFileNames": true
 	},
-	"exclude": ["dist", "node_modules", "tests", "jest.config.ts", "jest.setup.ts"]
+	"include": ["src/**/*.ts", "src/**/*.json", "types.d.ts"],
+	"exclude": [
+		"dist",
+		"migrations",
+		"node_modules",
+		"tests",
+		"jest.config.ts",
+		"jest.setup.ts",
+		"knexfile.ts"
+	]
 }

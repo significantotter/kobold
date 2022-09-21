@@ -5,6 +5,7 @@
 	"description": "A discord.js bot template written with TypeScript",
 	"license": "MIT",
 	"private": true,
+	"type": "module",
 	"engines": {
 		"node": ">=16.6.0"
 	},
@@ -17,8 +18,8 @@
 		"lint:fix": "eslint . --fix --cache --ext .js,.jsx,.ts,.tsx",
 		"format": "prettier --check .",
 		"format:fix": "prettier --write .",
-		"clean": "git clean -xdf --exclude=\"/config/**/*\"",
-		"clean:dry": "git clean -xdf --exclude=\"/config/**/*\" --dry-run",
+		"clean": "git clean -xdf --exclude=\"/src/config/**/*\"",
+		"clean:dry": "git clean -xdf --exclude=\"/src/config/**/*\" --dry-run",
 		"build-types": "node scripts/compileTypes.js",
 		"build": "npm run build-types && tsc --project tsconfig.json",
 		"commands:view": "npm run build && node --enable-source-maps dist/start-bot.js commands view",
@@ -36,7 +37,7 @@
 		"api-knex": "TS_NODE_COMPILER_OPTIONS='{ \"module\": \"commonjs\" }' knex --knexfile=./knexfile.ts",
 		"migrate": "npm run api-knex migrate:latest",
 		"migrate:test": "NODE_ENV=TEST npm run api-knex migrate:latest",
-		"test": "jest --coverage src/"
+		"test": "NODE_OPTIONS=--experimental-vm-modules node_modules/jest/bin/jest.js --no-cache --coverage src/"
 	},
 	"dependencies": {
 		"@discordjs/rest": "1.1.0",

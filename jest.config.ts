@@ -14,5 +14,6 @@ export default {
 	moduleNameMapper: {
 		'(.+)\\.js': '$1',
 	},
-	extensionsToTreatAsEsm: ['.ts'],
+	moduleDirectories: ['node_modules', 'src'],
+	extensionsToTreatAsEsm: ['.ts', '.json'],
 };
