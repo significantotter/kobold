@@ -1,0 +1,39 @@
+{
+	"title": "character",
+	"type": "object",
+	"description": "An imported character",
+	"properties": {
+		"id": {
+			"type": "integer",
+			"readOnly": true,
+			"description": "The id of the character record."
+		},
+		"charId": {
+			"type": "integer",
+			"description": "The external wanderer's guide character id."
+		},
+		"userId": {
+			"type": "string",
+			"description": "The discord id of the user who imported the character"
+		},
+		"calculatedStats": {
+			"type": "object",
+			"description": "The computed base stat block from the Wanderer's guide API"
+		},
+		"isActiveCharacter": {
+			"type": "boolean",
+			"description": "whether this is the active character for the user's character based commands"
+		},
+		"createdAt": {
+			"type": "string",
+			"format": "date-time",
+			"description": "When the character was first imported"
+		},
+		"lastUpdatedAt": {
+			"type": "string",
+			"format": "date-time",
+			"description": "When the character was last updated"
+		}
+	},
+	"required": ["charId", "userId", "isActiveCharacter"]
+}

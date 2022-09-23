@@ -34,8 +34,8 @@
 		"pm2:stop": "pm2 stop process.json",
 		"pm2:delete": "pm2 delete process.json",
 		"api-knex": "TS_NODE_COMPILER_OPTIONS='{ \"module\": \"commonjs\" }' knex --knexfile=./knexfile.ts",
-		"migrate": "npm run api-knex migrate:latest",
-		"migrate:test": "NODE_ENV=TEST npm run api-knex migrate:latest",
+		"migrate": "knex migrate:latest",
+		"migrate:test": "NODE_ENV=TEST knex migrate:latest",
 		"test": "jest --no-cache --coverage src/"
 	},
 	"dependencies": {

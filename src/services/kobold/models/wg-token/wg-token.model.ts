@@ -12,6 +12,4 @@ export class WgToken extends BaseModel {
 	static get jsonSchema(): JSONSchema7 {
 		return WgTokenSchema as JSONSchema7;
 	}
-
-	static readonly factory = {};
 }

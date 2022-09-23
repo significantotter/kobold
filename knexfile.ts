@@ -16,7 +16,7 @@ const config: { [key: string]: Knex.Config } = {
 		},
 	},
 
-	test: {
+	TEST: {
 		client: 'postgresql',
 		connection: Config.database.testUrl,
 		pool: {

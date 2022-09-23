@@ -1,98 +1,10 @@
 import axios from 'axios';
 import type { AxiosRequestConfig } from 'axios';
+import type { WG } from './wanderers-guide.js';
 
 interface httpHeaders {
 	[key: string]: number | string;
 }
-interface CharacterApiResponse {
-	id: number;
-	userID: number;
-	buildID: null;
-	name: string;
-	level: number;
-	experience: number;
-	currentHealth: number;
-	tempHealth: null | number;
-	heroPoints: null | number;
-	ancestryID: null | number;
-	heritageID: null | number;
-	uniHeritageID: null | number;
-	backgroundID: null | number;
-	classID: null | number;
-	classID_2: null | number;
-	inventoryID: number;
-	notes: null;
-	infoJSON: { imageUrl: string; pronouns: string; [key: string]: any };
-	rollHistoryJSON: any;
-	details: any;
-	customCode: any;
-	dataID: null | number;
-	currentStamina: null | number;
-	currentResolve: null | number;
-	builderByLevel: number;
-	optionAutoDetectPreReqs: number;
-	optionAutoHeightenSpells: number;
-	optionPublicCharacter: number;
-	optionCustomCodeBlock: number;
-	optionDiceRoller: number;
-	optionClassArchetypes: number;
-	optionIgnoreBulk: number;
-	variantProfWithoutLevel: number;
-	variantFreeArchetype: number;
-	variantAncestryParagon: number;
-	variantStamina: number;
-	variantAutoBonusProgression: number;
-	variantGradualAbilityBoosts: number;
-	enabledSources: string[];
-	enabledHomebrew: any[];
-	createdAt: string;
-	updatedAt: string;
-	[key: string]: any;
-}
-
-interface NamedBonus {
-	Name: string;
-	Bonus: number | null;
-	[key: string]: any;
-}
-
-interface Attack {
-	Name: string;
-	Bonus: number | null;
-	Damage: String | null;
-	[key: string]: any;
-}
-
-interface CharacterCalculatedStatsApiResponse {
-	charID: number;
-	maxHP: number | null;
-	totalClassDC: number | null;
-	totalSpeed: number | null;
-	totalAC: number | null;
-	totalPerception: number | null;
-	totalSkills: NamedBonus[];
-	totalSaves: NamedBonus[];
-	totalAbilityScores: NamedBonus[];
-	weapons: Attack[];
-	createdAt: Date;
-	updatedAt: Date;
-	[key: string]: any;
-}
-
-interface CharacterMetadataAPIResponseItem {
-	charID: number;
-	source: string;
-	sourceType: string;
-	sourceLevel: number;
-	sourceCode: string;
-	sourceCodeSNum: string;
-	value: string;
-	createdAt: string;
-	updatedAt: string;
-	[key: string]: any;
-}
-type CharacterMetadataAPIResponse = CharacterMetadataAPIResponseItem[];
-
 class CharacterApi {
 	wg: WanderersGuide;
 	baseURL: string;
@@ -120,29 +32,79 @@ class CharacterApi {
 		return response;
 	}
 
-	async get(characterId: number): Promise<CharacterApiResponse> {
+	async get(characterId: number): Promise<WG.CharacterApiResponse> {
 		const response = await axios.get(`${this.baseURL}/${characterId}`, {
 			headers: this.wg.headers,
 		});
-		const character: CharacterApiResponse = CharacterApi.parseAPIResponse(response.data);
+		const character: WG.CharacterApiResponse = CharacterApi.parseAPIResponse(response.data);
 		return character;
 	}
-	async getCalculatedStats(characterId: number) {
+	async getCalculatedStats(characterId: number): Promise<WG.CharacterCalculatedStatsApiResponse> {
 		const response = await axios.get(`${this.baseURL}/${characterId}/calculated-stats`, {
 			headers: this.wg.headers,
 		});
-		const calculatedStats: CharacterCalculatedStatsApiResponse = CharacterApi.parseAPIResponse(
-			response.data
-		);
+		const calculatedStats: WG.CharacterCalculatedStatsApiResponse =
+			CharacterApi.parseAPIResponse(response.data);
 		return calculatedStats;
 	}
 
-	async getMetadata(characterId: number): Promise<CharacterMetadataAPIResponse> {
+	async getMetadata(characterId: number): Promise<WG.CharacterMetadataAPIResponse> {
 		const response = await axios.get(`${this.baseURL}/${characterId}/metadata`, {
 			headers: this.wg.headers,
 		});
-		const metadata: CharacterMetadataAPIResponse = CharacterApi.parseAPIResponse(response.data);
-		return metadata as CharacterMetadataAPIResponse;
+		const metadata: WG.CharacterMetadataAPIResponse = CharacterApi.parseAPIResponse(
+			response.data
+		);
+		return metadata as WG.CharacterMetadataAPIResponse;
+	}
+
+	async getSpells(characterId: number): Promise<WG.CharacterSpellAPIResponse> {
+		const response = await axios.get(`${this.baseURL}/${characterId}/spell`, {
+			headers: this.wg.headers,
+		});
+		const metadata: WG.CharacterSpellAPIResponse = CharacterApi.parseAPIResponse(response.data);
+		return metadata as WG.CharacterSpellAPIResponse;
+	}
+
+	async getInventory(characterId: number): Promise<WG.CharacterInventoryAPIResponse> {
+		const response = await axios.get(`${this.baseURL}/${characterId}/inventory`, {
+			headers: this.wg.headers,
+		});
+		const metadata: WG.CharacterInventoryAPIResponse = CharacterApi.parseAPIResponse(
+			response.data
+		);
+		return metadata as WG.CharacterInventoryAPIResponse;
+	}
+
+	async getConditions(characterId: number): Promise<WG.CharacterConditionsAPIResponse> {
+		const response = await axios.get(`${this.baseURL}/${characterId}/conditions`, {
+			headers: this.wg.headers,
+		});
+		const metadata: WG.CharacterConditionsAPIResponse = CharacterApi.parseAPIResponse(
+			response.data
+		);
+		return metadata as WG.CharacterConditionsAPIResponse;
+	}
+	async getAllEndpoints(
+		characterId: number
+	): Promise<
+		[
+			WG.CharacterApiResponse,
+			WG.CharacterCalculatedStatsApiResponse,
+			WG.CharacterMetadataAPIResponse,
+			WG.CharacterSpellAPIResponse,
+			WG.CharacterInventoryAPIResponse,
+			WG.CharacterConditionsAPIResponse
+		]
+	> {
+		return await Promise.all([
+			this.get(characterId),
+			this.getCalculatedStats(characterId),
+			this.getMetadata(characterId),
+			this.getSpells(characterId),
+			this.getInventory(characterId),
+			this.getConditions(characterId),
+		]);
 	}
 }
 
@@ -152,7 +114,7 @@ export class WanderersGuide {
 		this.headers = { authorization: `Bearer ${accessToken}` };
 	}
 
-	character() {
+	get character() {
 		return new CharacterApi(this);
 	}
 }
