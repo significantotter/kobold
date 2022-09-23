@@ -2,7 +2,13 @@ import { REST } from '@discordjs/rest';
 import { Options } from 'discord.js';
 
 import { Button } from './buttons/index.js';
-import { HelpCommand, InfoCommand, TestCommand, ImportCommand } from './commands/chat/index.js';
+import {
+	HelpCommand,
+	InfoCommand,
+	TestCommand,
+	ImportCommand,
+	SheetCommand,
+} from './commands/chat/index.js';
 import { Command } from './commands/index.js';
 import { ViewDateSent } from './commands/message/index.js';
 import { ViewDateJoined } from './commands/user/index.js';
@@ -43,6 +49,7 @@ async function start(): Promise<void> {
 	let commands: Command[] = [
 		// Chat Commands
 		new ImportCommand(),
+		new SheetCommand(),
 		new HelpCommand(),
 		new InfoCommand(),
 		new TestCommand(),

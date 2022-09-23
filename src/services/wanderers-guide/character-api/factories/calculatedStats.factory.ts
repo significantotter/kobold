@@ -1,8 +1,8 @@
 import { AttackFactory } from './attack.factory';
-import { skills, abilities, saves } from './../../../constants/pathfinder';
+import { skills, abilities, saves } from './../../../../constants/pathfinder';
 import { Factory } from 'fishery';
 import type { DeepPartial } from 'fishery';
-import type { WG } from '../wanderers-guide.js';
+import type { WG } from '../../wanderers-guide.js';
 import { faker } from '@faker-js/faker';
 import { NamedBonusFactory } from './namedBonus.factory.js';
 import { NamedScoreFactory } from './namedScore.factory.js';

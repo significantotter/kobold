@@ -1,5 +1,5 @@
-import { CharacterDataFactory } from './../../../wanderers-guide/factories/characterData.factory';
-import { CalculatedStatsFactory } from './../../../wanderers-guide/factories/calculatedStats.factory';
+import { CharacterDataFactory } from './../../../wanderers-guide/character-api/factories/characterData.factory';
+import { CalculatedStatsFactory } from './../../../wanderers-guide/character-api/factories/calculatedStats.factory';
 import { Factory } from 'fishery';
 import type { DeepPartial } from 'fishery';
 import { Character } from './character.model.js';

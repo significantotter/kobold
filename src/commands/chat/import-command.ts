@@ -1,3 +1,4 @@
+import { WanderersGuide } from './../../services/wanderers-guide/index';
 import { Character } from './../../services/kobold/models/index.js';
 import {
 	ApplicationCommandType,
@@ -5,7 +6,6 @@ import {
 } from 'discord-api-types/v10';
 import { CommandInteraction, PermissionString } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
-import { WanderersGuide } from '../../services/wanderers-guide/index.js';
 
 import { ChatArgs } from '../../constants/index.js';
 import { Language } from '../../models/enum-helpers/index.js';
@@ -15,6 +15,7 @@ import { InteractionUtils } from '../../utils/index.js';
 import { Command, CommandDeferType } from '../index.js';
 import { MessageEmbed } from 'discord.js';
 import { WgToken } from '../../services/kobold/models/index.js';
+import Config from './../../config/config.json';
 
 export class ImportCommand implements Command {
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
@@ -54,7 +55,7 @@ export class ImportCommand implements Command {
 			await InteractionUtils.send(
 				intr,
 				`Yip! Before you can import a character, you need to authenticate it. ` +
-					`Give us permission to read your wanderer's guide character by following [this link](` +
+					`Give me permission to read your wanderer's guide character by following [this link](` +
 					`https://kobold.netlify.app/.netlify/functions/oauth?characterId=${charId}). ` +
 					`Then, /import your character again!`
 			);
@@ -62,11 +63,102 @@ export class ImportCommand implements Command {
 			// We have the authentication token! Fetch the user's sheet
 			const token = tokenResults[0].accessToken;
 
-			const [characterData, calculatedStats] = await Promise.all([
+			const WGTokenApi = new WanderersGuide({ token });
+
+			const WGApiKeyApi = new WanderersGuide({ apiKey: Config.wanderersGuide.apiKey });
+
+			let [characterData, calculatedStats] = await Promise.all([
 				// request sheet data from WG API
-				await new WanderersGuide(token).character.get(charId),
-				await new WanderersGuide(token).character.getCalculatedStats(charId),
+				await WGTokenApi.character.get(charId),
+				await WGTokenApi.character.getCalculatedStats(charId),
 			]);
+
+			// fetch the names of each value referenced as an id, so we don't have to later
+
+			const classId = characterData.classID;
+			const classId2 = characterData.classID_2;
+			const ancestryId = characterData.ancestryID;
+			const heritageId = characterData.heritageID;
+			const vHeritageId = characterData.uniHeritageID;
+			const backgroundId = characterData.backgroundID;
+
+			console.log({ classId, classId2, ancestryId, heritageId, vHeritageId, backgroundId });
+			const getNameFunctions = [
+				async () => {
+					if (classId) {
+						const response = await WGApiKeyApi.class.get(classId);
+						return response.class.name;
+					} else return '';
+				},
+				async () => {
+					if (classId2) {
+						const response = await WGApiKeyApi.class.get(classId2);
+						return response.class.name;
+					} else return '';
+				},
+				async () => {
+					if (ancestryId) {
+						const response = await WGApiKeyApi.ancestry.get(ancestryId);
+						return response.ancestry.name;
+					} else return '';
+				},
+				async () => {
+					if (heritageId) {
+						const response = await WGApiKeyApi.heritage.get(heritageId);
+						return response.name;
+					} else return '';
+				},
+				async () => {
+					if (vHeritageId) {
+						const response = await WGApiKeyApi.vHeritage.get(vHeritageId);
+						return response.heritage.name;
+					} else return '';
+				},
+				async () => {
+					if (backgroundId) {
+						const response = await WGApiKeyApi.background.get(backgroundId);
+						return response.background.name;
+					} else return '';
+				},
+			];
+
+			const [
+				className,
+				className2,
+				ancestryName,
+				heritageName,
+				vHeritageName,
+				backgroundName,
+			] = await Promise.all(
+				getNameFunctions.map(async nameFn => {
+					try {
+						return await nameFn();
+					} catch (err) {
+						console.warn(err);
+						//fail gracefully if we don't find the data or the API times out
+						return '';
+					}
+				})
+			);
+
+			console.log({
+				className,
+				className2,
+				ancestryName,
+				heritageName,
+				vHeritageName,
+				backgroundName,
+			});
+			//add these name properties to the character data
+			characterData = {
+				...characterData,
+				className,
+				className2,
+				ancestryName,
+				heritageName,
+				vHeritageName,
+				backgroundName,
+			};
 
 			// set current characters owned by user to inactive state
 			await Character.query()
@@ -86,7 +178,7 @@ export class ImportCommand implements Command {
 
 			await InteractionUtils.send(
 				intr,
-				`Yip! We've successfully imported ${characterData.name}!`
+				`Yip! I've successfully imported ${characterData.name}!`
 			);
 		}
 	}

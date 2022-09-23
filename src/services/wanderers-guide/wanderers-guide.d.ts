@@ -1,4 +1,11 @@
+import { VHeritageApi } from './v-heritage-api/index';
+import { Language } from './../../models/enum-helpers/language';
 export namespace WG {
+	/**
+	 * CHARACTER API
+	 */
+
+	// GET
 	interface CharacterApiResponse {
 		id: number;
 		userID: number;
@@ -45,6 +52,7 @@ export namespace WG {
 		[key: string]: any;
 	}
 
+	// GET SPELLS
 	interface SrcStruct {
 		charID: number;
 		source: string;
@@ -112,7 +120,7 @@ export namespace WG {
 		[className: string]: FocusSpell;
 	}
 
-	interface CharacterSpellAPIResponse {
+	interface CharacterSpellApiResponse {
 		spell_slots_map: SpellSlotsMap;
 		spell_books: SpellBook[];
 		innate_spells: InnateSpell;
@@ -120,6 +128,7 @@ export namespace WG {
 		focus_points: SrcStruct[];
 	}
 
+	// GET CALCULATED STATS
 	interface NamedScore {
 		Name: string;
 		Score: number | null;
@@ -155,6 +164,8 @@ export namespace WG {
 		[key: string]: any;
 	}
 
+	// GET INVENTORY
+
 	interface InventoryMetadata {
 		id: number;
 		equippedArmorInvItemID: number | null;
@@ -171,7 +182,7 @@ export namespace WG {
 		name: string;
 		price: number;
 		bulk: number;
-		description: string;
+		description: string | null;
 		size: string;
 		quantity: number;
 		isShoddy: number;
@@ -204,15 +215,16 @@ export namespace WG {
 		updatedAt: string;
 	}
 
-	interface CharacterInventoryAPIResponse {
+	interface CharacterInventoryApiResponse {
 		Inventory: InventoryMetadata;
 		InvItems: InventoryItem[];
 	}
 
+	// GET CONDITION
 	interface Condition {
 		id: number;
 		name: string;
-		description: string;
+		description: string | null;
 		hasValue: number;
 		code: string;
 		createdAt: string;
@@ -225,11 +237,12 @@ export namespace WG {
 		ParentID: number;
 	}
 
-	interface CharacterConditionsAPIResponse {
+	interface CharacterConditionsApiResponse {
 		[id: string]: ConditionEntry;
 	}
 
-	interface CharacterMetadataAPIResponseItem {
+	// GET METADATA
+	interface CharacterMetadataApiResponseItem {
 		charID: number;
 		source: string;
 		sourceType: string;
@@ -241,5 +254,187 @@ export namespace WG {
 		updatedAt: string;
 		[key: string]: any;
 	}
-	type CharacterMetadataAPIResponse = CharacterMetadataAPIResponseItem[];
+	type CharacterMetadataApiResponse = CharacterMetadataApiResponseItem[];
+
+	/**
+	 * CLASS API
+	 */
+
+	interface ClassFeature {
+		id: number;
+		classID: number;
+		name: string;
+		level: any;
+		description: string | null;
+		code: string;
+		selectType: string;
+		selectOptionFor: number;
+		displayInSheet: number;
+		indivClassName: any;
+		indivClassAbilName: any;
+		isArchived: number;
+		contentSrc: string;
+		homebrewID: any;
+		createdAt: string;
+		updatedAt: string;
+	}
+
+	interface ClassApiResponse {
+		class: {
+			id: number;
+			name: string;
+			rarity: string;
+			description: string | null;
+			keyAbility: string;
+			hitPoints: number;
+			tPerception: string;
+			tFortitude: string;
+			tReflex: string;
+			tWill: string;
+			tClassDC: string;
+			tSkills: string;
+			tSkillsMore: number;
+			tWeapons: string;
+			weaponsExtra: any;
+			tArmor: string;
+			tagID: number;
+			artworkURL: string;
+			code: any;
+			isArchived: number;
+			contentSrc: string;
+			homebrewID: any;
+			version: string;
+			createdAt: string;
+			updatedAt: string;
+		};
+		class_features: ClassFeature[];
+	}
+	interface ClassApiMapResponse {
+		[id: string]: ClassApiResponse;
+	}
+
+	/**
+	 * ANCESTRY API
+	 */
+
+	interface AncestryHeritage {
+		id: number;
+		name: string;
+		ancestryID?: number;
+		tagId?: number;
+		rarity: string;
+		description: string | null;
+		code: string;
+		isArchived: number;
+		contentSrc: string;
+		indivAncestryName?: any;
+		homebrewID: any;
+		artworkURL?: string | null;
+		version?: string;
+		createdAt: string;
+		updatedAt: string;
+	}
+
+	interface Language {
+		id: number;
+		name: string;
+		speakers: string;
+		script: any;
+		description: string | null;
+		homebrewID: any;
+		createdAt: string;
+		updatedAt: string;
+	}
+	interface AncestryFeature {
+		id: number;
+		name: string;
+		description: string | null;
+		code: string;
+		itemWeaponID: any;
+		overrides: any;
+	}
+
+	interface Ancestry {
+		id: number;
+		name: string;
+		rarity: string;
+		hitPoints: number;
+		size: string;
+		speed: number;
+		description: string;
+		visionSenseID: number;
+		additionalSenseID: any;
+		physicalFeatureOneID: number;
+		physicalFeatureTwoID: number;
+		tagID: number;
+		artworkURL: any;
+		isArchived: number;
+		contentSrc: string;
+		homebrewID: any;
+		version: string;
+		createdAt: string;
+		updatedAt: string;
+	}
+	interface AncestryApiResponse {
+		ancestry: Ancestry;
+		heritages: AncestryHeritage[];
+		languages: Language[];
+		bonus_languages: Language[];
+		boosts: string[];
+		flaws: string[];
+		vision_sense: {
+			id: number;
+			name: string;
+			description: string | null;
+			isVisionType: number;
+			visionPrecedence: number;
+			createdAt: string;
+			updatedAt: string;
+		};
+		additional_sense: null;
+		physical_feature_one: AncestryFeature;
+		physical_feature_two: AncestryFeature;
+		[otherFeature: string]: any;
+	}
+	interface AncestryApiMapResponse {
+		[id: string]: AncestryApiResponse;
+	}
+
+	/**
+	 * HERITAGE API
+	 */
+
+	// just uses AncestryHeritage
+
+	/**
+	 * V-HERITAGE API
+	 */
+
+	interface VHeritageApiResponse {
+		heritage: AncestryHeritage;
+	}
+
+	/**
+	 * BACKGROUND API
+	 */
+
+	interface Background {
+		id: number;
+		name: string;
+		rarity: string;
+		description: string | null;
+		boostOne: string;
+		boostTwo: string;
+		code: string;
+		isArchived: number;
+		contentSrc: string;
+		homebrewID: any;
+		version: string;
+		createdAt: string;
+		updatedAt: string;
+	}
+
+	interface BackgroundApiResponse {
+		background: Background;
+	}
 }
