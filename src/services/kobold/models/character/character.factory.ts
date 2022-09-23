@@ -1,3 +1,4 @@
+import { CharacterDataFactory } from './../../../wanderers-guide/factories/characterData.factory';
 import { CalculatedStatsFactory } from './../../../wanderers-guide/factories/calculatedStats.factory';
 import { Factory } from 'fishery';
 import type { DeepPartial } from 'fishery';
@@ -21,6 +22,7 @@ export const CharacterFactory = CharacterFactoryClass.define(({ onCreate }) => {
 		charId: faker.datatype.number(),
 		userId: faker.datatype.uuid(),
 		calculatedStats: CalculatedStatsFactory.build(),
+		characterData: CharacterDataFactory.build(),
 		isActiveCharacter: faker.datatype.boolean(),
 		createdAt: faker.date.recent(30).toISOString(),
 		lastUpdatedAt: faker.date.recent(30).toISOString(),

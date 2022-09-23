@@ -29,6 +29,5 @@
 			"type": "string",
 			"description": "the OAUTH token type"
 		}
-	},
-	"required": ["charId", "accessToken", "expiresAt", "accessRights", "tokenType"]
+	}
 }

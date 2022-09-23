@@ -1,9 +1,24 @@
-import { Model, RelationMappings } from 'objection';
+import { Model, RelationMappings, AjvValidator } from 'objection';
+import addFormats from 'ajv-formats';
 export class BaseModel extends Model {
 	static idColumn = 'id';
 
 	/** Allow arbitrary properties */
 	[k: string]: any;
+
+	// enable ajv formats to  validate the date field when inserting in database
+	static createValidator() {
+		return new AjvValidator({
+			onCreateAjv: ajv => {
+				addFormats(ajv);
+			},
+			options: {
+				allErrors: true,
+				validateSchema: true,
+				ownProperties: true,
+			},
+		});
+	}
 
 	/** Fields that are required to insert a row */
 	static requiredFields: string[] = [];

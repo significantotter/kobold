@@ -2,7 +2,7 @@ export namespace WG {
 	interface CharacterApiResponse {
 		id: number;
 		userID: number;
-		buildID: null;
+		buildID: null | number;
 		name: string;
 		level: number;
 		experience: number;

@@ -16,9 +16,13 @@
 			"type": "string",
 			"description": "The discord id of the user who imported the character"
 		},
+		"characterData": {
+			"type": "object",
+			"description": "The general character data from the Wanderer's guide API /character endpoint"
+		},
 		"calculatedStats": {
 			"type": "object",
-			"description": "The computed base stat block from the Wanderer's guide API"
+			"description": "The computed base stat block from the Wanderer's guide API /character/calculated-stats endpoint"
 		},
 		"isActiveCharacter": {
 			"type": "boolean",
@@ -34,6 +38,5 @@
 			"format": "date-time",
 			"description": "When the character was last updated"
 		}
-	},
-	"required": ["charId", "userId", "isActiveCharacter"]
+	}
 }

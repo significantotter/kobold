@@ -16,13 +16,19 @@ export interface Character {
 	/**
 	 * The external wanderer's guide character id.
 	 */
-	charId: number;
+	charId?: number;
 	/**
 	 * The discord id of the user who imported the character
 	 */
-	userId: string;
+	userId?: string;
 	/**
-	 * The computed base stat block from the Wanderer's guide API
+	 * The general character data from the Wanderer's guide API /character endpoint
+	 */
+	characterData?: {
+		[k: string]: any;
+	};
+	/**
+	 * The computed base stat block from the Wanderer's guide API /character/calculated-stats endpoint
 	 */
 	calculatedStats?: {
 		[k: string]: any;
@@ -30,7 +36,7 @@ export interface Character {
 	/**
 	 * whether this is the active character for the user's character based commands
 	 */
-	isActiveCharacter: boolean;
+	isActiveCharacter?: boolean;
 	/**
 	 * When the character was first imported
 	 */

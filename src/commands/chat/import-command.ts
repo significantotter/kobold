@@ -1,3 +1,4 @@
+import { Character } from './../../services/kobold/models/index.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -37,9 +38,18 @@ export class ImportCommand implements Command {
 		const charId = intr.options.getInteger(ChatArgs.IMPORT_OPTION.name);
 
 		//check if we have a token
-		const tokenResults = await WgToken.query().where('charId', '=', charId);
+		const [tokenResults, existingCharacter] = await Promise.all([
+			WgToken.query().where({ charId }),
+			Character.query().where({ charId, userId: intr.user.id }),
+		]);
 
-		if (!tokenResults.length) {
+		if (existingCharacter.length) {
+			const character = existingCharacter[0];
+			await InteractionUtils.send(
+				intr,
+				`Yip! ${character.characterData.name} is already in the system! Did you mean to /update?`
+			);
+		} else if (!tokenResults.length) {
 			// The user needs to authenticate!
 			await InteractionUtils.send(
 				intr,
@@ -50,24 +60,33 @@ export class ImportCommand implements Command {
 			);
 		} else {
 			// We have the authentication token! Fetch the user's sheet
-			console.log(tokenResults);
-			console.log(tokenResults[0]);
 			const token = tokenResults[0].accessToken;
 
-			console.log(`found token ${token} for character id ${charId}`);
+			const [characterData, calculatedStats] = await Promise.all([
+				// request sheet data from WG API
+				await new WanderersGuide(token).character.get(charId),
+				await new WanderersGuide(token).character.getCalculatedStats(charId),
+			]);
 
-			//request sheet data from WG API
+			// set current characters owned by user to inactive state
+			await Character.query()
+				.update({ isActiveCharacter: false })
+				.where({ userId: intr.user.id });
 
-			const apiResponse = await new WanderersGuide(token).character.getAllEndpoints(charId);
-
-			//store sheet in db
+			// store sheet in db
+			const newCharacter = await Character.query().insertAndFetch({
+				charId,
+				userId: intr.user.id,
+				isActiveCharacter: true,
+				characterData,
+				calculatedStats,
+			});
 
 			//send success message
 
 			await InteractionUtils.send(
 				intr,
-				`Yip! We have access to your sheet. ` +
-					`Our kobolds are working to fetch your character's information`
+				`Yip! We've successfully imported ${characterData.name}!`
 			);
 		}
 	}

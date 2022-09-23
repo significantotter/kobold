@@ -7,6 +7,7 @@ export async function up(knex: Knex): Promise<void> {
 		table.integer('char_id');
 		table.boolean('is_active_character').defaultTo(true);
 
+		table.jsonb('character_data').defaultTo({});
 		table.jsonb('calculated_stats').defaultTo({});
 
 		table.timestamp('created_at', { useTz: true }).defaultTo(knex.fn.now());
