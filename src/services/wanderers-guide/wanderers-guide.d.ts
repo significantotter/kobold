@@ -13,7 +13,7 @@ export namespace WG {
 		name: string;
 		level: number;
 		experience: number;
-		currentHealth: number;
+		currentHealth: null | number;
 		tempHealth: null | number;
 		heroPoints: null | number;
 		ancestryID: null | number;
@@ -23,8 +23,8 @@ export namespace WG {
 		classID: null | number;
 		classID_2: null | number;
 		inventoryID: number;
-		notes: null;
-		infoJSON: { imageUrl: string; pronouns: string; [key: string]: any };
+		notes: any;
+		infoJSON: null | { imageUrl: string; pronouns: string; [key: string]: any };
 		rollHistoryJSON: any;
 		details: any;
 		customCode: any;
@@ -159,8 +159,8 @@ export namespace WG {
 		totalSaves: NamedBonus[];
 		totalAbilityScores: NamedScore[];
 		weapons: Attack[];
-		createdAt: Date;
-		updatedAt: Date;
+		createdAt: string;
+		updatedAt: string;
 		[key: string]: any;
 	}
 

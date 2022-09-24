@@ -12,6 +12,25 @@ export async function fetchWgCharacterFromToken(charId: number, token: string) {
 		await WGTokenApi.character.getCalculatedStats(charId),
 	]);
 
+	if (!calculatedStats) {
+		// stub in default calculated stats
+		// this should only happen on trying to import an empty character
+		calculatedStats = {
+			charID: characterData.id,
+			maxHP: null,
+			totalClassDC: null,
+			totalSpeed: null,
+			totalAC: null,
+			totalPerception: null,
+			totalSkills: [],
+			totalSaves: [],
+			totalAbilityScores: [],
+			weapons: [],
+			createdAt: characterData.createdAt,
+			updatedAt: characterData.updatedAt,
+		};
+	}
+
 	// fetch the names of each value referenced as an id, so we don't have to later
 
 	const classId = characterData.classID;

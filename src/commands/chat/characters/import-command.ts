@@ -1,4 +1,4 @@
-import { WanderersGuide } from '../../../services/wanderers-guide/index';
+import { WanderersGuide } from './../../../services/wanderers-guide/index';
 import { Character } from '../../../services/kobold/models/index.js';
 import {
 	ApplicationCommandType,
@@ -57,7 +57,7 @@ export class ImportCommand implements Command {
 				intr,
 				`Yip! Before you can import a character, you need to authenticate it. ` +
 					`Give me permission to read your wanderer's guide character by following [this link](` +
-					`https://kobold.netlify.app/.netlify/functions/oauth?characterId=${charId}). ` +
+					`${Config.wanderersGuide.oauthBaseUrl}?characterId=${charId}). ` +
 					`Then, /import your character again!`
 			);
 		} else {
