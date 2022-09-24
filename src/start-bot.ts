@@ -3,9 +3,10 @@ import { Options } from 'discord.js';
 
 import { Button } from './buttons/index.js';
 import {
-	HelpCommand,
-	InfoCommand,
-	TestCommand,
+	SetActiveCommand,
+	ListCommand,
+	UpdateCommand,
+	RemoveCommand,
 	ImportCommand,
 	SheetCommand,
 } from './commands/chat/index.js';
@@ -50,9 +51,10 @@ async function start(): Promise<void> {
 		// Chat Commands
 		new ImportCommand(),
 		new SheetCommand(),
-		new HelpCommand(),
-		new InfoCommand(),
-		new TestCommand(),
+		new ListCommand(),
+		new SetActiveCommand(),
+		new UpdateCommand(),
+		new RemoveCommand(),
 		// User Context Commands
 		new ViewDateJoined(),
 		// Message Context Commands

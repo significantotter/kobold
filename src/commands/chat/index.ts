@@ -1,6 +1,6 @@
-import { ImportCommand } from './import-command';
-export { HelpCommand } from './help-command.js';
-export { InfoCommand } from './info-command.js';
-export { TestCommand } from './test-command.js';
-export { ImportCommand } from './import-command.js';
-export { SheetCommand } from './sheet-command.js';
+export { ListCommand } from './characters/list-command';
+export { SetActiveCommand } from './characters/set-active-command.js';
+export { RemoveCommand } from './characters/remove-command.js';
+export { UpdateCommand } from './characters/update-command.js';
+export { ImportCommand } from './characters/import-command.js';
+export { SheetCommand } from './characters/sheet-command.js';

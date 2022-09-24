@@ -1,20 +1,14 @@
-import { Character } from './../../services/kobold/models/index.js';
+import { Character } from '../../../services/kobold/models/index.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord-api-types/v10';
 import { CommandInteraction, PermissionString, MessageEmbed } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
-import { WanderersGuide } from '../../services/wanderers-guide/index.js';
-
-import { ChatArgs } from '../../constants/index.js';
-import { Language } from '../../models/enum-helpers/index.js';
-import { EventData } from '../../models/internal-models.js';
-import { Lang } from '../../services/index.js';
-import { InteractionUtils } from '../../utils/index.js';
-import { Command, CommandDeferType } from '../index.js';
-import { WgToken } from '../../services/kobold/models/index.js';
-import type { WG } from '../../services/wanderers-guide/wanderers-guide.js';
+import { EventData } from '../../../models/internal-models.js';
+import { InteractionUtils } from '../../../utils/index.js';
+import { Command, CommandDeferType } from '../../index.js';
+import type { WG } from '../../../services/wanderers-guide/wanderers-guide.js';
 
 export class SheetCommand implements Command {
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
