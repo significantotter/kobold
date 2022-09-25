@@ -32,9 +32,11 @@ export class RemoveCommand implements Command {
 
 	public async execute(intr: CommandInteraction, data: EventData): Promise<void> {
 		//check if we have an active character
-		const existingCharacter = await Character.query().where({ userId: intr.user.id });
-		const targetCharacter =
-			existingCharacter.find(char => char.isActiveCharacter) || existingCharacter[0];
+		const existingCharacter = await Character.query().where({
+			userId: intr.user.id,
+			isActiveCharacter: true,
+		});
+		const targetCharacter = existingCharacter[0];
 
 		if (targetCharacter) {
 			//check for token access

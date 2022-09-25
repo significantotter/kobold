@@ -9,7 +9,6 @@ import { EventData } from '../../../models/internal-models.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import type { WG } from '../../../services/wanderers-guide/wanderers-guide.js';
-import e from 'express';
 
 export class SheetCommand implements Command {
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {

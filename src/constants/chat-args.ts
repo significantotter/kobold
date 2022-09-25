@@ -75,4 +75,16 @@ export class ChatArgs {
 		required: false,
 		type: ApplicationCommandOptionType.Integer,
 	};
+	public static readonly ROLL_EXPRESSION_OPTION: APIApplicationCommandBasicOption = {
+		name: 'dice',
+		description: 'The dice expression to roll. Similar to Roll20 dice rolls.',
+		required: true,
+		type: ApplicationCommandOptionType.String,
+	};
+	public static readonly ROLL_NOTE_OPTION: APIApplicationCommandBasicOption = {
+		name: 'note',
+		description: 'A note about the reason for the roll.',
+		required: true,
+		type: ApplicationCommandOptionType.String,
+	};
 }
