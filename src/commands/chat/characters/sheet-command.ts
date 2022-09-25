@@ -9,6 +9,7 @@ import { EventData } from '../../../models/internal-models.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import type { WG } from '../../../services/wanderers-guide/wanderers-guide.js';
+import e from 'express';
 
 export class SheetCommand implements Command {
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
@@ -50,36 +51,54 @@ export class SheetCommand implements Command {
 			if (imageEmbed) {
 				messageEmbed = messageEmbed.setThumbnail(imageEmbed);
 			}
+
+			let maxHpText = String(calculatedStats.maxHP);
+			if (maxHpText === 'null') maxHpText = 'none';
+			let totalACText = String(calculatedStats.totalAC);
+			if (totalACText === 'null') totalACText = 'none';
+			let totalPerceptionText = String(calculatedStats.totalPerception);
+			if (totalPerceptionText === 'null') totalPerceptionText = 'none';
+			else if (calculatedStats.totalPerception >= 0)
+				totalPerceptionText = `+${totalPerceptionText}`;
+			else totalPerceptionText = `${totalPerceptionText}`;
+			let totalClassDCText = String(calculatedStats.totalClassDC);
+			if (totalClassDCText === 'null') totalClassDCText = 'none';
+			let totalSpeedText = String(calculatedStats.totalSpeed);
+			if (totalSpeedText === 'null') totalSpeedText = 'none';
+
 			messageEmbed.addFields([
 				{
 					name: `Level ${level} ${heritage} ${ancestry} ${classes}`,
 					value: `
-                    Max HP ${calculatedStats.maxHP}
-                    AC ${calculatedStats.totalAC}
-                    Perception +${calculatedStats.totalPerception}
-                    ${classes} DC ${calculatedStats.totalClassDC}
-                    Speed ${calculatedStats.totalSpeed}
+                    Max HP ${maxHpText}
+                    AC ${totalACText}
+                    Perception 	${totalPerceptionText}
+                    ${classes} DC ${totalClassDCText}
+                    Speed ${totalSpeedText}
 
-                    Background: ${characterData.backgroundName || 'None'}`,
+                    Background: ${characterData.backgroundName || 'none'}`,
 				},
 			]);
-			messageEmbed.addFields([
-				{
-					name: 'Abilities',
-					value: calculatedStats.totalAbilityScores
-						.map(ability => `${ability.Name}: ${ability.Score}`)
-						.join('\n'),
-					inline: true,
-				},
-				{
-					name: 'Saves',
-					value: calculatedStats.totalSaves
-						.map(save => `${save.Name} +${save.Bonus}`)
-						.join('\n'),
-					inline: true,
-				},
-				{ name: '\u200B', value: '\u200B' },
-			]);
+			const abilitiesText = calculatedStats.totalAbilityScores
+				.map(ability => `${ability.Name}: ${ability.Score}`)
+				.join('\n');
+			const abilitiesEmbed = {
+				name: 'Abilities',
+				value: abilitiesText,
+				inline: true,
+			};
+			const savesText = calculatedStats.totalSaves
+				.map(save => `${save.Name} +${save.Bonus}`)
+				.join('\n');
+			const savesEmbed = {
+				name: 'Saves',
+				value: savesText,
+				inline: true,
+			};
+			const skillAndSaveEmbeds = [];
+			if (abilitiesText) skillAndSaveEmbeds.push(abilitiesEmbed);
+			if (savesText) skillAndSaveEmbeds.push(savesEmbed);
+			messageEmbed.addFields(skillAndSaveEmbeds);
 
 			const thirdSkillsArr = calculatedStats.totalSkills.map(
 				skill => `${skill.Name} +${skill.Bonus}`
@@ -106,8 +125,7 @@ export class SheetCommand implements Command {
 					value: thirdSkillsArr.join('\n'),
 					inline: true,
 				});
-
-			messageEmbed.addFields(skillFields);
+			if (skillFields.length) messageEmbed.addFields(skillFields);
 
 			await InteractionUtils.send(intr, messageEmbed);
 		} else {
