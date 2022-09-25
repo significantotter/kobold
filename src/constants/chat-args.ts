@@ -58,10 +58,10 @@ export class ChatArgs {
 		],
 	};
 	public static readonly IMPORT_OPTION: APIApplicationCommandBasicOption = {
-		name: 'character_id',
-		description: `The id of your wanderer's guide character.`,
+		name: 'url',
+		description: `The url of your wanderer's guide character.`,
 		required: true,
-		type: ApplicationCommandOptionType.Integer,
+		type: ApplicationCommandOptionType.String,
 	};
 	public static readonly SET_ACTIVE_NAME_OPTION: APIApplicationCommandBasicOption = {
 		name: 'name',

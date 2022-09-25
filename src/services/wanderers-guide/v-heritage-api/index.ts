@@ -12,7 +12,6 @@ export class VHeritageApi {
 	}
 
 	async get(vheritageId: number): Promise<WG.VHeritageApiResponse> {
-		console.log('fetching ' + `${this.baseURL}?id=${vheritageId}`);
 		const response = await axios.get(`${this.baseURL}?id=${vheritageId}`, {
 			headers: this.wg.headers,
 		});

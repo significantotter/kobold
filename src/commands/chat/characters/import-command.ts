@@ -14,6 +14,7 @@ import { WgToken } from '../../../services/kobold/models/index.js';
 import { fetchWgCharacterFromToken } from './helpers.js';
 import Config from '../../../config/config.json';
 
+const characterIdRegex = /characters\/([0-9]+)/;
 export class ImportCommand implements Command {
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
@@ -33,7 +34,26 @@ export class ImportCommand implements Command {
 	public requireClientPerms: PermissionString[] = [];
 
 	public async execute(intr: CommandInteraction, data: EventData): Promise<void> {
-		const charId = intr.options.getInteger(ChatArgs.IMPORT_OPTION.name);
+		const url = intr.options.getString(ChatArgs.IMPORT_OPTION.name).trim();
+		let charId;
+		if (!isNaN(Number(url))) {
+			// we allow just a character id to be passed in as well
+			charId = Number(url);
+		} else {
+			// match the url to the regex
+			const matches = url.match(characterIdRegex);
+			if (!matches) {
+				// we didn't find a character id in the url! Let the player know
+				await InteractionUtils.send(
+					intr,
+					`Yip! I couldn't find the character at the url '${url}'. Check ` +
+						`and make sure you copied it over correctly! Or just paste ` +
+						`in the character's id value instead.`
+				);
+				return;
+			}
+			charId = Number(matches[1]);
+		}
 
 		//check if we have a token
 		const [tokenResults, existingCharacter] = await Promise.all([
