@@ -80,7 +80,10 @@ export class SheetCommand implements Command {
 				},
 			]);
 			const abilitiesText = calculatedStats.totalAbilityScores
-				.map(ability => `${ability.Name}: ${ability.Score}`)
+				.map(ability => {
+					const symbol = ability.Score >= 0 ? '+' : '';
+					return `${ability.Name} ${symbol}${ability.Score}`;
+				})
 				.join('\n');
 			const abilitiesEmbed = {
 				name: 'Abilities',
@@ -88,7 +91,10 @@ export class SheetCommand implements Command {
 				inline: true,
 			};
 			const savesText = calculatedStats.totalSaves
-				.map(save => `${save.Name} +${save.Bonus}`)
+				.map(save => {
+					const symbol = save.Bonus >= 0 ? '+' : '';
+					return `${save.Name} ${symbol}${save.Bonus}`;
+				})
 				.join('\n');
 			const savesEmbed = {
 				name: 'Saves',
@@ -98,11 +104,15 @@ export class SheetCommand implements Command {
 			const skillAndSaveEmbeds = [];
 			if (abilitiesText) skillAndSaveEmbeds.push(abilitiesEmbed);
 			if (savesText) skillAndSaveEmbeds.push(savesEmbed);
+			while (skillAndSaveEmbeds.length < 3) {
+				skillAndSaveEmbeds.push({ name: '\u200B', value: '\u200B', inline: true });
+			}
 			messageEmbed.addFields(skillAndSaveEmbeds);
 
-			const thirdSkillsArr = calculatedStats.totalSkills.map(
-				skill => `${skill.Name} +${skill.Bonus}`
-			);
+			const thirdSkillsArr = calculatedStats.totalSkills.map(skill => {
+				const symbol = skill.Bonus >= 0 ? '+' : '';
+				return `${skill.Name} ${symbol}${skill.Bonus}`;
+			});
 			const skillsPerField = Math.ceil(thirdSkillsArr.length / 3);
 			const firstSkillsArr = thirdSkillsArr.splice(0, skillsPerField);
 			const secondSkillsArr = thirdSkillsArr.splice(0, skillsPerField);
