@@ -81,6 +81,19 @@ export class ChatArgs {
 		required: true,
 		type: ApplicationCommandOptionType.String,
 	};
+	public static readonly SKILL_CHOICE_OPTION: APIApplicationCommandBasicOption = {
+		name: 'skill',
+		description: 'The skill to roll.',
+		required: true,
+		autocomplete: true,
+		type: ApplicationCommandOptionType.String,
+	};
+	public static readonly ROLL_MODIFIER_OPTION: APIApplicationCommandBasicOption = {
+		name: 'modifier',
+		description: 'A dice expression to modify your roll. (e.g. "+ 1 + 1d4")',
+		required: true,
+		type: ApplicationCommandOptionType.String,
+	};
 	public static readonly ROLL_NOTE_OPTION: APIApplicationCommandBasicOption = {
 		name: 'note',
 		description: 'A note about the reason for the roll.',

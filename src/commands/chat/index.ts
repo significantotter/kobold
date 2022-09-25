@@ -7,3 +7,4 @@ export { SheetCommand } from './characters/sheet-command.js';
 
 //roll commands
 export { RollCommand } from './roll/roll-command';
+export { RollSkillCommand } from './roll/roll-skill';

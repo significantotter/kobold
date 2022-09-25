@@ -67,50 +67,49 @@ export class SheetCommand implements Command {
 
 			messageEmbed.addFields([
 				{
-					name: `Level ${level} ${heritage} ${ancestry} ${classes}`,
-					value: `
-                    Max HP ${maxHpText}
-                    AC ${totalACText}
-                    Perception 	${totalPerceptionText}
-                    ${classes} DC ${totalClassDCText}
-                    Speed ${totalSpeedText}
-
-                    Background: ${characterData.backgroundName || 'none'}`,
+					name: `Level ${level} ${heritage} ${ancestry} ${classes}\n`,
+					value:
+						`Max HP \`${maxHpText}\`\n` +
+						`AC \`${totalACText}\`\n` +
+						`Perception \`${totalPerceptionText}\` (DC ${
+							10 + (calculatedStats.totalPerception || 0)
+						})\n` +
+						`${classes} DC \`${totalClassDCText}\`\n` +
+						`Speed \`${totalSpeedText}\`\n\n` +
+						`Background: ${characterData.backgroundName || 'none'}`,
 				},
 			]);
 			const abilitiesText = calculatedStats.totalAbilityScores
 				.map(ability => {
 					const symbol = ability.Score >= 0 ? '+' : '';
-					return `${ability.Name} ${symbol}${ability.Score}`;
+					return `${ability.Name.substring(0, 3)} \`${symbol}${ability.Score}\``;
 				})
-				.join('\n');
+				.join(', ');
 			const abilitiesEmbed = {
 				name: 'Abilities',
 				value: abilitiesText,
-				inline: true,
+				inline: false,
 			};
 			const savesText = calculatedStats.totalSaves
 				.map(save => {
 					const symbol = save.Bonus >= 0 ? '+' : '';
-					return `${save.Name} ${symbol}${save.Bonus}`;
+					return `${save.Name} \`${symbol}${save.Bonus}\` (DC ${10 + save.Bonus})`;
 				})
-				.join('\n');
+				.join(', ');
 			const savesEmbed = {
 				name: 'Saves',
 				value: savesText,
-				inline: true,
+				inline: false,
 			};
 			const skillAndSaveEmbeds = [];
 			if (abilitiesText) skillAndSaveEmbeds.push(abilitiesEmbed);
 			if (savesText) skillAndSaveEmbeds.push(savesEmbed);
-			while (skillAndSaveEmbeds.length < 3) {
-				skillAndSaveEmbeds.push({ name: '\u200B', value: '\u200B', inline: true });
-			}
+
 			messageEmbed.addFields(skillAndSaveEmbeds);
 
 			const thirdSkillsArr = calculatedStats.totalSkills.map(skill => {
 				const symbol = skill.Bonus >= 0 ? '+' : '';
-				return `${skill.Name} ${symbol}${skill.Bonus}`;
+				return `${skill.Name} \`${symbol}${skill.Bonus}\``;
 			});
 			const skillsPerField = Math.ceil(thirdSkillsArr.length / 3);
 			const firstSkillsArr = thirdSkillsArr.splice(0, skillsPerField);

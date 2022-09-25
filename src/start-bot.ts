@@ -10,6 +10,7 @@ import {
 	ImportCommand,
 	SheetCommand,
 	RollCommand,
+	RollSkillCommand,
 } from './commands/chat/index.js';
 import { Command } from './commands/index.js';
 import { ViewDateSent } from './commands/message/index.js';
@@ -58,6 +59,7 @@ async function start(): Promise<void> {
 		new RemoveCommand(),
 		//Roll Commands
 		new RollCommand(),
+		new RollSkillCommand(),
 		// User Context Commands
 		new ViewDateJoined(),
 		// Message Context Commands
