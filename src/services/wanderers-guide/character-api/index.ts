@@ -18,6 +18,7 @@ export class CharacterApi {
 			'totalSaves',
 			'totalAbilityScores',
 			'weapons',
+			'infoJSON',
 		];
 		const propertiesToDateParse = ['createdAt', 'updatedAt'];
 		for (const property of propertiesToJSONParse) {

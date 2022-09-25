@@ -36,7 +36,6 @@ export class SheetCommand implements Command {
 				character.calculatedStats as WG.CharacterCalculatedStatsApiResponse;
 
 			const imageUrl = characterData.infoJSON?.imageURL || '';
-			const imageEmbed = imageUrl ? `![${characterData.name}](${imageUrl})` : '';
 			const characterUrl = `https://wanderersguide.app/profile/characters/${characterData.id}`;
 			const level = characterData.level;
 			const heritage = [characterData.vHeritageName, characterData.heritageName]
@@ -47,8 +46,8 @@ export class SheetCommand implements Command {
 
 			let messageEmbed = new MessageEmbed().setTitle(characterData.name).setURL(characterUrl);
 
-			if (imageEmbed) {
-				messageEmbed = messageEmbed.setThumbnail(imageEmbed);
+			if (imageUrl) {
+				messageEmbed = messageEmbed.setThumbnail(imageUrl);
 			}
 
 			let maxHpText = String(calculatedStats.maxHP);
