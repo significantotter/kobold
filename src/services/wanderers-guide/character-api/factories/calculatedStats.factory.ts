@@ -27,8 +27,8 @@ export const CalculatedStatsFactory = CalculatedStatsFactoryClass.define(() => {
 		totalSaves: saves.map(save => NamedBonusFactory.build({ Name: save })),
 		totalAbilityScores: abilities.map(ability => NamedScoreFactory.build({ Name: ability })),
 		weapons: Array.from({ length: faker.datatype.number(10) }, () => AttackFactory.build()),
-		createdAt: faker.date.recent(30),
-		updatedAt: faker.date.recent(30),
+		createdAt: faker.date.recent(30).toISOString(),
+		updatedAt: faker.date.recent(30).toISOString(),
 	};
 
 	return calculatedStatsData;
