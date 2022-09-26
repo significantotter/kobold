@@ -10,6 +10,7 @@ import { EventData } from '../../../models/internal-models.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { Dice } from 'dice-typescript';
+import { rollDiceReturningMessage } from '../../../utils/dice-utils.js';
 
 export class RollCommand implements Command {
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
@@ -37,31 +38,9 @@ export class RollCommand implements Command {
 	public async execute(intr: CommandInteraction, data: EventData): Promise<void> {
 		const diceExpression = intr.options.getString(ChatArgs.ROLL_EXPRESSION_OPTION.name);
 		const rollNote = intr.options.getString(ChatArgs.ROLL_NOTE_OPTION.name);
-		let roll;
-		try {
-			roll = new Dice(null, null, {
-				maxRollTimes: 20, // limit to 20 rolls
-				maxDiceSides: 100, // limit to 100 dice faces
-			}).roll(diceExpression);
-			if (roll.errors?.length) {
-				await InteractionUtils.send(
-					intr,
-					`Yip! We didn't understand the dice roll.\n` + roll.errors.join('\n')
-				);
-			} else {
-				let response = `Rolled ${diceExpression}\n${roll.renderedExpression.toString()} = ${
-					roll.total
-				}`;
-				if (rollNote) response += `\n${rollNote}`;
 
-				//send a message about the total
-				await InteractionUtils.send(intr, response);
-			}
-		} catch (err) {
-			await InteractionUtils.send(
-				intr,
-				`Yip! We didn't understand the dice roll "${diceExpression}".`
-			);
-		}
+		const response = rollDiceReturningMessage(diceExpression, { rollNote });
+
+		await InteractionUtils.send(intr, response);
 	}
 }

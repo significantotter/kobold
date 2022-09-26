@@ -17,6 +17,7 @@ import { MessageEmbed } from 'discord.js';
 import { WgToken } from '../../../services/kobold/models/index.js';
 import { fetchWgCharacterFromToken } from './helpers.js';
 import Config from '../../../config/config.json';
+import { getActiveCharacter } from '../../../utils/character-utils.js';
 
 export class UpdateCommand implements Command {
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
@@ -32,48 +33,40 @@ export class UpdateCommand implements Command {
 
 	public async execute(intr: CommandInteraction, data: EventData): Promise<void> {
 		//check if we have an active character
-		const existingCharacter = await Character.query().where({
-			userId: intr.user.id,
-			isActiveCharacter: true,
-		});
-		const targetCharacter = existingCharacter[0];
-
-		if (targetCharacter) {
-			//check for token access
-			const token = await WgToken.query().where({ charId: targetCharacter.charId });
-
-			if (!token.length) {
-				// The user needs to authenticate!
-				await InteractionUtils.send(
-					intr,
-					`Yip! Before you can update this character, you need to authenticate again. Sorry! ` +
-						`Give me permission to read your wanderer's guide character by following [this link](` +
-						`https://kobold.netlify.app/.netlify/functions/oauth?characterId=${targetCharacter.charId}). ` +
-						`Then, /import your character again!`
-				);
-			}
-			const fetchedCharacter = await fetchWgCharacterFromToken(
-				targetCharacter.charId,
-				token[0].accessToken
-			);
-
-			// store sheet in db
-			const updatedCharacter = await Character.query().updateAndFetchById(
-				targetCharacter.id,
-				{
-					userId: intr.user.id,
-					...fetchedCharacter,
-				}
-			);
-
-			//send success message
-
-			await InteractionUtils.send(
-				intr,
-				`Yip! I've successfully updated ${updatedCharacter.characterData.name}!`
-			);
-		} else {
+		const activeCharacter = await getActiveCharacter(intr.user.id);
+		if (!activeCharacter) {
 			await InteractionUtils.send(intr, `Yip! You don't have any active characters!`);
 		}
+
+		//check for token access
+		const token = await WgToken.query().where({ charId: activeCharacter.charId });
+
+		if (!token.length) {
+			// The user needs to authenticate!
+			await InteractionUtils.send(
+				intr,
+				`Yip! Before you can update this character, you need to authenticate again. Sorry! ` +
+					`Give me permission to read your wanderer's guide character by following [this link](` +
+					`https://kobold.netlify.app/.netlify/functions/oauth?characterId=${activeCharacter.charId}). ` +
+					`Then, /import your character again!`
+			);
+		}
+		const fetchedCharacter = await fetchWgCharacterFromToken(
+			activeCharacter.charId,
+			token[0].accessToken
+		);
+
+		// store sheet in db
+		const updatedCharacter = await Character.query().updateAndFetchById(activeCharacter.id, {
+			userId: intr.user.id,
+			...fetchedCharacter,
+		});
+
+		//send success message
+
+		await InteractionUtils.send(
+			intr,
+			`Yip! I've successfully updated ${updatedCharacter.characterData.name}!`
+		);
 	}
 }

@@ -18,6 +18,12 @@ import { Command, CommandDeferType } from '../../index.js';
 import { Dice } from 'dice-typescript';
 import { Character } from '../../../services/kobold/models/index.js';
 import { WG } from '../../../services/wanderers-guide/wanderers-guide.js';
+import {
+	findPossibleSkillFromString,
+	getActiveCharacter,
+	getBestNameMatch,
+} from '../../../utils/character-utils.js';
+import { rollDiceReturningMessage } from '../../../utils/dice-utils.js';
 
 export class RollSkillCommand implements Command {
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
@@ -52,28 +58,25 @@ export class RollSkillCommand implements Command {
 	): Promise<void> {
 		if (!intr.isAutocomplete()) return;
 		if (intr.commandName === ChatArgs.SKILL_CHOICE_OPTION.name) {
+			//we don't need to autocomplete if we're just dealing with whitespace
 			const match = intr.options.getString(ChatArgs.SKILL_CHOICE_OPTION.name);
 			if (!match.trim()) {
 				InteractionUtils.respond(intr, []);
 				return;
 			}
-			const existingCharacter = await Character.query().where({
-				userId: intr.user.id,
-				isActiveCharacter: true,
-			});
-			const targetCharacter = existingCharacter[0];
-			const stats = targetCharacter.calculatedStats as WG.CharacterCalculatedStatsApiResponse;
-			const matchRegex = new RegExp(match, 'ig');
-			const results = [];
-			for (const skill of stats.totalSkills.concat({
-				Name: 'Perception',
-				Bonus: targetCharacter.calculatedStats.totalPerception,
-			})) {
-				if (matchRegex.test(skill.Name)) {
-					results.push({ name: skill.Name, value: skill.Name });
-				}
+			//get the active character
+			const activeCharacter = await getActiveCharacter(intr.user.id);
+			if (!activeCharacter) {
+				//no choices if we don't have a character to match against
+				InteractionUtils.respond(intr, []);
+				return;
 			}
-			InteractionUtils.respond(intr, results);
+			//find a skill on the character matching the autocomplete string
+			const matchedSkills = findPossibleSkillFromString(activeCharacter, match).map(
+				skill => ({ name: skill.Name, value: skill.Name })
+			);
+			//return the matched skills
+			InteractionUtils.respond(intr, matchedSkills);
 		}
 	}
 
@@ -81,63 +84,27 @@ export class RollSkillCommand implements Command {
 		const skillChoice = intr.options.getString(ChatArgs.SKILL_CHOICE_OPTION.name);
 		const modifierExpression = intr.options.getString(ChatArgs.ROLL_MODIFIER_OPTION.name);
 		const rollNote = intr.options.getString(ChatArgs.ROLL_NOTE_OPTION.name);
-		let roll;
 
-		//check if we have an active character
-		const existingCharacter = await Character.query().where({
-			userId: intr.user.id,
-			isActiveCharacter: true,
-		});
-		const targetCharacter = existingCharacter[0];
-
-		if (!targetCharacter) {
+		const activeCharacter = await getActiveCharacter(intr.user.id);
+		if (!activeCharacter) {
 			await InteractionUtils.send(intr, `Yip! You don't have any active characters!`);
 			return;
 		}
 
-		const stats = targetCharacter.calculatedStats as WG.CharacterCalculatedStatsApiResponse;
-		const match = intr.options.getString(ChatArgs.SKILL_CHOICE_OPTION.name);
-		const matchRegex = new RegExp(match, 'ig');
-		let targetSkill = { Name: 'unknown skill', Bonus: 0 } as WG.NamedBonus;
-		for (const skill of stats.totalSkills.concat({
-			Name: 'Perception',
-			Bonus: targetCharacter.calculatedStats.totalPerception,
-		})) {
-			if (matchRegex.test(skill.Name)) {
-				targetSkill = skill;
-				break;
-			}
-		}
+		//use the first skill that matches the text of what we were sent, or preferably a perfect match
+		const matchedSkills = findPossibleSkillFromString(activeCharacter, skillChoice);
+		let targetSkill = getBestNameMatch(skillChoice, matchedSkills);
 
+		// allow the modifier to only optionally start with +/- by wrapping it with +()
+		// because +(+1) is valid, but ++1 is not
 		let wrappedModifierExpression = '';
 		if (modifierExpression) wrappedModifierExpression = `+(${modifierExpression})`;
 		const diceExpression = `1d20+${targetSkill.Bonus || 0}${wrappedModifierExpression}`;
 
-		try {
-			roll = new Dice(null, null, {
-				maxRollTimes: 20, // limit to 20 rolls
-				maxDiceSides: 100, // limit to 100 dice faces
-			}).roll(diceExpression);
-			if (roll.errors?.length) {
-				await InteractionUtils.send(
-					intr,
-					`Yip! We didn't understand the dice roll.\n` + roll.errors.join('\n')
-				);
-				return;
-			}
-			let response = `Rolled ${
-				targetSkill.Name
-			} ${diceExpression}\n${roll.renderedExpression.toString()} = ${roll.total}`;
-			if (rollNote) response += `\n${rollNote}`;
-
-			//send a message about the total
-			await InteractionUtils.send(intr, response);
-		} catch (err) {
-			await InteractionUtils.send(
-				intr,
-				`Yip! We didn't understand the dice roll "${diceExpression}".`
-			);
-			return;
-		}
+		const response = rollDiceReturningMessage(diceExpression, {
+			prefixText: `Rolled ${targetSkill.Name} `,
+			rollNote,
+		});
+		await InteractionUtils.send(intr, response);
 	}
 }

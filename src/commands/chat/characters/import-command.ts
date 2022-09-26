@@ -13,8 +13,7 @@ import { Command, CommandDeferType } from '../../index.js';
 import { WgToken } from '../../../services/kobold/models/index.js';
 import { fetchWgCharacterFromToken } from './helpers.js';
 import Config from '../../../config/config.json';
-
-const characterIdRegex = /characters\/([0-9]+)/;
+import { parseCharacterIdFromText } from '../../../utils/character-utils.js';
 export class ImportCommand implements Command {
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
@@ -35,24 +34,15 @@ export class ImportCommand implements Command {
 
 	public async execute(intr: CommandInteraction, data: EventData): Promise<void> {
 		const url = intr.options.getString(ChatArgs.IMPORT_OPTION.name).trim();
-		let charId;
-		if (!isNaN(Number(url))) {
-			// we allow just a character id to be passed in as well
-			charId = Number(url);
-		} else {
-			// match the url to the regex
-			const matches = url.match(characterIdRegex);
-			if (!matches) {
-				// we didn't find a character id in the url! Let the player know
-				await InteractionUtils.send(
-					intr,
-					`Yip! I couldn't find the character at the url '${url}'. Check ` +
-						`and make sure you copied it over correctly! Or just paste ` +
-						`in the character's id value instead.`
-				);
-				return;
-			}
-			charId = Number(matches[1]);
+		let charId = parseCharacterIdFromText(url);
+		if (charId === null) {
+			await InteractionUtils.send(
+				intr,
+				`Yip! I couldn't find the character at the url '${url}'. Check ` +
+					`and make sure you copied it over correctly! Or just paste ` +
+					`in the character's id value instead.`
+			);
+			return;
 		}
 
 		//check if we have a token
@@ -67,6 +57,7 @@ export class ImportCommand implements Command {
 				intr,
 				`Yip! ${character.characterData.name} is already in the system! Did you mean to /update?`
 			);
+			return;
 		} else if (!tokenResults.length) {
 			// The user needs to authenticate!
 			await InteractionUtils.send(
@@ -76,6 +67,7 @@ export class ImportCommand implements Command {
 					`${Config.wanderersGuide.oauthBaseUrl}?characterId=${charId}). ` +
 					`Then, /import your character again!`
 			);
+			return;
 		} else {
 			// We have the authentication token! Fetch the user's sheet
 			const token = tokenResults[0].accessToken;
