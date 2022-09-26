@@ -39,9 +39,15 @@ export function getBestNameMatch<T extends NamedThing>(name: string, matchTarget
 	if (matchTargets.length === 0) return null;
 
 	let lowestMatchTarget = matchTargets[0];
-	let lowestMatchTargetDistance = levenshteinDistance(matchTargets[0].Name, name);
+	let lowestMatchTargetDistance = levenshteinDistance(
+		matchTargets[0].Name.toLowerCase(),
+		name.toLowerCase()
+	);
 	for (let i = 1; i < matchTargets.length; i++) {
-		const currentMatchTargetDistance = levenshteinDistance(matchTargets[i].Name, name);
+		const currentMatchTargetDistance = levenshteinDistance(
+			matchTargets[i].Name.toLowerCase(),
+			name.toLowerCase()
+		);
 		if (currentMatchTargetDistance < lowestMatchTargetDistance) {
 			lowestMatchTarget = matchTargets[i];
 			lowestMatchTargetDistance = currentMatchTargetDistance;

@@ -90,10 +90,17 @@ export class RollSkillCommand implements Command {
 			await InteractionUtils.send(intr, `Yip! You don't have any active characters!`);
 			return;
 		}
+		const skillsPlusPerception = [
+			...activeCharacter.calculatedStats.totalSkills,
+			{
+				Name: 'Perception',
+				Bonus: activeCharacter.calculatedStats.totalPerception,
+			},
+		] as WG.NamedBonus[];
 
 		//use the first skill that matches the text of what we were sent, or preferably a perfect match
 		const matchedSkills = findPossibleSkillFromString(activeCharacter, skillChoice);
-		let targetSkill = getBestNameMatch(skillChoice, matchedSkills);
+		let targetSkill = getBestNameMatch(skillChoice, skillsPlusPerception);
 
 		// allow the modifier to only optionally start with +/- by wrapping it with +()
 		// because +(+1) is valid, but ++1 is not
