@@ -88,9 +88,42 @@ export class ChatArgs {
 		autocomplete: true,
 		type: ApplicationCommandOptionType.String,
 	};
+	public static readonly SAVE_CHOICE_OPTION: APIApplicationCommandBasicOption = {
+		name: 'save',
+		description: 'The save to roll.',
+		required: true,
+		autocomplete: true,
+		type: ApplicationCommandOptionType.String,
+	};
+	public static readonly ABILITY_CHOICE_OPTION: APIApplicationCommandBasicOption = {
+		name: 'ability',
+		description: 'The ability to roll.',
+		required: true,
+		autocomplete: true,
+		type: ApplicationCommandOptionType.String,
+	};
+	public static readonly ATTACK_CHOICE_OPTION: APIApplicationCommandBasicOption = {
+		name: 'attack',
+		description: 'The attack to roll.',
+		required: true,
+		autocomplete: true,
+		type: ApplicationCommandOptionType.String,
+	};
 	public static readonly ROLL_MODIFIER_OPTION: APIApplicationCommandBasicOption = {
 		name: 'modifier',
 		description: 'A dice expression to modify your roll. (e.g. "+ 1 + 1d4")',
+		required: true,
+		type: ApplicationCommandOptionType.String,
+	};
+	public static readonly ATTACK_ROLL_MODIFIER_OPTION: APIApplicationCommandBasicOption = {
+		name: 'attack_modifier',
+		description: 'A dice expression to modify your attack roll. (e.g. "+ 1 + 1d4")',
+		required: true,
+		type: ApplicationCommandOptionType.String,
+	};
+	public static readonly DAMAGE_ROLL_MODIFIER_OPTION: APIApplicationCommandBasicOption = {
+		name: 'damage_modifier',
+		description: 'A dice expression to modify your damage roll. (e.g. "+ 1 + 1d4")',
 		required: true,
 		type: ApplicationCommandOptionType.String,
 	};

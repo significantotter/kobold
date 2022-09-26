@@ -81,6 +81,69 @@ export function findPossibleSkillFromString(
 }
 
 /**
+ * Given a string, finds all saves contining that string on a given character
+ * @param targetCharacter the character to check for matching saves
+ * @param saveText the text to match to saves
+ * @returns all saves that contain the given saveText
+ */
+export function findPossibleSaveFromString(
+	targetCharacter: Character,
+	saveText: string
+): WG.NamedBonus[] {
+	const stats = targetCharacter.calculatedStats as WG.CharacterCalculatedStatsApiResponse;
+	const matchRegex = new RegExp(saveText, 'ig');
+	const matchedSaves = [];
+	for (const save of stats.totalSaves) {
+		if (matchRegex.test(save.Name)) {
+			matchedSaves.push(save);
+		}
+	}
+	return matchedSaves;
+}
+
+/**
+ * Given a string, finds all ability scores contining that string on a given character
+ * @param targetCharacter the character to check for matching ability scores
+ * @param abilityText the text to match to ability scores
+ * @returns all ability scores that contain the given abilityText
+ */
+export function findPossibleAbilityFromString(
+	targetCharacter: Character,
+	abilityText: string
+): WG.NamedScore[] {
+	const stats = targetCharacter.calculatedStats as WG.CharacterCalculatedStatsApiResponse;
+	const matchRegex = new RegExp(abilityText, 'ig');
+	const matchedAbility = [];
+	for (const ability of stats.totalAbilityScores) {
+		if (matchRegex.test(ability.Name)) {
+			matchedAbility.push(ability);
+		}
+	}
+	return matchedAbility;
+}
+
+/**
+ * Given a string, finds all attacks contining that string on a given character
+ * @param targetCharacter the character to check for matching attacks
+ * @param attackText the text to match to attacks
+ * @returns all attacks that contain the given attackText
+ */
+export function findPossibleAttackFromString(
+	targetCharacter: Character,
+	attackText: string
+): WG.NamedBonus[] {
+	const stats = targetCharacter.calculatedStats as WG.CharacterCalculatedStatsApiResponse;
+	const matchRegex = new RegExp(attackText, 'ig');
+	const matchedAttacks = [];
+	for (const attack of stats.weapons) {
+		if (matchRegex.test(attack.Name)) {
+			matchedAttacks.push(attack);
+		}
+	}
+	return matchedAttacks;
+}
+
+/**
  * Gets the active character for a user
  * @param userId the discord use
  * @returns the active character for the user, or an empty array if one is not present

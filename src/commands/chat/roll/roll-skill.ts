@@ -15,15 +15,13 @@ import { ChatArgs } from '../../../constants/index.js';
 import { EventData } from '../../../models/internal-models.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
-import { Dice } from 'dice-typescript';
-import { Character } from '../../../services/kobold/models/index.js';
 import { WG } from '../../../services/wanderers-guide/wanderers-guide.js';
 import {
 	findPossibleSkillFromString,
 	getActiveCharacter,
 	getBestNameMatch,
 } from '../../../utils/character-utils.js';
-import { rollDiceReturningMessage } from '../../../utils/dice-utils.js';
+import { buildDiceExpression, RollBuilder } from '../../../utils/dice-utils.js';
 
 export class RollSkillCommand implements Command {
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
@@ -60,10 +58,7 @@ export class RollSkillCommand implements Command {
 		if (intr.commandName === ChatArgs.SKILL_CHOICE_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
 			const match = intr.options.getString(ChatArgs.SKILL_CHOICE_OPTION.name);
-			if (!match.trim()) {
-				InteractionUtils.respond(intr, []);
-				return;
-			}
+
 			//get the active character
 			const activeCharacter = await getActiveCharacter(intr.user.id);
 			if (!activeCharacter) {
@@ -99,19 +94,18 @@ export class RollSkillCommand implements Command {
 		] as WG.NamedBonus[];
 
 		//use the first skill that matches the text of what we were sent, or preferably a perfect match
-		const matchedSkills = findPossibleSkillFromString(activeCharacter, skillChoice);
 		let targetSkill = getBestNameMatch(skillChoice, skillsPlusPerception);
 
-		// allow the modifier to only optionally start with +/- by wrapping it with +()
-		// because +(+1) is valid, but ++1 is not
-		let wrappedModifierExpression = '';
-		if (modifierExpression) wrappedModifierExpression = `+(${modifierExpression})`;
-		const diceExpression = `1d20+${targetSkill.Bonus || 0}${wrappedModifierExpression}`;
-
-		const response = rollDiceReturningMessage(diceExpression, {
-			prefixText: `Rolled ${targetSkill.Name} `,
+		const rollBuilder = new RollBuilder({
+			character: activeCharacter,
 			rollNote,
+			rollDescription: `rolling ${targetSkill.Name}`,
 		});
+		rollBuilder.addRoll(
+			buildDiceExpression('d20', String(targetSkill.Bonus), modifierExpression)
+		);
+		const response = rollBuilder.compileEmbed();
+
 		await InteractionUtils.send(intr, response);
 	}
 }

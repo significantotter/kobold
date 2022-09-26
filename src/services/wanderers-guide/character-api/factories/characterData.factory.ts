@@ -33,7 +33,7 @@ export const CharacterDataFactory = CharacterDataFactoryClass.define(() => {
 		classID_2: faker.helpers.maybe(() => faker.datatype.number(), { probability: 0.1 }),
 		inventoryID: faker.datatype.number(),
 		notes: null,
-		infoJSON: { imageUrl: faker.internet.url(), pronouns: faker.random.words(2) },
+		infoJSON: { imageURL: faker.internet.url(), pronouns: faker.random.words(2) },
 		rollHistoryJSON: {},
 		details: {},
 		customCode: {},

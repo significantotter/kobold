@@ -3,18 +3,22 @@ import { Options } from 'discord.js';
 
 import { Button } from './buttons/index.js';
 import {
+	// character
 	SetActiveCommand,
 	ListCommand,
 	UpdateCommand,
 	RemoveCommand,
 	ImportCommand,
 	SheetCommand,
+	// roll
 	RollCommand,
 	RollSkillCommand,
+	RollSaveCommand,
+	RollPerceptionCommand,
+	RollAbilityCommand,
+	RollAttackCommand,
 } from './commands/chat/index.js';
 import { Command } from './commands/index.js';
-import { ViewDateSent } from './commands/message/index.js';
-import { ViewDateJoined } from './commands/user/index.js';
 import {
 	ButtonHandler,
 	CommandHandler,
@@ -60,11 +64,10 @@ async function start(): Promise<void> {
 		//Roll Commands
 		new RollCommand(),
 		new RollSkillCommand(),
-		// User Context Commands
-		new ViewDateJoined(),
-		// Message Context Commands
-		new ViewDateSent(),
-		// TODO: Add new commands here
+		new RollSaveCommand(),
+		new RollPerceptionCommand(),
+		new RollAbilityCommand(),
+		new RollAttackCommand(),
 	].sort((a, b) => (a.metadata.name > b.metadata.name ? 1 : -1));
 
 	// Buttons

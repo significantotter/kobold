@@ -9,8 +9,7 @@ import { ChatArgs } from '../../../constants/index.js';
 import { EventData } from '../../../models/internal-models.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
-import { Dice } from 'dice-typescript';
-import { rollDiceReturningMessage } from '../../../utils/dice-utils.js';
+import { RollBuilder } from '../../../utils/dice-utils.js';
 
 export class RollCommand implements Command {
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
@@ -39,7 +38,12 @@ export class RollCommand implements Command {
 		const diceExpression = intr.options.getString(ChatArgs.ROLL_EXPRESSION_OPTION.name);
 		const rollNote = intr.options.getString(ChatArgs.ROLL_NOTE_OPTION.name);
 
-		const response = rollDiceReturningMessage(diceExpression, { rollNote });
+		const rollBuilder = new RollBuilder({
+			character: null,
+			rollNote,
+		});
+		rollBuilder.addRoll(diceExpression);
+		const response = rollBuilder.compileEmbed();
 
 		await InteractionUtils.send(intr, response);
 	}

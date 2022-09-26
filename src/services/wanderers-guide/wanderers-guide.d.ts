@@ -24,7 +24,7 @@ export namespace WG {
 		classID_2: null | number;
 		inventoryID: number;
 		notes: any;
-		infoJSON: null | { imageUrl: string; pronouns: string; [key: string]: any };
+		infoJSON: null | { imageURL: string; pronouns: string; [key: string]: any };
 		rollHistoryJSON: any;
 		details: any;
 		customCode: any;
