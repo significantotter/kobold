@@ -66,8 +66,8 @@ export class RollBuilder {
 	public compileEmbed() {
 		const response = new MessageEmbed().setTitle(this.title).setColor('GREEN');
 
-		let characterData = this.character.characterData as WG.CharacterApiResponse;
-		if (characterData.infoJSON?.imageURL) {
+		let characterData = this.character?.characterData as WG.CharacterApiResponse;
+		if (characterData?.infoJSON?.imageURL) {
 			response.setThumbnail(characterData.infoJSON.imageURL);
 		}
 
