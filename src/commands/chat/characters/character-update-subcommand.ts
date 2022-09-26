@@ -13,7 +13,8 @@ import { WgToken } from '../../../services/kobold/models/index.js';
 import { fetchWgCharacterFromToken } from './helpers.js';
 import { getActiveCharacter } from '../../../utils/character-utils.js';
 
-export class UpdateCommand implements Command {
+export class CharacterUpdateSubCommand implements Command {
+	public names = ['update'];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: 'update',

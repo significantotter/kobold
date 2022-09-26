@@ -14,19 +14,14 @@ import { WgToken } from '../../../services/kobold/models/index.js';
 import { fetchWgCharacterFromToken } from './helpers.js';
 import Config from '../../../config/config.json';
 import { parseCharacterIdFromText } from '../../../utils/character-utils.js';
-export class ImportCommand implements Command {
+export class CharacterImportSubCommand implements Command {
+	public names = ['import'];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: 'import',
 		description: `imports a Wanderer's guide character`,
 		dm_permission: true,
 		default_member_permissions: undefined,
-		options: [
-			{
-				...ChatArgs.IMPORT_OPTION,
-				required: true,
-			},
-		],
 	};
 	public cooldown = new RateLimiter(1, 5000);
 	public deferType = CommandDeferType.PUBLIC;

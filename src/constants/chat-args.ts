@@ -66,7 +66,7 @@ export class ChatArgs {
 	public static readonly SET_ACTIVE_NAME_OPTION: APIApplicationCommandBasicOption = {
 		name: 'name',
 		description: `The name of your wanderer's guide character.`,
-		required: false,
+		required: true,
 		type: ApplicationCommandOptionType.String,
 	};
 	public static readonly SET_ACTIVE_ID_OPTION: APIApplicationCommandBasicOption = {

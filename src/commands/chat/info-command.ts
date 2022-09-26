@@ -17,6 +17,7 @@ import { Command, CommandDeferType } from '../index.js';
 import Config from './../../config/config.json';
 
 export class InfoCommand implements Command {
+	public names = ['info'];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: Lang.getRef('chatCommands.info', Language.Default),

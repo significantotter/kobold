@@ -13,7 +13,8 @@ import { Command, CommandDeferType } from '../../index.js';
 import { getActiveCharacter } from '../../../utils/character-utils.js';
 import { CollectorUtils } from 'discord.js-collector-utils';
 
-export class RemoveCommand implements Command {
+export class CharacterRemoveSubCommand implements Command {
+	public names = ['remove'];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: 'remove',

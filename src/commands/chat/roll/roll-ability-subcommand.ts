@@ -1,3 +1,4 @@
+import { buildDiceExpression, RollBuilder } from '../../../utils/dice-utils';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -15,38 +16,21 @@ import { ChatArgs } from '../../../constants/index.js';
 import { EventData } from '../../../models/internal-models.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
-import { Dice } from 'dice-typescript';
-import { Character } from '../../../services/kobold/models/index.js';
 import { WG } from '../../../services/wanderers-guide/wanderers-guide.js';
 import {
-	findPossibleSaveFromString,
+	findPossibleAbilityFromString,
 	getActiveCharacter,
 	getBestNameMatch,
 } from '../../../utils/character-utils.js';
-import { buildDiceExpression, RollBuilder } from '../../../utils/dice-utils.js';
 
-export class RollSaveCommand implements Command {
+export class RollAbilitySubCommand implements Command {
+	public names = ['ability'];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: 'save',
-		description: `rolls a save for your active character`,
+		name: 'ability',
+		description: `rolls an ability for your active character`,
 		dm_permission: true,
 		default_member_permissions: undefined,
-
-		options: [
-			{
-				...ChatArgs.SAVE_CHOICE_OPTION,
-				required: true,
-			},
-			{
-				...ChatArgs.ROLL_MODIFIER_OPTION,
-				required: false,
-			},
-			{
-				...ChatArgs.ROLL_NOTE_OPTION,
-				required: false,
-			},
-		],
 	};
 	public cooldown = new RateLimiter(1, 5000);
 	public deferType = CommandDeferType.PUBLIC;
@@ -57,9 +41,9 @@ export class RollSaveCommand implements Command {
 		option: AutocompleteFocusedOption
 	): Promise<void> {
 		if (!intr.isAutocomplete()) return;
-		if (intr.commandName === ChatArgs.SAVE_CHOICE_OPTION.name) {
+		if (option.name === ChatArgs.ABILITY_CHOICE_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(ChatArgs.SAVE_CHOICE_OPTION.name);
+			const match = intr.options.getString(ChatArgs.ABILITY_CHOICE_OPTION.name);
 
 			//get the active character
 			const activeCharacter = await getActiveCharacter(intr.user.id);
@@ -68,18 +52,20 @@ export class RollSaveCommand implements Command {
 				InteractionUtils.respond(intr, []);
 				return;
 			}
-			//find a save on the character matching the autocomplete string
-			const matchedSaves = findPossibleSaveFromString(activeCharacter, match).map(save => ({
-				name: save.Name,
-				value: save.Name,
-			}));
-			//return the matched saves
-			InteractionUtils.respond(intr, matchedSaves);
+			//find a ability on the character matching the autocomplete string
+			const matchedAbilitys = findPossibleAbilityFromString(activeCharacter, match).map(
+				ability => ({
+					name: ability.Name,
+					value: ability.Name,
+				})
+			);
+			//return the matched abilitys
+			InteractionUtils.respond(intr, matchedAbilitys);
 		}
 	}
 
 	public async execute(intr: CommandInteraction, data: EventData): Promise<void> {
-		const saveChoice = intr.options.getString(ChatArgs.SAVE_CHOICE_OPTION.name);
+		const abilityChoice = intr.options.getString(ChatArgs.ABILITY_CHOICE_OPTION.name);
 		const modifierExpression = intr.options.getString(ChatArgs.ROLL_MODIFIER_OPTION.name);
 		const rollNote = intr.options.getString(ChatArgs.ROLL_NOTE_OPTION.name);
 
@@ -89,19 +75,25 @@ export class RollSaveCommand implements Command {
 			return;
 		}
 
-		//use the first save that matches the text of what we were sent, or preferably a perfect match
-		let targetSave = getBestNameMatch(
-			saveChoice,
-			activeCharacter.calculatedStats.totalSaves as WG.NamedBonus[]
+		//use the first ability that matches the text of what we were sent, or preferably a perfect match
+		let targetAbility = getBestNameMatch(
+			abilityChoice,
+			activeCharacter.calculatedStats.totalAbilityScores as WG.NamedScore[]
 		);
+
+		// allow the modifier to only optionally start with +/- by wrapping it with +()
+		// because +(+1) is valid, but ++1 is not
+		let wrappedModifierExpression = '';
+		if (modifierExpression) wrappedModifierExpression = `+(${modifierExpression})`;
+		const diceExpression = `1d20+${targetAbility.Score || 0}${wrappedModifierExpression}`;
 
 		const rollBuilder = new RollBuilder({
 			character: activeCharacter,
 			rollNote,
-			rollDescription: `rolling ${targetSave.Name}`,
+			rollDescription: `rolled ${targetAbility.Name}`,
 		});
 		rollBuilder.addRoll(
-			buildDiceExpression('d20', String(targetSave.Bonus), modifierExpression)
+			buildDiceExpression('d20', String(targetAbility.Score), modifierExpression)
 		);
 		const response = rollBuilder.compileEmbed();
 

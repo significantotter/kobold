@@ -4,19 +4,24 @@ import { Options } from 'discord.js';
 import { Button } from './buttons/index.js';
 import {
 	// character
-	SetActiveCommand,
-	ListCommand,
-	UpdateCommand,
-	RemoveCommand,
-	ImportCommand,
-	SheetCommand,
+	CharacterCommand,
+	CharacterSetActiveSubCommand,
+	CharacterListSubCommand,
+	CharacterUpdateSubCommand,
+	CharacterRemoveSubCommand,
+	CharacterImportSubCommand,
+	CharacterSheetSubCommand,
 	// roll
 	RollCommand,
-	RollSkillCommand,
-	RollSaveCommand,
-	RollPerceptionCommand,
-	RollAbilityCommand,
-	RollAttackCommand,
+	RollDiceSubCommand,
+	RollSkillSubCommand,
+	RollSaveSubCommand,
+	RollPerceptionSubCommand,
+	RollAbilitySubCommand,
+	RollAttackSubCommand,
+	// init
+	InitCommand,
+	InitStartCommand,
 } from './commands/chat/index.js';
 import { Command } from './commands/index.js';
 import {
@@ -54,21 +59,28 @@ async function start(): Promise<void> {
 
 	// Commands
 	let commands: Command[] = [
-		// Sheet Commands
-		new ImportCommand(),
-		new SheetCommand(),
-		new ListCommand(),
-		new SetActiveCommand(),
-		new UpdateCommand(),
-		new RemoveCommand(),
+		// Character Commands
+		new CharacterCommand([
+			new CharacterSheetSubCommand(),
+			new CharacterListSubCommand(),
+			new CharacterSetActiveSubCommand(),
+			new CharacterImportSubCommand(),
+			new CharacterUpdateSubCommand(),
+			new CharacterRemoveSubCommand(),
+		]),
+
 		//Roll Commands
-		new RollCommand(),
-		new RollSkillCommand(),
-		new RollSaveCommand(),
-		new RollPerceptionCommand(),
-		new RollAbilityCommand(),
-		new RollAttackCommand(),
-	].sort((a, b) => (a.metadata.name > b.metadata.name ? 1 : -1));
+		new RollCommand([
+			new RollDiceSubCommand(),
+			new RollAttackSubCommand(),
+			new RollSkillSubCommand(),
+			new RollSaveSubCommand(),
+			new RollPerceptionSubCommand(),
+			new RollAbilitySubCommand(),
+		]),
+		// Init commands
+		new InitCommand([new InitStartCommand()]),
+	];
 
 	// Buttons
 	let buttons: Button[] = [

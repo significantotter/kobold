@@ -1,5 +1,5 @@
 import { Character } from './../services/kobold/models/character/character.model';
-import { EmbedFieldData, MessageEmbed } from 'discord.js';
+import { EmbedFieldData, MessageEmbed, User } from 'discord.js';
 import { Dice } from 'dice-typescript';
 import type { WG } from './../services/wanderers-guide/wanderers-guide.js';
 import _ from 'lodash';
@@ -12,21 +12,25 @@ export class RollBuilder {
 	private title: string;
 
 	constructor({
+		actorName,
 		character,
 		rollDescription,
 		rollNote,
+		title,
 	}: {
+		actorName?: string;
 		character?: Character | null;
 		rollDescription?: string;
 		rollNote?: string;
+		title?: string;
 	}) {
 		this.rollResults = [];
 		this.character = character || null;
 		this.rollNote = rollNote;
-		this.rollDescription = rollDescription || 'rolling some dice!';
+		this.rollDescription = rollDescription || 'rolled some dice!';
 
-		let characterText = this.character ? `${character.characterData.name} is ` : '';
-		this.title = _.capitalize(`${characterText}${this.rollDescription}`);
+		const actorText = character?.characterData?.name || actorName;
+		this.title = title || _.capitalize(`${actorText} ${this.rollDescription}`);
 	}
 
 	/**

@@ -11,7 +11,8 @@ import { Command, CommandDeferType } from '../../index.js';
 import type { WG } from '../../../services/wanderers-guide/wanderers-guide.js';
 import { getActiveCharacter } from '../../../utils/character-utils.js';
 
-export class SheetCommand implements Command {
+export class CharacterSheetSubCommand implements Command {
+	public names = ['sheet'];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: 'sheet',

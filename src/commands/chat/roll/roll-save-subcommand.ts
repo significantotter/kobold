@@ -17,34 +17,20 @@ import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { WG } from '../../../services/wanderers-guide/wanderers-guide.js';
 import {
-	findPossibleSkillFromString,
+	findPossibleSaveFromString,
 	getActiveCharacter,
 	getBestNameMatch,
 } from '../../../utils/character-utils.js';
 import { buildDiceExpression, RollBuilder } from '../../../utils/dice-utils.js';
 
-export class RollSkillCommand implements Command {
+export class RollSaveSubCommand implements Command {
+	public names = ['save'];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: 'skill',
-		description: `rolls a skill for your active character`,
+		name: 'save',
+		description: `rolls a save for your active character`,
 		dm_permission: true,
 		default_member_permissions: undefined,
-
-		options: [
-			{
-				...ChatArgs.SKILL_CHOICE_OPTION,
-				required: true,
-			},
-			{
-				...ChatArgs.ROLL_MODIFIER_OPTION,
-				required: false,
-			},
-			{
-				...ChatArgs.ROLL_NOTE_OPTION,
-				required: false,
-			},
-		],
 	};
 	public cooldown = new RateLimiter(1, 5000);
 	public deferType = CommandDeferType.PUBLIC;
@@ -55,9 +41,9 @@ export class RollSkillCommand implements Command {
 		option: AutocompleteFocusedOption
 	): Promise<void> {
 		if (!intr.isAutocomplete()) return;
-		if (intr.commandName === ChatArgs.SKILL_CHOICE_OPTION.name) {
+		if (option.name === ChatArgs.SAVE_CHOICE_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(ChatArgs.SKILL_CHOICE_OPTION.name);
+			const match = intr.options.getString(ChatArgs.SAVE_CHOICE_OPTION.name);
 
 			//get the active character
 			const activeCharacter = await getActiveCharacter(intr.user.id);
@@ -66,17 +52,18 @@ export class RollSkillCommand implements Command {
 				InteractionUtils.respond(intr, []);
 				return;
 			}
-			//find a skill on the character matching the autocomplete string
-			const matchedSkills = findPossibleSkillFromString(activeCharacter, match).map(
-				skill => ({ name: skill.Name, value: skill.Name })
-			);
-			//return the matched skills
-			InteractionUtils.respond(intr, matchedSkills);
+			//find a save on the character matching the autocomplete string
+			const matchedSaves = findPossibleSaveFromString(activeCharacter, match).map(save => ({
+				name: save.Name,
+				value: save.Name,
+			}));
+			//return the matched saves
+			InteractionUtils.respond(intr, matchedSaves);
 		}
 	}
 
 	public async execute(intr: CommandInteraction, data: EventData): Promise<void> {
-		const skillChoice = intr.options.getString(ChatArgs.SKILL_CHOICE_OPTION.name);
+		const saveChoice = intr.options.getString(ChatArgs.SAVE_CHOICE_OPTION.name);
 		const modifierExpression = intr.options.getString(ChatArgs.ROLL_MODIFIER_OPTION.name);
 		const rollNote = intr.options.getString(ChatArgs.ROLL_NOTE_OPTION.name);
 
@@ -85,24 +72,21 @@ export class RollSkillCommand implements Command {
 			await InteractionUtils.send(intr, `Yip! You don't have any active characters!`);
 			return;
 		}
-		const skillsPlusPerception = [
-			...activeCharacter.calculatedStats.totalSkills,
-			{
-				Name: 'Perception',
-				Bonus: activeCharacter.calculatedStats.totalPerception,
-			},
-		] as WG.NamedBonus[];
 
-		//use the first skill that matches the text of what we were sent, or preferably a perfect match
-		let targetSkill = getBestNameMatch(skillChoice, skillsPlusPerception);
+		//use the first save that matches the text of what we were sent, or preferably a perfect match
+		let targetSave = getBestNameMatch(
+			saveChoice,
+			activeCharacter.calculatedStats.totalSaves as WG.NamedBonus[]
+		);
 
 		const rollBuilder = new RollBuilder({
+			actorName: intr.user.username,
 			character: activeCharacter,
 			rollNote,
-			rollDescription: `rolling ${targetSkill.Name}`,
+			rollDescription: `rolled ${targetSave.Name}`,
 		});
 		rollBuilder.addRoll(
-			buildDiceExpression('d20', String(targetSkill.Bonus), modifierExpression)
+			buildDiceExpression('d20', String(targetSave.Bonus), modifierExpression)
 		);
 		const response = rollBuilder.compileEmbed();
 

@@ -18,24 +18,14 @@ import { Command, CommandDeferType } from '../../index.js';
 import { getActiveCharacter } from '../../../utils/character-utils.js';
 import { buildDiceExpression, RollBuilder } from '../../../utils/dice-utils.js';
 
-export class RollPerceptionCommand implements Command {
+export class RollPerceptionSubCommand implements Command {
+	public names = ['perception'];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: 'perception',
 		description: `rolls perception for your active character`,
 		dm_permission: true,
 		default_member_permissions: undefined,
-
-		options: [
-			{
-				...ChatArgs.ROLL_MODIFIER_OPTION,
-				required: false,
-			},
-			{
-				...ChatArgs.ROLL_NOTE_OPTION,
-				required: false,
-			},
-		],
 	};
 	public cooldown = new RateLimiter(1, 5000);
 	public deferType = CommandDeferType.PUBLIC;
@@ -54,7 +44,7 @@ export class RollPerceptionCommand implements Command {
 		const rollBuilder = new RollBuilder({
 			character: activeCharacter,
 			rollNote,
-			rollDescription: `rolling Perception`,
+			rollDescription: `rolled Perception`,
 		});
 		rollBuilder.addRoll(
 			buildDiceExpression(

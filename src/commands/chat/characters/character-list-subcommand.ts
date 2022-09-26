@@ -11,7 +11,8 @@ import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { MessageEmbed } from 'discord.js';
 
-export class ListCommand implements Command {
+export class CharacterListSubCommand implements Command {
+	public names = ['list'];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: 'list',

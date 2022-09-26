@@ -12,14 +12,14 @@ import { EventData } from '../../../models/internal-models.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 
-export class SetActiveCommand implements Command {
+export class CharacterSetActiveSubCommand implements Command {
+	public names = ['set-active'];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: 'set-active',
 		description: `sets a character as the active character`,
 		dm_permission: true,
 		default_member_permissions: undefined,
-		options: [ChatArgs.SET_ACTIVE_NAME_OPTION],
 	};
 	public cooldown = new RateLimiter(1, 5000);
 	public deferType = CommandDeferType.PUBLIC;

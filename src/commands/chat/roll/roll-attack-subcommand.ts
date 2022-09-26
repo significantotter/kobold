@@ -27,32 +27,14 @@ import {
 	RollBuilder,
 } from '../../../utils/dice-utils.js';
 
-export class RollAttackCommand implements Command {
+export class RollAttackSubCommand implements Command {
+	public names = ['attack'];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: 'attack',
 		description: `rolls an attack for your active character`,
 		dm_permission: true,
 		default_member_permissions: undefined,
-
-		options: [
-			{
-				...ChatArgs.ATTACK_CHOICE_OPTION,
-				required: true,
-			},
-			{
-				...ChatArgs.ATTACK_ROLL_MODIFIER_OPTION,
-				required: false,
-			},
-			{
-				...ChatArgs.DAMAGE_ROLL_MODIFIER_OPTION,
-				required: false,
-			},
-			{
-				...ChatArgs.ROLL_NOTE_OPTION,
-				required: false,
-			},
-		],
 	};
 	public cooldown = new RateLimiter(1, 5000);
 	public deferType = CommandDeferType.PUBLIC;
@@ -63,7 +45,7 @@ export class RollAttackCommand implements Command {
 		option: AutocompleteFocusedOption
 	): Promise<void> {
 		if (!intr.isAutocomplete()) return;
-		if (intr.commandName === ChatArgs.ATTACK_CHOICE_OPTION.name) {
+		if (option.name === ChatArgs.ATTACK_CHOICE_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
 			const match = intr.options.getString(ChatArgs.ATTACK_CHOICE_OPTION.name);
 
@@ -111,7 +93,7 @@ export class RollAttackCommand implements Command {
 		const rollBuilder = new RollBuilder({
 			character: activeCharacter,
 			rollNote,
-			rollDescription: `attacking with their ${targetAttack.Name}!`,
+			rollDescription: `attacked with their ${targetAttack.Name}!`,
 		});
 
 		//if we a to hit defined, roll the attack's to-hit
