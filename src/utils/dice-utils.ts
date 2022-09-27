@@ -42,7 +42,7 @@ export class RollBuilder {
 	public addRoll(rollExpression: string, rollTitle?: string) {
 		const rollField = {
 			name: rollTitle || '\u200B',
-			value: `Yip! Something went wrong while rolling this!`,
+			value: '',
 		};
 		try {
 			const roll = new Dice(null, null, {
@@ -87,7 +87,7 @@ export class RollBuilder {
 	}
 }
 
-const damageTypeMatch = / [A-Za-z]+$/;
+const damageTypeMatch = / [A-Za-z \-_,\/]+$/;
 export function parseDiceFromWgDamageField(wgDamageField: string): string {
 	return wgDamageField.replace(damageTypeMatch, '');
 }

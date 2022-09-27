@@ -1,0 +1,43 @@
+{
+	"title": "initiative",
+	"type": "object",
+	"description": "A  character",
+	"properties": {
+		"id": {
+			"type": "integer",
+			"readOnly": true,
+			"description": "The id of the initiative."
+		},
+		"channelId": {
+			"type": "string",
+			"description": "The id of the channel initiative is taking place in."
+		},
+		"gmUserId": {
+			"type": "string",
+			"description": "The discord id of the user who started the initiative"
+		},
+		"currentRound": {
+			"type": "number",
+			"description": "The current round number"
+		},
+		"currentInitiative": {
+			"type": ["number", "null"],
+			"description": "The current initiative value"
+		},
+		"currentGroupTurn": {
+			"type": ["number", "null"],
+
+			"description": "The id of the actor group whose turn it is. Used due to initiative ties"
+		},
+		"createdAt": {
+			"type": "string",
+			"format": "date-time",
+			"description": "When the initiative was first started"
+		},
+		"lastUpdatedAt": {
+			"type": "string",
+			"format": "date-time",
+			"description": "When the initiative was last interacted with"
+		}
+	}
+}

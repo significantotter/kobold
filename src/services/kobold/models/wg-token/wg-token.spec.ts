@@ -3,7 +3,7 @@ import { WgTokenFactory } from './wg-token.factory.js';
 import { WgToken } from './wg-token.model.js';
 import WgTokenSchema from './wg-token.schema.json';
 import addFormats from 'ajv-formats';
-const ajv = new Ajv();
+const ajv = new Ajv({ allowUnionTypes: true });
 addFormats(ajv);
 
 describe('WG Token', () => {

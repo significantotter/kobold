@@ -137,14 +137,14 @@ export namespace WG {
 
 	interface NamedBonus {
 		Name: string;
-		Bonus: number | null;
+		Bonus: number | string | null;
 		[key: string]: any;
 	}
 
 	interface Attack {
 		Name: string;
 		Bonus: number | null;
-		Damage: String | null;
+		Damage: string | null;
 		[key: string]: any;
 	}
 

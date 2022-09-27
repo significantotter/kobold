@@ -12,8 +12,10 @@ export default {
 		],
 	},
 	moduleNameMapper: {
+		'discord.js': 'discord.js',
 		'(.+)\\.js': '$1',
 	},
+	modulePathIgnorePatterns: ['discord.js'],
 	moduleDirectories: ['node_modules', 'src'],
 	extensionsToTreatAsEsm: ['.ts', '.json'],
 };

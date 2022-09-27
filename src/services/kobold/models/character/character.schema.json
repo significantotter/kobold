@@ -18,11 +18,110 @@
 		},
 		"characterData": {
 			"type": "object",
-			"description": "The general character data from the Wanderer's guide API /character endpoint"
+			"description": "The general character data from the Wanderer's guide API /character endpoint",
+			"properties": {
+				"id": { "type": "number" },
+				"userID": { "type": "number" },
+				"buildID": { "type": ["null", "number"] },
+				"name": { "type": "string" },
+				"level": { "type": "number" },
+				"experience": { "type": "number" },
+				"currentHealth": { "type": ["null", "number"] },
+				"tempHealth": { "type": ["null", "number"] },
+				"heroPoints": { "type": ["null", "number"] },
+				"ancestryID": { "type": ["null", "number"] },
+				"heritageID": { "type": ["null", "number"] },
+				"uniHeritageID": { "type": ["null", "number"] },
+				"backgroundID": { "type": ["null", "number"] },
+				"classID": { "type": ["null", "number"] },
+				"classID_2": { "type": ["null", "number"] },
+				"inventoryID": { "type": "number" },
+				"notes": {},
+				"rollHistoryJSON": {},
+				"details": {},
+				"customCode": {},
+				"infoJSON": {
+					"type": ["null", "object"],
+					"properties": { "imageURL": { "type": "string" }, "pronouns": {} },
+					"additionalProperties": true
+				},
+				"dataID": { "type": ["null", "number"] },
+				"currentStamina": { "type": ["null", "number"] },
+				"currentResolve": { "type": ["null", "number"] },
+				"builderByLevel": { "type": "number" },
+				"optionAutoDetectPreReqs": { "type": "number" },
+				"optionAutoHeightenSpells": { "type": "number" },
+				"optionPublicCharacter": { "type": "number" },
+				"optionCustomCodeBlock": { "type": "number" },
+				"optionDiceRoller": { "type": "number" },
+				"optionClassArchetypes": { "type": "number" },
+				"optionIgnoreBulk": { "type": "number" },
+				"variantProfWithoutLevel": { "type": "number" },
+				"variantFreeArchetype": { "type": "number" },
+				"variantAncestryParagon": { "type": "number" },
+				"variantStamina": { "type": "number" },
+				"variantAutoBonusProgression": { "type": "number" },
+				"variantGradualAbilityBoosts": { "type": "number" },
+				"enabledSources": { "type": "array" },
+				"enabledHomebrew": { "type": "array" },
+				"createdAt": { "type": "string" },
+				"updatedAt": { "type": "string" }
+			}
 		},
 		"calculatedStats": {
 			"type": "object",
-			"description": "The computed base stat block from the Wanderer's guide API /character/calculated-stats endpoint"
+			"description": "The computed base stat block from the Wanderer's guide API /character/calculated-stats endpoint",
+			"properties": {
+				"charID": { "type": "number" },
+				"maxHP": { "type": ["number", "null"] },
+				"totalClassDC": { "type": ["number", "null"] },
+				"totalSpeed": { "type": ["number", "null"] },
+				"totalAC": { "type": ["number", "null"] },
+				"totalPerception": { "type": ["number", "null"] },
+				"totalSkills": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"Name": { "type": "string" },
+							"Bonus": { "type": ["string", "number", "null"] }
+						}
+					}
+				},
+				"totalSaves": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"Name": { "type": "string" },
+							"Bonus": { "type": ["string", "number", "null"] }
+						}
+					}
+				},
+				"totalAbilityScores": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"Name": { "type": "string" },
+							"Score": { "type": ["number", "null"] }
+						}
+					}
+				},
+				"weapons": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"Name": { "type": "string" },
+							"Bonus": { "type": ["number", "null"] },
+							"Damage": { "type": ["string", "null"] }
+						}
+					}
+				},
+				"createdAt": { "type": "string" },
+				"updatedAt": { "type": "string" }
+			}
 		},
 		"isActiveCharacter": {
 			"type": "boolean",

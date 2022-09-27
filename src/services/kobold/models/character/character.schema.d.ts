@@ -25,12 +25,87 @@ export interface Character {
 	 * The general character data from the Wanderer's guide API /character endpoint
 	 */
 	characterData?: {
+		id?: number;
+		userID?: number;
+		buildID?: null | number;
+		name?: string;
+		level?: number;
+		experience?: number;
+		currentHealth?: null | number;
+		tempHealth?: null | number;
+		heroPoints?: null | number;
+		ancestryID?: null | number;
+		heritageID?: null | number;
+		uniHeritageID?: null | number;
+		backgroundID?: null | number;
+		classID?: null | number;
+		classID_2?: null | number;
+		inventoryID?: number;
+		notes?: any;
+		rollHistoryJSON?: any;
+		details?: any;
+		customCode?: any;
+		infoJSON?: null | {
+			imageURL?: string;
+			pronouns?: any;
+			[k: string]: any;
+		};
+		dataID?: null | number;
+		currentStamina?: null | number;
+		currentResolve?: null | number;
+		builderByLevel?: number;
+		optionAutoDetectPreReqs?: number;
+		optionAutoHeightenSpells?: number;
+		optionPublicCharacter?: number;
+		optionCustomCodeBlock?: number;
+		optionDiceRoller?: number;
+		optionClassArchetypes?: number;
+		optionIgnoreBulk?: number;
+		variantProfWithoutLevel?: number;
+		variantFreeArchetype?: number;
+		variantAncestryParagon?: number;
+		variantStamina?: number;
+		variantAutoBonusProgression?: number;
+		variantGradualAbilityBoosts?: number;
+		enabledSources?: any[];
+		enabledHomebrew?: any[];
+		createdAt?: string;
+		updatedAt?: string;
 		[k: string]: any;
 	};
 	/**
 	 * The computed base stat block from the Wanderer's guide API /character/calculated-stats endpoint
 	 */
 	calculatedStats?: {
+		charID?: number;
+		maxHP?: number | null;
+		totalClassDC?: number | null;
+		totalSpeed?: number | null;
+		totalAC?: number | null;
+		totalPerception?: number | null;
+		totalSkills?: {
+			Name?: string;
+			Bonus?: string | number | null;
+			[k: string]: any;
+		}[];
+		totalSaves?: {
+			Name?: string;
+			Bonus?: string | number | null;
+			[k: string]: any;
+		}[];
+		totalAbilityScores?: {
+			Name?: string;
+			Score?: number | null;
+			[k: string]: any;
+		}[];
+		weapons?: {
+			Name?: string;
+			Bonus?: number | null;
+			Damage?: string | null;
+			[k: string]: any;
+		}[];
+		createdAt?: string;
+		updatedAt?: string;
 		[k: string]: any;
 	};
 	/**

@@ -8,14 +8,14 @@ export { CharacterImportSubCommand } from './characters/character-import-subcomm
 export { CharacterSheetSubCommand } from './characters/character-sheet-subcommand.js';
 
 // roll commands
-export { RollCommand } from './roll/roll-command';
-export { RollDiceSubCommand } from './roll/roll-dice-subcommand';
-export { RollSkillSubCommand } from './roll/roll-skill-subcommand';
-export { RollSaveSubCommand } from './roll/roll-save-subcommand';
-export { RollPerceptionSubCommand } from './roll/roll-perception-subcommand';
-export { RollAbilitySubCommand } from './roll/roll-ability-subcommand';
-export { RollAttackSubCommand } from './roll/roll-attack-subcommand';
+export { RollCommand } from './roll/roll-command.js';
+export { RollDiceSubCommand } from './roll/roll-dice-subcommand.js';
+export { RollSkillSubCommand } from './roll/roll-skill-subcommand.js';
+export { RollSaveSubCommand } from './roll/roll-save-subcommand.js';
+export { RollPerceptionSubCommand } from './roll/roll-perception-subcommand.js';
+export { RollAbilitySubCommand } from './roll/roll-ability-subcommand.js';
+export { RollAttackSubCommand } from './roll/roll-attack-subcommand.js';
 
 // initiative commands
-export { InitCommand } from './init/init-command';
-export { InitStartCommand } from './init/init-start-command';
+export { InitCommand } from './init/init-command.js';
+export { InitStartCommand } from './init/init-start-subcommand.js';

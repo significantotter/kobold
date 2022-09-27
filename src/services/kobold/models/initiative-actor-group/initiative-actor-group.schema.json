@@ -1,0 +1,38 @@
+{
+	"title": "initiativeActorGroup",
+	"type": "object",
+	"description": "An actor group taking part in an initiative",
+	"properties": {
+		"id": {
+			"type": "integer",
+			"readOnly": true,
+			"description": "The id of the initiative actor."
+		},
+		"initiativeId": {
+			"type": "number",
+			"description": "The id of the initiative the actor belongs to."
+		},
+		"userId": {
+			"type": "string",
+			"description": "The discord id of the user who controls the group"
+		},
+		"name": {
+			"type": "string",
+			"description": "the name of the group of actors"
+		},
+		"initiativeResult": {
+			"type": "number",
+			"description": "The initiative result value for the group"
+		},
+		"createdAt": {
+			"type": "string",
+			"format": "date-time",
+			"description": "When the initiative was first started"
+		},
+		"lastUpdatedAt": {
+			"type": "string",
+			"format": "date-time",
+			"description": "When the initiative was last interacted with"
+		}
+	}
+}

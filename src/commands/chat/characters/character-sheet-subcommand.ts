@@ -1,4 +1,3 @@
-import { Character } from '../../../services/kobold/models/index.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -89,7 +88,7 @@ export class CharacterSheetSubCommand implements Command {
 		const savesText = calculatedStats.totalSaves
 			.map(save => {
 				const symbol = save.Bonus >= 0 ? '+' : '';
-				return `${save.Name} \`${symbol}${save.Bonus}\` (DC ${10 + save.Bonus})`;
+				return `${save.Name} \`${symbol}${save.Bonus}\` (DC ${10 + Number(save.Bonus)})`;
 			})
 			.join(', ');
 		const savesEmbed = {

@@ -1,7 +1,9 @@
+import { match } from 'assert';
 import { WG } from '../services/wanderers-guide/wanderers-guide.js';
 import { Character } from './../services/kobold/models/character/character.model';
 
 // determines the distance between two strings
+// taken from stack overflow
 function levenshteinDistance(str1: string, str2: string) {
 	const track = Array(str2.length + 1)
 		.fill(null)
@@ -66,14 +68,12 @@ export function findPossibleSkillFromString(
 	targetCharacter: Character,
 	skillText: string
 ): WG.NamedBonus[] {
-	const stats = targetCharacter.calculatedStats as WG.CharacterCalculatedStatsApiResponse;
-	const matchRegex = new RegExp(skillText, 'ig');
 	const matchedSkills = [];
-	for (const skill of stats.totalSkills.concat({
+	for (const skill of targetCharacter.calculatedStats.totalSkills.concat({
 		Name: 'Perception',
 		Bonus: targetCharacter.calculatedStats.totalPerception,
 	})) {
-		if (matchRegex.test(skill.Name)) {
+		if (skill.Name.toLowerCase().includes(skillText.toLowerCase())) {
 			matchedSkills.push(skill);
 		}
 	}
@@ -90,11 +90,9 @@ export function findPossibleSaveFromString(
 	targetCharacter: Character,
 	saveText: string
 ): WG.NamedBonus[] {
-	const stats = targetCharacter.calculatedStats as WG.CharacterCalculatedStatsApiResponse;
-	const matchRegex = new RegExp(saveText, 'ig');
 	const matchedSaves = [];
-	for (const save of stats.totalSaves) {
-		if (matchRegex.test(save.Name)) {
+	for (const save of targetCharacter.calculatedStats.totalSaves) {
+		if (save.Name.toLowerCase().includes(saveText.toLowerCase())) {
 			matchedSaves.push(save);
 		}
 	}
@@ -111,11 +109,9 @@ export function findPossibleAbilityFromString(
 	targetCharacter: Character,
 	abilityText: string
 ): WG.NamedScore[] {
-	const stats = targetCharacter.calculatedStats as WG.CharacterCalculatedStatsApiResponse;
-	const matchRegex = new RegExp(abilityText, 'ig');
 	const matchedAbility = [];
-	for (const ability of stats.totalAbilityScores) {
-		if (matchRegex.test(ability.Name)) {
+	for (const ability of targetCharacter.calculatedStats.totalAbilityScores) {
+		if (ability.Name.toLowerCase().includes(abilityText.toLowerCase())) {
 			matchedAbility.push(ability);
 		}
 	}
@@ -132,11 +128,9 @@ export function findPossibleAttackFromString(
 	targetCharacter: Character,
 	attackText: string
 ): WG.NamedBonus[] {
-	const stats = targetCharacter.calculatedStats as WG.CharacterCalculatedStatsApiResponse;
-	const matchRegex = new RegExp(attackText, 'ig');
 	const matchedAttacks = [];
-	for (const attack of stats.weapons) {
-		if (matchRegex.test(attack.Name)) {
+	for (const attack of targetCharacter.calculatedStats.weapons) {
+		if (attack.Name.toLowerCase().includes(attackText.toLowerCase())) {
 			matchedAttacks.push(attack);
 		}
 	}
@@ -146,14 +140,14 @@ export function findPossibleAttackFromString(
 /**
  * Gets the active character for a user
  * @param userId the discord use
- * @returns the active character for the user, or an empty array if one is not present
+ * @returns the active character for the user, or null if one is not present
  */
-export async function getActiveCharacter(userId: string): Promise<Character> {
+export async function getActiveCharacter(userId: string): Promise<Character | null> {
 	const existingCharacter = await Character.query().where({
 		userId: userId,
 		isActiveCharacter: true,
 	});
-	return existingCharacter[0];
+	return existingCharacter[0] || null;
 }
 
 const characterIdRegex = /characters\/([0-9]+)/;
@@ -162,13 +156,14 @@ const characterIdRegex = /characters\/([0-9]+)/;
  * @param text either a wanderer's guide url, or simply a numeric character id
  */
 export function parseCharacterIdFromText(text: string): number | null {
+	const trimmedText = text.trim();
 	let charId = null;
-	if (!isNaN(Number(text))) {
+	if (!isNaN(Number(trimmedText.trim()))) {
 		// we allow just a character id to be passed in as well
-		charId = Number(text);
+		charId = Number(trimmedText.trim());
 	} else {
-		// match the text to the regex
-		const matches = text.match(characterIdRegex);
+		// match the trimmedText to the regex
+		const matches = trimmedText.match(characterIdRegex);
 		if (!matches) {
 			charId = null;
 		} else charId = Number(matches[1]);

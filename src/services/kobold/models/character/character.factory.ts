@@ -18,7 +18,7 @@ class CharacterFactoryClass extends Factory<Character, CharacterTransientParams,
 export const CharacterFactory = CharacterFactoryClass.define(({ onCreate }) => {
 	onCreate(async builtCharacter => Character.query().insert(builtCharacter));
 
-	const wgTokenData: DeepPartial<Character> = {
+	const characterData: DeepPartial<Character> = {
 		charId: faker.datatype.number(),
 		userId: faker.datatype.uuid(),
 		calculatedStats: CalculatedStatsFactory.build(),
@@ -28,5 +28,5 @@ export const CharacterFactory = CharacterFactoryClass.define(({ onCreate }) => {
 		lastUpdatedAt: faker.date.recent(30).toISOString(),
 	};
 
-	return Character.fromDatabaseJson(wgTokenData);
+	return Character.fromDatabaseJson(characterData);
 });
