@@ -1,14 +1,19 @@
 import { Character } from './../services/kobold/models/character/character.model';
-import { EmbedFieldData, MessageEmbed, User } from 'discord.js';
-import { Dice } from 'dice-typescript';
+import { CommandInteraction, EmbedFieldData, MessageEmbed, User } from 'discord.js';
+import { Dice, DiceResult } from 'dice-typescript';
 import type { WG } from './../services/wanderers-guide/wanderers-guide.js';
 import _ from 'lodash';
+import { getBestNameMatch } from './character-utils.js';
+
+interface DiceRollResult extends EmbedFieldData {
+	results: DiceResult | null;
+}
 
 export class RollBuilder {
 	private character: Character | null;
 	private rollDescription: string;
 	private rollNote: string;
-	private rollResults: EmbedFieldData[];
+	public rollResults: DiceRollResult[];
 	private title: string;
 
 	constructor({
@@ -29,8 +34,8 @@ export class RollBuilder {
 		this.rollNote = rollNote;
 		this.rollDescription = rollDescription || 'rolled some dice!';
 
-		const actorText = character?.characterData?.name || actorName;
-		this.title = title || _.capitalize(`${actorText} ${this.rollDescription}`);
+		const actorText = character?.characterData?.name || actorName || '';
+		this.title = title || _.capitalize(`${actorText} ${this.rollDescription}`.trim());
 	}
 
 	/**
@@ -43,6 +48,7 @@ export class RollBuilder {
 		const rollField = {
 			name: rollTitle || '\u200B',
 			value: '',
+			results: null,
 		};
 		try {
 			const roll = new Dice(null, null, {
@@ -56,6 +62,7 @@ export class RollBuilder {
 				rollField.value = `${rollExpression}\n${roll.renderedExpression.toString()}\n total = \`${
 					roll.total
 				}\``;
+				rollField.results = roll;
 			}
 		} catch (err) {
 			console.warn(err);
@@ -76,12 +83,15 @@ export class RollBuilder {
 		}
 
 		if (this.rollResults.length > 1) {
-			response.addFields(this.rollResults);
+			response.addFields(
+				//strip extra properties from the roll results
+				this.rollResults.map(result => ({ name: result.name, value: result.value }))
+			);
 		} else if (this.rollResults.length === 1) {
 			response.setDescription(this.rollResults[0].value);
 		}
 		if (this.rollNote) {
-			response.addFields([{ name: 'note', value: this.rollNote }]);
+			response.setFooter({ text: this.rollNote });
 		}
 		return response;
 	}
@@ -113,4 +123,33 @@ export function buildDiceExpression(
 	if (modifierExpression) wrappedModifierExpression = `+(${modifierExpression})`;
 
 	return `${baseDice}${bonus || ''}${wrappedModifierExpression}`;
+}
+
+export function rollSkill(
+	intr: CommandInteraction,
+	activeCharacter: Character,
+	skillChoice: string,
+	rollNote?: string,
+	modifierExpression?: string,
+	description?: string
+) {
+	const skillsPlusPerception = [
+		...activeCharacter.calculatedStats.totalSkills,
+		{
+			Name: 'Perception',
+			Bonus: activeCharacter.calculatedStats.totalPerception,
+		},
+	] as WG.NamedBonus[];
+
+	//use the first skill that matches the text of what we were sent, or preferably a perfect match
+	let targetSkill = getBestNameMatch(skillChoice, skillsPlusPerception);
+
+	const rollBuilder = new RollBuilder({
+		actorName: intr.user.username,
+		character: activeCharacter,
+		rollNote,
+		rollDescription: `rolled ${targetSkill.Name}`,
+	});
+	rollBuilder.addRoll(buildDiceExpression('d20', String(targetSkill.Bonus), modifierExpression));
+	return rollBuilder;
 }

@@ -21,7 +21,7 @@ import {
 	getActiveCharacter,
 	getBestNameMatch,
 } from '../../../utils/character-utils.js';
-import { buildDiceExpression, RollBuilder } from '../../../utils/dice-utils.js';
+import { buildDiceExpression, RollBuilder, rollSkill } from '../../../utils/dice-utils.js';
 
 export class RollSkillSubCommand implements Command {
 	public names = ['skill'];
@@ -71,28 +71,14 @@ export class RollSkillSubCommand implements Command {
 			await InteractionUtils.send(intr, `Yip! You don't have any active characters!`);
 			return;
 		}
-		const skillsPlusPerception = [
-			...activeCharacter.calculatedStats.totalSkills,
-			{
-				Name: 'Perception',
-				Bonus: activeCharacter.calculatedStats.totalPerception,
-			},
-		] as WG.NamedBonus[];
-
-		//use the first skill that matches the text of what we were sent, or preferably a perfect match
-		let targetSkill = getBestNameMatch(skillChoice, skillsPlusPerception);
-
-		const rollBuilder = new RollBuilder({
-			actorName: intr.user.username,
-			character: activeCharacter,
+		const response = await rollSkill(
+			intr,
+			activeCharacter,
+			skillChoice,
 			rollNote,
-			rollDescription: `rolled ${targetSkill.Name}`,
-		});
-		rollBuilder.addRoll(
-			buildDiceExpression('d20', String(targetSkill.Bonus), modifierExpression)
+			modifierExpression
 		);
-		const response = rollBuilder.compileEmbed();
 
-		await InteractionUtils.send(intr, response);
+		await InteractionUtils.send(intr, response.compileEmbed());
 	}
 }

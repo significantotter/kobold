@@ -3,7 +3,13 @@ import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord-api-types/v10';
-import { CommandInteraction, PermissionString } from 'discord.js';
+import {
+	AutocompleteFocusedOption,
+	AutocompleteInteraction,
+	CacheType,
+	CommandInteraction,
+	PermissionString,
+} from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 import { ChatArgs } from '../../../constants/chat-args.js';
 
@@ -65,6 +71,20 @@ export class CharacterCommand implements Command {
 	public requireClientPerms: PermissionString[] = [];
 
 	constructor(private commands: Command[]) {}
+
+	public async autocomplete(
+		intr: AutocompleteInteraction<CacheType>,
+		option: AutocompleteFocusedOption
+	): Promise<void> {
+		if (!intr.isAutocomplete()) return;
+
+		let command = CommandUtils.getSubCommandByName(this.commands, intr.options.getSubcommand());
+		if (!command || !command.autocomplete) {
+			return;
+		}
+
+		await command.autocomplete(intr, option);
+	}
 
 	public async execute(intr: CommandInteraction, data: EventData): Promise<void> {
 		let command = CommandUtils.getSubCommandByName(this.commands, intr.options.getSubcommand());

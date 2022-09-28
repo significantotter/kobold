@@ -93,8 +93,7 @@ describe('Dice Utils', function () {
 			});
 			rollBuilder.addRoll('d6+1', 'testRoll');
 			const result = rollBuilder.compileEmbed();
-			const rollNoteField = result.fields.find(field => field.name === 'note');
-			expect(rollNoteField.value).toBe('testing!');
+			expect(result.footer.text).toBe('testing!');
 		});
 		test(`allows a title that will overwrite any otherwise generated title`, function () {
 			const fakeCharacter = CharacterFactory.build();

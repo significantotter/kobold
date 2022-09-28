@@ -5,6 +5,7 @@ import InitiativeActorSchema from './initiative-actor.schema.json';
 import { Model, RelationMappings } from 'objection';
 import { Initiative } from '../initiative/initiative.model.js';
 import { InitiativeActorGroup } from '../initiative-actor-group/initiative-actor-group.model.js';
+import { Character } from '../character/character.model.js';
 
 export interface InitiativeActor extends InitiativeActorTypes.InitiativeActor {}
 export class InitiativeActor extends BaseModel {
@@ -34,6 +35,20 @@ export class InitiativeActor extends BaseModel {
 					to: 'initiativeActorGroup.id',
 				},
 			},
+			character: {
+				relation: Model.BelongsToOneRelation,
+				modelClass: Character,
+				join: {
+					from: 'initiativeActor.characterId',
+					to: 'character.id',
+				},
+			},
 		};
+	}
+
+	static queryLooseCharacterName(characterName) {
+		return this.query().whereRaw(`initiativeActor.name ILIKE :characterName`, {
+			charName: `%${characterName}%`,
+		});
 	}
 }

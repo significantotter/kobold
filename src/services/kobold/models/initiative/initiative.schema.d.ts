@@ -22,6 +22,10 @@ export interface Initiative {
 	 */
 	gmUserId?: string;
 	/**
+	 * The message ids for the header of the most recent round. Ordered by round #.
+	 */
+	roundMessageIds?: string[];
+	/**
 	 * The current round number
 	 */
 	currentRound?: number;

@@ -12,4 +12,14 @@ export class Character extends BaseModel {
 	static get jsonSchema(): JSONSchema7 {
 		return CharacterSchema as JSONSchema7;
 	}
+
+	static queryLooseCharacterName(characterName, userId) {
+		return this.query().whereRaw(
+			`user_id=:userId AND (character_data->'name')::TEXT ILIKE :characterName`,
+			{
+				userId,
+				characterName: `%${characterName}%`,
+			}
+		);
+	}
 }

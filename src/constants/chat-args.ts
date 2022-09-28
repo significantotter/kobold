@@ -67,6 +67,7 @@ export class ChatArgs {
 		name: 'name',
 		description: `The name of your wanderer's guide character.`,
 		required: true,
+		autocomplete: true,
 		type: ApplicationCommandOptionType.String,
 	};
 	public static readonly SET_ACTIVE_ID_OPTION: APIApplicationCommandBasicOption = {
@@ -131,6 +132,19 @@ export class ChatArgs {
 		name: 'note',
 		description: 'A note about the reason for the roll.',
 		required: true,
+		type: ApplicationCommandOptionType.String,
+	};
+	public static readonly INIT_VALUE_OPTION: APIApplicationCommandBasicOption = {
+		name: 'value',
+		description: 'A value to set your initiative to. Overwrites any other init options.',
+		required: false,
+		type: ApplicationCommandOptionType.Number,
+	};
+	public static readonly INIT_CHARACTER_OPTION: APIApplicationCommandBasicOption = {
+		name: 'character',
+		description: 'A character present in the initiative.',
+		required: false,
+		autocomplete: true,
 		type: ApplicationCommandOptionType.String,
 	};
 }

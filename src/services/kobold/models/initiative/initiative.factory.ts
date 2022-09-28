@@ -19,6 +19,7 @@ export const InitiativeFactory = InitiativeFactoryClass.define(({ onCreate }) =>
 	const initiativeData: DeepPartial<Initiative> = {
 		channelId: faker.datatype.uuid(),
 		gmUserId: faker.datatype.uuid(),
+		roundMessageIds: [faker.datatype.uuid()],
 		currentRound: faker.datatype.number(11),
 		currentInitiative: faker.datatype.number(40),
 		currentGroupTurn: null,

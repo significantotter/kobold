@@ -21,7 +21,10 @@ import {
 	RollAttackSubCommand,
 	// init
 	InitCommand,
-	InitStartCommand,
+	InitStartSubCommand,
+	InitJoinSubCommand,
+	InitRemoveSubCommand,
+	InitEndSubCommand,
 } from './commands/chat/index.js';
 import { Command } from './commands/index.js';
 import {
@@ -79,7 +82,12 @@ async function start(): Promise<void> {
 			new RollAbilitySubCommand(),
 		]),
 		// Init commands
-		new InitCommand([new InitStartCommand()]),
+		new InitCommand([
+			new InitStartSubCommand(),
+			new InitJoinSubCommand(),
+			new InitRemoveSubCommand(),
+			new InitEndSubCommand(),
+		]),
 	];
 
 	// Buttons
