@@ -18,6 +18,12 @@ export { RollAttackSubCommand } from './roll/roll-attack-subcommand.js';
 
 // initiative commands
 export { InitCommand } from './init/init-command.js';
+export { InitAddSubCommand } from './init/init-add-subcommand.js';
+export { InitSetSubCommand } from './init/init-set-subcommand.js';
+export { InitShowSubCommand } from './init/init-show-subcommand.js';
+export { InitNextSubCommand } from './init/init-next-subcommand.js';
+export { InitPrevSubCommand } from './init/init-prev-subcommand.js';
+export { InitJumpToSubCommand } from './init/init-jump-to-subcommand.js';
 export { InitStartSubCommand } from './init/init-start-subcommand.js';
 export { InitEndSubCommand } from './init/init-end-subcommand.js';
 export { InitJoinSubCommand } from './init/init-join-subcommand.js';

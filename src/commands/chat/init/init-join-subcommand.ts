@@ -79,6 +79,13 @@ export class InitJoinSubCommand implements Command {
 			await InteractionUtils.send(intr, `Yip! You don't have any active characters!`);
 			return;
 		}
+		if (currentInit.actors.find(actor => actor.characterId === activeCharacter.id)) {
+			await InteractionUtils.send(
+				intr,
+				`Yip! ${activeCharacter.characterData.name} is already in this initiative!`
+			);
+			return;
+		}
 		const initiativeValue = intr.options.getNumber(ChatArgs.INIT_VALUE_OPTION.name);
 		const skillChoice = intr.options.getString(ChatArgs.SKILL_CHOICE_OPTION.name);
 		const diceExpression = intr.options.getString(ChatArgs.ROLL_EXPRESSION_OPTION.name);
@@ -130,19 +137,38 @@ export class InitJoinSubCommand implements Command {
 		if (targetMessageId) {
 			const targetMessage = await intr.channel.messages.fetch(targetMessageId);
 			rollResultMessage.addFields([
-				{ name: '\u200B', value: `[View Current Round](${targetMessage.url})` },
+				{
+					name: '\u200B',
+					value: `[Initiative Round ${currentInit.currentRound}](${targetMessage.url})`,
+				},
 			]);
 		}
+
+		let nameCount = 1;
+		let existingName = currentInit.actors.find(
+			actor => actor.name.toLowerCase() === activeCharacter.characterData.name.toLowerCase()
+		);
+		let uniqueName = activeCharacter.characterData.name;
+		if (existingName) {
+			while (
+				currentInit.actors.find(
+					actor => actor.name.toLowerCase() === uniqueName.toLowerCase()
+				)
+			) {
+				uniqueName = activeCharacter.characterData.name + `-${nameCount++}`;
+			}
+		}
+
 		const newActor = await InitiativeActor.query().insertGraphAndFetch({
 			initiativeId: currentInit.id,
-			name: activeCharacter.characterData.name,
+			name: uniqueName,
 			characterId: activeCharacter.id,
 			userId: intr.user.id,
 
 			actorGroup: {
 				initiativeId: currentInit.id,
 				userId: intr.user.id,
-				name: activeCharacter.characterData.name,
+				name: uniqueName,
 				initiativeResult: finalInitiative,
 			},
 		});

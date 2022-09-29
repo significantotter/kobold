@@ -7,7 +7,11 @@ import { Initiative } from '../initiative/initiative.model.js';
 import { InitiativeActorGroup } from '../initiative-actor-group/initiative-actor-group.model.js';
 import { Character } from '../character/character.model.js';
 
-export interface InitiativeActor extends InitiativeActorTypes.InitiativeActor {}
+export interface InitiativeActor extends InitiativeActorTypes.InitiativeActor {
+	initiative?: Initiative;
+	actorGroup?: InitiativeActorGroup;
+	character?: Character;
+}
 export class InitiativeActor extends BaseModel {
 	static get tableName(): string {
 		return 'initiativeActor';

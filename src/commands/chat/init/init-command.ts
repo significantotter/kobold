@@ -33,6 +33,27 @@ export class InitCommand implements Command {
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
 			},
 			{
+				name: 'show',
+				description: `Displays the current initiative`,
+				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+			},
+			{
+				name: 'next',
+				description: `Moves to the next participant in the initiative order`,
+				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+			},
+			{
+				name: 'prev',
+				description: `Moves to the previous participant in the initiative order`,
+				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+			},
+			{
+				name: 'jump_to',
+				description: `Jumps to a specific participant in the initiative order`,
+				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				options: [ChatArgs.INIT_CHARACTER_OPTION],
+			},
+			{
 				name: 'join',
 				description:
 					'Joins initiative with your active character. ' +
@@ -47,7 +68,7 @@ export class InitCommand implements Command {
 					{
 						...ChatArgs.ROLL_EXPRESSION_OPTION,
 						description:
-							'A dice roll expression to use to join initiative. ' +
+							'Dice to roll to join initiative. ' +
 							'Modifies your skill if you chose a skill.',
 						required: false,
 					},
@@ -58,15 +79,48 @@ export class InitCommand implements Command {
 				],
 			},
 			{
-				name: 'end',
-				description: 'Ends the initiative in the current channel.',
+				name: 'add',
+				description: `Adds a fake character to initiative`,
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				options: [
+					{
+						...ChatArgs.ACTOR_NAME_OPTION,
+						required: true,
+					},
+					{
+						...ChatArgs.ROLL_EXPRESSION_OPTION,
+						description: 'Dice to roll to join initiative. ',
+						required: false,
+					},
+					{
+						...ChatArgs.INIT_VALUE_OPTION,
+						required: false,
+					},
+				],
+			},
+			{
+				name: 'set',
+				description: `Sets certain properties of your character for initiative`,
+				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				options: [
+					{
+						...ChatArgs.INIT_CHARACTER_OPTION,
+						required: true,
+					},
+					ChatArgs.ACTOR_SET_OPTION,
+					ChatArgs.ACTOR_SET_VALUE_OPTION,
+				],
 			},
 			{
 				name: 'remove',
 				description: 'Removes a character from initiative.',
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
 				options: [ChatArgs.INIT_CHARACTER_OPTION],
+			},
+			{
+				name: 'end',
+				description: 'Ends the initiative in the current channel.',
+				type: ApplicationCommandOptionType.Subcommand.valueOf(),
 			},
 		],
 	};

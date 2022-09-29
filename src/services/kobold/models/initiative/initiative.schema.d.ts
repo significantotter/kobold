@@ -34,10 +34,6 @@ export interface Initiative {
 	 */
 	currentInitiative?: number | null;
 	/**
-	 * The id of the actor group whose turn it is. Used due to initiative ties
-	 */
-	currentGroupTurn?: number | null;
-	/**
 	 * When the initiative was first started
 	 */
 	createdAt?: string;

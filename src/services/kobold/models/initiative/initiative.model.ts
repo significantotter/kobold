@@ -6,7 +6,11 @@ import { Model, RelationMappings } from 'objection';
 import { InitiativeActorGroup } from '../initiative-actor-group/initiative-actor-group.model.js';
 import { InitiativeActor } from '../initiative-actor/initiative-actor.model.js';
 
-export interface Initiative extends InitiativeTypes.Initiative {}
+export interface Initiative extends InitiativeTypes.Initiative {
+	currentTurnGroup?: InitiativeActorGroup;
+	actorGroups?: InitiativeActorGroup[];
+	actors?: InitiativeActor[];
+}
 export class Initiative extends BaseModel {
 	static get tableName(): string {
 		return 'initiative';

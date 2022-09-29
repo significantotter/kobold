@@ -31,12 +31,12 @@ import { Command, CommandDeferType } from '../../index.js';
 import _ from 'lodash';
 import { Initiative } from '../../../services/kobold/models/index.js';
 
-export class InitNextSubCommand implements Command {
-	public names = ['next'];
+export class InitJumpToSubCommand implements Command {
+	public names = ['jump_to'];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: 'next',
-		description: `Moves to the next participant in the initiative order`,
+		name: 'jump_to',
+		description: `Jumps to a specific participant in the initiative order`,
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -54,14 +54,19 @@ export class InitNextSubCommand implements Command {
 			const match = intr.options.getString(ChatArgs.INIT_CHARACTER_OPTION.name);
 
 			const currentInitResponse = await getInitiativeForChannel(intr.channel);
-			if (!currentInitResponse) await InteractionUtils.respond(intr, []);
+			if (currentInitResponse.errorMessage) {
+				await InteractionUtils.respond(intr, []);
+				return;
+			}
 			//get the character matches
 			let actorOptions = getControllableInitiativeActors(
 				currentInitResponse.init,
 				//get all initiative actors
 				currentInitResponse.init.gmUserId
 			);
-			actorOptions = actorOptions.filter(actor => actor.name.includes(match));
+			actorOptions = actorOptions.filter(actor =>
+				actor.name.toLowerCase().includes(match.toLowerCase())
+			);
 
 			//return the matched actors
 			await InteractionUtils.respond(
@@ -79,42 +84,29 @@ export class InitNextSubCommand implements Command {
 		const initResult = await getInitiativeForChannel(intr.channel);
 		if (initResult.errorMessage) {
 			await InteractionUtils.send(intr, initResult.errorMessage);
-			return;
 		}
 
-		const initBuilder = new InitiativeBuilder({ initiative: initResult.init });
-		const nextTurn = initBuilder.getNextTurnChanges();
-		if (nextTurn.errorMessage) {
-			await InteractionUtils.send(intr, nextTurn.errorMessage);
+		const groupResponse = getNameMatchGroupFromInitiative(
+			initResult.init,
+			initResult.init.gmUserId,
+			targetCharacterName
+		);
+		if (groupResponse.errorMessage) {
+			await InteractionUtils.send(intr, groupResponse.errorMessage);
 			return;
 		}
-
-		let saveMessage = nextTurn.currentRound > initResult.init.currentRound;
 
 		const updatedInitiative = await Initiative.query()
-			.updateAndFetchById(initResult.init.id, nextTurn)
+			.updateAndFetchById(initResult.init.id, { currentGroupTurn: groupResponse.group.id })
 			.withGraphFetched('[actors.[character], actorGroups]');
 
-		initBuilder.set({
-			initiative: updatedInitiative,
-			actors: updatedInitiative.actors,
-			groups: updatedInitiative.actorGroups,
-		});
-
-		const roundMessage = await updateInitiativeRoundMessageOrSendNew(intr, initBuilder);
-
-		let currentRoundMessage = roundMessage;
-
-		if (saveMessage) {
-			let roundMessageIds = initResult.init.roundMessageIds;
-			roundMessageIds.push(roundMessage);
-			await Initiative.query().update({}).where({ id: initResult.init.id, roundMessageIds });
-		} else {
-			currentRoundMessage = await initBuilder.getCurrentRoundMessage(intr);
-		}
+		const initBuilder = new InitiativeBuilder({ initiative: updatedInitiative });
+		const currentRoundMessage = await initBuilder.getCurrentRoundMessage(intr);
 		const url = currentRoundMessage ? currentRoundMessage.url : '';
 		const currentTurnEmbed = await initBuilder.currentTurnEmbed(url);
 		const currentGroupTurn = initBuilder.currentGroupTurn;
+
+		await updateInitiativeRoundMessageOrSendNew(intr, initBuilder);
 
 		await InteractionUtils.send(intr, {
 			content: `<@${currentGroupTurn.userId}>`,

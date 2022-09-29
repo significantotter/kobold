@@ -21,6 +21,12 @@ import {
 	RollAttackSubCommand,
 	// init
 	InitCommand,
+	InitAddSubCommand,
+	InitSetSubCommand,
+	InitShowSubCommand,
+	InitNextSubCommand,
+	InitPrevSubCommand,
+	InitJumpToSubCommand,
 	InitStartSubCommand,
 	InitJoinSubCommand,
 	InitRemoveSubCommand,
@@ -83,7 +89,13 @@ async function start(): Promise<void> {
 		]),
 		// Init commands
 		new InitCommand([
+			new InitAddSubCommand(),
+			new InitSetSubCommand(),
 			new InitStartSubCommand(),
+			new InitShowSubCommand(),
+			new InitNextSubCommand(),
+			new InitPrevSubCommand(),
+			new InitJumpToSubCommand(),
 			new InitJoinSubCommand(),
 			new InitRemoveSubCommand(),
 			new InitEndSubCommand(),

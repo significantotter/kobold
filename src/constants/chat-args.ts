@@ -147,4 +147,32 @@ export class ChatArgs {
 		autocomplete: true,
 		type: ApplicationCommandOptionType.String,
 	};
+	public static readonly ACTOR_NAME_OPTION: APIApplicationCommandBasicOption = {
+		name: 'name',
+		description: 'The name of the dummy character to add to initiative.',
+		required: true,
+		type: ApplicationCommandOptionType.String,
+	};
+	public static readonly ACTOR_SET_OPTION: APIApplicationCommandBasicOption = {
+		name: 'option',
+		description: 'The character option to alter (only within this initiative).',
+		required: true,
+		type: ApplicationCommandOptionType.String,
+		choices: [
+			{
+				name: 'initiative',
+				value: 'initiative',
+			},
+			{
+				name: 'name',
+				value: 'name',
+			},
+		],
+	};
+	public static readonly ACTOR_SET_VALUE_OPTION: APIApplicationCommandBasicOption = {
+		name: 'value',
+		description: 'The value to set the option to.',
+		required: true,
+		type: ApplicationCommandOptionType.String,
+	};
 }

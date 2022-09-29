@@ -29,11 +29,6 @@
 			"type": ["number", "null"],
 			"description": "The current initiative value"
 		},
-		"currentGroupTurn": {
-			"type": ["number", "null"],
-
-			"description": "The id of the actor group whose turn it is. Used due to initiative ties"
-		},
 		"createdAt": {
 			"type": "string",
 			"format": "date-time",

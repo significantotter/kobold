@@ -1,5 +1,5 @@
 import { InitiativeActorGroup } from './../../../services/kobold/models/initiative-actor-group/initiative-actor-group.model';
-import { InitiativeBuilder } from './../../../utils/initiative-utils';
+import { getActiveCharacterActor, InitiativeBuilder } from './../../../utils/initiative-utils';
 import { InitiativeActor } from '../../../services/kobold/models/initiative-actor/initiative-actor.model';
 import { ChatArgs } from '../../../constants/chat-args';
 import {
@@ -27,6 +27,7 @@ import {
 } from '../../../utils/initiative-utils.js';
 import { Command, CommandDeferType } from '../../index.js';
 import _ from 'lodash';
+import { Initiative } from '../../../services/kobold/models/index.js';
 
 export class InitRemoveSubCommand implements Command {
 	public names = ['remove'];
@@ -80,21 +81,25 @@ export class InitRemoveSubCommand implements Command {
 		}
 		const currentInit = currentInitResponse.init;
 
-		const actorResponse = await getNameMatchCharacterFromInitiative(
-			intr.user.id,
-			currentInit,
-			targetCharacterName
-		);
+		let actorResponse: { actor: InitiativeActor; errorMessage: string };
+		if (!targetCharacterName) {
+			actorResponse = await getActiveCharacterActor(currentInit, intr.user.id);
+		} else {
+			actorResponse = await getNameMatchCharacterFromInitiative(
+				intr.user.id,
+				currentInit,
+				targetCharacterName
+			);
+		}
 		if (actorResponse.errorMessage) {
 			await InteractionUtils.send(intr, actorResponse.errorMessage);
 			return;
 		}
-		const actor = actorResponse.actor as InitiativeActor;
+		const actor = actorResponse.actor;
 		const actorsInGroup = _.filter(
-			currentInit.actors as InitiativeActor[],
+			currentInit.actors,
 			possibleActor => possibleActor.initiativeActorGroupId === actor.initiativeActorGroupId
 		);
-
 		await InitiativeActor.query().deleteById(actor.id);
 		if (actorsInGroup.length === 1) {
 			await InitiativeActorGroup.query().deleteById(actor.initiativeActorGroupId);
@@ -112,10 +117,45 @@ export class InitRemoveSubCommand implements Command {
 		}
 		await InteractionUtils.send(intr, deletedEmbed);
 
-		const initBuilder = new InitiativeBuilder({
-			initiative: currentInit,
-		});
-		initBuilder.removeActor(actor);
-		await updateInitiativeRoundMessageOrSendNew(intr, initBuilder);
+		if (
+			currentInit.currentGroupTurn === actor.initiativeActorGroupId &&
+			currentInit.actorGroups?.length
+		) {
+			//we need to fix the initiative!
+
+			const initBuilder = new InitiativeBuilder({ initiative: currentInit });
+			let previousTurn = initBuilder.getPreviousTurnChanges();
+			if (previousTurn.errorMessage) {
+				previousTurn = initBuilder.getNextTurnChanges();
+			}
+
+			const updatedInitiative = await Initiative.query()
+				.updateAndFetchById(currentInit.id, previousTurn)
+				.withGraphFetched('[actors.[character], actorGroups]');
+
+			initBuilder.set({
+				initiative: updatedInitiative,
+				actors: updatedInitiative.actors,
+				groups: updatedInitiative.actorGroups,
+			});
+
+			const currentRoundMessage = await initBuilder.getCurrentRoundMessage(intr);
+			const url = currentRoundMessage ? currentRoundMessage.url : '';
+			const currentTurnEmbed = await initBuilder.currentTurnEmbed(url);
+			const currentGroupTurn = initBuilder.currentGroupTurn;
+
+			await updateInitiativeRoundMessageOrSendNew(intr, initBuilder);
+
+			await InteractionUtils.send(intr, {
+				content: `<@${currentGroupTurn.userId}>`,
+				embeds: [currentTurnEmbed],
+			});
+		} else {
+			const initBuilder = new InitiativeBuilder({
+				initiative: currentInit,
+			});
+			initBuilder.removeActor(actor);
+			await updateInitiativeRoundMessageOrSendNew(intr, initBuilder);
+		}
 	}
 }
