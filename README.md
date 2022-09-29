@@ -13,9 +13,9 @@ Kobold was developed to integrate my preferred character management tool -- Wand
 
 Kobold is being developed with a focus on ease of playing with minimal configuration. However, although the base usage should be simple, I intend to allow as much complexity as a player wishes to utilize with it.
 
-For help using this bot, feel free to [join my support server](https://discord.gg/29RgmMq5)!
+For help using this bot, reporting bugs, or suggesting features, feel free to [join my support server](https://discord.gg/6bS2GM59uj)!
 
-[![Discord Shield](https://discord.com/api/guilds/1022906306442563634/widget.png?style=shield)](https://discord.gg/29RgmMq5)
+[![Discord Shield](https://discord.com/api/guilds/1022906306442563634/widget.png?style=shield)](https://discord.gg/6bS2GM59uj)
 
 ## Features
 

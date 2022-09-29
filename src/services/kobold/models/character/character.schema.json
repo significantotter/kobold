@@ -62,8 +62,8 @@
 				"variantStamina": { "type": "number" },
 				"variantAutoBonusProgression": { "type": "number" },
 				"variantGradualAbilityBoosts": { "type": "number" },
-				"enabledSources": { "type": "array" },
-				"enabledHomebrew": { "type": "array" },
+				"enabledSources": {},
+				"enabledHomebrew": {},
 				"createdAt": { "type": "string" },
 				"updatedAt": { "type": "string" }
 			}
@@ -114,8 +114,8 @@
 						"type": "object",
 						"properties": {
 							"Name": { "type": "string" },
-							"Bonus": { "type": ["number", "null"] },
-							"Damage": { "type": ["string", "null"] }
+							"Bonus": { "type": ["string", "number", "null"] },
+							"Damage": { "type": ["string", "number", "null"] }
 						}
 					}
 				},

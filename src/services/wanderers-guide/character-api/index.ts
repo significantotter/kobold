@@ -20,12 +20,8 @@ export class CharacterApi {
 			'weapons',
 			'infoJSON',
 		];
-		const propertiesToDateParse = ['createdAt', 'updatedAt'];
 		for (const property of propertiesToJSONParse) {
 			if (response[property]) response[property] = JSON.parse(response[property]);
-		}
-		for (const property of propertiesToDateParse) {
-			if (response[property]) response[property] = new Date(response[property]);
 		}
 		return response;
 	}

@@ -67,8 +67,8 @@ export interface Character {
 		variantStamina?: number;
 		variantAutoBonusProgression?: number;
 		variantGradualAbilityBoosts?: number;
-		enabledSources?: any[];
-		enabledHomebrew?: any[];
+		enabledSources?: any;
+		enabledHomebrew?: any;
 		createdAt?: string;
 		updatedAt?: string;
 		[k: string]: any;
@@ -100,8 +100,8 @@ export interface Character {
 		}[];
 		weapons?: {
 			Name?: string;
-			Bonus?: number | null;
-			Damage?: string | null;
+			Bonus?: string | number | null;
+			Damage?: string | number | null;
 			[k: string]: any;
 		}[];
 		createdAt?: string;
