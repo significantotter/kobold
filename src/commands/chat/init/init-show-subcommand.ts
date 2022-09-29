@@ -29,6 +29,7 @@ export class InitShowSubCommand implements Command {
 		const initResult = await getInitiativeForChannel(intr.channel);
 		if (initResult.errorMessage) {
 			await InteractionUtils.send(intr, initResult.errorMessage);
+			return;
 		}
 
 		const initBuilder = new InitiativeBuilder({ initiative: initResult.init });

@@ -102,12 +102,12 @@ export class InitPrevSubCommand implements Command {
 		const currentRoundMessage = await initBuilder.getCurrentRoundMessage(intr);
 		const url = currentRoundMessage ? currentRoundMessage.url : '';
 		const currentTurnEmbed = await initBuilder.currentTurnEmbed(url);
-		const currentGroupTurn = initBuilder.currentGroupTurn;
+		const activeGroup = initBuilder.activeGroup;
 
 		await updateInitiativeRoundMessageOrSendNew(intr, initBuilder);
 
 		await InteractionUtils.send(intr, {
-			content: `<@${currentGroupTurn.userId}>`,
+			content: `<@${activeGroup.userId}>`,
 			embeds: [currentTurnEmbed],
 		});
 	}

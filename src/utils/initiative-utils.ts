@@ -86,10 +86,10 @@ export class InitiativeBuilder {
 							'the very first turn of the first round!',
 					};
 				}
-				//move to the next round!
+				//move to the previous round!
 				return {
 					currentRound: (this.init.currentRound || 1) - 1,
-					currentGroupTurn: this.groups[0].id,
+					currentGroupTurn: this.groups[this.groups.length - 1].id,
 					errorMessage: undefined,
 				};
 			} else {
@@ -174,7 +174,7 @@ export class InitiativeBuilder {
 		return turnText;
 	}
 
-	get currentGroupTurn() {
+	get activeGroup() {
 		return this.groups.find(group => group.id === this.init.currentGroupTurn);
 	}
 
@@ -189,9 +189,10 @@ export class InitiativeBuilder {
 	async currentTurnEmbed(targetMessageUrl?: string): Promise<MessageEmbed> {
 		const result = new MessageEmbed().setColor('GREEN');
 
-		const groupTurn = this.currentGroupTurn;
+		const groupTurn = this.activeGroup;
 		if (!groupTurn) {
 			result.setTitle("Yip! Something went wrong! I can't figure out whose turn it is!");
+			return;
 		} else {
 			result.setTitle(`It's ${groupTurn.name}'s turn!`);
 

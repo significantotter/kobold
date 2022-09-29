@@ -118,8 +118,12 @@ export class InitRemoveSubCommand implements Command {
 		await InteractionUtils.send(intr, deletedEmbed);
 
 		if (
+			//we removed the currently active group
 			currentInit.currentGroupTurn === actor.initiativeActorGroupId &&
-			currentInit.actorGroups?.length
+			//the groups are not already empty somehow
+			currentInit.actorGroups?.length &&
+			//we haven't removed the last group
+			!(currentInit.actorGroups.length === 1 && actorsInGroup.length === 1)
 		) {
 			//we need to fix the initiative!
 
@@ -142,12 +146,12 @@ export class InitRemoveSubCommand implements Command {
 			const currentRoundMessage = await initBuilder.getCurrentRoundMessage(intr);
 			const url = currentRoundMessage ? currentRoundMessage.url : '';
 			const currentTurnEmbed = await initBuilder.currentTurnEmbed(url);
-			const currentGroupTurn = initBuilder.currentGroupTurn;
+			const activeGroup = initBuilder.activeGroup;
 
 			await updateInitiativeRoundMessageOrSendNew(intr, initBuilder);
 
 			await InteractionUtils.send(intr, {
-				content: `<@${currentGroupTurn.userId}>`,
+				content: `<@${activeGroup.userId}>`,
 				embeds: [currentTurnEmbed],
 			});
 		} else {

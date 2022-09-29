@@ -114,10 +114,10 @@ export class InitNextSubCommand implements Command {
 		}
 		const url = currentRoundMessage ? currentRoundMessage.url : '';
 		const currentTurnEmbed = await initBuilder.currentTurnEmbed(url);
-		const currentGroupTurn = initBuilder.currentGroupTurn;
+		const activeGroup = initBuilder.activeGroup;
 
 		await InteractionUtils.send(intr, {
-			content: `<@${currentGroupTurn.userId}>`,
+			content: `<@${activeGroup.userId}>`,
 			embeds: [currentTurnEmbed],
 		});
 	}

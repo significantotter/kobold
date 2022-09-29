@@ -32,6 +32,7 @@ export class InitStartSubCommand implements Command {
 				intr,
 				'Yip! You can only start initiative in a normal server channel.'
 			);
+			return;
 		}
 
 		const initBuilder = new InitiativeBuilder({});

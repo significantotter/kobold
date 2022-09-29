@@ -84,6 +84,7 @@ export class InitJumpToSubCommand implements Command {
 		const initResult = await getInitiativeForChannel(intr.channel);
 		if (initResult.errorMessage) {
 			await InteractionUtils.send(intr, initResult.errorMessage);
+			return;
 		}
 
 		const groupResponse = getNameMatchGroupFromInitiative(
@@ -104,12 +105,12 @@ export class InitJumpToSubCommand implements Command {
 		const currentRoundMessage = await initBuilder.getCurrentRoundMessage(intr);
 		const url = currentRoundMessage ? currentRoundMessage.url : '';
 		const currentTurnEmbed = await initBuilder.currentTurnEmbed(url);
-		const currentGroupTurn = initBuilder.currentGroupTurn;
+		const activeGroup = initBuilder.activeGroup;
 
 		await updateInitiativeRoundMessageOrSendNew(intr, initBuilder);
 
 		await InteractionUtils.send(intr, {
-			content: `<@${currentGroupTurn.userId}>`,
+			content: `<@${activeGroup.userId}>`,
 			embeds: [currentTurnEmbed],
 		});
 	}
