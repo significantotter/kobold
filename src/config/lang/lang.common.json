@@ -1,0 +1,27 @@
+{
+	"bot": {
+		"name": "Kobold",
+		"author": "Significantotter"
+	},
+	"emojis": {
+		"yes": "✅",
+		"no": "❌"
+	},
+	"colors": {
+		"default": "#0099ff",
+		"success": "#00ff83",
+		"warning": "#ffcc66",
+		"error": "#ff4a4a"
+	},
+	"links": {
+		"author": "https://github.com/significantotter",
+		"docs": "https://top.gg/",
+		"donate": "https://ko-fi.com/significantotter",
+		"invite": "https://discord.com/",
+		"source": "https://github.com/significantotter/kobold",
+		"stream": "",
+		"support": "https://support.discord.com/",
+		"template": "",
+		"vote": "https://top.gg/"
+	}
+}
