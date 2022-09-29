@@ -15,6 +15,8 @@ Kobold is being developed with a focus on ease of playing with minimal configura
 
 For help using this bot, reporting bugs, or suggesting features, feel free to [join my support server](https://discord.gg/6bS2GM59uj)!
 
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/F1F7FA6J6)
+
 [![Discord Shield](https://discord.com/api/guilds/1022906306442563634/widget.png?style=shield)](https://discord.gg/6bS2GM59uj)
 
 ## Features
