@@ -224,7 +224,7 @@ export class InitiativeBuilder {
 		}
 		builtTurnText += '```';
 		if (this.groups.length === 0) {
-			builtTurnText += '';
+			builtTurnText = '';
 		}
 		result.setDescription(builtTurnText);
 		return result;
