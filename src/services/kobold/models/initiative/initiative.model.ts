@@ -26,7 +26,7 @@ export class Initiative extends BaseModel {
 				relation: Model.BelongsToOneRelation,
 				modelClass: InitiativeActorGroup,
 				join: {
-					from: 'initiative.currentGroupTurn',
+					from: 'initiative.currentTurnGroupId',
 					to: 'initiativeActorGroup.id',
 				},
 			},

@@ -5,7 +5,9 @@ import { InitiativeActor } from './initiative-actor.model.js';
 import { faker } from '@faker-js/faker';
 import { InitiativeActorGroupFactory } from '../initiative-actor-group/initiative-actor-group.factory.js';
 
-type InitiativeActorTransientParams = {};
+type InitiativeActorTransientParams = {
+	includeGroup: boolean;
+};
 
 class InitiativeActorFactoryClass extends Factory<
 	InitiativeActor,
@@ -24,30 +26,39 @@ class InitiativeActorFactoryClass extends Factory<
 	}
 }
 
-export const InitiativeActorFactory = InitiativeActorFactoryClass.define(({ onCreate }) => {
-	onCreate(async builtInitiativeActor => {
-		return InitiativeActor.query().insertGraph(
-			{
-				...builtInitiativeActor,
-				actorGroup: {
-					...InitiativeActorGroupFactory.build({
-						userId: builtInitiativeActor.userId,
-						name: builtInitiativeActor.name,
-					}),
-					initiative: { '#ref': 'initiative' },
+export const InitiativeActorFactory = InitiativeActorFactoryClass.define(
+	({ onCreate, transientParams }) => {
+		onCreate(async builtInitiativeActor => {
+			return InitiativeActor.query().insertGraph(
+				{
+					...builtInitiativeActor,
+					actorGroup: {
+						...InitiativeActorGroupFactory.build({
+							userId: builtInitiativeActor.userId,
+							name: builtInitiativeActor.name,
+						}),
+						initiative: { '#ref': 'initiative' },
+					},
+					initiative: { '#id': 'initiative', ...InitiativeFactory.build() },
 				},
-				initiative: { '#id': 'initiative', ...InitiativeFactory.build() },
-			},
-			{ allowRefs: true }
-		);
-	});
+				{ allowRefs: true }
+			);
+		});
+		const name = faker.name.firstName();
+		let actorGroup;
+		if (transientParams.includeGroup) {
+			actorGroup = InitiativeActorGroupFactory.withFakeId().build({ name });
+		}
 
-	const actorData: DeepPartial<InitiativeActor> = {
-		userId: faker.datatype.uuid(),
-		name: faker.name.firstName(),
-		createdAt: faker.date.recent(30).toISOString(),
-		lastUpdatedAt: faker.date.recent(30).toISOString(),
-	};
+		const actorData: DeepPartial<InitiativeActor> = {
+			userId: faker.datatype.uuid(),
+			name,
+			actorGroup,
+			initiativeActorGroupId: actorGroup?.id,
+			createdAt: faker.date.recent(30).toISOString(),
+			lastUpdatedAt: faker.date.recent(30).toISOString(),
+		};
 
-	return InitiativeActor.fromDatabaseJson(actorData);
-});
+		return InitiativeActor.fromDatabaseJson(actorData);
+	}
+);

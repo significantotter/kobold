@@ -21,8 +21,7 @@ export const InitiativeFactory = InitiativeFactoryClass.define(({ onCreate }) =>
 		gmUserId: faker.datatype.uuid(),
 		roundMessageIds: [faker.datatype.uuid()],
 		currentRound: faker.datatype.number(11),
-		currentInitiative: faker.datatype.number(40),
-		currentGroupTurn: null,
+		currentTurnGroupId: null,
 		createdAt: faker.date.recent(30).toISOString(),
 		lastUpdatedAt: faker.date.recent(30).toISOString(),
 	};

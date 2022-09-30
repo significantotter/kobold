@@ -60,7 +60,7 @@ export class InitiativeBuilder {
 
 	getPreviousTurnChanges(): {
 		currentRound?: number;
-		currentGroupTurn?: number;
+		currentTurnGroupId?: number;
 		errorMessage?: string;
 	} {
 		if (!this.groups.length) {
@@ -68,7 +68,7 @@ export class InitiativeBuilder {
 				errorMessage: "Yip! I can't go to the next turn when no one is in the initiative!",
 			};
 		}
-		if (!this.init.currentGroupTurn) {
+		if (!this.init.currentTurnGroupId) {
 			return {
 				errorMessage:
 					"Yip! I can't go to the previous turn when we haven't started initiative!",
@@ -76,7 +76,7 @@ export class InitiativeBuilder {
 		} else {
 			const currentTurnIndex = _.findIndex(
 				this.groups,
-				group => group.id === this.init.currentGroupTurn
+				group => group.id === this.init.currentTurnGroupId
 			);
 			if (!this.groups[currentTurnIndex - 1]) {
 				if (this.init.currentRound === 1) {
@@ -89,13 +89,13 @@ export class InitiativeBuilder {
 				//move to the previous round!
 				return {
 					currentRound: (this.init.currentRound || 1) - 1,
-					currentGroupTurn: this.groups[this.groups.length - 1].id,
+					currentTurnGroupId: this.groups[this.groups.length - 1].id,
 					errorMessage: undefined,
 				};
 			} else {
 				return {
 					currentRound: this.init.currentRound || 1,
-					currentGroupTurn: this.groups[currentTurnIndex - 1].id,
+					currentTurnGroupId: this.groups[currentTurnIndex - 1].id,
 					errorMessage: undefined,
 				};
 			}
@@ -104,7 +104,7 @@ export class InitiativeBuilder {
 
 	getNextTurnChanges(): {
 		currentRound?: number;
-		currentGroupTurn?: number;
+		currentTurnGroupId?: number;
 		errorMessage?: string;
 	} {
 		if (!this.groups.length) {
@@ -112,28 +112,28 @@ export class InitiativeBuilder {
 				errorMessage: "Yip! I can't go to the next turn when no one is in the initiative!",
 			};
 		}
-		if (!this.init.currentGroupTurn) {
+		if (!this.init.currentTurnGroupId) {
 			return {
 				currentRound: this.init.currentRound || 1,
-				currentGroupTurn: this.groups[0].id,
+				currentTurnGroupId: this.groups[0].id,
 				errorMessage: undefined,
 			};
 		} else {
 			const currentTurnIndex = _.findIndex(
 				this.groups,
-				group => group.id === this.init.currentGroupTurn
+				group => group.id === this.init.currentTurnGroupId
 			);
 			if (!this.groups[currentTurnIndex + 1]) {
 				//move to the next round!
 				return {
 					currentRound: (this.init.currentRound || 1) + 1,
-					currentGroupTurn: this.groups[0].id,
+					currentTurnGroupId: this.groups[0].id,
 					errorMessage: undefined,
 				};
 			} else {
 				return {
 					currentRound: this.init.currentRound || 1,
-					currentGroupTurn: this.groups[currentTurnIndex + 1].id,
+					currentTurnGroupId: this.groups[currentTurnIndex + 1].id,
 					errorMessage: undefined,
 				};
 			}
@@ -154,7 +154,7 @@ export class InitiativeBuilder {
 
 	public getActorGroupTurnText(actorGroup: InitiativeActorGroup): string {
 		const actorsInGroup = this.actorsByGroup[actorGroup.id];
-		const isActiveGroup = this.init.currentGroupTurn === actorGroup.id;
+		const isActiveGroup = this.init.currentTurnGroupId === actorGroup.id;
 		let turnText = '';
 		let extraSymbol = ' ';
 		if (isActiveGroup) {
@@ -175,7 +175,7 @@ export class InitiativeBuilder {
 	}
 
 	get activeGroup() {
-		return this.groups.find(group => group.id === this.init.currentGroupTurn);
+		return this.groups.find(group => group.id === this.init.currentTurnGroupId);
 	}
 
 	async getCurrentRoundMessage(intr: CommandInteraction): Promise<Message<boolean>> {

@@ -7,7 +7,7 @@ export async function up(knex: Knex): Promise<void> {
 		table.text('gm_user_id').notNullable();
 		table.jsonb('round_message_ids');
 		table.integer('current_round').defaultTo(0).notNullable();
-		table.integer('current_group_turn');
+		table.integer('current_turn_group_id');
 
 		table.timestamp('created_at', { useTz: true }).defaultTo(knex.fn.now());
 		table.timestamp('last_updated_at', { useTz: true }).defaultTo(knex.fn.now());

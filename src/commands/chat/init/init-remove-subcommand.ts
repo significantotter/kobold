@@ -119,7 +119,7 @@ export class InitRemoveSubCommand implements Command {
 
 		if (
 			//we removed the currently active group
-			currentInit.currentGroupTurn === actor.initiativeActorGroupId &&
+			currentInit.currentTurnGroupId === actor.initiativeActorGroupId &&
 			//the groups are not already empty somehow
 			currentInit.actorGroups?.length &&
 			//we haven't removed the last group

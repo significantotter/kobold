@@ -64,7 +64,9 @@ export class CharacterSetActiveSubCommand implements Command {
 
 		if (targetCharacter) {
 			//set all other characters as not active
-			await Character.query().update({ isActiveCharacter: false });
+			await Character.query()
+				.update({ isActiveCharacter: false })
+				.where({ userId: intr.user.id });
 
 			//set the character as active
 			await Character.query().updateAndFetchById(targetCharacter.id, {
