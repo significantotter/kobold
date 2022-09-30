@@ -31,6 +31,7 @@ export class CharacterUpdateSubCommand implements Command {
 		const activeCharacter = await getActiveCharacter(intr.user.id);
 		if (!activeCharacter) {
 			await InteractionUtils.send(intr, `Yip! You don't have any active characters!`);
+			return;
 		}
 
 		//check for token access

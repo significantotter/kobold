@@ -27,6 +27,7 @@ export class CharacterSheetSubCommand implements Command {
 		const activeCharacter = await getActiveCharacter(intr.user.id);
 		if (!activeCharacter) {
 			await InteractionUtils.send(intr, `Yip! You don't have any active characters!`);
+			return;
 		}
 
 		const characterData = activeCharacter.characterData as WG.CharacterApiResponse;

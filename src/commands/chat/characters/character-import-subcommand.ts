@@ -77,6 +77,7 @@ export class CharacterImportSubCommand implements Command {
 			const newCharacter = await Character.query().insertAndFetch({
 				userId: intr.user.id,
 				...character,
+				isActiveCharacter: true,
 			});
 
 			//send success message
