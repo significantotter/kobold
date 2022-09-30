@@ -21,7 +21,7 @@
 			"description": "The discord id of the user who controls the actor"
 		},
 		"characterId": {
-			"type": "number",
+			"type": ["number", "null"],
 			"description": "The id of the character that this actor represents"
 		},
 		"name": {

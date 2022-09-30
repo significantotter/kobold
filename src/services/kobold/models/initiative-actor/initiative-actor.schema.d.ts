@@ -28,7 +28,7 @@ export interface InitiativeActor {
 	/**
 	 * The id of the character that this actor represents
 	 */
-	characterId?: number;
+	characterId?: number | null;
 	/**
 	 * the name of the actor
 	 */

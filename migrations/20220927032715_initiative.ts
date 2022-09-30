@@ -38,7 +38,7 @@ export async function up(knex: Knex): Promise<void> {
 			.notNullable()
 			.references('initiative_actor_group.id')
 			.onDelete('cascade');
-		table.integer('character_id').references('character.id');
+		table.integer('character_id').references('character.id').onDelete('set null');
 		table.text('user_id').notNullable();
 		table.text('name').notNullable();
 
