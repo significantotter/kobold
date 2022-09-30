@@ -83,7 +83,11 @@ export class CharacterRemoveSubCommand implements Command {
 
 			//set another character as active
 			const newActive = await Character.query().first().where({ userId: intr.user.id });
-			await Character.query().updateAndFetchById(newActive.id, { isActiveCharacter: true });
+			if (newActive) {
+				await Character.query().updateAndFetchById(newActive.id, {
+					isActiveCharacter: true,
+				});
+			}
 
 			//send success message
 
