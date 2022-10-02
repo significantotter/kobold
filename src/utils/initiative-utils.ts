@@ -33,6 +33,12 @@ export class InitiativeBuilder {
 		});
 	}
 
+	/**
+	 * Updates the initiative builder with new initiative data
+	 * @param param0.initiative The new initiative data
+	 * @param param0.actors The new actors data, defaults to initiative.actors if not set
+	 * @param param0.groups The new groups data defaults to initiative.groups if not set
+	 */
 	set({
 		initiative,
 		actors,
@@ -58,6 +64,10 @@ export class InitiativeBuilder {
 		}
 	}
 
+	/**
+	 * Gets the changed initiative data when going to the previous turn in the built initiative
+	 * @returns An object containing updates to the initiative, or an error message
+	 */
 	getPreviousTurnChanges(): {
 		currentRound?: number;
 		currentTurnGroupId?: number;
@@ -102,6 +112,10 @@ export class InitiativeBuilder {
 		}
 	}
 
+	/**
+	 * Gets the changed initiative data when going to the next turn in the built initiative
+	 * @returns An object containing updates to the initiative, or an error message
+	 */
 	getNextTurnChanges(): {
 		currentRound?: number;
 		currentTurnGroupId?: number;
@@ -140,6 +154,11 @@ export class InitiativeBuilder {
 		}
 	}
 
+	/**
+	 * Removes an actor from the current initiative
+	 * The removal operation is easy to do outside the builder, so this
+	 * operation is a helper to deeply alter the initiative values
+	 */
 	removeActor(actor: InitiativeActor) {
 		if (this.actorsByGroup[actor.initiativeActorGroupId]?.length === 1) {
 			_.remove(this.groups, group => group.id === actor.initiativeActorGroupId);
@@ -152,8 +171,13 @@ export class InitiativeBuilder {
 		}
 	}
 
+	/**
+	 * Creates a string that displays information for an actor group in an initiative display
+	 * @param actorGroup The actor group to generate text for
+	 * @returns
+	 */
 	public getActorGroupTurnText(actorGroup: InitiativeActorGroup): string {
-		const actorsInGroup = this.actorsByGroup[actorGroup.id];
+		const actorsInGroup = this.actorsByGroup[actorGroup.id] || [];
 		const isActiveGroup = this.init.currentTurnGroupId === actorGroup.id;
 		let turnText = '';
 		let extraSymbol = ' ';

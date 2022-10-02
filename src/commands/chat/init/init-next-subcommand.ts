@@ -108,7 +108,7 @@ export class InitNextSubCommand implements Command {
 		if (saveMessage) {
 			let roundMessageIds = initResult.init.roundMessageIds;
 			roundMessageIds.push(roundMessage);
-			await Initiative.query().update({}).where({ id: initResult.init.id, roundMessageIds });
+			await Initiative.query().update({ roundMessageIds }).where({ id: initResult.init.id });
 		} else {
 			currentRoundMessage = await initBuilder.getCurrentRoundMessage(intr);
 		}

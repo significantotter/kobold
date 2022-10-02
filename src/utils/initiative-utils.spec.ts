@@ -4,6 +4,7 @@ import {
 	InitiativeActorGroupFactory,
 } from '../services/kobold/models/index.js';
 import * as initiativeUtils from './initiative-utils.js';
+import { CommandInteraction } from 'discord.js';
 
 function setupInitiativeActorsAndGroupsForTests(initiative) {
 	const actors = InitiativeActorFactory.withFakeId().buildList(
@@ -163,9 +164,211 @@ describe('initiative-utils', function () {
 				expect(builder.getNextTurnChanges().errorMessage).not.toBeDefined();
 			});
 		});
-		describe('removeActor', function () {});
-		describe('getActorGroupTurnText', function () {});
-		describe('getCurrentRoundMessage', function () {});
+		describe('removeActor', function () {
+			test('does nothing when the actor is not in the initiative', async function () {
+				const initiative = InitiativeFactory.build({
+					currentRound: 1,
+					currentTurnGroupId: null,
+				});
+				const { actors, groups, firstGroup, secondGroup, thirdGroup } =
+					setupInitiativeActorsAndGroupsForTests(initiative);
+
+				const builder = new initiativeUtils.InitiativeBuilder({
+					initiative,
+					actors,
+					groups,
+				});
+				const turn = (await builder.compileEmbed()).toJSON();
+
+				builder.removeActor(InitiativeActorFactory.build());
+
+				const updatedTurn = (await builder.compileEmbed()).toJSON();
+				expect(turn).toMatchObject(updatedTurn);
+			});
+			test('removes an actor from the initiative', async function () {
+				const initiative = InitiativeFactory.build({
+					currentRound: 1,
+					currentTurnGroupId: null,
+				});
+				const { actors, groups, firstGroup, secondGroup, thirdGroup } =
+					setupInitiativeActorsAndGroupsForTests(initiative);
+
+				const builder = new initiativeUtils.InitiativeBuilder({
+					initiative,
+					actors,
+					groups,
+				});
+
+				builder.removeActor(actors[0]);
+
+				expect(builder.actorsByGroup[actors[0].initiativeActorGroupId] || []).not.toContain(
+					actors[0]
+				);
+				expect(
+					builder.groups.find(group => group.id === actors[0].initiativeActorGroupId)
+				).toBeFalsy();
+			});
+			test("Doesn't update the current turn", function () {
+				const initiative = InitiativeFactory.build({
+					currentRound: 1,
+					currentTurnGroupId: null,
+				});
+				const { actors, groups, firstGroup, secondGroup, thirdGroup } =
+					setupInitiativeActorsAndGroupsForTests(initiative);
+				initiative.currentTurnGroupId = actors[0].initiativeActorGroupId;
+
+				const builder = new initiativeUtils.InitiativeBuilder({
+					initiative,
+					actors,
+					groups,
+				});
+
+				builder.removeActor(actors[0]);
+
+				expect(builder.init.currentRound).toBe(1);
+				expect(builder.init.currentTurnGroupId).toBe(actors[0].initiativeActorGroupId);
+			});
+		});
+		describe('getActorGroupTurnText', function () {
+			test('returns the text for a group with one actor', function () {
+				const initiative = InitiativeFactory.build({
+					currentRound: 1,
+					currentTurnGroupId: null,
+				});
+				const { actors, groups, firstGroup, secondGroup, thirdGroup } =
+					setupInitiativeActorsAndGroupsForTests(initiative);
+
+				const builder = new initiativeUtils.InitiativeBuilder({
+					initiative,
+					actors,
+					groups,
+				});
+
+				expect(builder.getActorGroupTurnText(firstGroup)).toContain(firstGroup.name);
+				expect(builder.getActorGroupTurnText(firstGroup)).toContain(
+					firstGroup.initiativeResult + ''
+				);
+			});
+			test('returns the text for a group with multiple actors', function () {
+				const initiative = InitiativeFactory.build({
+					currentRound: 1,
+					currentTurnGroupId: null,
+				});
+				const { actors, groups, firstGroup, secondGroup, thirdGroup } =
+					setupInitiativeActorsAndGroupsForTests(initiative);
+				actors[1].initiativeActorGroupId = secondGroup.id;
+				actors[2].initiativeActorGroupId = secondGroup.id;
+
+				const builder = new initiativeUtils.InitiativeBuilder({
+					initiative,
+					actors,
+					groups,
+				});
+
+				const turnText = builder.getActorGroupTurnText(secondGroup);
+				expect(turnText).toContain(secondGroup.name);
+				expect(turnText).toContain(secondGroup.initiativeResult + '');
+				expect(turnText).toContain(actors[1].name);
+				expect(turnText).toContain(actors[2].name);
+			});
+			test('still returns a result for a group with no actors', function () {
+				const initiative = InitiativeFactory.build({
+					currentRound: 1,
+					currentTurnGroupId: null,
+				});
+				const { actors, groups, firstGroup, secondGroup, thirdGroup } =
+					setupInitiativeActorsAndGroupsForTests(initiative);
+
+				const builder = new initiativeUtils.InitiativeBuilder({
+					initiative,
+					actors,
+					groups,
+				});
+				const extraGroup = InitiativeActorGroupFactory.build();
+				expect(builder.getActorGroupTurnText(extraGroup)).toContain(extraGroup.name);
+			});
+		});
+		describe('activeGroup', function () {
+			test('returns the active group', function () {
+				const initiative = InitiativeFactory.build({
+					currentRound: 1,
+					currentTurnGroupId: null,
+				});
+				const { actors, groups, firstGroup, secondGroup, thirdGroup } =
+					setupInitiativeActorsAndGroupsForTests(initiative);
+				initiative.currentTurnGroupId = firstGroup.id;
+
+				const builder = new initiativeUtils.InitiativeBuilder({
+					initiative,
+					actors,
+					groups,
+				});
+				expect(builder.activeGroup).toBe(firstGroup);
+			});
+			test('returns a falsy value if there is no active group', function () {
+				const initiative = InitiativeFactory.build({
+					currentRound: 1,
+					currentTurnGroupId: null,
+				});
+				const { actors, groups, firstGroup, secondGroup, thirdGroup } =
+					setupInitiativeActorsAndGroupsForTests(initiative);
+
+				const builder = new initiativeUtils.InitiativeBuilder({
+					initiative,
+					actors,
+					groups,
+				});
+				expect(builder.activeGroup).toBeFalsy();
+			});
+		});
+		describe('getCurrentRoundMessage', function () {
+			test('returns the current round message', function () {
+				const initiative = InitiativeFactory.build({
+					currentRound: 1,
+					currentTurnGroupId: null,
+				});
+				initiative.roundMessageIds = ['first', 'second', 'third'];
+				const { actors, groups, firstGroup, secondGroup, thirdGroup } =
+					setupInitiativeActorsAndGroupsForTests(initiative);
+
+				const builder = new initiativeUtils.InitiativeBuilder({
+					initiative,
+					actors,
+					groups,
+				});
+				const fakeIntr = {
+					channel: {
+						messages: {
+							fetch(targetMessageId) {
+								return 'success! ' + targetMessageId;
+							},
+						},
+					},
+				};
+				expect(
+					builder.getCurrentRoundMessage(fakeIntr as any as CommandInteraction)
+				).resolves.toContain('success! ' + 'second');
+			});
+			test('returns null if there is no current round message', function () {
+				const initiative = InitiativeFactory.build({
+					currentRound: 1,
+					currentTurnGroupId: null,
+				});
+				initiative.roundMessageIds = [];
+				const { actors, groups, firstGroup, secondGroup, thirdGroup } =
+					setupInitiativeActorsAndGroupsForTests(initiative);
+
+				const builder = new initiativeUtils.InitiativeBuilder({
+					initiative,
+					actors,
+					groups,
+				});
+				const fakeIntr = {};
+				expect(
+					builder.getCurrentRoundMessage(fakeIntr as any as CommandInteraction)
+				).resolves.toBeNull();
+			});
+		});
 		describe('currentTurnEmbed', function () {});
 		describe('compileEmbed', function () {});
 	});
