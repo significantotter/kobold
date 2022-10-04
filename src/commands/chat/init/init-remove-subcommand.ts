@@ -28,6 +28,7 @@ import {
 import { Command, CommandDeferType } from '../../index.js';
 import _ from 'lodash';
 import { Initiative } from '../../../services/kobold/models/index.js';
+import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 
 export class InitRemoveSubCommand implements Command {
 	public names = ['remove'];
@@ -105,8 +106,8 @@ export class InitRemoveSubCommand implements Command {
 			await InitiativeActorGroup.query().deleteById(actor.initiativeActorGroupId);
 		}
 
-		const deletedEmbed = new MessageEmbed();
-		deletedEmbed.setColor('GREEN').setTitle(`Yip! ${actor.name} was removed from initiative.`);
+		const deletedEmbed = new KoboldEmbed();
+		deletedEmbed.setTitle(`Yip! ${actor.name} was removed from initiative.`);
 
 		const targetMessageId = currentInit.roundMessageIds[currentInit.currentRound || 0];
 		if (targetMessageId) {
@@ -145,7 +146,7 @@ export class InitRemoveSubCommand implements Command {
 
 			const currentRoundMessage = await initBuilder.getCurrentRoundMessage(intr);
 			const url = currentRoundMessage ? currentRoundMessage.url : '';
-			const currentTurnEmbed = await initBuilder.currentTurnEmbed(url);
+			const currentTurnEmbed = await KoboldEmbed.turnFromInitiativeBuilder(initBuilder, url);
 			const activeGroup = initBuilder.activeGroup;
 
 			await updateInitiativeRoundMessageOrSendNew(intr, initBuilder);

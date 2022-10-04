@@ -51,7 +51,6 @@ export class CharacterUpdateSubCommand implements Command {
 			activeCharacter.charId,
 			token[0].accessToken
 		);
-		delete fetchedCharacter.isActiveCharacter;
 
 		// store sheet in db
 		const updatedCharacter = await Character.query().updateAndFetchById(activeCharacter.id, {

@@ -27,6 +27,7 @@ import {
 } from '../../../utils/initiative-utils.js';
 import { Command, CommandDeferType } from '../../index.js';
 import _ from 'lodash';
+import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 
 export class InitSetSubCommand implements Command {
 	public names = ['set'];
@@ -160,10 +161,10 @@ export class InitSetSubCommand implements Command {
 		}
 		currentInit = currentInitResponse.init;
 
-		const updateEmbed = new MessageEmbed();
-		updateEmbed
-			.setColor('GREEN')
-			.setTitle(`Yip! ${actor.name} had their ${fieldToChange} set to ${newFieldValue}.`);
+		const updateEmbed = new KoboldEmbed();
+		updateEmbed.setTitle(
+			`Yip! ${actor.name} had their ${fieldToChange} set to ${newFieldValue}.`
+		);
 
 		const targetMessageId = currentInit.roundMessageIds[currentInit.currentRound || 0];
 		if (targetMessageId) {

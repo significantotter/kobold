@@ -10,6 +10,7 @@ import { EventData } from '../../../models/internal-models.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { MessageEmbed } from 'discord.js';
+import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 
 export class CharacterListSubCommand implements Command {
 	public names = ['list'];
@@ -62,8 +63,7 @@ export class CharacterListSubCommand implements Command {
 				});
 			}
 
-			const characterListEmbed = new MessageEmbed()
-				.setColor('GREEN')
+			const characterListEmbed = new KoboldEmbed()
 				.setTitle('Characters')
 				.addFields(characterFields);
 			await InteractionUtils.send(intr, characterListEmbed);

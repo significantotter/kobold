@@ -26,6 +26,7 @@ import {
 import { ChatArgs } from '../../../constants/chat-args.js';
 import { getActiveCharacter, findPossibleSkillFromString } from '../../../utils/character-utils.js';
 import { rollSkill } from '../../../utils/dice-utils.js';
+import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 
 export class InitAddSubCommand implements Command {
 	public names = ['add'];
@@ -70,8 +71,7 @@ export class InitAddSubCommand implements Command {
 		let rollResultMessage: MessageEmbed;
 		if (initiativeValue) {
 			finalInitiative = initiativeValue;
-			rollResultMessage = new MessageEmbed()
-				.setColor('GREEN')
+			rollResultMessage = new KoboldEmbed()
 				.setTitle(`${actorName} joined Initiative!`)
 				.setDescription(`Initiative: ${finalInitiative}`);
 		} else {

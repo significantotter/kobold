@@ -30,6 +30,7 @@ import {
 import { Command, CommandDeferType } from '../../index.js';
 import _ from 'lodash';
 import { Initiative } from '../../../services/kobold/models/index.js';
+import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 
 export class InitNextSubCommand implements Command {
 	public names = ['next'];
@@ -113,7 +114,7 @@ export class InitNextSubCommand implements Command {
 			currentRoundMessage = await initBuilder.getCurrentRoundMessage(intr);
 		}
 		const url = currentRoundMessage ? currentRoundMessage.url : '';
-		const currentTurnEmbed = await initBuilder.currentTurnEmbed(url);
+		const currentTurnEmbed = await KoboldEmbed.turnFromInitiativeBuilder(initBuilder, url);
 		const activeGroup = initBuilder.activeGroup;
 
 		await InteractionUtils.send(intr, {

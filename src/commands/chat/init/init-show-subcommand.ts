@@ -1,3 +1,4 @@
+import { KoboldEmbed } from './../../../utils/kobold-embed-utils';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -33,6 +34,7 @@ export class InitShowSubCommand implements Command {
 		}
 
 		const initBuilder = new InitiativeBuilder({ initiative: initResult.init });
-		await InteractionUtils.send(intr, { embeds: [initBuilder.compileEmbed()] });
+		const embed = await KoboldEmbed.roundFromInitiativeBuilder(initBuilder);
+		await InteractionUtils.send(intr, { embeds: [embed] });
 	}
 }

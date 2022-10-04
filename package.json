@@ -36,7 +36,7 @@
 		"api-knex": "TS_NODE_COMPILER_OPTIONS='{ \"module\": \"commonjs\" }' knex --knexfile=./knexfile.ts",
 		"migrate": "knex migrate:latest",
 		"migrate:test": "NODE_ENV=TEST knex migrate:latest",
-		"test": "jest --no-cache --coverage src/"
+		"test": "jest --coverage src/"
 	},
 	"dependencies": {
 		"@discordjs/rest": "1.1.0",

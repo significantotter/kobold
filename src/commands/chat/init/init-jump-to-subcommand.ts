@@ -1,3 +1,4 @@
+import { KoboldEmbed } from './../../../utils/kobold-embed-utils';
 import { InitiativeActorGroup } from '../../../services/kobold/models/initiative-actor-group/initiative-actor-group.model';
 import {
 	getNameMatchGroupFromInitiative,
@@ -104,7 +105,7 @@ export class InitJumpToSubCommand implements Command {
 		const initBuilder = new InitiativeBuilder({ initiative: updatedInitiative });
 		const currentRoundMessage = await initBuilder.getCurrentRoundMessage(intr);
 		const url = currentRoundMessage ? currentRoundMessage.url : '';
-		const currentTurnEmbed = await initBuilder.currentTurnEmbed(url);
+		const currentTurnEmbed = await KoboldEmbed.turnFromInitiativeBuilder(initBuilder, url);
 		const activeGroup = initBuilder.activeGroup;
 
 		await updateInitiativeRoundMessageOrSendNew(intr, initBuilder);

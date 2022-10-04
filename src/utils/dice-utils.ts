@@ -4,6 +4,7 @@ import { Dice, DiceResult } from 'dice-typescript';
 import type { WG } from './../services/wanderers-guide/wanderers-guide.js';
 import _ from 'lodash';
 import { getBestNameMatch } from './character-utils.js';
+import { KoboldEmbed } from './kobold-embed-utils.js';
 
 interface DiceRollResult extends EmbedFieldData {
 	results: DiceResult | null;
@@ -75,7 +76,7 @@ export class RollBuilder {
 	 * @returns A message embed containing the full roll results
 	 */
 	public compileEmbed() {
-		const response = new MessageEmbed().setTitle(this.title).setColor('GREEN');
+		const response = new KoboldEmbed().setTitle(this.title);
 
 		let characterData = this.character?.characterData as WG.CharacterApiResponse;
 		if (characterData?.infoJSON?.imageURL) {

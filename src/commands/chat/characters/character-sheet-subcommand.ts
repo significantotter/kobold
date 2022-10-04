@@ -9,6 +9,7 @@ import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import type { WG } from '../../../services/wanderers-guide/wanderers-guide.js';
 import { getActiveCharacter } from '../../../utils/character-utils.js';
+import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 
 export class CharacterSheetSubCommand implements Command {
 	public names = ['sheet'];
@@ -41,7 +42,7 @@ export class CharacterSheetSubCommand implements Command {
 		const ancestry = characterData.ancestryName;
 		const classes = [characterData.className, characterData.className2].join(' ').trim();
 
-		let messageEmbed = new MessageEmbed().setTitle(characterData.name).setURL(characterUrl);
+		let messageEmbed = new KoboldEmbed().setTitle(characterData.name).setURL(characterUrl);
 
 		if (imageUrl) {
 			messageEmbed = messageEmbed.setThumbnail(imageUrl);

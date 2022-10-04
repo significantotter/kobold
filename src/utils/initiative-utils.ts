@@ -5,6 +5,7 @@ import {
 	Character,
 } from './../services/kobold/models/index.js';
 import { CommandInteraction, GuildTextBasedChannel, Message, MessageEmbed, User } from 'discord.js';
+import { KoboldEmbed } from './kobold-embed-utils.js';
 import _ from 'lodash';
 import { InteractionUtils } from './interaction-utils.js';
 import { getBestNameMatch } from './character-utils.js';
@@ -209,51 +210,6 @@ export class InitiativeBuilder {
 		}
 		return null;
 	}
-
-	async currentTurnEmbed(targetMessageUrl?: string): Promise<MessageEmbed> {
-		const result = new MessageEmbed().setColor('GREEN');
-
-		const groupTurn = this.activeGroup;
-		if (!groupTurn) {
-			result.setTitle("Yip! Something went wrong! I can't figure out whose turn it is!");
-			return;
-		} else {
-			result.setTitle(`It's ${groupTurn.name}'s turn!`);
-
-			result.setDescription('```md\n' + this.getActorGroupTurnText(groupTurn) + '```');
-		}
-		let roundText = '';
-		if (targetMessageUrl) {
-			roundText = '';
-		}
-		if (this.actorsByGroup[groupTurn.id].length === 1) {
-			const actor = this.actorsByGroup[groupTurn.id][0];
-			if (actor?.character?.characterData?.infoJSON?.imageURL) {
-				result.setThumbnail(actor.character.characterData.infoJSON.imageURL);
-			}
-		}
-		result.setDescription(
-			result.description +
-				`\n[Initiative Round ${this.init.currentRound}](${targetMessageUrl})`
-		);
-		return result;
-	}
-
-	compileEmbed(): MessageEmbed {
-		const result = new MessageEmbed()
-			.setColor('GREEN')
-			.setTitle(`Initiative Round ${this.init?.currentRound || 0}`);
-		let builtTurnText = '```md\n';
-		for (const group of this.groups) {
-			builtTurnText += this.getActorGroupTurnText(group);
-		}
-		builtTurnText += '```';
-		if (this.groups.length === 0) {
-			builtTurnText = '';
-		}
-		result.setDescription(builtTurnText);
-		return result;
-	}
 }
 
 export async function getInitiativeForChannel(
@@ -289,11 +245,13 @@ export async function updateInitiativeRoundMessageOrSendNew(intr, initBuilder) {
 			throw err;
 		}
 		const targetMessage = await intr.channel.messages.fetch(targetMessageId);
-		await targetMessage.edit({ embeds: [initBuilder.compileEmbed()] });
+		const embed = await KoboldEmbed.roundFromInitiativeBuilder(initBuilder);
+		await targetMessage.edit({ embeds: [embed] });
 		return targetMessage;
 	} catch (err) {
 		if (err.message === 'Unknown Message' || err.code === 10008) {
-			const newMessage = await InteractionUtils.send(intr, initBuilder.compileEmbed());
+			const embed = await KoboldEmbed.roundFromInitiativeBuilder(initBuilder);
+			const newMessage = await InteractionUtils.send(intr, embed);
 			const roundMessageIds = initBuilder.init.roundMessageIds;
 			roundMessageIds[initBuilder.init.currentRound || 0] = newMessage.id;
 			await Initiative.query().updateAndFetchById(initBuilder.init.id, { roundMessageIds });

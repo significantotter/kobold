@@ -10,6 +10,7 @@ import { EventData } from '../../../models/internal-models.js';
 import { Initiative } from '../../../services/kobold/models/index.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { InitiativeBuilder } from '../../../utils/initiative-utils.js';
+import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { Command, CommandDeferType } from '../../index.js';
 
 export class InitStartSubCommand implements Command {
@@ -36,9 +37,9 @@ export class InitStartSubCommand implements Command {
 		}
 
 		const initBuilder = new InitiativeBuilder({});
+		const embed = await KoboldEmbed.roundFromInitiativeBuilder(initBuilder);
 
-		const message = await InteractionUtils.send(intr, initBuilder.compileEmbed());
-		const knex = Initiative.knex();
+		const message = await InteractionUtils.send(intr, embed);
 
 		try {
 			const init = await Initiative.query()
@@ -49,7 +50,8 @@ export class InitStartSubCommand implements Command {
 					roundMessageIds: [message.id],
 				});
 			initBuilder.set({ initiative: init, actors: init.actors, groups: init.actorGroups });
-			await message.edit({ embeds: [initBuilder.compileEmbed()] });
+			const updatedEmbed = await KoboldEmbed.roundFromInitiativeBuilder(initBuilder);
+			await message.edit({ embeds: [updatedEmbed] });
 		} catch (err) {
 			if (err.type === 'UniqueViolationError') {
 				await message.edit(

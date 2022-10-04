@@ -2,9 +2,11 @@ import {
 	InitiativeFactory,
 	InitiativeActorFactory,
 	InitiativeActorGroupFactory,
+	Initiative,
 } from '../services/kobold/models/index.js';
 import * as initiativeUtils from './initiative-utils.js';
 import { CommandInteraction } from 'discord.js';
+import { KoboldEmbed } from './kobold-embed-utils.js';
 
 function setupInitiativeActorsAndGroupsForTests(initiative) {
 	const actors = InitiativeActorFactory.withFakeId().buildList(
@@ -178,11 +180,11 @@ describe('initiative-utils', function () {
 					actors,
 					groups,
 				});
-				const turn = (await builder.compileEmbed()).toJSON();
+				const turn = await KoboldEmbed.roundFromInitiativeBuilder(builder).toJSON();
 
 				builder.removeActor(InitiativeActorFactory.build());
 
-				const updatedTurn = (await builder.compileEmbed()).toJSON();
+				const updatedTurn = await KoboldEmbed.roundFromInitiativeBuilder(builder).toJSON();
 				expect(turn).toMatchObject(updatedTurn);
 			});
 			test('removes an actor from the initiative', async function () {
@@ -369,10 +371,32 @@ describe('initiative-utils', function () {
 				).resolves.toBeNull();
 			});
 		});
-		describe('currentTurnEmbed', function () {});
-		describe('compileEmbed', function () {});
 	});
-	describe('getInitiativeForChannel', function () {});
+	describe('getInitiativeForChannel', function () {
+		beforeAll(async function () {
+			await Initiative.query().delete().where({ channelId: 'testChannelId' });
+			return await InitiativeFactory.create({ channelId: 'testChannelId' });
+		});
+		test('returns the initiative for the channel', async function () {
+			const result = await initiativeUtils.getInitiativeForChannel({
+				id: 'testChannelId',
+			} as any);
+			expect(result).toBeTruthy();
+		});
+		test('returns null if there is no initiative for the channel', async function () {
+			const result = await initiativeUtils.getInitiativeForChannel({
+				id: 'nonexistentChannelId',
+			} as any);
+			expect(result.errorMessage).toBeTruthy();
+		});
+		test('returns an error message if a channel is not provided', async function () {
+			const result = await initiativeUtils.getInitiativeForChannel(null as any);
+			expect(result.errorMessage).toBeTruthy();
+		});
+		afterAll(async function () {
+			await Initiative.query().delete().where({ channelId: 'testChannelId' });
+		});
+	});
 	describe('updateInitiativeRoundMessageOrSendNew', function () {});
 	describe('getControllableInitiativeActors', function () {});
 	describe('getControllableInitiativeGroups', function () {});
