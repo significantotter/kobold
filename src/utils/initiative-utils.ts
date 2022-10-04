@@ -26,12 +26,14 @@ export class InitiativeBuilder {
 		if (initiative && !actors) actors = initiative.actors;
 		if (initiative && !groups) groups = initiative.actorGroups;
 		this.actorsByGroup = _.groupBy(actors || [], actor => actor.initiativeActorGroupId);
-		this.groups = (groups || []).sort((a, b) => {
-			let comparison = a.initiativeResult - b.initiativeResult;
-			if (comparison === 0) comparison = a.name.localeCompare(b.name);
-			if (comparison === 0) comparison = a.id - b.id;
-			return comparison;
-		});
+		this.groups = (groups || []).sort(InitiativeBuilder.groupSortFunction);
+	}
+
+	public static groupSortFunction(a: InitiativeActorGroup, b: InitiativeActorGroup) {
+		let comparison = b.initiativeResult - a.initiativeResult;
+		if (comparison === 0) comparison = a.name.localeCompare(b.name);
+		if (comparison === 0) comparison = a.id - b.id;
+		return comparison;
 	}
 
 	/**
@@ -56,12 +58,7 @@ export class InitiativeBuilder {
 			this.actorsByGroup = _.groupBy(actors, actor => actor.initiativeActorGroupId);
 		}
 		if (groups !== undefined) {
-			this.groups = groups.sort((a, b) => {
-				let comparison = a.initiativeResult - b.initiativeResult;
-				if (comparison === 0) comparison = a.name.localeCompare(b.name);
-				if (comparison === 0) comparison = a.id - b.id;
-				return comparison;
-			});
+			this.groups = groups.sort(InitiativeBuilder.groupSortFunction);
 		}
 	}
 
@@ -236,7 +233,10 @@ export async function getInitiativeForChannel(
 	return { init: currentInit, errorMessage: errorMessage };
 }
 
-export async function updateInitiativeRoundMessageOrSendNew(intr, initBuilder) {
+export async function updateInitiativeRoundMessageOrSendNew(
+	intr: CommandInteraction,
+	initBuilder: InitiativeBuilder
+): Promise<Message<boolean>> {
 	try {
 		const targetMessageId =
 			initBuilder.init.roundMessageIds[initBuilder.init.currentRound || 0];
