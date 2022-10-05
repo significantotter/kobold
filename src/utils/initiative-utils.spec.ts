@@ -7,6 +7,7 @@ import {
 import * as initiativeUtils from './initiative-utils.js';
 import { CommandInteraction } from 'discord.js';
 import { KoboldEmbed } from './kobold-embed-utils.js';
+import { InteractionUtils } from './interaction-utils.js';
 
 function setupInitiativeActorsAndGroupsForTests(initiative) {
 	const actors = InitiativeActorFactory.withFakeId().buildList(
@@ -16,11 +17,14 @@ function setupInitiativeActorsAndGroupsForTests(initiative) {
 	);
 	const groups = actors.map(actor => actor.actorGroup);
 	const firstGroup = groups[2];
-	firstGroup.initiativeResult = 10;
+	firstGroup.initiativeResult = 30;
 	const secondGroup = groups[0];
 	secondGroup.initiativeResult = 20;
 	const thirdGroup = groups[1];
-	thirdGroup.initiativeResult = 30;
+	thirdGroup.initiativeResult = 10;
+
+	initiative.actors = actors;
+	initiative.actorGroups = groups;
 	return { actors, groups, firstGroup, secondGroup, thirdGroup };
 }
 
@@ -30,6 +34,19 @@ describe('initiative-utils', function () {
 		test('creates an empty initiative', function () {
 			const builder = new initiativeUtils.InitiativeBuilder({});
 			expect(builder).toBeDefined();
+		});
+		test('orders initiative actors by initiative result', function () {
+			const initiative = InitiativeFactory.build();
+			const { actors, groups, firstGroup, secondGroup, thirdGroup } =
+				setupInitiativeActorsAndGroupsForTests(initiative);
+			secondGroup.initiativeResult = 30;
+			thirdGroup.initiativeResult = 20;
+			firstGroup.initiativeResult = 10;
+			const builder = new initiativeUtils.InitiativeBuilder({ initiative, actors, groups });
+			const orderedGroups = builder.groups;
+			expect(orderedGroups[0]).toBe(secondGroup);
+			expect(orderedGroups[1]).toBe(thirdGroup);
+			expect(orderedGroups[2]).toBe(firstGroup);
 		});
 		describe('getPreviousTurnGroup', function () {
 			test('fails to move to the previous turn on the first turn of round 1', function () {
@@ -397,11 +414,252 @@ describe('initiative-utils', function () {
 			await Initiative.query().delete().where({ channelId: 'testChannelId' });
 		});
 	});
-	describe('updateInitiativeRoundMessageOrSendNew', function () {});
-	describe('getControllableInitiativeActors', function () {});
-	describe('getControllableInitiativeGroups', function () {});
-	describe('getActiveCharacterActor', function () {});
-	describe('nameMatchGeneric', function () {});
-	describe('getNameMatchCharacterFromInitiative', function () {});
-	describe('getNameMatchGroupFromInitiative', function () {});
+	describe('updateInitiativeRoundMessageOrSendNew', function () {
+		test('updates the initiative round message if it exists', async function () {
+			const initiative = await InitiativeFactory.create({
+				roundMessageIds: ['first', 'second', 'third'],
+				currentRound: 2,
+			});
+
+			const fakeIntr = {
+				channel: {
+					messages: {
+						fetch(targetMessageId) {
+							return {
+								edit(content) {
+									return Promise.resolve(content);
+								},
+								val: 'success! ' + targetMessageId,
+							};
+						},
+					},
+				},
+			};
+			const result: any = await initiativeUtils.updateInitiativeRoundMessageOrSendNew(
+				fakeIntr as any as CommandInteraction,
+				new initiativeUtils.InitiativeBuilder({ initiative })
+			);
+			expect(result.val).toBe('success! third');
+		});
+		test('sends a new initiative round message if it does not exist', async function () {
+			const initiative = await InitiativeFactory.create({
+				roundMessageIds: [],
+				currentRound: 0,
+			});
+			const fakeIntr = {
+				channel: {
+					send(content) {
+						return 'success! ' + content;
+					},
+				},
+			};
+			jest.spyOn(InteractionUtils, 'send').mockResolvedValueOnce('success!' as any);
+			jest.spyOn(Initiative, 'query').mockImplementationOnce((): any => {
+				return {
+					updateAndFetchById(id, obj) {
+						return initiative;
+					},
+				};
+			});
+			const result = await initiativeUtils.updateInitiativeRoundMessageOrSendNew(
+				fakeIntr as any as CommandInteraction,
+				new initiativeUtils.InitiativeBuilder({ initiative })
+			);
+			expect(result).toBe('success!');
+		});
+	});
+	describe('getControllableInitiativeActors', function () {
+		test('returns all controllable actors', async function () {
+			const initiative = await InitiativeFactory.create({ gmUserId: 'testGmUserId' });
+			const { actors, groups, firstGroup, secondGroup, thirdGroup } =
+				setupInitiativeActorsAndGroupsForTests(initiative);
+			actors[0].userId = 'testUserId';
+			actors[1].userId = 'anotherUserId';
+			actors[2].userId = 'testUserId';
+
+			const result = initiativeUtils.getControllableInitiativeActors(
+				initiative,
+				'testUserId'
+			);
+			expect(result).toHaveLength(2);
+		});
+		test('returns all initiative actors if the user created the initiative', function () {
+			const initiative = InitiativeFactory.build({
+				gmUserId: 'testUserId',
+			});
+			const { actors, groups, firstGroup, secondGroup, thirdGroup } =
+				setupInitiativeActorsAndGroupsForTests(initiative);
+			actors[0].userId = 'testUserId';
+			actors[1].userId = 'anotherUserId';
+
+			const result = initiativeUtils.getControllableInitiativeActors(
+				initiative,
+				'testUserId'
+			);
+			expect(result).toHaveLength(3);
+		});
+	});
+	describe('getControllableInitiativeGroups', function () {
+		test('returns all controllable initiative groups', async function () {
+			const initiative = await InitiativeFactory.create({ gmUserId: 'testGmUserId' });
+			const { actors, groups, firstGroup, secondGroup, thirdGroup } =
+				setupInitiativeActorsAndGroupsForTests(initiative);
+			firstGroup.userId = 'testUserId';
+			secondGroup.userId = 'anotherUserId';
+			thirdGroup.userId = 'testUserId';
+
+			const result = initiativeUtils.getControllableInitiativeGroups(
+				initiative,
+				'testUserId'
+			);
+			expect(result).toHaveLength(2);
+		});
+		test('returns all initiative groups if the user created the initiative', function () {
+			const initiative = InitiativeFactory.build({
+				gmUserId: 'testUserId',
+			});
+			const { actors, groups, firstGroup, secondGroup, thirdGroup } =
+				setupInitiativeActorsAndGroupsForTests(initiative);
+			firstGroup.userId = 'testUserId';
+			secondGroup.userId = 'anotherUserId';
+
+			const result = initiativeUtils.getControllableInitiativeGroups(
+				initiative,
+				'testUserId'
+			);
+			expect(result).toHaveLength(3);
+		});
+	});
+	describe('getActiveCharacterActor', function () {
+		test('returns the active character actor', function () {
+			const initiative = InitiativeFactory.build();
+			const { actors, groups, firstGroup, secondGroup, thirdGroup } =
+				setupInitiativeActorsAndGroupsForTests(initiative);
+			actors[0].character = {
+				userId: 'anotherUserId',
+				isActiveCharacter: true,
+			} as any;
+			actors[1].character = {
+				userId: 'testUserId',
+				isActiveCharacter: false,
+			} as any;
+			actors[2].character = {
+				userId: 'testUserId',
+				isActiveCharacter: true,
+			} as any;
+
+			const result = initiativeUtils.getActiveCharacterActor(initiative, 'testUserId');
+			expect(result.actor).toBe(actors[2]);
+		});
+		test('returns an error message if the user does not have an active character', function () {
+			const initiative = InitiativeFactory.build();
+			const { actors, groups, firstGroup, secondGroup, thirdGroup } =
+				setupInitiativeActorsAndGroupsForTests(initiative);
+			actors[0].character = {
+				userId: 'anotherUserId',
+				isActiveCharacter: true,
+			} as any;
+			actors[1].character = {
+				userId: 'testUserId',
+				isActiveCharacter: false,
+			} as any;
+			actors[2].character = {
+				userId: 'testUserId',
+				isActiveCharacter: false,
+			} as any;
+
+			const result = initiativeUtils.getActiveCharacterActor(initiative, 'testUserId');
+			expect(result.errorMessage).toBeTruthy();
+		});
+	});
+	describe('nameMatchGeneric', function () {
+		// test a function that takes an array of objects with a name property, and finds
+		// the closest match to a given name. It also takes a parameter for the error if no choices
+		// are found
+		test('returns the closest match', function () {
+			const names = [
+				{ name: 'testName' },
+				{ name: 'anotherName' },
+				{ name: 'yetAnotherName' },
+			];
+			const result = initiativeUtils.nameMatchGeneric(names, 'another', '');
+			expect(result.value).toBe(names[1]);
+		});
+		test('returns an error message if no match is found', function () {
+			const names = [];
+			const result = initiativeUtils.nameMatchGeneric(names, 'notFound', 'error');
+			expect(result.errorMessage).toBe('error');
+		});
+	});
+	describe('getNameMatchCharacterFromInitiative', function () {
+		test('returns the closest match', function () {
+			const initiative = InitiativeFactory.build();
+			const { actors, groups, firstGroup, secondGroup, thirdGroup } =
+				setupInitiativeActorsAndGroupsForTests(initiative);
+			actors[0].name = 'testName';
+			actors[0].userId = 'anotherUserId';
+			actors[1].name = 'anotherName';
+			actors[1].userId = 'testUserId';
+			actors[2].name = 'yetAnotherName';
+			actors[2].userId = 'testUserId';
+
+			const result = initiativeUtils.getNameMatchCharacterFromInitiative(
+				'testUserId',
+				initiative,
+				'another'
+			);
+			expect(result.actor).toBe(actors[1]);
+		});
+		test('returns an error message if no match is found', function () {
+			const initiative = InitiativeFactory.build();
+			const { actors, groups, firstGroup, secondGroup, thirdGroup } =
+				setupInitiativeActorsAndGroupsForTests(initiative);
+			initiative.actors = [];
+
+			const result = initiativeUtils.getNameMatchCharacterFromInitiative(
+				'testUserId',
+				initiative,
+				'notFound'
+			);
+			expect(result.errorMessage).toBeTruthy();
+		});
+	});
+	describe('getNameMatchGroupFromInitiative', function () {
+		test('returns the closest match', function () {
+			const initiative = InitiativeFactory.build();
+			const { actors, groups, firstGroup, secondGroup, thirdGroup } =
+				setupInitiativeActorsAndGroupsForTests(initiative);
+			firstGroup.name = 'testName';
+			firstGroup.userId = 'testUserId';
+			secondGroup.name = 'anotherName';
+			secondGroup.userId = 'testUserId';
+			thirdGroup.name = 'yetAnotherName';
+			thirdGroup.userId = 'testUserId';
+
+			const result = initiativeUtils.getNameMatchGroupFromInitiative(
+				initiative,
+				'testUserId',
+				'another'
+			);
+			expect(result.group).toBe(secondGroup);
+		});
+		test('returns an error message if no match is found', function () {
+			const initiative = InitiativeFactory.build();
+			const { actors, groups, firstGroup, secondGroup, thirdGroup } =
+				setupInitiativeActorsAndGroupsForTests(initiative);
+			firstGroup.name = 'testName';
+			firstGroup.userId = 'asdf';
+			secondGroup.name = 'anotherName';
+			secondGroup.userId = 'qwer';
+			thirdGroup.name = 'yetAnotherName';
+			thirdGroup.userId = 'zxcv';
+
+			const result = initiativeUtils.getNameMatchGroupFromInitiative(
+				initiative,
+				'testUserId',
+				'notFound'
+			);
+			expect(result.errorMessage).toBeTruthy();
+		});
+	});
 });

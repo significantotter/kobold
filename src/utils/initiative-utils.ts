@@ -265,17 +265,17 @@ export function getControllableInitiativeActors(initiative: Initiative, userId: 
 	const controllableActors = actorOptions.filter(
 		actor => initiative.gmUserId === userId || actor.userId === userId
 	);
-	return actorOptions;
+	return controllableActors;
 }
 export function getControllableInitiativeGroups(initiative: Initiative, userId: string) {
 	const actorGroupOptions = initiative.actorGroups;
 	const controllableGroups = actorGroupOptions.filter(
-		actor => initiative.gmUserId === userId || actor.userId === userId
+		group => initiative.gmUserId === userId || group.userId === userId
 	);
-	return actorGroupOptions;
+	return controllableGroups;
 }
 
-export async function getActiveCharacterActor(initiative: Initiative, userId: string) {
+export function getActiveCharacterActor(initiative: Initiative, userId: string) {
 	let actor: InitiativeActor = null;
 	let errorMessage: string = null;
 	for (const possibleActor of initiative?.actors || []) {
