@@ -26,7 +26,7 @@ import { InteractionUtils } from '../../../utils/index.js';
 import {
 	getControllableInitiativeActors,
 	getInitiativeForChannel,
-	getNameMatchCharacterFromInitiative,
+	getNameMatchActorFromInitiative,
 } from '../../../utils/initiative-utils.js';
 import { Command, CommandDeferType } from '../../index.js';
 import _ from 'lodash';

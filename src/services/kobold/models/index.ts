@@ -1,5 +1,7 @@
 export { WgToken } from './wg-token/wg-token.model.js';
+export { WgTokenFactory } from './wg-token/wg-token.factory.js';
 export { Character } from './character/character.model.js';
+export { CharacterFactory } from './character/character.factory';
 export { Initiative } from './initiative/initiative.model';
 export { InitiativeActor } from './initiative-actor/initiative-actor.model';
 export { InitiativeActorGroup } from './initiative-actor-group/initiative-actor-group.model';

@@ -18,4 +18,5 @@ export default {
 	modulePathIgnorePatterns: ['discord.js'],
 	moduleDirectories: ['node_modules', 'src'],
 	extensionsToTreatAsEsm: ['.ts', '.json'],
+	clearMocks: true,
 };

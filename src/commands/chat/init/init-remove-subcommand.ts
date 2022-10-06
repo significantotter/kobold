@@ -22,7 +22,7 @@ import { InteractionUtils } from '../../../utils/index.js';
 import {
 	getControllableInitiativeActors,
 	getInitiativeForChannel,
-	getNameMatchCharacterFromInitiative,
+	getNameMatchActorFromInitiative,
 	updateInitiativeRoundMessageOrSendNew,
 } from '../../../utils/initiative-utils.js';
 import { Command, CommandDeferType } from '../../index.js';
@@ -86,7 +86,7 @@ export class InitRemoveSubCommand implements Command {
 		if (!targetCharacterName) {
 			actorResponse = await getActiveCharacterActor(currentInit, intr.user.id);
 		} else {
-			actorResponse = await getNameMatchCharacterFromInitiative(
+			actorResponse = await getNameMatchActorFromInitiative(
 				intr.user.id,
 				currentInit,
 				targetCharacterName

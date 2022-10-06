@@ -326,7 +326,7 @@ export function nameMatchGeneric<T extends LowerNamedThing>(
 	return { value: thing, errorMessage: '' };
 }
 
-export function getNameMatchCharacterFromInitiative(
+export function getNameMatchActorFromInitiative(
 	userId: string,
 	initiative: Initiative,
 	characterName: string

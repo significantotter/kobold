@@ -591,7 +591,7 @@ describe('initiative-utils', function () {
 			expect(result.errorMessage).toBe('error');
 		});
 	});
-	describe('getNameMatchCharacterFromInitiative', function () {
+	describe('getNameMatchActorFromInitiative', function () {
 		test('returns the closest match', function () {
 			const initiative = InitiativeFactory.build();
 			const { actors, groups, firstGroup, secondGroup, thirdGroup } =
@@ -603,7 +603,7 @@ describe('initiative-utils', function () {
 			actors[2].name = 'yetAnotherName';
 			actors[2].userId = 'testUserId';
 
-			const result = initiativeUtils.getNameMatchCharacterFromInitiative(
+			const result = initiativeUtils.getNameMatchActorFromInitiative(
 				'testUserId',
 				initiative,
 				'another'
@@ -616,7 +616,7 @@ describe('initiative-utils', function () {
 				setupInitiativeActorsAndGroupsForTests(initiative);
 			initiative.actors = [];
 
-			const result = initiativeUtils.getNameMatchCharacterFromInitiative(
+			const result = initiativeUtils.getNameMatchActorFromInitiative(
 				'testUserId',
 				initiative,
 				'notFound'

@@ -22,7 +22,7 @@ import { InteractionUtils } from '../../../utils/index.js';
 import {
 	getControllableInitiativeActors,
 	getInitiativeForChannel,
-	getNameMatchCharacterFromInitiative,
+	getNameMatchActorFromInitiative,
 	updateInitiativeRoundMessageOrSendNew,
 } from '../../../utils/initiative-utils.js';
 import { Command, CommandDeferType } from '../../index.js';
@@ -93,11 +93,7 @@ export class InitSetSubCommand implements Command {
 		let currentInit = currentInitResponse.init;
 
 		const actorResponse: { actor: InitiativeActor; errorMessage: string } =
-			await getNameMatchCharacterFromInitiative(
-				intr.user.id,
-				currentInit,
-				targetCharacterName
-			);
+			await getNameMatchActorFromInitiative(intr.user.id, currentInit, targetCharacterName);
 		if (actorResponse.errorMessage) {
 			await InteractionUtils.send(intr, actorResponse.errorMessage);
 			return;
