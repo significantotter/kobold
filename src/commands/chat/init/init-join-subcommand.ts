@@ -15,17 +15,12 @@ import {
 import { RateLimiter } from 'discord.js-rate-limiter';
 
 import { EventData } from '../../../models/internal-models.js';
-import { Initiative } from '../../../services/kobold/models/index.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
-import {
-	getInitiativeForChannel,
-	InitiativeBuilder,
-	updateInitiativeRoundMessageOrSendNew,
-} from '../../../utils/initiative-utils.js';
+import { InitiativeUtils, InitiativeBuilder } from '../../../utils/initiative-utils.js';
 import { ChatArgs } from '../../../constants/chat-args.js';
-import { getActiveCharacter, findPossibleSkillFromString } from '../../../utils/character-utils.js';
-import { rollSkill } from '../../../utils/dice-utils.js';
+import { CharacterUtils } from '../../../utils/character-utils.js';
+import { DiceUtils } from '../../../utils/dice-utils.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 
 export class InitJoinSubCommand implements Command {
@@ -51,16 +46,17 @@ export class InitJoinSubCommand implements Command {
 			const match = intr.options.getString(ChatArgs.SKILL_CHOICE_OPTION.name);
 
 			//get the active character
-			const activeCharacter = await getActiveCharacter(intr.user.id);
+			const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id);
 			if (!activeCharacter) {
 				//no choices if we don't have a character to match against
 				await InteractionUtils.respond(intr, []);
 				return;
 			}
 			//find a skill on the character matching the autocomplete string
-			const matchedSkills = findPossibleSkillFromString(activeCharacter, match).map(
-				skill => ({ name: skill.Name, value: skill.Name })
-			);
+			const matchedSkills = CharacterUtils.findPossibleSkillFromString(
+				activeCharacter,
+				match
+			).map(skill => ({ name: skill.Name, value: skill.Name }));
 			//return the matched skills
 			await InteractionUtils.respond(intr, matchedSkills);
 		}
@@ -68,8 +64,8 @@ export class InitJoinSubCommand implements Command {
 
 	public async execute(intr: CommandInteraction, data: EventData): Promise<void> {
 		const [currentInitResponse, activeCharacter] = await Promise.all([
-			getInitiativeForChannel(intr.channel),
-			getActiveCharacter(intr.user.id),
+			InitiativeUtils.getInitiativeForChannel(intr.channel),
+			CharacterUtils.getActiveCharacter(intr.user.id),
 		]);
 		if (currentInitResponse.errorMessage) {
 			await InteractionUtils.send(intr, currentInitResponse.errorMessage);
@@ -104,7 +100,7 @@ export class InitJoinSubCommand implements Command {
 				);
 			}
 		} else if (skillChoice) {
-			const response = await rollSkill(
+			const response = await DiceUtils.rollSkill(
 				intr,
 				activeCharacter,
 				skillChoice,
@@ -122,7 +118,7 @@ export class InitJoinSubCommand implements Command {
 			finalInitiative = rollBuilder.rollResults[0]?.results?.total || 0;
 			rollResultMessage = rollBuilder.compileEmbed();
 		} else {
-			const response = await rollSkill(
+			const response = await DiceUtils.rollSkill(
 				intr,
 				activeCharacter,
 				'Perception',
@@ -178,7 +174,7 @@ export class InitJoinSubCommand implements Command {
 			actors: currentInit.actors.concat(newActor),
 			groups: currentInit.actorGroups.concat(newActor.actorGroup),
 		});
-		await updateInitiativeRoundMessageOrSendNew(intr, initBuilder);
+		await InitiativeUtils.updateInitiativeRoundMessageOrSendNew(intr, initBuilder);
 		await InteractionUtils.send(intr, rollResultMessage);
 	}
 }

@@ -3,7 +3,7 @@ import { CommandInteraction, EmbedFieldData, MessageEmbed, User } from 'discord.
 import { Dice, DiceResult } from 'dice-typescript';
 import type { WG } from './../services/wanderers-guide/wanderers-guide.js';
 import _ from 'lodash';
-import { getBestNameMatch } from './character-utils.js';
+import { CharacterUtils } from './character-utils.js';
 import { KoboldEmbed } from './kobold-embed-utils.js';
 
 interface DiceRollResult extends EmbedFieldData {
@@ -99,58 +99,62 @@ export class RollBuilder {
 }
 
 const damageTypeMatch = / [A-Za-z \-_,\/]+$/;
-export function parseDiceFromWgDamageField(wgDamageField: string): string {
-	return wgDamageField.replace(damageTypeMatch, '');
-}
-
-export function buildDiceExpression(
-	baseDice?: string,
-	bonus?: string,
-	modifierExpression?: string
-) {
-	let builtDice = '';
-	//if we have a bonus, and the bonus does not start with + or -
-	if (bonus?.length && !['-', '+'].includes(bonus.charAt(0))) {
-		//add a sign to the bonus
-		bonus = '+' + bonus;
+export class DiceUtils {
+	public static parseDiceFromWgDamageField(wgDamageField: string): string {
+		return wgDamageField.replace(damageTypeMatch, '');
 	}
 
-	//if we have a bonus, but no base dice, base the dice on a d20
-	if (bonus && !baseDice) {
-		baseDice = 'd20';
+	public static buildDiceExpression(
+		baseDice?: string,
+		bonus?: string,
+		modifierExpression?: string
+	) {
+		let builtDice = '';
+		//if we have a bonus, and the bonus does not start with + or -
+		if (bonus?.length && !['-', '+'].includes(bonus.charAt(0))) {
+			//add a sign to the bonus
+			bonus = '+' + bonus;
+		}
+
+		//if we have a bonus, but no base dice, base the dice on a d20
+		if (bonus && !baseDice) {
+			baseDice = 'd20';
+		}
+
+		let wrappedModifierExpression = '';
+		if (modifierExpression) wrappedModifierExpression = `+(${modifierExpression})`;
+
+		return `${baseDice}${bonus || ''}${wrappedModifierExpression}`;
 	}
 
-	let wrappedModifierExpression = '';
-	if (modifierExpression) wrappedModifierExpression = `+(${modifierExpression})`;
+	public static rollSkill(
+		intr: CommandInteraction,
+		activeCharacter: Character,
+		skillChoice: string,
+		rollNote?: string,
+		modifierExpression?: string,
+		description?: string
+	) {
+		const skillsPlusPerception = [
+			...activeCharacter.calculatedStats.totalSkills,
+			{
+				Name: 'Perception',
+				Bonus: activeCharacter.calculatedStats.totalPerception,
+			},
+		] as WG.NamedBonus[];
 
-	return `${baseDice}${bonus || ''}${wrappedModifierExpression}`;
-}
+		//use the first skill that matches the text of what we were sent, or preferably a perfect match
+		let targetSkill = CharacterUtils.getBestNameMatch(skillChoice, skillsPlusPerception);
 
-export function rollSkill(
-	intr: CommandInteraction,
-	activeCharacter: Character,
-	skillChoice: string,
-	rollNote?: string,
-	modifierExpression?: string,
-	description?: string
-) {
-	const skillsPlusPerception = [
-		...activeCharacter.calculatedStats.totalSkills,
-		{
-			Name: 'Perception',
-			Bonus: activeCharacter.calculatedStats.totalPerception,
-		},
-	] as WG.NamedBonus[];
-
-	//use the first skill that matches the text of what we were sent, or preferably a perfect match
-	let targetSkill = getBestNameMatch(skillChoice, skillsPlusPerception);
-
-	const rollBuilder = new RollBuilder({
-		actorName: intr.user.username,
-		character: activeCharacter,
-		rollNote,
-		rollDescription: `rolled ${targetSkill.Name}`,
-	});
-	rollBuilder.addRoll(buildDiceExpression('d20', String(targetSkill.Bonus), modifierExpression));
-	return rollBuilder;
+		const rollBuilder = new RollBuilder({
+			actorName: intr.user.username,
+			character: activeCharacter,
+			rollNote,
+			rollDescription: `rolled ${targetSkill.Name}`,
+		});
+		rollBuilder.addRoll(
+			DiceUtils.buildDiceExpression('d20', String(targetSkill.Bonus), modifierExpression)
+		);
+		return rollBuilder;
+	}
 }

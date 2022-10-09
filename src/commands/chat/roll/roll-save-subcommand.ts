@@ -17,11 +17,11 @@ import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { WG } from '../../../services/wanderers-guide/wanderers-guide.js';
 import {
-	findPossibleSaveFromString,
-	getActiveCharacter,
-	getBestNameMatch,
+	CharacterUtils.findPossibleSaveFromString,
+	CharacterUtils.getActiveCharacter,
+	CharacterUtils.getBestNameMatch,
 } from '../../../utils/character-utils.js';
-import { buildDiceExpression, RollBuilder } from '../../../utils/dice-utils.js';
+import { DiceUtils.buildDiceExpression, RollBuilder } from '../../../utils/dice-utils.js';
 
 export class RollSaveSubCommand implements Command {
 	public names = ['save'];
@@ -46,14 +46,14 @@ export class RollSaveSubCommand implements Command {
 			const match = intr.options.getString(ChatArgs.SAVE_CHOICE_OPTION.name);
 
 			//get the active character
-			const activeCharacter = await getActiveCharacter(intr.user.id);
+			const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id);
 			if (!activeCharacter) {
 				//no choices if we don't have a character to match against
 				InteractionUtils.respond(intr, []);
 				return;
 			}
 			//find a save on the character matching the autocomplete string
-			const matchedSaves = findPossibleSaveFromString(activeCharacter, match).map(save => ({
+			const matchedSaves = CharacterUtils.findPossibleSaveFromString(activeCharacter, match).map(save => ({
 				name: save.Name,
 				value: save.Name,
 			}));
@@ -67,14 +67,14 @@ export class RollSaveSubCommand implements Command {
 		const modifierExpression = intr.options.getString(ChatArgs.ROLL_MODIFIER_OPTION.name);
 		const rollNote = intr.options.getString(ChatArgs.ROLL_NOTE_OPTION.name);
 
-		const activeCharacter = await getActiveCharacter(intr.user.id);
+		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id);
 		if (!activeCharacter) {
 			await InteractionUtils.send(intr, `Yip! You don't have any active characters!`);
 			return;
 		}
 
 		//use the first save that matches the text of what we were sent, or preferably a perfect match
-		let targetSave = getBestNameMatch(
+		let targetSave = CharacterUtils.getBestNameMatch(
 			saveChoice,
 			activeCharacter.calculatedStats.totalSaves as WG.NamedBonus[]
 		);
@@ -86,7 +86,7 @@ export class RollSaveSubCommand implements Command {
 			rollDescription: `rolled ${targetSave.Name}`,
 		});
 		rollBuilder.addRoll(
-			buildDiceExpression('d20', String(targetSave.Bonus), modifierExpression)
+			DiceUtils.buildDiceExpression('d20', String(targetSave.Bonus), modifierExpression)
 		);
 		const response = rollBuilder.compileEmbed();
 

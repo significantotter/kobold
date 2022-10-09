@@ -6,15 +6,14 @@ import {
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord-api-types/v10';
 import { CommandInteraction, PermissionString } from 'discord.js';
-import { RateLimiter } from 'discord.js-rate-limiter';
 
 import { EventData } from '../../../models/internal-models.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { WgToken } from '../../../services/kobold/models/index.js';
-import characterHelpers from './helpers.js';
+import { CharacterHelpers } from './helpers.js';
 import Config from '../../../config/config.json';
-import { parseCharacterIdFromText } from '../../../utils/character-utils.js';
+import { CharacterUtils } from '../../../utils/character-utils.js';
 import { CharacterOptions } from './command-options.js';
 
 export class CharacterImportSubCommand implements Command {
@@ -32,7 +31,7 @@ export class CharacterImportSubCommand implements Command {
 	public async execute(intr: CommandInteraction, data: EventData): Promise<void> {
 		const url = intr.options.getString(CharacterOptions.IMPORT_OPTION.name).trim();
 		const LL = Language.localize(data.lang());
-		let charId = parseCharacterIdFromText(url);
+		let charId = CharacterUtils.parseCharacterIdFromText(url);
 		if (charId === null) {
 			await InteractionUtils.send(
 				intr,
@@ -71,7 +70,7 @@ export class CharacterImportSubCommand implements Command {
 		} else {
 			// We have the authentication token! Fetch the user's sheet
 			const token = tokenResults[0].accessToken;
-			const character = await characterHelpers.fetchWgCharacterFromToken(charId, token);
+			const character = await CharacterHelpers.fetchWgCharacterFromToken(charId, token);
 
 			// set current characters owned by user to inactive state
 			await Character.query()

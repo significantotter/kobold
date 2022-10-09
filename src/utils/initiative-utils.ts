@@ -8,7 +8,8 @@ import { CommandInteraction, GuildTextBasedChannel, Message, MessageEmbed, User 
 import { KoboldEmbed } from './kobold-embed-utils.js';
 import _ from 'lodash';
 import { InteractionUtils } from './interaction-utils.js';
-import { getBestNameMatch } from './character-utils.js';
+import { CharacterUtils } from './character-utils.js';
+
 export class InitiativeBuilder {
 	public init: Initiative;
 	public actorsByGroup: { [key: number]: InitiativeActor[] };
@@ -209,155 +210,161 @@ export class InitiativeBuilder {
 	}
 }
 
-export async function getInitiativeForChannel(
-	channel: GuildTextBasedChannel,
-	options = { sendErrors: true }
-) {
-	let errorMessage = null;
-	if (!channel || !channel.id) {
-		errorMessage = 'Yip! You can only send initiative commands in a regular server channel.';
-		return { init: null, errorMessage: errorMessage };
-	}
-	const channelId = channel.id;
-
-	const currentInit = await Initiative.query()
-		.withGraphFetched('[actors.[character], actorGroups]')
-		.where({
-			channelId,
-		})
-		.first();
-	if (!currentInit || currentInit.length === 0) {
-		errorMessage = "Yip! There's no active initiative in this channel.";
-		return { init: null, errorMessage: errorMessage };
-	}
-	return { init: currentInit, errorMessage: errorMessage };
-}
-
-export async function updateInitiativeRoundMessageOrSendNew(
-	intr: CommandInteraction,
-	initBuilder: InitiativeBuilder
-): Promise<Message<boolean>> {
-	try {
-		const targetMessageId =
-			initBuilder.init.roundMessageIds[initBuilder.init.currentRound || 0];
-		if (!targetMessageId) {
-			const err = new Error('Unknown Message');
-			throw err;
-		}
-		const targetMessage = await intr.channel.messages.fetch(targetMessageId);
-		const embed = await KoboldEmbed.roundFromInitiativeBuilder(initBuilder);
-		await targetMessage.edit({ embeds: [embed] });
-		return targetMessage;
-	} catch (err) {
-		if (err.message === 'Unknown Message' || err.code === 10008) {
-			const embed = await KoboldEmbed.roundFromInitiativeBuilder(initBuilder);
-			const newMessage = await InteractionUtils.send(intr, embed);
-			const roundMessageIds = initBuilder.init.roundMessageIds;
-			roundMessageIds[initBuilder.init.currentRound || 0] = newMessage.id;
-			await Initiative.query().updateAndFetchById(initBuilder.init.id, { roundMessageIds });
-			return newMessage;
-		}
-	}
-}
-
-export function getControllableInitiativeActors(initiative: Initiative, userId: string) {
-	const actorOptions = initiative.actors;
-	const controllableActors = actorOptions.filter(
-		actor => initiative.gmUserId === userId || actor.userId === userId
-	);
-	return controllableActors;
-}
-export function getControllableInitiativeGroups(initiative: Initiative, userId: string) {
-	const actorGroupOptions = initiative.actorGroups;
-	const controllableGroups = actorGroupOptions.filter(
-		group => initiative.gmUserId === userId || group.userId === userId
-	);
-	return controllableGroups;
-}
-
-export function getActiveCharacterActor(initiative: Initiative, userId: string) {
-	let actor: InitiativeActor = null;
-	let errorMessage: string = null;
-	for (const possibleActor of initiative?.actors || []) {
-		const actorCharacter = possibleActor.character;
-		if (
-			actorCharacter &&
-			actorCharacter.isActiveCharacter &&
-			actorCharacter.userId === userId
-		) {
-			actor = possibleActor;
-			break;
-		}
-	}
-	if (!actor) {
-		return {
-			actor,
-			errorMessage: `Yip! Your active character isn't in this initiative!`,
-		};
-	}
-	return { actor, errorMessage };
-}
-
 interface LowerNamedThing {
 	name?: string;
 }
-export function nameMatchGeneric<T extends LowerNamedThing>(
-	options: T[],
-	name: string,
-	noChoicesError: string
-): { value: T; errorMessage: string } {
-	let thing;
-	let errorMessage;
-	if (options.length === 0) {
-		return {
-			value: null,
-			errorMessage: noChoicesError,
-		};
-	} else {
-		const nameMatch = getBestNameMatch<{ Name: string; thing: T }>(
-			name,
-			options.map(thing => ({
-				Name: thing.name,
-				thing: thing,
-			}))
-		);
-		thing = nameMatch.thing;
+
+export class InitiativeUtils {
+	public static async getInitiativeForChannel(
+		channel: GuildTextBasedChannel,
+		options = { sendErrors: true }
+	) {
+		let errorMessage = null;
+		if (!channel || !channel.id) {
+			errorMessage =
+				'Yip! You can only send initiative commands in a regular server channel.';
+			return { init: null, errorMessage: errorMessage };
+		}
+		const channelId = channel.id;
+
+		const currentInit = await Initiative.query()
+			.withGraphFetched('[actors.[character], actorGroups]')
+			.where({
+				channelId,
+			})
+			.first();
+		if (!currentInit || currentInit.length === 0) {
+			errorMessage = "Yip! There's no active initiative in this channel.";
+			return { init: null, errorMessage: errorMessage };
+		}
+		return { init: currentInit, errorMessage: errorMessage };
 	}
-	return { value: thing, errorMessage: '' };
-}
 
-export function getNameMatchActorFromInitiative(
-	userId: string,
-	initiative: Initiative,
-	characterName: string
-): { actor: InitiativeActor; errorMessage: string } {
-	let errorMessage = null;
-	let actor: InitiativeActor | null = null;
-	// get actor options that match the given name, were created by you, or you're the gm of
-	const actorOptions = getControllableInitiativeActors(initiative, userId);
-	const result = nameMatchGeneric<InitiativeActor>(
-		actorOptions,
-		characterName,
-		`Yip! You don't have control of any characters in the initiative matching that name!`
-	);
+	public static async updateInitiativeRoundMessageOrSendNew(
+		intr: CommandInteraction,
+		initBuilder: InitiativeBuilder
+	): Promise<Message<boolean>> {
+		try {
+			const targetMessageId =
+				initBuilder.init.roundMessageIds[initBuilder.init.currentRound || 0];
+			if (!targetMessageId) {
+				const err = new Error('Unknown Message');
+				throw err;
+			}
+			const targetMessage = await intr.channel.messages.fetch(targetMessageId);
+			const embed = await KoboldEmbed.roundFromInitiativeBuilder(initBuilder);
+			await targetMessage.edit({ embeds: [embed] });
+			return targetMessage;
+		} catch (err) {
+			if (err.message === 'Unknown Message' || err.code === 10008) {
+				const embed = await KoboldEmbed.roundFromInitiativeBuilder(initBuilder);
+				const newMessage = await InteractionUtils.send(intr, embed);
+				const roundMessageIds = initBuilder.init.roundMessageIds;
+				roundMessageIds[initBuilder.init.currentRound || 0] = newMessage.id;
+				await Initiative.query().updateAndFetchById(initBuilder.init.id, {
+					roundMessageIds,
+				});
+				return newMessage;
+			}
+		}
+	}
 
-	return { actor: result.value, errorMessage: result.errorMessage };
-}
+	public static getControllableInitiativeActors(initiative: Initiative, userId: string) {
+		const actorOptions = initiative.actors;
+		const controllableActors = actorOptions.filter(
+			actor => initiative.gmUserId === userId || actor.userId === userId
+		);
+		return controllableActors;
+	}
+	public static getControllableInitiativeGroups(initiative: Initiative, userId: string) {
+		const actorGroupOptions = initiative.actorGroups;
+		const controllableGroups = actorGroupOptions.filter(
+			group => initiative.gmUserId === userId || group.userId === userId
+		);
+		return controllableGroups;
+	}
 
-export function getNameMatchGroupFromInitiative(
-	initiative: Initiative,
-	userId: string,
-	groupName: string
-): { group: InitiativeActorGroup; errorMessage: string } {
-	let errorMessage = null;
-	let group: InitiativeActorGroup | null = null;
-	// get group options that match the given name, were created by you, or you're the gm of
-	const groupOptions = getControllableInitiativeGroups(initiative, userId);
-	const result = nameMatchGeneric<InitiativeActorGroup>(
-		groupOptions,
-		groupName,
-		`Yip! You don't have control of any characters in the initiative matching that name!`
-	);
+	public static getActiveCharacterActor(initiative: Initiative, userId: string) {
+		let actor: InitiativeActor = null;
+		let errorMessage: string = null;
+		for (const possibleActor of initiative?.actors || []) {
+			const actorCharacter = possibleActor.character;
+			if (
+				actorCharacter &&
+				actorCharacter.isActiveCharacter &&
+				actorCharacter.userId === userId
+			) {
+				actor = possibleActor;
+				break;
+			}
+		}
+		if (!actor) {
+			return {
+				actor,
+				errorMessage: `Yip! Your active character isn't in this initiative!`,
+			};
+		}
+		return { actor, errorMessage };
+	}
 
-	return { group: result.value, errorMessage: result.errorMessage };
+	public static nameMatchGeneric<T extends LowerNamedThing>(
+		options: T[],
+		name: string,
+		noChoicesError: string
+	): { value: T; errorMessage: string } {
+		let thing;
+		let errorMessage;
+		if (options.length === 0) {
+			return {
+				value: null,
+				errorMessage: noChoicesError,
+			};
+		} else {
+			const nameMatch = CharacterUtils.getBestNameMatch<{ Name: string; thing: T }>(
+				name,
+				options.map(thing => ({
+					Name: thing.name,
+					thing: thing,
+				}))
+			);
+			thing = nameMatch.thing;
+		}
+		return { value: thing, errorMessage: '' };
+	}
+
+	public static getNameMatchActorFromInitiative(
+		userId: string,
+		initiative: Initiative,
+		characterName: string
+	): { actor: InitiativeActor; errorMessage: string } {
+		let errorMessage = null;
+		let actor: InitiativeActor | null = null;
+		// get actor options that match the given name, were created by you, or you're the gm of
+		const actorOptions = InitiativeUtils.getControllableInitiativeActors(initiative, userId);
+		const result = InitiativeUtils.nameMatchGeneric<InitiativeActor>(
+			actorOptions,
+			characterName,
+			`Yip! You don't have control of any characters in the initiative matching that name!`
+		);
+
+		return { actor: result.value, errorMessage: result.errorMessage };
+	}
+
+	public static getNameMatchGroupFromInitiative(
+		initiative: Initiative,
+		userId: string,
+		groupName: string
+	): { group: InitiativeActorGroup; errorMessage: string } {
+		let errorMessage = null;
+		let group: InitiativeActorGroup | null = null;
+		// get group options that match the given name, were created by you, or you're the gm of
+		const groupOptions = InitiativeUtils.getControllableInitiativeGroups(initiative, userId);
+		const result = InitiativeUtils.nameMatchGeneric<InitiativeActorGroup>(
+			groupOptions,
+			groupName,
+			`Yip! You don't have control of any characters in the initiative matching that name!`
+		);
+
+		return { group: result.value, errorMessage: result.errorMessage };
+	}
 }

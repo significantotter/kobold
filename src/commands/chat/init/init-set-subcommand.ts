@@ -1,5 +1,5 @@
 import { InitiativeActorGroup } from './../../../services/kobold/models/initiative-actor-group/initiative-actor-group.model';
-import { getActiveCharacterActor, InitiativeBuilder } from './../../../utils/initiative-utils';
+import { InitiativeUtils, InitiativeBuilder } from './../../../utils/initiative-utils';
 import { InitiativeActor } from '../../../services/kobold/models/initiative-actor/initiative-actor.model';
 import { ChatArgs } from '../../../constants/chat-args';
 import {
@@ -17,14 +17,7 @@ import {
 import { RateLimiter } from 'discord.js-rate-limiter';
 
 import { EventData } from '../../../models/internal-models.js';
-import { getActiveCharacter, getBestNameMatch } from '../../../utils/character-utils.js';
 import { InteractionUtils } from '../../../utils/index.js';
-import {
-	getControllableInitiativeActors,
-	getInitiativeForChannel,
-	getNameMatchActorFromInitiative,
-	updateInitiativeRoundMessageOrSendNew,
-} from '../../../utils/initiative-utils.js';
 import { Command, CommandDeferType } from '../../index.js';
 import _ from 'lodash';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
@@ -51,13 +44,13 @@ export class InitSetSubCommand implements Command {
 			//we don't need to autocomplete if we're just dealing with whitespace
 			const match = intr.options.getString(ChatArgs.INIT_CHARACTER_OPTION.name);
 
-			const currentInitResponse = await getInitiativeForChannel(intr.channel);
+			const currentInitResponse = await InitiativeUtils.getInitiativeForChannel(intr.channel);
 			if (currentInitResponse.errorMessage) {
 				await InteractionUtils.respond(intr, []);
 				return;
 			}
 			//get the actor matches
-			let actorOptions = getControllableInitiativeActors(
+			let actorOptions = InitiativeUtils.getControllableInitiativeActors(
 				currentInitResponse.init,
 				intr.user.id
 			);
@@ -85,7 +78,7 @@ export class InitSetSubCommand implements Command {
 			await InteractionUtils.send(intr, 'Yip! Please send a valid option to update.');
 			return;
 		}
-		let currentInitResponse = await getInitiativeForChannel(intr.channel);
+		let currentInitResponse = await InitiativeUtils.getInitiativeForChannel(intr.channel);
 		if (currentInitResponse.errorMessage) {
 			await InteractionUtils.send(intr, currentInitResponse.errorMessage);
 			return;
@@ -93,7 +86,11 @@ export class InitSetSubCommand implements Command {
 		let currentInit = currentInitResponse.init;
 
 		const actorResponse: { actor: InitiativeActor; errorMessage: string } =
-			await getNameMatchActorFromInitiative(intr.user.id, currentInit, targetCharacterName);
+			await InitiativeUtils.getNameMatchActorFromInitiative(
+				intr.user.id,
+				currentInit,
+				targetCharacterName
+			);
 		if (actorResponse.errorMessage) {
 			await InteractionUtils.send(intr, actorResponse.errorMessage);
 			return;
@@ -150,7 +147,7 @@ export class InitSetSubCommand implements Command {
 				);
 			}
 		}
-		currentInitResponse = await getInitiativeForChannel(intr.channel);
+		currentInitResponse = await InitiativeUtils.getInitiativeForChannel(intr.channel);
 		if (currentInitResponse.errorMessage) {
 			await InteractionUtils.send(intr, currentInitResponse.errorMessage);
 			return;
@@ -174,6 +171,6 @@ export class InitSetSubCommand implements Command {
 		const initBuilder = new InitiativeBuilder({
 			initiative: currentInit,
 		});
-		await updateInitiativeRoundMessageOrSendNew(intr, initBuilder);
+		await InitiativeUtils.updateInitiativeRoundMessageOrSendNew(intr, initBuilder);
 	}
 }

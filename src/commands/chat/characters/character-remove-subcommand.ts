@@ -10,7 +10,7 @@ import { EventData } from '../../../models/internal-models.js';
 import { Lang } from '../../../services/index.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
-import { getActiveCharacter } from '../../../utils/character-utils.js';
+import { CharacterUtils } from '../../../utils/character-utils.js';
 import { CollectorUtils } from 'discord.js-collector-utils';
 import { Language } from '../../../models/enum-helpers/index.js';
 
@@ -28,27 +28,33 @@ export class CharacterRemoveSubCommand implements Command {
 
 	public async execute(intr: CommandInteraction, data: EventData): Promise<void> {
 		//check if we have an active character
-		const activeCharacter = await getActiveCharacter(intr.user.id);
+		const LL = Language.localize(data.lang());
+		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id);
 		if (!activeCharacter) {
-			await InteractionUtils.send(intr, `Yip! You don't have any active characters!`);
+			await InteractionUtils.send(
+				intr,
+				LL.commands.character.interactions.noActiveCharacter()
+			);
 			return;
 		}
 
 		const prompt = await InteractionUtils.send(intr, {
-			content: `Are you sure you want to remove ${activeCharacter.characterData.name}?`,
+			content: LL.commands.character.remove.interactions.removeConfirmation.text({
+				characterName: activeCharacter.characterData.name,
+			}),
 			components: [
 				{
 					type: 'ACTION_ROW',
 					components: [
 						{
 							type: 'BUTTON',
-							label: 'REMOVE',
+							label: LL.commands.character.remove.interactions.removeConfirmation.removeButton(),
 							customId: 'remove',
 							style: 'DANGER',
 						},
 						{
 							type: 'BUTTON',
-							label: 'CANCEL',
+							label: LL.commands.character.remove.interactions.removeConfirmation.cancelButton(),
 							customId: 'cancel',
 							style: 'PRIMARY',
 						},
@@ -73,7 +79,10 @@ export class CharacterRemoveSubCommand implements Command {
 				target: intr.user,
 				stopFilter: message => message.content.toLowerCase() === 'stop',
 				onExpire: async () => {
-					await InteractionUtils.send(intr, 'Yip! Character removal request expired.');
+					await InteractionUtils.send(
+						intr,
+						LL.commands.character.remove.interactions.removeConfirmation.expired()
+					);
 				},
 			}
 		);
@@ -92,13 +101,17 @@ export class CharacterRemoveSubCommand implements Command {
 			//send success message
 
 			await InteractionUtils.editReply(intr, {
-				content: `Yip! I've successfully removed ${activeCharacter.characterData.name}! You can import them again at any time.`,
+				content: LL.commands.character.remove.interactions.success({
+					characterName: activeCharacter.characterData.name,
+				}),
 				components: [],
 			});
 		} else {
 			// cancel
 			await InteractionUtils.editReply(intr, {
-				content: `Yip! Canceled the request to remove ${activeCharacter.characterData.name}!`,
+				content: LL.commands.character.remove.interactions.cancelled({
+					characterName: activeCharacter.characterData.name,
+				}),
 				components: [],
 			});
 		}

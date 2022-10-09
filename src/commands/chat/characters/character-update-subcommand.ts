@@ -11,7 +11,7 @@ import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { WgToken } from '../../../services/kobold/models/index.js';
 import { fetchWgCharacterFromToken } from './helpers.js';
-import { getActiveCharacter } from '../../../utils/character-utils.js';
+import { CharacterUtils.getActiveCharacter } from '../../../utils/character-utils.js';
 import { Language } from '../../../models/enum-helpers/index.js';
 import { Lang } from '../../../services/index.js';
 
@@ -29,7 +29,7 @@ export class CharacterUpdateSubCommand implements Command {
 
 	public async execute(intr: CommandInteraction, data: EventData): Promise<void> {
 		//check if we have an active character
-		const activeCharacter = await getActiveCharacter(intr.user.id);
+		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id);
 		if (!activeCharacter) {
 			await InteractionUtils.send(intr, `Yip! You don't have any active characters!`);
 			return;

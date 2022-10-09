@@ -1,8 +1,8 @@
 import { InitiativeActorGroup } from '../../../services/kobold/models/initiative-actor-group/initiative-actor-group.model';
 import {
-	getNameMatchGroupFromInitiative,
+	InitiativeUtils.getNameMatchGroupFromInitiative,
 	InitiativeBuilder,
-	updateInitiativeRoundMessageOrSendNew,
+	InitiativeUtils.updateInitiativeRoundMessageOrSendNew,
 } from '../../../utils/initiative-utils';
 import { InitiativeActor } from '../../../services/kobold/models/initiative-actor/initiative-actor.model';
 import { ChatArgs } from '../../../constants/chat-args';
@@ -23,9 +23,9 @@ import { RateLimiter } from 'discord.js-rate-limiter';
 import { EventData } from '../../../models/internal-models.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import {
-	getControllableInitiativeActors,
-	getInitiativeForChannel,
-	getNameMatchActorFromInitiative,
+	InitiativeUtils.getControllableInitiativeActors,
+	InitiativeUtils.getInitiativeForChannel,
+	InitiativeUtils.getNameMatchActorFromInitiative,
 } from '../../../utils/initiative-utils.js';
 import { Command, CommandDeferType } from '../../index.js';
 import _ from 'lodash';
@@ -54,10 +54,10 @@ export class InitPrevSubCommand implements Command {
 			//we don't need to autocomplete if we're just dealing with whitespace
 			const match = intr.options.getString(ChatArgs.INIT_CHARACTER_OPTION.name);
 
-			const currentInitResponse = await getInitiativeForChannel(intr.channel);
+			const currentInitResponse = await InitiativeUtils.getInitiativeForChannel(intr.channel);
 			if (!currentInitResponse) await InteractionUtils.respond(intr, []);
 			//get the character matches
-			let actorOptions = getControllableInitiativeActors(
+			let actorOptions = InitiativeUtils.getControllableInitiativeActors(
 				currentInitResponse.init,
 				//get all initiative actors
 				currentInitResponse.init.gmUserId
@@ -77,7 +77,7 @@ export class InitPrevSubCommand implements Command {
 
 	public async execute(intr: CommandInteraction, data: EventData): Promise<void> {
 		const targetCharacterName = intr.options.getString(ChatArgs.INIT_CHARACTER_OPTION.name);
-		const initResult = await getInitiativeForChannel(intr.channel);
+		const initResult = await InitiativeUtils.getInitiativeForChannel(intr.channel);
 		if (initResult.errorMessage) {
 			await InteractionUtils.send(intr, initResult.errorMessage);
 			return;
@@ -105,7 +105,7 @@ export class InitPrevSubCommand implements Command {
 		const currentTurnEmbed = await KoboldEmbed.turnFromInitiativeBuilder(initBuilder, url);
 		const activeGroup = initBuilder.activeGroup;
 
-		await updateInitiativeRoundMessageOrSendNew(intr, initBuilder);
+		await InitiativeUtils.updateInitiativeRoundMessageOrSendNew(intr, initBuilder);
 
 		await InteractionUtils.send(intr, {
 			content: `<@${activeGroup.userId}>`,

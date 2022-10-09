@@ -1,4 +1,4 @@
-import { buildDiceExpression, RollBuilder } from '../../../utils/dice-utils';
+import { DiceUtils.buildDiceExpression, RollBuilder } from '../../../utils/dice-utils';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -18,9 +18,9 @@ import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { WG } from '../../../services/wanderers-guide/wanderers-guide.js';
 import {
-	findPossibleAbilityFromString,
-	getActiveCharacter,
-	getBestNameMatch,
+	CharacterUtils.findPossibleAbilityFromString,
+	CharacterUtils.getActiveCharacter,
+	CharacterUtils.getBestNameMatch,
 } from '../../../utils/character-utils.js';
 
 export class RollAbilitySubCommand implements Command {
@@ -46,14 +46,14 @@ export class RollAbilitySubCommand implements Command {
 			const match = intr.options.getString(ChatArgs.ABILITY_CHOICE_OPTION.name);
 
 			//get the active character
-			const activeCharacter = await getActiveCharacter(intr.user.id);
+			const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id);
 			if (!activeCharacter) {
 				//no choices if we don't have a character to match against
 				InteractionUtils.respond(intr, []);
 				return;
 			}
 			//find a ability on the character matching the autocomplete string
-			const matchedAbilitys = findPossibleAbilityFromString(activeCharacter, match).map(
+			const matchedAbilitys = CharacterUtils.findPossibleAbilityFromString(activeCharacter, match).map(
 				ability => ({
 					name: ability.Name,
 					value: ability.Name,
@@ -69,14 +69,14 @@ export class RollAbilitySubCommand implements Command {
 		const modifierExpression = intr.options.getString(ChatArgs.ROLL_MODIFIER_OPTION.name);
 		const rollNote = intr.options.getString(ChatArgs.ROLL_NOTE_OPTION.name);
 
-		const activeCharacter = await getActiveCharacter(intr.user.id);
+		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id);
 		if (!activeCharacter) {
 			await InteractionUtils.send(intr, `Yip! You don't have any active characters!`);
 			return;
 		}
 
 		//use the first ability that matches the text of what we were sent, or preferably a perfect match
-		let targetAbility = getBestNameMatch(
+		let targetAbility = CharacterUtils.getBestNameMatch(
 			abilityChoice,
 			activeCharacter.calculatedStats.totalAbilityScores as WG.NamedScore[]
 		);
@@ -93,7 +93,7 @@ export class RollAbilitySubCommand implements Command {
 			rollDescription: `rolled ${targetAbility.Name}`,
 		});
 		rollBuilder.addRoll(
-			buildDiceExpression('d20', String(targetAbility.Score), modifierExpression)
+			DiceUtils.buildDiceExpression('d20', String(targetAbility.Score), modifierExpression)
 		);
 		const response = rollBuilder.compileEmbed();
 

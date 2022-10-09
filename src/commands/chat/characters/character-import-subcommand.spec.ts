@@ -7,7 +7,7 @@ import {
 } from '../../../services/kobold/models/index.js';
 import { InteractionUtils } from '../../../utils/interaction-utils.js';
 import { CharacterImportSubCommand } from './character-import-subcommand';
-import characterHelpers from './helpers.js';
+import { CharacterHelpers } from './helpers.js';
 import Config from '../../../config/config.json';
 import { Language } from '../../../models/enum-helpers/index.js';
 
@@ -108,7 +108,7 @@ describe('CharacterImportSubCommand', () => {
 	});
 	test('imports a character successfully', function (done) {
 		// pretend we fetch a real character
-		jest.spyOn(characterHelpers, 'fetchWgCharacterFromToken').mockImplementation(((
+		jest.spyOn(CharacterHelpers, 'fetchWgCharacterFromToken').mockImplementation(((
 			charId,
 			Token
 		) => {

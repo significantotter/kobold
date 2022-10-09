@@ -1,5 +1,4 @@
 import { InitiativeActorGroup } from './../../../services/kobold/models/initiative-actor-group/initiative-actor-group.model';
-import { getActiveCharacterActor, InitiativeBuilder } from './../../../utils/initiative-utils';
 import { InitiativeActor } from '../../../services/kobold/models/initiative-actor/initiative-actor.model';
 import { ChatArgs } from '../../../constants/chat-args';
 import {
@@ -17,14 +16,9 @@ import {
 import { RateLimiter } from 'discord.js-rate-limiter';
 
 import { EventData } from '../../../models/internal-models.js';
-import { getActiveCharacter, getBestNameMatch } from '../../../utils/character-utils.js';
+import { CharacterUtils } from '../../../utils/character-utils.js';
 import { InteractionUtils } from '../../../utils/index.js';
-import {
-	getControllableInitiativeActors,
-	getInitiativeForChannel,
-	getNameMatchActorFromInitiative,
-	updateInitiativeRoundMessageOrSendNew,
-} from '../../../utils/initiative-utils.js';
+import { InitiativeUtils, InitiativeBuilder } from '../../../utils/initiative-utils.js';
 import { Command, CommandDeferType } from '../../index.js';
 import _ from 'lodash';
 import { Initiative } from '../../../services/kobold/models/index.js';
@@ -52,10 +46,10 @@ export class InitRemoveSubCommand implements Command {
 			//we don't need to autocomplete if we're just dealing with whitespace
 			const match = intr.options.getString(ChatArgs.INIT_CHARACTER_OPTION.name);
 
-			const currentInitResponse = await getInitiativeForChannel(intr.channel);
+			const currentInitResponse = await InitiativeUtils.getInitiativeForChannel(intr.channel);
 			if (!currentInitResponse) await InteractionUtils.respond(intr, []);
 			//get the character matches
-			let actorOptions = getControllableInitiativeActors(
+			let actorOptions = InitiativeUtils.getControllableInitiativeActors(
 				currentInitResponse.init,
 				intr.user.id
 			);
@@ -75,7 +69,7 @@ export class InitRemoveSubCommand implements Command {
 	public async execute(intr: CommandInteraction, data: EventData): Promise<void> {
 		const targetCharacterName = intr.options.getString(ChatArgs.INIT_CHARACTER_OPTION.name);
 
-		const currentInitResponse = await getInitiativeForChannel(intr.channel);
+		const currentInitResponse = await InitiativeUtils.getInitiativeForChannel(intr.channel);
 		if (currentInitResponse.errorMessage) {
 			await InteractionUtils.send(intr, currentInitResponse.errorMessage);
 			return;
@@ -84,9 +78,12 @@ export class InitRemoveSubCommand implements Command {
 
 		let actorResponse: { actor: InitiativeActor; errorMessage: string };
 		if (!targetCharacterName) {
-			actorResponse = await getActiveCharacterActor(currentInit, intr.user.id);
+			actorResponse = await InitiativeUtils.getActiveCharacterActor(
+				currentInit,
+				intr.user.id
+			);
 		} else {
-			actorResponse = await getNameMatchActorFromInitiative(
+			actorResponse = await InitiativeUtils.getNameMatchActorFromInitiative(
 				intr.user.id,
 				currentInit,
 				targetCharacterName
@@ -149,7 +146,7 @@ export class InitRemoveSubCommand implements Command {
 			const currentTurnEmbed = await KoboldEmbed.turnFromInitiativeBuilder(initBuilder, url);
 			const activeGroup = initBuilder.activeGroup;
 
-			await updateInitiativeRoundMessageOrSendNew(intr, initBuilder);
+			await InitiativeUtils.updateInitiativeRoundMessageOrSendNew(intr, initBuilder);
 
 			await InteractionUtils.send(intr, {
 				content: `<@${activeGroup.userId}>`,
@@ -160,7 +157,7 @@ export class InitRemoveSubCommand implements Command {
 				initiative: currentInit,
 			});
 			initBuilder.removeActor(actor);
-			await updateInitiativeRoundMessageOrSendNew(intr, initBuilder);
+			await InitiativeUtils.updateInitiativeRoundMessageOrSendNew(intr, initBuilder);
 		}
 	}
 }

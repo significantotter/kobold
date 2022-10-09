@@ -34,7 +34,7 @@
 		"pm2:stop": "pm2 stop process.json",
 		"pm2:delete": "pm2 delete process.json",
 		"api-knex": "TS_NODE_COMPILER_OPTIONS='{ \"module\": \"commonjs\" }' knex --knexfile=./knexfile.ts",
-		"typesafe-i18n": "typesafe-i18n",
+		"typesafe-i18n": "TS_NODE_COMPILER_OPTIONS='{ \"module\": \"commonjs\" }' typesafe-i18n",
 		"migrate": "knex migrate:latest",
 		"migrate:test": "NODE_ENV=TEST knex migrate:latest",
 		"test": "jest --coverage src/"

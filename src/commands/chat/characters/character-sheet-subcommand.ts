@@ -8,7 +8,7 @@ import { EventData } from '../../../models/internal-models.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import type { WG } from '../../../services/wanderers-guide/wanderers-guide.js';
-import { getActiveCharacter } from '../../../utils/character-utils.js';
+import { CharacterUtils.getActiveCharacter } from '../../../utils/character-utils.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { Language } from '../../../models/enum-helpers/index.js';
 import { Lang } from '../../../services/index.js';
@@ -26,7 +26,7 @@ export class CharacterSheetSubCommand implements Command {
 	public requireClientPerms: PermissionString[] = [];
 
 	public async execute(intr: CommandInteraction, data: EventData): Promise<void> {
-		const activeCharacter = await getActiveCharacter(intr.user.id);
+		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id);
 		if (!activeCharacter) {
 			await InteractionUtils.send(intr, `Yip! You don't have any active characters!`);
 			return;

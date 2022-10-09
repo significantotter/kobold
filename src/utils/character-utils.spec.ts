@@ -1,20 +1,12 @@
 import { CharacterFactory } from './../services/kobold/models/character/character.factory';
-import {
-	findPossibleAbilityFromString,
-	findPossibleAttackFromString,
-	findPossibleSaveFromString,
-	findPossibleSkillFromString,
-	getActiveCharacter,
-	getBestNameMatch,
-	parseCharacterIdFromText,
-} from './character-utils.js';
+import { CharacterUtils } from './character-utils.js';
 import { WG } from './../services/wanderers-guide/wanderers-guide.js';
 import { Character } from '../services/kobold/models/index.js';
 
 describe('Character Utils', function () {
-	describe('getBestNameMatch', function () {
+	describe('CharacterUtils.getBestNameMatch', function () {
 		it('returns null if no possible matches are provided', function () {
-			const match = getBestNameMatch('test', []);
+			const match = CharacterUtils.getBestNameMatch('test', []);
 			expect(match).toBe(null);
 		});
 		it('finds the best match on multiple close possibilities', function () {
@@ -23,7 +15,7 @@ describe('Character Utils', function () {
 			const twoOff = 'steltn';
 			const twoOffAgain = 'steelt';
 			const threeOff = 'slphth';
-			const match = getBestNameMatch(
+			const match = CharacterUtils.getBestNameMatch(
 				target,
 				[oneOff, twoOff, twoOffAgain, threeOff].map(str => ({ Name: str }))
 			);
@@ -35,14 +27,14 @@ describe('Character Utils', function () {
 			const twoOff = 'steltn';
 			const twoOffAgain = 'steelt';
 			const threeOff = 'slphth';
-			const match = getBestNameMatch(
+			const match = CharacterUtils.getBestNameMatch(
 				target,
 				[oneOff, twoOff, twoOffAgain, threeOff, target].map(str => ({ Name: str }))
 			);
 			expect(match.Name).toBe(target);
 		});
 	});
-	describe('findPossibleSkillFromString', function () {
+	describe('CharacterUtils.findPossibleSkillFromString', function () {
 		it('fetches possible skill targets from a character', function () {
 			const fakeCharacter = CharacterFactory.build();
 			const targetSkill: WG.NamedBonus = { Name: 'FakeSkill', Bonus: 3 };
@@ -53,7 +45,10 @@ describe('Character Utils', function () {
 				otherTargetSkill,
 				unmatchedSkill,
 			];
-			const foundSkills = findPossibleSkillFromString(fakeCharacter, targetSkill.Name);
+			const foundSkills = CharacterUtils.findPossibleSkillFromString(
+				fakeCharacter,
+				targetSkill.Name
+			);
 			expect(foundSkills).toContain(targetSkill);
 			expect(foundSkills).toContain(otherTargetSkill);
 			expect(foundSkills).not.toContain(unmatchedSkill);
@@ -64,11 +59,14 @@ describe('Character Utils', function () {
 			const secondSkill: WG.NamedBonus = { Name: 'qwer FakeSkill asdf', Bonus: 3 };
 			const thirdSkill: WG.NamedBonus = { Name: 'akeSkil', Bonus: 3 };
 			fakeCharacter.calculatedStats.totalSkills = [firstSkill, secondSkill, thirdSkill];
-			const foundSkills = findPossibleSkillFromString(fakeCharacter, 'jkljdfiawhedfiuws');
+			const foundSkills = CharacterUtils.findPossibleSkillFromString(
+				fakeCharacter,
+				'jkljdfiawhedfiuws'
+			);
 			expect(foundSkills.length).toBe(0);
 		});
 	});
-	describe('findPossibleAttackFromString', function () {
+	describe('CharacterUtils.findPossibleAttackFromString', function () {
 		it('fetches possible attack targets from a character', function () {
 			const fakeCharacter = CharacterFactory.build();
 			const targetAttack: WG.Attack = { Name: 'FakeAttack', Bonus: 3, Damage: 'd4' };
@@ -83,7 +81,10 @@ describe('Character Utils', function () {
 				otherTargetAttack,
 				unmatchedAttack,
 			];
-			const foundAttacks = findPossibleAttackFromString(fakeCharacter, targetAttack.Name);
+			const foundAttacks = CharacterUtils.findPossibleAttackFromString(
+				fakeCharacter,
+				targetAttack.Name
+			);
 			expect(foundAttacks).toContain(targetAttack);
 			expect(foundAttacks).toContain(otherTargetAttack);
 			expect(foundAttacks).not.toContain(unmatchedAttack);
@@ -98,11 +99,14 @@ describe('Character Utils', function () {
 			};
 			const thirdAttack: WG.Attack = { Name: 'akeAttac', Bonus: 3, Damage: 'd4' };
 			fakeCharacter.calculatedStats.weapons = [firstAttack, secondAttack, thirdAttack];
-			const foundAttacks = findPossibleAttackFromString(fakeCharacter, 'jkljdfiawhedfiuws');
+			const foundAttacks = CharacterUtils.findPossibleAttackFromString(
+				fakeCharacter,
+				'jkljdfiawhedfiuws'
+			);
 			expect(foundAttacks.length).toBe(0);
 		});
 	});
-	describe('findPossibleAbilityFromString', function () {
+	describe('CharacterUtils.findPossibleAbilityFromString', function () {
 		it('fetches possible skill targets from a character', function () {
 			const fakeCharacter = CharacterFactory.build();
 			const targetAbility: WG.NamedScore = { Name: 'FakeAbility', Score: 10 };
@@ -113,7 +117,10 @@ describe('Character Utils', function () {
 				otherTargetAbility,
 				unmatchedAbility,
 			];
-			const foundAbilitys = findPossibleAbilityFromString(fakeCharacter, targetAbility.Name);
+			const foundAbilitys = CharacterUtils.findPossibleAbilityFromString(
+				fakeCharacter,
+				targetAbility.Name
+			);
 			expect(foundAbilitys).toContain(targetAbility);
 			expect(foundAbilitys).toContain(otherTargetAbility);
 			expect(foundAbilitys).not.toContain(unmatchedAbility);
@@ -128,18 +135,24 @@ describe('Character Utils', function () {
 				secondAbility,
 				thirdAbility,
 			];
-			const foundAbilitys = findPossibleAbilityFromString(fakeCharacter, 'jkljdfiawhedfiuws');
+			const foundAbilitys = CharacterUtils.findPossibleAbilityFromString(
+				fakeCharacter,
+				'jkljdfiawhedfiuws'
+			);
 			expect(foundAbilitys.length).toBe(0);
 		});
 	});
-	describe('findPossibleSaveFromString', function () {
+	describe('CharacterUtils.findPossibleSaveFromString', function () {
 		it('fetches possible skill targets from a character', function () {
 			const fakeCharacter = CharacterFactory.build();
 			const targetSave: WG.NamedBonus = { Name: 'FakeSave', Bonus: 3 };
 			const otherTargetSave: WG.NamedBonus = { Name: 'qwer FakeSave asdf', Bonus: 3 };
 			const unmatchedSave: WG.NamedBonus = { Name: 'akeSav', Bonus: 3 };
 			fakeCharacter.calculatedStats.totalSaves = [targetSave, otherTargetSave, unmatchedSave];
-			const foundSaves = findPossibleSaveFromString(fakeCharacter, targetSave.Name);
+			const foundSaves = CharacterUtils.findPossibleSaveFromString(
+				fakeCharacter,
+				targetSave.Name
+			);
 			expect(foundSaves).toContain(targetSave);
 			expect(foundSaves).toContain(otherTargetSave);
 			expect(foundSaves).not.toContain(unmatchedSave);
@@ -150,11 +163,14 @@ describe('Character Utils', function () {
 			const secondSave: WG.NamedBonus = { Name: 'qwer FakeSave asdf', Bonus: 3 };
 			const thirdSave: WG.NamedBonus = { Name: 'akeSav', Bonus: 3 };
 			fakeCharacter.calculatedStats.totalSaves = [firstSave, secondSave, thirdSave];
-			const foundSaves = findPossibleSaveFromString(fakeCharacter, 'jkljdfiawhedfiuws');
+			const foundSaves = CharacterUtils.findPossibleSaveFromString(
+				fakeCharacter,
+				'jkljdfiawhedfiuws'
+			);
 			expect(foundSaves.length).toBe(0);
 		});
 	});
-	describe('getActiveCharacter', function () {
+	describe('CharacterUtils.getActiveCharacter', function () {
 		afterEach(function () {
 			return Character.query().delete().whereRaw('true');
 		});
@@ -167,7 +183,7 @@ describe('Character Utils', function () {
 				userId: '0',
 				isActiveCharacter: false,
 			});
-			const fetchedCharacter = await getActiveCharacter('0');
+			const fetchedCharacter = await CharacterUtils.getActiveCharacter('0');
 			expect(activeCharacter.id).toBe(fetchedCharacter.id);
 		});
 		it(
@@ -182,7 +198,7 @@ describe('Character Utils', function () {
 					userId: '0',
 					isActiveCharacter: false,
 				});
-				const fetchedCharacter = await getActiveCharacter('0');
+				const fetchedCharacter = await CharacterUtils.getActiveCharacter('0');
 				expect(activeCharacters.map(char => char.id)).toContain(fetchedCharacter.id);
 			}
 		);
@@ -191,34 +207,34 @@ describe('Character Utils', function () {
 				userId: '0',
 				isActiveCharacter: false,
 			});
-			const fetchedCharacter = await getActiveCharacter('0');
+			const fetchedCharacter = await CharacterUtils.getActiveCharacter('0');
 			expect(fetchedCharacter).toBe(null);
 		});
 	});
-	describe('parseCharacterIdFromText', function () {
+	describe('CharacterUtils.parseCharacterIdFromText', function () {
 		test('it parses a trimmed number', function () {
-			const charId = parseCharacterIdFromText('1234');
+			const charId = CharacterUtils.parseCharacterIdFromText('1234');
 			expect(charId).toBe(1234);
-			const trimmedCharId = parseCharacterIdFromText('  5432 ');
+			const trimmedCharId = CharacterUtils.parseCharacterIdFromText('  5432 ');
 			expect(trimmedCharId).toBe(5432);
 		});
 		test('it parses a wg url', function () {
-			const charId = parseCharacterIdFromText(
+			const charId = CharacterUtils.parseCharacterIdFromText(
 				'https://wanderersguide.app/profile/characters/9876'
 			);
 			expect(charId).toBe(9876);
-			const trimmedCharId = parseCharacterIdFromText(' /characters/8765 ');
+			const trimmedCharId = CharacterUtils.parseCharacterIdFromText(' /characters/8765 ');
 			expect(trimmedCharId).toBe(8765);
 		});
 		test('it returns null when it fails to parse an invalid input', function () {
-			const fail1 = parseCharacterIdFromText('  54 32 ');
+			const fail1 = CharacterUtils.parseCharacterIdFromText('  54 32 ');
 			expect(fail1).toBe(null);
 
-			const fail2 = parseCharacterIdFromText(
+			const fail2 = CharacterUtils.parseCharacterIdFromText(
 				'https://wanderersguide.appprofilecharacters9876'
 			);
 			expect(fail2).toBe(null);
-			const fail3 = parseCharacterIdFromText(' /8765 ');
+			const fail3 = CharacterUtils.parseCharacterIdFromText(' /8765 ');
 			expect(fail3).toBe(null);
 		});
 	});

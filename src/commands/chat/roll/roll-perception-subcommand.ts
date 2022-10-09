@@ -15,8 +15,8 @@ import { ChatArgs } from '../../../constants/index.js';
 import { EventData } from '../../../models/internal-models.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
-import { getActiveCharacter } from '../../../utils/character-utils.js';
-import { buildDiceExpression, RollBuilder } from '../../../utils/dice-utils.js';
+import { CharacterUtils.getActiveCharacter } from '../../../utils/character-utils.js';
+import { DiceUtils.buildDiceExpression, RollBuilder } from '../../../utils/dice-utils.js';
 
 export class RollPerceptionSubCommand implements Command {
 	public names = ['perception'];
@@ -35,7 +35,7 @@ export class RollPerceptionSubCommand implements Command {
 		const modifierExpression = intr.options.getString(ChatArgs.ROLL_MODIFIER_OPTION.name);
 		const rollNote = intr.options.getString(ChatArgs.ROLL_NOTE_OPTION.name);
 
-		const activeCharacter = await getActiveCharacter(intr.user.id);
+		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id);
 		if (!activeCharacter) {
 			await InteractionUtils.send(intr, `Yip! You don't have any active characters!`);
 			return;
@@ -47,7 +47,7 @@ export class RollPerceptionSubCommand implements Command {
 			rollDescription: `rolled Perception`,
 		});
 		rollBuilder.addRoll(
-			buildDiceExpression(
+			DiceUtils.buildDiceExpression(
 				'd20',
 				String(activeCharacter.calculatedStats.totalPerception),
 				modifierExpression

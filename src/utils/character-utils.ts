@@ -1,4 +1,3 @@
-import { match } from 'assert';
 import { WG } from '../services/wanderers-guide/wanderers-guide.js';
 import { Character } from './../services/kobold/models/character/character.model';
 
@@ -30,143 +29,145 @@ function levenshteinDistance(str1: string, str2: string) {
 interface NamedThing {
 	Name: string;
 }
+const characterIdRegex = /characters\/([0-9]+)/;
 
-/**
- * Finds the array item whose Name property is closest to 'name'. Useful for loose string matching skills, etc.
- * @param name the name to match
- * @param matchTargets the targets of the match with property .Name
- * @returns the closest matchTarget to name
- */
-export function getBestNameMatch<T extends NamedThing>(name: string, matchTargets: T[]): T {
-	if (matchTargets.length === 0) return null;
+export class CharacterUtils {
+	/**
+	 * Finds the array item whose Name property is closest to 'name'. Useful for loose string matching skills, etc.
+	 * @param name the name to match
+	 * @param matchTargets the targets of the match with property .Name
+	 * @returns the closest matchTarget to name
+	 */
+	public static getBestNameMatch<T extends NamedThing>(name: string, matchTargets: T[]): T {
+		if (matchTargets.length === 0) return null;
 
-	let lowestMatchTarget = matchTargets[0];
-	let lowestMatchTargetDistance = levenshteinDistance(
-		matchTargets[0].Name.toLowerCase(),
-		name.toLowerCase()
-	);
-	for (let i = 1; i < matchTargets.length; i++) {
-		const currentMatchTargetDistance = levenshteinDistance(
-			matchTargets[i].Name.toLowerCase(),
+		let lowestMatchTarget = matchTargets[0];
+		let lowestMatchTargetDistance = levenshteinDistance(
+			matchTargets[0].Name.toLowerCase(),
 			name.toLowerCase()
 		);
-		if (currentMatchTargetDistance < lowestMatchTargetDistance) {
-			lowestMatchTarget = matchTargets[i];
-			lowestMatchTargetDistance = currentMatchTargetDistance;
+		for (let i = 1; i < matchTargets.length; i++) {
+			const currentMatchTargetDistance = levenshteinDistance(
+				matchTargets[i].Name.toLowerCase(),
+				name.toLowerCase()
+			);
+			if (currentMatchTargetDistance < lowestMatchTargetDistance) {
+				lowestMatchTarget = matchTargets[i];
+				lowestMatchTargetDistance = currentMatchTargetDistance;
+			}
 		}
+		return lowestMatchTarget;
 	}
-	return lowestMatchTarget;
-}
 
-/**
- * Given a string, finds all skills contining that string on a given character
- * @param targetCharacter the character to check for matching skills
- * @param skillText the text to match to skills
- * @returns all skills that contain the given skillText
- */
-export function findPossibleSkillFromString(
-	targetCharacter: Character,
-	skillText: string
-): WG.NamedBonus[] {
-	const matchedSkills = [];
-	for (const skill of targetCharacter.calculatedStats.totalSkills.concat({
-		Name: 'Perception',
-		Bonus: targetCharacter.calculatedStats.totalPerception,
-	})) {
-		if (skill.Name.toLowerCase().includes(skillText.toLowerCase())) {
-			matchedSkills.push(skill);
+	/**
+	 * Given a string, finds all skills contining that string on a given character
+	 * @param targetCharacter the character to check for matching skills
+	 * @param skillText the text to match to skills
+	 * @returns all skills that contain the given skillText
+	 */
+	public static findPossibleSkillFromString(
+		targetCharacter: Character,
+		skillText: string
+	): WG.NamedBonus[] {
+		const matchedSkills = [];
+		for (const skill of targetCharacter.calculatedStats.totalSkills.concat({
+			Name: 'Perception',
+			Bonus: targetCharacter.calculatedStats.totalPerception,
+		})) {
+			if (skill.Name.toLowerCase().includes(skillText.toLowerCase())) {
+				matchedSkills.push(skill);
+			}
 		}
+		return matchedSkills;
 	}
-	return matchedSkills;
-}
 
-/**
- * Given a string, finds all saves contining that string on a given character
- * @param targetCharacter the character to check for matching saves
- * @param saveText the text to match to saves
- * @returns all saves that contain the given saveText
- */
-export function findPossibleSaveFromString(
-	targetCharacter: Character,
-	saveText: string
-): WG.NamedBonus[] {
-	const matchedSaves = [];
-	for (const save of targetCharacter.calculatedStats.totalSaves) {
-		if (save.Name.toLowerCase().includes(saveText.toLowerCase())) {
-			matchedSaves.push(save);
+	/**
+	 * Given a string, finds all saves contining that string on a given character
+	 * @param targetCharacter the character to check for matching saves
+	 * @param saveText the text to match to saves
+	 * @returns all saves that contain the given saveText
+	 */
+	public static findPossibleSaveFromString(
+		targetCharacter: Character,
+		saveText: string
+	): WG.NamedBonus[] {
+		const matchedSaves = [];
+		for (const save of targetCharacter.calculatedStats.totalSaves) {
+			if (save.Name.toLowerCase().includes(saveText.toLowerCase())) {
+				matchedSaves.push(save);
+			}
 		}
+		return matchedSaves;
 	}
-	return matchedSaves;
-}
 
-/**
- * Given a string, finds all ability scores contining that string on a given character
- * @param targetCharacter the character to check for matching ability scores
- * @param abilityText the text to match to ability scores
- * @returns all ability scores that contain the given abilityText
- */
-export function findPossibleAbilityFromString(
-	targetCharacter: Character,
-	abilityText: string
-): WG.NamedScore[] {
-	const matchedAbility = [];
-	for (const ability of targetCharacter.calculatedStats.totalAbilityScores) {
-		if (ability.Name.toLowerCase().includes(abilityText.toLowerCase())) {
-			matchedAbility.push(ability);
+	/**
+	 * Given a string, finds all ability scores contining that string on a given character
+	 * @param targetCharacter the character to check for matching ability scores
+	 * @param abilityText the text to match to ability scores
+	 * @returns all ability scores that contain the given abilityText
+	 */
+	public static findPossibleAbilityFromString(
+		targetCharacter: Character,
+		abilityText: string
+	): WG.NamedScore[] {
+		const matchedAbility = [];
+		for (const ability of targetCharacter.calculatedStats.totalAbilityScores) {
+			if (ability.Name.toLowerCase().includes(abilityText.toLowerCase())) {
+				matchedAbility.push(ability);
+			}
 		}
+		return matchedAbility;
 	}
-	return matchedAbility;
-}
 
-/**
- * Given a string, finds all attacks contining that string on a given character
- * @param targetCharacter the character to check for matching attacks
- * @param attackText the text to match to attacks
- * @returns all attacks that contain the given attackText
- */
-export function findPossibleAttackFromString(
-	targetCharacter: Character,
-	attackText: string
-): WG.NamedBonus[] {
-	const matchedAttacks = [];
-	for (const attack of targetCharacter.calculatedStats.weapons) {
-		if (attack.Name.toLowerCase().includes(attackText.toLowerCase())) {
-			matchedAttacks.push(attack);
+	/**
+	 * Given a string, finds all attacks contining that string on a given character
+	 * @param targetCharacter the character to check for matching attacks
+	 * @param attackText the text to match to attacks
+	 * @returns all attacks that contain the given attackText
+	 */
+	public static findPossibleAttackFromString(
+		targetCharacter: Character,
+		attackText: string
+	): WG.NamedBonus[] {
+		const matchedAttacks = [];
+		for (const attack of targetCharacter.calculatedStats.weapons) {
+			if (attack.Name.toLowerCase().includes(attackText.toLowerCase())) {
+				matchedAttacks.push(attack);
+			}
 		}
+		return matchedAttacks;
 	}
-	return matchedAttacks;
-}
 
-/**
- * Gets the active character for a user
- * @param userId the discord use
- * @returns the active character for the user, or null if one is not present
- */
-export async function getActiveCharacter(userId: string): Promise<Character | null> {
-	const existingCharacter = await Character.query().where({
-		userId: userId,
-		isActiveCharacter: true,
-	});
-	return existingCharacter[0] || null;
-}
-
-const characterIdRegex = /characters\/([0-9]+)/;
-/**
- * Parses the text to find a character id out of a url or parses full string as a number
- * @param text either a wanderer's guide url, or simply a numeric character id
- */
-export function parseCharacterIdFromText(text: string): number | null {
-	const trimmedText = text.trim();
-	let charId = null;
-	if (!isNaN(Number(trimmedText.trim()))) {
-		// we allow just a character id to be passed in as well
-		charId = Number(trimmedText.trim());
-	} else {
-		// match the trimmedText to the regex
-		const matches = trimmedText.match(characterIdRegex);
-		if (!matches) {
-			charId = null;
-		} else charId = Number(matches[1]);
+	/**
+	 * Gets the active character for a user
+	 * @param userId the discord use
+	 * @returns the active character for the user, or null if one is not present
+	 */
+	public static async getActiveCharacter(userId: string): Promise<Character | null> {
+		const existingCharacter = await Character.query().where({
+			userId: userId,
+			isActiveCharacter: true,
+		});
+		return existingCharacter[0] || null;
 	}
-	return charId;
+
+	/**
+	 * Parses the text to find a character id out of a url or parses full string as a number
+	 * @param text either a wanderer's guide url, or simply a numeric character id
+	 */
+	public static parseCharacterIdFromText(text: string): number | null {
+		const trimmedText = text.trim();
+		let charId = null;
+		if (!isNaN(Number(trimmedText.trim()))) {
+			// we allow just a character id to be passed in as well
+			charId = Number(trimmedText.trim());
+		} else {
+			// match the trimmedText to the regex
+			const matches = trimmedText.match(characterIdRegex);
+			if (!matches) {
+				charId = null;
+			} else charId = Number(matches[1]);
+		}
+		return charId;
+	}
 }

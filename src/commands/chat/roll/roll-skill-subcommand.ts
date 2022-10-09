@@ -17,11 +17,11 @@ import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { WG } from '../../../services/wanderers-guide/wanderers-guide.js';
 import {
-	findPossibleSkillFromString,
-	getActiveCharacter,
-	getBestNameMatch,
+	CharacterUtils.findPossibleSkillFromString,
+	CharacterUtils.getActiveCharacter,
+	CharacterUtils.getBestNameMatch,
 } from '../../../utils/character-utils.js';
-import { buildDiceExpression, RollBuilder, rollSkill } from '../../../utils/dice-utils.js';
+import { DiceUtils, RollBuilder } from '../../../utils/dice-utils.js';
 
 export class RollSkillSubCommand implements Command {
 	public names = ['skill'];
@@ -46,14 +46,14 @@ export class RollSkillSubCommand implements Command {
 			const match = intr.options.getString(ChatArgs.SKILL_CHOICE_OPTION.name);
 
 			//get the active character
-			const activeCharacter = await getActiveCharacter(intr.user.id);
+			const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id);
 			if (!activeCharacter) {
 				//no choices if we don't have a character to match against
 				await InteractionUtils.respond(intr, []);
 				return;
 			}
 			//find a skill on the character matching the autocomplete string
-			const matchedSkills = findPossibleSkillFromString(activeCharacter, match).map(
+			const matchedSkills = CharacterUtils.findPossibleSkillFromString(activeCharacter, match).map(
 				skill => ({ name: skill.Name, value: skill.Name })
 			);
 			//return the matched skills
@@ -66,12 +66,12 @@ export class RollSkillSubCommand implements Command {
 		const modifierExpression = intr.options.getString(ChatArgs.ROLL_MODIFIER_OPTION.name);
 		const rollNote = intr.options.getString(ChatArgs.ROLL_NOTE_OPTION.name);
 
-		const activeCharacter = await getActiveCharacter(intr.user.id);
+		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id);
 		if (!activeCharacter) {
 			await InteractionUtils.send(intr, `Yip! You don't have any active characters!`);
 			return;
 		}
-		const response = await rollSkill(
+		const response = await DiceUtils.rollSkill(
 			intr,
 			activeCharacter,
 			skillChoice,

@@ -15,10 +15,6 @@ export type Translation = RootTranslation
 export type Translations = RootTranslation
 
 type RootTranslation = {
-	/**
-	 * h​i​!
-	 */
-	hello: string
 	commands: {
 		character: {
 			/**
@@ -60,6 +56,12 @@ type RootTranslation = {
 					 */
 					description: string
 				}
+			}
+			interactions: {
+				/**
+				 * Y​i​p​!​ ​Y​o​u​ ​d​o​n​'​t​ ​h​a​v​e​ ​a​n​y​ ​a​c​t​i​v​e​ ​c​h​a​r​a​c​t​e​r​s​!​ ​U​s​e​ ​/​i​m​p​o​r​t​ ​t​o​ ​i​m​p​o​r​t​ ​o​n​e​.
+				 */
+				noActiveCharacter: string
 			}
 			'import': {
 				/**
@@ -139,6 +141,37 @@ type RootTranslation = {
 				 * r​e​m​o​v​e​s​ ​a​n​ ​a​l​r​e​a​d​y​ ​i​m​p​o​r​t​e​d​ ​c​h​a​r​a​c​t​e​r
 				 */
 				description: string
+				interactions: {
+					removeConfirmation: {
+						/**
+						 * A​r​e​ ​y​o​u​ ​s​u​r​e​ ​y​o​u​ ​w​a​n​t​ ​t​o​ ​r​e​m​o​v​e​ ​{​c​h​a​r​a​c​t​e​r​N​a​m​e​}​?
+						 * @param {unknown} characterName
+						 */
+						text: RequiredParams<'characterName'>
+						/**
+						 * R​E​M​O​V​E
+						 */
+						removeButton: string
+						/**
+						 * C​A​N​C​E​L
+						 */
+						cancelButton: string
+						/**
+						 * Y​i​p​!​ ​C​h​a​r​a​c​t​e​r​ ​r​e​m​o​v​a​l​ ​r​e​q​u​e​s​t​ ​e​x​p​i​r​e​d​.
+						 */
+						expired: string
+					}
+					/**
+					 * Y​i​p​!​ ​I​'​v​e​ ​s​u​c​c​e​s​s​f​u​l​l​y​ ​r​e​m​o​v​e​d​ ​{​c​h​a​r​a​c​t​e​r​N​a​m​e​}​!​ ​Y​o​u​ ​c​a​n​ ​i​m​p​o​r​t​ ​t​h​e​m​ ​a​g​a​i​n​ ​a​t​ ​a​n​y​ ​t​i​m​e​.
+					 * @param {unknown} characterName
+					 */
+					success: RequiredParams<'characterName'>
+					/**
+					 * Y​i​p​!​ ​C​a​n​c​e​l​e​d​ ​t​h​e​ ​r​e​q​u​e​s​t​ ​t​o​ ​r​e​m​o​v​e​ ​{​c​h​a​r​a​c​t​e​r​N​a​m​e​}​!
+					 * @param {unknown} characterName
+					 */
+					cancelled: RequiredParams<'characterName'>
+				}
 			}
 			setActive: {
 				/**
@@ -172,13 +205,47 @@ type RootTranslation = {
 			}
 		}
 	}
+	embedLinks: {
+		/**
+		 * [​S​i​g​n​i​f​i​c​a​n​t​o​t​t​e​r​]​(​h​t​t​p​s​:​/​/​g​i​t​h​u​b​.​c​o​m​/​s​i​g​n​i​f​i​c​a​n​t​o​t​t​e​r​)
+		 */
+		authorEmbed: string
+		/**
+		 * [​V​i​e​w​ ​D​o​c​u​m​e​n​t​a​t​i​o​n​]​(​h​t​t​p​s​:​/​/​t​o​p​.​g​g​/​)
+		 */
+		docsEmbed: string
+		/**
+		 * [​H​e​l​p​ ​s​u​p​p​o​r​t​ ​K​o​b​o​l​d​'​s​ ​d​e​v​e​l​o​p​m​e​n​t​!​]​(​h​t​t​p​s​:​/​/​k​o​-​f​i​.​c​o​m​/​s​i​g​n​i​f​i​c​a​n​t​o​t​t​e​r​)
+		 */
+		donateEmbed: string
+		/**
+		 * [​I​n​v​i​t​e​ ​K​o​b​o​l​d​ ​t​o​ ​a​ ​S​e​r​v​e​r​!​]​(​h​t​t​p​s​:​/​/​d​i​s​c​o​r​d​.​c​o​m​/​)
+		 */
+		inviteEmbed: string
+		/**
+		 * [​V​i​e​w​ ​S​o​u​r​c​e​ ​C​o​d​e​]​(​h​t​t​p​s​:​/​/​g​i​t​h​u​b​.​c​o​m​/​s​i​g​n​i​f​i​c​a​n​t​o​t​t​e​r​/​k​o​b​o​l​d​)
+		 */
+		sourceEmbed: string
+		/**
+		 * [​J​o​i​n​ ​S​u​p​p​o​r​t​ ​S​e​r​v​e​r​]​(​h​t​t​p​s​:​/​/​d​i​s​c​o​r​d​.​g​g​/​6​b​S​2​G​M​5​9​u​j​)
+		 */
+		supportEmbed: string
+		/**
+		 * [​D​i​s​c​o​r​d​ ​B​o​t​ ​T​y​p​e​S​c​r​i​p​t​ ​T​e​m​p​l​a​t​e​]​(​)
+		 */
+		templateEmbed: string
+		/**
+		 * [​V​o​t​e​ ​f​o​r​ ​K​o​b​o​l​d​!​]​(​h​t​t​p​s​:​/​/​t​o​p​.​g​g​/​)
+		 */
+		voteEmbed: string
+		/**
+		 * [​W​a​n​d​e​r​e​r​'​s​ ​G​u​i​d​e​]​(​h​t​t​p​s​:​/​/​w​a​n​d​e​r​e​r​s​g​u​i​d​e​.​a​p​p​)
+		 */
+		wgEmbed: string
+	}
 }
 
 export type TranslationFunctions = {
-	/**
-	 * hi!
-	 */
-	hello: () => LocalizedString
 	commands: {
 		character: {
 			/**
@@ -220,6 +287,12 @@ export type TranslationFunctions = {
 					 */
 					description: () => LocalizedString
 				}
+			}
+			interactions: {
+				/**
+				 * Yip! You don't have any active characters! Use /import to import one.
+				 */
+				noActiveCharacter: () => LocalizedString
 			}
 			'import': {
 				/**
@@ -288,6 +361,34 @@ export type TranslationFunctions = {
 				 * removes an already imported character
 				 */
 				description: () => LocalizedString
+				interactions: {
+					removeConfirmation: {
+						/**
+						 * Are you sure you want to remove {characterName}?
+						 */
+						text: (arg: { characterName: unknown }) => LocalizedString
+						/**
+						 * REMOVE
+						 */
+						removeButton: () => LocalizedString
+						/**
+						 * CANCEL
+						 */
+						cancelButton: () => LocalizedString
+						/**
+						 * Yip! Character removal request expired.
+						 */
+						expired: () => LocalizedString
+					}
+					/**
+					 * Yip! I've successfully removed {characterName}! You can import them again at any time.
+					 */
+					success: (arg: { characterName: unknown }) => LocalizedString
+					/**
+					 * Yip! Canceled the request to remove {characterName}!
+					 */
+					cancelled: (arg: { characterName: unknown }) => LocalizedString
+				}
 			}
 			setActive: {
 				/**
@@ -320,6 +421,44 @@ export type TranslationFunctions = {
 				description: () => LocalizedString
 			}
 		}
+	}
+	embedLinks: {
+		/**
+		 * [Significantotter](https://github.com/significantotter)
+		 */
+		authorEmbed: () => LocalizedString
+		/**
+		 * [View Documentation](https://top.gg/)
+		 */
+		docsEmbed: () => LocalizedString
+		/**
+		 * [Help support Kobold's development!](https://ko-fi.com/significantotter)
+		 */
+		donateEmbed: () => LocalizedString
+		/**
+		 * [Invite Kobold to a Server!](https://discord.com/)
+		 */
+		inviteEmbed: () => LocalizedString
+		/**
+		 * [View Source Code](https://github.com/significantotter/kobold)
+		 */
+		sourceEmbed: () => LocalizedString
+		/**
+		 * [Join Support Server](https://discord.gg/6bS2GM59uj)
+		 */
+		supportEmbed: () => LocalizedString
+		/**
+		 * [Discord Bot TypeScript Template]()
+		 */
+		templateEmbed: () => LocalizedString
+		/**
+		 * [Vote for Kobold!](https://top.gg/)
+		 */
+		voteEmbed: () => LocalizedString
+		/**
+		 * [Wanderer's Guide](https://wanderersguide.app)
+		 */
+		wgEmbed: () => LocalizedString
 	}
 }
 

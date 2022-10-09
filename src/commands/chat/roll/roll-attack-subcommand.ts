@@ -17,13 +17,13 @@ import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { WG } from '../../../services/wanderers-guide/wanderers-guide.js';
 import {
-	findPossibleAttackFromString,
-	getActiveCharacter,
-	getBestNameMatch,
+	CharacterUtils.findPossibleAttackFromString,
+	CharacterUtils.getActiveCharacter,
+	CharacterUtils.getBestNameMatch,
 } from '../../../utils/character-utils.js';
 import {
-	buildDiceExpression,
-	parseDiceFromWgDamageField,
+	DiceUtils.buildDiceExpression,
+	DiceUtils.parseDiceFromWgDamageField,
 	RollBuilder,
 } from '../../../utils/dice-utils.js';
 
@@ -50,14 +50,14 @@ export class RollAttackSubCommand implements Command {
 			const match = intr.options.getString(ChatArgs.ATTACK_CHOICE_OPTION.name);
 
 			//get the active character
-			const activeCharacter = await getActiveCharacter(intr.user.id);
+			const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id);
 			if (!activeCharacter) {
 				//no choices if we don't have a character to match against
 				InteractionUtils.respond(intr, []);
 				return;
 			}
 			//find a attack on the character matching the autocomplete string
-			const matchedAttack = findPossibleAttackFromString(activeCharacter, match).map(
+			const matchedAttack = CharacterUtils.findPossibleAttackFromString(activeCharacter, match).map(
 				attack => ({
 					name: attack.Name,
 					value: attack.Name,
@@ -78,14 +78,14 @@ export class RollAttackSubCommand implements Command {
 		);
 		const rollNote = intr.options.getString(ChatArgs.ROLL_NOTE_OPTION.name);
 
-		const activeCharacter = await getActiveCharacter(intr.user.id);
+		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id);
 		if (!activeCharacter) {
 			await InteractionUtils.send(intr, `Yip! You don't have any active characters!`);
 			return;
 		}
 
 		//use the first attack that matches the text of what we were sent, or preferably a perfect match
-		let targetAttack = getBestNameMatch(
+		let targetAttack = CharacterUtils.getBestNameMatch(
 			attackChoice,
 			activeCharacter.calculatedStats.weapons as WG.NamedBonus[]
 		);
@@ -99,7 +99,7 @@ export class RollAttackSubCommand implements Command {
 		//if we a to hit defined, roll the attack's to-hit
 		if (targetAttack.Bonus !== undefined) {
 			rollBuilder.addRoll(
-				buildDiceExpression('d20', String(targetAttack.Bonus), attackModifierExpression),
+				DiceUtils.buildDiceExpression('d20', String(targetAttack.Bonus), attackModifierExpression),
 				'To Hit'
 			);
 		}
@@ -107,8 +107,8 @@ export class RollAttackSubCommand implements Command {
 		//if we have damage defined, roll that as well
 		if (targetAttack.Damage !== undefined) {
 			rollBuilder.addRoll(
-				buildDiceExpression(
-					String(parseDiceFromWgDamageField(targetAttack.Damage)),
+				DiceUtils.buildDiceExpression(
+					String(DiceUtils.parseDiceFromWgDamageField(targetAttack.Damage)),
 					null,
 					damageModifierExpression
 				),

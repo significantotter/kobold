@@ -4,28 +4,14 @@ import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord-api-types/v10';
-import {
-	AutocompleteFocusedOption,
-	AutocompleteInteraction,
-	CacheType,
-	CommandInteraction,
-	MessageEmbed,
-	PermissionString,
-} from 'discord.js';
+import { CommandInteraction, MessageEmbed, PermissionString } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 
 import { EventData } from '../../../models/internal-models.js';
-import { Initiative } from '../../../services/kobold/models/index.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
-import {
-	getInitiativeForChannel,
-	InitiativeBuilder,
-	updateInitiativeRoundMessageOrSendNew,
-} from '../../../utils/initiative-utils.js';
+import { InitiativeUtils, InitiativeBuilder } from '../../../utils/initiative-utils.js';
 import { ChatArgs } from '../../../constants/chat-args.js';
-import { getActiveCharacter, findPossibleSkillFromString } from '../../../utils/character-utils.js';
-import { rollSkill } from '../../../utils/dice-utils.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 
 export class InitAddSubCommand implements Command {
@@ -42,7 +28,7 @@ export class InitAddSubCommand implements Command {
 	public requireClientPerms: PermissionString[] = [];
 
 	public async execute(intr: CommandInteraction, data: EventData): Promise<void> {
-		const currentInitResponse = await getInitiativeForChannel(intr.channel);
+		const currentInitResponse = await InitiativeUtils.getInitiativeForChannel(intr.channel);
 		if (currentInitResponse.errorMessage) {
 			await InteractionUtils.send(intr, currentInitResponse.errorMessage);
 			return;
@@ -111,7 +97,7 @@ export class InitAddSubCommand implements Command {
 			actors: currentInit.actors.concat(newActor),
 			groups: currentInit.actorGroups.concat(newActor.actorGroup),
 		});
-		await updateInitiativeRoundMessageOrSendNew(intr, initBuilder);
+		await InitiativeUtils.updateInitiativeRoundMessageOrSendNew(intr, initBuilder);
 		await InteractionUtils.send(intr, rollResultMessage);
 	}
 }
