@@ -1,3 +1,5 @@
+import { Language } from './../../../models/enum-helpers/language';
+import { Lang } from './../../../services/lang';
 import { Character } from '../../../services/kobold/models/index.js';
 import {
 	ApplicationCommandType,
@@ -6,20 +8,21 @@ import {
 import { CommandInteraction, PermissionString } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 
-import { ChatArgs } from '../../../constants/index.js';
 import { EventData } from '../../../models/internal-models.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { WgToken } from '../../../services/kobold/models/index.js';
-import { fetchWgCharacterFromToken } from './helpers.js';
+import characterHelpers from './helpers.js';
 import Config from '../../../config/config.json';
 import { parseCharacterIdFromText } from '../../../utils/character-utils.js';
+import { CharacterOptions } from './command-options.js';
+
 export class CharacterImportSubCommand implements Command {
-	public names = ['import'];
+	public names = [Language.LL.commands.character.import.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: 'import',
-		description: `imports a Wanderer's guide character`,
+		name: Language.LL.commands.character.import.name(),
+		description: Language.LL.commands.character.import.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -27,14 +30,15 @@ export class CharacterImportSubCommand implements Command {
 	public requireClientPerms: PermissionString[] = [];
 
 	public async execute(intr: CommandInteraction, data: EventData): Promise<void> {
-		const url = intr.options.getString(ChatArgs.IMPORT_OPTION.name).trim();
+		const url = intr.options.getString(CharacterOptions.IMPORT_OPTION.name).trim();
+		const LL = Language.localize(data.lang());
 		let charId = parseCharacterIdFromText(url);
 		if (charId === null) {
 			await InteractionUtils.send(
 				intr,
-				`Yip! I couldn't find the character at the url '${url}'. Check ` +
-					`and make sure you copied it over correctly! Or just paste ` +
-					`in the character's id value instead.`
+				LL.commands.character.import.interactions.invalidUrl({
+					url,
+				})
 			);
 			return;
 		}
@@ -49,23 +53,25 @@ export class CharacterImportSubCommand implements Command {
 			const character = existingCharacter[0];
 			await InteractionUtils.send(
 				intr,
-				`Yip! ${character.characterData.name} is already in the system! Did you mean to /update?`
+				LL.commands.character.import.interactions.characterAlreadyExists({
+					characterName: character.characterData.name,
+				})
 			);
 			return;
 		} else if (!tokenResults.length) {
 			// The user needs to authenticate!
 			await InteractionUtils.send(
 				intr,
-				`Yip! Before you can import a character, you need to authenticate it. ` +
-					`Give me permission to read your wanderer's guide character by following [this link](` +
-					`${Config.wanderersGuide.oauthBaseUrl}?characterId=${charId}). ` +
-					`Then, /import your character again!`
+				LL.commands.character.import.interactions.authenticationRequest({
+					wgBaseUrl: Config.wanderersGuide.oauthBaseUrl,
+					charId,
+				})
 			);
 			return;
 		} else {
 			// We have the authentication token! Fetch the user's sheet
 			const token = tokenResults[0].accessToken;
-			const character = await fetchWgCharacterFromToken(charId, token);
+			const character = await characterHelpers.fetchWgCharacterFromToken(charId, token);
 
 			// set current characters owned by user to inactive state
 			await Character.query()
@@ -83,7 +89,9 @@ export class CharacterImportSubCommand implements Command {
 
 			await InteractionUtils.send(
 				intr,
-				`Yip! I've successfully imported ${character.characterData.name}!`
+				LL.commands.character.import.interactions.success({
+					characterName: newCharacter.characterData.name,
+				})
 			);
 		}
 	}

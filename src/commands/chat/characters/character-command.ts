@@ -1,3 +1,4 @@
+import { CharacterOptions } from './command-options';
 import {
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
@@ -11,57 +12,64 @@ import {
 	PermissionString,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
-import { ChatArgs } from '../../../constants/chat-args.js';
+import { Language } from '../../../models/enum-helpers/index.js';
 
 import { EventData } from '../../../models/internal-models.js';
+import { Lang } from '../../../services/index.js';
 import { CommandUtils, InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 
 export class CharacterCommand implements Command {
-	public names = ['character'];
+	public names = [Language.LL.commands.character.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: 'character',
-		description: `Character management`,
+		name: Language.LL.commands.character.name(),
+		description: Language.LL.commands.character.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 
 		options: [
 			{
-				name: 'import',
-				description: `imports a Wanderer's guide character`,
+				// IMPORT
+				name: Language.LL.commands.character.import.name(),
+				description: Language.LL.commands.character.import.description(),
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
 				options: [
 					{
-						...ChatArgs.IMPORT_OPTION,
+						...CharacterOptions.IMPORT_OPTION,
 						required: true,
 					},
 				],
 			},
 			{
-				name: 'list',
-				description: `lists all active characters`,
+				// LIST
+				name: Language.LL.commands.character.list.name(),
+				description: Language.LL.commands.character.list.description(),
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
 			},
 			{
-				name: 'remove',
-				description: `removes an already imported character`,
+				// REMOVE
+				name: Language.LL.commands.character.remove.name(),
+				description: Language.LL.commands.character.remove.description(),
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
 			},
 			{
-				name: 'set-active',
-				description: `sets a character as the active character`,
+				// SET-ACTIVE
+				name: Language.LL.commands.character.setActive.name(),
+				description: Language.LL.commands.character.setActive.description(),
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
-				options: [ChatArgs.SET_ACTIVE_NAME_OPTION],
+				options: [CharacterOptions.SET_ACTIVE_NAME_OPTION],
 			},
 			{
-				name: 'sheet',
-				description: `displays the active character's sheet`,
+				// SHEET
+				name: Language.LL.commands.character.sheet.name(),
+				description: Language.LL.commands.character.sheet.description(),
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
 			},
 			{
-				name: 'update',
-				description: `updates an already imported character`,
+				// UPDATE
+				name: Language.LL.commands.character.update.name(),
+				description: Language.LL.commands.character.update.description(),
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
 			},
 		],

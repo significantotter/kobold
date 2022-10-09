@@ -12,13 +12,14 @@ import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { getActiveCharacter } from '../../../utils/character-utils.js';
 import { CollectorUtils } from 'discord.js-collector-utils';
+import { Language } from '../../../models/enum-helpers/index.js';
 
 export class CharacterRemoveSubCommand implements Command {
-	public names = ['remove'];
+	public names = [Language.LL.commands.character.remove.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: 'remove',
-		description: `removes an already imported character`,
+		name: Language.LL.commands.character.remove.name(),
+		description: Language.LL.commands.character.remove.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};

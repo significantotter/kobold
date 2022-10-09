@@ -17,16 +17,20 @@ describe('Character', () => {
 		const valid = ajv.validate(CharacterSchema, createdCharacter);
 		expect(valid).toBe(true);
 	});
-	test('builds a token with a fake id', async () => {
+	test('builds a character with a fake id', async () => {
 		const builtCharacter = CharacterFactory.withFakeId().build();
 		expect(builtCharacter).toHaveProperty('id');
 	});
-	test('Model successfully inserts and retrieves a created token', async () => {
+	test('builds a character with a given name', async () => {
+		const builtCharacter = CharacterFactory.withName('testName').build();
+		expect(builtCharacter.characterData.name).toBe('testName');
+	});
+	test('Model successfully inserts and retrieves a created character', async () => {
 		const builtCharacter = CharacterFactory.build();
 		await Character.query().insert(builtCharacter);
 		const fetchedCharacters = await Character.query();
 		const insertedCharacter = fetchedCharacters.find(
-			token => token.charId === builtCharacter.charId
+			character => character.charId === builtCharacter.charId
 		);
 		expect(insertedCharacter.charId).toBe(builtCharacter.charId);
 	});

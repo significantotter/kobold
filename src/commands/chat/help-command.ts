@@ -16,7 +16,7 @@ export class HelpCommand implements Command {
 	public names = ['help'];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Lang.getRef('chatCommands.help', Language.Default),
+		name: Language.LL.chatCommands.help(),
 		name_localizations: Lang.getRefLocalizationMap('chatCommands.help'),
 		description: Lang.getRef('commandDescs.help', Language.Default),
 		description_localizations: Lang.getRefLocalizationMap('commandDescs.help'),

@@ -17,13 +17,15 @@ import { ChatArgs } from '../../../constants/index.js';
 import { EventData } from '../../../models/internal-models.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
+import { Language } from '../../../models/enum-helpers/index.js';
+import { Lang } from '../../../services/index.js';
 
 export class CharacterSetActiveSubCommand implements Command {
-	public names = ['set-active'];
+	public names = [Language.LL.commands.character.setActive.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: 'set-active',
-		description: `sets a character as the active character`,
+		name: Language.LL.commands.character.setActive.name(),
+		description: Language.LL.commands.character.setActive.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};

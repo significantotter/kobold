@@ -12,13 +12,15 @@ import { Command, CommandDeferType } from '../../index.js';
 import { WgToken } from '../../../services/kobold/models/index.js';
 import { fetchWgCharacterFromToken } from './helpers.js';
 import { getActiveCharacter } from '../../../utils/character-utils.js';
+import { Language } from '../../../models/enum-helpers/index.js';
+import { Lang } from '../../../services/index.js';
 
 export class CharacterUpdateSubCommand implements Command {
-	public names = ['update'];
+	public names = [Language.LL.commands.character.update.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: 'update',
-		description: `updates an already imported character`,
+		name: Language.LL.commands.character.update.name(),
+		description: Language.LL.commands.character.update.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};

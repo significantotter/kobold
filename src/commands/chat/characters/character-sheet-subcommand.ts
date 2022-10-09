@@ -10,13 +10,15 @@ import { Command, CommandDeferType } from '../../index.js';
 import type { WG } from '../../../services/wanderers-guide/wanderers-guide.js';
 import { getActiveCharacter } from '../../../utils/character-utils.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
+import { Language } from '../../../models/enum-helpers/index.js';
+import { Lang } from '../../../services/index.js';
 
 export class CharacterSheetSubCommand implements Command {
-	public names = ['sheet'];
+	public names = [Language.LL.commands.character.sheet.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: 'sheet',
-		description: `displays the active character's sheet`,
+		name: Language.LL.commands.character.sheet.name(),
+		description: Language.LL.commands.character.sheet.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};

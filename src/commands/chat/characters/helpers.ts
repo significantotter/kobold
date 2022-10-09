@@ -110,3 +110,7 @@ export async function fetchWgCharacterFromToken(charId: number, token: string) {
 		calculatedStats,
 	};
 }
+
+export default {
+	fetchWgCharacterFromToken,
+};

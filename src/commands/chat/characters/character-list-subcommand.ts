@@ -11,13 +11,15 @@ import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { MessageEmbed } from 'discord.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
+import { Language } from '../../../models/enum-helpers/index.js';
+import { Lang } from '../../../services/lang.js';
 
 export class CharacterListSubCommand implements Command {
-	public names = ['list'];
+	public names = [Language.LL.commands.character.list.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: 'list',
-		description: `lists all active characters`,
+		name: Language.LL.commands.character.list.name(),
+		description: Language.LL.commands.character.list.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};

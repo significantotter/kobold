@@ -1,4 +1,5 @@
 import { Locale } from 'discord-api-types/v10';
+import { L } from '../../i18n/i18n-node.js';
 
 interface LanguageData {
 	englishName: string;
@@ -7,7 +8,16 @@ interface LanguageData {
 
 export class Language {
 	public static Default = Locale.EnglishUS;
-	public static Enabled: Locale[] = [Locale.EnglishUS, Locale.EnglishGB];
+	public static Enabled: Locale[] = [Locale.EnglishUS];
+
+	public static LL = L.en;
+	public static localize(locale: Locale | null): typeof L.en {
+		if (!locale || !L[locale]) {
+			return L.en;
+		} else {
+			return L[locale];
+		}
+	}
 
 	public static Data: {
 		[key in Locale]: LanguageData;
@@ -45,7 +55,9 @@ export class Language {
 	};
 
 	public static find(input: string, enabled: boolean): Locale {
-		return this.findMultiple(input, enabled, 1)[0];
+		let found = this.findMultiple(input, enabled, 1)[0];
+		if (!found) found = Language.Default;
+		return found;
 	}
 
 	public static findMultiple(

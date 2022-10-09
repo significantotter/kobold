@@ -6,6 +6,7 @@
 /**/config/**/*.json
 !/**/config/**/*.example.json
 !/**/config/lang/**/*.json
+.DS_Store
 
 # =====================================================
 # Node.js

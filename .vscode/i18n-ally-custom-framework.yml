@@ -1,0 +1,23 @@
+languageIds:
+    - typescript
+    - javascript
+    - typescriptreact
+    - javascriptreact
+    - svelte
+    - html
+
+usageMatchRegex:
+    - "\\.?LL\\.({key})\\(((\\{.*\\})|([^)]*))\\)"
+    - "\\.?localize\\(\\W*.+\\W*\\)\\.({key})\\(((\\{.*\\})|([^)]*))\\)"
+
+refactorTemplates:
+    - '{$LL.$1()}'
+    - '{LL.$1()}'
+    - '$LL.$1()'
+    - 'LL.$1()'
+    - '{$localize().$1()}'
+    - '{localize().$1()}'
+    - '$localize().$1()'
+    - 'localize().$1()'
+
+monopoly: true
