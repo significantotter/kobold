@@ -48,6 +48,14 @@ const en: BaseTranslation = {
 			list: {
 				name: 'list',
 				description: 'lists all active characters',
+				interactions: {
+					noCharacters: `Yip! You don't have any characters yet! Use /import to import some!`,
+					characterListEmbed: {
+						title: 'Characters',
+						characterFieldName: '{characterName}{activeText?}',
+						characterFieldValue: 'Level {level} {heritage} {ancestry} {classes}',
+					},
+				},
 			},
 			remove: {
 				name: 'remove',

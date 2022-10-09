@@ -103,6 +103,32 @@ type RootTranslation = {
 				 * l​i​s​t​s​ ​a​l​l​ ​a​c​t​i​v​e​ ​c​h​a​r​a​c​t​e​r​s
 				 */
 				description: string
+				interactions: {
+					/**
+					 * Y​i​p​!​ ​Y​o​u​ ​d​o​n​'​t​ ​h​a​v​e​ ​a​n​y​ ​c​h​a​r​a​c​t​e​r​s​ ​y​e​t​!​ ​U​s​e​ ​/​i​m​p​o​r​t​ ​t​o​ ​i​m​p​o​r​t​ ​s​o​m​e​!
+					 */
+					noCharacters: string
+					characterListEmbed: {
+						/**
+						 * C​h​a​r​a​c​t​e​r​s
+						 */
+						title: string
+						/**
+						 * {​c​h​a​r​a​c​t​e​r​N​a​m​e​}​{​a​c​t​i​v​e​T​e​x​t​?​}
+						 * @param {unknown} [activeText]
+						 * @param {unknown} characterName
+						 */
+						characterFieldName: RequiredParams<'activeText?' | 'characterName'> | RequiredParams<'characterName'>
+						/**
+						 * L​e​v​e​l​ ​{​l​e​v​e​l​}​ ​{​h​e​r​i​t​a​g​e​}​ ​{​a​n​c​e​s​t​r​y​}​ ​{​c​l​a​s​s​e​s​}
+						 * @param {unknown} ancestry
+						 * @param {unknown} classes
+						 * @param {unknown} heritage
+						 * @param {unknown} level
+						 */
+						characterFieldValue: RequiredParams<'ancestry' | 'classes' | 'heritage' | 'level'>
+					}
+				}
 			}
 			remove: {
 				/**
@@ -232,6 +258,26 @@ export type TranslationFunctions = {
 				 * lists all active characters
 				 */
 				description: () => LocalizedString
+				interactions: {
+					/**
+					 * Yip! You don't have any characters yet! Use /import to import some!
+					 */
+					noCharacters: () => LocalizedString
+					characterListEmbed: {
+						/**
+						 * Characters
+						 */
+						title: () => LocalizedString
+						/**
+						 * {characterName}{activeText?}
+						 */
+						characterFieldName: (arg: { activeText?: unknown, characterName: unknown }) => LocalizedString
+						/**
+						 * Level {level} {heritage} {ancestry} {classes}
+						 */
+						characterFieldValue: (arg: { ancestry: unknown, classes: unknown, heritage: unknown, level: unknown }) => LocalizedString
+					}
+				}
 			}
 			remove: {
 				/**

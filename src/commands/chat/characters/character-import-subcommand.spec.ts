@@ -112,7 +112,6 @@ describe('CharacterImportSubCommand', () => {
 			charId,
 			Token
 		) => {
-			console.log('calling mock character fetch from token');
 			expect(charId).toBe(28375);
 			return CharacterFactory.withName('importedChar').build({ charId });
 		}) as any);

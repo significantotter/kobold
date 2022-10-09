@@ -23,11 +23,11 @@ export class CharacterListSubCommand implements Command {
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
-	public cooldown = new RateLimiter(1, 5000);
 	public deferType = CommandDeferType.PUBLIC;
 	public requireClientPerms: PermissionString[] = [];
 
 	public async execute(intr: CommandInteraction, data: EventData): Promise<void> {
+		const LL = Language.localize(data.lang());
 		// try and find that charcter
 		const targetCharacter = await Character.query().where({
 			userId: intr.user.id,
@@ -37,7 +37,7 @@ export class CharacterListSubCommand implements Command {
 			//send success message
 			await InteractionUtils.send(
 				intr,
-				`Yip! You have no characters yet! Use /import to import some!`
+				LL.commands.character.list.interactions.noCharacters()
 			);
 		} else {
 			const characterFields = [];
@@ -58,15 +58,25 @@ export class CharacterListSubCommand implements Command {
 					.join(' ')
 					.trim();
 				characterFields.push({
-					name:
-						character.characterData.name +
-						(character.isActiveCharacter ? ' (active)' : ''),
-					value: `Level ${level} ${heritage} ${ancestry} ${classes}`,
+					name: LL.commands.character.list.interactions.characterListEmbed.characterFieldName(
+						{
+							characterName: character.characterData.name,
+							activeText: character.isActiveCharacter ? ' (active)' : '',
+						}
+					),
+					value: LL.commands.character.list.interactions.characterListEmbed.characterFieldValue(
+						{
+							level,
+							heritage,
+							ancestry,
+							classes,
+						}
+					),
 				});
 			}
 
 			const characterListEmbed = new KoboldEmbed()
-				.setTitle('Characters')
+				.setTitle(LL.commands.character.list.interactions.characterListEmbed.title())
 				.addFields(characterFields);
 			await InteractionUtils.send(intr, characterListEmbed);
 		}
