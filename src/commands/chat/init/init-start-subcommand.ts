@@ -1,10 +1,10 @@
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
-} from 'discord-api-types/v10';
-import { CommandInteraction, PermissionString } from 'discord.js';
+	ChatInputCommandInteraction,
+	PermissionsString,
+} from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
-import { raw } from 'objection';
 
 import { EventData } from '../../../models/internal-models.js';
 import { Initiative } from '../../../services/kobold/models/index.js';
@@ -24,9 +24,9 @@ export class InitStartSubCommand implements Command {
 	};
 	public cooldown = new RateLimiter(1, 5000);
 	public deferType = CommandDeferType.PUBLIC;
-	public requireClientPerms: PermissionString[] = [];
+	public requireClientPerms: PermissionsString[] = [];
 
-	public async execute(intr: CommandInteraction, data: EventData): Promise<void> {
+	public async execute(intr: ChatInputCommandInteraction, data: EventData): Promise<void> {
 		const startingUser = intr.user.id;
 		if (!intr.channel || !intr.channel.id) {
 			await InteractionUtils.send(
@@ -53,12 +53,18 @@ export class InitStartSubCommand implements Command {
 			const updatedEmbed = await KoboldEmbed.roundFromInitiativeBuilder(initBuilder);
 			await message.edit({ embeds: [updatedEmbed] });
 		} catch (err) {
-			if (err.type === 'UniqueViolationError') {
-				await message.edit(
-					"Yip! There's already an initiative in this channel. End it before you start a new one!"
-				);
+			if (err.name === 'UniqueViolationError') {
+				await Promise.all([
+					message.edit(
+						"Yip! There's already an initiative in this channel. End it before you start a new one!"
+					),
+					message.suppressEmbeds(true),
+				]);
 			} else {
-				await message.edit('Yip! Something when wrong when starting your initiative!');
+				await Promise.all([
+					message.edit('Yip! Something when wrong when starting your initiative!'),
+					message.suppressEmbeds(true),
+				]);
 				console.error(err);
 			}
 		}

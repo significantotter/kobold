@@ -1,14 +1,13 @@
-import { DiceUtils.buildDiceExpression, RollBuilder } from '../../../utils/dice-utils';
+import { DiceUtils, RollBuilder } from '../../../utils/dice-utils';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
-} from 'discord-api-types/v10';
-import {
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
-	CommandInteraction,
-	PermissionString,
+	ChatInputCommandInteraction,
+	PermissionsString,
+	ApplicationCommandOptionChoiceData,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 
@@ -17,11 +16,7 @@ import { EventData } from '../../../models/internal-models.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { WG } from '../../../services/wanderers-guide/wanderers-guide.js';
-import {
-	CharacterUtils.findPossibleAbilityFromString,
-	CharacterUtils.getActiveCharacter,
-	CharacterUtils.getBestNameMatch,
-} from '../../../utils/character-utils.js';
+import { CharacterUtils } from '../../../utils/character-utils.js';
 
 export class RollAbilitySubCommand implements Command {
 	public names = ['ability'];
@@ -34,12 +29,12 @@ export class RollAbilitySubCommand implements Command {
 	};
 	public cooldown = new RateLimiter(1, 5000);
 	public deferType = CommandDeferType.PUBLIC;
-	public requireClientPerms: PermissionString[] = [];
+	public requireClientPerms: PermissionsString[] = [];
 
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption
-	): Promise<void> {
+	): Promise<ApplicationCommandOptionChoiceData[]> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === ChatArgs.ABILITY_CHOICE_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
@@ -49,22 +44,22 @@ export class RollAbilitySubCommand implements Command {
 			const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id);
 			if (!activeCharacter) {
 				//no choices if we don't have a character to match against
-				InteractionUtils.respond(intr, []);
-				return;
+				return [];
 			}
 			//find a ability on the character matching the autocomplete string
-			const matchedAbilitys = CharacterUtils.findPossibleAbilityFromString(activeCharacter, match).map(
-				ability => ({
-					name: ability.Name,
-					value: ability.Name,
-				})
-			);
+			const matchedAbilitys = CharacterUtils.findPossibleAbilityFromString(
+				activeCharacter,
+				match
+			).map(ability => ({
+				name: ability.Name,
+				value: ability.Name,
+			}));
 			//return the matched abilitys
-			InteractionUtils.respond(intr, matchedAbilitys);
+			return matchedAbilitys;
 		}
 	}
 
-	public async execute(intr: CommandInteraction, data: EventData): Promise<void> {
+	public async execute(intr: ChatInputCommandInteraction, data: EventData): Promise<void> {
 		const abilityChoice = intr.options.getString(ChatArgs.ABILITY_CHOICE_OPTION.name);
 		const modifierExpression = intr.options.getString(ChatArgs.ROLL_MODIFIER_OPTION.name);
 		const rollNote = intr.options.getString(ChatArgs.ROLL_NOTE_OPTION.name);

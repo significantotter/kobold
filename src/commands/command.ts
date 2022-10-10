@@ -1,9 +1,10 @@
-import { RESTPostAPIApplicationCommandsJSONBody } from 'discord-api-types/v10';
 import {
+	RESTPostAPIApplicationCommandsJSONBody,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
-	BaseCommandInteraction,
-	PermissionString,
+	CommandInteraction,
+	PermissionsString,
+	ApplicationCommandOptionChoiceData,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 
@@ -14,9 +15,12 @@ export interface Command {
 	metadata: RESTPostAPIApplicationCommandsJSONBody;
 	cooldown?: RateLimiter;
 	deferType: CommandDeferType;
-	requireClientPerms: PermissionString[];
-	autocomplete?(intr: AutocompleteInteraction, option: AutocompleteFocusedOption): Promise<void>;
-	execute(intr: BaseCommandInteraction, data: EventData): Promise<void>;
+	requireClientPerms: PermissionsString[];
+	autocomplete?(
+		intr: AutocompleteInteraction,
+		option: AutocompleteFocusedOption
+	): Promise<ApplicationCommandOptionChoiceData[]>;
+	execute(intr: CommandInteraction, data: EventData): Promise<void>;
 }
 
 export enum CommandDeferType {

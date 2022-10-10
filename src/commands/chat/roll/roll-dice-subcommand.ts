@@ -1,8 +1,9 @@
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
-} from 'discord-api-types/v10';
-import { CommandInteraction, PermissionString } from 'discord.js';
+	ChatInputCommandInteraction,
+	PermissionsString,
+} from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 
 import { ChatArgs } from '../../../constants/index.js';
@@ -22,9 +23,10 @@ export class RollDiceSubCommand implements Command {
 	};
 	public cooldown = new RateLimiter(1, 5000);
 	public deferType = CommandDeferType.PUBLIC;
-	public requireClientPerms: PermissionString[] = [];
+	public requireClientPerms: PermissionsString[] = [];
 
-	public async execute(intr: CommandInteraction, data: EventData): Promise<void> {
+	public async execute(intr: ChatInputCommandInteraction, data: EventData): Promise<void> {
+		if (!intr.isChatInputCommand()) return;
 		const diceExpression = intr.options.getString(ChatArgs.ROLL_EXPRESSION_OPTION.name);
 		const rollNote = intr.options.getString(ChatArgs.ROLL_NOTE_OPTION.name);
 

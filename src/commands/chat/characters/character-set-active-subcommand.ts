@@ -3,13 +3,12 @@ import { Character } from '../../../services/kobold/models/index.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
-} from 'discord-api-types/v10';
-import {
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
-	CommandInteraction,
-	PermissionString,
+	ChatInputCommandInteraction,
+	PermissionsString,
+	ApplicationCommandOptionChoiceData,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 
@@ -30,12 +29,12 @@ export class CharacterSetActiveSubCommand implements Command {
 		default_member_permissions: undefined,
 	};
 	public deferType = CommandDeferType.PUBLIC;
-	public requireClientPerms: PermissionString[] = [];
+	public requireClientPerms: PermissionsString[] = [];
 
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption
-	): Promise<void> {
+	): Promise<ApplicationCommandOptionChoiceData[]> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === ChatArgs.SET_ACTIVE_NAME_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
@@ -45,17 +44,14 @@ export class CharacterSetActiveSubCommand implements Command {
 			const options = await Character.queryLooseCharacterName(match, intr.user.id);
 
 			//return the matched characters
-			await InteractionUtils.respond(
-				intr,
-				options.map(character => ({
-					name: character.characterData.name,
-					value: character.characterData.name,
-				}))
-			);
+			return options.map(character => ({
+				name: character.characterData.name,
+				value: character.characterData.name,
+			}));
 		}
 	}
 
-	public async execute(intr: CommandInteraction, data: EventData): Promise<void> {
+	public async execute(intr: ChatInputCommandInteraction, data: EventData): Promise<void> {
 		const charName = intr.options.getString(ChatArgs.SET_ACTIVE_NAME_OPTION.name);
 
 		// try and find that charcter

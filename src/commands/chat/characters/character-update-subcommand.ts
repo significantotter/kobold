@@ -2,16 +2,17 @@ import { Character } from '../../../services/kobold/models/index.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
-} from 'discord-api-types/v10';
-import { CommandInteraction, PermissionString } from 'discord.js';
+	ChatInputCommandInteraction,
+	PermissionsString,
+} from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 
 import { EventData } from '../../../models/internal-models.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { WgToken } from '../../../services/kobold/models/index.js';
-import { fetchWgCharacterFromToken } from './helpers.js';
-import { CharacterUtils.getActiveCharacter } from '../../../utils/character-utils.js';
+import { CharacterHelpers } from './helpers.js';
+import { CharacterUtils } from '../../../utils/character-utils.js';
 import { Language } from '../../../models/enum-helpers/index.js';
 import { Lang } from '../../../services/index.js';
 
@@ -25,9 +26,9 @@ export class CharacterUpdateSubCommand implements Command {
 		default_member_permissions: undefined,
 	};
 	public deferType = CommandDeferType.PUBLIC;
-	public requireClientPerms: PermissionString[] = [];
+	public requireClientPerms: PermissionsString[] = [];
 
-	public async execute(intr: CommandInteraction, data: EventData): Promise<void> {
+	public async execute(intr: ChatInputCommandInteraction, data: EventData): Promise<void> {
 		//check if we have an active character
 		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id);
 		if (!activeCharacter) {
@@ -48,7 +49,7 @@ export class CharacterUpdateSubCommand implements Command {
 					`Then, /import your character again!`
 			);
 		}
-		const fetchedCharacter = await fetchWgCharacterFromToken(
+		const fetchedCharacter = await CharacterHelpers.fetchWgCharacterFromToken(
 			activeCharacter.charId,
 			token[0].accessToken
 		);

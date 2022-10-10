@@ -1,5 +1,5 @@
 import { REST } from '@discordjs/rest';
-import { Options } from 'discord.js';
+import { Options, GatewayIntentBits, Partials } from 'discord.js';
 
 import { Button } from './buttons/index.js';
 import {
@@ -56,11 +56,11 @@ async function start(): Promise<void> {
 
 	// Client
 	let client = new CustomClient({
-		intents: Config.client.intents as any,
-		partials: Config.client.partials as any,
+		intents: (Config.client.intents as string[]).map(intent => GatewayIntentBits[intent]),
+		partials: (Config.client.partials as string[]).map(partial => Partials[partial]),
 		makeCache: Options.cacheWithLimits({
 			// Keep default caching behavior
-			...Options.defaultMakeCacheSettings,
+			...Options.DefaultMakeCacheSettings,
 			// Override specific options from config
 			...Config.client.caches,
 		}),

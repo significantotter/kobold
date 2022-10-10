@@ -1,7 +1,7 @@
 import { KoboldEmbed } from './../../../utils/kobold-embed-utils';
 import { Language } from './../../../models/enum-helpers/language';
 import { InteractionUtils } from './../../../utils/interaction-utils';
-import { Locale } from 'discord-api-types/v10';
+import { Locale } from 'discord.js';
 import { Character, CharacterFactory } from '../../../services/kobold/models/index.js';
 import { CharacterListSubCommand } from './character-list-subcommand.js';
 
@@ -44,13 +44,13 @@ describe('CharacterListSubCommand', () => {
 		} as any;
 
 		jest.spyOn(InteractionUtils, 'send').mockImplementation((intr, embed: KoboldEmbed): any => {
-			expect(embed.title).toBe(
+			expect(embed.data.title).toBe(
 				Language.LL.commands.character.list.interactions.characterListEmbed.title()
 			);
-			expect(embed.fields.length).toBe(5);
-			expect(embed.fields.find(field => field.name.includes('(active)'))).toBeDefined();
+			expect(embed.data.fields.length).toBe(5);
+			expect(embed.data.fields.find(field => field.name.includes('(active)'))).toBeDefined();
 			for (const character of builtCharacters) {
-				const field = embed.fields.find(field =>
+				const field = embed.data.fields.find(field =>
 					field.name.includes(character.characterData.name)
 				);
 				expect(field.value).toContain(String(character.characterData.level));

@@ -1,4 +1,4 @@
-import { Locale } from 'discord-api-types/v10';
+import { Locale } from 'discord.js';
 
 import { Language } from './enum-helpers/index.js';
 

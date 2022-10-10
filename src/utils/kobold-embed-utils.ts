@@ -1,11 +1,11 @@
-import { MessageEmbed } from 'discord.js';
+import { EmbedBuilder } from 'discord.js';
 import { Character } from '../services/kobold/models/index.js';
 import { InitiativeBuilder } from './initiative-utils.js';
 
-export class KoboldEmbed extends MessageEmbed {
+export class KoboldEmbed extends EmbedBuilder {
 	public constructor() {
 		super();
-		this.setColor('GREEN');
+		this.setColor('Green');
 	}
 	/**
 	 * Sets character specific attributes for the embed: currently just the thumbnail
@@ -45,7 +45,7 @@ export class KoboldEmbed extends MessageEmbed {
 			}
 		}
 		result.setDescription(
-			result.description +
+			result.data.description +
 				`\n[Initiative Round ${initiativeBuilder.init.currentRound}](${targetMessageUrl})`
 		);
 		return result;
@@ -60,7 +60,7 @@ export class KoboldEmbed extends MessageEmbed {
 		}
 		builtTurnText += '```';
 		if (initiativeBuilder.groups.length === 0) {
-			builtTurnText = '';
+			builtTurnText = ' ';
 		}
 		result.setDescription(builtTurnText);
 		return result;

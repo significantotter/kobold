@@ -1,4 +1,4 @@
-import { ShardingManager } from 'discord.js';
+import { ShardingManager, ActivityType } from 'discord.js';
 import { Request, Response, Router } from 'express';
 import router from 'express-promise-router';
 
@@ -69,7 +69,7 @@ export class ShardsController implements Controller {
 			(client: CustomClient, context) => {
 				return client.setPresence(context.type, context.name, context.url);
 			},
-			{ context: { type: reqBody.type, name: reqBody.name, url: reqBody.url } }
+			{ context: { type: ActivityType[reqBody.type], name: reqBody.name, url: reqBody.url } }
 		);
 
 		res.sendStatus(200);

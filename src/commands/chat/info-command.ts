@@ -1,8 +1,10 @@
-import {
+import djs, {
+	ChatInputCommandInteraction,
+	EmbedBuilder,
+	PermissionsString,
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
-} from 'discord-api-types/v10';
-import djs, { CommandInteraction, MessageEmbed, PermissionString } from 'discord.js';
+} from 'discord.js';
 import fileSize from 'filesize';
 import os from 'node:os';
 import typescript from 'typescript';
@@ -34,12 +36,12 @@ export class InfoCommand implements Command {
 		],
 	};
 	public deferType = CommandDeferType.PUBLIC;
-	public requireClientPerms: PermissionString[] = [];
+	public requireClientPerms: PermissionsString[] = [];
 
-	public async execute(intr: CommandInteraction, data: EventData): Promise<void> {
+	public async execute(intr: ChatInputCommandInteraction, data: EventData): Promise<void> {
 		let option = intr.options.getString(Lang.getRef('arguments.option', Language.Default));
 
-		let embed: MessageEmbed;
+		let embed: EmbedBuilder;
 		switch (option) {
 			case InfoOption.ABOUT: {
 				embed = Lang.getEmbed('displayEmbeds.about', data.lang());
@@ -73,7 +75,7 @@ export class InfoCommand implements Command {
 						serverCount = await ShardUtils.serverCount(intr.client.shard);
 					} catch (error) {
 						// SHARDING_IN_PROCESS: Shards are still being spawned.
-						if (error.name.includes('SHARDING_IN_PROCESS')) {
+						if (error.name.includes('ShardingInProcess')) {
 							await InteractionUtils.send(
 								intr,
 								Lang.getEmbed('errorEmbeds.startupInProcess', data.lang())

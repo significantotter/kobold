@@ -1,13 +1,12 @@
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
-} from 'discord-api-types/v10';
-import {
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
-	CommandInteraction,
-	PermissionString,
+	ChatInputCommandInteraction,
+	PermissionsString,
+	ApplicationCommandOptionChoiceData,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 
@@ -16,16 +15,8 @@ import { EventData } from '../../../models/internal-models.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { WG } from '../../../services/wanderers-guide/wanderers-guide.js';
-import {
-	CharacterUtils.findPossibleAttackFromString,
-	CharacterUtils.getActiveCharacter,
-	CharacterUtils.getBestNameMatch,
-} from '../../../utils/character-utils.js';
-import {
-	DiceUtils.buildDiceExpression,
-	DiceUtils.parseDiceFromWgDamageField,
-	RollBuilder,
-} from '../../../utils/dice-utils.js';
+import { CharacterUtils } from '../../../utils/character-utils.js';
+import { DiceUtils, RollBuilder } from '../../../utils/dice-utils.js';
 
 export class RollAttackSubCommand implements Command {
 	public names = ['attack'];
@@ -38,12 +29,12 @@ export class RollAttackSubCommand implements Command {
 	};
 	public cooldown = new RateLimiter(1, 5000);
 	public deferType = CommandDeferType.PUBLIC;
-	public requireClientPerms: PermissionString[] = [];
+	public requireClientPerms: PermissionsString[] = [];
 
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption
-	): Promise<void> {
+	): Promise<ApplicationCommandOptionChoiceData[]> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === ChatArgs.ATTACK_CHOICE_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
@@ -53,22 +44,22 @@ export class RollAttackSubCommand implements Command {
 			const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id);
 			if (!activeCharacter) {
 				//no choices if we don't have a character to match against
-				InteractionUtils.respond(intr, []);
-				return;
+				return [];
 			}
 			//find a attack on the character matching the autocomplete string
-			const matchedAttack = CharacterUtils.findPossibleAttackFromString(activeCharacter, match).map(
-				attack => ({
-					name: attack.Name,
-					value: attack.Name,
-				})
-			);
+			const matchedAttack = CharacterUtils.findPossibleAttackFromString(
+				activeCharacter,
+				match
+			).map(attack => ({
+				name: attack.Name,
+				value: attack.Name,
+			}));
 			//return the matched attacks
-			InteractionUtils.respond(intr, matchedAttack);
+			return matchedAttack;
 		}
 	}
 
-	public async execute(intr: CommandInteraction, data: EventData): Promise<void> {
+	public async execute(intr: ChatInputCommandInteraction, data: EventData): Promise<void> {
 		const attackChoice = intr.options.getString(ChatArgs.ATTACK_CHOICE_OPTION.name);
 		const attackModifierExpression = intr.options.getString(
 			ChatArgs.ATTACK_ROLL_MODIFIER_OPTION.name
@@ -99,7 +90,11 @@ export class RollAttackSubCommand implements Command {
 		//if we a to hit defined, roll the attack's to-hit
 		if (targetAttack.Bonus !== undefined) {
 			rollBuilder.addRoll(
-				DiceUtils.buildDiceExpression('d20', String(targetAttack.Bonus), attackModifierExpression),
+				DiceUtils.buildDiceExpression(
+					'd20',
+					String(targetAttack.Bonus),
+					attackModifierExpression
+				),
 				'To Hit'
 			);
 		}

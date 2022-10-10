@@ -1,9 +1,8 @@
 import {
 	AutocompleteInteraction,
-	BaseCommandInteraction,
+	CommandInteraction,
 	ButtonInteraction,
 	Client,
-	Constants,
 	Guild,
 	Interaction,
 	Message,
@@ -12,6 +11,8 @@ import {
 	PartialUser,
 	RateLimitData,
 	User,
+	Events,
+	RESTEvents,
 } from 'discord.js';
 
 import {
@@ -49,24 +50,21 @@ export class Bot {
 	}
 
 	private registerListeners(): void {
-		this.client.on(Constants.Events.CLIENT_READY, () => this.onReady());
-		this.client.on(
-			Constants.Events.SHARD_READY,
-			(shardId: number, unavailableGuilds: Set<string>) =>
-				this.onShardReady(shardId, unavailableGuilds)
+		this.client.on(Events.ClientReady, () => this.onReady());
+		this.client.on(Events.ShardReady, (shardId: number, unavailableGuilds: Set<string>) =>
+			this.onShardReady(shardId, unavailableGuilds)
 		);
-		this.client.on(Constants.Events.GUILD_CREATE, (guild: Guild) => this.onGuildJoin(guild));
-		this.client.on(Constants.Events.GUILD_DELETE, (guild: Guild) => this.onGuildLeave(guild));
-		this.client.on(Constants.Events.MESSAGE_CREATE, (msg: Message) => this.onMessage(msg));
-		this.client.on(Constants.Events.INTERACTION_CREATE, (intr: Interaction) =>
-			this.onInteraction(intr)
-		);
+		this.client.on(Events.GuildCreate, (guild: Guild) => this.onGuildJoin(guild));
+		this.client.on(Events.GuildDelete, (guild: Guild) => this.onGuildLeave(guild));
+		this.client.on(Events.MessageCreate, (msg: Message) => this.onMessage(msg));
+		this.client.on(Events.InteractionCreate, (intr: Interaction) => this.onInteraction(intr));
 		this.client.on(
-			Constants.Events.MESSAGE_REACTION_ADD,
+			Events.MessageReactionAdd,
 			(messageReaction: MessageReaction | PartialMessageReaction, user: User | PartialUser) =>
 				this.onReaction(messageReaction, user)
 		);
-		this.client.on(Constants.Events.RATE_LIMIT, (rateLimitData: RateLimitData) =>
+		// for some reason this enum got removed?
+		this.client.rest.on(RESTEvents.RateLimited, (rateLimitData: RateLimitData) =>
 			this.onRateLimit(rateLimitData)
 		);
 	}
@@ -148,7 +146,7 @@ export class Bot {
 			return;
 		}
 
-		if (intr instanceof BaseCommandInteraction || intr instanceof AutocompleteInteraction) {
+		if (intr instanceof CommandInteraction || intr instanceof AutocompleteInteraction) {
 			try {
 				await this.commandHandler.process(intr);
 			} catch (error) {
@@ -156,7 +154,7 @@ export class Bot {
 			}
 		} else if (intr instanceof ButtonInteraction) {
 			try {
-				await this.buttonHandler.process(intr, intr.message as Message);
+				await this.buttonHandler.process(intr);
 			} catch (error) {
 				Logger.error(Logs.error.button, error);
 			}
@@ -196,7 +194,7 @@ export class Bot {
 	}
 
 	private async onRateLimit(rateLimitData: RateLimitData): Promise<void> {
-		if (rateLimitData.timeout >= Config.logging.rateLimit.minTimeout * 1000) {
+		if (rateLimitData.timeToReset >= Config.logging.rateLimit.minTimeout * 1000) {
 			Logger.error(Logs.error.apiRateLimit, rateLimitData);
 		}
 	}

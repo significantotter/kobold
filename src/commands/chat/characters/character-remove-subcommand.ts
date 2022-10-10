@@ -1,13 +1,14 @@
-import { Character, InitiativeActor } from '../../../services/kobold/models/index.js';
+import { Character } from '../../../services/kobold/models/index.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
-} from 'discord-api-types/v10';
-import { CommandInteraction, PermissionString, ButtonInteraction } from 'discord.js';
-import { RateLimiter } from 'discord.js-rate-limiter';
+	ChatInputCommandInteraction,
+	PermissionsString,
+	ButtonStyle,
+	ComponentType,
+} from 'discord.js';
 
 import { EventData } from '../../../models/internal-models.js';
-import { Lang } from '../../../services/index.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
@@ -24,9 +25,9 @@ export class CharacterRemoveSubCommand implements Command {
 		default_member_permissions: undefined,
 	};
 	public deferType = CommandDeferType.PUBLIC;
-	public requireClientPerms: PermissionString[] = [];
+	public requireClientPerms: PermissionsString[] = [];
 
-	public async execute(intr: CommandInteraction, data: EventData): Promise<void> {
+	public async execute(intr: ChatInputCommandInteraction, data: EventData): Promise<void> {
 		//check if we have an active character
 		const LL = Language.localize(data.lang());
 		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id);
@@ -44,25 +45,25 @@ export class CharacterRemoveSubCommand implements Command {
 			}),
 			components: [
 				{
-					type: 'ACTION_ROW',
+					type: ComponentType.ActionRow,
 					components: [
 						{
-							type: 'BUTTON',
+							type: ComponentType.Button,
 							label: LL.commands.character.remove.interactions.removeConfirmation.removeButton(),
 							customId: 'remove',
-							style: 'DANGER',
+							style: ButtonStyle.Danger,
 						},
 						{
-							type: 'BUTTON',
+							type: ComponentType.Button,
 							label: LL.commands.character.remove.interactions.removeConfirmation.cancelButton(),
 							customId: 'cancel',
-							style: 'PRIMARY',
+							style: ButtonStyle.Primary,
 						},
 					],
 				},
 			],
 		});
-
+		let timedOut = false;
 		let result = await CollectorUtils.collectByButton(
 			prompt,
 			async buttonInteraction => {
@@ -79,6 +80,8 @@ export class CharacterRemoveSubCommand implements Command {
 				target: intr.user,
 				stopFilter: message => message.content.toLowerCase() === 'stop',
 				onExpire: async () => {
+					timedOut = true;
+					await result.intr.deleteReply();
 					await InteractionUtils.send(
 						intr,
 						LL.commands.character.remove.interactions.removeConfirmation.expired()
@@ -106,6 +109,8 @@ export class CharacterRemoveSubCommand implements Command {
 				}),
 				components: [],
 			});
+		} else if (timedOut) {
+			return;
 		} else {
 			// cancel
 			await InteractionUtils.editReply(intr, {

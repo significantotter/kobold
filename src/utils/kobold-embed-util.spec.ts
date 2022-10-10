@@ -1,4 +1,4 @@
-import { MessageEmbed } from 'discord.js';
+import { EmbedBuilder } from 'discord.js';
 import { Character } from '../services/kobold/models/index.js';
 import { KoboldEmbed } from './kobold-embed-utils.js';
 
@@ -38,8 +38,8 @@ describe('KoboldEmbedUtils', () => {
 	describe('KoboldEmbed', () => {
 		test('creates a new extension of a message embed and sets it green', function () {
 			const embed = new KoboldEmbed();
-			expect(embed.color).toBe(5763719);
-			expect(embed).toBeInstanceOf(MessageEmbed);
+			expect(embed.data.color).toBe(5763719);
+			expect(embed).toBeInstanceOf(EmbedBuilder);
 		});
 		describe('setCharacter', () => {
 			test('sets the thumbnail of the embed to the character image url', function () {
@@ -52,7 +52,9 @@ describe('KoboldEmbedUtils', () => {
 					},
 				};
 				embed.setCharacter(character as Character);
-				expect(embed.thumbnail).toMatchObject({ url: 'https://example.com/image.png' });
+				expect(embed.data.thumbnail).toMatchObject({
+					url: 'https://example.com/image.png',
+				});
 			});
 			test('does not set the thumbnail if the character does not have an image url', function () {
 				const embed = new KoboldEmbed();
@@ -62,7 +64,7 @@ describe('KoboldEmbedUtils', () => {
 					},
 				};
 				embed.setCharacter(character as Character);
-				expect(embed.thumbnail).toBeNull();
+				expect(embed.data.thumbnail).toBeNull();
 			});
 		});
 		describe('turnFromInitiativeBuilder', () => {
@@ -71,24 +73,26 @@ describe('KoboldEmbedUtils', () => {
 					...getFakeInitiativeBuilder(),
 					activeGroup: null,
 				} as any);
-				expect(embed.title).toBe(
+				expect(embed.data.title).toBe(
 					"Yip! Something went wrong! I can't figure out whose turn it is!"
 				);
 			});
 			test('sets the title to the active group name', function () {
 				const initiativeBuilder = getFakeInitiativeBuilder();
 				const embed = KoboldEmbed.turnFromInitiativeBuilder(initiativeBuilder as any);
-				expect(embed.title).toContain('Test Group');
+				expect(embed.data.title).toContain('Test Group');
 			});
 			test('sets the description to the active group turn text', function () {
 				const initiativeBuilder = getFakeInitiativeBuilder();
 				const embed = KoboldEmbed.turnFromInitiativeBuilder(initiativeBuilder as any);
-				expect(embed.description).toContain('Test Group');
+				expect(embed.data.description).toContain('Test Group');
 			});
 			test('sets the character if there is only one actor in the group', function () {
 				const initiativeBuilder = getFakeInitiativeBuilder();
 				const embed = KoboldEmbed.turnFromInitiativeBuilder(initiativeBuilder as any);
-				expect(embed.thumbnail).toMatchObject({ url: 'https://example.com/image.png' });
+				expect(embed.data.thumbnail).toMatchObject({
+					url: 'https://example.com/image.png',
+				});
 			});
 			test('does not set the character if there is more than one actor in the group', function () {
 				const initiativeBuilder = {
@@ -117,7 +121,7 @@ describe('KoboldEmbedUtils', () => {
 					},
 				};
 				const embed = KoboldEmbed.turnFromInitiativeBuilder(initiativeBuilder as any);
-				expect(embed.thumbnail).toBeNull();
+				expect(embed.data.thumbnail).toBeNull();
 			});
 			test('adds a link to the message url if there is one', function () {
 				const initiativeBuilder = getFakeInitiativeBuilder();
@@ -125,7 +129,7 @@ describe('KoboldEmbedUtils', () => {
 					initiativeBuilder as any,
 					'https://example.com/message'
 				);
-				expect(embed.description).toContain('https://example.com/message');
+				expect(embed.data.description).toContain('https://example.com/message');
 			});
 		});
 
@@ -133,7 +137,7 @@ describe('KoboldEmbedUtils', () => {
 			test('sets the title to the current round', function () {
 				const initiativeBuilder = getFakeInitiativeBuilder();
 				const embed = KoboldEmbed.roundFromInitiativeBuilder(initiativeBuilder as any);
-				expect(embed.title).toContain('Round 1');
+				expect(embed.data.title).toContain('Round 1');
 			});
 			test('includes all the groups in the description', function () {
 				const initiativeBuilder = {
@@ -151,8 +155,8 @@ describe('KoboldEmbedUtils', () => {
 					],
 				};
 				const embed = KoboldEmbed.roundFromInitiativeBuilder(initiativeBuilder as any);
-				expect(embed.description).toContain('Test Group 1');
-				expect(embed.description).toContain('Test Group 2');
+				expect(embed.data.description).toContain('Test Group 1');
+				expect(embed.data.description).toContain('Test Group 2');
 			});
 			test('still works if there are no groups', function () {
 				const initiativeBuilder = {
@@ -160,7 +164,7 @@ describe('KoboldEmbedUtils', () => {
 					groups: [],
 				};
 				const embed = KoboldEmbed.roundFromInitiativeBuilder(initiativeBuilder as any);
-				expect(embed.description).toBe('');
+				expect(embed.data.description).toBe('');
 			});
 			test('works if the initiative has no current round', function () {
 				const initiativeBuilder = {
@@ -168,7 +172,7 @@ describe('KoboldEmbedUtils', () => {
 					init: { currentRound: null },
 				};
 				const embed = KoboldEmbed.roundFromInitiativeBuilder(initiativeBuilder as any);
-				expect(embed.title).toContain('Round 0');
+				expect(embed.data.title).toContain('Round 0');
 			});
 		});
 	});

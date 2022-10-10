@@ -4,14 +4,13 @@ import { ChatArgs } from '../../../constants/chat-args';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
-} from 'discord-api-types/v10';
-import {
-	CommandInteraction,
-	PermissionString,
-	MessageEmbed,
+	ChatInputCommandInteraction,
+	PermissionsString,
+	EmbedBuilder,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
+	ApplicationCommandOptionChoiceData,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 
@@ -35,12 +34,12 @@ export class InitRemoveSubCommand implements Command {
 	};
 	public cooldown = new RateLimiter(1, 5000);
 	public deferType = CommandDeferType.PUBLIC;
-	public requireClientPerms: PermissionString[] = [];
+	public requireClientPerms: PermissionsString[] = [];
 
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption
-	): Promise<void> {
+	): Promise<ApplicationCommandOptionChoiceData[]> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === ChatArgs.INIT_CHARACTER_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
@@ -56,17 +55,14 @@ export class InitRemoveSubCommand implements Command {
 			actorOptions = actorOptions.filter(actor => actor.name.includes(match));
 
 			//return the matched skills
-			await InteractionUtils.respond(
-				intr,
-				actorOptions.map(actor => ({
-					name: actor.name,
-					value: actor.name,
-				}))
-			);
+			return actorOptions.map(actor => ({
+				name: actor.name,
+				value: actor.name,
+			}));
 		}
 	}
 
-	public async execute(intr: CommandInteraction, data: EventData): Promise<void> {
+	public async execute(intr: ChatInputCommandInteraction, data: EventData): Promise<void> {
 		const targetCharacterName = intr.options.getString(ChatArgs.INIT_CHARACTER_OPTION.name);
 
 		const currentInitResponse = await InitiativeUtils.getInitiativeForChannel(intr.channel);

@@ -4,8 +4,9 @@ import { Character } from '../../../services/kobold/models/index.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
-} from 'discord-api-types/v10';
-import { CommandInteraction, PermissionString } from 'discord.js';
+	ChatInputCommandInteraction,
+	PermissionsString,
+} from 'discord.js';
 
 import { EventData } from '../../../models/internal-models.js';
 import { InteractionUtils } from '../../../utils/index.js';
@@ -26,9 +27,9 @@ export class CharacterImportSubCommand implements Command {
 		default_member_permissions: undefined,
 	};
 	public deferType = CommandDeferType.PUBLIC;
-	public requireClientPerms: PermissionString[] = [];
+	public requireClientPerms: PermissionsString[] = [];
 
-	public async execute(intr: CommandInteraction, data: EventData): Promise<void> {
+	public async execute(intr: ChatInputCommandInteraction, data: EventData): Promise<void> {
 		const url = intr.options.getString(CharacterOptions.IMPORT_OPTION.name).trim();
 		const LL = Language.localize(data.lang());
 		let charId = CharacterUtils.parseCharacterIdFromText(url);

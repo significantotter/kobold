@@ -3,14 +3,13 @@ import { InitiativeActor } from './../../../services/kobold/models/initiative-ac
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
-} from 'discord-api-types/v10';
-import {
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
-	CommandInteraction,
-	MessageEmbed,
-	PermissionString,
+	ChatInputCommandInteraction,
+	EmbedBuilder,
+	PermissionsString,
+	ApplicationCommandOptionChoiceData,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 
@@ -34,12 +33,12 @@ export class InitJoinSubCommand implements Command {
 	};
 	public cooldown = new RateLimiter(1, 5000);
 	public deferType = CommandDeferType.PUBLIC;
-	public requireClientPerms: PermissionString[] = [];
+	public requireClientPerms: PermissionsString[] = [];
 
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption
-	): Promise<void> {
+	): Promise<ApplicationCommandOptionChoiceData[]> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === ChatArgs.SKILL_CHOICE_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
@@ -49,8 +48,7 @@ export class InitJoinSubCommand implements Command {
 			const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id);
 			if (!activeCharacter) {
 				//no choices if we don't have a character to match against
-				await InteractionUtils.respond(intr, []);
-				return;
+				return [];
 			}
 			//find a skill on the character matching the autocomplete string
 			const matchedSkills = CharacterUtils.findPossibleSkillFromString(
@@ -58,11 +56,11 @@ export class InitJoinSubCommand implements Command {
 				match
 			).map(skill => ({ name: skill.Name, value: skill.Name }));
 			//return the matched skills
-			await InteractionUtils.respond(intr, matchedSkills);
+			return matchedSkills;
 		}
 	}
 
-	public async execute(intr: CommandInteraction, data: EventData): Promise<void> {
+	public async execute(intr: ChatInputCommandInteraction, data: EventData): Promise<void> {
 		const [currentInitResponse, activeCharacter] = await Promise.all([
 			InitiativeUtils.getInitiativeForChannel(intr.channel),
 			CharacterUtils.getActiveCharacter(intr.user.id),
@@ -88,7 +86,7 @@ export class InitJoinSubCommand implements Command {
 		const diceExpression = intr.options.getString(ChatArgs.ROLL_EXPRESSION_OPTION.name);
 
 		let finalInitiative = 0;
-		let rollResultMessage: MessageEmbed;
+		let rollResultMessage: EmbedBuilder;
 		if (initiativeValue) {
 			finalInitiative = initiativeValue;
 			rollResultMessage = new KoboldEmbed()

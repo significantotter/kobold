@@ -1,4 +1,4 @@
-import { Locale } from 'discord-api-types/v10';
+import { Locale } from 'discord.js';
 import { L } from '../../i18n/i18n-node.js';
 
 interface LanguageData {

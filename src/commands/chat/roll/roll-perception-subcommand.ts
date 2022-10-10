@@ -1,13 +1,8 @@
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
-} from 'discord-api-types/v10';
-import {
-	AutocompleteFocusedOption,
-	AutocompleteInteraction,
-	CacheType,
-	CommandInteraction,
-	PermissionString,
+	ChatInputCommandInteraction,
+	PermissionsString,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 
@@ -15,8 +10,8 @@ import { ChatArgs } from '../../../constants/index.js';
 import { EventData } from '../../../models/internal-models.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
-import { CharacterUtils.getActiveCharacter } from '../../../utils/character-utils.js';
-import { DiceUtils.buildDiceExpression, RollBuilder } from '../../../utils/dice-utils.js';
+import { CharacterUtils } from '../../../utils/character-utils.js';
+import { DiceUtils, RollBuilder } from '../../../utils/dice-utils.js';
 
 export class RollPerceptionSubCommand implements Command {
 	public names = ['perception'];
@@ -29,9 +24,10 @@ export class RollPerceptionSubCommand implements Command {
 	};
 	public cooldown = new RateLimiter(1, 5000);
 	public deferType = CommandDeferType.PUBLIC;
-	public requireClientPerms: PermissionString[] = [];
+	public requireClientPerms: PermissionsString[] = [];
 
-	public async execute(intr: CommandInteraction, data: EventData): Promise<void> {
+	public async execute(intr: ChatInputCommandInteraction, data: EventData): Promise<void> {
+		if (!intr.isChatInputCommand()) return;
 		const modifierExpression = intr.options.getString(ChatArgs.ROLL_MODIFIER_OPTION.name);
 		const rollNote = intr.options.getString(ChatArgs.ROLL_NOTE_OPTION.name);
 

@@ -1,13 +1,12 @@
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
-} from 'discord-api-types/v10';
-import {
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
-	CommandInteraction,
-	PermissionString,
+	ChatInputCommandInteraction,
+	PermissionsString,
+	ApplicationCommandOptionChoiceData,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 
@@ -16,12 +15,8 @@ import { EventData } from '../../../models/internal-models.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { WG } from '../../../services/wanderers-guide/wanderers-guide.js';
-import {
-	CharacterUtils.findPossibleSaveFromString,
-	CharacterUtils.getActiveCharacter,
-	CharacterUtils.getBestNameMatch,
-} from '../../../utils/character-utils.js';
-import { DiceUtils.buildDiceExpression, RollBuilder } from '../../../utils/dice-utils.js';
+import { CharacterUtils } from '../../../utils/character-utils.js';
+import { DiceUtils, RollBuilder } from '../../../utils/dice-utils.js';
 
 export class RollSaveSubCommand implements Command {
 	public names = ['save'];
@@ -34,12 +29,12 @@ export class RollSaveSubCommand implements Command {
 	};
 	public cooldown = new RateLimiter(1, 5000);
 	public deferType = CommandDeferType.PUBLIC;
-	public requireClientPerms: PermissionString[] = [];
+	public requireClientPerms: PermissionsString[] = [];
 
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption
-	): Promise<void> {
+	): Promise<ApplicationCommandOptionChoiceData[]> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === ChatArgs.SAVE_CHOICE_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
@@ -49,20 +44,23 @@ export class RollSaveSubCommand implements Command {
 			const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id);
 			if (!activeCharacter) {
 				//no choices if we don't have a character to match against
-				InteractionUtils.respond(intr, []);
-				return;
+				return [];
 			}
 			//find a save on the character matching the autocomplete string
-			const matchedSaves = CharacterUtils.findPossibleSaveFromString(activeCharacter, match).map(save => ({
+			const matchedSaves = CharacterUtils.findPossibleSaveFromString(
+				activeCharacter,
+				match
+			).map(save => ({
 				name: save.Name,
 				value: save.Name,
 			}));
 			//return the matched saves
-			InteractionUtils.respond(intr, matchedSaves);
+			return matchedSaves;
 		}
 	}
 
-	public async execute(intr: CommandInteraction, data: EventData): Promise<void> {
+	public async execute(intr: ChatInputCommandInteraction, data: EventData): Promise<void> {
+		if (!intr.isChatInputCommand()) return;
 		const saveChoice = intr.options.getString(ChatArgs.SAVE_CHOICE_OPTION.name);
 		const modifierExpression = intr.options.getString(ChatArgs.ROLL_MODIFIER_OPTION.name);
 		const rollNote = intr.options.getString(ChatArgs.ROLL_NOTE_OPTION.name);

@@ -5,7 +5,7 @@ import {
 	RESTPatchAPIApplicationCommandJSONBody,
 	RESTPostAPIApplicationCommandsJSONBody,
 	Routes,
-} from 'discord-api-types/v10';
+} from 'discord.js';
 
 import { Logger } from './logger.js';
 import Config from './../config/config.json';

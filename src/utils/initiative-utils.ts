@@ -4,7 +4,7 @@ import {
 	Initiative,
 	Character,
 } from './../services/kobold/models/index.js';
-import { CommandInteraction, GuildTextBasedChannel, Message, MessageEmbed, User } from 'discord.js';
+import { CommandInteraction, GuildTextBasedChannel, Message, EmbedBuilder, User } from 'discord.js';
 import { KoboldEmbed } from './kobold-embed-utils.js';
 import _ from 'lodash';
 import { InteractionUtils } from './interaction-utils.js';

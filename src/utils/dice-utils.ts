@@ -1,12 +1,12 @@
 import { Character } from './../services/kobold/models/character/character.model';
-import { CommandInteraction, EmbedFieldData, MessageEmbed, User } from 'discord.js';
+import { CommandInteraction, APIEmbedField, EmbedBuilder, User } from 'discord.js';
 import { Dice, DiceResult } from 'dice-typescript';
 import type { WG } from './../services/wanderers-guide/wanderers-guide.js';
 import _ from 'lodash';
 import { CharacterUtils } from './character-utils.js';
 import { KoboldEmbed } from './kobold-embed-utils.js';
 
-interface DiceRollResult extends EmbedFieldData {
+interface DiceRollResult extends APIEmbedField {
 	results: DiceResult | null;
 }
 

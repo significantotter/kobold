@@ -60,11 +60,11 @@ describe('RollBuilder', function () {
 		rollBuilder.addRoll('d20+1', 'testRoll');
 		rollBuilder.addRoll('d4+1', 'testRoll2');
 		const result = rollBuilder.compileEmbed();
-		const diceField1 = result.fields.find(field => field.name === 'testRoll');
-		const diceField2 = result.fields.find(field => field.name === 'testRoll2');
+		const diceField1 = result.data.fields.find(field => field.name === 'testRoll');
+		const diceField2 = result.data.fields.find(field => field.name === 'testRoll2');
 		expect(diceField1.value).toContain('d20+1');
 		expect(diceField2.value).toContain('d4+1');
-		expect(result.title.toLowerCase()).toContain('testname');
+		expect(result.data.title.toLowerCase()).toContain('testname');
 	});
 	test(`making a single roll puts the roll value in the description and ignores the title`, function () {
 		const rollBuilder = new RollBuilder({
@@ -73,10 +73,10 @@ describe('RollBuilder', function () {
 		});
 		rollBuilder.addRoll('d20+1', 'testRoll');
 		const result = rollBuilder.compileEmbed();
-		const diceField = result.fields.find(field => field.name === 'testRoll');
-		expect(result.title.toLowerCase()).toContain('testname');
-		expect(result.title.toLowerCase()).not.toContain('testRoll');
-		expect(result.description).toContain('d20+1');
+		const diceField = result.data.fields.find(field => field.name === 'testRoll');
+		expect(result.data.title.toLowerCase()).toContain('testname');
+		expect(result.data.title.toLowerCase()).not.toContain('testRoll');
+		expect(result.data.description).toContain('d20+1');
 		expect(diceField).toBeUndefined();
 	});
 	test(`when referencing a character, applies the character's name and image to the embed`, function () {
@@ -86,10 +86,10 @@ describe('RollBuilder', function () {
 		});
 		rollBuilder.addRoll('d6+1', 'testRoll');
 		const result = rollBuilder.compileEmbed();
-		expect(result.title.toLowerCase()).toContain(
+		expect(result.data.title.toLowerCase()).toContain(
 			fakeCharacter.characterData.name.toLowerCase()
 		);
-		expect(result.thumbnail.url).toBe(fakeCharacter.characterData?.infoJSON?.imageURL);
+		expect(result.data.thumbnail.url).toBe(fakeCharacter.characterData?.infoJSON?.imageURL);
 	});
 	test(`allows a custom rollnote`, function () {
 		const rollBuilder = new RollBuilder({
@@ -97,7 +97,7 @@ describe('RollBuilder', function () {
 		});
 		rollBuilder.addRoll('d6+1', 'testRoll');
 		const result = rollBuilder.compileEmbed();
-		expect(result.footer.text).toBe('testing!');
+		expect(result.data.footer.text).toBe('testing!');
 	});
 	test(`allows a title that will overwrite any otherwise generated title`, function () {
 		const fakeCharacter = CharacterFactory.build();
@@ -108,9 +108,9 @@ describe('RollBuilder', function () {
 		});
 		rollBuilder.addRoll('d6+1', 'testRoll');
 		const result = rollBuilder.compileEmbed();
-		expect(result.title.toLowerCase()).not.toContain(fakeCharacter.characterData.name);
-		expect(result.title.toLowerCase()).not.toContain('some actor');
-		expect(result.title.toLowerCase()).toBe(`an entirely different title`);
+		expect(result.data.title.toLowerCase()).not.toContain(fakeCharacter.characterData.name);
+		expect(result.data.title.toLowerCase()).not.toContain('some actor');
+		expect(result.data.title.toLowerCase()).toBe(`an entirely different title`);
 	});
 	test('records errors if something causes a thrown error', function () {
 		const rollBuilder = new RollBuilder({});
@@ -121,7 +121,7 @@ describe('RollBuilder', function () {
 		rollBuilder.addRoll('dd6++1', 'errorRoll');
 		console.warn = temp;
 		const result = rollBuilder.compileEmbed();
-		const errorRollField = result.fields.find(field => field.name === 'errorRoll');
+		const errorRollField = result.data.fields.find(field => field.name === 'errorRoll');
 		expect(errorRollField.value).toContain("Yip! We didn't understand the dice roll");
 	});
 	test('records errors if the dice expression is not allowed', function () {
@@ -129,7 +129,7 @@ describe('RollBuilder', function () {
 		rollBuilder.addRoll('d10', 'testRoll');
 		rollBuilder.addRoll('500d6', 'errorRoll');
 		const result = rollBuilder.compileEmbed();
-		const errorRollField = result.fields.find(field => field.name === 'errorRoll');
+		const errorRollField = result.data.fields.find(field => field.name === 'errorRoll');
 		expect(errorRollField.value).toContain("Yip! We didn't understand the dice roll");
 	});
 });

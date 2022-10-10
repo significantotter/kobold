@@ -2,13 +2,12 @@ import {
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
-} from 'discord-api-types/v10';
-import {
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
-	CommandInteraction,
-	PermissionString,
+	ChatInputCommandInteraction,
+	PermissionsString,
+	ApplicationCommandOptionChoiceData,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 import { ChatArgs } from '../../../constants/chat-args.js';
@@ -126,14 +125,14 @@ export class InitCommand implements Command {
 	};
 	public cooldown = new RateLimiter(1, 1000);
 	public deferType = CommandDeferType.PUBLIC;
-	public requireClientPerms: PermissionString[] = [];
+	public requireClientPerms: PermissionsString[] = [];
 
 	constructor(private commands: Command[]) {}
 
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption
-	): Promise<void> {
+	): Promise<ApplicationCommandOptionChoiceData[]> {
 		if (!intr.isAutocomplete()) return;
 
 		let command = CommandUtils.getSubCommandByName(this.commands, intr.options.getSubcommand());
@@ -141,10 +140,11 @@ export class InitCommand implements Command {
 			return;
 		}
 
-		await command.autocomplete(intr, option);
+		return await command.autocomplete(intr, option);
 	}
 
-	public async execute(intr: CommandInteraction, data: EventData): Promise<void> {
+	public async execute(intr: ChatInputCommandInteraction, data: EventData): Promise<void> {
+		if (!intr.isChatInputCommand()) return;
 		let command = CommandUtils.getSubCommandByName(this.commands, intr.options.getSubcommand());
 		if (!command) {
 			await InteractionUtils.send(intr, `Yip! Ran the base command!`);

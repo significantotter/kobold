@@ -1,32 +1,19 @@
-import { InitiativeActorGroup } from '../../../services/kobold/models/initiative-actor-group/initiative-actor-group.model';
-import {
-	InitiativeUtils.getNameMatchGroupFromInitiative,
-	InitiativeBuilder,
-	InitiativeUtils.updateInitiativeRoundMessageOrSendNew,
-} from '../../../utils/initiative-utils';
-import { InitiativeActor } from '../../../services/kobold/models/initiative-actor/initiative-actor.model';
+import { InitiativeUtils, InitiativeBuilder } from '../../../utils/initiative-utils';
 import { ChatArgs } from '../../../constants/chat-args';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
-} from 'discord-api-types/v10';
-import {
-	CommandInteraction,
-	PermissionString,
-	MessageEmbed,
+	ChatInputCommandInteraction,
+	PermissionsString,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
+	ApplicationCommandOptionChoiceData,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 
 import { EventData } from '../../../models/internal-models.js';
 import { InteractionUtils } from '../../../utils/index.js';
-import {
-	InitiativeUtils.getControllableInitiativeActors,
-	InitiativeUtils.getInitiativeForChannel,
-	InitiativeUtils.getNameMatchActorFromInitiative,
-} from '../../../utils/initiative-utils.js';
 import { Command, CommandDeferType } from '../../index.js';
 import _ from 'lodash';
 import { Initiative } from '../../../services/kobold/models/index.js';
@@ -43,12 +30,12 @@ export class InitNextSubCommand implements Command {
 	};
 	public cooldown = new RateLimiter(1, 5000);
 	public deferType = CommandDeferType.PUBLIC;
-	public requireClientPerms: PermissionString[] = [];
+	public requireClientPerms: PermissionsString[] = [];
 
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption
-	): Promise<void> {
+	): Promise<ApplicationCommandOptionChoiceData[]> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === ChatArgs.INIT_CHARACTER_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
@@ -65,17 +52,14 @@ export class InitNextSubCommand implements Command {
 			actorOptions = actorOptions.filter(actor => actor.name.includes(match));
 
 			//return the matched actors
-			await InteractionUtils.respond(
-				intr,
-				actorOptions.map(actor => ({
-					name: actor.name,
-					value: actor.name,
-				}))
-			);
+			return actorOptions.map(actor => ({
+				name: actor.name,
+				value: actor.name,
+			}));
 		}
 	}
 
-	public async execute(intr: CommandInteraction, data: EventData): Promise<void> {
+	public async execute(intr: ChatInputCommandInteraction, data: EventData): Promise<void> {
 		const targetCharacterName = intr.options.getString(ChatArgs.INIT_CHARACTER_OPTION.name);
 		const initResult = await InitiativeUtils.getInitiativeForChannel(intr.channel);
 		if (initResult.errorMessage) {
@@ -102,7 +86,10 @@ export class InitNextSubCommand implements Command {
 			groups: updatedInitiative.actorGroups,
 		});
 
-		const roundMessage = await InitiativeUtils.updateInitiativeRoundMessageOrSendNew(intr, initBuilder);
+		const roundMessage = await InitiativeUtils.updateInitiativeRoundMessageOrSendNew(
+			intr,
+			initBuilder
+		);
 
 		let currentRoundMessage = roundMessage;
 

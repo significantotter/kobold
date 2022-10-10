@@ -1,5 +1,4 @@
-import { Locale, LocalizationMap } from 'discord-api-types/v10';
-import { MessageEmbed } from 'discord.js';
+import { Locale, LocalizationMap, EmbedBuilder, resolveColor } from 'discord.js';
 import { Linguini, TypeMapper, TypeMappers, Utils } from 'linguini';
 import path, { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -13,10 +12,10 @@ export class Lang {
 		location: string,
 		langCode: Locale,
 		variables?: { [name: string]: string }
-	): MessageEmbed {
+	): EmbedBuilder {
 		return (
-			this.linguini.get(location, langCode, this.messageEmbedTm, variables) ??
-			this.linguini.get(location, Language.Default, this.messageEmbedTm, variables)
+			this.linguini.get(location, langCode, this.EmbedBuilderTm, variables) ??
+			this.linguini.get(location, Language.Default, this.EmbedBuilderTm, variables)
 		);
 	}
 
@@ -53,8 +52,8 @@ export class Lang {
 		return this.linguini.getCom(location, variables);
 	}
 
-	private static messageEmbedTm: TypeMapper<MessageEmbed> = (jsonValue: any) => {
-		return new MessageEmbed({
+	private static EmbedBuilderTm: TypeMapper<EmbedBuilder> = (jsonValue: any) => {
+		return new EmbedBuilder({
 			author: jsonValue.author,
 			title: Utils.join(jsonValue.title, '\n'),
 			url: jsonValue.url,
@@ -75,7 +74,7 @@ export class Lang {
 				iconURL: jsonValue.footer?.icon,
 			},
 			timestamp: jsonValue.timestamp ? Date.now() : undefined,
-			color: jsonValue.color ?? Lang.getCom('colors.default'),
+			color: resolveColor(jsonValue.color ?? Lang.getCom('colors.default')),
 		});
 	};
 }

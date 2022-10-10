@@ -1,14 +1,16 @@
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
-} from 'discord-api-types/v10';
-import { CommandInteraction, PermissionString, MessageEmbed } from 'discord.js';
+	ChatInputCommandInteraction,
+	PermissionsString,
+	EmbedBuilder,
+} from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 import { EventData } from '../../../models/internal-models.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import type { WG } from '../../../services/wanderers-guide/wanderers-guide.js';
-import { CharacterUtils.getActiveCharacter } from '../../../utils/character-utils.js';
+import { CharacterUtils } from '../../../utils/character-utils.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { Language } from '../../../models/enum-helpers/index.js';
 import { Lang } from '../../../services/index.js';
@@ -23,9 +25,9 @@ export class CharacterSheetSubCommand implements Command {
 		default_member_permissions: undefined,
 	};
 	public deferType = CommandDeferType.PUBLIC;
-	public requireClientPerms: PermissionString[] = [];
+	public requireClientPerms: PermissionsString[] = [];
 
-	public async execute(intr: CommandInteraction, data: EventData): Promise<void> {
+	public async execute(intr: ChatInputCommandInteraction, data: EventData): Promise<void> {
 		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id);
 		if (!activeCharacter) {
 			await InteractionUtils.send(intr, `Yip! You don't have any active characters!`);
@@ -43,10 +45,10 @@ export class CharacterSheetSubCommand implements Command {
 		const ancestry = characterData.ancestryName;
 		const classes = [characterData.className, characterData.className2].join(' ').trim();
 
-		let messageEmbed = new KoboldEmbed().setTitle(characterData.name).setURL(characterUrl);
+		let EmbedBuilder = new KoboldEmbed().setTitle(characterData.name).setURL(characterUrl);
 
 		if (imageUrl) {
-			messageEmbed = messageEmbed.setThumbnail(imageUrl);
+			EmbedBuilder = EmbedBuilder.setThumbnail(imageUrl);
 		}
 
 		let maxHpText = String(calculatedStats.maxHP);
@@ -63,7 +65,7 @@ export class CharacterSheetSubCommand implements Command {
 		let totalSpeedText = String(calculatedStats.totalSpeed);
 		if (totalSpeedText === 'null') totalSpeedText = 'none';
 
-		messageEmbed.addFields([
+		EmbedBuilder.addFields([
 			{
 				name: `Level ${level} ${heritage} ${ancestry} ${classes}\n`,
 				value:
@@ -103,7 +105,7 @@ export class CharacterSheetSubCommand implements Command {
 		if (abilitiesText) skillAndSaveEmbeds.push(abilitiesEmbed);
 		if (savesText) skillAndSaveEmbeds.push(savesEmbed);
 
-		messageEmbed.addFields(skillAndSaveEmbeds);
+		EmbedBuilder.addFields(skillAndSaveEmbeds);
 
 		const thirdSkillsArr = calculatedStats.totalSkills.map(skill => {
 			const symbol = skill.Bonus >= 0 ? '+' : '';
@@ -131,8 +133,8 @@ export class CharacterSheetSubCommand implements Command {
 				value: thirdSkillsArr.join('\n'),
 				inline: true,
 			});
-		if (skillFields.length) messageEmbed.addFields(skillFields);
+		if (skillFields.length) EmbedBuilder.addFields(skillFields);
 
-		await InteractionUtils.send(intr, messageEmbed);
+		await InteractionUtils.send(intr, EmbedBuilder);
 	}
 }

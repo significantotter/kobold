@@ -1,9 +1,10 @@
+import { CollectorUtils } from 'discord.js-collector-utils';
 import { Language } from './../../../models/enum-helpers/language';
 import { InteractionUtils } from './../../../utils/interaction-utils';
-import { Locale } from 'discord-api-types/v10';
+import { Locale } from 'discord.js';
 import { Character, CharacterFactory } from '../../../services/kobold/models/index.js';
 import { CharacterRemoveSubCommand } from './character-remove-subcommand.js';
-
+console.log(CollectorUtils.collectByMessage);
 describe('CharacterRemoveSubCommand', () => {
 	const fakeData = {
 		lang() {
@@ -27,5 +28,50 @@ describe('CharacterRemoveSubCommand', () => {
 		} as any;
 		const command = new CharacterRemoveSubCommand();
 		command.execute(fakeIntr, fakeData as any);
+	});
+	test('Allows the user to cancel the removal of their character', done => {
+		let charToRemove = CharacterFactory.withFakeId().build();
+		let interactionCount = 0;
+		let prompt;
+		jest.spyOn(Character, 'query').mockReturnValue({
+			where({ userId }) {
+				return [charToRemove];
+			},
+		} as any);
+
+		jest.spyOn(InteractionUtils, 'send').mockImplementation((intr, message: any): any => {
+			if (interactionCount === 0) {
+				prompt = 'arrived here!';
+				return;
+			} else if (interactionCount === 1) {
+				expect(message?.content).toBe(
+					Language.LL.commands.character.remove.interactions.cancelled({
+						characterName: charToRemove.characterData.name,
+					})
+				);
+			} else {
+				done();
+			}
+		});
+
+		jest.spyOn(CollectorUtils, 'collectByButton').mockImplementation(((
+			message,
+			retriever,
+			options
+		) => {
+			expect(message).toBe(prompt);
+			return { value: 'cancel' };
+		}) as any);
+
+		const fakeIntr = {
+			user: { id: null },
+		} as any;
+		const command = new CharacterRemoveSubCommand();
+		command.execute(fakeIntr, fakeData as any);
+	});
+	test('A removal request can expire', () => {});
+	test("Removes the user's character", () => {});
+	afterEach(function () {
+		jest.restoreAllMocks();
 	});
 });

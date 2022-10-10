@@ -2,17 +2,15 @@ import { Character } from '../../../services/kobold/models/index.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
-} from 'discord-api-types/v10';
-import { CommandInteraction, PermissionString } from 'discord.js';
-import { RateLimiter } from 'discord.js-rate-limiter';
+	ChatInputCommandInteraction,
+	PermissionsString,
+} from 'discord.js';
 
 import { EventData } from '../../../models/internal-models.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
-import { MessageEmbed } from 'discord.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { Language } from '../../../models/enum-helpers/index.js';
-import { Lang } from '../../../services/lang.js';
 
 export class CharacterListSubCommand implements Command {
 	public names = [Language.LL.commands.character.list.name()];
@@ -24,9 +22,9 @@ export class CharacterListSubCommand implements Command {
 		default_member_permissions: undefined,
 	};
 	public deferType = CommandDeferType.PUBLIC;
-	public requireClientPerms: PermissionString[] = [];
+	public requireClientPerms: PermissionsString[] = [];
 
-	public async execute(intr: CommandInteraction, data: EventData): Promise<void> {
+	public async execute(intr: ChatInputCommandInteraction, data: EventData): Promise<void> {
 		const LL = Language.localize(data.lang());
 		// try and find that charcter
 		const targetCharacter = await Character.query().where({
