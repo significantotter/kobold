@@ -12,7 +12,7 @@ import { EventData } from '../../../models/internal-models.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
-import { CollectorUtils } from 'discord.js-collector-utils';
+import { CollectorUtils } from './../../../utils/collector-utils.js';
 import { Language } from '../../../models/enum-helpers/index.js';
 
 export class CharacterRemoveSubCommand implements Command {

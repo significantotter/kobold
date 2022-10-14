@@ -74,8 +74,6 @@ export class InitNextSubCommand implements Command {
 			return;
 		}
 
-		let saveMessage = nextTurn.currentRound > initResult.init.currentRound;
-
 		const updatedInitiative = await Initiative.query()
 			.updateAndFetchById(initResult.init.id, nextTurn)
 			.withGraphFetched('[actors.[character], actorGroups]');
@@ -86,22 +84,7 @@ export class InitNextSubCommand implements Command {
 			groups: updatedInitiative.actorGroups,
 		});
 
-		const roundMessage = await InitiativeUtils.updateInitiativeRoundMessageOrSendNew(
-			intr,
-			initBuilder
-		);
-
-		let currentRoundMessage = roundMessage;
-
-		if (saveMessage) {
-			let roundMessageIds = initResult.init.roundMessageIds;
-			roundMessageIds.push(roundMessage.id);
-			await Initiative.query().update({ roundMessageIds }).where({ id: initResult.init.id });
-		} else {
-			currentRoundMessage = await initBuilder.getCurrentRoundMessage(intr);
-		}
-		const url = currentRoundMessage ? currentRoundMessage.url : '';
-		const currentTurnEmbed = await KoboldEmbed.turnFromInitiativeBuilder(initBuilder, url);
+		const currentTurnEmbed = await KoboldEmbed.turnFromInitiativeBuilder(initBuilder);
 		const activeGroup = initBuilder.activeGroup;
 
 		await InteractionUtils.send(intr, {

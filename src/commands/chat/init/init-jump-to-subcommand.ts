@@ -86,12 +86,8 @@ export class InitJumpToSubCommand implements Command {
 			.withGraphFetched('[actors.[character], actorGroups]');
 
 		const initBuilder = new InitiativeBuilder({ initiative: updatedInitiative });
-		const currentRoundMessage = await initBuilder.getCurrentRoundMessage(intr);
-		const url = currentRoundMessage ? currentRoundMessage.url : '';
-		const currentTurnEmbed = await KoboldEmbed.turnFromInitiativeBuilder(initBuilder, url);
+		const currentTurnEmbed = await KoboldEmbed.turnFromInitiativeBuilder(initBuilder);
 		const activeGroup = initBuilder.activeGroup;
-
-		await InitiativeUtils.updateInitiativeRoundMessageOrSendNew(intr, initBuilder);
 
 		await InteractionUtils.send(intr, {
 			content: `<@${activeGroup.userId}>`,

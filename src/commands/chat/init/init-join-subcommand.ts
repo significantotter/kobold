@@ -172,7 +172,12 @@ export class InitJoinSubCommand implements Command {
 			actors: currentInit.actors.concat(newActor),
 			groups: currentInit.actorGroups.concat(newActor.actorGroup),
 		});
-		await InitiativeUtils.updateInitiativeRoundMessageOrSendNew(intr, initBuilder);
 		await InteractionUtils.send(intr, rollResultMessage);
+		if (currentInit.currentRound === 0) {
+			await InitiativeUtils.updateInitiativeRoundMessageOrSendNew(intr, initBuilder);
+		} else {
+			const embed = await KoboldEmbed.roundFromInitiativeBuilder(initBuilder);
+			await InteractionUtils.send(intr, { embeds: [embed] });
+		}
 	}
 }

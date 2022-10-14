@@ -73,7 +73,7 @@ describe('RollBuilder', function () {
 		});
 		rollBuilder.addRoll('d20+1', 'testRoll');
 		const result = rollBuilder.compileEmbed();
-		const diceField = result.data.fields.find(field => field.name === 'testRoll');
+		const diceField = (result.data?.fields || []).find(field => field.name === 'testRoll');
 		expect(result.data.title.toLowerCase()).toContain('testname');
 		expect(result.data.title.toLowerCase()).not.toContain('testRoll');
 		expect(result.data.description).toContain('d20+1');

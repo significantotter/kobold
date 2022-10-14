@@ -18,6 +18,7 @@ function getFakeInitiativeBuilder() {
 			},
 		],
 		getActorGroupTurnText: jest.fn(() => 'Test Group Turn Text'),
+		getAllGroupsTurnText: jest.fn(() => 'Test Group Turn Text'),
 		actorsByGroup: {
 			'test-group-id': [
 				{
@@ -64,7 +65,7 @@ describe('KoboldEmbedUtils', () => {
 					},
 				};
 				embed.setCharacter(character as Character);
-				expect(embed.data.thumbnail).toBeNull();
+				expect(embed.data.thumbnail).toBeFalsy();
 			});
 		});
 		describe('turnFromInitiativeBuilder', () => {
@@ -121,7 +122,7 @@ describe('KoboldEmbedUtils', () => {
 					},
 				};
 				const embed = KoboldEmbed.turnFromInitiativeBuilder(initiativeBuilder as any);
-				expect(embed.data.thumbnail).toBeNull();
+				expect(embed.data.thumbnail).toBeFalsy();
 			});
 			test('adds a link to the message url if there is one', function () {
 				const initiativeBuilder = getFakeInitiativeBuilder();
@@ -143,6 +144,9 @@ describe('KoboldEmbedUtils', () => {
 				const initiativeBuilder = {
 					...getFakeInitiativeBuilder(),
 					getActorGroupTurnText: jest.fn(group => `${group.name} Turn Text`),
+					getAllGroupsTurnText: jest.fn(
+						() => 'Test Group 1 Turn Text\n Test Group 2 Turn Text'
+					),
 					groups: [
 						{
 							name: 'Test Group 1',
@@ -161,10 +165,11 @@ describe('KoboldEmbedUtils', () => {
 			test('still works if there are no groups', function () {
 				const initiativeBuilder = {
 					...getFakeInitiativeBuilder(),
+					getAllGroupsTurnText: jest.fn(() => ' '),
 					groups: [],
 				};
 				const embed = KoboldEmbed.roundFromInitiativeBuilder(initiativeBuilder as any);
-				expect(embed.data.description).toBe('');
+				expect(embed.data.description.trim()).toBe('');
 			});
 			test('works if the initiative has no current round', function () {
 				const initiativeBuilder = {

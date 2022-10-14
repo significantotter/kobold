@@ -248,6 +248,40 @@ describe('initiative-utils', function () {
 				expect(builder.init.currentTurnGroupId).toBe(actors[0].initiativeActorGroupId);
 			});
 		});
+		describe('getAllGroupsTurnText', function () {
+			test('includes all the groups in the description', function () {
+				const initiative = InitiativeFactory.build({
+					currentRound: 1,
+					currentTurnGroupId: null,
+				});
+				const { actors, groups, firstGroup, secondGroup, thirdGroup } =
+					setupInitiativeActorsAndGroupsForTests(initiative);
+
+				const builder = new InitiativeBuilder({
+					initiative,
+					actors,
+					groups,
+				});
+
+				const result = builder.getAllGroupsTurnText();
+				expect(result).toContain(firstGroup.name);
+				expect(result).toContain(secondGroup.name);
+				expect(result).toContain(thirdGroup.name);
+			});
+			test('still works if there are no groups', function () {
+				const initiative = InitiativeFactory.build({
+					currentRound: 1,
+					currentTurnGroupId: null,
+				});
+				const builder = new InitiativeBuilder({
+					initiative,
+					actors: [],
+					groups: [],
+				});
+
+				expect(builder.getAllGroupsTurnText().trim()).toBe('');
+			});
+		});
 		describe('getActorGroupTurnText', function () {
 			test('returns the text for a group with one actor', function () {
 				const initiative = InitiativeFactory.build({

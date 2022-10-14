@@ -171,9 +171,23 @@ export class InitiativeBuilder {
 	}
 
 	/**
+	 * Creates a string that displays information for all actor groups in an initiative display
+	 */
+	public getAllGroupsTurnText(): string {
+		let builtTurnText = '```md\n';
+		for (const group of this.groups) {
+			builtTurnText += this.getActorGroupTurnText(group);
+		}
+		builtTurnText += '```';
+		if (this.groups.length === 0) {
+			builtTurnText = ' ';
+		}
+		return builtTurnText;
+	}
+
+	/**
 	 * Creates a string that displays information for an actor group in an initiative display
 	 * @param actorGroup The actor group to generate text for
-	 * @returns
 	 */
 	public getActorGroupTurnText(actorGroup: InitiativeActorGroup): string {
 		const actorsInGroup = this.actorsByGroup[actorGroup.id] || [];

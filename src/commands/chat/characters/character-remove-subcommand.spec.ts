@@ -1,10 +1,10 @@
-import { CollectorUtils } from 'discord.js-collector-utils';
+import { CollectorUtils } from './../../../utils/collector-utils.js';
 import { Language } from './../../../models/enum-helpers/language';
 import { InteractionUtils } from './../../../utils/interaction-utils';
 import { Locale } from 'discord.js';
 import { Character, CharacterFactory } from '../../../services/kobold/models/index.js';
 import { CharacterRemoveSubCommand } from './character-remove-subcommand.js';
-console.log(CollectorUtils.collectByMessage);
+
 describe('CharacterRemoveSubCommand', () => {
 	const fakeData = {
 		lang() {
@@ -40,18 +40,16 @@ describe('CharacterRemoveSubCommand', () => {
 		} as any);
 
 		jest.spyOn(InteractionUtils, 'send').mockImplementation((intr, message: any): any => {
-			if (interactionCount === 0) {
-				prompt = 'arrived here!';
-				return;
-			} else if (interactionCount === 1) {
-				expect(message?.content).toBe(
-					Language.LL.commands.character.remove.interactions.cancelled({
-						characterName: charToRemove.characterData.name,
-					})
-				);
-			} else {
-				done();
-			}
+			prompt = 'arrived here!';
+			return prompt;
+		});
+		jest.spyOn(InteractionUtils, 'editReply').mockImplementation((intr, message: any): any => {
+			expect(message?.content).toBe(
+				Language.LL.commands.character.remove.interactions.cancelled({
+					characterName: charToRemove.characterData.name,
+				})
+			);
+			done();
 		});
 
 		jest.spyOn(CollectorUtils, 'collectByButton').mockImplementation(((

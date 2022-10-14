@@ -27,13 +27,11 @@ export class KoboldEmbed extends EmbedBuilder {
 		if (!groupTurn) {
 			result.setTitle("Yip! Something went wrong! I can't figure out whose turn it is!");
 			return result;
-		} else {
-			result.setTitle(`It's ${groupTurn.name}'s turn!`);
-
-			result.setDescription(
-				'```md\n' + initiativeBuilder.getActorGroupTurnText(groupTurn) + '```'
-			);
 		}
+		result.setTitle(`It's ${groupTurn.name}'s turn!`);
+
+		result.setDescription(initiativeBuilder.getAllGroupsTurnText());
+
 		let roundText = '';
 		if (targetMessageUrl) {
 			roundText = '';
@@ -54,15 +52,7 @@ export class KoboldEmbed extends EmbedBuilder {
 		const result = new KoboldEmbed().setTitle(
 			`Initiative Round ${initiativeBuilder.init?.currentRound || 0}`
 		);
-		let builtTurnText = '```md\n';
-		for (const group of initiativeBuilder.groups) {
-			builtTurnText += initiativeBuilder.getActorGroupTurnText(group);
-		}
-		builtTurnText += '```';
-		if (initiativeBuilder.groups.length === 0) {
-			builtTurnText = ' ';
-		}
-		result.setDescription(builtTurnText);
+		result.setDescription(initiativeBuilder.getAllGroupsTurnText());
 		return result;
 	}
 }

@@ -85,12 +85,8 @@ export class InitPrevSubCommand implements Command {
 			groups: updatedInitiative.actorGroups,
 		});
 
-		const currentRoundMessage = await initBuilder.getCurrentRoundMessage(intr);
-		const url = currentRoundMessage ? currentRoundMessage.url : '';
-		const currentTurnEmbed = await KoboldEmbed.turnFromInitiativeBuilder(initBuilder, url);
+		const currentTurnEmbed = await KoboldEmbed.turnFromInitiativeBuilder(initBuilder);
 		const activeGroup = initBuilder.activeGroup;
-
-		await InitiativeUtils.updateInitiativeRoundMessageOrSendNew(intr, initBuilder);
 
 		await InteractionUtils.send(intr, {
 			content: `<@${activeGroup.userId}>`,
