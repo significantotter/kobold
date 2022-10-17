@@ -20,6 +20,7 @@ import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import _ from 'lodash';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
+import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 
 export class InitSetSubCommand implements Command {
 	public names = ['set'];
@@ -62,7 +63,11 @@ export class InitSetSubCommand implements Command {
 		}
 	}
 
-	public async execute(intr: ChatInputCommandInteraction, data: EventData): Promise<void> {
+	public async execute(
+		intr: ChatInputCommandInteraction,
+		data: EventData,
+		LL: TranslationFunctions
+	): Promise<void> {
 		const targetCharacterName = intr.options
 			.getString(ChatArgs.INIT_CHARACTER_OPTION.name)
 			.trim();

@@ -12,6 +12,7 @@ import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
 import { DiceUtils, RollBuilder } from '../../../utils/dice-utils.js';
+import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 
 export class RollPerceptionSubCommand implements Command {
 	public names = ['perception'];
@@ -26,7 +27,11 @@ export class RollPerceptionSubCommand implements Command {
 	public deferType = CommandDeferType.PUBLIC;
 	public requireClientPerms: PermissionsString[] = [];
 
-	public async execute(intr: ChatInputCommandInteraction, data: EventData): Promise<void> {
+	public async execute(
+		intr: ChatInputCommandInteraction,
+		data: EventData,
+		LL: TranslationFunctions
+	): Promise<void> {
 		if (!intr.isChatInputCommand()) return;
 		const modifierExpression = intr.options.getString(ChatArgs.ROLL_MODIFIER_OPTION.name);
 		const rollNote = intr.options.getString(ChatArgs.ROLL_NOTE_OPTION.name);

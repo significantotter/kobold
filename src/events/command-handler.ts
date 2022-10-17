@@ -16,6 +16,7 @@ import { CommandUtils, InteractionUtils } from '../utils/index.js';
 import { EventHandler } from './index.js';
 import Config from './../config/config.json';
 import Logs from './../config/lang/logs.json';
+import { Language } from '../models/enum-helpers/language.js';
 
 export class CommandHandler implements EventHandler {
 	private rateLimiter = new RateLimiter(
@@ -128,7 +129,8 @@ export class CommandHandler implements EventHandler {
 			let passesChecks = await CommandUtils.runChecks(command, intr, data);
 			if (passesChecks) {
 				// Execute the command
-				await command.execute(intr, data);
+				const LL = Language.localize(data.lang());
+				await command.execute(intr, data, LL);
 			}
 		} catch (error) {
 			await this.sendError(intr, data);

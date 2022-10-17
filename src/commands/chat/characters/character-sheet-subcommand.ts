@@ -14,6 +14,7 @@ import { CharacterUtils } from '../../../utils/character-utils.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { Language } from '../../../models/enum-helpers/index.js';
 import { Lang } from '../../../services/index.js';
+import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 
 export class CharacterSheetSubCommand implements Command {
 	public names = [Language.LL.commands.character.sheet.name()];
@@ -27,10 +28,17 @@ export class CharacterSheetSubCommand implements Command {
 	public deferType = CommandDeferType.PUBLIC;
 	public requireClientPerms: PermissionsString[] = [];
 
-	public async execute(intr: ChatInputCommandInteraction, data: EventData): Promise<void> {
+	public async execute(
+		intr: ChatInputCommandInteraction,
+		data: EventData,
+		LL: TranslationFunctions
+	): Promise<void> {
 		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id);
 		if (!activeCharacter) {
-			await InteractionUtils.send(intr, `Yip! You don't have any active characters!`);
+			await InteractionUtils.send(
+				intr,
+				LL.commands.character.interactions.noActiveCharacter()
+			);
 			return;
 		}
 
@@ -67,16 +75,22 @@ export class CharacterSheetSubCommand implements Command {
 
 		EmbedBuilder.addFields([
 			{
-				name: `Level ${level} ${heritage} ${ancestry} ${classes}\n`,
-				value:
-					`Max HP \`${maxHpText}\`\n` +
-					`AC \`${totalACText}\`\n` +
-					`Perception \`${totalPerceptionText}\` (DC ${
-						10 + (calculatedStats.totalPerception || 0)
-					})\n` +
-					`${classes} DC \`${totalClassDCText}\`\n` +
-					`Speed \`${totalSpeedText}\`\n\n` +
-					`Background: ${characterData.backgroundName || 'none'}`,
+				name: LL.commands.character.sheet.interactions.sheet.coreDataField.name({
+					level,
+					heritage,
+					ancestry,
+					classes,
+				}),
+				value: LL.commands.character.sheet.interactions.sheet.coreDataField.value({
+					health: maxHpText,
+					armorClass: totalACText,
+					perceptionModifier: totalPerceptionText,
+					perceptionDC: 10 + (Number(totalPerceptionText) || 0),
+					classes,
+					classDC: totalClassDCText,
+					speed: totalSpeedText,
+					background: characterData.backgroundName || 'none',
+				}),
 			},
 		]);
 		const abilitiesText = calculatedStats.totalAbilityScores
@@ -86,7 +100,7 @@ export class CharacterSheetSubCommand implements Command {
 			})
 			.join(', ');
 		const abilitiesEmbed = {
-			name: 'Abilities',
+			name: LL.commands.character.sheet.interactions.sheet.abilitiesField.name(),
 			value: abilitiesText,
 			inline: false,
 		};
@@ -97,7 +111,7 @@ export class CharacterSheetSubCommand implements Command {
 			})
 			.join(', ');
 		const savesEmbed = {
-			name: 'Saves',
+			name: LL.commands.character.sheet.interactions.sheet.savesField.name(),
 			value: savesText,
 			inline: false,
 		};
@@ -117,19 +131,19 @@ export class CharacterSheetSubCommand implements Command {
 		const skillFields = [];
 		if (firstSkillsArr.length)
 			skillFields.push({
-				name: 'Skills',
+				name: LL.commands.character.sheet.interactions.sheet.skillsField.name(),
 				value: firstSkillsArr.join('\n'),
 				inline: true,
 			});
 		if (secondSkillsArr.length)
 			skillFields.push({
-				name: 'Skills',
+				name: LL.commands.character.sheet.interactions.sheet.skillsField.name(),
 				value: secondSkillsArr.join('\n'),
 				inline: true,
 			});
 		if (thirdSkillsArr.length)
 			skillFields.push({
-				name: 'Skills',
+				name: LL.commands.character.sheet.interactions.sheet.skillsField.name(),
 				value: thirdSkillsArr.join('\n'),
 				inline: true,
 			});

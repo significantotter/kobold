@@ -16,6 +16,7 @@ import { CharacterHelpers } from './helpers.js';
 import Config from '../../../config/config.json';
 import { CharacterUtils } from '../../../utils/character-utils.js';
 import { CharacterOptions } from './command-options.js';
+import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 
 export class CharacterImportSubCommand implements Command {
 	public names = [Language.LL.commands.character.import.name()];
@@ -29,9 +30,12 @@ export class CharacterImportSubCommand implements Command {
 	public deferType = CommandDeferType.PUBLIC;
 	public requireClientPerms: PermissionsString[] = [];
 
-	public async execute(intr: ChatInputCommandInteraction, data: EventData): Promise<void> {
+	public async execute(
+		intr: ChatInputCommandInteraction,
+		data: EventData,
+		LL: TranslationFunctions
+	): Promise<void> {
 		const url = intr.options.getString(CharacterOptions.IMPORT_OPTION.name).trim();
-		const LL = Language.localize(data.lang());
 		let charId = CharacterUtils.parseCharacterIdFromText(url);
 		if (charId === null) {
 			await InteractionUtils.send(
@@ -62,9 +66,10 @@ export class CharacterImportSubCommand implements Command {
 			// The user needs to authenticate!
 			await InteractionUtils.send(
 				intr,
-				LL.commands.character.import.interactions.authenticationRequest({
+				LL.commands.character.interactions.authenticationRequest({
 					wgBaseUrl: Config.wanderersGuide.oauthBaseUrl,
 					charId,
+					action: 'import',
 				})
 			);
 			return;

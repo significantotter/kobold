@@ -18,6 +18,7 @@ import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import _ from 'lodash';
 import { Initiative } from '../../../services/kobold/models/index.js';
+import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 
 export class InitJumpToSubCommand implements Command {
 	public names = ['jump_to'];
@@ -63,7 +64,11 @@ export class InitJumpToSubCommand implements Command {
 		}
 	}
 
-	public async execute(intr: ChatInputCommandInteraction, data: EventData): Promise<void> {
+	public async execute(
+		intr: ChatInputCommandInteraction,
+		data: EventData,
+		LL: TranslationFunctions
+	): Promise<void> {
 		const targetCharacterName = intr.options.getString(ChatArgs.INIT_CHARACTER_OPTION.name);
 		const initResult = await InitiativeUtils.getInitiativeForChannel(intr.channel);
 		if (initResult.errorMessage) {

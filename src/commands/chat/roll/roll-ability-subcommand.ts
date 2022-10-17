@@ -17,6 +17,7 @@ import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { WG } from '../../../services/wanderers-guide/wanderers-guide.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
+import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 
 export class RollAbilitySubCommand implements Command {
 	public names = ['ability'];
@@ -59,7 +60,11 @@ export class RollAbilitySubCommand implements Command {
 		}
 	}
 
-	public async execute(intr: ChatInputCommandInteraction, data: EventData): Promise<void> {
+	public async execute(
+		intr: ChatInputCommandInteraction,
+		data: EventData,
+		LL: TranslationFunctions
+	): Promise<void> {
 		const abilityChoice = intr.options.getString(ChatArgs.ABILITY_CHOICE_OPTION.name);
 		const modifierExpression = intr.options.getString(ChatArgs.ROLL_MODIFIER_OPTION.name);
 		const rollNote = intr.options.getString(ChatArgs.ROLL_NOTE_OPTION.name);

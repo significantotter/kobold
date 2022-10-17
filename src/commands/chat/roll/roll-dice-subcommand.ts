@@ -11,6 +11,7 @@ import { EventData } from '../../../models/internal-models.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { RollBuilder } from '../../../utils/dice-utils.js';
+import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 
 export class RollDiceSubCommand implements Command {
 	public names = ['dice'];
@@ -25,7 +26,11 @@ export class RollDiceSubCommand implements Command {
 	public deferType = CommandDeferType.PUBLIC;
 	public requireClientPerms: PermissionsString[] = [];
 
-	public async execute(intr: ChatInputCommandInteraction, data: EventData): Promise<void> {
+	public async execute(
+		intr: ChatInputCommandInteraction,
+		data: EventData,
+		LL: TranslationFunctions
+	): Promise<void> {
 		if (!intr.isChatInputCommand()) return;
 		const diceExpression = intr.options.getString(ChatArgs.ROLL_EXPRESSION_OPTION.name);
 		const rollNote = intr.options.getString(ChatArgs.ROLL_NOTE_OPTION.name);

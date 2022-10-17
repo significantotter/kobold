@@ -17,6 +17,7 @@ import { Command, CommandDeferType } from '../../index.js';
 import { WG } from '../../../services/wanderers-guide/wanderers-guide.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
 import { DiceUtils, RollBuilder } from '../../../utils/dice-utils.js';
+import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 
 export class RollSaveSubCommand implements Command {
 	public names = ['save'];
@@ -59,7 +60,11 @@ export class RollSaveSubCommand implements Command {
 		}
 	}
 
-	public async execute(intr: ChatInputCommandInteraction, data: EventData): Promise<void> {
+	public async execute(
+		intr: ChatInputCommandInteraction,
+		data: EventData,
+		LL: TranslationFunctions
+	): Promise<void> {
 		if (!intr.isChatInputCommand()) return;
 		const saveChoice = intr.options.getString(ChatArgs.SAVE_CHOICE_OPTION.name);
 		const modifierExpression = intr.options.getString(ChatArgs.ROLL_MODIFIER_OPTION.name);

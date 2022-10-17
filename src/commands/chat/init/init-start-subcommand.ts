@@ -5,6 +5,7 @@ import {
 	PermissionsString,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
+import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 
 import { EventData } from '../../../models/internal-models.js';
 import { Initiative } from '../../../services/kobold/models/index.js';
@@ -26,7 +27,11 @@ export class InitStartSubCommand implements Command {
 	public deferType = CommandDeferType.PUBLIC;
 	public requireClientPerms: PermissionsString[] = [];
 
-	public async execute(intr: ChatInputCommandInteraction, data: EventData): Promise<void> {
+	public async execute(
+		intr: ChatInputCommandInteraction,
+		data: EventData,
+		LL: TranslationFunctions
+	): Promise<void> {
 		const startingUser = intr.user.id;
 		if (!intr.channel || !intr.channel.id) {
 			await InteractionUtils.send(

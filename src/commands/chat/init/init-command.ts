@@ -11,6 +11,7 @@ import {
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 import { ChatArgs } from '../../../constants/chat-args.js';
+import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 
 import { EventData } from '../../../models/internal-models.js';
 import { CommandUtils, InteractionUtils } from '../../../utils/index.js';
@@ -143,7 +144,11 @@ export class InitCommand implements Command {
 		return await command.autocomplete(intr, option);
 	}
 
-	public async execute(intr: ChatInputCommandInteraction, data: EventData): Promise<void> {
+	public async execute(
+		intr: ChatInputCommandInteraction,
+		data: EventData,
+		LL: TranslationFunctions
+	): Promise<void> {
 		if (!intr.isChatInputCommand()) return;
 		let command = CommandUtils.getSubCommandByName(this.commands, intr.options.getSubcommand());
 		if (!command) {
@@ -153,7 +158,7 @@ export class InitCommand implements Command {
 
 		let passesChecks = await CommandUtils.runChecks(command, intr, data);
 		if (passesChecks) {
-			await command.execute(intr, data);
+			await command.execute(intr, data, LL);
 		}
 	}
 }

@@ -11,6 +11,7 @@ import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { Language } from '../../../models/enum-helpers/index.js';
+import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 
 export class CharacterListSubCommand implements Command {
 	public names = [Language.LL.commands.character.list.name()];
@@ -24,8 +25,11 @@ export class CharacterListSubCommand implements Command {
 	public deferType = CommandDeferType.PUBLIC;
 	public requireClientPerms: PermissionsString[] = [];
 
-	public async execute(intr: ChatInputCommandInteraction, data: EventData): Promise<void> {
-		const LL = Language.localize(data.lang());
+	public async execute(
+		intr: ChatInputCommandInteraction,
+		data: EventData,
+		LL: TranslationFunctions
+	): Promise<void> {
 		// try and find that charcter
 		const targetCharacter = await Character.query().where({
 			userId: intr.user.id,

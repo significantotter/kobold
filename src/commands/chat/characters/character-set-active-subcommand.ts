@@ -10,14 +10,13 @@ import {
 	PermissionsString,
 	ApplicationCommandOptionChoiceData,
 } from 'discord.js';
-import { RateLimiter } from 'discord.js-rate-limiter';
 
 import { ChatArgs } from '../../../constants/index.js';
 import { EventData } from '../../../models/internal-models.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { Language } from '../../../models/enum-helpers/index.js';
-import { Lang } from '../../../services/index.js';
+import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 
 export class CharacterSetActiveSubCommand implements Command {
 	public names = [Language.LL.commands.character.setActive.name()];
@@ -51,7 +50,11 @@ export class CharacterSetActiveSubCommand implements Command {
 		}
 	}
 
-	public async execute(intr: ChatInputCommandInteraction, data: EventData): Promise<void> {
+	public async execute(
+		intr: ChatInputCommandInteraction,
+		data: EventData,
+		LL: TranslationFunctions
+	): Promise<void> {
 		const charName = intr.options.getString(ChatArgs.SET_ACTIVE_NAME_OPTION.name);
 
 		// try and find that charcter
@@ -73,13 +76,14 @@ export class CharacterSetActiveSubCommand implements Command {
 			//send success message
 			await InteractionUtils.send(
 				intr,
-				`Yip! ${targetCharacter.characterData.name} is now your active character!`
+				LL.commands.character.setActive.interactions.success({
+					characterName: targetCharacter.characterData.name,
+				})
 			);
 		} else {
 			await InteractionUtils.send(
 				intr,
-				`Yip! I couldn't find a character matching that name! ` +
-					`Check what characters you've imported using /character list`
+				LL.commands.character.setActive.interactions.notFound()
 			);
 		}
 	}

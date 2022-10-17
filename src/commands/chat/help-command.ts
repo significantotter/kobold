@@ -33,7 +33,11 @@ export class HelpCommand implements Command {
 	};
 	public deferType = CommandDeferType.PUBLIC;
 	public requireClientPerms: PermissionsString[] = [];
-	public async execute(intr: ChatInputCommandInteraction, data: EventData): Promise<void> {
+	public async execute(
+		intr: ChatInputCommandInteraction,
+		data: EventData,
+		LL: TranslationFunctions
+	): Promise<void> {
 		let option = intr.options.getString(Lang.getRef('arguments.option', Language.Default));
 
 		let embed: EmbedBuilder;

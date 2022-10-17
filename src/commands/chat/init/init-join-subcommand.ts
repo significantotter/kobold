@@ -21,6 +21,7 @@ import { ChatArgs } from '../../../constants/chat-args.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
 import { DiceUtils } from '../../../utils/dice-utils.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
+import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 
 export class InitJoinSubCommand implements Command {
 	public names = ['join'];
@@ -60,7 +61,11 @@ export class InitJoinSubCommand implements Command {
 		}
 	}
 
-	public async execute(intr: ChatInputCommandInteraction, data: EventData): Promise<void> {
+	public async execute(
+		intr: ChatInputCommandInteraction,
+		data: EventData,
+		LL: TranslationFunctions
+	): Promise<void> {
 		const [currentInitResponse, activeCharacter] = await Promise.all([
 			InitiativeUtils.getInitiativeForChannel(intr.channel),
 			CharacterUtils.getActiveCharacter(intr.user.id),

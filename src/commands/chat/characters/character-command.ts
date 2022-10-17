@@ -16,6 +16,7 @@ import { Language } from '../../../models/enum-helpers/index.js';
 import { EventData } from '../../../models/internal-models.js';
 import { CommandUtils, InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
+import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 
 export class CharacterCommand implements Command {
 	public names = [Language.LL.commands.character.name()];
@@ -92,7 +93,11 @@ export class CharacterCommand implements Command {
 		return await command.autocomplete(intr, option);
 	}
 
-	public async execute(intr: ChatInputCommandInteraction, data: EventData): Promise<void> {
+	public async execute(
+		intr: ChatInputCommandInteraction,
+		data: EventData,
+		LL: TranslationFunctions
+	): Promise<void> {
 		if (!intr.isChatInputCommand()) return;
 		let command = CommandUtils.getSubCommandByName(this.commands, intr.options.getSubcommand());
 		if (!command) {
@@ -101,7 +106,7 @@ export class CharacterCommand implements Command {
 
 		let passesChecks = await CommandUtils.runChecks(command, intr, data);
 		if (passesChecks) {
-			await command.execute(intr, data);
+			await command.execute(intr, data, LL);
 		}
 	}
 }

@@ -62,6 +62,13 @@ type RootTranslation = {
 				 * Y​i​p​!​ ​Y​o​u​ ​d​o​n​'​t​ ​h​a​v​e​ ​a​n​y​ ​a​c​t​i​v​e​ ​c​h​a​r​a​c​t​e​r​s​!​ ​U​s​e​ ​/​i​m​p​o​r​t​ ​t​o​ ​i​m​p​o​r​t​ ​o​n​e​.
 				 */
 				noActiveCharacter: string
+				/**
+				 * Y​i​p​!​ ​B​e​f​o​r​e​ ​y​o​u​ ​c​a​n​ ​{​a​c​t​i​o​n​}​ ​a​ ​c​h​a​r​a​c​t​e​r​,​ ​y​o​u​ ​n​e​e​d​ ​t​o​ ​a​u​t​h​e​n​t​i​c​a​t​e​ ​i​t​.​ ​G​i​v​e​ ​m​e​ ​p​e​r​m​i​s​s​i​o​n​ ​t​o​ ​r​e​a​d​ ​y​o​u​r​ ​w​a​n​d​e​r​e​r​'​s​ ​g​u​i​d​e​ ​c​h​a​r​a​c​t​e​r​ ​b​y​ ​f​o​l​l​o​w​i​n​g​ ​[​t​h​i​s​ ​l​i​n​k​]​(​{​w​g​B​a​s​e​U​r​l​}​?​c​h​a​r​a​c​t​e​r​I​d​=​{​c​h​a​r​I​d​}​)​.​ ​T​h​e​n​,​ ​/​c​h​a​r​a​c​t​e​r​/​{​a​c​t​i​o​n​}​ ​y​o​u​r​ ​c​h​a​r​a​c​t​e​r​ ​a​g​a​i​n​!
+				 * @param {unknown} action
+				 * @param {unknown} charId
+				 * @param {unknown} wgBaseUrl
+				 */
+				authenticationRequest: RequiredParams<'action' | 'action' | 'charId' | 'wgBaseUrl'>
 			}
 			'import': {
 				/**
@@ -83,12 +90,6 @@ type RootTranslation = {
 					 * @param {unknown} characterName
 					 */
 					characterAlreadyExists: RequiredParams<'characterName'>
-					/**
-					 * Y​i​p​!​ ​B​e​f​o​r​e​ ​y​o​u​ ​c​a​n​ ​i​m​p​o​r​t​ ​a​ ​c​h​a​r​a​c​t​e​r​,​ ​y​o​u​ ​n​e​e​d​ ​t​o​ ​a​u​t​h​e​n​t​i​c​a​t​e​ ​i​t​.​ ​G​i​v​e​ ​m​e​ ​p​e​r​m​i​s​s​i​o​n​ ​t​o​ ​r​e​a​d​ ​y​o​u​r​ ​w​a​n​d​e​r​e​r​'​s​ ​g​u​i​d​e​ ​c​h​a​r​a​c​t​e​r​ ​b​y​ ​f​o​l​l​o​w​i​n​g​ ​[​t​h​i​s​ ​l​i​n​k​]​(​{​w​g​B​a​s​e​U​r​l​}​?​c​h​a​r​a​c​t​e​r​I​d​=​{​c​h​a​r​I​d​}​)​.​ ​T​h​e​n​,​ ​/​i​m​p​o​r​t​ ​y​o​u​r​ ​c​h​a​r​a​c​t​e​r​ ​a​g​a​i​n​!
-					 * @param {unknown} charId
-					 * @param {unknown} wgBaseUrl
-					 */
-					authenticationRequest: RequiredParams<'charId' | 'wgBaseUrl'>
 					/**
 					 * Y​i​p​!​ ​I​'​v​e​ ​s​u​c​c​e​s​s​f​u​l​l​y​ ​i​m​p​o​r​t​e​d​ ​{​c​h​a​r​a​c​t​e​r​N​a​m​e​}​!
 					 * @param {unknown} characterName
@@ -182,6 +183,17 @@ type RootTranslation = {
 				 * s​e​t​s​ ​a​ ​c​h​a​r​a​c​t​e​r​ ​a​s​ ​t​h​e​ ​a​c​t​i​v​e​ ​c​h​a​r​a​c​t​e​r
 				 */
 				description: string
+				interactions: {
+					/**
+					 * Y​i​p​!​ ​{​c​h​a​r​a​c​t​e​r​N​a​m​e​}​ ​i​s​ ​n​o​w​ ​y​o​u​r​ ​a​c​t​i​v​e​ ​c​h​a​r​a​c​t​e​r​!
+					 * @param {unknown} characterName
+					 */
+					success: RequiredParams<'characterName'>
+					/**
+					 * Y​i​p​!​ ​I​ ​c​o​u​l​d​n​'​t​ ​f​i​n​d​ ​a​ ​c​h​a​r​a​c​t​e​r​ ​m​a​t​c​h​i​n​g​ ​t​h​a​t​ ​n​a​m​e​!​ ​C​h​e​c​k​ ​w​h​a​t​ ​c​h​a​r​a​c​t​e​r​s​ ​y​o​u​'​v​e​ ​i​m​p​o​r​t​e​d​ ​u​s​i​n​g​ ​/​c​h​a​r​a​c​t​e​r​ ​l​i​s​t
+					 */
+					notFound: string
+				}
 			}
 			sheet: {
 				/**
@@ -192,6 +204,57 @@ type RootTranslation = {
 				 * d​i​s​p​l​a​y​s​ ​t​h​e​ ​a​c​t​i​v​e​ ​c​h​a​r​a​c​t​e​r​'​s​ ​s​h​e​e​t
 				 */
 				description: string
+				interactions: {
+					sheet: {
+						coreDataField: {
+							/**
+							 * L​e​v​e​l​ ​{​l​e​v​e​l​}​ ​{​h​e​r​i​t​a​g​e​}​ ​{​a​n​c​e​s​t​r​y​}​ ​{​c​l​a​s​s​e​s​}​
+					
+							 * @param {unknown} ancestry
+							 * @param {unknown} classes
+							 * @param {unknown} heritage
+							 * @param {unknown} level
+							 */
+							name: RequiredParams<'ancestry' | 'classes' | 'heritage' | 'level'>
+							/**
+							 * M​a​x​ ​H​P​ ​`​$​{​h​e​a​l​t​h​}​`​
+						​A​C​ ​`​$​{​a​r​m​o​r​C​l​a​s​s​}​`​
+						​P​e​r​c​e​p​t​i​o​n​ ​`​$​{​p​e​r​c​e​p​t​i​o​n​M​o​d​i​f​i​e​r​}​`​ ​(​D​C​ ​{​p​e​r​c​e​p​t​i​o​n​D​C​}​)​
+						​$​{​c​l​a​s​s​e​s​}​ ​D​C​ ​`​$​{​c​l​a​s​s​D​C​}​`​
+						​S​p​e​e​d​ ​`​$​{​s​p​e​e​d​}​`​
+						​
+						​B​a​c​k​g​r​o​u​n​d​:​ ​$​{​b​a​c​k​g​r​o​u​n​d​}
+							 * @param {unknown} armorClass
+							 * @param {unknown} background
+							 * @param {unknown} classDC
+							 * @param {unknown} classes
+							 * @param {unknown} health
+							 * @param {unknown} perceptionDC
+							 * @param {unknown} perceptionModifier
+							 * @param {unknown} speed
+							 */
+							value: RequiredParams<'armorClass' | 'background' | 'classDC' | 'classes' | 'health' | 'perceptionDC' | 'perceptionModifier' | 'speed'>
+						}
+						abilitiesField: {
+							/**
+							 * A​b​i​l​i​t​i​e​s
+							 */
+							name: string
+						}
+						savesField: {
+							/**
+							 * S​a​v​e​s
+							 */
+							name: string
+						}
+						skillsField: {
+							/**
+							 * S​k​i​l​l​s
+							 */
+							name: string
+						}
+					}
+				}
 			}
 			update: {
 				/**
@@ -202,6 +265,32 @@ type RootTranslation = {
 				 * u​p​d​a​t​e​s​ ​a​n​ ​a​l​r​e​a​d​y​ ​i​m​p​o​r​t​e​d​ ​c​h​a​r​a​c​t​e​r
 				 */
 				description: string
+				interactions: {
+					/**
+					 * Y​i​p​!​ ​I​'​v​e​ ​s​u​c​c​e​s​s​f​u​l​l​y​ ​u​p​d​a​t​e​d​ ​{​c​h​a​r​a​c​t​e​r​N​a​m​e​}​!
+					 * @param {unknown} characterName
+					 */
+					success: RequiredParams<'characterName'>
+				}
+			}
+		}
+		init: {
+			name: string
+			description: string
+			commandOptions: {
+			}
+			interactions: {
+			}
+		}
+		roll: {
+			/**
+			 * r​o​l​l
+			 */
+			name: string
+			description: string
+			commandOptions: {
+			}
+			interactions: {
 			}
 		}
 	}
@@ -293,6 +382,10 @@ export type TranslationFunctions = {
 				 * Yip! You don't have any active characters! Use /import to import one.
 				 */
 				noActiveCharacter: () => LocalizedString
+				/**
+				 * Yip! Before you can {action} a character, you need to authenticate it. Give me permission to read your wanderer's guide character by following [this link]({wgBaseUrl}?characterId={charId}). Then, /character/{action} your character again!
+				 */
+				authenticationRequest: (arg: { action: unknown, charId: unknown, wgBaseUrl: unknown }) => LocalizedString
 			}
 			'import': {
 				/**
@@ -312,10 +405,6 @@ export type TranslationFunctions = {
 					 * Yip! {characterName} is already in the system! Did you mean to /update?
 					 */
 					characterAlreadyExists: (arg: { characterName: unknown }) => LocalizedString
-					/**
-					 * Yip! Before you can import a character, you need to authenticate it. Give me permission to read your wanderer's guide character by following [this link]({wgBaseUrl}?characterId={charId}). Then, /import your character again!
-					 */
-					authenticationRequest: (arg: { charId: unknown, wgBaseUrl: unknown }) => LocalizedString
 					/**
 					 * Yip! I've successfully imported {characterName}!
 					 */
@@ -399,6 +488,16 @@ export type TranslationFunctions = {
 				 * sets a character as the active character
 				 */
 				description: () => LocalizedString
+				interactions: {
+					/**
+					 * Yip! {characterName} is now your active character!
+					 */
+					success: (arg: { characterName: unknown }) => LocalizedString
+					/**
+					 * Yip! I couldn't find a character matching that name! Check what characters you've imported using /character list
+					 */
+					notFound: () => LocalizedString
+				}
 			}
 			sheet: {
 				/**
@@ -409,6 +508,45 @@ export type TranslationFunctions = {
 				 * displays the active character's sheet
 				 */
 				description: () => LocalizedString
+				interactions: {
+					sheet: {
+						coreDataField: {
+							/**
+							 * Level {level} {heritage} {ancestry} {classes}
+					
+							 */
+							name: (arg: { ancestry: unknown, classes: unknown, heritage: unknown, level: unknown }) => LocalizedString
+							/**
+							 * Max HP `${health}`
+						AC `${armorClass}`
+						Perception `${perceptionModifier}` (DC {perceptionDC})
+						${classes} DC `${classDC}`
+						Speed `${speed}`
+					
+						Background: ${background}
+							 */
+							value: (arg: { armorClass: unknown, background: unknown, classDC: unknown, classes: unknown, health: unknown, perceptionDC: unknown, perceptionModifier: unknown, speed: unknown }) => LocalizedString
+						}
+						abilitiesField: {
+							/**
+							 * Abilities
+							 */
+							name: () => LocalizedString
+						}
+						savesField: {
+							/**
+							 * Saves
+							 */
+							name: () => LocalizedString
+						}
+						skillsField: {
+							/**
+							 * Skills
+							 */
+							name: () => LocalizedString
+						}
+					}
+				}
 			}
 			update: {
 				/**
@@ -419,6 +557,31 @@ export type TranslationFunctions = {
 				 * updates an already imported character
 				 */
 				description: () => LocalizedString
+				interactions: {
+					/**
+					 * Yip! I've successfully updated {characterName}!
+					 */
+					success: (arg: { characterName: unknown }) => LocalizedString
+				}
+			}
+		}
+		init: {
+			name: () => LocalizedString
+			description: () => LocalizedString
+			commandOptions: {
+			}
+			interactions: {
+			}
+		}
+		roll: {
+			/**
+			 * roll
+			 */
+			name: () => LocalizedString
+			description: () => LocalizedString
+			commandOptions: {
+			}
+			interactions: {
 			}
 		}
 	}

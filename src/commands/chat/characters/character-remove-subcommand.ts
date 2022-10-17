@@ -14,6 +14,7 @@ import { Command, CommandDeferType } from '../../index.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
 import { CollectorUtils } from './../../../utils/collector-utils.js';
 import { Language } from '../../../models/enum-helpers/index.js';
+import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 
 export class CharacterRemoveSubCommand implements Command {
 	public names = [Language.LL.commands.character.remove.name()];
@@ -27,9 +28,12 @@ export class CharacterRemoveSubCommand implements Command {
 	public deferType = CommandDeferType.PUBLIC;
 	public requireClientPerms: PermissionsString[] = [];
 
-	public async execute(intr: ChatInputCommandInteraction, data: EventData): Promise<void> {
+	public async execute(
+		intr: ChatInputCommandInteraction,
+		data: EventData,
+		LL: TranslationFunctions
+	): Promise<void> {
 		//check if we have an active character
-		const LL = Language.localize(data.lang());
 		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id);
 		if (!activeCharacter) {
 			await InteractionUtils.send(

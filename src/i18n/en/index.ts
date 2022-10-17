@@ -62,6 +62,12 @@ const en: BaseTranslation = {
 			// SHARED INTERACTIONS
 			interactions: {
 				noActiveCharacter: `Yip! You don't have any active characters! Use /import to import one.`,
+
+				authenticationRequest:
+					`Yip! Before you can {action} a character, you need to authenticate it. ` +
+					`Give me permission to read your wanderer's guide character by following [this link](` +
+					`{wgBaseUrl}?characterId={charId}). ` +
+					`Then, /character/{action} your character again!`,
 			},
 
 			// SUBCOMMANDS
@@ -76,11 +82,6 @@ const en: BaseTranslation = {
 					characterAlreadyExists:
 						`Yip! {characterName} is already in the system!` +
 						` Did you mean to /update?`,
-					authenticationRequest:
-						`Yip! Before you can import a character, you need to authenticate it. ` +
-						`Give me permission to read your wanderer's guide character by following [this link](` +
-						`{wgBaseUrl}?characterId={charId}). ` +
-						`Then, /import your character again!`,
 					success: `Yip! I've successfully imported {characterName}!`,
 				},
 			},
@@ -113,16 +114,55 @@ const en: BaseTranslation = {
 			setActive: {
 				name: 'set-active',
 				description: 'sets a character as the active character',
+				interactions: {
+					success: 'Yip! {characterName} is now your active character!',
+					notFound:
+						"Yip! I couldn't find a character matching that name! " +
+						"Check what characters you've imported using /character list",
+				},
 			},
 			sheet: {
 				name: 'sheet',
 				description: "displays the active character's sheet",
+				interactions: {
+					sheet: {
+						coreDataField: {
+							name: 'Level {level} {heritage} {ancestry} {classes}\n',
+							value:
+								'Max HP `${health}`\n' +
+								'AC `${armorClass}`\n' +
+								'Perception `${perceptionModifier}` (DC {perceptionDC})\n' +
+								'${classes} DC `${classDC}`\n' +
+								'Speed `${speed}`\n\n' +
+								'Background: ${background}',
+						},
+						abilitiesField: {
+							name: 'Abilities',
+						},
+						savesField: {
+							name: 'Saves',
+						},
+						skillsField: {
+							name: 'Skills',
+						},
+					},
+				},
 			},
 			update: {
 				name: 'update',
 				description: 'updates an already imported character',
+				interactions: {
+					success: `Yip! I've successfully updated {characterName}!`,
+				},
 			},
 		},
+		init: {
+			name: 'init',
+			description: 'Initiative Tracking',
+			commandOptions: {},
+			interactions: {},
+		},
+		roll: { name: 'roll', description: 'Roll Dice', commandOptions: {}, interactions: {} },
 	},
 	embedLinks,
 };

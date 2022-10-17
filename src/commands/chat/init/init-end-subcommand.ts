@@ -11,6 +11,7 @@ import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { InitiativeUtils } from '../../../utils/initiative-utils.js';
 import { Initiative } from '../../../services/kobold/models/index.js';
+import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 
 export class InitEndSubCommand implements Command {
 	public names = ['end'];
@@ -25,7 +26,11 @@ export class InitEndSubCommand implements Command {
 	public deferType = CommandDeferType.PUBLIC;
 	public requireClientPerms: PermissionsString[] = [];
 
-	public async execute(intr: ChatInputCommandInteraction, data: EventData): Promise<void> {
+	public async execute(
+		intr: ChatInputCommandInteraction,
+		data: EventData,
+		LL: TranslationFunctions
+	): Promise<void> {
 		const currentInitResponse = await InitiativeUtils.getInitiativeForChannel(intr.channel);
 		if (currentInitResponse.errorMessage) {
 			await InteractionUtils.send(intr, currentInitResponse.errorMessage);

@@ -1,3 +1,4 @@
+import { Language } from './../../../models/enum-helpers/language';
 import {
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
@@ -11,17 +12,18 @@ import {
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 import { ChatArgs } from '../../../constants/chat-args.js';
+import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 
 import { EventData } from '../../../models/internal-models.js';
 import { CommandUtils, InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 
 export class RollCommand implements Command {
-	public names = ['roll'];
+	public names = [Language.LL.commands.roll.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: 'roll',
-		description: `Roll Dice`,
+		name: Language.LL.commands.roll.name(),
+		description: Language.LL.commands.roll.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 
@@ -158,7 +160,11 @@ export class RollCommand implements Command {
 		await command.autocomplete(intr, option);
 	}
 
-	public async execute(intr: ChatInputCommandInteraction, data: EventData): Promise<void> {
+	public async execute(
+		intr: ChatInputCommandInteraction,
+		data: EventData,
+		LL: TranslationFunctions
+	): Promise<void> {
 		if (!intr.isChatInputCommand()) return;
 		let command = CommandUtils.getSubCommandByName(this.commands, intr.options.getSubcommand());
 		if (!command) {
@@ -167,7 +173,7 @@ export class RollCommand implements Command {
 
 		let passesChecks = await CommandUtils.runChecks(command, intr, data);
 		if (passesChecks) {
-			await command.execute(intr, data);
+			await command.execute(intr, data, LL);
 		}
 	}
 }

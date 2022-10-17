@@ -1,3 +1,4 @@
+import { TranslationFunctions } from './../i18n/i18n-types';
 import {
 	RESTPostAPIApplicationCommandsJSONBody,
 	AutocompleteFocusedOption,
@@ -20,7 +21,7 @@ export interface Command {
 		intr: AutocompleteInteraction,
 		option: AutocompleteFocusedOption
 	): Promise<ApplicationCommandOptionChoiceData[]>;
-	execute(intr: CommandInteraction, data: EventData): Promise<void>;
+	execute(intr: CommandInteraction, data: EventData, LL: TranslationFunctions): Promise<void>;
 }
 
 export enum CommandDeferType {
