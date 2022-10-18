@@ -29,8 +29,8 @@ export class RollCommand implements Command {
 
 		options: [
 			{
-				name: 'ability',
-				description: `rolls an ability for your active character`,
+				name: Language.LL.commands.roll.ability.name(),
+				description: Language.LL.commands.roll.ability.description(),
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
 				options: [
 					{
@@ -48,8 +48,8 @@ export class RollCommand implements Command {
 				],
 			},
 			{
-				name: 'attack',
-				description: `rolls an attack for your active character`,
+				name: Language.LL.commands.roll.attack.name(),
+				description: Language.LL.commands.roll.attack.description(),
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
 				options: [
 					{
@@ -71,8 +71,8 @@ export class RollCommand implements Command {
 				],
 			},
 			{
-				name: 'dice',
-				description: `Rolls some dice.`,
+				name: Language.LL.commands.roll.dice.name(),
+				description: Language.LL.commands.roll.dice.description(),
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
 				options: [
 					{
@@ -86,8 +86,8 @@ export class RollCommand implements Command {
 				],
 			},
 			{
-				name: 'perception',
-				description: `rolls perception for your active character`,
+				name: Language.LL.commands.roll.perception.name(),
+				description: Language.LL.commands.roll.perception.description(),
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
 				options: [
 					{
@@ -101,8 +101,8 @@ export class RollCommand implements Command {
 				],
 			},
 			{
-				name: 'save',
-				description: `rolls a save for your active character`,
+				name: Language.LL.commands.roll.save.name(),
+				description: Language.LL.commands.roll.save.description(),
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
 				options: [
 					{
@@ -120,8 +120,8 @@ export class RollCommand implements Command {
 				],
 			},
 			{
-				name: 'skill',
-				description: `rolls a skill for your active character`,
+				name: Language.LL.commands.roll.skill.name(),
+				description: Language.LL.commands.roll.skill.description(),
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
 				options: [
 					{

@@ -31,7 +31,7 @@ describe('CharacterListSubCommand', () => {
 			user: { id: null },
 		} as any;
 		const command = new CharacterListSubCommand();
-		command.execute(fakeIntr, fakeData as any);
+		command.execute(fakeIntr, fakeData as any, Language.LL);
 	});
 	it("Returns an embed of the user's characters", done => {
 		jest.spyOn(Character, 'query').mockReturnValue({
@@ -62,7 +62,7 @@ describe('CharacterListSubCommand', () => {
 			done();
 		});
 		const command = new CharacterListSubCommand();
-		command.execute(fakeIntr, fakeData as any);
+		command.execute(fakeIntr, fakeData as any, Language.LL);
 	});
 	afterEach(function () {
 		jest.restoreAllMocks();

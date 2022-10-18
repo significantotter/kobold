@@ -59,7 +59,7 @@ describe('CharacterImportSubCommand', () => {
 			},
 		} as any;
 		const command = new CharacterImportSubCommand();
-		command.execute(fakeIntr, fakeData as any);
+		command.execute(fakeIntr, fakeData as any, Language.LL);
 	});
 	test(
 		"responds with an error if an existing character with that wanderer's " +
@@ -82,15 +82,16 @@ describe('CharacterImportSubCommand', () => {
 				},
 			} as any;
 			const command = new CharacterImportSubCommand();
-			command.execute(fakeIntr, fakeData as any);
+			command.execute(fakeIntr, fakeData as any, Language.LL);
 		}
 	);
 	test('responds with an auth link if a Wg token is not found for the character', function (done) {
 		jest.spyOn(InteractionUtils, 'send').mockImplementation((intr, msg): any => {
 			expect(msg).toBe(
-				Language.LL.commands.character.import.interactions.authenticationRequest({
+				Language.LL.commands.character.interactions.authenticationRequest({
 					wgBaseUrl: Config.wanderersGuide.oauthBaseUrl,
 					charId: '56789',
+					action: 'import',
 				})
 			);
 			done();
@@ -104,7 +105,7 @@ describe('CharacterImportSubCommand', () => {
 			},
 		} as any;
 		const command = new CharacterImportSubCommand();
-		command.execute(fakeIntr, fakeData as any);
+		command.execute(fakeIntr, fakeData as any, Language.LL);
 	});
 	test('imports a character successfully', function (done) {
 		// pretend we fetch a real character
@@ -133,7 +134,7 @@ describe('CharacterImportSubCommand', () => {
 			},
 		} as any;
 		const command = new CharacterImportSubCommand();
-		command.execute(fakeIntr, fakeData as any);
+		command.execute(fakeIntr, fakeData as any, Language.LL);
 	});
 	afterEach(function () {
 		jest.restoreAllMocks();

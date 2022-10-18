@@ -12,6 +12,7 @@ import {
 import { RateLimiter } from 'discord.js-rate-limiter';
 import { ChatArgs } from '../../../constants/chat-args.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
+import { Language } from '../../../models/enum-helpers/index.js';
 
 import { EventData } from '../../../models/internal-models.js';
 import { CommandUtils, InteractionUtils } from '../../../utils/index.js';
@@ -28,41 +29,40 @@ export class InitCommand implements Command {
 
 		options: [
 			{
-				name: 'start',
-				description: 'Start initiative in the current channel.',
+				name: Language.LL.commands.init.start.name(),
+				description: Language.LL.commands.init.start.description(),
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
 			},
 			{
-				name: 'show',
-				description: `Displays the current initiative`,
+				name: Language.LL.commands.init.show.name(),
+				description: Language.LL.commands.init.show.description(),
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
 			},
 			{
-				name: 'next',
-				description: `Moves to the next participant in the initiative order`,
+				name: Language.LL.commands.init.next.name(),
+				description: Language.LL.commands.init.next.description(),
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
 			},
 			{
-				name: 'prev',
-				description: `Moves to the previous participant in the initiative order`,
+				name: Language.LL.commands.init.prev.name(),
+				description: Language.LL.commands.init.prev.description(),
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
 			},
 			{
-				name: 'jump_to',
-				description: `Jumps to a specific participant in the initiative order`,
+				name: Language.LL.commands.init.jumpTo.name(),
+				description: Language.LL.commands.init.jumpTo.description(),
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
 				options: [ChatArgs.INIT_CHARACTER_OPTION],
 			},
 			{
-				name: 'join',
-				description:
-					'Joins initiative with your active character. ' +
-					'Defaults to rolling perception.',
+				name: Language.LL.commands.init.join.name(),
+				description: Language.LL.commands.init.join.description(),
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
 				options: [
 					{
 						...ChatArgs.SKILL_CHOICE_OPTION,
-						description: 'The skill to use for initiative instead of perception.',
+						description:
+							Language.LL.commandOptions.skillChoice.overwrites.initJoinDescription(),
 						required: false,
 					},
 					{
@@ -79,8 +79,8 @@ export class InitCommand implements Command {
 				],
 			},
 			{
-				name: 'add',
-				description: `Adds a fake character to initiative`,
+				name: Language.LL.commands.init.add.name(),
+				description: Language.LL.commands.init.add.description(),
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
 				options: [
 					{
@@ -89,7 +89,8 @@ export class InitCommand implements Command {
 					},
 					{
 						...ChatArgs.ROLL_EXPRESSION_OPTION,
-						description: 'Dice to roll to join initiative. ',
+						description:
+							Language.LL.commandOptions.rollExpression.overwrites.initAddDescription(),
 						required: false,
 					},
 					{
@@ -99,8 +100,8 @@ export class InitCommand implements Command {
 				],
 			},
 			{
-				name: 'set',
-				description: `Sets certain properties of your character for initiative`,
+				name: Language.LL.commands.init.set.name(),
+				description: Language.LL.commands.init.set.description(),
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
 				options: [
 					{
@@ -112,14 +113,14 @@ export class InitCommand implements Command {
 				],
 			},
 			{
-				name: 'remove',
-				description: 'Removes a character from initiative.',
+				name: Language.LL.commands.init.remove.name(),
+				description: Language.LL.commands.init.remove.description(),
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
 				options: [ChatArgs.INIT_CHARACTER_OPTION],
 			},
 			{
-				name: 'end',
-				description: 'Ends the initiative in the current channel.',
+				name: Language.LL.commands.init.end.name(),
+				description: Language.LL.commands.init.end.description(),
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
 			},
 		],
@@ -152,7 +153,6 @@ export class InitCommand implements Command {
 		if (!intr.isChatInputCommand()) return;
 		let command = CommandUtils.getSubCommandByName(this.commands, intr.options.getSubcommand());
 		if (!command) {
-			await InteractionUtils.send(intr, `Yip! Ran the base command!`);
 			return;
 		}
 

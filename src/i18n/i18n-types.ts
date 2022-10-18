@@ -25,38 +25,6 @@ type RootTranslation = {
 			 * C​h​a​r​a​c​t​e​r​ ​m​a​n​a​g​e​m​e​n​t
 			 */
 			description: string
-			commandOptions: {
-				wgUrl: {
-					/**
-					 * u​r​l
-					 */
-					name: string
-					/**
-					 * T​h​e​ ​u​r​l​ ​o​f​ ​y​o​u​r​ ​w​a​n​d​e​r​e​r​'​s​ ​g​u​i​d​e​ ​c​h​a​r​a​c​t​e​r​.
-					 */
-					description: string
-				}
-				name: {
-					/**
-					 * n​a​m​e
-					 */
-					name: string
-					/**
-					 * T​h​e​ ​n​a​m​e​ ​o​f​ ​y​o​u​r​ ​w​a​n​d​e​r​e​r​'​s​ ​g​u​i​d​e​ ​c​h​a​r​a​c​t​e​r​.
-					 */
-					description: string
-				}
-				id: {
-					/**
-					 * c​h​a​r​a​c​t​e​r​_​i​d
-					 */
-					name: string
-					/**
-					 * T​h​e​ ​i​d​ ​o​f​ ​y​o​u​r​ ​w​a​n​d​e​r​e​r​'​s​ ​g​u​i​d​e​ ​c​h​a​r​a​c​t​e​r​.
-					 */
-					description: string
-				}
-			}
 			interactions: {
 				/**
 				 * Y​i​p​!​ ​Y​o​u​ ​d​o​n​'​t​ ​h​a​v​e​ ​a​n​y​ ​a​c​t​i​v​e​ ​c​h​a​r​a​c​t​e​r​s​!​ ​U​s​e​ ​/​i​m​p​o​r​t​ ​t​o​ ​i​m​p​o​r​t​ ​o​n​e​.
@@ -275,11 +243,115 @@ type RootTranslation = {
 			}
 		}
 		init: {
+			/**
+			 * i​n​i​t
+			 */
 			name: string
+			/**
+			 * I​n​i​t​i​a​t​i​v​e​ ​T​r​a​c​k​i​n​g
+			 */
 			description: string
-			commandOptions: {
-			}
 			interactions: {
+			}
+			start: {
+				/**
+				 * s​t​a​r​t
+				 */
+				name: string
+				/**
+				 * S​t​a​r​t​ ​i​n​i​t​i​a​t​i​v​e​ ​i​n​ ​t​h​e​ ​c​u​r​r​e​n​t​ ​c​h​a​n​n​e​l​.
+				 */
+				description: string
+			}
+			show: {
+				/**
+				 * s​h​o​w
+				 */
+				name: string
+				/**
+				 * D​i​s​p​l​a​y​s​ ​t​h​e​ ​c​u​r​r​e​n​t​ ​i​n​i​t​i​a​t​i​v​e
+				 */
+				description: string
+			}
+			next: {
+				/**
+				 * n​e​x​t
+				 */
+				name: string
+				/**
+				 * M​o​v​e​s​ ​t​o​ ​t​h​e​ ​n​e​x​t​ ​p​a​r​t​i​c​i​p​a​n​t​ ​i​n​ ​t​h​e​ ​i​n​i​t​i​a​t​i​v​e​ ​o​r​d​e​r
+				 */
+				description: string
+			}
+			prev: {
+				/**
+				 * p​r​e​v
+				 */
+				name: string
+				/**
+				 * M​o​v​e​s​ ​t​o​ ​t​h​e​ ​p​r​e​v​i​o​u​s​ ​p​a​r​t​i​c​i​p​a​n​t​ ​i​n​ ​t​h​e​ ​i​n​i​t​i​a​t​i​v​e​ ​o​r​d​e​r
+				 */
+				description: string
+			}
+			jumpTo: {
+				/**
+				 * j​u​m​p​_​t​o
+				 */
+				name: string
+				/**
+				 * J​u​m​p​s​ ​t​o​ ​a​ ​s​p​e​c​i​f​i​c​ ​p​a​r​t​i​c​i​p​a​n​t​ ​i​n​ ​t​h​e​ ​i​n​i​t​i​a​t​i​v​e​ ​o​r​d​e​r
+				 */
+				description: string
+			}
+			join: {
+				/**
+				 * j​o​i​n
+				 */
+				name: string
+				/**
+				 * J​o​i​n​s​ ​i​n​i​t​i​a​t​i​v​e​ ​w​i​t​h​ ​y​o​u​r​ ​a​c​t​i​v​e​ ​c​h​a​r​a​c​t​e​r​.​ ​D​e​f​a​u​l​t​s​ ​t​o​ ​r​o​l​l​i​n​g​ ​p​e​r​c​e​p​t​i​o​n​.
+				 */
+				description: string
+			}
+			add: {
+				/**
+				 * a​d​d
+				 */
+				name: string
+				/**
+				 * A​d​d​s​ ​a​ ​f​a​k​e​ ​c​h​a​r​a​c​t​e​r​ ​t​o​ ​i​n​i​t​i​a​t​i​v​e
+				 */
+				description: string
+			}
+			set: {
+				/**
+				 * s​e​t
+				 */
+				name: string
+				/**
+				 * S​e​t​s​ ​c​e​r​t​a​i​n​ ​p​r​o​p​e​r​t​i​e​s​ ​o​f​ ​y​o​u​r​ ​c​h​a​r​a​c​t​e​r​ ​f​o​r​ ​i​n​i​t​i​a​t​i​v​e
+				 */
+				description: string
+			}
+			remove: {
+				/**
+				 * r​e​m​o​v​e
+				 */
+				name: string
+				/**
+				 * R​e​m​o​v​e​s​ ​a​ ​c​h​a​r​a​c​t​e​r​ ​f​r​o​m​ ​i​n​i​t​i​a​t​i​v​e​.
+				 */
+				description: string
+			}
+			end: {
+				/**
+				 * e​n​d
+				 */
+				name: string
+				/**
+				 * E​n​d​s​ ​t​h​e​ ​i​n​i​t​i​a​t​i​v​e​ ​i​n​ ​t​h​e​ ​c​u​r​r​e​n​t​ ​c​h​a​n​n​e​l​.
+				 */
+				description: string
 			}
 		}
 		roll: {
@@ -287,11 +359,282 @@ type RootTranslation = {
 			 * r​o​l​l
 			 */
 			name: string
+			/**
+			 * R​o​l​l​ ​D​i​c​e
+			 */
 			description: string
-			commandOptions: {
-			}
 			interactions: {
 			}
+			ability: {
+				/**
+				 * a​b​i​l​i​t​y
+				 */
+				name: string
+				/**
+				 * r​o​l​l​s​ ​a​n​ ​a​b​i​l​i​t​y​ ​f​o​r​ ​y​o​u​r​ ​a​c​t​i​v​e​ ​c​h​a​r​a​c​t​e​r
+				 */
+				description: string
+			}
+			attack: {
+				/**
+				 * a​t​t​a​c​k
+				 */
+				name: string
+				/**
+				 * r​o​l​l​s​ ​a​n​ ​a​t​t​a​c​k​ ​f​o​r​ ​y​o​u​r​ ​a​c​t​i​v​e​ ​c​h​a​r​a​c​t​e​r
+				 */
+				description: string
+			}
+			dice: {
+				/**
+				 * d​i​c​e
+				 */
+				name: string
+				/**
+				 * R​o​l​l​s​ ​s​o​m​e​ ​d​i​c​e​.
+				 */
+				description: string
+			}
+			perception: {
+				/**
+				 * p​e​r​c​e​p​t​i​o​n
+				 */
+				name: string
+				/**
+				 * r​o​l​l​s​ ​p​e​r​c​e​p​t​i​o​n​ ​f​o​r​ ​y​o​u​r​ ​a​c​t​i​v​e​ ​c​h​a​r​a​c​t​e​r
+				 */
+				description: string
+			}
+			save: {
+				/**
+				 * s​a​v​e
+				 */
+				name: string
+				/**
+				 * r​o​l​l​s​ ​a​ ​s​a​v​e​ ​f​o​r​ ​y​o​u​r​ ​a​c​t​i​v​e​ ​c​h​a​r​a​c​t​e​r
+				 */
+				description: string
+			}
+			skill: {
+				/**
+				 * s​k​i​l​l
+				 */
+				name: string
+				/**
+				 * r​o​l​l​s​ ​a​ ​s​k​i​l​l​ ​f​o​r​ ​y​o​u​r​ ​a​c​t​i​v​e​ ​c​h​a​r​a​c​t​e​r
+				 */
+				description: string
+			}
+		}
+	}
+	commandOptions: {
+		wgUrl: {
+			/**
+			 * u​r​l
+			 */
+			name: string
+			/**
+			 * T​h​e​ ​u​r​l​ ​o​f​ ​y​o​u​r​ ​w​a​n​d​e​r​e​r​'​s​ ​g​u​i​d​e​ ​c​h​a​r​a​c​t​e​r​.
+			 */
+			description: string
+		}
+		name: {
+			/**
+			 * n​a​m​e
+			 */
+			name: string
+			/**
+			 * T​h​e​ ​n​a​m​e​ ​o​f​ ​y​o​u​r​ ​w​a​n​d​e​r​e​r​'​s​ ​g​u​i​d​e​ ​c​h​a​r​a​c​t​e​r​.
+			 */
+			description: string
+		}
+		id: {
+			/**
+			 * c​h​a​r​a​c​t​e​r​_​i​d
+			 */
+			name: string
+			/**
+			 * T​h​e​ ​i​d​ ​o​f​ ​y​o​u​r​ ​w​a​n​d​e​r​e​r​'​s​ ​g​u​i​d​e​ ​c​h​a​r​a​c​t​e​r​.
+			 */
+			description: string
+		}
+		saveChoice: {
+			/**
+			 * s​a​v​e
+			 */
+			name: string
+			/**
+			 * T​h​e​ ​s​a​v​e​ ​t​o​ ​r​o​l​l​.
+			 */
+			description: string
+		}
+		skillChoice: {
+			/**
+			 * s​k​i​l​l
+			 */
+			name: string
+			/**
+			 * T​h​e​ ​s​k​i​l​l​ ​t​o​ ​r​o​l​l​.
+			 */
+			description: string
+			overwrites: {
+				/**
+				 * T​h​e​ ​s​k​i​l​l​ ​t​o​ ​u​s​e​ ​f​o​r​ ​i​n​i​t​i​a​t​i​v​e​ ​i​n​s​t​e​a​d​ ​o​f​ ​p​e​r​c​e​p​t​i​o​n​.
+				 */
+				initJoinDescription: string
+			}
+		}
+		abilityChoice: {
+			/**
+			 * a​b​i​l​i​t​y
+			 */
+			name: string
+			/**
+			 * T​h​e​ ​a​b​i​l​i​t​y​ ​t​o​ ​r​o​l​l​.
+			 */
+			description: string
+		}
+		attackChoice: {
+			/**
+			 * a​t​t​a​c​k
+			 */
+			name: string
+			/**
+			 * T​h​e​ ​a​t​t​a​c​k​ ​t​o​ ​r​o​l​l​.
+			 */
+			description: string
+		}
+		rollExpression: {
+			/**
+			 * d​i​c​e
+			 */
+			name: string
+			/**
+			 * T​h​e​ ​d​i​c​e​ ​e​x​p​r​e​s​s​i​o​n​ ​t​o​ ​r​o​l​l​.​ ​S​i​m​i​l​a​r​ ​t​o​ ​R​o​l​l​2​0​ ​d​i​c​e​ ​r​o​l​l​s​.
+			 */
+			description: string
+			overwrites: {
+				/**
+				 * D​i​c​e​ ​t​o​ ​r​o​l​l​ ​t​o​ ​j​o​i​n​ ​i​n​i​t​i​a​t​i​v​e​.
+				 */
+				initAddDescription: string
+				/**
+				 * D​i​c​e​ ​t​o​ ​r​o​l​l​ ​t​o​ ​j​o​i​n​ ​i​n​i​t​i​a​t​i​v​e​.​ ​M​o​d​i​f​i​e​s​ ​y​o​u​r​ ​s​k​i​l​l​ ​i​f​ ​y​o​u​ ​c​h​o​s​e​ ​a​ ​s​k​i​l​l​.
+				 */
+				initJoinDescription: string
+			}
+		}
+		rollModifier: {
+			/**
+			 * m​o​d​i​f​i​e​r
+			 */
+			name: string
+			/**
+			 * A​ ​d​i​c​e​ ​e​x​p​r​e​s​s​i​o​n​ ​t​o​ ​m​o​d​i​f​y​ ​y​o​u​r​ ​r​o​l​l​.​ ​(​e​.​g​.​ ​"​+​ ​1​ ​+​ ​1​d​4​"​)
+			 */
+			description: string
+		}
+		attackRollModifier: {
+			/**
+			 * a​t​t​a​c​k​_​m​o​d​i​f​i​e​r
+			 */
+			name: string
+			/**
+			 * A​ ​d​i​c​e​ ​e​x​p​r​e​s​s​i​o​n​ ​t​o​ ​m​o​d​i​f​y​ ​y​o​u​r​ ​a​t​t​a​c​k​ ​r​o​l​l​.​ ​(​e​.​g​.​ ​"​+​ ​1​ ​+​ ​1​d​4​"​)
+			 */
+			description: string
+		}
+		damageRollModifier: {
+			/**
+			 * d​a​m​a​g​e​_​m​o​d​i​f​i​e​r
+			 */
+			name: string
+			/**
+			 * A​ ​d​i​c​e​ ​e​x​p​r​e​s​s​i​o​n​ ​t​o​ ​m​o​d​i​f​y​ ​y​o​u​r​ ​d​a​m​a​g​e​ ​r​o​l​l​.​ ​(​e​.​g​.​ ​"​+​ ​1​ ​+​ ​1​d​4​"​)
+			 */
+			description: string
+		}
+		rollNote: {
+			/**
+			 * n​o​t​e
+			 */
+			name: string
+			/**
+			 * A​ ​n​o​t​e​ ​a​b​o​u​t​ ​t​h​e​ ​r​e​a​s​o​n​ ​f​o​r​ ​t​h​e​ ​r​o​l​l​.
+			 */
+			description: string
+		}
+		initValue: {
+			/**
+			 * v​a​l​u​e
+			 */
+			name: string
+			/**
+			 * A​ ​v​a​l​u​e​ ​t​o​ ​s​e​t​ ​y​o​u​r​ ​i​n​i​t​i​a​t​i​v​e​ ​t​o​.​ ​O​v​e​r​w​r​i​t​e​s​ ​a​n​y​ ​o​t​h​e​r​ ​i​n​i​t​ ​o​p​t​i​o​n​s​.
+			 */
+			description: string
+		}
+		initActor: {
+			/**
+			 * n​a​m​e
+			 */
+			name: string
+			/**
+			 * T​h​e​ ​n​a​m​e​ ​o​f​ ​t​h​e​ ​d​u​m​m​y​ ​c​h​a​r​a​c​t​e​r​ ​t​o​ ​a​d​d​ ​t​o​ ​i​n​i​t​i​a​t​i​v​e​.
+			 */
+			description: string
+		}
+		initCharacter: {
+			/**
+			 * c​h​a​r​a​c​t​e​r
+			 */
+			name: string
+			/**
+			 * A​ ​c​h​a​r​a​c​t​e​r​ ​p​r​e​s​e​n​t​ ​i​n​ ​t​h​e​ ​i​n​i​t​i​a​t​i​v​e​.
+			 */
+			description: string
+		}
+		setOption: {
+			/**
+			 * o​p​t​i​o​n
+			 */
+			name: string
+			/**
+			 * T​h​e​ ​c​h​a​r​a​c​t​e​r​ ​o​p​t​i​o​n​ ​t​o​ ​a​l​t​e​r​ ​(​o​n​l​y​ ​w​i​t​h​i​n​ ​t​h​i​s​ ​i​n​i​t​i​a​t​i​v​e​)​.
+			 */
+			description: string
+			choices: {
+				initiative: {
+					/**
+					 * i​n​i​t​i​a​t​i​v​e
+					 */
+					name: string
+					/**
+					 * i​n​i​t​i​a​t​i​v​e
+					 */
+					value: string
+				}
+				actorName: {
+					/**
+					 * n​a​m​e
+					 */
+					name: string
+					/**
+					 * n​a​m​e
+					 */
+					value: string
+				}
+			}
+		}
+		setValue: {
+			/**
+			 * v​a​l​u​e
+			 */
+			name: string
+			/**
+			 * T​h​e​ ​v​a​l​u​e​ ​t​o​ ​s​e​t​ ​t​h​e​ ​o​p​t​i​o​n​ ​t​o​.
+			 */
+			description: string
 		}
 	}
 	embedLinks: {
@@ -345,38 +688,6 @@ export type TranslationFunctions = {
 			 * Character management
 			 */
 			description: () => LocalizedString
-			commandOptions: {
-				wgUrl: {
-					/**
-					 * url
-					 */
-					name: () => LocalizedString
-					/**
-					 * The url of your wanderer's guide character.
-					 */
-					description: () => LocalizedString
-				}
-				name: {
-					/**
-					 * name
-					 */
-					name: () => LocalizedString
-					/**
-					 * The name of your wanderer's guide character.
-					 */
-					description: () => LocalizedString
-				}
-				id: {
-					/**
-					 * character_id
-					 */
-					name: () => LocalizedString
-					/**
-					 * The id of your wanderer's guide character.
-					 */
-					description: () => LocalizedString
-				}
-			}
 			interactions: {
 				/**
 				 * Yip! You don't have any active characters! Use /import to import one.
@@ -566,11 +877,115 @@ export type TranslationFunctions = {
 			}
 		}
 		init: {
+			/**
+			 * init
+			 */
 			name: () => LocalizedString
+			/**
+			 * Initiative Tracking
+			 */
 			description: () => LocalizedString
-			commandOptions: {
-			}
 			interactions: {
+			}
+			start: {
+				/**
+				 * start
+				 */
+				name: () => LocalizedString
+				/**
+				 * Start initiative in the current channel.
+				 */
+				description: () => LocalizedString
+			}
+			show: {
+				/**
+				 * show
+				 */
+				name: () => LocalizedString
+				/**
+				 * Displays the current initiative
+				 */
+				description: () => LocalizedString
+			}
+			next: {
+				/**
+				 * next
+				 */
+				name: () => LocalizedString
+				/**
+				 * Moves to the next participant in the initiative order
+				 */
+				description: () => LocalizedString
+			}
+			prev: {
+				/**
+				 * prev
+				 */
+				name: () => LocalizedString
+				/**
+				 * Moves to the previous participant in the initiative order
+				 */
+				description: () => LocalizedString
+			}
+			jumpTo: {
+				/**
+				 * jump_to
+				 */
+				name: () => LocalizedString
+				/**
+				 * Jumps to a specific participant in the initiative order
+				 */
+				description: () => LocalizedString
+			}
+			join: {
+				/**
+				 * join
+				 */
+				name: () => LocalizedString
+				/**
+				 * Joins initiative with your active character. Defaults to rolling perception.
+				 */
+				description: () => LocalizedString
+			}
+			add: {
+				/**
+				 * add
+				 */
+				name: () => LocalizedString
+				/**
+				 * Adds a fake character to initiative
+				 */
+				description: () => LocalizedString
+			}
+			set: {
+				/**
+				 * set
+				 */
+				name: () => LocalizedString
+				/**
+				 * Sets certain properties of your character for initiative
+				 */
+				description: () => LocalizedString
+			}
+			remove: {
+				/**
+				 * remove
+				 */
+				name: () => LocalizedString
+				/**
+				 * Removes a character from initiative.
+				 */
+				description: () => LocalizedString
+			}
+			end: {
+				/**
+				 * end
+				 */
+				name: () => LocalizedString
+				/**
+				 * Ends the initiative in the current channel.
+				 */
+				description: () => LocalizedString
 			}
 		}
 		roll: {
@@ -578,11 +993,282 @@ export type TranslationFunctions = {
 			 * roll
 			 */
 			name: () => LocalizedString
+			/**
+			 * Roll Dice
+			 */
 			description: () => LocalizedString
-			commandOptions: {
-			}
 			interactions: {
 			}
+			ability: {
+				/**
+				 * ability
+				 */
+				name: () => LocalizedString
+				/**
+				 * rolls an ability for your active character
+				 */
+				description: () => LocalizedString
+			}
+			attack: {
+				/**
+				 * attack
+				 */
+				name: () => LocalizedString
+				/**
+				 * rolls an attack for your active character
+				 */
+				description: () => LocalizedString
+			}
+			dice: {
+				/**
+				 * dice
+				 */
+				name: () => LocalizedString
+				/**
+				 * Rolls some dice.
+				 */
+				description: () => LocalizedString
+			}
+			perception: {
+				/**
+				 * perception
+				 */
+				name: () => LocalizedString
+				/**
+				 * rolls perception for your active character
+				 */
+				description: () => LocalizedString
+			}
+			save: {
+				/**
+				 * save
+				 */
+				name: () => LocalizedString
+				/**
+				 * rolls a save for your active character
+				 */
+				description: () => LocalizedString
+			}
+			skill: {
+				/**
+				 * skill
+				 */
+				name: () => LocalizedString
+				/**
+				 * rolls a skill for your active character
+				 */
+				description: () => LocalizedString
+			}
+		}
+	}
+	commandOptions: {
+		wgUrl: {
+			/**
+			 * url
+			 */
+			name: () => LocalizedString
+			/**
+			 * The url of your wanderer's guide character.
+			 */
+			description: () => LocalizedString
+		}
+		name: {
+			/**
+			 * name
+			 */
+			name: () => LocalizedString
+			/**
+			 * The name of your wanderer's guide character.
+			 */
+			description: () => LocalizedString
+		}
+		id: {
+			/**
+			 * character_id
+			 */
+			name: () => LocalizedString
+			/**
+			 * The id of your wanderer's guide character.
+			 */
+			description: () => LocalizedString
+		}
+		saveChoice: {
+			/**
+			 * save
+			 */
+			name: () => LocalizedString
+			/**
+			 * The save to roll.
+			 */
+			description: () => LocalizedString
+		}
+		skillChoice: {
+			/**
+			 * skill
+			 */
+			name: () => LocalizedString
+			/**
+			 * The skill to roll.
+			 */
+			description: () => LocalizedString
+			overwrites: {
+				/**
+				 * The skill to use for initiative instead of perception.
+				 */
+				initJoinDescription: () => LocalizedString
+			}
+		}
+		abilityChoice: {
+			/**
+			 * ability
+			 */
+			name: () => LocalizedString
+			/**
+			 * The ability to roll.
+			 */
+			description: () => LocalizedString
+		}
+		attackChoice: {
+			/**
+			 * attack
+			 */
+			name: () => LocalizedString
+			/**
+			 * The attack to roll.
+			 */
+			description: () => LocalizedString
+		}
+		rollExpression: {
+			/**
+			 * dice
+			 */
+			name: () => LocalizedString
+			/**
+			 * The dice expression to roll. Similar to Roll20 dice rolls.
+			 */
+			description: () => LocalizedString
+			overwrites: {
+				/**
+				 * Dice to roll to join initiative.
+				 */
+				initAddDescription: () => LocalizedString
+				/**
+				 * Dice to roll to join initiative. Modifies your skill if you chose a skill.
+				 */
+				initJoinDescription: () => LocalizedString
+			}
+		}
+		rollModifier: {
+			/**
+			 * modifier
+			 */
+			name: () => LocalizedString
+			/**
+			 * A dice expression to modify your roll. (e.g. "+ 1 + 1d4")
+			 */
+			description: () => LocalizedString
+		}
+		attackRollModifier: {
+			/**
+			 * attack_modifier
+			 */
+			name: () => LocalizedString
+			/**
+			 * A dice expression to modify your attack roll. (e.g. "+ 1 + 1d4")
+			 */
+			description: () => LocalizedString
+		}
+		damageRollModifier: {
+			/**
+			 * damage_modifier
+			 */
+			name: () => LocalizedString
+			/**
+			 * A dice expression to modify your damage roll. (e.g. "+ 1 + 1d4")
+			 */
+			description: () => LocalizedString
+		}
+		rollNote: {
+			/**
+			 * note
+			 */
+			name: () => LocalizedString
+			/**
+			 * A note about the reason for the roll.
+			 */
+			description: () => LocalizedString
+		}
+		initValue: {
+			/**
+			 * value
+			 */
+			name: () => LocalizedString
+			/**
+			 * A value to set your initiative to. Overwrites any other init options.
+			 */
+			description: () => LocalizedString
+		}
+		initActor: {
+			/**
+			 * name
+			 */
+			name: () => LocalizedString
+			/**
+			 * The name of the dummy character to add to initiative.
+			 */
+			description: () => LocalizedString
+		}
+		initCharacter: {
+			/**
+			 * character
+			 */
+			name: () => LocalizedString
+			/**
+			 * A character present in the initiative.
+			 */
+			description: () => LocalizedString
+		}
+		setOption: {
+			/**
+			 * option
+			 */
+			name: () => LocalizedString
+			/**
+			 * The character option to alter (only within this initiative).
+			 */
+			description: () => LocalizedString
+			choices: {
+				initiative: {
+					/**
+					 * initiative
+					 */
+					name: () => LocalizedString
+					/**
+					 * initiative
+					 */
+					value: () => LocalizedString
+				}
+				actorName: {
+					/**
+					 * name
+					 */
+					name: () => LocalizedString
+					/**
+					 * name
+					 */
+					value: () => LocalizedString
+				}
+			}
+		}
+		setValue: {
+			/**
+			 * value
+			 */
+			name: () => LocalizedString
+			/**
+			 * The value to set the option to.
+			 */
+			description: () => LocalizedString
 		}
 	}
 	embedLinks: {

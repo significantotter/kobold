@@ -43,22 +43,6 @@ const en: BaseTranslation = {
 			name: 'character',
 			description: 'Character management',
 
-			// SLASH COMMAND OPTIONS
-			commandOptions: {
-				wgUrl: {
-					name: 'url',
-					description: "The url of your wanderer's guide character.",
-				},
-				name: {
-					name: 'name',
-					description: "The name of your wanderer's guide character.",
-				},
-				id: {
-					name: 'character_id',
-					description: `The id of your wanderer's guide character.`,
-				},
-			},
-
 			// SHARED INTERACTIONS
 			interactions: {
 				noActiveCharacter: `Yip! You don't have any active characters! Use /import to import one.`,
@@ -159,10 +143,175 @@ const en: BaseTranslation = {
 		init: {
 			name: 'init',
 			description: 'Initiative Tracking',
-			commandOptions: {},
 			interactions: {},
+
+			// SUBCOMMANDS
+			start: {
+				name: 'start',
+				description: 'Start initiative in the current channel.',
+			},
+			show: {
+				name: 'show',
+				description: `Displays the current initiative`,
+			},
+			next: {
+				name: 'next',
+				description: `Moves to the next participant in the initiative order`,
+			},
+			prev: {
+				name: 'prev',
+				description: `Moves to the previous participant in the initiative order`,
+			},
+			jumpTo: {
+				name: 'jump_to',
+				description: `Jumps to a specific participant in the initiative order`,
+			},
+			join: {
+				name: 'join',
+				description:
+					'Joins initiative with your active character. ' +
+					'Defaults to rolling perception.',
+			},
+			add: {
+				name: 'add',
+				description: `Adds a fake character to initiative`,
+			},
+			set: {
+				name: 'set',
+				description: `Sets certain properties of your character for initiative`,
+			},
+			remove: {
+				name: 'remove',
+				description: 'Removes a character from initiative.',
+			},
+			end: {
+				name: 'end',
+				description: 'Ends the initiative in the current channel.',
+			},
 		},
-		roll: { name: 'roll', description: 'Roll Dice', commandOptions: {}, interactions: {} },
+		roll: {
+			name: 'roll',
+			description: 'Roll Dice',
+			interactions: {},
+
+			ability: {
+				name: 'ability',
+				description: `rolls an ability for your active character`,
+			},
+			attack: {
+				name: 'attack',
+				description: `rolls an attack for your active character`,
+			},
+			dice: {
+				name: 'dice',
+				description: `Rolls some dice.`,
+			},
+			perception: {
+				name: 'perception',
+				description: `rolls perception for your active character`,
+			},
+			save: {
+				name: 'save',
+				description: `rolls a save for your active character`,
+			},
+			skill: {
+				name: 'skill',
+				description: `rolls a skill for your active character`,
+			},
+		},
+	},
+	commandOptions: {
+		// IMPORT
+		wgUrl: {
+			name: 'url',
+			description: "The url of your wanderer's guide character.",
+		},
+		name: {
+			name: 'name',
+			description: "The name of your wanderer's guide character.",
+		},
+		id: {
+			name: 'character_id',
+			description: `The id of your wanderer's guide character.`,
+		},
+		// ROLL
+		saveChoice: {
+			name: 'save',
+			description: 'The save to roll.',
+		},
+		skillChoice: {
+			name: 'skill',
+			description: 'The skill to roll.',
+			overwrites: {
+				initJoinDescription: 'The skill to use for initiative instead of perception.',
+			},
+		},
+		abilityChoice: {
+			name: 'ability',
+			description: 'The ability to roll.',
+		},
+		attackChoice: {
+			name: 'attack',
+			description: 'The attack to roll.',
+		},
+		rollExpression: {
+			name: 'dice',
+			description: 'The dice expression to roll. Similar to Roll20 dice rolls.',
+			overwrites: {
+				initAddDescription: 'Dice to roll to join initiative.',
+				initJoinDescription:
+					'Dice to roll to join initiative. ' +
+					'Modifies your skill if you chose a skill.',
+			},
+		},
+		rollModifier: {
+			name: 'modifier',
+			description: 'A dice expression to modify your roll. (e.g. "+ 1 + 1d4")',
+		},
+		attackRollModifier: {
+			name: 'attack_modifier',
+			description: 'A dice expression to modify your attack roll. (e.g. "+ 1 + 1d4")',
+		},
+		damageRollModifier: {
+			name: 'damage_modifier',
+			description: 'A dice expression to modify your damage roll. (e.g. "+ 1 + 1d4")',
+		},
+		rollNote: {
+			name: 'note',
+			description: 'A note about the reason for the roll.',
+		},
+
+		// INIT
+		initValue: {
+			name: 'value',
+			description: 'A value to set your initiative to. Overwrites any other init options.',
+		},
+		initActor: {
+			name: 'name',
+			description: 'The name of the dummy character to add to initiative.',
+		},
+		initCharacter: {
+			name: 'character',
+			description: 'A character present in the initiative.',
+		},
+		setOption: {
+			name: 'option',
+			description: 'The character option to alter (only within this initiative).',
+			choices: {
+				initiative: {
+					name: 'initiative',
+					value: 'initiative',
+				},
+				actorName: {
+					name: 'name',
+					value: 'name',
+				},
+			},
+		},
+		setValue: {
+			name: 'value',
+			description: 'The value to set the option to.',
+		},
 	},
 	embedLinks,
 };

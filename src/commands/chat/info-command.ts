@@ -11,6 +11,7 @@ import typescript from 'typescript';
 
 import { ChatArgs } from '../../constants/index.js';
 import { InfoOption } from '../../enums/index.js';
+import { TranslationFunctions } from '../../i18n/i18n-types.js';
 import { Language } from '../../models/enum-helpers/index.js';
 import { EventData } from '../../models/internal-models.js';
 import { Lang } from '../../services/index.js';

@@ -14,7 +14,8 @@
 		"experimentalDecorators": true,
 		"emitDecoratorMetadata": true,
 		"skipLibCheck": true,
-		"forceConsistentCasingInFileNames": true
+		"forceConsistentCasingInFileNames": true,
+		"disableSizeLimit": true
 	},
 	"include": ["src/**/*.ts", "src/**/*.json", "types.d.ts"],
 	"exclude": [

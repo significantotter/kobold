@@ -27,7 +27,7 @@ describe('CharacterRemoveSubCommand', () => {
 			user: { id: null },
 		} as any;
 		const command = new CharacterRemoveSubCommand();
-		command.execute(fakeIntr, fakeData as any);
+		command.execute(fakeIntr, fakeData as any, Language.LL);
 	});
 	test('Allows the user to cancel the removal of their character', done => {
 		let charToRemove = CharacterFactory.withFakeId().build();
@@ -65,7 +65,7 @@ describe('CharacterRemoveSubCommand', () => {
 			user: { id: null },
 		} as any;
 		const command = new CharacterRemoveSubCommand();
-		command.execute(fakeIntr, fakeData as any);
+		command.execute(fakeIntr, fakeData as any, Language.LL);
 	});
 	test('A removal request can expire', () => {});
 	test("Removes the user's character", () => {});
