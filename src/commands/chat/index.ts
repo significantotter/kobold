@@ -28,3 +28,6 @@ export { InitStartSubCommand } from './init/init-start-subcommand.js';
 export { InitEndSubCommand } from './init/init-end-subcommand.js';
 export { InitJoinSubCommand } from './init/init-join-subcommand.js';
 export { InitRemoveSubCommand } from './init/init-remove-subcommand.js';
+
+// help command
+export { HelpCommand } from './help-command';

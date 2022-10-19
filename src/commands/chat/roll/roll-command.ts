@@ -152,7 +152,10 @@ export class RollCommand implements Command {
 	): Promise<ApplicationCommandOptionChoiceData[]> {
 		if (!intr.isAutocomplete()) return;
 
-		let command = CommandUtils.getSubCommandByName(this.commands, intr.options.getSubcommand());
+		const command = CommandUtils.getSubCommandByName(
+			this.commands,
+			intr.options.getSubcommand()
+		);
 		if (!command || !command.autocomplete) {
 			return;
 		}
@@ -166,12 +169,15 @@ export class RollCommand implements Command {
 		LL: TranslationFunctions
 	): Promise<void> {
 		if (!intr.isChatInputCommand()) return;
-		let command = CommandUtils.getSubCommandByName(this.commands, intr.options.getSubcommand());
+		const command = CommandUtils.getSubCommandByName(
+			this.commands,
+			intr.options.getSubcommand()
+		);
 		if (!command) {
 			return;
 		}
 
-		let passesChecks = await CommandUtils.runChecks(command, intr, data);
+		const passesChecks = await CommandUtils.runChecks(command, intr, data);
 		if (passesChecks) {
 			await command.execute(intr, data, LL);
 		}

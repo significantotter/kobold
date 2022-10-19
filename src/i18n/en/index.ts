@@ -1,11 +1,23 @@
+import { Client } from 'discord.js';
 import type { BaseTranslation } from '../i18n-types';
-import Config from './../../config/config.json';
 
-const refs = {
-	bot: {
-		name: 'Kobold',
-		author: 'Significantotter',
-	},
+const links = {
+	thumbnail: 'https://i.imgur.com/cVOfw8P.png',
+	docs: 'https://top.gg/',
+	donate: 'https://ko-fi.com/significantotter',
+	invite: 'https://discord.com/oauth2/authorize?client_id=909138081163137094&scope=bot&permissions=532643576896',
+	source: 'https://github.com/significantotter/kobold',
+	support: 'https://discord.gg/6bS2GM59uj',
+	template: 'https://github.com/KevinNovak/Discord-Bot-TypeScript-Template',
+	vote: 'https://top.gg/',
+};
+const bot = {
+	name: 'Kobold',
+	author: 'SignificantOtter#3403',
+};
+
+let refs = {
+	bot: { ...bot },
 	colors: {
 		default: '#0099ff',
 		success: '#00ff83',
@@ -13,31 +25,135 @@ const refs = {
 		error: '#ff4a4a',
 	},
 	links: {
-		author: 'https://github.com/significantotter',
-		docs: 'https://top.gg/',
-		donate: 'https://ko-fi.com/significantotter',
-		invite: 'https://discord.com/',
-		source: 'https://github.com/significantotter/kobold',
-		support: 'https://discord.gg/6bS2GM59uj',
-		template: '',
-		vote: 'https://top.gg/',
+		...links,
+		embed: {
+			donate: `[Support Kobold's development through ko-fi](${links.donate})`,
+			invite: `[Invite Kobold to a Discord Server](${links.invite})`,
+			source: `[Follow Kobold's development on Github](${links.source})`,
+			support: `[Join Kobold's Support Server on Discord](${links.support})`,
+			template: `[Built with Kevin Novak's Discord Bot TypeScript Template](${links.template})`,
+			vote: `[Vote for Kobold!](${links.vote})`,
+			wanderersGuide: `[Wanderer's Guide](https://wanderersguide.app)`,
+		},
 	},
-};
-
-const embedLinks = {
-	authorEmbed: `[${refs.bot.author}](${refs.links.author})`,
-	docsEmbed: `[View Documentation](${refs.links.docs})`,
-	donateEmbed: `[Help support ${refs.bot.name}'s development!](${refs.links.donate})`,
-	inviteEmbed: `[Invite ${refs.bot.name} to a Server!](${refs.links.invite})`,
-	sourceEmbed: `[View Source Code](${refs.links.source})`,
-	supportEmbed: `[Join Support Server](${refs.links.support})`,
-	templateEmbed: `[Discord Bot TypeScript Template](${refs.links.template})`,
-	voteEmbed: `[Vote for ${refs.bot.name}!](${refs.links.vote})`,
-	wgEmbed: `[Wanderer's Guide](https://wanderersguide.app)`,
 };
 
 const en: BaseTranslation = {
 	commands: {
+		help: {
+			name: 'help',
+			description: 'Get help with commands, permissions, FAQ, etc.',
+
+			faq: {
+				name: 'faq',
+				value: 'faq',
+				description: 'Frequently Asked Questions',
+				interactions: {
+					embed: {
+						title: 'Frequently Asked Questions',
+						thumbnail: refs.links.thumbnail,
+						addToServer: {
+							name: 'How do I add Kobold to a server?',
+							value: refs.links.embed.invite,
+						},
+						slashCommands: {
+							name: 'How do commands work?',
+							value:
+								"Kobold uses discord's new slash commands. " +
+								'To use a slash command, type "/" followed by one of Kobold\'s commands, ' +
+								"and then select the command from discord's pop-up. " +
+								'Required command options automatically appear for you to enter. ' +
+								'Optional command options may require you to choose the option from ' +
+								"discord's pop-up or to tap the right arrow from the options.\n\n" +
+								"See [Discord's explanation](https://support.discord.com/hc/vi/" +
+								'articles/1500000368501-Slash-Commands-FAQ) for more details!',
+						},
+						commandOptions: {
+							name: "Where can I find a list of kobold's commands",
+							value: 'Use the command `/help commands`',
+						},
+						importCharacter: {
+							name: "How do I import a wanderer's guide character?",
+							value:
+								"go to your character's webpage in wanderer's guide " +
+								'and copy the webpage URL.\n\n' +
+								'Then, start the `/import` command, and enter that URL ' +
+								"in the command's url option. It may ask you to authenticate the " +
+								'character. If so, follow the link, complete the instructions, ' +
+								"and then `/import` your character's url again.",
+						},
+						initiative: {
+							name: 'How does initiative work?',
+							value:
+								'To start initiative, use the command `/init start`. ' +
+								"An initiative is now running in the current channel, but it doesn't " +
+								'have any members yet. \n\nTo join initiative with your active character, ' +
+								'use `/init join`. If, instead, you want to join initiative with an NPC' +
+								'use `/init add`. You will be required to enter a name, and have options to' +
+								'either choose an initiative value to have them join on, or to provide a ' +
+								'dice expression for them to roll for their initiative value.',
+						},
+					},
+				},
+			},
+			about: {
+				name: 'about',
+				value: 'about',
+				description: 'Information about the Kobold bot',
+				interactions: {
+					embed: {
+						title: 'About Kobold',
+						thumbnail: refs.links.thumbnail,
+						description:
+							'Kobold integrates the excellent character management ' +
+							"website Wanderer's Guide with discord for play by " +
+							'post pathfinder 2E games.\n',
+						authorField: {
+							name: 'Developed by',
+							value: refs.bot.author,
+						},
+						featuresField: {
+							name: 'Features',
+							value:
+								"Import characters from Wanderer's Guide\n\n" +
+								"Roll dice for your character's stats\n\n" +
+								'Track characters and NPCs through rounds of initiative',
+						},
+						linksField: {
+							name: 'Links',
+							value:
+								refs.links.embed.invite +
+								'\n' +
+								refs.links.embed.donate +
+								'\n' +
+								refs.links.embed.support +
+								'\n' +
+								refs.links.embed.source,
+						},
+					},
+				},
+			},
+			commands: {
+				name: 'commands',
+				value: 'commands',
+				description: 'all commands in Kobold',
+			},
+			init: {
+				name: 'init',
+				value: 'init',
+				description: 'the /init command',
+			},
+			character: {
+				name: 'character',
+				value: 'character',
+				description: 'the /character command',
+			},
+			roll: {
+				name: 'roll',
+				value: 'roll',
+				description: 'the /roll command',
+			},
+		},
 		character: {
 			// MAIN COMMAND INFO
 			name: 'character',
@@ -113,12 +229,12 @@ const en: BaseTranslation = {
 						coreDataField: {
 							name: 'Level {level} {heritage} {ancestry} {classes}\n',
 							value:
-								'Max HP `${health}`\n' +
-								'AC `${armorClass}`\n' +
-								'Perception `${perceptionModifier}` (DC {perceptionDC})\n' +
-								'${classes} DC `${classDC}`\n' +
-								'Speed `${speed}`\n\n' +
-								'Background: ${background}',
+								'Max HP `{health}`\n' +
+								'AC `{armorClass}`\n' +
+								'Perception `{perceptionModifier}` (DC {perceptionDC})\n' +
+								'{classes} DC `{classDC}`\n' +
+								'Speed `{speed}`\n\n' +
+								'Background: {background}',
 						},
 						abilitiesField: {
 							name: 'Abilities',
@@ -313,7 +429,6 @@ const en: BaseTranslation = {
 			description: 'The value to set the option to.',
 		},
 	},
-	embedLinks,
 };
 
 export default en;

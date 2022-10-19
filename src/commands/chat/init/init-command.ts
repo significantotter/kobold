@@ -19,11 +19,11 @@ import { CommandUtils, InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 
 export class InitCommand implements Command {
-	public names = ['init'];
+	public names = [Language.LL.commands.init.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: 'init',
-		description: `Initiative Tracking`,
+		name: Language.LL.commands.init.name(),
+		description: Language.LL.commands.init.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 

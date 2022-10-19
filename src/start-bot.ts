@@ -31,6 +31,8 @@ import {
 	InitJoinSubCommand,
 	InitRemoveSubCommand,
 	InitEndSubCommand,
+	// help
+	HelpCommand,
 } from './commands/chat/index.js';
 import { Command } from './commands/index.js';
 import {
@@ -68,6 +70,8 @@ async function start(): Promise<void> {
 
 	// Commands
 	let commands: Command[] = [
+		// Help
+		new HelpCommand(),
 		// Character Commands
 		new CharacterCommand([
 			new CharacterSheetSubCommand(),

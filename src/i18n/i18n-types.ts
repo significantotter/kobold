@@ -16,6 +16,220 @@ export type Translations = RootTranslation
 
 type RootTranslation = {
 	commands: {
+		help: {
+			/**
+			 * h​e​l​p
+			 */
+			name: string
+			/**
+			 * G​e​t​ ​h​e​l​p​ ​w​i​t​h​ ​c​o​m​m​a​n​d​s​,​ ​p​e​r​m​i​s​s​i​o​n​s​,​ ​F​A​Q​,​ ​e​t​c​.
+			 */
+			description: string
+			faq: {
+				/**
+				 * f​a​q
+				 */
+				name: string
+				/**
+				 * f​a​q
+				 */
+				value: string
+				/**
+				 * F​r​e​q​u​e​n​t​l​y​ ​A​s​k​e​d​ ​Q​u​e​s​t​i​o​n​s
+				 */
+				description: string
+				interactions: {
+					embed: {
+						/**
+						 * F​r​e​q​u​e​n​t​l​y​ ​A​s​k​e​d​ ​Q​u​e​s​t​i​o​n​s
+						 */
+						title: string
+						/**
+						 * h​t​t​p​s​:​/​/​i​.​i​m​g​u​r​.​c​o​m​/​c​V​O​f​w​8​P​.​p​n​g
+						 */
+						thumbnail: string
+						addToServer: {
+							/**
+							 * H​o​w​ ​d​o​ ​I​ ​a​d​d​ ​K​o​b​o​l​d​ ​t​o​ ​a​ ​s​e​r​v​e​r​?
+							 */
+							name: string
+							/**
+							 * [​I​n​v​i​t​e​ ​K​o​b​o​l​d​ ​t​o​ ​a​ ​D​i​s​c​o​r​d​ ​S​e​r​v​e​r​]​(​h​t​t​p​s​:​/​/​d​i​s​c​o​r​d​.​c​o​m​/​o​a​u​t​h​2​/​a​u​t​h​o​r​i​z​e​?​c​l​i​e​n​t​_​i​d​=​9​0​9​1​3​8​0​8​1​1​6​3​1​3​7​0​9​4​&​s​c​o​p​e​=​b​o​t​&​p​e​r​m​i​s​s​i​o​n​s​=​5​3​2​6​4​3​5​7​6​8​9​6​)
+							 */
+							value: string
+						}
+						slashCommands: {
+							/**
+							 * H​o​w​ ​d​o​ ​c​o​m​m​a​n​d​s​ ​w​o​r​k​?
+							 */
+							name: string
+							/**
+							 * K​o​b​o​l​d​ ​u​s​e​s​ ​d​i​s​c​o​r​d​'​s​ ​n​e​w​ ​s​l​a​s​h​ ​c​o​m​m​a​n​d​s​.​ ​T​o​ ​u​s​e​ ​a​ ​s​l​a​s​h​ ​c​o​m​m​a​n​d​,​ ​t​y​p​e​ ​"​/​"​ ​f​o​l​l​o​w​e​d​ ​b​y​ ​o​n​e​ ​o​f​ ​K​o​b​o​l​d​'​s​ ​c​o​m​m​a​n​d​s​,​ ​a​n​d​ ​t​h​e​n​ ​s​e​l​e​c​t​ ​t​h​e​ ​c​o​m​m​a​n​d​ ​f​r​o​m​ ​d​i​s​c​o​r​d​'​s​ ​p​o​p​-​u​p​.​ ​R​e​q​u​i​r​e​d​ ​c​o​m​m​a​n​d​ ​o​p​t​i​o​n​s​ ​a​u​t​o​m​a​t​i​c​a​l​l​y​ ​a​p​p​e​a​r​ ​f​o​r​ ​y​o​u​ ​t​o​ ​e​n​t​e​r​.​ ​O​p​t​i​o​n​a​l​ ​c​o​m​m​a​n​d​ ​o​p​t​i​o​n​s​ ​m​a​y​ ​r​e​q​u​i​r​e​ ​y​o​u​ ​t​o​ ​c​h​o​o​s​e​ ​t​h​e​ ​o​p​t​i​o​n​ ​f​r​o​m​ ​d​i​s​c​o​r​d​'​s​ ​p​o​p​-​u​p​ ​o​r​ ​t​o​ ​t​a​p​ ​t​h​e​ ​r​i​g​h​t​ ​a​r​r​o​w​ ​f​r​o​m​ ​t​h​e​ ​o​p​t​i​o​n​s​.​
+						​
+						​S​e​e​ ​[​D​i​s​c​o​r​d​'​s​ ​e​x​p​l​a​n​a​t​i​o​n​]​(​h​t​t​p​s​:​/​/​s​u​p​p​o​r​t​.​d​i​s​c​o​r​d​.​c​o​m​/​h​c​/​v​i​/​a​r​t​i​c​l​e​s​/​1​5​0​0​0​0​0​3​6​8​5​0​1​-​S​l​a​s​h​-​C​o​m​m​a​n​d​s​-​F​A​Q​)​ ​f​o​r​ ​m​o​r​e​ ​d​e​t​a​i​l​s​!
+							 */
+							value: string
+						}
+						commandOptions: {
+							/**
+							 * W​h​e​r​e​ ​c​a​n​ ​I​ ​f​i​n​d​ ​a​ ​l​i​s​t​ ​o​f​ ​k​o​b​o​l​d​'​s​ ​c​o​m​m​a​n​d​s
+							 */
+							name: string
+							/**
+							 * U​s​e​ ​t​h​e​ ​c​o​m​m​a​n​d​ ​`​/​h​e​l​p​ ​c​o​m​m​a​n​d​s​`
+							 */
+							value: string
+						}
+						importCharacter: {
+							/**
+							 * H​o​w​ ​d​o​ ​I​ ​i​m​p​o​r​t​ ​a​ ​w​a​n​d​e​r​e​r​'​s​ ​g​u​i​d​e​ ​c​h​a​r​a​c​t​e​r​?
+							 */
+							name: string
+							/**
+							 * g​o​ ​t​o​ ​y​o​u​r​ ​c​h​a​r​a​c​t​e​r​'​s​ ​w​e​b​p​a​g​e​ ​i​n​ ​w​a​n​d​e​r​e​r​'​s​ ​g​u​i​d​e​ ​a​n​d​ ​c​o​p​y​ ​t​h​e​ ​w​e​b​p​a​g​e​ ​U​R​L​.​
+						​
+						​T​h​e​n​,​ ​s​t​a​r​t​ ​t​h​e​ ​/​i​m​p​o​r​t​ ​c​o​m​m​a​n​d​,​ ​a​n​d​ ​e​n​t​e​r​ ​t​h​a​t​ ​U​R​L​ ​i​n​ ​t​h​e​ ​c​o​m​m​a​n​d​'​s​ ​u​r​l​ ​o​p​t​i​o​n
+							 */
+							value: string
+						}
+						initiative: {
+							/**
+							 * H​o​w​ ​d​o​e​s​ ​i​n​i​t​i​a​t​i​v​e​ ​w​o​r​k​?
+							 */
+							name: string
+							/**
+							 * T​o​ ​s​t​a​r​t​ ​i​n​i​t​i​a​t​i​v​e​ ​e​n​t​e​r​ ​`​/​i​n​i​t​ ​s​t​a​r​t​`​.​ ​A​n​ ​i​n​i​t​i​a​t​i​v​e​ ​i​s​ ​n​o​w​ ​r​u​n​n​i​n​g​ ​i​n​ ​t​h​e​ ​c​u​r​r​e​n​t​ ​c​h​a​n​n​e​l​,​ ​b​u​t​ ​i​t​ ​d​o​e​s​n​'​t​ ​h​a​v​e​ ​a​n​y​ ​m​e​m​b​e​r​s​ ​y​e​t​.​ ​T​o​ ​j​o​i​n​ ​i​n​i​t​i​a​t​i​v​e​ ​w​i​t​h​ ​y​o​u​r​ ​a​c​t​i​v​e​ ​c​h​a​r​a​c​t​e​r​,​ ​u​s​e​ ​`​/​i​n​i​t​ ​j​o​i​n​`​.​ ​I​f​,​ ​i​n​s​t​e​a​d​,​ ​y​o​u​ ​w​a​n​t​ ​t​o​ ​j​o​i​n​ ​i​n​i​t​i​a​t​i​v​e​ ​w​i​t​h​ ​a​n​ ​N​P​C​u​s​e​ ​`​/​i​n​i​t​ ​a​d​d​`​.​ ​Y​o​u​ ​w​i​l​l​ ​b​e​ ​r​e​q​u​i​r​e​d​ ​t​o​ ​e​n​t​e​r​ ​a​ ​n​a​m​e​,​ ​a​n​d​ ​h​a​v​e​ ​o​p​t​i​o​n​s​ ​t​o​e​i​t​h​e​r​ ​c​h​o​o​s​e​ ​a​n​ ​i​n​i​t​i​a​t​i​v​e​ ​v​a​l​u​e​ ​t​o​ ​h​a​v​e​ ​t​h​e​m​ ​j​o​i​n​ ​o​n​,​ ​o​r​ ​t​o​ ​p​r​o​v​i​d​e​ ​a​ ​d​i​c​e​ ​e​x​p​r​e​s​s​i​o​n​ ​f​o​r​ ​t​h​e​m​ ​t​o​ ​r​o​l​l​ ​f​o​r​ ​t​h​e​i​r​ ​i​n​i​t​i​a​t​i​v​e​ ​v​a​l​u​e​.
+							 */
+							value: string
+						}
+					}
+				}
+			}
+			about: {
+				/**
+				 * a​b​o​u​t
+				 */
+				name: string
+				/**
+				 * a​b​o​u​t
+				 */
+				value: string
+				/**
+				 * I​n​f​o​r​m​a​t​i​o​n​ ​a​b​o​u​t​ ​t​h​e​ ​K​o​b​o​l​d​ ​b​o​t
+				 */
+				description: string
+				interactions: {
+					embed: {
+						/**
+						 * A​b​o​u​t​ ​K​o​b​o​l​d
+						 */
+						title: string
+						/**
+						 * h​t​t​p​s​:​/​/​i​.​i​m​g​u​r​.​c​o​m​/​c​V​O​f​w​8​P​.​p​n​g
+						 */
+						thumbnail: string
+						/**
+						 * K​o​b​o​l​d​ ​i​n​t​e​g​r​a​t​e​s​ ​t​h​e​ ​e​x​c​e​l​l​e​n​t​ ​c​h​a​r​a​c​t​e​r​ ​m​a​n​a​g​e​m​e​n​t​ ​w​e​b​s​i​t​e​ ​W​a​n​d​e​r​e​r​'​s​ ​G​u​i​d​e​ ​w​i​t​h​ ​d​i​s​c​o​r​d​ ​f​o​r​ ​p​l​a​y​ ​b​y​ ​p​o​s​t​ ​p​a​t​h​f​i​n​d​e​r​ ​2​E​ ​g​a​m​e​s​.​
+				
+						 */
+						description: string
+						authorField: {
+							/**
+							 * D​e​v​e​l​o​p​e​d​ ​b​y
+							 */
+							name: string
+							/**
+							 * S​i​g​n​i​f​i​c​a​n​t​O​t​t​e​r​#​3​4​0​3
+							 */
+							value: string
+						}
+						featuresField: {
+							/**
+							 * F​e​a​t​u​r​e​s
+							 */
+							name: string
+							/**
+							 * I​m​p​o​r​t​ ​c​h​a​r​a​c​t​e​r​s​ ​f​r​o​m​ ​W​a​n​d​e​r​e​r​'​s​ ​G​u​i​d​e​
+						​
+						​R​o​l​l​ ​d​i​c​e​ ​f​o​r​ ​y​o​u​r​ ​c​h​a​r​a​c​t​e​r​'​s​ ​s​t​a​t​s​
+						​
+						​T​r​a​c​k​ ​c​h​a​r​a​c​t​e​r​s​ ​a​n​d​ ​N​P​C​s​ ​t​h​r​o​u​g​h​ ​r​o​u​n​d​s​ ​o​f​ ​i​n​i​t​i​a​t​i​v​e
+							 */
+							value: string
+						}
+						linksField: {
+							/**
+							 * L​i​n​k​s
+							 */
+							name: string
+							/**
+							 * [​I​n​v​i​t​e​ ​K​o​b​o​l​d​ ​t​o​ ​a​ ​D​i​s​c​o​r​d​ ​S​e​r​v​e​r​]​(​h​t​t​p​s​:​/​/​d​i​s​c​o​r​d​.​c​o​m​/​o​a​u​t​h​2​/​a​u​t​h​o​r​i​z​e​?​c​l​i​e​n​t​_​i​d​=​9​0​9​1​3​8​0​8​1​1​6​3​1​3​7​0​9​4​&​s​c​o​p​e​=​b​o​t​&​p​e​r​m​i​s​s​i​o​n​s​=​5​3​2​6​4​3​5​7​6​8​9​6​)​
+						​[​S​u​p​p​o​r​t​ ​K​o​b​o​l​d​'​s​ ​d​e​v​e​l​o​p​m​e​n​t​ ​t​h​r​o​u​g​h​ ​k​o​-​f​i​]​(​h​t​t​p​s​:​/​/​k​o​-​f​i​.​c​o​m​/​s​i​g​n​i​f​i​c​a​n​t​o​t​t​e​r​)​
+						​[​J​o​i​n​ ​K​o​b​o​l​d​'​s​ ​S​u​p​p​o​r​t​ ​S​e​r​v​e​r​ ​o​n​ ​D​i​s​c​o​r​d​]​(​h​t​t​p​s​:​/​/​d​i​s​c​o​r​d​.​g​g​/​6​b​S​2​G​M​5​9​u​j​)​
+						​[​F​o​l​l​o​w​ ​K​o​b​o​l​d​'​s​ ​d​e​v​e​l​o​p​m​e​n​t​ ​o​n​ ​G​i​t​h​u​b​]​(​h​t​t​p​s​:​/​/​g​i​t​h​u​b​.​c​o​m​/​s​i​g​n​i​f​i​c​a​n​t​o​t​t​e​r​/​k​o​b​o​l​d​)
+							 */
+							value: string
+						}
+					}
+				}
+			}
+			commands: {
+				/**
+				 * c​o​m​m​a​n​d​s
+				 */
+				name: string
+				/**
+				 * c​o​m​m​a​n​d​s
+				 */
+				value: string
+				/**
+				 * a​l​l​ ​c​o​m​m​a​n​d​s​ ​i​n​ ​K​o​b​o​l​d
+				 */
+				description: string
+			}
+			init: {
+				/**
+				 * i​n​i​t
+				 */
+				name: string
+				/**
+				 * i​n​i​t
+				 */
+				value: string
+				/**
+				 * t​h​e​ ​/​i​n​i​t​ ​c​o​m​m​a​n​d
+				 */
+				description: string
+			}
+			character: {
+				/**
+				 * c​h​a​r​a​c​t​e​r
+				 */
+				name: string
+				/**
+				 * c​h​a​r​a​c​t​e​r
+				 */
+				value: string
+				/**
+				 * t​h​e​ ​/​c​h​a​r​a​c​t​e​r​ ​c​o​m​m​a​n​d
+				 */
+				description: string
+			}
+			roll: {
+				/**
+				 * r​o​l​l
+				 */
+				name: string
+				/**
+				 * r​o​l​l
+				 */
+				value: string
+				/**
+				 * t​h​e​ ​/​r​o​l​l​ ​c​o​m​m​a​n​d
+				 */
+				description: string
+			}
+		}
 		character: {
 			/**
 			 * c​h​a​r​a​c​t​e​r
@@ -185,13 +399,13 @@ type RootTranslation = {
 							 */
 							name: RequiredParams<'ancestry' | 'classes' | 'heritage' | 'level'>
 							/**
-							 * M​a​x​ ​H​P​ ​`​$​{​h​e​a​l​t​h​}​`​
-						​A​C​ ​`​$​{​a​r​m​o​r​C​l​a​s​s​}​`​
-						​P​e​r​c​e​p​t​i​o​n​ ​`​$​{​p​e​r​c​e​p​t​i​o​n​M​o​d​i​f​i​e​r​}​`​ ​(​D​C​ ​{​p​e​r​c​e​p​t​i​o​n​D​C​}​)​
-						​$​{​c​l​a​s​s​e​s​}​ ​D​C​ ​`​$​{​c​l​a​s​s​D​C​}​`​
-						​S​p​e​e​d​ ​`​$​{​s​p​e​e​d​}​`​
+							 * M​a​x​ ​H​P​ ​`​{​h​e​a​l​t​h​}​`​
+						​A​C​ ​`​{​a​r​m​o​r​C​l​a​s​s​}​`​
+						​P​e​r​c​e​p​t​i​o​n​ ​`​{​p​e​r​c​e​p​t​i​o​n​M​o​d​i​f​i​e​r​}​`​ ​(​D​C​ ​{​p​e​r​c​e​p​t​i​o​n​D​C​}​)​
+						​{​c​l​a​s​s​e​s​}​ ​D​C​ ​`​{​c​l​a​s​s​D​C​}​`​
+						​S​p​e​e​d​ ​`​{​s​p​e​e​d​}​`​
 						​
-						​B​a​c​k​g​r​o​u​n​d​:​ ​$​{​b​a​c​k​g​r​o​u​n​d​}
+						​B​a​c​k​g​r​o​u​n​d​:​ ​{​b​a​c​k​g​r​o​u​n​d​}
 							 * @param {unknown} armorClass
 							 * @param {unknown} background
 							 * @param {unknown} classDC
@@ -637,48 +851,224 @@ type RootTranslation = {
 			description: string
 		}
 	}
-	embedLinks: {
-		/**
-		 * [​S​i​g​n​i​f​i​c​a​n​t​o​t​t​e​r​]​(​h​t​t​p​s​:​/​/​g​i​t​h​u​b​.​c​o​m​/​s​i​g​n​i​f​i​c​a​n​t​o​t​t​e​r​)
-		 */
-		authorEmbed: string
-		/**
-		 * [​V​i​e​w​ ​D​o​c​u​m​e​n​t​a​t​i​o​n​]​(​h​t​t​p​s​:​/​/​t​o​p​.​g​g​/​)
-		 */
-		docsEmbed: string
-		/**
-		 * [​H​e​l​p​ ​s​u​p​p​o​r​t​ ​K​o​b​o​l​d​'​s​ ​d​e​v​e​l​o​p​m​e​n​t​!​]​(​h​t​t​p​s​:​/​/​k​o​-​f​i​.​c​o​m​/​s​i​g​n​i​f​i​c​a​n​t​o​t​t​e​r​)
-		 */
-		donateEmbed: string
-		/**
-		 * [​I​n​v​i​t​e​ ​K​o​b​o​l​d​ ​t​o​ ​a​ ​S​e​r​v​e​r​!​]​(​h​t​t​p​s​:​/​/​d​i​s​c​o​r​d​.​c​o​m​/​)
-		 */
-		inviteEmbed: string
-		/**
-		 * [​V​i​e​w​ ​S​o​u​r​c​e​ ​C​o​d​e​]​(​h​t​t​p​s​:​/​/​g​i​t​h​u​b​.​c​o​m​/​s​i​g​n​i​f​i​c​a​n​t​o​t​t​e​r​/​k​o​b​o​l​d​)
-		 */
-		sourceEmbed: string
-		/**
-		 * [​J​o​i​n​ ​S​u​p​p​o​r​t​ ​S​e​r​v​e​r​]​(​h​t​t​p​s​:​/​/​d​i​s​c​o​r​d​.​g​g​/​6​b​S​2​G​M​5​9​u​j​)
-		 */
-		supportEmbed: string
-		/**
-		 * [​D​i​s​c​o​r​d​ ​B​o​t​ ​T​y​p​e​S​c​r​i​p​t​ ​T​e​m​p​l​a​t​e​]​(​)
-		 */
-		templateEmbed: string
-		/**
-		 * [​V​o​t​e​ ​f​o​r​ ​K​o​b​o​l​d​!​]​(​h​t​t​p​s​:​/​/​t​o​p​.​g​g​/​)
-		 */
-		voteEmbed: string
-		/**
-		 * [​W​a​n​d​e​r​e​r​'​s​ ​G​u​i​d​e​]​(​h​t​t​p​s​:​/​/​w​a​n​d​e​r​e​r​s​g​u​i​d​e​.​a​p​p​)
-		 */
-		wgEmbed: string
-	}
 }
 
 export type TranslationFunctions = {
 	commands: {
+		help: {
+			/**
+			 * help
+			 */
+			name: () => LocalizedString
+			/**
+			 * Get help with commands, permissions, FAQ, etc.
+			 */
+			description: () => LocalizedString
+			faq: {
+				/**
+				 * faq
+				 */
+				name: () => LocalizedString
+				/**
+				 * faq
+				 */
+				value: () => LocalizedString
+				/**
+				 * Frequently Asked Questions
+				 */
+				description: () => LocalizedString
+				interactions: {
+					embed: {
+						/**
+						 * Frequently Asked Questions
+						 */
+						title: () => LocalizedString
+						/**
+						 * https://i.imgur.com/cVOfw8P.png
+						 */
+						thumbnail: () => LocalizedString
+						addToServer: {
+							/**
+							 * How do I add Kobold to a server?
+							 */
+							name: () => LocalizedString
+							/**
+							 * [Invite Kobold to a Discord Server](https://discord.com/oauth2/authorize?client_id=909138081163137094&scope=bot&permissions=532643576896)
+							 */
+							value: () => LocalizedString
+						}
+						slashCommands: {
+							/**
+							 * How do commands work?
+							 */
+							name: () => LocalizedString
+							/**
+							 * Kobold uses discord's new slash commands. To use a slash command, type "/" followed by one of Kobold's commands, and then select the command from discord's pop-up. Required command options automatically appear for you to enter. Optional command options may require you to choose the option from discord's pop-up or to tap the right arrow from the options.
+					
+						See [Discord's explanation](https://support.discord.com/hc/vi/articles/1500000368501-Slash-Commands-FAQ) for more details!
+							 */
+							value: () => LocalizedString
+						}
+						commandOptions: {
+							/**
+							 * Where can I find a list of kobold's commands
+							 */
+							name: () => LocalizedString
+							/**
+							 * Use the command `/help commands`
+							 */
+							value: () => LocalizedString
+						}
+						importCharacter: {
+							/**
+							 * How do I import a wanderer's guide character?
+							 */
+							name: () => LocalizedString
+							/**
+							 * go to your character's webpage in wanderer's guide and copy the webpage URL.
+					
+						Then, start the /import command, and enter that URL in the command's url option
+							 */
+							value: () => LocalizedString
+						}
+						initiative: {
+							/**
+							 * How does initiative work?
+							 */
+							name: () => LocalizedString
+							/**
+							 * To start initiative enter `/init start`. An initiative is now running in the current channel, but it doesn't have any members yet. To join initiative with your active character, use `/init join`. If, instead, you want to join initiative with an NPCuse `/init add`. You will be required to enter a name, and have options toeither choose an initiative value to have them join on, or to provide a dice expression for them to roll for their initiative value.
+							 */
+							value: () => LocalizedString
+						}
+					}
+				}
+			}
+			about: {
+				/**
+				 * about
+				 */
+				name: () => LocalizedString
+				/**
+				 * about
+				 */
+				value: () => LocalizedString
+				/**
+				 * Information about the Kobold bot
+				 */
+				description: () => LocalizedString
+				interactions: {
+					embed: {
+						/**
+						 * About Kobold
+						 */
+						title: () => LocalizedString
+						/**
+						 * https://i.imgur.com/cVOfw8P.png
+						 */
+						thumbnail: () => LocalizedString
+						/**
+						 * Kobold integrates the excellent character management website Wanderer's Guide with discord for play by post pathfinder 2E games.
+				
+						 */
+						description: () => LocalizedString
+						authorField: {
+							/**
+							 * Developed by
+							 */
+							name: () => LocalizedString
+							/**
+							 * SignificantOtter#3403
+							 */
+							value: () => LocalizedString
+						}
+						featuresField: {
+							/**
+							 * Features
+							 */
+							name: () => LocalizedString
+							/**
+							 * Import characters from Wanderer's Guide
+					
+						Roll dice for your character's stats
+					
+						Track characters and NPCs through rounds of initiative
+							 */
+							value: () => LocalizedString
+						}
+						linksField: {
+							/**
+							 * Links
+							 */
+							name: () => LocalizedString
+							/**
+							 * [Invite Kobold to a Discord Server](https://discord.com/oauth2/authorize?client_id=909138081163137094&scope=bot&permissions=532643576896)
+						[Support Kobold's development through ko-fi](https://ko-fi.com/significantotter)
+						[Join Kobold's Support Server on Discord](https://discord.gg/6bS2GM59uj)
+						[Follow Kobold's development on Github](https://github.com/significantotter/kobold)
+							 */
+							value: () => LocalizedString
+						}
+					}
+				}
+			}
+			commands: {
+				/**
+				 * commands
+				 */
+				name: () => LocalizedString
+				/**
+				 * commands
+				 */
+				value: () => LocalizedString
+				/**
+				 * all commands in Kobold
+				 */
+				description: () => LocalizedString
+			}
+			init: {
+				/**
+				 * init
+				 */
+				name: () => LocalizedString
+				/**
+				 * init
+				 */
+				value: () => LocalizedString
+				/**
+				 * the /init command
+				 */
+				description: () => LocalizedString
+			}
+			character: {
+				/**
+				 * character
+				 */
+				name: () => LocalizedString
+				/**
+				 * character
+				 */
+				value: () => LocalizedString
+				/**
+				 * the /character command
+				 */
+				description: () => LocalizedString
+			}
+			roll: {
+				/**
+				 * roll
+				 */
+				name: () => LocalizedString
+				/**
+				 * roll
+				 */
+				value: () => LocalizedString
+				/**
+				 * the /roll command
+				 */
+				description: () => LocalizedString
+			}
+		}
 		character: {
 			/**
 			 * character
@@ -828,13 +1218,13 @@ export type TranslationFunctions = {
 							 */
 							name: (arg: { ancestry: unknown, classes: unknown, heritage: unknown, level: unknown }) => LocalizedString
 							/**
-							 * Max HP `${health}`
-						AC `${armorClass}`
-						Perception `${perceptionModifier}` (DC {perceptionDC})
-						${classes} DC `${classDC}`
-						Speed `${speed}`
+							 * Max HP `{health}`
+						AC `{armorClass}`
+						Perception `{perceptionModifier}` (DC {perceptionDC})
+						{classes} DC `{classDC}`
+						Speed `{speed}`
 					
-						Background: ${background}
+						Background: {background}
 							 */
 							value: (arg: { armorClass: unknown, background: unknown, classDC: unknown, classes: unknown, health: unknown, perceptionDC: unknown, perceptionModifier: unknown, speed: unknown }) => LocalizedString
 						}
@@ -1270,44 +1660,6 @@ export type TranslationFunctions = {
 			 */
 			description: () => LocalizedString
 		}
-	}
-	embedLinks: {
-		/**
-		 * [Significantotter](https://github.com/significantotter)
-		 */
-		authorEmbed: () => LocalizedString
-		/**
-		 * [View Documentation](https://top.gg/)
-		 */
-		docsEmbed: () => LocalizedString
-		/**
-		 * [Help support Kobold's development!](https://ko-fi.com/significantotter)
-		 */
-		donateEmbed: () => LocalizedString
-		/**
-		 * [Invite Kobold to a Server!](https://discord.com/)
-		 */
-		inviteEmbed: () => LocalizedString
-		/**
-		 * [View Source Code](https://github.com/significantotter/kobold)
-		 */
-		sourceEmbed: () => LocalizedString
-		/**
-		 * [Join Support Server](https://discord.gg/6bS2GM59uj)
-		 */
-		supportEmbed: () => LocalizedString
-		/**
-		 * [Discord Bot TypeScript Template]()
-		 */
-		templateEmbed: () => LocalizedString
-		/**
-		 * [Vote for Kobold!](https://top.gg/)
-		 */
-		voteEmbed: () => LocalizedString
-		/**
-		 * [Wanderer's Guide](https://wanderersguide.app)
-		 */
-		wgEmbed: () => LocalizedString
 	}
 }
 
