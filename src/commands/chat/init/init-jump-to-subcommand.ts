@@ -21,10 +21,10 @@ import { Initiative } from '../../../services/kobold/models/index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 
 export class InitJumpToSubCommand implements Command {
-	public names = ['jump_to'];
+	public names = ['jump-to'];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: 'jump_to',
+		name: 'jump-to',
 		description: `Jumps to a specific participant in the initiative order`,
 		dm_permission: true,
 		default_member_permissions: undefined,

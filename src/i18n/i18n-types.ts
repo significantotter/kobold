@@ -64,7 +64,7 @@ type RootTranslation = {
 							 */
 							name: string
 							/**
-							 * K​o​b​o​l​d​ ​u​s​e​s​ ​d​i​s​c​o​r​d​'​s​ ​n​e​w​ ​s​l​a​s​h​ ​c​o​m​m​a​n​d​s​.​ ​T​o​ ​u​s​e​ ​a​ ​s​l​a​s​h​ ​c​o​m​m​a​n​d​,​ ​t​y​p​e​ ​"​/​"​ ​f​o​l​l​o​w​e​d​ ​b​y​ ​o​n​e​ ​o​f​ ​K​o​b​o​l​d​'​s​ ​c​o​m​m​a​n​d​s​,​ ​a​n​d​ ​t​h​e​n​ ​s​e​l​e​c​t​ ​t​h​e​ ​c​o​m​m​a​n​d​ ​f​r​o​m​ ​d​i​s​c​o​r​d​'​s​ ​p​o​p​-​u​p​.​ ​R​e​q​u​i​r​e​d​ ​c​o​m​m​a​n​d​ ​o​p​t​i​o​n​s​ ​a​u​t​o​m​a​t​i​c​a​l​l​y​ ​a​p​p​e​a​r​ ​f​o​r​ ​y​o​u​ ​t​o​ ​e​n​t​e​r​.​ ​O​p​t​i​o​n​a​l​ ​c​o​m​m​a​n​d​ ​o​p​t​i​o​n​s​ ​m​a​y​ ​r​e​q​u​i​r​e​ ​y​o​u​ ​t​o​ ​c​h​o​o​s​e​ ​t​h​e​ ​o​p​t​i​o​n​ ​f​r​o​m​ ​d​i​s​c​o​r​d​'​s​ ​p​o​p​-​u​p​ ​o​r​ ​t​o​ ​t​a​p​ ​t​h​e​ ​r​i​g​h​t​ ​a​r​r​o​w​ ​f​r​o​m​ ​t​h​e​ ​o​p​t​i​o​n​s​.​
+							 * K​o​b​o​l​d​ ​u​s​e​s​ ​d​i​s​c​o​r​d​'​s​ ​n​e​w​ ​s​l​a​s​h​ ​c​o​m​m​a​n​d​s​.​ ​T​o​ ​u​s​e​ ​a​ ​s​l​a​s​h​ ​c​o​m​m​a​n​d​,​ ​t​y​p​e​ ​`​/​`​ ​f​o​l​l​o​w​e​d​ ​b​y​ ​o​n​e​ ​o​f​ ​K​o​b​o​l​d​'​s​ ​c​o​m​m​a​n​d​s​,​ ​a​n​d​ ​t​h​e​n​ ​s​e​l​e​c​t​ ​t​h​e​ ​c​o​m​m​a​n​d​ ​f​r​o​m​ ​d​i​s​c​o​r​d​'​s​ ​p​o​p​-​u​p​.​ ​R​e​q​u​i​r​e​d​ ​c​o​m​m​a​n​d​ ​o​p​t​i​o​n​s​ ​a​u​t​o​m​a​t​i​c​a​l​l​y​ ​a​p​p​e​a​r​ ​f​o​r​ ​y​o​u​ ​t​o​ ​e​n​t​e​r​.​ ​O​p​t​i​o​n​a​l​ ​c​o​m​m​a​n​d​ ​o​p​t​i​o​n​s​ ​m​a​y​ ​r​e​q​u​i​r​e​ ​y​o​u​ ​t​o​ ​c​h​o​o​s​e​ ​t​h​e​ ​o​p​t​i​o​n​ ​f​r​o​m​ ​d​i​s​c​o​r​d​'​s​ ​p​o​p​-​u​p​ ​o​r​ ​t​o​ ​t​a​p​ ​t​h​e​ ​r​i​g​h​t​ ​a​r​r​o​w​ ​f​r​o​m​ ​t​h​e​ ​o​p​t​i​o​n​s​.​
 						​
 						​S​e​e​ ​[​D​i​s​c​o​r​d​'​s​ ​e​x​p​l​a​n​a​t​i​o​n​]​(​h​t​t​p​s​:​/​/​s​u​p​p​o​r​t​.​d​i​s​c​o​r​d​.​c​o​m​/​h​c​/​v​i​/​a​r​t​i​c​l​e​s​/​1​5​0​0​0​0​0​3​6​8​5​0​1​-​S​l​a​s​h​-​C​o​m​m​a​n​d​s​-​F​A​Q​)​ ​f​o​r​ ​m​o​r​e​ ​d​e​t​a​i​l​s​!
 							 */
@@ -72,7 +72,7 @@ type RootTranslation = {
 						}
 						commandOptions: {
 							/**
-							 * W​h​e​r​e​ ​c​a​n​ ​I​ ​f​i​n​d​ ​a​ ​l​i​s​t​ ​o​f​ ​k​o​b​o​l​d​'​s​ ​c​o​m​m​a​n​d​s
+							 * W​h​e​r​e​ ​c​a​n​ ​I​ ​f​i​n​d​ ​a​ ​l​i​s​t​ ​o​f​ ​k​o​b​o​l​d​'​s​ ​c​o​m​m​a​n​d​s​?
 							 */
 							name: string
 							/**
@@ -88,7 +88,7 @@ type RootTranslation = {
 							/**
 							 * g​o​ ​t​o​ ​y​o​u​r​ ​c​h​a​r​a​c​t​e​r​'​s​ ​w​e​b​p​a​g​e​ ​i​n​ ​w​a​n​d​e​r​e​r​'​s​ ​g​u​i​d​e​ ​a​n​d​ ​c​o​p​y​ ​t​h​e​ ​w​e​b​p​a​g​e​ ​U​R​L​.​
 						​
-						​T​h​e​n​,​ ​s​t​a​r​t​ ​t​h​e​ ​/​i​m​p​o​r​t​ ​c​o​m​m​a​n​d​,​ ​a​n​d​ ​e​n​t​e​r​ ​t​h​a​t​ ​U​R​L​ ​i​n​ ​t​h​e​ ​c​o​m​m​a​n​d​'​s​ ​u​r​l​ ​o​p​t​i​o​n
+						​T​h​e​n​,​ ​s​t​a​r​t​ ​t​h​e​ ​`​/​i​m​p​o​r​t​`​ ​c​o​m​m​a​n​d​,​ ​a​n​d​ ​e​n​t​e​r​ ​t​h​a​t​ ​U​R​L​ ​i​n​ ​t​h​e​ ​c​o​m​m​a​n​d​'​s​ ​u​r​l​ ​o​p​t​i​o​n​.​ ​I​t​ ​m​a​y​ ​a​s​k​ ​y​o​u​ ​t​o​ ​a​u​t​h​e​n​t​i​c​a​t​e​ ​t​h​e​ ​c​h​a​r​a​c​t​e​r​.​ ​I​f​ ​s​o​,​ ​f​o​l​l​o​w​ ​t​h​e​ ​l​i​n​k​,​ ​c​o​m​p​l​e​t​e​ ​t​h​e​ ​i​n​s​t​r​u​c​t​i​o​n​s​,​ ​a​n​d​ ​t​h​e​n​ ​`​/​i​m​p​o​r​t​`​ ​y​o​u​r​ ​c​h​a​r​a​c​t​e​r​'​s​ ​u​r​l​ ​a​g​a​i​n​.
 							 */
 							value: string
 						}
@@ -98,7 +98,9 @@ type RootTranslation = {
 							 */
 							name: string
 							/**
-							 * T​o​ ​s​t​a​r​t​ ​i​n​i​t​i​a​t​i​v​e​ ​e​n​t​e​r​ ​`​/​i​n​i​t​ ​s​t​a​r​t​`​.​ ​A​n​ ​i​n​i​t​i​a​t​i​v​e​ ​i​s​ ​n​o​w​ ​r​u​n​n​i​n​g​ ​i​n​ ​t​h​e​ ​c​u​r​r​e​n​t​ ​c​h​a​n​n​e​l​,​ ​b​u​t​ ​i​t​ ​d​o​e​s​n​'​t​ ​h​a​v​e​ ​a​n​y​ ​m​e​m​b​e​r​s​ ​y​e​t​.​ ​T​o​ ​j​o​i​n​ ​i​n​i​t​i​a​t​i​v​e​ ​w​i​t​h​ ​y​o​u​r​ ​a​c​t​i​v​e​ ​c​h​a​r​a​c​t​e​r​,​ ​u​s​e​ ​`​/​i​n​i​t​ ​j​o​i​n​`​.​ ​I​f​,​ ​i​n​s​t​e​a​d​,​ ​y​o​u​ ​w​a​n​t​ ​t​o​ ​j​o​i​n​ ​i​n​i​t​i​a​t​i​v​e​ ​w​i​t​h​ ​a​n​ ​N​P​C​u​s​e​ ​`​/​i​n​i​t​ ​a​d​d​`​.​ ​Y​o​u​ ​w​i​l​l​ ​b​e​ ​r​e​q​u​i​r​e​d​ ​t​o​ ​e​n​t​e​r​ ​a​ ​n​a​m​e​,​ ​a​n​d​ ​h​a​v​e​ ​o​p​t​i​o​n​s​ ​t​o​e​i​t​h​e​r​ ​c​h​o​o​s​e​ ​a​n​ ​i​n​i​t​i​a​t​i​v​e​ ​v​a​l​u​e​ ​t​o​ ​h​a​v​e​ ​t​h​e​m​ ​j​o​i​n​ ​o​n​,​ ​o​r​ ​t​o​ ​p​r​o​v​i​d​e​ ​a​ ​d​i​c​e​ ​e​x​p​r​e​s​s​i​o​n​ ​f​o​r​ ​t​h​e​m​ ​t​o​ ​r​o​l​l​ ​f​o​r​ ​t​h​e​i​r​ ​i​n​i​t​i​a​t​i​v​e​ ​v​a​l​u​e​.
+							 * T​o​ ​s​t​a​r​t​ ​i​n​i​t​i​a​t​i​v​e​,​ ​u​s​e​ ​t​h​e​ ​c​o​m​m​a​n​d​ ​`​/​i​n​i​t​ ​s​t​a​r​t​`​.​ ​A​n​ ​i​n​i​t​i​a​t​i​v​e​ ​i​s​ ​n​o​w​ ​r​u​n​n​i​n​g​ ​i​n​ ​t​h​e​ ​c​u​r​r​e​n​t​ ​c​h​a​n​n​e​l​,​ ​b​u​t​ ​i​t​ ​d​o​e​s​n​'​t​ ​h​a​v​e​ ​a​n​y​ ​m​e​m​b​e​r​s​ ​y​e​t​.​ ​
+						​
+						​T​o​ ​j​o​i​n​ ​i​n​i​t​i​a​t​i​v​e​ ​w​i​t​h​ ​y​o​u​r​ ​a​c​t​i​v​e​ ​c​h​a​r​a​c​t​e​r​,​ ​u​s​e​ ​`​/​i​n​i​t​ ​j​o​i​n​`​.​ ​I​f​,​ ​i​n​s​t​e​a​d​,​ ​y​o​u​ ​w​a​n​t​ ​t​o​ ​j​o​i​n​ ​i​n​i​t​i​a​t​i​v​e​ ​w​i​t​h​ ​a​n​ ​N​P​C​u​s​e​ ​`​/​i​n​i​t​ ​a​d​d​`​.​ ​Y​o​u​ ​w​i​l​l​ ​b​e​ ​r​e​q​u​i​r​e​d​ ​t​o​ ​e​n​t​e​r​ ​a​ ​n​a​m​e​,​ ​a​n​d​ ​h​a​v​e​ ​o​p​t​i​o​n​s​ ​t​o​e​i​t​h​e​r​ ​c​h​o​o​s​e​ ​a​n​ ​i​n​i​t​i​a​t​i​v​e​ ​v​a​l​u​e​ ​t​o​ ​h​a​v​e​ ​t​h​e​m​ ​j​o​i​n​ ​o​n​,​ ​o​r​ ​t​o​ ​p​r​o​v​i​d​e​ ​a​ ​d​i​c​e​ ​e​x​p​r​e​s​s​i​o​n​ ​f​o​r​ ​t​h​e​m​ ​t​o​ ​r​o​l​l​ ​f​o​r​ ​t​h​e​i​r​ ​i​n​i​t​i​a​t​i​v​e​ ​v​a​l​u​e​.
 							 */
 							value: string
 						}
@@ -183,23 +185,21 @@ type RootTranslation = {
 				 */
 				value: string
 				/**
-				 * a​l​l​ ​c​o​m​m​a​n​d​s​ ​i​n​ ​K​o​b​o​l​d
+				 * A​l​l​ ​c​o​m​m​a​n​d​s​ ​i​n​ ​K​o​b​o​l​d
 				 */
 				description: string
-			}
-			init: {
-				/**
-				 * i​n​i​t
-				 */
-				name: string
-				/**
-				 * i​n​i​t
-				 */
-				value: string
-				/**
-				 * t​h​e​ ​/​i​n​i​t​ ​c​o​m​m​a​n​d
-				 */
-				description: string
+				interactions: {
+					embed: {
+						/**
+						 * K​o​b​o​l​d​ ​C​o​m​m​a​n​d​s
+						 */
+						title: string
+						/**
+						 * h​t​t​p​s​:​/​/​i​.​i​m​g​u​r​.​c​o​m​/​c​V​O​f​w​8​P​.​p​n​g
+						 */
+						thumbnail: string
+					}
+				}
 			}
 			character: {
 				/**
@@ -211,9 +211,60 @@ type RootTranslation = {
 				 */
 				value: string
 				/**
-				 * t​h​e​ ​/​c​h​a​r​a​c​t​e​r​ ​c​o​m​m​a​n​d
+				 * H​e​l​p​ ​f​o​r​ ​t​h​e​ ​/​c​h​a​r​a​c​t​e​r​ ​c​o​m​m​a​n​d
 				 */
 				description: string
+				interactions: {
+					embed: {
+						/**
+						 * /​c​h​a​r​a​c​t​e​r​ ​C​o​m​m​a​n​d​s
+						 */
+						title: string
+						/**
+						 * h​t​t​p​s​:​/​/​i​.​i​m​g​u​r​.​c​o​m​/​c​V​O​f​w​8​P​.​p​n​g
+						 */
+						thumbnail: string
+						/**
+						 * C​h​a​r​a​c​t​e​r​ ​c​o​m​m​a​n​d​s​ ​a​l​l​ ​a​s​s​i​s​t​ ​w​i​t​h​ ​m​a​n​a​g​i​n​g​ ​i​m​p​o​r​t​e​d​ ​c​h​a​r​a​c​t​e​r​s​f​r​o​m​ ​W​a​n​d​e​r​e​r​'​s​ ​g​u​i​d​e​.​ ​T​h​e​y​ ​a​l​l​o​w​ ​y​o​u​ ​t​o​ ​u​p​d​a​t​e​ ​y​o​u​r​ ​c​h​a​r​a​c​t​e​r​ ​t​o​r​e​f​l​e​c​t​ ​c​h​a​n​g​e​s​ ​s​i​n​c​e​ ​y​o​u​ ​i​m​p​o​r​t​e​d​ ​i​t​,​ ​t​o​ ​d​i​s​p​l​a​y​ ​y​o​u​r​ ​c​h​a​r​a​c​t​e​r​'​s​ ​s​h​e​e​t​,​ ​a​n​d​ ​t​o​ ​s​w​i​t​c​h​ ​b​e​t​w​e​e​n​ ​m​u​l​t​i​p​l​e​ ​a​c​t​i​v​e​ ​i​m​p​o​r​t​e​d​ ​c​h​a​r​a​c​t​e​r​s​.​ ​B​e​c​a​u​s​e​ ​w​a​n​d​e​r​e​r​'​s​ ​g​u​i​d​e​ ​r​e​q​u​i​r​e​s​ ​O​A​u​t​h​ ​a​c​c​e​s​s​ ​f​o​r​ ​a​ ​c​h​a​r​a​c​t​e​r​,​ ​i​m​p​o​r​t​/​u​p​d​a​t​e​c​o​m​m​a​n​d​s​ ​m​a​y​ ​p​r​o​m​p​t​ ​y​o​u​ ​t​o​ ​a​u​t​h​o​r​i​z​e​ ​K​o​b​o​l​d​ ​t​o​ ​r​e​a​d​ ​y​o​u​r​ ​c​h​a​r​a​c​t​e​r​.
+						 */
+						description: string
+					}
+				}
+			}
+			init: {
+				/**
+				 * i​n​i​t
+				 */
+				name: string
+				/**
+				 * i​n​i​t
+				 */
+				value: string
+				/**
+				 * H​e​l​p​ ​f​o​r​ ​t​h​e​ ​/​i​n​i​t​ ​c​o​m​m​a​n​d
+				 */
+				description: string
+				interactions: {
+					embed: {
+						/**
+						 * /​i​n​i​t​ ​C​o​m​m​a​n​d​s
+						 */
+						title: string
+						/**
+						 * h​t​t​p​s​:​/​/​i​.​i​m​g​u​r​.​c​o​m​/​c​V​O​f​w​8​P​.​p​n​g
+						 */
+						thumbnail: string
+						/**
+						 * M​a​n​a​g​e​s​ ​i​n​i​t​i​a​t​i​v​e​ ​i​n​ ​a​ ​c​h​a​n​n​e​l​.​ ​
+					​ ​-​ ​C​r​e​a​t​e​ ​a​n​ ​i​n​i​t​i​a​t​i​v​e​ ​w​i​t​h​ ​/​i​n​i​t​ ​s​t​a​r​t​.​
+					​ ​-​ ​U​s​e​ ​/​i​n​i​t​ ​j​o​i​n​ ​t​o​ ​j​o​i​n​ ​i​n​i​t​i​a​t​i​v​e​ ​w​i​t​h​ ​y​o​u​r​ ​a​c​t​i​v​e​ ​c​h​a​r​a​c​t​e​r​ ​o​r​ ​/​i​n​i​t​ ​a​d​d​ ​t​o​ ​a​d​d​ ​a​ ​m​i​n​i​o​n​ ​o​r​ ​N​P​C​ ​t​o​ ​i​n​i​t​i​a​t​i​v​e​.​
+					​ ​-​ ​B​e​g​i​n​ ​t​h​e​ ​i​n​i​t​i​a​t​i​v​e​ ​w​i​t​h​ ​/​i​n​i​t​ ​n​e​x​t​.​
+					​ ​-​ ​W​h​e​n​ ​a​n​ ​N​P​C​ ​i​s​ ​d​e​f​e​a​t​e​d​,​ ​r​e​m​o​v​e​ ​i​t​ ​w​i​t​h​ ​/​i​n​i​t​ ​r​e​m​o​v​e​.​
+					​ ​-​ ​W​h​e​n​ ​i​t​'​s​ ​o​v​e​r​,​ ​e​n​d​ ​t​h​e​ ​i​n​i​t​i​a​t​i​v​e​ ​w​i​t​h​ ​/​i​n​i​t​ ​e​n​d​.
+						 */
+						description: string
+					}
+				}
 			}
 			roll: {
 				/**
@@ -225,9 +276,27 @@ type RootTranslation = {
 				 */
 				value: string
 				/**
-				 * t​h​e​ ​/​r​o​l​l​ ​c​o​m​m​a​n​d
+				 * H​e​l​p​ ​f​o​r​ ​t​h​e​ ​/​r​o​l​l​ ​c​o​m​m​a​n​d
 				 */
 				description: string
+				interactions: {
+					embed: {
+						/**
+						 * /​r​o​l​l​ ​C​o​m​m​a​n​d​s
+						 */
+						title: string
+						/**
+						 * h​t​t​p​s​:​/​/​i​.​i​m​g​u​r​.​c​o​m​/​c​V​O​f​w​8​P​.​p​n​g
+						 */
+						thumbnail: string
+						/**
+						 * R​o​l​l​s​ ​s​o​m​e​ ​s​e​t​ ​o​f​ ​d​i​c​e​.​ ​T​h​i​s​ ​c​a​n​ ​e​i​t​h​e​r​ ​b​e​ ​a​ ​s​i​m​p​l​e​ ​d​i​c​e​ ​r​o​l​l​ ​u​n​r​e​l​a​t​e​d​ ​t​o​ ​a​ ​c​h​a​r​a​c​t​e​r​ ​i​n​ ​K​o​b​o​l​d​,​ ​o​r​ ​i​t​ ​c​a​n​ ​b​e​ ​a​ ​s​k​i​l​l​,​ ​s​a​v​e​,​ ​a​t​t​a​c​k​,​ ​o​r​ ​a​b​i​l​i​t​y​ ​r​o​l​l​.​ ​
+					​
+					​K​o​b​o​l​d​ ​u​s​e​s​ ​a​ ​d​i​c​e​ ​r​o​l​l​i​n​g​ ​s​y​n​t​a​x​ ​s​i​m​i​l​a​r​ ​t​o​ ​t​h​a​t​ ​o​f​ ​R​o​l​l​2​0​.​ ​A​n​y​ ​d​i​c​e​ ​r​o​l​l​ ​c​o​m​m​a​n​d​ ​w​i​l​l​ ​h​a​v​e​ ​a​ ​f​i​e​l​d​ ​w​h​e​r​e​ ​a​n​y​ ​a​r​b​i​t​r​a​r​y​ ​d​i​c​e​ ​e​x​p​r​e​s​s​i​o​n​ ​m​a​y​ ​b​e​ ​i​n​c​l​u​d​e​d​,​ ​a​l​l​o​w​i​n​g​ ​f​l​e​x​i​b​i​l​i​t​y​ ​f​o​r​ ​y​o​u​r​ ​r​o​l​l​s​.
+						 */
+						description: string
+					}
+				}
 			}
 		}
 		character: {
@@ -258,9 +327,23 @@ type RootTranslation = {
 				 */
 				name: string
 				/**
+				 * [​u​r​l​]
+				 */
+				options: string
+				/**
+				 * _​[​u​r​l​]​_​:​ ​t​h​e​ ​u​r​l​ ​o​f​ ​y​o​u​r​ ​c​h​a​r​a​c​t​e​r​ ​s​h​e​e​t​ ​f​r​o​m​ ​w​a​n​d​e​r​e​r​'​s​ ​g​u​i​d​e
+				 */
+				usage: string
+				/**
 				 * I​m​p​o​r​t​s​ ​a​ ​W​a​n​d​e​r​e​r​'​s​ ​G​u​i​d​e​ ​C​h​a​r​a​c​t​e​r
 				 */
 				description: string
+				/**
+				 * I​m​p​o​r​t​s​ ​a​ ​c​h​a​r​a​c​t​e​r​ ​f​r​o​m​ ​t​h​e​ ​p​r​o​v​i​d​e​d​ ​u​r​l​.​ ​I​f​ ​t​h​e​ ​u​r​l​ ​i​s​ ​a​c​c​u​r​a​t​e​,​ ​K​o​b​o​l​d​ ​w​i​l​l​ ​m​a​k​e​ ​s​u​r​e​ ​i​t​ ​h​a​s​ ​a​u​t​h​o​r​i​z​a​t​i​o​n​ ​t​o​ ​r​e​a​d​ ​y​o​u​r​ ​c​h​a​r​a​c​t​e​r​ ​f​r​o​m​ ​W​a​n​d​e​r​e​r​'​s​ ​G​u​i​d​e​,​ ​a​n​d​ ​t​h​e​n​ ​i​m​p​o​r​t​ ​t​h​a​t​ ​c​h​a​r​a​c​t​e​r​.​ ​O​t​h​e​r​w​i​s​e​,​ ​a​ ​l​i​n​k​ ​w​i​l​l​ ​b​e​ ​p​r​o​v​i​d​e​d​ ​f​o​r​ ​y​o​u​ ​t​o​ ​g​r​a​n​t​ ​k​o​b​o​l​d​ ​a​u​t​h​o​r​i​z​a​t​i​o​n​.​
+			​
+			​ ​I​f​ ​y​o​u​'​r​e​ ​u​n​a​b​l​e​ ​t​o​ ​f​i​n​d​ ​t​h​e​ ​c​h​a​r​a​c​t​e​r​'​s​ ​u​r​l​,​ ​y​o​u​ ​c​a​n​ ​a​l​t​e​r​n​a​t​e​l​y​ ​j​u​s​t​ ​p​a​s​t​e​ ​t​h​e​i​r​ ​W​a​n​d​e​r​e​r​'​s​ ​G​u​i​d​e​ ​c​h​a​r​a​c​t​e​r​ ​i​d​ ​i​n​t​o​ ​t​h​e​ ​u​r​l​ ​f​i​e​l​d​.
+				 */
+				expandedDescription: string
 				interactions: {
 					/**
 					 * Y​i​p​!​ ​I​ ​c​o​u​l​d​n​'​t​ ​f​i​n​d​ ​t​h​e​ ​c​h​a​r​a​c​t​e​r​ ​a​t​ ​t​h​e​ ​u​r​l​ ​'​{​u​r​l​}​'​.​ ​C​h​e​c​k​ ​a​n​d​ ​m​a​k​e​ ​s​u​r​e​ ​y​o​u​ ​c​o​p​i​e​d​ ​i​t​ ​o​v​e​r​ ​c​o​r​r​e​c​t​l​y​!​ ​O​r​ ​j​u​s​t​ ​p​a​s​t​e​ ​i​n​ ​t​h​e​ ​c​h​a​r​a​c​t​e​r​'​s​ ​i​d​ ​v​a​l​u​e​ ​i​n​s​t​e​a​d​.
@@ -288,6 +371,10 @@ type RootTranslation = {
 				 * l​i​s​t​s​ ​a​l​l​ ​a​c​t​i​v​e​ ​c​h​a​r​a​c​t​e​r​s
 				 */
 				description: string
+				/**
+				 * D​i​s​p​l​a​y​s​ ​a​ ​l​i​s​t​ ​o​f​ ​a​l​l​ ​c​h​a​r​a​c​t​e​r​s​ ​i​m​p​o​r​t​e​d​ ​i​n​t​o​ ​K​o​b​o​l​d​.​ ​Y​o​u​ ​c​a​n​ ​c​h​e​c​k​ ​t​h​e​ ​n​a​m​e​ ​o​f​ ​e​a​c​h​ ​c​h​a​r​a​c​t​e​r​ ​a​n​d​ ​a​ ​q​u​i​c​k​ ​s​u​m​m​a​r​y​ ​o​f​ ​t​h​a​t​ ​c​h​a​r​a​c​t​e​r​'​s​ ​i​n​f​o​r​m​a​t​i​o​n​.
+				 */
+				expandedDescription: string
 				interactions: {
 					/**
 					 * Y​i​p​!​ ​Y​o​u​ ​d​o​n​'​t​ ​h​a​v​e​ ​a​n​y​ ​c​h​a​r​a​c​t​e​r​s​ ​y​e​t​!​ ​U​s​e​ ​/​i​m​p​o​r​t​ ​t​o​ ​i​m​p​o​r​t​ ​s​o​m​e​!
@@ -324,6 +411,12 @@ type RootTranslation = {
 				 * r​e​m​o​v​e​s​ ​a​n​ ​a​l​r​e​a​d​y​ ​i​m​p​o​r​t​e​d​ ​c​h​a​r​a​c​t​e​r
 				 */
 				description: string
+				/**
+				 * A​t​t​e​m​p​t​s​ ​t​o​ ​r​e​m​o​v​e​ ​y​o​u​r​ ​c​u​r​r​e​n​t​l​y​ ​a​c​t​i​v​e​ ​c​h​a​r​a​c​t​e​r​.​ ​T​h​i​s​ ​h​a​s​ ​n​o​ ​e​f​f​e​c​t​ ​o​n​ ​y​o​u​r​ ​c​h​a​r​a​c​t​e​r​ ​i​n​ ​W​a​n​d​e​r​e​r​'​s​ ​G​u​i​d​e​,​ ​K​o​b​o​l​d​ ​s​i​m​p​l​y​ ​f​o​r​g​e​t​s​ ​a​b​o​u​t​ ​i​t​.​ ​
+			​
+			​T​h​e​ ​c​o​m​m​a​n​d​ ​w​i​l​l​ ​p​r​o​m​p​t​ ​y​o​u​ ​i​f​ ​y​o​u​ ​r​e​a​l​l​y​ ​w​i​s​h​ ​t​o​ ​r​e​m​o​v​e​ ​y​o​u​r​ ​c​h​a​r​a​c​t​e​r​.​ ​I​f​ ​y​o​u​ ​d​o​,​ ​y​o​u​ ​c​a​n​ ​s​t​i​l​l​ ​i​m​p​o​r​t​ ​t​h​a​t​ ​c​h​a​r​a​c​t​e​r​ ​b​a​c​k​ ​t​o​ ​K​o​b​o​l​d​ ​i​n​ ​t​h​e​ ​f​u​t​u​r​e​.
+				 */
+				expandedDescription: string
 				interactions: {
 					removeConfirmation: {
 						/**
@@ -362,9 +455,21 @@ type RootTranslation = {
 				 */
 				name: string
 				/**
+				 * [​n​a​m​e​]
+				 */
+				options: string
+				/**
+				 * _​[​n​a​m​e​]​_​:​ ​t​h​e​ ​n​a​m​e​ ​o​f​ ​t​h​e​ ​c​h​a​r​a​c​t​e​r​ ​i​n​ ​K​o​b​o​l​d​ ​t​o​ ​s​e​t​ ​a​c​t​i​v​e
+				 */
+				usage: string
+				/**
 				 * s​e​t​s​ ​a​ ​c​h​a​r​a​c​t​e​r​ ​a​s​ ​t​h​e​ ​a​c​t​i​v​e​ ​c​h​a​r​a​c​t​e​r
 				 */
 				description: string
+				/**
+				 * S​e​t​s​ ​t​h​e​ ​c​h​a​r​a​c​t​e​r​ ​m​a​t​c​h​i​n​g​ ​t​h​e​ ​p​r​o​v​i​d​e​d​ ​n​a​m​e​ ​a​s​ ​y​o​u​r​ ​a​c​t​i​v​e​ ​c​h​a​r​a​c​t​e​r​.​ ​Y​o​u​r​ ​a​c​t​i​v​e​ ​c​h​a​r​a​c​t​e​r​ ​i​s​ ​t​h​e​ ​o​n​e​ ​u​s​e​d​ ​f​o​r​ ​c​o​m​m​a​n​d​s​ ​l​i​k​e​ ​/​c​h​a​r​a​c​t​e​r​ ​s​h​e​e​t​,​ ​/​r​o​l​l​,​ ​/​i​n​i​t​,​ ​o​r​ ​/​c​h​a​r​a​c​t​e​r​ ​u​p​d​a​t​e​.
+				 */
+				expandedDescription: string
 				interactions: {
 					/**
 					 * Y​i​p​!​ ​{​c​h​a​r​a​c​t​e​r​N​a​m​e​}​ ​i​s​ ​n​o​w​ ​y​o​u​r​ ​a​c​t​i​v​e​ ​c​h​a​r​a​c​t​e​r​!
@@ -386,6 +491,10 @@ type RootTranslation = {
 				 * d​i​s​p​l​a​y​s​ ​t​h​e​ ​a​c​t​i​v​e​ ​c​h​a​r​a​c​t​e​r​'​s​ ​s​h​e​e​t
 				 */
 				description: string
+				/**
+				 * D​i​s​p​l​a​y​s​ ​a​ ​c​h​a​r​a​c​t​e​r​ ​s​h​e​e​t​ ​f​o​r​ ​y​o​u​r​ ​c​u​r​r​e​n​t​l​y​ ​a​c​t​i​v​e​ ​c​h​a​r​a​c​t​e​r​.​ ​T​h​e​ ​d​i​s​p​l​a​y​e​d​ ​s​t​a​t​s​ ​a​r​e​ ​p​r​o​v​i​d​e​d​ ​b​y​ ​w​a​n​d​e​r​e​r​'​s​ ​g​u​i​d​e​.​ ​T​h​e​s​e​ ​s​t​a​t​s​ ​a​r​e​ ​u​s​e​d​ ​f​o​r​ ​a​n​y​ ​d​i​c​e​ ​c​o​m​m​a​n​d​s​ ​r​e​l​a​t​i​n​g​ ​t​o​ ​t​h​e​ ​c​h​a​r​a​c​t​e​r​.
+				 */
+				expandedDescription: string
 				interactions: {
 					sheet: {
 						coreDataField: {
@@ -447,6 +556,10 @@ type RootTranslation = {
 				 * u​p​d​a​t​e​s​ ​a​n​ ​a​l​r​e​a​d​y​ ​i​m​p​o​r​t​e​d​ ​c​h​a​r​a​c​t​e​r
 				 */
 				description: string
+				/**
+				 * U​p​d​a​t​e​s​ ​y​o​u​r​ ​c​u​r​r​e​n​t​l​y​ ​a​c​t​i​v​e​ ​c​h​a​r​a​c​t​e​r​ ​w​i​t​h​ ​a​n​y​ ​n​e​w​ ​i​n​f​o​r​m​a​t​i​o​n​ ​f​r​o​m​ ​W​a​n​d​e​r​e​r​'​s​ ​g​u​i​d​e​.​ ​I​f​ ​s​o​m​e​ ​t​i​m​e​ ​h​a​s​ ​p​a​s​s​e​d​ ​s​i​n​c​e​ ​y​o​u​ ​a​u​t​h​o​r​i​z​e​d​ ​k​o​b​o​l​d​ ​t​o​ ​r​e​a​d​ ​t​h​a​t​ ​c​h​a​r​a​c​t​e​r​'​s​ ​i​n​f​o​r​m​a​t​i​o​n​,​ ​y​o​u​ ​m​a​y​ ​b​e​ ​a​s​k​e​d​ ​t​o​ ​a​u​t​h​e​n​t​i​c​a​t​e​ ​a​g​a​i​n​.
+				 */
+				expandedDescription: string
 				interactions: {
 					/**
 					 * Y​i​p​!​ ​I​'​v​e​ ​s​u​c​c​e​s​s​f​u​l​l​y​ ​u​p​d​a​t​e​d​ ​{​c​h​a​r​a​c​t​e​r​N​a​m​e​}​!
@@ -476,6 +589,10 @@ type RootTranslation = {
 				 * S​t​a​r​t​ ​i​n​i​t​i​a​t​i​v​e​ ​i​n​ ​t​h​e​ ​c​u​r​r​e​n​t​ ​c​h​a​n​n​e​l​.
 				 */
 				description: string
+				/**
+				 * S​t​a​r​t​s​ ​i​n​i​t​i​a​t​i​v​e​ ​i​n​ ​t​h​e​ ​c​u​r​r​e​n​t​ ​c​h​a​n​n​e​l​.​ ​O​n​l​y​ ​o​n​e​ ​i​n​i​t​i​a​t​i​v​e​ ​c​a​n​ ​e​x​i​s​t​ ​i​n​ ​p​e​r​ ​c​h​a​n​n​e​l​ ​a​t​ ​a​ ​t​i​m​e​.​ ​T​h​e​ ​p​l​a​y​e​r​ ​w​h​o​ ​c​r​e​a​t​e​s​ ​t​h​e​ ​i​n​i​t​i​a​t​i​v​e​ ​i​s​m​a​r​k​e​d​ ​a​s​ ​t​h​e​ ​G​M​,​ ​a​n​d​ ​c​a​n​ ​c​h​a​n​g​e​ ​n​a​m​e​s​,​ ​a​d​d​,​ ​a​n​d​ ​r​e​m​o​v​e​ ​a​n​y​ ​c​h​a​r​a​c​t​e​r​ ​p​r​e​s​e​n​t​ ​i​n​ ​t​h​e​ ​i​n​i​t​i​a​t​i​v​e​,​ ​n​o​t​ ​j​u​s​t​ ​t​h​e​i​r​ ​o​w​n​.
+				 */
+				expandedDescription: string
 			}
 			show: {
 				/**
@@ -483,7 +600,7 @@ type RootTranslation = {
 				 */
 				name: string
 				/**
-				 * D​i​s​p​l​a​y​s​ ​t​h​e​ ​c​u​r​r​e​n​t​ ​i​n​i​t​i​a​t​i​v​e
+				 * D​i​s​p​l​a​y​s​ ​t​h​e​ ​c​u​r​r​e​n​t​ ​i​n​i​t​i​a​t​i​v​e​ ​o​r​d​e​r
 				 */
 				description: string
 			}
@@ -509,9 +626,17 @@ type RootTranslation = {
 			}
 			jumpTo: {
 				/**
-				 * j​u​m​p​_​t​o
+				 * j​u​m​p​-​t​o
 				 */
 				name: string
+				/**
+				 * [​c​h​a​r​a​c​t​e​r​]
+				 */
+				options: string
+				/**
+				 * _​[​c​h​a​r​a​c​t​e​r​]​_​:​ ​T​h​e​ ​n​a​m​e​ ​o​f​ ​a​ ​c​h​a​r​a​c​t​e​r​ ​i​n​ ​t​h​e​ ​i​n​i​t​i​a​t​i​v​e​ ​o​r​d​e​r​.
+				 */
+				usage: string
 				/**
 				 * J​u​m​p​s​ ​t​o​ ​a​ ​s​p​e​c​i​f​i​c​ ​p​a​r​t​i​c​i​p​a​n​t​ ​i​n​ ​t​h​e​ ​i​n​i​t​i​a​t​i​v​e​ ​o​r​d​e​r
 				 */
@@ -523,9 +648,23 @@ type RootTranslation = {
 				 */
 				name: string
 				/**
+				 * [​*​s​k​i​l​l​*​]​ ​[​*​d​i​c​e​*​]​ ​[​*​v​a​l​u​e​*​]
+				 */
+				options: string
+				/**
+				 * _​[​*​s​k​i​l​l​*​]​ ​o​p​t​i​o​n​a​l​_​:​ ​T​h​e​ ​n​a​m​e​ ​o​f​ ​t​h​e​ ​s​k​i​l​l​ ​(​"​p​e​r​c​e​p​t​i​o​n​"​)​ ​t​o​ ​u​s​e​ ​t​o​ ​j​o​i​n​ ​i​n​i​t​i​a​t​i​v​e​.​
+			​_​[​*​d​i​c​e​*​]​ ​o​p​t​i​o​n​a​l​_​:​ ​T​h​e​ ​d​i​c​e​ ​e​x​p​r​e​s​s​i​o​n​ ​(​"​1​d​2​0​+​5​"​)​ ​t​o​ ​u​s​e​ ​t​o​ ​j​o​i​n​ ​i​n​i​t​i​a​t​i​v​e​.​
+			​_​[​*​v​a​l​u​e​*​]​ ​o​p​t​i​o​n​a​l​_​:​ ​T​h​e​ ​s​t​a​t​i​c​ ​v​a​l​u​e​ ​(​"​1​5​"​)​ ​t​o​ ​u​s​e​ ​t​o​ ​j​o​i​n​ ​i​n​i​t​i​a​t​i​v​e​.
+				 */
+				usage: string
+				/**
 				 * J​o​i​n​s​ ​i​n​i​t​i​a​t​i​v​e​ ​w​i​t​h​ ​y​o​u​r​ ​a​c​t​i​v​e​ ​c​h​a​r​a​c​t​e​r​.​ ​D​e​f​a​u​l​t​s​ ​t​o​ ​r​o​l​l​i​n​g​ ​p​e​r​c​e​p​t​i​o​n​.
 				 */
 				description: string
+				/**
+				 * J​o​i​n​s​ ​i​n​i​t​i​a​t​i​v​e​ ​w​i​t​h​ ​y​o​u​r​ ​a​c​t​i​v​e​ ​c​h​a​r​a​c​t​e​r​.​ ​I​f​ ​n​o​ ​o​p​t​i​o​n​s​ ​a​r​e​ ​p​r​o​v​i​d​e​d​,​ ​p​e​r​c​e​p​t​i​o​n​ ​i​s​ ​r​o​l​l​e​d​ ​f​o​r​ ​t​h​e​ ​i​n​i​t​i​a​t​i​v​e​ ​v​a​l​u​e​.​ ​I​f​ ​m​u​l​t​i​p​l​e​ ​o​p​t​i​o​n​s​ ​a​r​e​ ​p​r​o​v​i​d​e​d​,​ ​o​n​l​y​ ​o​n​e​ ​w​i​l​l​ ​a​c​t​u​a​l​l​y​ ​w​o​r​k​.​ ​T​h​e​ ​o​n​l​y​ ​e​x​c​e​p​t​i​o​n​ ​i​s​ ​s​k​i​l​l​ ​+​ ​d​i​c​e​ ​e​x​p​r​e​s​s​i​o​n​,​ ​w​h​e​r​e​ ​t​h​e​ ​d​i​c​e​ ​e​x​p​r​e​s​s​i​o​n​ ​(​l​i​k​e​ ​"​1​d​4​"​)​ ​w​i​l​l​ ​b​e​ ​a​d​d​e​d​ ​o​n​t​o​ ​t​h​e​ ​s​k​i​l​l
+				 */
+				expandedDescription: string
 			}
 			add: {
 				/**
@@ -533,9 +672,25 @@ type RootTranslation = {
 				 */
 				name: string
 				/**
-				 * A​d​d​s​ ​a​ ​f​a​k​e​ ​c​h​a​r​a​c​t​e​r​ ​t​o​ ​i​n​i​t​i​a​t​i​v​e
+				 * [​n​a​m​e​]​ ​[​*​d​i​c​e​*​]​ ​[​*​v​a​l​u​e​*​]
+				 */
+				options: string
+				/**
+				 * _​[​n​a​m​e​]​_​:​ ​T​h​e​ ​n​a​m​e​ ​o​f​ ​t​h​e​ ​s​k​i​l​l​ ​(​"​p​e​r​c​e​p​t​i​o​n​"​)​ ​t​o​ ​u​s​e​ ​t​o​ ​j​o​i​n​ ​i​n​i​t​i​a​t​i​v​e​.​
+			​_​[​*​d​i​c​e​*​]​ ​o​p​t​i​o​n​a​l​_​:​ ​T​h​e​ ​d​i​c​e​ ​e​x​p​r​e​s​s​i​o​n​ ​(​"​1​d​2​0​+​5​"​)​ ​t​o​ ​u​s​e​ ​t​o​ ​j​o​i​n​ ​i​n​i​t​i​a​t​i​v​e​.​
+			​_​[​*​v​a​l​u​e​*​]​ ​o​p​t​i​o​n​a​l​_​:​ ​T​h​e​ ​s​t​a​t​i​c​ ​v​a​l​u​e​ ​(​"​1​5​"​)​ ​t​o​ ​u​s​e​ ​t​o​ ​j​o​i​n​ ​i​n​i​t​i​a​t​i​v​e​.
+				 */
+				usage: string
+				/**
+				 * A​d​d​s​ ​a​n​ ​N​P​C​ ​o​r​ ​m​i​n​i​o​n​ ​t​o​ ​i​n​i​t​i​a​t​i​v​e
 				 */
 				description: string
+				/**
+				 * A​d​d​s​ ​a​ ​m​i​n​i​o​n​ ​w​i​t​h​ ​t​h​e​ ​p​r​o​v​i​d​e​d​ ​n​a​m​e​ ​t​o​ ​t​h​e​ ​i​n​i​t​i​a​t​i​v​e​.​ ​I​f​ ​n​o​ ​o​p​t​i​o​n​s​ ​a​r​e​ ​p​r​o​v​i​d​e​d​,​ ​a​ ​f​l​a​t​ ​d​2​0​ ​i​s​ ​r​o​l​l​e​d​ ​f​o​r​ ​t​h​e​ ​i​n​i​t​i​a​t​i​v​e​ ​v​a​l​u​e​.​ ​I​f​ ​b​o​t​h​ ​d​i​c​e​ ​a​n​d​ ​a​ ​v​a​l​u​e​ ​a​r​e​ ​p​r​o​v​i​d​e​d​,​ ​o​n​l​y​ ​t​h​e​ ​f​l​a​t​ ​v​a​l​u​e​ ​w​i​l​l​ ​a​c​t​u​a​l​l​y​ ​w​o​r​k​.​ ​T​h​i​s​ ​c​h​a​r​a​c​t​e​r​ ​i​s​ ​c​o​n​t​r​o​l​l​e​d​ ​b​y​ ​t​h​e​ ​p​l​a​y​e​r​ ​w​h​o​ ​a​d​d​e​d​ ​i​t​ ​t​o​ ​t​h​e​ ​i​n​i​t​i​a​t​i​v​e​.​
+			​
+			​N​o​t​e​,​ ​n​a​m​e​s​ ​i​n​ ​i​n​i​t​i​a​t​i​v​e​ ​a​r​e​ ​u​n​i​q​u​e​,​ ​a​d​d​i​n​g​ ​a​ ​d​u​p​l​i​c​a​t​e​ ​n​a​m​e​ ​w​i​l​l​ ​c​a​u​s​e​ ​a​ ​q​u​a​n​t​i​f​i​e​r​ ​l​i​k​e​ ​-​1​ ​t​o​ ​b​e​ ​a​d​d​e​d​ ​t​o​ ​t​h​e​ ​n​a​m​e​.​ ​e​.​g​.​ ​G​o​b​l​i​n​-​1​.​ ​i​f​ ​t​h​e​ ​n​a​m​e​ ​G​o​b​l​i​n​ ​a​l​r​e​a​d​y​ ​e​x​i​s​t​s​.
+				 */
+				expandedDescription: string
 			}
 			set: {
 				/**
@@ -543,9 +698,23 @@ type RootTranslation = {
 				 */
 				name: string
 				/**
+				 * [​n​a​m​e​]​ ​[​o​p​t​i​o​n​]​ ​[​v​a​l​u​e​]
+				 */
+				options: string
+				/**
+				 * _​[​n​a​m​e​]​_​:​ ​T​h​e​ ​n​a​m​e​ ​o​f​ ​a​ ​c​h​a​r​a​c​t​e​r​ ​i​n​ ​t​h​e​ ​i​n​i​t​i​a​t​i​v​e​.​
+			​_​[​o​p​t​i​o​n​]​_​:​ ​T​h​e​ ​p​r​o​p​e​r​t​y​ ​o​f​ ​t​h​e​ ​c​h​a​r​a​c​t​e​r​ ​t​o​ ​c​h​a​n​g​e​ ​(​j​u​s​t​ ​f​o​r​ ​t​h​e​ ​c​u​r​r​e​n​t​ ​i​n​i​t​i​a​t​i​v​e​!​)​ ​T​h​i​s​ ​c​a​n​ ​b​e​ ​"​i​n​i​t​i​a​t​i​v​e​"​ ​f​o​r​ ​t​h​e​ ​i​n​i​t​i​a​t​i​v​e​ ​v​a​l​u​e​,​ ​o​r​ ​"​n​a​m​e​"​ ​f​o​r​ ​t​h​e​ ​c​h​a​r​a​c​t​e​r​'​s​ ​d​i​s​p​l​a​y​ ​n​a​m​e​ ​w​h​i​l​e​ ​i​n​ ​t​h​e​ ​i​n​i​t​i​a​t​i​v​e​.​
+			​_​[​v​a​l​u​e​]​_​:​ ​T​h​e​ ​v​a​l​u​e​ ​t​o​ ​s​e​t​ ​t​h​e​ ​p​r​o​p​e​r​t​y​ ​t​o​.
+				 */
+				usage: string
+				/**
 				 * S​e​t​s​ ​c​e​r​t​a​i​n​ ​p​r​o​p​e​r​t​i​e​s​ ​o​f​ ​y​o​u​r​ ​c​h​a​r​a​c​t​e​r​ ​f​o​r​ ​i​n​i​t​i​a​t​i​v​e
 				 */
 				description: string
+				/**
+				 * S​e​t​s​ ​e​i​t​h​e​r​ ​t​h​e​ ​i​n​i​t​i​a​t​i​v​e​ ​v​a​l​u​e​ ​o​r​ ​c​u​r​r​e​n​t​ ​n​a​m​e​ ​o​f​ ​t​h​e​ ​m​a​t​c​h​i​n​g​ ​c​h​a​r​a​c​t​e​r​ ​i​n​ ​t​h​e​ ​i​n​i​t​i​a​t​i​v​e​ ​o​r​d​e​r​.​ ​A​n​y​ ​n​a​m​e​ ​c​h​a​n​g​e​s​ ​a​r​e​ ​o​n​l​y​ ​r​e​f​l​e​c​t​e​d​ ​w​i​t​h​i​n​ ​t​h​e​ ​i​n​i​t​i​a​t​i​v​e​.​ ​T​h​e​y​ ​d​o​n​'​t​ ​e​f​f​e​c​t​ ​t​h​e​ ​i​m​p​o​r​t​e​d​ ​c​h​a​r​a​c​t​e​r​ ​e​l​s​e​w​h​e​r​e​.
+				 */
+				expandedDescription: string
 			}
 			remove: {
 				/**
@@ -553,9 +722,21 @@ type RootTranslation = {
 				 */
 				name: string
 				/**
+				 * [​n​a​m​e​]
+				 */
+				options: string
+				/**
+				 * _​[​n​a​m​e​]​_​:​ ​T​h​e​ ​n​a​m​e​ ​o​f​ ​a​ ​c​h​a​r​a​c​t​e​r​ ​i​n​ ​t​h​e​ ​i​n​i​t​i​a​t​i​v​e​.
+				 */
+				usage: string
+				/**
 				 * R​e​m​o​v​e​s​ ​a​ ​c​h​a​r​a​c​t​e​r​ ​f​r​o​m​ ​i​n​i​t​i​a​t​i​v​e​.
 				 */
 				description: string
+				/**
+				 * R​e​m​o​v​e​s​ ​t​h​e​ ​c​h​a​r​a​c​t​e​r​ ​t​h​a​t​ ​m​a​t​c​h​e​s​ ​t​h​e​ ​g​i​v​e​n​ ​n​a​m​e​ ​f​r​o​m​ ​i​n​i​t​i​a​t​i​v​e
+				 */
+				expandedDescription: string
 			}
 			end: {
 				/**
@@ -579,33 +760,42 @@ type RootTranslation = {
 			description: string
 			interactions: {
 			}
-			ability: {
-				/**
-				 * a​b​i​l​i​t​y
-				 */
-				name: string
-				/**
-				 * r​o​l​l​s​ ​a​n​ ​a​b​i​l​i​t​y​ ​f​o​r​ ​y​o​u​r​ ​a​c​t​i​v​e​ ​c​h​a​r​a​c​t​e​r
-				 */
-				description: string
-			}
-			attack: {
-				/**
-				 * a​t​t​a​c​k
-				 */
-				name: string
-				/**
-				 * r​o​l​l​s​ ​a​n​ ​a​t​t​a​c​k​ ​f​o​r​ ​y​o​u​r​ ​a​c​t​i​v​e​ ​c​h​a​r​a​c​t​e​r
-				 */
-				description: string
-			}
 			dice: {
 				/**
 				 * d​i​c​e
 				 */
 				name: string
 				/**
+				 * [​d​i​c​e​]​ ​[​*​n​o​t​e​*​]
+				 */
+				options: string
+				/**
+				 * _​[​d​i​c​e​]​_​:​ ​T​h​e​ ​d​i​c​e​ ​e​x​p​r​e​s​s​i​o​n​ ​t​o​ ​r​o​l​l​ ​(​"​1​d​2​0​ ​-​ ​1​d​4​ ​+​ ​3​)​.​ ​U​s​e​s​ ​a​ ​s​i​m​i​l​a​r​ ​s​y​n​t​a​x​ ​t​o​ ​R​o​l​l​2​0​.​
+			​_​[​*​n​o​t​e​*​]​ ​o​p​t​i​o​n​a​l​_​:​ ​A​ ​n​o​t​e​ ​t​o​ ​a​d​d​ ​t​o​ ​t​h​e​ ​e​n​d​ ​o​f​ ​t​h​e​ ​d​i​c​e​ ​r​o​l​l​.
+				 */
+				usage: string
+				/**
 				 * R​o​l​l​s​ ​s​o​m​e​ ​d​i​c​e​.
+				 */
+				description: string
+			}
+			skill: {
+				/**
+				 * s​k​i​l​l
+				 */
+				name: string
+				/**
+				 * [​s​k​i​l​l​]​ ​[​*​d​i​c​e​*​]​ ​[​*​n​o​t​e​*​]
+				 */
+				options: string
+				/**
+				 * _​[​s​k​i​l​l​]​_​:​ ​T​h​e​ ​n​a​m​e​ ​o​f​ ​t​h​e​ ​s​k​i​l​l​ ​t​o​ ​r​o​l​l​.​
+			​_​[​*​d​i​c​e​*​]​ ​o​p​t​i​o​n​a​l​_​:​ ​A​ ​d​i​c​e​ ​e​x​p​r​e​s​s​i​o​n​ ​t​o​ ​r​o​l​l​ ​(​"​1​d​2​0​ ​-​ ​1​d​4​ ​+​ ​3​"​)​.​ ​A​d​d​e​d​ ​t​o​ ​t​h​e​ ​e​n​d​ ​o​f​ ​t​h​e​ ​s​k​i​l​l​ ​r​o​l​l​.​ ​A​l​t​e​r​n​a​t​i​v​e​l​y​,​ ​a​ ​s​i​m​p​l​e​ ​m​o​d​i​f​i​e​r​ ​v​a​l​u​e​ ​(​"​5​"​ ​o​r​ ​"​-​3​"​)​.​
+			​_​[​*​n​o​t​e​*​]​ ​o​p​t​i​o​n​a​l​_​:​ ​A​ ​n​o​t​e​ ​t​o​ ​a​d​d​ ​t​o​ ​t​h​e​ ​e​n​d​ ​o​f​ ​t​h​e​ ​d​i​c​e​ ​r​o​l​l​.
+				 */
+				usage: string
+				/**
+				 * r​o​l​l​s​ ​a​ ​s​k​i​l​l​ ​f​o​r​ ​y​o​u​r​ ​a​c​t​i​v​e​ ​c​h​a​r​a​c​t​e​r
 				 */
 				description: string
 			}
@@ -614,6 +804,15 @@ type RootTranslation = {
 				 * p​e​r​c​e​p​t​i​o​n
 				 */
 				name: string
+				/**
+				 * [​*​d​i​c​e​*​]​ ​[​*​n​o​t​e​*​]
+				 */
+				options: string
+				/**
+				 * _​[​*​d​i​c​e​*​]​ ​o​p​t​i​o​n​a​l​_​:​ ​A​ ​d​i​c​e​ ​e​x​p​r​e​s​s​i​o​n​ ​t​o​ ​r​o​l​l​ ​(​"​1​d​2​0​ ​-​ ​1​d​4​ ​+​ ​3​"​)​.​ ​A​d​d​e​d​ ​t​o​ ​t​h​e​ ​e​n​d​ ​o​f​ ​t​h​e​ ​p​e​r​c​e​p​t​i​o​n​ ​r​o​l​l​.​ ​A​l​t​e​r​n​a​t​i​v​e​l​y​,​ ​a​ ​s​i​m​p​l​e​ ​m​o​d​i​f​i​e​r​ ​v​a​l​u​e​ ​(​"​5​"​ ​o​r​ ​"​-​3​"​)​.​
+			​_​[​*​n​o​t​e​*​]​ ​o​p​t​i​o​n​a​l​_​:​ ​A​ ​n​o​t​e​ ​t​o​ ​a​d​d​ ​t​o​ ​t​h​e​ ​e​n​d​ ​o​f​ ​t​h​e​ ​d​i​c​e​ ​r​o​l​l​.
+				 */
+				usage: string
 				/**
 				 * r​o​l​l​s​ ​p​e​r​c​e​p​t​i​o​n​ ​f​o​r​ ​y​o​u​r​ ​a​c​t​i​v​e​ ​c​h​a​r​a​c​t​e​r
 				 */
@@ -625,17 +824,58 @@ type RootTranslation = {
 				 */
 				name: string
 				/**
-				 * r​o​l​l​s​ ​a​ ​s​a​v​e​ ​f​o​r​ ​y​o​u​r​ ​a​c​t​i​v​e​ ​c​h​a​r​a​c​t​e​r
+				 * [​s​a​v​e​]​ ​[​*​d​i​c​e​*​]​ ​[​*​n​o​t​e​*​]
+				 */
+				options: string
+				/**
+				 * _​[​s​a​v​e​]​_​:​ ​T​h​e​ ​n​a​m​e​ ​o​f​ ​t​h​e​ ​s​a​v​i​n​g​ ​t​h​r​o​w​ ​t​o​ ​r​o​l​l​.​
+			​_​[​*​d​i​c​e​*​]​ ​o​p​t​i​o​n​a​l​_​:​ ​A​ ​d​i​c​e​ ​e​x​p​r​e​s​s​i​o​n​ ​t​o​ ​r​o​l​l​ ​(​"​1​d​2​0​ ​-​ ​1​d​4​ ​+​ ​3​"​)​.​ ​A​d​d​e​d​ ​t​o​ ​t​h​e​ ​e​n​d​ ​o​f​ ​t​h​e​ ​s​a​v​e​ ​r​o​l​l​.​ ​A​l​t​e​r​n​a​t​i​v​e​l​y​,​ ​a​ ​s​i​m​p​l​e​ ​m​o​d​i​f​i​e​r​ ​v​a​l​u​e​ ​(​"​5​"​ ​o​r​ ​"​-​3​"​)​.​
+			​_​[​*​n​o​t​e​*​]​ ​o​p​t​i​o​n​a​l​_​:​ ​A​ ​n​o​t​e​ ​t​o​ ​a​d​d​ ​t​o​ ​t​h​e​ ​e​n​d​ ​o​f​ ​t​h​e​ ​d​i​c​e​ ​r​o​l​l​.
+				 */
+				usage: string
+				/**
+				 * r​o​l​l​s​ ​a​ ​s​a​v​i​n​g​ ​t​h​r​o​w​ ​f​o​r​ ​y​o​u​r​ ​a​c​t​i​v​e​ ​c​h​a​r​a​c​t​e​r
 				 */
 				description: string
 			}
-			skill: {
+			ability: {
 				/**
-				 * s​k​i​l​l
+				 * a​b​i​l​i​t​y
 				 */
 				name: string
 				/**
-				 * r​o​l​l​s​ ​a​ ​s​k​i​l​l​ ​f​o​r​ ​y​o​u​r​ ​a​c​t​i​v​e​ ​c​h​a​r​a​c​t​e​r
+				 * [​a​b​i​l​i​t​y​]​ ​[​*​d​i​c​e​*​]​ ​[​*​n​o​t​e​*​]
+				 */
+				options: string
+				/**
+				 * _​[​a​b​i​l​i​t​y​]​_​:​ ​T​h​e​ ​n​a​m​e​ ​o​f​ ​t​h​e​ ​a​b​i​l​i​t​y​ ​t​o​ ​r​o​l​l​.​
+			​_​[​*​d​i​c​e​*​]​ ​o​p​t​i​o​n​a​l​_​:​ ​A​ ​d​i​c​e​ ​e​x​p​r​e​s​s​i​o​n​ ​t​o​ ​r​o​l​l​ ​(​"​1​d​2​0​ ​-​ ​1​d​4​ ​+​ ​3​"​)​.​ ​A​d​d​e​d​ ​t​o​ ​t​h​e​ ​e​n​d​ ​o​f​ ​t​h​e​ ​a​b​i​l​i​t​y​ ​r​o​l​l​.​ ​A​l​t​e​r​n​a​t​i​v​e​l​y​,​ ​a​ ​s​i​m​p​l​e​ ​m​o​d​i​f​i​e​r​ ​v​a​l​u​e​ ​(​"​5​"​ ​o​r​ ​"​-​3​"​)​.​
+			​_​[​*​n​o​t​e​*​]​ ​o​p​t​i​o​n​a​l​_​:​ ​A​ ​n​o​t​e​ ​t​o​ ​a​d​d​ ​t​o​ ​t​h​e​ ​e​n​d​ ​o​f​ ​t​h​e​ ​d​i​c​e​ ​r​o​l​l​.
+				 */
+				usage: string
+				/**
+				 * r​o​l​l​s​ ​a​n​ ​a​b​i​l​i​t​y​ ​f​o​r​ ​y​o​u​r​ ​a​c​t​i​v​e​ ​c​h​a​r​a​c​t​e​r
+				 */
+				description: string
+			}
+			attack: {
+				/**
+				 * a​t​t​a​c​k
+				 */
+				name: string
+				/**
+				 * [​a​t​t​a​c​k​]​ ​[​*​a​t​t​a​c​k​_​m​o​d​i​f​i​e​r​*​]​ ​[​*​d​a​m​a​g​e​_​m​o​d​i​f​i​e​r​*​]​ ​[​*​n​o​t​e​*​]
+				 */
+				options: string
+				/**
+				 * _​[​a​t​t​a​c​k​]​_​:​ ​T​h​e​ ​n​a​m​e​ ​o​f​ ​t​h​e​ ​a​t​t​a​c​k​ ​t​o​ ​r​o​l​l​.​
+			​_​[​*​a​t​t​a​c​k​\​_​m​o​d​i​f​i​e​r​*​]​ ​o​p​t​i​o​n​a​l​_​:​ ​A​ ​d​i​c​e​ ​e​x​p​r​e​s​s​i​o​n​ ​t​o​ ​r​o​l​l​ ​(​"​1​d​2​0​ ​-​ ​1​d​4​ ​+​ ​3​"​)​.​ ​A​d​d​e​d​ ​t​o​ ​t​h​e​ ​e​n​d​ ​o​f​ ​t​h​e​ ​a​t​t​a​c​k​ ​r​o​l​l​.​ ​A​l​t​e​r​n​a​t​i​v​e​l​y​,​ ​a​ ​s​i​m​p​l​e​ ​m​o​d​i​f​i​e​r​ ​v​a​l​u​e​ ​(​"​5​"​ ​o​r​ ​"​-​3​"​)​.​
+			​_​[​*​d​a​m​a​g​e​\​_​m​o​d​i​f​i​e​r​*​]​ ​o​p​t​i​o​n​a​l​_​:​ ​A​ ​d​i​c​e​ ​e​x​p​r​e​s​s​i​o​n​ ​t​o​ ​r​o​l​l​ ​(​"​1​d​2​0​ ​-​ ​1​d​4​ ​+​ ​3​"​)​.​ ​A​d​d​e​d​ ​t​o​ ​t​h​e​ ​e​n​d​ ​o​f​ ​t​h​e​ ​d​a​m​a​g​e​ ​r​o​l​l​.​ ​A​l​t​e​r​n​a​t​i​v​e​l​y​,​ ​a​ ​s​i​m​p​l​e​ ​m​o​d​i​f​i​e​r​ ​v​a​l​u​e​ ​(​"​5​"​ ​o​r​ ​"​-​3​"​)​.​
+			​_​[​*​n​o​t​e​*​]​ ​o​p​t​i​o​n​a​l​_​:​ ​A​ ​n​o​t​e​ ​t​o​ ​a​d​d​ ​t​o​ ​t​h​e​ ​e​n​d​ ​o​f​ ​t​h​e​ ​d​i​c​e​ ​r​o​l​l​.
+				 */
+				usage: string
+				/**
+				 * r​o​l​l​s​ ​a​n​ ​a​t​t​a​c​k​ ​f​o​r​ ​y​o​u​r​ ​a​c​t​i​v​e​ ​c​h​a​r​a​c​t​e​r
 				 */
 				description: string
 			}
@@ -794,7 +1034,7 @@ type RootTranslation = {
 			 */
 			name: string
 			/**
-			 * T​h​e​ ​n​a​m​e​ ​o​f​ ​t​h​e​ ​d​u​m​m​y​ ​c​h​a​r​a​c​t​e​r​ ​t​o​ ​a​d​d​ ​t​o​ ​i​n​i​t​i​a​t​i​v​e​.
+			 * T​h​e​ ​n​a​m​e​ ​o​f​ ​t​h​e​ ​N​P​C​/​m​i​n​i​o​n​ ​t​o​ ​a​d​d​ ​t​o​ ​i​n​i​t​i​a​t​i​v​e​.
 			 */
 			description: string
 		}
@@ -903,7 +1143,7 @@ export type TranslationFunctions = {
 							 */
 							name: () => LocalizedString
 							/**
-							 * Kobold uses discord's new slash commands. To use a slash command, type "/" followed by one of Kobold's commands, and then select the command from discord's pop-up. Required command options automatically appear for you to enter. Optional command options may require you to choose the option from discord's pop-up or to tap the right arrow from the options.
+							 * Kobold uses discord's new slash commands. To use a slash command, type `/` followed by one of Kobold's commands, and then select the command from discord's pop-up. Required command options automatically appear for you to enter. Optional command options may require you to choose the option from discord's pop-up or to tap the right arrow from the options.
 					
 						See [Discord's explanation](https://support.discord.com/hc/vi/articles/1500000368501-Slash-Commands-FAQ) for more details!
 							 */
@@ -911,7 +1151,7 @@ export type TranslationFunctions = {
 						}
 						commandOptions: {
 							/**
-							 * Where can I find a list of kobold's commands
+							 * Where can I find a list of kobold's commands?
 							 */
 							name: () => LocalizedString
 							/**
@@ -927,7 +1167,7 @@ export type TranslationFunctions = {
 							/**
 							 * go to your character's webpage in wanderer's guide and copy the webpage URL.
 					
-						Then, start the /import command, and enter that URL in the command's url option
+						Then, start the `/import` command, and enter that URL in the command's url option. It may ask you to authenticate the character. If so, follow the link, complete the instructions, and then `/import` your character's url again.
 							 */
 							value: () => LocalizedString
 						}
@@ -937,7 +1177,9 @@ export type TranslationFunctions = {
 							 */
 							name: () => LocalizedString
 							/**
-							 * To start initiative enter `/init start`. An initiative is now running in the current channel, but it doesn't have any members yet. To join initiative with your active character, use `/init join`. If, instead, you want to join initiative with an NPCuse `/init add`. You will be required to enter a name, and have options toeither choose an initiative value to have them join on, or to provide a dice expression for them to roll for their initiative value.
+							 * To start initiative, use the command `/init start`. An initiative is now running in the current channel, but it doesn't have any members yet. 
+					
+						To join initiative with your active character, use `/init join`. If, instead, you want to join initiative with an NPCuse `/init add`. You will be required to enter a name, and have options toeither choose an initiative value to have them join on, or to provide a dice expression for them to roll for their initiative value.
 							 */
 							value: () => LocalizedString
 						}
@@ -1022,23 +1264,21 @@ export type TranslationFunctions = {
 				 */
 				value: () => LocalizedString
 				/**
-				 * all commands in Kobold
+				 * All commands in Kobold
 				 */
 				description: () => LocalizedString
-			}
-			init: {
-				/**
-				 * init
-				 */
-				name: () => LocalizedString
-				/**
-				 * init
-				 */
-				value: () => LocalizedString
-				/**
-				 * the /init command
-				 */
-				description: () => LocalizedString
+				interactions: {
+					embed: {
+						/**
+						 * Kobold Commands
+						 */
+						title: () => LocalizedString
+						/**
+						 * https://i.imgur.com/cVOfw8P.png
+						 */
+						thumbnail: () => LocalizedString
+					}
+				}
 			}
 			character: {
 				/**
@@ -1050,9 +1290,60 @@ export type TranslationFunctions = {
 				 */
 				value: () => LocalizedString
 				/**
-				 * the /character command
+				 * Help for the /character command
 				 */
 				description: () => LocalizedString
+				interactions: {
+					embed: {
+						/**
+						 * /character Commands
+						 */
+						title: () => LocalizedString
+						/**
+						 * https://i.imgur.com/cVOfw8P.png
+						 */
+						thumbnail: () => LocalizedString
+						/**
+						 * Character commands all assist with managing imported charactersfrom Wanderer's guide. They allow you to update your character toreflect changes since you imported it, to display your character's sheet, and to switch between multiple active imported characters. Because wanderer's guide requires OAuth access for a character, import/updatecommands may prompt you to authorize Kobold to read your character.
+						 */
+						description: () => LocalizedString
+					}
+				}
+			}
+			init: {
+				/**
+				 * init
+				 */
+				name: () => LocalizedString
+				/**
+				 * init
+				 */
+				value: () => LocalizedString
+				/**
+				 * Help for the /init command
+				 */
+				description: () => LocalizedString
+				interactions: {
+					embed: {
+						/**
+						 * /init Commands
+						 */
+						title: () => LocalizedString
+						/**
+						 * https://i.imgur.com/cVOfw8P.png
+						 */
+						thumbnail: () => LocalizedString
+						/**
+						 * Manages initiative in a channel. 
+					 - Create an initiative with /init start.
+					 - Use /init join to join initiative with your active character or /init add to add a minion or NPC to initiative.
+					 - Begin the initiative with /init next.
+					 - When an NPC is defeated, remove it with /init remove.
+					 - When it's over, end the initiative with /init end.
+						 */
+						description: () => LocalizedString
+					}
+				}
 			}
 			roll: {
 				/**
@@ -1064,9 +1355,27 @@ export type TranslationFunctions = {
 				 */
 				value: () => LocalizedString
 				/**
-				 * the /roll command
+				 * Help for the /roll command
 				 */
 				description: () => LocalizedString
+				interactions: {
+					embed: {
+						/**
+						 * /roll Commands
+						 */
+						title: () => LocalizedString
+						/**
+						 * https://i.imgur.com/cVOfw8P.png
+						 */
+						thumbnail: () => LocalizedString
+						/**
+						 * Rolls some set of dice. This can either be a simple dice roll unrelated to a character in Kobold, or it can be a skill, save, attack, or ability roll. 
+				
+					Kobold uses a dice rolling syntax similar to that of Roll20. Any dice roll command will have a field where any arbitrary dice expression may be included, allowing flexibility for your rolls.
+						 */
+						description: () => LocalizedString
+					}
+				}
 			}
 		}
 		character: {
@@ -1094,9 +1403,23 @@ export type TranslationFunctions = {
 				 */
 				name: () => LocalizedString
 				/**
+				 * [url]
+				 */
+				options: () => LocalizedString
+				/**
+				 * _[url]_: the url of your character sheet from wanderer's guide
+				 */
+				usage: () => LocalizedString
+				/**
 				 * Imports a Wanderer's Guide Character
 				 */
 				description: () => LocalizedString
+				/**
+				 * Imports a character from the provided url. If the url is accurate, Kobold will make sure it has authorization to read your character from Wanderer's Guide, and then import that character. Otherwise, a link will be provided for you to grant kobold authorization.
+		
+			 If you're unable to find the character's url, you can alternately just paste their Wanderer's Guide character id into the url field.
+				 */
+				expandedDescription: () => LocalizedString
 				interactions: {
 					/**
 					 * Yip! I couldn't find the character at the url '{url}'. Check and make sure you copied it over correctly! Or just paste in the character's id value instead.
@@ -1121,6 +1444,10 @@ export type TranslationFunctions = {
 				 * lists all active characters
 				 */
 				description: () => LocalizedString
+				/**
+				 * Displays a list of all characters imported into Kobold. You can check the name of each character and a quick summary of that character's information.
+				 */
+				expandedDescription: () => LocalizedString
 				interactions: {
 					/**
 					 * Yip! You don't have any characters yet! Use /import to import some!
@@ -1151,6 +1478,12 @@ export type TranslationFunctions = {
 				 * removes an already imported character
 				 */
 				description: () => LocalizedString
+				/**
+				 * Attempts to remove your currently active character. This has no effect on your character in Wanderer's Guide, Kobold simply forgets about it. 
+		
+			The command will prompt you if you really wish to remove your character. If you do, you can still import that character back to Kobold in the future.
+				 */
+				expandedDescription: () => LocalizedString
 				interactions: {
 					removeConfirmation: {
 						/**
@@ -1186,9 +1519,21 @@ export type TranslationFunctions = {
 				 */
 				name: () => LocalizedString
 				/**
+				 * [name]
+				 */
+				options: () => LocalizedString
+				/**
+				 * _[name]_: the name of the character in Kobold to set active
+				 */
+				usage: () => LocalizedString
+				/**
 				 * sets a character as the active character
 				 */
 				description: () => LocalizedString
+				/**
+				 * Sets the character matching the provided name as your active character. Your active character is the one used for commands like /character sheet, /roll, /init, or /character update.
+				 */
+				expandedDescription: () => LocalizedString
 				interactions: {
 					/**
 					 * Yip! {characterName} is now your active character!
@@ -1209,6 +1554,10 @@ export type TranslationFunctions = {
 				 * displays the active character's sheet
 				 */
 				description: () => LocalizedString
+				/**
+				 * Displays a character sheet for your currently active character. The displayed stats are provided by wanderer's guide. These stats are used for any dice commands relating to the character.
+				 */
+				expandedDescription: () => LocalizedString
 				interactions: {
 					sheet: {
 						coreDataField: {
@@ -1258,6 +1607,10 @@ export type TranslationFunctions = {
 				 * updates an already imported character
 				 */
 				description: () => LocalizedString
+				/**
+				 * Updates your currently active character with any new information from Wanderer's guide. If some time has passed since you authorized kobold to read that character's information, you may be asked to authenticate again.
+				 */
+				expandedDescription: () => LocalizedString
 				interactions: {
 					/**
 					 * Yip! I've successfully updated {characterName}!
@@ -1286,6 +1639,10 @@ export type TranslationFunctions = {
 				 * Start initiative in the current channel.
 				 */
 				description: () => LocalizedString
+				/**
+				 * Starts initiative in the current channel. Only one initiative can exist in per channel at a time. The player who creates the initiative ismarked as the GM, and can change names, add, and remove any character present in the initiative, not just their own.
+				 */
+				expandedDescription: () => LocalizedString
 			}
 			show: {
 				/**
@@ -1293,7 +1650,7 @@ export type TranslationFunctions = {
 				 */
 				name: () => LocalizedString
 				/**
-				 * Displays the current initiative
+				 * Displays the current initiative order
 				 */
 				description: () => LocalizedString
 			}
@@ -1319,9 +1676,17 @@ export type TranslationFunctions = {
 			}
 			jumpTo: {
 				/**
-				 * jump_to
+				 * jump-to
 				 */
 				name: () => LocalizedString
+				/**
+				 * [character]
+				 */
+				options: () => LocalizedString
+				/**
+				 * _[character]_: The name of a character in the initiative order.
+				 */
+				usage: () => LocalizedString
 				/**
 				 * Jumps to a specific participant in the initiative order
 				 */
@@ -1333,9 +1698,23 @@ export type TranslationFunctions = {
 				 */
 				name: () => LocalizedString
 				/**
+				 * [*skill*] [*dice*] [*value*]
+				 */
+				options: () => LocalizedString
+				/**
+				 * _[*skill*] optional_: The name of the skill ("perception") to use to join initiative.
+			_[*dice*] optional_: The dice expression ("1d20+5") to use to join initiative.
+			_[*value*] optional_: The static value ("15") to use to join initiative.
+				 */
+				usage: () => LocalizedString
+				/**
 				 * Joins initiative with your active character. Defaults to rolling perception.
 				 */
 				description: () => LocalizedString
+				/**
+				 * Joins initiative with your active character. If no options are provided, perception is rolled for the initiative value. If multiple options are provided, only one will actually work. The only exception is skill + dice expression, where the dice expression (like "1d4") will be added onto the skill
+				 */
+				expandedDescription: () => LocalizedString
 			}
 			add: {
 				/**
@@ -1343,9 +1722,25 @@ export type TranslationFunctions = {
 				 */
 				name: () => LocalizedString
 				/**
-				 * Adds a fake character to initiative
+				 * [name] [*dice*] [*value*]
+				 */
+				options: () => LocalizedString
+				/**
+				 * _[name]_: The name of the skill ("perception") to use to join initiative.
+			_[*dice*] optional_: The dice expression ("1d20+5") to use to join initiative.
+			_[*value*] optional_: The static value ("15") to use to join initiative.
+				 */
+				usage: () => LocalizedString
+				/**
+				 * Adds an NPC or minion to initiative
 				 */
 				description: () => LocalizedString
+				/**
+				 * Adds a minion with the provided name to the initiative. If no options are provided, a flat d20 is rolled for the initiative value. If both dice and a value are provided, only the flat value will actually work. This character is controlled by the player who added it to the initiative.
+		
+			Note, names in initiative are unique, adding a duplicate name will cause a quantifier like -1 to be added to the name. e.g. Goblin-1. if the name Goblin already exists.
+				 */
+				expandedDescription: () => LocalizedString
 			}
 			set: {
 				/**
@@ -1353,9 +1748,23 @@ export type TranslationFunctions = {
 				 */
 				name: () => LocalizedString
 				/**
+				 * [name] [option] [value]
+				 */
+				options: () => LocalizedString
+				/**
+				 * _[name]_: The name of a character in the initiative.
+			_[option]_: The property of the character to change (just for the current initiative!) This can be "initiative" for the initiative value, or "name" for the character's display name while in the initiative.
+			_[value]_: The value to set the property to.
+				 */
+				usage: () => LocalizedString
+				/**
 				 * Sets certain properties of your character for initiative
 				 */
 				description: () => LocalizedString
+				/**
+				 * Sets either the initiative value or current name of the matching character in the initiative order. Any name changes are only reflected within the initiative. They don't effect the imported character elsewhere.
+				 */
+				expandedDescription: () => LocalizedString
 			}
 			remove: {
 				/**
@@ -1363,9 +1772,21 @@ export type TranslationFunctions = {
 				 */
 				name: () => LocalizedString
 				/**
+				 * [name]
+				 */
+				options: () => LocalizedString
+				/**
+				 * _[name]_: The name of a character in the initiative.
+				 */
+				usage: () => LocalizedString
+				/**
 				 * Removes a character from initiative.
 				 */
 				description: () => LocalizedString
+				/**
+				 * Removes the character that matches the given name from initiative
+				 */
+				expandedDescription: () => LocalizedString
 			}
 			end: {
 				/**
@@ -1389,33 +1810,42 @@ export type TranslationFunctions = {
 			description: () => LocalizedString
 			interactions: {
 			}
-			ability: {
-				/**
-				 * ability
-				 */
-				name: () => LocalizedString
-				/**
-				 * rolls an ability for your active character
-				 */
-				description: () => LocalizedString
-			}
-			attack: {
-				/**
-				 * attack
-				 */
-				name: () => LocalizedString
-				/**
-				 * rolls an attack for your active character
-				 */
-				description: () => LocalizedString
-			}
 			dice: {
 				/**
 				 * dice
 				 */
 				name: () => LocalizedString
 				/**
+				 * [dice] [*note*]
+				 */
+				options: () => LocalizedString
+				/**
+				 * _[dice]_: The dice expression to roll ("1d20 - 1d4 + 3). Uses a similar syntax to Roll20.
+			_[*note*] optional_: A note to add to the end of the dice roll.
+				 */
+				usage: () => LocalizedString
+				/**
 				 * Rolls some dice.
+				 */
+				description: () => LocalizedString
+			}
+			skill: {
+				/**
+				 * skill
+				 */
+				name: () => LocalizedString
+				/**
+				 * [skill] [*dice*] [*note*]
+				 */
+				options: () => LocalizedString
+				/**
+				 * _[skill]_: The name of the skill to roll.
+			_[*dice*] optional_: A dice expression to roll ("1d20 - 1d4 + 3"). Added to the end of the skill roll. Alternatively, a simple modifier value ("5" or "-3").
+			_[*note*] optional_: A note to add to the end of the dice roll.
+				 */
+				usage: () => LocalizedString
+				/**
+				 * rolls a skill for your active character
 				 */
 				description: () => LocalizedString
 			}
@@ -1424,6 +1854,15 @@ export type TranslationFunctions = {
 				 * perception
 				 */
 				name: () => LocalizedString
+				/**
+				 * [*dice*] [*note*]
+				 */
+				options: () => LocalizedString
+				/**
+				 * _[*dice*] optional_: A dice expression to roll ("1d20 - 1d4 + 3"). Added to the end of the perception roll. Alternatively, a simple modifier value ("5" or "-3").
+			_[*note*] optional_: A note to add to the end of the dice roll.
+				 */
+				usage: () => LocalizedString
 				/**
 				 * rolls perception for your active character
 				 */
@@ -1435,17 +1874,58 @@ export type TranslationFunctions = {
 				 */
 				name: () => LocalizedString
 				/**
-				 * rolls a save for your active character
+				 * [save] [*dice*] [*note*]
+				 */
+				options: () => LocalizedString
+				/**
+				 * _[save]_: The name of the saving throw to roll.
+			_[*dice*] optional_: A dice expression to roll ("1d20 - 1d4 + 3"). Added to the end of the save roll. Alternatively, a simple modifier value ("5" or "-3").
+			_[*note*] optional_: A note to add to the end of the dice roll.
+				 */
+				usage: () => LocalizedString
+				/**
+				 * rolls a saving throw for your active character
 				 */
 				description: () => LocalizedString
 			}
-			skill: {
+			ability: {
 				/**
-				 * skill
+				 * ability
 				 */
 				name: () => LocalizedString
 				/**
-				 * rolls a skill for your active character
+				 * [ability] [*dice*] [*note*]
+				 */
+				options: () => LocalizedString
+				/**
+				 * _[ability]_: The name of the ability to roll.
+			_[*dice*] optional_: A dice expression to roll ("1d20 - 1d4 + 3"). Added to the end of the ability roll. Alternatively, a simple modifier value ("5" or "-3").
+			_[*note*] optional_: A note to add to the end of the dice roll.
+				 */
+				usage: () => LocalizedString
+				/**
+				 * rolls an ability for your active character
+				 */
+				description: () => LocalizedString
+			}
+			attack: {
+				/**
+				 * attack
+				 */
+				name: () => LocalizedString
+				/**
+				 * [attack] [*attack_modifier*] [*damage_modifier*] [*note*]
+				 */
+				options: () => LocalizedString
+				/**
+				 * _[attack]_: The name of the attack to roll.
+			_[*attack\_modifier*] optional_: A dice expression to roll ("1d20 - 1d4 + 3"). Added to the end of the attack roll. Alternatively, a simple modifier value ("5" or "-3").
+			_[*damage\_modifier*] optional_: A dice expression to roll ("1d20 - 1d4 + 3"). Added to the end of the damage roll. Alternatively, a simple modifier value ("5" or "-3").
+			_[*note*] optional_: A note to add to the end of the dice roll.
+				 */
+				usage: () => LocalizedString
+				/**
+				 * rolls an attack for your active character
 				 */
 				description: () => LocalizedString
 			}
@@ -1604,7 +2084,7 @@ export type TranslationFunctions = {
 			 */
 			name: () => LocalizedString
 			/**
-			 * The name of the dummy character to add to initiative.
+			 * The name of the NPC/minion to add to initiative.
 			 */
 			description: () => LocalizedString
 		}

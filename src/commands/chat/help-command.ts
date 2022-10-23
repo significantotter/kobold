@@ -17,6 +17,20 @@ import { CommandUtils, InteractionUtils } from '../../utils/index.js';
 import { Command, CommandDeferType } from '../index.js';
 import _ from 'lodash';
 
+function createCommandOperationHelpField(command, operation, LL) {
+	const langBase = LL.commands[command][_.camelCase(operation)];
+
+	let fieldName = `\`/${command} ${operation}`;
+	if (langBase.options()) fieldName += ` ${langBase.options()}`;
+	fieldName += '`';
+
+	let fieldValue = '';
+	if (langBase.usage()) fieldValue += `${langBase.usage()}\n\n`;
+	fieldValue += langBase.expandedDescription() || langBase.description();
+
+	return { name: fieldName, value: fieldValue };
+}
+
 export class HelpCommand implements Command {
 	public names = [Language.LL.commands.help.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
@@ -40,6 +54,12 @@ export class HelpCommand implements Command {
 				name: Language.LL.commands.help.commands.name(),
 				description: Language.LL.commands.help.commands.description(),
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+			},
+			{
+				name: Language.LL.commands.help.character.name(),
+				description: Language.LL.commands.help.character.description(),
+				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				options: [],
 			},
 			{
 				name: Language.LL.commands.help.init.name(),
@@ -119,27 +139,108 @@ export class HelpCommand implements Command {
 				break;
 			}
 			case Language.LL.commands.help.commands.name(): {
-				embed.setTitle(LL.commands.help.about.interactions.embed.title());
-				embed.setDescription(LL.commands.help.about.interactions.embed.description());
-
+				embed.setTitle(LL.commands.help.commands.interactions.embed.title());
+				embed.addFields([
+					{
+						name: LL.commands.help.commands.name(),
+						value:
+							`\`/${LL.commands.help.name()} ${LL.commands.help.about.name()}\` ${LL.commands.help.about.description()}\n` +
+							`\`/${LL.commands.help.name()} ${LL.commands.help.faq.name()}\` ${LL.commands.help.faq.description()}\n` +
+							`\`/${LL.commands.help.name()} ${LL.commands.help.commands.name()}\` ${LL.commands.help.commands.description()}\n` +
+							`\`/${LL.commands.help.name()} ${LL.commands.help.character.name()}\` ${LL.commands.help.character.description()}\n` +
+							`\`/${LL.commands.help.name()} ${LL.commands.help.roll.name()}\` ${LL.commands.help.roll.description()}\n` +
+							`\`/${LL.commands.help.name()} ${LL.commands.help.init.name()}\` ${LL.commands.help.init.description()}`,
+					},
+					{
+						name: LL.commands.character.name(),
+						value:
+							`\`/${LL.commands.character.name()} ${LL.commands.character.import.name()}\` ${LL.commands.character.import.description()}\n` +
+							`\`/${LL.commands.character.name()} ${LL.commands.character.list.name()}\` ${LL.commands.character.list.description()}\n` +
+							`\`/${LL.commands.character.name()} ${LL.commands.character.remove.name()}\` ${LL.commands.character.remove.description()}\n` +
+							`\`/${LL.commands.character.name()} ${LL.commands.character.setActive.name()}\` ${LL.commands.character.setActive.description()}\n` +
+							`\`/${LL.commands.character.name()} ${LL.commands.character.sheet.name()}\` ${LL.commands.character.sheet.description()}\n` +
+							`\`/${LL.commands.character.name()} ${LL.commands.character.update.name()}\` ${LL.commands.character.update.description()}`,
+					},
+					{
+						name: LL.commands.roll.name(),
+						value:
+							`\`/${LL.commands.roll.name()} ${LL.commands.roll.dice.name()}\` ${LL.commands.roll.dice.description()}\n` +
+							`\`/${LL.commands.roll.name()} ${LL.commands.roll.skill.name()}\` ${LL.commands.roll.skill.description()}\n` +
+							`\`/${LL.commands.roll.name()} ${LL.commands.roll.perception.name()}\` ${LL.commands.roll.perception.description()}\n` +
+							`\`/${LL.commands.roll.name()} ${LL.commands.roll.save.name()}\` ${LL.commands.roll.save.description()}\n` +
+							`\`/${LL.commands.roll.name()} ${LL.commands.roll.attack.name()}\` ${LL.commands.roll.attack.description()}\n` +
+							`\`/${LL.commands.roll.name()} ${LL.commands.roll.ability.name()}\` ${LL.commands.roll.ability.description()}`,
+					},
+					{
+						name: LL.commands.init.name(),
+						value:
+							`\`/${LL.commands.init.name()} ${LL.commands.init.start.name()}\` ${LL.commands.init.start.description()}\n` +
+							`\`/${LL.commands.init.name()} ${LL.commands.init.join.name()}\` ${LL.commands.init.join.description()}\n` +
+							`\`/${LL.commands.init.name()} ${LL.commands.init.add.name()}\` ${LL.commands.init.add.description()}\n` +
+							`\`/${LL.commands.init.name()} ${LL.commands.init.next.name()}\` ${LL.commands.init.next.description()}\n` +
+							`\`/${LL.commands.init.name()} ${LL.commands.init.prev.name()}\` ${LL.commands.init.prev.description()}\n` +
+							`\`/${LL.commands.init.name()} ${LL.commands.init.jumpTo.name()}\` ${LL.commands.init.jumpTo.description()}\n` +
+							`\`/${LL.commands.init.name()} ${LL.commands.init.remove.name()}\` ${LL.commands.init.remove.description()}\n` +
+							`\`/${LL.commands.init.name()} ${LL.commands.init.show.name()}\` ${LL.commands.init.show.description()}\n` +
+							`\`/${LL.commands.init.name()} ${LL.commands.init.set.name()}\` ${LL.commands.init.set.description()}\n` +
+							`\`/${LL.commands.init.name()} ${LL.commands.init.end.name()}\` ${LL.commands.init.end.description()}\n`,
+					},
+				]);
 				break;
 			}
 			case Language.LL.commands.help.character.name(): {
-				embed.setTitle(LL.commands.help.about.interactions.embed.title());
-				embed.setDescription(LL.commands.help.about.interactions.embed.description());
-
-				break;
-			}
-			case Language.LL.commands.help.roll.name(): {
-				embed.setTitle(LL.commands.help.about.interactions.embed.title());
-				embed.setDescription(LL.commands.help.about.interactions.embed.description());
-
+				embed.setTitle(LL.commands.help.character.interactions.embed.title());
+				embed.setDescription(LL.commands.help.character.interactions.embed.description());
+				embed.addFields(
+					[
+						LL.commands.character.import.name(),
+						LL.commands.character.update.name(),
+						LL.commands.character.list.name(),
+						LL.commands.character.setActive.name(),
+						LL.commands.character.sheet.name(),
+						LL.commands.character.remove.name(),
+					].map(command =>
+						createCommandOperationHelpField(LL.commands.character.name(), command, LL)
+					)
+				);
 				break;
 			}
 			case Language.LL.commands.help.init.name(): {
-				embed.setTitle(LL.commands.help.about.interactions.embed.title());
-				embed.setDescription(LL.commands.help.about.interactions.embed.description());
-
+				embed.setTitle(LL.commands.help.init.interactions.embed.title());
+				embed.setDescription(LL.commands.help.init.interactions.embed.description());
+				embed.addFields(
+					[
+						LL.commands.init.start.name(),
+						LL.commands.init.end.name(),
+						LL.commands.init.join.name(),
+						LL.commands.init.add.name(),
+						LL.commands.init.next.name(),
+						LL.commands.init.prev.name(),
+						LL.commands.init.jumpTo.name(),
+						LL.commands.init.remove.name(),
+						LL.commands.init.show.name(),
+						LL.commands.init.set.name(),
+					].map(command =>
+						createCommandOperationHelpField(LL.commands.init.name(), command, LL)
+					)
+				);
+				break;
+			}
+			case Language.LL.commands.help.roll.name(): {
+				embed.setTitle(LL.commands.help.roll.interactions.embed.title());
+				embed.setDescription(LL.commands.help.roll.interactions.embed.description());
+				embed.addFields(
+					[
+						LL.commands.roll.dice.name(),
+						LL.commands.roll.skill.name(),
+						LL.commands.roll.perception.name(),
+						LL.commands.roll.save.name(),
+						LL.commands.roll.ability.name(),
+						LL.commands.roll.attack.name(),
+					].map(command =>
+						createCommandOperationHelpField(LL.commands.roll.name(), command, LL)
+					)
+				);
 				break;
 			}
 			default: {

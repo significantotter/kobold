@@ -60,7 +60,7 @@ const en: BaseTranslation = {
 							name: 'How do commands work?',
 							value:
 								"Kobold uses discord's new slash commands. " +
-								'To use a slash command, type "/" followed by one of Kobold\'s commands, ' +
+								"To use a slash command, type `/` followed by one of Kobold's commands, " +
 								"and then select the command from discord's pop-up. " +
 								'Required command options automatically appear for you to enter. ' +
 								'Optional command options may require you to choose the option from ' +
@@ -69,7 +69,7 @@ const en: BaseTranslation = {
 								'articles/1500000368501-Slash-Commands-FAQ) for more details!',
 						},
 						commandOptions: {
-							name: "Where can I find a list of kobold's commands",
+							name: "Where can I find a list of kobold's commands?",
 							value: 'Use the command `/help commands`',
 						},
 						importCharacter: {
@@ -136,22 +136,65 @@ const en: BaseTranslation = {
 			commands: {
 				name: 'commands',
 				value: 'commands',
-				description: 'all commands in Kobold',
-			},
-			init: {
-				name: 'init',
-				value: 'init',
-				description: 'the /init command',
+				description: 'All commands in Kobold',
+				interactions: {
+					embed: {
+						title: 'Kobold Commands',
+						thumbnail: refs.links.thumbnail,
+					},
+				},
 			},
 			character: {
 				name: 'character',
 				value: 'character',
-				description: 'the /character command',
+				description: 'Help for the /character command',
+				interactions: {
+					embed: {
+						title: '/character Commands',
+						thumbnail: refs.links.thumbnail,
+						description:
+							'Character commands all assist with managing imported characters' +
+							"from Wanderer's guide. They allow you to update your character to" +
+							"reflect changes since you imported it, to display your character's sheet, " +
+							'and to switch between multiple active imported characters. Because ' +
+							"wanderer's guide requires OAuth access for a character, import/update" +
+							'commands may prompt you to authorize Kobold to read your character.',
+					},
+				},
+			},
+			init: {
+				name: 'init',
+				value: 'init',
+				description: 'Help for the /init command',
+				interactions: {
+					embed: {
+						title: '/init Commands',
+						thumbnail: refs.links.thumbnail,
+						description:
+							'Manages initiative in a channel. \n - Create an initiative with /init start.\n' +
+							' - Use /init join to join initiative with your active character or /init ' +
+							'add to add a minion or NPC to initiative.\n - Begin the initiative with /init ' +
+							"next.\n - When an NPC is defeated, remove it with /init remove.\n - When it's " +
+							'over, end the initiative with /init end.',
+					},
+				},
 			},
 			roll: {
 				name: 'roll',
 				value: 'roll',
-				description: 'the /roll command',
+				description: 'Help for the /roll command',
+				interactions: {
+					embed: {
+						title: '/roll Commands',
+						thumbnail: refs.links.thumbnail,
+						description:
+							'Rolls some set of dice. This can either be a simple dice roll unrelated ' +
+							'to a character in Kobold, or it can be a skill, save, attack, or ability roll. ' +
+							'\n\nKobold uses a dice rolling syntax similar to that of Roll20. Any ' +
+							'dice roll command will have a field where any arbitrary dice expression ' +
+							'may be included, allowing flexibility for your rolls.',
+					},
+				},
 			},
 		},
 		character: {
@@ -173,7 +216,17 @@ const en: BaseTranslation = {
 			// SUBCOMMANDS
 			import: {
 				name: 'import',
+				options: '[url]',
+				usage: "_[url]_: the url of your character sheet from wanderer's guide",
 				description: "Imports a Wanderer's Guide Character",
+				expandedDescription:
+					'Imports a character from ' +
+					'the provided url. If the url is accurate, Kobold will make sure it ' +
+					"has authorization to read your character from Wanderer's Guide, and " +
+					'then import that character. Otherwise, a link will be provided for you ' +
+					"to grant kobold authorization.\n\n If you're unable to find the character's " +
+					"url, you can alternately just paste their Wanderer's Guide character id " +
+					'into the url field.',
 				interactions: {
 					invalidUrl:
 						`Yip! I couldn't find the character at the url '{url}'. Check ` +
@@ -188,6 +241,10 @@ const en: BaseTranslation = {
 			list: {
 				name: 'list',
 				description: 'lists all active characters',
+				expandedDescription:
+					'Displays a list of all characters imported ' +
+					'into Kobold. You can check the name of each character and a quick summary ' +
+					"of that character's information.",
 				interactions: {
 					noCharacters: `Yip! You don't have any characters yet! Use /import to import some!`,
 					characterListEmbed: {
@@ -200,6 +257,12 @@ const en: BaseTranslation = {
 			remove: {
 				name: 'remove',
 				description: 'removes an already imported character',
+				expandedDescription:
+					'Attempts to remove your currently active character. ' +
+					"This has no effect on your character in Wanderer's Guide, Kobold simply " +
+					'forgets about it. \n\nThe command will prompt you if you really wish to remove ' +
+					'your character. If you do, you can still import that character back to ' +
+					'Kobold in the future.',
 				interactions: {
 					removeConfirmation: {
 						text: `Are you sure you want to remove {characterName}?`,
@@ -213,7 +276,13 @@ const en: BaseTranslation = {
 			},
 			setActive: {
 				name: 'set-active',
+				options: '[name]',
+				usage: '_[name]_: the name of the character in Kobold to set active',
 				description: 'sets a character as the active character',
+				expandedDescription:
+					'Sets the character matching the provided name ' +
+					'as your active character. Your active character is the one used for ' +
+					'commands like /character sheet, /roll, /init, or /character update.',
 				interactions: {
 					success: 'Yip! {characterName} is now your active character!',
 					notFound:
@@ -224,6 +293,10 @@ const en: BaseTranslation = {
 			sheet: {
 				name: 'sheet',
 				description: "displays the active character's sheet",
+				expandedDescription:
+					'Displays a character sheet for your currently active ' +
+					"character. The displayed stats are provided by wanderer's guide. These " +
+					'stats are used for any dice commands relating to the character.',
 				interactions: {
 					sheet: {
 						coreDataField: {
@@ -251,6 +324,11 @@ const en: BaseTranslation = {
 			update: {
 				name: 'update',
 				description: 'updates an already imported character',
+				expandedDescription:
+					'Updates your currently active ' +
+					"character with any new information from Wanderer's guide. If some " +
+					"time has passed since you authorized kobold to read that character's " +
+					'information, you may be asked to authenticate again.',
 				interactions: {
 					success: `Yip! I've successfully updated {characterName}!`,
 				},
@@ -265,10 +343,15 @@ const en: BaseTranslation = {
 			start: {
 				name: 'start',
 				description: 'Start initiative in the current channel.',
+				expandedDescription:
+					'Starts initiative in the current channel. Only one initiative can ' +
+					'exist in per channel at a time. The player who creates the initiative is' +
+					'marked as the GM, and can change names, add, and remove any character ' +
+					'present in the initiative, not just their own.',
 			},
 			show: {
 				name: 'show',
-				description: `Displays the current initiative`,
+				description: `Displays the current initiative order`,
 			},
 			next: {
 				name: 'next',
@@ -279,26 +362,65 @@ const en: BaseTranslation = {
 				description: `Moves to the previous participant in the initiative order`,
 			},
 			jumpTo: {
-				name: 'jump_to',
+				name: 'jump-to',
+				options: '[character]',
+				usage: '_[character]_: The name of a character in the initiative order.',
 				description: `Jumps to a specific participant in the initiative order`,
 			},
 			join: {
 				name: 'join',
+				options: '[*skill*] [*dice*] [*value*]',
+				usage:
+					'_[*skill*] optional_: The name of the skill ("perception") to use to join initiative.\n' +
+					'_[*dice*] optional_: The dice expression ("1d20+5") to use to join initiative.\n' +
+					'_[*value*] optional_: The static value ("15") to use to join initiative.',
 				description:
 					'Joins initiative with your active character. ' +
 					'Defaults to rolling perception.',
+				expandedDescription:
+					'Joins initiative with your active character. If no options are provided, ' +
+					'perception is rolled for the initiative value. If multiple options are provided, only ' +
+					'one will actually work. The only exception is skill + dice expression, where the ' +
+					'dice expression (like "1d4") will be added onto the skill',
 			},
 			add: {
 				name: 'add',
-				description: `Adds a fake character to initiative`,
+				options: '[name] [*dice*] [*value*]',
+				usage:
+					'_[name]_: The name of the skill ("perception") to use to join initiative.\n' +
+					'_[*dice*] optional_: The dice expression ("1d20+5") to use to join initiative.\n' +
+					'_[*value*] optional_: The static value ("15") to use to join initiative.',
+				description: `Adds an NPC or minion to initiative`,
+				expandedDescription:
+					'Adds a minion with the provided name to the initiative. If no options are provided, ' +
+					'a flat d20 is rolled for the initiative value. If both dice and a value are provided, ' +
+					'only the flat value will actually work. This character is controlled by the player ' +
+					'who added it to the initiative.\n\nNote, names in initiative are unique, adding a ' +
+					'duplicate name will cause a quantifier like -1 to be added to the name. e.g. Goblin-1. ' +
+					'if the name Goblin already exists.',
 			},
 			set: {
 				name: 'set',
+				options: '[name] [option] [value]',
+				usage:
+					'_[name]_: The name of a character in the initiative.\n' +
+					'_[option]_: The property of the character to change (just for the current ' +
+					'initiative!) This can be "initiative" for the initiative value, or "name" for ' +
+					"the character's display name while in the initiative.\n" +
+					'_[value]_: The value to set the property to.',
 				description: `Sets certain properties of your character for initiative`,
+				expandedDescription:
+					'Sets either the initiative value or current name of the ' +
+					'matching character in the initiative order. Any name changes are only reflected ' +
+					"within the initiative. They don't effect the imported character elsewhere.",
 			},
 			remove: {
 				name: 'remove',
+				options: '[name]',
+				usage: '_[name]_: The name of a character in the initiative.',
 				description: 'Removes a character from initiative.',
+				expandedDescription:
+					'Removes the character that matches the given name from initiative',
 			},
 			end: {
 				name: 'end',
@@ -310,29 +432,65 @@ const en: BaseTranslation = {
 			description: 'Roll Dice',
 			interactions: {},
 
-			ability: {
-				name: 'ability',
-				description: `rolls an ability for your active character`,
-			},
-			attack: {
-				name: 'attack',
-				description: `rolls an attack for your active character`,
-			},
 			dice: {
 				name: 'dice',
+				options: '[dice] [*note*]',
+				usage:
+					'_[dice]_: The dice expression to roll ("1d20 - 1d4 + 3). Uses a ' +
+					'similar syntax to Roll20.\n' +
+					'_[*note*] optional_: A note to add to the end of the dice roll.',
 				description: `Rolls some dice.`,
+			},
+			skill: {
+				name: 'skill',
+				options: '[skill] [*dice*] [*note*]',
+				usage:
+					'_[skill]_: The name of the skill to roll.\n' +
+					'_[*dice*] optional_: A dice expression to roll ("1d20 - 1d4 + 3"). Added to the end ' +
+					'of the skill roll. Alternatively, a simple modifier value ("5" or "-3").\n' +
+					'_[*note*] optional_: A note to add to the end of the dice roll.',
+				description: `rolls a skill for your active character`,
 			},
 			perception: {
 				name: 'perception',
+				options: '[*dice*] [*note*]',
+				usage:
+					'_[*dice*] optional_: A dice expression to roll ("1d20 - 1d4 + 3"). Added to the end ' +
+					'of the perception roll. Alternatively, a simple modifier value ("5" or "-3").\n' +
+					'_[*note*] optional_: A note to add to the end of the dice roll.',
 				description: `rolls perception for your active character`,
 			},
 			save: {
 				name: 'save',
-				description: `rolls a save for your active character`,
+				options: '[save] [*dice*] [*note*]',
+				usage:
+					'_[save]_: The name of the saving throw to roll.\n' +
+					'_[*dice*] optional_: A dice expression to roll ("1d20 - 1d4 + 3"). Added to the end ' +
+					'of the save roll. Alternatively, a simple modifier value ("5" or "-3").\n' +
+					'_[*note*] optional_: A note to add to the end of the dice roll.',
+				description: `rolls a saving throw for your active character`,
 			},
-			skill: {
-				name: 'skill',
-				description: `rolls a skill for your active character`,
+			ability: {
+				name: 'ability',
+				options: '[ability] [*dice*] [*note*]',
+				usage:
+					'_[ability]_: The name of the ability to roll.\n' +
+					'_[*dice*] optional_: A dice expression to roll ("1d20 - 1d4 + 3"). Added to the end ' +
+					'of the ability roll. Alternatively, a simple modifier value ("5" or "-3").\n' +
+					'_[*note*] optional_: A note to add to the end of the dice roll.',
+				description: `rolls an ability for your active character`,
+			},
+			attack: {
+				name: 'attack',
+				options: '[attack] [*attack_modifier*] [*damage_modifier*] [*note*]',
+				usage:
+					'_[attack]_: The name of the attack to roll.\n' +
+					'_[*attack\\_modifier*] optional_: A dice expression to roll ("1d20 - 1d4 + 3"). Added to ' +
+					'the end of the attack roll. Alternatively, a simple modifier value ("5" or "-3").\n' +
+					'_[*damage\\_modifier*] optional_: A dice expression to roll ("1d20 - 1d4 + 3"). Added to ' +
+					'the end of the damage roll. Alternatively, a simple modifier value ("5" or "-3").\n' +
+					'_[*note*] optional_: A note to add to the end of the dice roll.',
+				description: `rolls an attack for your active character`,
 			},
 		},
 	},
@@ -404,7 +562,7 @@ const en: BaseTranslation = {
 		},
 		initActor: {
 			name: 'name',
-			description: 'The name of the dummy character to add to initiative.',
+			description: 'The name of the NPC/minion to add to initiative.',
 		},
 		initCharacter: {
 			name: 'character',
