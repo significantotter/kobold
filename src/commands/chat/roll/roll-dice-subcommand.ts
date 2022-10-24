@@ -12,13 +12,14 @@ import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { RollBuilder } from '../../../utils/dice-utils.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
+import { Language } from '../../../models/enum-helpers/index.js';
 
 export class RollDiceSubCommand implements Command {
-	public names = ['dice'];
+	public names = [Language.LL.commands.roll.dice.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: 'dice',
-		description: `Rolls some dice.`,
+		name: Language.LL.commands.roll.dice.name(),
+		description: Language.LL.commands.roll.dice.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};

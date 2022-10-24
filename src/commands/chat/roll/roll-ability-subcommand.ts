@@ -18,13 +18,14 @@ import { Command, CommandDeferType } from '../../index.js';
 import { WG } from '../../../services/wanderers-guide/wanderers-guide.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
+import { Language } from '../../../models/enum-helpers/index.js';
 
 export class RollAbilitySubCommand implements Command {
-	public names = ['ability'];
+	public names = [Language.LL.commands.roll.ability.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: 'ability',
-		description: `rolls an ability for your active character`,
+		name: Language.LL.commands.roll.ability.name(),
+		description: Language.LL.commands.roll.ability.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};

@@ -18,13 +18,14 @@ import { WG } from '../../../services/wanderers-guide/wanderers-guide.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
 import { DiceUtils, RollBuilder } from '../../../utils/dice-utils.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
+import { Language } from '../../../models/enum-helpers/index.js';
 
 export class RollSaveSubCommand implements Command {
-	public names = ['save'];
+	public names = [Language.LL.commands.roll.save.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: 'save',
-		description: `rolls a save for your active character`,
+		name: Language.LL.commands.roll.save.name(),
+		description: Language.LL.commands.roll.save.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};

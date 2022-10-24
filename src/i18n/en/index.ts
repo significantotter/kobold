@@ -337,7 +337,9 @@ const en: BaseTranslation = {
 		init: {
 			name: 'init',
 			description: 'Initiative Tracking',
-			interactions: {},
+			interactions: {
+				noActiveCharacter: "Yip! You don't have any active characters!",
+			},
 
 			// SUBCOMMANDS
 			start: {
@@ -398,6 +400,17 @@ const en: BaseTranslation = {
 					'who added it to the initiative.\n\nNote, names in initiative are unique, adding a ' +
 					'duplicate name will cause a quantifier like -1 to be added to the name. e.g. Goblin-1. ' +
 					'if the name Goblin already exists.',
+				interactions: {
+					joinedEmbed: {
+						rolledTitle: '{actorName} rolled initiative!',
+						joinedTitle: '{actorName} joined initiative!',
+						description: 'Initiative: {finalInitiative}',
+						roundField: {
+							name: '\u200B',
+							value: `[Initiative Round {currentRound}]({url})`,
+						},
+					},
+				},
 			},
 			set: {
 				name: 'set',
@@ -425,6 +438,10 @@ const en: BaseTranslation = {
 			end: {
 				name: 'end',
 				description: 'Ends the initiative in the current channel.',
+				interactions: {
+					success: 'Yip! Ended the initiative!',
+					error: 'Yip! Something went wrong!',
+				},
 			},
 		},
 		roll: {

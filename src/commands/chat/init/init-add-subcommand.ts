@@ -16,13 +16,14 @@ import { InitiativeUtils, InitiativeBuilder } from '../../../utils/initiative-ut
 import { ChatArgs } from '../../../constants/chat-args.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
+import { Language } from '../../../models/enum-helpers/language.js';
 
 export class InitAddSubCommand implements Command {
-	public names = ['add'];
+	public names = [Language.LL.commands.init.add.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: 'add',
-		description: `Adds a fake character to initiative`,
+		name: Language.LL.commands.init.add.name(),
+		description: Language.LL.commands.init.add.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -65,11 +66,21 @@ export class InitAddSubCommand implements Command {
 		if (initiativeValue) {
 			finalInitiative = initiativeValue;
 			rollResultMessage = new KoboldEmbed()
-				.setTitle(`${actorName} joined Initiative!`)
-				.setDescription(`Initiative: ${finalInitiative}`);
+				.setTitle(
+					Language.LL.commands.init.add.interactions.joinedEmbed.joinedTitle({
+						actorName,
+					})
+				)
+				.setDescription(
+					Language.LL.commands.init.add.interactions.joinedEmbed.description({
+						finalInitiative,
+					})
+				);
 		} else {
 			const rollBuilder = new RollBuilder({
-				title: `${actorName} rolled Initiative!`,
+				title: Language.LL.commands.init.add.interactions.joinedEmbed.rolledTitle({
+					actorName,
+				}),
 			});
 			rollBuilder.addRoll(diceExpression || 'd20');
 			finalInitiative = rollBuilder.rollResults[0]?.results?.total || 0;
@@ -81,8 +92,11 @@ export class InitAddSubCommand implements Command {
 			const targetMessage = await intr.channel.messages.fetch(targetMessageId);
 			rollResultMessage.addFields([
 				{
-					name: '\u200B',
-					value: `[Initiative Round ${currentInit.currentRound}](${targetMessage.url})`,
+					name: Language.LL.commands.init.add.interactions.joinedEmbed.roundField.name(),
+					value: Language.LL.commands.init.add.interactions.joinedEmbed.roundField.value({
+						currentRound: currentInit.currentRound,
+						url: targetMessage.url,
+					}),
 				},
 			]);
 		}

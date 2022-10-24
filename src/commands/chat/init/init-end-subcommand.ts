@@ -12,13 +12,14 @@ import { Command, CommandDeferType } from '../../index.js';
 import { InitiativeUtils } from '../../../utils/initiative-utils.js';
 import { Initiative } from '../../../services/kobold/models/index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
+import { Language } from '../../../models/enum-helpers/index.js';
 
 export class InitEndSubCommand implements Command {
-	public names = ['end'];
+	public names = [Language.LL.commands.init.end.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: 'end',
-		description: 'Ends the initiative in the current channel.',
+		name: Language.LL.commands.init.end.name(),
+		description: Language.LL.commands.init.end.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -40,9 +41,9 @@ export class InitEndSubCommand implements Command {
 
 		try {
 			await Initiative.query().deleteById(currentInit.id);
-			await InteractionUtils.send(intr, `Yip! Ended the initiative!`);
+			await InteractionUtils.send(intr, Language.LL.commands.init.end.interactions.success());
 		} catch (err) {
-			await InteractionUtils.send(intr, `Yip! Something went wrong!`);
+			await InteractionUtils.send(intr, Language.LL.commands.init.end.interactions.error());
 			console.error(err);
 		}
 	}

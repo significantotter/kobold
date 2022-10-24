@@ -20,13 +20,14 @@ import _ from 'lodash';
 import { Initiative } from '../../../services/kobold/models/index.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
+import { Language } from '../../../models/enum-helpers/index.js';
 
 export class InitPrevSubCommand implements Command {
-	public names = ['prev'];
+	public names = [Language.LL.commands.init.prev.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: 'prev',
-		description: `Moves to the previous participant in the initiative order`,
+		name: Language.LL.commands.init.prev.name(),
+		description: Language.LL.commands.init.prev.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};

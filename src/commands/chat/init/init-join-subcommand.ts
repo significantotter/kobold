@@ -22,13 +22,14 @@ import { CharacterUtils } from '../../../utils/character-utils.js';
 import { DiceUtils } from '../../../utils/dice-utils.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
+import { Language } from '../../../models/enum-helpers/index.js';
 
 export class InitJoinSubCommand implements Command {
-	public names = ['join'];
+	public names = [Language.LL.commands.init.join.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: 'join',
-		description: `Initiative Tracking`,
+		name: Language.LL.commands.init.join.name(),
+		description: Language.LL.commands.init.join.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -76,7 +77,10 @@ export class InitJoinSubCommand implements Command {
 		}
 		const currentInit = currentInitResponse.init;
 		if (!activeCharacter) {
-			await InteractionUtils.send(intr, `Yip! You don't have any active characters!`);
+			await InteractionUtils.send(
+				intr,
+				Language.LL.commands.init.interactions.noActiveCharacter()
+			);
 			return;
 		}
 		if (currentInit.actors.find(actor => actor.characterId === activeCharacter.id)) {

@@ -19,13 +19,14 @@ import _ from 'lodash';
 import { Initiative } from '../../../services/kobold/models/index.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
+import { Language } from '../../../models/enum-helpers/index.js';
 
 export class InitNextSubCommand implements Command {
-	public names = ['next'];
+	public names = [Language.LL.commands.init.next.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: 'next',
-		description: `Moves to the next participant in the initiative order`,
+		name: Language.LL.commands.init.next.name(),
+		description: Language.LL.commands.init.next.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};

@@ -6,6 +6,7 @@ import {
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
+import { Language } from '../../../models/enum-helpers/index.js';
 
 import { EventData } from '../../../models/internal-models.js';
 import { Initiative } from '../../../services/kobold/models/index.js';
@@ -15,11 +16,11 @@ import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { Command, CommandDeferType } from '../../index.js';
 
 export class InitStartSubCommand implements Command {
-	public names = ['start'];
+	public names = [Language.LL.commands.init.start.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: 'start',
-		description: `Start an Initiative`,
+		name: Language.LL.commands.init.start.name(),
+		description: Language.LL.commands.init.show.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};

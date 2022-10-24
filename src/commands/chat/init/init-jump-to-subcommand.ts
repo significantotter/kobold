@@ -19,13 +19,14 @@ import { Command, CommandDeferType } from '../../index.js';
 import _ from 'lodash';
 import { Initiative } from '../../../services/kobold/models/index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
+import { Language } from '../../../models/enum-helpers/index.js';
 
 export class InitJumpToSubCommand implements Command {
-	public names = ['jump-to'];
+	public names = [Language.LL.commands.init.jumpTo.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: 'jump-to',
-		description: `Jumps to a specific participant in the initiative order`,
+		name: Language.LL.commands.init.jumpTo.name(),
+		description: Language.LL.commands.init.jumpTo.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};

@@ -691,6 +691,37 @@ type RootTranslation = {
 			​N​o​t​e​,​ ​n​a​m​e​s​ ​i​n​ ​i​n​i​t​i​a​t​i​v​e​ ​a​r​e​ ​u​n​i​q​u​e​,​ ​a​d​d​i​n​g​ ​a​ ​d​u​p​l​i​c​a​t​e​ ​n​a​m​e​ ​w​i​l​l​ ​c​a​u​s​e​ ​a​ ​q​u​a​n​t​i​f​i​e​r​ ​l​i​k​e​ ​-​1​ ​t​o​ ​b​e​ ​a​d​d​e​d​ ​t​o​ ​t​h​e​ ​n​a​m​e​.​ ​e​.​g​.​ ​G​o​b​l​i​n​-​1​.​ ​i​f​ ​t​h​e​ ​n​a​m​e​ ​G​o​b​l​i​n​ ​a​l​r​e​a​d​y​ ​e​x​i​s​t​s​.
 				 */
 				expandedDescription: string
+				interactions: {
+					joinedEmbed: {
+						/**
+						 * {​a​c​t​o​r​N​a​m​e​}​ ​r​o​l​l​e​d​ ​i​n​i​t​i​a​t​i​v​e​!
+						 * @param {unknown} actorName
+						 */
+						rolledTitle: RequiredParams<'actorName'>
+						/**
+						 * {​a​c​t​o​r​N​a​m​e​}​ ​j​o​i​n​e​d​ ​i​n​i​t​i​a​t​i​v​e​!
+						 * @param {unknown} actorName
+						 */
+						joinedTitle: RequiredParams<'actorName'>
+						/**
+						 * I​n​i​t​i​a​t​i​v​e​:​ ​{​f​i​n​a​l​I​n​i​t​i​a​t​i​v​e​}
+						 * @param {unknown} finalInitiative
+						 */
+						description: RequiredParams<'finalInitiative'>
+						roundField: {
+							/**
+							 * ​
+							 */
+							name: string
+							/**
+							 * [​I​n​i​t​i​a​t​i​v​e​ ​R​o​u​n​d​ ​{​c​u​r​r​e​n​t​R​o​u​n​d​}​]​(​{​u​r​l​}​)
+							 * @param {unknown} currentRound
+							 * @param {unknown} url
+							 */
+							value: RequiredParams<'currentRound' | 'url'>
+						}
+					}
+				}
 			}
 			set: {
 				/**
@@ -1741,6 +1772,32 @@ export type TranslationFunctions = {
 			Note, names in initiative are unique, adding a duplicate name will cause a quantifier like -1 to be added to the name. e.g. Goblin-1. if the name Goblin already exists.
 				 */
 				expandedDescription: () => LocalizedString
+				interactions: {
+					joinedEmbed: {
+						/**
+						 * {actorName} rolled initiative!
+						 */
+						rolledTitle: (arg: { actorName: unknown }) => LocalizedString
+						/**
+						 * {actorName} joined initiative!
+						 */
+						joinedTitle: (arg: { actorName: unknown }) => LocalizedString
+						/**
+						 * Initiative: {finalInitiative}
+						 */
+						description: (arg: { finalInitiative: unknown }) => LocalizedString
+						roundField: {
+							/**
+							 * ​
+							 */
+							name: () => LocalizedString
+							/**
+							 * [Initiative Round {currentRound}]({url})
+							 */
+							value: (arg: { currentRound: unknown, url: unknown }) => LocalizedString
+						}
+					}
+				}
 			}
 			set: {
 				/**

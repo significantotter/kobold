@@ -21,13 +21,14 @@ import { Command, CommandDeferType } from '../../index.js';
 import _ from 'lodash';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
+import { Language } from '../../../models/enum-helpers/index.js';
 
 export class InitSetSubCommand implements Command {
-	public names = ['set'];
+	public names = [Language.LL.commands.init.set.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: 'set',
-		description: `Sets certain properties of your character for initiative`,
+		name: Language.LL.commands.init.set.name(),
+		description: Language.LL.commands.init.set.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};

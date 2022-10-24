@@ -13,13 +13,14 @@ import { Command, CommandDeferType } from '../../index.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
 import { DiceUtils, RollBuilder } from '../../../utils/dice-utils.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
+import { Language } from '../../../models/enum-helpers/index.js';
 
 export class RollPerceptionSubCommand implements Command {
-	public names = ['perception'];
+	public names = [Language.LL.commands.roll.perception.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: 'perception',
-		description: `rolls perception for your active character`,
+		name: Language.LL.commands.roll.perception.name(),
+		description: Language.LL.commands.roll.perception.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};

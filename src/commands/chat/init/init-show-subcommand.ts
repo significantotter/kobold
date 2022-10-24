@@ -14,13 +14,14 @@ import { InteractionUtils } from '../../../utils/index.js';
 import { InitiativeUtils, InitiativeBuilder } from '../../../utils/initiative-utils.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
+import { Language } from '../../../models/enum-helpers/index.js';
 
 export class InitShowSubCommand implements Command {
-	public names = ['show'];
+	public names = [Language.LL.commands.init.show.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: 'show',
-		description: `Displays the current initiative`,
+		name: Language.LL.commands.init.show.name(),
+		description: Language.LL.commands.init.show.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};

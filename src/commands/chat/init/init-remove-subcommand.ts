@@ -23,13 +23,14 @@ import _ from 'lodash';
 import { Initiative } from '../../../services/kobold/models/index.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
+import { Language } from '../../../models/enum-helpers/index.js';
 
 export class InitRemoveSubCommand implements Command {
-	public names = ['remove'];
+	public names = [Language.LL.commands.init.remove.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: 'remove',
-		description: `Remove a character from the Initiative`,
+		name: Language.LL.commands.init.remove.name(),
+		description: Language.LL.commands.init.remove.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
