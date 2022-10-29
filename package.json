@@ -20,7 +20,7 @@
 		"clean": "git clean -xdf --exclude=\"/src/config/**/*\"",
 		"clean:dry": "git clean -xdf --exclude=\"/src/config/**/*\" --dry-run",
 		"build-types": "NODE_OPTIONS='--max-old-space-size=8192' node scripts/compileTypes.js",
-		"build": "typesafe-i18n --no-watch && npm run build-types && tsc --project tsconfig.json",
+		"build": "NODE_OPTIONS='--max-old-space-size=8192' typesafe-i18n --no-watch && npm run build-types && tsc --project tsconfig.json",
 		"commands:view": "npm run build && node --enable-source-maps dist/start-bot.js commands view",
 		"commands:register": "NODE_OPTIONS='--max-old-space-size=8192' npm run build && node --enable-source-maps dist/start-bot.js commands register",
 		"commands:register-prod": "NODE_OPTIONS='--max-old-space-size=8192' node dist/start-bot.js commands register",
@@ -40,7 +40,7 @@
 		"api-knex": "TS_NODE_COMPILER_OPTIONS='{ \"module\": \"commonjs\" }' knex --knexfile=./knexfile.ts",
 		"typesafe-i18n": "TS_NODE_COMPILER_OPTIONS='{ \"module\": \"commonjs\" }' typesafe-i18n --no-watch",
 		"typesafe-i18n:watch": "TS_NODE_COMPILER_OPTIONS='{ \"module\": \"commonjs\" }' typesafe-i18n",
-		"migrate": "knex migrate:latest",
+		"migrate": "NODE_OPTIONS='--max-old-space-size=8192' knex migrate:latest",
 		"migrate:test": "NODE_ENV=TEST knex migrate:latest",
 		"test": "jest --coverage src/"
 	},
