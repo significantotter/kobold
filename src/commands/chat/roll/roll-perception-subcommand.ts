@@ -39,14 +39,18 @@ export class RollPerceptionSubCommand implements Command {
 
 		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id);
 		if (!activeCharacter) {
-			await InteractionUtils.send(intr, `Yip! You don't have any active characters!`);
+			await InteractionUtils.send(intr, LL.commands.roll.interactions.noActiveCharacter());
 			return;
 		}
 
+		let diceType = LL.terms.perception();
 		const rollBuilder = new RollBuilder({
 			character: activeCharacter,
 			rollNote,
-			rollDescription: `rolled Perception`,
+			rollDescription: LL.commands.roll.interactions.rolledDice({
+				diceType,
+			}),
+			LL,
 		});
 		rollBuilder.addRoll(
 			DiceUtils.buildDiceExpression(

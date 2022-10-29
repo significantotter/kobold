@@ -34,13 +34,16 @@ export class InitShowSubCommand implements Command {
 		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
-		const initResult = await InitiativeUtils.getInitiativeForChannel(intr.channel);
+		const initResult = await InitiativeUtils.getInitiativeForChannel(intr.channel, {
+			sendErrors: true,
+			LL,
+		});
 		if (initResult.errorMessage) {
 			await InteractionUtils.send(intr, initResult.errorMessage);
 			return;
 		}
 
-		const initBuilder = new InitiativeBuilder({ initiative: initResult.init });
+		const initBuilder = new InitiativeBuilder({ initiative: initResult.init, LL });
 		const embed = await KoboldEmbed.roundFromInitiativeBuilder(initBuilder);
 		await InteractionUtils.send(intr, { embeds: [embed] });
 	}

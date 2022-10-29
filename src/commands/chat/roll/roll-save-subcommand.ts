@@ -73,7 +73,7 @@ export class RollSaveSubCommand implements Command {
 
 		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id);
 		if (!activeCharacter) {
-			await InteractionUtils.send(intr, `Yip! You don't have any active characters!`);
+			await InteractionUtils.send(intr, LL.commands.roll.interactions.noActiveCharacter());
 			return;
 		}
 
@@ -87,7 +87,10 @@ export class RollSaveSubCommand implements Command {
 			actorName: intr.user.username,
 			character: activeCharacter,
 			rollNote,
-			rollDescription: `rolled ${targetSave.Name}`,
+			rollDescription: Language.LL.commands.roll.interactions.rolledDice({
+				diceType: targetSave.Name,
+			}),
+			LL,
 		});
 		rollBuilder.addRoll(
 			DiceUtils.buildDiceExpression('d20', String(targetSave.Bonus), modifierExpression)

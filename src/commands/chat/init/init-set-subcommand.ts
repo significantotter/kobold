@@ -76,10 +76,16 @@ export class InitSetSubCommand implements Command {
 		const newFieldValue = intr.options.getString(ChatArgs.ACTOR_SET_VALUE_OPTION.name).trim();
 
 		if (!fieldToChange || !['initiative', 'name'].includes(fieldToChange)) {
-			await InteractionUtils.send(intr, 'Yip! Please send a valid option to update.');
+			await InteractionUtils.send(
+				intr,
+				LL.commands.init.set.interactions.invalidOptionError()
+			);
 			return;
 		}
-		let currentInitResponse = await InitiativeUtils.getInitiativeForChannel(intr.channel);
+		let currentInitResponse = await InitiativeUtils.getInitiativeForChannel(intr.channel, {
+			sendErrors: true,
+			LL,
+		});
 		if (currentInitResponse.errorMessage) {
 			await InteractionUtils.send(intr, currentInitResponse.errorMessage);
 			return;
@@ -90,7 +96,8 @@ export class InitSetSubCommand implements Command {
 			await InitiativeUtils.getNameMatchActorFromInitiative(
 				intr.user.id,
 				currentInit,
-				targetCharacterName
+				targetCharacterName,
+				LL
 			);
 		if (actorResponse.errorMessage) {
 			await InteractionUtils.send(intr, actorResponse.errorMessage);
@@ -106,7 +113,10 @@ export class InitSetSubCommand implements Command {
 		if (fieldToChange === targetCharacterName) {
 			//a name can't be an empty string
 			if (newFieldValue === '') {
-				await InteractionUtils.send(intr, "Yip! You can't use an empty name!");
+				await InteractionUtils.send(
+					intr,
+					LL.commands.init.set.interactions.emptyNameError()
+				);
 				return;
 				//a name can't already be in the initiative
 			} else if (
@@ -116,7 +126,7 @@ export class InitSetSubCommand implements Command {
 			) {
 				await InteractionUtils.send(
 					intr,
-					'Yip! A character with that name is already in the initiative.'
+					LL.commands.init.set.interactions.nameExistsError()
 				);
 				return;
 			}
@@ -126,7 +136,7 @@ export class InitSetSubCommand implements Command {
 			if (isNaN(Number(newFieldValue))) {
 				await InteractionUtils.send(
 					intr,
-					'Yip! You can only update initiative with a number.'
+					LL.commands.init.set.interactions.initNotNumberError()
 				);
 				return;
 			}
@@ -148,7 +158,10 @@ export class InitSetSubCommand implements Command {
 				);
 			}
 		}
-		currentInitResponse = await InitiativeUtils.getInitiativeForChannel(intr.channel);
+		currentInitResponse = await InitiativeUtils.getInitiativeForChannel(intr.channel, {
+			sendErrors: true,
+			LL,
+		});
 		if (currentInitResponse.errorMessage) {
 			await InteractionUtils.send(intr, currentInitResponse.errorMessage);
 			return;
@@ -157,21 +170,21 @@ export class InitSetSubCommand implements Command {
 
 		const updateEmbed = new KoboldEmbed();
 		updateEmbed.setTitle(
-			`Yip! ${actor.name} had their ${fieldToChange} set to ${newFieldValue}.`
+			LL.commands.init.set.interactions.successEmbed.title({
+				actorName: actor.name,
+				fieldToChange,
+				newFieldValue,
+			})
 		);
 
-		const targetMessageId = currentInit.roundMessageIds[currentInit.currentRound || 0];
-		if (targetMessageId) {
-			const targetMessage = await intr.channel.messages.fetch(targetMessageId);
-			updateEmbed.addFields([
-				{ name: '\u200B', value: `[View Current Round](${targetMessage.url})` },
-			]);
-		}
 		await InteractionUtils.send(intr, updateEmbed);
 
 		const initBuilder = new InitiativeBuilder({
 			initiative: currentInit,
+			LL,
 		});
-		await InitiativeUtils.updateInitiativeRoundMessageOrSendNew(intr, initBuilder);
+		if (currentInit.currentRound === 0) {
+			await InitiativeUtils.updateInitiativeRoundMessageOrSendNew(intr, initBuilder);
+		}
 	}
 }

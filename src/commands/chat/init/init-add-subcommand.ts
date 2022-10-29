@@ -36,7 +36,10 @@ export class InitAddSubCommand implements Command {
 		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
-		const currentInitResponse = await InitiativeUtils.getInitiativeForChannel(intr.channel);
+		const currentInitResponse = await InitiativeUtils.getInitiativeForChannel(intr.channel, {
+			sendErrors: true,
+			LL,
+		});
 		if (currentInitResponse.errorMessage) {
 			await InteractionUtils.send(intr, currentInitResponse.errorMessage);
 			return;
@@ -117,6 +120,7 @@ export class InitAddSubCommand implements Command {
 			initiative: currentInit,
 			actors: currentInit.actors.concat(newActor),
 			groups: currentInit.actorGroups.concat(newActor.actorGroup),
+			LL,
 		});
 		await InitiativeUtils.updateInitiativeRoundMessageOrSendNew(intr, initBuilder);
 		await InteractionUtils.send(intr, rollResultMessage);

@@ -71,7 +71,10 @@ export class InitRemoveSubCommand implements Command {
 	): Promise<void> {
 		const targetCharacterName = intr.options.getString(ChatArgs.INIT_CHARACTER_OPTION.name);
 
-		const currentInitResponse = await InitiativeUtils.getInitiativeForChannel(intr.channel);
+		const currentInitResponse = await InitiativeUtils.getInitiativeForChannel(intr.channel, {
+			sendErrors: true,
+			LL,
+		});
 		if (currentInitResponse.errorMessage) {
 			await InteractionUtils.send(intr, currentInitResponse.errorMessage);
 			return;
@@ -82,13 +85,15 @@ export class InitRemoveSubCommand implements Command {
 		if (!targetCharacterName) {
 			actorResponse = await InitiativeUtils.getActiveCharacterActor(
 				currentInit,
-				intr.user.id
+				intr.user.id,
+				LL
 			);
 		} else {
 			actorResponse = await InitiativeUtils.getNameMatchActorFromInitiative(
 				intr.user.id,
 				currentInit,
-				targetCharacterName
+				targetCharacterName,
+				LL
 			);
 		}
 		if (actorResponse.errorMessage) {
@@ -106,15 +111,12 @@ export class InitRemoveSubCommand implements Command {
 		}
 
 		const deletedEmbed = new KoboldEmbed();
-		deletedEmbed.setTitle(`Yip! ${actor.name} was removed from initiative.`);
+		deletedEmbed.setTitle(
+			LL.commands.init.remove.interactions.deletedEmbed.title({
+				actorName: actor.name,
+			})
+		);
 
-		const targetMessageId = currentInit.roundMessageIds[currentInit.currentRound || 0];
-		if (targetMessageId) {
-			const targetMessage = await intr.channel.messages.fetch(targetMessageId);
-			deletedEmbed.addFields([
-				{ name: '\u200B', value: `[View Current Round](${targetMessage.url})` },
-			]);
-		}
 		await InteractionUtils.send(intr, deletedEmbed);
 
 		if (
@@ -127,7 +129,7 @@ export class InitRemoveSubCommand implements Command {
 		) {
 			//we need to fix the initiative!
 
-			const initBuilder = new InitiativeBuilder({ initiative: currentInit });
+			const initBuilder = new InitiativeBuilder({ initiative: currentInit, LL });
 			let previousTurn = initBuilder.getPreviousTurnChanges();
 			if (previousTurn.errorMessage) {
 				previousTurn = initBuilder.getNextTurnChanges();
@@ -148,7 +150,9 @@ export class InitRemoveSubCommand implements Command {
 			const currentTurnEmbed = await KoboldEmbed.turnFromInitiativeBuilder(initBuilder, url);
 			const activeGroup = initBuilder.activeGroup;
 
-			await InitiativeUtils.updateInitiativeRoundMessageOrSendNew(intr, initBuilder);
+			if (updatedInitiative.currentRound === 0) {
+				await InitiativeUtils.updateInitiativeRoundMessageOrSendNew(intr, initBuilder);
+			}
 
 			await InteractionUtils.send(intr, {
 				content: `<@${activeGroup.userId}>`,
@@ -157,9 +161,12 @@ export class InitRemoveSubCommand implements Command {
 		} else {
 			const initBuilder = new InitiativeBuilder({
 				initiative: currentInit,
+				LL,
 			});
 			initBuilder.removeActor(actor);
-			await InitiativeUtils.updateInitiativeRoundMessageOrSendNew(intr, initBuilder);
+			if (currentInit.currentRound === 0) {
+				await InitiativeUtils.updateInitiativeRoundMessageOrSendNew(intr, initBuilder);
+			}
 		}
 	}
 }

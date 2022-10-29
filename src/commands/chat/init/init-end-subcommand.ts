@@ -32,7 +32,10 @@ export class InitEndSubCommand implements Command {
 		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
-		const currentInitResponse = await InitiativeUtils.getInitiativeForChannel(intr.channel);
+		const currentInitResponse = await InitiativeUtils.getInitiativeForChannel(intr.channel, {
+			sendErrors: true,
+			LL,
+		});
 		if (currentInitResponse.errorMessage) {
 			await InteractionUtils.send(intr, currentInitResponse.errorMessage);
 			return;

@@ -15,6 +15,12 @@ export type Translation = RootTranslation
 export type Translations = RootTranslation
 
 type RootTranslation = {
+	terms: {
+		/**
+		 * P​e​r​c​e​p​t​i​o​n
+		 */
+		perception: string
+	}
 	commands: {
 		help: {
 			/**
@@ -579,6 +585,10 @@ type RootTranslation = {
 			 */
 			description: string
 			interactions: {
+				/**
+				 * Y​i​p​!​ ​Y​o​u​ ​d​o​n​'​t​ ​h​a​v​e​ ​a​n​y​ ​a​c​t​i​v​e​ ​c​h​a​r​a​c​t​e​r​s​!
+				 */
+				noActiveCharacter: string
 			}
 			start: {
 				/**
@@ -593,6 +603,20 @@ type RootTranslation = {
 				 * S​t​a​r​t​s​ ​i​n​i​t​i​a​t​i​v​e​ ​i​n​ ​t​h​e​ ​c​u​r​r​e​n​t​ ​c​h​a​n​n​e​l​.​ ​O​n​l​y​ ​o​n​e​ ​i​n​i​t​i​a​t​i​v​e​ ​c​a​n​ ​e​x​i​s​t​ ​i​n​ ​p​e​r​ ​c​h​a​n​n​e​l​ ​a​t​ ​a​ ​t​i​m​e​.​ ​T​h​e​ ​p​l​a​y​e​r​ ​w​h​o​ ​c​r​e​a​t​e​s​ ​t​h​e​ ​i​n​i​t​i​a​t​i​v​e​ ​i​s​m​a​r​k​e​d​ ​a​s​ ​t​h​e​ ​G​M​,​ ​a​n​d​ ​c​a​n​ ​c​h​a​n​g​e​ ​n​a​m​e​s​,​ ​a​d​d​,​ ​a​n​d​ ​r​e​m​o​v​e​ ​a​n​y​ ​c​h​a​r​a​c​t​e​r​ ​p​r​e​s​e​n​t​ ​i​n​ ​t​h​e​ ​i​n​i​t​i​a​t​i​v​e​,​ ​n​o​t​ ​j​u​s​t​ ​t​h​e​i​r​ ​o​w​n​.
 				 */
 				expandedDescription: string
+				interactions: {
+					/**
+					 * Y​i​p​!​ ​Y​o​u​ ​c​a​n​ ​o​n​l​y​ ​s​t​a​r​t​ ​i​n​i​t​i​a​t​i​v​e​ ​i​n​ ​a​ ​n​o​r​m​a​l​ ​s​e​r​v​e​r​ ​c​h​a​n​n​e​l​.
+					 */
+					notServerChannelError: string
+					/**
+					 * Y​i​p​!​ ​T​h​e​r​e​'​s​ ​a​l​r​e​a​d​y​ ​a​n​ ​i​n​i​t​i​a​t​i​v​e​ ​i​n​ ​t​h​i​s​ ​c​h​a​n​n​e​l​.​ ​E​n​d​ ​i​t​ ​b​e​f​o​r​e​ ​y​o​u​ ​s​t​a​r​t​ ​a​ ​n​e​w​ ​o​n​e​!
+					 */
+					initExistsError: string
+					/**
+					 * Y​i​p​!​ ​S​o​m​e​t​h​i​n​g​ ​w​h​e​n​ ​w​r​o​n​g​ ​w​h​e​n​ ​s​t​a​r​t​i​n​g​ ​y​o​u​r​ ​i​n​i​t​i​a​t​i​v​e​!
+					 */
+					otherError: string
+				}
 			}
 			show: {
 				/**
@@ -665,6 +689,41 @@ type RootTranslation = {
 				 * J​o​i​n​s​ ​i​n​i​t​i​a​t​i​v​e​ ​w​i​t​h​ ​y​o​u​r​ ​a​c​t​i​v​e​ ​c​h​a​r​a​c​t​e​r​.​ ​I​f​ ​n​o​ ​o​p​t​i​o​n​s​ ​a​r​e​ ​p​r​o​v​i​d​e​d​,​ ​p​e​r​c​e​p​t​i​o​n​ ​i​s​ ​r​o​l​l​e​d​ ​f​o​r​ ​t​h​e​ ​i​n​i​t​i​a​t​i​v​e​ ​v​a​l​u​e​.​ ​I​f​ ​m​u​l​t​i​p​l​e​ ​o​p​t​i​o​n​s​ ​a​r​e​ ​p​r​o​v​i​d​e​d​,​ ​o​n​l​y​ ​o​n​e​ ​w​i​l​l​ ​a​c​t​u​a​l​l​y​ ​w​o​r​k​.​ ​T​h​e​ ​o​n​l​y​ ​e​x​c​e​p​t​i​o​n​ ​i​s​ ​s​k​i​l​l​ ​+​ ​d​i​c​e​ ​e​x​p​r​e​s​s​i​o​n​,​ ​w​h​e​r​e​ ​t​h​e​ ​d​i​c​e​ ​e​x​p​r​e​s​s​i​o​n​ ​(​l​i​k​e​ ​"​1​d​4​"​)​ ​w​i​l​l​ ​b​e​ ​a​d​d​e​d​ ​o​n​t​o​ ​t​h​e​ ​s​k​i​l​l
 				 */
 				expandedDescription: string
+				interactions: {
+					/**
+					 * Y​i​p​!​ ​{​c​h​a​r​a​c​t​e​r​N​a​m​e​}​ ​i​s​ ​a​l​r​e​a​d​y​ ​i​n​ ​t​h​i​s​ ​i​n​i​t​i​a​t​i​v​e​!
+					 * @param {unknown} characterName
+					 */
+					characterAlreadyInInit: RequiredParams<'characterName'>
+					joinedEmbed: {
+						/**
+						 * {​c​h​a​r​a​c​t​e​r​N​a​m​e​}​ ​ ​j​o​i​n​e​d​ ​I​n​i​t​i​a​t​i​v​e​!
+						 * @param {unknown} characterName
+						 */
+						title: RequiredParams<'characterName'>
+						/**
+						 * I​n​i​t​i​a​t​i​v​e​:​ ​{​i​n​i​t​V​a​l​u​e​}
+						 * @param {unknown} initValue
+						 */
+						setDescription: RequiredParams<'initValue'>
+						/**
+						 * r​o​l​l​e​d​ ​i​n​i​t​i​a​t​i​v​e​!
+						 */
+						rollDescription: string
+						roundField: {
+							/**
+							 * ​
+							 */
+							name: string
+							/**
+							 * [​I​n​i​t​i​a​t​i​v​e​ ​R​o​u​n​d​ ​{​c​u​r​r​e​n​t​R​o​u​n​d​}​]​(​{​u​r​l​}​)
+							 * @param {unknown} currentRound
+							 * @param {unknown} url
+							 */
+							value: RequiredParams<'currentRound' | 'url'>
+						}
+					}
+				}
 			}
 			add: {
 				/**
@@ -746,6 +805,33 @@ type RootTranslation = {
 				 * S​e​t​s​ ​e​i​t​h​e​r​ ​t​h​e​ ​i​n​i​t​i​a​t​i​v​e​ ​v​a​l​u​e​ ​o​r​ ​c​u​r​r​e​n​t​ ​n​a​m​e​ ​o​f​ ​t​h​e​ ​m​a​t​c​h​i​n​g​ ​c​h​a​r​a​c​t​e​r​ ​i​n​ ​t​h​e​ ​i​n​i​t​i​a​t​i​v​e​ ​o​r​d​e​r​.​ ​A​n​y​ ​n​a​m​e​ ​c​h​a​n​g​e​s​ ​a​r​e​ ​o​n​l​y​ ​r​e​f​l​e​c​t​e​d​ ​w​i​t​h​i​n​ ​t​h​e​ ​i​n​i​t​i​a​t​i​v​e​.​ ​T​h​e​y​ ​d​o​n​'​t​ ​e​f​f​e​c​t​ ​t​h​e​ ​i​m​p​o​r​t​e​d​ ​c​h​a​r​a​c​t​e​r​ ​e​l​s​e​w​h​e​r​e​.
 				 */
 				expandedDescription: string
+				interactions: {
+					/**
+					 * Y​i​p​!​ ​P​l​e​a​s​e​ ​s​e​n​d​ ​a​ ​v​a​l​i​d​ ​o​p​t​i​o​n​ ​t​o​ ​u​p​d​a​t​e​.
+					 */
+					invalidOptionError: string
+					/**
+					 * Y​i​p​!​ ​Y​o​u​ ​c​a​n​'​t​ ​u​s​e​ ​a​n​ ​e​m​p​t​y​ ​n​a​m​e​!
+					 */
+					emptyNameError: string
+					/**
+					 * Y​i​p​!​ ​A​ ​c​h​a​r​a​c​t​e​r​ ​w​i​t​h​ ​t​h​a​t​ ​n​a​m​e​ ​i​s​ ​a​l​r​e​a​d​y​ ​i​n​ ​t​h​e​ ​i​n​i​t​i​a​t​i​v​e​.
+					 */
+					nameExistsError: string
+					/**
+					 * Y​i​p​!​ ​Y​o​u​ ​c​a​n​ ​o​n​l​y​ ​u​p​d​a​t​e​ ​i​n​i​t​i​a​t​i​v​e​ ​w​i​t​h​ ​a​ ​n​u​m​b​e​r​.
+					 */
+					initNotNumberError: string
+					successEmbed: {
+						/**
+						 * Y​i​p​!​ ​{​a​c​t​o​r​N​a​m​e​}​ ​h​a​d​ ​t​h​e​i​r​ ​{​f​i​e​l​d​T​o​C​h​a​n​g​e​}​ ​s​e​t​ ​t​o​ ​{​n​e​w​F​i​e​l​d​V​a​l​u​e​}​.
+						 * @param {unknown} actorName
+						 * @param {unknown} fieldToChange
+						 * @param {unknown} newFieldValue
+						 */
+						title: RequiredParams<'actorName' | 'fieldToChange' | 'newFieldValue'>
+					}
+				}
 			}
 			remove: {
 				/**
@@ -768,6 +854,15 @@ type RootTranslation = {
 				 * R​e​m​o​v​e​s​ ​t​h​e​ ​c​h​a​r​a​c​t​e​r​ ​t​h​a​t​ ​m​a​t​c​h​e​s​ ​t​h​e​ ​g​i​v​e​n​ ​n​a​m​e​ ​f​r​o​m​ ​i​n​i​t​i​a​t​i​v​e
 				 */
 				expandedDescription: string
+				interactions: {
+					deletedEmbed: {
+						/**
+						 * Y​i​p​!​ ​{​a​c​t​o​r​N​a​m​e​}​ ​w​a​s​ ​r​e​m​o​v​e​d​ ​f​r​o​m​ ​i​n​i​t​i​a​t​i​v​e​.
+						 * @param {unknown} actorName
+						 */
+						title: RequiredParams<'actorName'>
+					}
+				}
 			}
 			end: {
 				/**
@@ -778,6 +873,16 @@ type RootTranslation = {
 				 * E​n​d​s​ ​t​h​e​ ​i​n​i​t​i​a​t​i​v​e​ ​i​n​ ​t​h​e​ ​c​u​r​r​e​n​t​ ​c​h​a​n​n​e​l​.
 				 */
 				description: string
+				interactions: {
+					/**
+					 * Y​i​p​!​ ​E​n​d​e​d​ ​t​h​e​ ​i​n​i​t​i​a​t​i​v​e​!
+					 */
+					success: string
+					/**
+					 * Y​i​p​!​ ​S​o​m​e​t​h​i​n​g​ ​w​e​n​t​ ​w​r​o​n​g​!
+					 */
+					error: string
+				}
 			}
 		}
 		roll: {
@@ -790,6 +895,15 @@ type RootTranslation = {
 			 */
 			description: string
 			interactions: {
+				/**
+				 * Y​i​p​!​ ​Y​o​u​ ​d​o​n​'​t​ ​h​a​v​e​ ​a​n​y​ ​a​c​t​i​v​e​ ​c​h​a​r​a​c​t​e​r​s​!
+				 */
+				noActiveCharacter: string
+				/**
+				 * r​o​l​l​e​d​ ​{​d​i​c​e​T​y​p​e​}
+				 * @param {unknown} diceType
+				 */
+				rolledDice: RequiredParams<'diceType'>
 			}
 			dice: {
 				/**
@@ -809,6 +923,12 @@ type RootTranslation = {
 				 * R​o​l​l​s​ ​s​o​m​e​ ​d​i​c​e​.
 				 */
 				description: string
+				interactions: {
+					/**
+					 * r​o​l​l​e​d​ ​s​o​m​e​ ​d​i​c​e​!
+					 */
+					rolledDice: string
+				}
 			}
 			skill: {
 				/**
@@ -909,6 +1029,23 @@ type RootTranslation = {
 				 * r​o​l​l​s​ ​a​n​ ​a​t​t​a​c​k​ ​f​o​r​ ​y​o​u​r​ ​a​c​t​i​v​e​ ​c​h​a​r​a​c​t​e​r
 				 */
 				description: string
+				interactions: {
+					rollEmbed: {
+						/**
+						 * a​t​t​a​c​k​e​d​ ​w​i​t​h​ ​t​h​e​i​r​ ​{​a​t​t​a​c​k​N​a​m​e​}​!
+						 * @param {unknown} attackName
+						 */
+						rollDescription: RequiredParams<'attackName'>
+						/**
+						 * T​o​ ​H​i​t
+						 */
+						toHit: string
+						/**
+						 * D​a​m​a​g​e
+						 */
+						damage: string
+					}
+				}
 			}
 		}
 	}
@@ -1122,9 +1259,82 @@ type RootTranslation = {
 			description: string
 		}
 	}
+	utils: {
+		dice: {
+			/**
+			 * r​o​l​l​e​d​ ​s​o​m​e​ ​d​i​c​e​!
+			 */
+			rolledDice: string
+			/**
+			 * r​o​l​l​e​d​ ​{​a​c​t​i​o​n​N​a​m​e​}
+			 * @param {unknown} actionName
+			 */
+			rolledAction: RequiredParams<'actionName'>
+			/**
+			 * {​r​o​l​l​E​x​p​r​e​s​s​i​o​n​}​
+		​{​r​o​l​l​R​e​n​d​e​r​e​d​E​x​p​r​e​s​s​i​o​n​}​
+		​ ​t​o​t​a​l​ ​=​ ​`​{​r​o​l​l​T​o​t​a​l​}​`
+			 * @param {unknown} rollExpression
+			 * @param {unknown} rollRenderedExpression
+			 * @param {unknown} rollTotal
+			 */
+			rollResult: RequiredParams<'rollExpression' | 'rollRenderedExpression' | 'rollTotal'>
+			/**
+			 * Y​i​p​!​ ​W​e​ ​d​i​d​n​'​t​ ​u​n​d​e​r​s​t​a​n​d​ ​t​h​e​ ​d​i​c​e​ ​r​o​l​l​ ​{​r​o​l​l​E​x​p​r​e​s​s​i​o​n​}​.
+			 * @param {unknown} rollExpression
+			 */
+			diceRollError: RequiredParams<'rollExpression'>
+			/**
+			 * Y​i​p​!​ ​W​e​ ​d​i​d​n​'​t​ ​u​n​d​e​r​s​t​a​n​d​ ​t​h​e​ ​d​i​c​e​ ​r​o​l​l​.​
+		​{​r​o​l​l​E​r​r​o​r​s​}
+			 * @param {unknown} rollErrors
+			 */
+			diceRollOtherErrors: RequiredParams<'rollErrors'>
+		}
+		initiative: {
+			/**
+			 * Y​i​p​!​ ​Y​o​u​ ​d​o​n​'​t​ ​h​a​v​e​ ​c​o​n​t​r​o​l​ ​o​f​ ​a​n​y​ ​c​h​a​r​a​c​t​e​r​s​ ​i​n​ ​t​h​e​ ​i​n​i​t​i​a​t​i​v​e​ ​m​a​t​c​h​i​n​g​ ​t​h​a​t​ ​n​a​m​e​!
+			 */
+			characterNameNotFoundError: string
+			/**
+			 * Y​i​p​!​ ​Y​o​u​r​ ​a​c​t​i​v​e​ ​c​h​a​r​a​c​t​e​r​ ​i​s​n​'​t​ ​i​n​ ​t​h​i​s​ ​i​n​i​t​i​a​t​i​v​e​!
+			 */
+			activeCharacterNotInInitError: string
+			/**
+			 * Y​i​p​!​ ​T​h​e​r​e​'​s​ ​n​o​ ​a​c​t​i​v​e​ ​i​n​i​t​i​a​t​i​v​e​ ​i​n​ ​t​h​i​s​ ​c​h​a​n​n​e​l​.
+			 */
+			noActiveInitError: string
+			/**
+			 * Y​i​p​!​ ​Y​o​u​ ​c​a​n​ ​o​n​l​y​ ​s​e​n​d​ ​i​n​i​t​i​a​t​i​v​e​ ​c​o​m​m​a​n​d​s​ ​i​n​ ​a​ ​r​e​g​u​l​a​r​ ​s​e​r​v​e​r​ ​c​h​a​n​n​e​l​.
+			 */
+			initOutsideServerChannelError: string
+			/**
+			 * Y​i​p​!​ ​I​ ​c​a​n​'​t​ ​g​o​ ​t​o​ ​t​h​e​ ​n​e​x​t​ ​t​u​r​n​ ​w​h​e​n​ ​n​o​ ​o​n​e​ ​i​s​ ​i​n​ ​t​h​e​ ​i​n​i​t​i​a​t​i​v​e​!
+			 */
+			nextTurnInitEmptyError: string
+			/**
+			 * Y​i​p​!​ ​I​ ​c​a​n​'​t​ ​g​o​ ​t​o​ ​t​h​e​ ​n​e​x​t​ ​t​u​r​n​ ​w​h​e​n​ ​n​o​ ​o​n​e​ ​i​s​ ​i​n​ ​t​h​e​ ​i​n​i​t​i​a​t​i​v​e​!
+			 */
+			prevTurnInitEmptyError: string
+			/**
+			 * Y​i​p​!​ ​I​ ​c​a​n​'​t​ ​g​o​ ​t​o​ ​t​h​e​ ​p​r​e​v​i​o​u​s​ ​t​u​r​n​ ​w​h​e​n​ ​w​e​ ​h​a​v​e​n​'​t​ ​s​t​a​r​t​e​d​ ​i​n​i​t​i​a​t​i​v​e​!
+			 */
+			prevTurnInitNotStartedError: string
+			/**
+			 * Y​i​p​!​ ​I​ ​c​a​n​'​t​ ​g​o​ ​t​o​ ​t​h​e​ ​p​r​e​v​i​o​u​s​ ​t​u​r​n​ ​w​h​e​n​ ​i​t​'​s​ ​t​h​e​ ​v​e​r​y​ ​f​i​r​s​t​ ​t​u​r​n​ ​o​f​ ​t​h​e​ ​f​i​r​s​t​ ​r​o​u​n​d​!
+			 */
+			prevTurnNotPossibleError: string
+		}
+	}
 }
 
 export type TranslationFunctions = {
+	terms: {
+		/**
+		 * Perception
+		 */
+		perception: () => LocalizedString
+	}
 	commands: {
 		help: {
 			/**
@@ -1660,6 +1870,10 @@ export type TranslationFunctions = {
 			 */
 			description: () => LocalizedString
 			interactions: {
+				/**
+				 * Yip! You don't have any active characters!
+				 */
+				noActiveCharacter: () => LocalizedString
 			}
 			start: {
 				/**
@@ -1674,6 +1888,20 @@ export type TranslationFunctions = {
 				 * Starts initiative in the current channel. Only one initiative can exist in per channel at a time. The player who creates the initiative ismarked as the GM, and can change names, add, and remove any character present in the initiative, not just their own.
 				 */
 				expandedDescription: () => LocalizedString
+				interactions: {
+					/**
+					 * Yip! You can only start initiative in a normal server channel.
+					 */
+					notServerChannelError: () => LocalizedString
+					/**
+					 * Yip! There's already an initiative in this channel. End it before you start a new one!
+					 */
+					initExistsError: () => LocalizedString
+					/**
+					 * Yip! Something when wrong when starting your initiative!
+					 */
+					otherError: () => LocalizedString
+				}
 			}
 			show: {
 				/**
@@ -1746,6 +1974,36 @@ export type TranslationFunctions = {
 				 * Joins initiative with your active character. If no options are provided, perception is rolled for the initiative value. If multiple options are provided, only one will actually work. The only exception is skill + dice expression, where the dice expression (like "1d4") will be added onto the skill
 				 */
 				expandedDescription: () => LocalizedString
+				interactions: {
+					/**
+					 * Yip! {characterName} is already in this initiative!
+					 */
+					characterAlreadyInInit: (arg: { characterName: unknown }) => LocalizedString
+					joinedEmbed: {
+						/**
+						 * {characterName}  joined Initiative!
+						 */
+						title: (arg: { characterName: unknown }) => LocalizedString
+						/**
+						 * Initiative: {initValue}
+						 */
+						setDescription: (arg: { initValue: unknown }) => LocalizedString
+						/**
+						 * rolled initiative!
+						 */
+						rollDescription: () => LocalizedString
+						roundField: {
+							/**
+							 * ​
+							 */
+							name: () => LocalizedString
+							/**
+							 * [Initiative Round {currentRound}]({url})
+							 */
+							value: (arg: { currentRound: unknown, url: unknown }) => LocalizedString
+						}
+					}
+				}
 			}
 			add: {
 				/**
@@ -1822,6 +2080,30 @@ export type TranslationFunctions = {
 				 * Sets either the initiative value or current name of the matching character in the initiative order. Any name changes are only reflected within the initiative. They don't effect the imported character elsewhere.
 				 */
 				expandedDescription: () => LocalizedString
+				interactions: {
+					/**
+					 * Yip! Please send a valid option to update.
+					 */
+					invalidOptionError: () => LocalizedString
+					/**
+					 * Yip! You can't use an empty name!
+					 */
+					emptyNameError: () => LocalizedString
+					/**
+					 * Yip! A character with that name is already in the initiative.
+					 */
+					nameExistsError: () => LocalizedString
+					/**
+					 * Yip! You can only update initiative with a number.
+					 */
+					initNotNumberError: () => LocalizedString
+					successEmbed: {
+						/**
+						 * Yip! {actorName} had their {fieldToChange} set to {newFieldValue}.
+						 */
+						title: (arg: { actorName: unknown, fieldToChange: unknown, newFieldValue: unknown }) => LocalizedString
+					}
+				}
 			}
 			remove: {
 				/**
@@ -1844,6 +2126,14 @@ export type TranslationFunctions = {
 				 * Removes the character that matches the given name from initiative
 				 */
 				expandedDescription: () => LocalizedString
+				interactions: {
+					deletedEmbed: {
+						/**
+						 * Yip! {actorName} was removed from initiative.
+						 */
+						title: (arg: { actorName: unknown }) => LocalizedString
+					}
+				}
 			}
 			end: {
 				/**
@@ -1854,6 +2144,16 @@ export type TranslationFunctions = {
 				 * Ends the initiative in the current channel.
 				 */
 				description: () => LocalizedString
+				interactions: {
+					/**
+					 * Yip! Ended the initiative!
+					 */
+					success: () => LocalizedString
+					/**
+					 * Yip! Something went wrong!
+					 */
+					error: () => LocalizedString
+				}
 			}
 		}
 		roll: {
@@ -1866,6 +2166,14 @@ export type TranslationFunctions = {
 			 */
 			description: () => LocalizedString
 			interactions: {
+				/**
+				 * Yip! You don't have any active characters!
+				 */
+				noActiveCharacter: () => LocalizedString
+				/**
+				 * rolled {diceType}
+				 */
+				rolledDice: (arg: { diceType: unknown }) => LocalizedString
 			}
 			dice: {
 				/**
@@ -1885,6 +2193,12 @@ export type TranslationFunctions = {
 				 * Rolls some dice.
 				 */
 				description: () => LocalizedString
+				interactions: {
+					/**
+					 * rolled some dice!
+					 */
+					rolledDice: () => LocalizedString
+				}
 			}
 			skill: {
 				/**
@@ -1985,6 +2299,22 @@ export type TranslationFunctions = {
 				 * rolls an attack for your active character
 				 */
 				description: () => LocalizedString
+				interactions: {
+					rollEmbed: {
+						/**
+						 * attacked with their {attackName}!
+						 */
+						rollDescription: (arg: { attackName: unknown }) => LocalizedString
+						/**
+						 * To Hit
+						 */
+						toHit: () => LocalizedString
+						/**
+						 * Damage
+						 */
+						damage: () => LocalizedString
+					}
+				}
 			}
 		}
 	}
@@ -2196,6 +2526,67 @@ export type TranslationFunctions = {
 			 * The value to set the option to.
 			 */
 			description: () => LocalizedString
+		}
+	}
+	utils: {
+		dice: {
+			/**
+			 * rolled some dice!
+			 */
+			rolledDice: () => LocalizedString
+			/**
+			 * rolled {actionName}
+			 */
+			rolledAction: (arg: { actionName: unknown }) => LocalizedString
+			/**
+			 * {rollExpression}
+		{rollRenderedExpression}
+		 total = `{rollTotal}`
+			 */
+			rollResult: (arg: { rollExpression: unknown, rollRenderedExpression: unknown, rollTotal: unknown }) => LocalizedString
+			/**
+			 * Yip! We didn't understand the dice roll {rollExpression}.
+			 */
+			diceRollError: (arg: { rollExpression: unknown }) => LocalizedString
+			/**
+			 * Yip! We didn't understand the dice roll.
+		{rollErrors}
+			 */
+			diceRollOtherErrors: (arg: { rollErrors: unknown }) => LocalizedString
+		}
+		initiative: {
+			/**
+			 * Yip! You don't have control of any characters in the initiative matching that name!
+			 */
+			characterNameNotFoundError: () => LocalizedString
+			/**
+			 * Yip! Your active character isn't in this initiative!
+			 */
+			activeCharacterNotInInitError: () => LocalizedString
+			/**
+			 * Yip! There's no active initiative in this channel.
+			 */
+			noActiveInitError: () => LocalizedString
+			/**
+			 * Yip! You can only send initiative commands in a regular server channel.
+			 */
+			initOutsideServerChannelError: () => LocalizedString
+			/**
+			 * Yip! I can't go to the next turn when no one is in the initiative!
+			 */
+			nextTurnInitEmptyError: () => LocalizedString
+			/**
+			 * Yip! I can't go to the next turn when no one is in the initiative!
+			 */
+			prevTurnInitEmptyError: () => LocalizedString
+			/**
+			 * Yip! I can't go to the previous turn when we haven't started initiative!
+			 */
+			prevTurnInitNotStartedError: () => LocalizedString
+			/**
+			 * Yip! I can't go to the previous turn when it's the very first turn of the first round!
+			 */
+			prevTurnNotPossibleError: () => LocalizedString
 		}
 	}
 }

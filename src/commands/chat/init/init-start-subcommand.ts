@@ -37,12 +37,12 @@ export class InitStartSubCommand implements Command {
 		if (!intr.channel || !intr.channel.id) {
 			await InteractionUtils.send(
 				intr,
-				'Yip! You can only start initiative in a normal server channel.'
+				LL.commands.init.start.interactions.notServerChannelError()
 			);
 			return;
 		}
 
-		const initBuilder = new InitiativeBuilder({});
+		const initBuilder = new InitiativeBuilder({ LL });
 		const embed = await KoboldEmbed.roundFromInitiativeBuilder(initBuilder);
 
 		const message = await InteractionUtils.send(intr, embed);
@@ -61,14 +61,12 @@ export class InitStartSubCommand implements Command {
 		} catch (err) {
 			if (err.name === 'UniqueViolationError') {
 				await Promise.all([
-					message.edit(
-						"Yip! There's already an initiative in this channel. End it before you start a new one!"
-					),
+					message.edit(LL.commands.init.start.interactions.initExistsError()),
 					message.suppressEmbeds(true),
 				]);
 			} else {
 				await Promise.all([
-					message.edit('Yip! Something when wrong when starting your initiative!'),
+					message.edit(LL.commands.init.start.interactions.otherError()),
 					message.suppressEmbeds(true),
 				]);
 				console.error(err);

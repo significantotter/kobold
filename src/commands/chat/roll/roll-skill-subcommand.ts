@@ -70,7 +70,10 @@ export class RollSkillSubCommand implements Command {
 
 		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id);
 		if (!activeCharacter) {
-			await InteractionUtils.send(intr, `Yip! You don't have any active characters!`);
+			await InteractionUtils.send(
+				intr,
+				Language.LL.commands.roll.interactions.noActiveCharacter()
+			);
 			return;
 		}
 		const response = await DiceUtils.rollSkill(
@@ -78,7 +81,9 @@ export class RollSkillSubCommand implements Command {
 			activeCharacter,
 			skillChoice,
 			rollNote,
-			modifierExpression
+			modifierExpression,
+			undefined,
+			LL
 		);
 
 		await InteractionUtils.send(intr, response.compileEmbed());

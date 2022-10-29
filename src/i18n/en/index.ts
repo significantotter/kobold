@@ -39,6 +39,9 @@ let refs = {
 };
 
 const en: BaseTranslation = {
+	terms: {
+		perception: 'Perception',
+	},
 	commands: {
 		help: {
 			name: 'help',
@@ -350,6 +353,14 @@ const en: BaseTranslation = {
 					'exist in per channel at a time. The player who creates the initiative is' +
 					'marked as the GM, and can change names, add, and remove any character ' +
 					'present in the initiative, not just their own.',
+				interactions: {
+					notServerChannelError:
+						'Yip! You can only start initiative in a normal server channel.',
+					initExistsError:
+						"Yip! There's already an initiative in this " +
+						'channel. End it before you start a new one!',
+					otherError: 'Yip! Something when wrong when starting your initiative!',
+				},
 			},
 			show: {
 				name: 'show',
@@ -384,6 +395,18 @@ const en: BaseTranslation = {
 					'perception is rolled for the initiative value. If multiple options are provided, only ' +
 					'one will actually work. The only exception is skill + dice expression, where the ' +
 					'dice expression (like "1d4") will be added onto the skill',
+				interactions: {
+					characterAlreadyInInit: 'Yip! {characterName} is already in this initiative!',
+					joinedEmbed: {
+						title: '{characterName}  joined Initiative!',
+						setDescription: 'Initiative: {initValue}',
+						rollDescription: 'rolled initiative!',
+						roundField: {
+							name: '\u200B',
+							value: '[Initiative Round {currentRound}]({url})',
+						},
+					},
+				},
 			},
 			add: {
 				name: 'add',
@@ -426,6 +449,16 @@ const en: BaseTranslation = {
 					'Sets either the initiative value or current name of the ' +
 					'matching character in the initiative order. Any name changes are only reflected ' +
 					"within the initiative. They don't effect the imported character elsewhere.",
+				interactions: {
+					invalidOptionError: 'Yip! Please send a valid option to update.',
+					emptyNameError: "Yip! You can't use an empty name!",
+					nameExistsError:
+						'Yip! A character with that name is already in the initiative.',
+					initNotNumberError: 'Yip! You can only update initiative with a number.',
+					successEmbed: {
+						title: 'Yip! {actorName} had their {fieldToChange} set to {newFieldValue}.',
+					},
+				},
 			},
 			remove: {
 				name: 'remove',
@@ -434,6 +467,11 @@ const en: BaseTranslation = {
 				description: 'Removes a character from initiative.',
 				expandedDescription:
 					'Removes the character that matches the given name from initiative',
+				interactions: {
+					deletedEmbed: {
+						title: 'Yip! {actorName} was removed from initiative.',
+					},
+				},
 			},
 			end: {
 				name: 'end',
@@ -447,7 +485,10 @@ const en: BaseTranslation = {
 		roll: {
 			name: 'roll',
 			description: 'Roll Dice',
-			interactions: {},
+			interactions: {
+				noActiveCharacter: "Yip! You don't have any active characters!",
+				rolledDice: 'rolled {diceType}',
+			},
 
 			dice: {
 				name: 'dice',
@@ -457,6 +498,9 @@ const en: BaseTranslation = {
 					'similar syntax to Roll20.\n' +
 					'_[*note*] optional_: A note to add to the end of the dice roll.',
 				description: `Rolls some dice.`,
+				interactions: {
+					rolledDice: 'rolled some dice!',
+				},
 			},
 			skill: {
 				name: 'skill',
@@ -508,6 +552,13 @@ const en: BaseTranslation = {
 					'the end of the damage roll. Alternatively, a simple modifier value ("5" or "-3").\n' +
 					'_[*note*] optional_: A note to add to the end of the dice roll.',
 				description: `rolls an attack for your active character`,
+				interactions: {
+					rollEmbed: {
+						rollDescription: 'attacked with their {attackName}!',
+						toHit: 'To Hit',
+						damage: 'Damage',
+					},
+				},
 			},
 		},
 	},
@@ -602,6 +653,32 @@ const en: BaseTranslation = {
 		setValue: {
 			name: 'value',
 			description: 'The value to set the option to.',
+		},
+	},
+	utils: {
+		dice: {
+			rolledDice: 'rolled some dice!',
+			rolledAction: 'rolled {actionName}',
+			rollResult: '{rollExpression}\n{rollRenderedExpression}\n total = `{rollTotal}`',
+			diceRollError: "Yip! We didn't understand the dice roll {rollExpression}.",
+			diceRollOtherErrors: "Yip! We didn't understand the dice roll.\n{rollErrors}",
+		},
+		initiative: {
+			characterNameNotFoundError:
+				"Yip! You don't have control of any characters in the initiative matching that name!",
+			activeCharacterNotInInitError: "Yip! Your active character isn't in this initiative!",
+			noActiveInitError: "Yip! There's no active initiative in this channel.",
+			initOutsideServerChannelError:
+				'Yip! You can only send initiative commands in a regular server channel.',
+			nextTurnInitEmptyError:
+				"Yip! I can't go to the next turn when no one is in the initiative!",
+			prevTurnInitEmptyError:
+				"Yip! I can't go to the next turn when no one is in the initiative!",
+			prevTurnInitNotStartedError:
+				"Yip! I can't go to the previous turn when we haven't started initiative!",
+			prevTurnNotPossibleError:
+				"Yip! I can't go to the previous turn when it's " +
+				'the very first turn of the first round!',
 		},
 	},
 };

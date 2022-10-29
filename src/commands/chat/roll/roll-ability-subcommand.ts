@@ -72,7 +72,10 @@ export class RollAbilitySubCommand implements Command {
 
 		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id);
 		if (!activeCharacter) {
-			await InteractionUtils.send(intr, `Yip! You don't have any active characters!`);
+			await InteractionUtils.send(
+				intr,
+				Language.LL.commands.roll.interactions.noActiveCharacter()
+			);
 			return;
 		}
 
@@ -91,7 +94,10 @@ export class RollAbilitySubCommand implements Command {
 		const rollBuilder = new RollBuilder({
 			character: activeCharacter,
 			rollNote,
-			rollDescription: `rolled ${targetAbility.Name}`,
+			rollDescription: Language.LL.commands.roll.interactions.rolledDice({
+				diceType: targetAbility.Name,
+			}),
+			LL,
 		});
 		rollBuilder.addRoll(
 			DiceUtils.buildDiceExpression('d20', String(targetAbility.Score), modifierExpression)

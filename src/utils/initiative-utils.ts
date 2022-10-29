@@ -1,3 +1,4 @@
+import { TranslationFunctions } from './../i18n/i18n-types';
 import {
 	InitiativeActorGroup,
 	InitiativeActor,
@@ -9,20 +10,26 @@ import { KoboldEmbed } from './kobold-embed-utils.js';
 import _ from 'lodash';
 import { InteractionUtils } from './interaction-utils.js';
 import { CharacterUtils } from './character-utils.js';
+import { Language } from '../models/enum-helpers/index.js';
 
 export class InitiativeBuilder {
 	public init: Initiative;
 	public actorsByGroup: { [key: number]: InitiativeActor[] };
 	public groups: InitiativeActorGroup[];
+	private LL: TranslationFunctions;
+
 	constructor({
 		initiative,
 		actors,
 		groups,
+		LL,
 	}: {
 		initiative?: Initiative;
 		actors?: InitiativeActor[];
 		groups?: InitiativeActorGroup[];
+		LL?: TranslationFunctions;
 	}) {
+		this.LL = LL || Language.LL;
 		this.init = initiative;
 		if (initiative && !actors) actors = initiative.actors;
 		if (initiative && !groups) groups = initiative.actorGroups;
@@ -74,13 +81,12 @@ export class InitiativeBuilder {
 	} {
 		if (!this.groups.length) {
 			return {
-				errorMessage: "Yip! I can't go to the next turn when no one is in the initiative!",
+				errorMessage: this.LL.utils.initiative.prevTurnInitEmptyError(),
 			};
 		}
 		if (!this.init.currentTurnGroupId) {
 			return {
-				errorMessage:
-					"Yip! I can't go to the previous turn when we haven't started initiative!",
+				errorMessage: this.LL.utils.initiative.prevTurnInitNotStartedError(),
 			};
 		} else {
 			const currentTurnIndex = _.findIndex(
@@ -90,9 +96,7 @@ export class InitiativeBuilder {
 			if (!this.groups[currentTurnIndex - 1]) {
 				if (this.init.currentRound === 1) {
 					return {
-						errorMessage:
-							"Yip! I can't go to the previous turn when it's " +
-							'the very first turn of the first round!',
+						errorMessage: this.LL.utils.initiative.prevTurnNotPossibleError(),
 					};
 				}
 				//move to the previous round!
@@ -122,7 +126,7 @@ export class InitiativeBuilder {
 	} {
 		if (!this.groups.length) {
 			return {
-				errorMessage: "Yip! I can't go to the next turn when no one is in the initiative!",
+				errorMessage: this.LL.utils.initiative.nextTurnInitEmptyError(),
 			};
 		}
 		if (!this.init.currentTurnGroupId) {
@@ -231,12 +235,12 @@ interface LowerNamedThing {
 export class InitiativeUtils {
 	public static async getInitiativeForChannel(
 		channel: GuildTextBasedChannel,
-		options = { sendErrors: true }
+		options = { sendErrors: true, LL: Language.LL }
 	) {
+		const LL = options.LL;
 		let errorMessage = null;
 		if (!channel || !channel.id) {
-			errorMessage =
-				'Yip! You can only send initiative commands in a regular server channel.';
+			errorMessage = LL.utils.initiative.initOutsideServerChannelError();
 			return { init: null, errorMessage: errorMessage };
 		}
 		const channelId = channel.id;
@@ -248,7 +252,7 @@ export class InitiativeUtils {
 			})
 			.first();
 		if (!currentInit || currentInit.length === 0) {
-			errorMessage = "Yip! There's no active initiative in this channel.";
+			errorMessage = LL.utils.initiative.noActiveInitError();
 			return { init: null, errorMessage: errorMessage };
 		}
 		return { init: currentInit, errorMessage: errorMessage };
@@ -298,7 +302,12 @@ export class InitiativeUtils {
 		return controllableGroups;
 	}
 
-	public static getActiveCharacterActor(initiative: Initiative, userId: string) {
+	public static getActiveCharacterActor(
+		initiative: Initiative,
+		userId: string,
+		LL: TranslationFunctions
+	) {
+		LL = Language.LL;
 		let actor: InitiativeActor = null;
 		let errorMessage: string = null;
 		for (const possibleActor of initiative?.actors || []) {
@@ -315,7 +324,7 @@ export class InitiativeUtils {
 		if (!actor) {
 			return {
 				actor,
-				errorMessage: `Yip! Your active character isn't in this initiative!`,
+				errorMessage: LL.utils.initiative.activeCharacterNotInInitError(),
 			};
 		}
 		return { actor, errorMessage };
@@ -349,8 +358,10 @@ export class InitiativeUtils {
 	public static getNameMatchActorFromInitiative(
 		userId: string,
 		initiative: Initiative,
-		characterName: string
+		characterName: string,
+		LL: TranslationFunctions
 	): { actor: InitiativeActor; errorMessage: string } {
+		LL = LL || Language.LL;
 		let errorMessage = null;
 		let actor: InitiativeActor | null = null;
 		// get actor options that match the given name, were created by you, or you're the gm of
@@ -358,7 +369,7 @@ export class InitiativeUtils {
 		const result = InitiativeUtils.nameMatchGeneric<InitiativeActor>(
 			actorOptions,
 			characterName,
-			`Yip! You don't have control of any characters in the initiative matching that name!`
+			LL.utils.initiative.characterNameNotFoundError()
 		);
 
 		return { actor: result.value, errorMessage: result.errorMessage };
@@ -367,8 +378,10 @@ export class InitiativeUtils {
 	public static getNameMatchGroupFromInitiative(
 		initiative: Initiative,
 		userId: string,
-		groupName: string
+		groupName: string,
+		LL: TranslationFunctions
 	): { group: InitiativeActorGroup; errorMessage: string } {
+		LL = LL || Language.LL;
 		let errorMessage = null;
 		let group: InitiativeActorGroup | null = null;
 		// get group options that match the given name, were created by you, or you're the gm of
@@ -376,7 +389,7 @@ export class InitiativeUtils {
 		const result = InitiativeUtils.nameMatchGeneric<InitiativeActorGroup>(
 			groupOptions,
 			groupName,
-			`Yip! You don't have control of any characters in the initiative matching that name!`
+			LL.utils.initiative.characterNameNotFoundError()
 		);
 
 		return { group: result.value, errorMessage: result.errorMessage };

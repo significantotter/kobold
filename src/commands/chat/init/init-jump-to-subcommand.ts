@@ -71,7 +71,10 @@ export class InitJumpToSubCommand implements Command {
 		LL: TranslationFunctions
 	): Promise<void> {
 		const targetCharacterName = intr.options.getString(ChatArgs.INIT_CHARACTER_OPTION.name);
-		const initResult = await InitiativeUtils.getInitiativeForChannel(intr.channel);
+		const initResult = await InitiativeUtils.getInitiativeForChannel(intr.channel, {
+			sendErrors: true,
+			LL,
+		});
 		if (initResult.errorMessage) {
 			await InteractionUtils.send(intr, initResult.errorMessage);
 			return;
@@ -80,7 +83,8 @@ export class InitJumpToSubCommand implements Command {
 		const groupResponse = InitiativeUtils.getNameMatchGroupFromInitiative(
 			initResult.init,
 			initResult.init.gmUserId,
-			targetCharacterName
+			targetCharacterName,
+			LL
 		);
 		if (groupResponse.errorMessage) {
 			await InteractionUtils.send(intr, groupResponse.errorMessage);
@@ -91,7 +95,7 @@ export class InitJumpToSubCommand implements Command {
 			.updateAndFetchById(initResult.init.id, { currentTurnGroupId: groupResponse.group.id })
 			.withGraphFetched('[actors.[character], actorGroups]');
 
-		const initBuilder = new InitiativeBuilder({ initiative: updatedInitiative });
+		const initBuilder = new InitiativeBuilder({ initiative: updatedInitiative, LL });
 		const currentTurnEmbed = await KoboldEmbed.turnFromInitiativeBuilder(initBuilder);
 		const activeGroup = initBuilder.activeGroup;
 

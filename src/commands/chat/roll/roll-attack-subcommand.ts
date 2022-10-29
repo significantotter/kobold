@@ -77,7 +77,10 @@ export class RollAttackSubCommand implements Command {
 
 		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id);
 		if (!activeCharacter) {
-			await InteractionUtils.send(intr, `Yip! You don't have any active characters!`);
+			await InteractionUtils.send(
+				intr,
+				Language.LL.commands.roll.interactions.noActiveCharacter()
+			);
 			return;
 		}
 
@@ -90,7 +93,11 @@ export class RollAttackSubCommand implements Command {
 		const rollBuilder = new RollBuilder({
 			character: activeCharacter,
 			rollNote,
-			rollDescription: `attacked with their ${targetAttack.Name}!`,
+			rollDescription:
+				Language.LL.commands.roll.attack.interactions.rollEmbed.rollDescription({
+					attackName: targetAttack.Name,
+				}),
+			LL,
 		});
 
 		//if we a to hit defined, roll the attack's to-hit
@@ -101,7 +108,7 @@ export class RollAttackSubCommand implements Command {
 					String(targetAttack.Bonus),
 					attackModifierExpression
 				),
-				'To Hit'
+				Language.LL.commands.roll.attack.interactions.rollEmbed.toHit()
 			);
 		}
 
@@ -113,7 +120,7 @@ export class RollAttackSubCommand implements Command {
 					null,
 					damageModifierExpression
 				),
-				'Damage'
+				Language.LL.commands.roll.attack.interactions.rollEmbed.damage()
 			);
 		}
 		const response = rollBuilder.compileEmbed();

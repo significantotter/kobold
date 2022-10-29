@@ -68,7 +68,10 @@ export class InitJoinSubCommand implements Command {
 		LL: TranslationFunctions
 	): Promise<void> {
 		const [currentInitResponse, activeCharacter] = await Promise.all([
-			InitiativeUtils.getInitiativeForChannel(intr.channel),
+			InitiativeUtils.getInitiativeForChannel(intr.channel, {
+				sendErrors: true,
+				LL,
+			}),
 			CharacterUtils.getActiveCharacter(intr.user.id),
 		]);
 		if (currentInitResponse.errorMessage) {
@@ -86,7 +89,9 @@ export class InitJoinSubCommand implements Command {
 		if (currentInit.actors.find(actor => actor.characterId === activeCharacter.id)) {
 			await InteractionUtils.send(
 				intr,
-				`Yip! ${activeCharacter.characterData.name} is already in this initiative!`
+				Language.LL.commands.init.join.interactions.characterAlreadyInInit({
+					characterName: activeCharacter.characterData.name,
+				})
 			);
 			return;
 		}
@@ -99,12 +104,18 @@ export class InitJoinSubCommand implements Command {
 		if (initiativeValue) {
 			finalInitiative = initiativeValue;
 			rollResultMessage = new KoboldEmbed()
-				.setTitle(`${activeCharacter.characterData.name} joined Initiative!`)
-				.setDescription(`Initiative: ${finalInitiative}`);
-			if (activeCharacter.characterData.infoJSON?.imageURL) {
-				rollResultMessage.setThumbnail(
-					`${activeCharacter.characterData.infoJSON?.imageURL}`
+				.setTitle(
+					LL.commands.init.join.interactions.joinedEmbed.title({
+						characterName: activeCharacter.characterData.name,
+					})
+				)
+				.setDescription(
+					LL.commands.init.join.interactions.joinedEmbed.setDescription({
+						initValue: finalInitiative,
+					})
 				);
+			if (activeCharacter.characterData.infoJSON?.imageURL) {
+				rollResultMessage.setThumbnail(activeCharacter.characterData.infoJSON?.imageURL);
 			}
 		} else if (skillChoice) {
 			const response = await DiceUtils.rollSkill(
@@ -119,7 +130,7 @@ export class InitJoinSubCommand implements Command {
 		} else if (diceExpression) {
 			const rollBuilder = new RollBuilder({
 				character: activeCharacter,
-				rollDescription: 'rolled initiative!',
+				rollDescription: LL.commands.init.join.interactions.joinedEmbed.rollDescription(),
 			});
 			rollBuilder.addRoll(diceExpression);
 			finalInitiative = rollBuilder.rollResults[0]?.results?.total || 0;
@@ -141,8 +152,11 @@ export class InitJoinSubCommand implements Command {
 			const targetMessage = await intr.channel.messages.fetch(targetMessageId);
 			rollResultMessage.addFields([
 				{
-					name: '\u200B',
-					value: `[Initiative Round ${currentInit.currentRound}](${targetMessage.url})`,
+					name: LL.commands.init.join.interactions.joinedEmbed.roundField.name(),
+					value: LL.commands.init.join.interactions.joinedEmbed.roundField.value({
+						currentRound: currentInit.currentRound,
+						url: targetMessage.url,
+					}),
 				},
 			]);
 		}
@@ -180,6 +194,7 @@ export class InitJoinSubCommand implements Command {
 			initiative: currentInit,
 			actors: currentInit.actors.concat(newActor),
 			groups: currentInit.actorGroups.concat(newActor.actorGroup),
+			LL,
 		});
 		await InteractionUtils.send(intr, rollResultMessage);
 		if (currentInit.currentRound === 0) {

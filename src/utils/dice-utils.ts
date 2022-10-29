@@ -5,6 +5,8 @@ import type { WG } from './../services/wanderers-guide/wanderers-guide.js';
 import _ from 'lodash';
 import { CharacterUtils } from './character-utils.js';
 import { KoboldEmbed } from './kobold-embed-utils.js';
+import { TranslationFunctions } from '../i18n/i18n-types.js';
+import { Language } from '../models/enum-helpers/index.js';
 
 interface DiceRollResult extends APIEmbedField {
 	results: DiceResult | null;
@@ -16,6 +18,7 @@ export class RollBuilder {
 	private rollNote: string;
 	public rollResults: DiceRollResult[];
 	private title: string;
+	private LL: TranslationFunctions;
 
 	constructor({
 		actorName,
@@ -23,17 +26,20 @@ export class RollBuilder {
 		rollDescription,
 		rollNote,
 		title,
+		LL,
 	}: {
 		actorName?: string;
 		character?: Character | null;
 		rollDescription?: string;
 		rollNote?: string;
 		title?: string;
+		LL?: TranslationFunctions;
 	}) {
 		this.rollResults = [];
 		this.character = character || null;
 		this.rollNote = rollNote;
-		this.rollDescription = rollDescription || 'rolled some dice!';
+		this.rollDescription = rollDescription;
+		this.LL = LL || Language.LL;
 
 		const actorText = character?.characterData?.name || actorName || '';
 		this.title = title || _.capitalize(`${actorText} ${this.rollDescription}`.trim());
@@ -57,17 +63,20 @@ export class RollBuilder {
 				maxDiceSides: 100, // limit to 100 dice faces
 			}).roll(rollExpression);
 			if (roll.errors?.length) {
-				rollField.value =
-					`Yip! We didn't understand the dice roll.\n` + roll.errors.join('\n');
+				rollField.value = this.LL.utils.dice.diceRollOtherErrors({
+					rollErrors: roll.errors.join('\n'),
+				});
 			} else {
-				rollField.value = `${rollExpression}\n${roll.renderedExpression.toString()}\n total = \`${
-					roll.total
-				}\``;
+				rollField.value = this.LL.utils.dice.rollResult({
+					rollExpression,
+					rollRenderedExpression: roll.renderedExpression.toString(),
+					rollTotal: roll.total,
+				});
 				rollField.results = roll;
 			}
 		} catch (err) {
 			console.warn(err);
-			rollField.value = `Yip! We didn't understand the dice roll "${rollExpression}".`;
+			rollField.value = this.LL.utils.dice.diceRollError({ rollExpression });
 		}
 		this.rollResults.push(rollField);
 	}
@@ -133,8 +142,10 @@ export class DiceUtils {
 		skillChoice: string,
 		rollNote?: string,
 		modifierExpression?: string,
-		description?: string
+		description?: string,
+		LL?: TranslationFunctions
 	) {
+		LL = LL || Language.LL;
 		const skillsPlusPerception = [
 			...activeCharacter.calculatedStats.totalSkills,
 			{
@@ -150,7 +161,9 @@ export class DiceUtils {
 			actorName: intr.user.username,
 			character: activeCharacter,
 			rollNote,
-			rollDescription: `rolled ${targetSkill.Name}`,
+			rollDescription: LL.utils.dice.rolledAction({
+				actionName: targetSkill.Name,
+			}),
 		});
 		rollBuilder.addRoll(
 			DiceUtils.buildDiceExpression('d20', String(targetSkill.Bonus), modifierExpression)

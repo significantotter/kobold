@@ -68,13 +68,16 @@ export class InitPrevSubCommand implements Command {
 		LL: TranslationFunctions
 	): Promise<void> {
 		const targetCharacterName = intr.options.getString(ChatArgs.INIT_CHARACTER_OPTION.name);
-		const initResult = await InitiativeUtils.getInitiativeForChannel(intr.channel);
+		const initResult = await InitiativeUtils.getInitiativeForChannel(intr.channel, {
+			sendErrors: true,
+			LL,
+		});
 		if (initResult.errorMessage) {
 			await InteractionUtils.send(intr, initResult.errorMessage);
 			return;
 		}
 
-		const initBuilder = new InitiativeBuilder({ initiative: initResult.init });
+		const initBuilder = new InitiativeBuilder({ initiative: initResult.init, LL });
 		const previousTurn = initBuilder.getPreviousTurnChanges();
 		if (previousTurn.errorMessage) {
 			await InteractionUtils.send(intr, previousTurn.errorMessage);

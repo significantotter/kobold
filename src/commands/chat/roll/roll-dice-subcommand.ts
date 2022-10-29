@@ -39,8 +39,9 @@ export class RollDiceSubCommand implements Command {
 		const rollBuilder = new RollBuilder({
 			character: null,
 			actorName: intr.user.username,
-			rollDescription: `rolled some dice!`,
+			rollDescription: LL.commands.roll.dice.interactions.rolledDice(),
 			rollNote,
+			LL,
 		});
 		rollBuilder.addRoll(diceExpression);
 		const response = rollBuilder.compileEmbed();

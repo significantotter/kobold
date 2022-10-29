@@ -8,6 +8,7 @@ import { InitiativeUtils, InitiativeBuilder } from './initiative-utils.js';
 import { CommandInteraction } from 'discord.js';
 import { KoboldEmbed } from './kobold-embed-utils.js';
 import { InteractionUtils } from './interaction-utils.js';
+import { Language } from '../models/enum-helpers/index.js';
 
 function setupInitiativeActorsAndGroupsForTests(initiative) {
 	const actors = InitiativeActorFactory.withFakeId().buildList(
@@ -582,7 +583,11 @@ describe('initiative-utils', function () {
 				isActiveCharacter: true,
 			} as any;
 
-			const result = InitiativeUtils.getActiveCharacterActor(initiative, 'testUserId');
+			const result = InitiativeUtils.getActiveCharacterActor(
+				initiative,
+				'testUserId',
+				Language.LL
+			);
 			expect(result.actor).toBe(actors[2]);
 		});
 		test('returns an error message if the user does not have an active character', function () {
@@ -602,7 +607,11 @@ describe('initiative-utils', function () {
 				isActiveCharacter: false,
 			} as any;
 
-			const result = InitiativeUtils.getActiveCharacterActor(initiative, 'testUserId');
+			const result = InitiativeUtils.getActiveCharacterActor(
+				initiative,
+				'testUserId',
+				Language.LL
+			);
 			expect(result.errorMessage).toBeTruthy();
 		});
 	});
@@ -640,7 +649,8 @@ describe('initiative-utils', function () {
 			const result = InitiativeUtils.getNameMatchActorFromInitiative(
 				'testUserId',
 				initiative,
-				'another'
+				'another',
+				Language.LL
 			);
 			expect(result.actor).toBe(actors[1]);
 		});
@@ -653,7 +663,8 @@ describe('initiative-utils', function () {
 			const result = InitiativeUtils.getNameMatchActorFromInitiative(
 				'testUserId',
 				initiative,
-				'notFound'
+				'notFound',
+				Language.LL
 			);
 			expect(result.errorMessage).toBeTruthy();
 		});
@@ -673,7 +684,8 @@ describe('initiative-utils', function () {
 			const result = InitiativeUtils.getNameMatchGroupFromInitiative(
 				initiative,
 				'testUserId',
-				'another'
+				'another',
+				Language.LL
 			);
 			expect(result.group).toBe(secondGroup);
 		});
@@ -691,7 +703,8 @@ describe('initiative-utils', function () {
 			const result = InitiativeUtils.getNameMatchGroupFromInitiative(
 				initiative,
 				'testUserId',
-				'notFound'
+				'notFound',
+				Language.LL
 			);
 			expect(result.errorMessage).toBeTruthy();
 		});
