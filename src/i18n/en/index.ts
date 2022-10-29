@@ -680,6 +680,12 @@ const en: BaseTranslation = {
 				"Yip! I can't go to the previous turn when it's " +
 				'the very first turn of the first round!',
 		},
+		koboldEmbed: {
+			cantDetermineTurnError:
+				"Yip! Something went wrong! I can't figure out whose turn it is!",
+			turnTitle: "It's {groupName}'s turn!",
+			roundTitle: 'Initiative Round {currentRound}',
+		},
 	},
 };
 

@@ -1,4 +1,6 @@
 import { EmbedBuilder } from 'discord.js';
+import { TranslationFunctions } from '../i18n/i18n-types.js';
+import { Language } from '../models/enum-helpers/index.js';
 import { Character } from '../services/kobold/models/index.js';
 import { InitiativeBuilder } from './initiative-utils.js';
 
@@ -20,15 +22,21 @@ export class KoboldEmbed extends EmbedBuilder {
 
 	public static turnFromInitiativeBuilder(
 		initiativeBuilder: InitiativeBuilder,
-		targetMessageUrl?: string
+		targetMessageUrl?: string,
+		LL?: TranslationFunctions
 	) {
+		LL = LL || Language.LL;
 		const result = new KoboldEmbed();
 		const groupTurn = initiativeBuilder.activeGroup;
 		if (!groupTurn) {
-			result.setTitle("Yip! Something went wrong! I can't figure out whose turn it is!");
+			result.setTitle(LL.utils.koboldEmbed.cantDetermineTurnError());
 			return result;
 		}
-		result.setTitle(`It's ${groupTurn.name}'s turn!`);
+		result.setTitle(
+			LL.utils.koboldEmbed.turnTitle({
+				groupName: groupTurn.name,
+			})
+		);
 
 		result.setDescription(initiativeBuilder.getAllGroupsTurnText());
 
@@ -42,15 +50,17 @@ export class KoboldEmbed extends EmbedBuilder {
 				result.setCharacter(actor.character);
 			}
 		}
-		result.setDescription(
-			result.data.description +
-				`\n[Initiative Round ${initiativeBuilder.init.currentRound}](${targetMessageUrl})`
-		);
 		return result;
 	}
-	public static roundFromInitiativeBuilder(initiativeBuilder: InitiativeBuilder) {
+	public static roundFromInitiativeBuilder(
+		initiativeBuilder: InitiativeBuilder,
+		LL?: TranslationFunctions
+	) {
+		LL = LL || Language.LL;
 		const result = new KoboldEmbed().setTitle(
-			`Initiative Round ${initiativeBuilder.init?.currentRound || 0}`
+			LL.utils.koboldEmbed.roundTitle({
+				currentRound: initiativeBuilder.init?.currentRound || 0,
+			})
 		);
 		result.setDescription(initiativeBuilder.getAllGroupsTurnText());
 		return result;

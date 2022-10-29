@@ -200,7 +200,7 @@ export class InitJoinSubCommand implements Command {
 		if (currentInit.currentRound === 0) {
 			await InitiativeUtils.updateInitiativeRoundMessageOrSendNew(intr, initBuilder);
 		} else {
-			const embed = await KoboldEmbed.roundFromInitiativeBuilder(initBuilder);
+			const embed = await KoboldEmbed.roundFromInitiativeBuilder(initBuilder, LL);
 			await InteractionUtils.send(intr, { embeds: [embed] });
 		}
 	}

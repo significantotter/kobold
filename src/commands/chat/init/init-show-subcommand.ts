@@ -44,7 +44,7 @@ export class InitShowSubCommand implements Command {
 		}
 
 		const initBuilder = new InitiativeBuilder({ initiative: initResult.init, LL });
-		const embed = await KoboldEmbed.roundFromInitiativeBuilder(initBuilder);
+		const embed = await KoboldEmbed.roundFromInitiativeBuilder(initBuilder, LL);
 		await InteractionUtils.send(intr, { embeds: [embed] });
 	}
 }

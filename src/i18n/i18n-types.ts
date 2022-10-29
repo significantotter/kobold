@@ -1325,6 +1325,22 @@ type RootTranslation = {
 			 */
 			prevTurnNotPossibleError: string
 		}
+		koboldEmbed: {
+			/**
+			 * Y​i​p​!​ ​S​o​m​e​t​h​i​n​g​ ​w​e​n​t​ ​w​r​o​n​g​!​ ​I​ ​c​a​n​'​t​ ​f​i​g​u​r​e​ ​o​u​t​ ​w​h​o​s​e​ ​t​u​r​n​ ​i​t​ ​i​s​!
+			 */
+			cantDetermineTurnError: string
+			/**
+			 * I​t​'​s​ ​{​g​r​o​u​p​N​a​m​e​}​'​s​ ​t​u​r​n​!
+			 * @param {unknown} groupName
+			 */
+			turnTitle: RequiredParams<'groupName'>
+			/**
+			 * I​n​i​t​i​a​t​i​v​e​ ​R​o​u​n​d​ ​{​c​u​r​r​e​n​t​R​o​u​n​d​}
+			 * @param {unknown} currentRound
+			 */
+			roundTitle: RequiredParams<'currentRound'>
+		}
 	}
 }
 
@@ -2587,6 +2603,20 @@ export type TranslationFunctions = {
 			 * Yip! I can't go to the previous turn when it's the very first turn of the first round!
 			 */
 			prevTurnNotPossibleError: () => LocalizedString
+		}
+		koboldEmbed: {
+			/**
+			 * Yip! Something went wrong! I can't figure out whose turn it is!
+			 */
+			cantDetermineTurnError: () => LocalizedString
+			/**
+			 * It's {groupName}'s turn!
+			 */
+			turnTitle: (arg: { groupName: unknown }) => LocalizedString
+			/**
+			 * Initiative Round {currentRound}
+			 */
+			roundTitle: (arg: { currentRound: unknown }) => LocalizedString
 		}
 	}
 }

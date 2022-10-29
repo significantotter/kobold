@@ -147,7 +147,11 @@ export class InitRemoveSubCommand implements Command {
 
 			const currentRoundMessage = await initBuilder.getCurrentRoundMessage(intr);
 			const url = currentRoundMessage ? currentRoundMessage.url : '';
-			const currentTurnEmbed = await KoboldEmbed.turnFromInitiativeBuilder(initBuilder, url);
+			const currentTurnEmbed = await KoboldEmbed.turnFromInitiativeBuilder(
+				initBuilder,
+				url,
+				LL
+			);
 			const activeGroup = initBuilder.activeGroup;
 
 			if (updatedInitiative.currentRound === 0) {

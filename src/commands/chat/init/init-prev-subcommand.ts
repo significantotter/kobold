@@ -94,7 +94,7 @@ export class InitPrevSubCommand implements Command {
 			groups: updatedInitiative.actorGroups,
 		});
 
-		const currentTurnEmbed = await KoboldEmbed.turnFromInitiativeBuilder(initBuilder);
+		const currentTurnEmbed = await KoboldEmbed.turnFromInitiativeBuilder(initBuilder, LL);
 		const activeGroup = initBuilder.activeGroup;
 
 		await InteractionUtils.send(intr, {

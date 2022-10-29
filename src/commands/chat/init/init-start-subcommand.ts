@@ -43,7 +43,7 @@ export class InitStartSubCommand implements Command {
 		}
 
 		const initBuilder = new InitiativeBuilder({ LL });
-		const embed = await KoboldEmbed.roundFromInitiativeBuilder(initBuilder);
+		const embed = await KoboldEmbed.roundFromInitiativeBuilder(initBuilder, LL);
 
 		const message = await InteractionUtils.send(intr, embed);
 
@@ -56,7 +56,7 @@ export class InitStartSubCommand implements Command {
 					roundMessageIds: [message.id],
 				});
 			initBuilder.set({ initiative: init, actors: init.actors, groups: init.actorGroups });
-			const updatedEmbed = await KoboldEmbed.roundFromInitiativeBuilder(initBuilder);
+			const updatedEmbed = await KoboldEmbed.roundFromInitiativeBuilder(initBuilder, LL);
 			await message.edit({ embeds: [updatedEmbed] });
 		} catch (err) {
 			if (err.name === 'UniqueViolationError') {
