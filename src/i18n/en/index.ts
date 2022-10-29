@@ -213,7 +213,7 @@ const en: BaseTranslation = {
 					`Yip! Before you can {action} a character, you need to authenticate it. ` +
 					`Give me permission to read your wanderer's guide character by following [this link](` +
 					`{wgBaseUrl}?characterId={charId}). ` +
-					`Then, /character/{action} your character again!`,
+					`Then, /character {action} your character again!`,
 			},
 
 			// SUBCOMMANDS

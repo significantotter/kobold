@@ -320,7 +320,7 @@ type RootTranslation = {
 				 */
 				noActiveCharacter: string
 				/**
-				 * Y​i​p​!​ ​B​e​f​o​r​e​ ​y​o​u​ ​c​a​n​ ​{​a​c​t​i​o​n​}​ ​a​ ​c​h​a​r​a​c​t​e​r​,​ ​y​o​u​ ​n​e​e​d​ ​t​o​ ​a​u​t​h​e​n​t​i​c​a​t​e​ ​i​t​.​ ​G​i​v​e​ ​m​e​ ​p​e​r​m​i​s​s​i​o​n​ ​t​o​ ​r​e​a​d​ ​y​o​u​r​ ​w​a​n​d​e​r​e​r​'​s​ ​g​u​i​d​e​ ​c​h​a​r​a​c​t​e​r​ ​b​y​ ​f​o​l​l​o​w​i​n​g​ ​[​t​h​i​s​ ​l​i​n​k​]​(​{​w​g​B​a​s​e​U​r​l​}​?​c​h​a​r​a​c​t​e​r​I​d​=​{​c​h​a​r​I​d​}​)​.​ ​T​h​e​n​,​ ​/​c​h​a​r​a​c​t​e​r​/​{​a​c​t​i​o​n​}​ ​y​o​u​r​ ​c​h​a​r​a​c​t​e​r​ ​a​g​a​i​n​!
+				 * Y​i​p​!​ ​B​e​f​o​r​e​ ​y​o​u​ ​c​a​n​ ​{​a​c​t​i​o​n​}​ ​a​ ​c​h​a​r​a​c​t​e​r​,​ ​y​o​u​ ​n​e​e​d​ ​t​o​ ​a​u​t​h​e​n​t​i​c​a​t​e​ ​i​t​.​ ​G​i​v​e​ ​m​e​ ​p​e​r​m​i​s​s​i​o​n​ ​t​o​ ​r​e​a​d​ ​y​o​u​r​ ​w​a​n​d​e​r​e​r​'​s​ ​g​u​i​d​e​ ​c​h​a​r​a​c​t​e​r​ ​b​y​ ​f​o​l​l​o​w​i​n​g​ ​[​t​h​i​s​ ​l​i​n​k​]​(​{​w​g​B​a​s​e​U​r​l​}​?​c​h​a​r​a​c​t​e​r​I​d​=​{​c​h​a​r​I​d​}​)​.​ ​T​h​e​n​,​ ​/​c​h​a​r​a​c​t​e​r​ ​{​a​c​t​i​o​n​}​ ​y​o​u​r​ ​c​h​a​r​a​c​t​e​r​ ​a​g​a​i​n​!
 				 * @param {unknown} action
 				 * @param {unknown} charId
 				 * @param {unknown} wgBaseUrl
@@ -1650,7 +1650,7 @@ export type TranslationFunctions = {
 				 */
 				noActiveCharacter: () => LocalizedString
 				/**
-				 * Yip! Before you can {action} a character, you need to authenticate it. Give me permission to read your wanderer's guide character by following [this link]({wgBaseUrl}?characterId={charId}). Then, /character/{action} your character again!
+				 * Yip! Before you can {action} a character, you need to authenticate it. Give me permission to read your wanderer's guide character by following [this link]({wgBaseUrl}?characterId={charId}). Then, /character {action} your character again!
 				 */
 				authenticationRequest: (arg: { action: unknown, charId: unknown, wgBaseUrl: unknown }) => LocalizedString
 			}

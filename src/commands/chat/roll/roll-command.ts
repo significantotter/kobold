@@ -160,7 +160,7 @@ export class RollCommand implements Command {
 			return;
 		}
 
-		await command.autocomplete(intr, option);
+		return await command.autocomplete(intr, option);
 	}
 
 	public async execute(

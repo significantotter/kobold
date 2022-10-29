@@ -3,7 +3,6 @@
 		{
 			"name": "kobold",
 			"script": "dist/start-manager.js",
-			"node_args": ["--enable-source-maps"],
 			"restart_delay": 10000
 		}
 	]

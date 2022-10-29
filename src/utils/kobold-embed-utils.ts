@@ -37,8 +37,14 @@ export class KoboldEmbed extends EmbedBuilder {
 				groupName: groupTurn.name,
 			})
 		);
-
-		result.setDescription(initiativeBuilder.getAllGroupsTurnText());
+		result.addFields([
+			{
+				name: LL.utils.koboldEmbed.roundTitle({
+					currentRound: initiativeBuilder.init?.currentRound || 0,
+				}),
+				value: initiativeBuilder.getAllGroupsTurnText(),
+			},
+		]);
 
 		let roundText = '';
 		if (targetMessageUrl) {

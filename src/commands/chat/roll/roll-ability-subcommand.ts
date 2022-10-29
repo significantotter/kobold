@@ -49,15 +49,15 @@ export class RollAbilitySubCommand implements Command {
 				return [];
 			}
 			//find a ability on the character matching the autocomplete string
-			const matchedAbilitys = CharacterUtils.findPossibleAbilityFromString(
+			const matchedAbilities = CharacterUtils.findPossibleAbilityFromString(
 				activeCharacter,
 				match
 			).map(ability => ({
 				name: ability.Name,
 				value: ability.Name,
 			}));
-			//return the matched abilitys
-			return matchedAbilitys;
+			//return the matched abilities
+			return matchedAbilities;
 		}
 	}
 
