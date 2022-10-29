@@ -270,12 +270,12 @@ export class InitiativeUtils {
 				throw err;
 			}
 			const targetMessage = await intr.channel.messages.fetch(targetMessageId);
-			const embed = await KoboldEmbed.roundFromInitiativeBuilder(initBuilder, LL);
+			const embed = await KoboldEmbed.roundFromInitiativeBuilder(initBuilder);
 			await targetMessage.edit({ embeds: [embed] });
 			return targetMessage;
 		} catch (err) {
 			if (err.message === 'Unknown Message' || err.code === 10008) {
-				const embed = await KoboldEmbed.roundFromInitiativeBuilder(initBuilder, LL);
+				const embed = await KoboldEmbed.roundFromInitiativeBuilder(initBuilder);
 				const newMessage = await InteractionUtils.send(intr, embed);
 				const roundMessageIds = initBuilder.init.roundMessageIds;
 				roundMessageIds[initBuilder.init.currentRound || 0] = newMessage.id;
