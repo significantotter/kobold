@@ -75,7 +75,7 @@
 		"pm2": "^5.2.0",
 		"reflect-metadata": "^0.1.13",
 		"remove-markdown": "0.5.0",
-		"typesafe-i18n": "^5.15.0"
+		"typesafe-i18n": "^5.16.3"
 	},
 	"devDependencies": {
 		"@types/express": "4.17.13",

@@ -302,6 +302,9 @@ const en: BaseTranslation = {
 					'stats are used for any dice commands relating to the character.',
 				interactions: {
 					sheet: {
+						staminaText: 'Max Stamina {maxStamina}\n',
+						resolveText: 'Max Resolve {maxResolve}\n',
+
 						coreDataField: {
 							name: 'Level {level} {heritage} {ancestry} {classes}\n',
 							value:
