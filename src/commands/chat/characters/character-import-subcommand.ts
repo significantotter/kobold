@@ -76,7 +76,28 @@ export class CharacterImportSubCommand implements Command {
 		} else {
 			// We have the authentication token! Fetch the user's sheet
 			const token = tokenResults[0].accessToken;
-			const character = await CharacterHelpers.fetchWgCharacterFromToken(charId, token);
+			let character;
+
+			//TODO: merge this with the one in helpers as a util
+			try {
+				character = await CharacterHelpers.fetchWgCharacterFromToken(charId, token);
+			} catch (err) {
+				if (err.response.status === 401) {
+					//token expired!
+					await WgToken.query().delete().where({ charId });
+					await InteractionUtils.send(
+						intr,
+						LL.commands.character.interactions.expiredToken({
+							wgBaseUrl: Config.wanderersGuide.oauthBaseUrl,
+							charId: charId,
+						})
+					);
+					return;
+				} else {
+					//otherwise, something else went wrong that we want to be a real error
+					throw err;
+				}
+			}
 
 			// set current characters owned by user to inactive state
 			await Character.query()

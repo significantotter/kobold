@@ -213,6 +213,10 @@ const en: BaseTranslation = {
 					`Give me permission to read your wanderer's guide character by following [this link](` +
 					`{wgBaseUrl}?characterId={charId}). ` +
 					`Then, /character {action} your character again!`,
+				expiredToken:
+					`Yip! It's been a while since we last authenticated your character, so our ` +
+					`authentication expired. Please give me permission to read your wanderer's guide ` +
+					`character again by following [this link]({wgBaseUrl}?characterId={charId})`,
 			},
 
 			// SUBCOMMANDS

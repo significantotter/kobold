@@ -57,10 +57,29 @@ export class CharacterUpdateSubCommand implements Command {
 				})
 			);
 		}
-		const fetchedCharacter = await CharacterHelpers.fetchWgCharacterFromToken(
-			activeCharacter.charId,
-			token[0].accessToken
-		);
+		let fetchedCharacter;
+		try {
+			fetchedCharacter = await CharacterHelpers.fetchWgCharacterFromToken(
+				activeCharacter.charId,
+				token[0].accessToken
+			);
+		} catch (err) {
+			if (err.response.status === 401) {
+				//token expired!
+				await WgToken.query().delete().where({ charId: activeCharacter.charId });
+				await InteractionUtils.send(
+					intr,
+					LL.commands.character.interactions.expiredToken({
+						wgBaseUrl: Config.wanderersGuide.oauthBaseUrl,
+						charId: activeCharacter.charId,
+					})
+				);
+				return;
+			} else {
+				//otherwise, something else went wrong that we want to be a real error
+				throw err;
+			}
+		}
 
 		// store sheet in db
 		const updatedCharacter = await Character.query().updateAndFetchById(activeCharacter.id, {
