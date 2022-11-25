@@ -1,4 +1,3 @@
-import { Client } from 'discord.js';
 import type { BaseTranslation } from '../i18n-types';
 
 const links = {
@@ -302,18 +301,17 @@ const en: BaseTranslation = {
 					'stats are used for any dice commands relating to the character.',
 				interactions: {
 					sheet: {
-						staminaText: 'Max Stamina {maxStamina}\n',
-						resolveText: 'Max Resolve {maxResolve}\n',
-
 						coreDataField: {
 							name: 'Level {level} {heritage} {ancestry} {classes}\n',
-							value:
-								'Max HP `{health}`\n' +
-								'AC `{armorClass}`\n' +
-								'Perception `{perceptionModifier}` (DC {perceptionDC})\n' +
-								'{classes} DC `{classDC}`\n' +
-								'Speed `{speed}`\n\n' +
-								'Background: {background}',
+							maxHpField: 'Max HP `{health}`',
+							resolveField: 'Max Resolve `{resolve}`',
+							staminaField: 'Max Stamina `{stamina}`',
+							acField: 'AC `{armorClass}`',
+							perceptionField:
+								'Perception `{perceptionModifier}` (DC {perceptionDC})',
+							classDcField: '{classes} DC `{classDC}`',
+							speedField: 'Speed `{speed}`\n',
+							backgroundField: 'Background: {background}',
 						},
 						abilitiesField: {
 							name: 'Abilities',

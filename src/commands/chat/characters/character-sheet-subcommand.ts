@@ -72,6 +72,54 @@ export class CharacterSheetSubCommand implements Command {
 		if (totalClassDCText === 'null') totalClassDCText = 'none';
 		let totalSpeedText = String(calculatedStats.totalSpeed);
 		if (totalSpeedText === 'null') totalSpeedText = 'none';
+		let maxResolveText = String(calculatedStats.maxResolve);
+		let maxStaminaText = String(calculatedStats.maxStamina);
+
+		//TODO: Turn this into a builder function
+		const charInfoValues = [];
+		const maxHpField = LL.commands.character.sheet.interactions.sheet.coreDataField.maxHpField({
+			health: maxHpText,
+		});
+		charInfoValues.push(maxHpField);
+		if (maxStaminaText !== 'null') {
+			const maxResolveField =
+				LL.commands.character.sheet.interactions.sheet.coreDataField.staminaField({
+					stamina: maxStaminaText,
+				});
+			charInfoValues.push(maxResolveField);
+		}
+		if (maxResolveText !== 'null') {
+			const maxResolveField =
+				LL.commands.character.sheet.interactions.sheet.coreDataField.resolveField({
+					resolve: maxResolveText,
+				});
+			charInfoValues.push(maxResolveField);
+		}
+		const acField = LL.commands.character.sheet.interactions.sheet.coreDataField.acField({
+			armorClass: totalACText,
+		});
+		charInfoValues.push(acField);
+		const perceptionField =
+			LL.commands.character.sheet.interactions.sheet.coreDataField.perceptionField({
+				perceptionModifier: totalPerceptionText,
+				perceptionDC: 10 + (Number(totalPerceptionText) || 0),
+			});
+		charInfoValues.push(perceptionField);
+		const classDcField =
+			LL.commands.character.sheet.interactions.sheet.coreDataField.classDcField({
+				classes,
+				classDC: totalClassDCText,
+			});
+		charInfoValues.push(classDcField);
+		const speedField = LL.commands.character.sheet.interactions.sheet.coreDataField.speedField({
+			speed: totalSpeedText,
+		});
+		charInfoValues.push(speedField);
+		const backgroundField =
+			LL.commands.character.sheet.interactions.sheet.coreDataField.backgroundField({
+				background: characterData.backgroundName || 'none',
+			});
+		charInfoValues.push(backgroundField);
 
 		EmbedBuilder.addFields([
 			{
@@ -81,16 +129,7 @@ export class CharacterSheetSubCommand implements Command {
 					ancestry,
 					classes,
 				}),
-				value: LL.commands.character.sheet.interactions.sheet.coreDataField.value({
-					health: maxHpText,
-					armorClass: totalACText,
-					perceptionModifier: totalPerceptionText,
-					perceptionDC: 10 + (Number(totalPerceptionText) || 0),
-					classes,
-					classDC: totalClassDCText,
-					speed: totalSpeedText,
-					background: characterData.backgroundName || 'none',
-				}),
+				value: charInfoValues.join('\n'),
 			},
 		]);
 		const abilitiesText = calculatedStats.totalAbilityScores

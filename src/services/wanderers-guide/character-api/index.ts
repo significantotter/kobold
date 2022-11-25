@@ -13,6 +13,7 @@ export class CharacterApi {
 
 	static parseApiResponse(response: any) {
 		const propertiesToJSONParse = [
+			'conditions',
 			'totalSkills',
 			'totalStats',
 			'totalSaves',

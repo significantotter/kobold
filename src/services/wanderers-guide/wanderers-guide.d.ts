@@ -148,9 +148,22 @@ export namespace WG {
 		[key: string]: any;
 	}
 
+	interface CalculatedCondition {
+		conditionID: number | null;
+		name: string | null;
+		entryID: number | null;
+		parentEntryID: number | null;
+		sourceText: any;
+		value: number | null;
+		[key: string]: any;
+	}
+
 	interface CharacterCalculatedStatsApiResponse {
 		charID: number;
 		maxHP: number | null;
+		maxStamina: number | null;
+		maxResolve: number | null;
+		conditions: CalculatedCondition[] | null;
 		totalClassDC: number | null;
 		totalSpeed: number | null;
 		totalAC: number | null;
@@ -233,7 +246,7 @@ export namespace WG {
 	interface ConditionEntry {
 		EntryID: number;
 		Value: number | null;
-		SourceText: string;
+		SourceText: string | null;
 		ParentID: number;
 	}
 

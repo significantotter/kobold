@@ -19,6 +19,9 @@ export class CharacterHelpers {
 			calculatedStats = {
 				charID: characterData.id,
 				maxHP: null,
+				maxResolve: null,
+				maxStamina: null,
+				conditions: [],
 				totalClassDC: null,
 				totalSpeed: null,
 				totalAC: null,

@@ -19,6 +19,9 @@ export const CalculatedStatsFactory = CalculatedStatsFactoryClass.define(() => {
 	const calculatedStatsData: DeepPartial<WG.CharacterCalculatedStatsApiResponse> = {
 		charID: faker.datatype.number({ max: 30 }),
 		maxHP: faker.datatype.number({ max: 30 }), //add 5% chance of null
+		maxStamina: faker.datatype.number({ max: 30 }),
+		maxResolve: faker.datatype.number({ max: 30 }),
+		conditions: [],
 		totalClassDC: faker.datatype.number({ max: 30 }), //add 5% chance of null
 		totalSpeed: faker.datatype.number({ max: 30 }), //add 5% chance of null
 		totalAC: faker.datatype.number({ max: 30 }), //add 5% chance of null
