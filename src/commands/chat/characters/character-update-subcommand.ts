@@ -65,7 +65,7 @@ export class CharacterUpdateSubCommand implements Command {
 				token[0].accessToken
 			);
 		} catch (err) {
-			if (err.response.status === 401) {
+			if (err?.response?.status === 401) {
 				//token expired!
 				await WgToken.query().delete().where({ charId: activeCharacter.charId });
 				await InteractionUtils.send(
