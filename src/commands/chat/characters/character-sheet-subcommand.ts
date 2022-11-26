@@ -81,14 +81,14 @@ export class CharacterSheetSubCommand implements Command {
 			health: maxHpText,
 		});
 		charInfoValues.push(maxHpField);
-		if (maxStaminaText !== 'null') {
+		if (maxStaminaText !== 'null' && characterData.variantStamina) {
 			const maxResolveField =
 				LL.commands.character.sheet.interactions.sheet.coreDataField.staminaField({
 					stamina: maxStaminaText,
 				});
 			charInfoValues.push(maxResolveField);
 		}
-		if (maxResolveText !== 'null') {
+		if (maxResolveText !== 'null' && characterData.variantStamina) {
 			const maxResolveField =
 				LL.commands.character.sheet.interactions.sheet.coreDataField.resolveField({
 					resolve: maxResolveText,
