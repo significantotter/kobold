@@ -56,6 +56,7 @@ export class CharacterUpdateSubCommand implements Command {
 					action: 'update',
 				})
 			);
+			return;
 		}
 		let fetchedCharacter;
 		try {

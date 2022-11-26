@@ -12,11 +12,7 @@ export class Language {
 
 	public static LL = L.en;
 	public static localize(locale: Locale | null): typeof L.en {
-		if (!locale || !L[locale]) {
-			return L.en;
-		} else {
-			return L[locale];
-		}
+		return L.en; //check against other possible localizations if more are added
 	}
 
 	public static Data: {
