@@ -134,8 +134,7 @@ export class CharacterSheetSubCommand implements Command {
 		]);
 		const abilitiesText = calculatedStats.totalAbilityScores
 			.map(ability => {
-				const symbol = ability.Score >= 0 ? '+' : '';
-				return `${ability.Name.substring(0, 3)} \`${symbol}${ability.Score}\``;
+				return `${ability.Name.substring(0, 3)} \`${ability.Score}\``;
 			})
 			.join(', ');
 		const abilitiesEmbed = {
