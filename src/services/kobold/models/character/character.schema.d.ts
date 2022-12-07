@@ -22,6 +22,38 @@ export interface Character {
 	 */
 	userId?: string;
 	/**
+	 * An array of attribute objects that can be used to apply character values to dice expressions. These attributes are set internally and uneditable.
+	 */
+	attributes?: {
+		name?: string;
+		type?: string;
+		value?: number;
+		tags?: string[];
+		[k: string]: any;
+	}[];
+	/**
+	 * An array of attribute objects that can be used to apply character values to dice expressions. These attributes are set by the user.
+	 */
+	custom_attributes?: {
+		name?: string;
+		type?: string;
+		value?: number;
+		tags?: string[];
+		[k: string]: any;
+	}[];
+	/**
+	 * An array of toggleable modifier objects that apply dice expression values to rolls with certain tags.
+	 */
+	modifiers?: any[];
+	/**
+	 * An array of default actions set up for the user. These allow the user to make certain roll operations as a single command.
+	 */
+	actions?: any[];
+	/**
+	 * An array of customizable actions set up for the user. These allow the user to make certain roll operations as a single command.
+	 */
+	custom_actions?: any[];
+	/**
 	 * The general character data from the Wanderer's guide API /character endpoint
 	 */
 	characterData?: {
