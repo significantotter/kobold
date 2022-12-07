@@ -12,6 +12,8 @@ interface DiceRollResult extends APIEmbedField {
 	results: DiceResult | null;
 }
 
+const attributeRegex = /(\[[\w \-_\.]{2,}\])/g;
+
 export class RollBuilder {
 	private character: Character | null;
 	private rollDescription: string;
@@ -45,6 +47,50 @@ export class RollBuilder {
 		this.title = title || _.capitalize(`${actorText} ${this.rollDescription}`.trim());
 	}
 
+	public attributeShorthands = {
+		str: 'strength',
+		dex: 'dexterity',
+		con: 'constitution',
+		int: 'intelligence',
+		wis: 'wisdom',
+		cha: 'charisma',
+		fort: 'fortitude',
+		ref: 'reflex',
+		health: 'hp',
+		tempHealth: 'tempHp',
+		perc: 'perception',
+	};
+
+	public parseAttribute(token: string): string {
+		const attributes = this.character?.attributes || [];
+		const customAttributes = this.character?.customAttributes || [];
+
+		const trimmedToken = token.replace('[', '').replace(']', '');
+		const attributeName = this.attributeShorthands[trimmedToken] || trimmedToken;
+
+		const attribute = attributes.find(
+			attributeObject => attributeObject.name.toLowerCase() === attributeName.toLowerCase()
+		);
+		const customAttribute = customAttributes.find(
+			attributeObject => attributeObject.name.toLowerCase() === attributeName.toLowerCase()
+		);
+
+		return `(${customAttribute?.value || attribute?.value || token})`;
+	}
+
+	public parseAttributes(rollExpression: string): string {
+		const splitExpression = rollExpression.split(attributeRegex);
+		let finalExpression = '';
+		for (const token of splitExpression) {
+			if (attributeRegex.test(token)) {
+				finalExpression += this.parseAttribute(token);
+			} else {
+				finalExpression += token;
+			}
+		}
+		return finalExpression;
+	}
+
 	/**
 	 * Rolls an expression for the embed
 	 * @param rollExpression The roll expression to roll
@@ -58,13 +104,14 @@ export class RollBuilder {
 			results: null,
 		};
 		try {
+			const parsedExpression = this.parseAttributes(rollExpression);
 			const roll = new Dice(null, null, {
 				maxRollTimes: 20, // limit to 20 rolls
 				maxDiceSides: 100, // limit to 100 dice faces
-			}).roll(rollExpression);
+			}).roll(parsedExpression);
 			if (roll.errors?.length) {
 				rollField.value = this.LL.utils.dice.diceRollOtherErrors({
-					rollErrors: roll.errors.join('\n'),
+					rollErrors: roll.errors.map(err => err.message).join('\n'),
 				});
 			} else {
 				rollField.value = this.LL.utils.dice.rollResult({

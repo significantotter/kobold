@@ -13,6 +13,7 @@ import { Command, CommandDeferType } from '../../index.js';
 import { RollBuilder } from '../../../utils/dice-utils.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Language } from '../../../models/enum-helpers/index.js';
+import { CharacterUtils } from '../../../utils/character-utils.js';
 
 export class RollDiceSubCommand implements Command {
 	public names = [Language.LL.commands.roll.dice.name()];
@@ -36,8 +37,10 @@ export class RollDiceSubCommand implements Command {
 		const diceExpression = intr.options.getString(ChatArgs.ROLL_EXPRESSION_OPTION.name);
 		const rollNote = intr.options.getString(ChatArgs.ROLL_NOTE_OPTION.name);
 
+		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id);
+
 		const rollBuilder = new RollBuilder({
-			character: null,
+			character: activeCharacter || null,
 			actorName: intr.user.username,
 			rollDescription: LL.commands.roll.dice.interactions.rolledDice(),
 			rollNote,

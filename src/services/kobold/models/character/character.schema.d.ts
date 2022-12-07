@@ -34,7 +34,7 @@ export interface Character {
 	/**
 	 * An array of attribute objects that can be used to apply character values to dice expressions. These attributes are set by the user.
 	 */
-	custom_attributes?: {
+	customAttributes?: {
 		name?: string;
 		type?: string;
 		value?: number;
@@ -52,7 +52,7 @@ export interface Character {
 	/**
 	 * An array of customizable actions set up for the user. These allow the user to make certain roll operations as a single command.
 	 */
-	custom_actions?: any[];
+	customActions?: any[];
 	/**
 	 * The general character data from the Wanderer's guide API /character endpoint
 	 */

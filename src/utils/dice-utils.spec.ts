@@ -132,4 +132,122 @@ describe('RollBuilder', function () {
 		const errorRollField = result.data.fields.find(field => field.name === 'errorRoll');
 		expect(errorRollField.value).toContain("Yip! We didn't understand the dice roll");
 	});
+	test('parses an attribute', function () {
+		const character = CharacterFactory.build({
+			attributes: [
+				{
+					name: 'test',
+					type: 'base',
+					value: 7,
+					tags: [],
+				},
+			],
+			customAttributes: [],
+		});
+		const rollBuilder = new RollBuilder({ character });
+		expect(rollBuilder.parseAttribute('[test]')).toBe('(7)');
+	});
+	test('parses a custom attribute', function () {
+		const character = CharacterFactory.build({
+			customAttributes: [
+				{
+					name: 'custom',
+					type: 'base',
+					value: 3,
+					tags: [],
+				},
+			],
+			attributes: [],
+		});
+		const rollBuilder = new RollBuilder({ character });
+		expect(rollBuilder.parseAttribute('[custom]')).toBe('(3)');
+	});
+	test('parses custom over base when multiple attributes are present', function () {
+		const character = CharacterFactory.build({
+			attributes: [
+				{
+					name: 'same',
+					type: 'base',
+					value: 8,
+					tags: [],
+				},
+			],
+			customAttributes: [
+				{
+					name: 'same',
+					type: 'base',
+					value: 4,
+					tags: [],
+				},
+			],
+		});
+		const rollBuilder = new RollBuilder({ character });
+		expect(rollBuilder.parseAttribute('[same]')).toBe('(4)');
+	});
+	test('fails to parse an invalid attribute', function () {
+		const rollBuilder = new RollBuilder({});
+		expect(rollBuilder.parseAttribute('[same]')).toBe('([same])');
+	});
+	test('parses an attribute using a shorthand value', function () {
+		const character = CharacterFactory.build({
+			attributes: [
+				{
+					name: 'strength',
+					type: 'base',
+					value: 11,
+					tags: [],
+				},
+			],
+			customAttributes: [],
+		});
+		const rollBuilder = new RollBuilder({ character });
+		expect(rollBuilder.parseAttribute('[str]')).toBe('(11)');
+	});
+	test('parses all attributes in a dice expression', function () {
+		const character = CharacterFactory.build({
+			attributes: [
+				{
+					name: 'base',
+					type: 'base',
+					value: 8,
+					tags: [],
+				},
+			],
+			customAttributes: [
+				{
+					name: 'custom',
+					type: 'base',
+					value: 4,
+					tags: [],
+				},
+			],
+		});
+		const rollBuilder = new RollBuilder({ character });
+		expect(rollBuilder.parseAttributes('[custom]d20 + [base] - [custom]')).toBe(
+			'(4)d20 + (8) - (4)'
+		);
+	});
+	test('rolls dice using parsed character attributes', function () {
+		const character = CharacterFactory.build({
+			attributes: [
+				{
+					name: 'base',
+					type: 'base',
+					value: 8,
+					tags: [],
+				},
+			],
+			customAttributes: [
+				{
+					name: 'custom',
+					type: 'base',
+					value: 4,
+					tags: [],
+				},
+			],
+		});
+		const rollBuilder = new RollBuilder({ character });
+		rollBuilder.addRoll('[custom]d20 + [base] - [custom]', 'attribute roll');
+		expect(rollBuilder.rollResults[0]?.value).toBeTruthy();
+	});
 });
