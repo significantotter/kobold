@@ -33,6 +33,8 @@ import {
 	InitEndSubCommand,
 	// help
 	HelpCommand,
+	// admin
+	AdminCommand,
 } from './commands/chat/index.js';
 import { Command } from './commands/index.js';
 import {
@@ -72,6 +74,8 @@ async function start(): Promise<void> {
 	let commands: Command[] = [
 		// Help
 		new HelpCommand(),
+		// Admin
+		new AdminCommand(),
 		// Character Commands
 		new CharacterCommand([
 			new CharacterSheetSubCommand(),
@@ -153,8 +157,7 @@ async function start(): Promise<void> {
 		try {
 			let rest = new REST({ version: '10' }).setToken(Config.client.token);
 			let commandRegistrationService = new CommandRegistrationService(rest);
-			let localCmds = commands.map(cmd => cmd.metadata);
-			await commandRegistrationService.process(localCmds, process.argv);
+			await commandRegistrationService.process(commands, process.argv);
 		} catch (error) {
 			Logger.error(Logs.error.commandAction, error);
 		}

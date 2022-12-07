@@ -42,6 +42,10 @@ const en: BaseTranslation = {
 		perception: 'Perception',
 	},
 	commands: {
+		admin: {
+			name: 'admin',
+			description: 'administration tools',
+		},
 		help: {
 			name: 'help',
 			description: 'Get help with commands, permissions, FAQ, etc.',
