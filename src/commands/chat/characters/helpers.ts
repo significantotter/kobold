@@ -151,11 +151,11 @@ export class CharacterHelpers {
 		const calculatedStats = character.calculated_stats;
 		const attributes = [
 			{ name: 'level', type: 'base', value: characterData.level, tags: ['level'] },
-			{ name: 'maxHp', type: 'base', value: calculatedStats.maxHp, tags: ['maxHp'] },
+			{ name: 'maxHp', type: 'base', value: calculatedStats.maxHP, tags: ['maxHp'] },
 			{
 				name: 'hp',
 				type: 'base',
-				value: characterData.currentHealth ?? calculatedStats.maxHp,
+				value: characterData.currentHealth ?? calculatedStats.maxHP,
 				tags: ['hp'],
 			},
 			{
@@ -164,7 +164,7 @@ export class CharacterHelpers {
 				value: characterData.tempHealth ?? 0,
 				tags: ['tempHp'],
 			},
-			{ name: 'ac', type: 'base', value: calculatedStats.totalAc, tags: ['ac'] },
+			{ name: 'ac', type: 'base', value: calculatedStats.totalAC, tags: ['ac'] },
 			{
 				name: 'heroPoints',
 				type: 'base',

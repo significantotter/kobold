@@ -1,3 +1,4 @@
+import { Logger } from './../services/logger';
 import { Character } from './../services/kobold/models/character/character.model';
 import { CommandInteraction, APIEmbedField, EmbedBuilder, User } from 'discord.js';
 import { Dice, DiceResult } from 'dice-typescript';
@@ -52,7 +53,13 @@ export class RollBuilder {
 		const attributes = this.character?.attributes || [];
 		const customAttributes = this.character?.customAttributes || [];
 
-		const trimmedToken = token.replace('[', '').replace(']', '');
+		const trimmedToken = token
+			.replace('[', '')
+			.replace(']', '')
+			.trim()
+			.replaceAll(' ', '')
+			.replaceAll('-', '')
+			.replaceAll('_', '');
 		const attributeName = attributeShorthands[trimmedToken] || trimmedToken;
 
 		const attribute = attributes.find(
