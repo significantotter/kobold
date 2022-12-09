@@ -180,6 +180,14 @@ export class CommandRegistrationService {
 					)
 				);
 				await this.rest.put(Routes.applicationCommands(Config.client.id), { body: [] });
+				for (const command of commands) {
+					for (const guildId of command?.restrictedGuilds || []) {
+						await this.rest.put(
+							Routes.applicationGuildCommands(Config.client.id, guildId),
+							{ body: [] }
+						);
+					}
+				}
 				Logger.info(Logs.info.commandActionCleared);
 				return;
 			}

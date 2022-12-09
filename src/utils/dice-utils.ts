@@ -7,6 +7,7 @@ import { CharacterUtils } from './character-utils.js';
 import { KoboldEmbed } from './kobold-embed-utils.js';
 import { TranslationFunctions } from '../i18n/i18n-types.js';
 import { Language } from '../models/enum-helpers/index.js';
+import { attributeShorthands, staticAttributes } from '../constants/attributes.js';
 
 interface DiceRollResult extends APIEmbedField {
 	results: DiceResult | null;
@@ -47,26 +48,12 @@ export class RollBuilder {
 		this.title = title || _.capitalize(`${actorText} ${this.rollDescription}`.trim());
 	}
 
-	public attributeShorthands = {
-		str: 'strength',
-		dex: 'dexterity',
-		con: 'constitution',
-		int: 'intelligence',
-		wis: 'wisdom',
-		cha: 'charisma',
-		fort: 'fortitude',
-		ref: 'reflex',
-		health: 'hp',
-		tempHealth: 'tempHp',
-		perc: 'perception',
-	};
-
 	public parseAttribute(token: string): string {
 		const attributes = this.character?.attributes || [];
 		const customAttributes = this.character?.customAttributes || [];
 
 		const trimmedToken = token.replace('[', '').replace(']', '');
-		const attributeName = this.attributeShorthands[trimmedToken] || trimmedToken;
+		const attributeName = attributeShorthands[trimmedToken] || trimmedToken;
 
 		const attribute = attributes.find(
 			attributeObject => attributeObject.name.toLowerCase() === attributeName.toLowerCase()
@@ -74,8 +61,11 @@ export class RollBuilder {
 		const customAttribute = customAttributes.find(
 			attributeObject => attributeObject.name.toLowerCase() === attributeName.toLowerCase()
 		);
+		const staticAttribute = staticAttributes.find(
+			attributeObject => attributeObject.name.toLowerCase() === attributeName.toLowerCase()
+		);
 
-		return `(${customAttribute?.value || attribute?.value || token})`;
+		return `(${customAttribute?.value || attribute?.value || staticAttribute?.value || token})`;
 	}
 
 	public parseAttributes(rollExpression: string): string {

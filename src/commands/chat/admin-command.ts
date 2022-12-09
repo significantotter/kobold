@@ -1,3 +1,4 @@
+import { KoboldEmbed } from './../../utils/kobold-embed-utils';
 import djs, {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -40,7 +41,10 @@ export class AdminCommand implements Command {
 		LL: TranslationFunctions
 	): Promise<void> {
 		if (!intr.isChatInputCommand()) return;
-		if (!Config.developers.includes(intr.user.id)) {
+		if (
+			!Config.developers.includes(intr.user.id) ||
+			!this.restrictedGuilds.includes(intr.guildId)
+		) {
 			await InteractionUtils.send(intr, 'Yip! This is a kobold admin command. Sorry!');
 			return;
 		}
@@ -95,8 +99,29 @@ export class AdminCommand implements Command {
 			SERVER_ID: intr.guild?.id ?? Lang.getRef('other.na', data.lang()),
 			BOT_ID: intr.client.user?.id,
 			USER_ID: intr.user.id,
-			ALL_GUILDS: intr.client.guilds.cache.map(guild => guild.name).join('\n'),
 		});
 		await InteractionUtils.send(intr, embed);
+
+		const allGuilds = intr.client.guilds.cache.map(guild => guild.name);
+		let guildEmbedValue = '';
+		let guildsPage = 1;
+		for (let i = 0; i < allGuilds.length; i++) {
+			if (guildEmbedValue.length > 1800) {
+				const embed = new KoboldEmbed();
+				embed.setTitle(`All Guilds, page ${guildsPage}`);
+				embed.setDescription(guildEmbedValue);
+				await InteractionUtils.send(intr, embed);
+				guildsPage += 1;
+				guildEmbedValue = '';
+			}
+			guildEmbedValue += allGuilds[i] + '\n';
+		}
+		if (guildEmbedValue !== '') {
+			const embed = new KoboldEmbed();
+			embed.setTitle(`All Guilds, page ${guildsPage}`);
+			embed.setDescription(guildEmbedValue);
+			await InteractionUtils.send(intr, embed);
+		}
+		return;
 	}
 }
