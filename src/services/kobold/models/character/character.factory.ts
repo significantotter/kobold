@@ -28,10 +28,50 @@ class CharacterFactoryClass extends Factory<Character, CharacterTransientParams,
 export const CharacterFactory = CharacterFactoryClass.define(({ onCreate, transientParams }) => {
 	onCreate(async builtCharacter => Character.query().insert(builtCharacter));
 
+	function createRandomAttributes(times: number): Character['attributes'] {
+		const attributes = [];
+		for (let i = 0; i < times; i++) {
+			attributes.push({
+				name: faker.random.word(),
+				type: faker.helpers.arrayElement(['base', 'ability', 'save', 'skill']),
+				value: faker.datatype.number({ max: 30 }),
+				tags: [
+					faker.helpers.arrayElement(['ability', 'save', 'skill']),
+					faker.helpers.arrayElement([
+						'strength',
+						'dexterity',
+						'constitution',
+						'intelligence',
+						'wisdom',
+						'charisma',
+					]),
+					faker.helpers.arrayElement([
+						'fortitude',
+						'reflex',
+						'will',
+						'athletics',
+						'arcana',
+						'nature',
+						'perform',
+						'nature',
+						'lore',
+						'medicine',
+					]),
+				],
+			});
+		}
+		return attributes;
+	}
+
 	const characterDataOptions = transientParams.characterDataOptions;
 	const characterData: DeepPartial<Character> = {
 		charId: faker.datatype.number(),
 		userId: faker.datatype.uuid(),
+		attributes: createRandomAttributes(faker.datatype.number({ max: 50 })),
+		customAttributes: createRandomAttributes(faker.datatype.number({ max: 50 })),
+		modifiers: [],
+		actions: [],
+		customActions: [],
 		calculatedStats: CalculatedStatsFactory.build(),
 		characterData: CharacterDataFactory.build(characterDataOptions),
 		isActiveCharacter: faker.datatype.boolean(),

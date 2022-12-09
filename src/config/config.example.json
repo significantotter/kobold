@@ -1,5 +1,6 @@
 {
 	"developers": ["<YOUR_DISCORD_ID>"],
+	"adminGuilds": ["<PRIVATE_ADMIN_GUILD_ID>"],
 	"client": {
 		"id": "<DISCORD_BOT_ID>",
 		"token": "<DISCORD_BOT_TOKEN>",

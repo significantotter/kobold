@@ -17,6 +17,7 @@ export interface Command {
 	cooldown?: RateLimiter;
 	deferType: CommandDeferType;
 	requireClientPerms: PermissionsString[];
+	restrictedGuilds?: string[];
 	autocomplete?(
 		intr: AutocompleteInteraction,
 		option: AutocompleteFocusedOption

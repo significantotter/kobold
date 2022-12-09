@@ -86,7 +86,7 @@ describe('KoboldEmbedUtils', () => {
 			test('sets the description to the active group turn text', function () {
 				const initiativeBuilder = getFakeInitiativeBuilder();
 				const embed = KoboldEmbed.turnFromInitiativeBuilder(initiativeBuilder as any);
-				expect(embed.data.description).toContain('Test Group');
+				expect(embed.data.fields[0].value).toContain('Test Group');
 			});
 			test('sets the character if there is only one actor in the group', function () {
 				const initiativeBuilder = getFakeInitiativeBuilder();
@@ -123,14 +123,6 @@ describe('KoboldEmbedUtils', () => {
 				};
 				const embed = KoboldEmbed.turnFromInitiativeBuilder(initiativeBuilder as any);
 				expect(embed.data.thumbnail).toBeFalsy();
-			});
-			test('adds a link to the message url if there is one', function () {
-				const initiativeBuilder = getFakeInitiativeBuilder();
-				const embed = KoboldEmbed.turnFromInitiativeBuilder(
-					initiativeBuilder as any,
-					'https://example.com/message'
-				);
-				expect(embed.data.description).toContain('https://example.com/message');
 			});
 		});
 

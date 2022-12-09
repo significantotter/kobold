@@ -31,3 +31,6 @@ export { InitRemoveSubCommand } from './init/init-remove-subcommand.js';
 
 // help command
 export { HelpCommand } from './help-command';
+
+// admin command
+export { AdminCommand } from './admin-command';

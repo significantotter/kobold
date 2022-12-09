@@ -85,11 +85,13 @@ export class RollAbilitySubCommand implements Command {
 			activeCharacter.calculatedStats.totalAbilityScores as WG.NamedScore[]
 		);
 
+		const scoreModifier = Math.floor((targetAbility.Score - 10) / 2);
+
 		// allow the modifier to only optionally start with +/- by wrapping it with +()
 		// because +(+1) is valid, but ++1 is not
 		let wrappedModifierExpression = '';
 		if (modifierExpression) wrappedModifierExpression = `+(${modifierExpression})`;
-		const diceExpression = `1d20+${targetAbility.Score || 0}${wrappedModifierExpression}`;
+		const diceExpression = `1d20+${scoreModifier}${wrappedModifierExpression}`;
 
 		const rollBuilder = new RollBuilder({
 			character: activeCharacter,
@@ -100,7 +102,7 @@ export class RollAbilitySubCommand implements Command {
 			LL,
 		});
 		rollBuilder.addRoll(
-			DiceUtils.buildDiceExpression('d20', String(targetAbility.Score), modifierExpression)
+			DiceUtils.buildDiceExpression('d20', String(scoreModifier), modifierExpression)
 		);
 		const response = rollBuilder.compileEmbed();
 

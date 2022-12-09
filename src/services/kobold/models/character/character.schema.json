@@ -16,6 +16,66 @@
 			"type": "string",
 			"description": "The discord id of the user who imported the character"
 		},
+		"attributes": {
+			"type": "array",
+			"description": "An array of attribute objects that can be used to apply character values to dice expressions. These attributes are set internally and uneditable.",
+			"items": {
+				"type": "object",
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"type": {
+						"type": "string"
+					},
+					"value": {
+						"type": "number"
+					},
+					"tags": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						}
+					}
+				}
+			}
+		},
+		"customAttributes": {
+			"type": "array",
+			"description": "An array of attribute objects that can be used to apply character values to dice expressions. These attributes are set by the user.",
+			"items": {
+				"type": "object",
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"type": {
+						"type": "string"
+					},
+					"value": {
+						"type": "number"
+					},
+					"tags": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						}
+					}
+				}
+			}
+		},
+		"modifiers": {
+			"type": "array",
+			"description": "An array of toggleable modifier objects that apply dice expression values to rolls with certain tags."
+		},
+		"actions": {
+			"type": "array",
+			"description": "An array of default actions set up for the user. These allow the user to make certain roll operations as a single command."
+		},
+		"customActions": {
+			"type": "array",
+			"description": "An array of customizable actions set up for the user. These allow the user to make certain roll operations as a single command."
+		},
 		"characterData": {
 			"type": "object",
 			"description": "The general character data from the Wanderer's guide API /character endpoint",

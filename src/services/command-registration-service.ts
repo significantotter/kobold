@@ -1,3 +1,4 @@
+import { Command } from './../commands/command';
 import { REST } from '@discordjs/rest';
 import {
 	APIApplicationCommand,
@@ -14,22 +15,31 @@ import Logs from './../config/lang/logs.json';
 export class CommandRegistrationService {
 	constructor(private rest: REST) {}
 
-	public async process(
-		localCmds: RESTPostAPIApplicationCommandsJSONBody[],
-		args: string[]
-	): Promise<void> {
+	public async process(commands: Command[], args: string[]): Promise<void> {
+		let localCmds = commands.map(command => command.metadata);
 		let remoteCmds = (await this.rest.get(
 			Routes.applicationCommands(Config.client.id)
 		)) as RESTGetAPIApplicationCommandsResult;
 
-		let localCmdsOnRemote = localCmds.filter(localCmd =>
-			remoteCmds.some(remoteCmd => remoteCmd.name === localCmd.name)
+		let localCmdsOnRemote = commands.filter(localCmd =>
+			remoteCmds.some(remoteCmd => remoteCmd.name === localCmd.metadata.name)
 		);
-		let localCmdsOnly = localCmds.filter(
-			localCmd => !remoteCmds.some(remoteCmd => remoteCmd.name === localCmd.name)
+		const localCmdsOnRemoteMetadata = localCmdsOnRemote.map(cmd => cmd.metadata);
+		let localCmdsOnly = commands.filter(
+			localCmd => !remoteCmds.some(remoteCmd => remoteCmd.name === localCmd.metadata.name)
 		);
+		const localCmdsOnlyMetadata = localCmdsOnly.map(cmd => cmd.metadata);
 		let remoteCmdsOnly = remoteCmds.filter(
-			remoteCmd => !localCmds.some(localCmd => localCmd.name === remoteCmd.name)
+			remoteCmd => !commands.some(localCmd => localCmd.metadata.name === remoteCmd.name)
+		);
+
+		let guildCommands = remoteCmds.filter(cmd => cmd.guild_id);
+		let guildCommandsToRemove = guildCommands.filter(existingCommand =>
+			commands.find(
+				command =>
+					command.metadata.name === existingCommand.name &&
+					!command.restrictedGuilds.includes(existingCommand.guild_id)
+			)
 		);
 
 		switch (args[3]) {
@@ -38,9 +48,12 @@ export class CommandRegistrationService {
 					Logs.info.commandActionView
 						.replaceAll(
 							'{LOCAL_AND_REMOTE_LIST}',
-							this.formatCommandList(localCmdsOnRemote)
+							this.formatCommandList(localCmdsOnRemoteMetadata)
 						)
-						.replaceAll('{LOCAL_ONLY_LIST}', this.formatCommandList(localCmdsOnly))
+						.replaceAll(
+							'{LOCAL_ONLY_LIST}',
+							this.formatCommandList(localCmdsOnlyMetadata)
+						)
 						.replaceAll('{REMOTE_ONLY_LIST}', this.formatCommandList(remoteCmdsOnly))
 				);
 				return;
@@ -50,25 +63,35 @@ export class CommandRegistrationService {
 					Logger.info(
 						Logs.info.commandActionCreating.replaceAll(
 							'{COMMAND_LIST}',
-							this.formatCommandList(localCmdsOnly)
+							this.formatCommandList(localCmdsOnlyMetadata)
 						)
 					);
+					//insert new guilds
 					for (let localCmd of localCmdsOnly) {
-						await this.rest.post(Routes.applicationCommands(Config.client.id), {
-							body: localCmd,
-						});
+						if (localCmd.restrictedGuilds?.length) {
+							for (const guildId of localCmd.restrictedGuilds) {
+								await this.rest.post(
+									Routes.applicationGuildCommands(Config.client.id, guildId),
+									{ body: localCmd.metadata }
+								);
+							}
+						} else {
+							await this.rest.post(Routes.applicationCommands(Config.client.id), {
+								body: localCmd.metadata,
+							});
+						}
 					}
 					Logger.info(Logs.info.commandActionCreated);
 				}
 
-				if (localCmdsOnRemote.length > 0) {
+				if (localCmdsOnRemoteMetadata.length > 0) {
 					Logger.info(
 						Logs.info.commandActionUpdating.replaceAll(
 							'{COMMAND_LIST}',
-							this.formatCommandList(localCmdsOnRemote)
+							this.formatCommandList(localCmdsOnRemoteMetadata)
 						)
 					);
-					for (let localCmd of localCmdsOnRemote) {
+					for (let localCmd of localCmdsOnRemoteMetadata) {
 						await this.rest.post(Routes.applicationCommands(Config.client.id), {
 							body: localCmd,
 						});
@@ -138,6 +161,14 @@ export class CommandRegistrationService {
 					)
 				);
 				await this.rest.put(Routes.applicationCommands(Config.client.id), { body: [] });
+				for (const command of commands) {
+					for (const guildId of command?.restrictedGuilds || []) {
+						await this.rest.put(
+							Routes.applicationGuildCommands(Config.client.id, guildId),
+							{ body: [] }
+						);
+					}
+				}
 				Logger.info(Logs.info.commandActionCleared);
 				return;
 			}

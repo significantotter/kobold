@@ -12,7 +12,9 @@
 							"**/update** - updates your character to reflect any changes on wanderer's guide",
 							"**/set-active <character name>** - sets a certain character as your active character",
 							"**/roll <dice expression>** - rolls some dice!",
-							"**/skill <skill name>** - rolls a skill on your active character"
+							"**/skill <skill name>** - rolls a skill on your active character",
+							"**/help faq** - see some frequently asked questions about Kobold",
+							"**/help commands** - view a list of Kobold's commands"
 						]
 					},
 					{
