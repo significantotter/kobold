@@ -81,25 +81,6 @@ export class CommandRegistrationService {
 							});
 						}
 					}
-					//check existing guilds to see if any that are guild-specific changed the target guilds
-					for (let remoteCmd of remoteCmds) {
-						if (
-							remoteCmd.guild_id &&
-							!localCmdsOnRemote.find(
-								localCmd =>
-									localCmd.restrictedGuilds.includes(remoteCmd.guild_id) &&
-									localCmd.metadata.name === remoteCmd.name
-							)
-						) {
-							await this.rest.delete(
-								Routes.applicationGuildCommand(
-									Config.client.id,
-									remoteCmd.guild_id,
-									remoteCmd.id
-								)
-							);
-						}
-					}
 					Logger.info(Logs.info.commandActionCreated);
 				}
 
