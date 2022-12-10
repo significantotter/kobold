@@ -53,23 +53,22 @@ export class RollBuilder {
 		const attributes = this.character?.attributes || [];
 		const customAttributes = this.character?.customAttributes || [];
 
-		const trimmedToken = token
-			.replace('[', '')
-			.replace(']', '')
-			.trim()
-			.replaceAll(' ', '')
-			.replaceAll('-', '')
-			.replaceAll('_', '');
+		const trimRegex = /[\[\]\\ _\-]/g;
+		const trimmedToken = token.replace(trimRegex, '').trim().toLowerCase();
+
 		const attributeName = attributeShorthands[trimmedToken] || trimmedToken;
 
 		const attribute = attributes.find(
-			attributeObject => attributeObject.name.toLowerCase() === attributeName.toLowerCase()
+			attributeObject =>
+				attributeObject.name.replace(trimRegex, '').toLowerCase() === attributeName
 		);
 		const customAttribute = customAttributes.find(
-			attributeObject => attributeObject.name.toLowerCase() === attributeName.toLowerCase()
+			attributeObject =>
+				attributeObject.name.replace(trimRegex, '').toLowerCase() === attributeName
 		);
 		const staticAttribute = staticAttributes.find(
-			attributeObject => attributeObject.name.toLowerCase() === attributeName.toLowerCase()
+			attributeObject =>
+				attributeObject.name.replace(trimRegex, '').toLowerCase() === attributeName
 		);
 
 		return `(${customAttribute?.value || attribute?.value || staticAttribute?.value || token})`;
