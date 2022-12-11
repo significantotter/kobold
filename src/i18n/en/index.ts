@@ -41,6 +41,9 @@ const en: BaseTranslation = {
 	terms: {
 		perception: 'Perception',
 	},
+	sharedInteractions: {
+		choiceRegistered: 'You chose {choice}.',
+	},
 	commands: {
 		admin: {
 			name: 'admin',
@@ -486,6 +489,13 @@ const en: BaseTranslation = {
 				name: 'end',
 				description: 'Ends the initiative in the current channel.',
 				interactions: {
+					confirmation: {
+						text: 'Are you sure you want to end the initiative?',
+						expired: 'Yip! The request to end the initiative expired.',
+						confirmButton: 'end',
+						cancelButton: 'cancel',
+					},
+					cancel: 'Yip! Canceled the request to end the initiative!',
 					success: 'Yip! Ended the initiative!',
 					error: 'Yip! Something went wrong!',
 				},

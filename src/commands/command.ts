@@ -18,6 +18,7 @@ export interface Command {
 	deferType: CommandDeferType;
 	requireClientPerms: PermissionsString[];
 	restrictedGuilds?: string[];
+	commands?: Command[];
 	autocomplete?(
 		intr: AutocompleteInteraction,
 		option: AutocompleteFocusedOption

@@ -25,7 +25,7 @@ export class CharacterRemoveSubCommand implements Command {
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
-	public deferType = CommandDeferType.PUBLIC;
+	public deferType = CommandDeferType.NONE;
 	public requireClientPerms: PermissionsString[] = [];
 
 	public async execute(
@@ -43,7 +43,7 @@ export class CharacterRemoveSubCommand implements Command {
 			return;
 		}
 
-		const prompt = await InteractionUtils.send(intr, {
+		const prompt = await intr.reply({
 			content: LL.commands.character.remove.interactions.removeConfirmation.text({
 				characterName: activeCharacter.characterData.name,
 			}),
@@ -66,11 +66,16 @@ export class CharacterRemoveSubCommand implements Command {
 					],
 				},
 			],
+			ephemeral: true,
+			fetchReply: true,
 		});
 		let timedOut = false;
 		let result = await CollectorUtils.collectByButton(
 			prompt,
 			async buttonInteraction => {
+				if (buttonInteraction.user.id !== intr.user.id) {
+					return;
+				}
 				switch (buttonInteraction.customId) {
 					case 'remove':
 						return { intr: buttonInteraction, value: 'remove' };
@@ -79,21 +84,27 @@ export class CharacterRemoveSubCommand implements Command {
 				}
 			},
 			{
-				time: 10000,
+				time: 50000,
 				reset: true,
 				target: intr.user,
 				stopFilter: message => message.content.toLowerCase() === 'stop',
 				onExpire: async () => {
 					timedOut = true;
-					await result.intr.deleteReply();
-					await InteractionUtils.send(
-						intr,
-						LL.commands.character.remove.interactions.removeConfirmation.expired()
-					);
+					await InteractionUtils.editReply(intr, {
+						content:
+							LL.commands.character.remove.interactions.removeConfirmation.expired(),
+						components: [],
+					});
 				},
 			}
 		);
 		if (result.value === 'remove') {
+			await InteractionUtils.editReply(intr, {
+				content: LL.sharedInteractions.choiceRegistered({
+					choice: 'Remove',
+				}),
+				components: [],
+			});
 			//delete the character
 			await Character.query().deleteById(activeCharacter.id);
 
@@ -107,7 +118,7 @@ export class CharacterRemoveSubCommand implements Command {
 
 			//send success message
 
-			await InteractionUtils.editReply(intr, {
+			await InteractionUtils.send(intr, {
 				content: LL.commands.character.remove.interactions.success({
 					characterName: activeCharacter.characterData.name,
 				}),
@@ -116,8 +127,14 @@ export class CharacterRemoveSubCommand implements Command {
 		} else if (timedOut) {
 			return;
 		} else {
-			// cancel
 			await InteractionUtils.editReply(intr, {
+				content: LL.sharedInteractions.choiceRegistered({
+					choice: 'Cancel',
+				}),
+				components: [],
+			});
+			// cancel
+			await InteractionUtils.send(intr, {
 				content: LL.commands.character.remove.interactions.cancelled({
 					characterName: activeCharacter.characterData.name,
 				}),

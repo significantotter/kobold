@@ -144,7 +144,7 @@ export class RollCommand implements Command {
 	public deferType = CommandDeferType.PUBLIC;
 	public requireClientPerms: PermissionsString[] = [];
 
-	constructor(private commands: Command[]) {}
+	constructor(public commands: Command[]) {}
 
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,

@@ -105,7 +105,14 @@ export class CommandHandler implements EventHandler {
 
 		// Defer interaction
 		// NOTE: Anything after this point we should be responding to the interaction
-		switch (command.deferType) {
+		let deferType = command.deferType;
+		if (intr instanceof ChatInputCommandInteraction && command?.commands) {
+			const subCommandName = intr.options.getSubcommand();
+			const subCommand = CommandUtils.getSubCommandByName(command?.commands, subCommandName);
+			if (subCommand.deferType !== undefined) deferType = subCommand.deferType;
+		}
+
+		switch (deferType) {
 			case CommandDeferType.PUBLIC: {
 				await InteractionUtils.deferReply(intr, false);
 				break;
@@ -117,7 +124,7 @@ export class CommandHandler implements EventHandler {
 		}
 
 		// Return if defer was unsuccessful
-		if (command.deferType !== CommandDeferType.NONE && !intr.deferred) {
+		if (deferType !== CommandDeferType.NONE && !intr.deferred) {
 			return;
 		}
 
