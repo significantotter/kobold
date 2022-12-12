@@ -17,6 +17,7 @@
 			"description": "The discord id of the user who started the initiative"
 		},
 		"roundMessageIds": {
+			"type": ["array", "null"],
 			"description": "The message ids for the header of the most recent round. Ordered by round #."
 		},
 		"currentRound": {
