@@ -63,13 +63,24 @@ export const CharacterFactory = CharacterFactoryClass.define(({ onCreate, transi
 		return attributes;
 	}
 
+	function createRandomModifiers(times: number): Character['modifiers'] {
+		const modifier = {
+			name: faker.random.word(),
+			description: faker.random.words(5),
+			type: faker.helpers.arrayElement(['base', 'ability', 'save', 'skill', 'other']),
+			tags: [],
+			value: faker.datatype.number(),
+		};
+		return [modifier];
+	}
+
 	const characterDataOptions = transientParams.characterDataOptions;
 	const characterData: DeepPartial<Character> = {
 		charId: faker.datatype.number(),
 		userId: faker.datatype.uuid(),
 		attributes: createRandomAttributes(faker.datatype.number({ max: 50 })),
 		customAttributes: createRandomAttributes(faker.datatype.number({ max: 50 })),
-		modifiers: [],
+		modifiers: createRandomModifiers(faker.datatype.number({ max: 50 })),
 		actions: [],
 		customActions: [],
 		calculatedStats: CalculatedStatsFactory.build(),

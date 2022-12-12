@@ -523,6 +523,19 @@ const en: BaseTranslation = {
 				},
 			},
 		},
+		modifier: {
+			name: 'modifer',
+			description: 'Toggleable values to modify specified dice rolls.',
+
+			list: {
+				name: 'list',
+				description: 'Lists all modifiers available to your active character.',
+			},
+			create: {
+				name: 'create',
+				description: 'Creates a modifier for the active character.',
+			},
+		},
 		roll: {
 			name: 'roll',
 			description: 'Roll Dice',
@@ -694,6 +707,23 @@ const en: BaseTranslation = {
 		setValue: {
 			name: 'value',
 			description: 'The value to set the option to.',
+		},
+		modifierName: {
+			name: 'name',
+			description: 'The name of the modifier.',
+		},
+		modifierDescription: {
+			name: 'description',
+			description: 'A description for the modifier.',
+		},
+		modifierValue: {
+			name: 'value',
+			description: 'The value applied by the modifier to dice rolls.',
+		},
+		modifierTargetTags: {
+			name: 'targetTags',
+			description:
+				'A set of tags for the rolls that this modifier applies to. Separated by commas.',
 		},
 	},
 	utils: {
