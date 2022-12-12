@@ -5,7 +5,7 @@ import { Locale } from 'discord.js';
 import { Character, CharacterFactory } from '../../../services/kobold/models/index.js';
 import { CharacterRemoveSubCommand } from './character-remove-subcommand.js';
 
-describe('CharacterRemoveSubCommand', () => {
+describe.skip('CharacterRemoveSubCommand', () => {
 	const fakeData = {
 		lang() {
 			return 'en-US' as Locale;
