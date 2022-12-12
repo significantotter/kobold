@@ -24,7 +24,9 @@ export interface Initiative {
 	/**
 	 * The message ids for the header of the most recent round. Ordered by round #.
 	 */
-	roundMessageIds?: string[];
+	roundMessageIds?: {
+		[k: string]: any;
+	};
 	/**
 	 * The current round number
 	 */

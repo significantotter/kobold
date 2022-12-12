@@ -276,13 +276,7 @@ export class InitiativeUtils {
 		} catch (err) {
 			if (err.message === 'Unknown Message' || err.code === 10008) {
 				const embed = await KoboldEmbed.roundFromInitiativeBuilder(initBuilder);
-				const newMessage = await InteractionUtils.send(intr, embed);
-				const roundMessageIds = initBuilder.init.roundMessageIds;
-				roundMessageIds[initBuilder.init.currentRound || 0] = newMessage.id;
-				await Initiative.query().updateAndFetchById(initBuilder.init.id, {
-					roundMessageIds,
-				});
-				return newMessage;
+				return await InteractionUtils.send(intr, embed);
 			}
 		}
 	}
