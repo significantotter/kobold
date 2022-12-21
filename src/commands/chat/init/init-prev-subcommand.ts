@@ -32,7 +32,7 @@ export class InitPrevSubCommand implements Command {
 		default_member_permissions: undefined,
 	};
 	public cooldown = new RateLimiter(1, 5000);
-	public deferType = CommandDeferType.PUBLIC;
+	public deferType = CommandDeferType.NONE;
 	public requireClientPerms: PermissionsString[] = [];
 
 	public async autocomplete(
@@ -98,7 +98,7 @@ export class InitPrevSubCommand implements Command {
 		const activeGroup = initBuilder.activeGroup;
 
 		await InteractionUtils.send(intr, {
-			content: `<@${activeGroup.userId}>`,
+			content: `<@!${activeGroup.userId}>`,
 			embeds: [currentTurnEmbed],
 		});
 	}

@@ -159,7 +159,7 @@ export class InitRemoveSubCommand implements Command {
 			}
 
 			await InteractionUtils.send(intr, {
-				content: `<@${activeGroup.userId}>`,
+				content: `<@!${activeGroup.userId}>`,
 				embeds: [currentTurnEmbed],
 			});
 		} else {
