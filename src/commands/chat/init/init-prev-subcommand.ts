@@ -85,7 +85,7 @@ export class InitPrevSubCommand implements Command {
 		}
 
 		const updatedInitiative = await Initiative.query()
-			.updateAndFetchById(initResult.init.id, previousTurn)
+			.patchAndFetchById(initResult.init.id, previousTurn)
 			.withGraphFetched('[actors.[character], actorGroups]');
 
 		initBuilder.set({

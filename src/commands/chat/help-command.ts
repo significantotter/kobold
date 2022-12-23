@@ -158,6 +158,7 @@ export class HelpCommand implements Command {
 							`\`/${LL.commands.character.name()} ${LL.commands.character.list.name()}\` ${LL.commands.character.list.description()}\n` +
 							`\`/${LL.commands.character.name()} ${LL.commands.character.remove.name()}\` ${LL.commands.character.remove.description()}\n` +
 							`\`/${LL.commands.character.name()} ${LL.commands.character.setActive.name()}\` ${LL.commands.character.setActive.description()}\n` +
+							`\`/${LL.commands.character.name()} ${LL.commands.character.setServerDefault.name()}\` ${LL.commands.character.setServerDefault.description()}\n` +
 							`\`/${LL.commands.character.name()} ${LL.commands.character.sheet.name()}\` ${LL.commands.character.sheet.description()}\n` +
 							`\`/${LL.commands.character.name()} ${LL.commands.character.update.name()}\` ${LL.commands.character.update.description()}`,
 					},
@@ -197,6 +198,7 @@ export class HelpCommand implements Command {
 						LL.commands.character.update.name(),
 						LL.commands.character.list.name(),
 						LL.commands.character.setActive.name(),
+						LL.commands.character.setServerDefault.name(),
 						LL.commands.character.sheet.name(),
 						LL.commands.character.remove.name(),
 					].map(command =>

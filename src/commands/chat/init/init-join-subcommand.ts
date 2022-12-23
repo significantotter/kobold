@@ -47,7 +47,10 @@ export class InitJoinSubCommand implements Command {
 			const match = intr.options.getString(ChatArgs.SKILL_CHOICE_OPTION.name);
 
 			//get the active character
-			const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id);
+			const activeCharacter = await CharacterUtils.getActiveCharacter(
+				intr.user.id,
+				intr.guildId
+			);
 			if (!activeCharacter) {
 				//no choices if we don't have a character to match against
 				return [];
@@ -72,7 +75,7 @@ export class InitJoinSubCommand implements Command {
 				sendErrors: true,
 				LL,
 			}),
-			CharacterUtils.getActiveCharacter(intr.user.id),
+			CharacterUtils.getActiveCharacter(intr.user.id, intr.guildId),
 		]);
 		if (currentInitResponse.errorMessage) {
 			await InteractionUtils.send(intr, currentInitResponse.errorMessage);

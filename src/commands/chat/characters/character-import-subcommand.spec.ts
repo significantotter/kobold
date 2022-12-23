@@ -24,7 +24,14 @@ describe('CharacterImportSubCommand', () => {
 					return [CharacterFactory.withName('firstTest').build({ charId, userId })];
 				} else return [];
 			},
-			update({ isActiveCharacter }) {
+			joinRelated(options) {
+				return {
+					where() {
+						return [];
+					},
+				};
+			},
+			patch({ isActiveCharacter }) {
 				return {
 					where({ userId }) {
 						return [CharacterFactory.build({ userId, isActiveCharacter })];
@@ -89,8 +96,6 @@ describe('CharacterImportSubCommand', () => {
 		jest.spyOn(InteractionUtils, 'send').mockImplementation((intr, msg): any => {
 			expect(msg).toBe(
 				Language.LL.commands.character.interactions.authenticationRequest({
-					wgBaseUrl: Config.wanderersGuide.oauthBaseUrl,
-					charId: '56789',
 					action: 'import',
 				})
 			);

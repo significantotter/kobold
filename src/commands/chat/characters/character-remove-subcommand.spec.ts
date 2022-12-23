@@ -16,6 +16,13 @@ describe('CharacterRemoveSubCommand', () => {
 			where({ userId }) {
 				return [];
 			},
+			joinRelated(options) {
+				return {
+					where() {
+						return [];
+					},
+				};
+			},
 		} as any);
 
 		jest.spyOn(InteractionUtils, 'send').mockImplementation((intr, message): any => {
@@ -29,7 +36,7 @@ describe('CharacterRemoveSubCommand', () => {
 		const command = new CharacterRemoveSubCommand();
 		command.execute(fakeIntr, fakeData as any, Language.LL);
 	});
-	test('Allows the user to cancel the removal of their character', done => {
+	test('Confirms before the removal of their character', done => {
 		let charToRemove = CharacterFactory.withFakeId().build();
 		let interactionCount = 0;
 		let prompt;
@@ -37,20 +44,14 @@ describe('CharacterRemoveSubCommand', () => {
 			where({ userId }) {
 				return [charToRemove];
 			},
+			joinRelated(options) {
+				return {
+					where() {
+						return [];
+					},
+				};
+			},
 		} as any);
-
-		jest.spyOn(InteractionUtils, 'send').mockImplementation((intr, message: any): any => {
-			prompt = 'arrived here!';
-			return prompt;
-		});
-		jest.spyOn(InteractionUtils, 'editReply').mockImplementation((intr, message: any): any => {
-			expect(message?.content).toBe(
-				Language.LL.commands.character.remove.interactions.cancelled({
-					characterName: charToRemove.characterData.name,
-				})
-			);
-			done();
-		});
 
 		jest.spyOn(CollectorUtils, 'collectByButton').mockImplementation(((
 			message,
@@ -63,7 +64,30 @@ describe('CharacterRemoveSubCommand', () => {
 
 		const fakeIntr = {
 			user: { id: null },
+			reply({ content, components }, ephemeral, fetchReply) {
+				expect(content).toBe(
+					Language.LL.commands.character.remove.interactions.removeConfirmation.text({
+						characterName: charToRemove.characterData.name,
+					})
+				);
+			},
+			editReply({ content, components }, ephemeral, fetchReply) {
+				expect(content).toBe(
+					Language.LL.sharedInteractions.choiceRegistered({
+						choice: 'Cancel',
+					})
+				);
+			},
 		} as any;
+		jest.spyOn(InteractionUtils, 'send').mockImplementation((intr, message: any): any => {
+			expect(message?.content).toBe(
+				Language.LL.commands.character.remove.interactions.cancelled({
+					characterName: charToRemove.characterData.name,
+				})
+			);
+			done();
+		});
+
 		const command = new CharacterRemoveSubCommand();
 		command.execute(fakeIntr, fakeData as any, Language.LL);
 	});

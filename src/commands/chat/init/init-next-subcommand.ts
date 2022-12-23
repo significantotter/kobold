@@ -84,7 +84,7 @@ export class InitNextSubCommand implements Command {
 		}
 
 		const updatedInitiative = await Initiative.query()
-			.updateAndFetchById(initResult.init.id, nextTurn)
+			.patchAndFetchById(initResult.init.id, nextTurn)
 			.withGraphFetched('[actors.[character], actorGroups]');
 
 		initBuilder.set({

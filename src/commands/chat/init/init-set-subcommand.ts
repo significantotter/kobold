@@ -144,18 +144,15 @@ export class InitSetSubCommand implements Command {
 
 		// perform the updates
 		if (fieldToChange === 'initiative') {
-			await InitiativeActorGroup.query().updateAndFetchById(actor.initiativeActorGroupId, {
+			await InitiativeActorGroup.query().patchAndFetchById(actor.initiativeActorGroupId, {
 				initiativeResult: Number(newFieldValue),
 			});
 		} else if (fieldToChange === 'name') {
-			await InitiativeActor.query().updateAndFetchById(actor.id, { name: newFieldValue });
+			await InitiativeActor.query().patchAndFetchById(actor.id, { name: newFieldValue });
 			if (actorsInGroup.length === 1) {
-				await InitiativeActorGroup.query().updateAndFetchById(
-					actor.initiativeActorGroupId,
-					{
-						name: newFieldValue,
-					}
-				);
+				await InitiativeActorGroup.query().patchAndFetchById(actor.initiativeActorGroupId, {
+					name: newFieldValue,
+				});
 			}
 		}
 		currentInitResponse = await InitiativeUtils.getInitiativeForChannel(intr.channel, {

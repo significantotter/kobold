@@ -1,7 +1,7 @@
 import { Model, RelationMappings, AjvValidator } from 'objection';
 import addFormats from 'ajv-formats';
 export class BaseModel extends Model {
-	static idColumn = 'id';
+	static idColumn: string | string[] = 'id';
 
 	/** Allow arbitrary properties */
 	[k: string]: any;

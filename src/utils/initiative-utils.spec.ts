@@ -31,6 +31,9 @@ function setupInitiativeActorsAndGroupsForTests(initiative) {
 
 // setup jest tests for each function in ./initiative-utils.ts
 describe('initiative-utils', function () {
+	afterEach(function () {
+		jest.restoreAllMocks();
+	});
 	describe('InitiativeBuilder', function () {
 		test('creates an empty initiative', function () {
 			const builder = new InitiativeBuilder({});
@@ -518,8 +521,8 @@ describe('initiative-utils', function () {
 			);
 			expect(result).toHaveLength(2);
 		});
-		test('returns all initiative actors if the user created the initiative', function () {
-			const initiative = InitiativeFactory.build({
+		test('returns all initiative actors if the user created the initiative', async function () {
+			const initiative = await InitiativeFactory.create({
 				gmUserId: 'testUserId',
 			});
 			const { actors, groups, firstGroup, secondGroup, thirdGroup } =

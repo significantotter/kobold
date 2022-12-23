@@ -43,7 +43,10 @@ export class RollSaveSubCommand implements Command {
 			const match = intr.options.getString(ChatArgs.SAVE_CHOICE_OPTION.name);
 
 			//get the active character
-			const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id);
+			const activeCharacter = await CharacterUtils.getActiveCharacter(
+				intr.user.id,
+				intr.guildId
+			);
 			if (!activeCharacter) {
 				//no choices if we don't have a character to match against
 				return [];
@@ -71,7 +74,7 @@ export class RollSaveSubCommand implements Command {
 		const modifierExpression = intr.options.getString(ChatArgs.ROLL_MODIFIER_OPTION.name);
 		const rollNote = intr.options.getString(ChatArgs.ROLL_NOTE_OPTION.name);
 
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id);
+		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id, intr.guildId);
 		if (!activeCharacter) {
 			await InteractionUtils.send(intr, LL.commands.roll.interactions.noActiveCharacter());
 			return;

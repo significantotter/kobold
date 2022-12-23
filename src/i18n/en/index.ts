@@ -217,13 +217,13 @@ const en: BaseTranslation = {
 
 				authenticationRequest:
 					`Yip! Before you can {action} a character, you need to authenticate it. ` +
-					`Give me permission to read your wanderer's guide character by following [this link](` +
-					`{wgBaseUrl}?characterId={charId}). ` +
-					`Then, /character {action} your character again!`,
+					`Give me permission to read your wanderer's guide character by following the link ` +
+					`below. Then, /character {action} your character again!`,
 				expiredToken:
 					`Yip! It's been a while since we last authenticated your character, so our ` +
 					`authentication expired. Please give me permission to read your wanderer's guide ` +
-					`character again by following [this link]({wgBaseUrl}?characterId={charId})`,
+					`character again by following the link below`,
+				authenticationLink: `Yip! Please follow  [this link]({wgBaseUrl}?characterId={charId}) to give me access to your character!`,
 			},
 
 			// SUBCOMMANDS
@@ -262,7 +262,7 @@ const en: BaseTranslation = {
 					noCharacters: `Yip! You don't have any characters yet! Use /import to import some!`,
 					characterListEmbed: {
 						title: 'Characters',
-						characterFieldName: '{characterName}{activeText?}',
+						characterFieldName: '{characterName}{activeText?}{serverDefaultText?}',
 						characterFieldValue: 'Level {level} {heritage} {ancestry} {classes}',
 					},
 				},
@@ -298,6 +298,27 @@ const en: BaseTranslation = {
 					'commands like /character sheet, /roll, /init, or /character update.',
 				interactions: {
 					success: 'Yip! {characterName} is now your active character!',
+					notFound:
+						"Yip! I couldn't find a character matching that name! " +
+						"Check what characters you've imported using /character list",
+				},
+			},
+			setServerDefault: {
+				name: 'set-server-default',
+				options: '[name]',
+				usage: '_[name]_: the name of the character in Kobold to set as the server default',
+				description: 'sets a character as the default character for the server',
+				expandedDescription:
+					'Sets the character matching the provided name ' +
+					'as the default character used for commands in this server. This applies to ' +
+					'commands like /character sheet, /roll, /init, or /character update. Your server default ' +
+					'overrides your active character',
+				noneOption: '(None)',
+				interactions: {
+					success: 'Yip! {characterName} is now your default character on this server!',
+					removed:
+						'Yip! I removed your default character for this server. This server will ' +
+						'now use your active character for commands again.',
 					notFound:
 						"Yip! I couldn't find a character matching that name! " +
 						"Check what characters you've imported using /character list",

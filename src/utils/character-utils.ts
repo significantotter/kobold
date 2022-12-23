@@ -143,12 +143,23 @@ export class CharacterUtils {
 	 * @param userId the discord use
 	 * @returns the active character for the user, or null if one is not present
 	 */
-	public static async getActiveCharacter(userId: string): Promise<Character | null> {
-		const existingCharacter = await Character.query().where({
-			userId: userId,
-			isActiveCharacter: true,
-		});
-		return existingCharacter[0] || null;
+	public static async getActiveCharacter(
+		userId: string,
+		guildId?: string
+	): Promise<Character | null> {
+		const [activeCharacter, GuildDefaultCharacter] = await Promise.all([
+			Character.query().where({
+				userId: userId,
+				isActiveCharacter: true,
+			}),
+			Character.query()
+				.joinRelated('guildDefaultCharacter')
+				.where({
+					'guildDefaultCharacter.userId': userId,
+					'guildDefaultCharacter.guildId': guildId ?? 0,
+				}),
+		]);
+		return GuildDefaultCharacter[0] ?? activeCharacter[0] ?? null;
 	}
 
 	/**

@@ -92,7 +92,7 @@ export class InitJumpToSubCommand implements Command {
 		}
 
 		const updatedInitiative = await Initiative.query()
-			.updateAndFetchById(initResult.init.id, { currentTurnGroupId: groupResponse.group.id })
+			.patchAndFetchById(initResult.init.id, { currentTurnGroupId: groupResponse.group.id })
 			.withGraphFetched('[actors.[character], actorGroups]');
 
 		const initBuilder = new InitiativeBuilder({ initiative: updatedInitiative, LL });

@@ -6,6 +6,7 @@ import {
 	// character
 	CharacterCommand,
 	CharacterSetActiveSubCommand,
+	CharacterSetServerDefaultSubCommand,
 	CharacterListSubCommand,
 	CharacterUpdateSubCommand,
 	CharacterRemoveSubCommand,
@@ -81,6 +82,7 @@ async function start(): Promise<void> {
 			new CharacterSheetSubCommand(),
 			new CharacterListSubCommand(),
 			new CharacterSetActiveSubCommand(),
+			new CharacterSetServerDefaultSubCommand(),
 			new CharacterImportSubCommand(),
 			new CharacterUpdateSubCommand(),
 			new CharacterRemoveSubCommand(),

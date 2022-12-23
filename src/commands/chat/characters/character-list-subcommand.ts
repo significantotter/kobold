@@ -1,4 +1,4 @@
-import { Character } from '../../../services/kobold/models/index.js';
+import { Character, GuildDefaultCharacter } from '../../../services/kobold/models/index.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -34,6 +34,12 @@ export class CharacterListSubCommand implements Command {
 		const targetCharacter = await Character.query().where({
 			userId: intr.user.id,
 		});
+		const serverDefault = (
+			await GuildDefaultCharacter.query().where({
+				userId: intr.user.id,
+				guildId: intr.guildId,
+			})
+		)[0];
 
 		if (!targetCharacter.length) {
 			//send success message
@@ -59,11 +65,13 @@ export class CharacterListSubCommand implements Command {
 				]
 					.join(' ')
 					.trim();
+				const isServerDefault = serverDefault?.characterId == character.id;
 				characterFields.push({
 					name: LL.commands.character.list.interactions.characterListEmbed.characterFieldName(
 						{
 							characterName: character.characterData.name,
 							activeText: character.isActiveCharacter ? ' (active)' : '',
+							serverDefaultText: isServerDefault ? ' (server default)' : '',
 						}
 					),
 					value: LL.commands.character.list.interactions.characterListEmbed.characterFieldValue(

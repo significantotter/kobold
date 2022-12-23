@@ -136,7 +136,7 @@ export class InitRemoveSubCommand implements Command {
 			}
 
 			const updatedInitiative = await Initiative.query()
-				.updateAndFetchById(currentInit.id, previousTurn)
+				.patchAndFetchById(currentInit.id, previousTurn)
 				.withGraphFetched('[actors.[character], actorGroups]');
 
 			initBuilder.set({

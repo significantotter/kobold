@@ -34,7 +34,7 @@ export class CharacterUpdateSubCommand implements Command {
 		LL: TranslationFunctions
 	): Promise<void> {
 		//check if we have an active character
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id);
+		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id, intr.guildId);
 		if (!activeCharacter) {
 			await InteractionUtils.send(
 				intr,
@@ -51,10 +51,16 @@ export class CharacterUpdateSubCommand implements Command {
 			await InteractionUtils.send(
 				intr,
 				LL.commands.character.interactions.authenticationRequest({
-					wgBaseUrl: Config.wanderersGuide.oauthBaseUrl,
-					charId: activeCharacter.charId,
 					action: 'update',
 				})
+			);
+			await InteractionUtils.send(
+				intr,
+				LL.commands.character.interactions.authenticationLink({
+					wgBaseUrl: Config.wanderersGuide.oauthBaseUrl,
+					charId: activeCharacter.charId,
+				}),
+				true
 			);
 			return;
 		}
@@ -70,10 +76,15 @@ export class CharacterUpdateSubCommand implements Command {
 				await WgToken.query().delete().where({ charId: activeCharacter.charId });
 				await InteractionUtils.send(
 					intr,
-					LL.commands.character.interactions.expiredToken({
+					LL.commands.character.interactions.expiredToken()
+				);
+				await InteractionUtils.send(
+					intr,
+					LL.commands.character.interactions.authenticationLink({
 						wgBaseUrl: Config.wanderersGuide.oauthBaseUrl,
 						charId: activeCharacter.charId,
-					})
+					}),
+					true
 				);
 				return;
 			} else {

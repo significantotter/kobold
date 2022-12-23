@@ -1,5 +1,5 @@
 import { WanderersGuide } from '../../../services/wanderers-guide/index';
-import { Character } from '../../../services/kobold/models/index.js';
+import { Character, GuildDefaultCharacter } from '../../../services/kobold/models/index.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -18,12 +18,12 @@ import { Command, CommandDeferType } from '../../index.js';
 import { Language } from '../../../models/enum-helpers/index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 
-export class CharacterSetActiveSubCommand implements Command {
-	public names = [Language.LL.commands.character.setActive.name()];
+export class CharacterSetServerDefaultSubCommand implements Command {
+	public names = [Language.LL.commands.character.setServerDefault.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.character.setActive.name(),
-		description: Language.LL.commands.character.setActive.description(),
+		name: Language.LL.commands.character.setServerDefault.name(),
+		description: Language.LL.commands.character.setServerDefault.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -39,14 +39,25 @@ export class CharacterSetActiveSubCommand implements Command {
 			//we don't need to autocomplete if we're just dealing with whitespace
 			const match = intr.options.getString(ChatArgs.SET_ACTIVE_NAME_OPTION.name);
 
+			const matchedCharacters = await Character.queryLooseCharacterName(match, intr.user.id);
 			//get the character matches
-			const options = await Character.queryLooseCharacterName(match, intr.user.id);
-
-			//return the matched characters
-			return options.map(character => ({
+			const options = matchedCharacters.map(character => ({
 				name: character.characterData.name,
 				value: character.characterData.name,
 			}));
+
+			if (
+				match == '' ||
+				Language.LL.commands.character.setServerDefault.noneOption().includes(match)
+			) {
+				options.push({
+					name: Language.LL.commands.character.setServerDefault.noneOption().toString(),
+					value: '__NONE__',
+				});
+			}
+
+			//return the matched characters
+			return options;
 		}
 	}
 
@@ -56,6 +67,7 @@ export class CharacterSetActiveSubCommand implements Command {
 		LL: TranslationFunctions
 	): Promise<void> {
 		const charName = intr.options.getString(ChatArgs.SET_ACTIVE_NAME_OPTION.name);
+		const currentGuildId = intr.guildId;
 
 		// try and find that charcter
 		const targetCharacter = (
@@ -63,28 +75,41 @@ export class CharacterSetActiveSubCommand implements Command {
 		)[0];
 
 		if (targetCharacter) {
-			//set all other characters as not active
-			await Character.query()
-				.patch({ isActiveCharacter: false })
-				.where({ userId: intr.user.id });
+			//set all other characters as not the default for this user in this guild
+			await GuildDefaultCharacter.query()
+				.delete()
+				.where({ userId: intr.user.id, guildId: currentGuildId });
 
-			//set the character as active
-			await Character.query().patchAndFetchById(targetCharacter.id, {
-				isActiveCharacter: true,
+			//set the character as the default for this guild
+			await GuildDefaultCharacter.query().insert({
+				userId: intr.user.id,
+				guildId: currentGuildId,
+				characterId: targetCharacter.id,
 			});
 
 			//send success message
 			await InteractionUtils.send(
 				intr,
-				LL.commands.character.setActive.interactions.success({
+				LL.commands.character.setServerDefault.interactions.success({
 					characterName: targetCharacter.characterData.name,
 				})
 			);
 		} else {
-			await InteractionUtils.send(
-				intr,
-				LL.commands.character.setActive.interactions.notFound()
-			);
+			if ('__NONE__'.includes(charName)) {
+				//unset the server default character.
+				await GuildDefaultCharacter.query()
+					.delete()
+					.where({ userId: intr.user.id, guildId: currentGuildId });
+				await InteractionUtils.send(
+					intr,
+					LL.commands.character.setServerDefault.interactions.removed()
+				);
+			} else {
+				await InteractionUtils.send(
+					intr,
+					LL.commands.character.setServerDefault.interactions.notFound()
+				);
+			}
 		}
 	}
 }

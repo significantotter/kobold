@@ -37,7 +37,7 @@ export class RollPerceptionSubCommand implements Command {
 		const modifierExpression = intr.options.getString(ChatArgs.ROLL_MODIFIER_OPTION.name);
 		const rollNote = intr.options.getString(ChatArgs.ROLL_NOTE_OPTION.name);
 
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id);
+		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id, intr.guildId);
 		if (!activeCharacter) {
 			await InteractionUtils.send(intr, LL.commands.roll.interactions.noActiveCharacter());
 			return;

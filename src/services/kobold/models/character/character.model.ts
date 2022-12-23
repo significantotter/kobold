@@ -1,3 +1,4 @@
+import { GuildDefaultCharacter } from './../index.js';
 import type CharacterTypes from './character.schema.js';
 import { JSONSchema7 } from 'json-schema';
 import { BaseModel } from '../../lib/base-model.js';
@@ -21,5 +22,18 @@ export class Character extends BaseModel {
 				characterName: `%${characterName}%`,
 			}
 		);
+	}
+
+	static get relationMappings() {
+		return {
+			guildDefaultCharacter: {
+				relation: BaseModel.HasManyRelation,
+				modelClass: GuildDefaultCharacter,
+				join: {
+					from: 'character.id',
+					to: 'guildDefaultCharacter.characterId',
+				},
+			},
+		};
 	}
 }

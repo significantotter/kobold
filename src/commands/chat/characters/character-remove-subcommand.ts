@@ -34,7 +34,7 @@ export class CharacterRemoveSubCommand implements Command {
 		LL: TranslationFunctions
 	): Promise<void> {
 		//check if we have an active character
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id);
+		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id, intr.guildId);
 		if (!activeCharacter) {
 			await InteractionUtils.send(
 				intr,
@@ -111,7 +111,7 @@ export class CharacterRemoveSubCommand implements Command {
 			//set another character as active
 			const newActive = await Character.query().first().where({ userId: intr.user.id });
 			if (newActive) {
-				await Character.query().updateAndFetchById(newActive.id, {
+				await Character.query().patchAndFetchById(newActive.id, {
 					isActiveCharacter: true,
 				});
 			}

@@ -1,7 +1,7 @@
 import { CharacterFactory } from './../services/kobold/models/character/character.factory';
 import { CharacterUtils } from './character-utils.js';
 import { WG } from './../services/wanderers-guide/wanderers-guide.js';
-import { Character } from '../services/kobold/models/index.js';
+import { Character, GuildDefaultCharacterFactory } from '../services/kobold/models/index.js';
 
 describe('Character Utils', function () {
 	describe('CharacterUtils.getBestNameMatch', function () {
@@ -202,6 +202,23 @@ describe('Character Utils', function () {
 				expect(activeCharacters.map(char => char.id)).toContain(fetchedCharacter.id);
 			}
 		);
+		it('fetches a default character for a guild even when an active character is present', async function () {
+			const inactiveCharacters = await CharacterFactory.createList(10, {
+				userId: '0',
+				isActiveCharacter: false,
+			});
+			const activeCharacter = await CharacterFactory.create({
+				userId: '0',
+				isActiveCharacter: true,
+			});
+			const guildDefaultCharacter = await GuildDefaultCharacterFactory.create({
+				characterId: inactiveCharacters[4].id,
+				userId: '0',
+				guildId: 'foo',
+			});
+			const fetchedCharacter = await CharacterUtils.getActiveCharacter('0', 'foo');
+			expect(fetchedCharacter.id).toEqual(inactiveCharacters[4].id);
+		});
 		it('returns null if no active character is present', async function () {
 			const inactiveCharacters = await CharacterFactory.createList(10, {
 				userId: '0',

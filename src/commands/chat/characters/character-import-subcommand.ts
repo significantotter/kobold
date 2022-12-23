@@ -67,10 +67,16 @@ export class CharacterImportSubCommand implements Command {
 			await InteractionUtils.send(
 				intr,
 				LL.commands.character.interactions.authenticationRequest({
-					wgBaseUrl: Config.wanderersGuide.oauthBaseUrl,
-					charId,
 					action: 'import',
 				})
+			);
+			await InteractionUtils.send(
+				intr,
+				LL.commands.character.interactions.authenticationLink({
+					wgBaseUrl: Config.wanderersGuide.oauthBaseUrl,
+					charId: charId,
+				}),
+				true
 			);
 			return;
 		} else {
@@ -87,10 +93,15 @@ export class CharacterImportSubCommand implements Command {
 					await WgToken.query().delete().where({ charId });
 					await InteractionUtils.send(
 						intr,
-						LL.commands.character.interactions.expiredToken({
+						LL.commands.character.interactions.expiredToken()
+					);
+					await InteractionUtils.send(
+						intr,
+						LL.commands.character.interactions.authenticationLink({
 							wgBaseUrl: Config.wanderersGuide.oauthBaseUrl,
 							charId: charId,
-						})
+						}),
+						true
 					);
 					return;
 				} else {
@@ -101,7 +112,7 @@ export class CharacterImportSubCommand implements Command {
 
 			// set current characters owned by user to inactive state
 			await Character.query()
-				.update({ isActiveCharacter: false })
+				.patch({ isActiveCharacter: false })
 				.where({ userId: intr.user.id });
 
 			// store sheet in db

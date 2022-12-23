@@ -16,12 +16,6 @@ describe('CharacterListSubCommand', () => {
 		CharacterFactory.build({ isActiveCharacter: true }),
 	];
 	it('Returns a message when there are no characters', done => {
-		jest.spyOn(Character, 'query').mockReturnValue({
-			where({ userId }) {
-				return [];
-			},
-		} as any);
-
 		jest.spyOn(InteractionUtils, 'send').mockImplementation((intr, message): any => {
 			expect(message).toBe(Language.LL.commands.character.list.interactions.noCharacters());
 			done();
@@ -37,6 +31,13 @@ describe('CharacterListSubCommand', () => {
 		jest.spyOn(Character, 'query').mockReturnValue({
 			where({ userId }) {
 				return builtCharacters;
+			},
+			joinRelated(options) {
+				return {
+					where() {
+						return [];
+					},
+				};
 			},
 		} as any);
 		const fakeIntr = {
