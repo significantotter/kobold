@@ -535,6 +535,20 @@ const en: BaseTranslation = {
 				name: 'create',
 				description: 'Creates a modifier for the active character.',
 			},
+			delete: {
+				name: 'delete',
+				description: 'Deletes a modifier for the active character.',
+
+				interactions: {
+					deleteConfirmation: {
+						text: `Are you sure you want to delete the modifier {modifierName}?`,
+						deleteButton: 'DELETE',
+						cancelButton: 'CANCEL',
+						expired: 'Yip! Modifier removal request expired.',
+					},
+					success: 'Yip! You deleted the modifier {modifierName}',
+				},
+			},
 		},
 		roll: {
 			name: 'roll',

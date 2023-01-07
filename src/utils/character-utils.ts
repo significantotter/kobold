@@ -60,7 +60,7 @@ export class CharacterUtils {
 	}
 
 	/**
-	 * Given a string, finds all skills contining that string on a given character
+	 * Given a string, finds all skills containing that string on a given character
 	 * @param targetCharacter the character to check for matching skills
 	 * @param skillText the text to match to skills
 	 * @returns all skills that contain the given skillText
@@ -82,7 +82,7 @@ export class CharacterUtils {
 	}
 
 	/**
-	 * Given a string, finds all saves contining that string on a given character
+	 * Given a string, finds all saves containing that string on a given character
 	 * @param targetCharacter the character to check for matching saves
 	 * @param saveText the text to match to saves
 	 * @returns all saves that contain the given saveText
@@ -101,7 +101,26 @@ export class CharacterUtils {
 	}
 
 	/**
-	 * Given a string, finds all ability scores contining that string on a given character
+	 * Given a string, finds all modifiers containing that string on a given character
+	 * @param targetCharacter the character to check for matching modifiers
+	 * @param modifierText the text to match to modifiers
+	 * @returns all modifiers that contain the given modifierText
+	 */
+	public static findPossibleModifierFromString(
+		targetCharacter: Character,
+		modifierText: string
+	): Character['modifiers'] {
+		const matchedModifiers = [];
+		for (const modifier of targetCharacter.modifiers || []) {
+			if (modifier.name.toLowerCase().includes(modifierText.toLowerCase())) {
+				matchedModifiers.push(modifier);
+			}
+		}
+		return matchedModifiers;
+	}
+
+	/**
+	 * Given a string, finds all ability scores containing that string on a given character
 	 * @param targetCharacter the character to check for matching ability scores
 	 * @param abilityText the text to match to ability scores
 	 * @returns all ability scores that contain the given abilityText
@@ -120,7 +139,7 @@ export class CharacterUtils {
 	}
 
 	/**
-	 * Given a string, finds all attacks contining that string on a given character
+	 * Given a string, finds all attacks containing that string on a given character
 	 * @param targetCharacter the character to check for matching attacks
 	 * @param attackText the text to match to attacks
 	 * @returns all attacks that contain the given attackText
