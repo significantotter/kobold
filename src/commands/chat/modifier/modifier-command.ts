@@ -44,6 +44,12 @@ export class ModifierCommand implements Command {
 					ModifierOptions.MODIFIER_TARGET_TAGS_OPTION,
 				],
 			},
+			{
+				name: Language.LL.commands.modifier.delete.name(),
+				description: Language.LL.commands.modifier.delete.description(),
+				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				options: [{ ...ModifierOptions.MODIFIER_NAME_OPTION, autocomplete: true }],
+			},
 		],
 	};
 	public cooldown = new RateLimiter(1, 5000);

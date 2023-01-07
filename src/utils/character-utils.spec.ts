@@ -170,6 +170,70 @@ describe('Character Utils', function () {
 			expect(foundSaves.length).toBe(0);
 		});
 	});
+	describe('CharacterUtils.findPossibleModifierFromString', function () {
+		it('fetches possible skill targets from a character', function () {
+			const fakeCharacter = CharacterFactory.build();
+			const targetModifier: Character['modifiers'][0] = {
+				name: 'FakeModifier',
+				description: 'description',
+				tags: ['foo', 'bar'],
+				type: 'custom',
+				value: 10,
+			};
+			const otherTargetModifier: Character['modifiers'][0] = {
+				name: 'qwer FakeModifier asdf',
+				description: 'description',
+				tags: ['foo', 'bar'],
+				type: 'custom',
+				value: 10,
+			};
+			const unmatchedModifier: Character['modifiers'][0] = {
+				name: 'akeAbilit',
+				description: 'description',
+				tags: ['foo', 'bar'],
+				type: 'custom',
+				value: 10,
+			};
+			fakeCharacter.modifiers = [targetModifier, otherTargetModifier, unmatchedModifier];
+			const foundModifiers = CharacterUtils.findPossibleModifierFromString(
+				fakeCharacter,
+				targetModifier.name
+			);
+			expect(foundModifiers).toContain(targetModifier);
+			expect(foundModifiers).toContain(otherTargetModifier);
+			expect(foundModifiers).not.toContain(unmatchedModifier);
+		});
+		it("fails to fetch skills that don't match from a character", function () {
+			const fakeCharacter = CharacterFactory.build();
+			const firstModifier: Character['modifiers'][0] = {
+				name: 'FakeModifier',
+				description: 'description',
+				tags: ['foo', 'bar'],
+				type: 'custom',
+				value: 10,
+			};
+			const secondModifier: Character['modifiers'][0] = {
+				name: 'qwer FakeModifier asdf',
+				description: 'description',
+				tags: ['foo', 'bar'],
+				type: 'custom',
+				value: 10,
+			};
+			const thirdModifier: Character['modifiers'][0] = {
+				name: 'akeAbilit',
+				description: 'description',
+				tags: ['foo', 'bar'],
+				type: 'custom',
+				value: 10,
+			};
+			fakeCharacter.modifiers = [firstModifier, secondModifier, thirdModifier];
+			const foundModifiers = CharacterUtils.findPossibleModifierFromString(
+				fakeCharacter,
+				'jkljdfiawhedfiuws'
+			);
+			expect(foundModifiers.length).toBe(0);
+		});
+	});
 	describe('CharacterUtils.getActiveCharacter', function () {
 		afterEach(function () {
 			return Character.query().delete().whereRaw('true');
