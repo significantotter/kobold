@@ -23,12 +23,12 @@ import { CharacterUtils } from '../../../utils/character-utils.js';
 import { ModifierOptions } from './modifier-command-options.js';
 import _ from 'lodash';
 
-export class ModifierDeleteSubCommand implements Command {
-	public names = [Language.LL.commands.modifier.delete.name()];
+export class ModifierRemoveSubCommand implements Command {
+	public names = [Language.LL.commands.modifier.remove.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.modifier.delete.name(),
-		description: Language.LL.commands.modifier.delete.description(),
+		name: Language.LL.commands.modifier.remove.name(),
+		description: Language.LL.commands.modifier.remove.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -55,15 +55,15 @@ export class ModifierDeleteSubCommand implements Command {
 				return [];
 			}
 			//find a save on the character matching the autocomplete string
-			const matchedSaves = CharacterUtils.findPossibleModifierFromString(
+			const matchedModifiers = CharacterUtils.findPossibleModifierFromString(
 				activeCharacter,
 				match
-			).map(save => ({
-				name: save.Name,
-				value: save.Name,
+			).map(modifier => ({
+				name: modifier.name,
+				value: modifier.name,
 			}));
 			//return the matched saves
-			return matchedSaves;
+			return matchedModifiers;
 		}
 	}
 
@@ -77,13 +77,13 @@ export class ModifierDeleteSubCommand implements Command {
 		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id, intr.guildId);
 		const targetModifier = _.find(
 			activeCharacter.modifiers,
-			modifier => modifier.name.toLowerCase() === modifierChoice.toLowerCase()
+			modifier => modifier.name.toLocaleLowerCase() === modifierChoice.toLocaleLowerCase()
 		);
 		if (targetModifier) {
 			// ask for confirmation
 
 			const prompt = await intr.reply({
-				content: LL.commands.modifier.delete.interactions.deleteConfirmation.text({
+				content: LL.commands.modifier.remove.interactions.removeConfirmation.text({
 					modifierName: targetModifier.name,
 				}),
 				components: [
@@ -92,13 +92,13 @@ export class ModifierDeleteSubCommand implements Command {
 						components: [
 							{
 								type: ComponentType.Button,
-								label: LL.commands.modifier.delete.interactions.deleteConfirmation.deleteButton(),
-								customId: 'delete',
+								label: LL.commands.modifier.remove.interactions.removeConfirmation.removeButton(),
+								customId: 'remove',
 								style: ButtonStyle.Danger,
 							},
 							{
 								type: ComponentType.Button,
-								label: LL.commands.modifier.delete.interactions.deleteConfirmation.cancelButton(),
+								label: LL.commands.modifier.remove.interactions.removeConfirmation.cancelButton(),
 								customId: 'cancel',
 								style: ButtonStyle.Primary,
 							},
@@ -116,8 +116,8 @@ export class ModifierDeleteSubCommand implements Command {
 						return;
 					}
 					switch (buttonInteraction.customId) {
-						case 'delete':
-							return { intr: buttonInteraction, value: 'delete' };
+						case 'remove':
+							return { intr: buttonInteraction, value: 'remove' };
 						default:
 							return { intr: buttonInteraction, value: 'cancel' };
 					}
@@ -131,20 +131,49 @@ export class ModifierDeleteSubCommand implements Command {
 						timedOut = true;
 						await InteractionUtils.editReply(intr, {
 							content:
-								LL.commands.modifier.delete.interactions.deleteConfirmation.expired(),
+								LL.commands.modifier.remove.interactions.removeConfirmation.expired(),
 							components: [],
 						});
 					},
 				}
 			);
-			// delete the modifier
-			if (result.value === 'delete') {
+			await InteractionUtils.editReply(intr, {
+				content: LL.sharedInteractions.choiceRegistered({
+					choice: _.capitalize(result.value),
+				}),
+				components: [],
+			});
+			// remove the modifier
+			if (result.value === 'remove') {
+				const modifiersWithoutRemoved = _.filter(
+					activeCharacter.modifiers,
+					modifier =>
+						modifier.name.toLocaleLowerCase() !== modifierChoice.toLocaleLowerCase()
+				);
+				await Character.query()
+					.patch({ modifiers: modifiersWithoutRemoved })
+					.where({ userId: intr.user.id });
+
+				await InteractionUtils.send(
+					intr,
+					LL.commands.modifier.remove.interactions.success({
+						modifierName: targetModifier.name,
+					})
+				);
+				return;
 			}
 			// cancel
 			else {
+				await InteractionUtils.send(
+					intr,
+					LL.commands.modifier.remove.interactions.cancel()
+				);
+				return;
 			}
 		} else {
 			// no matching modifier found
+			await InteractionUtils.send(intr, LL.commands.modifier.remove.interactions.notFound());
+			return;
 		}
 	}
 }

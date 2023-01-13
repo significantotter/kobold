@@ -45,8 +45,8 @@ export class ModifierCommand implements Command {
 				],
 			},
 			{
-				name: Language.LL.commands.modifier.delete.name(),
-				description: Language.LL.commands.modifier.delete.description(),
+				name: Language.LL.commands.modifier.remove.name(),
+				description: Language.LL.commands.modifier.remove.description(),
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
 				options: [{ ...ModifierOptions.MODIFIER_NAME_OPTION, autocomplete: true }],
 			},

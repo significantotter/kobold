@@ -17,7 +17,7 @@ import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Language } from '../../../models/enum-helpers/index.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
 
-const targetTagsRegex = /([\W\d],)*([\W\d])/;
+const targetTagsRegex = /([\W\d], ?)*([\W\d])/;
 const replaceTargetTagsRegex = /["'`]/g;
 
 export class ModifierCreateSubCommand implements Command {
@@ -60,26 +60,48 @@ export class ModifierCreateSubCommand implements Command {
 
 		// make sure the name does't already exist in the character's modifiers
 		if (activeCharacter.modifiers.find(modifier => modifier.name.toLowerCase() === name)) {
+			await InteractionUtils.send(
+				intr,
+				LL.commands.modifier.create.interactions.alreadyExists({
+					modifierName: name,
+					characterName: activeCharacter.characterData.name,
+				})
+			);
 			return;
 		}
 
 		// parse the target tags
 		targetTags = targetTags.replaceAll(replaceTargetTagsRegex, '');
-		if (!targetTagsRegex.test(targetTags)) {
+		if (!targetTags || !targetTagsRegex.test(targetTags)) {
 			// the tags are in an invalid format
+			await InteractionUtils.send(
+				intr,
+				LL.commands.modifier.create.interactions.invalidTags()
+			);
 			return;
 		}
-		const splitTags = targetTags.split(',');
+		const splitTags = targetTags.split(/, */).filter(tag => tag !== '');
 
 		await Character.query().updateAndFetchById(activeCharacter.id, {
-			modifiers: {
-				name,
-				description,
-				value,
-				targetTags: splitTags,
-			},
+			modifiers: [
+				...activeCharacter.modifiers,
+				{
+					name,
+					description,
+					value,
+					targetTags: splitTags,
+				},
+			],
 		});
 
+		await InteractionUtils.send(
+			intr,
+			LL.commands.modifier.create.interactions.created({
+				modifierName: name,
+				characterName: activeCharacter.characterData.name,
+			})
+		);
+		return;
 		//send a response
 		return;
 	}

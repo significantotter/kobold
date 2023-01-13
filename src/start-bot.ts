@@ -32,6 +32,11 @@ import {
 	InitJoinSubCommand,
 	InitRemoveSubCommand,
 	InitEndSubCommand,
+	// modifier
+	ModifierCommand,
+	ModifierCreateSubCommand,
+	ModifierRemoveSubCommand,
+	ModifierListSubCommand,
 	// help
 	HelpCommand,
 	// admin
@@ -75,8 +80,10 @@ async function start(): Promise<void> {
 	let commands: Command[] = [
 		// Help
 		new HelpCommand(),
+
 		// Admin
 		new AdminCommand(),
+
 		// Character Commands
 		new CharacterCommand([
 			new CharacterSheetSubCommand(),
@@ -97,6 +104,7 @@ async function start(): Promise<void> {
 			new RollPerceptionSubCommand(),
 			new RollAbilitySubCommand(),
 		]),
+
 		// Init commands
 		new InitCommand([
 			new InitAddSubCommand(),
@@ -109,6 +117,13 @@ async function start(): Promise<void> {
 			new InitJoinSubCommand(),
 			new InitRemoveSubCommand(),
 			new InitEndSubCommand(),
+		]),
+
+		// Modifier commands
+		new ModifierCommand([
+			new ModifierCreateSubCommand(),
+			new ModifierRemoveSubCommand(),
+			new ModifierListSubCommand(),
 		]),
 	];
 

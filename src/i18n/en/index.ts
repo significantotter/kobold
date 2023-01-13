@@ -524,7 +524,7 @@ const en: BaseTranslation = {
 			},
 		},
 		modifier: {
-			name: 'modifer',
+			name: 'modifier',
 			description: 'Toggleable values to modify specified dice rolls.',
 
 			list: {
@@ -534,19 +534,28 @@ const en: BaseTranslation = {
 			create: {
 				name: 'create',
 				description: 'Creates a modifier for the active character.',
+				interactions: {
+					created: 'Yip! I created the modifier {modifierName} for {characterName}.',
+					alreadyExists:
+						'Yip! A modifier named {modifierName} already exists for {characterName}.',
+					invalidTags:
+						'Yip! I didn\'t understand the tags you provided. Tags should be words separated by commas. For example, "attack,skill"',
+				},
 			},
-			delete: {
-				name: 'delete',
-				description: 'Deletes a modifier for the active character.',
+			remove: {
+				name: 'remove',
+				description: 'Removes a modifier for the active character.',
 
 				interactions: {
-					deleteConfirmation: {
-						text: `Are you sure you want to delete the modifier {modifierName}?`,
-						deleteButton: 'DELETE',
+					removeConfirmation: {
+						text: `Are you sure you want to remove the modifier {modifierName}?`,
+						removeButton: 'REMOVE',
 						cancelButton: 'CANCEL',
 						expired: 'Yip! Modifier removal request expired.',
 					},
-					success: 'Yip! You deleted the modifier {modifierName}',
+					notFound: "Yip! I couldn't find a modifier with that name.",
+					cancel: 'Yip! Canceled the request to remove the modifier!',
+					success: 'Yip! I removed the modifier {modifierName}.',
 				},
 			},
 		},
@@ -735,7 +744,7 @@ const en: BaseTranslation = {
 			description: 'The value applied by the modifier to dice rolls.',
 		},
 		modifierTargetTags: {
-			name: 'targetTags',
+			name: 'target-tags',
 			description:
 				'A set of tags for the rolls that this modifier applies to. Separated by commas.',
 		},

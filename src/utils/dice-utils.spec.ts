@@ -14,7 +14,7 @@ describe('Dice Utils', function () {
 			const result = DiceUtils.buildDiceExpression('d10', '+5', '+2d4');
 			expect(result).toBe('d10+5+(+2d4)');
 		});
-		test('allows for base dice with no modifer', function () {
+		test('allows for base dice with no modifier', function () {
 			const result = DiceUtils.buildDiceExpression('d10', '5');
 			expect(result).toBe('d10+5');
 		});

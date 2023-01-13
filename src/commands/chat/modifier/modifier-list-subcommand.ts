@@ -54,7 +54,7 @@ export class ModifierListSubCommand implements Command {
 				name: modifier.name,
 				value: `${modifier.description ? modifier.description + '\n' : ''}Value: ${
 					modifier.value
-				}\nApplies to: ${modifier.tags.join(', ')}`,
+				}\nApplies to: ${modifier.targetTags.join(', ')}`,
 			});
 		}
 		embed.addFields(fields);
