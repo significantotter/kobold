@@ -37,6 +37,14 @@
 			"type": "string",
 			"format": "date-time",
 			"description": "When the initiative was last interacted with"
+		},
+		"hp": {
+			"type": ["number", "null"],
+			"description": "The HP of the initiative actor."
+		},
+		"maxHp": {
+			"type": ["number", "null"],
+			"description": "The max HP of the initiative actor."
 		}
 	}
 }

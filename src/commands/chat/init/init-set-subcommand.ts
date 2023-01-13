@@ -75,7 +75,7 @@ export class InitSetSubCommand implements Command {
 		const fieldToChange = intr.options.getString(ChatArgs.ACTOR_SET_OPTION.name).trim();
 		const newFieldValue = intr.options.getString(ChatArgs.ACTOR_SET_VALUE_OPTION.name).trim();
 
-		if (!fieldToChange || !['initiative', 'name'].includes(fieldToChange)) {
+		if (!fieldToChange || !['initiative', 'name', 'hp', 'maxHp'].includes(fieldToChange)) {
 			await InteractionUtils.send(
 				intr,
 				LL.commands.init.set.interactions.invalidOptionError()
@@ -141,6 +141,24 @@ export class InitSetSubCommand implements Command {
 				return;
 			}
 		}
+		if (fieldToChange === 'hp') {
+			if (isNaN(Number(newFieldValue))) {
+				await InteractionUtils.send(
+					intr,
+					LL.commands.init.set.interactions.hpNotNumberError()
+				);
+				return;
+			}
+		}
+		if (fieldToChange === 'maxHp') {
+			if (isNaN(Number(newFieldValue))) {
+				await InteractionUtils.send(
+					intr,
+					LL.commands.init.set.interactions.maxHpNotNumberError()
+				);
+				return;
+			}
+		}
 
 		// perform the updates
 		if (fieldToChange === 'initiative') {
@@ -154,6 +172,14 @@ export class InitSetSubCommand implements Command {
 					name: newFieldValue,
 				});
 			}
+		} else if (fieldToChange === 'hp') {
+			await InitiativeActor.query().patchAndFetchById(actor.id, {
+				hp: newFieldValue,
+			});
+		} else if (fieldToChange === 'maxHp') {
+			await InitiativeActor.query().patchAndFetchById(actor.id, {
+				maxHp: newFieldValue,
+			});
 		}
 		currentInitResponse = await InitiativeUtils.getInitiativeForChannel(intr.channel, {
 			sendErrors: true,

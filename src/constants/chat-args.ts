@@ -115,6 +115,20 @@ export class ChatArgs {
 		autocomplete: true,
 		type: ApplicationCommandOptionType.String,
 	};
+	public static readonly INIT_HP_OPTION: APIApplicationCommandBasicOption = {
+		name: Language.LL.commandOptions.initHp.name(),
+		description: Language.LL.commandOptions.initHp.description(),
+		required: false,
+		autocomplete: true,
+		type: ApplicationCommandOptionType.Number,
+	};
+	public static readonly INIT_MAX_HP_OPTION: APIApplicationCommandBasicOption = {
+		name: Language.LL.commandOptions.initMaxHp.name(),
+		description: Language.LL.commandOptions.initMaxHp.description(),
+		required: false,
+		autocomplete: true,
+		type: ApplicationCommandOptionType.Number,
+	};
 	public static readonly ACTOR_NAME_OPTION: APIApplicationCommandBasicOption = {
 		name: Language.LL.commandOptions.initActor.name(),
 		description: Language.LL.commandOptions.initActor.description(),
@@ -134,6 +148,14 @@ export class ChatArgs {
 			{
 				name: Language.LL.commandOptions.initSetOption.choices.actorName.name(),
 				value: Language.LL.commandOptions.initSetOption.choices.actorName.value(),
+			},
+			{
+				name: Language.LL.commandOptions.setOption.choices.hp.name(),
+				value: Language.LL.commandOptions.setOption.choices.hp.value(),
+			},
+			{
+				name: Language.LL.commandOptions.setOption.choices.maxHp.name(),
+				value: Language.LL.commandOptions.setOption.choices.maxHp.value(),
 			},
 		],
 	};

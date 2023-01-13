@@ -603,6 +603,8 @@ const en: BaseTranslation = {
 					nameExistsError:
 						'Yip! A character with that name is already in the initiative.',
 					initNotNumberError: 'Yip! You can only update initiative with a number.',
+					hpNotNumberError: 'Yip! You can only update HP with a number.',
+					maxHpNotNumberError: 'Yip! You can only update max HP with a number.',
 					successEmbed: {
 						title: 'Yip! {actorName} had their {fieldToChange} set to {newFieldValue}.',
 					},
@@ -909,6 +911,14 @@ const en: BaseTranslation = {
 			name: 'character',
 			description: 'A character present in the initiative.',
 		},
+		initHp: {
+			name: 'hp',
+			description: 'A value to set HP to in initiative.',
+		},
+		initMaxHp: {
+			name: 'maxHp',
+			description: 'A value to set max HP to in initiative.',
+		},
 		initSetOption: {
 			name: 'option',
 			description: 'The character option to alter (only within this initiative).',
@@ -920,6 +930,14 @@ const en: BaseTranslation = {
 				actorName: {
 					name: 'name',
 					value: 'name',
+				},
+				hp: {
+					name: 'hp',
+					value: 'hp',
+				},
+				maxHp: {
+					name: 'maxHp',
+					value: 'maxHp',
 				},
 			},
 		},

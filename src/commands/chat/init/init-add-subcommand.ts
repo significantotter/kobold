@@ -49,6 +49,8 @@ export class InitAddSubCommand implements Command {
 		let actorName = intr.options.getString(ChatArgs.ACTOR_NAME_OPTION.name);
 		const initiativeValue = intr.options.getNumber(ChatArgs.INIT_VALUE_OPTION.name);
 		const diceExpression = intr.options.getString(ChatArgs.ROLL_EXPRESSION_OPTION.name);
+		const hpValue = intr.options.getNumber(ChatArgs.INIT_HP_OPTION.name);
+		const maxHpValue = intr.options.getNumber(ChatArgs.INIT_MAX_HP_OPTION.name);
 
 		let nameCount = 1;
 		let existingName = currentInit.actors.find(
@@ -111,6 +113,8 @@ export class InitAddSubCommand implements Command {
 			initiativeId: currentInit.id,
 			name: actorName,
 			userId: intr.user.id,
+			hp: hpValue,
+			maxHp: maxHpValue,
 
 			actorGroup: {
 				initiativeId: currentInit.id,

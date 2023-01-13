@@ -101,6 +101,8 @@ export class InitJoinSubCommand implements Command {
 		const initiativeValue = intr.options.getNumber(ChatArgs.INIT_VALUE_OPTION.name);
 		const skillChoice = intr.options.getString(ChatArgs.SKILL_CHOICE_OPTION.name);
 		const diceExpression = intr.options.getString(ChatArgs.ROLL_EXPRESSION_OPTION.name);
+		let hpValue = intr.options.getNumber(ChatArgs.INIT_HP_OPTION.name);
+		let maxHpValue = intr.options.getNumber(ChatArgs.INIT_MAX_HP_OPTION.name);
 
 		let finalInitiative = 0;
 		let rollResultMessage: EmbedBuilder;
@@ -179,11 +181,20 @@ export class InitJoinSubCommand implements Command {
 			}
 		}
 
+		if (!maxHpValue) {
+			maxHpValue = activeCharacter.calculatedStats.maxHP;
+		}
+		if (!hpValue) {
+			hpValue = maxHpValue;
+		}
+
 		const newActor = await InitiativeActor.query().insertGraphAndFetch({
 			initiativeId: currentInit.id,
 			name: uniqueName,
 			characterId: activeCharacter.id,
 			userId: intr.user.id,
+			hp: hpValue,
+			maxHp: maxHpValue,
 
 			actorGroup: {
 				initiativeId: currentInit.id,
