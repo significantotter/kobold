@@ -104,9 +104,14 @@ export class RollAbilitySubCommand implements Command {
 			}),
 			LL,
 		});
-		rollBuilder.addRoll(
-			DiceUtils.buildDiceExpression('d20', String(scoreModifier), modifierExpression)
-		);
+		rollBuilder.addRoll({
+			rollExpression: DiceUtils.buildDiceExpression(
+				'd20',
+				String(scoreModifier),
+				modifierExpression
+			),
+			tags: ['ability', abilityChoice.toLocaleLowerCase()],
+		});
 		const response = rollBuilder.compileEmbed();
 
 		await InteractionUtils.send(intr, response);

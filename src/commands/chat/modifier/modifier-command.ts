@@ -40,6 +40,7 @@ export class ModifierCommand implements Command {
 				options: [
 					ModifierOptions.MODIFIER_NAME_OPTION,
 					ModifierOptions.MODIFIER_DESCRIPTION_OPTION,
+					ModifierOptions.MODIFIER_TYPE_OPTION,
 					ModifierOptions.MODIFIER_VALUE_OPTION,
 					ModifierOptions.MODIFIER_TARGET_TAGS_OPTION,
 				],

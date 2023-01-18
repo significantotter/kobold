@@ -92,15 +92,45 @@ export class RollBuilder {
 	 * @param rollExpression The roll expression to roll
 	 * @param rollTitle The optional title of the roll. If the embed
 	 *                  only has a single roll, this will be overwritten
+	 * @param tags an array of strings that describe the roll and how modifiers
+	 * 					apply to it.
 	 */
-	public addRoll(rollExpression: string, rollTitle?: string) {
+	public addRoll({
+		rollExpression,
+		rollTitle,
+		tags,
+	}: {
+		rollExpression: string;
+		rollTitle?: string;
+		tags?: string[];
+	}) {
 		const rollField = {
 			name: rollTitle || '\u200B',
 			value: '',
 			results: null,
 		};
 		try {
-			const parsedExpression = this.parseAttributes(rollExpression);
+			const modifier = 0;
+			let modifiers = [];
+
+			// check for any referenced character attributes in the roll
+			let parsedExpression = this.parseAttributes(rollExpression);
+
+			// if we have a character and tags, check for active modifiers
+			if (this.character && tags.length) {
+				modifiers = this.character.getModifiersFromTags(tags);
+			}
+			for (const modifier of modifiers) {
+				// add to both the parsed expression and the initial roll expression
+				// the roll expression shows the user the meaning behind the roll values, while
+				// the parsed expression just has the math for the dice roller to use
+				const modifierSymbol = modifier.value >= 0 ? '+' : '-';
+				rollExpression += ` ${modifierSymbol} [${modifier.name}] ${Math.abs(
+					modifier.value
+				)}`;
+				parsedExpression += ` ${modifierSymbol} ${Math.abs(modifier.value)}`;
+			}
+
 			const roll = new Dice(null, null, {
 				maxRollTimes: 20, // limit to 20 rolls
 				maxDiceSides: 100, // limit to 100 dice faces
@@ -179,15 +209,25 @@ export class DiceUtils {
 		return `${baseDice}${bonus || ''}${wrappedModifierExpression}`;
 	}
 
-	public static rollSkill(
-		intr: CommandInteraction,
-		activeCharacter: Character,
-		skillChoice: string,
-		rollNote?: string,
-		modifierExpression?: string,
-		description?: string,
-		LL?: TranslationFunctions
-	) {
+	public static rollSkill({
+		intr,
+		activeCharacter,
+		skillChoice,
+		rollNote,
+		modifierExpression,
+		description,
+		tags,
+		LL,
+	}: {
+		intr: CommandInteraction;
+		activeCharacter: Character;
+		skillChoice: string;
+		rollNote?: string;
+		modifierExpression?: string;
+		description?: string;
+		tags?: string[];
+		LL?: TranslationFunctions;
+	}) {
 		LL = LL || Language.LL;
 		const skillsPlusPerception = [
 			...activeCharacter.calculatedStats.totalSkills,
@@ -208,9 +248,14 @@ export class DiceUtils {
 				actionName: targetSkill.Name,
 			}),
 		});
-		rollBuilder.addRoll(
-			DiceUtils.buildDiceExpression('d20', String(targetSkill.Bonus), modifierExpression)
-		);
+		rollBuilder.addRoll({
+			rollExpression: DiceUtils.buildDiceExpression(
+				'd20',
+				String(targetSkill.Bonus),
+				modifierExpression
+			),
+			tags: (tags || []).concat(['skill', skillChoice.toLocaleLowerCase()]),
+		});
 		return rollBuilder;
 	}
 }

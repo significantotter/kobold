@@ -8,6 +8,12 @@ export class ModifierOptions {
 		required: true,
 		type: ApplicationCommandOptionType.String,
 	};
+	public static readonly MODIFIER_TYPE_OPTION: APIApplicationCommandBasicOption = {
+		name: Language.LL.commandOptions.modifierType.name(),
+		description: Language.LL.commandOptions.modifierType.description(),
+		required: true,
+		type: ApplicationCommandOptionType.String,
+	};
 	public static readonly MODIFIER_DESCRIPTION_OPTION: APIApplicationCommandBasicOption = {
 		name: Language.LL.commandOptions.modifierDescription.name(),
 		description: Language.LL.commandOptions.modifierDescription.description(),

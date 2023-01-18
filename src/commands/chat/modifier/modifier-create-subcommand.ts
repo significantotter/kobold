@@ -17,7 +17,7 @@ import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Language } from '../../../models/enum-helpers/index.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
 
-const targetTagsRegex = /([\W\d], ?)*([\W\d])/;
+const targetTagsRegex = /[\w\d]+(, ?([\w\d]+))*,? */;
 const replaceTargetTagsRegex = /["'`]/g;
 
 export class ModifierCreateSubCommand implements Command {
@@ -48,6 +48,9 @@ export class ModifierCreateSubCommand implements Command {
 		}
 		let name = intr.options
 			.getString(ModifierOptions.MODIFIER_NAME_OPTION.name)
+			.trim()
+			.toLowerCase();
+		let modifierType = (intr.options.getString(ModifierOptions.MODIFIER_TYPE_OPTION.name) || '')
 			.trim()
 			.toLowerCase();
 		const description = intr.options
@@ -87,8 +90,10 @@ export class ModifierCreateSubCommand implements Command {
 				...activeCharacter.modifiers,
 				{
 					name,
+					isActive: true,
 					description,
 					value,
+					type: modifierType,
 					targetTags: splitTags,
 				},
 			],

@@ -51,10 +51,10 @@ export class ModifierListSubCommand implements Command {
 		const fields = [];
 		for (const modifier of modifiers) {
 			fields.push({
-				name: modifier.name,
-				value: `${modifier.description ? modifier.description + '\n' : ''}Value: ${
-					modifier.value
-				}\nApplies to: ${modifier.targetTags.join(', ')}`,
+				name: `${modifier.name}${modifier.isActive ? ' (active)' : ''}`,
+				value: `${modifier.description ? modifier.description + '\n' : ''}${
+					modifier.type ? `'Type: ${modifier.type}\n` : ''
+				}Value: ${modifier.value}\nApplies to: ${modifier.targetTags.join(', ')}`,
 			});
 		}
 		embed.addFields(fields);

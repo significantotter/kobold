@@ -67,8 +67,9 @@ export const CharacterFactory = CharacterFactoryClass.define(({ onCreate, transi
 		const modifier = {
 			name: faker.random.word(),
 			description: faker.random.words(5),
-			type: faker.helpers.arrayElement(['base', 'ability', 'save', 'skill', 'other']),
-			tags: [],
+			isActive: faker.datatype.boolean(),
+			type: faker.helpers.arrayElement(['status', 'circumstance', 'item']),
+			targetTags: [],
 			value: faker.datatype.number(),
 		};
 		return [modifier];

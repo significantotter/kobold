@@ -735,6 +735,10 @@ const en: BaseTranslation = {
 			name: 'name',
 			description: 'The name of the modifier.',
 		},
+		modifierType: {
+			name: 'type',
+			description: 'The optional type (status, item, or circumstance) of the modifier.',
+		},
 		modifierDescription: {
 			name: 'description',
 			description: 'A description for the modifier.',

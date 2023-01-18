@@ -71,9 +71,10 @@
 				"type": "object",
 				"properties": {
 					"name": { "type": "string" },
+					"isActive": { "type": "boolean" },
 					"description": { "type": "string" },
 					"type": { "type": "string" },
-					"tags": { "type": "array", "items": { "type": "string" } },
+					"targetTags": { "type": "array", "items": { "type": "string" } },
 					"value": { "type": "number" }
 				}
 			}

@@ -52,13 +52,14 @@ export class RollPerceptionSubCommand implements Command {
 			}),
 			LL,
 		});
-		rollBuilder.addRoll(
-			DiceUtils.buildDiceExpression(
+		rollBuilder.addRoll({
+			rollExpression: DiceUtils.buildDiceExpression(
 				'd20',
 				String(activeCharacter.calculatedStats.totalPerception),
 				modifierExpression
-			)
-		);
+			),
+			tags: ['skill', 'perception'],
+		});
 		const response = rollBuilder.compileEmbed();
 
 		await InteractionUtils.send(intr, response);

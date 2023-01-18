@@ -46,9 +46,10 @@ export interface Character {
 	 */
 	modifiers?: {
 		name?: string;
+		isActive?: boolean;
 		description?: string;
 		type?: string;
-		tags?: string[];
+		targetTags?: string[];
 		value?: number;
 		[k: string]: any;
 	}[];

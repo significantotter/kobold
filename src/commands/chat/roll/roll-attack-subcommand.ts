@@ -105,26 +105,28 @@ export class RollAttackSubCommand implements Command {
 
 		//if we a to hit defined, roll the attack's to-hit
 		if (targetAttack.Bonus !== undefined) {
-			rollBuilder.addRoll(
-				DiceUtils.buildDiceExpression(
+			rollBuilder.addRoll({
+				rollExpression: DiceUtils.buildDiceExpression(
 					'd20',
 					String(targetAttack.Bonus),
 					attackModifierExpression
 				),
-				Language.LL.commands.roll.attack.interactions.rollEmbed.toHit()
-			);
+				rollTitle: Language.LL.commands.roll.attack.interactions.rollEmbed.toHit(),
+				tags: ['attack'],
+			});
 		}
 
 		//if we have damage defined, roll that as well
 		if (targetAttack.Damage !== undefined) {
-			rollBuilder.addRoll(
-				DiceUtils.buildDiceExpression(
+			rollBuilder.addRoll({
+				rollExpression: DiceUtils.buildDiceExpression(
 					String(DiceUtils.parseDiceFromWgDamageField(targetAttack.Damage)),
 					null,
 					damageModifierExpression
 				),
-				Language.LL.commands.roll.attack.interactions.rollEmbed.damage()
-			);
+				rollTitle: Language.LL.commands.roll.attack.interactions.rollEmbed.damage(),
+				tags: ['damage'],
+			});
 		}
 		const response = rollBuilder.compileEmbed();
 

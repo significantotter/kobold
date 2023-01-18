@@ -57,8 +57,8 @@ describe('RollBuilder', function () {
 			actorName: 'testname',
 			character: null,
 		});
-		rollBuilder.addRoll('d20+1', 'testRoll');
-		rollBuilder.addRoll('d4+1', 'testRoll2');
+		rollBuilder.addRoll({ rollExpression: 'd20+1', rollTitle: 'testRoll' });
+		rollBuilder.addRoll({ rollExpression: 'd4+1', rollTitle: 'testRoll2' });
 		const result = rollBuilder.compileEmbed();
 		const diceField1 = result.data.fields.find(field => field.name === 'testRoll');
 		const diceField2 = result.data.fields.find(field => field.name === 'testRoll2');
@@ -71,7 +71,7 @@ describe('RollBuilder', function () {
 			actorName: 'testname',
 			character: null,
 		});
-		rollBuilder.addRoll('d20+1', 'testRoll');
+		rollBuilder.addRoll({ rollExpression: 'd20+1', rollTitle: 'testRoll' });
 		const result = rollBuilder.compileEmbed();
 		const diceField = (result.data?.fields || []).find(field => field.name === 'testRoll');
 		expect(result.data.title.toLowerCase()).toContain('testname');
@@ -84,7 +84,7 @@ describe('RollBuilder', function () {
 		const rollBuilder = new RollBuilder({
 			character: fakeCharacter,
 		});
-		rollBuilder.addRoll('d6+1', 'testRoll');
+		rollBuilder.addRoll({ rollExpression: 'd6+1', rollTitle: 'testRoll' });
 		const result = rollBuilder.compileEmbed();
 		expect(result.data.title.toLowerCase()).toContain(
 			fakeCharacter.characterData.name.toLowerCase()
@@ -95,7 +95,7 @@ describe('RollBuilder', function () {
 		const rollBuilder = new RollBuilder({
 			rollNote: 'testing!',
 		});
-		rollBuilder.addRoll('d6+1', 'testRoll');
+		rollBuilder.addRoll({ rollExpression: 'd6+1', rollTitle: 'testRoll' });
 		const result = rollBuilder.compileEmbed();
 		expect(result.data.footer.text).toBe('testing!');
 	});
@@ -106,7 +106,7 @@ describe('RollBuilder', function () {
 			actorName: 'some actor',
 			title: `an entirely different title`,
 		});
-		rollBuilder.addRoll('d6+1', 'testRoll');
+		rollBuilder.addRoll({ rollExpression: 'd6+1', rollTitle: 'testRoll' });
 		const result = rollBuilder.compileEmbed();
 		expect(result.data.title.toLowerCase()).not.toContain(fakeCharacter.characterData.name);
 		expect(result.data.title.toLowerCase()).not.toContain('some actor');
@@ -114,11 +114,11 @@ describe('RollBuilder', function () {
 	});
 	test('records errors if something causes a thrown error', function () {
 		const rollBuilder = new RollBuilder({});
-		rollBuilder.addRoll('d10', 'testRoll');
+		rollBuilder.addRoll({ rollExpression: 'd10', rollTitle: 'testRoll' });
 		//temporarily disable the console for the error test
 		const temp = console.warn;
 		console.warn = (...args) => {};
-		rollBuilder.addRoll('dd6++1', 'errorRoll');
+		rollBuilder.addRoll({ rollExpression: 'dd6++1', rollTitle: 'errorRoll' });
 		console.warn = temp;
 		const result = rollBuilder.compileEmbed();
 		const errorRollField = result.data.fields.find(field => field.name === 'errorRoll');
@@ -126,8 +126,8 @@ describe('RollBuilder', function () {
 	});
 	test('records errors if the dice expression is not allowed', function () {
 		const rollBuilder = new RollBuilder({});
-		rollBuilder.addRoll('d10', 'testRoll');
-		rollBuilder.addRoll('500d6', 'errorRoll');
+		rollBuilder.addRoll({ rollExpression: 'd10', rollTitle: 'testRoll' });
+		rollBuilder.addRoll({ rollExpression: '500d6', rollTitle: 'errorRoll' });
 		const result = rollBuilder.compileEmbed();
 		const errorRollField = result.data.fields.find(field => field.name === 'errorRoll');
 		expect(errorRollField.value).toContain("Yip! We didn't understand the dice roll");
@@ -247,7 +247,10 @@ describe('RollBuilder', function () {
 			],
 		});
 		const rollBuilder = new RollBuilder({ character });
-		rollBuilder.addRoll('[custom]d20 + [base] - [custom]', 'attribute roll');
+		rollBuilder.addRoll({
+			rollExpression: '[custom]d20 + [base] - [custom]',
+			rollTitle: 'attribute roll',
+		});
 		expect(rollBuilder.rollResults[0]?.value).toBeTruthy();
 	});
 });

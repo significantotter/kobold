@@ -51,7 +51,7 @@ export class RollDiceSubCommand implements Command {
 			rollNote,
 			LL,
 		});
-		rollBuilder.addRoll(diceExpression);
+		rollBuilder.addRoll({ rollExpression: diceExpression });
 		const response = rollBuilder.compileEmbed();
 
 		await InteractionUtils.send(intr, response);
