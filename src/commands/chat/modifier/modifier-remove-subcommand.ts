@@ -75,10 +75,7 @@ export class ModifierRemoveSubCommand implements Command {
 		const modifierChoice = intr.options.getString(ModifierOptions.MODIFIER_NAME_OPTION.name);
 		//get the active character
 		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id, intr.guildId);
-		const targetModifier = _.find(
-			activeCharacter.modifiers,
-			modifier => modifier.name.toLocaleLowerCase() === modifierChoice.toLocaleLowerCase()
-		);
+		const targetModifier = activeCharacter.getModifierByName(modifierChoice);
 		if (targetModifier) {
 			// ask for confirmation
 
@@ -172,7 +169,7 @@ export class ModifierRemoveSubCommand implements Command {
 			}
 		} else {
 			// no matching modifier found
-			await InteractionUtils.send(intr, LL.commands.modifier.remove.interactions.notFound());
+			await InteractionUtils.send(intr, LL.commands.modifier.interactions.notFound());
 			return;
 		}
 	}

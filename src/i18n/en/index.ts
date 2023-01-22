@@ -527,9 +527,43 @@ const en: BaseTranslation = {
 			name: 'modifier',
 			description: 'Toggleable values to modify specified dice rolls.',
 
+			interactions: {
+				notFound: "Yip! I couldn't find a modifier with that name.",
+				detailHeader: '{modifierName}{modifierIsActive}',
+				detailBody:
+					'{modifierDescriptionText}\nType: `{modifierType}`\nValue: `{modifierValue}`\nApplies to: `{modifierTargetTags}`',
+			},
 			list: {
 				name: 'list',
 				description: 'Lists all modifiers available to your active character.',
+			},
+			detail: {
+				name: 'detail',
+				description: 'Describes a modifier available to your active character.',
+			},
+			toggle: {
+				name: 'toggle',
+				description:
+					'Toggles whether a modifier is currently applying to your active character.',
+				interactions: {
+					success:
+						'Yip! {characterName} had their modifier {modifierName} set to {activeSetting}.',
+					active: 'active',
+					inactive: 'inactive',
+				},
+			},
+			update: {
+				name: 'update',
+				description: 'Updates a modifier for your active character.',
+				interactions: {
+					invalidOptionError: 'Yip! Please send a valid option to update.',
+					emptyNameError: "Yip! You can't use an empty name!",
+					nameExistsError: 'Yip! A modifier with that name already exists.',
+					valueNotNumberError: 'Yip! You can only update a modifier value with a number.',
+					successEmbed: {
+						title: "Yip! {characterName} had their modifier {modifierName}'s {fieldToChange} set to {newFieldValue}.",
+					},
+				},
 			},
 			create: {
 				name: 'create',
@@ -539,7 +573,9 @@ const en: BaseTranslation = {
 					alreadyExists:
 						'Yip! A modifier named {modifierName} already exists for {characterName}.',
 					invalidTags:
-						'Yip! I didn\'t understand the tags you provided. Tags should be words separated by commas. For example, "attack,skill"',
+						"Yip! I didn't understand the target tag expression you provided. Tags can be" +
+						' any expression in a format like "(attack or skill) and not in (acrobatics, athletics)". ' +
+						'See (this link)[https://github.com/joewalnes/filtrex] for more details.',
 				},
 			},
 			remove: {
@@ -553,7 +589,6 @@ const en: BaseTranslation = {
 						cancelButton: 'CANCEL',
 						expired: 'Yip! Modifier removal request expired.',
 					},
-					notFound: "Yip! I couldn't find a modifier with that name.",
 					cancel: 'Yip! Canceled the request to remove the modifier!',
 					success: 'Yip! I removed the modifier {modifierName}.',
 				},
@@ -713,7 +748,7 @@ const en: BaseTranslation = {
 			name: 'character',
 			description: 'A character present in the initiative.',
 		},
-		setOption: {
+		initSetOption: {
 			name: 'option',
 			description: 'The character option to alter (only within this initiative).',
 			choices: {
@@ -727,7 +762,7 @@ const en: BaseTranslation = {
 				},
 			},
 		},
-		setValue: {
+		initSetValue: {
 			name: 'value',
 			description: 'The value to set the option to.',
 		},
@@ -751,6 +786,54 @@ const en: BaseTranslation = {
 			name: 'target-tags',
 			description:
 				'A set of tags for the rolls that this modifier applies to. Separated by commas.',
+		},
+		modifierSetOption: {
+			name: 'option',
+			description: 'The modifier option to alter.',
+			choices: {
+				name: {
+					name: 'name',
+					value: 'name',
+				},
+				description: {
+					name: 'description',
+					value: 'description',
+				},
+				type: {
+					name: 'type',
+					value: 'type',
+				},
+				value: {
+					name: 'value',
+					value: 'value',
+				},
+				targetTags: {
+					name: 'targetTags',
+					value: 'targetTags',
+				},
+			},
+		},
+		modifierSetValue: {
+			name: 'value',
+			description: 'The value to set the option to.',
+		},
+		modifierCustomOption: {
+			name: 'custom',
+			description: 'Whether to view custom created modifiers, default modifiers, or both.',
+			choices: {
+				custom: {
+					name: 'custom',
+					value: 'custom',
+				},
+				default: {
+					name: 'default',
+					value: 'default',
+				},
+				both: {
+					name: 'both',
+					value: 'both',
+				},
+			},
 		},
 	},
 	utils: {

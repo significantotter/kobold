@@ -142,17 +142,23 @@ export class CharacterHelpers {
 			backgroundName,
 		};
 
-		return {
+		const character = {
 			charId,
 			isActiveCharacter: true,
 			characterData,
 			calculatedStats,
 		};
+
+		const attributes = this.parseAttributesForCharacter(character);
+
+		return {
+			...character,
+			attributes,
+		};
 	}
 
 	public static parseAttributesForCharacter(character) {
-		const characterData = character.character_data;
-		const calculatedStats = character.calculated_stats;
+		const { characterData, calculatedStats } = character;
 		const attributes = [
 			{ name: 'level', type: 'base', value: characterData.level, tags: ['level'] },
 			{ name: 'maxHp', type: 'base', value: calculatedStats.maxHP, tags: ['maxHp'] },
@@ -247,9 +253,6 @@ export class CharacterHelpers {
 			attributes.push(attr);
 		}
 
-		return {
-			id: character.id,
-			attributes,
-		};
+		return attributes;
 	}
 }

@@ -1,3 +1,4 @@
+import './config/load-environment.js';
 import { REST } from '@discordjs/rest';
 import { Options, GatewayIntentBits, Partials } from 'discord.js';
 
@@ -37,6 +38,9 @@ import {
 	ModifierCreateSubCommand,
 	ModifierRemoveSubCommand,
 	ModifierListSubCommand,
+	ModifierDetailSubCommand,
+	ModifierUpdateSubCommand,
+	ModifierToggleSubCommand,
 	// help
 	HelpCommand,
 	// admin
@@ -124,6 +128,9 @@ async function start(): Promise<void> {
 			new ModifierCreateSubCommand(),
 			new ModifierRemoveSubCommand(),
 			new ModifierListSubCommand(),
+			new ModifierDetailSubCommand(),
+			new ModifierUpdateSubCommand(),
+			new ModifierToggleSubCommand(),
 		]),
 	];
 

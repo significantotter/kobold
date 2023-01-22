@@ -35,6 +35,9 @@ export { ModifierCommand } from './modifier/modifier-command.js';
 export { ModifierCreateSubCommand } from './modifier/modifier-create-subcommand.js';
 export { ModifierRemoveSubCommand } from './modifier/modifier-remove-subcommand.js';
 export { ModifierListSubCommand } from './modifier/modifier-list-subcommand.js';
+export { ModifierDetailSubCommand } from './modifier/modifier-detail-subcommand.js';
+export { ModifierUpdateSubCommand } from './modifier/modifier-update-subcommand.js';
+export { ModifierToggleSubCommand } from './modifier/modifier-toggle-subcommand.js';
 
 // help command
 export { HelpCommand } from './help-command';

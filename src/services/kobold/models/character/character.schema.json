@@ -72,9 +72,9 @@
 				"properties": {
 					"name": { "type": "string" },
 					"isActive": { "type": "boolean" },
-					"description": { "type": "string" },
+					"description": { "type": ["string", "null"] },
 					"type": { "type": "string" },
-					"targetTags": { "type": "array", "items": { "type": "string" } },
+					"targetTags": { "type": "string" },
 					"value": { "type": "number" }
 				}
 			}

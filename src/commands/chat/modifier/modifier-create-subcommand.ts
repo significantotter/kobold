@@ -1,5 +1,4 @@
 import { ModifierOptions } from './modifier-command-options';
-import { KoboldEmbed } from './../../../utils/kobold-embed-utils';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -7,7 +6,6 @@ import {
 	PermissionsString,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
-import { raw } from 'objection';
 
 import { EventData } from '../../../models/internal-models.js';
 import { Character, Initiative } from '../../../services/kobold/models/index.js';
@@ -16,9 +14,8 @@ import { Command, CommandDeferType } from '../../index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Language } from '../../../models/enum-helpers/index.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
-
-const targetTagsRegex = /[\w\d]+(, ?([\w\d]+))*,? */;
-const replaceTargetTagsRegex = /["'`]/g;
+import { parseTagsFromInput, tagsInputValid } from './helpers.js';
+import { compileExpression } from 'filtrex';
 
 export class ModifierCreateSubCommand implements Command {
 	public names = [Language.LL.commands.modifier.create.name()];
@@ -53,16 +50,16 @@ export class ModifierCreateSubCommand implements Command {
 		let modifierType = (intr.options.getString(ModifierOptions.MODIFIER_TYPE_OPTION.name) || '')
 			.trim()
 			.toLowerCase();
-		const description = intr.options
-			.getString(ModifierOptions.MODIFIER_DESCRIPTION_OPTION.name)
-			.trim();
+		const description = intr.options.getString(
+			ModifierOptions.MODIFIER_DESCRIPTION_OPTION.name
+		);
 		const value = intr.options.getNumber(ModifierOptions.MODIFIER_VALUE_OPTION.name);
 		let targetTags = intr.options
 			.getString(ModifierOptions.MODIFIER_TARGET_TAGS_OPTION.name)
 			.trim();
 
 		// make sure the name does't already exist in the character's modifiers
-		if (activeCharacter.modifiers.find(modifier => modifier.name.toLowerCase() === name)) {
+		if (activeCharacter.getModifierByName(name)) {
 			await InteractionUtils.send(
 				intr,
 				LL.commands.modifier.create.interactions.alreadyExists({
@@ -73,9 +70,9 @@ export class ModifierCreateSubCommand implements Command {
 			return;
 		}
 
-		// parse the target tags
-		targetTags = targetTags.replaceAll(replaceTargetTagsRegex, '');
-		if (!targetTags || !targetTagsRegex.test(targetTags)) {
+		try {
+			compileExpression(targetTags);
+		} catch (err) {
 			// the tags are in an invalid format
 			await InteractionUtils.send(
 				intr,
@@ -83,7 +80,6 @@ export class ModifierCreateSubCommand implements Command {
 			);
 			return;
 		}
-		const splitTags = targetTags.split(/, */).filter(tag => tag !== '');
 
 		await Character.query().updateAndFetchById(activeCharacter.id, {
 			modifiers: [
@@ -94,7 +90,7 @@ export class ModifierCreateSubCommand implements Command {
 					description,
 					value,
 					type: modifierType,
-					targetTags: splitTags,
+					targetTags,
 				},
 			],
 		});

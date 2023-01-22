@@ -34,15 +34,37 @@ export class ModifierCommand implements Command {
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
 			},
 			{
+				name: Language.LL.commands.modifier.detail.name(),
+				description: Language.LL.commands.modifier.detail.description(),
+				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				options: [{ ...ModifierOptions.MODIFIER_NAME_OPTION, autocomplete: true }],
+			},
+			{
 				name: Language.LL.commands.modifier.create.name(),
 				description: Language.LL.commands.modifier.create.description(),
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
 				options: [
 					ModifierOptions.MODIFIER_NAME_OPTION,
-					ModifierOptions.MODIFIER_DESCRIPTION_OPTION,
 					ModifierOptions.MODIFIER_TYPE_OPTION,
 					ModifierOptions.MODIFIER_VALUE_OPTION,
 					ModifierOptions.MODIFIER_TARGET_TAGS_OPTION,
+					ModifierOptions.MODIFIER_DESCRIPTION_OPTION,
+				],
+			},
+			{
+				name: Language.LL.commands.modifier.toggle.name(),
+				description: Language.LL.commands.modifier.toggle.description(),
+				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				options: [{ ...ModifierOptions.MODIFIER_NAME_OPTION, autocomplete: true }],
+			},
+			{
+				name: Language.LL.commands.modifier.update.name(),
+				description: Language.LL.commands.modifier.update.description(),
+				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				options: [
+					{ ...ModifierOptions.MODIFIER_NAME_OPTION, autocomplete: true },
+					ModifierOptions.MODIFIER_SET_OPTION,
+					ModifierOptions.MODIFIER_SET_VALUE_OPTION,
 				],
 			},
 			{

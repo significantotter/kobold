@@ -47,9 +47,9 @@ export interface Character {
 	modifiers?: {
 		name?: string;
 		isActive?: boolean;
-		description?: string;
+		description?: string | null;
 		type?: string;
-		targetTags?: string[];
+		targetTags?: string;
 		value?: number;
 		[k: string]: any;
 	}[];

@@ -6,10 +6,8 @@ import {
 	PermissionsString,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
-import { raw } from 'objection';
 
 import { EventData } from '../../../models/internal-models.js';
-import { Initiative } from '../../../services/kobold/models/index.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
@@ -51,10 +49,17 @@ export class ModifierListSubCommand implements Command {
 		const fields = [];
 		for (const modifier of modifiers) {
 			fields.push({
-				name: `${modifier.name}${modifier.isActive ? ' (active)' : ''}`,
-				value: `${modifier.description ? modifier.description + '\n' : ''}${
-					modifier.type ? `'Type: ${modifier.type}\n` : ''
-				}Value: ${modifier.value}\nApplies to: ${modifier.targetTags.join(', ')}`,
+				name: LL.commands.modifier.interactions.detailHeader({
+					modifierName: modifier.name,
+					modifierIsActive: modifier.isActive ? ' (active)' : '',
+				}),
+				value: LL.commands.modifier.interactions.detailBody({
+					modifierDescriptionText: modifier.description,
+					modifierType: modifier.type || 'untyped',
+					modifierValue: modifier.value,
+					modifierTargetTags: modifier.targetTags,
+				}),
+				inline: true,
 			});
 		}
 		embed.addFields(fields);

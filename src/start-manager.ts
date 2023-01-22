@@ -1,3 +1,4 @@
+import './config/load-environment.js';
 import { ShardingManager } from 'discord.js';
 import 'reflect-metadata';
 
