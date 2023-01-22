@@ -87,6 +87,12 @@ export class CharacterUpdateSubCommand implements Command {
 					true
 				);
 				return;
+			} else if (err.response.status === 429) {
+				await InteractionUtils.send(
+					intr,
+					LL.commands.character.interactions.tooManyWGRequests()
+				);
+				return;
 			} else {
 				//otherwise, something else went wrong that we want to be a real error
 				throw err;

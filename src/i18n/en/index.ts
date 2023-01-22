@@ -224,6 +224,7 @@ const en: BaseTranslation = {
 					`authentication expired. Please give me permission to read your wanderer's guide ` +
 					`character again by following the link below`,
 				authenticationLink: `Yip! Please follow  [this link]({wgBaseUrl}?characterId={charId}) to give me access to your character!`,
+				tooManyWGRequests: `Yip! Wanderer's Guide told me I'm being pesky and sending too many requests! Try again in a moment.`,
 			},
 
 			// SUBCOMMANDS
