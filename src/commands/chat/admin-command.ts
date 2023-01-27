@@ -18,6 +18,7 @@ import typescript from 'typescript';
 import fileSize from 'filesize';
 import { ShardUtils } from '../../utils/shard-utils.js';
 import { Lang } from '../../services/lang.js';
+import _ from 'lodash';
 
 const tsConfig = JSON.parse(fs.readFileSync('./tsconfig.json').toString());
 
@@ -99,29 +100,9 @@ export class AdminCommand implements Command {
 			SERVER_ID: intr.guild?.id ?? Lang.getRef('other.na', data.lang()),
 			BOT_ID: intr.client.user?.id,
 			USER_ID: intr.user.id,
+			GUILD_COUNT: `${intr.client.guilds.cache.size}`,
 		});
 		await InteractionUtils.send(intr, embed);
-
-		const allGuilds = intr.client.guilds.cache.map(guild => guild.name);
-		let guildEmbedValue = '';
-		let guildsPage = 1;
-		for (let i = 0; i < allGuilds.length; i++) {
-			if (guildEmbedValue.length > 1800) {
-				const embed = new KoboldEmbed();
-				embed.setTitle(`All Guilds, page ${guildsPage}`);
-				embed.setDescription(guildEmbedValue);
-				await InteractionUtils.send(intr, embed);
-				guildsPage += 1;
-				guildEmbedValue = '';
-			}
-			guildEmbedValue += allGuilds[i] + '\n';
-		}
-		if (guildEmbedValue !== '') {
-			const embed = new KoboldEmbed();
-			embed.setTitle(`All Guilds, page ${guildsPage}`);
-			embed.setDescription(guildEmbedValue);
-			await InteractionUtils.send(intr, embed);
-		}
 		return;
 	}
 }

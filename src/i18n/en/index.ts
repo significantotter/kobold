@@ -205,6 +205,18 @@ const en: BaseTranslation = {
 					},
 				},
 			},
+			modifier: {
+				name: 'modifier',
+				value: 'modifier',
+				description: 'Help for the /modifier command',
+				interactions: {
+					embed: {
+						title: '/modifier Commands',
+						thumbnail: refs.links.thumbnail,
+						description: '.',
+					},
+				},
+			},
 		},
 		character: {
 			// MAIN COMMAND INFO
@@ -862,11 +874,11 @@ const en: BaseTranslation = {
 			name: 'import-mode',
 			description: 'What to do when importing data.',
 			choices: {
-				overwrite: {
+				fullyReplace: {
 					name: 'overwrite-all',
 					value: 'overwrite-all',
 				},
-				fullyReplace: {
+				overwrite: {
 					name: 'overwrite-on-conflict',
 					value: 'overwrite-on-conflict',
 				},

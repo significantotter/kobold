@@ -53,10 +53,7 @@ export class ModifierImportSubCommand implements Command {
 			.getString(ModifierOptions.MODIFIER_IMPORT_MODE.name)
 			.trim()
 			.toLowerCase();
-		let importUrl = intr.options
-			.getString(ModifierOptions.MODIFIER_IMPORT_URL.name)
-			.trim()
-			.toLowerCase();
+		let importUrl = intr.options.getString(ModifierOptions.MODIFIER_IMPORT_URL.name).trim();
 
 		const importId = CharacterUtils.parsePastebinIdFromText(importUrl);
 
@@ -70,19 +67,24 @@ export class ModifierImportSubCommand implements Command {
 		let invalidJson = false;
 		try {
 			const modifiersText = await new PasteBin({}).get({ paste_key: importId });
-			newModifiers = JSON.parse(modifiersText);
+			if (_.isArray(modifiersText)) {
+				newModifiers = modifiersText;
+			} else {
+				newModifiers = JSON.parse(modifiersText);
+			}
 			const valid = ajv.validate(characterSchema.properties.modifiers, newModifiers);
 			if (!valid) {
 				invalidJson = true;
-			}
-			for (const modifier of newModifiers) {
-				// throws an error on an invalid expression
-				compileExpression(modifier.targetTags);
+			} else {
+				for (const modifier of newModifiers) {
+					// throws an error on an invalid expression
+					compileExpression(modifier.targetTags);
+				}
 			}
 		} catch (err) {
+			console.warn(err);
 			invalidJson = true;
 		}
-
 		if (invalidJson) {
 			await InteractionUtils.send(
 				intr,
@@ -145,6 +147,13 @@ export class ModifierImportSubCommand implements Command {
 					finalModifier.push(modifier);
 				}
 			}
+		} else {
+			console.error('failed to match an import option');
+			await InteractionUtils.send(
+				intr,
+				LL.commands.modifier.import.interactions.failedParsing()
+			);
+			return;
 		}
 
 		await Character.query().patchAndFetchById(activeCharacter.id, {
@@ -157,8 +166,6 @@ export class ModifierImportSubCommand implements Command {
 				characterName: activeCharacter.characterData.name,
 			})
 		);
-		return;
-		//send a response
 		return;
 	}
 }

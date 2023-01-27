@@ -73,6 +73,12 @@ export class HelpCommand implements Command {
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
 				options: [],
 			},
+			{
+				name: Language.LL.commands.help.modifier.name(),
+				description: Language.LL.commands.help.modifier.description(),
+				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				options: [],
+			},
 		],
 	};
 	public deferType = CommandDeferType.PUBLIC;
@@ -186,6 +192,18 @@ export class HelpCommand implements Command {
 							`\`/${LL.commands.init.name()} ${LL.commands.init.set.name()}\` ${LL.commands.init.set.description()}\n` +
 							`\`/${LL.commands.init.name()} ${LL.commands.init.end.name()}\` ${LL.commands.init.end.description()}\n`,
 					},
+					{
+						name: LL.commands.modifier.name(),
+						value:
+							`\`/${LL.commands.modifier.name()} ${LL.commands.modifier.create.name()}\` ${LL.commands.modifier.create.description()}\n` +
+							`\`/${LL.commands.modifier.name()} ${LL.commands.modifier.toggle.name()}\` ${LL.commands.modifier.toggle.description()}\n` +
+							`\`/${LL.commands.modifier.name()} ${LL.commands.modifier.list.name()}\` ${LL.commands.modifier.list.description()}\n` +
+							`\`/${LL.commands.modifier.name()} ${LL.commands.modifier.detail.name()}\` ${LL.commands.modifier.detail.description()}\n` +
+							`\`/${LL.commands.modifier.name()} ${LL.commands.modifier.update.name()}\` ${LL.commands.modifier.update.description()}\n` +
+							`\`/${LL.commands.modifier.name()} ${LL.commands.modifier.remove.name()}\` ${LL.commands.modifier.remove.description()}\n` +
+							`\`/${LL.commands.modifier.name()} ${LL.commands.modifier.import.name()}\` ${LL.commands.modifier.import.description()}\n` +
+							`\`/${LL.commands.modifier.name()} ${LL.commands.modifier.export.name()}\` ${LL.commands.modifier.export.description()}\n`,
+					},
 				]);
 				break;
 			}
@@ -239,6 +257,25 @@ export class HelpCommand implements Command {
 						LL.commands.roll.save.name(),
 						LL.commands.roll.ability.name(),
 						LL.commands.roll.attack.name(),
+					].map(command =>
+						createCommandOperationHelpField(LL.commands.roll.name(), command, LL)
+					)
+				);
+				break;
+			}
+			case Language.LL.commands.help.modifier.name(): {
+				embed.setTitle(LL.commands.help.modifier.interactions.embed.title());
+				embed.setDescription(LL.commands.help.modifier.interactions.embed.description());
+				embed.addFields(
+					[
+						LL.commands.modifier.create.name(),
+						LL.commands.modifier.toggle.name(),
+						LL.commands.modifier.list.name(),
+						LL.commands.modifier.detail.name(),
+						LL.commands.modifier.update.name(),
+						LL.commands.modifier.remove.name(),
+						LL.commands.modifier.import.name(),
+						LL.commands.modifier.export.name(),
 					].map(command =>
 						createCommandOperationHelpField(LL.commands.roll.name(), command, LL)
 					)
