@@ -87,4 +87,34 @@ export class ModifierOptions {
 		required: true,
 		type: ApplicationCommandOptionType.String,
 	};
+	public static readonly MODIFIER_IMPORT_MODE: APIApplicationCommandBasicOption = {
+		name: Language.LL.commandOptions.modifierImportMode.name(),
+		description: Language.LL.commandOptions.modifierImportMode.description(),
+		required: true,
+		type: ApplicationCommandOptionType.String,
+		choices: [
+			{
+				name: Language.LL.commandOptions.modifierImportMode.choices.overwrite.name(),
+				value: Language.LL.commandOptions.modifierImportMode.choices.overwrite.value(),
+			},
+			{
+				name: Language.LL.commandOptions.modifierImportMode.choices.fullyReplace.name(),
+				value: Language.LL.commandOptions.modifierImportMode.choices.fullyReplace.value(),
+			},
+			{
+				name: Language.LL.commandOptions.modifierImportMode.choices.renameOnConflict.name(),
+				value: Language.LL.commandOptions.modifierImportMode.choices.renameOnConflict.value(),
+			},
+			{
+				name: Language.LL.commandOptions.modifierImportMode.choices.ignoreOnConflict.name(),
+				value: Language.LL.commandOptions.modifierImportMode.choices.ignoreOnConflict.value(),
+			},
+		],
+	};
+	public static readonly MODIFIER_IMPORT_URL: APIApplicationCommandBasicOption = {
+		name: Language.LL.commandOptions.modifierImportUrl.name(),
+		description: Language.LL.commandOptions.modifierImportUrl.description(),
+		required: true,
+		type: ApplicationCommandOptionType.String,
+	};
 }

@@ -14,7 +14,7 @@ import { CharacterHelpers } from './helpers.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
 import { Language } from '../../../models/enum-helpers/index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import Config from '../../../config/config.json';
+import { Config } from '../../../config/config.js';
 
 export class CharacterUpdateSubCommand implements Command {
 	public names = [Language.LL.commands.character.update.name()];

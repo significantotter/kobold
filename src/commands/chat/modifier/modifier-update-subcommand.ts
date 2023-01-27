@@ -19,7 +19,6 @@ import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Language } from '../../../models/enum-helpers/index.js';
 import { ModifierOptions } from './modifier-command-options.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
-import { parseTagsFromInput, tagsInputValid } from './helpers.js';
 import { Character } from '../../../services/kobold/models/index.js';
 import { compileExpression } from 'filtrex';
 

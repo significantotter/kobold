@@ -593,6 +593,29 @@ const en: BaseTranslation = {
 					success: 'Yip! I removed the modifier {modifierName}.',
 				},
 			},
+			export: {
+				name: 'export',
+				description:
+					'Exports a chunk of modifier data for you to later import on another character.',
+				interactions: {
+					success:
+						"Yip! I've saved {characterName}'s modifiers to [this PasteBin link]({pasteBinLink}",
+				},
+			},
+			import: {
+				name: 'import',
+				description: 'Imports an array of modifier data to a character from PasteBin.',
+				expandedDescription:
+					'Imports an array of modifier data to a character from PasteBin. Use ' +
+					'exported data from another character. Only try to modify it if you know how to work with JSON!',
+				interactions: {
+					failedParsing:
+						"Yip! I can't figure out how to read that! Try exporting another modifier to check and make " +
+						"sure you're formatting it right!",
+					badUrl: "Yip! I don't understand that Url! Copy the pastebin url for the pasted modifiers directly into the Url field.",
+					imported: 'Yip! I successfully imported those modifiers to {characterName}.',
+				},
+			},
 		},
 		roll: {
 			name: 'roll',
@@ -808,8 +831,8 @@ const en: BaseTranslation = {
 					value: 'value',
 				},
 				targetTags: {
-					name: 'targetTags',
-					value: 'targetTags',
+					name: 'target-tags',
+					value: 'target-tags',
 				},
 			},
 		},
@@ -834,6 +857,32 @@ const en: BaseTranslation = {
 					value: 'both',
 				},
 			},
+		},
+		modifierImportMode: {
+			name: 'import-mode',
+			description: 'What to do when importing data.',
+			choices: {
+				overwrite: {
+					name: 'overwrite-all',
+					value: 'overwrite-all',
+				},
+				fullyReplace: {
+					name: 'overwrite-on-conflict',
+					value: 'overwrite-on-conflict',
+				},
+				renameOnConflict: {
+					name: 'rename-on-conflict',
+					value: 'rename-on-conflict',
+				},
+				ignoreOnConflict: {
+					name: 'ignore-on-conflict',
+					value: 'ignore-on-conflict',
+				},
+			},
+		},
+		modifierImportUrl: {
+			name: 'url',
+			description: 'The pastebin url with the modifier code to import.',
 		},
 	},
 	utils: {

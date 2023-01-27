@@ -6,7 +6,7 @@ import {
 	RegisterClusterResponse,
 } from '../models/master-api/index.js';
 import { HttpService } from './index.js';
-import Config from './../config/config.json';
+import { Config } from './../config/config.js';
 
 export class MasterApiService {
 	private clusterId: string;

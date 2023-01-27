@@ -1,5 +1,5 @@
 import type { Knex } from 'knex';
-import Config from './src/config/config.json';
+import { Config } from './src/config/config.js';
 
 // Update with your config settings.
 

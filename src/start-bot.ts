@@ -1,4 +1,4 @@
-import './config/load-environment.js';
+import './config/config.js';
 import { REST } from '@discordjs/rest';
 import { Options, GatewayIntentBits, Partials } from 'discord.js';
 
@@ -39,6 +39,8 @@ import {
 	ModifierRemoveSubCommand,
 	ModifierListSubCommand,
 	ModifierDetailSubCommand,
+	ModifierExportSubCommand,
+	ModifierImportSubCommand,
 	ModifierUpdateSubCommand,
 	ModifierToggleSubCommand,
 	// help
@@ -62,7 +64,7 @@ import { Bot } from './models/bot.js';
 import { Reaction } from './reactions/index.js';
 import { CommandRegistrationService, DBModel, JobService, Logger } from './services/index.js';
 import { Trigger } from './triggers/index.js';
-import Config from './config/config.json';
+import { Config } from './config/config.js';
 import Logs from './config/lang/logs.json';
 
 async function start(): Promise<void> {
@@ -129,6 +131,8 @@ async function start(): Promise<void> {
 			new ModifierRemoveSubCommand(),
 			new ModifierListSubCommand(),
 			new ModifierDetailSubCommand(),
+			new ModifierExportSubCommand(),
+			new ModifierImportSubCommand(),
 			new ModifierUpdateSubCommand(),
 			new ModifierToggleSubCommand(),
 		]),

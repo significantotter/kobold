@@ -1,5 +1,5 @@
 import { WanderersGuide } from '../../../services/wanderers-guide/index.js';
-import Config from '../../../config/config.json';
+import { Config } from '../../../config/config.js';
 
 const attributeAbilityMap = {
 	Acrobatics: 'dexterity',

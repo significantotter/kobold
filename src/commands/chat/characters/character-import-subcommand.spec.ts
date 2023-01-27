@@ -8,7 +8,7 @@ import {
 import { InteractionUtils } from '../../../utils/interaction-utils.js';
 import { CharacterImportSubCommand } from './character-import-subcommand';
 import { CharacterHelpers } from './helpers.js';
-import Config from '../../../config/config.json';
+import { Config } from '../../../config/config.js';
 import { Language } from '../../../models/enum-helpers/index.js';
 
 describe('CharacterImportSubCommand', () => {

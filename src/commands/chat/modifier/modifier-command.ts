@@ -40,6 +40,21 @@ export class ModifierCommand implements Command {
 				options: [{ ...ModifierOptions.MODIFIER_NAME_OPTION, autocomplete: true }],
 			},
 			{
+				name: Language.LL.commands.modifier.export.name(),
+				description: Language.LL.commands.modifier.export.description(),
+				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				options: [],
+			},
+			{
+				name: Language.LL.commands.modifier.import.name(),
+				description: Language.LL.commands.modifier.import.description(),
+				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				options: [
+					ModifierOptions.MODIFIER_IMPORT_URL,
+					ModifierOptions.MODIFIER_IMPORT_MODE,
+				],
+			},
+			{
 				name: Language.LL.commands.modifier.create.name(),
 				description: Language.LL.commands.modifier.create.description(),
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),

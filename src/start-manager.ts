@@ -1,4 +1,4 @@
-import './config/load-environment.js';
+import './config/config.js';
 import { ShardingManager } from 'discord.js';
 import 'reflect-metadata';
 
@@ -8,7 +8,7 @@ import { Api } from './models/api.js';
 import { Manager } from './models/manager.js';
 import { DBModel, HttpService, JobService, Logger, MasterApiService } from './services/index.js';
 import { MathUtils, ShardUtils } from './utils/index.js';
-import Config from './config/config.json';
+import { Config } from './config/config.js';
 import Debug from './config/debug.json';
 import Logs from './config/lang/logs.json';
 

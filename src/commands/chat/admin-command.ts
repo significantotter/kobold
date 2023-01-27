@@ -12,7 +12,7 @@ import { Language } from '../../models/enum-helpers/language.js';
 import { EventData } from '../../models/internal-models.js';
 import { InteractionUtils } from '../../utils/interaction-utils.js';
 import { Command, CommandDeferType } from '../command.js';
-import Config from './../../config/config.json';
+import { Config } from './../../config/config.js';
 import fs from 'fs';
 import typescript from 'typescript';
 import fileSize from 'filesize';

@@ -30,6 +30,7 @@ interface NamedThing {
 	Name: string;
 }
 const characterIdRegex = /characters\/([0-9]+)/;
+const pastebinIdRegex = /pastebin\.com(?:\/raw)?\/([A-Za-z0-9]+)/;
 
 export class CharacterUtils {
 	/**
@@ -194,6 +195,26 @@ export class CharacterUtils {
 		} else {
 			// match the trimmedText to the regex
 			const matches = trimmedText.match(characterIdRegex);
+			if (!matches) {
+				charId = null;
+			} else charId = Number(matches[1]);
+		}
+		return charId;
+	}
+
+	/**
+	 * Parses the text to find a character id out of a url or parses full string as a number
+	 * @param text either a wanderer's guide url, or simply a numeric character id
+	 */
+	public static parsePastebinIdFromText(text: string): number | null {
+		const trimmedText = text.trim();
+		let charId = null;
+		if (!isNaN(Number(trimmedText.trim()))) {
+			// we allow just a character id to be passed in as well
+			charId = Number(trimmedText.trim());
+		} else {
+			// match the trimmedText to the regex
+			const matches = trimmedText.match(pastebinIdRegex);
 			if (!matches) {
 				charId = null;
 			} else charId = Number(matches[1]);

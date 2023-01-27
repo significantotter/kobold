@@ -9,7 +9,7 @@ import {
 } from 'discord.js';
 
 import { Logger } from './logger.js';
-import Config from './../config/config.json';
+import { Config } from './../config/config.js';
 import Logs from './../config/lang/logs.json';
 
 export class CommandRegistrationService {

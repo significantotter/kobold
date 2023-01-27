@@ -14,7 +14,6 @@ import { Command, CommandDeferType } from '../../index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Language } from '../../../models/enum-helpers/index.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
-import { parseTagsFromInput, tagsInputValid } from './helpers.js';
 import { compileExpression } from 'filtrex';
 
 export class ModifierCreateSubCommand implements Command {
