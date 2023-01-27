@@ -378,54 +378,6 @@ describe('initiative-utils', function () {
 				expect(builder.activeGroup).toBeFalsy();
 			});
 		});
-		describe('getCurrentRoundMessage', function () {
-			test('returns the current round message', function () {
-				const initiative = InitiativeFactory.build({
-					currentRound: 1,
-					currentTurnGroupId: null,
-				});
-				initiative.roundMessageIds = ['first', 'second', 'third'];
-				const { actors, groups, firstGroup, secondGroup, thirdGroup } =
-					setupInitiativeActorsAndGroupsForTests(initiative);
-
-				const builder = new InitiativeBuilder({
-					initiative,
-					actors,
-					groups,
-				});
-				const fakeIntr = {
-					channel: {
-						messages: {
-							fetch(targetMessageId) {
-								return 'success! ' + targetMessageId;
-							},
-						},
-					},
-				};
-				expect(
-					builder.getCurrentRoundMessage(fakeIntr as any as CommandInteraction)
-				).resolves.toContain('success! ' + 'second');
-			});
-			test('returns null if there is no current round message', function () {
-				const initiative = InitiativeFactory.build({
-					currentRound: 1,
-					currentTurnGroupId: null,
-				});
-				initiative.roundMessageIds = [];
-				const { actors, groups, firstGroup, secondGroup, thirdGroup } =
-					setupInitiativeActorsAndGroupsForTests(initiative);
-
-				const builder = new InitiativeBuilder({
-					initiative,
-					actors,
-					groups,
-				});
-				const fakeIntr = {};
-				expect(
-					builder.getCurrentRoundMessage(fakeIntr as any as CommandInteraction)
-				).resolves.toBeNull();
-			});
-		});
 	});
 	describe('InitiativeUtils.getInitiativeForChannel', function () {
 		beforeAll(async function () {

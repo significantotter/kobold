@@ -150,19 +150,14 @@ export class InitJoinSubCommand implements Command {
 			rollResultMessage = response.compileEmbed();
 		}
 
-		const targetMessageId = currentInit.roundMessageIds[currentInit.currentRound || 0];
-		if (targetMessageId) {
-			const targetMessage = await intr.channel.messages.fetch(targetMessageId);
-			rollResultMessage.addFields([
-				{
-					name: LL.commands.init.join.interactions.joinedEmbed.roundField.name(),
-					value: LL.commands.init.join.interactions.joinedEmbed.roundField.value({
-						currentRound: currentInit.currentRound,
-						url: targetMessage.url,
-					}),
-				},
-			]);
-		}
+		rollResultMessage.addFields([
+			{
+				name: LL.commands.init.join.interactions.joinedEmbed.roundField.name(),
+				value: LL.commands.init.join.interactions.joinedEmbed.roundField.value({
+					currentRound: currentInit.currentRound,
+				}),
+			},
+		]);
 
 		let nameCount = 1;
 		let existingName = currentInit.actors.find(

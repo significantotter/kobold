@@ -22,7 +22,6 @@ export class KoboldEmbed extends EmbedBuilder {
 
 	public static turnFromInitiativeBuilder(
 		initiativeBuilder: InitiativeBuilder,
-		targetMessageUrl?: string,
 		LL?: TranslationFunctions
 	) {
 		LL = LL || Language.LL;
@@ -46,10 +45,6 @@ export class KoboldEmbed extends EmbedBuilder {
 			},
 		]);
 
-		let roundText = '';
-		if (targetMessageUrl) {
-			roundText = '';
-		}
 		if (initiativeBuilder.actorsByGroup[groupTurn.id].length === 1) {
 			const actor = initiativeBuilder.actorsByGroup[groupTurn.id][0];
 			if (actor?.character) {

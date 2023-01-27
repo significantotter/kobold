@@ -53,7 +53,7 @@ export class InitStartSubCommand implements Command {
 				.insertAndFetch({
 					gmUserId: startingUser,
 					channelId: intr.channel.id,
-					roundMessageIds: [message.id],
+					roundMessageIds: [],
 				});
 			initBuilder.set({ initiative: init, actors: init.actors, groups: init.actorGroups });
 			const updatedEmbed = await KoboldEmbed.roundFromInitiativeBuilder(initBuilder, LL);

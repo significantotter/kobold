@@ -437,7 +437,7 @@ const en: BaseTranslation = {
 						rollDescription: 'rolled initiative!',
 						roundField: {
 							name: '\u200B',
-							value: '[Initiative Round {currentRound}]({url})',
+							value: 'Initiative Round {currentRound}',
 						},
 					},
 				},

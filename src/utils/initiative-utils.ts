@@ -218,14 +218,6 @@ export class InitiativeBuilder {
 	get activeGroup() {
 		return this.groups.find(group => group.id === this.init.currentTurnGroupId);
 	}
-
-	async getCurrentRoundMessage(intr: CommandInteraction): Promise<Message<boolean>> {
-		const targetMessageId = this.init.roundMessageIds[this.init.currentRound || 0];
-		if (targetMessageId) {
-			return await intr.channel.messages.fetch(targetMessageId);
-		}
-		return null;
-	}
 }
 
 interface LowerNamedThing {
