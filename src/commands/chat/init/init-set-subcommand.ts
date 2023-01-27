@@ -181,7 +181,7 @@ export class InitSetSubCommand implements Command {
 			LL,
 		});
 		if (currentInit.currentRound === 0) {
-			await InitiativeUtils.updateInitiativeRoundMessageOrSendNew(intr, initBuilder);
+			await InitiativeUtils.sendNewRoundMessage(intr, initBuilder);
 		}
 	}
 }

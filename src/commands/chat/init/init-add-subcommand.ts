@@ -122,7 +122,7 @@ export class InitAddSubCommand implements Command {
 			groups: currentInit.actorGroups.concat(newActor.actorGroup),
 			LL,
 		});
-		await InitiativeUtils.updateInitiativeRoundMessageOrSendNew(intr, initBuilder);
+		await InitiativeUtils.sendNewRoundMessage(intr, initBuilder);
 		await InteractionUtils.send(intr, rollResultMessage);
 	}
 }

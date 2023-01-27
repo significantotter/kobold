@@ -258,27 +258,12 @@ export class InitiativeUtils {
 		return { init: currentInit, errorMessage: errorMessage };
 	}
 
-	public static async updateInitiativeRoundMessageOrSendNew(
+	public static async sendNewRoundMessage(
 		intr: CommandInteraction,
 		initBuilder: InitiativeBuilder
 	): Promise<Message<boolean>> {
-		try {
-			const targetMessageId =
-				initBuilder.init.roundMessageIds[initBuilder.init.currentRound || 0];
-			if (!targetMessageId) {
-				const err = new Error('Unknown Message');
-				throw err;
-			}
-			const targetMessage = await intr.channel.messages.fetch(targetMessageId);
-			const embed = await KoboldEmbed.roundFromInitiativeBuilder(initBuilder);
-			await targetMessage.edit({ embeds: [embed] });
-			return targetMessage;
-		} catch (err) {
-			if (err.message === 'Unknown Message' || err.code === 10008) {
-				const embed = await KoboldEmbed.roundFromInitiativeBuilder(initBuilder);
-				return await InteractionUtils.send(intr, embed);
-			}
-		}
+		const embed = await KoboldEmbed.roundFromInitiativeBuilder(initBuilder);
+		return await InteractionUtils.send(intr, embed);
 	}
 
 	public static getControllableInitiativeActors(initiative: Initiative, userId: string) {

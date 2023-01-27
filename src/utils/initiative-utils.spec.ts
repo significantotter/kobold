@@ -452,33 +452,7 @@ describe('initiative-utils', function () {
 			await Initiative.query().delete().where({ channelId: 'testChannelId' });
 		});
 	});
-	describe('InitiativeUtils.updateInitiativeRoundMessageOrSendNew', function () {
-		test('updates the initiative round message if it exists', async function () {
-			const initiative = await InitiativeFactory.create({
-				roundMessageIds: ['first', 'second', 'third'],
-				currentRound: 2,
-			});
-
-			const fakeIntr = {
-				channel: {
-					messages: {
-						fetch(targetMessageId) {
-							return {
-								edit(content) {
-									return Promise.resolve(content);
-								},
-								val: 'success! ' + targetMessageId,
-							};
-						},
-					},
-				},
-			};
-			const result: any = await InitiativeUtils.updateInitiativeRoundMessageOrSendNew(
-				fakeIntr as any as CommandInteraction,
-				new InitiativeBuilder({ initiative })
-			);
-			expect(result.val).toBe('success! third');
-		});
+	describe('InitiativeUtils.sendNewRoundMessage', function () {
 		test('sends a new initiative round message if it does not exist', async function () {
 			const initiative = await InitiativeFactory.create({
 				roundMessageIds: [],
@@ -499,7 +473,7 @@ describe('initiative-utils', function () {
 					},
 				};
 			});
-			const result = await InitiativeUtils.updateInitiativeRoundMessageOrSendNew(
+			const result = await InitiativeUtils.sendNewRoundMessage(
 				fakeIntr as any as CommandInteraction,
 				new InitiativeBuilder({ initiative })
 			);

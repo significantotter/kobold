@@ -155,7 +155,7 @@ export class InitRemoveSubCommand implements Command {
 			const activeGroup = initBuilder.activeGroup;
 
 			if (updatedInitiative.currentRound === 0) {
-				await InitiativeUtils.updateInitiativeRoundMessageOrSendNew(intr, initBuilder);
+				await InitiativeUtils.sendNewRoundMessage(intr, initBuilder);
 			}
 
 			await InteractionUtils.send(intr, {
@@ -169,7 +169,7 @@ export class InitRemoveSubCommand implements Command {
 			});
 			initBuilder.removeActor(actor);
 			if (currentInit.currentRound === 0) {
-				await InitiativeUtils.updateInitiativeRoundMessageOrSendNew(intr, initBuilder);
+				await InitiativeUtils.sendNewRoundMessage(intr, initBuilder);
 			}
 		}
 	}
