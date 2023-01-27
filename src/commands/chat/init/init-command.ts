@@ -52,7 +52,7 @@ export class InitCommand implements Command {
 				name: Language.LL.commands.init.jumpTo.name(),
 				description: Language.LL.commands.init.jumpTo.description(),
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
-				options: [ChatArgs.INIT_CHARACTER_OPTION],
+				options: [{ ...ChatArgs.INIT_CHARACTER_OPTION, required: true }],
 			},
 			{
 				name: Language.LL.commands.init.join.name(),
@@ -116,7 +116,7 @@ export class InitCommand implements Command {
 				name: Language.LL.commands.init.remove.name(),
 				description: Language.LL.commands.init.remove.description(),
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
-				options: [ChatArgs.INIT_CHARACTER_OPTION],
+				options: [{ ...ChatArgs.INIT_CHARACTER_OPTION, required: true }],
 			},
 			{
 				name: Language.LL.commands.init.end.name(),

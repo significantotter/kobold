@@ -44,6 +44,10 @@ export class CharacterHelpers {
 			await WGTokenApi.character.getCalculatedStats(charId),
 		]);
 
+		if (!characterData.name) {
+			characterData.name = 'Unnamed Character';
+		}
+
 		if (!calculatedStats) {
 			// stub in default calculated stats
 			// this should only happen on trying to import an empty character

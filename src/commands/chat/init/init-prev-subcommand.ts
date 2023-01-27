@@ -35,39 +35,11 @@ export class InitPrevSubCommand implements Command {
 	public deferType = CommandDeferType.NONE;
 	public requireClientPerms: PermissionsString[] = [];
 
-	public async autocomplete(
-		intr: AutocompleteInteraction<CacheType>,
-		option: AutocompleteFocusedOption
-	): Promise<ApplicationCommandOptionChoiceData[]> {
-		if (!intr.isAutocomplete()) return;
-		if (option.name === ChatArgs.INIT_CHARACTER_OPTION.name) {
-			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(ChatArgs.INIT_CHARACTER_OPTION.name);
-
-			const currentInitResponse = await InitiativeUtils.getInitiativeForChannel(intr.channel);
-			if (!currentInitResponse) await InteractionUtils.respond(intr, []);
-			//get the character matches
-			let actorOptions = InitiativeUtils.getControllableInitiativeActors(
-				currentInitResponse.init,
-				//get all initiative actors
-				currentInitResponse.init.gmUserId
-			);
-			actorOptions = actorOptions.filter(actor => actor.name.includes(match));
-
-			//return the matched actors
-			return actorOptions.map(actor => ({
-				name: actor.name,
-				value: actor.name,
-			}));
-		}
-	}
-
 	public async execute(
 		intr: ChatInputCommandInteraction,
 		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
-		const targetCharacterName = intr.options.getString(ChatArgs.INIT_CHARACTER_OPTION.name);
 		const initResult = await InitiativeUtils.getInitiativeForChannel(intr.channel, {
 			sendErrors: true,
 			LL,

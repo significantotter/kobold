@@ -43,12 +43,12 @@ export class CharacterUtils {
 
 		let lowestMatchTarget = matchTargets[0];
 		let lowestMatchTargetDistance = levenshteinDistance(
-			matchTargets[0].Name.toLowerCase(),
+			(matchTargets[0].Name || '').toLowerCase(),
 			name.toLowerCase()
 		);
 		for (let i = 1; i < matchTargets.length; i++) {
 			const currentMatchTargetDistance = levenshteinDistance(
-				matchTargets[i].Name.toLowerCase(),
+				(matchTargets[i].Name || '').toLowerCase(),
 				name.toLowerCase()
 			);
 			if (currentMatchTargetDistance < lowestMatchTargetDistance) {
