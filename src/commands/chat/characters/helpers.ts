@@ -184,7 +184,7 @@ export class CharacterHelpers {
 
 			{ name: 'speed', type: 'base', value: calculatedStats.totalSpeed, tags: ['speed'] },
 			{
-				name: 'classDC',
+				name: 'classDc',
 				type: 'base',
 				value: calculatedStats.totalClassDC,
 				tags: ['classDc'],

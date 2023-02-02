@@ -213,7 +213,96 @@ const en: BaseTranslation = {
 					embed: {
 						title: '/modifier Commands',
 						thumbnail: refs.links.thumbnail,
-						description: '.',
+						description:
+							'Modifiers are conditional bonuses or penalties that apply to certain dice rolls. These ' +
+							'Which dice rolls are effected are based on a system of "tags." For example, every attack roll has ' +
+							'the "attack" tag and every skill roll has the "skill" tag. A full list of tags are available under ' +
+							'`/help attributes-and-tags`. \n\nModifiers can be toggled active or inactive. When inactive, a ' +
+							'modifier will never apply to a roll, even if it applies to the given tags.\n\nTo learn how to build target tags ' +
+							'you can use [this link](https://github.com/joewalnes/filtrex), although its fairly technical. Alternatively, ' +
+							'here are some examples to show how they can work:\n\n' +
+							'`attack or (skill and dexterity)` - attacks or skills that use dexterity\n' +
+							'`skill and not in(arcana,nature,occultism,religion)` - A skill that is not one of arcana, nature, occultism, or religion\n' +
+							'`damage or in(athletics,intimidation)` - A damage roll or a roll that is either athletics or intimidation\n' +
+							'`__hp < 50 and damage` - Damage, but only when your current health is below 50 (Yes, you can use ' +
+							'attributes in target tag expressions if you prefix them with "__"!)\n' +
+							'`attack` - An attack roll! easy as that.',
+					},
+				},
+			},
+			attributesAndTags: {
+				name: 'attributes-and-tags',
+				value: 'attributes-and-tags',
+				description: 'Help for character attributes and roll tags',
+				interactions: {
+					embed: {
+						title: 'Character Attributes and Roll Tags',
+						thumbnail: refs.links.thumbnail,
+						description:
+							'Character attributes are numeric values about your character that are usable in any roll. ' +
+							'You can add attributes to any roll by simply including the attribute name wrapped in square ' +
+							"brackets []. For example, a d20 roll that you're trained in using strength can be rolled with " +
+							'`d20 + [trained] + [strength]`. Certain attributes also add tags to your rolls, allowing modifiers ' +
+							'to effect them. For example a roll with `[athletics]` would apply the "athletics" tag and the "skill" tag. ' +
+							'\n\nBelow are all available attributes:',
+						attributes: {
+							character: [
+								'level',
+								'maxHp',
+								'tempHp',
+								'ac',
+								'heroPoints',
+								'speed',
+								'classDc',
+								'perception',
+								'maxStamina',
+								'stamina',
+								'maxResolve',
+								'resolve',
+							],
+							abilities: [
+								'strength',
+								'dexterity',
+								'constitution',
+								'intelligence/',
+								'wisdom',
+								'charisma',
+							],
+							saves: ['fortitude', 'reflex', 'will'],
+							skills: [
+								'Acrobatics',
+								'Arcana',
+								'Athletics',
+								'Crafting',
+								'Deception',
+								'Diplomacy',
+								'Intimidation',
+								'Medicine',
+								'Nature',
+								'Occultism',
+								'Performance',
+								'Religion',
+								'Society',
+								'Stealth',
+								'Survival',
+								'Thievery',
+								"(Any custom skills such as lores as well. E.G. 'Warfare_Lore'. Spaces are replaced with \\_'s)",
+							],
+							helpers: ['untrained', 'trained', 'expert', 'master', 'legendary'],
+						},
+						shorthands: {
+							str: 'strength',
+							dex: 'dexterity',
+							con: 'constitution',
+							int: 'intelligence',
+							wis: 'wisdom',
+							cha: 'charisma',
+							fort: 'fortitude',
+							ref: 'reflex',
+							health: 'hp',
+							tempHealth: 'tempHp',
+							perc: 'perception',
+						},
 					},
 				},
 			},
@@ -232,7 +321,7 @@ const en: BaseTranslation = {
 					`Give me permission to read your wanderer's guide character by following the link ` +
 					`below. Then, /character {action} your character again!`,
 				expiredToken:
-					`Yip! It's been a while since we last authenticated your character, so our ` +
+					`Yip! It's been a while since I last authenticated your character, so our ` +
 					`authentication expired. Please give me permission to read your wanderer's guide ` +
 					`character again by following the link below`,
 				authenticationLink: `Yip! Please follow  [this link]({wgBaseUrl}?characterId={charId}) to give me access to your character!`,
@@ -611,7 +700,7 @@ const en: BaseTranslation = {
 					'Exports a chunk of modifier data for you to later import on another character.',
 				interactions: {
 					success:
-						"Yip! I've saved {characterName}'s modifiers to [this PasteBin link]({pasteBinLink}",
+						"Yip! I've saved {characterName}'s modifiers to [this PasteBin link]({pasteBinLink})",
 				},
 			},
 			import: {
@@ -902,8 +991,8 @@ const en: BaseTranslation = {
 			rolledDice: 'rolled some dice!',
 			rolledAction: 'rolled {actionName}',
 			rollResult: '{rollExpression}\n{rollRenderedExpression}\n total = `{rollTotal}`',
-			diceRollError: "Yip! We didn't understand the dice roll {rollExpression}.",
-			diceRollOtherErrors: "Yip! We didn't understand the dice roll.\n{rollErrors}",
+			diceRollError: "Yip! I didn't understand the dice roll {rollExpression}.",
+			diceRollOtherErrors: "Yip! I didn't understand the dice roll.\n{rollErrors}",
 		},
 		initiative: {
 			characterNameNotFoundError:

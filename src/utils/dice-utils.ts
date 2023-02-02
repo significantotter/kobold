@@ -1,4 +1,3 @@
-import { Logger } from './../services/logger';
 import { Character } from './../services/kobold/models/character/character.model';
 import { CommandInteraction, APIEmbedField, EmbedBuilder, User } from 'discord.js';
 import { Dice, DiceResult } from 'dice-typescript';
@@ -49,7 +48,7 @@ export class RollBuilder {
 		this.title = title || _.capitalize(`${actorText} ${this.rollDescription}`.trim());
 	}
 
-	public parseAttribute(token: string): string {
+	public parseAttribute(token: string): [number, string[]] {
 		const attributes = this.character?.attributes || [];
 		const customAttributes = this.character?.customAttributes || [];
 
@@ -70,21 +69,29 @@ export class RollBuilder {
 			attributeObject =>
 				attributeObject.name.replace(trimRegex, '').toLowerCase() === attributeName
 		);
-
-		return `(${customAttribute?.value || attribute?.value || staticAttribute?.value || token})`;
+		if (customAttribute?.value) {
+			return [customAttribute.value, customAttribute.tags];
+		} else if (attribute?.value) {
+			return [attribute.value, attribute.tags];
+		} else {
+			return [staticAttribute.value, []];
+		}
 	}
 
-	public parseAttributes(rollExpression: string): string {
+	public parseAttributes(rollExpression: string): [string, string[]] {
 		const splitExpression = rollExpression.split(attributeRegex);
+		const newTags = [];
 		let finalExpression = '';
 		for (const token of splitExpression) {
 			if (attributeRegex.test(token)) {
-				finalExpression += this.parseAttribute(token);
+				const [resultValue, resultTags] = this.parseAttribute(token);
+				finalExpression += resultValue;
+				newTags.push(...resultTags);
 			} else {
 				finalExpression += token;
 			}
 		}
-		return finalExpression;
+		return [finalExpression, newTags];
 	}
 
 	/**
@@ -114,18 +121,20 @@ export class RollBuilder {
 			let modifiers = [];
 
 			// check for any referenced character attributes in the roll
-			let parsedExpression = this.parseAttributes(rollExpression);
+			let [parsedExpression, parsedTags] = this.parseAttributes(rollExpression);
+
+			const totalTags = (tags || []).concat(parsedTags);
 
 			// if we have a character and tags, check for active modifiers
-			if (this.character && tags.length) {
-				modifiers = this.character.getModifiersFromTags(tags);
+			if (this.character && totalTags.length) {
+				modifiers = this.character.getModifiersFromTags(totalTags);
 			}
 			for (const modifier of modifiers) {
 				// add to both the parsed expression and the initial roll expression
 				// the roll expression shows the user the meaning behind the roll values, while
 				// the parsed expression just has the math for the dice roller to use
 				const modifierSymbol = modifier.value >= 0 ? '+' : '-';
-				rollExpression += ` ${modifierSymbol} [${modifier.name}] ${Math.abs(
+				rollExpression += ` ${modifierSymbol} "${modifier.name}" ${Math.abs(
 					modifier.value
 				)}`;
 				parsedExpression += ` ${modifierSymbol} ${Math.abs(modifier.value)}`;

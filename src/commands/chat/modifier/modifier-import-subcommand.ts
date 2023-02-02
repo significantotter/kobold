@@ -105,7 +105,9 @@ export class ModifierImportSubCommand implements Command {
 			for (const modifier of newModifiers) {
 				let sameModifierIndex = _.indexOf(
 					finalModifiers,
-					targetCurrentModifier => targetCurrentModifier.name === modifier.name
+					targetCurrentModifier =>
+						targetCurrentModifier.name.trim().toLocaleLowerCase() ===
+						modifier.name.trim().toLocaleLowerCase()
 				);
 				if (sameModifierIndex === -1) {
 					finalModifiers.push(modifier);
@@ -119,7 +121,9 @@ export class ModifierImportSubCommand implements Command {
 				let finalModifier = modifier;
 				let sameModifierIndex = _.indexOf(
 					finalModifiers,
-					targetCurrentModifier => targetCurrentModifier.name === finalModifier.name
+					targetCurrentModifier =>
+						targetCurrentModifier.name.trim().toLocaleLowerCase() ===
+						finalModifier.name.trim().toLocaleLowerCase()
 				);
 				//increment the counter on the name each time we try and fail to insert it
 				let i = 1;
@@ -130,7 +134,9 @@ export class ModifierImportSubCommand implements Command {
 					};
 					sameModifierIndex = _.indexOf(
 						finalModifiers,
-						targetCurrentModifier => targetCurrentModifier.name === finalModifier.name
+						targetCurrentModifier =>
+							targetCurrentModifier.name.trim().toLocaleLowerCase() ===
+							finalModifier.name.trim().toLocaleLowerCase()
 					);
 				}
 				finalModifiers.push(modifier);
@@ -141,7 +147,9 @@ export class ModifierImportSubCommand implements Command {
 				let finalModifier = modifier;
 				let sameModifierIndex = _.indexOf(
 					finalModifiers,
-					targetCurrentModifier => targetCurrentModifier.name === finalModifier.name
+					targetCurrentModifier =>
+						targetCurrentModifier.name.trim().toLocaleLowerCase() ===
+						finalModifier.name.trim().toLocaleLowerCase()
 				);
 				if (sameModifierIndex === -1) {
 					finalModifier.push(modifier);

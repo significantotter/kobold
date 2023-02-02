@@ -79,6 +79,12 @@ export class HelpCommand implements Command {
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
 				options: [],
 			},
+			{
+				name: Language.LL.commands.help.attributesAndTags.name(),
+				description: Language.LL.commands.help.attributesAndTags.description(),
+				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				options: [],
+			},
 		],
 	};
 	public deferType = CommandDeferType.PUBLIC;
@@ -98,6 +104,8 @@ export class HelpCommand implements Command {
 
 		let embed = new KoboldEmbed();
 		embed.setThumbnail(LL.commands.help.about.interactions.embed.thumbnail());
+		console.warn(command);
+		console.warn('here');
 		switch (command) {
 			case Language.LL.commands.help.faq.name(): {
 				embed.setTitle(LL.commands.help.about.interactions.embed.title());
@@ -126,6 +134,7 @@ export class HelpCommand implements Command {
 				break;
 			}
 			case Language.LL.commands.help.about.name(): {
+				console.warn('about???');
 				embed.setTitle(LL.commands.help.about.interactions.embed.title());
 				embed.setDescription(LL.commands.help.about.interactions.embed.description());
 				embed.addFields([
@@ -282,11 +291,30 @@ export class HelpCommand implements Command {
 				);
 				break;
 			}
+			case Language.LL.commands.help.attributesAndTags.name(): {
+				console.warn('attrs and tags!');
+				embed.setTitle(LL.commands.help.attributesAndTags.interactions.embed.title());
+				embed.setDescription(
+					LL.commands.help.attributesAndTags.interactions.embed.description()
+				);
+				embed.addFields(
+					_.map(
+						LL.commands.help.attributesAndTags.interactions.embed.attributes,
+						(attributeList, attribute) => ({
+							name: attribute,
+							value: _.values(attributeList)
+								.map(value => value())
+								.join('\n'),
+							inline: true,
+						})
+					)
+				);
+				break;
+			}
 			default: {
 				return;
 			}
 		}
-
 		await InteractionUtils.send(intr, embed);
 	}
 }

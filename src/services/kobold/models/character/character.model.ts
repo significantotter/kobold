@@ -60,7 +60,7 @@ export class Character extends BaseModel {
 			let tagTruthValues: { [k: string]: boolean | number } = {};
 
 			for (const attribute of this.attributes) {
-				tagTruthValues[attribute.name.toLocaleLowerCase()] = attribute.value;
+				tagTruthValues['__' + attribute.name.toLocaleLowerCase()] = attribute.value;
 			}
 			for (const tag of possibleTags) {
 				if (
