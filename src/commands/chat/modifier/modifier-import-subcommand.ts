@@ -20,6 +20,7 @@ import characterSchema from './../../../services/kobold/models/character/charact
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 import _ from 'lodash';
+import { ignoreOnConflict, overwriteOnConflict, renameOnConflict, replaceAll } from './helpers.js';
 const ajv = new Ajv({ allowUnionTypes: true });
 addFormats(ajv);
 
@@ -94,67 +95,27 @@ export class ModifierImportSubCommand implements Command {
 		}
 		const currentModifiers = activeCharacter.modifiers;
 
-		let finalModifiers = [];
+		let finalModifiers: Character['modifiers'] = [];
+
 		if (
 			importMode ===
 			Language.LL.commandOptions.modifierImportMode.choices.fullyReplace.value()
 		) {
-			finalModifiers = newModifiers;
-		} else if (Language.LL.commandOptions.modifierImportMode.choices.overwrite.value()) {
-			finalModifiers = _.clone(currentModifiers);
-			for (const modifier of newModifiers) {
-				let sameModifierIndex = _.indexOf(
-					finalModifiers,
-					targetCurrentModifier =>
-						targetCurrentModifier.name.trim().toLocaleLowerCase() ===
-						modifier.name.trim().toLocaleLowerCase()
-				);
-				if (sameModifierIndex === -1) {
-					finalModifiers.push(modifier);
-				} else {
-					finalModifiers[sameModifierIndex] = modifier;
-				}
-			}
-		} else if (Language.LL.commandOptions.modifierImportMode.choices.renameOnConflict.value()) {
-			finalModifiers = _.clone(currentModifiers);
-			for (const modifier of newModifiers) {
-				let finalModifier = modifier;
-				let sameModifierIndex = _.indexOf(
-					finalModifiers,
-					targetCurrentModifier =>
-						targetCurrentModifier.name.trim().toLocaleLowerCase() ===
-						finalModifier.name.trim().toLocaleLowerCase()
-				);
-				//increment the counter on the name each time we try and fail to insert it
-				let i = 1;
-				while (sameModifierIndex !== -1) {
-					finalModifier = {
-						...finalModifier,
-						name: finalModifier + `-${i++}`,
-					};
-					sameModifierIndex = _.indexOf(
-						finalModifiers,
-						targetCurrentModifier =>
-							targetCurrentModifier.name.trim().toLocaleLowerCase() ===
-							finalModifier.name.trim().toLocaleLowerCase()
-					);
-				}
-				finalModifiers.push(modifier);
-			}
-		} else if (Language.LL.commandOptions.modifierImportMode.choices.ignoreOnConflict.value()) {
-			finalModifiers = _.clone(currentModifiers);
-			for (const modifier of newModifiers) {
-				let finalModifier = modifier;
-				let sameModifierIndex = _.indexOf(
-					finalModifiers,
-					targetCurrentModifier =>
-						targetCurrentModifier.name.trim().toLocaleLowerCase() ===
-						finalModifier.name.trim().toLocaleLowerCase()
-				);
-				if (sameModifierIndex === -1) {
-					finalModifier.push(modifier);
-				}
-			}
+			finalModifiers = replaceAll(currentModifiers, newModifiers);
+		} else if (
+			importMode === Language.LL.commandOptions.modifierImportMode.choices.overwrite.value()
+		) {
+			finalModifiers = overwriteOnConflict(currentModifiers, newModifiers);
+		} else if (
+			importMode ===
+			Language.LL.commandOptions.modifierImportMode.choices.renameOnConflict.value()
+		) {
+			finalModifiers = renameOnConflict(currentModifiers, newModifiers);
+		} else if (
+			importMode ===
+			Language.LL.commandOptions.modifierImportMode.choices.ignoreOnConflict.value()
+		) {
+			finalModifiers = ignoreOnConflict(currentModifiers, newModifiers);
 		} else {
 			console.error('failed to match an import option');
 			await InteractionUtils.send(

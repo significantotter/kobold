@@ -1,8 +1,9 @@
 import objection from 'objection';
+import dotenv from 'dotenv';
 import { DBModel } from './src/services/db-model.js';
-import { Config } from './src/config/config.js';
+dotenv.config();
 
-DBModel.init(Config.database.testUrl);
+DBModel.init(process.env.DATABASE_TEST_URL as string);
 const knex = DBModel.knex;
 
 const { transaction, Model } = objection;
