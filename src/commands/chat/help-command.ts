@@ -3,17 +3,14 @@ import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
 	ChatInputCommandInteraction,
-	EmbedBuilder,
 	PermissionsString,
 	ApplicationCommandOptionType,
 } from 'discord.js';
 
-import { ChatArgs } from '../../constants/index.js';
 import { TranslationFunctions } from '../../i18n/i18n-types.js';
 import { Language } from '../../models/enum-helpers/index.js';
 import { EventData } from '../../models/internal-models.js';
-import { Lang } from '../../services/index.js';
-import { CommandUtils, InteractionUtils } from '../../utils/index.js';
+import { InteractionUtils } from '../../utils/index.js';
 import { Command, CommandDeferType } from '../index.js';
 import _ from 'lodash';
 
