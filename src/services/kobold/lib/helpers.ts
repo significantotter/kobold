@@ -3,6 +3,7 @@ import { Character } from '../models/index.js';
 
 export function isModifierValidForTags(
 	modifier: Character['modifiers'][0],
+	attributes: Character['attributes'],
 	tags: string[]
 ): boolean {
 	// compile the modifier's target tags
@@ -12,7 +13,7 @@ export function isModifierValidForTags(
 
 	let tagTruthValues: { [k: string]: boolean | number } = {};
 
-	for (const attribute of this.attributes) {
+	for (const attribute of attributes) {
 		tagTruthValues['__' + attribute.name.toLocaleLowerCase()] = attribute.value;
 	}
 	for (const tag of possibleTags) {
@@ -52,6 +53,7 @@ export function isModifierValidForTags(
 
 export function parseBonusesForTagsFromModifiers(
 	modifiers: Character['modifiers'],
+	attributes: Character['attributes'],
 	tags: string[]
 ) {
 	const sanitizedTags = tags.map(tag => tag.toLocaleLowerCase().trim());
@@ -63,29 +65,35 @@ export function parseBonusesForTagsFromModifiers(
 		// if this modifier isn't active, move to the next one
 		if (!modifier.isActive) continue;
 
-		const modifierValidForTags = isModifierValidForTags(modifier, sanitizedTags);
+		const modifierValidForTags = isModifierValidForTags(modifier, attributes, sanitizedTags);
 
 		// check if any tags match between the modifier and the provided tags
 		if (modifierValidForTags) {
-			if (!modifier.type) {
+			const modifierType = modifier.type.toLocaleLowerCase().trim();
+			if (
+				!modifier.type ||
+				['untyped', 'none', 'n.a.', 'un typed', 'no', 'false', 'null', 'no type'].includes(
+					modifierType
+				)
+			) {
 				untyped.push(modifier);
 			}
 			// apply the modifier
 			else if (modifier.value > 0) {
 				// apply a bonus
-				if (bonuses[modifier.type]) {
-					if (modifier.value > bonuses[modifier.type].value)
-						bonuses[modifier.type] = modifier;
+				if (bonuses[modifierType]) {
+					if (modifier.value > bonuses[modifierType].value)
+						bonuses[modifierType] = modifier;
 				} else {
-					bonuses[modifier.type] = modifier;
+					bonuses[modifierType] = modifier;
 				}
 			} else if (modifier.value < 0) {
 				// apply a penalty
-				if (penalties[modifier.type]) {
-					if (modifier.value < penalties[modifier.type].value)
-						penalties[modifier.type] = modifier;
+				if (penalties[modifierType]) {
+					if (modifier.value < penalties[modifierType].value)
+						penalties[modifierType] = modifier;
 				} else {
-					penalties[modifier.type] = modifier;
+					penalties[modifierType] = modifier;
 				}
 			}
 		}

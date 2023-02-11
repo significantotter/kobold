@@ -45,6 +45,7 @@ export class Character extends BaseModel {
 	public getModifiersFromTags(tags: string[]): Character['modifiers'] {
 		const { untyped, bonuses, penalties } = parseBonusesForTagsFromModifiers(
 			this.modifiers,
+			this.attributes,
 			tags
 		);
 		return untyped.concat(_.values(bonuses), _.values(penalties));

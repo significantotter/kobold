@@ -104,8 +104,6 @@ export class HelpCommand implements Command {
 
 		let embed = new KoboldEmbed();
 		embed.setThumbnail(LL.commands.help.about.interactions.embed.thumbnail());
-		console.warn(command);
-		console.warn('here');
 		switch (command) {
 			case Language.LL.commands.help.faq.name(): {
 				embed.setTitle(LL.commands.help.about.interactions.embed.title());
@@ -134,7 +132,6 @@ export class HelpCommand implements Command {
 				break;
 			}
 			case Language.LL.commands.help.about.name(): {
-				console.warn('about???');
 				embed.setTitle(LL.commands.help.about.interactions.embed.title());
 				embed.setDescription(LL.commands.help.about.interactions.embed.description());
 				embed.addFields([
@@ -286,13 +283,12 @@ export class HelpCommand implements Command {
 						LL.commands.modifier.import.name(),
 						LL.commands.modifier.export.name(),
 					].map(command =>
-						createCommandOperationHelpField(LL.commands.roll.name(), command, LL)
+						createCommandOperationHelpField(LL.commands.modifier.name(), command, LL)
 					)
 				);
 				break;
 			}
 			case Language.LL.commands.help.attributesAndTags.name(): {
-				console.warn('attrs and tags!');
 				embed.setTitle(LL.commands.help.attributesAndTags.interactions.embed.title());
 				embed.setDescription(
 					LL.commands.help.attributesAndTags.interactions.embed.description()

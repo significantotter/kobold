@@ -214,8 +214,8 @@ const en: BaseTranslation = {
 						title: '/modifier Commands',
 						thumbnail: refs.links.thumbnail,
 						description:
-							'Modifiers are conditional bonuses or penalties that apply to certain dice rolls. These ' +
-							'Which dice rolls are effected are based on a system of "tags." For example, every attack roll has ' +
+							'Modifiers are conditional bonuses or penalties that apply to certain dice rolls. ' +
+							'Which dice rolls are affected is based on a system of "tags." For example, every attack roll has ' +
 							'the "attack" tag and every skill roll has the "skill" tag. A full list of tags are available under ' +
 							'`/help attributes-and-tags`. \n\nModifiers can be toggled active or inactive. When inactive, a ' +
 							'modifier will never apply to a roll, even if it applies to the given tags.\n\nTo learn how to build target tags ' +

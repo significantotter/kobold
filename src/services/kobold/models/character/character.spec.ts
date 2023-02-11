@@ -66,7 +66,4 @@ describe('Character', () => {
 			expect(modifier).toStrictEqual(modifiers[0]);
 		});
 	});
-	describe('getModifiersFromTags', () => {
-		test.todo('todo');
-	});
 });
