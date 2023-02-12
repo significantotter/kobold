@@ -102,7 +102,7 @@ function parseEnvNumber(envVariable: string) {
 
 function parseEnvBoolean(envVariable: string) {
 	if (!envVariable) return undefined;
-	return Boolean(envVariable);
+	return envVariable.toLocaleLowerCase().trim() === 'false' ? false : true;
 }
 
 export const Config: config = Object.freeze({
