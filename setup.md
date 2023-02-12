@@ -39,14 +39,14 @@ Go to site settings, and change the name to whatever domain you want for it.
 Go to the Build & Deploy section of the settings, and then the Environment subsection.
 Set the following environment variables:
 DATABASE_URL to the saved database connection string including the password
-VITE_BASE_URL to https://<your netlify app name>.netlify.app
+VITE_BASE_URL to https://\<your netlify app name\>.netlify.app
 WG_API_KEY to the saved wanderer's guide API key
 WG_CLIENT_ID to the saved wanderer's guide client id
 WG_STATE to an arbitrary secret value
 
 Then, go to the netlify deploys tab and click Trigger Deploy -> Deploy Site
 
-Go back to your wanderer's guide account page and edit the client/api key item. Update the redirect URL to https://<your netlify app name>.netlify.app/.netlify/functions/oauthCallback
+Go back to your wanderer's guide account page and edit the client/api key item. Update the redirect URL to https://\<your netlify app name\>.netlify.app/.netlify/functions/oauthCallback
 
 # Get a Pastebin API key if you want
 
@@ -64,11 +64,11 @@ Copy the .env.example file and rename it to .env
 
 Fill in the values with the following notes:
 
-WANDERERS_GUIDE_OAUTH_BASE_URL gets set to https://<your netlify app name>.netlify.app/.netlify/functions/oauth
+WANDERERS_GUIDE_OAUTH_BASE_URL gets set to https://\<your netlify app name\>.netlify.app/.netlify/functions/oauth
 
 DEVELOPER_IDS and ADMIN_GUILD_IDS can stay blank. They only determine what users are allowed to use the /admin command and in what server to register that command.
 
-The TEST_DATABASE_URL can stay blank. You need to fill it in if you want to use `npm run test`. The best way to do that is to set up a local postgres database, create a kobold_test database, and then set it to something like postgresql://<your user name>:<your password>@localhost:5432/kobold_test. Note, 5432 is the default postgres port. It may be on a different port.
+The TEST_DATABASE_URL can stay blank. You need to fill it in if you want to use `npm run test`. The best way to do that is to set up a local postgres database, create a kobold_test database, and then set it to something like postgresql://\<your user name\>:\<your password\>@localhost:5432/kobold_test. Note, 5432 is the default postgres port. It may be on a different port.
 
 API_SECRET is an arbitrary value you set.
 
