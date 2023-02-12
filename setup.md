@@ -80,7 +80,7 @@ navigate into the directory you cloned the kobold repository into.
 
 run `npm install` to install all the npm packages
 
-run `npm run migrate` to migrate the database schema.
+run `npm run build && npm run migrate` to migrate the database schema.
 
 run `npm run commands:register` to register the bot's commands with discord
 
