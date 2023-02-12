@@ -9,7 +9,6 @@ import { Manager } from './models/manager.js';
 import { DBModel, HttpService, JobService, Logger, MasterApiService } from './services/index.js';
 import { MathUtils, ShardUtils } from './utils/index.js';
 import { Config } from './config/config.js';
-import Debug from './config/debug.json';
 import Logs from './config/lang/logs.json';
 
 async function start(): Promise<void> {
@@ -52,9 +51,7 @@ async function start(): Promise<void> {
 
 	let shardManager = new ShardingManager('dist/start-bot.js', {
 		token: Config.client.token,
-		mode: (Debug.override.shardMode.enabled
-			? Debug.override.shardMode.value
-			: 'process') as any,
+		mode: (Config.debug.shardMode.enabled ? Config.debug.shardMode.value : 'process') as any,
 		respawn: true,
 		totalShards,
 		shardList,

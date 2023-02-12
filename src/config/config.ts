@@ -78,6 +78,10 @@ interface config {
 			enabled: boolean;
 			whiteList: string[];
 		};
+		shardMode: {
+			enabled: boolean;
+			value: string;
+		};
 	};
 }
 
@@ -191,6 +195,10 @@ export const Config: config = Object.freeze({
 		dummyMode: {
 			enabled: parseEnvBoolean(env.DEBUG_DUMMY_MODE_ENABLED) ?? false,
 			whiteList: parseEnvArray(env.DEBUG_DUMMY_MODE_WHITELIST) ?? [],
+		},
+		shardMode: {
+			enabled: parseEnvBoolean(env.DEBUG_SHARD_MODE_ENABLED) ?? false,
+			value: env.DEBUG_SHARD_MODE_VALUE ?? 'worker',
 		},
 	},
 });
