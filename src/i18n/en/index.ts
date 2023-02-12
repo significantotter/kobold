@@ -236,11 +236,7 @@ const en: BaseTranslation = {
 							'So BOTH attack and EITHER skill or dexterity must be in the roll\n\n\n' +
 							'**Advanced**\n\n' +
 							'To learn how to build target tags ' +
-							'you can use [this link](https://github.com/joewalnes/filtrex), although its fairly technical. Alternatively, ' +
-							'here are some more examples to show how they can work:\n\n' +
-							'`attack or (skill and dexterity)` - attacks or skills that use dexterity\n' +
-							'`skill and not (arcana or nature or occultism or religion)` - A skill that is not one of arcana, nature, occultism, or religion\n' +
-							'`damage or (athletics or intimidation)` - A damage roll or a roll that is either athletics or intimidation\n', //+
+							'you can also reference [this link](https://github.com/joewalnes/filtrex), although its fairly technical.', //+
 						// '`__hp < 50 and damage` - Damage, but only when your current health is below 50 (Yes, you can use ' +
 						// 'attributes in target tag expressions if you prefix them with "__"!)\n' +
 						// '`attack` - An attack roll! easy as that.',
