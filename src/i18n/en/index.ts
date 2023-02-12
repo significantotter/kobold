@@ -240,10 +240,10 @@ const en: BaseTranslation = {
 							'here are some more examples to show how they can work:\n\n' +
 							'`attack or (skill and dexterity)` - attacks or skills that use dexterity\n' +
 							'`skill and not (arcana or nature or occultism or religion)` - A skill that is not one of arcana, nature, occultism, or religion\n' +
-							'`damage or (athletics or intimidation)` - A damage roll or a roll that is either athletics or intimidation\n' +
-							'`__hp < 50 and damage` - Damage, but only when your current health is below 50 (Yes, you can use ' +
-							'attributes in target tag expressions if you prefix them with "__"!)\n' +
-							'`attack` - An attack roll! easy as that.',
+							'`damage or (athletics or intimidation)` - A damage roll or a roll that is either athletics or intimidation\n', //+
+						// '`__hp < 50 and damage` - Damage, but only when your current health is below 50 (Yes, you can use ' +
+						// 'attributes in target tag expressions if you prefix them with "__"!)\n' +
+						// '`attack` - An attack roll! easy as that.',
 					},
 				},
 			},
