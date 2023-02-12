@@ -86,6 +86,7 @@ interface config {
 }
 
 function parseEnvArray(envVariable: string) {
+	if (envVariable == '') return [];
 	return (envVariable || '').split(',');
 }
 

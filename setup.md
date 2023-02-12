@@ -85,3 +85,5 @@ run `npm run build && npm run migrate` to migrate the database schema.
 run `npm run commands:register` to register the bot's commands with discord
 
 run `npm start` to build and run the bot!
+
+now just add your bot to a server by going to the url from the environment variable CLIENT_INVITE_URL in your .env!
