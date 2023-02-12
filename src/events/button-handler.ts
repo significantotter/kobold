@@ -5,7 +5,7 @@ import { Button, ButtonDeferType } from '../buttons/index.js';
 import { EventData } from '../models/internal-models.js';
 import { InteractionUtils } from '../utils/index.js';
 import { EventHandler } from './index.js';
-import Config from './../config/config.json';
+import { Config } from './../config/config.js';
 
 export class ButtonHandler implements EventHandler {
 	private rateLimiter = new RateLimiter(

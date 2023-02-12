@@ -66,7 +66,18 @@
 		},
 		"modifiers": {
 			"type": "array",
-			"description": "An array of toggleable modifier objects that apply dice expression values to rolls with certain tags."
+			"description": "An array of toggleable modifier objects that apply dice expression values to rolls with certain tags.",
+			"items": {
+				"type": "object",
+				"properties": {
+					"name": { "type": "string" },
+					"isActive": { "type": "boolean" },
+					"description": { "type": ["string", "null"] },
+					"type": { "type": "string" },
+					"targetTags": { "type": "string" },
+					"value": { "type": "number" }
+				}
+			}
 		},
 		"actions": {
 			"type": "array",

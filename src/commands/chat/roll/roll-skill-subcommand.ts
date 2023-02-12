@@ -79,15 +79,14 @@ export class RollSkillSubCommand implements Command {
 			);
 			return;
 		}
-		const response = await DiceUtils.rollSkill(
+		const response = await DiceUtils.rollSkill({
 			intr,
 			activeCharacter,
 			skillChoice,
 			rollNote,
 			modifierExpression,
-			undefined,
-			LL
-		);
+			LL,
+		});
 
 		await InteractionUtils.send(intr, response.compileEmbed());
 	}

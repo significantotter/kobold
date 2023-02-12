@@ -30,6 +30,17 @@ export { InitEndSubCommand } from './init/init-end-subcommand.js';
 export { InitJoinSubCommand } from './init/init-join-subcommand.js';
 export { InitRemoveSubCommand } from './init/init-remove-subcommand.js';
 
+// modifier commands
+export { ModifierCommand } from './modifier/modifier-command.js';
+export { ModifierCreateSubCommand } from './modifier/modifier-create-subcommand.js';
+export { ModifierRemoveSubCommand } from './modifier/modifier-remove-subcommand.js';
+export { ModifierListSubCommand } from './modifier/modifier-list-subcommand.js';
+export { ModifierDetailSubCommand } from './modifier/modifier-detail-subcommand.js';
+export { ModifierImportSubCommand } from './modifier/modifier-import-subcommand.js';
+export { ModifierExportSubCommand } from './modifier/modifier-export-subcommand.js';
+export { ModifierUpdateSubCommand } from './modifier/modifier-update-subcommand.js';
+export { ModifierToggleSubCommand } from './modifier/modifier-toggle-subcommand.js';
+
 // help command
 export { HelpCommand } from './help-command';
 

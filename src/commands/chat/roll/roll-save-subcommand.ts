@@ -95,9 +95,29 @@ export class RollSaveSubCommand implements Command {
 			}),
 			LL,
 		});
-		rollBuilder.addRoll(
-			DiceUtils.buildDiceExpression('d20', String(targetSave.Bonus), modifierExpression)
-		);
+
+		const tags = ['save', targetSave.Name.toLocaleLowerCase()];
+		// add the ability tag
+		// TODO this should be moved to a helper
+		// something like getTagsForSave()
+		if (['will', 'fortitude', 'reflex'].includes(targetSave.Name.toLocaleLowerCase())) {
+			tags.push(
+				{
+					will: 'wisdom',
+					fortitude: 'constitution',
+					reflex: 'dexterity',
+				}[targetSave.Name.toLocaleLowerCase()]
+			);
+		}
+
+		rollBuilder.addRoll({
+			rollExpression: DiceUtils.buildDiceExpression(
+				'd20',
+				String(targetSave.Bonus),
+				modifierExpression
+			),
+			tags,
+		});
 		const response = rollBuilder.compileEmbed();
 
 		await InteractionUtils.send(intr, response);

@@ -25,8 +25,7 @@ import {
 } from '../events/index.js';
 import { JobService, Logger } from '../services/index.js';
 import { PartialUtils } from '../utils/index.js';
-import Config from './../config/config.json';
-import Debug from './../config/debug.json';
+import { Config } from './../config/config.js';
 import Logs from './../config/lang/logs.json';
 
 export class Bot {
@@ -82,7 +81,7 @@ export class Bot {
 		let userTag = this.client.user?.tag;
 		Logger.info(Logs.info.clientLogin.replaceAll('{USER_TAG}', userTag));
 
-		if (!Debug.dummyMode.enabled) {
+		if (!Config.debug.dummyMode.enabled) {
 			this.jobService.start();
 		}
 
@@ -95,7 +94,7 @@ export class Bot {
 	}
 
 	private async onGuildJoin(guild: Guild): Promise<void> {
-		if (!this.ready || Debug.dummyMode.enabled) {
+		if (!this.ready || Config.debug.dummyMode.enabled) {
 			return;
 		}
 
@@ -107,7 +106,7 @@ export class Bot {
 	}
 
 	private async onGuildLeave(guild: Guild): Promise<void> {
-		if (!this.ready || Debug.dummyMode.enabled) {
+		if (!this.ready || Config.debug.dummyMode.enabled) {
 			return;
 		}
 
@@ -121,7 +120,8 @@ export class Bot {
 	private async onMessage(msg: Message): Promise<void> {
 		if (
 			!this.ready ||
-			(Debug.dummyMode.enabled && !Debug.dummyMode.whitelist.includes(msg.author.id))
+			(Config.debug.dummyMode.enabled &&
+				!Config.debug.dummyMode.whiteList.includes(msg.author.id))
 		) {
 			return;
 		}
@@ -141,7 +141,8 @@ export class Bot {
 	private async onInteraction(intr: Interaction): Promise<void> {
 		if (
 			!this.ready ||
-			(Debug.dummyMode.enabled && !Debug.dummyMode.whitelist.includes(intr.user.id))
+			(Config.debug.dummyMode.enabled &&
+				!Config.debug.dummyMode.whiteList.includes(intr.user.id))
 		) {
 			return;
 		}
@@ -167,7 +168,8 @@ export class Bot {
 	): Promise<void> {
 		if (
 			!this.ready ||
-			(Debug.dummyMode.enabled && !Debug.dummyMode.whitelist.includes(reactor.id))
+			(Config.debug.dummyMode.enabled &&
+				!Config.debug.dummyMode.whiteList.includes(reactor.id))
 		) {
 			return;
 		}

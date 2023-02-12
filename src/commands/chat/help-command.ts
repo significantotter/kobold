@@ -3,17 +3,14 @@ import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
 	ChatInputCommandInteraction,
-	EmbedBuilder,
 	PermissionsString,
 	ApplicationCommandOptionType,
 } from 'discord.js';
 
-import { ChatArgs } from '../../constants/index.js';
 import { TranslationFunctions } from '../../i18n/i18n-types.js';
 import { Language } from '../../models/enum-helpers/index.js';
 import { EventData } from '../../models/internal-models.js';
-import { Lang } from '../../services/index.js';
-import { CommandUtils, InteractionUtils } from '../../utils/index.js';
+import { InteractionUtils } from '../../utils/index.js';
 import { Command, CommandDeferType } from '../index.js';
 import _ from 'lodash';
 
@@ -70,6 +67,18 @@ export class HelpCommand implements Command {
 			{
 				name: Language.LL.commands.help.roll.name(),
 				description: Language.LL.commands.help.roll.description(),
+				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				options: [],
+			},
+			{
+				name: Language.LL.commands.help.modifier.name(),
+				description: Language.LL.commands.help.modifier.description(),
+				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				options: [],
+			},
+			{
+				name: Language.LL.commands.help.attributesAndTags.name(),
+				description: Language.LL.commands.help.attributesAndTags.description(),
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
 				options: [],
 			},
@@ -186,6 +195,18 @@ export class HelpCommand implements Command {
 							`\`/${LL.commands.init.name()} ${LL.commands.init.set.name()}\` ${LL.commands.init.set.description()}\n` +
 							`\`/${LL.commands.init.name()} ${LL.commands.init.end.name()}\` ${LL.commands.init.end.description()}\n`,
 					},
+					{
+						name: LL.commands.modifier.name(),
+						value:
+							`\`/${LL.commands.modifier.name()} ${LL.commands.modifier.create.name()}\` ${LL.commands.modifier.create.description()}\n` +
+							`\`/${LL.commands.modifier.name()} ${LL.commands.modifier.toggle.name()}\` ${LL.commands.modifier.toggle.description()}\n` +
+							`\`/${LL.commands.modifier.name()} ${LL.commands.modifier.list.name()}\` ${LL.commands.modifier.list.description()}\n` +
+							`\`/${LL.commands.modifier.name()} ${LL.commands.modifier.detail.name()}\` ${LL.commands.modifier.detail.description()}\n` +
+							`\`/${LL.commands.modifier.name()} ${LL.commands.modifier.update.name()}\` ${LL.commands.modifier.update.description()}\n` +
+							`\`/${LL.commands.modifier.name()} ${LL.commands.modifier.remove.name()}\` ${LL.commands.modifier.remove.description()}\n` +
+							`\`/${LL.commands.modifier.name()} ${LL.commands.modifier.import.name()}\` ${LL.commands.modifier.import.description()}\n` +
+							`\`/${LL.commands.modifier.name()} ${LL.commands.modifier.export.name()}\` ${LL.commands.modifier.export.description()}\n`,
+					},
 				]);
 				break;
 			}
@@ -245,11 +266,48 @@ export class HelpCommand implements Command {
 				);
 				break;
 			}
+			case Language.LL.commands.help.modifier.name(): {
+				embed.setTitle(LL.commands.help.modifier.interactions.embed.title());
+				embed.setDescription(LL.commands.help.modifier.interactions.embed.description());
+				embed.addFields(
+					[
+						LL.commands.modifier.create.name(),
+						LL.commands.modifier.toggle.name(),
+						LL.commands.modifier.list.name(),
+						LL.commands.modifier.detail.name(),
+						LL.commands.modifier.update.name(),
+						LL.commands.modifier.remove.name(),
+						LL.commands.modifier.import.name(),
+						LL.commands.modifier.export.name(),
+					].map(command =>
+						createCommandOperationHelpField(LL.commands.modifier.name(), command, LL)
+					)
+				);
+				break;
+			}
+			case Language.LL.commands.help.attributesAndTags.name(): {
+				embed.setTitle(LL.commands.help.attributesAndTags.interactions.embed.title());
+				embed.setDescription(
+					LL.commands.help.attributesAndTags.interactions.embed.description()
+				);
+				embed.addFields(
+					_.map(
+						LL.commands.help.attributesAndTags.interactions.embed.attributes,
+						(attributeList, attribute) => ({
+							name: attribute,
+							value: _.values(attributeList)
+								.map(value => value())
+								.join('\n'),
+							inline: true,
+						})
+					)
+				);
+				break;
+			}
 			default: {
 				return;
 			}
 		}
-
 		await InteractionUtils.send(intr, embed);
 	}
 }

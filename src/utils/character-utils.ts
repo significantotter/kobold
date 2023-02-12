@@ -30,6 +30,7 @@ interface NamedThing {
 	Name: string;
 }
 const characterIdRegex = /characters\/([0-9]+)/;
+const pastebinIdRegex = /pastebin\.com(?:\/raw)?\/([A-Za-z0-9]+)/;
 
 export class CharacterUtils {
 	/**
@@ -60,7 +61,7 @@ export class CharacterUtils {
 	}
 
 	/**
-	 * Given a string, finds all skills contining that string on a given character
+	 * Given a string, finds all skills containing that string on a given character
 	 * @param targetCharacter the character to check for matching skills
 	 * @param skillText the text to match to skills
 	 * @returns all skills that contain the given skillText
@@ -82,7 +83,7 @@ export class CharacterUtils {
 	}
 
 	/**
-	 * Given a string, finds all saves contining that string on a given character
+	 * Given a string, finds all saves containing that string on a given character
 	 * @param targetCharacter the character to check for matching saves
 	 * @param saveText the text to match to saves
 	 * @returns all saves that contain the given saveText
@@ -101,7 +102,26 @@ export class CharacterUtils {
 	}
 
 	/**
-	 * Given a string, finds all ability scores contining that string on a given character
+	 * Given a string, finds all modifiers containing that string on a given character
+	 * @param targetCharacter the character to check for matching modifiers
+	 * @param modifierText the text to match to modifiers
+	 * @returns all modifiers that contain the given modifierText
+	 */
+	public static findPossibleModifierFromString(
+		targetCharacter: Character,
+		modifierText: string
+	): Character['modifiers'] {
+		const matchedModifiers = [];
+		for (const modifier of targetCharacter.modifiers || []) {
+			if (modifier.name.toLowerCase().includes(modifierText.toLowerCase())) {
+				matchedModifiers.push(modifier);
+			}
+		}
+		return matchedModifiers;
+	}
+
+	/**
+	 * Given a string, finds all ability scores containing that string on a given character
 	 * @param targetCharacter the character to check for matching ability scores
 	 * @param abilityText the text to match to ability scores
 	 * @returns all ability scores that contain the given abilityText
@@ -120,7 +140,7 @@ export class CharacterUtils {
 	}
 
 	/**
-	 * Given a string, finds all attacks contining that string on a given character
+	 * Given a string, finds all attacks containing that string on a given character
 	 * @param targetCharacter the character to check for matching attacks
 	 * @param attackText the text to match to attacks
 	 * @returns all attacks that contain the given attackText
@@ -180,5 +200,25 @@ export class CharacterUtils {
 			} else charId = Number(matches[1]);
 		}
 		return charId;
+	}
+
+	/**
+	 * Parses the text to find a pastebin id out of a url or parses full string as a number
+	 * @param text either a pastebin url, or simply a pastebin post id
+	 */
+	public static parsePastebinIdFromText(text: string): string | null {
+		const trimmedText = text.trim();
+		let pastebinId: string | null = null;
+		if (/^([A-Za-z0-9]+)$/.test(trimmedText)) {
+			// we allow just a pastebin id to be passed in as well
+			pastebinId = text;
+		} else {
+			// match the trimmedText to the regex
+			const matches = trimmedText.match(pastebinIdRegex);
+			if (!matches) {
+				pastebinId = null;
+			} else pastebinId = matches[1];
+		}
+		return pastebinId;
 	}
 }

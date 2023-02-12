@@ -102,24 +102,24 @@ export class ChatArgs {
 		type: ApplicationCommandOptionType.String,
 	};
 	public static readonly ACTOR_SET_OPTION: APIApplicationCommandBasicOption = {
-		name: Language.LL.commandOptions.setOption.name(),
-		description: Language.LL.commandOptions.setOption.description(),
+		name: Language.LL.commandOptions.initSetOption.name(),
+		description: Language.LL.commandOptions.initSetOption.description(),
 		required: true,
 		type: ApplicationCommandOptionType.String,
 		choices: [
 			{
-				name: Language.LL.commandOptions.setOption.choices.initiative.name(),
-				value: Language.LL.commandOptions.setOption.choices.initiative.value(),
+				name: Language.LL.commandOptions.initSetOption.choices.initiative.name(),
+				value: Language.LL.commandOptions.initSetOption.choices.initiative.value(),
 			},
 			{
-				name: Language.LL.commandOptions.setOption.choices.actorName.name(),
-				value: Language.LL.commandOptions.setOption.choices.actorName.value(),
+				name: Language.LL.commandOptions.initSetOption.choices.actorName.name(),
+				value: Language.LL.commandOptions.initSetOption.choices.actorName.value(),
 			},
 		],
 	};
 	public static readonly ACTOR_SET_VALUE_OPTION: APIApplicationCommandBasicOption = {
-		name: Language.LL.commandOptions.setValue.name(),
-		description: Language.LL.commandOptions.setValue.description(),
+		name: Language.LL.commandOptions.initSetValue.name(),
+		description: Language.LL.commandOptions.initSetValue.description(),
 		required: true,
 		type: ApplicationCommandOptionType.String,
 	};

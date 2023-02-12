@@ -112,7 +112,8 @@
 						"name": "Stats",
 						"value": [
 							"**Shards**: {{SHARD_COUNT}}",
-							"**Servers**: {{SERVER_COUNT}} ({{SERVER_COUNT_PER_SHARD}}/Shard)"
+							"**Servers**: {{SERVER_COUNT}} ({{SERVER_COUNT_PER_SHARD}}/Shard)",
+							"**Guild Count**: {{GUILD_COUNT}} "
 						]
 					},
 					{

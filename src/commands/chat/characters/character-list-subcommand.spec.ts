@@ -2,7 +2,11 @@ import { KoboldEmbed } from './../../../utils/kobold-embed-utils';
 import { Language } from './../../../models/enum-helpers/language';
 import { InteractionUtils } from './../../../utils/interaction-utils';
 import { Locale } from 'discord.js';
-import { Character, CharacterFactory } from '../../../services/kobold/models/index.js';
+import {
+	Character,
+	CharacterFactory,
+	GuildDefaultCharacter,
+} from '../../../services/kobold/models/index.js';
 import { CharacterListSubCommand } from './character-list-subcommand.js';
 
 describe('CharacterListSubCommand', () => {
@@ -23,6 +27,7 @@ describe('CharacterListSubCommand', () => {
 
 		const fakeIntr = {
 			user: { id: null },
+			guildId: 'foo',
 		} as any;
 		const command = new CharacterListSubCommand();
 		command.execute(fakeIntr, fakeData as any, Language.LL);
@@ -38,6 +43,11 @@ describe('CharacterListSubCommand', () => {
 						return [];
 					},
 				};
+			},
+		} as any);
+		jest.spyOn(GuildDefaultCharacter, 'query').mockReturnValue({
+			where({ userId, guildId }) {
+				return [];
 			},
 		} as any);
 		const fakeIntr = {

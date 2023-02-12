@@ -4,7 +4,7 @@ import util from 'node:util';
 import { Controller } from '../controllers/index.js';
 import { checkAuth, handleError } from '../middleware/index.js';
 import { Logger } from '../services/index.js';
-import Config from './../config/config.json';
+import { Config } from './../config/config.js';
 import Logs from './../config/lang/logs.json';
 
 export class Api {

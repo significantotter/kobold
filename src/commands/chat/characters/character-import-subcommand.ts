@@ -13,7 +13,7 @@ import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { WgToken } from '../../../services/kobold/models/index.js';
 import { CharacterHelpers } from './helpers.js';
-import Config from '../../../config/config.json';
+import { Config } from '../../../config/config.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
 import { CharacterOptions } from './command-options.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';

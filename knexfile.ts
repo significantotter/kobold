@@ -1,12 +1,13 @@
 import type { Knex } from 'knex';
-import Config from './src/config/config.json';
+import dotenv from 'dotenv';
+dotenv.config();
 
 // Update with your config settings.
 
 const config: { [key: string]: Knex.Config } = {
 	development: {
 		client: 'postgresql',
-		connection: Config.database.url,
+		connection: process.env.DATABASE_URL,
 		pool: {
 			min: 2,
 			max: 10,
@@ -18,7 +19,7 @@ const config: { [key: string]: Knex.Config } = {
 
 	TEST: {
 		client: 'postgresql',
-		connection: Config.database.testUrl,
+		connection: process.env.DATABASE_TEST_URL,
 		pool: {
 			min: 2,
 			max: 10,

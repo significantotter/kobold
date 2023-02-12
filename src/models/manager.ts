@@ -1,8 +1,7 @@
 import { Shard, ShardingManager } from 'discord.js';
 
 import { JobService, Logger } from '../services/index.js';
-import Config from './../config/config.json';
-import Debug from './../config/debug.json';
+import { Config } from './../config/config.js';
 import Logs from './../config/lang/logs.json';
 
 export class Manager {
@@ -30,7 +29,7 @@ export class Manager {
 			return;
 		}
 
-		if (Debug.dummyMode.enabled) {
+		if (Config.debug.dummyMode.enabled) {
 			return;
 		}
 

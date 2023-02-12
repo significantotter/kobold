@@ -8,7 +8,7 @@ import {
 import { InteractionUtils } from '../../../utils/interaction-utils.js';
 import { CharacterImportSubCommand } from './character-import-subcommand';
 import { CharacterHelpers } from './helpers.js';
-import Config from '../../../config/config.json';
+import { Config } from '../../../config/config.js';
 import { Language } from '../../../models/enum-helpers/index.js';
 
 describe('CharacterImportSubCommand', () => {
@@ -93,13 +93,22 @@ describe('CharacterImportSubCommand', () => {
 		}
 	);
 	test('responds with an auth link if a Wg token is not found for the character', function (done) {
+		let count = 0;
 		jest.spyOn(InteractionUtils, 'send').mockImplementation((intr, msg): any => {
-			expect(msg).toBe(
+			if (count === 0) {
 				Language.LL.commands.character.interactions.authenticationRequest({
 					action: 'import',
-				})
-			);
-			done();
+				});
+				count += 1;
+			} else if (count === 1) {
+				expect(msg).toBe(
+					Language.LL.commands.character.interactions.authenticationLink({
+						wgBaseUrl: Config.wanderersGuide.oauthBaseUrl,
+						charId: '56789',
+					})
+				);
+				done();
+			}
 		});
 		const fakeIntr = {
 			options: {

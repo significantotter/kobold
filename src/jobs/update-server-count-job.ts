@@ -5,11 +5,10 @@ import { BotSite } from '../models/config-models.js';
 import { HttpService, Lang, Logger } from '../services/index.js';
 import { ShardUtils } from '../utils/index.js';
 import { Job } from './index.js';
-import Config from './../config/config.json';
+import { Config } from './../config/config.js';
 import Logs from './../config/lang/logs.json';
-import BotSitesImport from './../config/bot-sites.json';
 
-let BotSites: BotSite[] = BotSitesImport;
+let BotSites: BotSite[] = [];
 
 export class UpdateServerCountJob implements Job {
 	public name = 'Update Server Count';

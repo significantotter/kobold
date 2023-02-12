@@ -1,13 +1,9 @@
-import axios from 'axios';
-import type { AxiosRequestConfig } from 'axios';
-import type { WG } from './wanderers-guide.js';
 import { CharacterApi } from './character-api/index.js';
 import { ClassApi } from './class-api/index.js';
 import { AncestryApi } from './ancestry-api/index.js';
 import { BackgroundApi } from './background-api/index';
 import { HeritageApi } from './heritage-api/index.js';
 import { VHeritageApi } from './v-heritage-api/index';
-import { access } from 'fs';
 
 interface httpHeaders {
 	[key: string]: number | string;

@@ -6,6 +6,22 @@ import { Character } from './character.model.js';
 import { faker } from '@faker-js/faker';
 import { WG } from '../../../wanderers-guide/wanderers-guide.js';
 
+export function createRandomModifiers(times: number): Character['modifiers'] {
+	const modifiers = [];
+	for (let i = 0; i < times; i++) {
+		const modifier = {
+			name: faker.random.word(),
+			description: faker.random.words(5),
+			isActive: faker.datatype.boolean(),
+			type: faker.helpers.arrayElement(['status', 'circumstance', 'item']),
+			targetTags: 'attack or skill',
+			value: faker.datatype.number(),
+		};
+		modifiers.push(modifier);
+	}
+	return modifiers;
+}
+
 type CharacterTransientParams = {
 	characterDataOptions: Partial<WG.CharacterApiResponse>;
 };
@@ -69,7 +85,7 @@ export const CharacterFactory = CharacterFactoryClass.define(({ onCreate, transi
 		userId: faker.datatype.uuid(),
 		attributes: createRandomAttributes(faker.datatype.number({ max: 50 })),
 		customAttributes: createRandomAttributes(faker.datatype.number({ max: 50 })),
-		modifiers: [],
+		modifiers: createRandomModifiers(faker.datatype.number({ max: 50 })),
 		actions: [],
 		customActions: [],
 		calculatedStats: CalculatedStatsFactory.build(),

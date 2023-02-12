@@ -84,8 +84,12 @@ export class InitAddSubCommand implements Command {
 				title: Language.LL.commands.init.add.interactions.joinedEmbed.rolledTitle({
 					actorName,
 				}),
+				LL,
 			});
-			rollBuilder.addRoll(diceExpression || 'd20');
+			rollBuilder.addRoll({
+				rollExpression: diceExpression || 'd20',
+				tags: ['skill', 'perception', 'initiative'],
+			});
 			finalInitiative = rollBuilder.rollResults[0]?.results?.total || 0;
 			rollResultMessage = rollBuilder.compileEmbed();
 		}

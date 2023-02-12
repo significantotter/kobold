@@ -205,6 +205,120 @@ const en: BaseTranslation = {
 					},
 				},
 			},
+			modifier: {
+				name: 'modifier',
+				value: 'modifier',
+				description: 'Help for the /modifier command',
+				interactions: {
+					embed: {
+						title: '/modifier Commands',
+						thumbnail: refs.links.thumbnail,
+						description:
+							'Modifiers are conditional bonuses or penalties that apply to certain dice rolls. ' +
+							'Which dice rolls are affected is based on a system of "tags." For example, every attack roll has ' +
+							'the `attack` tag and every skill roll has the `skill` tag. A full list of tags are available under ' +
+							'`/help attributes-and-tags`. \n\nModifiers can be toggled active or inactive. When inactive, a ' +
+							'modifier will never apply to a roll, even if it applies to the given tags.\n\n\n' +
+							'**How to target rolls with target-tags**\n\n' +
+							'\t**or**\n\n' +
+							'`or` means you need EITHER tag in the roll.\n\n' +
+							'`attack or save` means that the roll can either be an attack roll OR a save roll\n\n\n' +
+							'\t**and**\n\n' +
+							'`and` means you needs BOTH tags in the roll.\n\n' +
+							"`attack and save` means the roll must be an attack roll AND a save roll, which doesn't happen!!\n\n" +
+							'`skill and intimidation` would be true on any intimidation roll, because intimidation also has the skill tag!\n\n' +
+							'\t**not**\n\n' +
+							'`not` means that the roll applies to things that are not that tag \n\n' +
+							'`skill and not strength` applies to skill rolls that are NOT strength skills\n\n\n' +
+							'\t**Parentheses**\n\n' +
+							'Parentheses group tags. () \n\n' +
+							'`attack and (skill or dexterity)` requires attack and for the group to be valid! ' +
+							'So BOTH attack and EITHER skill or dexterity must be in the roll\n\n\n' +
+							'**Advanced**\n\n' +
+							'To learn how to build target tags ' +
+							'you can also reference [this link](https://github.com/joewalnes/filtrex), although its fairly technical.', //+
+						// '`__hp < 50 and damage` - Damage, but only when your current health is below 50 (Yes, you can use ' +
+						// 'attributes in target tag expressions if you prefix them with "__"!)\n' +
+						// '`attack` - An attack roll! easy as that.',
+					},
+				},
+			},
+			attributesAndTags: {
+				name: 'attributes-and-tags',
+				value: 'attributes-and-tags',
+				description: 'Help for character attributes and roll tags',
+				interactions: {
+					embed: {
+						title: 'Character Attributes and Roll Tags',
+						thumbnail: refs.links.thumbnail,
+						description:
+							'Character attributes are numeric values about your character that are usable in any roll. ' +
+							'You can add attributes to any roll by simply including the attribute name wrapped in square ' +
+							"brackets []. For example, a d20 roll that you're trained in using strength can be rolled with " +
+							'`d20 + [trained] + [strength]`. Certain attributes also add tags to your rolls, allowing modifiers ' +
+							'to effect them. For example a roll with `[athletics]` would apply the "athletics" tag and the "skill" tag. ' +
+							'\n\nBelow are all available attributes:',
+						attributes: {
+							character: [
+								'level',
+								'maxHp',
+								'tempHp',
+								'ac',
+								'heroPoints',
+								'speed',
+								'classDc',
+								'perception',
+								'maxStamina',
+								'stamina',
+								'maxResolve',
+								'resolve',
+							],
+							ability: [
+								'strength',
+								'dexterity',
+								'constitution',
+								'intelligence/',
+								'wisdom',
+								'charisma',
+							],
+							save: ['fortitude', 'reflex', 'will'],
+							skill: [
+								'Acrobatics',
+								'Arcana',
+								'Athletics',
+								'Crafting',
+								'Deception',
+								'Diplomacy',
+								'Intimidation',
+								'Medicine',
+								'Nature',
+								'Occultism',
+								'Performance',
+								'Religion',
+								'Society',
+								'Stealth',
+								'Survival',
+								'Thievery',
+								"(Any custom skills such as lores as well. E.G. 'Warfare_Lore'. Spaces are replaced with \\_'s)",
+							],
+							helpers: ['untrained', 'trained', 'expert', 'master', 'legendary'],
+						},
+						shorthands: {
+							str: 'strength',
+							dex: 'dexterity',
+							con: 'constitution',
+							int: 'intelligence',
+							wis: 'wisdom',
+							cha: 'charisma',
+							fort: 'fortitude',
+							ref: 'reflex',
+							health: 'hp',
+							tempHealth: 'tempHp',
+							perc: 'perception',
+						},
+					},
+				},
+			},
 		},
 		character: {
 			// MAIN COMMAND INFO
@@ -220,7 +334,7 @@ const en: BaseTranslation = {
 					`Give me permission to read your wanderer's guide character by following the link ` +
 					`below. Then, /character {action} your character again!`,
 				expiredToken:
-					`Yip! It's been a while since we last authenticated your character, so our ` +
+					`Yip! It's been a while since I last authenticated your character, so our ` +
 					`authentication expired. Please give me permission to read your wanderer's guide ` +
 					`character again by following the link below`,
 				authenticationLink: `Yip! Please follow  [this link]({wgBaseUrl}?characterId={charId}) to give me access to your character!`,
@@ -523,6 +637,100 @@ const en: BaseTranslation = {
 				},
 			},
 		},
+		modifier: {
+			name: 'modifier',
+			description: 'Toggleable values to modify specified dice rolls.',
+
+			interactions: {
+				notFound: "Yip! I couldn't find a modifier with that name.",
+				detailHeader: '{modifierName}{modifierIsActive}',
+				detailBody:
+					'{modifierDescriptionText}\nType: `{modifierType}`\nValue: `{modifierValue}`\nApplies to: `{modifierTargetTags}`',
+			},
+			list: {
+				name: 'list',
+				description: 'Lists all modifiers available to your active character.',
+			},
+			detail: {
+				name: 'detail',
+				description: 'Describes a modifier available to your active character.',
+			},
+			toggle: {
+				name: 'toggle',
+				description:
+					'Toggles whether a modifier is currently applying to your active character.',
+				interactions: {
+					success:
+						'Yip! {characterName} had their modifier {modifierName} set to {activeSetting}.',
+					active: 'active',
+					inactive: 'inactive',
+				},
+			},
+			update: {
+				name: 'update',
+				description: 'Updates a modifier for your active character.',
+				interactions: {
+					invalidOptionError: 'Yip! Please send a valid option to update.',
+					emptyNameError: "Yip! You can't use an empty name!",
+					nameExistsError: 'Yip! A modifier with that name already exists.',
+					valueNotNumberError: 'Yip! You can only update a modifier value with a number.',
+					successEmbed: {
+						title: "Yip! {characterName} had their modifier {modifierName}'s {fieldToChange} set to {newFieldValue}.",
+					},
+				},
+			},
+			create: {
+				name: 'create',
+				description: 'Creates a modifier for the active character.',
+				interactions: {
+					created: 'Yip! I created the modifier {modifierName} for {characterName}.',
+					alreadyExists:
+						'Yip! A modifier named {modifierName} already exists for {characterName}.',
+					invalidTags:
+						"Yip! I didn't understand the target tag expression you provided. Tags can be" +
+						' any expression in a format like "attack or skill". ' +
+						'See [this link](https://github.com/joewalnes/filtrex) for more details.',
+				},
+			},
+			remove: {
+				name: 'remove',
+				description: 'Removes a modifier for the active character.',
+
+				interactions: {
+					removeConfirmation: {
+						text: `Are you sure you want to remove the modifier {modifierName}?`,
+						removeButton: 'REMOVE',
+						cancelButton: 'CANCEL',
+						expired: 'Yip! Modifier removal request expired.',
+					},
+					cancel: 'Yip! Canceled the request to remove the modifier!',
+					success: 'Yip! I removed the modifier {modifierName}.',
+				},
+			},
+			export: {
+				name: 'export',
+				description:
+					'Exports a chunk of modifier data for you to later import on another character.',
+				interactions: {
+					success:
+						"Yip! I've saved {characterName}'s modifiers to [this PasteBin link]({pasteBinLink})",
+				},
+			},
+			import: {
+				name: 'import',
+				description: 'Imports an array of modifier data to a character from PasteBin.',
+				expandedDescription:
+					'Imports an array of modifier data to a character from PasteBin. Use ' +
+					'exported data from another character. Only try to modify it if you know how to work with JSON!',
+				interactions: {
+					failedParsing:
+						"Yip! I can't figure out how to read that! Try exporting another modifier to check and make " +
+						"sure you're formatting it right!",
+					badUrl: "Yip! I don't understand that Url! Copy the pastebin url for the pasted modifiers directly into the Url field.",
+					imported: 'Yip! I successfully imported those modifiers to {characterName}.',
+				},
+			},
+		},
 		roll: {
 			name: 'roll',
 			description: 'Roll Dice',
@@ -677,7 +885,7 @@ const en: BaseTranslation = {
 			name: 'character',
 			description: 'A character present in the initiative.',
 		},
-		setOption: {
+		initSetOption: {
 			name: 'option',
 			description: 'The character option to alter (only within this initiative).',
 			choices: {
@@ -691,9 +899,104 @@ const en: BaseTranslation = {
 				},
 			},
 		},
-		setValue: {
+		initSetValue: {
 			name: 'value',
 			description: 'The value to set the option to.',
+		},
+		modifierName: {
+			name: 'name',
+			description: 'The name of the modifier.',
+		},
+		modifierType: {
+			name: 'type',
+			description: 'The optional type (status, item, or circumstance) of the modifier.',
+		},
+		modifierDescription: {
+			name: 'description',
+			description: 'A description for the modifier.',
+		},
+		modifierValue: {
+			name: 'value',
+			description: 'The value applied by the modifier to dice rolls.',
+		},
+		modifierTargetTags: {
+			name: 'target-tags',
+			description:
+				'A set of tags for the rolls that this modifier applies to. For example "skill or attack or save"',
+		},
+		modifierSetOption: {
+			name: 'option',
+			description: 'The modifier option to alter.',
+			choices: {
+				name: {
+					name: 'name',
+					value: 'name',
+				},
+				description: {
+					name: 'description',
+					value: 'description',
+				},
+				type: {
+					name: 'type',
+					value: 'type',
+				},
+				value: {
+					name: 'value',
+					value: 'value',
+				},
+				targetTags: {
+					name: 'target-tags',
+					value: 'target-tags',
+				},
+			},
+		},
+		modifierSetValue: {
+			name: 'value',
+			description: 'The value to set the option to.',
+		},
+		modifierCustomOption: {
+			name: 'custom',
+			description: 'Whether to view custom created modifiers, default modifiers, or both.',
+			choices: {
+				custom: {
+					name: 'custom',
+					value: 'custom',
+				},
+				default: {
+					name: 'default',
+					value: 'default',
+				},
+				both: {
+					name: 'both',
+					value: 'both',
+				},
+			},
+		},
+		modifierImportMode: {
+			name: 'import-mode',
+			description: 'What to do when importing data.',
+			choices: {
+				fullyReplace: {
+					name: 'overwrite-all',
+					value: 'overwrite-all',
+				},
+				overwrite: {
+					name: 'overwrite-on-conflict',
+					value: 'overwrite-on-conflict',
+				},
+				renameOnConflict: {
+					name: 'rename-on-conflict',
+					value: 'rename-on-conflict',
+				},
+				ignoreOnConflict: {
+					name: 'ignore-on-conflict',
+					value: 'ignore-on-conflict',
+				},
+			},
+		},
+		modifierImportUrl: {
+			name: 'url',
+			description: 'The pastebin url with the modifier code to import.',
 		},
 	},
 	utils: {
@@ -701,8 +1004,8 @@ const en: BaseTranslation = {
 			rolledDice: 'rolled some dice!',
 			rolledAction: 'rolled {actionName}',
 			rollResult: '{rollExpression}\n{rollRenderedExpression}\n total = `{rollTotal}`',
-			diceRollError: "Yip! We didn't understand the dice roll {rollExpression}.",
-			diceRollOtherErrors: "Yip! We didn't understand the dice roll.\n{rollErrors}",
+			diceRollError: "Yip! I didn't understand the dice roll {rollExpression}.",
+			diceRollOtherErrors: "Yip! I didn't understand the dice roll.\n{rollErrors}",
 		},
 		initiative: {
 			characterNameNotFoundError:

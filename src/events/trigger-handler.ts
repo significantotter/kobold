@@ -3,7 +3,7 @@ import { RateLimiter } from 'discord.js-rate-limiter';
 
 import { EventData } from '../models/internal-models.js';
 import { Trigger } from '../triggers/index.js';
-import Config from './../config/config.json';
+import { Config } from './../config/config.js';
 
 export class TriggerHandler {
 	private rateLimiter = new RateLimiter(

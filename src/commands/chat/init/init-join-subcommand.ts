@@ -121,31 +121,36 @@ export class InitJoinSubCommand implements Command {
 				rollResultMessage.setThumbnail(activeCharacter.characterData.infoJSON?.imageURL);
 			}
 		} else if (skillChoice) {
-			const response = await DiceUtils.rollSkill(
+			const response = await DiceUtils.rollSkill({
 				intr,
 				activeCharacter,
 				skillChoice,
-				null,
-				diceExpression
-			);
+				modifierExpression: diceExpression,
+				tags: ['initiative'],
+				LL,
+			});
 			finalInitiative = response.rollResults[0]?.results?.total || 0;
 			rollResultMessage = response.compileEmbed();
 		} else if (diceExpression) {
 			const rollBuilder = new RollBuilder({
 				character: activeCharacter,
 				rollDescription: LL.commands.init.join.interactions.joinedEmbed.rollDescription(),
+				LL,
 			});
-			rollBuilder.addRoll(diceExpression);
+			rollBuilder.addRoll({
+				rollExpression: diceExpression,
+				tags: ['skill', 'perception', 'initiative'],
+			});
 			finalInitiative = rollBuilder.rollResults[0]?.results?.total || 0;
 			rollResultMessage = rollBuilder.compileEmbed();
 		} else {
-			const response = await DiceUtils.rollSkill(
+			const response = await DiceUtils.rollSkill({
 				intr,
 				activeCharacter,
-				'Perception',
-				null,
-				diceExpression
-			);
+				skillChoice: 'Perception',
+				modifierExpression: diceExpression,
+				tags: ['initiative'],
+			});
 			finalInitiative = response.rollResults[0]?.results?.total || 0;
 			rollResultMessage = response.compileEmbed();
 		}

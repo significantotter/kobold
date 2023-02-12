@@ -9,7 +9,7 @@ import {
 } from 'discord.js';
 
 import { Logger } from './logger.js';
-import Config from './../config/config.json';
+import { Config } from './../config/config.js';
 import Logs from './../config/lang/logs.json';
 
 export class CommandRegistrationService {
@@ -75,6 +75,9 @@ export class CommandRegistrationService {
 									{ body: localCmd.metadata }
 								);
 							}
+						} else if (localCmd.restrictedGuilds !== undefined) {
+							//if we just define empty restricted guilds, we don't allow it to show up in any guilds
+							continue;
 						} else {
 							await this.rest.post(Routes.applicationCommands(Config.client.id), {
 								body: localCmd.metadata,

@@ -44,7 +44,15 @@ export interface Character {
 	/**
 	 * An array of toggleable modifier objects that apply dice expression values to rolls with certain tags.
 	 */
-	modifiers?: any[];
+	modifiers?: {
+		name?: string;
+		isActive?: boolean;
+		description?: string | null;
+		type?: string;
+		targetTags?: string;
+		value?: number;
+		[k: string]: any;
+	}[];
 	/**
 	 * An array of default actions set up for the user. These allow the user to make certain roll operations as a single command.
 	 */
