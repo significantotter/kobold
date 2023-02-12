@@ -265,7 +265,7 @@ export class DiceUtils {
 			attr =>
 				attr.name.trim().toLocaleLowerCase() === targetSkill.Name.trim().toLocaleLowerCase()
 		);
-		let skillTags = targetSkillAttribute.tags || ['skill', skillChoice.toLocaleLowerCase()];
+		let skillTags = targetSkillAttribute?.tags || ['skill', skillChoice.toLocaleLowerCase()];
 
 		const rollBuilder = new RollBuilder({
 			actorName: intr.user.username,
