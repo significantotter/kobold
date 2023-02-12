@@ -34,7 +34,7 @@ export class ModifierExportSubCommand implements Command {
 		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id);
+		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id, intr.guildId);
 		if (!activeCharacter) {
 			await InteractionUtils.send(
 				intr,
