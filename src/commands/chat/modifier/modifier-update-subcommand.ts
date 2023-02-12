@@ -155,7 +155,6 @@ export class ModifierUpdateSubCommand implements Command {
 			);
 			return;
 		}
-		console.warn(updateValue);
 		// just in case the update is for the name
 		const nameBeforeUpdate = targetModifier.name;
 

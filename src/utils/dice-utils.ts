@@ -20,6 +20,7 @@ export class RollBuilder {
 	private rollDescription: string;
 	private rollNote: string;
 	public rollResults: DiceRollResult[];
+	private footer: string;
 	private title: string;
 	private LL: TranslationFunctions;
 
@@ -43,6 +44,7 @@ export class RollBuilder {
 		this.rollNote = rollNote;
 		this.rollDescription = rollDescription;
 		this.LL = LL || Language.LL;
+		this.footer = '';
 
 		const actorText = character?.characterData?.name || actorName || '';
 		this.title = title || _.capitalize(`${actorText} ${this.rollDescription}`.trim());
@@ -116,6 +118,7 @@ export class RollBuilder {
 			value: '',
 			results: null,
 		};
+		let totalTags = tags || [];
 		try {
 			const modifier = 0;
 			let modifiers = [];
@@ -123,7 +126,7 @@ export class RollBuilder {
 			// check for any referenced character attributes in the roll
 			let [parsedExpression, parsedTags] = this.parseAttributes(rollExpression);
 
-			const totalTags = (tags || []).concat(parsedTags);
+			totalTags = totalTags.concat(parsedTags);
 
 			// if we have a character and tags, check for active modifiers
 			if (this.character && totalTags.length) {
@@ -161,6 +164,13 @@ export class RollBuilder {
 			rollField.value = this.LL.utils.dice.diceRollError({ rollExpression });
 		}
 		this.rollResults.push(rollField);
+
+		if (totalTags?.length) {
+			const rollTagsText = rollTitle ? `${rollTitle} tags` : 'tags';
+			this.footer = this.footer
+				? `${this.footer}\n${rollTagsText}: ${totalTags.join(', ')}`
+				: `${rollTagsText}: ${totalTags.join(', ')}`;
+		}
 	}
 	/**
 	 * Compiles all of the roll results and fields into a message embed
@@ -182,9 +192,12 @@ export class RollBuilder {
 		} else if (this.rollResults.length === 1) {
 			response.setDescription(this.rollResults[0].value);
 		}
-		if (this.rollNote) {
-			response.setFooter({ text: this.rollNote });
+		const rollNote = this.rollNote ? this.rollNote + '\n\n' : '';
+		const footer = this.footer || '';
+		if ((rollNote + footer).length) {
+			response.setFooter({ text: rollNote + footer });
 		}
+
 		return response;
 	}
 }
@@ -248,6 +261,11 @@ export class DiceUtils {
 
 		//use the first skill that matches the text of what we were sent, or preferably a perfect match
 		let targetSkill = CharacterUtils.getBestNameMatch(skillChoice, skillsPlusPerception);
+		let targetSkillAttribute = activeCharacter.attributes.find(
+			attr =>
+				attr.name.trim().toLocaleLowerCase() === targetSkill.Name.trim().toLocaleLowerCase()
+		);
+		let skillTags = targetSkillAttribute.tags || ['skill', skillChoice.toLocaleLowerCase()];
 
 		const rollBuilder = new RollBuilder({
 			actorName: intr.user.username,
@@ -263,7 +281,7 @@ export class DiceUtils {
 				String(targetSkill.Bonus),
 				modifierExpression
 			),
-			tags: (tags || []).concat(['skill', skillChoice.toLocaleLowerCase()]),
+			tags: (tags || []).concat(skillTags),
 		});
 		return rollBuilder;
 	}

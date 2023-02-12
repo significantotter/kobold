@@ -1,35 +1,36 @@
 import { WanderersGuide } from '../../../services/wanderers-guide/index.js';
 import { Config } from '../../../config/config.js';
+import { WG } from '../../../services/wanderers-guide/wanderers-guide.js';
 
-const attributeAbilityMap = {
-	Acrobatics: 'dexterity',
-	Arcana: 'intelligence',
-	Athletics: 'strength',
-	Crafting: 'intelligence',
-	Deception: 'charisma',
-	Diplomacy: 'charisma',
-	Intimidation: 'charisma',
-	Medicine: 'wisdom',
-	Nature: 'wisdom',
-	Occultism: 'intelligence',
-	Performance: 'charisma',
-	Religion: 'dexterity',
-	Society: 'intelligence',
-	Stealth: 'dexterity',
-	Survival: 'wisdom',
-	Thievery: 'dexterity',
-	Perception: 'wisdom',
+export const attributeAbilityMap = {
+	acrobatics: 'dexterity',
+	arcana: 'intelligence',
+	athletics: 'strength',
+	crafting: 'intelligence',
+	deception: 'charisma',
+	diplomacy: 'charisma',
+	intimidation: 'charisma',
+	medicine: 'wisdom',
+	nature: 'wisdom',
+	occultism: 'intelligence',
+	performance: 'charisma',
+	religion: 'dexterity',
+	society: 'intelligence',
+	stealth: 'dexterity',
+	survival: 'wisdom',
+	thievery: 'dexterity',
+	perception: 'wisdom',
 
-	Fortitude: 'constitution',
-	Reflex: 'dexterity',
-	Will: 'wisdom',
+	fortitude: 'constitution',
+	reflex: 'dexterity',
+	will: 'wisdom',
 
-	Strength: 'strength',
-	Dexterity: 'dexterity',
-	Constitution: 'constitution',
-	Intelligence: 'intelligence',
-	Wisdom: 'wisdom',
-	Charisma: 'charisma',
+	strength: 'strength',
+	dexterity: 'dexterity',
+	constitution: 'constitution',
+	intelligence: 'intelligence',
+	wisdom: 'wisdom',
+	charisma: 'charisma',
 };
 
 export class CharacterHelpers {
@@ -157,7 +158,17 @@ export class CharacterHelpers {
 		};
 	}
 
-	public static parseAttributesForCharacter(character) {
+	public static parseAttributesForCharacter(character: {
+		[k: string]: any;
+		characterData: WG.CharacterApiResponse;
+		calculatedStats: WG.CharacterCalculatedStatsApiResponse;
+	}): {
+		[k: string]: any;
+		name?: string;
+		type?: string;
+		value?: number;
+		tags?: string[];
+	}[] {
 		const { characterData, calculatedStats } = character;
 		const attributes = [
 			{ name: 'level', type: 'base', value: characterData.level, tags: ['level'] },
@@ -229,27 +240,31 @@ export class CharacterHelpers {
 				name: abilityScore.Name,
 				value: Math.floor((abilityScore.Score - 10) / 2),
 				type: 'ability',
-				tags: ['ability', abilityScore.Name.toLowerCase()],
+				tags: ['ability', abilityScore.Name.toLocaleLowerCase()],
 			});
 		}
 		for (const save of calculatedStats.totalSaves) {
 			const attr = {
 				name: save.Name,
-				value: save.Bonus,
+				value: Number(save.Bonus),
 				type: 'save',
-				tags: ['save', save.Name.toLowerCase()],
+				tags: ['save', save.Name.toLocaleLowerCase()],
 			};
-			if (attributeAbilityMap[save.Name]) attr.tags.push(attributeAbilityMap[save.Name]);
+			if (attributeAbilityMap[save.Name.toLocaleLowerCase()])
+				attr.tags.push(attributeAbilityMap[save.Name.toLocaleLowerCase()]);
 			attributes.push(attr);
 		}
 		for (const skill of calculatedStats.totalSkills) {
 			const attr = {
 				name: skill.Name,
-				value: skill.Bonus,
+				value: Number(skill.Bonus),
 				type: 'skill',
-				tags: ['skill', skill.Name.toLowerCase()],
+				tags: ['skill', skill.Name.toLocaleLowerCase()],
 			};
-			if (attributeAbilityMap[skill.Name]) attr.tags.push(attributeAbilityMap[skill.Name]);
+			if (attributeAbilityMap[skill.Name.toLocaleLowerCase()])
+				attr.tags.push(attributeAbilityMap[skill.Name.toLocaleLowerCase()]);
+			if ((skill.Name as string).toLocaleLowerCase().includes('lore'))
+				attr.tags.push('intelligence');
 			attributes.push(attr);
 		}
 

@@ -1,34 +1,35 @@
 import { Knex } from 'knex';
+import { CharacterHelpers } from '../src/commands/chat/characters/helpers.js';
 
 const attributeAbilityMap = {
-	Acrobatics: 'dexterity',
-	Arcana: 'intelligence',
-	Athletics: 'strength',
-	Crafting: 'intelligence',
-	Deception: 'charisma',
-	Diplomacy: 'charisma',
-	Intimidation: 'charisma',
-	Medicine: 'wisdom',
-	Nature: 'wisdom',
-	Occultism: 'intelligence',
-	Performance: 'charisma',
-	Religion: 'dexterity',
-	Society: 'intelligence',
-	Stealth: 'dexterity',
-	Survival: 'wisdom',
-	Thievery: 'dexterity',
-	Perception: 'wisdom',
+	acrobatics: 'dexterity',
+	arcana: 'intelligence',
+	athletics: 'strength',
+	crafting: 'intelligence',
+	deception: 'charisma',
+	diplomacy: 'charisma',
+	intimidation: 'charisma',
+	medicine: 'wisdom',
+	nature: 'wisdom',
+	occultism: 'intelligence',
+	performance: 'charisma',
+	religion: 'dexterity',
+	society: 'intelligence',
+	stealth: 'dexterity',
+	survival: 'wisdom',
+	thievery: 'dexterity',
+	perception: 'wisdom',
 
-	Fortitude: 'constitution',
-	Reflex: 'dexterity',
-	Will: 'wisdom',
+	fortitude: 'constitution',
+	reflex: 'dexterity',
+	will: 'wisdom',
 
-	Strength: 'strength',
-	Dexterity: 'dexterity',
-	Constitution: 'constitution',
-	Intelligence: 'intelligence',
-	Wisdom: 'wisdom',
-	Charisma: 'charisma',
+	strength: 'strength',
+	dexterity: 'dexterity',
+	constitution: 'constitution',
+	intelligence: 'intelligence',
+	wisdom: 'wisdom',
+	charisma: 'charisma',
 };
 
 //this needs to be run again because it referenced the wrong variable for maxHP and totalAC
@@ -41,6 +42,11 @@ export async function up(knex: Knex): Promise<void> {
 	while (characters.length) {
 		//convert attributes into new structure
 		const characterUpdates = characters.map(character => {
+			return {
+				...character,
+				attributes: CharacterHelpers.parseAttributesForCharacter(character),
+			};
+
 			const characterData = character.character_data;
 			const calculatedStats = character.calculated_stats;
 			const attributes = [
@@ -123,7 +129,8 @@ export async function up(knex: Knex): Promise<void> {
 					type: 'save',
 					tags: ['save', save.Name.toLowerCase()],
 				};
-				if (attributeAbilityMap[save.Name]) attr.tags.push(attributeAbilityMap[save.Name]);
+				if (attributeAbilityMap[save.Name.toLowerCase()])
+					attr.tags.push(attributeAbilityMap[save.Name.toLowerCase()]);
 				attributes.push(attr);
 			}
 			for (const skill of calculatedStats.totalSkills) {
@@ -133,8 +140,8 @@ export async function up(knex: Knex): Promise<void> {
 					type: 'skill',
 					tags: ['skill', skill.Name.toLowerCase()],
 				};
-				if (attributeAbilityMap[skill.Name])
-					attr.tags.push(attributeAbilityMap[skill.Name]);
+				if (attributeAbilityMap[skill.Name.toLowerCase()])
+					attr.tags.push(attributeAbilityMap[skill.Name.toLowerCase()]);
 				attributes.push(attr);
 			}
 
