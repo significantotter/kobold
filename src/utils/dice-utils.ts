@@ -87,7 +87,8 @@ export class RollBuilder {
 		for (const token of splitExpression) {
 			if (attributeRegex.test(token)) {
 				const [resultValue, resultTags] = this.parseAttribute(token);
-				finalExpression += resultValue;
+				if (resultValue < 0) finalExpression += `(${resultValue})`;
+				else finalExpression += resultValue;
 				newTags.push(...resultTags);
 			} else {
 				finalExpression += token;
@@ -142,7 +143,6 @@ export class RollBuilder {
 				)}`;
 				parsedExpression += ` ${modifierSymbol} ${Math.abs(modifier.value)}`;
 			}
-
 			const roll = new Dice(null, null, {
 				maxRollTimes: 20, // limit to 20 rolls
 				maxDiceSides: 100, // limit to 100 dice faces
