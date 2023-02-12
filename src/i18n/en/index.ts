@@ -216,11 +216,16 @@ const en: BaseTranslation = {
 						description:
 							'Modifiers are conditional bonuses or penalties that apply to certain dice rolls. ' +
 							'Which dice rolls are affected is based on a system of "tags." For example, every attack roll has ' +
-							'the "attack" tag and every skill roll has the "skill" tag. A full list of tags are available under ' +
+							'the `attack` tag and every skill roll has the `skill` tag. A full list of tags are available under ' +
 							'`/help attributes-and-tags`. \n\nModifiers can be toggled active or inactive. When inactive, a ' +
-							'modifier will never apply to a roll, even if it applies to the given tags.\n\nTo learn how to build target tags ' +
+							'modifier will never apply to a roll, even if it applies to the given tags.\n\n\n' +
+							'Basic target-tags use the terms `and` and `or`. `and` means you needs BOTH tags in the roll. ' +
+							'`or` means you need EITHER tag in the roll.\n\n' +
+							"`attack and save` means the roll must be an attack roll AND a save roll, which doesn't happen!!\n\n" +
+							'`attack or save` means that the roll can either be an attack roll OR a save roll\n\n\n' +
+							'To learn how to build target tags ' +
 							'you can use [this link](https://github.com/joewalnes/filtrex), although its fairly technical. Alternatively, ' +
-							'here are some examples to show how they can work:\n\n' +
+							'here are some more examples to show how they can work:\n\n' +
 							'`attack or (skill and dexterity)` - attacks or skills that use dexterity\n' +
 							'`skill and not (arcana or nature or occultism or religion)` - A skill that is not one of arcana, nature, occultism, or religion\n' +
 							'`damage or (athletics or intimidation)` - A damage roll or a roll that is either athletics or intimidation\n' +
