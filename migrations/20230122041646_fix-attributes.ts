@@ -1,5 +1,4 @@
 import { Knex } from 'knex';
-import { CharacterHelpers } from '../src/commands/chat/characters/helpers.js';
 
 const attributeAbilityMap = {
 	acrobatics: 'dexterity',
@@ -42,11 +41,6 @@ export async function up(knex: Knex): Promise<void> {
 	while (characters.length) {
 		//convert attributes into new structure
 		const characterUpdates = characters.map(character => {
-			return {
-				...character,
-				attributes: CharacterHelpers.parseAttributesForCharacter(character),
-			};
-
 			const characterData = character.character_data;
 			const calculatedStats = character.calculated_stats;
 			const attributes = [
@@ -119,29 +113,31 @@ export async function up(knex: Knex): Promise<void> {
 					name: abilityScore.Name,
 					value: Math.floor((abilityScore.Score - 10) / 2),
 					type: 'ability',
-					tags: ['ability', abilityScore.Name.toLowerCase()],
+					tags: ['ability', abilityScore.Name.toLocaleLowerCase()],
 				});
 			}
 			for (const save of calculatedStats.totalSaves) {
 				const attr = {
 					name: save.Name,
-					value: save.Bonus,
+					value: Number(save.Bonus),
 					type: 'save',
-					tags: ['save', save.Name.toLowerCase()],
+					tags: ['save', save.Name.toLocaleLowerCase()],
 				};
-				if (attributeAbilityMap[save.Name.toLowerCase()])
-					attr.tags.push(attributeAbilityMap[save.Name.toLowerCase()]);
+				if (attributeAbilityMap[save.Name.toLocaleLowerCase()])
+					attr.tags.push(attributeAbilityMap[save.Name.toLocaleLowerCase()]);
 				attributes.push(attr);
 			}
 			for (const skill of calculatedStats.totalSkills) {
 				const attr = {
 					name: skill.Name,
-					value: skill.Bonus,
+					value: Number(skill.Bonus),
 					type: 'skill',
-					tags: ['skill', skill.Name.toLowerCase()],
+					tags: ['skill', skill.Name.toLocaleLowerCase()],
 				};
-				if (attributeAbilityMap[skill.Name.toLowerCase()])
-					attr.tags.push(attributeAbilityMap[skill.Name.toLowerCase()]);
+				if (attributeAbilityMap[skill.Name.toLocaleLowerCase()])
+					attr.tags.push(attributeAbilityMap[skill.Name.toLocaleLowerCase()]);
+				if ((skill.Name as string).toLocaleLowerCase().includes('lore'))
+					attr.tags.push('intelligence');
 				attributes.push(attr);
 			}
 
