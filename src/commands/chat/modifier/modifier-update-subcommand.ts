@@ -130,7 +130,7 @@ export class ModifierUpdateSubCommand implements Command {
 			} else {
 				updateValue = Number(newFieldValue);
 			}
-		} else if (fieldToChange === 'targettags') {
+		} else if (fieldToChange === 'target-tags') {
 			fieldToChange = 'targetTags';
 			// parse the target tags
 			try {

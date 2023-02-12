@@ -222,8 +222,8 @@ const en: BaseTranslation = {
 							'you can use [this link](https://github.com/joewalnes/filtrex), although its fairly technical. Alternatively, ' +
 							'here are some examples to show how they can work:\n\n' +
 							'`attack or (skill and dexterity)` - attacks or skills that use dexterity\n' +
-							'`skill and not in(arcana,nature,occultism,religion)` - A skill that is not one of arcana, nature, occultism, or religion\n' +
-							'`damage or in(athletics,intimidation)` - A damage roll or a roll that is either athletics or intimidation\n' +
+							'`skill and not (arcana or nature or occultism or religion)` - A skill that is not one of arcana, nature, occultism, or religion\n' +
+							'`damage or (athletics or intimidation)` - A damage roll or a roll that is either athletics or intimidation\n' +
 							'`__hp < 50 and damage` - Damage, but only when your current health is below 50 (Yes, you can use ' +
 							'attributes in target tag expressions if you prefix them with "__"!)\n' +
 							'`attack` - An attack roll! easy as that.',
@@ -260,7 +260,7 @@ const en: BaseTranslation = {
 								'maxResolve',
 								'resolve',
 							],
-							abilities: [
+							ability: [
 								'strength',
 								'dexterity',
 								'constitution',
@@ -268,8 +268,8 @@ const en: BaseTranslation = {
 								'wisdom',
 								'charisma',
 							],
-							saves: ['fortitude', 'reflex', 'will'],
-							skills: [
+							save: ['fortitude', 'reflex', 'will'],
+							skill: [
 								'Acrobatics',
 								'Arcana',
 								'Athletics',
@@ -675,8 +675,8 @@ const en: BaseTranslation = {
 						'Yip! A modifier named {modifierName} already exists for {characterName}.',
 					invalidTags:
 						"Yip! I didn't understand the target tag expression you provided. Tags can be" +
-						' any expression in a format like "(attack or skill) and not in (acrobatics, athletics)". ' +
-						'See (this link)[https://github.com/joewalnes/filtrex] for more details.',
+						' any expression in a format like "attack or skill". ' +
+						'See [this link](https://github.com/joewalnes/filtrex) for more details.',
 				},
 			},
 			remove: {
@@ -909,7 +909,7 @@ const en: BaseTranslation = {
 		modifierTargetTags: {
 			name: 'target-tags',
 			description:
-				'A set of tags for the rolls that this modifier applies to. Separated by commas.',
+				'A set of tags for the rolls that this modifier applies to. For example "skill or attack or save"',
 		},
 		modifierSetOption: {
 			name: 'option',

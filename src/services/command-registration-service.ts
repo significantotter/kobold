@@ -75,6 +75,9 @@ export class CommandRegistrationService {
 									{ body: localCmd.metadata }
 								);
 							}
+						} else if (localCmd.restrictedGuilds !== undefined) {
+							//if we just define empty restricted guilds, we don't allow it to show up in any guilds
+							continue;
 						} else {
 							await this.rest.post(Routes.applicationCommands(Config.client.id), {
 								body: localCmd.metadata,
