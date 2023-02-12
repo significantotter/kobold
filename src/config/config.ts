@@ -73,6 +73,12 @@ interface config {
 			minTimeout: number;
 		};
 	};
+	debug: {
+		dummyMode: {
+			enabled: boolean;
+			whiteList: string[];
+		};
+	};
 }
 
 function parseEnvArray(envVariable: string) {
@@ -179,6 +185,12 @@ export const Config: config = Object.freeze({
 		pretty: parseEnvBoolean(env.LOGGING_PRETTY) ?? true,
 		rateLimit: {
 			minTimeout: parseEnvNumber(env.LOGGING_RATE_LIMIT_MIN_TIMEOUT) ?? 30,
+		},
+	},
+	debug: {
+		dummyMode: {
+			enabled: parseEnvBoolean(env.DEBUG_DUMMY_MODE_ENABLED) ?? false,
+			whiteList: parseEnvArray(env.DEBUG_DUMMY_MODE_WHITELIST) ?? [],
 		},
 	},
 });
