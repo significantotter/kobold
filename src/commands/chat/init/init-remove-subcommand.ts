@@ -48,7 +48,9 @@ export class InitRemoveSubCommand implements Command {
 			const match = intr.options.getString(ChatArgs.INIT_CHARACTER_OPTION.name);
 
 			const currentInitResponse = await InitiativeUtils.getInitiativeForChannel(intr.channel);
-			if (!currentInitResponse) await InteractionUtils.respond(intr, []);
+			if (!currentInitResponse) {
+				return [];
+			}
 			//get the character matches
 			let actorOptions = InitiativeUtils.getControllableInitiativeActors(
 				currentInitResponse.init,

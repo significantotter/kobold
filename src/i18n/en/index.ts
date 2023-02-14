@@ -855,6 +855,10 @@ const en: BaseTranslation = {
 					'Modifies your skill if you chose a skill.',
 			},
 		},
+		rollSecret: {
+			name: 'secret',
+			description: 'Whether to send the roll in a hidden, temporary message.',
+		},
 		rollModifier: {
 			name: 'modifier',
 			description: 'A dice expression to modify your roll. (e.g. "+ 1 + 1d4")',

@@ -30,7 +30,7 @@ export class RollAbilitySubCommand implements Command {
 		default_member_permissions: undefined,
 	};
 	public cooldown = new RateLimiter(1, 5000);
-	public deferType = CommandDeferType.PUBLIC;
+	public deferType = CommandDeferType.NONE;
 	public requireClientPerms: PermissionsString[] = [];
 
 	public async autocomplete(
@@ -72,12 +72,14 @@ export class RollAbilitySubCommand implements Command {
 		const abilityChoice = intr.options.getString(ChatArgs.ABILITY_CHOICE_OPTION.name);
 		const modifierExpression = intr.options.getString(ChatArgs.ROLL_MODIFIER_OPTION.name);
 		const rollNote = intr.options.getString(ChatArgs.ROLL_NOTE_OPTION.name);
+		const isSecretRoll = intr.options.getBoolean(ChatArgs.ROLL_SECRET_OPTION.name);
 
 		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id, intr.guildId);
 		if (!activeCharacter) {
 			await InteractionUtils.send(
 				intr,
-				Language.LL.commands.roll.interactions.noActiveCharacter()
+				Language.LL.commands.roll.interactions.noActiveCharacter(),
+				isSecretRoll
 			);
 			return;
 		}
@@ -114,6 +116,6 @@ export class RollAbilitySubCommand implements Command {
 		});
 		const response = rollBuilder.compileEmbed();
 
-		await InteractionUtils.send(intr, response);
+		await InteractionUtils.send(intr, response, isSecretRoll);
 	}
 }

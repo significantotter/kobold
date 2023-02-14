@@ -45,6 +45,10 @@ export class RollCommand implements Command {
 						...ChatArgs.ROLL_NOTE_OPTION,
 						required: false,
 					},
+					{
+						...ChatArgs.ROLL_SECRET_OPTION,
+						required: false,
+					},
 				],
 			},
 			{
@@ -68,6 +72,10 @@ export class RollCommand implements Command {
 						...ChatArgs.ROLL_NOTE_OPTION,
 						required: false,
 					},
+					{
+						...ChatArgs.ROLL_SECRET_OPTION,
+						required: false,
+					},
 				],
 			},
 			{
@@ -83,6 +91,10 @@ export class RollCommand implements Command {
 						...ChatArgs.ROLL_NOTE_OPTION,
 						required: false,
 					},
+					{
+						...ChatArgs.ROLL_SECRET_OPTION,
+						required: false,
+					},
 				],
 			},
 			{
@@ -96,6 +108,10 @@ export class RollCommand implements Command {
 					},
 					{
 						...ChatArgs.ROLL_NOTE_OPTION,
+						required: false,
+					},
+					{
+						...ChatArgs.ROLL_SECRET_OPTION,
 						required: false,
 					},
 				],
@@ -117,6 +133,10 @@ export class RollCommand implements Command {
 						...ChatArgs.ROLL_NOTE_OPTION,
 						required: false,
 					},
+					{
+						...ChatArgs.ROLL_SECRET_OPTION,
+						required: false,
+					},
 				],
 			},
 			{
@@ -134,6 +154,10 @@ export class RollCommand implements Command {
 					},
 					{
 						...ChatArgs.ROLL_NOTE_OPTION,
+						required: false,
+					},
+					{
+						...ChatArgs.ROLL_SECRET_OPTION,
 						required: false,
 					},
 				],

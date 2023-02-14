@@ -30,6 +30,12 @@ export class ChatArgs {
 		required: true,
 		type: ApplicationCommandOptionType.String,
 	};
+	public static readonly ROLL_SECRET_OPTION: APIApplicationCommandBasicOption = {
+		name: Language.LL.commandOptions.rollSecret.name(),
+		description: Language.LL.commandOptions.rollSecret.description(),
+		required: true,
+		type: ApplicationCommandOptionType.Boolean,
+	};
 	public static readonly SKILL_CHOICE_OPTION: APIApplicationCommandBasicOption = {
 		name: Language.LL.commandOptions.skillChoice.name(),
 		description: Language.LL.commandOptions.skillChoice.description(),
