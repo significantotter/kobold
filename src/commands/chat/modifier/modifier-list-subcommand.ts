@@ -13,6 +13,7 @@ import { Command, CommandDeferType } from '../../index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Language } from '../../../models/enum-helpers/index.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
+import _ from 'lodash';
 
 export class ModifierListSubCommand implements Command {
 	public names = [Language.LL.commands.modifier.list.name()];
@@ -41,13 +42,8 @@ export class ModifierListSubCommand implements Command {
 			return;
 		}
 		const modifiers = activeCharacter.modifiers;
-
-		const embed = await new KoboldEmbed();
-		embed.setCharacter(activeCharacter);
-		embed.setTitle(`${activeCharacter.characterData.name}'s Available Modifiers`);
-
 		const fields = [];
-		for (const modifier of modifiers) {
+		for (const modifier of modifiers.sort((a, b) => (a.name || '').localeCompare(b.name))) {
 			fields.push({
 				name: LL.commands.modifier.interactions.detailHeader({
 					modifierName: modifier.name,
@@ -62,8 +58,25 @@ export class ModifierListSubCommand implements Command {
 				inline: true,
 			});
 		}
-		embed.addFields(fields);
 
-		await InteractionUtils.send(intr, { embeds: [embed] });
+		const embeds = [];
+
+		const fieldChunks = _.chunk(fields, 25);
+
+		for (let i = 0; i < fieldChunks.length; i++) {
+			const fieldChunk = fieldChunks[i];
+			const fieldsPage = fieldChunks.length > 1 ? ` (${i + 1}/${fieldChunks.length})` : '';
+			const embed = await new KoboldEmbed();
+			embed.setCharacter(activeCharacter);
+			embed.setTitle(
+				`${activeCharacter.characterData.name}'s Available Modifiers` + fieldsPage
+			);
+			embed.addFields(fieldChunk);
+			embeds.push(embed);
+		}
+
+		for (const embed of embeds) {
+			await InteractionUtils.send(intr, { embeds: [embed] });
+		}
 	}
 }
