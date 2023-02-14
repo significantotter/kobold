@@ -79,6 +79,10 @@ export class ModifierCreateSubCommand implements Command {
 			);
 			return;
 		}
+		if (activeCharacter.modifiers.length + 1 > 50) {
+			await InteractionUtils.send(intr, LL.commands.modifier.interactions.tooMany());
+			return;
+		}
 
 		await Character.query().updateAndFetchById(activeCharacter.id, {
 			modifiers: [

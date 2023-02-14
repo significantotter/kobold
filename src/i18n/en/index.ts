@@ -643,6 +643,7 @@ const en: BaseTranslation = {
 
 			interactions: {
 				notFound: "Yip! I couldn't find a modifier with that name.",
+				tooMany: "Yip! A character can't have over 50 modifiers!",
 				detailHeader: '{modifierName}{modifierIsActive}',
 				detailBody:
 					'{modifierDescriptionText}\nType: `{modifierType}`\nValue: `{modifierValue}`\nApplies to: `{modifierTargetTags}`',
