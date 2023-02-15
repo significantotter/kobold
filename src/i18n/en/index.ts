@@ -812,6 +812,23 @@ const en: BaseTranslation = {
 				},
 			},
 		},
+		game: {
+			name: 'game',
+			description: 'Commands for interacting with players as the GM of a game.',
+			manage: {
+				name: 'manage',
+				description: 'Options to create, delete, join, or leave a game',
+			},
+			init: {
+				name: 'init',
+				description:
+					'Starts an initiative and automatically causes all players in the game to join with the skill. GM only.',
+			},
+			roll: {
+				name: 'roll',
+				description: 'Causes one or more players in the game to make a roll. GM only.',
+			},
+		},
 	},
 	commandOptions: {
 		// IMPORT

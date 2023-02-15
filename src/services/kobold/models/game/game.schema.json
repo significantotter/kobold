@@ -1,0 +1,6 @@
+{
+	"title": "game",
+	"type": "object",
+	"description": "A game",
+	"properties": {}
+}
