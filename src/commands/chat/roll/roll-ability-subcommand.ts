@@ -72,7 +72,12 @@ export class RollAbilitySubCommand implements Command {
 		const abilityChoice = intr.options.getString(ChatArgs.ABILITY_CHOICE_OPTION.name);
 		const modifierExpression = intr.options.getString(ChatArgs.ROLL_MODIFIER_OPTION.name);
 		const rollNote = intr.options.getString(ChatArgs.ROLL_NOTE_OPTION.name);
-		const isSecretRoll = intr.options.getBoolean(ChatArgs.ROLL_SECRET_OPTION.name);
+		const secretRoll = intr.options.getString(ChatArgs.ROLL_SECRET_OPTION.name);
+		const isSecretRoll =
+			secretRoll === Language.LL.commandOptions.rollSecret.choices.secret.value() ||
+			secretRoll === Language.LL.commandOptions.rollSecret.choices.secretAndNotify.value();
+		const notifyRoll =
+			secretRoll === Language.LL.commandOptions.rollSecret.choices.secretAndNotify.value();
 
 		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id, intr.guildId);
 		if (!activeCharacter) {
@@ -116,6 +121,12 @@ export class RollAbilitySubCommand implements Command {
 		});
 		const response = rollBuilder.compileEmbed();
 
+		if (notifyRoll) {
+			await InteractionUtils.send(
+				intr,
+				Language.LL.commands.roll.interactions.secretRollNotification()
+			);
+		}
 		await InteractionUtils.send(intr, response, isSecretRoll);
 	}
 }

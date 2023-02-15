@@ -35,7 +35,14 @@ export class RollDiceSubCommand implements Command {
 	): Promise<void> {
 		if (!intr.isChatInputCommand()) return;
 		const diceExpression = intr.options.getString(ChatArgs.ROLL_EXPRESSION_OPTION.name);
-		const isSecretRoll = intr.options.getBoolean(ChatArgs.ROLL_SECRET_OPTION.name);
+
+		const secretRoll = intr.options.getString(ChatArgs.ROLL_SECRET_OPTION.name);
+		const isSecretRoll =
+			secretRoll === Language.LL.commandOptions.rollSecret.choices.secret.value() ||
+			secretRoll === Language.LL.commandOptions.rollSecret.choices.secretAndNotify.value();
+		const notifyRoll =
+			secretRoll === Language.LL.commandOptions.rollSecret.choices.secretAndNotify.value();
+
 		const rollNote = intr.options.getString(ChatArgs.ROLL_NOTE_OPTION.name);
 
 		let activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id, intr.guildId);
@@ -55,6 +62,12 @@ export class RollDiceSubCommand implements Command {
 		rollBuilder.addRoll({ rollExpression: diceExpression });
 		const response = rollBuilder.compileEmbed();
 
+		if (notifyRoll) {
+			await InteractionUtils.send(
+				intr,
+				Language.LL.commands.roll.interactions.secretRollNotification()
+			);
+		}
 		await InteractionUtils.send(intr, response, isSecretRoll);
 	}
 }

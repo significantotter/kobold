@@ -737,6 +737,7 @@ const en: BaseTranslation = {
 			description: 'Roll Dice',
 			interactions: {
 				noActiveCharacter: "Yip! You don't have any active characters!",
+				secretRollNotification: "Yip! I'm rolling in secret!",
 				rolledDice: 'rolled {diceType}',
 			},
 
@@ -859,6 +860,24 @@ const en: BaseTranslation = {
 		rollSecret: {
 			name: 'secret',
 			description: 'Whether to send the roll in a hidden, temporary message.',
+			choices: {
+				public: {
+					name: 'public',
+					value: 'public',
+					description: 'A public roll.',
+				},
+				secret: {
+					name: 'secret',
+					value: 'secret',
+					description: 'A temporary, hidden roll viewable only to you.',
+				},
+				secretAndNotify: {
+					name: 'secret-and-notify',
+					value: 'secret-and-notify',
+					description:
+						'A secret roll that still notifies the channel that a roll was made.',
+				},
+			},
 		},
 		rollModifier: {
 			name: 'modifier',

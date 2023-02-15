@@ -34,7 +34,21 @@ export class ChatArgs {
 		name: Language.LL.commandOptions.rollSecret.name(),
 		description: Language.LL.commandOptions.rollSecret.description(),
 		required: true,
-		type: ApplicationCommandOptionType.Boolean,
+		type: ApplicationCommandOptionType.String,
+		choices: [
+			{
+				name: Language.LL.commandOptions.rollSecret.choices.public.name(),
+				value: Language.LL.commandOptions.rollSecret.choices.public.value(),
+			},
+			{
+				name: Language.LL.commandOptions.rollSecret.choices.secret.name(),
+				value: Language.LL.commandOptions.rollSecret.choices.secret.value(),
+			},
+			{
+				name: Language.LL.commandOptions.rollSecret.choices.secretAndNotify.name(),
+				value: Language.LL.commandOptions.rollSecret.choices.secretAndNotify.value(),
+			},
+		],
 	};
 	public static readonly SKILL_CHOICE_OPTION: APIApplicationCommandBasicOption = {
 		name: Language.LL.commandOptions.skillChoice.name(),
