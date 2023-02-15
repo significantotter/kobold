@@ -17,6 +17,8 @@ import { EventHandler } from './index.js';
 import { Config } from './../config/config.js';
 import Logs from './../config/lang/logs.json';
 import { Language } from '../models/enum-helpers/language.js';
+import { KoboldEmbed } from '../utils/kobold-embed-utils.js';
+import { refs } from '../i18n/en/common.js';
 
 export class CommandHandler implements EventHandler {
 	private rateLimiter = new RateLimiter(
@@ -168,14 +170,12 @@ export class CommandHandler implements EventHandler {
 
 	private async sendError(intr: CommandInteraction, data: EventData): Promise<void> {
 		try {
-			await InteractionUtils.send(
-				intr,
-				Lang.getEmbed('errorEmbeds.command', data.lang(), {
-					ERROR_CODE: intr.id,
-					GUILD_ID: intr.guild?.id ?? Lang.getRef('other.na', data.lang()),
-					SHARD_ID: (intr.guild?.shardId ?? 0).toString(),
-				})
+			const embed = new KoboldEmbed();
+			embed.setTitle('Something went Wrong!');
+			embed.setDescription(
+				`Kobold ran into an unexpected error. If you want to report this issue, let my creator know on [my support server](${refs.links.support}).`
 			);
+			await InteractionUtils.send(intr, embed);
 		} catch {
 			// Ignore
 		}
