@@ -815,9 +815,28 @@ const en: BaseTranslation = {
 		game: {
 			name: 'game',
 			description: 'Commands for interacting with players as the GM of a game.',
+			interactions: {
+				notFound: "Yip! I couldn't find the game {gameName} in this server.",
+			},
 			manage: {
 				name: 'manage',
-				description: 'Options to create, delete, join, or leave a game',
+				description: 'Options to create, delete, set-active, join, or leave a game',
+				interactions: {
+					gameAlreadyExists: 'Yip! A game with that name already exists in this server.',
+					gameNameTooShort: "Yip! Your game's name needs to be at least 2 characters!",
+					gameNameDisallowedCharacters:
+						'Yip! Your game\'s name can\'t include " - ".' +
+						' I use that to separate games from characters when kicking a character!',
+					createSuccess: 'Yip! I created the game {gameName} in this server.',
+					setActiveSuccess:
+						'Yip! I set the game {gameName} as your active game in this server.',
+					deleteSuccess: 'Yip! I deleted the game {gameName} in this server.',
+					kickSuccess: 'Yip! I kicked {characterName} out of the game {gameName}!',
+					characterNotInGame:
+						"Yip! I couldn't find the character {characterName} in the game {gameName}!",
+					joinSuccess: 'Yip! {characterName} joined the game {gameName}!',
+					leaveSuccess: 'Yip! {characterName} left the game {gameName}!',
+				},
 			},
 			init: {
 				name: 'init',
@@ -1038,6 +1057,41 @@ const en: BaseTranslation = {
 		modifierImportUrl: {
 			name: 'url',
 			description: 'The pastebin url with the modifier code to import.',
+		},
+		gameManageOption: {
+			name: 'manage-option',
+			description: 'What you want to do to manage a game',
+			choices: {
+				create: {
+					name: 'create',
+					value: 'create',
+				},
+				join: {
+					name: 'join',
+					value: 'join',
+				},
+				setActive: {
+					name: 'set-active',
+					value: 'set-active',
+				},
+				leave: {
+					name: 'leave',
+					value: 'leave',
+				},
+				kick: {
+					name: 'kick',
+					value: 'kick',
+				},
+				delete: {
+					name: 'delete',
+					value: 'delete',
+				},
+			},
+		},
+		gameManageValue: {
+			name: 'manage-value',
+			description:
+				'Enter the name of the game if creating, otherwise pick between possible choices for the action.',
 		},
 	},
 	utils: {

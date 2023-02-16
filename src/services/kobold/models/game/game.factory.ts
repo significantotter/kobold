@@ -16,7 +16,12 @@ class GameFactoryClass extends Factory<Game, GameTransientParams, Game> {
 export const GameFactory = GameFactoryClass.define(({ onCreate }) => {
 	onCreate(async builtGame => Game.query().insert(builtGame));
 
-	const gameData: DeepPartial<Game> = {};
+	const gameData: DeepPartial<Game> = {
+		name: faker.random.word(),
+		guildId: faker.datatype.uuid(),
+		gmUserId: faker.datatype.uuid(),
+		isActive: Math.random() > 0.5,
+	};
 
 	return Game.fromDatabaseJson(gameData);
 });

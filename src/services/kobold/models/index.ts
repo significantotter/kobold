@@ -10,3 +10,5 @@ export { InitiativeActorGroup } from './initiative-actor-group/initiative-actor-
 export { InitiativeFactory } from './initiative/initiative.factory';
 export { InitiativeActorFactory } from './initiative-actor/initiative-actor.factory';
 export { InitiativeActorGroupFactory } from './initiative-actor-group/initiative-actor-group.factory';
+export { Game } from './game/game.model';
+export { GameFactory } from './game/game.factory';

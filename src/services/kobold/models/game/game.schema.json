@@ -1,6 +1,41 @@
 {
 	"title": "game",
 	"type": "object",
-	"description": "A game",
-	"properties": {}
+	"description": "A group of characters led by a GM, allowing the GM access to character rolls.",
+	"properties": {
+		"id": {
+			"type": "integer",
+			"readOnly": true,
+			"description": "The id of the game."
+		},
+		"gmUserId": {
+			"type": "string",
+			"readOnly": true,
+			"description": "The discord id of the GM of the game."
+		},
+		"name": {
+			"type": "string",
+			"readOnly": true,
+			"description": "The name of the game."
+		},
+		"isActive": {
+			"type": "boolean",
+			"description": "Whether the game is the gm's active game on the server"
+		},
+		"guildId": {
+			"type": "string",
+			"readOnly": true,
+			"description": "The discord guild id of the game."
+		},
+		"createdAt": {
+			"type": "string",
+			"format": "date-time",
+			"description": "When the initiative was first started"
+		},
+		"lastUpdatedAt": {
+			"type": "string",
+			"format": "date-time",
+			"description": "When the initiative was last interacted with"
+		}
+	}
 }
