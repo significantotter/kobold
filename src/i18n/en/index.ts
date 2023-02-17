@@ -1097,9 +1097,9 @@ const en: BaseTranslation = {
 			description:
 				'Enter the name of the game if creating, otherwise pick between possible choices for the action.',
 		},
-		gameTargetCharacters: {
-			name: 'game-target-characters',
-			description: 'Defaults to all. separated by ","',
+		gameTargetCharacter: {
+			name: 'game-target-character',
+			description: 'Rolls for a single character instead of all characters.',
 		},
 		gameRollType: {
 			name: 'game-roll-type',

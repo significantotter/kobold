@@ -48,6 +48,13 @@ export class GameOptions {
 		autocomplete: true,
 		type: ApplicationCommandOptionType.String,
 	};
+	public static readonly GAME_TARGET_CHARACTER: APIApplicationCommandBasicOption = {
+		name: Language.LL.commandOptions.gameTargetCharacter.name(),
+		description: Language.LL.commandOptions.gameTargetCharacter.description(),
+		required: false,
+		autocomplete: true,
+		type: ApplicationCommandOptionType.String,
+	};
 	public static readonly GAME_DICE_ROLL_OR_MODIFIER: APIApplicationCommandBasicOption = {
 		name: Language.LL.commandOptions.gameDiceRollOrModifier.name(),
 		description: Language.LL.commandOptions.gameDiceRollOrModifier.description(),

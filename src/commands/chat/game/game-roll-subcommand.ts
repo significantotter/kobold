@@ -42,7 +42,28 @@ export class GameRollSubCommand implements Command {
 		option: AutocompleteFocusedOption
 	): Promise<ApplicationCommandOptionChoiceData[]> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === GameOptions.GAME_ROLL_TYPE.name) {
+		if (option.name === GameOptions.GAME_TARGET_CHARACTER.name) {
+			const targetCharacter = intr.options.getString(GameOptions.GAME_TARGET_CHARACTER.name);
+
+			const activeGame = await GameUtils.getActiveGame(intr.user.id, intr.guildId);
+			if (!activeGame.characters) return [];
+
+			const matches: Character[] = [];
+			for (const character of activeGame.characters) {
+				if (
+					targetCharacter === '' ||
+					character.characterData.name
+						.toLowerCase()
+						.includes(targetCharacter.toLowerCase())
+				) {
+					matches.push(character);
+				}
+			}
+			return matches.map(character => ({
+				name: character.characterData.name,
+				value: character.characterData.name,
+			}));
+		} else if (option.name === GameOptions.GAME_ROLL_TYPE.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
 			const match = intr.options.getString(GameOptions.GAME_ROLL_TYPE.name);
 
@@ -101,6 +122,7 @@ export class GameRollSubCommand implements Command {
 		if (!intr.isChatInputCommand()) return;
 		const rollType = intr.options.getString(GameOptions.GAME_ROLL_TYPE.name);
 		const diceExpression = intr.options.getString(GameOptions.GAME_DICE_ROLL_OR_MODIFIER.name);
+		const targetCharacter = intr.options.getString(GameOptions.GAME_TARGET_CHARACTER.name);
 
 		const secretRoll = intr.options.getString(ChatArgs.ROLL_SECRET_OPTION.name);
 		const isSecretRoll =
@@ -121,6 +143,14 @@ export class GameRollSubCommand implements Command {
 		const embeds: KoboldEmbed[] = [];
 
 		for (const character of activeGame.characters) {
+			if (
+				targetCharacter &&
+				targetCharacter.toLocaleLowerCase().trim().length > 0 &&
+				targetCharacter.toLocaleLowerCase().trim() !==
+					character.characterData.name.toLocaleLowerCase().trim()
+			) {
+				continue;
+			}
 			const matchingSkills = character.calculatedStats.totalSkills.filter(
 				skill => skill.Name.toLocaleLowerCase() === rollType.toLocaleLowerCase()
 			);

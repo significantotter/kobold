@@ -37,7 +37,10 @@ export class GameManageSubCommand implements Command {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === GameOptions.GAME_MANAGE_VALUE.name) {
 			const option = intr.options.getString(GameOptions.GAME_MANAGE_OPTION.name);
-			const value = intr.options.getString(GameOptions.GAME_MANAGE_VALUE.name);
+			const value = intr.options
+				.getString(GameOptions.GAME_MANAGE_VALUE.name)
+				.trim()
+				.toLocaleLowerCase();
 
 			let targetGames: Game[] = [];
 			if (option === Language.LL.commandOptions.gameManageOption.choices.kick.name()) {
@@ -52,10 +55,13 @@ export class GameManageSubCommand implements Command {
 				const options: ApplicationCommandOptionChoiceData[] = [];
 				for (const game of targetGames) {
 					for (const character of game.characters || []) {
-						options.push({
-							name: game.name + ' - ' + character.characterData.name,
-							value: game.name + ' - ' + character.characterData.name,
-						});
+						const option = game.name + ' - ' + character.characterData.name;
+						if (value == '' || option.toLocaleLowerCase().trim().includes(value)) {
+							options.push({
+								name: option,
+								value: option,
+							});
+						}
 					}
 				}
 
@@ -82,14 +88,17 @@ export class GameManageSubCommand implements Command {
 				});
 			} else {
 				// create or unset
-				return [{ name: value, value: value }];
+				return value && value.length > 0 ? [{ name: value, value: value }] : [];
 			}
 			// for everything else, we format the target games as the options
-			if (value.length < 1 || value.length > 100) return [];
-			return targetGames.map(game => ({
-				name: game.name,
-				value: game.name,
-			}));
+			return targetGames
+				.map(game => ({
+					name: game.name,
+					value: game.name,
+				}))
+				.filter(
+					field => value == '' || field.name.trim().toLocaleLowerCase().includes(value)
+				);
 		}
 	}
 
@@ -259,12 +268,10 @@ export class GameManageSubCommand implements Command {
 				);
 			}
 		} else if (option === Language.LL.commandOptions.gameManageOption.choices.join.name()) {
-			const targetGames = await Game.query()
-				.where({
-					guildId: intr.guildId,
-					name: value,
-				})
-				.andWhereNot({ gmUserId: intr.user.id });
+			const targetGames = await Game.query().where({
+				guildId: intr.guildId,
+				name: value,
+			});
 			if (targetGames.length > 0) {
 				const activeCharacter = await CharacterUtils.getActiveCharacter(
 					intr.user.id,

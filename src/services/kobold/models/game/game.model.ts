@@ -20,8 +20,7 @@ export class Game extends BaseModel {
 	static async queryWhereUserHasCharacter(userId, guildId) {
 		const options = await this.query()
 			.withGraphJoined('characters')
-			.where({ guildId: guildId })
-			.andWhereNot({ gmUserId: userId });
+			.where({ guildId: guildId });
 
 		return options.filter(
 			option =>
@@ -30,10 +29,7 @@ export class Game extends BaseModel {
 		);
 	}
 	static async queryWhereUserLacksCharacter(userId, guildId) {
-		const options = await this.query()
-			.withGraphFetched('characters')
-			.where('guildId', guildId)
-			.andWhereNot({ gmUserId: userId });
+		const options = await this.query().withGraphFetched('characters').where('guildId', guildId);
 		// Filter out the games that the user is already in
 		return options.filter(
 			option =>
