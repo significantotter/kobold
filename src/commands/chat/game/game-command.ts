@@ -41,12 +41,16 @@ export class GameCommand implements Command {
 			// 	type: ApplicationCommandOptionType.Subcommand.valueOf(),
 			// 	options: [],
 			// },
-			// {
-			// 	name: Language.LL.commands.game.roll.name(),
-			// 	description: Language.LL.commands.game.roll.description(),
-			// 	type: ApplicationCommandOptionType.Subcommand.valueOf(),
-			// 	options: [],
-			// },
+			{
+				name: Language.LL.commands.game.roll.name(),
+				description: Language.LL.commands.game.roll.description(),
+				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				options: [
+					GameOptions.GAME_ROLL_TYPE,
+					GameOptions.GAME_DICE_ROLL_OR_MODIFIER,
+					ChatArgs.ROLL_SECRET_OPTION,
+				],
+			},
 		],
 	};
 	public cooldown = new RateLimiter(1, 5000);

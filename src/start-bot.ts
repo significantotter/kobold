@@ -46,6 +46,7 @@ import {
 	// game
 	GameCommand,
 	GameManageSubCommand,
+	GameRollSubCommand,
 	// help
 	HelpCommand,
 	// admin
@@ -141,7 +142,7 @@ async function start(): Promise<void> {
 		]),
 
 		// Game commands
-		new GameCommand([new GameManageSubCommand()]),
+		new GameCommand([new GameRollSubCommand(), new GameManageSubCommand()]),
 	];
 
 	// Buttons

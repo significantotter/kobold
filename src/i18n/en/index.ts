@@ -817,6 +817,8 @@ const en: BaseTranslation = {
 			description: 'Commands for interacting with players as the GM of a game.',
 			interactions: {
 				notFound: "Yip! I couldn't find the game {gameName} in this server.",
+				activeGameNotFound:
+					"Yip! I couldn't find a game that you run in this server that you've set to active!",
 			},
 			manage: {
 				name: 'manage',
@@ -1094,6 +1096,18 @@ const en: BaseTranslation = {
 			name: 'manage-value',
 			description:
 				'Enter the name of the game if creating, otherwise pick between possible choices for the action.',
+		},
+		gameTargetCharacters: {
+			name: 'game-target-characters',
+			description: 'Defaults to all. separated by ","',
+		},
+		gameRollType: {
+			name: 'game-roll-type',
+			description: 'The type of roll for the characters to make',
+		},
+		gameDiceRollOrModifier: {
+			name: 'dice-roll-or-modifier',
+			description: 'the dice roll if doing a custom roll, or a modifier to add to the roll.',
 		},
 	},
 	utils: {

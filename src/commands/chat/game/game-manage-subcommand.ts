@@ -155,7 +155,7 @@ export class GameManageSubCommand implements Command {
 		) {
 			// set target game to active
 			const updated = await Game.query()
-				.patch({ isActive: false })
+				.patch({ isActive: true })
 				.where({ gmUserId: intr.user.id, guildId: intr.guildId })
 				.andWhere('name', 'ilike', value);
 

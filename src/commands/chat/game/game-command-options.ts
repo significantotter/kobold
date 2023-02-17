@@ -41,4 +41,17 @@ export class GameOptions {
 		autocomplete: true,
 		type: ApplicationCommandOptionType.String,
 	};
+	public static readonly GAME_ROLL_TYPE: APIApplicationCommandBasicOption = {
+		name: Language.LL.commandOptions.gameRollType.name(),
+		description: Language.LL.commandOptions.gameRollType.description(),
+		required: true,
+		autocomplete: true,
+		type: ApplicationCommandOptionType.String,
+	};
+	public static readonly GAME_DICE_ROLL_OR_MODIFIER: APIApplicationCommandBasicOption = {
+		name: Language.LL.commandOptions.gameDiceRollOrModifier.name(),
+		description: Language.LL.commandOptions.gameDiceRollOrModifier.description(),
+		required: false,
+		type: ApplicationCommandOptionType.String,
+	};
 }
