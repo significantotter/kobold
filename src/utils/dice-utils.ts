@@ -71,9 +71,10 @@ export class RollBuilder {
 			attributeObject =>
 				attributeObject.name.replace(trimRegex, '').toLowerCase() === attributeName
 		);
-		if (customAttribute?.value) {
+
+		if (customAttribute?.value !== undefined) {
 			return [customAttribute.value, customAttribute.tags];
-		} else if (attribute?.value) {
+		} else if (attribute?.value !== undefined) {
 			return [attribute.value, attribute.tags];
 		} else {
 			return [staticAttribute.value, []];
