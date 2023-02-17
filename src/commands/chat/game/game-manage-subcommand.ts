@@ -14,11 +14,11 @@ import { EventData } from '../../../models/internal-models.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { Language } from '../../../models/enum-helpers/index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { Character, Game } from '../../../services/kobold/models/index.js';
+import { Game } from '../../../services/kobold/models/index.js';
 import { InteractionUtils } from '../../../utils/interaction-utils.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
 
-export class CharacterSetActiveSubCommand implements Command {
+export class GameManageSubCommand implements Command {
 	public names = [Language.LL.commands.game.manage.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
@@ -42,6 +42,7 @@ export class CharacterSetActiveSubCommand implements Command {
 			let targetGames: Game[] = [];
 			if (option === Language.LL.commandOptions.gameManageOption.choices.kick.name()) {
 				targetGames = await Game.query()
+					.withGraphFetched('characters')
 					.where('guildId', intr.guildId)
 					.andWhere('gmUserId', intr.user.id);
 
@@ -50,7 +51,7 @@ export class CharacterSetActiveSubCommand implements Command {
 
 				const options: ApplicationCommandOptionChoiceData[] = [];
 				for (const game of targetGames) {
-					for (const character of game.characters) {
+					for (const character of game.characters || []) {
 						options.push({
 							name: game.name + ' - ' + character.characterData.name,
 							value: game.name + ' - ' + character.characterData.name,
@@ -81,9 +82,10 @@ export class CharacterSetActiveSubCommand implements Command {
 				});
 			} else {
 				// create or unset
-				targetGames = [];
+				return [{ name: value, value: value }];
 			}
 			// for everything else, we format the target games as the options
+			if (value.length < 1 || value.length > 100) return [];
 			return targetGames.map(game => ({
 				name: game.name,
 				value: game.name,
@@ -98,9 +100,6 @@ export class CharacterSetActiveSubCommand implements Command {
 	): Promise<void> {
 		const option = intr.options.getString(GameOptions.GAME_MANAGE_OPTION.name);
 		const value = intr.options.getString(GameOptions.GAME_MANAGE_VALUE.name);
-
-		console.log(`${option}ing ${value}!`);
-		await InteractionUtils.send(intr, 'got it!');
 
 		if (option === Language.LL.commandOptions.gameManageOption.choices.create.name()) {
 			// ensure it's not a duplicate name
@@ -156,11 +155,11 @@ export class CharacterSetActiveSubCommand implements Command {
 		) {
 			// set target game to active
 			const updated = await Game.query()
-				.patchAndFetch({ isActive: false })
+				.patch({ isActive: false })
 				.where({ gmUserId: intr.user.id, guildId: intr.guildId })
 				.andWhere('name', 'ilike', value);
 
-			if (updated.length > 0) {
+			if (updated > 0) {
 				// set existing games here to not active
 				await Game.query()
 					.patch({ isActive: false })
@@ -208,15 +207,15 @@ export class CharacterSetActiveSubCommand implements Command {
 			const [gameName, ...characterNameSections] = value.split(' - ');
 			//just in case a character name has ' - ' in it
 			const characterName = characterNameSections.join(' - ');
-			if (!gameName || !characterName) {
-				const targetGames = await Game.query().where({
+			if (gameName && characterName) {
+				const targetGames = await Game.query().withGraphFetched('characters').where({
 					gmUserId: intr.user.id,
 					guildId: intr.guildId,
-					name: value,
+					name: gameName,
 				});
 				if (targetGames.length) {
 					const targetGame = targetGames[0];
-					const targetCharacters = targetGame.characters.filter(
+					const targetCharacters = (targetGame.characters || []).filter(
 						character => character.characterData.name === characterName
 					);
 					if (targetCharacters.length) {
@@ -229,7 +228,7 @@ export class CharacterSetActiveSubCommand implements Command {
 							intr,
 							LL.commands.game.manage.interactions.kickSuccess({
 								characterName: characterName,
-								gameName: value,
+								gameName: gameName,
 							})
 						);
 						return;
@@ -239,7 +238,7 @@ export class CharacterSetActiveSubCommand implements Command {
 							intr,
 							LL.commands.game.manage.interactions.characterNotInGame({
 								characterName: characterName,
-								gameName: value,
+								gameName: gameName,
 							})
 						);
 					}
@@ -248,11 +247,16 @@ export class CharacterSetActiveSubCommand implements Command {
 					await InteractionUtils.send(
 						intr,
 						LL.commands.game.interactions.notFound({
-							gameName: value,
+							gameName: gameName,
 						})
 					);
 				}
 				return;
+			} else {
+				await InteractionUtils.send(
+					intr,
+					LL.commands.game.manage.interactions.kickParseFailed()
+				);
 			}
 		} else if (option === Language.LL.commandOptions.gameManageOption.choices.join.name()) {
 			const targetGames = await Game.query()
@@ -274,7 +278,9 @@ export class CharacterSetActiveSubCommand implements Command {
 					);
 				} else {
 					//relate the two!
-					targetGames[0].$relatedQuery('characters').relate(activeCharacter);
+					const result = await targetGames[0]
+						.$relatedQuery('characters')
+						.relate(activeCharacter);
 					await InteractionUtils.send(
 						intr,
 						LL.commands.game.manage.interactions.joinSuccess({
@@ -312,7 +318,7 @@ export class CharacterSetActiveSubCommand implements Command {
 						LL.commands.character.interactions.noActiveCharacter()
 					);
 				} else if (
-					targetGames[0].characters.filter(
+					(targetGames[0].characters || []).filter(
 						character => character.id === activeCharacter.id
 					).length > 0
 				) {
@@ -325,7 +331,7 @@ export class CharacterSetActiveSubCommand implements Command {
 					);
 				} else {
 					//unrelate the two!
-					targetGames[0]
+					await targetGames[0]
 						.$relatedQuery('characters')
 						.unrelate()
 						.where('id', activeCharacter.id);

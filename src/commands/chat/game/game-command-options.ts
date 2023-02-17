@@ -38,6 +38,7 @@ export class GameOptions {
 		name: Language.LL.commandOptions.gameManageValue.name(),
 		description: Language.LL.commandOptions.gameManageValue.description(),
 		required: true,
+		autocomplete: true,
 		type: ApplicationCommandOptionType.String,
 	};
 }

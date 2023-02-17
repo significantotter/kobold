@@ -17,11 +17,17 @@ export class Game extends BaseModel {
 		return GameSchema as JSONSchema7;
 	}
 
-	static queryWhereUserHasCharacter(userId, guildId) {
-		return this.query()
+	static async queryWhereUserHasCharacter(userId, guildId) {
+		const options = await this.query()
 			.withGraphJoined('characters')
-			.where({ guildId: guildId, 'character.userId': userId })
+			.where({ guildId: guildId })
 			.andWhereNot({ gmUserId: userId });
+
+		return options.filter(
+			option =>
+				option.characters.filter(char => char.userId === userId && char.isActiveCharacter)
+					.length > 0
+		);
 	}
 	static async queryWhereUserLacksCharacter(userId, guildId) {
 		const options = await this.query()

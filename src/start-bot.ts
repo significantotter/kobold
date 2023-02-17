@@ -43,6 +43,9 @@ import {
 	ModifierImportSubCommand,
 	ModifierUpdateSubCommand,
 	ModifierToggleSubCommand,
+	// game
+	GameCommand,
+	GameManageSubCommand,
 	// help
 	HelpCommand,
 	// admin
@@ -136,6 +139,9 @@ async function start(): Promise<void> {
 			new ModifierUpdateSubCommand(),
 			new ModifierToggleSubCommand(),
 		]),
+
+		// Game commands
+		new GameCommand([new GameManageSubCommand()]),
 	];
 
 	// Buttons

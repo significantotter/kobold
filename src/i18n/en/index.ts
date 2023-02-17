@@ -827,15 +827,17 @@ const en: BaseTranslation = {
 					gameNameDisallowedCharacters:
 						'Yip! Your game\'s name can\'t include " - ".' +
 						' I use that to separate games from characters when kicking a character!',
-					createSuccess: 'Yip! I created the game {gameName} in this server.',
+					createSuccess: 'Yip! I created the game "{gameName}" in this server.',
 					setActiveSuccess:
-						'Yip! I set the game {gameName} as your active game in this server.',
-					deleteSuccess: 'Yip! I deleted the game {gameName} in this server.',
-					kickSuccess: 'Yip! I kicked {characterName} out of the game {gameName}!',
+						'Yip! I set the game "{gameName}" as your active game in this server.',
+					deleteSuccess: 'Yip! I deleted the game "{gameName}" in this server.',
+					kickSuccess: 'Yip! I kicked {characterName} out of the game "{gameName}"!',
+					kickParseFailed:
+						"Yip! I couldn't tell the game and character apart! Try using one of the suggested options.",
 					characterNotInGame:
-						"Yip! I couldn't find the character {characterName} in the game {gameName}!",
-					joinSuccess: 'Yip! {characterName} joined the game {gameName}!',
-					leaveSuccess: 'Yip! {characterName} left the game {gameName}!',
+						'Yip! I couldn\'t find the character {characterName} in the game "{gameName}"!',
+					joinSuccess: 'Yip! {characterName} joined the game "{gameName}"!',
+					leaveSuccess: 'Yip! {characterName} left the game "{gameName}"!',
 				},
 			},
 			init: {

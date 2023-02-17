@@ -14,8 +14,8 @@ export async function up(knex: Knex): Promise<void> {
 		table.timestamp('last_updated_at', { useTz: true }).defaultTo(knex.fn.now());
 	});
 	await knex.schema.createTable('characters_in_games', function (table) {
-		table.text('game_id').notNullable().references('game.id').onDelete('cascade');
-		table.jsonb('character_id').notNullable().references('character.id').onDelete('cascade');
+		table.integer('game_id').notNullable().references('game.id').onDelete('cascade');
+		table.integer('character_id').notNullable().references('character.id').onDelete('cascade');
 
 		table.timestamp('created_at', { useTz: true }).defaultTo(knex.fn.now());
 		table.timestamp('last_updated_at', { useTz: true }).defaultTo(knex.fn.now());

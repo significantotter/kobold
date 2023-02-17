@@ -17,6 +17,7 @@ import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { EventData } from '../../../models/internal-models.js';
 import { CommandUtils, InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
+import { GameOptions } from './game-command-options.js';
 
 export class GameCommand implements Command {
 	public names = [Language.LL.commands.game.name()];
@@ -32,7 +33,7 @@ export class GameCommand implements Command {
 				name: Language.LL.commands.game.manage.name(),
 				description: Language.LL.commands.game.manage.description(),
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
-				options: [],
+				options: [GameOptions.GAME_MANAGE_OPTION, GameOptions.GAME_MANAGE_VALUE],
 			},
 			// {
 			// 	name: Language.LL.commands.game.init.name(),
