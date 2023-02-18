@@ -319,6 +319,24 @@ const en: BaseTranslation = {
 					},
 				},
 			},
+			game: {
+				name: 'game',
+				value: 'game',
+				description: 'help for the /game command.',
+				interactions: {
+					embed: {
+						title: '/game Commands',
+						thumbnail: refs.links.thumbnail,
+						description:
+							'The game commands are used to manage players within a game, allowing a GM to ' +
+							'roll dice for their characters. Games are per-server. You can never use or manage ' +
+							'a game outside of the server it was created in.\n\n' +
+							'Create a game with \n`/game manage [create] [name of the new game]`\n\n' +
+							'Have your players join the game using \n`/game manage [join] [name of the created game]`\n\n' +
+							'Then roll dice for your players with \n`/game roll [roll type]`!\n\n',
+					},
+				},
+			},
 		},
 		character: {
 			// MAIN COMMAND INFO
@@ -743,11 +761,13 @@ const en: BaseTranslation = {
 
 			dice: {
 				name: 'dice',
-				options: '[dice] [*note*]',
+				options: '[dice] [*note*] [*secret*]',
 				usage:
-					'_[dice]_: The dice expression to roll ("1d20 - 1d4 + 3). Uses a ' +
+					'**[dice]**: The dice expression to roll ("1d20 - 1d4 + 3). Uses a ' +
 					'similar syntax to Roll20.\n' +
-					'_[*note*] optional_: A note to add to the end of the dice roll.',
+					'**[*note*] optional**: A note to add to the end of the dice roll.\n' +
+					'**[*secret*] optional**: Choose to either leave the roll public (default), hide the roll entirely, or ' +
+					'hide the roll, but publicly notify the channel that a roll has been made.',
 				description: `Rolls some dice.`,
 				interactions: {
 					rolledDice: 'rolled some dice!',
@@ -755,53 +775,63 @@ const en: BaseTranslation = {
 			},
 			skill: {
 				name: 'skill',
-				options: '[skill] [*dice*] [*note*]',
+				options: '[skill] [*dice*] [*note*] [*secret*]',
 				usage:
-					'_[skill]_: The name of the skill to roll.\n' +
-					'_[*dice*] optional_: A dice expression to roll ("1d20 - 1d4 + 3"). Added to the end ' +
+					'**[skill]**: The name of the skill to roll.\n' +
+					'**[*dice*] optional**: A dice expression to roll ("1d20 - 1d4 + 3"). Added to the end ' +
 					'of the skill roll. Alternatively, a simple modifier value ("5" or "-3").\n' +
-					'_[*note*] optional_: A note to add to the end of the dice roll.',
+					'**[*note*] optional**: A note to add to the end of the dice roll.\n' +
+					'**[*secret*] optional**: Choose to either leave the roll public (default), hide the roll entirely, or ' +
+					'hide the roll, but publicly notify the channel that a roll has been made.',
 				description: `rolls a skill for your active character`,
 			},
 			perception: {
 				name: 'perception',
-				options: '[*dice*] [*note*]',
+				options: '[*dice*] [*note*] [*secret*]',
 				usage:
-					'_[*dice*] optional_: A dice expression to roll ("1d20 - 1d4 + 3"). Added to the end ' +
+					'**[*dice*] optional**: A dice expression to roll ("1d20 - 1d4 + 3"). Added to the end ' +
 					'of the perception roll. Alternatively, a simple modifier value ("5" or "-3").\n' +
-					'_[*note*] optional_: A note to add to the end of the dice roll.',
+					'**[*note*] optional**: A note to add to the end of the dice roll.\n' +
+					'**[*secret*] optional**: Choose to either leave the roll public (default), hide the roll entirely, or ' +
+					'hide the roll, but publicly notify the channel that a roll has been made.',
 				description: `rolls perception for your active character`,
 			},
 			save: {
 				name: 'save',
-				options: '[save] [*dice*] [*note*]',
+				options: '[save] [*dice*] [*note*] [*secret*]',
 				usage:
-					'_[save]_: The name of the saving throw to roll.\n' +
-					'_[*dice*] optional_: A dice expression to roll ("1d20 - 1d4 + 3"). Added to the end ' +
+					'**[save]**: The name of the saving throw to roll.\n' +
+					'**[*dice*] optional**: A dice expression to roll ("1d20 - 1d4 + 3"). Added to the end ' +
 					'of the save roll. Alternatively, a simple modifier value ("5" or "-3").\n' +
-					'_[*note*] optional_: A note to add to the end of the dice roll.',
+					'**[*note*] optional**: A note to add to the end of the dice roll.\n' +
+					'**[*secret*] optional**: Choose to either leave the roll public (default), hide the roll entirely, or ' +
+					'hide the roll, but publicly notify the channel that a roll has been made.',
 				description: `rolls a saving throw for your active character`,
 			},
 			ability: {
 				name: 'ability',
-				options: '[ability] [*dice*] [*note*]',
+				options: '[ability] [*dice*] [*note*] [*secret*]',
 				usage:
-					'_[ability]_: The name of the ability to roll.\n' +
-					'_[*dice*] optional_: A dice expression to roll ("1d20 - 1d4 + 3"). Added to the end ' +
+					'**[ability]**: The name of the ability to roll.\n' +
+					'**[*dice*] optional**: A dice expression to roll ("1d20 - 1d4 + 3"). Added to the end ' +
 					'of the ability roll. Alternatively, a simple modifier value ("5" or "-3").\n' +
-					'_[*note*] optional_: A note to add to the end of the dice roll.',
+					'**[*note*] optional**: A note to add to the end of the dice roll.\n' +
+					'**[*secret*] optional**: Choose to either leave the roll public (default), hide the roll entirely, or ' +
+					'hide the roll, but publicly notify the channel that a roll has been made.',
 				description: `rolls an ability for your active character`,
 			},
 			attack: {
 				name: 'attack',
-				options: '[attack] [*attack_modifier*] [*damage_modifier*] [*note*]',
+				options: '[attack] [*attack_modifier*] [*damage_modifier*] [*note*] [*secret*]',
 				usage:
-					'_[attack]_: The name of the attack to roll.\n' +
-					'_[*attack\\_modifier*] optional_: A dice expression to roll ("1d20 - 1d4 + 3"). Added to ' +
+					'**[attack]**: The name of the attack to roll.\n' +
+					'**[*attack\\_modifier*] optional**: A dice expression to roll ("1d20 - 1d4 + 3"). Added to ' +
 					'the end of the attack roll. Alternatively, a simple modifier value ("5" or "-3").\n' +
-					'_[*damage\\_modifier*] optional_: A dice expression to roll ("1d20 - 1d4 + 3"). Added to ' +
+					'**[*damage\\_modifier*] optional**: A dice expression to roll ("1d20 - 1d4 + 3"). Added to ' +
 					'the end of the damage roll. Alternatively, a simple modifier value ("5" or "-3").\n' +
-					'_[*note*] optional_: A note to add to the end of the dice roll.',
+					'**[*note*] optional**: A note to add to the end of the dice roll.\n' +
+					'**[*secret*] optional**: Choose to either leave the roll public (default), hide the roll entirely, or ' +
+					'hide the roll, but publicly notify the channel that a roll has been made.',
 				description: `rolls an attack for your active character`,
 				interactions: {
 					rollEmbed: {
@@ -822,7 +852,16 @@ const en: BaseTranslation = {
 			},
 			manage: {
 				name: 'manage',
-				description: 'Options to create, delete, set-active, join, or leave a game',
+				description:
+					"Manage a a GM'd group of characters. Choose to create, delete, set-active, join, kick, or leave",
+				expandedDescription:
+					'Manage a game.\n' +
+					'`/game manage [create] [game name]`\ncreates a game named "game name" in this discord server.\n' +
+					'`/game manage [delete] [game name]`\ndeletes the game named "game name".\n' +
+					'`/game manage [set-active] [game name]`\nsets the game "game name" as active for your /game commands.\n' +
+					'`/game manage [join] [game name]`\njoins the game named "game name" with your active character\n' +
+					'`/game manage [kick] [game name - character name]`\nkicks the character from the specified game.\n' +
+					'`/game manage [leave] [game name]`\nleaves the game "game name" with your active character.',
 				interactions: {
 					gameAlreadyExists: 'Yip! A game with that name already exists in this server.',
 					gameNameTooShort: "Yip! Your game's name needs to be at least 2 characters!",
@@ -849,7 +888,17 @@ const en: BaseTranslation = {
 			},
 			roll: {
 				name: 'roll',
-				description: 'Causes one or more players in the game to make a roll. GM only.',
+				description:
+					'Rolls dice for all characters in a game (or optionally one). GM only.',
+				options:
+					'[game-roll-type] [*dice-roll-or-modifier*] [*game-target-character*] [*secret*]',
+				usage:
+					'**[game-roll-type]**: The name of the ability to roll.\n' +
+					'**[*dice-roll-or-modifier*] optional**: A dice expression to roll ("1d20 - 1d4 + 3"). Added to the end ' +
+					'of the roll if choosing a skill/ability/save. Alternatively, a simple modifier value ("5" or "-3").\n' +
+					'**[*game-target-character*] optional**: Restricts the roll to just the specified character.\n' +
+					'**[*secret*] optional**: Choose to either leave the roll public (default), hide the roll entirely, or ' +
+					'hide the roll, but publicly notify the channel that a roll has been made.',
 			},
 		},
 	},
