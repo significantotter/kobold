@@ -203,28 +203,51 @@ export class InitiativeBuilder {
 		}
 		turnText += '\n';
 		if (actorsInGroup.length === 1 && actorsInGroup[0].name === actorGroup.name) {
-			//We're displaying the actor in its initiative slot with HP and Max HP shown if present
+			//We're displaying the actor in its initiative slot with HP, Max HP, SP and Max SP shown if present
 			turnText += `${extraSymbol} ${actorGroup.initiativeResult}: ${actorGroup.name}`;
-			if (actorsInGroup[0].hp) {
-				turnText += `HP ${actorsInGroup[0].hp}`;
-				if (actorsInGroup[0].maxHp) {
-					turnText += `/${actorsInGroup[0].maxHp}`;
-				}
-			}
+			turnText += this.pointsToText(actorsInGroup[0]);
 		} else {
 			turnText += `${extraSymbol} ${actorGroup.initiativeResult}: ${actorGroup.name}\n`;
 			const sortedActors = actorsInGroup.sort((a, b) => a.name.localeCompare(b.name));
 			for (let i = 0; i < sortedActors.length; i++) {
 				turnText += `       ${i}. ${sortedActors[i].name}`;
-				if (sortedActors[i].hp) {
-					turnText += `HP ${sortedActors[i].hp}`;
-					if (sortedActors[i].maxHp) {
-						turnText += `/${sortedActors[i].maxHp}`;
-					}
-				}
+				turnText += this.pointsToText(sortedActors[i]);
 				turnText += `\n`;
 			}
 		}
+		return turnText;
+	}
+
+	private pointsToText(actor: InitiativeActor): string {
+		let turnText = '';
+		if (actor.name.length > 40) {
+			turnText += '\n';
+		}
+		if (actor.hp) {
+			turnText += ` <HP ${actor.hp}`;
+			if (actor.maxHp) {
+				turnText += `/${actor.maxHp}`;
+			}
+			turnText += `>`;
+		}
+		if (actor.sp) {
+			turnText += `<SP ${actor.sp}`;
+			if (actor.maxSp) {
+				turnText += `/${actor.maxSp}`;
+			}
+			turnText += `>`;
+		}
+		if (actor.rp) {
+			turnText += `<RP ${actor.rp}`;
+			if (actor.maxRp) {
+				turnText += `/${actor.maxRp}`;
+			}
+			turnText += `>`;
+		}
+		if (actor.thp) {
+			turnText += `<THP ${actor.thp}>`;
+		}
+
 		return turnText;
 	}
 

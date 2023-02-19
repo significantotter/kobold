@@ -45,6 +45,26 @@
 		"maxHp": {
 			"type": ["number", "null"],
 			"description": "The max HP of the initiative actor."
+		},
+		"sp": {
+			"type": ["number", "null"],
+			"description": "The Stamina Points of the initiative actor."
+		},
+		"maxSp": {
+			"type": ["number", "null"],
+			"description": "The max Stamina Points of the initiative actor."
+		},
+		"rp": {
+			"type": ["number", "null"],
+			"description": "The Resolve Points of the initiative actor."
+		},
+		"maxRp": {
+			"type": ["number", "null"],
+			"description": "The max Resolve Points of the initiative actor."
+		},
+		"thp": {
+			"type": ["number", "null"],
+			"description": "The Temporary Hit Points of the initiative actor."
 		}
 	}
 }

@@ -41,6 +41,13 @@ export async function up(knex: Knex): Promise<void> {
 		table.integer('character_id').references('character.id').onDelete('set null');
 		table.text('user_id').notNullable();
 		table.text('name').notNullable();
+		table.integer('hp');
+		table.integer('max_hp');
+		table.integer('sp');
+		table.integer('max_sp');
+		table.integer('rp');
+		table.integer('max_rp');
+		table.integer('thp');
 
 		table.timestamp('created_at', { useTz: true }).defaultTo(knex.fn.now());
 		table.timestamp('last_updated_at', { useTz: true }).defaultTo(knex.fn.now());

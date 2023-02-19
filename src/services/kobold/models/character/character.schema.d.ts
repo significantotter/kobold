@@ -119,6 +119,8 @@ export interface Character {
 	calculatedStats?: {
 		charID?: number;
 		maxHP?: number | null;
+		maxStamina?: number | null;
+		maxResolve?: number | null;
 		totalClassDC?: number | null;
 		totalSpeed?: number | null;
 		totalAC?: number | null;

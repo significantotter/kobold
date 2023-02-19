@@ -129,6 +129,41 @@ export class ChatArgs {
 		autocomplete: true,
 		type: ApplicationCommandOptionType.Number,
 	};
+	public static readonly INIT_SP_OPTION: APIApplicationCommandBasicOption = {
+		name: Language.LL.commandOptions.initSp.name(),
+		description: Language.LL.commandOptions.initSp.description(),
+		required: false,
+		autocomplete: true,
+		type: ApplicationCommandOptionType.Number,
+	};
+	public static readonly INIT_MAX_SP_OPTION: APIApplicationCommandBasicOption = {
+		name: Language.LL.commandOptions.initMaxSp.name(),
+		description: Language.LL.commandOptions.initMaxSp.description(),
+		required: false,
+		autocomplete: true,
+		type: ApplicationCommandOptionType.Number,
+	};
+	public static readonly INIT_RP_OPTION: APIApplicationCommandBasicOption = {
+		name: Language.LL.commandOptions.initRp.name(),
+		description: Language.LL.commandOptions.initRp.description(),
+		required: false,
+		autocomplete: true,
+		type: ApplicationCommandOptionType.Number,
+	};
+	public static readonly INIT_MAX_RP_OPTION: APIApplicationCommandBasicOption = {
+		name: Language.LL.commandOptions.initMaxRp.name(),
+		description: Language.LL.commandOptions.initMaxRp.description(),
+		required: false,
+		autocomplete: true,
+		type: ApplicationCommandOptionType.Number,
+	};
+	public static readonly INIT_THP_OPTION: APIApplicationCommandBasicOption = {
+		name: Language.LL.commandOptions.initThp.name(),
+		description: Language.LL.commandOptions.initThp.description(),
+		required: false,
+		autocomplete: true,
+		type: ApplicationCommandOptionType.Number,
+	};
 	public static readonly ACTOR_NAME_OPTION: APIApplicationCommandBasicOption = {
 		name: Language.LL.commandOptions.initActor.name(),
 		description: Language.LL.commandOptions.initActor.description(),
@@ -156,6 +191,26 @@ export class ChatArgs {
 			{
 				name: Language.LL.commandOptions.setOption.choices.maxHp.name(),
 				value: Language.LL.commandOptions.setOption.choices.maxHp.value(),
+			},
+			{
+				name: Language.LL.commandOptions.setOption.choices.sp.name(),
+				value: Language.LL.commandOptions.setOption.choices.sp.value(),
+			},
+			{
+				name: Language.LL.commandOptions.setOption.choices.maxSp.name(),
+				value: Language.LL.commandOptions.setOption.choices.maxSp.value(),
+			},
+			{
+				name: Language.LL.commandOptions.setOption.choices.rp.name(),
+				value: Language.LL.commandOptions.setOption.choices.rp.value(),
+			},
+			{
+				name: Language.LL.commandOptions.setOption.choices.maxRp.name(),
+				value: Language.LL.commandOptions.setOption.choices.maxRp.value(),
+			},
+			{
+				name: Language.LL.commandOptions.setOption.choices.thp.name(),
+				value: Language.LL.commandOptions.setOption.choices.thp.value(),
 			},
 		],
 	};

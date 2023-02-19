@@ -145,6 +145,8 @@
 			"properties": {
 				"charID": { "type": "number" },
 				"maxHP": { "type": ["number", "null"] },
+				"maxStamina": { "type": ["number", "null"] },
+				"maxResolve": { "type": ["number", "null"] },
 				"totalClassDC": { "type": ["number", "null"] },
 				"totalSpeed": { "type": ["number", "null"] },
 				"totalAC": { "type": ["number", "null"] },

@@ -75,7 +75,12 @@ export class InitSetSubCommand implements Command {
 		const fieldToChange = intr.options.getString(ChatArgs.ACTOR_SET_OPTION.name).trim();
 		const newFieldValue = intr.options.getString(ChatArgs.ACTOR_SET_VALUE_OPTION.name).trim();
 
-		if (!fieldToChange || !['initiative', 'name', 'hp', 'maxHp'].includes(fieldToChange)) {
+		if (
+			!fieldToChange ||
+			!['initiative', 'name', 'hp', 'maxHp', 'sp', 'maxSp', 'rp', 'maxRp', 'thp'].includes(
+				fieldToChange
+			)
+		) {
 			await InteractionUtils.send(
 				intr,
 				LL.commands.init.set.interactions.invalidOptionError()
@@ -159,6 +164,51 @@ export class InitSetSubCommand implements Command {
 				return;
 			}
 		}
+		if (fieldToChange === 'sp') {
+			if (isNaN(Number(newFieldValue))) {
+				await InteractionUtils.send(
+					intr,
+					LL.commands.init.set.interactions.spNotNumberError()
+				);
+				return;
+			}
+		}
+		if (fieldToChange === 'maxSp') {
+			if (isNaN(Number(newFieldValue))) {
+				await InteractionUtils.send(
+					intr,
+					LL.commands.init.set.interactions.maxSpNotNumberError()
+				);
+				return;
+			}
+		}
+		if (fieldToChange === 'rp') {
+			if (isNaN(Number(newFieldValue))) {
+				await InteractionUtils.send(
+					intr,
+					LL.commands.init.set.interactions.rpNotNumberError()
+				);
+				return;
+			}
+		}
+		if (fieldToChange === 'maxRp') {
+			if (isNaN(Number(newFieldValue))) {
+				await InteractionUtils.send(
+					intr,
+					LL.commands.init.set.interactions.maxRpNotNumberError()
+				);
+				return;
+			}
+		}
+		if (fieldToChange === 'thp') {
+			if (isNaN(Number(newFieldValue))) {
+				await InteractionUtils.send(
+					intr,
+					LL.commands.init.set.interactions.thpNotNumberError()
+				);
+				return;
+			}
+		}
 
 		// perform the updates
 		if (fieldToChange === 'initiative') {
@@ -174,11 +224,31 @@ export class InitSetSubCommand implements Command {
 			}
 		} else if (fieldToChange === 'hp') {
 			await InitiativeActor.query().patchAndFetchById(actor.id, {
-				hp: newFieldValue,
+				hp: Number(newFieldValue),
 			});
 		} else if (fieldToChange === 'maxHp') {
 			await InitiativeActor.query().patchAndFetchById(actor.id, {
-				maxHp: newFieldValue,
+				maxHp: Number(newFieldValue),
+			});
+		} else if (fieldToChange === 'sp') {
+			await InitiativeActor.query().patchAndFetchById(actor.id, {
+				sp: Number(newFieldValue),
+			});
+		} else if (fieldToChange === 'maxSp') {
+			await InitiativeActor.query().patchAndFetchById(actor.id, {
+				maxSp: Number(newFieldValue),
+			});
+		} else if (fieldToChange === 'rp') {
+			await InitiativeActor.query().patchAndFetchById(actor.id, {
+				rp: Number(newFieldValue),
+			});
+		} else if (fieldToChange === 'maxRp') {
+			await InitiativeActor.query().patchAndFetchById(actor.id, {
+				maxRp: Number(newFieldValue),
+			});
+		} else if (fieldToChange === 'thp') {
+			await InitiativeActor.query().patchAndFetchById(actor.id, {
+				thp: Number(newFieldValue),
 			});
 		}
 		currentInitResponse = await InitiativeUtils.getInitiativeForChannel(intr.channel, {

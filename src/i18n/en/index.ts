@@ -605,6 +605,11 @@ const en: BaseTranslation = {
 					initNotNumberError: 'Yip! You can only update initiative with a number.',
 					hpNotNumberError: 'Yip! You can only update HP with a number.',
 					maxHpNotNumberError: 'Yip! You can only update max HP with a number.',
+					spNotNumberError: 'Yip! You can only update SP with a number.',
+					maxSpNotNumberError: 'Yip! You can only update max SP with a number.',
+					rpNotNumberError: 'Yip! You can only update RP with a number.',
+					maxRpNotNumberError: 'Yip! You can only update max RP with a number.',
+					thpNotNumberError: 'Yip! You can only update THP with a number.',
 					successEmbed: {
 						title: 'Yip! {actorName} had their {fieldToChange} set to {newFieldValue}.',
 					},
@@ -919,6 +924,26 @@ const en: BaseTranslation = {
 			name: 'maxHp',
 			description: 'A value to set max HP to in initiative.',
 		},
+		initSp: {
+			name: 'sp',
+			description: 'A value to set SP to in initiative.',
+		},
+		initMaxSp: {
+			name: 'maxSp',
+			description: 'A value to set max SP to in initiative.',
+		},
+		initRp: {
+			name: 'rp',
+			description: 'A value to set RP to in initiative.',
+		},
+		initMaxRp: {
+			name: 'maxRp',
+			description: 'A value to set max RP to in initiative.',
+		},
+		initThp: {
+			name: 'thp',
+			description: 'A value to set THP to in initiative.',
+		},
 		initSetOption: {
 			name: 'option',
 			description: 'The character option to alter (only within this initiative).',
@@ -938,6 +963,26 @@ const en: BaseTranslation = {
 				maxHp: {
 					name: 'maxHp',
 					value: 'maxHp',
+				},
+				sp: {
+					name: 'sp',
+					value: 'sp',
+				},
+				maxSp: {
+					name: 'maxSp',
+					value: 'maxSp',
+				},
+				rp: {
+					name: 'rp',
+					value: 'rp',
+				},
+				maxRp: {
+					name: 'maxRp',
+					value: 'maxRp',
+				},
+				thp: {
+					name: 'thp',
+					value: 'thp',
 				},
 			},
 		},

@@ -103,6 +103,11 @@ export class InitJoinSubCommand implements Command {
 		const diceExpression = intr.options.getString(ChatArgs.ROLL_EXPRESSION_OPTION.name);
 		let hpValue = intr.options.getNumber(ChatArgs.INIT_HP_OPTION.name);
 		let maxHpValue = intr.options.getNumber(ChatArgs.INIT_MAX_HP_OPTION.name);
+		let spValue = intr.options.getNumber(ChatArgs.INIT_SP_OPTION.name);
+		let maxSpValue = intr.options.getNumber(ChatArgs.INIT_MAX_SP_OPTION.name);
+		let rpValue = intr.options.getNumber(ChatArgs.INIT_RP_OPTION.name);
+		let maxRpValue = intr.options.getNumber(ChatArgs.INIT_MAX_RP_OPTION.name);
+		let thpValue = intr.options.getNumber(ChatArgs.INIT_THP_OPTION.name);
 
 		let finalInitiative = 0;
 		let rollResultMessage: EmbedBuilder;
@@ -185,7 +190,24 @@ export class InitJoinSubCommand implements Command {
 			maxHpValue = activeCharacter.calculatedStats.maxHP;
 		}
 		if (!hpValue) {
-			hpValue = maxHpValue;
+			hpValue = activeCharacter.characterData.currentHealth | maxHpValue;
+		}
+		if (activeCharacter.characterData.variantStamina) {
+			if (!maxSpValue) {
+				maxSpValue = activeCharacter.calculatedStats.maxStamina;
+			}
+			if (!spValue) {
+				spValue = activeCharacter.characterData.currentStamina | maxSpValue;
+			}
+			if (!maxRpValue) {
+				maxRpValue = activeCharacter.calculatedStats.maxResolve;
+			}
+			if (!rpValue) {
+				rpValue = activeCharacter.characterData.currentResolve | maxRpValue;
+			}
+		}
+		if (!thpValue) {
+			thpValue = activeCharacter.characterData.tempHealth;
 		}
 
 		const newActor = await InitiativeActor.query().insertGraphAndFetch({
@@ -195,6 +217,11 @@ export class InitJoinSubCommand implements Command {
 			userId: intr.user.id,
 			hp: hpValue,
 			maxHp: maxHpValue,
+			sp: spValue,
+			maxSp: maxSpValue,
+			rp: rpValue,
+			maxRp: maxRpValue,
+			thp: thpValue,
 
 			actorGroup: {
 				initiativeId: currentInit.id,

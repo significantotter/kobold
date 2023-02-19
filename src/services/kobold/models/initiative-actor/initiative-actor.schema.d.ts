@@ -41,5 +41,33 @@ export interface InitiativeActor {
 	 * When the initiative was last interacted with
 	 */
 	lastUpdatedAt?: string;
+	/**
+	 * The HP of the initiative actor.
+	 */
+	hp?: number | null;
+	/**
+	 * The max HP of the initiative actor.
+	 */
+	maxHp?: number | null;
+	/**
+	 * The Stamina Points of the initiative actor.
+	 */
+	sp?: number | null;
+	/**
+	 * The max Stamina Points of the initiative actor.
+	 */
+	maxSp?: number | null;
+	/**
+	 * The Resolve Points of the initiative actor.
+	 */
+	rp?: number | null;
+	/**
+	 * The max Resolve Points of the initiative actor.
+	 */
+	maxRp?: number | null;
+	/**
+	 * The Temporary Hit Points of the initiative actor.
+	 */
+	thp?: number | null;
 	[k: string]: any;
 }
