@@ -14,7 +14,7 @@ export const attributeAbilityMap = {
 	nature: 'wisdom',
 	occultism: 'intelligence',
 	performance: 'charisma',
-	religion: 'dexterity',
+	religion: 'wisdom',
 	society: 'intelligence',
 	stealth: 'dexterity',
 	survival: 'wisdom',
