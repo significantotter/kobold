@@ -1,4 +1,4 @@
-export const GameCommandLang = {
+export default {
 	name: 'game',
 	description: 'Commands for interacting with players as the GM of a game.',
 	interactions: {
@@ -40,7 +40,10 @@ export const GameCommandLang = {
 	init: {
 		name: 'init',
 		description:
-			'Starts an initiative and automatically causes all players in the game to join with the skill. GM only.',
+			'Starts an initiative and adds joins with all characters in the game. GM only.',
+		interactions: {
+			alreadyInInit: 'Yip! All the characters in your game were already in the initiative!',
+		},
 	},
 	roll: {
 		name: 'roll',
@@ -53,55 +56,5 @@ export const GameCommandLang = {
 			'**[*game-target-character*] optional**: Restricts the roll to just the specified character.\n' +
 			'**[*secret*] optional**: Choose to either leave the roll public (default), hide the roll entirely, or ' +
 			'hide the roll, but publicly notify the channel that a roll has been made.',
-	},
-};
-
-export const GameCommandOptionsLang = {
-	gameManageOption: {
-		name: 'manage-option',
-		description: 'What you want to do to manage a game',
-		choices: {
-			create: {
-				name: 'create',
-				value: 'create',
-			},
-			join: {
-				name: 'join',
-				value: 'join',
-			},
-			setActive: {
-				name: 'set-active',
-				value: 'set-active',
-			},
-			leave: {
-				name: 'leave',
-				value: 'leave',
-			},
-			kick: {
-				name: 'kick',
-				value: 'kick',
-			},
-			delete: {
-				name: 'delete',
-				value: 'delete',
-			},
-		},
-	},
-	gameManageValue: {
-		name: 'manage-value',
-		description:
-			'Enter the name of the game if creating, otherwise pick between possible choices for the action.',
-	},
-	gameTargetCharacter: {
-		name: 'game-target-character',
-		description: 'Rolls for a single character instead of all characters.',
-	},
-	gameRollType: {
-		name: 'game-roll-type',
-		description: 'The type of roll for the characters to make',
-	},
-	gameDiceRollOrModifier: {
-		name: 'dice-roll-or-modifier',
-		description: 'the dice roll if doing a custom roll, or a modifier to add to the roll.',
 	},
 };

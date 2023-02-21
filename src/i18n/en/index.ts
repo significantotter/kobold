@@ -1,12 +1,13 @@
 import type { BaseTranslation } from '../i18n-types';
-import { AdminCommandLang } from './commands/admin-lang.js';
-import { CharacterCommandLang, CharacterCommandOptionsLang } from './commands/character-lang.js';
-import { GameCommandLang, GameCommandOptionsLang } from './commands/game-lang.js';
-import { HelpCommandLang } from './commands/help-lang.js';
-import { InitCommandLang, InitCommandOptionsLang } from './commands/init-lang.js';
-import { ModifierCommandLang, ModifierCommandOptionsLang } from './commands/modifier-lang.js';
-import { RollCommandLang, RollCommandOptionsLang } from './commands/roll-lang.js';
-import { UtilsLang } from './commands/utils-lang.js';
+import AdminCommand from './commands/admin.js';
+import CharacterCommand from './commands/character.js';
+import GameCommand from './commands/game.js';
+import HelpCommand from './commands/help.js';
+import InitCommand from './commands/init.js';
+import ModifierCommand from './commands/modifier.js';
+import RollCommand from './commands/roll.js';
+import UtilsLang from './commands/utils.js';
+import commandOptions from './commandOptions.js';
 
 const links = {
 	thumbnail: 'https://i.imgur.com/cVOfw8P.png',
@@ -53,21 +54,15 @@ const en: BaseTranslation = {
 		choiceRegistered: 'You chose {choice}.',
 	},
 	commands: {
-		admin: AdminCommandLang,
-		help: HelpCommandLang,
-		character: CharacterCommandLang,
-		init: InitCommandLang,
-		modifier: ModifierCommandLang,
-		roll: RollCommandLang,
-		game: GameCommandLang,
+		admin: AdminCommand,
+		help: HelpCommand,
+		character: CharacterCommand,
+		init: InitCommand,
+		modifier: ModifierCommand,
+		roll: RollCommand,
+		game: GameCommand,
 	},
-	commandOptions: {
-		...CharacterCommandOptionsLang,
-		...RollCommandOptionsLang,
-		...InitCommandOptionsLang,
-		...ModifierCommandOptionsLang,
-		...GameCommandOptionsLang,
-	},
+	commandOptions: commandOptions,
 	utils: UtilsLang,
 };
 

@@ -35,12 +35,31 @@ export class GameCommand implements Command {
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
 				options: [GameOptions.GAME_MANAGE_OPTION, GameOptions.GAME_MANAGE_VALUE],
 			},
-			// {
-			// 	name: Language.LL.commands.game.init.name(),
-			// 	description: Language.LL.commands.game.init.description(),
-			// 	type: ApplicationCommandOptionType.Subcommand.valueOf(),
-			// 	options: [],
-			// },
+			{
+				name: Language.LL.commands.game.init.name(),
+				description: Language.LL.commands.game.init.description(),
+				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				options: [
+					{
+						...ChatArgs.SKILL_CHOICE_OPTION,
+						description:
+							Language.LL.commandOptions.skillChoice.overwrites.initJoinDescription(),
+						required: false,
+					},
+					{
+						...ChatArgs.ROLL_EXPRESSION_OPTION,
+						description:
+							'Dice to roll to join initiative. ' +
+							'Modifies your skill if you chose a skill.',
+						required: false,
+					},
+					{
+						...ChatArgs.INIT_VALUE_OPTION,
+						required: false,
+					},
+					GameOptions.GAME_TARGET_CHARACTER,
+				],
+			},
 			{
 				name: Language.LL.commands.game.roll.name(),
 				description: Language.LL.commands.game.roll.description(),

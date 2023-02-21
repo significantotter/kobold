@@ -1,4 +1,4 @@
-export const InitCommandLang = {
+export default {
 	name: 'init',
 	description: 'Initiative Tracking',
 	interactions: {
@@ -144,38 +144,5 @@ export const InitCommandLang = {
 			success: 'Yip! Ended the initiative!',
 			error: 'Yip! Something went wrong!',
 		},
-	},
-};
-
-export const InitCommandOptionsLang = {
-	initValue: {
-		name: 'value',
-		description: 'A value to set your initiative to. Overwrites any other init options.',
-	},
-	initActor: {
-		name: 'name',
-		description: 'The name of the NPC/minion to add to initiative.',
-	},
-	initCharacter: {
-		name: 'character',
-		description: 'A character present in the initiative.',
-	},
-	initSetOption: {
-		name: 'option',
-		description: 'The character option to alter (only within this initiative).',
-		choices: {
-			initiative: {
-				name: 'initiative',
-				value: 'initiative',
-			},
-			actorName: {
-				name: 'name',
-				value: 'name',
-			},
-		},
-	},
-	initSetValue: {
-		name: 'value',
-		description: 'The value to set the option to.',
 	},
 };

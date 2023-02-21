@@ -45,6 +45,7 @@ export { ModifierToggleSubCommand } from './modifier/modifier-toggle-subcommand.
 export { GameCommand } from './game/game-command.js';
 export { GameManageSubCommand } from './game/game-manage-subcommand.js';
 export { GameRollSubCommand } from './game/game-roll-subcommand.js';
+export { GameInitSubCommand } from './game/game-init-subcommand.js';
 
 // help command
 export { HelpCommand } from './help-command';

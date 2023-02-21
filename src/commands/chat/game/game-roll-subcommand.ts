@@ -46,23 +46,7 @@ export class GameRollSubCommand implements Command {
 			const targetCharacter = intr.options.getString(GameOptions.GAME_TARGET_CHARACTER.name);
 
 			const activeGame = await GameUtils.getActiveGame(intr.user.id, intr.guildId);
-			if (!activeGame.characters) return [];
-
-			const matches: Character[] = [];
-			for (const character of activeGame.characters) {
-				if (
-					targetCharacter === '' ||
-					character.characterData.name
-						.toLowerCase()
-						.includes(targetCharacter.toLowerCase())
-				) {
-					matches.push(character);
-				}
-			}
-			return matches.map(character => ({
-				name: character.characterData.name,
-				value: character.characterData.name,
-			}));
+			return GameUtils.autocompleteGameCharacter(targetCharacter, activeGame);
 		} else if (option.name === GameOptions.GAME_ROLL_TYPE.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
 			const match = intr.options.getString(GameOptions.GAME_ROLL_TYPE.name);
@@ -163,7 +147,7 @@ export class GameRollSubCommand implements Command {
 
 			if (matchingSkills.length) {
 				const response = await DiceUtils.rollSkill({
-					intr,
+					userName: intr.user.username,
 					activeCharacter: character,
 					skillChoice: matchingSkills[0].Name,
 					modifierExpression: diceExpression,

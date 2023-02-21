@@ -1,6 +1,6 @@
 import { refs } from '../common.js';
 
-export const HelpCommandLang = {
+export default {
 	name: 'help',
 	description: 'Get help with commands, permissions, FAQ, etc.',
 

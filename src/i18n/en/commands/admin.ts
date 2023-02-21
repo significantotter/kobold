@@ -1,4 +1,4 @@
-export const AdminCommandLang = {
+export default {
 	name: 'admin',
 	description: 'administration tools',
 };

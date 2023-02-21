@@ -1,4 +1,4 @@
-export const ModifierCommandLang = {
+export default {
 	name: 'modifier',
 	description: 'Toggleable values to modify specified dice rolls.',
 
@@ -90,103 +90,5 @@ export const ModifierCommandLang = {
 			badUrl: "Yip! I don't understand that Url! Copy the pastebin url for the pasted modifiers directly into the Url field.",
 			imported: 'Yip! I successfully imported those modifiers to {characterName}.',
 		},
-	},
-};
-
-export const ModifierCommandOptionsLang = {
-	modifierName: {
-		name: 'name',
-		description: 'The name of the modifier.',
-	},
-	modifierType: {
-		name: 'type',
-		description: 'The optional type (status, item, or circumstance) of the modifier.',
-	},
-	modifierDescription: {
-		name: 'description',
-		description: 'A description for the modifier.',
-	},
-	modifierValue: {
-		name: 'value',
-		description: 'The value applied by the modifier to dice rolls.',
-	},
-	modifierTargetTags: {
-		name: 'target-tags',
-		description:
-			'A set of tags for the rolls that this modifier applies to. For example "skill or attack or save"',
-	},
-	modifierSetOption: {
-		name: 'option',
-		description: 'The modifier option to alter.',
-		choices: {
-			name: {
-				name: 'name',
-				value: 'name',
-			},
-			description: {
-				name: 'description',
-				value: 'description',
-			},
-			type: {
-				name: 'type',
-				value: 'type',
-			},
-			value: {
-				name: 'value',
-				value: 'value',
-			},
-			targetTags: {
-				name: 'target-tags',
-				value: 'target-tags',
-			},
-		},
-	},
-	modifierSetValue: {
-		name: 'value',
-		description: 'The value to set the option to.',
-	},
-	modifierCustomOption: {
-		name: 'custom',
-		description: 'Whether to view custom created modifiers, default modifiers, or both.',
-		choices: {
-			custom: {
-				name: 'custom',
-				value: 'custom',
-			},
-			default: {
-				name: 'default',
-				value: 'default',
-			},
-			both: {
-				name: 'both',
-				value: 'both',
-			},
-		},
-	},
-	modifierImportMode: {
-		name: 'import-mode',
-		description: 'What to do when importing data.',
-		choices: {
-			fullyReplace: {
-				name: 'overwrite-all',
-				value: 'overwrite-all',
-			},
-			overwrite: {
-				name: 'overwrite-on-conflict',
-				value: 'overwrite-on-conflict',
-			},
-			renameOnConflict: {
-				name: 'rename-on-conflict',
-				value: 'rename-on-conflict',
-			},
-			ignoreOnConflict: {
-				name: 'ignore-on-conflict',
-				value: 'ignore-on-conflict',
-			},
-		},
-	},
-	modifierImportUrl: {
-		name: 'url',
-		description: 'The pastebin url with the modifier code to import.',
 	},
 };

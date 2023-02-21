@@ -1,4 +1,4 @@
-export const CharacterCommandLang = {
+export default {
 	// MAIN COMMAND INFO
 	name: 'character',
 	description: 'Character management',
@@ -159,20 +159,5 @@ export const CharacterCommandLang = {
 		interactions: {
 			success: `Yip! I've successfully updated {characterName}!`,
 		},
-	},
-};
-
-export const CharacterCommandOptionsLang = {
-	wgUrl: {
-		name: 'url',
-		description: "The url of your wanderer's guide character.",
-	},
-	name: {
-		name: 'name',
-		description: "The name of your wanderer's guide character.",
-	},
-	id: {
-		name: 'character_id',
-		description: `The id of your wanderer's guide character.`,
 	},
 };

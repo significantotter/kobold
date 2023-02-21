@@ -1,4 +1,4 @@
-export const UtilsLang = {
+export default {
 	dice: {
 		rolledDice: 'rolled some dice!',
 		rolledAction: 'rolled {actionName}',

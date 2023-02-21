@@ -1,4 +1,4 @@
-export const RollCommandLang = {
+export default {
 	name: 'roll',
 	description: 'Roll Dice',
 	interactions: {
@@ -88,73 +88,5 @@ export const RollCommandLang = {
 				damage: 'Damage',
 			},
 		},
-	},
-};
-
-export const RollCommandOptionsLang = {
-	saveChoice: {
-		name: 'save',
-		description: 'The save to roll.',
-	},
-	skillChoice: {
-		name: 'skill',
-		description: 'The skill to roll.',
-		overwrites: {
-			initJoinDescription: 'The skill to use for initiative instead of perception.',
-		},
-	},
-	abilityChoice: {
-		name: 'ability',
-		description: 'The ability to roll.',
-	},
-	attackChoice: {
-		name: 'attack',
-		description: 'The attack to roll.',
-	},
-	rollExpression: {
-		name: 'dice',
-		description: 'The dice expression to roll. Similar to Roll20 dice rolls.',
-		overwrites: {
-			initAddDescription: 'Dice to roll to join initiative.',
-			initJoinDescription:
-				'Dice to roll to join initiative. ' + 'Modifies your skill if you chose a skill.',
-		},
-	},
-	rollSecret: {
-		name: 'secret',
-		description: 'Whether to send the roll in a hidden, temporary message.',
-		choices: {
-			public: {
-				name: 'public',
-				value: 'public',
-				description: 'A public roll.',
-			},
-			secret: {
-				name: 'secret',
-				value: 'secret',
-				description: 'A temporary, hidden roll viewable only to you.',
-			},
-			secretAndNotify: {
-				name: 'secret-and-notify',
-				value: 'secret-and-notify',
-				description: 'A secret roll that still notifies the channel that a roll was made.',
-			},
-		},
-	},
-	rollModifier: {
-		name: 'modifier',
-		description: 'A dice expression to modify your roll. (e.g. "+ 1 + 1d4")',
-	},
-	attackRollModifier: {
-		name: 'attack_modifier',
-		description: 'A dice expression to modify your attack roll. (e.g. "+ 1 + 1d4")',
-	},
-	damageRollModifier: {
-		name: 'damage_modifier',
-		description: 'A dice expression to modify your damage roll. (e.g. "+ 1 + 1d4")',
-	},
-	rollNote: {
-		name: 'note',
-		description: 'A note about the reason for the roll.',
 	},
 };
