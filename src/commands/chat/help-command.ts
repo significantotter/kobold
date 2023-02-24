@@ -218,7 +218,8 @@ export class HelpCommand implements Command {
 						value:
 							`\`/${LL.commands.game.name()} ${LL.commands.game.manage.name()}\` ${LL.commands.game.manage.description()}\n` +
 							`\`/${LL.commands.game.name()} ${LL.commands.game.roll.name()}\` ${LL.commands.game.roll.description()}\n` +
-							`\`/${LL.commands.game.name()} ${LL.commands.game.init.name()}\` ${LL.commands.game.init.description()}\n`,
+							`\`/${LL.commands.game.name()} ${LL.commands.game.init.name()}\` ${LL.commands.game.init.description()}\n` +
+							`\`/${LL.commands.game.name()} ${LL.commands.game.list.name()}\` ${LL.commands.game.list.description()}\n`,
 					},
 				]);
 				break;
@@ -306,6 +307,7 @@ export class HelpCommand implements Command {
 						LL.commands.game.manage.name(),
 						LL.commands.game.roll.name(),
 						LL.commands.game.init.name(),
+						LL.commands.game.list.name(),
 					].map(command =>
 						createCommandOperationHelpField(LL.commands.game.name(), command, LL)
 					)
