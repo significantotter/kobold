@@ -1,12 +1,20 @@
-export const refs = {
-	bot: {
-		name: 'Kobold',
-		author: 'Significantotter',
-	},
-	emojis: {
-		yes: '✅',
-		no: '❌',
-	},
+const links = {
+	thumbnail: 'https://i.imgur.com/cVOfw8P.png',
+	docs: 'https://top.gg/bot/909138081163137094',
+	donate: 'https://ko-fi.com/significantotter',
+	invite: 'https://discord.com/oauth2/authorize?client_id=909138081163137094&scope=bot&permissions=532643576896',
+	source: 'https://github.com/significantotter/kobold',
+	support: 'https://discord.gg/6bS2GM59uj',
+	template: 'https://github.com/KevinNovak/Discord-Bot-TypeScript-Template',
+	vote: 'https://top.gg/bot/909138081163137094',
+};
+const bot = {
+	name: 'Kobold',
+	author: 'SignificantOtter#3403',
+};
+
+export let refs = {
+	bot: { ...bot },
 	colors: {
 		default: '#0099ff',
 		success: '#00ff83',
@@ -14,18 +22,20 @@ export const refs = {
 		error: '#ff4a4a',
 	},
 	links: {
-		author: 'https://github.com/significantotter',
-		docs: 'https://top.gg/',
-		donate: 'https://ko-fi.com/significantotter',
-		invite: 'https://discord.com/',
-		source: 'https://github.com/significantotter/kobold',
-		support: 'https://discord.gg/6bS2GM59uj',
-		template: '',
-		vote: 'https://top.gg/',
+		...links,
+		embed: {
+			donate: `[Support Kobold's development through ko-fi](${links.donate})`,
+			invite: `[Invite Kobold to a Discord Server](${links.invite})`,
+			source: `[Follow Kobold's development on Github](${links.source})`,
+			support: `[Join Kobold's Support Server on Discord](${links.support})`,
+			template: `[Built with Kevin Novak's Discord Bot TypeScript Template](${links.template})`,
+			vote: `[Vote for Kobold!](${links.vote})`,
+			wanderersGuide: `[Wanderer's Guide](https://wanderersguide.app)`,
+		},
 	},
 };
 export const embedLinks = {
-	authorEmbed: `[${refs.bot.author}]${refs.links.author})`,
+	authorEmbed: `[${refs.bot.author}]${refs.links.source})`,
 	docsEmbed: `[View Documentation]${refs.links.docs})`,
 	donateEmbed: `[Help support ${refs.bot.name}'s development!]${refs.links.donate})`,
 	inviteEmbed: `[Invite ${refs.bot.name} to a Server!]${refs.links.invite})`,

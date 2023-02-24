@@ -102,101 +102,21 @@ export class InitJoinSubCommand implements Command {
 		const skillChoice = intr.options.getString(ChatArgs.SKILL_CHOICE_OPTION.name);
 		const diceExpression = intr.options.getString(ChatArgs.ROLL_EXPRESSION_OPTION.name);
 
-		let finalInitiative = 0;
-		let rollResultMessage: EmbedBuilder;
-		if (initiativeValue) {
-			finalInitiative = initiativeValue;
-			rollResultMessage = new KoboldEmbed()
-				.setTitle(
-					LL.commands.init.join.interactions.joinedEmbed.title({
-						characterName: activeCharacter.characterData.name,
-					})
-				)
-				.setDescription(
-					LL.commands.init.join.interactions.joinedEmbed.setDescription({
-						initValue: finalInitiative,
-					})
-				);
-			if (activeCharacter.characterData.infoJSON?.imageURL) {
-				rollResultMessage.setThumbnail(activeCharacter.characterData.infoJSON?.imageURL);
-			}
-		} else if (skillChoice) {
-			const response = await DiceUtils.rollSkill({
-				intr,
-				activeCharacter,
-				skillChoice,
-				modifierExpression: diceExpression,
-				tags: ['initiative'],
-				LL,
-			});
-			finalInitiative = response.rollResults[0]?.results?.total || 0;
-			rollResultMessage = response.compileEmbed();
-		} else if (diceExpression) {
-			const rollBuilder = new RollBuilder({
-				character: activeCharacter,
-				rollDescription: LL.commands.init.join.interactions.joinedEmbed.rollDescription(),
-				LL,
-			});
-			rollBuilder.addRoll({
-				rollExpression: diceExpression,
-				tags: ['skill', 'perception', 'initiative'],
-			});
-			finalInitiative = rollBuilder.rollResults[0]?.results?.total || 0;
-			rollResultMessage = rollBuilder.compileEmbed();
-		} else {
-			const response = await DiceUtils.rollSkill({
-				intr,
-				activeCharacter,
-				skillChoice: 'Perception',
-				modifierExpression: diceExpression,
-				tags: ['initiative'],
-			});
-			finalInitiative = response.rollResults[0]?.results?.total || 0;
-			rollResultMessage = response.compileEmbed();
-		}
-
-		rollResultMessage.addFields([
-			{
-				name: LL.commands.init.join.interactions.joinedEmbed.roundField.name(),
-				value: LL.commands.init.join.interactions.joinedEmbed.roundField.value({
-					currentRound: currentInit.currentRound,
-				}),
-			},
-		]);
-
-		let nameCount = 1;
-		let existingName = currentInit.actors.find(
-			actor => actor.name.toLowerCase() === activeCharacter.characterData.name.toLowerCase()
-		);
-		let uniqueName = activeCharacter.characterData.name;
-		if (existingName) {
-			while (
-				currentInit.actors.find(
-					actor => actor.name.toLowerCase() === uniqueName.toLowerCase()
-				)
-			) {
-				uniqueName = activeCharacter.characterData.name + `-${nameCount++}`;
-			}
-		}
-
-		const newActor = await InitiativeActor.query().insertGraphAndFetch({
-			initiativeId: currentInit.id,
-			name: uniqueName,
-			characterId: activeCharacter.id,
+		const rollResultMessage = await InitiativeUtils.addCharacterToInitiative({
+			character: activeCharacter,
+			currentInit,
+			initiativeValue,
+			skillChoice,
+			diceExpression,
+			userName: intr.user.username,
 			userId: intr.user.id,
-
-			actorGroup: {
-				initiativeId: currentInit.id,
-				userId: intr.user.id,
-				name: uniqueName,
-				initiativeResult: finalInitiative,
-			},
+			LL,
 		});
 
 		const initBuilder = new InitiativeBuilder({
 			initiative: currentInit,
-			actors: currentInit.actors.concat(newActor),
-			groups: currentInit.actorGroups.concat(newActor.actorGroup),
+			actors: currentInit.actors,
+			groups: currentInit.actorGroups,
 			LL,
 		});
 		await InteractionUtils.send(intr, rollResultMessage);

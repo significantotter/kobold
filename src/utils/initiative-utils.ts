@@ -5,12 +5,21 @@ import {
 	Initiative,
 	Character,
 } from './../services/kobold/models/index.js';
-import { CommandInteraction, GuildTextBasedChannel, Message, EmbedBuilder, User } from 'discord.js';
+import {
+	CommandInteraction,
+	GuildTextBasedChannel,
+	Message,
+	EmbedBuilder,
+	User,
+	CacheType,
+	ChatInputCommandInteraction,
+} from 'discord.js';
 import { KoboldEmbed } from './kobold-embed-utils.js';
 import _ from 'lodash';
 import { InteractionUtils } from './interaction-utils.js';
 import { CharacterUtils } from './character-utils.js';
 import { Language } from '../models/enum-helpers/index.js';
+import { DiceUtils, RollBuilder } from './dice-utils.js';
 
 export class InitiativeBuilder {
 	public init: Initiative;
@@ -225,6 +234,126 @@ interface LowerNamedThing {
 }
 
 export class InitiativeUtils {
+	/**
+	 * adds a character to initiative.
+	 * @returns A kobold embed message with a roll result message for the initiative join operation
+	 */
+	public static async addCharacterToInitiative({
+		character,
+		currentInit,
+		skillChoice,
+		diceExpression,
+		initiativeValue,
+		userName,
+		userId,
+		LL,
+	}: {
+		character: Character;
+		currentInit: Initiative;
+		skillChoice?: string;
+		diceExpression: string;
+		initiativeValue?: number;
+		userName: string;
+		userId: string;
+		LL: TranslationFunctions;
+	}): Promise<KoboldEmbed> {
+		let finalInitiative = 0;
+		let rollResultMessage: KoboldEmbed;
+		if (initiativeValue) {
+			finalInitiative = initiativeValue;
+			rollResultMessage = new KoboldEmbed()
+				.setTitle(
+					LL.commands.init.join.interactions.joinedEmbed.title({
+						characterName: character.characterData.name,
+					})
+				)
+				.setDescription(
+					LL.commands.init.join.interactions.joinedEmbed.setDescription({
+						initValue: finalInitiative,
+					})
+				);
+			if (character.characterData.infoJSON?.imageURL) {
+				rollResultMessage.setThumbnail(character.characterData.infoJSON?.imageURL);
+			}
+		} else if (skillChoice) {
+			const response = await DiceUtils.rollSkill({
+				userName,
+				activeCharacter: character,
+				skillChoice,
+				modifierExpression: diceExpression,
+				tags: ['initiative'],
+				LL,
+			});
+			finalInitiative = response.rollResults[0]?.results?.total || 0;
+			rollResultMessage = response.compileEmbed();
+		} else if (diceExpression) {
+			const rollBuilder = new RollBuilder({
+				character: character,
+				rollDescription: LL.commands.init.join.interactions.joinedEmbed.rollDescription(),
+				LL,
+			});
+			rollBuilder.addRoll({
+				rollExpression: diceExpression,
+				tags: ['initiative'],
+			});
+			finalInitiative = rollBuilder.rollResults[0]?.results?.total || 0;
+			rollResultMessage = rollBuilder.compileEmbed();
+		} else {
+			const response = await DiceUtils.rollSkill({
+				userName,
+				activeCharacter: character,
+				skillChoice: 'Perception',
+				modifierExpression: diceExpression,
+				tags: ['initiative'],
+			});
+			finalInitiative = response.rollResults[0]?.results?.total || 0;
+			rollResultMessage = response.compileEmbed();
+		}
+
+		rollResultMessage.addFields([
+			{
+				name: LL.commands.init.join.interactions.joinedEmbed.roundField.name(),
+				value: LL.commands.init.join.interactions.joinedEmbed.roundField.value({
+					currentRound: currentInit.currentRound,
+				}),
+			},
+		]);
+
+		let nameCount = 1;
+		let existingName = currentInit.actors.find(
+			actor => actor.name.toLowerCase() === character.characterData.name.toLowerCase()
+		);
+		let uniqueName = character.characterData.name;
+		if (existingName) {
+			while (
+				currentInit.actors.find(
+					actor => actor.name.toLowerCase() === uniqueName.toLowerCase()
+				)
+			) {
+				uniqueName = character.characterData.name + `-${nameCount++}`;
+			}
+		}
+
+		const newActor = await InitiativeActor.query().insertGraphAndFetch({
+			initiativeId: currentInit.id,
+			name: uniqueName,
+			characterId: character.id,
+			userId,
+
+			actorGroup: {
+				initiativeId: currentInit.id,
+				userId,
+				name: uniqueName,
+				initiativeResult: finalInitiative,
+			},
+		});
+
+		currentInit.actors = currentInit.actors.concat(newActor);
+		currentInit.actorGroups = currentInit.actorGroups.concat(newActor.actorGroup);
+
+		return rollResultMessage;
+	}
+
 	public static async getInitiativeForChannel(
 		channel: GuildTextBasedChannel,
 		options = { sendErrors: true, LL: Language.LL }

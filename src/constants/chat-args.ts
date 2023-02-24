@@ -33,7 +33,6 @@ export class ChatArgs {
 	public static readonly ROLL_SECRET_OPTION: APIApplicationCommandBasicOption = {
 		name: Language.LL.commandOptions.rollSecret.name(),
 		description: Language.LL.commandOptions.rollSecret.description(),
-		required: true,
 		type: ApplicationCommandOptionType.String,
 		choices: [
 			{

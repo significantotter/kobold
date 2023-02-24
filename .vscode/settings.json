@@ -44,8 +44,9 @@
 	"editor.inlineSuggest.enabled": true,
 	"i18n-ally.displayLanguage": "en",
 	"i18n-ally.annotationMaxLength": 9999999,
-	"i18n-ally.pathMatcher": "{locale}/index.{ext}",
+	"i18n-ally.pathMatcher": "{locale}/{namespaces}.{ext}",
 	"i18n-ally.enabledParsers": ["ts", "js"],
 	"i18n-ally.keystyle": "nested",
-	"i18n-ally.localesPaths": ["src/i18n/"]
+	"i18n-ally.localesPaths": ["src/i18n", "coverage/lcov-report/i18n"],
+	"i18n-ally.namespace": true
 }

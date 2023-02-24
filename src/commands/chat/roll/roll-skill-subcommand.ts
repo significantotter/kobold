@@ -88,7 +88,7 @@ export class RollSkillSubCommand implements Command {
 			return;
 		}
 		const response = await DiceUtils.rollSkill({
-			intr,
+			userName: intr.user.username,
 			activeCharacter,
 			skillChoice,
 			rollNote,

@@ -71,9 +71,10 @@ export class RollBuilder {
 			attributeObject =>
 				attributeObject.name.replace(trimRegex, '').toLowerCase() === attributeName
 		);
-		if (customAttribute?.value) {
+
+		if (customAttribute?.value !== undefined) {
 			return [customAttribute.value, customAttribute.tags];
-		} else if (attribute?.value) {
+		} else if (attribute?.value !== undefined) {
 			return [attribute.value, attribute.tags];
 		} else {
 			return [staticAttribute.value, []];
@@ -232,7 +233,7 @@ export class DiceUtils {
 	}
 
 	public static rollSkill({
-		intr,
+		userName,
 		activeCharacter,
 		skillChoice,
 		rollNote,
@@ -241,7 +242,7 @@ export class DiceUtils {
 		tags,
 		LL,
 	}: {
-		intr: CommandInteraction;
+		userName: string;
 		activeCharacter: Character;
 		skillChoice: string;
 		rollNote?: string;
@@ -268,7 +269,7 @@ export class DiceUtils {
 		let skillTags = targetSkillAttribute?.tags || ['skill', skillChoice.toLocaleLowerCase()];
 
 		const rollBuilder = new RollBuilder({
-			actorName: intr.user.username,
+			actorName: userName,
 			character: activeCharacter,
 			rollNote,
 			rollDescription: LL.utils.dice.rolledAction({
