@@ -71,6 +71,12 @@ export class GameCommand implements Command {
 					ChatArgs.ROLL_SECRET_OPTION,
 				],
 			},
+			{
+				name: Language.LL.commands.game.list.name(),
+				description: Language.LL.commands.game.list.description(),
+				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				options: [],
+			},
 		],
 	};
 	public cooldown = new RateLimiter(1, 5000);

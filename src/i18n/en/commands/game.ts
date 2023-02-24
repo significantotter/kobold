@@ -57,4 +57,14 @@ export default {
 			'**[*secret*] optional**: Choose to either leave the roll public (default), hide the roll entirely, or ' +
 			'hide the roll, but publicly notify the channel that a roll has been made.',
 	},
+	list: {
+		name: 'list',
+		description: 'Lists all of the games you have in this server.',
+		interactions: {
+			gameListEmbed: {
+				title: 'Games in this server',
+				noCharacters: 'No characters added.',
+			},
+		},
+	},
 };
