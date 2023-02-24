@@ -23,6 +23,7 @@ import _ from 'lodash';
 import { GameOptions } from './game-command-options.js';
 import { Character } from '../../../services/kobold/models/index.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
+import { WG } from '../../../services/wanderers-guide/wanderers-guide.js';
 
 export class GameRollSubCommand implements Command {
 	public names = [Language.LL.commands.game.roll.name()];
@@ -135,7 +136,15 @@ export class GameRollSubCommand implements Command {
 			) {
 				continue;
 			}
-			const matchingSkills = character.calculatedStats.totalSkills.filter(
+			const skillsPlusPerception = [
+				...character.calculatedStats.totalSkills,
+				{
+					Name: 'Perception',
+					Bonus: character.calculatedStats.totalPerception,
+				},
+			] as WG.NamedBonus[];
+
+			const matchingSkills = skillsPlusPerception.filter(
 				skill => skill.Name.toLocaleLowerCase() === rollType.toLocaleLowerCase()
 			);
 			const matchingSaves = character.calculatedStats.totalSaves.filter(
