@@ -35,6 +35,11 @@ export class GameListSubCommand implements Command {
 			guildId: intr.guild.id,
 		});
 
+		if (allGames.length === 0) {
+			InteractionUtils.send(intr, Language.LL.commands.game.interactions.noGames());
+			return;
+		}
+
 		const gameListEmbed = new KoboldEmbed().setTitle(
 			LL.commands.game.list.interactions.gameListEmbed.title()
 		);

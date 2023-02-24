@@ -3,6 +3,7 @@ export default {
 	description: 'Commands for interacting with players as the GM of a game.',
 	interactions: {
 		notFound: "Yip! I couldn't find the game {gameName} in this server.",
+		noGames: 'Yip! You have no games yet on this server.',
 		activeGameNotFound:
 			"Yip! I couldn't find a game that you run in this server that you've set to active!",
 	},
@@ -62,7 +63,7 @@ export default {
 		description: 'Lists all of the games you have in this server.',
 		interactions: {
 			gameListEmbed: {
-				title: 'Games in this server',
+				title: 'Games you run in this server',
 				noCharacters: 'No characters added.',
 			},
 		},
