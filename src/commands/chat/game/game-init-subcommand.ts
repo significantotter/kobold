@@ -149,8 +149,8 @@ export class GameInitSubCommand implements Command {
 				diceExpression,
 				initiativeValue,
 				currentInit,
-				userName: intr.user.username,
-				userId: intr.user.id,
+				userName: character.characterData.name,
+				userId: character.userId,
 				LL,
 			});
 
