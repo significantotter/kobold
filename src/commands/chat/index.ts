@@ -48,6 +48,10 @@ export { GameRollSubCommand } from './game/game-roll-subcommand.js';
 export { GameInitSubCommand } from './game/game-init-subcommand.js';
 export { GameListSubCommand } from './game/game-list-subcommand.js';
 
+// action command
+export { ActionCommand } from './action/action-command.js';
+export { ActionBuilderSubCommand } from './action/action-builder-subcommand.js';
+
 // help command
 export { HelpCommand } from './help-command';
 

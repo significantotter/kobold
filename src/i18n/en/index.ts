@@ -8,6 +8,7 @@ import ModifierCommand from './commands/modifier.js';
 import RollCommand from './commands/roll.js';
 import UtilsLang from './commands/utils.js';
 import commandOptions from './commandOptions.js';
+import ActionCommand from './commands/action.js';
 
 const links = {
 	thumbnail: 'https://i.imgur.com/cVOfw8P.png',
@@ -55,6 +56,7 @@ const en: BaseTranslation = {
 	},
 	commands: {
 		admin: AdminCommand,
+		action: ActionCommand,
 		help: HelpCommand,
 		character: CharacterCommand,
 		init: InitCommand,
