@@ -75,7 +75,7 @@ export class ModifierToggleSubCommand implements Command {
 			.trim()
 			.toLowerCase();
 
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id);
+		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id, intr.guildId);
 		if (!activeCharacter) {
 			await InteractionUtils.send(
 				intr,
