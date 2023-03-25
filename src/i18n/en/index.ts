@@ -9,6 +9,7 @@ import RollCommand from './commands/roll.js';
 import UtilsLang from './commands/utils.js';
 import commandOptions from './commandOptions.js';
 import ActionCommand from './commands/action.js';
+import SharedInteractions from './sharedInteractions.js';
 
 const links = {
 	thumbnail: 'https://i.imgur.com/cVOfw8P.png',
@@ -51,9 +52,7 @@ const en: BaseTranslation = {
 	terms: {
 		perception: 'Perception',
 	},
-	sharedInteractions: {
-		choiceRegistered: 'You chose {choice}.',
-	},
+	sharedInteractions: SharedInteractions,
 	commands: {
 		admin: AdminCommand,
 		action: ActionCommand,

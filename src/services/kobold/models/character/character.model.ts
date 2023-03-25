@@ -38,6 +38,17 @@ export class Character extends BaseModel {
 	}
 
 	/**
+	 * Fetches a character's action by the action name
+	 * @param name the name of the action
+	 * @returns the action
+	 */
+	public getActionByName(name: string): Character['actions'][0] | null {
+		return this.actions.find(
+			action => action.name.toLocaleLowerCase().trim() === name.toLocaleLowerCase().trim()
+		);
+	}
+
+	/**
 	 * Gets a list of the applicable modifiers for any set of tags
 	 * @param tags the tags to check against a character's modifiers
 	 * @returns modifier[]

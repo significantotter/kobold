@@ -98,6 +98,7 @@ export class ModifierCreateSubCommand implements Command {
 			],
 		});
 
+		//send a response
 		await InteractionUtils.send(
 			intr,
 			LL.commands.modifier.create.interactions.created({
@@ -105,8 +106,6 @@ export class ModifierCreateSubCommand implements Command {
 				characterName: activeCharacter.characterData.name,
 			})
 		);
-		return;
-		//send a response
 		return;
 	}
 }

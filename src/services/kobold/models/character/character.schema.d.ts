@@ -56,7 +56,19 @@ export interface Character {
 	/**
 	 * An array of default actions set up for the user. These allow the user to make certain roll operations as a single command.
 	 */
-	actions?: any[];
+	actions?: {
+		name?: string;
+		description?: string;
+		rolls?: {
+			name?: string;
+			type?: string;
+			diceRoll?: string;
+			canCrit?: boolean;
+			tags?: string[];
+			[k: string]: any;
+		}[];
+		[k: string]: any;
+	}[];
 	/**
 	 * An array of customizable actions set up for the user. These allow the user to make certain roll operations as a single command.
 	 */

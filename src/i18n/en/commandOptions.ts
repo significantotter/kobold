@@ -1,4 +1,60 @@
 export default {
+	// ACTION
+	actionName: {
+		name: 'name',
+		description: 'The name of the action.',
+	},
+	actionDescription: {
+		name: 'description',
+		description: 'The description of the action.',
+	},
+	actionTarget: {
+		name: 'action',
+		description: 'The target action.',
+	},
+	actionRollTarget: {
+		name: 'targetRoll',
+		description: 'The target roll.',
+	},
+	actionRollName: {
+		name: 'rollName',
+		description: 'The name of the roll.',
+	},
+	actionDiceRoll: {
+		name: 'diceRoll',
+		description: 'The dice rolled for the action.',
+	},
+	actionRollTags: {
+		name: 'tags',
+		description: 'the tags used to describe the roll.',
+	},
+	actionImportUrl: {
+		name: 'url',
+		description: 'The url to import from',
+	},
+	actionImportMode: {
+		name: 'mode',
+		description: 'The import mode to use.',
+		choices: {
+			fullyReplace: {
+				name: 'overwrite-all',
+				value: 'overwrite-all',
+			},
+			overwrite: {
+				name: 'overwrite-on-conflict',
+				value: 'overwrite-on-conflict',
+			},
+			renameOnConflict: {
+				name: 'rename-on-conflict',
+				value: 'rename-on-conflict',
+			},
+			ignoreOnConflict: {
+				name: 'ignore-on-conflict',
+				value: 'ignore-on-conflict',
+			},
+		},
+	},
+
 	// CHARACTER
 
 	wgUrl: {

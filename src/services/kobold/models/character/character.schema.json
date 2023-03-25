@@ -81,7 +81,27 @@
 		},
 		"actions": {
 			"type": "array",
-			"description": "An array of default actions set up for the user. These allow the user to make certain roll operations as a single command."
+			"description": "An array of default actions set up for the user. These allow the user to make certain roll operations as a single command.",
+			"items": {
+				"type": "object",
+				"properties": {
+					"name": { "type": "string" },
+					"description": { "type": "string" },
+					"rolls": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"properties": {
+								"name": { "type": "string" },
+								"type": { "type": "string" },
+								"diceRoll": { "type": "string" },
+								"canCrit": { "type": "boolean" },
+								"tags": { "type": "array", "items": { "type": "string" } }
+							}
+						}
+					}
+				}
+			}
 		},
 		"customActions": {
 			"type": "array",

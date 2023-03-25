@@ -121,6 +121,25 @@ export class CharacterUtils {
 	}
 
 	/**
+	 * Given a string, finds all actions containing that string on a given character
+	 * @param targetCharacter the character to check for matching actions
+	 * @param actionText the text to match to actions
+	 * @returns all actions that contain the given actionText
+	 */
+	public static findPossibleActionFromString(
+		targetCharacter: Character,
+		actionText: string
+	): Character['actions'] {
+		const matchedActions = [];
+		for (const action of targetCharacter.actions || []) {
+			if (action.name.toLowerCase().includes(actionText.toLowerCase())) {
+				matchedActions.push(action);
+			}
+		}
+		return matchedActions;
+	}
+
+	/**
 	 * Given a string, finds all ability scores containing that string on a given character
 	 * @param targetCharacter the character to check for matching ability scores
 	 * @param abilityText the text to match to ability scores

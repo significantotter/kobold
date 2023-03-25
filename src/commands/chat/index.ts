@@ -50,7 +50,13 @@ export { GameListSubCommand } from './game/game-list-subcommand.js';
 
 // action command
 export { ActionCommand } from './action/action-command.js';
-export { ActionBuilderSubCommand } from './action/action-builder-subcommand.js';
+export { ActionListSubCommand } from './action/action-list-subcommand.js';
+export { ActionCreateSubCommand } from './action/action-create-subcommand.js';
+export { ActionRemoveSubCommand } from './action/action-remove-subcommand.js';
+export { ActionAddRollSubCommand } from './action/action-add-roll-subcommand.js';
+export { ActionRemoveRollSubCommand } from './action/action-remove-roll-subcommand.js';
+export { ActionImportSubCommand } from './action/action-import-subcommand.js';
+export { ActionExportSubCommand } from './action/action-export-subcommand.js';
 
 // help command
 export { HelpCommand } from './help-command';

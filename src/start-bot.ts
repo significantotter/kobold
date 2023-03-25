@@ -51,7 +51,13 @@ import {
 	GameListSubCommand,
 	// action
 	ActionCommand,
-	ActionBuilderSubCommand,
+	ActionListSubCommand,
+	ActionCreateSubCommand,
+	ActionRemoveSubCommand,
+	ActionAddRollSubCommand,
+	ActionRemoveRollSubCommand,
+	ActionImportSubCommand,
+	ActionExportSubCommand,
 	// help
 	HelpCommand,
 	// admin
@@ -155,7 +161,15 @@ async function start(): Promise<void> {
 		]),
 
 		// Action commands
-		new ActionCommand([new ActionBuilderSubCommand()]),
+		new ActionCommand([
+			new ActionListSubCommand(),
+			new ActionCreateSubCommand(),
+			new ActionRemoveSubCommand(),
+			new ActionAddRollSubCommand(),
+			new ActionRemoveRollSubCommand(),
+			new ActionImportSubCommand(),
+			new ActionExportSubCommand(),
+		]),
 	];
 
 	// Buttons
