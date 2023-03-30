@@ -32,6 +32,7 @@ export class Language {
 		hr: { englishName: 'Croatian', nativeName: 'Hrvatski' },
 		hu: { englishName: 'Hungarian', nativeName: 'Magyar' },
 		it: { englishName: 'Italian', nativeName: 'Italiano' },
+		id: { englishName: 'Indonesian', nativeName: 'Bahasa Indonesia' },
 		ja: { englishName: 'Japanese', nativeName: '日本語' },
 		ko: { englishName: 'Korean', nativeName: '한국어' },
 		lt: { englishName: 'Lithuanian', nativeName: 'Lietuviškai' },
