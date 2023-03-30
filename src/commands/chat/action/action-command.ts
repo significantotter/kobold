@@ -40,46 +40,50 @@ export class ActionCommand implements Command {
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
 				options: [
 					ActionOptions.ACTION_NAME_OPTION,
+					ActionOptions.ACTION_TYPE_OPTION,
+					ActionOptions.ACTION_ACTIONS_OPTION,
 					ActionOptions.ACTION_DESCRIPTION_OPTION,
+					ActionOptions.ACTION_BASE_LEVEL_OPTION,
+					ActionOptions.ACTION_AUTO_HEIGHTEN_OPTION,
 				],
 			},
 			{
 				name: Language.LL.commands.action.remove.name(),
 				description: Language.LL.commands.action.remove.description(),
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
-				options: [ActionOptions.ACTION_TARGET_OPTION],
+				options: [{ ...ActionOptions.ACTION_TARGET_OPTION, autocomplete: true }],
 			},
-			{
-				name: Language.LL.commands.action.addRoll.name(),
-				description: Language.LL.commands.action.addRoll.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
-				options: [
-					ActionOptions.ACTION_TARGET_OPTION,
-					ActionOptions.ACTION_DICE_ROLL_OPTION,
-					ActionOptions.ACTION_ROLL_TAGS_OPTION,
-				],
-			},
-			{
-				name: Language.LL.commands.action.removeRoll.name(),
-				description: Language.LL.commands.action.removeRoll.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
-				options: [ActionOptions.ACTION_ROLL_TARGET_OPTION],
-			},
-			{
-				name: Language.LL.commands.action.import.name(),
-				description: Language.LL.commands.action.import.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
-				options: [
-					ActionOptions.ACTION_IMPORT_URL_OPTION,
-					ActionOptions.ACTION_IMPORT_MODE_OPTION,
-				],
-			},
-			{
-				name: Language.LL.commands.action.export.name(),
-				description: Language.LL.commands.action.export.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
-				options: [],
-			},
+			// {
+			// 	name: Language.LL.commands.action.addRoll.name(),
+			// 	description: Language.LL.commands.action.addRoll.description(),
+			// 	type: ApplicationCommandOptionType.Subcommand.valueOf(),
+			// 	options: [
+			// 		ActionOptions.ACTION_TARGET_OPTION,
+			// 		ActionOptions.ACTION_DICE_ROLL_OPTION,
+			// 		ActionOptions.ACTION_ROLL_TAGS_OPTION,
+			// 	],
+			// },
+			// {
+			// 	name: Language.LL.commands.action.removeRoll.name(),
+			// 	description: Language.LL.commands.action.removeRoll.description(),
+			// 	type: ApplicationCommandOptionType.Subcommand.valueOf(),
+			// 	options: [ActionOptions.ACTION_ROLL_TARGET_OPTION],
+			// },
+			// {
+			// 	name: Language.LL.commands.action.import.name(),
+			// 	description: Language.LL.commands.action.import.description(),
+			// 	type: ApplicationCommandOptionType.Subcommand.valueOf(),
+			// 	options: [
+			// 		ActionOptions.ACTION_IMPORT_URL_OPTION,
+			// 		ActionOptions.ACTION_IMPORT_MODE_OPTION,
+			// 	],
+			// },
+			// {
+			// 	name: Language.LL.commands.action.export.name(),
+			// 	description: Language.LL.commands.action.export.description(),
+			// 	type: ApplicationCommandOptionType.Subcommand.valueOf(),
+			// 	options: [],
+			// },
 		],
 	};
 	public cooldown = new RateLimiter(1, 5000);

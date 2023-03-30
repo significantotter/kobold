@@ -87,6 +87,9 @@
 				"properties": {
 					"name": { "type": "string" },
 					"description": { "type": "string" },
+					"type": { "type": "string" },
+					"baseSpellLevel": { "type": ["number", "null"] },
+					"autoHeighten": { "type": ["number", "null"] },
 					"rolls": {
 						"type": "array",
 						"items": {
@@ -94,8 +97,9 @@
 							"properties": {
 								"name": { "type": "string" },
 								"type": { "type": "string" },
-								"diceRoll": { "type": "string" },
-								"canCrit": { "type": "boolean" },
+								"targets": { "type": ["string", "null"] },
+								"diceRoll": { "type": ["string", "null"] },
+								"canCrit": { "type": ["boolean", "null"] },
 								"tags": { "type": "array", "items": { "type": "string" } }
 							}
 						}

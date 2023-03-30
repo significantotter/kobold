@@ -59,11 +59,15 @@ export interface Character {
 	actions?: {
 		name?: string;
 		description?: string;
+		type?: string;
+		baseSpellLevel?: number | null;
+		autoHeighten?: number | null;
 		rolls?: {
 			name?: string;
 			type?: string;
-			diceRoll?: string;
-			canCrit?: boolean;
+			targets?: string | null;
+			diceRoll?: string | null;
+			canCrit?: boolean | null;
 			tags?: string[];
 			[k: string]: any;
 		}[];

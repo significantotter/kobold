@@ -8,20 +8,77 @@ export default {
 		name: 'description',
 		description: 'The description of the action.',
 	},
+	actionType: {
+		name: 'action-type',
+		description: 'The type of action.',
+		choices: {
+			attack: {
+				name: 'attack',
+				value: 'attack',
+			},
+			spell: {
+				name: 'spell',
+				value: 'spell',
+			},
+			other: {
+				name: 'other',
+				value: 'other',
+			},
+		},
+	},
 	actionTarget: {
 		name: 'action',
 		description: 'The target action.',
 	},
+	actionActions: {
+		name: 'actions',
+		description: 'The number of actions used.',
+		choices: {
+			reaction: {
+				name: 'reaction',
+				value: 'reaction',
+			},
+			free: {
+				name: 'free',
+				value: 'free',
+			},
+			one: {
+				name: 'one',
+				value: 'one',
+			},
+			two: {
+				name: 'two',
+				value: 'two',
+			},
+			three: {
+				name: 'three',
+				value: 'three',
+			},
+			variable: {
+				name: 'variable',
+				value: 'variable',
+			},
+		},
+	},
+	actionBaseLevel: {
+		name: 'base-level',
+		description:
+			'The default (and minimum) level of the action. Access this value in a roll with [actionLevel].',
+	},
+	actionAutoHeighten: {
+		name: 'auto-heighten',
+		description: "Whether to default [actionLevel] to half the character's level rounded up.",
+	},
 	actionRollTarget: {
-		name: 'targetRoll',
+		name: 'target-roll',
 		description: 'The target roll.',
 	},
 	actionRollName: {
-		name: 'rollName',
+		name: 'roll-name',
 		description: 'The name of the roll.',
 	},
 	actionDiceRoll: {
-		name: 'diceRoll',
+		name: 'dice-roll',
 		description: 'The dice rolled for the action.',
 	},
 	actionRollTags: {

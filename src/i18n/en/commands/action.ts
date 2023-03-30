@@ -13,6 +13,10 @@ export default {
 			alreadyExists: 'Yip! A action named {actionName} already exists for {characterName}.',
 		},
 	},
+	createSpell: {
+		name: 'create-spell',
+		description: 'Creates a spell action with spell-specific properties.',
+	},
 	remove: {
 		name: 'remove',
 		description: 'Removes an action',
@@ -30,6 +34,10 @@ export default {
 	addRoll: {
 		name: 'add-roll',
 		description: 'Adds a roll to an action',
+	},
+	addSave: {
+		name: 'add-save',
+		description: 'Adds a saving throw to an action',
 	},
 	removeRoll: {
 		name: 'remove-roll',

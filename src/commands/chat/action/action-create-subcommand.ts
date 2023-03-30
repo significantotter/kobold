@@ -45,6 +45,7 @@ export class ActionCreateSubCommand implements Command {
 			.trim()
 			.toLowerCase();
 		const description = intr.options.getString(ActionOptions.ACTION_DESCRIPTION_OPTION.name);
+		const type = intr.options.getString(ActionOptions.ACTION_TYPE_OPTION.name);
 
 		// make sure the name does't already exist in the character's actions
 		if (activeCharacter.getActionByName(name)) {
@@ -64,6 +65,7 @@ export class ActionCreateSubCommand implements Command {
 				{
 					name,
 					description,
+					type: type,
 					rolls: [],
 				},
 			],

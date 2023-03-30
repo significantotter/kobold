@@ -14,6 +14,70 @@ export class ActionOptions {
 		required: true,
 		type: ApplicationCommandOptionType.String,
 	};
+	public static readonly ACTION_TYPE_OPTION: APIApplicationCommandBasicOption = {
+		name: Language.LL.commandOptions.actionType.name(),
+		description: Language.LL.commandOptions.actionType.description(),
+		required: true,
+		choices: [
+			{
+				name: Language.LL.commandOptions.actionType.choices.attack.name(),
+				value: Language.LL.commandOptions.actionType.choices.attack.value(),
+			},
+			{
+				name: Language.LL.commandOptions.actionType.choices.spell.name(),
+				value: Language.LL.commandOptions.actionType.choices.spell.value(),
+			},
+			{
+				name: Language.LL.commandOptions.actionType.choices.other.name(),
+				value: Language.LL.commandOptions.actionType.choices.other.value(),
+			},
+		],
+		type: ApplicationCommandOptionType.String,
+	};
+	public static readonly ACTION_ACTIONS_OPTION: APIApplicationCommandBasicOption = {
+		name: Language.LL.commandOptions.actionActions.name(),
+		description: Language.LL.commandOptions.actionActions.description(),
+		required: true,
+		choices: [
+			{
+				name: Language.LL.commandOptions.actionActions.choices.reaction.name(),
+				value: Language.LL.commandOptions.actionActions.choices.reaction.value(),
+			},
+			{
+				name: Language.LL.commandOptions.actionActions.choices.free.name(),
+				value: Language.LL.commandOptions.actionActions.choices.free.value(),
+			},
+			{
+				name: Language.LL.commandOptions.actionActions.choices.one.name(),
+				value: Language.LL.commandOptions.actionActions.choices.one.value(),
+			},
+			{
+				name: Language.LL.commandOptions.actionActions.choices.two.name(),
+				value: Language.LL.commandOptions.actionActions.choices.two.value(),
+			},
+			{
+				name: Language.LL.commandOptions.actionActions.choices.three.name(),
+				value: Language.LL.commandOptions.actionActions.choices.three.value(),
+			},
+			{
+				name: Language.LL.commandOptions.actionActions.choices.variable.name(),
+				value: Language.LL.commandOptions.actionActions.choices.variable.value(),
+			},
+		],
+		type: ApplicationCommandOptionType.String,
+	};
+	public static readonly ACTION_BASE_LEVEL_OPTION: APIApplicationCommandBasicOption = {
+		name: Language.LL.commandOptions.actionBaseLevel.name(),
+		description: Language.LL.commandOptions.actionBaseLevel.description(),
+		required: false,
+		type: ApplicationCommandOptionType.String,
+	};
+	public static readonly ACTION_AUTO_HEIGHTEN_OPTION: APIApplicationCommandBasicOption = {
+		name: Language.LL.commandOptions.actionAutoHeighten.name(),
+		description: Language.LL.commandOptions.actionAutoHeighten.description(),
+		required: false,
+		type: ApplicationCommandOptionType.String,
+	};
 	public static readonly ACTION_TARGET_OPTION: APIApplicationCommandBasicOption = {
 		name: Language.LL.commandOptions.actionTarget.name(),
 		description: Language.LL.commandOptions.actionTarget.description(),

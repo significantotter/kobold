@@ -40,9 +40,9 @@ export class ActionRemoveSubCommand implements Command {
 		option: AutocompleteFocusedOption
 	): Promise<ApplicationCommandOptionChoiceData[]> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === ActionOptions.ACTION_NAME_OPTION.name) {
+		if (option.name === ActionOptions.ACTION_TARGET_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(ActionOptions.ACTION_NAME_OPTION.name);
+			const match = intr.options.getString(ActionOptions.ACTION_TARGET_OPTION.name);
 
 			//get the active character
 			const activeCharacter = await CharacterUtils.getActiveCharacter(
@@ -71,7 +71,7 @@ export class ActionRemoveSubCommand implements Command {
 		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
-		const actionChoice = intr.options.getString(ActionOptions.ACTION_NAME_OPTION.name);
+		const actionChoice = intr.options.getString(ActionOptions.ACTION_TARGET_OPTION.name);
 		//get the active character
 		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id, intr.guildId);
 		const targetAction = activeCharacter.getActionByName(actionChoice);
