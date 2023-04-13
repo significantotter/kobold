@@ -98,7 +98,7 @@ describe('RollBuilder', function () {
 		});
 		rollBuilder.addRoll({ rollExpression: 'd6+1', rollTitle: 'testRoll' });
 		const result = rollBuilder.compileEmbed();
-		expect(result.data.footer.text).toBe('testing!');
+		expect(result.data.footer.text).toBe('testing!\n\n');
 	});
 	test(`allows a title that will overwrite any otherwise generated title`, function () {
 		const fakeCharacter = CharacterFactory.build();
@@ -261,6 +261,6 @@ describe('RollBuilder', function () {
 			rollExpression: '[custom]d20 + [base] - [custom]',
 			rollTitle: 'attribute roll',
 		});
-		expect(rollBuilder.rollResults[0]?.value).toBeTruthy();
+		expect(rollBuilder.getRollTotalArray()?.length).toBeTruthy();
 	});
 });

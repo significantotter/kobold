@@ -21,12 +21,12 @@ import { CharacterUtils } from '../../../utils/character-utils.js';
 import { ActionOptions } from './action-command-options.js';
 import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
 
-export class ActionAddSaveSubCommand implements Command {
-	public names = [Language.LL.commands.action.addSave.name()];
+export class ActionAddBasicDamageSubCommand implements Command {
+	public names = [Language.LL.commands.action.addBasicDamage.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.action.addSave.name(),
-		description: Language.LL.commands.action.addSave.description(),
+		name: Language.LL.commands.action.addBasicDamage.name(),
+		description: Language.LL.commands.action.addBasicDamage.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -43,12 +43,6 @@ export class ActionAddSaveSubCommand implements Command {
 			const match = intr.options.getString(ActionOptions.ACTION_TARGET_OPTION.name);
 
 			return await AutocompleteUtils.getTargetActionForActiveCharacter(intr, match);
-		} else if (option.name === ActionOptions.ACTION_SAVE_ROLL_TYPE_OPTION.name) {
-			const match = intr.options.getString(ActionOptions.ACTION_SAVE_ROLL_TYPE_OPTION.name);
-			return await AutocompleteUtils.getAllMatchingRollsForActiveCharacter(intr, match);
-		} else if (option.name === ActionOptions.ACTION_ROLL_ABILITY_DC_OPTION.name) {
-			const match = intr.options.getString(ActionOptions.ACTION_ROLL_ABILITY_DC_OPTION.name);
-			return await AutocompleteUtils.getAllMatchingRollsForActiveCharacter(intr, match);
 		}
 	}
 
@@ -58,15 +52,15 @@ export class ActionAddSaveSubCommand implements Command {
 		LL: TranslationFunctions
 	): Promise<void> {
 		const targetAction = intr.options.getString(ActionOptions.ACTION_TARGET_OPTION.name);
-		const rollType = 'save';
+		const rollType = 'damage';
 		const rollName = intr.options.getString(ActionOptions.ACTION_ROLL_NAME_OPTION.name);
-
-		const saveRollType = intr.options.getString(
-			ActionOptions.ACTION_SAVE_ROLL_TYPE_OPTION.name
+		const basicDamageDiceRoll = intr.options.getString(
+			ActionOptions.ACTION_BASIC_DAMAGE_DICE_ROLL_OPTION.name
 		);
-		const saveTargetDC = intr.options.getString(
-			ActionOptions.ACTION_ROLL_ABILITY_DC_OPTION.name
+		let allowRollModifiers = intr.options.getBoolean(
+			ActionOptions.ACTION_ROLL_ALLOW_MODIFIERS.name
 		);
+		if (allowRollModifiers === null) allowRollModifiers = true;
 
 		//get the active character
 		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id, intr.guildId);
@@ -93,10 +87,7 @@ export class ActionAddSaveSubCommand implements Command {
 			) || matchedActions[0];
 
 		if (action.rolls.find(roll => roll.name === rollName)) {
-			await InteractionUtils.send(
-				intr,
-				LL.commands.action.addSave.interactions.requireText()
-			);
+			await InteractionUtils.send(intr, LL.commands.action.interactions.rollAlreadyExists());
 			return;
 		}
 
@@ -104,8 +95,8 @@ export class ActionAddSaveSubCommand implements Command {
 		action.rolls.push({
 			name: rollName,
 			type: rollType,
-			saveRollType,
-			saveTargetDC,
+			roll: basicDamageDiceRoll,
+			allowRollModifiers,
 		});
 
 		// save the character
@@ -117,7 +108,7 @@ export class ActionAddSaveSubCommand implements Command {
 		// send the response message
 		await InteractionUtils.send(
 			intr,
-			LL.commands.action.addAttack.interactions.success({
+			LL.commands.action.addBasicDamage.interactions.success({
 				actionName: action.name,
 				rollName: rollName,
 			})

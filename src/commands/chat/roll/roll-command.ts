@@ -17,6 +17,7 @@ import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { EventData } from '../../../models/internal-models.js';
 import { CommandUtils, InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
+import { ActionOptions } from '../action/action-command-options.js';
 
 export class RollCommand implements Command {
 	public names = [Language.LL.commands.roll.name()];
@@ -39,6 +40,36 @@ export class RollCommand implements Command {
 					},
 					{
 						...ChatArgs.ROLL_MODIFIER_OPTION,
+						required: false,
+					},
+					{
+						...ChatArgs.ROLL_NOTE_OPTION,
+						required: false,
+					},
+					{
+						...ChatArgs.ROLL_SECRET_OPTION,
+						required: false,
+					},
+				],
+			},
+			{
+				name: Language.LL.commands.roll.action.name(),
+				description: Language.LL.commands.roll.action.description(),
+				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				options: [
+					{
+						...ActionOptions.ACTION_TARGET_OPTION,
+						required: true,
+					},
+					ChatArgs.HEIGHTEN_LEVEL_OPTION,
+					ChatArgs.ROLL_TARGET_DC_OPTION,
+					ChatArgs.ROLL_SAVE_DICE_ROLL_OPTION,
+					{
+						...ChatArgs.ATTACK_ROLL_MODIFIER_OPTION,
+						required: false,
+					},
+					{
+						...ChatArgs.DAMAGE_ROLL_MODIFIER_OPTION,
 						required: false,
 					},
 					{

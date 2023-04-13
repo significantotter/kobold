@@ -21,12 +21,12 @@ import { CharacterUtils } from '../../../utils/character-utils.js';
 import { ActionOptions } from './action-command-options.js';
 import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
 
-export class ActionAddSaveSubCommand implements Command {
-	public names = [Language.LL.commands.action.addSave.name()];
+export class ActionAddTextSubCommand implements Command {
+	public names = [Language.LL.commands.action.addText.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.action.addSave.name(),
-		description: Language.LL.commands.action.addSave.description(),
+		name: Language.LL.commands.action.addText.name(),
+		description: Language.LL.commands.action.addText.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -43,12 +43,6 @@ export class ActionAddSaveSubCommand implements Command {
 			const match = intr.options.getString(ActionOptions.ACTION_TARGET_OPTION.name);
 
 			return await AutocompleteUtils.getTargetActionForActiveCharacter(intr, match);
-		} else if (option.name === ActionOptions.ACTION_SAVE_ROLL_TYPE_OPTION.name) {
-			const match = intr.options.getString(ActionOptions.ACTION_SAVE_ROLL_TYPE_OPTION.name);
-			return await AutocompleteUtils.getAllMatchingRollsForActiveCharacter(intr, match);
-		} else if (option.name === ActionOptions.ACTION_ROLL_ABILITY_DC_OPTION.name) {
-			const match = intr.options.getString(ActionOptions.ACTION_ROLL_ABILITY_DC_OPTION.name);
-			return await AutocompleteUtils.getAllMatchingRollsForActiveCharacter(intr, match);
 		}
 	}
 
@@ -57,16 +51,23 @@ export class ActionAddSaveSubCommand implements Command {
 		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
-		const targetAction = intr.options.getString(ActionOptions.ACTION_TARGET_OPTION.name);
-		const rollType = 'save';
+		const rollType = 'text';
 		const rollName = intr.options.getString(ActionOptions.ACTION_ROLL_NAME_OPTION.name);
-
-		const saveRollType = intr.options.getString(
-			ActionOptions.ACTION_SAVE_ROLL_TYPE_OPTION.name
+		const targetAction = intr.options.getString(ActionOptions.ACTION_TARGET_OPTION.name);
+		const defaultText = intr.options.getString(ActionOptions.ACTION_DEFAULT_TEXT_OPTION.name);
+		const successText = intr.options.getString(ActionOptions.ACTION_SUCCESS_TEXT_OPTION.name);
+		const criticalSuccessText = intr.options.getString(
+			ActionOptions.ACTION_CRITICAL_SUCCESS_TEXT_OPTION.name
 		);
-		const saveTargetDC = intr.options.getString(
-			ActionOptions.ACTION_ROLL_ABILITY_DC_OPTION.name
+		const criticalFailureText = intr.options.getString(
+			ActionOptions.ACTION_CRITICAL_FAILURE_TEXT_OPTION.name
 		);
+		const failureText = intr.options.getString(ActionOptions.ACTION_FAILURE_TEXT_OPTION.name);
+		const extraTags = intr.options.getString(ActionOptions.ACTION_EXTRA_TAGS_OPTION.name);
+		let allowRollModifiers = intr.options.getBoolean(
+			ActionOptions.ACTION_ROLL_ALLOW_MODIFIERS.name
+		);
+		if (allowRollModifiers === null) allowRollModifiers = true;
 
 		//get the active character
 		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id, intr.guildId);
@@ -93,9 +94,20 @@ export class ActionAddSaveSubCommand implements Command {
 			) || matchedActions[0];
 
 		if (action.rolls.find(roll => roll.name === rollName)) {
+			await InteractionUtils.send(intr, LL.commands.action.interactions.rollAlreadyExists());
+			return;
+		}
+
+		if (
+			!defaultText &&
+			!successText &&
+			!criticalSuccessText &&
+			!criticalFailureText &&
+			!failureText
+		) {
 			await InteractionUtils.send(
 				intr,
-				LL.commands.action.addSave.interactions.requireText()
+				LL.commands.action.addText.interactions.requireText()
 			);
 			return;
 		}
@@ -104,8 +116,13 @@ export class ActionAddSaveSubCommand implements Command {
 		action.rolls.push({
 			name: rollName,
 			type: rollType,
-			saveRollType,
-			saveTargetDC,
+			defaultText,
+			successText,
+			criticalSuccessText,
+			criticalFailureText,
+			failureText,
+			allowRollModifiers,
+			extraTags: extraTags ? extraTags.split(',').map(tag => tag.trim()) : [],
 		});
 
 		// save the character
@@ -117,7 +134,7 @@ export class ActionAddSaveSubCommand implements Command {
 		// send the response message
 		await InteractionUtils.send(
 			intr,
-			LL.commands.action.addAttack.interactions.success({
+			LL.commands.action.addAdvancedDamage.interactions.success({
 				actionName: action.name,
 				rollName: rollName,
 			})

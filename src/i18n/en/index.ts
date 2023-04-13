@@ -6,7 +6,7 @@ import HelpCommand from './commands/help.js';
 import InitCommand from './commands/init.js';
 import ModifierCommand from './commands/modifier.js';
 import RollCommand from './commands/roll.js';
-import UtilsLang from './commands/utils.js';
+import UtilsLang from './utils.js';
 import commandOptions from './commandOptions.js';
 import ActionCommand from './commands/action.js';
 import SharedInteractions from './sharedInteractions.js';

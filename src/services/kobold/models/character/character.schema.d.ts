@@ -60,17 +60,58 @@ export interface Character {
 		name?: string;
 		description?: string;
 		type?: string;
-		baseSpellLevel?: number | null;
-		autoHeighten?: number | null;
-		rolls?: {
-			name?: string;
-			type?: string;
-			targets?: string | null;
-			diceRoll?: string | null;
-			canCrit?: boolean | null;
-			tags?: string[];
-			[k: string]: any;
-		}[];
+		actionCost?: string | null;
+		baseLevel?: number | null;
+		autoHeighten?: boolean;
+		tags?: string[];
+		rolls?: (
+			| {
+					name?: string;
+					type?: "attack";
+					targetDC?: string | null;
+					roll?: string | null;
+					allowRollModifiers?: boolean;
+					[k: string]: any;
+			  }
+			| {
+					name?: string;
+					type?: "damage";
+					roll?: string | null;
+					allowRollModifiers?: boolean;
+					[k: string]: any;
+			  }
+			| {
+					name?: string;
+					type?: "advanced-damage";
+					criticalSuccessRoll?: string | null;
+					criticalFailureRoll?: string | null;
+					successRoll?: string | null;
+					failureRoll?: string | null;
+					allowRollModifiers?: boolean;
+					[k: string]: any;
+			  }
+			| {
+					name?: string;
+					type?: "save";
+					saveRollType?: string | null;
+					saveTargetDC?: string | null;
+					targetAbilityRoll?: string | null;
+					allowRollModifiers?: boolean;
+					[k: string]: any;
+			  }
+			| {
+					name?: string;
+					type?: "text";
+					defaultText?: string | null;
+					criticalSuccessText?: string | null;
+					criticalFailureText?: string | null;
+					successText?: string | null;
+					failureText?: string | null;
+					allowRollModifiers?: boolean;
+					extraTags?: string[];
+					[k: string]: any;
+			  }
+		)[];
 		[k: string]: any;
 	}[];
 	/**

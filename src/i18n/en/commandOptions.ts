@@ -40,23 +40,23 @@ export default {
 			},
 			free: {
 				name: 'free',
-				value: 'free',
+				value: 'freeAction',
 			},
 			one: {
 				name: 'one',
-				value: 'one',
+				value: 'oneAction',
 			},
 			two: {
 				name: 'two',
-				value: 'two',
+				value: 'twoActions',
 			},
 			three: {
 				name: 'three',
-				value: 'three',
+				value: 'threeActions',
 			},
 			variable: {
 				name: 'variable',
-				value: 'variable',
+				value: 'variableActions',
 			},
 		},
 	},
@@ -73,17 +73,132 @@ export default {
 		name: 'target-roll',
 		description: 'The target roll.',
 	},
+	actionStageEditOption: {
+		name: 'edit-option',
+		description: 'The option to edit.',
+		choices: {
+			name: { name: 'name', value: 'name' },
+			targetDC: { name: 'target-dc', value: 'targetDC' },
+			roll: { name: 'roll', value: 'roll' },
+			successRoll: { name: 'success-roll', value: 'successRoll' },
+			failureRoll: { name: 'failure-roll', value: 'failureRoll' },
+			criticalSuccessRoll: { name: 'critical-success-roll', value: 'criticalSuccessRoll' },
+			criticalFailureRoll: { name: 'critical-failure-roll', value: 'criticalFailureRoll' },
+			allowRollModifier: { name: 'allow-roll-modifier', value: 'allowRollModifier' },
+		},
+	},
+	actionEditOption: {
+		name: 'edit-option',
+		description: 'The option to edit.',
+		choices: {
+			name: { name: 'name', value: 'name' },
+			description: { name: 'description', value: 'description' },
+			type: { name: 'type', value: 'type' },
+			actionCost: { name: 'action-cost', value: 'actionCost' },
+			baseLevel: { name: 'base-level', value: 'baseLevel' },
+			tags: { name: 'tags', value: 'tags' },
+			autoHeighten: { name: 'auto-heighten', value: 'autoHeighten' },
+		},
+	},
+	actionStageEditValue: {
+		name: 'edit-value',
+		description: 'The value to change the option to.',
+	},
 	actionRollName: {
 		name: 'roll-name',
 		description: 'The name of the roll.',
 	},
+	actionRollType: {
+		name: 'type',
+		description: 'The type of roll. Attack, damage, or other.',
+		choices: {
+			attack: {
+				name: 'attack',
+				value: 'attack',
+			},
+			damage: {
+				name: 'damage',
+				value: 'damage',
+			},
+			other: {
+				name: 'other',
+				value: 'other',
+			},
+		},
+	},
+	actionRollSave: {
+		name: 'target-ac-save-or-skill',
+		description: 'Whether the attack roll checks against AC, a Save DC, or a Skill DC.',
+	},
+	actionRollAbilityDc: {
+		name: 'save-dc-type',
+		description: 'Whether this saving throw is against your AC, Saving Throw, or Skill DC.',
+	},
+	actionSaveRollType: {
+		name: 'save-roll-type',
+		description: 'What the target rolls against the your DC.',
+	},
 	actionDiceRoll: {
 		name: 'dice-roll',
-		description: 'The dice rolled for the action.',
+		description:
+			'The dice rolled for the action. (damage-only) Dice rolled for a regular success.',
 	},
-	actionRollTags: {
+	actionRollAllowModifiers: {
+		name: 'allow-modifiers',
+		description:
+			'Whether to allow modifiers to alter the roll. (Default: true). Ex. set to false for bonus damage',
+	},
+	actionBasicDamageDiceRoll: {
+		name: 'basic-damage-dice-roll',
+		description: 'A simple damage roll for an attack or save. Ignored if other rolls set.',
+	},
+	actionSuccessDiceRoll: {
+		name: 'success-dice-roll',
+		description: 'The damage dice optionally rolled for a success.',
+	},
+	actionCriticalSuccessDiceRoll: {
+		name: 'critical-success-dice-roll',
+		description: 'The damage dice optionally rolled for a critical success.',
+	},
+	actionCriticalFailureDiceRoll: {
+		name: 'critical-failure-dice-roll',
+		description: 'The damage dice optionally rolled for a critical failure.',
+	},
+	actionFailureDiceRoll: {
+		name: 'failure-dice-roll',
+		description: 'The damage dice optionally rolled for a regular failure.',
+	},
+	actionDefaultText: {
+		name: 'default-text',
+		description: 'Text shown no matter the success of an attack or save.',
+	},
+	actionSuccessText: {
+		name: 'success-text',
+		description: 'Text displayed for a success. Inline rolls using the format {diceFormat}',
+	},
+	actionCriticalSuccessText: {
+		name: 'critical-success-text',
+		description:
+			'Text displayed for a critical success. Inline rolls using the format {diceFormat}',
+	},
+	actionCriticalFailureText: {
+		name: 'critical-failure-text',
+		description:
+			'Text displayed for a critical failure. Inline rolls using the format {diceFormat}',
+	},
+	actionFailureText: {
+		name: 'failure-text',
+		description:
+			'Text displayed for a regular failure. Inline rolls using the format {diceFormat}',
+	},
+	actionExtraTags: {
+		name: 'extra-tags',
+		description:
+			'Extra tags that can optionally apply certain modifiers to the inline text roll.',
+	},
+	actionTags: {
 		name: 'tags',
-		description: 'the tags used to describe the roll.',
+		description: 'the tags used to describe this part of the action.',
 	},
 	actionImportUrl: {
 		name: 'url',
@@ -363,6 +478,14 @@ export default {
 		name: 'modifier',
 		description: 'A dice expression to modify your roll. (e.g. "+ 1 + 1d4")',
 	},
+	rollTargetDc: {
+		name: 'target-dc',
+		description: 'The DC to roll attacks against.',
+	},
+	rollSaveDiceRoll: {
+		name: 'save-dice-roll',
+		description: 'The dice roll to use for any saving throw in the action.',
+	},
 	attackRollModifier: {
 		name: 'attack_modifier',
 		description: 'A dice expression to modify your attack roll. (e.g. "+ 1 + 1d4")',
@@ -370,6 +493,14 @@ export default {
 	damageRollModifier: {
 		name: 'damage_modifier',
 		description: 'A dice expression to modify your damage roll. (e.g. "+ 1 + 1d4")',
+	},
+	otherRollModifier: {
+		name: 'other_modifier',
+		description: 'A dice expression to modify your "other" action rolls. (e.g. "+ 1 + 1d4")',
+	},
+	rollHeightenLevel: {
+		name: 'heighten',
+		description: 'The level to heighten the action to.',
 	},
 	rollNote: {
 		name: 'note',

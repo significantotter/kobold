@@ -21,6 +21,7 @@ import {
 	RollPerceptionSubCommand,
 	RollAbilitySubCommand,
 	RollAttackSubCommand,
+	RollActionSubCommand,
 	// init
 	InitCommand,
 	InitAddSubCommand,
@@ -52,10 +53,17 @@ import {
 	// action
 	ActionCommand,
 	ActionListSubCommand,
+	ActionDetailSubCommand,
 	ActionCreateSubCommand,
 	ActionRemoveSubCommand,
-	ActionAddRollSubCommand,
-	ActionRemoveRollSubCommand,
+	ActionAddAttackSubCommand,
+	ActionAddSaveSubCommand,
+	ActionAddTextSubCommand,
+	ActionAddBasicDamageSubCommand,
+	ActionAddAdvancedDamageSubCommand,
+	ActionEditActionStageSubCommand,
+	ActionEditSubCommand,
+	ActionRemoveActionStageSubCommand,
 	ActionImportSubCommand,
 	ActionExportSubCommand,
 	// help
@@ -119,6 +127,7 @@ async function start(): Promise<void> {
 		//Roll Commands
 		new RollCommand([
 			new RollDiceSubCommand(),
+			new RollActionSubCommand(),
 			new RollAttackSubCommand(),
 			new RollSkillSubCommand(),
 			new RollSaveSubCommand(),
@@ -163,10 +172,17 @@ async function start(): Promise<void> {
 		// Action commands
 		new ActionCommand([
 			new ActionListSubCommand(),
+			new ActionDetailSubCommand(),
 			new ActionCreateSubCommand(),
 			new ActionRemoveSubCommand(),
-			new ActionAddRollSubCommand(),
-			new ActionRemoveRollSubCommand(),
+			new ActionAddAttackSubCommand(),
+			new ActionAddSaveSubCommand(),
+			new ActionAddTextSubCommand(),
+			new ActionAddBasicDamageSubCommand(),
+			new ActionAddAdvancedDamageSubCommand(),
+			new ActionEditActionStageSubCommand(),
+			new ActionEditSubCommand(),
+			new ActionRemoveActionStageSubCommand(),
 			new ActionImportSubCommand(),
 			new ActionExportSubCommand(),
 		]),

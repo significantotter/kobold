@@ -53,7 +53,7 @@ export class ActionRemoveSubCommand implements Command {
 				//no choices if we don't have a character to match against
 				return [];
 			}
-			//find a save on the character matching the autocomplete string
+			//find an action on the character matching the autocomplete string
 			const matchedActions = CharacterUtils.findPossibleActionFromString(
 				activeCharacter,
 				match
@@ -61,7 +61,7 @@ export class ActionRemoveSubCommand implements Command {
 				name: action.name,
 				value: action.name,
 			}));
-			//return the matched saves
+			//return the matched actions
 			return matchedActions;
 		}
 	}

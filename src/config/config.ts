@@ -114,6 +114,7 @@ export const Config: config = Object.freeze({
 		intents: parseEnvArray(env.CLIENT_INTENTS) ?? [
 			'Guilds',
 			'GuildMessages',
+			'GuildEmojisAndStickers',
 			'GuildMessageReactions',
 			'DirectMessages',
 			'DirectMessageReactions',

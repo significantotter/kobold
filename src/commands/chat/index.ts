@@ -16,6 +16,7 @@ export { RollSaveSubCommand } from './roll/roll-save-subcommand.js';
 export { RollPerceptionSubCommand } from './roll/roll-perception-subcommand.js';
 export { RollAbilitySubCommand } from './roll/roll-ability-subcommand.js';
 export { RollAttackSubCommand } from './roll/roll-attack-subcommand.js';
+export { RollActionSubCommand } from './roll/roll-action-subcommand.js';
 
 // initiative commands
 export { InitCommand } from './init/init-command.js';
@@ -51,10 +52,17 @@ export { GameListSubCommand } from './game/game-list-subcommand.js';
 // action command
 export { ActionCommand } from './action/action-command.js';
 export { ActionListSubCommand } from './action/action-list-subcommand.js';
+export { ActionDetailSubCommand } from './action/action-detail-subcommand.js';
 export { ActionCreateSubCommand } from './action/action-create-subcommand.js';
 export { ActionRemoveSubCommand } from './action/action-remove-subcommand.js';
-export { ActionAddRollSubCommand } from './action/action-add-roll-subcommand.js';
-export { ActionRemoveRollSubCommand } from './action/action-remove-roll-subcommand.js';
+export { ActionAddAttackSubCommand } from './action/action-add-attack-subcommand.js';
+export { ActionAddSaveSubCommand } from './action/action-add-save-subcommand.js';
+export { ActionAddTextSubCommand } from './action/action-add-text-subcommand.js';
+export { ActionAddBasicDamageSubCommand } from './action/action-add-basic-damage-subcommand.js';
+export { ActionAddAdvancedDamageSubCommand } from './action/action-add-advanced-damage-subcommand.js';
+export { ActionEditSubCommand } from './action/action-edit-subcommand.js';
+export { ActionEditActionStageSubCommand } from './action/action-edit-action-stage-subcommand.js';
+export { ActionRemoveActionStageSubCommand } from './action/action-remove-action-stage-subcommand.js';
 export { ActionImportSubCommand } from './action/action-import-subcommand.js';
 export { ActionExportSubCommand } from './action/action-export-subcommand.js';
 

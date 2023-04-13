@@ -46,6 +46,11 @@ export class ActionCreateSubCommand implements Command {
 			.toLowerCase();
 		const description = intr.options.getString(ActionOptions.ACTION_DESCRIPTION_OPTION.name);
 		const type = intr.options.getString(ActionOptions.ACTION_TYPE_OPTION.name);
+		const actionCost = intr.options.getString(ActionOptions.ACTION_ACTIONS_OPTION.name);
+		const baseLevel = intr.options.getInteger(ActionOptions.ACTION_BASE_LEVEL_OPTION.name);
+		const autoHeighten =
+			intr.options.getBoolean(ActionOptions.ACTION_AUTO_HEIGHTEN_OPTION.name) ?? false;
+		const tags = intr.options.getString(ActionOptions.ACTION_TAGS_OPTION.name);
 
 		// make sure the name does't already exist in the character's actions
 		if (activeCharacter.getActionByName(name)) {
@@ -66,7 +71,11 @@ export class ActionCreateSubCommand implements Command {
 					name,
 					description,
 					type: type,
+					actionCost,
+					baseLevel,
+					autoHeighten,
 					rolls: [],
+					tags: tags ? tags.split(',').map(tag => tag.trim()) : [],
 				},
 			],
 		});
