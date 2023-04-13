@@ -504,7 +504,12 @@ export class RollBuilder {
 					)
 					.join('\n'),
 			};
-		} else if (result.type === 'text' || result.type === 'dice') {
+		} else if (result.type === 'text') {
+			return {
+				name: result.name,
+				value: result.value,
+			};
+		} else if (result.type === 'dice') {
 			return {
 				name: result.name,
 				value: result.value.replaceAll('*', '\\*').replaceAll('_', '\\_'),
@@ -533,7 +538,9 @@ export class RollBuilder {
 		if (this.rollResults.length > 1 || options?.forceFields) {
 			response.addFields(
 				//strip extra properties from the roll results
-				this.rollResults.map(result => this.convertResultToEmbedField(result))
+				this.rollResults
+					.map(result => this.convertResultToEmbedField(result))
+					.filter(result => result.value !== '')
 			);
 		} else if (this.rollResults.length === 1) {
 			const resultField = this.convertResultToEmbedField(this.rollResults[0]);
