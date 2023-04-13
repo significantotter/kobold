@@ -95,7 +95,6 @@ export interface Character {
 					type?: "save";
 					saveRollType?: string | null;
 					saveTargetDC?: string | null;
-					targetAbilityRoll?: string | null;
 					allowRollModifiers?: boolean;
 					[k: string]: any;
 			  }

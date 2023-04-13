@@ -117,19 +117,19 @@ export class ActionDetailSubCommand implements Command {
 				actionDetailEmbed.addFields([field]);
 			} else if (roll.type === 'advanced-damage') {
 				let description = ``;
-				description += `\nCritical Success: ${roll.criticalSuccessRoll}`;
-				description += `\nSuccess: ${roll.successRoll}`;
-				description += `\nFailure: ${roll.failureRoll}`;
-				description += `\nCritical Failure: ${roll.criticalFailureRoll}`;
+				description += `\nCritical Success: ${roll.criticalSuccessRoll ?? 'none'}`;
+				description += `\nSuccess: ${roll.successRoll ?? 'none'}`;
+				description += `\nFailure: ${roll.failureRoll ?? 'none'}`;
+				description += `\nCritical Failure: ${roll.criticalFailureRoll ?? 'none'}`;
 				const field = { name: roll.name, value: description };
 				actionDetailEmbed.addFields([field]);
 			} else if (roll.type === 'text') {
 				let description = ``;
-				description += `\nDefault Text: ${roll.defaultText}`;
-				description += `\nCritical Success: ${roll.criticalSuccessText}`;
-				description += `\nSuccess: ${roll.successText}`;
-				description += `\nFailure: ${roll.failureText}`;
-				description += `\nCritical Failure: ${roll.criticalFailureText}`;
+				description += `\nDefault Text: ${roll.defaultText ?? 'none'}`;
+				description += `\nCritical Success: ${roll.criticalSuccessText ?? 'none'}`;
+				description += `\nSuccess: ${roll.successText ?? 'none'}`;
+				description += `\nFailure: ${roll.failureText ?? 'none'}`;
+				description += `\nCritical Failure: ${roll.criticalFailureText ?? 'none'}`;
 				const field = { name: roll.name, value: description };
 				actionDetailEmbed.addFields([field]);
 			} else if (roll.type === 'save') {

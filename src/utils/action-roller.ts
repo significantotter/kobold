@@ -11,6 +11,7 @@ type BuildRollOptions = {
 	saveDiceRoll?: string;
 	attackModifierExpression?: string;
 	damageModifierExpression?: string;
+	title?: string;
 };
 type Attribute = { name: string; value: number; tags?: string[] };
 
@@ -511,7 +512,8 @@ export class ActionRoller {
 			character: this.character,
 			rollNote,
 			rollDescription,
-			title: `${this.character.characterData.name} used ${this.action.name}!`,
+			title:
+				options?.title ?? `${this.character.characterData.name} used ${this.action.name}!`,
 		});
 
 		let abilityLevel = 1;

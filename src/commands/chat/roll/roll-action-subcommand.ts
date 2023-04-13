@@ -22,6 +22,7 @@ import { Language } from '../../../models/enum-helpers/index.js';
 import { ActionOptions } from '../action/action-command-options.js';
 import _ from 'lodash';
 import { ActionRoller } from '../../../utils/action-roller.js';
+import { getEmoji } from '../../../constants/emoji.js';
 
 export class RollActionSubCommand implements Command {
 	public names = [Language.LL.commands.roll.action.name()];
@@ -109,12 +110,15 @@ export class RollActionSubCommand implements Command {
 			heightenLevel,
 		});
 
-		const builtRoll = await actionRoller.buildRoll(rollNote, targetAction.description, {
+		const builtRoll = actionRoller.buildRoll(rollNote, targetAction.description, {
 			heightenLevel,
 			targetDC,
 			saveDiceRoll,
 			attackModifierExpression,
 			damageModifierExpression,
+			title: `${getEmoji(intr, targetAction.actionCost)} ${
+				activeCharacter.characterData.name
+			} used ${targetAction.name}!`,
 		});
 
 		const response = builtRoll.compileEmbed({ forceFields: true, showTags: false });
@@ -152,7 +156,7 @@ export class RollActionSubCommand implements Command {
 			}
 			descriptionArr.push(`VS a${saveType} of ${targetDC}`);
 		}
-		response.setDescription(descriptionArr.join('\n'));
+		if (descriptionArr.length) response.setDescription(descriptionArr.join('\n'));
 
 		if (notifyRoll) {
 			await InteractionUtils.send(
