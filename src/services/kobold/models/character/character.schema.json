@@ -134,7 +134,6 @@
 										"type": { "type": "string", "enum": ["save"] },
 										"saveRollType": { "type": ["string", "null"] },
 										"saveTargetDC": { "type": ["string", "null"] },
-										"targetAbilityRoll": { "type": ["string", "null"] },
 										"allowRollModifiers": { "type": "boolean" }
 									}
 								},

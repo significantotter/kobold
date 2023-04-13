@@ -112,19 +112,30 @@ export class ActionDetailSubCommand implements Command {
 				actionDetailEmbed.addFields([field]);
 			} else if (roll.type === 'damage') {
 				let description = ``;
-				if (
-					roll.criticalSuccessRoll ||
-					roll.criticalFailureRoll ||
-					roll.successRoll ||
-					roll.failureRoll
-				) {
-					description += `\nCritical Success: ${roll.criticalSuccessRoll}`;
-					description += `\nSuccess: ${roll.successRoll}`;
-					description += `\nFailure: ${roll.failureRoll}`;
-					description += `\nCritical Failure: ${roll.criticalFailureRoll}`;
-				} else {
-					description += `\ndamage: ${roll.roll}`;
-				}
+				description += `\ndamage: ${roll.roll}`;
+				const field = { name: roll.name, value: description };
+				actionDetailEmbed.addFields([field]);
+			} else if (roll.type === 'advanced-damage') {
+				let description = ``;
+				description += `\nCritical Success: ${roll.criticalSuccessRoll}`;
+				description += `\nSuccess: ${roll.successRoll}`;
+				description += `\nFailure: ${roll.failureRoll}`;
+				description += `\nCritical Failure: ${roll.criticalFailureRoll}`;
+				const field = { name: roll.name, value: description };
+				actionDetailEmbed.addFields([field]);
+			} else if (roll.type === 'text') {
+				let description = ``;
+				description += `\nDefault Text: ${roll.defaultText}`;
+				description += `\nCritical Success: ${roll.criticalSuccessText}`;
+				description += `\nSuccess: ${roll.successText}`;
+				description += `\nFailure: ${roll.failureText}`;
+				description += `\nCritical Failure: ${roll.criticalFailureText}`;
+				const field = { name: roll.name, value: description };
+				actionDetailEmbed.addFields([field]);
+			} else if (roll.type === 'save') {
+				let description = ``;
+				description += `\nThe target rolls: ${roll.saveRollType}`;
+				description += `\nVs your: ${roll.saveTargetDC}`;
 				const field = { name: roll.name, value: description };
 				actionDetailEmbed.addFields([field]);
 			}
