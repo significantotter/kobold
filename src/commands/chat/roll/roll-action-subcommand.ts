@@ -119,6 +119,41 @@ export class RollActionSubCommand implements Command {
 
 		const response = builtRoll.compileEmbed({ forceFields: true, showTags: false });
 
+		const descriptionArr = [];
+		if (heightenLevel) {
+			descriptionArr.push(`Heightened to level ${heightenLevel}`);
+		}
+		if (saveDiceRoll) {
+			let rollType = '';
+			for (const roll of targetAction.rolls) {
+				if (roll.type === 'save') {
+					rollType = ` ${roll.saveRollType}`;
+					break;
+				}
+			}
+			descriptionArr.push(`The target rolls${rollType} ${saveDiceRoll}`);
+		}
+		if (targetDC) {
+			let saveType = ' DC';
+			for (const roll of targetAction.rolls) {
+				if (roll.type === 'save' || roll.type === 'attack') {
+					saveType = ` ${roll.saveTargetDC ?? roll.targetDC}`;
+					// add the word DC if we aren't checking vs the AC
+					if (
+						saveType.toLocaleLowerCase() !== ' ac' &&
+						!_.endsWith(saveType.toLocaleLowerCase(), ' dc')
+					)
+						saveType += ' DC';
+					// change a to an if the next letter is a vowel
+					if (['a', 'e', 'i', 'o', 'u'].includes(saveType[1].toLocaleLowerCase()))
+						saveType = `n${saveType}`;
+					break;
+				}
+			}
+			descriptionArr.push(`VS a${saveType} of ${targetDC}`);
+		}
+		response.setDescription(descriptionArr.join('\n'));
+
 		if (notifyRoll) {
 			await InteractionUtils.send(
 				intr,
