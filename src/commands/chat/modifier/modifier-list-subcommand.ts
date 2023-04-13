@@ -74,6 +74,12 @@ export class ModifierListSubCommand implements Command {
 			embed.addFields(fieldChunk);
 			embeds.push(embed);
 		}
+		if (embeds.length === 0) {
+			const embed = await new KoboldEmbed();
+			embed.setCharacter(activeCharacter);
+			embed.setTitle(`${activeCharacter.characterData.name}'s Available Modifiers`);
+			embeds.push(embed);
+		}
 
 		for (const embed of embeds) {
 			await InteractionUtils.send(intr, { embeds: [embed] });
