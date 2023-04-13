@@ -89,7 +89,7 @@ export class RollBuilder {
 			attributeObject =>
 				attributeObject.name.replace(trimRegex, '').toLowerCase() === attributeName
 		);
-		const staticAttribute = staticAttributes.find(
+		const staticAttribute = staticAttributes(this.character).find(
 			attributeObject =>
 				attributeObject.name.replace(trimRegex, '').toLowerCase() === attributeName
 		);

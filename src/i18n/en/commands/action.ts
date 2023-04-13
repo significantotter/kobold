@@ -6,6 +6,7 @@ export default {
 		rollNotFound: "Yip! I couldn't find a stage of the action with that name.",
 		tooMany: "Yip! A character can't have over 50 actions!",
 		rollAlreadyExists: 'Yip! A roll with that name already exists for this action.',
+		rollAddSuccess: 'Yip! I added the {rollType} roll {rollName} to the action {actionName}.',
 	},
 	create: {
 		name: 'create',
@@ -36,25 +37,16 @@ export default {
 	addAttack: {
 		name: 'add-attack',
 		description: 'Adds an attack roll to an action',
-		interactions: {
-			success: 'Yip! I added the attack {rollName} to the action {actionName}.',
-		},
 	},
 	addBasicDamage: {
 		name: 'add-basic-damage',
 		description:
 			'Adds a basic damage roll to an action. Automatically adjusts for crits or failures.',
-		interactions: {
-			success: 'Yip! I added the damage roll {rollName} to the action {actionName}.',
-		},
 	},
 	addAdvancedDamage: {
 		name: 'add-advanced-damage',
 		description:
 			'Adds an advanced damage roll to an action. Requires manual input for all successes and failures.',
-		interactions: {
-			success: 'Yip! I added the damage roll {rollName} to the action {actionName}.',
-		},
 	},
 	addText: {
 		name: 'add-text',

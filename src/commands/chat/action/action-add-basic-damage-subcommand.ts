@@ -108,9 +108,10 @@ export class ActionAddBasicDamageSubCommand implements Command {
 		// send the response message
 		await InteractionUtils.send(
 			intr,
-			LL.commands.action.addBasicDamage.interactions.success({
+			LL.commands.action.interactions.rollAddSuccess({
 				actionName: action.name,
 				rollName: rollName,
+				rollType: 'damage',
 			})
 		);
 	}

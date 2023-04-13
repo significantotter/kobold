@@ -115,9 +115,10 @@ export class ActionAddAttackSubCommand implements Command {
 		// send the response message
 		await InteractionUtils.send(
 			intr,
-			LL.commands.action.addAttack.interactions.success({
+			LL.commands.action.interactions.rollAddSuccess({
 				actionName: action.name,
 				rollName: rollName,
+				rollType: 'attack',
 			})
 		);
 	}
