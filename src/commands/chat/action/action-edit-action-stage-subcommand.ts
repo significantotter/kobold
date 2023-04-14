@@ -56,7 +56,6 @@ export class ActionEditActionStageSubCommand implements Command {
 			for (const action of activeCharacter.actions || []) {
 				for (const roll of action.rolls) {
 					const rollMatchText = `${action.name.toLocaleLowerCase()} -- ${roll.name.toLocaleLowerCase()}`;
-					console.log(rollMatchText, match);
 					if (rollMatchText.includes(match.toLocaleLowerCase())) {
 						matchedActionRolls.push({
 							name: rollMatchText,
@@ -114,6 +113,61 @@ export class ActionEditActionStageSubCommand implements Command {
 		}
 		const roll = matchedAction.rolls[rollIndex];
 
+		let invalid = false;
+		// validate the strings into different types based on which field is being edited
+		if (roll.type === 'attack') {
+			if (!['name', 'targetDC', 'roll', 'allowRollModifier'].includes(fieldToEdit)) {
+				invalid = true;
+			}
+		} else if (roll.type === 'damage') {
+			if (!['name', 'roll', 'allowRollModifier'].includes(fieldToEdit)) {
+				invalid = true;
+			}
+		} else if (roll.type === 'advanced-damage') {
+			if (
+				![
+					'name',
+					'successRoll',
+					'failureRoll',
+					'criticalSuccessRoll',
+					'criticalFailureRoll',
+					'allowRollModifier',
+				].includes(fieldToEdit)
+			) {
+				invalid = true;
+			}
+		} else if (roll.type === 'save') {
+			if (
+				!['name', 'saveRollType', 'saveTargetDC', 'allowRollModifier'].includes(fieldToEdit)
+			) {
+				invalid = true;
+			}
+		} else if (roll.type === 'text') {
+			if (
+				![
+					'name',
+					'defaultText',
+					'successText',
+					'failureText',
+					'criticalSuccessText',
+					'criticalFailureText',
+					'allowRollModifier',
+					'extraTags',
+				].includes(fieldToEdit)
+			) {
+				invalid = true;
+			}
+		}
+		if (invalid) {
+			await InteractionUtils.send(
+				intr,
+				LL.commands.action.editActionStage.interactions.invalidField({
+					stageType: roll.type,
+				})
+			);
+			return;
+		}
+
 		// just in case we need to edit the name of the action, save it here
 		const currentActionName = roll.name;
 
@@ -130,6 +184,13 @@ export class ActionEditActionStageSubCommand implements Command {
 				'failureRoll',
 				'criticalSuccessRoll',
 				'criticalFailureRoll',
+				'defaultText',
+				'successText',
+				'failureText',
+				'criticalSuccessText',
+				'criticalFailureText',
+				'saveRollType',
+				'saveTargetDC',
 			].includes(fieldToEdit)
 		) {
 			finalValue = newValue.trim();
@@ -143,6 +204,8 @@ export class ActionEditActionStageSubCommand implements Command {
 			finalValue = ['true', 'yes', '1', 'ok', 'okay'].includes(
 				newValue.toLocaleLowerCase().trim()
 			);
+		} else if (['textExtraTags'].includes(fieldToEdit)) {
+			finalValue = newValue.split(',').map(tag => tag.trim());
 		} else {
 			// invalid field
 			await InteractionUtils.send(

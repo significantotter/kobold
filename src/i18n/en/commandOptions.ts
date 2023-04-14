@@ -78,13 +78,37 @@ export default {
 		description: 'The option to edit.',
 		choices: {
 			name: { name: 'name', value: 'name' },
-			targetDC: { name: 'target-dc', value: 'targetDC' },
-			roll: { name: 'roll', value: 'roll' },
-			successRoll: { name: 'success-roll', value: 'successRoll' },
-			failureRoll: { name: 'failure-roll', value: 'failureRoll' },
-			criticalSuccessRoll: { name: 'critical-success-roll', value: 'criticalSuccessRoll' },
-			criticalFailureRoll: { name: 'critical-failure-roll', value: 'criticalFailureRoll' },
 			allowRollModifier: { name: 'allow-roll-modifier', value: 'allowRollModifier' },
+			attackTargetDC: { name: 'attack-target-dc', value: 'targetDC' },
+			attackRoll: { name: 'attack-roll', value: 'roll' },
+			basicDamageRoll: { name: 'basic-damage-roll', value: 'roll' },
+			advancedDamageCritSuccessRoll: {
+				name: 'advanced-damage-crit-success-roll',
+				value: 'criticalSuccessRoll',
+			},
+			advancedDamageSuccessRoll: {
+				name: 'advanced-damage-success-roll',
+				value: 'successRoll',
+			},
+			advancedDamageFailureRoll: {
+				name: 'advanced-damage-failure-roll',
+				value: 'failureRoll',
+			},
+			advancedDamageCritFailureRoll: {
+				name: 'advanced-damage-crit-failure-roll',
+				value: 'criticalFailureRoll',
+			},
+			saveRollType: {
+				name: 'save-roll-type',
+				value: 'saveRollType',
+			},
+			saveTargetDC: { name: 'save-target-dc', value: 'saveTargetDC' },
+			defaultText: { name: 'text-default', value: 'defaultText' },
+			successText: { name: 'text-success', value: 'successText' },
+			failureText: { name: 'text-failure', value: 'failureText' },
+			criticalSuccessText: { name: 'text-critical-success', value: 'criticalSuccessText' },
+			criticalFailureText: { name: 'text-critical-failure', value: 'criticalFailureText' },
+			textExtraTags: { name: 'text-extra-tags', value: 'textExtraTags' },
 		},
 	},
 	actionEditOption: {

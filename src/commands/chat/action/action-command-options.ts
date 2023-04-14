@@ -109,32 +109,68 @@ export class ActionOptions {
 				value: Language.LL.commandOptions.actionStageEditOption.choices.name.value(),
 			},
 			{
-				name: Language.LL.commandOptions.actionStageEditOption.choices.targetDC.name(),
-				value: Language.LL.commandOptions.actionStageEditOption.choices.targetDC.value(),
-			},
-			{
-				name: Language.LL.commandOptions.actionStageEditOption.choices.roll.name(),
-				value: Language.LL.commandOptions.actionStageEditOption.choices.roll.value(),
-			},
-			{
-				name: Language.LL.commandOptions.actionStageEditOption.choices.successRoll.name(),
-				value: Language.LL.commandOptions.actionStageEditOption.choices.successRoll.value(),
-			},
-			{
-				name: Language.LL.commandOptions.actionStageEditOption.choices.failureRoll.name(),
-				value: Language.LL.commandOptions.actionStageEditOption.choices.failureRoll.value(),
-			},
-			{
-				name: Language.LL.commandOptions.actionStageEditOption.choices.criticalSuccessRoll.name(),
-				value: Language.LL.commandOptions.actionStageEditOption.choices.criticalSuccessRoll.value(),
-			},
-			{
-				name: Language.LL.commandOptions.actionStageEditOption.choices.criticalFailureRoll.name(),
-				value: Language.LL.commandOptions.actionStageEditOption.choices.criticalFailureRoll.value(),
-			},
-			{
 				name: Language.LL.commandOptions.actionStageEditOption.choices.allowRollModifier.name(),
 				value: Language.LL.commandOptions.actionStageEditOption.choices.allowRollModifier.value(),
+			},
+			{
+				name: Language.LL.commandOptions.actionStageEditOption.choices.attackTargetDC.name(),
+				value: Language.LL.commandOptions.actionStageEditOption.choices.attackTargetDC.value(),
+			},
+			{
+				name: Language.LL.commandOptions.actionStageEditOption.choices.attackRoll.name(),
+				value: Language.LL.commandOptions.actionStageEditOption.choices.attackRoll.value(),
+			},
+			{
+				name: Language.LL.commandOptions.actionStageEditOption.choices.basicDamageRoll.name(),
+				value: Language.LL.commandOptions.actionStageEditOption.choices.basicDamageRoll.value(),
+			},
+			{
+				name: Language.LL.commandOptions.actionStageEditOption.choices.advancedDamageCritSuccessRoll.name(),
+				value: Language.LL.commandOptions.actionStageEditOption.choices.advancedDamageCritSuccessRoll.value(),
+			},
+			{
+				name: Language.LL.commandOptions.actionStageEditOption.choices.advancedDamageSuccessRoll.name(),
+				value: Language.LL.commandOptions.actionStageEditOption.choices.advancedDamageSuccessRoll.value(),
+			},
+			{
+				name: Language.LL.commandOptions.actionStageEditOption.choices.advancedDamageFailureRoll.name(),
+				value: Language.LL.commandOptions.actionStageEditOption.choices.advancedDamageFailureRoll.value(),
+			},
+			{
+				name: Language.LL.commandOptions.actionStageEditOption.choices.advancedDamageCritFailureRoll.name(),
+				value: Language.LL.commandOptions.actionStageEditOption.choices.advancedDamageCritFailureRoll.value(),
+			},
+			{
+				name: Language.LL.commandOptions.actionStageEditOption.choices.saveRollType.name(),
+				value: Language.LL.commandOptions.actionStageEditOption.choices.saveRollType.value(),
+			},
+			{
+				name: Language.LL.commandOptions.actionStageEditOption.choices.saveTargetDC.name(),
+				value: Language.LL.commandOptions.actionStageEditOption.choices.saveTargetDC.value(),
+			},
+			{
+				name: Language.LL.commandOptions.actionStageEditOption.choices.defaultText.name(),
+				value: Language.LL.commandOptions.actionStageEditOption.choices.defaultText.value(),
+			},
+			{
+				name: Language.LL.commandOptions.actionStageEditOption.choices.successText.name(),
+				value: Language.LL.commandOptions.actionStageEditOption.choices.successText.value(),
+			},
+			{
+				name: Language.LL.commandOptions.actionStageEditOption.choices.failureText.name(),
+				value: Language.LL.commandOptions.actionStageEditOption.choices.failureText.value(),
+			},
+			{
+				name: Language.LL.commandOptions.actionStageEditOption.choices.criticalSuccessText.name(),
+				value: Language.LL.commandOptions.actionStageEditOption.choices.criticalSuccessText.value(),
+			},
+			{
+				name: Language.LL.commandOptions.actionStageEditOption.choices.criticalFailureText.name(),
+				value: Language.LL.commandOptions.actionStageEditOption.choices.criticalFailureText.value(),
+			},
+			{
+				name: Language.LL.commandOptions.actionStageEditOption.choices.textExtraTags.name(),
+				value: Language.LL.commandOptions.actionStageEditOption.choices.textExtraTags.value(),
 			},
 		],
 	};

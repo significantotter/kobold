@@ -82,6 +82,7 @@ export default {
 			success:
 				'Yip! {actionStageOption} was set to {newValue} for action stage {actionStageName} in the action {actionName}.',
 			unknownField: "Yip! That's not a field I recognize for action stages!",
+			invalidField: 'Yip! That field is not valid for a {stageType} stage.',
 		},
 	},
 	removeActionStage: {
