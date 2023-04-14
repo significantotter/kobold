@@ -70,21 +70,21 @@ export class ActionCommand implements Command {
 					ActionOptions.ACTION_EDIT_VALUE,
 				],
 			},
-			// {
-			// 	name: Language.LL.commands.action.import.name(),
-			// 	description: Language.LL.commands.action.import.description(),
-			// 	type: ApplicationCommandOptionType.Subcommand.valueOf(),
-			// 	options: [
-			// 		ActionOptions.ACTION_IMPORT_URL_OPTION,
-			// 		ActionOptions.ACTION_IMPORT_MODE_OPTION,
-			// 	],
-			// },
-			// {
-			// 	name: Language.LL.commands.action.export.name(),
-			// 	description: Language.LL.commands.action.export.description(),
-			// 	type: ApplicationCommandOptionType.Subcommand.valueOf(),
-			// 	options: [],
-			// },
+			{
+				name: Language.LL.commands.action.import.name(),
+				description: Language.LL.commands.action.import.description(),
+				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				options: [
+					ActionOptions.ACTION_IMPORT_URL_OPTION,
+					ActionOptions.ACTION_IMPORT_MODE_OPTION,
+				],
+			},
+			{
+				name: Language.LL.commands.action.export.name(),
+				description: Language.LL.commands.action.export.description(),
+				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				options: [],
+			},
 		],
 	};
 	public cooldown = new RateLimiter(1, 5000);

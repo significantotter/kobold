@@ -79,9 +79,9 @@ export default {
 	},
 	import: {
 		name: 'import',
-		description: 'Imports an array of modifier data to a character from PasteBin.',
+		description: 'Imports a list of modifier data to a character from PasteBin.',
 		expandedDescription:
-			'Imports an array of modifier data to a character from PasteBin. Use ' +
+			'Imports a list of modifier data to a character from PasteBin. Use ' +
 			'exported data from another character. Only try to modify it if you know how to work with JSON!',
 		interactions: {
 			failedParsing:

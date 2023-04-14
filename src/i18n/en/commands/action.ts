@@ -44,11 +44,25 @@ export default {
 	},
 	import: {
 		name: 'import',
-		description: 'Imports actions from a Pastebin url.',
+		description: 'Imports a list of action data to a character from PasteBin.',
+		expandedDescription:
+			'Imports a list of action data to a character from PasteBin. Use ' +
+			'exported data from another character. Only try to modify it if you know how to work with JSON!',
+		interactions: {
+			failedParsing:
+				"Yip! I can't figure out how to read that! Try exporting another action to check and make " +
+				"sure you're formatting it right!",
+			badUrl: "Yip! I don't understand that Url! Copy the pastebin url for the pasted actions directly into the Url field.",
+			imported: 'Yip! I successfully imported those actions to {characterName}.',
+		},
 	},
 	export: {
 		name: 'export',
 		description: 'Exports actions to a Pastebin url.',
+		interactions: {
+			success:
+				"Yip! I've saved {characterName}'s modifiers to [this PasteBin link]({pasteBinLink})",
+		},
 	},
 	list: {
 		name: 'list',
