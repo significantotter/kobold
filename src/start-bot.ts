@@ -56,16 +56,19 @@ import {
 	ActionDetailSubCommand,
 	ActionCreateSubCommand,
 	ActionRemoveSubCommand,
-	ActionAddAttackSubCommand,
-	ActionAddSaveSubCommand,
-	ActionAddTextSubCommand,
-	ActionAddBasicDamageSubCommand,
-	ActionAddAdvancedDamageSubCommand,
-	ActionEditActionStageSubCommand,
 	ActionEditSubCommand,
-	ActionRemoveActionStageSubCommand,
 	ActionImportSubCommand,
 	ActionExportSubCommand,
+	//action stage
+	ActionStageCommand,
+	ActionStageAddAttackSubCommand,
+	ActionStageAddSaveSubCommand,
+	ActionStageAddTextSubCommand,
+	ActionStageAddBasicDamageSubCommand,
+	ActionStageAddAdvancedDamageSubCommand,
+	ActionStageEditSubCommand,
+	ActionStageRemoveSubCommand,
+
 	// help
 	HelpCommand,
 	// admin
@@ -175,16 +178,19 @@ async function start(): Promise<void> {
 			new ActionDetailSubCommand(),
 			new ActionCreateSubCommand(),
 			new ActionRemoveSubCommand(),
-			new ActionAddAttackSubCommand(),
-			new ActionAddSaveSubCommand(),
-			new ActionAddTextSubCommand(),
-			new ActionAddBasicDamageSubCommand(),
-			new ActionAddAdvancedDamageSubCommand(),
-			new ActionEditActionStageSubCommand(),
 			new ActionEditSubCommand(),
-			new ActionRemoveActionStageSubCommand(),
 			new ActionImportSubCommand(),
 			new ActionExportSubCommand(),
+		]),
+
+		new ActionStageCommand([
+			new ActionStageAddAttackSubCommand(),
+			new ActionStageAddSaveSubCommand(),
+			new ActionStageAddTextSubCommand(),
+			new ActionStageAddBasicDamageSubCommand(),
+			new ActionStageAddAdvancedDamageSubCommand(),
+			new ActionStageEditSubCommand(),
+			new ActionStageRemoveSubCommand(),
 		]),
 	];
 

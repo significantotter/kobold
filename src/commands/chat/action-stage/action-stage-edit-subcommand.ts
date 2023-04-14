@@ -18,14 +18,14 @@ import { Language } from '../../../models/enum-helpers/index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { CollectorUtils } from '../../../utils/collector-utils.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
-import { ActionOptions } from './action-command-options.js';
+import { ActionStageOptions } from './action-stage-command-options.js';
 
-export class ActionEditActionStageSubCommand implements Command {
-	public names = [Language.LL.commands.action.editActionStage.name()];
+export class ActionStageEditSubCommand implements Command {
+	public names = [Language.LL.commands.actionStage.edit.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.action.editActionStage.name(),
-		description: Language.LL.commands.action.editActionStage.description(),
+		name: Language.LL.commands.actionStage.edit.name(),
+		description: Language.LL.commands.actionStage.edit.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -37,9 +37,9 @@ export class ActionEditActionStageSubCommand implements Command {
 		option: AutocompleteFocusedOption
 	): Promise<ApplicationCommandOptionChoiceData[]> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === ActionOptions.ACTION_ROLL_TARGET_OPTION.name) {
+		if (option.name === ActionStageOptions.ACTION_ROLL_TARGET_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(ActionOptions.ACTION_ROLL_TARGET_OPTION.name);
+			const match = intr.options.getString(ActionStageOptions.ACTION_ROLL_TARGET_OPTION.name);
 
 			//get the active character
 			const activeCharacter = await CharacterUtils.getActiveCharacter(
@@ -76,14 +76,21 @@ export class ActionEditActionStageSubCommand implements Command {
 		LL: TranslationFunctions
 	): Promise<void> {
 		const actionRollTarget = intr.options.getString(
-			ActionOptions.ACTION_ROLL_TARGET_OPTION.name,
+			ActionStageOptions.ACTION_ROLL_TARGET_OPTION.name,
 			true
 		);
 		const fieldToEdit = intr.options.getString(
-			ActionOptions.ACTION_STAGE_EDIT_OPTION.name,
+			ActionStageOptions.ACTION_STAGE_EDIT_OPTION.name,
 			true
 		);
-		const newValue = intr.options.getString(ActionOptions.ACTION_Stage_Edit_VALUE.name, true);
+		const moveTo = intr.options.getString(
+			ActionStageOptions.ACTION_STAGE_MOVE_OPTION.name,
+			true
+		);
+		const newValue = intr.options.getString(
+			ActionStageOptions.ACTION_STAGE_EDIT_VALUE.name,
+			true
+		);
 		const [actionName, action] = actionRollTarget.split(' -- ').map(term => term.trim());
 
 		//get the active character
@@ -101,14 +108,14 @@ export class ActionEditActionStageSubCommand implements Command {
 			action => action.name.toLocaleLowerCase() === actionName.toLocaleLowerCase()
 		);
 		if (!matchedAction) {
-			await InteractionUtils.send(intr, LL.commands.action.interactions.notFound());
+			await InteractionUtils.send(intr, LL.commands.actionStage.interactions.notFound());
 			return;
 		}
 		const rollIndex = matchedAction.rolls.findIndex(
 			roll => roll.name.toLocaleLowerCase() === action.toLocaleLowerCase()
 		);
 		if (rollIndex === -1) {
-			await InteractionUtils.send(intr, LL.commands.action.interactions.rollNotFound());
+			await InteractionUtils.send(intr, LL.commands.actionStage.interactions.rollNotFound());
 			return;
 		}
 		const roll = matchedAction.rolls[rollIndex];
@@ -161,7 +168,7 @@ export class ActionEditActionStageSubCommand implements Command {
 		if (invalid) {
 			await InteractionUtils.send(
 				intr,
-				LL.commands.action.editActionStage.interactions.invalidField({
+				LL.commands.actionStage.edit.interactions.invalidField({
 					stageType: roll.type,
 				})
 			);
@@ -210,11 +217,19 @@ export class ActionEditActionStageSubCommand implements Command {
 			// invalid field
 			await InteractionUtils.send(
 				intr,
-				LL.commands.action.editActionStage.interactions.unknownField()
+				LL.commands.actionStage.edit.interactions.unknownField()
 			);
 		}
 
-		matchedAction.rolls[rollIndex][fieldToEdit] = finalValue;
+		if (moveTo === 'top') {
+			const roll = matchedAction.rolls.splice(rollIndex, 1)[0];
+			matchedAction.rolls = [roll, ...matchedAction.rolls];
+		} else if (moveTo === 'bottom') {
+			const roll = matchedAction.rolls.splice(rollIndex, 1)[0];
+			matchedAction.rolls = [...matchedAction.rolls, roll];
+		} else {
+			matchedAction.rolls[rollIndex][fieldToEdit] = finalValue;
+		}
 
 		await Character.query().updateAndFetchById(activeCharacter.id, {
 			actions: activeCharacter.actions,
@@ -223,7 +238,7 @@ export class ActionEditActionStageSubCommand implements Command {
 		//send a confirmation message
 		await InteractionUtils.send(
 			intr,
-			LL.commands.action.editActionStage.interactions.success({
+			LL.commands.actionStage.edit.interactions.success({
 				actionStageOption: fieldToEdit,
 				newValue: newValue,
 				actionStageName: currentActionName,

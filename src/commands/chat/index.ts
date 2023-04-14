@@ -55,16 +55,19 @@ export { ActionListSubCommand } from './action/action-list-subcommand.js';
 export { ActionDetailSubCommand } from './action/action-detail-subcommand.js';
 export { ActionCreateSubCommand } from './action/action-create-subcommand.js';
 export { ActionRemoveSubCommand } from './action/action-remove-subcommand.js';
-export { ActionAddAttackSubCommand } from './action/action-add-attack-subcommand.js';
-export { ActionAddSaveSubCommand } from './action/action-add-save-subcommand.js';
-export { ActionAddTextSubCommand } from './action/action-add-text-subcommand.js';
-export { ActionAddBasicDamageSubCommand } from './action/action-add-basic-damage-subcommand.js';
-export { ActionAddAdvancedDamageSubCommand } from './action/action-add-advanced-damage-subcommand.js';
 export { ActionEditSubCommand } from './action/action-edit-subcommand.js';
-export { ActionEditActionStageSubCommand } from './action/action-edit-action-stage-subcommand.js';
-export { ActionRemoveActionStageSubCommand } from './action/action-remove-action-stage-subcommand.js';
 export { ActionImportSubCommand } from './action/action-import-subcommand.js';
 export { ActionExportSubCommand } from './action/action-export-subcommand.js';
+
+// action stage command
+export { ActionStageCommand } from './action-stage/action-stage-command.js';
+export { ActionStageAddAttackSubCommand } from './action-stage/action-stage-add-attack-subcommand.js';
+export { ActionStageAddSaveSubCommand } from './action-stage/action-stage-add-save-subcommand.js';
+export { ActionStageAddTextSubCommand } from './action-stage/action-stage-add-text-subcommand.js';
+export { ActionStageAddBasicDamageSubCommand } from './action-stage/action-stage-add-basic-damage-subcommand.js';
+export { ActionStageAddAdvancedDamageSubCommand } from './action-stage/action-stage-add-advanced-damage-subcommand.js';
+export { ActionStageEditSubCommand } from './action-stage/action-stage-edit-subcommand.js';
+export { ActionStageRemoveSubCommand } from './action-stage/action-stage-remove-subcommand.js';
 
 // help command
 export { HelpCommand } from './help-command';

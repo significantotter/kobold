@@ -371,7 +371,6 @@ export class RollBuilder {
 			let natTwenty = null;
 			try {
 				natTwenty = this.determineNatOneOrNatTwenty(rollResult.results.reducedExpression);
-				console.log('crit? ' + natTwenty);
 			} catch (err) {
 				console.log(err);
 			}

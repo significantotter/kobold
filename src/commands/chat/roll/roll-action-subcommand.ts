@@ -164,6 +164,6 @@ export class RollActionSubCommand implements Command {
 				Language.LL.commands.roll.interactions.secretRollNotification()
 			);
 		}
-		await InteractionUtils.send(intr, response, isSecretRoll);
+		await response.sendBatches(intr, isSecretRoll);
 	}
 }

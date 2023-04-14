@@ -18,14 +18,14 @@ import { Language } from '../../../models/enum-helpers/index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { CollectorUtils } from '../../../utils/collector-utils.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
-import { ActionOptions } from './action-command-options.js';
+import { ActionStageOptions } from './action-stage-command-options.js';
 
-export class ActionRemoveActionStageSubCommand implements Command {
-	public names = [Language.LL.commands.action.removeActionStage.name()];
+export class ActionStageRemoveSubCommand implements Command {
+	public names = [Language.LL.commands.actionStage.remove.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.action.removeActionStage.name(),
-		description: Language.LL.commands.action.removeActionStage.description(),
+		name: Language.LL.commands.actionStage.remove.name(),
+		description: Language.LL.commands.actionStage.remove.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -38,9 +38,9 @@ export class ActionRemoveActionStageSubCommand implements Command {
 	): Promise<ApplicationCommandOptionChoiceData[]> {
 		if (!intr.isAutocomplete()) return;
 		console.log(option.name);
-		if (option.name === ActionOptions.ACTION_ROLL_TARGET_OPTION.name) {
+		if (option.name === ActionStageOptions.ACTION_ROLL_TARGET_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(ActionOptions.ACTION_ROLL_TARGET_OPTION.name);
+			const match = intr.options.getString(ActionStageOptions.ACTION_ROLL_TARGET_OPTION.name);
 
 			//get the active character
 			const activeCharacter = await CharacterUtils.getActiveCharacter(
@@ -78,7 +78,7 @@ export class ActionRemoveActionStageSubCommand implements Command {
 		LL: TranslationFunctions
 	): Promise<void> {
 		const actionRollTarget = intr.options.getString(
-			ActionOptions.ACTION_ROLL_TARGET_OPTION.name,
+			ActionStageOptions.ACTION_ROLL_TARGET_OPTION.name,
 			true
 		);
 		const [actionName, action] = actionRollTarget.split(' -- ').map(term => term.trim());
@@ -98,14 +98,14 @@ export class ActionRemoveActionStageSubCommand implements Command {
 			action => action.name.toLocaleLowerCase() === actionName.toLocaleLowerCase()
 		);
 		if (!matchedAction) {
-			await InteractionUtils.send(intr, LL.commands.action.interactions.notFound());
+			await InteractionUtils.send(intr, LL.commands.actionStage.interactions.notFound());
 			return;
 		}
 		const rollIndex = matchedAction.rolls.findIndex(
 			roll => roll.name.toLocaleLowerCase() === action.toLocaleLowerCase()
 		);
 		if (rollIndex === -1) {
-			await InteractionUtils.send(intr, LL.commands.action.interactions.rollNotFound());
+			await InteractionUtils.send(intr, LL.commands.actionStage.interactions.rollNotFound());
 			return;
 		}
 		const rollName = matchedAction.rolls[rollIndex].name;
@@ -119,7 +119,7 @@ export class ActionRemoveActionStageSubCommand implements Command {
 		//send a confirmation message
 		await InteractionUtils.send(
 			intr,
-			LL.commands.action.removeActionStage.interactions.success({
+			LL.commands.actionStage.remove.interactions.success({
 				actionStageName: rollName,
 				actionName: matchedAction.name,
 			})

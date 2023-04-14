@@ -544,7 +544,6 @@ export class ActionRoller {
 		let rollCounter = 0;
 
 		for (const roll of this.action.rolls) {
-			console.log(lastTargetingActionType, lastTargetingResult);
 			// main fields
 			const rollType = roll.type;
 			rollCounter += 1;

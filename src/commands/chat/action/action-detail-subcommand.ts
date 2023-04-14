@@ -143,6 +143,6 @@ export class ActionDetailSubCommand implements Command {
 
 		actionDetailEmbed.setFooter({ text: `rollTags: ${targetAction.tags.join(', ')}` });
 
-		await InteractionUtils.send(intr, { embeds: [actionDetailEmbed] });
+		await actionDetailEmbed.sendBatches(intr);
 	}
 }

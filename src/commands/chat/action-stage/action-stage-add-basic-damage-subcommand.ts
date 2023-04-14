@@ -18,16 +18,15 @@ import { Language } from '../../../models/enum-helpers/index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { CollectorUtils } from '../../../utils/collector-utils.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
-import { ActionOptions } from './action-command-options.js';
-import _ from 'lodash';
 import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
+import { ActionStageOptions } from './action-stage-command-options.js';
 
-export class ActionAddAttackSubCommand implements Command {
-	public names = [Language.LL.commands.action.addAttack.name()];
+export class ActionStageAddBasicDamageSubCommand implements Command {
+	public names = [Language.LL.commands.actionStage.addBasicDamage.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.action.addAttack.name(),
-		description: Language.LL.commands.action.addAttack.description(),
+		name: Language.LL.commands.actionStage.addBasicDamage.name(),
+		description: Language.LL.commands.actionStage.addBasicDamage.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -39,14 +38,11 @@ export class ActionAddAttackSubCommand implements Command {
 		option: AutocompleteFocusedOption
 	): Promise<ApplicationCommandOptionChoiceData[]> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === ActionOptions.ACTION_TARGET_OPTION.name) {
+		if (option.name === ActionStageOptions.ACTION_TARGET_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(ActionOptions.ACTION_TARGET_OPTION.name);
+			const match = intr.options.getString(ActionStageOptions.ACTION_TARGET_OPTION.name);
+
 			return await AutocompleteUtils.getTargetActionForActiveCharacter(intr, match);
-		} else if (option.name === ActionOptions.ACTION_ROLL_TARGET_DC_OPTION.name) {
-			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(ActionOptions.ACTION_ROLL_TARGET_DC_OPTION.name);
-			return await AutocompleteUtils.getAllMatchingRollsForActiveCharacter(intr, match);
 		}
 	}
 
@@ -55,16 +51,14 @@ export class ActionAddAttackSubCommand implements Command {
 		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
-		const targetAction = intr.options.getString(ActionOptions.ACTION_TARGET_OPTION.name);
-		const rollType = 'attack';
-		const rollName = intr.options.getString(ActionOptions.ACTION_ROLL_NAME_OPTION.name);
-		const diceRoll = intr.options.getString(ActionOptions.ACTION_DICE_ROLL_OPTION.name);
-
-		const rollTargetDC = intr.options.getString(
-			ActionOptions.ACTION_ROLL_TARGET_DC_OPTION.name
+		const targetAction = intr.options.getString(ActionStageOptions.ACTION_TARGET_OPTION.name);
+		const rollType = 'damage';
+		const rollName = intr.options.getString(ActionStageOptions.ACTION_ROLL_NAME_OPTION.name);
+		const basicDamageDiceRoll = intr.options.getString(
+			ActionStageOptions.ACTION_BASIC_DAMAGE_DICE_ROLL_OPTION.name
 		);
 		let allowRollModifiers = intr.options.getBoolean(
-			ActionOptions.ACTION_ROLL_ALLOW_MODIFIERS.name
+			ActionStageOptions.ACTION_ROLL_ALLOW_MODIFIERS.name
 		);
 		if (allowRollModifiers === null) allowRollModifiers = true;
 
@@ -84,7 +78,7 @@ export class ActionAddAttackSubCommand implements Command {
 			targetAction
 		);
 		if (!matchedActions || !matchedActions.length) {
-			await InteractionUtils.send(intr, LL.commands.action.interactions.notFound());
+			await InteractionUtils.send(intr, LL.commands.actionStage.interactions.notFound());
 			return;
 		}
 		const action =
@@ -93,7 +87,10 @@ export class ActionAddAttackSubCommand implements Command {
 			) || matchedActions[0];
 
 		if (action.rolls.find(roll => roll.name === rollName)) {
-			await InteractionUtils.send(intr, LL.commands.action.interactions.rollAlreadyExists());
+			await InteractionUtils.send(
+				intr,
+				LL.commands.actionStage.interactions.rollAlreadyExists()
+			);
 			return;
 		}
 
@@ -101,8 +98,7 @@ export class ActionAddAttackSubCommand implements Command {
 		action.rolls.push({
 			name: rollName,
 			type: rollType,
-			roll: diceRoll,
-			targetDC: rollTargetDC,
+			roll: basicDamageDiceRoll,
 			allowRollModifiers,
 		});
 
@@ -115,10 +111,10 @@ export class ActionAddAttackSubCommand implements Command {
 		// send the response message
 		await InteractionUtils.send(
 			intr,
-			LL.commands.action.interactions.rollAddSuccess({
+			LL.commands.actionStage.interactions.rollAddSuccess({
 				actionName: action.name,
 				rollName: rollName,
-				rollType: 'attack',
+				rollType: 'damage',
 			})
 		);
 	}

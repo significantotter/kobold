@@ -51,6 +51,6 @@ export class GameListSubCommand implements Command {
 					LL.commands.game.list.interactions.gameListEmbed.noCharacters(),
 			}))
 		);
-		InteractionUtils.send(intr, gameListEmbed);
+		await gameListEmbed.sendBatches(intr);
 	}
 }

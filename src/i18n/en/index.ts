@@ -9,6 +9,7 @@ import RollCommand from './commands/roll.js';
 import UtilsLang from './utils.js';
 import commandOptions from './commandOptions.js';
 import ActionCommand from './commands/action.js';
+import ActionStageCommand from './commands/actionStage.js';
 import SharedInteractions from './sharedInteractions.js';
 
 const links = {
@@ -56,6 +57,7 @@ const en: BaseTranslation = {
 	commands: {
 		admin: AdminCommand,
 		action: ActionCommand,
+		actionStage: ActionStageCommand,
 		help: HelpCommand,
 		character: CharacterCommand,
 		init: InitCommand,

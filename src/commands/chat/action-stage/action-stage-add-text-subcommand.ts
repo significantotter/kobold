@@ -18,15 +18,15 @@ import { Language } from '../../../models/enum-helpers/index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { CollectorUtils } from '../../../utils/collector-utils.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
-import { ActionOptions } from './action-command-options.js';
 import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
+import { ActionStageOptions } from './action-stage-command-options.js';
 
-export class ActionAddAdvancedDamageSubCommand implements Command {
-	public names = [Language.LL.commands.action.addAdvancedDamage.name()];
+export class ActionStageAddTextSubCommand implements Command {
+	public names = [Language.LL.commands.actionStage.addText.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.action.addAdvancedDamage.name(),
-		description: Language.LL.commands.action.addAdvancedDamage.description(),
+		name: Language.LL.commands.actionStage.addText.name(),
+		description: Language.LL.commands.actionStage.addText.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -38,9 +38,9 @@ export class ActionAddAdvancedDamageSubCommand implements Command {
 		option: AutocompleteFocusedOption
 	): Promise<ApplicationCommandOptionChoiceData[]> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === ActionOptions.ACTION_TARGET_OPTION.name) {
+		if (option.name === ActionStageOptions.ACTION_TARGET_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(ActionOptions.ACTION_TARGET_OPTION.name);
+			const match = intr.options.getString(ActionStageOptions.ACTION_TARGET_OPTION.name);
 
 			return await AutocompleteUtils.getTargetActionForActiveCharacter(intr, match);
 		}
@@ -51,23 +51,27 @@ export class ActionAddAdvancedDamageSubCommand implements Command {
 		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
-		const targetAction = intr.options.getString(ActionOptions.ACTION_TARGET_OPTION.name);
-		const rollType = 'advanced-damage';
-		const rollName = intr.options.getString(ActionOptions.ACTION_ROLL_NAME_OPTION.name);
-		const successDiceRoll = intr.options.getString(
-			ActionOptions.ACTION_SUCCESS_DICE_ROLL_OPTION.name
+		const rollType = 'text';
+		const rollName = intr.options.getString(ActionStageOptions.ACTION_ROLL_NAME_OPTION.name);
+		const targetAction = intr.options.getString(ActionStageOptions.ACTION_TARGET_OPTION.name);
+		const defaultText = intr.options.getString(
+			ActionStageOptions.ACTION_DEFAULT_TEXT_OPTION.name
 		);
-		const criticalSuccessDiceRoll = intr.options.getString(
-			ActionOptions.ACTION_CRITICAL_SUCCESS_DICE_ROLL_OPTION.name
+		const successText = intr.options.getString(
+			ActionStageOptions.ACTION_SUCCESS_TEXT_OPTION.name
 		);
-		const criticalFailureDiceRoll = intr.options.getString(
-			ActionOptions.ACTION_CRITICAL_FAILURE_DICE_ROLL_OPTION.name
+		const criticalSuccessText = intr.options.getString(
+			ActionStageOptions.ACTION_CRITICAL_SUCCESS_TEXT_OPTION.name
 		);
-		const failureDiceRoll = intr.options.getString(
-			ActionOptions.ACTION_FAILURE_DICE_ROLL_OPTION.name
+		const criticalFailureText = intr.options.getString(
+			ActionStageOptions.ACTION_CRITICAL_FAILURE_TEXT_OPTION.name
 		);
+		const failureText = intr.options.getString(
+			ActionStageOptions.ACTION_FAILURE_TEXT_OPTION.name
+		);
+		const extraTags = intr.options.getString(ActionStageOptions.ACTION_EXTRA_TAGS_OPTION.name);
 		let allowRollModifiers = intr.options.getBoolean(
-			ActionOptions.ACTION_ROLL_ALLOW_MODIFIERS.name
+			ActionStageOptions.ACTION_ROLL_ALLOW_MODIFIERS.name
 		);
 		if (allowRollModifiers === null) allowRollModifiers = true;
 
@@ -87,7 +91,7 @@ export class ActionAddAdvancedDamageSubCommand implements Command {
 			targetAction
 		);
 		if (!matchedActions || !matchedActions.length) {
-			await InteractionUtils.send(intr, LL.commands.action.interactions.notFound());
+			await InteractionUtils.send(intr, LL.commands.actionStage.interactions.notFound());
 			return;
 		}
 		const action =
@@ -96,17 +100,38 @@ export class ActionAddAdvancedDamageSubCommand implements Command {
 			) || matchedActions[0];
 
 		if (action.rolls.find(roll => roll.name === rollName)) {
-			await InteractionUtils.send(intr, LL.commands.action.interactions.rollAlreadyExists());
+			await InteractionUtils.send(
+				intr,
+				LL.commands.actionStage.interactions.rollAlreadyExists()
+			);
+			return;
+		}
+		if (
+			(defaultText ?? '').length +
+				(successText ?? '').length +
+				(criticalSuccessText ?? '').length +
+				(criticalFailureText ?? '').length +
+				(failureText ?? '').length >
+			900
+		) {
+			await InteractionUtils.send(
+				intr,
+				LL.commands.actionStage.addText.interactions.tooMuchText()
+			);
 			return;
 		}
 
 		if (
-			!successDiceRoll &&
-			!criticalSuccessDiceRoll &&
-			!criticalFailureDiceRoll &&
-			!failureDiceRoll
+			!defaultText &&
+			!successText &&
+			!criticalSuccessText &&
+			!criticalFailureText &&
+			!failureText
 		) {
-			await InteractionUtils.send(intr, LL.commands.action.interactions.rollAlreadyExists());
+			await InteractionUtils.send(
+				intr,
+				LL.commands.actionStage.addText.interactions.requireText()
+			);
 			return;
 		}
 
@@ -114,11 +139,13 @@ export class ActionAddAdvancedDamageSubCommand implements Command {
 		action.rolls.push({
 			name: rollName,
 			type: rollType,
-			successRoll: successDiceRoll,
-			criticalSuccessRoll: criticalSuccessDiceRoll,
-			criticalFailureRoll: criticalFailureDiceRoll,
-			failureRoll: failureDiceRoll,
+			defaultText,
+			successText,
+			criticalSuccessText,
+			criticalFailureText,
+			failureText,
 			allowRollModifiers,
+			extraTags: extraTags ? extraTags.split(',').map(tag => tag.trim()) : [],
 		});
 
 		// save the character
@@ -130,10 +157,10 @@ export class ActionAddAdvancedDamageSubCommand implements Command {
 		// send the response message
 		await InteractionUtils.send(
 			intr,
-			LL.commands.action.interactions.rollAddSuccess({
+			LL.commands.actionStage.interactions.rollAddSuccess({
 				actionName: action.name,
 				rollName: rollName,
-				rollType: 'advanced damage',
+				rollType: 'text',
 			})
 		);
 	}

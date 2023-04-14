@@ -91,6 +91,7 @@ export class RollCommand implements Command {
 						...ChatArgs.ATTACK_CHOICE_OPTION,
 						required: true,
 					},
+					ChatArgs.ROLL_TARGET_AC_OPTION,
 					{
 						...ChatArgs.ATTACK_ROLL_MODIFIER_OPTION,
 						required: false,

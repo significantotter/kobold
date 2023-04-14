@@ -26,10 +26,6 @@ export default {
 			},
 		},
 	},
-	actionTarget: {
-		name: 'action',
-		description: 'The target action.',
-	},
 	actionActions: {
 		name: 'actions',
 		description: 'The number of actions used.',
@@ -69,11 +65,165 @@ export default {
 		name: 'auto-heighten',
 		description: "Whether to default [actionLevel] to half the character's level rounded up.",
 	},
-	actionRollTarget: {
+	actionEditOption: {
+		name: 'edit-option',
+		description: 'The option to edit.',
+		choices: {
+			name: { name: 'name', value: 'name' },
+			description: { name: 'description', value: 'description' },
+			type: { name: 'type', value: 'type' },
+			actionCost: { name: 'action-cost', value: 'actionCost' },
+			baseLevel: { name: 'base-level', value: 'baseLevel' },
+			tags: { name: 'tags', value: 'tags' },
+			autoHeighten: { name: 'auto-heighten', value: 'autoHeighten' },
+		},
+	},
+	actionEditValue: {
+		name: 'edit-value',
+		description: 'The value to change the option to.',
+	},
+	actionTags: {
+		name: 'tags',
+		description: 'the tags used to describe this part of the action.',
+	},
+	actionImportUrl: {
+		name: 'url',
+		description: 'The url to import from',
+	},
+	actionImportMode: {
+		name: 'mode',
+		description: 'The import mode to use.',
+		choices: {
+			fullyReplace: {
+				name: 'overwrite-all',
+				value: 'overwrite-all',
+			},
+			overwrite: {
+				name: 'overwrite-on-conflict',
+				value: 'overwrite-on-conflict',
+			},
+			renameOnConflict: {
+				name: 'rename-on-conflict',
+				value: 'rename-on-conflict',
+			},
+			ignoreOnConflict: {
+				name: 'ignore-on-conflict',
+				value: 'ignore-on-conflict',
+			},
+		},
+	},
+	actionTarget: {
+		name: 'action',
+		description: 'The target action.',
+	},
+
+	// ACTION STAGE
+
+	actionStageTarget: {
+		name: 'action',
+		description: 'The target action.',
+	},
+	actionStageEditValue: {
+		name: 'edit-value',
+		description: 'The value to change the option to.',
+	},
+	actionStageRollName: {
+		name: 'roll-name',
+		description: 'The name of the roll.',
+	},
+	actionStageRollType: {
+		name: 'type',
+		description: 'The type of roll. Attack, damage, or other.',
+		choices: {
+			attack: {
+				name: 'attack',
+				value: 'attack',
+			},
+			damage: {
+				name: 'damage',
+				value: 'damage',
+			},
+			other: {
+				name: 'other',
+				value: 'other',
+			},
+		},
+	},
+	actionStageRollSave: {
+		name: 'target-ac-save-or-skill',
+		description: 'Whether the attack roll checks against AC, a Save DC, or a Skill DC.',
+	},
+	actionStageRollAbilityDc: {
+		name: 'save-dc-type',
+		description: 'Whether this saving throw is against your AC, Saving Throw, or Skill DC.',
+	},
+	actionStageSaveRollType: {
+		name: 'save-roll-type',
+		description: 'What the target rolls against the your DC.',
+	},
+	actionStageDiceRoll: {
+		name: 'dice-roll',
+		description:
+			'The dice rolled for the action. (damage-only) Dice rolled for a regular success.',
+	},
+	actionStageRollAllowModifiers: {
+		name: 'allow-modifiers',
+		description:
+			'Whether to allow modifiers to alter the roll. (Default: true). Ex. set to false for bonus damage',
+	},
+	actionStageBasicDamageDiceRoll: {
+		name: 'basic-damage-dice-roll',
+		description: 'A simple damage roll for an attack or save. Ignored if other rolls set.',
+	},
+	actionStageSuccessDiceRoll: {
+		name: 'success-dice-roll',
+		description: 'The damage dice optionally rolled for a success.',
+	},
+	actionStageCriticalSuccessDiceRoll: {
+		name: 'critical-success-dice-roll',
+		description: 'The damage dice optionally rolled for a critical success.',
+	},
+	actionStageCriticalFailureDiceRoll: {
+		name: 'critical-failure-dice-roll',
+		description: 'The damage dice optionally rolled for a critical failure.',
+	},
+	actionStageFailureDiceRoll: {
+		name: 'failure-dice-roll',
+		description: 'The damage dice optionally rolled for a regular failure.',
+	},
+	actionStageDefaultText: {
+		name: 'default-text',
+		description: 'Text shown no matter the success of an attack or save.',
+	},
+	actionStageSuccessText: {
+		name: 'success-text',
+		description: 'Text displayed for a success. Inline rolls using the format {diceFormat}',
+	},
+	actionStageCriticalSuccessText: {
+		name: 'critical-success-text',
+		description:
+			'Text displayed for a critical success. Inline rolls using the format {diceFormat}',
+	},
+	actionStageCriticalFailureText: {
+		name: 'critical-failure-text',
+		description:
+			'Text displayed for a critical failure. Inline rolls using the format {diceFormat}',
+	},
+	actionStageFailureText: {
+		name: 'failure-text',
+		description:
+			'Text displayed for a regular failure. Inline rolls using the format {diceFormat}',
+	},
+	actionStageExtraTags: {
+		name: 'extra-tags',
+		description:
+			'Extra tags that can optionally apply certain modifiers to the inline text roll.',
+	},
+	actionStageRollTarget: {
 		name: 'target-roll',
 		description: 'The target roll.',
 	},
-	actionStageEditOption: {
+	actionStageStageEditOption: {
 		name: 'edit-option',
 		description: 'The option to edit.',
 		choices: {
@@ -111,143 +261,12 @@ export default {
 			textExtraTags: { name: 'text-extra-tags', value: 'textExtraTags' },
 		},
 	},
-	actionEditOption: {
-		name: 'edit-option',
+	actionStageStageMoveOption: {
+		name: 'move-to',
 		description: 'The option to edit.',
 		choices: {
-			name: { name: 'name', value: 'name' },
-			description: { name: 'description', value: 'description' },
-			type: { name: 'type', value: 'type' },
-			actionCost: { name: 'action-cost', value: 'actionCost' },
-			baseLevel: { name: 'base-level', value: 'baseLevel' },
-			tags: { name: 'tags', value: 'tags' },
-			autoHeighten: { name: 'auto-heighten', value: 'autoHeighten' },
-		},
-	},
-	actionStageEditValue: {
-		name: 'edit-value',
-		description: 'The value to change the option to.',
-	},
-	actionRollName: {
-		name: 'roll-name',
-		description: 'The name of the roll.',
-	},
-	actionRollType: {
-		name: 'type',
-		description: 'The type of roll. Attack, damage, or other.',
-		choices: {
-			attack: {
-				name: 'attack',
-				value: 'attack',
-			},
-			damage: {
-				name: 'damage',
-				value: 'damage',
-			},
-			other: {
-				name: 'other',
-				value: 'other',
-			},
-		},
-	},
-	actionRollSave: {
-		name: 'target-ac-save-or-skill',
-		description: 'Whether the attack roll checks against AC, a Save DC, or a Skill DC.',
-	},
-	actionRollAbilityDc: {
-		name: 'save-dc-type',
-		description: 'Whether this saving throw is against your AC, Saving Throw, or Skill DC.',
-	},
-	actionSaveRollType: {
-		name: 'save-roll-type',
-		description: 'What the target rolls against the your DC.',
-	},
-	actionDiceRoll: {
-		name: 'dice-roll',
-		description:
-			'The dice rolled for the action. (damage-only) Dice rolled for a regular success.',
-	},
-	actionRollAllowModifiers: {
-		name: 'allow-modifiers',
-		description:
-			'Whether to allow modifiers to alter the roll. (Default: true). Ex. set to false for bonus damage',
-	},
-	actionBasicDamageDiceRoll: {
-		name: 'basic-damage-dice-roll',
-		description: 'A simple damage roll for an attack or save. Ignored if other rolls set.',
-	},
-	actionSuccessDiceRoll: {
-		name: 'success-dice-roll',
-		description: 'The damage dice optionally rolled for a success.',
-	},
-	actionCriticalSuccessDiceRoll: {
-		name: 'critical-success-dice-roll',
-		description: 'The damage dice optionally rolled for a critical success.',
-	},
-	actionCriticalFailureDiceRoll: {
-		name: 'critical-failure-dice-roll',
-		description: 'The damage dice optionally rolled for a critical failure.',
-	},
-	actionFailureDiceRoll: {
-		name: 'failure-dice-roll',
-		description: 'The damage dice optionally rolled for a regular failure.',
-	},
-	actionDefaultText: {
-		name: 'default-text',
-		description: 'Text shown no matter the success of an attack or save.',
-	},
-	actionSuccessText: {
-		name: 'success-text',
-		description: 'Text displayed for a success. Inline rolls using the format {diceFormat}',
-	},
-	actionCriticalSuccessText: {
-		name: 'critical-success-text',
-		description:
-			'Text displayed for a critical success. Inline rolls using the format {diceFormat}',
-	},
-	actionCriticalFailureText: {
-		name: 'critical-failure-text',
-		description:
-			'Text displayed for a critical failure. Inline rolls using the format {diceFormat}',
-	},
-	actionFailureText: {
-		name: 'failure-text',
-		description:
-			'Text displayed for a regular failure. Inline rolls using the format {diceFormat}',
-	},
-	actionExtraTags: {
-		name: 'extra-tags',
-		description:
-			'Extra tags that can optionally apply certain modifiers to the inline text roll.',
-	},
-	actionTags: {
-		name: 'tags',
-		description: 'the tags used to describe this part of the action.',
-	},
-	actionImportUrl: {
-		name: 'url',
-		description: 'The url to import from',
-	},
-	actionImportMode: {
-		name: 'mode',
-		description: 'The import mode to use.',
-		choices: {
-			fullyReplace: {
-				name: 'overwrite-all',
-				value: 'overwrite-all',
-			},
-			overwrite: {
-				name: 'overwrite-on-conflict',
-				value: 'overwrite-on-conflict',
-			},
-			renameOnConflict: {
-				name: 'rename-on-conflict',
-				value: 'rename-on-conflict',
-			},
-			ignoreOnConflict: {
-				name: 'ignore-on-conflict',
-				value: 'ignore-on-conflict',
-			},
+			top: { name: 'top', value: 'top' },
+			bottom: { name: 'bottom', value: 'bottom' },
 		},
 	},
 
@@ -505,6 +524,10 @@ export default {
 	rollTargetDc: {
 		name: 'target-dc',
 		description: 'The DC to roll attacks against.',
+	},
+	rollTargetAC: {
+		name: 'target-ac',
+		description: 'The AC to roll the attack against.',
 	},
 	rollSaveDiceRoll: {
 		name: 'save-dice-roll',

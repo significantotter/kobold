@@ -44,7 +44,8 @@ export class ActionCreateSubCommand implements Command {
 			.getString(ActionOptions.ACTION_NAME_OPTION.name)
 			.trim()
 			.toLowerCase();
-		const description = intr.options.getString(ActionOptions.ACTION_DESCRIPTION_OPTION.name);
+		const description =
+			intr.options.getString(ActionOptions.ACTION_DESCRIPTION_OPTION.name) ?? '';
 		const type = intr.options.getString(ActionOptions.ACTION_TYPE_OPTION.name);
 		const actionCost = intr.options.getString(ActionOptions.ACTION_ACTIONS_OPTION.name);
 		const baseLevel = intr.options.getInteger(ActionOptions.ACTION_BASE_LEVEL_OPTION.name);

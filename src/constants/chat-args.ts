@@ -107,6 +107,12 @@ export class ChatArgs {
 		required: false,
 		type: ApplicationCommandOptionType.Integer,
 	};
+	public static readonly ROLL_TARGET_AC_OPTION: APIApplicationCommandBasicOption = {
+		name: Language.LL.commandOptions.rollTargetAC.name(),
+		description: Language.LL.commandOptions.rollTargetAC.description(),
+		required: false,
+		type: ApplicationCommandOptionType.Integer,
+	};
 	public static readonly ROLL_SAVE_DICE_ROLL_OPTION: APIApplicationCommandBasicOption = {
 		name: Language.LL.commandOptions.rollSaveDiceRoll.name(),
 		description: Language.LL.commandOptions.rollSaveDiceRoll.description(),

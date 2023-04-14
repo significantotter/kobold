@@ -54,30 +54,10 @@ export class ActionListSubCommand implements Command {
 			});
 		}
 
-		const embeds = [];
-
-		const fieldChunks = _.chunk(fields, 25);
-
-		for (let i = 0; i < fieldChunks.length; i++) {
-			const fieldChunk = fieldChunks[i];
-			const fieldsPage = fieldChunks.length > 1 ? ` (${i + 1}/${fieldChunks.length})` : '';
-			const embed = await new KoboldEmbed();
-			embed.setCharacter(activeCharacter);
-			embed.setTitle(
-				`${activeCharacter.characterData.name}'s Available Actions` + fieldsPage
-			);
-			embed.addFields(fieldChunk);
-			embeds.push(embed);
-		}
-		if (embeds.length === 0) {
-			const embed = await new KoboldEmbed();
-			embed.setCharacter(activeCharacter);
-			embed.setTitle(`${activeCharacter.characterData.name}'s Available Actions`);
-			embeds.push(embed);
-		}
-
-		for (const embed of embeds) {
-			await InteractionUtils.send(intr, { embeds: [embed] });
-		}
+		const embed = await new KoboldEmbed();
+		embed.setCharacter(activeCharacter);
+		embed.setTitle(`${activeCharacter.characterData.name}'s Available Actions`);
+		embed.addFields(fields);
+		await embed.sendBatches(intr);
 	}
 }

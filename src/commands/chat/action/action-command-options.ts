@@ -11,7 +11,7 @@ export class ActionOptions {
 	public static readonly ACTION_DESCRIPTION_OPTION: APIApplicationCommandBasicOption = {
 		name: Language.LL.commandOptions.actionDescription.name(),
 		description: Language.LL.commandOptions.actionDescription.description(),
-		required: true,
+		required: false,
 		type: ApplicationCommandOptionType.String,
 	};
 	public static readonly ACTION_TYPE_OPTION: APIApplicationCommandBasicOption = {
@@ -85,95 +85,6 @@ export class ActionOptions {
 		autocomplete: true,
 		type: ApplicationCommandOptionType.String,
 	};
-	public static readonly ACTION_ROLL_ALLOW_MODIFIERS: APIApplicationCommandBasicOption = {
-		name: Language.LL.commandOptions.actionRollAllowModifiers.name(),
-		description: Language.LL.commandOptions.actionRollAllowModifiers.description(),
-		required: false,
-		type: ApplicationCommandOptionType.Boolean,
-	};
-	public static readonly ACTION_ROLL_TARGET_OPTION: APIApplicationCommandBasicOption = {
-		name: Language.LL.commandOptions.actionRollTarget.name(),
-		description: Language.LL.commandOptions.actionRollTarget.description(),
-		required: true,
-		autocomplete: true,
-		type: ApplicationCommandOptionType.String,
-	};
-	public static readonly ACTION_STAGE_EDIT_OPTION: APIApplicationCommandBasicOption = {
-		name: Language.LL.commandOptions.actionStageEditOption.name(),
-		description: Language.LL.commandOptions.actionStageEditOption.description(),
-		required: true,
-		type: ApplicationCommandOptionType.String,
-		choices: [
-			{
-				name: Language.LL.commandOptions.actionStageEditOption.choices.name.name(),
-				value: Language.LL.commandOptions.actionStageEditOption.choices.name.value(),
-			},
-			{
-				name: Language.LL.commandOptions.actionStageEditOption.choices.allowRollModifier.name(),
-				value: Language.LL.commandOptions.actionStageEditOption.choices.allowRollModifier.value(),
-			},
-			{
-				name: Language.LL.commandOptions.actionStageEditOption.choices.attackTargetDC.name(),
-				value: Language.LL.commandOptions.actionStageEditOption.choices.attackTargetDC.value(),
-			},
-			{
-				name: Language.LL.commandOptions.actionStageEditOption.choices.attackRoll.name(),
-				value: Language.LL.commandOptions.actionStageEditOption.choices.attackRoll.value(),
-			},
-			{
-				name: Language.LL.commandOptions.actionStageEditOption.choices.basicDamageRoll.name(),
-				value: Language.LL.commandOptions.actionStageEditOption.choices.basicDamageRoll.value(),
-			},
-			{
-				name: Language.LL.commandOptions.actionStageEditOption.choices.advancedDamageCritSuccessRoll.name(),
-				value: Language.LL.commandOptions.actionStageEditOption.choices.advancedDamageCritSuccessRoll.value(),
-			},
-			{
-				name: Language.LL.commandOptions.actionStageEditOption.choices.advancedDamageSuccessRoll.name(),
-				value: Language.LL.commandOptions.actionStageEditOption.choices.advancedDamageSuccessRoll.value(),
-			},
-			{
-				name: Language.LL.commandOptions.actionStageEditOption.choices.advancedDamageFailureRoll.name(),
-				value: Language.LL.commandOptions.actionStageEditOption.choices.advancedDamageFailureRoll.value(),
-			},
-			{
-				name: Language.LL.commandOptions.actionStageEditOption.choices.advancedDamageCritFailureRoll.name(),
-				value: Language.LL.commandOptions.actionStageEditOption.choices.advancedDamageCritFailureRoll.value(),
-			},
-			{
-				name: Language.LL.commandOptions.actionStageEditOption.choices.saveRollType.name(),
-				value: Language.LL.commandOptions.actionStageEditOption.choices.saveRollType.value(),
-			},
-			{
-				name: Language.LL.commandOptions.actionStageEditOption.choices.saveTargetDC.name(),
-				value: Language.LL.commandOptions.actionStageEditOption.choices.saveTargetDC.value(),
-			},
-			{
-				name: Language.LL.commandOptions.actionStageEditOption.choices.defaultText.name(),
-				value: Language.LL.commandOptions.actionStageEditOption.choices.defaultText.value(),
-			},
-			{
-				name: Language.LL.commandOptions.actionStageEditOption.choices.successText.name(),
-				value: Language.LL.commandOptions.actionStageEditOption.choices.successText.value(),
-			},
-			{
-				name: Language.LL.commandOptions.actionStageEditOption.choices.failureText.name(),
-				value: Language.LL.commandOptions.actionStageEditOption.choices.failureText.value(),
-			},
-			{
-				name: Language.LL.commandOptions.actionStageEditOption.choices.criticalSuccessText.name(),
-				value: Language.LL.commandOptions.actionStageEditOption.choices.criticalSuccessText.value(),
-			},
-			{
-				name: Language.LL.commandOptions.actionStageEditOption.choices.criticalFailureText.name(),
-				value: Language.LL.commandOptions.actionStageEditOption.choices.criticalFailureText.value(),
-			},
-			{
-				name: Language.LL.commandOptions.actionStageEditOption.choices.textExtraTags.name(),
-				value: Language.LL.commandOptions.actionStageEditOption.choices.textExtraTags.value(),
-			},
-		],
-	};
 	public static readonly ACTION_EDIT_OPTION: APIApplicationCommandBasicOption = {
 		name: Language.LL.commandOptions.actionEditOption.name(),
 		description: Language.LL.commandOptions.actionEditOption.description(),
@@ -210,139 +121,10 @@ export class ActionOptions {
 			},
 		],
 	};
-	public static readonly ACTION_Stage_Edit_VALUE: APIApplicationCommandBasicOption = {
-		name: Language.LL.commandOptions.actionStageEditValue.name(),
-		description: Language.LL.commandOptions.actionStageEditValue.description(),
+	public static readonly ACTION_EDIT_VALUE: APIApplicationCommandBasicOption = {
+		name: Language.LL.commandOptions.actionEditValue.name(),
+		description: Language.LL.commandOptions.actionEditValue.description(),
 		required: true,
-		type: ApplicationCommandOptionType.String,
-	};
-	public static readonly ACTION_ROLL_TARGET_DC_OPTION: APIApplicationCommandBasicOption = {
-		name: Language.LL.commandOptions.actionRollSave.name(),
-		description: Language.LL.commandOptions.actionRollSave.description(),
-		required: false,
-		type: ApplicationCommandOptionType.String,
-	};
-	public static readonly ACTION_ROLL_ABILITY_DC_OPTION: APIApplicationCommandBasicOption = {
-		name: Language.LL.commandOptions.actionRollAbilityDc.name(),
-		description: Language.LL.commandOptions.actionRollSave.description(),
-		required: true,
-		autocomplete: true,
-		type: ApplicationCommandOptionType.String,
-	};
-	public static readonly ACTION_SAVE_ROLL_TYPE_OPTION: APIApplicationCommandBasicOption = {
-		name: Language.LL.commandOptions.actionSaveRollType.name(),
-		description: Language.LL.commandOptions.actionSaveRollType.description(),
-		required: true,
-		autocomplete: true,
-		type: ApplicationCommandOptionType.String,
-	};
-	public static readonly ACTION_ROLL_TYPE_OPTION: APIApplicationCommandBasicOption = {
-		name: Language.LL.commandOptions.actionRollType.name(),
-		description: Language.LL.commandOptions.actionRollType.description(),
-		required: true,
-		type: ApplicationCommandOptionType.String,
-		choices: [
-			{
-				name: Language.LL.commandOptions.actionRollType.choices.attack.name(),
-				value: Language.LL.commandOptions.actionRollType.choices.attack.value(),
-			},
-			{
-				name: Language.LL.commandOptions.actionRollType.choices.damage.name(),
-				value: Language.LL.commandOptions.actionRollType.choices.damage.value(),
-			},
-			{
-				name: Language.LL.commandOptions.actionRollType.choices.other.name(),
-				value: Language.LL.commandOptions.actionRollType.choices.other.value(),
-			},
-		],
-	};
-	public static readonly ACTION_ROLL_NAME_OPTION: APIApplicationCommandBasicOption = {
-		name: Language.LL.commandOptions.actionRollName.name(),
-		description: Language.LL.commandOptions.actionRollName.description(),
-		required: true,
-		type: ApplicationCommandOptionType.String,
-	};
-	public static readonly ACTION_DICE_ROLL_OPTION: APIApplicationCommandBasicOption = {
-		name: Language.LL.commandOptions.actionDiceRoll.name(),
-		description: Language.LL.commandOptions.actionDiceRoll.description(),
-		required: true,
-		type: ApplicationCommandOptionType.String,
-	};
-	public static readonly ACTION_BASIC_DAMAGE_DICE_ROLL_OPTION: APIApplicationCommandBasicOption =
-		{
-			name: Language.LL.commandOptions.actionBasicDamageDiceRoll.name(),
-			description: Language.LL.commandOptions.actionBasicDamageDiceRoll.description(),
-			required: true,
-			type: ApplicationCommandOptionType.String,
-		};
-	public static readonly ACTION_SUCCESS_DICE_ROLL_OPTION: APIApplicationCommandBasicOption = {
-		name: Language.LL.commandOptions.actionSuccessDiceRoll.name(),
-		description: Language.LL.commandOptions.actionSuccessDiceRoll.description(),
-		required: false,
-		type: ApplicationCommandOptionType.String,
-	};
-	public static readonly ACTION_CRITICAL_SUCCESS_DICE_ROLL_OPTION: APIApplicationCommandBasicOption =
-		{
-			name: Language.LL.commandOptions.actionCriticalSuccessDiceRoll.name(),
-			description: Language.LL.commandOptions.actionCriticalSuccessDiceRoll.description(),
-			required: false,
-			type: ApplicationCommandOptionType.String,
-		};
-	public static readonly ACTION_CRITICAL_FAILURE_DICE_ROLL_OPTION: APIApplicationCommandBasicOption =
-		{
-			name: Language.LL.commandOptions.actionCriticalFailureDiceRoll.name(),
-			description: Language.LL.commandOptions.actionCriticalFailureDiceRoll.description(),
-			required: false,
-			type: ApplicationCommandOptionType.String,
-		};
-	public static readonly ACTION_FAILURE_DICE_ROLL_OPTION: APIApplicationCommandBasicOption = {
-		name: Language.LL.commandOptions.actionFailureDiceRoll.name(),
-		description: Language.LL.commandOptions.actionFailureDiceRoll.description(),
-		required: false,
-		type: ApplicationCommandOptionType.String,
-	};
-	public static readonly ACTION_DEFAULT_TEXT_OPTION: APIApplicationCommandBasicOption = {
-		name: Language.LL.commandOptions.actionDefaultText.name(),
-		description: Language.LL.commandOptions.actionDefaultText.description(),
-		required: false,
-		type: ApplicationCommandOptionType.String,
-	};
-	public static readonly ACTION_SUCCESS_TEXT_OPTION: APIApplicationCommandBasicOption = {
-		name: Language.LL.commandOptions.actionSuccessText.name(),
-		description: Language.LL.commandOptions.actionSuccessText.description({
-			diceFormat: '{{1d20}}',
-		}),
-		required: false,
-		type: ApplicationCommandOptionType.String,
-	};
-	public static readonly ACTION_CRITICAL_SUCCESS_TEXT_OPTION: APIApplicationCommandBasicOption = {
-		name: Language.LL.commandOptions.actionCriticalSuccessText.name(),
-		description: Language.LL.commandOptions.actionCriticalSuccessText.description({
-			diceFormat: '{{1d20}}',
-		}),
-		required: false,
-		type: ApplicationCommandOptionType.String,
-	};
-	public static readonly ACTION_CRITICAL_FAILURE_TEXT_OPTION: APIApplicationCommandBasicOption = {
-		name: Language.LL.commandOptions.actionCriticalFailureText.name(),
-		description: Language.LL.commandOptions.actionCriticalFailureText.description({
-			diceFormat: '{{1d20}}',
-		}),
-		required: false,
-		type: ApplicationCommandOptionType.String,
-	};
-	public static readonly ACTION_FAILURE_TEXT_OPTION: APIApplicationCommandBasicOption = {
-		name: Language.LL.commandOptions.actionFailureText.name(),
-		description: Language.LL.commandOptions.actionFailureText.description({
-			diceFormat: '{{1d20}}',
-		}),
-		required: false,
-		type: ApplicationCommandOptionType.String,
-	};
-	public static readonly ACTION_EXTRA_TAGS_OPTION: APIApplicationCommandBasicOption = {
-		name: Language.LL.commandOptions.actionExtraTags.name(),
-		description: Language.LL.commandOptions.actionExtraTags.description(),
-		required: false,
 		type: ApplicationCommandOptionType.String,
 	};
 	public static readonly ACTION_TAGS_OPTION: APIApplicationCommandBasicOption = {

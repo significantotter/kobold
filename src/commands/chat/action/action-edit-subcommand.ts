@@ -70,7 +70,7 @@ export class ActionEditSubCommand implements Command {
 	): Promise<void> {
 		const actionTarget = intr.options.getString(ActionOptions.ACTION_TARGET_OPTION.name, true);
 		const fieldToEdit = intr.options.getString(ActionOptions.ACTION_EDIT_OPTION.name, true);
-		const newValue = intr.options.getString(ActionOptions.ACTION_Stage_Edit_VALUE.name, true);
+		const newValue = intr.options.getString(ActionOptions.ACTION_EDIT_VALUE.name, true);
 
 		//get the active character
 		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id, intr.guildId);

@@ -16,10 +16,6 @@ export default {
 			alreadyExists: 'Yip! A action named {actionName} already exists for {characterName}.',
 		},
 	},
-	createSpell: {
-		name: 'create-spell',
-		description: 'Creates a spell action with spell-specific properties.',
-	},
 	remove: {
 		name: 'remove',
 		description: 'Removes an action',
@@ -34,37 +30,8 @@ export default {
 			success: 'Yip! I removed the action {actionName}.',
 		},
 	},
-	addAttack: {
-		name: 'add-attack',
-		description: 'Adds an attack roll to an action',
-	},
-	addBasicDamage: {
-		name: 'add-basic-damage',
-		description:
-			'Adds a basic damage roll to an action. Automatically adjusts for crits or failures.',
-	},
-	addAdvancedDamage: {
-		name: 'add-advanced-damage',
-		description:
-			'Adds an advanced damage roll to an action. Requires manual input for all successes and failures.',
-	},
-	addText: {
-		name: 'add-text',
-		description: 'Adds a text block to an action. Can include dice rolls surrounded by [[]]',
-		interactions: {
-			requireText: 'Yip! You must provide at least one text input to add text to an action!',
-		},
-	},
-	addSave: {
-		name: 'add-save',
-		description: 'Adds a saving throw to an action',
-		interactions: {
-			requireText:
-				'Yip! You must provide at least one save result to add a save to an action!',
-		},
-	},
 	editAction: {
-		name: 'edit-action',
+		name: 'edit',
 		description: 'Edits an action. "none" clears a field.',
 		interactions: {
 			success: 'Yip! {actionOption} was set to {newValue} for the action {actionName}.',
@@ -73,24 +40,6 @@ export default {
 				'Yip! Valid action costs are "one", "two", "three", "free", "variable", and "reaction".',
 			invalidInteger: 'Yip! This field must be a positive, whole number.',
 			unknownField: "Yip! That's not a field I recognize for an action!",
-		},
-	},
-	editActionStage: {
-		name: 'edit-action-stage',
-		description: 'Edits a roll, text, or save on an action. "none" clears a field.',
-		interactions: {
-			success:
-				'Yip! {actionStageOption} was set to {newValue} for action stage {actionStageName} in the action {actionName}.',
-			unknownField: "Yip! That's not a field I recognize for action stages!",
-			invalidField: 'Yip! That field is not valid for a {stageType} stage.',
-		},
-	},
-	removeActionStage: {
-		name: 'remove-action-stage',
-		description: 'Removes a roll, text, or save from an action',
-		interactions: {
-			success:
-				'Yip! I removed the action stage {actionStageName} from the action {actionName}.',
 		},
 	},
 	import: {
