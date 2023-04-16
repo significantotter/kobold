@@ -69,6 +69,13 @@ export { ActionStageAddAdvancedDamageSubCommand } from './action-stage/action-st
 export { ActionStageEditSubCommand } from './action-stage/action-stage-edit-subcommand.js';
 export { ActionStageRemoveSubCommand } from './action-stage/action-stage-remove-subcommand.js';
 
+// roll macro command
+export { RollMacroCommand } from './roll-macro/roll-macro-command.js';
+export { RollMacroListSubCommand } from './roll-macro/roll-macro-list-subcommand.js';
+export { RollMacroCreateSubCommand } from './roll-macro/roll-macro-create-subcommand.js';
+export { RollMacroRemoveSubCommand } from './roll-macro/roll-macro-remove-subcommand.js';
+export { RollMacroUpdateSubCommand } from './roll-macro/roll-macro-update-subcommand.js';
+
 // help command
 export { HelpCommand } from './help-command';
 

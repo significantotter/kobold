@@ -102,6 +102,25 @@ export class CharacterUtils {
 	}
 
 	/**
+	 * Given a string, finds all roll macros containing that string on a given character
+	 * @param targetCharacter the character to check for matching roll macros
+	 * @param rollMacroText the text to match to roll macros
+	 * @returns all roll macros that contain the given roll macroText
+	 */
+	public static findPossibleRollMacroFromString(
+		targetCharacter: Character,
+		rollMacroText: string
+	): Character['rollMacros'] {
+		const matchedRollMacros = [];
+		for (const rollMacro of targetCharacter.rollMacros || []) {
+			if (rollMacro.name.toLowerCase().includes(rollMacroText.toLowerCase())) {
+				matchedRollMacros.push(rollMacro);
+			}
+		}
+		return matchedRollMacros;
+	}
+
+	/**
 	 * Given a string, finds all modifiers containing that string on a given character
 	 * @param targetCharacter the character to check for matching modifiers
 	 * @param modifierText the text to match to modifiers

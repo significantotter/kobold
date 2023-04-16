@@ -37,7 +37,6 @@ export class ActionStageRemoveSubCommand implements Command {
 		option: AutocompleteFocusedOption
 	): Promise<ApplicationCommandOptionChoiceData[]> {
 		if (!intr.isAutocomplete()) return;
-		console.log(option.name);
 		if (option.name === ActionStageOptions.ACTION_ROLL_TARGET_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
 			const match = intr.options.getString(ActionStageOptions.ACTION_ROLL_TARGET_OPTION.name);
@@ -57,7 +56,6 @@ export class ActionStageRemoveSubCommand implements Command {
 			for (const action of activeCharacter.actions || []) {
 				for (const roll of action.rolls) {
 					const rollMatchText = `${action.name.toLocaleLowerCase()} -- ${roll.name.toLocaleLowerCase()}`;
-					console.log(rollMatchText, match);
 					if (rollMatchText.includes(match.toLocaleLowerCase())) {
 						matchedActionRolls.push({
 							name: rollMatchText,

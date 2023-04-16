@@ -6,6 +6,7 @@ import HelpCommand from './commands/help.js';
 import InitCommand from './commands/init.js';
 import ModifierCommand from './commands/modifier.js';
 import RollCommand from './commands/roll.js';
+import RollMacroCommand from './commands/rollMacro.js';
 import UtilsLang from './utils.js';
 import commandOptions from './commandOptions.js';
 import ActionCommand from './commands/action.js';
@@ -63,6 +64,7 @@ const en: BaseTranslation = {
 		init: InitCommand,
 		modifier: ModifierCommand,
 		roll: RollCommand,
+		rollMacro: RollMacroCommand,
 		game: GameCommand,
 	},
 	commandOptions: commandOptions,

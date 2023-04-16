@@ -27,6 +27,18 @@ export class Character extends BaseModel {
 	}
 
 	/**
+	 * Fetches a character's roll macro by the roll macro's name
+	 * @param name the name of the roll macro
+	 * @returns the roll macro
+	 */
+	public getRollMacroByName(name: string): Character['rollMacros'][0] | null {
+		return this.rollMacros.find(
+			rollMacro =>
+				rollMacro.name.toLocaleLowerCase().trim() === name.toLocaleLowerCase().trim()
+		);
+	}
+
+	/**
 	 * Fetches a character's modifier by the modifier name
 	 * @param name the name of the modifier
 	 * @returns the modifier

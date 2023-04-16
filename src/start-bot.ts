@@ -68,6 +68,12 @@ import {
 	ActionStageAddAdvancedDamageSubCommand,
 	ActionStageEditSubCommand,
 	ActionStageRemoveSubCommand,
+	// roll macro
+	RollMacroCommand,
+	RollMacroListSubCommand,
+	RollMacroCreateSubCommand,
+	RollMacroUpdateSubCommand,
+	RollMacroRemoveSubCommand,
 
 	// help
 	HelpCommand,
@@ -191,6 +197,13 @@ async function start(): Promise<void> {
 			new ActionStageAddAdvancedDamageSubCommand(),
 			new ActionStageEditSubCommand(),
 			new ActionStageRemoveSubCommand(),
+		]),
+
+		new RollMacroCommand([
+			new RollMacroListSubCommand(),
+			new RollMacroCreateSubCommand(),
+			new RollMacroUpdateSubCommand(),
+			new RollMacroRemoveSubCommand(),
 		]),
 	];
 

@@ -112,7 +112,7 @@ export class RollBuilder {
 		} else if (extraAttribute?.value !== undefined) {
 			return [extraAttribute.value, extraAttribute?.tags || []];
 		} else {
-			return [null, []];
+			return [0, []];
 		}
 	}
 
@@ -130,8 +130,6 @@ export class RollBuilder {
 		for (const token of splitExpression) {
 			if (attributeRegex.test(token)) {
 				const [resultValue, resultTags] = this.parseAttribute(token, extraAttributes);
-				// skip attributes that don't exist
-				if (resultValue === null) continue;
 				// apply the rest
 				if (resultValue < 0) finalExpression += `(${resultValue})`;
 				else finalExpression += resultValue;
@@ -141,6 +139,26 @@ export class RollBuilder {
 			}
 		}
 		return [finalExpression, newTags];
+	}
+
+	public expandRollMacros(rollExpression: string): string {
+		if (!this.character) return;
+		const characterRollMacros = this.character.rollMacros || [];
+		const maxDepth = 10;
+		let resultRollExpression = rollExpression.toLocaleLowerCase();
+		for (let i = 0; i < maxDepth; i++) {
+			let rollExpressionBeforeExpanding = resultRollExpression;
+			// replace every instance of each macro in the rollExpression with the macro's value
+			for (const macro of characterRollMacros) {
+				resultRollExpression = resultRollExpression.replaceAll(
+					`[${macro.name.toLocaleLowerCase()}]`,
+					macro.macro
+				);
+			}
+			// if we haven't changed the roll expression, then we're done checking macros
+			if (rollExpressionBeforeExpanding === resultRollExpression) break;
+		}
+		return resultRollExpression;
 	}
 
 	/**
@@ -183,9 +201,11 @@ export class RollBuilder {
 			const modifier = 0;
 			let modifiers = [];
 
+			let expandedExpression = this.expandRollMacros(rollExpression);
+
 			// check for any referenced character attributes in the roll
 			let [parsedExpression, parsedTags] = this.parseAttributes(
-				rollExpression,
+				expandedExpression,
 				extraAttributes
 			);
 

@@ -16,6 +16,21 @@
 			"type": "string",
 			"description": "The discord id of the user who imported the character"
 		},
+		"rollMacros": {
+			"type": "array",
+			"description": "An array of roll macro objects that allow the substituting of saved roll expressions for simple keywords.",
+			"items": {
+				"type": "object",
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"macro": {
+						"type": "string"
+					}
+				}
+			}
+		},
 		"attributes": {
 			"type": "array",
 			"description": "An array of attribute objects that can be used to apply character values to dice expressions. These attributes are set internally and uneditable.",

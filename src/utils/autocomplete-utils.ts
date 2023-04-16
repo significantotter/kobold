@@ -74,4 +74,26 @@ export class AutocompleteUtils {
 		}
 		return results;
 	}
+
+	public static async getAllMatchingRollsMacrosForCharacter(
+		intr: AutocompleteInteraction<CacheType>,
+		matchText: string
+	) {
+		//get the active character
+		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id, intr.guildId);
+		if (!activeCharacter) {
+			//no choices if we don't have a character to match against
+			return [];
+		}
+		//find a save on the character matching the autocomplete string
+		const matchedRollMacros = CharacterUtils.findPossibleRollMacroFromString(
+			activeCharacter,
+			matchText
+		).map(modifier => ({
+			name: modifier.name,
+			value: modifier.name,
+		}));
+		//return the matched saves
+		return matchedRollMacros;
+	}
 }

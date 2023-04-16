@@ -553,4 +553,16 @@ export default {
 		name: 'note',
 		description: 'A note about the reason for the roll.',
 	},
+
+	// ROLL MACROS
+
+	rollMacroName: {
+		name: 'name',
+		description: 'The name of the roll macro.',
+	},
+	rollMacroValue: {
+		name: 'value',
+		description:
+			'A mini-roll expression. Must be able to evaluate on its own. Ex. "5" or "d4+[str]"',
+	},
 };

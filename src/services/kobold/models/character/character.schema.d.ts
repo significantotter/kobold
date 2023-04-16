@@ -22,6 +22,14 @@ export interface Character {
 	 */
 	userId?: string;
 	/**
+	 * An array of roll macro objects that allow the substituting of saved roll expressions for simple keywords.
+	 */
+	rollMacros?: {
+		name?: string;
+		macro?: string;
+		[k: string]: any;
+	}[];
+	/**
 	 * An array of attribute objects that can be used to apply character values to dice expressions. These attributes are set internally and uneditable.
 	 */
 	attributes?: {

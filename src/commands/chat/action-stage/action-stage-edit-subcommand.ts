@@ -83,10 +83,7 @@ export class ActionStageEditSubCommand implements Command {
 			ActionStageOptions.ACTION_STAGE_EDIT_OPTION.name,
 			true
 		);
-		const moveTo = intr.options.getString(
-			ActionStageOptions.ACTION_STAGE_MOVE_OPTION.name,
-			true
-		);
+		const moveTo = intr.options.getString(ActionStageOptions.ACTION_STAGE_MOVE_OPTION.name);
 		const newValue = intr.options.getString(
 			ActionStageOptions.ACTION_STAGE_EDIT_VALUE.name,
 			true
