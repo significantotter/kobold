@@ -323,7 +323,7 @@ export default {
 					' and the bot will roll the attack and damage for her!',
 				fireball:
 					'Lilac Sootscale, a level 7 kobold sorceress, wants to make her spell Fireball as a custom action. \n\n' +
-					'She starts off by creating the action itself. The action\'s name is "Phantom Pain". It\'s a first level spell, so ' +
+					'She starts off by creating the action itself. The action\'s name is "Fireball". It\'s a first level spell, so ' +
 					"we won't turn on automatic heightening, but we will give it a base level of 3. It costs 2 actions to cast. She adds some tags to " +
 					'indicate that the spell is an instantaneous fire spell from her bloodline (so she can add her modifiers ' +
 					'for dangerous sorcery and her blood magic to the damage!). So, she creates it with the following command:\n\n' +
