@@ -88,6 +88,7 @@ export const CharacterFactory = CharacterFactoryClass.define(({ onCreate, transi
 		modifiers: createRandomModifiers(faker.datatype.number({ max: 50 })),
 		actions: [],
 		customActions: [],
+		rollMacros: [],
 		calculatedStats: CalculatedStatsFactory.build(),
 		characterData: CharacterDataFactory.build(characterDataOptions),
 		isActiveCharacter: faker.datatype.boolean(),

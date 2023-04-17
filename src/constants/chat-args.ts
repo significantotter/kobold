@@ -95,6 +95,30 @@ export class ChatArgs {
 		required: true,
 		type: ApplicationCommandOptionType.String,
 	};
+	public static readonly HEIGHTEN_LEVEL_OPTION: APIApplicationCommandBasicOption = {
+		name: Language.LL.commandOptions.rollHeightenLevel.name(),
+		description: Language.LL.commandOptions.rollHeightenLevel.description(),
+		required: false,
+		type: ApplicationCommandOptionType.Integer,
+	};
+	public static readonly ROLL_TARGET_DC_OPTION: APIApplicationCommandBasicOption = {
+		name: Language.LL.commandOptions.rollTargetDc.name(),
+		description: Language.LL.commandOptions.rollTargetDc.description(),
+		required: false,
+		type: ApplicationCommandOptionType.Integer,
+	};
+	public static readonly ROLL_TARGET_AC_OPTION: APIApplicationCommandBasicOption = {
+		name: Language.LL.commandOptions.rollTargetAC.name(),
+		description: Language.LL.commandOptions.rollTargetAC.description(),
+		required: false,
+		type: ApplicationCommandOptionType.Integer,
+	};
+	public static readonly ROLL_SAVE_DICE_ROLL_OPTION: APIApplicationCommandBasicOption = {
+		name: Language.LL.commandOptions.rollSaveDiceRoll.name(),
+		description: Language.LL.commandOptions.rollSaveDiceRoll.description(),
+		required: false,
+		type: ApplicationCommandOptionType.String,
+	};
 	public static readonly ROLL_NOTE_OPTION: APIApplicationCommandBasicOption = {
 		name: Language.LL.commandOptions.rollNote.name(),
 		description: Language.LL.commandOptions.rollNote.description(),

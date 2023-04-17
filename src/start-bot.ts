@@ -21,6 +21,7 @@ import {
 	RollPerceptionSubCommand,
 	RollAbilitySubCommand,
 	RollAttackSubCommand,
+	RollActionSubCommand,
 	// init
 	InitCommand,
 	InitAddSubCommand,
@@ -49,6 +50,31 @@ import {
 	GameRollSubCommand,
 	GameInitSubCommand,
 	GameListSubCommand,
+	// action
+	ActionCommand,
+	ActionListSubCommand,
+	ActionDetailSubCommand,
+	ActionCreateSubCommand,
+	ActionRemoveSubCommand,
+	ActionEditSubCommand,
+	ActionImportSubCommand,
+	ActionExportSubCommand,
+	//action stage
+	ActionStageCommand,
+	ActionStageAddAttackSubCommand,
+	ActionStageAddSaveSubCommand,
+	ActionStageAddTextSubCommand,
+	ActionStageAddBasicDamageSubCommand,
+	ActionStageAddAdvancedDamageSubCommand,
+	ActionStageEditSubCommand,
+	ActionStageRemoveSubCommand,
+	// roll macro
+	RollMacroCommand,
+	RollMacroListSubCommand,
+	RollMacroCreateSubCommand,
+	RollMacroUpdateSubCommand,
+	RollMacroRemoveSubCommand,
+
 	// help
 	HelpCommand,
 	// admin
@@ -110,6 +136,7 @@ async function start(): Promise<void> {
 		//Roll Commands
 		new RollCommand([
 			new RollDiceSubCommand(),
+			new RollActionSubCommand(),
 			new RollAttackSubCommand(),
 			new RollSkillSubCommand(),
 			new RollSaveSubCommand(),
@@ -149,6 +176,34 @@ async function start(): Promise<void> {
 			new GameInitSubCommand(),
 			new GameListSubCommand(),
 			new GameManageSubCommand(),
+		]),
+
+		// Action commands
+		new ActionCommand([
+			new ActionListSubCommand(),
+			new ActionDetailSubCommand(),
+			new ActionCreateSubCommand(),
+			new ActionRemoveSubCommand(),
+			new ActionEditSubCommand(),
+			new ActionImportSubCommand(),
+			new ActionExportSubCommand(),
+		]),
+
+		new ActionStageCommand([
+			new ActionStageAddAttackSubCommand(),
+			new ActionStageAddSaveSubCommand(),
+			new ActionStageAddTextSubCommand(),
+			new ActionStageAddBasicDamageSubCommand(),
+			new ActionStageAddAdvancedDamageSubCommand(),
+			new ActionStageEditSubCommand(),
+			new ActionStageRemoveSubCommand(),
+		]),
+
+		new RollMacroCommand([
+			new RollMacroListSubCommand(),
+			new RollMacroCreateSubCommand(),
+			new RollMacroUpdateSubCommand(),
+			new RollMacroRemoveSubCommand(),
 		]),
 	];
 

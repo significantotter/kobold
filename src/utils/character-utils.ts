@@ -102,6 +102,25 @@ export class CharacterUtils {
 	}
 
 	/**
+	 * Given a string, finds all roll macros containing that string on a given character
+	 * @param targetCharacter the character to check for matching roll macros
+	 * @param rollMacroText the text to match to roll macros
+	 * @returns all roll macros that contain the given roll macroText
+	 */
+	public static findPossibleRollMacroFromString(
+		targetCharacter: Character,
+		rollMacroText: string
+	): Character['rollMacros'] {
+		const matchedRollMacros = [];
+		for (const rollMacro of targetCharacter.rollMacros || []) {
+			if (rollMacro.name.toLowerCase().includes(rollMacroText.toLowerCase())) {
+				matchedRollMacros.push(rollMacro);
+			}
+		}
+		return matchedRollMacros;
+	}
+
+	/**
 	 * Given a string, finds all modifiers containing that string on a given character
 	 * @param targetCharacter the character to check for matching modifiers
 	 * @param modifierText the text to match to modifiers
@@ -118,6 +137,25 @@ export class CharacterUtils {
 			}
 		}
 		return matchedModifiers;
+	}
+
+	/**
+	 * Given a string, finds all actions containing that string on a given character
+	 * @param targetCharacter the character to check for matching actions
+	 * @param actionText the text to match to actions
+	 * @returns all actions that contain the given actionText
+	 */
+	public static findPossibleActionFromString(
+		targetCharacter: Character,
+		actionText: string
+	): Character['actions'] {
+		const matchedActions = [];
+		for (const action of targetCharacter.actions || []) {
+			if (action.name.toLowerCase().includes(actionText.toLowerCase())) {
+				matchedActions.push(action);
+			}
+		}
+		return matchedActions;
 	}
 
 	/**

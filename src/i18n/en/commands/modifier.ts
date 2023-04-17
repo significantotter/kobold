@@ -51,6 +51,7 @@ export default {
 				"Yip! I didn't understand the target tag expression you provided. Tags can be" +
 				' any expression in a format like "attack or skill". ' +
 				'See [this link](https://github.com/joewalnes/filtrex) for more details.',
+			doesntEvaluateError: 'Yip! That modifier is not a valid number or dice roll.',
 		},
 	},
 	remove: {
@@ -79,9 +80,9 @@ export default {
 	},
 	import: {
 		name: 'import',
-		description: 'Imports an array of modifier data to a character from PasteBin.',
+		description: 'Imports a list of modifier data to a character from PasteBin.',
 		expandedDescription:
-			'Imports an array of modifier data to a character from PasteBin. Use ' +
+			'Imports a list of modifier data to a character from PasteBin. Use ' +
 			'exported data from another character. Only try to modify it if you know how to work with JSON!',
 		interactions: {
 			failedParsing:

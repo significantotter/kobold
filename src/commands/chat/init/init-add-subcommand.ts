@@ -90,7 +90,7 @@ export class InitAddSubCommand implements Command {
 				rollExpression: diceExpression || 'd20',
 				tags: ['skill', 'perception', 'initiative'],
 			});
-			finalInitiative = rollBuilder.rollResults[0]?.results?.total || 0;
+			finalInitiative = rollBuilder.getRollTotalArray()[0] || 0;
 			rollResultMessage = rollBuilder.compileEmbed();
 		}
 

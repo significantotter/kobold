@@ -3,6 +3,7 @@
 		"target": "es2021",
 		"module": "CommonJS",
 		"moduleResolution": "Node",
+		"composite": true,
 		"lib": ["es2021"],
 		"declaration": true,
 		"sourceMap": true,

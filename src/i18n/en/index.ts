@@ -6,8 +6,12 @@ import HelpCommand from './commands/help.js';
 import InitCommand from './commands/init.js';
 import ModifierCommand from './commands/modifier.js';
 import RollCommand from './commands/roll.js';
-import UtilsLang from './commands/utils.js';
+import RollMacroCommand from './commands/rollMacro.js';
+import UtilsLang from './utils.js';
 import commandOptions from './commandOptions.js';
+import ActionCommand from './commands/action.js';
+import ActionStageCommand from './commands/actionStage.js';
+import SharedInteractions from './sharedInteractions.js';
 
 const links = {
 	thumbnail: 'https://i.imgur.com/cVOfw8P.png',
@@ -50,16 +54,17 @@ const en: BaseTranslation = {
 	terms: {
 		perception: 'Perception',
 	},
-	sharedInteractions: {
-		choiceRegistered: 'You chose {choice}.',
-	},
+	sharedInteractions: SharedInteractions,
 	commands: {
 		admin: AdminCommand,
+		action: ActionCommand,
+		actionStage: ActionStageCommand,
 		help: HelpCommand,
 		character: CharacterCommand,
 		init: InitCommand,
 		modifier: ModifierCommand,
 		roll: RollCommand,
+		rollMacro: RollMacroCommand,
 		game: GameCommand,
 	},
 	commandOptions: commandOptions,

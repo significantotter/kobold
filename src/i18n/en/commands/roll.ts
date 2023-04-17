@@ -89,4 +89,14 @@ export default {
 			},
 		},
 	},
+	action: {
+		name: 'action',
+		options: '[action] [*action_modifier*] [*damage_modifier*] [*note*] [*secret*]',
+		description: `rolls an action for your active character`,
+		interactions: {
+			rollEmbed: {
+				rollDescription: 'used {actionName}!',
+			},
+		},
+	},
 };

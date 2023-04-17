@@ -88,7 +88,7 @@ export class CharacterListSubCommand implements Command {
 			const characterListEmbed = new KoboldEmbed()
 				.setTitle(LL.commands.character.list.interactions.characterListEmbed.title())
 				.addFields(characterFields);
-			await InteractionUtils.send(intr, characterListEmbed);
+			await characterListEmbed.sendBatches(intr);
 		}
 	}
 }

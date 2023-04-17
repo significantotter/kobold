@@ -22,6 +22,14 @@ export interface Character {
 	 */
 	userId?: string;
 	/**
+	 * An array of roll macro objects that allow the substituting of saved roll expressions for simple keywords.
+	 */
+	rollMacros?: {
+		name?: string;
+		macro?: string;
+		[k: string]: any;
+	}[];
+	/**
 	 * An array of attribute objects that can be used to apply character values to dice expressions. These attributes are set internally and uneditable.
 	 */
 	attributes?: {
@@ -50,13 +58,69 @@ export interface Character {
 		description?: string | null;
 		type?: string;
 		targetTags?: string;
-		value?: number;
+		value?: number | string;
 		[k: string]: any;
 	}[];
 	/**
 	 * An array of default actions set up for the user. These allow the user to make certain roll operations as a single command.
 	 */
-	actions?: any[];
+	actions?: {
+		name?: string;
+		description?: string;
+		type?: string;
+		actionCost?: string | null;
+		baseLevel?: number | null;
+		autoHeighten?: boolean;
+		tags?: string[];
+		rolls?: (
+			| {
+					name?: string;
+					type?: "attack";
+					targetDC?: string | null;
+					roll?: string | null;
+					allowRollModifiers?: boolean;
+					[k: string]: any;
+			  }
+			| {
+					name?: string;
+					type?: "damage";
+					roll?: string | null;
+					allowRollModifiers?: boolean;
+					[k: string]: any;
+			  }
+			| {
+					name?: string;
+					type?: "advanced-damage";
+					criticalSuccessRoll?: string | null;
+					criticalFailureRoll?: string | null;
+					successRoll?: string | null;
+					failureRoll?: string | null;
+					allowRollModifiers?: boolean;
+					[k: string]: any;
+			  }
+			| {
+					name?: string;
+					type?: "save";
+					saveRollType?: string | null;
+					saveTargetDC?: string | null;
+					allowRollModifiers?: boolean;
+					[k: string]: any;
+			  }
+			| {
+					name?: string;
+					type?: "text";
+					defaultText?: string | null;
+					criticalSuccessText?: string | null;
+					criticalFailureText?: string | null;
+					successText?: string | null;
+					failureText?: string | null;
+					allowRollModifiers?: boolean;
+					extraTags?: string[];
+					[k: string]: any;
+			  }
+		)[];
+		[k: string]: any;
+	}[];
 	/**
 	 * An array of customizable actions set up for the user. These allow the user to make certain roll operations as a single command.
 	 */

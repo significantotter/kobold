@@ -284,7 +284,7 @@ export class InitiativeUtils {
 				tags: ['initiative'],
 				LL,
 			});
-			finalInitiative = response.rollResults[0]?.results?.total || 0;
+			finalInitiative = response.getRollTotalArray()[0] || 0;
 			rollResultMessage = response.compileEmbed();
 		} else if (diceExpression) {
 			const rollBuilder = new RollBuilder({
@@ -296,7 +296,7 @@ export class InitiativeUtils {
 				rollExpression: diceExpression,
 				tags: ['initiative'],
 			});
-			finalInitiative = rollBuilder.rollResults[0]?.results?.total || 0;
+			finalInitiative = rollBuilder.getRollTotalArray()[0] || 0;
 			rollResultMessage = rollBuilder.compileEmbed();
 		} else {
 			const response = await DiceUtils.rollSkill({
@@ -306,7 +306,7 @@ export class InitiativeUtils {
 				modifierExpression: diceExpression,
 				tags: ['initiative'],
 			});
-			finalInitiative = response.rollResults[0]?.results?.total || 0;
+			finalInitiative = response.getRollTotalArray()[0] || 0;
 			rollResultMessage = response.compileEmbed();
 		}
 

@@ -19,6 +19,8 @@ import { CharacterUtils } from '../../../utils/character-utils.js';
 import { DiceUtils, RollBuilder } from '../../../utils/dice-utils.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Language } from '../../../models/enum-helpers/index.js';
+import { Character } from '../../../services/kobold/models/index.js';
+import { ActionRoller } from '../../../utils/action-roller.js';
 
 export class RollAttackSubCommand implements Command {
 	public names = [Language.LL.commands.roll.attack.name()];
@@ -77,6 +79,7 @@ export class RollAttackSubCommand implements Command {
 			ChatArgs.DAMAGE_ROLL_MODIFIER_OPTION.name
 		);
 		const rollNote = intr.options.getString(ChatArgs.ROLL_NOTE_OPTION.name);
+		const targetAC = intr.options.getInteger(ChatArgs.ROLL_TARGET_AC_OPTION.name);
 
 		const secretRoll = intr.options.getString(ChatArgs.ROLL_SECRET_OPTION.name);
 		const isSecretRoll =
@@ -101,42 +104,53 @@ export class RollAttackSubCommand implements Command {
 			activeCharacter.calculatedStats.weapons as WG.NamedBonus[]
 		);
 
-		const rollBuilder = new RollBuilder({
-			character: activeCharacter,
-			rollNote,
-			rollDescription:
+		// build a little action from the attack!
+
+		const action: Character['actions'][0] = {
+			name: targetAttack.Name,
+			type: 'attack',
+			actionCost: 'oneAction',
+			tags: [],
+			rolls: [
+				{
+					type: 'attack',
+					name: 'To Hit',
+					roll: DiceUtils.buildDiceExpression(
+						'd20',
+						String(targetAttack.Bonus),
+						attackModifierExpression
+					),
+					targetDC: 'AC',
+					allowRollModifiers: true,
+				},
+				{
+					type: 'damage',
+					name: 'Damage',
+					roll: DiceUtils.buildDiceExpression(
+						String(DiceUtils.parseDiceFromWgDamageField(targetAttack.Damage)),
+						null,
+						damageModifierExpression
+					),
+					allowRollModifiers: true,
+				},
+			],
+		};
+
+		const actionResult = new ActionRoller(action, activeCharacter)
+			.buildRoll(
+				rollNote,
 				Language.LL.commands.roll.attack.interactions.rollEmbed.rollDescription({
 					attackName: targetAttack.Name,
 				}),
-			LL,
-		});
-
-		//if we a to hit defined, roll the attack's to-hit
-		if (targetAttack.Bonus !== undefined) {
-			rollBuilder.addRoll({
-				rollExpression: DiceUtils.buildDiceExpression(
-					'd20',
-					String(targetAttack.Bonus),
-					attackModifierExpression
-				),
-				rollTitle: Language.LL.commands.roll.attack.interactions.rollEmbed.toHit(),
-				tags: ['attack'],
+				{
+					targetDC: targetAC,
+					attackModifierExpression: attackModifierExpression,
+					damageModifierExpression: damageModifierExpression,
+				}
+			)
+			.compileEmbed({
+				forceFields: true,
 			});
-		}
-
-		//if we have damage defined, roll that as well
-		if (targetAttack.Damage !== undefined) {
-			rollBuilder.addRoll({
-				rollExpression: DiceUtils.buildDiceExpression(
-					String(DiceUtils.parseDiceFromWgDamageField(targetAttack.Damage)),
-					null,
-					damageModifierExpression
-				),
-				rollTitle: Language.LL.commands.roll.attack.interactions.rollEmbed.damage(),
-				tags: ['damage'],
-			});
-		}
-		const response = rollBuilder.compileEmbed();
 
 		if (notifyRoll) {
 			await InteractionUtils.send(
@@ -144,6 +158,6 @@ export class RollAttackSubCommand implements Command {
 				Language.LL.commands.roll.interactions.secretRollNotification()
 			);
 		}
-		await InteractionUtils.send(intr, response, isSecretRoll);
+		actionResult.sendBatches(intr, isSecretRoll);
 	}
 }

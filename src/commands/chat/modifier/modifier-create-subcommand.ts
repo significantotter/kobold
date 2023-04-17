@@ -15,6 +15,7 @@ import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Language } from '../../../models/enum-helpers/index.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
 import { compileExpression } from 'filtrex';
+import { DiceRollResult, DiceUtils, RollBuilder } from '../../../utils/dice-utils.js';
 
 export class ModifierCreateSubCommand implements Command {
 	public names = [Language.LL.commands.modifier.create.name()];
@@ -52,7 +53,7 @@ export class ModifierCreateSubCommand implements Command {
 		const description = intr.options.getString(
 			ModifierOptions.MODIFIER_DESCRIPTION_OPTION.name
 		);
-		const value = intr.options.getNumber(ModifierOptions.MODIFIER_VALUE_OPTION.name);
+		const value = intr.options.getString(ModifierOptions.MODIFIER_VALUE_OPTION.name);
 		let targetTags = intr.options
 			.getString(ModifierOptions.MODIFIER_TARGET_TAGS_OPTION.name)
 			.trim();
@@ -69,6 +70,7 @@ export class ModifierCreateSubCommand implements Command {
 			return;
 		}
 
+		// the tags for the modifier have to be valid
 		try {
 			compileExpression(targetTags);
 		} catch (err) {
@@ -81,6 +83,21 @@ export class ModifierCreateSubCommand implements Command {
 		}
 		if (activeCharacter.modifiers.length + 1 > 50) {
 			await InteractionUtils.send(intr, LL.commands.modifier.interactions.tooMany());
+			return;
+		}
+
+		// we must be able to evaluate the modifier as a roll for this character
+		const result = DiceUtils.parseAndEvaluateDiceExpression({
+			rollExpression: value,
+			character: activeCharacter,
+			LL: Language.LL,
+		});
+
+		if (result.error) {
+			await InteractionUtils.send(
+				intr,
+				LL.commands.modifier.create.interactions.doesntEvaluateError()
+			);
 			return;
 		}
 
@@ -98,6 +115,7 @@ export class ModifierCreateSubCommand implements Command {
 			],
 		});
 
+		//send a response
 		await InteractionUtils.send(
 			intr,
 			LL.commands.modifier.create.interactions.created({
@@ -105,8 +123,6 @@ export class ModifierCreateSubCommand implements Command {
 				characterName: activeCharacter.characterData.name,
 			})
 		);
-		return;
-		//send a response
 		return;
 	}
 }
