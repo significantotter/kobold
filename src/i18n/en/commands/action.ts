@@ -30,7 +30,7 @@ export default {
 			success: 'Yip! I removed the action {actionName}.',
 		},
 	},
-	editAction: {
+	edit: {
 		name: 'edit',
 		description: 'Edits an action. "none" clears a field.',
 		interactions: {

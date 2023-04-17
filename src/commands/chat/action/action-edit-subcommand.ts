@@ -22,11 +22,11 @@ import { ActionOptions } from './action-command-options.js';
 import _ from 'lodash';
 
 export class ActionEditSubCommand implements Command {
-	public names = [Language.LL.commands.action.editAction.name()];
+	public names = [Language.LL.commands.action.edit.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.action.editAction.name(),
-		description: Language.LL.commands.action.editAction.description(),
+		name: Language.LL.commands.action.edit.name(),
+		description: Language.LL.commands.action.edit.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -108,7 +108,7 @@ export class ActionEditSubCommand implements Command {
 				} else {
 					await InteractionUtils.send(
 						intr,
-						LL.commands.action.editAction.interactions.invalidActionType()
+						LL.commands.action.edit.interactions.invalidActionType()
 					);
 					return;
 				}
@@ -132,7 +132,7 @@ export class ActionEditSubCommand implements Command {
 				} else {
 					await InteractionUtils.send(
 						intr,
-						LL.commands.action.editAction.interactions.invalidActionCost()
+						LL.commands.action.edit.interactions.invalidActionCost()
 					);
 					return;
 				}
@@ -144,7 +144,7 @@ export class ActionEditSubCommand implements Command {
 			if (isNaN(finalValue) || finalValue < 1) {
 				await InteractionUtils.send(
 					intr,
-					LL.commands.action.editAction.interactions.invalidInteger()
+					LL.commands.action.edit.interactions.invalidInteger()
 				);
 			}
 		}
@@ -160,10 +160,7 @@ export class ActionEditSubCommand implements Command {
 			);
 		} else {
 			// invalid field
-			await InteractionUtils.send(
-				intr,
-				LL.commands.action.editAction.interactions.unknownField()
-			);
+			await InteractionUtils.send(intr, LL.commands.action.edit.interactions.unknownField());
 		}
 
 		matchedAction[fieldToEdit] = finalValue;
@@ -175,7 +172,7 @@ export class ActionEditSubCommand implements Command {
 		//send a confirmation message
 		await InteractionUtils.send(
 			intr,
-			LL.commands.action.editAction.interactions.success({
+			LL.commands.action.edit.interactions.success({
 				actionOption: fieldToEdit,
 				newValue: newValue,
 				actionName: currentActionName,

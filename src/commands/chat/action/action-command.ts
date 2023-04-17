@@ -61,8 +61,8 @@ export class ActionCommand implements Command {
 				options: [{ ...ActionOptions.ACTION_TARGET_OPTION, autocomplete: true }],
 			},
 			{
-				name: Language.LL.commands.action.editAction.name(),
-				description: Language.LL.commands.action.editAction.description(),
+				name: Language.LL.commands.action.edit.name(),
+				description: Language.LL.commands.action.edit.description(),
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
 				options: [
 					ActionOptions.ACTION_TARGET_OPTION,

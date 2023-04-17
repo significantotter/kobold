@@ -67,7 +67,9 @@ export class ActionStageCommand implements Command {
 			},
 			{
 				name: Language.LL.commands.actionStage.addText.name(),
-				description: Language.LL.commands.actionStage.addText.description(),
+				description: Language.LL.commands.actionStage.addText.description({
+					addTextRollInput: '{{}}',
+				}),
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
 				options: [
 					ActionStageOptions.ACTION_TARGET_OPTION,

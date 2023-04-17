@@ -40,10 +40,7 @@ export class ActionCreateSubCommand implements Command {
 			);
 			return;
 		}
-		let name = intr.options
-			.getString(ActionOptions.ACTION_NAME_OPTION.name)
-			.trim()
-			.toLowerCase();
+		let name = intr.options.getString(ActionOptions.ACTION_NAME_OPTION.name).trim();
 		const description =
 			intr.options.getString(ActionOptions.ACTION_DESCRIPTION_OPTION.name) ?? '';
 		const type = intr.options.getString(ActionOptions.ACTION_TYPE_OPTION.name);

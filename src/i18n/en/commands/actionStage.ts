@@ -24,7 +24,8 @@ export default {
 	},
 	addText: {
 		name: 'add-text',
-		description: 'Adds a text block to an action. Can include dice rolls surrounded by [[]]',
+		description:
+			'Adds a text block to an action. Can include dice rolls surrounded by {addTextRollInput}',
 		interactions: {
 			requireText: 'Yip! You must provide at least one text input to add text to an action!',
 			tooMuchText:

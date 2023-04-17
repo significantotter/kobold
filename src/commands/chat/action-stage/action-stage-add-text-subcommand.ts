@@ -26,7 +26,9 @@ export class ActionStageAddTextSubCommand implements Command {
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: Language.LL.commands.actionStage.addText.name(),
-		description: Language.LL.commands.actionStage.addText.description(),
+		description: Language.LL.commands.actionStage.addText.description({
+			addTextRollInput: '{{}}',
+		}),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};

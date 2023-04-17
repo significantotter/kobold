@@ -99,7 +99,7 @@ export class ActionDetailSubCommand implements Command {
 			}\n`;
 		}
 		description = `${targetAction.description}`;
-		actionDetailEmbed.setDescription(description);
+		if (description !== '') actionDetailEmbed.setDescription(description);
 
 		for (const roll of targetAction.rolls) {
 			if (roll.type === 'attack') {

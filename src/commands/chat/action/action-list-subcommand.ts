@@ -49,7 +49,7 @@ export class ActionListSubCommand implements Command {
 			)}`;
 			fields.push({
 				name: action.name,
-				value: action.description,
+				value: action.description || '\u200B',
 				inline: true,
 			});
 		}

@@ -15,7 +15,7 @@ import { Command, CommandDeferType } from '../index.js';
 import _ from 'lodash';
 
 function createCommandOperationHelpField(command, operation, LL) {
-	const langBase = LL.commands[command][_.camelCase(operation)];
+	const langBase = LL.commands[_.camelCase(command)][_.camelCase(operation)];
 
 	let fieldName = `\`/${command} ${operation}`;
 	if (langBase.options()) fieldName += ` ${langBase.options()}`;
@@ -85,6 +85,55 @@ export class HelpCommand implements Command {
 			{
 				name: Language.LL.commands.help.attributesAndTags.name(),
 				description: Language.LL.commands.help.attributesAndTags.description(),
+				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				options: [],
+			},
+			{
+				name: Language.LL.commands.help.makingACustomAction.name(),
+				description: Language.LL.commands.help.makingACustomAction.description(),
+				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				options: [
+					{
+						name: 'example-choice',
+						description: 'Which custom action should we walk through?',
+						required: true,
+						type: ApplicationCommandOptionType.String,
+						choices: [
+							{
+								name: 'Produce Flame (simple attack roll cantrip)',
+								value: 'produceFlame',
+							},
+							{
+								name: 'Fireball (simple save with basic damage)',
+								value: 'fireball',
+							},
+							{
+								name: 'Phantom Pain (save with complex results)',
+								value: 'phantomPain',
+							},
+							{
+								name: 'Gunslinger: Paired Shots (mutliple strikes with deadly crits)',
+								value: 'gunslingerPairedShots',
+							},
+						],
+					},
+				],
+			},
+			{
+				name: Language.LL.commands.help.rollMacro.name(),
+				description: Language.LL.commands.help.rollMacro.description(),
+				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				options: [],
+			},
+			{
+				name: Language.LL.commands.help.action.name(),
+				description: Language.LL.commands.help.action.description(),
+				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				options: [],
+			},
+			{
+				name: Language.LL.commands.help.actionStage.name(),
+				description: Language.LL.commands.help.actionStage.description(),
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
 				options: [],
 			},
@@ -184,6 +233,7 @@ export class HelpCommand implements Command {
 							`\`/${LL.commands.roll.name()} ${LL.commands.roll.skill.name()}\` ${LL.commands.roll.skill.description()}\n` +
 							`\`/${LL.commands.roll.name()} ${LL.commands.roll.perception.name()}\` ${LL.commands.roll.perception.description()}\n` +
 							`\`/${LL.commands.roll.name()} ${LL.commands.roll.save.name()}\` ${LL.commands.roll.save.description()}\n` +
+							`\`/${LL.commands.roll.name()} ${LL.commands.roll.action.name()}\` ${LL.commands.roll.action.description()}\n` +
 							`\`/${LL.commands.roll.name()} ${LL.commands.roll.attack.name()}\` ${LL.commands.roll.attack.description()}\n` +
 							`\`/${LL.commands.roll.name()} ${LL.commands.roll.ability.name()}\` ${LL.commands.roll.ability.description()}`,
 					},
@@ -220,6 +270,40 @@ export class HelpCommand implements Command {
 							`\`/${LL.commands.game.name()} ${LL.commands.game.roll.name()}\` ${LL.commands.game.roll.description()}\n` +
 							`\`/${LL.commands.game.name()} ${LL.commands.game.init.name()}\` ${LL.commands.game.init.description()}\n` +
 							`\`/${LL.commands.game.name()} ${LL.commands.game.list.name()}\` ${LL.commands.game.list.description()}\n`,
+					},
+					{
+						name: LL.commands.action.name(),
+						value:
+							`\`/${LL.commands.action.name()} ${LL.commands.action.create.name()}\` ${LL.commands.action.create.description()}\n` +
+							`\`/${LL.commands.action.name()} ${LL.commands.action.detail.name()}\` ${LL.commands.action.detail.description()}\n` +
+							`\`/${LL.commands.action.name()} ${LL.commands.action.edit.name()}\` ${LL.commands.action.edit.description()}\n` +
+							`\`/${LL.commands.action.name()} ${LL.commands.action.export.name()}\` ${LL.commands.action.export.description()}\n` +
+							`\`/${LL.commands.action.name()} ${LL.commands.action.import.name()}\` ${LL.commands.action.import.description()}\n` +
+							`\`/${LL.commands.action.name()} ${LL.commands.action.list.name()}\` ${LL.commands.action.list.description()}\n` +
+							`\`/${LL.commands.action.name()} ${LL.commands.action.remove.name()}\` ${LL.commands.action.remove.description()}\n`,
+					},
+					{
+						name: LL.commands.actionStage.name(),
+						value:
+							`\`/${LL.commands.actionStage.name()} ${LL.commands.actionStage.addAttack.name()}\` ${LL.commands.actionStage.addAttack.description()}\n` +
+							`\`/${LL.commands.actionStage.name()} ${LL.commands.actionStage.addSave.name()}\` ${LL.commands.actionStage.addSave.description()}\n` +
+							`\`/${LL.commands.actionStage.name()} ${LL.commands.actionStage.addBasicDamage.name()}\` ${LL.commands.actionStage.addBasicDamage.description()}\n` +
+							`\`/${LL.commands.actionStage.name()} ${LL.commands.actionStage.addAdvancedDamage.name()}\` ${LL.commands.actionStage.addAdvancedDamage.description()}\n` +
+							`\`/${LL.commands.actionStage.name()} ${LL.commands.actionStage.addText.name()}\` ${LL.commands.actionStage.addText.description(
+								{
+									addTextRollInput: '{{}}',
+								}
+							)}\n` +
+							`\`/${LL.commands.actionStage.name()} ${LL.commands.actionStage.edit.name()}\` ${LL.commands.actionStage.edit.description()}\n` +
+							`\`/${LL.commands.actionStage.name()} ${LL.commands.actionStage.remove.name()}\` ${LL.commands.actionStage.remove.description()}\n`,
+					},
+					{
+						name: LL.commands.rollMacro.name(),
+						value:
+							`\`/${LL.commands.rollMacro.name()} ${LL.commands.rollMacro.create.name()}\` ${LL.commands.rollMacro.create.description()}\n` +
+							`\`/${LL.commands.rollMacro.name()} ${LL.commands.rollMacro.update.name()}\` ${LL.commands.rollMacro.update.description()}\n` +
+							`\`/${LL.commands.rollMacro.name()} ${LL.commands.rollMacro.list.name()}\` ${LL.commands.rollMacro.list.description()}\n` +
+							`\`/${LL.commands.rollMacro.name()} ${LL.commands.rollMacro.remove.name()}\` ${LL.commands.rollMacro.remove.description()}\n`,
 					},
 				]);
 				break;
@@ -274,6 +358,7 @@ export class HelpCommand implements Command {
 						LL.commands.roll.save.name(),
 						LL.commands.roll.ability.name(),
 						LL.commands.roll.attack.name(),
+						LL.commands.roll.action.name(),
 					].map(command =>
 						createCommandOperationHelpField(LL.commands.roll.name(), command, LL)
 					)
@@ -314,6 +399,66 @@ export class HelpCommand implements Command {
 				);
 				break;
 			}
+
+			case Language.LL.commands.help.action.name(): {
+				embed.setTitle(LL.commands.help.action.interactions.embed.title());
+				embed.setDescription(LL.commands.help.action.interactions.embed.description());
+				embed.addFields(
+					[
+						LL.commands.action.create.name(),
+						LL.commands.action.detail.name(),
+						LL.commands.action.list.name(),
+						LL.commands.action.edit.name(),
+						LL.commands.action.remove.name(),
+						LL.commands.action.export.name(),
+						LL.commands.action.import.name(),
+					].map(command =>
+						createCommandOperationHelpField(LL.commands.action.name(), command, LL)
+					)
+				);
+				break;
+			}
+
+			case Language.LL.commands.help.actionStage.name(): {
+				embed.setTitle(LL.commands.help.actionStage.interactions.embed.title());
+				embed.setDescription(LL.commands.help.actionStage.interactions.embed.description());
+				const actionStageFields = [
+					LL.commands.actionStage.addAttack.name(),
+					LL.commands.actionStage.addSave.name(),
+					LL.commands.actionStage.addBasicDamage.name(),
+					LL.commands.actionStage.addAdvancedDamage.name(),
+					LL.commands.actionStage.addText.name(),
+					LL.commands.actionStage.edit.name(),
+					LL.commands.actionStage.remove.name(),
+				].map(command =>
+					createCommandOperationHelpField(LL.commands.actionStage.name(), command, LL)
+				);
+				actionStageFields.splice(3, 0, {
+					name: LL.commands.actionStage.addText.name(),
+					value: LL.commands.actionStage.addText.description({
+						addTextRollInput: '{{}}',
+					}),
+				});
+				embed.addFields(actionStageFields);
+				break;
+			}
+
+			case Language.LL.commands.help.rollMacro.name(): {
+				embed.setTitle(LL.commands.help.rollMacro.interactions.embed.title());
+				embed.setDescription(LL.commands.help.rollMacro.interactions.embed.description());
+				embed.addFields(
+					[
+						LL.commands.rollMacro.list.name(),
+						LL.commands.rollMacro.create.name(),
+						LL.commands.rollMacro.update.name(),
+						LL.commands.rollMacro.remove.name(),
+					].map(command =>
+						createCommandOperationHelpField(LL.commands.rollMacro.name(), command, LL)
+					)
+				);
+				break;
+			}
+
 			case Language.LL.commands.help.attributesAndTags.name(): {
 				embed.setTitle(LL.commands.help.attributesAndTags.interactions.embed.title());
 				embed.setDescription(
@@ -329,6 +474,22 @@ export class HelpCommand implements Command {
 								.join('\n'),
 							inline: true,
 						})
+					)
+				);
+				break;
+			}
+			case Language.LL.commands.help.makingACustomAction.name(): {
+				const actionChoice = intr.options.getString('example-choice').trim();
+
+				const i18nOptionsByActionChoice = {
+					produceFlame: { inlineOne: '{{[spellLevel]}}' },
+					phantomPain: { inlineOne: '{{[spellLevel]}}' },
+				};
+				embed.setTitle(LL.commands.help.makingACustomAction.interactions.embed.title());
+
+				embed.setDescription(
+					LL.commands.help.makingACustomAction.interactions.embed[actionChoice](
+						i18nOptionsByActionChoice[actionChoice]
 					)
 				);
 				break;
