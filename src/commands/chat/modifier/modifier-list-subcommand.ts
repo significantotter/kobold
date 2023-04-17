@@ -66,6 +66,6 @@ export class ModifierListSubCommand implements Command {
 		embed.setTitle(`${activeCharacter.characterData.name}'s Available Modifiers`);
 		embed.addFields(fields);
 
-		await embed.sendBatches(embeds);
+		await embed.sendBatches(intr);
 	}
 }

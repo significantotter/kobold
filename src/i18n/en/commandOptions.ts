@@ -384,7 +384,8 @@ export default {
 	},
 	modifierValue: {
 		name: 'value',
-		description: 'The value applied by the modifier to dice rolls.',
+		description:
+			'The value applied by the modifier to dice rolls. Can be a number or a dice expression.',
 	},
 	modifierTargetTags: {
 		name: 'target-tags',

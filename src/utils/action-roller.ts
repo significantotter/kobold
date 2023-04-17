@@ -1,4 +1,4 @@
-import _, { result } from 'lodash';
+import _ from 'lodash';
 import { Character, Initiative } from '../services/kobold/models/index.js';
 import { MultiRollResult, RollBuilder } from './dice-utils.js';
 
@@ -26,6 +26,7 @@ type TargetingResult =
 type MultiRollResultItem = MultiRollResult['results'][0] | null;
 
 export class ActionRoller {
+	public tags;
 	constructor(
 		public action: Action,
 		public character: Character,
@@ -35,6 +36,7 @@ export class ActionRoller {
 		}
 	) {
 		this.action = action;
+		this.tags = _.uniq([...action.tags, this.action.type]);
 		this.character = character;
 		this.initiative = initiative;
 		this.options = options;
@@ -51,7 +53,7 @@ export class ActionRoller {
 		let rollExpression = roll.roll;
 		const allowRollModifiers = roll.allowRollModifiers ?? true;
 		let currentExtraAttributes = _.values(extraAttributes);
-		const tags = [...this.action.tags, 'attack'];
+		const tags = [...this.tags, 'attack'];
 
 		tags.push('attack');
 
@@ -93,7 +95,7 @@ export class ActionRoller {
 		extraAttributes: { [k: string]: Attribute },
 		rollCounter: number
 	) {
-		const tags = [...this.action.tags, 'save'];
+		const tags = [...this.tags, 'save'];
 		let currentExtraAttributes = _.values(extraAttributes);
 		if (options.saveDiceRoll) {
 			// Roll the save
@@ -151,7 +153,7 @@ export class ActionRoller {
 		lastTargetingResult: TargetingResult,
 		lastTargetingActionType: 'attack' | 'save' | 'none'
 	) {
-		const tags = [...this.action.tags, 'text', ...(roll.extraTags || [])];
+		const tags = [...this.tags, 'text', ...(roll.extraTags || [])];
 		// should always be true, but coerces the type of the roll
 		if (roll.type !== 'text') return null;
 		const title = roll.name || 'Text';
@@ -208,7 +210,7 @@ export class ActionRoller {
 		lastTargetingResult: TargetingResult,
 		lastTargetingActionType: 'attack' | 'save' | 'none'
 	) {
-		const tags = [...this.action.tags, 'damage'];
+		const tags = [...this.tags, 'damage'];
 		let currentExtraAttributes = _.values(extraAttributes);
 		const rollExpression = roll.roll;
 		// normal damage cases: Last action was an attack and it succeeded, last action was a save that failed, we don't know about the last action
@@ -268,7 +270,7 @@ export class ActionRoller {
 		lastTargetingResult: TargetingResult,
 		lastTargetingActionType: 'attack' | 'save' | 'none'
 	) {
-		const tags = [...this.action.tags, 'damage'];
+		const tags = [...this.tags, 'damage'];
 		let currentExtraAttributes = _.values(extraAttributes);
 		const rollExpressions = [];
 

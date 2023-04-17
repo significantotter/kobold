@@ -58,7 +58,7 @@ export interface Character {
 		description?: string | null;
 		type?: string;
 		targetTags?: string;
-		value?: number;
+		value?: number | string;
 		[k: string]: any;
 	}[];
 	/**

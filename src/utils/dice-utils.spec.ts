@@ -154,7 +154,7 @@ describe('RollBuilder', function () {
 			customAttributes: [],
 		});
 		const rollBuilder = new RollBuilder({ character });
-		expect(rollBuilder.parseAttribute('[test]')).toStrictEqual([7, []]);
+		expect(DiceUtils.parseAttribute('[test]')).toStrictEqual([7, []]);
 	});
 	test('parses a custom attribute', function () {
 		const character = CharacterFactory.build({
@@ -169,7 +169,7 @@ describe('RollBuilder', function () {
 			attributes: [],
 		});
 		const rollBuilder = new RollBuilder({ character });
-		expect(rollBuilder.parseAttribute('[custom]')).toStrictEqual([3, ['a', 'b', 'c']]);
+		expect(DiceUtils.parseAttribute('[custom]')).toStrictEqual([3, ['a', 'b', 'c']]);
 	});
 	test('parses custom over base when multiple attributes are present', function () {
 		const character = CharacterFactory.build({
@@ -191,11 +191,11 @@ describe('RollBuilder', function () {
 			],
 		});
 		const rollBuilder = new RollBuilder({ character });
-		expect(rollBuilder.parseAttribute('[same]')).toStrictEqual([4, []]);
+		expect(DiceUtils.parseAttribute('[same]')).toStrictEqual([4, []]);
 	});
 	test('fails to parse an invalid attribute', function () {
 		const rollBuilder = new RollBuilder({});
-		expect(() => rollBuilder.parseAttribute('[same]')).toThrowError();
+		expect(() => DiceUtils.parseAttribute('[same]')).toThrowError();
 	});
 	test('parses an attribute using a shorthand value', function () {
 		const character = CharacterFactory.build({
@@ -210,7 +210,7 @@ describe('RollBuilder', function () {
 			customAttributes: [],
 		});
 		const rollBuilder = new RollBuilder({ character });
-		expect(rollBuilder.parseAttribute('[str]')).toStrictEqual([11, ['ability', 'strength']]);
+		expect(DiceUtils.parseAttribute('[str]')).toStrictEqual([11, ['ability', 'strength']]);
 	});
 	test('parses all attributes in a dice expression', function () {
 		const character = CharacterFactory.build({
@@ -232,7 +232,7 @@ describe('RollBuilder', function () {
 			],
 		});
 		const rollBuilder = new RollBuilder({ character });
-		expect(rollBuilder.parseAttributes('[custom]d20 + [base] - [custom]')).toStrictEqual([
+		expect(DiceUtils.parseAttributes('[custom]d20 + [base] - [custom]')).toStrictEqual([
 			'4d20 + 8 - 4',
 			[],
 		]);

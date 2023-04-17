@@ -77,7 +77,9 @@ export default {
 					value:
 						"Import characters from Wanderer's Guide\n\n" +
 						"Roll dice for your character's stats\n\n" +
-						'Track characters and NPCs through rounds of initiative',
+						'Track characters and NPCs through rounds of initiative' +
+						'Create custom, configurable, rollable actions\n\n' +
+						'Use flexible modifiers to track bonuses and penalties to dice roll\n\n',
 				},
 				linksField: {
 					name: 'Links',

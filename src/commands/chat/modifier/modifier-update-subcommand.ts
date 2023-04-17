@@ -21,6 +21,7 @@ import { ModifierOptions } from './modifier-command-options.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
 import { Character } from '../../../services/kobold/models/index.js';
 import { compileExpression } from 'filtrex';
+import { DiceRollResult, DiceUtils, RollBuilder } from '../../../utils/dice-utils.js';
 
 export class ModifierUpdateSubCommand implements Command {
 	public names = [Language.LL.commands.modifier.update.name()];
@@ -121,15 +122,20 @@ export class ModifierUpdateSubCommand implements Command {
 				updateValue = newFieldValue;
 			}
 		} else if (fieldToChange === 'value') {
-			if (isNaN(Number(newFieldValue))) {
+			// we must be able to evaluate the modifier as a roll for this character
+			const result = DiceUtils.parseAndEvaluateDiceExpression({
+				rollExpression: newFieldValue,
+				character: activeCharacter,
+				LL: Language.LL,
+			});
+
+			if (result.error) {
 				await InteractionUtils.send(
 					intr,
-					LL.commands.modifier.update.interactions.valueNotNumberError()
+					LL.commands.modifier.create.interactions.doesntEvaluateError()
 				);
 				return;
-			} else {
-				updateValue = Number(newFieldValue);
-			}
+			} else updateValue = newFieldValue;
 		} else if (fieldToChange === 'target-tags') {
 			fieldToChange = 'targetTags';
 			// parse the target tags

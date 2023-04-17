@@ -90,7 +90,7 @@
 					"description": { "type": ["string", "null"] },
 					"type": { "type": "string" },
 					"targetTags": { "type": "string" },
-					"value": { "type": "number" }
+					"value": { "type": ["number", "string"] }
 				}
 			}
 		},

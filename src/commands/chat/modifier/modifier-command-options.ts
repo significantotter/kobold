@@ -44,7 +44,7 @@ export class ModifierOptions {
 		name: Language.LL.commandOptions.modifierValue.name(),
 		description: Language.LL.commandOptions.modifierValue.description(),
 		required: true,
-		type: ApplicationCommandOptionType.Number,
+		type: ApplicationCommandOptionType.String,
 	};
 	public static readonly MODIFIER_TARGET_TAGS_OPTION: APIApplicationCommandBasicOption = {
 		name: Language.LL.commandOptions.modifierTargetTags.name(),

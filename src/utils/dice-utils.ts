@@ -65,198 +65,6 @@ export class RollBuilder {
 		this.title = title || _.capitalize(`${actorText} ${this.rollDescription}`.trim());
 	}
 
-	public parseAttribute(
-		token: string,
-		extraAttributes?: {
-			name: string;
-			value: number;
-			tags?: string[];
-		}[]
-	): [number | null, string[]] {
-		const attributes = this.character?.attributes || [];
-		const customAttributes = this.character?.customAttributes || [];
-
-		const trimRegex = /[\[\]\\ _\-]/g;
-		const trimmedToken = token.replace(trimRegex, '').trim().toLowerCase();
-
-		const attributeName = attributeShorthands[trimmedToken] || trimmedToken;
-
-		const attribute = attributes.find(
-			attributeObject =>
-				attributeObject.name.replace(trimRegex, '').toLowerCase() === attributeName
-		);
-		const customAttribute = customAttributes.find(
-			attributeObject =>
-				attributeObject.name.replace(trimRegex, '').toLowerCase() === attributeName
-		);
-		const staticAttribute = staticAttributes(this.character).find(
-			attributeObject =>
-				attributeObject.name.replace(trimRegex, '').toLowerCase() === attributeName
-		);
-		let extraAttribute: { tags?: string[]; value: number; [k: string]: any } = {
-			value: undefined,
-			tags: [],
-		};
-		if (extraAttributes) {
-			extraAttribute = extraAttributes.find(
-				attributeObject =>
-					attributeObject.name.replace(trimRegex, '').toLowerCase() === attributeName
-			);
-		}
-		if (customAttribute?.value !== undefined) {
-			return [customAttribute.value, customAttribute.tags];
-		} else if (attribute?.value !== undefined) {
-			return [attribute.value, attribute.tags];
-		} else if (staticAttribute?.value !== undefined) {
-			return [staticAttribute.value, []];
-		} else if (extraAttribute?.value !== undefined) {
-			return [extraAttribute.value, extraAttribute?.tags || []];
-		} else {
-			return [0, []];
-		}
-	}
-
-	public parseAttributes(
-		rollExpression: string,
-		extraAttributes: {
-			name: string;
-			value: number;
-			tags?: string[];
-		}[] = []
-	): [string, string[]] {
-		const splitExpression = rollExpression.split(attributeRegex);
-		const newTags = [];
-		let finalExpression = '';
-		for (const token of splitExpression) {
-			if (attributeRegex.test(token)) {
-				const [resultValue, resultTags] = this.parseAttribute(token, extraAttributes);
-				// apply the rest
-				if (resultValue < 0) finalExpression += `(${resultValue})`;
-				else finalExpression += resultValue;
-				newTags.push(...resultTags);
-			} else {
-				finalExpression += token;
-			}
-		}
-		return [finalExpression, newTags];
-	}
-
-	public expandRollMacros(rollExpression: string): string {
-		if (!this.character) return;
-		const characterRollMacros = this.character.rollMacros || [];
-		const maxDepth = 10;
-		let resultRollExpression = rollExpression.toLocaleLowerCase();
-		for (let i = 0; i < maxDepth; i++) {
-			let rollExpressionBeforeExpanding = resultRollExpression;
-			// replace every instance of each macro in the rollExpression with the macro's value
-			for (const macro of characterRollMacros) {
-				resultRollExpression = resultRollExpression.replaceAll(
-					`[${macro.name.toLocaleLowerCase()}]`,
-					macro.macro
-				);
-			}
-			// if we haven't changed the roll expression, then we're done checking macros
-			if (rollExpressionBeforeExpanding === resultRollExpression) break;
-		}
-		return resultRollExpression;
-	}
-
-	/**
-	 * Takes a dice expression and tags, rolls it, and returns an object containing key information
-	 * @param rollExpression The roll expression to roll
-	 * @param tags an array of strings that describe the roll and how modifiers
-	 * 					apply to it.
-	 * @param extraAttributes an object containing extra attributes to add to the roll
-	 */
-	public parseAndEvaluateDiceExpression({
-		rollExpression,
-		tags,
-		extraAttributes,
-		multiplier,
-		modifierMultiplier,
-	}: {
-		rollExpression: string;
-		tags?: string[];
-		extraAttributes?: {
-			name: string;
-			value: number;
-			tags?: string[];
-		}[];
-		multiplier?: number;
-		modifierMultiplier?: number;
-	}) {
-		const rollInformation: {
-			value: string;
-			results: DiceResult | null;
-			multiplier?: number;
-			totalTags: string[];
-		} = {
-			value: '',
-			results: null,
-			multiplier: null,
-			totalTags: [],
-		};
-		let totalTags = tags || [];
-		try {
-			const modifier = 0;
-			let modifiers = [];
-
-			let expandedExpression = this.expandRollMacros(rollExpression);
-
-			// check for any referenced character attributes in the roll
-			let [parsedExpression, parsedTags] = this.parseAttributes(
-				expandedExpression,
-				extraAttributes
-			);
-
-			rollInformation.totalTags = totalTags.concat(parsedTags);
-
-			// if we have a character and tags, check for active modifiers
-			if (this.character && totalTags.length) {
-				modifiers = this.character.getModifiersFromTags(rollInformation.totalTags);
-			}
-			for (const modifier of modifiers) {
-				// add to both the parsed expression and the initial roll expression
-				// the roll expression shows the user the meaning behind the roll values, while
-				// the parsed expression just has the math for the dice roller to use
-				const modifierSymbol = modifier.value >= 0 ? '+' : '-';
-				const modifierMultiplierText =
-					modifierMultiplier ?? 1 !== 1 ? `x${modifierMultiplier ?? 1}` : '';
-				rollExpression += ` ${modifierSymbol} "${modifier.name}" ${Math.abs(
-					modifier.value
-				)}${modifierMultiplierText}`;
-				parsedExpression += ` ${modifierSymbol} ${Math.floor(
-					Math.abs(modifier.value) * (modifierMultiplier ?? 1)
-				)}`;
-			}
-			let roll = new Dice(null, null, {
-				maxRollTimes: 20, // limit to 20 rolls
-				maxDiceSides: 100, // limit to 100 dice faces
-			}).roll(parsedExpression);
-			if (roll.errors?.length) {
-				rollInformation.value = this.LL.utils.dice.diceRollOtherErrors({
-					rollErrors: roll.errors.map(err => err.message).join('\n'),
-				});
-			} else {
-				const untypedRoll: any = roll;
-				if (multiplier !== undefined && multiplier !== 1) {
-					untypedRoll.total = Math.floor(untypedRoll.total * multiplier);
-					untypedRoll.renderedExpression = `(${untypedRoll.renderedExpression.toString()}) * ${multiplier}`;
-				}
-				rollInformation.value = this.LL.utils.dice.rollResult({
-					rollExpression,
-					rollRenderedExpression: roll.renderedExpression.toString(),
-					rollTotal: roll.total,
-				});
-				rollInformation.results = roll;
-			}
-		} catch (err) {
-			console.warn(err);
-			rollInformation.value = this.LL.utils.dice.diceRollError({ rollExpression });
-		}
-		return rollInformation;
-	}
-
 	/**
 	 * Rolls multiple expressions for a single field for the embed
 	 * @param rollExpressions The roll expressions to roll
@@ -288,11 +96,13 @@ export class RollBuilder {
 		const title = rollTitle || '\u200B';
 		let values = '';
 		const rollFields = rollExpressions.map(rollExpression => ({
-			...this.parseAndEvaluateDiceExpression({
+			...DiceUtils.parseAndEvaluateDiceExpression({
 				rollExpression: rollExpression.rollExpression,
 				tags: rollExpression.tags,
 				extraAttributes: rollExpression.extraAttributes,
 				modifierMultiplier: rollExpression.modifierMultiplier,
+				character: this.character,
+				LL: this.LL,
 			}),
 			name: rollExpression.name,
 		}));
@@ -363,11 +173,13 @@ export class RollBuilder {
 		showTags?: boolean;
 		rollType?: 'attack' | 'damage' | 'save';
 	}) {
-		const rollField = this.parseAndEvaluateDiceExpression({
+		const rollField = DiceUtils.parseAndEvaluateDiceExpression({
 			rollExpression,
 			tags,
 			extraAttributes,
 			multiplier,
+			character: this.character,
+			LL: this.LL,
 		});
 		const title = rollTitle || '\u200B';
 		let totalTags = tags || [];
@@ -439,7 +251,6 @@ export class RollBuilder {
 				? `${this.footer}\n${rollTagsText}: ${totalTags.join(', ')}`
 				: `${rollTagsText}: ${totalTags.join(', ')}`;
 		}
-
 		return rollResult;
 	}
 
@@ -465,9 +276,11 @@ export class RollBuilder {
 		for (let i = 0; i < splitText.length; i++) {
 			if (splitText[i].indexOf('}}') !== -1) {
 				const [rollExpression, postRollExpressionText] = splitText[i].split('}}');
-				const rollResult = this.parseAndEvaluateDiceExpression({
+				const rollResult = DiceUtils.parseAndEvaluateDiceExpression({
 					rollExpression,
 					extraAttributes,
+					character: this.character,
+					LL: this.LL,
 				});
 				let resultText = '';
 				if (rollResult.results.renderedExpression == rollResult.results.total.toString()) {
@@ -657,5 +470,253 @@ export class DiceUtils {
 			tags: (tags || []).concat(skillTags),
 		});
 		return rollBuilder;
+	}
+
+	public static parseAttribute(
+		token: string,
+		character?: Character,
+		extraAttributes?: {
+			name: string;
+			value: number;
+			tags?: string[];
+		}[]
+	): [number | null, string[]] {
+		const attributes = character?.attributes || [];
+		const customAttributes = character?.customAttributes || [];
+
+		const trimRegex = /[\[\]\\ _\-]/g;
+		const trimmedToken = token.replace(trimRegex, '').trim().toLowerCase();
+
+		const attributeName = attributeShorthands[trimmedToken] || trimmedToken;
+
+		const attribute = attributes.find(
+			attributeObject =>
+				attributeObject.name.replace(trimRegex, '').toLowerCase() === attributeName
+		);
+		const customAttribute = customAttributes.find(
+			attributeObject =>
+				attributeObject.name.replace(trimRegex, '').toLowerCase() === attributeName
+		);
+		const staticAttribute = staticAttributes(character).find(
+			attributeObject =>
+				attributeObject.name.replace(trimRegex, '').toLowerCase() === attributeName
+		);
+		let extraAttribute: { tags?: string[]; value: number; [k: string]: any } = {
+			value: undefined,
+			tags: [],
+		};
+		if (extraAttributes) {
+			extraAttribute = extraAttributes.find(
+				attributeObject =>
+					attributeObject.name.replace(trimRegex, '').toLowerCase() === attributeName
+			);
+		}
+		if (customAttribute?.value !== undefined) {
+			return [customAttribute.value, customAttribute.tags];
+		} else if (attribute?.value !== undefined) {
+			return [attribute.value, attribute.tags];
+		} else if (staticAttribute?.value !== undefined) {
+			return [staticAttribute.value, []];
+		} else if (extraAttribute?.value !== undefined) {
+			return [extraAttribute.value, extraAttribute?.tags || []];
+		} else {
+			return [0, []];
+		}
+	}
+
+	public static parseAttributes(
+		rollExpression: string,
+		character?: Character,
+		extraAttributes: {
+			name: string;
+			value: number;
+			tags?: string[];
+		}[] = []
+	): [string, string[]] {
+		const splitExpression = rollExpression.split(attributeRegex);
+		const newTags = [];
+		let finalExpression = '';
+		for (const token of splitExpression) {
+			if (attributeRegex.test(token)) {
+				const [resultValue, resultTags] = DiceUtils.parseAttribute(
+					token,
+					character,
+					extraAttributes
+				);
+				// apply the rest
+				if (resultValue < 0) finalExpression += `(${resultValue})`;
+				else finalExpression += resultValue;
+				newTags.push(...resultTags);
+			} else {
+				finalExpression += token;
+			}
+		}
+		return [finalExpression, newTags];
+	}
+
+	public static parseDiceExpression({
+		rollExpression,
+		character,
+		tags,
+		skipModifiers,
+		extraAttributes,
+		modifierMultiplier,
+	}: {
+		rollExpression: string;
+		character?: Character;
+		tags?: string[];
+		skipModifiers?: boolean;
+		extraAttributes?: {
+			name: string;
+			value: number;
+			tags?: string[];
+		}[];
+		modifierMultiplier?: number;
+	}) {
+		let modifiers = [];
+		let finalTags = [];
+
+		let expandedExpression = character
+			? character.expandRollWithMacros(rollExpression)
+			: rollExpression;
+
+		// check for any referenced character attributes in the roll
+		let [parsedExpression, parsedTags] = DiceUtils.parseAttributes(
+			expandedExpression,
+			character,
+			extraAttributes
+		);
+		let displayExpression = parsedExpression;
+
+		finalTags = (tags || []).concat(parsedTags);
+
+		// if we have a character and tags, check for active modifiers
+		if (character && finalTags.length && !skipModifiers) {
+			modifiers = character.getModifiersFromTags(finalTags, extraAttributes);
+		}
+		for (const modifier of modifiers) {
+			// add to both the parsed expression and the initial roll expression
+			// the roll expression shows the user the meaning behind the roll values, while
+			// the parsed expression just has the math for the dice roller to use
+
+			const expandedModifier = character
+				? character.expandRollWithMacros(modifier.value.toString())
+				: modifier.value.toString();
+
+			const [parsedModifier] = DiceUtils.parseAttributes(
+				expandedModifier,
+				character,
+				extraAttributes
+			);
+
+			const modifierMultiplierText =
+				modifierMultiplier ?? 1 !== 1 ? `x${modifierMultiplier ?? 1}` : '';
+			displayExpression += ` + "${
+				modifier.name
+			}" ${modifier.value.toString()}${modifierMultiplierText}`;
+			if (modifierMultiplier && modifierMultiplier !== 1) {
+				parsedExpression += ` +((${parsedModifier})*(${modifierMultiplier ?? 1}))`;
+			} else parsedExpression += ` +(${parsedModifier})`;
+		}
+
+		return {
+			rollExpression: parsedExpression,
+			displayExpression,
+			tags: finalTags,
+		};
+	}
+
+	/**
+	 * Takes a dice expression and tags, rolls it, and returns an object containing key information
+	 * @param rollExpression The roll expression to roll
+	 * @param tags an array of strings that describe the roll and how modifiers
+	 * 					apply to it.
+	 * @param extraAttributes an object containing extra attributes to add to the roll
+	 */
+	public static parseAndEvaluateDiceExpression({
+		rollExpression,
+		character,
+		tags,
+		extraAttributes,
+		skipModifiers,
+		multiplier,
+		modifierMultiplier,
+		LL,
+	}: {
+		rollExpression: string;
+		character?: Character;
+		tags?: string[];
+		extraAttributes?: {
+			name: string;
+			value: number;
+			tags?: string[];
+		}[];
+		skipModifiers?: boolean;
+		multiplier?: number;
+		modifierMultiplier?: number;
+		LL: TranslationFunctions;
+	}) {
+		const rollInformation: {
+			value: string;
+			parsedExpression: string;
+			results: DiceResult | null;
+			multiplier?: number;
+			totalTags: string[];
+			error: boolean;
+		} = {
+			value: '',
+			parsedExpression: '',
+			results: null,
+			multiplier: null,
+			totalTags: [],
+			error: false,
+		};
+		let totalTags = tags || [];
+		let displayExpression = rollExpression;
+		try {
+			let parseResults = DiceUtils.parseDiceExpression({
+				rollExpression,
+				character,
+				tags,
+				skipModifiers,
+				extraAttributes,
+				modifierMultiplier,
+			});
+
+			displayExpression = parseResults.displayExpression;
+			const parsedExpression = parseResults.rollExpression;
+			rollInformation.parsedExpression = parsedExpression;
+			rollInformation.totalTags = parseResults.tags;
+
+			let roll = new Dice(null, null, {
+				maxRollTimes: 20, // limit to 20 rolls
+				maxDiceSides: 100, // limit to 100 dice faces
+			}).roll(parsedExpression);
+			if (roll.errors?.length) {
+				rollInformation.value = LL.utils.dice.diceRollOtherErrors({
+					rollErrors: roll.errors.map(err => err.message).join('\n'),
+				});
+				rollInformation.error = true;
+			} else {
+				const untypedRoll: any = roll;
+				if (multiplier !== undefined && multiplier !== 1) {
+					untypedRoll.total = Math.floor(untypedRoll.total * multiplier);
+					untypedRoll.renderedExpression = `(${untypedRoll.renderedExpression.toString()}) * ${multiplier}`;
+				}
+				rollInformation.value = LL.utils.dice.rollResult({
+					rollExpression: displayExpression,
+					rollRenderedExpression: roll.renderedExpression.toString(),
+					rollTotal: roll.total,
+				});
+				rollInformation.results = roll;
+			}
+		} catch (err) {
+			console.warn(err);
+			rollInformation.value = LL.utils.dice.diceRollError({
+				rollExpression: displayExpression,
+			});
+			rollInformation.error = true;
+		}
+		return rollInformation;
 	}
 }
