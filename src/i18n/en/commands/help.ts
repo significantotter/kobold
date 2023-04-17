@@ -338,8 +338,8 @@ export default {
 					" the spell's level with the action's attribute [spellLevel], as fireball rolls 2d6 per spell level.\n\n" +
 					'`/action-stage add-basic-damage action:Fireball roll-name:Damage basic-damage-dice-roll:(2*[spellLevel])d6`\n\n' +
 					'Now, Lilac can roll Fireball! She sets the monster\'s roll at "d20+15" against her own primal spell DC of 25. ' +
-					'She heightens the spell to level 2. \n\n' +
-					'`/roll action action:Fireball save-dice-roll:d20+15 target-dc:25 heighten:2`',
+					'She heightens the spell to level 4. \n\n' +
+					'`/roll action action:Fireball save-dice-roll:d20+15 target-dc:25 heighten:4`',
 				phantomPain:
 					'Portia, a level 7 anadi bard, wants to make the spell Phantom Pain as a custom action. \n\n' +
 					'She starts off by creating the action itself. The action\'s name is "Phantom Pain". It\'s a first level spell, so ' +
