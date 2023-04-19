@@ -104,6 +104,19 @@ export class RollAttackSubCommand implements Command {
 			activeCharacter.calculatedStats.weapons as WG.NamedBonus[]
 		);
 
+		console.log('here!!');
+
+		console.log(
+			DiceUtils.buildDiceExpression(
+				'd20',
+				String(targetAttack.Bonus),
+				attackModifierExpression
+			),
+			'd20',
+			String(targetAttack.Bonus),
+			attackModifierExpression
+		);
+
 		// build a little action from the attack!
 
 		const action: Character['actions'][0] = {
@@ -144,8 +157,6 @@ export class RollAttackSubCommand implements Command {
 				}),
 				{
 					targetDC: targetAC,
-					attackModifierExpression: attackModifierExpression,
-					damageModifierExpression: damageModifierExpression,
 				}
 			)
 			.compileEmbed({

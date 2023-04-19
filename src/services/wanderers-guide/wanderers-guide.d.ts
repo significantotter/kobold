@@ -63,6 +63,7 @@ export namespace WG {
 		value: any;
 		createdAt: string;
 		updatedAt: string;
+		[k: string]: any;
 	}
 	interface SpellSlot {
 		slotID: number;
@@ -72,10 +73,12 @@ export namespace WG {
 		type: string;
 		level_lock: number;
 		srcStruct: SrcStruct;
+		[k: string]: any;
 	}
 
 	interface SpellSlotsMap {
 		[classname: string]: SpellSlot;
+		[k: string]: any;
 	}
 
 	interface Spell {
@@ -83,6 +86,7 @@ export namespace WG {
 		SpellID: number;
 		SpellLevel: number;
 		SpellType: string;
+		[k: string]: any;
 	}
 
 	interface SpellBook {
@@ -92,6 +96,7 @@ export namespace WG {
 		SpellKeyAbility: string;
 		IsFocus: boolean;
 		SpellBook: Spell[];
+		[k: string]: any;
 	}
 
 	interface InnateSpell {
@@ -110,14 +115,17 @@ export namespace WG {
 		TimesPerDay: number;
 		KeyAbility: string;
 		TimesCast: number;
+		[k: string]: any;
 	}
 
 	interface FocusSpell extends SrcStruct {
 		SpellID: string;
+		[k: string]: any;
 	}
 
 	interface FocusSpellsMap {
 		[className: string]: FocusSpell;
+		[k: string]: any;
 	}
 
 	interface CharacterSpellApiResponse {
@@ -126,6 +134,7 @@ export namespace WG {
 		innate_spells: InnateSpell;
 		focus_spells_map: FocusSpellsMap;
 		focus_points: SrcStruct[];
+		[k: string]: any;
 	}
 
 	// GET CALCULATED STATS
@@ -186,6 +195,7 @@ export namespace WG {
 		equippedArmorCategory: string | null;
 		createdAt: string;
 		updatedAt: string;
+		[k: string]: any;
 	}
 
 	interface InventoryItem {
@@ -226,6 +236,7 @@ export namespace WG {
 		propRune4ID: any | null;
 		createdAt: string;
 		updatedAt: string;
+		[k: string]: any;
 	}
 
 	interface CharacterInventoryApiResponse {
@@ -242,16 +253,19 @@ export namespace WG {
 		code: string;
 		createdAt: string;
 		updatedAt: string;
+		[k: string]: any;
 	}
 	interface ConditionEntry {
 		EntryID: number;
 		Value: number | null;
 		SourceText: string | null;
 		ParentID: number;
+		[k: string]: any;
 	}
 
 	interface CharacterConditionsApiResponse {
 		[id: string]: ConditionEntry;
+		[k: string]: any;
 	}
 
 	// GET METADATA
@@ -290,6 +304,7 @@ export namespace WG {
 		homebrewID: any;
 		createdAt: string;
 		updatedAt: string;
+		[k: string]: any;
 	}
 
 	interface ClassApiResponse {
@@ -319,11 +334,14 @@ export namespace WG {
 			version: string;
 			createdAt: string;
 			updatedAt: string;
+			[k: string]: any;
 		};
 		class_features: ClassFeature[];
+		[k: string]: any;
 	}
 	interface ClassApiMapResponse {
 		[id: string]: ClassApiResponse;
+		[k: string]: any;
 	}
 
 	/**
@@ -346,6 +364,7 @@ export namespace WG {
 		version?: string;
 		createdAt: string;
 		updatedAt: string;
+		[k: string]: any;
 	}
 
 	interface Language {
@@ -357,6 +376,7 @@ export namespace WG {
 		homebrewID: any;
 		createdAt: string;
 		updatedAt: string;
+		[k: string]: any;
 	}
 	interface AncestryFeature {
 		id: number;
@@ -365,6 +385,7 @@ export namespace WG {
 		code: string;
 		itemWeaponID: any;
 		overrides: any;
+		[k: string]: any;
 	}
 
 	interface Ancestry {
@@ -387,6 +408,7 @@ export namespace WG {
 		version: string;
 		createdAt: string;
 		updatedAt: string;
+		[k: string]: any;
 	}
 	interface AncestryApiResponse {
 		ancestry: Ancestry;
@@ -408,9 +430,11 @@ export namespace WG {
 		physical_feature_one: AncestryFeature;
 		physical_feature_two: AncestryFeature;
 		[otherFeature: string]: any;
+		[k: string]: any;
 	}
 	interface AncestryApiMapResponse {
 		[id: string]: AncestryApiResponse;
+		[k: string]: any;
 	}
 
 	/**
@@ -425,6 +449,7 @@ export namespace WG {
 
 	interface VHeritageApiResponse {
 		heritage: AncestryHeritage;
+		[k: string]: any;
 	}
 
 	/**
@@ -445,9 +470,11 @@ export namespace WG {
 		version: string;
 		createdAt: string;
 		updatedAt: string;
+		[k: string]: any;
 	}
 
 	interface BackgroundApiResponse {
 		background: Background;
+		[k: string]: any;
 	}
 }

@@ -212,7 +212,11 @@ export class ActionRoller {
 	) {
 		const tags = [...this.tags, 'damage'];
 		let currentExtraAttributes = _.values(extraAttributes);
-		const rollExpression = roll.roll;
+		let rollExpression = roll.roll;
+		if (options.damageModifierExpression) {
+			rollExpression = `${rollExpression} + (${options.damageModifierExpression})`;
+		}
+
 		// normal damage cases: Last action was an attack and it succeeded, last action was a save that failed, we don't know about the last action
 		let multiplier = 1;
 		// no damage cases: Last action was an attack and it failed or crit failed, last action was a save that crit succeeded
