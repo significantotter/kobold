@@ -48,6 +48,7 @@ function parseDate(val: string): string {
 pg.types.setTypeParser(pg.types.builtins.TIMESTAMPTZ, val => parseDateTime(val));
 pg.types.setTypeParser(pg.types.builtins.TIMESTAMP, val => parseDateTime(val));
 pg.types.setTypeParser(pg.types.builtins.DATE, val => parseDate(val));
+pg.types.setTypeParser(pg.types.builtins.NUMERIC, val => parseFloat(val));
 
 // Convert bitInts to js number
 pg.types.setTypeParser(pg.types.builtins.INT8, parseInt);
