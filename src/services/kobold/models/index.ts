@@ -12,3 +12,5 @@ export { InitiativeActorFactory } from './initiative-actor/initiative-actor.fact
 export { InitiativeActorGroupFactory } from './initiative-actor-group/initiative-actor-group.factory';
 export { Game } from './game/game.model';
 export { GameFactory } from './game/game.factory';
+export { BestiaryFilesLoaded } from './bestiary-files-loaded/bestiary-files-loaded.model';
+export { Creature } from './creature/creature.model';

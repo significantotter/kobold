@@ -98,9 +98,13 @@ import { CommandRegistrationService, DBModel, JobService, Logger } from './servi
 import { Trigger } from './triggers/index.js';
 import { Config } from './config/config.js';
 import Logs from './config/lang/logs.json';
+import { checkAndLoadBestiaryFiles } from './services/pf2etools/bestiaryLoader.js';
 
 async function start(): Promise<void> {
 	DBModel.init(Config.database.url);
+
+	// asynchronously load the bestiary files
+	checkAndLoadBestiaryFiles();
 
 	// Client
 	let client = new CustomClient({

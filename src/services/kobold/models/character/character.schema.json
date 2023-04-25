@@ -16,6 +16,420 @@
 			"type": "string",
 			"description": "The discord id of the user who imported the character"
 		},
+		"sheet": {
+			"type": "object",
+			"description": "The character's statistics.",
+			"properties": {
+				"info": {
+					"description": "The general character sheet formation.",
+					"type": "object",
+					"properties": {
+						"name": {
+							"description": "The character's name.",
+							"type": "string"
+						},
+						"imageURL": {
+							"description": "The character's portrait image URL.",
+							"type": "string"
+						},
+						"level": {
+							"description": "The character's level.",
+							"type": "integer"
+						},
+						"class": {
+							"description": "The character's class.",
+							"type": "string"
+						},
+						"ancestry": {
+							"description": "The character's ancestry.",
+							"type": "string"
+						},
+						"heritage": {
+							"description": "The character's heritage.",
+							"type": "string"
+						},
+						"languages": {
+							"description": "The character's spoken languages.",
+							"type": "array",
+							"items": { "type": "string" }
+						}
+					}
+				},
+				"health": {
+					"description": "The character sheet information related to health.",
+					"type": "object",
+					"properties": {
+						"currentHp": {
+							"description": "The character's current hit points.",
+							"type": "integer"
+						},
+						"maxHp": {
+							"description": "The character's maximum hit points.",
+							"type": "integer"
+						},
+						"tempHp": {
+							"description": "The character's temporary hit points.",
+							"type": "integer"
+						},
+						"currentResolve": {
+							"description": "The character's current resolve points.",
+							"type": "integer"
+						},
+						"maxResolve": {
+							"description": "The character's maximum resolve points.",
+							"type": "integer"
+						},
+						"currentStamina": {
+							"description": "The character's current stamina points.",
+							"type": "integer"
+						},
+						"maxStamina": {
+							"description": "The character's maximum stamina points.",
+							"type": "integer"
+						}
+					}
+				},
+				"attributes": {
+					"description": "The general attributes for the character.",
+					"type": "object",
+					"properties": {
+						"currentHeroPoints": {
+							"description": "The character's current hero points.",
+							"type": "integer"
+						},
+						"speed": {
+							"description": "The character's speed.",
+							"type": "integer"
+						},
+						"speedBonus": {
+							"description": "The character's speed bonus.",
+							"type": "integer"
+						},
+						"currentFocusPoints": {
+							"description": "The character's current focus points.",
+							"type": "integer"
+						},
+						"focusPoints": {
+							"description": "The character's maximum focus points.",
+							"type": "integer"
+						},
+						"classDC": {
+							"description": "The character's class DC.",
+							"type": "integer"
+						},
+						"perception": {
+							"description": "The character's perception.",
+							"type": "integer"
+						},
+						"perceptionProfMod": {
+							"description": "The character's perception proficiency modifier.",
+							"type": "integer"
+						}
+					}
+				},
+				"defenses": {
+					"description": "The character's defensive attributes.",
+					"type": "object",
+					"properties": {
+						"ac": { "description": "The character's armor class", "type": "integer" },
+						"heavyProfMod": {
+							"description": "The character's heavy armor proficiency modifier.",
+							"type": "integer"
+						},
+						"mediumProfMod": {
+							"description": "The character's medium armor proficiency modifier.",
+							"type": "integer"
+						},
+						"lightProfMod": {
+							"description": "The character's light armor proficiency modifier.",
+							"type": "integer"
+						},
+						"unarmoredProfMod": {
+							"description": "The character's unarmored proficiency modifier.",
+							"type": "integer"
+						}
+					}
+				},
+				"offense": {
+					"description": "The character's offensive attributes.",
+					"type": "object",
+					"properties": {
+						"martialProfMod": {
+							"description": "The character's martial weapon proficiency modifier.",
+							"type": "integer"
+						},
+						"simpleProfMod": {
+							"description": "The character's simple weapon proficiency modifier.",
+							"type": "integer"
+						},
+						"unarmedProfMod": {
+							"description": "The character's unarmed weapon proficiency modifier.",
+							"type": "integer"
+						},
+						"advancedProfMod": {
+							"description": "The character's advanced weapon proficiency modifier.",
+							"type": "integer"
+						}
+					}
+				},
+				"castingStats": {
+					"description": "The character's casting stats.",
+					"type": "object",
+					"properties": {
+						"castingArcane": {
+							"description": "The character's arcane casting stat.",
+							"type": "integer"
+						},
+						"castingArcaneProfMod": {
+							"description": "The character's arcane casting proficiency modifier.",
+							"type": "integer"
+						},
+						"castingDivine": {
+							"description": "The character's divine casting stat.",
+							"type": "integer"
+						},
+						"castingDivineProfMod": {
+							"description": "The character's divine casting proficiency modifier.",
+							"type": "integer"
+						},
+						"castingOccult": {
+							"description": "The character's occult casting stat.",
+							"type": "integer"
+						},
+						"castingOccultProfMod": {
+							"description": "The character's occult casting proficiency modifier.",
+							"type": "integer"
+						},
+						"castingPrimal": {
+							"description": "The character's primal casting stat.",
+							"type": "integer"
+						},
+						"castingPrimalProfMod": {
+							"description": "The character's primal casting proficiency modifier.",
+							"type": "integer"
+						}
+					}
+				},
+				"saves": {
+					"description": "The character's saving throw attributes.",
+					"type": "object",
+					"properties": {
+						"fortitude": {
+							"description": "The character's fortitude save.",
+							"type": "integer"
+						},
+						"fortitudeProfMod": {
+							"description": "The character's fortitude proficiency modifier.",
+							"type": "integer"
+						},
+						"reflex": {
+							"description": "The character's reflex save.",
+							"type": "integer"
+						},
+						"reflexProfMod": {
+							"description": "The character's reflex proficiency modifier.",
+							"type": "integer"
+						},
+						"will": {
+							"description": "The character's will save.",
+							"type": "integer"
+						},
+						"willProfMod": {
+							"description": "The character's will proficiency modifier.",
+							"type": "integer"
+						}
+					}
+				},
+				"skills": {
+					"description": "The character's skill attributes.",
+					"type": "object",
+					"properties": {
+						"acrobatics": {
+							"description": "The character's acrobatics skill.",
+							"type": "integer"
+						},
+						"acrobaticsProfMod": {
+							"description": "The character's acrobatics proficiency modifier.",
+							"type": "integer"
+						},
+						"arcana": {
+							"description": "The character's arcana skill.",
+							"type": "integer"
+						},
+						"arcanaProfMod": {
+							"description": "The character's arcana proficiency modifier.",
+							"type": "integer"
+						},
+						"athletics": {
+							"description": "The character's athletics skill.",
+							"type": "integer"
+						},
+						"athleticsProfMod": {
+							"description": "The character's athletics proficiency modifier.",
+							"type": "integer"
+						},
+						"crafting": {
+							"description": "The character's crafting skill.",
+							"type": "integer"
+						},
+						"craftingProfMod": {
+							"description": "The character's crafting proficiency modifier.",
+							"type": "integer"
+						},
+						"deception": {
+							"description": "The character's deception skill.",
+							"type": "integer"
+						},
+						"deceptionProfMod": {
+							"description": "The character's deception proficiency modifier.",
+							"type": "integer"
+						},
+						"diplomacy": {
+							"description": "The character's diplomacy skill.",
+							"type": "integer"
+						},
+						"diplomacyProfMod": {
+							"description": "The character's diplomacy proficiency modifier.",
+							"type": "integer"
+						},
+						"intimidation": {
+							"description": "The character's intimidation skill.",
+							"type": "integer"
+						},
+						"intimidationProfMod": {
+							"description": "The character's intimidation proficiency modifier.",
+							"type": "integer"
+						},
+						"medicine": {
+							"description": "The character's medicine skill.",
+							"type": "integer"
+						},
+						"medicineProfMod": {
+							"description": "The character's medicine proficiency modifier.",
+							"type": "integer"
+						},
+						"nature": {
+							"description": "The character's nature skill.",
+							"type": "integer"
+						},
+						"natureProfMod": {
+							"description": "The character's nature proficiency modifier.",
+							"type": "integer"
+						},
+						"occultism": {
+							"description": "The character's occultism skill.",
+							"type": "integer"
+						},
+						"occultismProfMod": {
+							"description": "The character's occultism proficiency modifier.",
+							"type": "integer"
+						},
+						"performance": {
+							"description": "The character's performance skill.",
+							"type": "integer"
+						},
+						"performanceProfMod": {
+							"description": "The character's performance proficiency modifier.",
+							"type": "integer"
+						},
+						"religion": {
+							"description": "The character's religion skill.",
+							"type": "integer"
+						},
+						"religionProfMod": {
+							"description": "The character's religion proficiency modifier.",
+							"type": "integer"
+						},
+						"society": {
+							"description": "The character's society skill.",
+							"type": "integer"
+						},
+						"societyProfMod": {
+							"description": "The character's society proficiency modifier.",
+							"type": "integer"
+						},
+						"stealth": {
+							"description": "The character's stealth skill.",
+							"type": "integer"
+						},
+						"stealthProfMod": {
+							"description": "The character's stealth proficiency modifier.",
+							"type": "integer"
+						},
+						"survival": {
+							"description": "The character's survival skill.",
+							"type": "integer"
+						},
+						"survivalProfMod": {
+							"description": "The character's survival proficiency modifier.",
+							"type": "integer"
+						},
+						"thievery": {
+							"description": "The character's thievery skill.",
+							"type": "integer"
+						},
+						"thieveryProfMod": {
+							"description": "The character's thievery proficiency modifier.",
+							"type": "integer"
+						},
+						"lores": {
+							"description": "The character's lore skills.",
+							"type": "array",
+							"items": {
+								"type": "object",
+								"properties": {
+									"name": {
+										"description": "The lore name.",
+										"type": "string"
+									},
+									"bonus": {
+										"description": "The lore bonus.",
+										"type": "integer"
+									},
+									"profMod": {
+										"description": "The lore proficiencyModifer.",
+										"type": "integer"
+									}
+								}
+							}
+						}
+					}
+				},
+				"attacks": {
+					"description": "The character's attacks.",
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"name": {
+								"description": "The attack name.",
+								"type": "string"
+							},
+							"toHit": {
+								"description": "The attack toHit.",
+								"type": "integer"
+							},
+							"damage": {
+								"description": "The attack damage.",
+								"type": "string"
+							},
+							"damageType": {
+								"description": "The attack damageType.",
+								"type": "string"
+							},
+							"range": {
+								"description": "The attack range.",
+								"type": "string"
+							},
+							"notes": {
+								"description": "The attack notes.",
+								"type": "string"
+							}
+						}
+					}
+				}
+			}
+		},
 		"rollMacros": {
 			"type": "array",
 			"description": "An array of roll macro objects that allow the substituting of saved roll expressions for simple keywords.",
@@ -178,6 +592,10 @@
 		"customActions": {
 			"type": "array",
 			"description": "An array of customizable actions set up for the user. These allow the user to make certain roll operations as a single command."
+		},
+		"pathBuilderData": {
+			"type": ["null", "object"],
+			"description": "The general character data from the PathBuilder json export"
 		},
 		"characterData": {
 			"type": "object",
