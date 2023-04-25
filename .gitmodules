@@ -1,3 +1,4 @@
 [submodule "src/services/pf2etools/Pf2eTools"]
 	path = src/services/pf2etools/Pf2eTools
 	url = git@github.com:Pf2eToolsOrg/Pf2eTools.git
+	shallow = true
