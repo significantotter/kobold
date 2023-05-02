@@ -2,7 +2,7 @@ import { APIEmbed, EmbedBuilder, EmbedData } from 'discord.js';
 import _ from 'lodash';
 import { TranslationFunctions } from '../i18n/i18n-types.js';
 import { Language } from '../models/enum-helpers/index.js';
-import { Character } from '../services/kobold/models/index.js';
+import { Character, Sheet } from '../services/kobold/models/index.js';
 import { InitiativeBuilder } from './initiative-utils.js';
 import { InteractionUtils } from './interaction-utils.js';
 
@@ -16,8 +16,8 @@ export class KoboldEmbed extends EmbedBuilder {
 	 * @param character The character to set the attributes for
 	 */
 	public setCharacter(character: Character) {
-		if (character?.characterData?.infoJSON?.imageURL) {
-			this.setThumbnail(character.characterData.infoJSON.imageURL);
+		if (character?.sheet?.info?.imageURL) {
+			this.setThumbnail(character.sheet.info.imageURL);
 		}
 		return this;
 	}
@@ -160,5 +160,57 @@ export class KoboldEmbed extends EmbedBuilder {
 		for (const embed of splitEmbeds) {
 			await InteractionUtils.send(intr, embed, isSecretRoll);
 		}
+	}
+}
+
+export class EmbedUtils {
+	public static describeActionResult({
+		embed,
+		action,
+		heightenLevel,
+		saveRollType,
+		targetDC,
+	}: {
+		embed: KoboldEmbed;
+		action: Sheet['actions'][0];
+		heightenLevel?: number;
+		saveRollType?: string;
+		targetDC?: number;
+	}): KoboldEmbed {
+		const descriptionArr = [];
+		if (heightenLevel) {
+			descriptionArr.push(`Heightened to level ${heightenLevel}`);
+		}
+		if (saveRollType) {
+			let rollType = '';
+			for (const roll of action.rolls) {
+				if (roll.type === 'save') {
+					rollType = ` ${roll.saveRollType}`;
+					break;
+				}
+			}
+			descriptionArr.push(`The target rolls${rollType} ${saveRollType}`);
+		}
+		if (targetDC) {
+			let saveType = ' DC';
+			for (const roll of action.rolls) {
+				if (roll.type === 'save' || roll.type === 'attack') {
+					saveType = ` ${roll.saveTargetDC ?? roll.targetDC ?? 'ac'}`;
+					// add the word DC if we aren't checking vs the AC
+					if (
+						saveType.toLocaleLowerCase() !== ' ac' &&
+						!_.endsWith(saveType.toLocaleLowerCase(), ' dc')
+					)
+						saveType += ' DC';
+					// change a to an if the next letter is a vowel
+					if (['a', 'e', 'i', 'o', 'u'].includes(saveType[1].toLocaleLowerCase()))
+						saveType = `n${saveType}`;
+					break;
+				}
+			}
+			descriptionArr.push(`VS a${saveType} of ${targetDC}`);
+		}
+		if (descriptionArr.length) embed.setDescription(descriptionArr.join('\n'));
+		return embed;
 	}
 }

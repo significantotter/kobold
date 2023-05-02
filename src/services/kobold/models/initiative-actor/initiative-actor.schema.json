@@ -24,6 +24,10 @@
 			"type": ["number", "null"],
 			"description": "The id of the character that this actor represents"
 		},
+		"referenceNpcName": {
+			"type": ["string", "null"],
+			"description": "The name of the npc that this actor represents"
+		},
 		"name": {
 			"type": "string",
 			"description": "the name of the actor"

@@ -20,6 +20,7 @@ export class CharacterApi {
 			'totalAbilityScores',
 			'weapons',
 			'infoJSON',
+			'generalInfo',
 		];
 		for (const property of propertiesToJSONParse) {
 			if (response[property]) response[property] = JSON.parse(response[property]);

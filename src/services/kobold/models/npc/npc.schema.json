@@ -1,0 +1,42 @@
+{
+	"title": "Npc",
+	"type": "object",
+	"description": "A pathfinder npc from the bestiary",
+	"properties": {
+		"id": {
+			"type": "integer",
+			"readOnly": true,
+			"description": "The id of the npc record."
+		},
+		"data": {
+			"type": "object",
+			"description": "The pf2etools json data of the npc."
+		},
+		"name": {
+			"type": "string",
+			"description": "The name of the npc."
+		},
+		"fluff": {
+			"type": "object",
+			"description": "The fluff data of the npc."
+		},
+		"referenceNpcName": {
+			"type": "string",
+			"description": "The name of the npc that serves as the source for this npc's statistics."
+		},
+		"sourceFileName": {
+			"type": "string",
+			"description": "The name of the source file that the npc was imported from."
+		},
+		"createdAt": {
+			"type": "string",
+			"format": "date-time",
+			"description": "When the character was first imported"
+		},
+		"lastUpdatedAt": {
+			"type": "string",
+			"format": "date-time",
+			"description": "When the character was last updated"
+		}
+	}
+}

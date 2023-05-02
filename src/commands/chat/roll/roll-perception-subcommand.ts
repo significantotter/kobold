@@ -11,9 +11,11 @@ import { EventData } from '../../../models/internal-models.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
-import { DiceUtils, RollBuilder } from '../../../utils/dice-utils.js';
+import { DiceUtils } from '../../../utils/dice-utils.js';
+import { RollBuilder } from '../../../utils/roll-builder.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Language } from '../../../models/enum-helpers/index.js';
+import { Creature } from '../../../utils/creature.js';
 
 export class RollPerceptionSubCommand implements Command {
 	public names = [Language.LL.commands.roll.perception.name()];
@@ -54,19 +56,20 @@ export class RollPerceptionSubCommand implements Command {
 			return;
 		}
 
-		let diceType = LL.terms.perception();
+		const creature = Creature.fromCharacter(activeCharacter);
+
 		const rollBuilder = new RollBuilder({
 			character: activeCharacter,
 			rollNote,
 			rollDescription: LL.commands.roll.interactions.rolledDice({
-				diceType,
+				diceType: 'Perception',
 			}),
 			LL,
 		});
 		rollBuilder.addRoll({
 			rollExpression: DiceUtils.buildDiceExpression(
 				'd20',
-				String(activeCharacter.calculatedStats.totalPerception),
+				String(creature.sheet.general.perception),
 				modifierExpression
 			),
 			tags: ['skill', 'perception'],

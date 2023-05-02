@@ -218,7 +218,8 @@ export class HelpCommand implements Command {
 					{
 						name: LL.commands.character.name(),
 						value:
-							`\`/${LL.commands.character.name()} ${LL.commands.character.import.name()}\` ${LL.commands.character.import.description()}\n` +
+							`\`/${LL.commands.character.name()} ${LL.commands.character.importWanderersGuide.name()}\` ${LL.commands.character.importWanderersGuide.description()}\n` +
+							`\`/${LL.commands.character.name()} ${LL.commands.character.importPathBuilder.name()}\` ${LL.commands.character.importPathBuilder.description()}\n` +
 							`\`/${LL.commands.character.name()} ${LL.commands.character.list.name()}\` ${LL.commands.character.list.description()}\n` +
 							`\`/${LL.commands.character.name()} ${LL.commands.character.remove.name()}\` ${LL.commands.character.remove.description()}\n` +
 							`\`/${LL.commands.character.name()} ${LL.commands.character.setActive.name()}\` ${LL.commands.character.setActive.description()}\n` +
@@ -313,7 +314,8 @@ export class HelpCommand implements Command {
 				embed.setDescription(LL.commands.help.character.interactions.embed.description());
 				embed.addFields(
 					[
-						LL.commands.character.import.name(),
+						LL.commands.character.importWanderersGuide.name(),
+						LL.commands.character.importPathBuilder.name(),
 						LL.commands.character.update.name(),
 						LL.commands.character.list.name(),
 						LL.commands.character.setActive.name(),

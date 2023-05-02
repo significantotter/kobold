@@ -67,7 +67,7 @@ describe.skip('CharacterRemoveSubCommand', () => {
 			reply({ content, components }, ephemeral, fetchReply) {
 				expect(content).toBe(
 					Language.LL.commands.character.remove.interactions.removeConfirmation.text({
-						characterName: charToRemove.characterData.name,
+						characterName: charToRemove.sheet.info.name,
 					})
 				);
 			},
@@ -82,7 +82,7 @@ describe.skip('CharacterRemoveSubCommand', () => {
 		jest.spyOn(InteractionUtils, 'send').mockImplementation((intr, message: any): any => {
 			expect(message?.content).toBe(
 				Language.LL.commands.character.remove.interactions.cancelled({
-					characterName: charToRemove.characterData.name,
+					characterName: charToRemove.sheet.info.name,
 				})
 			);
 			done();

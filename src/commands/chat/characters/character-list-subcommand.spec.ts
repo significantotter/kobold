@@ -62,11 +62,11 @@ describe('CharacterListSubCommand', () => {
 			expect(embed.data.fields.find(field => field.name.includes('(active)'))).toBeDefined();
 			for (const character of builtCharacters) {
 				const field = embed.data.fields.find(field =>
-					field.name.includes(character.characterData.name)
+					field.name.includes(character.sheet.info.name)
 				);
-				expect(field.value).toContain(String(character.characterData.level));
-				if (character.characterData.ancestryName) {
-					expect(field.value).toContain(character.characterData.ancestryName);
+				expect(field.value).toContain(String(character.sheet.info.level));
+				if (character.sheet.info.ancestry) {
+					expect(field.value).toContain(character.sheet.info.ancestry);
 				}
 			}
 

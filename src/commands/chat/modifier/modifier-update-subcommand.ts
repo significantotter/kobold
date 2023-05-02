@@ -21,7 +21,9 @@ import { ModifierOptions } from './modifier-command-options.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
 import { Character } from '../../../services/kobold/models/index.js';
 import { compileExpression } from 'filtrex';
-import { DiceRollResult, DiceUtils, RollBuilder } from '../../../utils/dice-utils.js';
+import { DiceUtils } from '../../../utils/dice-utils.js';
+import { RollBuilder } from '../../../utils/roll-builder.js';
+import { Creature } from '../../../utils/creature.js';
 
 export class ModifierUpdateSubCommand implements Command {
 	public names = [Language.LL.commands.modifier.update.name()];
@@ -125,7 +127,7 @@ export class ModifierUpdateSubCommand implements Command {
 			// we must be able to evaluate the modifier as a roll for this character
 			const result = DiceUtils.parseAndEvaluateDiceExpression({
 				rollExpression: newFieldValue,
-				character: activeCharacter,
+				creature: Creature.fromCharacter(activeCharacter),
 				LL: Language.LL,
 			});
 
@@ -176,7 +178,7 @@ export class ModifierUpdateSubCommand implements Command {
 		const updateEmbed = new KoboldEmbed();
 		updateEmbed.setTitle(
 			LL.commands.modifier.update.interactions.successEmbed.title({
-				characterName: activeCharacter.characterData.name,
+				characterName: activeCharacter.sheet.info.name,
 				modifierName: nameBeforeUpdate,
 				fieldToChange,
 				newFieldValue,

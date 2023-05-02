@@ -56,7 +56,7 @@ export class ActionCreateSubCommand implements Command {
 				intr,
 				LL.commands.action.create.interactions.alreadyExists({
 					actionName: name,
-					characterName: activeCharacter.characterData.name,
+					characterName: activeCharacter.sheet.info.name,
 				})
 			);
 			return;
@@ -83,7 +83,7 @@ export class ActionCreateSubCommand implements Command {
 			intr,
 			LL.commands.action.create.interactions.created({
 				actionName: name,
-				characterName: activeCharacter.characterData.name,
+				characterName: activeCharacter.sheet.info.name,
 			})
 		);
 		return;

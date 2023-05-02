@@ -63,7 +63,7 @@ export class ModifierListSubCommand implements Command {
 
 		const embed = await new KoboldEmbed();
 		embed.setCharacter(activeCharacter);
-		embed.setTitle(`${activeCharacter.characterData.name}'s Available Modifiers`);
+		embed.setTitle(`${activeCharacter.sheet.info.name}'s Available Modifiers`);
 		embed.addFields(fields);
 
 		await embed.sendBatches(intr);

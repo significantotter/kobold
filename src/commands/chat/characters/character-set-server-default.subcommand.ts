@@ -42,8 +42,8 @@ export class CharacterSetServerDefaultSubCommand implements Command {
 			const matchedCharacters = await Character.queryLooseCharacterName(match, intr.user.id);
 			//get the character matches
 			const options = matchedCharacters.map(character => ({
-				name: character.characterData.name,
-				value: character.characterData.name,
+				name: character.sheet.info.name,
+				value: character.sheet.info.name,
 			}));
 
 			if (
@@ -91,7 +91,7 @@ export class CharacterSetServerDefaultSubCommand implements Command {
 			await InteractionUtils.send(
 				intr,
 				LL.commands.character.setServerDefault.interactions.success({
-					characterName: targetCharacter.characterData.name,
+					characterName: targetCharacter.sheet.info.name,
 				})
 			);
 		} else {

@@ -15,7 +15,9 @@ import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Language } from '../../../models/enum-helpers/index.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
 import { compileExpression } from 'filtrex';
-import { DiceRollResult, DiceUtils, RollBuilder } from '../../../utils/dice-utils.js';
+import { DiceRollResult, DiceUtils } from '../../../utils/dice-utils.js';
+import { RollBuilder } from '../../../utils/roll-builder.js';
+import { Creature } from '../../../utils/creature.js';
 
 export class ModifierCreateSubCommand implements Command {
 	public names = [Language.LL.commands.modifier.create.name()];
@@ -64,7 +66,7 @@ export class ModifierCreateSubCommand implements Command {
 				intr,
 				LL.commands.modifier.create.interactions.alreadyExists({
 					modifierName: name,
-					characterName: activeCharacter.characterData.name,
+					characterName: activeCharacter.sheet.info.name,
 				})
 			);
 			return;
@@ -89,7 +91,7 @@ export class ModifierCreateSubCommand implements Command {
 		// we must be able to evaluate the modifier as a roll for this character
 		const result = DiceUtils.parseAndEvaluateDiceExpression({
 			rollExpression: value,
-			character: activeCharacter,
+			creature: Creature.fromCharacter(activeCharacter),
 			LL: Language.LL,
 		});
 
@@ -120,7 +122,7 @@ export class ModifierCreateSubCommand implements Command {
 			intr,
 			LL.commands.modifier.create.interactions.created({
 				modifierName: name,
-				characterName: activeCharacter.characterData.name,
+				characterName: activeCharacter.sheet.info.name,
 			})
 		);
 		return;

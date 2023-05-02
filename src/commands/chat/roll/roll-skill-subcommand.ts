@@ -14,11 +14,12 @@ import { ChatArgs } from '../../../constants/index.js';
 import { EventData } from '../../../models/internal-models.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
-import { WG } from '../../../services/wanderers-guide/wanderers-guide.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
-import { DiceUtils, RollBuilder } from '../../../utils/dice-utils.js';
+import { DiceUtils } from '../../../utils/dice-utils.js';
+import { RollBuilder } from '../../../utils/roll-builder.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Language } from '../../../models/enum-helpers/index.js';
+import { Creature } from '../../../utils/creature.js';
 
 export class RollSkillSubCommand implements Command {
 	public names = [Language.LL.commands.roll.skill.name()];
@@ -87,10 +88,10 @@ export class RollSkillSubCommand implements Command {
 			);
 			return;
 		}
-		const response = await DiceUtils.rollSkill({
+		const response = await DiceUtils.rollSimpleCreatureRoll({
 			userName: intr.user.username,
-			activeCharacter,
-			skillChoice,
+			creature: Creature.fromCharacter(activeCharacter),
+			attributeName: skillChoice,
 			rollNote,
 			modifierExpression,
 			LL,

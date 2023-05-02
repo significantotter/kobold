@@ -1,4 +1,4 @@
-import { RollBuilder } from './../../../utils/dice-utils';
+import { RollBuilder } from '../../../utils/roll-builder.js';
 import { InitiativeActor } from './../../../services/kobold/models/initiative-actor/initiative-actor.model';
 import {
 	ApplicationCommandType,
@@ -139,7 +139,7 @@ export class GameInitSubCommand implements Command {
 				(targetCharacter &&
 					targetCharacter.toLocaleLowerCase().trim().length > 0 &&
 					targetCharacter.toLocaleLowerCase().trim() !==
-						character.characterData.name.toLocaleLowerCase().trim())
+						character.sheet.info.name.toLocaleLowerCase().trim())
 			) {
 				continue;
 			}
@@ -149,7 +149,7 @@ export class GameInitSubCommand implements Command {
 				diceExpression,
 				initiativeValue,
 				currentInit,
-				userName: character.characterData.name,
+				userName: character.sheet.info.name,
 				userId: character.userId,
 				LL,
 			});

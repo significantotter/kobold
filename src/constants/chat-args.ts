@@ -138,6 +138,27 @@ export class ChatArgs {
 		autocomplete: true,
 		type: ApplicationCommandOptionType.String,
 	};
+	public static readonly INIT_TARGET_ACTOR_OPTION: APIApplicationCommandBasicOption = {
+		name: Language.LL.commandOptions.initTargetActor.name(),
+		description: Language.LL.commandOptions.initTargetActor.description(),
+		required: true,
+		autocomplete: true,
+		type: ApplicationCommandOptionType.String,
+	};
+	public static readonly INIT_ROLL_CHOICE_OPTION: APIApplicationCommandBasicOption = {
+		name: Language.LL.commandOptions.initRollChoice.name(),
+		description: Language.LL.commandOptions.initRollChoice.description(),
+		required: true,
+		autocomplete: true,
+		type: ApplicationCommandOptionType.String,
+	};
+	public static readonly INIT_CREATURE_OPTION: APIApplicationCommandBasicOption = {
+		name: Language.LL.commandOptions.initCreature.name(),
+		description: Language.LL.commandOptions.initCreature.description(),
+		required: true,
+		autocomplete: true,
+		type: ApplicationCommandOptionType.String,
+	};
 	public static readonly ACTOR_NAME_OPTION: APIApplicationCommandBasicOption = {
 		name: Language.LL.commandOptions.initActor.name(),
 		description: Language.LL.commandOptions.initActor.description(),
@@ -157,6 +178,10 @@ export class ChatArgs {
 			{
 				name: Language.LL.commandOptions.initSetOption.choices.actorName.name(),
 				value: Language.LL.commandOptions.initSetOption.choices.actorName.value(),
+			},
+			{
+				name: Language.LL.commandOptions.initSetOption.choices.isGm.name(),
+				value: Language.LL.commandOptions.initSetOption.choices.isGm.value(),
 			},
 		],
 	};

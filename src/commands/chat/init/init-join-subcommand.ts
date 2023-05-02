@@ -1,4 +1,4 @@
-import { RollBuilder } from './../../../utils/dice-utils';
+import { RollBuilder } from '../../../utils/roll-builder.js';
 import { InitiativeActor } from './../../../services/kobold/models/initiative-actor/initiative-actor.model';
 import {
 	ApplicationCommandType,
@@ -93,7 +93,7 @@ export class InitJoinSubCommand implements Command {
 			await InteractionUtils.send(
 				intr,
 				Language.LL.commands.init.join.interactions.characterAlreadyInInit({
-					characterName: activeCharacter.characterData.name,
+					characterName: activeCharacter.sheet.info.name,
 				})
 			);
 			return;

@@ -106,7 +106,7 @@ export class ModifierToggleSubCommand implements Command {
 		const updateEmbed = new KoboldEmbed();
 		updateEmbed.setTitle(
 			LL.commands.modifier.toggle.interactions.success({
-				characterName: activeCharacter.characterData.name,
+				characterName: activeCharacter.sheet.info.name,
 				modifierName: modifier.name,
 				activeSetting: activeText,
 			})

@@ -141,7 +141,7 @@ export class ModifierImportSubCommand implements Command {
 		await InteractionUtils.send(
 			intr,
 			LL.commands.modifier.import.interactions.imported({
-				characterName: activeCharacter.characterData.name,
+				characterName: activeCharacter.sheet.info.name,
 			})
 		);
 		return;

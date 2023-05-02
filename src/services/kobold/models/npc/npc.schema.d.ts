@@ -6,23 +6,37 @@
  */
 
 /**
- * A pathfinder creature from the bestiary
+ * A pathfinder npc from the bestiary
  */
-export interface Creature {
+export interface Npc {
 	/**
-	 * The id of the creature record.
+	 * The id of the npc record.
 	 */
 	id?: number;
 	/**
-	 * The pf2etools json data of the creature.
+	 * The pf2etools json data of the npc.
 	 */
 	data?: {
 		[k: string]: any;
 	};
 	/**
-	 * The name of the source file that the creature was imported from.
+	 * The name of the npc.
 	 */
-	source_file_name?: string;
+	name?: string;
+	/**
+	 * The fluff data of the npc.
+	 */
+	fluff?: {
+		[k: string]: any;
+	};
+	/**
+	 * The name of the npc that serves as the source for this npc's statistics.
+	 */
+	referenceNpcName?: string;
+	/**
+	 * The name of the source file that the npc was imported from.
+	 */
+	sourceFileName?: string;
 	/**
 	 * When the character was first imported
 	 */

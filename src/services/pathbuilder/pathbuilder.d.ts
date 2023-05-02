@@ -1,7 +1,7 @@
 export type ability = 'str' | 'dex' | 'con' | 'int' | 'wis' | 'cha';
 export type spellTradition = 'arcane' | 'divine' | 'occult' | 'primal';
 
-export namespace Pathbuilder {
+export namespace PathBuilder {
 	interface JsonExport {
 		success: boolean;
 		build: Character;
@@ -43,6 +43,12 @@ export namespace Pathbuilder {
 		spellCasters: SpellCasting[];
 		formula: [];
 		pets: [];
+		acTotal: {
+			acProfBonus: number;
+			acAbilityBonus: number;
+			acItemBonus: number;
+			acTotal: number;
+		};
 	}
 	interface Attributes {
 		ancestryhp: number;

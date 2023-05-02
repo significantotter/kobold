@@ -4,6 +4,7 @@ import { BaseModel } from '../../lib/base-model.js';
 import InitiativeActorSchema from './initiative-actor.schema.json';
 import { Model, RelationMappings } from 'objection';
 import { Initiative } from '../initiative/initiative.model.js';
+import SheetTypes from '../../lib/sheet.schema';
 import { InitiativeActorGroup } from '../initiative-actor-group/initiative-actor-group.model.js';
 import { Character } from '../character/character.model.js';
 
@@ -11,6 +12,7 @@ export interface InitiativeActor extends InitiativeActorTypes.InitiativeActor {
 	initiative?: Initiative;
 	actorGroup?: InitiativeActorGroup;
 	character?: Character;
+	sheet?: SheetTypes.Sheet;
 }
 export class InitiativeActor extends BaseModel {
 	static get tableName(): string {

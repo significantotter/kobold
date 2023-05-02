@@ -37,10 +37,10 @@ export default {
 					value:
 						"go to your character's webpage in wanderer's guide " +
 						'and copy the webpage URL.\n\n' +
-						'Then, start the `/import` command, and enter that URL ' +
+						'Then, start the `/character import-wanderers-guide` command, and enter that URL ' +
 						"in the command's url option. It may ask you to authenticate the " +
 						'character. If so, follow the link, complete the instructions, ' +
-						"and then `/import` your character's url again.",
+						"and then `/character import-wanderers-guide` your character's url again.",
 				},
 				initiative: {
 					name: 'How does initiative work?',

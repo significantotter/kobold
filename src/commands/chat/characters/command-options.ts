@@ -8,6 +8,18 @@ export class CharacterOptions {
 		required: true,
 		type: ApplicationCommandOptionType.String,
 	};
+	public static readonly IMPORT_PATHBUILDER_OPTION: APIApplicationCommandBasicOption = {
+		name: Language.LL.commandOptions.pbJsonId.name(),
+		description: Language.LL.commandOptions.pbJsonId.description(),
+		required: true,
+		type: ApplicationCommandOptionType.Number,
+	};
+	public static readonly IMPORT_USE_STAMINA_OPTION: APIApplicationCommandBasicOption = {
+		name: Language.LL.commandOptions.useStamina.name(),
+		description: Language.LL.commandOptions.useStamina.description(),
+		required: false,
+		type: ApplicationCommandOptionType.String,
+	};
 	public static readonly SET_ACTIVE_NAME_OPTION: APIApplicationCommandBasicOption = {
 		name: Language.LL.commandOptions.name.name(),
 		description: Language.LL.commandOptions.name.description(),

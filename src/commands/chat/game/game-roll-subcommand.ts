@@ -14,7 +14,8 @@ import { ChatArgs } from '../../../constants/index.js';
 import { EventData } from '../../../models/internal-models.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
-import { DiceUtils, RollBuilder } from '../../../utils/dice-utils.js';
+import { DiceUtils } from '../../../utils/dice-utils.js';
+import { RollBuilder } from '../../../utils/roll-builder.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Language } from '../../../models/enum-helpers/index.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
@@ -24,6 +25,7 @@ import { GameOptions } from './game-command-options.js';
 import { Character } from '../../../services/kobold/models/index.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { WG } from '../../../services/wanderers-guide/wanderers-guide.js';
+import { Creature } from '../../../utils/creature.js';
 
 export class GameRollSubCommand implements Command {
 	public names = [Language.LL.commands.game.roll.name()];
@@ -59,42 +61,31 @@ export class GameRollSubCommand implements Command {
 			const choices: Set<string> = new Set();
 			if (match === '' || 'dice'.includes(match.toLocaleLowerCase())) choices.add('Dice');
 
+			let results: { name: string; value: string }[] = [];
 			for (const character of activeGame?.characters || []) {
-				// add skills
-				const matchedSkills = CharacterUtils.findPossibleSkillFromString(
-					character,
-					match
-				).map(skill => skill.Name);
-				for (const skill of matchedSkills) {
-					choices.add(_.capitalize(skill));
-				}
+				const creature = new Creature(character.sheet);
 
-				// add saves
-				const matchedSaves = CharacterUtils.findPossibleSaveFromString(
-					character,
-					match
-				).map(save => save.Name);
-				for (const save of matchedSaves) {
-					choices.add(_.capitalize(save));
-				}
-				// add abilities
-				const matchedAbilities = CharacterUtils.findPossibleAbilityFromString(
-					character,
-					match
-				).map(ability => ability.Name);
-				for (const ability of matchedAbilities) {
-					choices.add(_.capitalize(ability));
-				}
-			}
-			choices.delete('');
+				const allRolls = [
+					..._.keys(creature.rolls),
+					..._.keys(creature.attackRolls),
+					...creature.actions.map(action => action.name),
+				];
 
-			const results = [];
-			let counter = 0;
-			for (const value of choices.values()) {
-				if (counter > 90) continue;
-				results.push({ name: value, value: value });
-				counter++;
+				const matchedRolls = allRolls.filter(roll =>
+					roll.toLowerCase().includes(match.toLowerCase())
+				);
+				results.push(
+					...matchedRolls.map(roll => ({
+						name: roll,
+						value: roll,
+					}))
+				);
 			}
+			results = _.uniqBy(
+				results,
+				(resultA, resultB) =>
+					resultA.name === resultB.name && resultA.value === resultB.value
+			);
 			return results;
 		}
 	}
@@ -132,96 +123,28 @@ export class GameRollSubCommand implements Command {
 				targetCharacter &&
 				targetCharacter.toLocaleLowerCase().trim().length > 0 &&
 				targetCharacter.toLocaleLowerCase().trim() !==
-					character.characterData.name.toLocaleLowerCase().trim()
+					character.sheet.info.name.toLocaleLowerCase().trim()
 			) {
 				continue;
 			}
-			const skillsPlusPerception = [
-				...character.calculatedStats.totalSkills,
-				{
-					Name: 'Perception',
-					Bonus: character.calculatedStats.totalPerception,
-				},
-			] as WG.NamedBonus[];
 
-			const matchingSkills = skillsPlusPerception.filter(
-				skill => skill.Name.toLocaleLowerCase() === rollType.toLocaleLowerCase()
-			);
-			const matchingSaves = character.calculatedStats.totalSaves.filter(
-				save => save.Name.toLocaleLowerCase() === rollType.toLocaleLowerCase()
-			);
-			const matchingAbilities = character.calculatedStats.totalAbilityScores.filter(
-				ability => ability.Name.toLocaleLowerCase() === rollType.toLocaleLowerCase()
-			);
-
-			if (matchingSkills.length) {
-				const response = await DiceUtils.rollSkill({
-					userName: intr.user.username,
-					activeCharacter: character,
-					skillChoice: matchingSkills[0].Name,
+			const creature = Creature.fromCharacter(character);
+			const rollOptions = {
+				...creature.rolls,
+				...creature.attackRolls,
+			};
+			if (rollOptions[rollType.trim().toLocaleLowerCase()]) {
+				const rollResult = await DiceUtils.rollCreatureDice(creature, rollType, intr, {
 					modifierExpression: diceExpression,
-					LL,
 				});
-				embeds.push(response.compileEmbed());
-			} else if (matchingSaves.length) {
-				const targetSave = matchingSaves[0];
-				const rollBuilder = new RollBuilder({
-					actorName: intr.user.username,
-					character,
-					rollDescription: Language.LL.commands.roll.interactions.rolledDice({
-						diceType: targetSave.Name,
-					}),
-					LL,
-				});
-				let targetSaveAttribute = character.attributes.find(
-					attr =>
-						attr.name.trim().toLocaleLowerCase() ===
-						targetSave.Name.trim().toLocaleLowerCase()
-				);
-				let saveTags = targetSaveAttribute?.tags || [
-					'save',
-					targetSave.Name.toLocaleLowerCase(),
-				];
-				rollBuilder.addRoll({
-					rollExpression: DiceUtils.buildDiceExpression(
-						'd20',
-						String(targetSave.Bonus),
-						diceExpression
-					),
-					tags: saveTags,
-				});
-				embeds.push(rollBuilder.compileEmbed());
-			} else if (matchingAbilities.length) {
-				const targetAbility = matchingAbilities[0];
-				const rollBuilder = new RollBuilder({
-					actorName: intr.user.username,
-					character,
-					rollDescription: Language.LL.commands.roll.interactions.rolledDice({
-						diceType: targetAbility.Name,
-					}),
-					LL,
-				});
-				let targetAbilityAttribute = character.attributes.find(
-					attr =>
-						attr.name.trim().toLocaleLowerCase() ===
-						targetAbility.Name.trim().toLocaleLowerCase()
-				);
-				let abilityTags = targetAbilityAttribute?.tags || [
-					'ability',
-					targetAbility.Name.toLocaleLowerCase(),
-				];
-				rollBuilder.addRoll({
-					rollExpression: DiceUtils.buildDiceExpression(
-						'd20',
-						String(Math.floor((Number(targetAbility.Score) - 10) / 2)),
-						diceExpression
-					),
-					tags: abilityTags,
-				});
-				embeds.push(rollBuilder.compileEmbed());
+				if (_.isString(rollResult.message)) {
+					embeds.push(new KoboldEmbed().setDescription(rollResult.message));
+				} else {
+					embeds.push(rollResult.message);
+				}
 			} else if (rollType.toLocaleLowerCase() === 'dice') {
 				const rollBuilder = new RollBuilder({
-					character: character || null,
+					creature: creature,
 					actorName: intr.user.username,
 					rollDescription: LL.commands.roll.dice.interactions.rolledDice(),
 					LL,
@@ -229,7 +152,6 @@ export class GameRollSubCommand implements Command {
 				rollBuilder.addRoll({ rollExpression: diceExpression });
 				embeds.push(rollBuilder.compileEmbed());
 			}
-			// otherwise, if we don't have a match, like on a lore skill that not every character has, we skip
 		}
 
 		if (notifyRoll) {

@@ -24,7 +24,16 @@ export namespace WG {
 		classID_2: null | number;
 		inventoryID: number;
 		notes: any;
-		infoJSON: null | { imageURL: string; pronouns: string; [key: string]: any };
+		infoJSON: null | {
+			gender?: string;
+			beliefs?: string;
+			appearance?: string;
+			nationality?: string;
+			alignment?: string;
+			imageURL?: string;
+			pronouns?: string;
+			[key: string]: any;
+		};
 		rollHistoryJSON: any;
 		details: any;
 		customCode: any;
@@ -147,6 +156,7 @@ export namespace WG {
 	interface NamedBonus {
 		Name: string;
 		Bonus: number | string | null;
+		ProficiencyMod?: number | null;
 		[key: string]: any;
 	}
 
@@ -174,13 +184,41 @@ export namespace WG {
 		maxResolve: number | null;
 		conditions: CalculatedCondition[] | null;
 		totalClassDC: number | null;
+		classDCProfMod?: number | null;
 		totalSpeed: number | null;
+		generalInfo: {
+			className?: string;
+			heritageAncestryName?: string;
+			backgroundName?: string;
+			size?: string;
+			traits?: string[];
+		};
 		totalAC: number | null;
 		totalPerception: number | null;
+		perceptionProfMod?: number | null;
 		totalSkills: NamedBonus[];
 		totalSaves: NamedBonus[];
 		totalAbilityScores: NamedScore[];
 		weapons: Attack[];
+
+		unarmedProfMod?: number | null;
+		simpleWeaponProfMod?: number | null;
+		martialWeaponProfMod?: number | null;
+		advancedWeaponProfMod?: number | null;
+
+		arcaneSpellDC?: number | null;
+		divineSpellDC?: number | null;
+		occultSpellDC?: number | null;
+		primalSpellDC?: number | null;
+		arcaneSpellAttack?: number | null;
+		divineSpellAttack?: number | null;
+		occultSpellAttack?: number | null;
+		primalSpellAttack?: number | null;
+		arcaneSpellProfMod?: number | null;
+		divineSpellProfMod?: number | null;
+		occultSpellProfMod?: number | null;
+		primalSpellProfMod?: number | null;
+
 		createdAt: string;
 		updatedAt: string;
 		[key: string]: any;

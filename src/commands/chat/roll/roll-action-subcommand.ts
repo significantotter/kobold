@@ -14,15 +14,16 @@ import { ChatArgs } from '../../../constants/index.js';
 import { EventData } from '../../../models/internal-models.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
-import { WG } from '../../../services/wanderers-guide/wanderers-guide.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
-import { DiceUtils, MultiRollResult, RollBuilder } from '../../../utils/dice-utils.js';
+import { DiceUtils } from '../../../utils/dice-utils.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Language } from '../../../models/enum-helpers/index.js';
 import { ActionOptions } from '../action/action-command-options.js';
 import _ from 'lodash';
 import { ActionRoller } from '../../../utils/action-roller.js';
 import { getEmoji } from '../../../constants/emoji.js';
+import { Creature } from '../../../utils/creature.js';
+import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
 
 export class RollActionSubCommand implements Command {
 	public names = [Language.LL.commands.roll.action.name()];
@@ -82,7 +83,7 @@ export class RollActionSubCommand implements Command {
 		);
 		const heightenLevel = intr.options.getInteger(ChatArgs.HEIGHTEN_LEVEL_OPTION.name);
 		const targetDC = intr.options.getInteger(ChatArgs.ROLL_TARGET_DC_OPTION.name);
-		const saveDiceRoll = intr.options.getString(ChatArgs.ROLL_SAVE_DICE_ROLL_OPTION.name);
+		const saveRollType = intr.options.getString(ChatArgs.ROLL_SAVE_DICE_ROLL_OPTION.name);
 		const rollNote = intr.options.getString(ChatArgs.ROLL_NOTE_OPTION.name);
 
 		const secretRoll = intr.options.getString(ChatArgs.ROLL_SECRET_OPTION.name);
@@ -106,57 +107,32 @@ export class RollActionSubCommand implements Command {
 			action => action.name.toLocaleLowerCase() === targetActionName.toLocaleLowerCase()
 		);
 
-		const actionRoller = new ActionRoller(targetAction, activeCharacter, null, {
+		const creature = Creature.fromCharacter(activeCharacter);
+
+		const actionRoller = new ActionRoller(targetAction, creature, null, {
 			heightenLevel,
 		});
 
 		const builtRoll = actionRoller.buildRoll(rollNote, targetAction.description, {
 			heightenLevel,
 			targetDC,
-			saveDiceRoll,
+			saveDiceRoll: saveRollType,
 			attackModifierExpression,
 			damageModifierExpression,
-			title: `${getEmoji(intr, targetAction.actionCost)} ${
-				activeCharacter.characterData.name
-			} used ${targetAction.name}!`,
+			title: `${getEmoji(intr, targetAction.actionCost)} ${creature.sheet.info.name} used ${
+				targetAction.name
+			}!`,
 		});
 
-		const response = builtRoll.compileEmbed({ forceFields: true, showTags: false });
+		const embed = builtRoll.compileEmbed({ forceFields: true, showTags: false });
 
-		const descriptionArr = [];
-		if (heightenLevel) {
-			descriptionArr.push(`Heightened to level ${heightenLevel}`);
-		}
-		if (saveDiceRoll) {
-			let rollType = '';
-			for (const roll of targetAction.rolls) {
-				if (roll.type === 'save') {
-					rollType = ` ${roll.saveRollType}`;
-					break;
-				}
-			}
-			descriptionArr.push(`The target rolls${rollType} ${saveDiceRoll}`);
-		}
-		if (targetDC) {
-			let saveType = ' DC';
-			for (const roll of targetAction.rolls) {
-				if (roll.type === 'save' || roll.type === 'attack') {
-					saveType = ` ${roll.saveTargetDC ?? roll.targetDC}`;
-					// add the word DC if we aren't checking vs the AC
-					if (
-						saveType.toLocaleLowerCase() !== ' ac' &&
-						!_.endsWith(saveType.toLocaleLowerCase(), ' dc')
-					)
-						saveType += ' DC';
-					// change a to an if the next letter is a vowel
-					if (['a', 'e', 'i', 'o', 'u'].includes(saveType[1].toLocaleLowerCase()))
-						saveType = `n${saveType}`;
-					break;
-				}
-			}
-			descriptionArr.push(`VS a${saveType} of ${targetDC}`);
-		}
-		if (descriptionArr.length) response.setDescription(descriptionArr.join('\n'));
+		const response = EmbedUtils.describeActionResult({
+			embed,
+			action: targetAction,
+			heightenLevel,
+			saveRollType,
+			targetDC,
+		});
 
 		if (notifyRoll) {
 			await InteractionUtils.send(

@@ -276,6 +276,15 @@ export default {
 		name: 'url',
 		description: "The url of your wanderer's guide character.",
 	},
+	pbJsonId: {
+		name: 'json-id',
+		description: 'The most recent json export id for your PathBuilder character.',
+	},
+	useStamina: {
+		name: 'use-stamina',
+		description:
+			'Whether the PathBuilder character should use the variant stamina/resolve systems.',
+	},
 	name: {
 		name: 'name',
 		description: "The name of your wanderer's guide character.",
@@ -343,11 +352,24 @@ export default {
 	},
 	initActor: {
 		name: 'name',
-		description: 'The name of the NPC/minion to add to initiative.',
+		description: 'What to display the NPC/minion as in the initiative order.',
 	},
 	initCharacter: {
 		name: 'character',
-		description: 'A character present in the initiative.',
+		description: 'A character or npc present in the initiative.',
+	},
+	initCreature: {
+		name: 'creature',
+		description: 'A creature to add to the initiative.',
+	},
+	initTargetActor: {
+		name: 'target-initiative-member',
+		description: 'Which member of the initiative to target.',
+	},
+	initRollChoice: {
+		name: 'roll',
+		description:
+			'What to have that initiative member roll. Choose the initiative member first!',
 	},
 	initSetOption: {
 		name: 'option',
@@ -360,6 +382,10 @@ export default {
 			actorName: {
 				name: 'name',
 				value: 'name',
+			},
+			isGm: {
+				name: 'player-is-gm',
+				value: 'player-is-gm',
 			},
 		},
 	},

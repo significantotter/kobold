@@ -15,6 +15,10 @@ import { CharacterUtils } from '../../../utils/character-utils.js';
 import { Language } from '../../../models/enum-helpers/index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Config } from '../../../config/config.js';
+import { CharacterOptions } from './command-options.js';
+import { refs } from '../../../i18n/en/common.js';
+import { PathBuilder } from '../../../services/pathbuilder/index.js';
+import { Creature } from '../../../utils/creature.js';
 
 export class CharacterUpdateSubCommand implements Command {
 	public names = [Language.LL.commands.character.update.name()];
@@ -42,6 +46,64 @@ export class CharacterUpdateSubCommand implements Command {
 			);
 			return;
 		}
+
+		if (activeCharacter.importSource === 'pathbuilder') {
+			let jsonId = intr.options.getNumber(CharacterOptions.IMPORT_PATHBUILDER_OPTION.name);
+
+			let newSheetUpdateWarning = '';
+			if (!jsonId) {
+				jsonId = activeCharacter.charId;
+				newSheetUpdateWarning =
+					' Note: You must re-export your pathbuilder character and use the new json ' +
+					'id to update your character sheet with new changes. Otherwise, I will just ' +
+					'reload the data from the last exported pathbuilder json id.';
+			}
+
+			const [pathBuilderChar, existingCharacter] = await Promise.all([
+				new PathBuilder().get({ characterJsonId: jsonId }),
+				Character.query().first().where({
+					id: activeCharacter.id,
+					importSource: 'pathbuilder',
+					userId: intr.user.id,
+				}),
+			]);
+
+			if (!pathBuilderChar.success) {
+				await InteractionUtils.send(
+					intr,
+					LL.commands.character.importPathBuilder.interactions.failedRequest({
+						supportServerUrl: refs.links.support,
+					})
+				);
+			}
+
+			const creature = Creature.fromPathBuilder(pathBuilderChar.build);
+
+			// set current characters owned by user to inactive state
+			await Character.query()
+				.patch({ isActiveCharacter: false })
+				.where({ userId: intr.user.id });
+
+			// store sheet in db
+			const newCharacter = await Character.query().patchAndFetchById(existingCharacter.id, {
+				charId: jsonId,
+				userId: intr.user.id,
+				sheet: creature.sheet,
+				isActiveCharacter: true,
+				importSource: 'pathbuilder',
+			});
+
+			//send success message
+
+			await InteractionUtils.send(
+				intr,
+				LL.commands.character.update.interactions.success({
+					characterName: newCharacter.sheet.info.name,
+				}) + newSheetUpdateWarning
+			);
+			return;
+		}
+		//otherwise wanderer's guide
 
 		//check for token access
 		const token = await WgToken.query().where({ charId: activeCharacter.charId });
@@ -110,7 +172,7 @@ export class CharacterUpdateSubCommand implements Command {
 		await InteractionUtils.send(
 			intr,
 			LL.commands.character.update.interactions.success({
-				characterName: updatedCharacter.characterData.name,
+				characterName: updatedCharacter.sheet.info.name,
 			})
 		);
 	}

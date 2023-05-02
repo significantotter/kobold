@@ -132,7 +132,7 @@ export class ActionImportSubCommand implements Command {
 		await InteractionUtils.send(
 			intr,
 			LL.commands.action.import.interactions.imported({
-				characterName: activeCharacter.characterData.name,
+				characterName: activeCharacter.sheet.info.name,
 			})
 		);
 		return;

@@ -26,6 +26,20 @@ export default {
 		name: 'show',
 		description: `Displays the current initiative order`,
 	},
+	statBlock: {
+		name: 'stat-block',
+		description: `Displays the statBlock for a creature in the initiative order`,
+	},
+	roll: {
+		name: 'roll',
+		description: `Rolls dice for an initiative member that you control`,
+		interactions: {
+			noSheet:
+				"Yip! That character doesn't have any creature/character data associated with it. " +
+				"It's either a custom npc or wasn't imported properly",
+			invalidRoll: "Yip! I couldn't find that roll on your sheet.",
+		},
+	},
 	next: {
 		name: 'next',
 		description: `Moves to the next participant in the initiative order`,

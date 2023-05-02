@@ -1,7 +1,8 @@
 import { compileExpression } from 'filtrex';
 import { Language } from '../../../models/enum-helpers/language.js';
 import { DiceUtils } from '../../../utils/dice-utils.js';
-import { Character } from '../models/index.js';
+import { Character, Sheet } from '../models/index.js';
+import { Creature } from '../../../utils/creature.js';
 
 export function isModifierValidForTags(
 	modifier: Character['modifiers'][0],
@@ -71,14 +72,14 @@ function diceWereRolled(node: any): boolean {
 }
 
 export function parseBonusesForTagsFromModifiers(
-	modifiers: Character['modifiers'],
+	modifiers: Sheet['modifiers'],
 	attributes: {
 		name: string;
 		value: number;
 		tags?: string[];
 	}[],
 	tags: string[],
-	character?: Character
+	creature?: Creature
 ) {
 	const sanitizedTags = tags.map(tag => tag.toLocaleLowerCase().trim());
 	let bonuses = {};
@@ -98,7 +99,7 @@ export function parseBonusesForTagsFromModifiers(
 			let modifierSubRoll = DiceUtils.parseAndEvaluateDiceExpression({
 				rollExpression: modifier.value.toString(),
 				skipModifiers: true, // we don't want any possibility of an infinite loop here
-				character,
+				creature,
 				extraAttributes: attributes,
 				tags,
 				LL: Language.LL,

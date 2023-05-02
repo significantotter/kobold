@@ -21,7 +21,7 @@
 	"include": ["src/**/*.ts", "src/**/*.json", "types.d.ts"],
 	"exclude": [
 		"dist",
-		"migrations",
+		"src/migrations",
 		"node_modules",
 		"tests",
 		"jest.config.ts",

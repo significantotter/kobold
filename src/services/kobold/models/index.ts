@@ -13,4 +13,6 @@ export { InitiativeActorGroupFactory } from './initiative-actor-group/initiative
 export { Game } from './game/game.model';
 export { GameFactory } from './game/game.factory';
 export { BestiaryFilesLoaded } from './bestiary-files-loaded/bestiary-files-loaded.model';
-export { Creature } from './creature/creature.model';
+export { Npc } from './npc/npc.model';
+
+export type { Sheet } from './../lib/sheet.schema';

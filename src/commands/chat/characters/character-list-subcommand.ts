@@ -51,25 +51,15 @@ export class CharacterListSubCommand implements Command {
 			const characterFields = [];
 
 			for (const character of targetCharacter) {
-				const level = character.characterData.level;
-				const heritage = [
-					character.characterData.vHeritageName,
-					character.characterData.heritageName,
-				]
-					.join(' ')
-					.trim();
-				const ancestry = character.characterData.ancestryName;
-				const classes = [
-					character.characterData.className,
-					character.characterData.className2,
-				]
-					.join(' ')
-					.trim();
+				const level = character.sheet.info.level;
+				const heritage = character.sheet.info.heritage;
+				const ancestry = character.sheet.info.ancestry;
+				const classes = character.sheet.info.class;
 				const isServerDefault = serverDefault?.characterId == character.id;
 				characterFields.push({
 					name: LL.commands.character.list.interactions.characterListEmbed.characterFieldName(
 						{
-							characterName: character.characterData.name,
+							characterName: character.sheet.info.name,
 							activeText: character.isActiveCharacter ? ' (active)' : '',
 							serverDefaultText: isServerDefault ? ' (server default)' : '',
 						}

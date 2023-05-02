@@ -22,6 +22,7 @@ import _ from 'lodash';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Language } from '../../../models/enum-helpers/index.js';
+import { Initiative } from '../../../services/kobold/models/index.js';
 
 export class InitSetSubCommand implements Command {
 	public names = [Language.LL.commands.init.set.name()];
@@ -75,7 +76,7 @@ export class InitSetSubCommand implements Command {
 		const fieldToChange = intr.options.getString(ChatArgs.ACTOR_SET_OPTION.name).trim();
 		const newFieldValue = intr.options.getString(ChatArgs.ACTOR_SET_VALUE_OPTION.name).trim();
 
-		if (!fieldToChange || !['initiative', 'name'].includes(fieldToChange)) {
+		if (!fieldToChange || !['initiative', 'name', 'player-is-gm'].includes(fieldToChange)) {
 			await InteractionUtils.send(
 				intr,
 				LL.commands.init.set.interactions.invalidOptionError()
@@ -109,6 +110,8 @@ export class InitSetSubCommand implements Command {
 			possibleActor => possibleActor.initiativeActorGroupId === actor.initiativeActorGroupId
 		);
 
+		let finalValue: any = newFieldValue;
+
 		// validate the updates
 		if (fieldToChange === targetCharacterName) {
 			//a name can't be an empty string
@@ -140,18 +143,27 @@ export class InitSetSubCommand implements Command {
 				);
 				return;
 			}
+			finalValue = Number(newFieldValue);
+		}
+
+		if (fieldToChange === 'player-is-gm') {
+			finalValue = actor.userId;
 		}
 
 		// perform the updates
-		if (fieldToChange === 'initiative') {
+		if (fieldToChange === 'player-is-gm') {
+			await Initiative.query().patchAndFetchById(currentInit.id, {
+				gmUserId: finalValue,
+			});
+		} else if (fieldToChange === 'initiative') {
 			await InitiativeActorGroup.query().patchAndFetchById(actor.initiativeActorGroupId, {
-				initiativeResult: Number(newFieldValue),
+				initiativeResult: finalValue,
 			});
 		} else if (fieldToChange === 'name') {
-			await InitiativeActor.query().patchAndFetchById(actor.id, { name: newFieldValue });
+			await InitiativeActor.query().patchAndFetchById(actor.id, { name: finalValue });
 			if (actorsInGroup.length === 1) {
 				await InitiativeActorGroup.query().patchAndFetchById(actor.initiativeActorGroupId, {
-					name: newFieldValue,
+					name: finalValue,
 				});
 			}
 		}

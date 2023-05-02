@@ -1,6 +1,6 @@
 import fs from 'fs';
 import xxhash from 'xxhashjs';
-import { BestiaryFilesLoaded, Creature } from '../kobold/models/index.js';
+import { BestiaryFilesLoaded, Npc } from '../kobold/models/index.js';
 import { transaction } from 'objection';
 import path from 'path';
 
@@ -33,9 +33,6 @@ export async function hashBestiaryFiles() {
 
 	await Promise.all(promises);
 
-	console.log('Hashed bestiary files:');
-	console.log(hashesByFile);
-
 	return hashesByFile;
 
 	// compare hashes to the saved hashes of uploaded bestiary files in the db
@@ -44,9 +41,8 @@ export async function hashBestiaryFiles() {
 }
 
 export async function loadBestiaryFileIfNoMatchingHash(file: string, hash: string): Promise<void> {
-	await transaction(BestiaryFilesLoaded, Creature, async (BestiaryFilesLoaded, Creature) => {
+	await transaction(BestiaryFilesLoaded, Npc, async (BestiaryFilesLoaded, Npc) => {
 		const loadedFile = (await BestiaryFilesLoaded.query().where('fileName', file))[0];
-		console.log('checking ' + file);
 		let load = false;
 
 		if (loadedFile && loadedFile.fileHash !== hash) {
@@ -55,33 +51,52 @@ export async function loadBestiaryFileIfNoMatchingHash(file: string, hash: strin
 			// delete the old records
 			await Promise.all([
 				loadedFile.$query().delete(),
-				Creature.query().delete().where('sourceFileName', file),
+				Npc.query().delete().where('sourceFileName', file),
 			]);
 		} else if (!loadedFile) {
 			load = true;
 		}
 
 		if (load) {
-			console.log('loading the file');
+			console.log('importing ' + file);
+
 			// load the file
-			const creatures = JSON.parse(
+			const npcs = JSON.parse(
 				fs.readFileSync(path.join(__dirname, `/Pf2eTools/data/bestiary/${file}`), 'utf8')
 			) as { creature: { [k: string]: any }[] };
+
+			let npcFluff: { npcFluff?: any[] } = { npcFluff: [] };
+			try {
+				npcFluff = JSON.parse(
+					fs.readFileSync(
+						path.join(__dirname, `/Pf2eTools/data/bestiary/fluff-${file}`),
+						'utf8'
+					)
+				);
+			} catch {}
+
 			// save the file hash
 			await BestiaryFilesLoaded.query().insert({ fileName: file, fileHash: hash });
-			// save the creatures
+			// save the npcs
 			await Promise.all(
-				(creatures?.creature || []).map(creature =>
-					Creature.query().insert({
-						data: creature,
+				(npcs?.creature || []).map(npc => {
+					let fluff = {};
+					if (npcFluff?.npcFluff?.length) {
+						fluff = npcFluff.npcFluff.find(
+							fluff =>
+								(fluff?.name || '').toLowerCase() ===
+								(npc?.name || '').toLowerCase()
+						);
+					}
+					return Npc.query().insert({
+						name: npc?.name || 'unknown',
+						data: npc,
+						fluff,
 						sourceFileName: file,
-						name: creature?.name || 'unknown',
-					})
-				)
+					});
+				})
 			);
 			console.log('loaded!');
-		} else {
-			console.log('skipping');
 		}
 	});
 }

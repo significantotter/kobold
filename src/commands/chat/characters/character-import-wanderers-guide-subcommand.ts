@@ -1,5 +1,5 @@
-import { Language } from './../../../models/enum-helpers/language';
-import { Lang } from './../../../services/lang';
+import { Language } from '../../../models/enum-helpers/language';
+import { Lang } from '../../../services/lang';
 import { Character } from '../../../services/kobold/models/index.js';
 import {
 	ApplicationCommandType,
@@ -18,12 +18,12 @@ import { CharacterUtils } from '../../../utils/character-utils.js';
 import { CharacterOptions } from './command-options.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 
-export class CharacterImportSubCommand implements Command {
-	public names = [Language.LL.commands.character.import.name()];
+export class CharacterImportWanderersGuideSubCommand implements Command {
+	public names = [Language.LL.commands.character.importWanderersGuide.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.character.import.name(),
-		description: Language.LL.commands.character.import.description(),
+		name: Language.LL.commands.character.importWanderersGuide.name(),
+		description: Language.LL.commands.character.importWanderersGuide.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -40,7 +40,7 @@ export class CharacterImportSubCommand implements Command {
 		if (charId === null) {
 			await InteractionUtils.send(
 				intr,
-				LL.commands.character.import.interactions.invalidUrl({
+				LL.commands.character.importWanderersGuide.interactions.invalidUrl({
 					url,
 				})
 			);
@@ -50,15 +50,15 @@ export class CharacterImportSubCommand implements Command {
 		//check if we have a token
 		const [tokenResults, existingCharacter] = await Promise.all([
 			WgToken.query().where({ charId }),
-			Character.query().where({ charId, userId: intr.user.id }),
+			Character.query().where({ charId, importSource: 'wg', userId: intr.user.id }),
 		]);
 
 		if (existingCharacter.length) {
 			const character = existingCharacter[0];
 			await InteractionUtils.send(
 				intr,
-				LL.commands.character.import.interactions.characterAlreadyExists({
-					characterName: character.characterData.name,
+				LL.commands.character.importWanderersGuide.interactions.characterAlreadyExists({
+					characterName: character.sheet.info.name,
 				})
 			);
 			return;
@@ -126,14 +126,15 @@ export class CharacterImportSubCommand implements Command {
 				userId: intr.user.id,
 				...character,
 				isActiveCharacter: true,
+				importSource: 'wg',
 			});
 
 			//send success message
 
 			await InteractionUtils.send(
 				intr,
-				LL.commands.character.import.interactions.success({
-					characterName: newCharacter.characterData.name,
+				LL.commands.character.importWanderersGuide.interactions.success({
+					characterName: newCharacter.sheet.info.name,
 				})
 			);
 		}

@@ -62,6 +62,13 @@ export class CharacterHelpers {
 				totalSpeed: null,
 				totalAC: null,
 				totalPerception: null,
+				generalInfo: {
+					className: '',
+					heritageAncestryName: '',
+					backgroundName: '',
+					size: '',
+					traits: [],
+				},
 				totalSkills: [],
 				totalSaves: [],
 				totalAbilityScores: [],

@@ -20,8 +20,8 @@ export default {
 	},
 
 	// SUBCOMMANDS
-	import: {
-		name: 'import',
+	importWanderersGuide: {
+		name: 'import-wanderers-guide',
 		options: '[url]',
 		usage: "_[url]_: the url of your character sheet from wanderer's guide",
 		description: "Imports a Wanderer's Guide Character",
@@ -40,6 +40,28 @@ export default {
 				`in the character's id value instead.`,
 			characterAlreadyExists:
 				`Yip! {characterName} is already in the system!` + ` Did you mean to /update?`,
+			success: `Yip! I've successfully imported {characterName}!`,
+		},
+	},
+	importPathBuilder: {
+		name: 'import-pathbuilder',
+		options: '[json-id] ',
+		usage: '_[json-id]_: the json export id for your PathBuilder character',
+		description: 'Imports a PathBuilder 2E Character',
+		expandedDescription:
+			'Imports a character from PathBuilder 2E at ' +
+			'the provided json id. If the id is accurate, Kobold will make fetch the character.',
+		interactions: {
+			invalidUrl:
+				`Yip! I couldn't find the character at the json id '{id}'. Check ` +
+				`and make sure you copied it over correctly! Or just paste ` +
+				`in the character's id value instead.`,
+			characterAlreadyExists:
+				`Yip! {characterName} is already in the system!` + ` Did you mean to /update?`,
+			failedRequest:
+				'Yip! I ran into an issue importing that character. Try again later, ' +
+				'make sure that the json import id is correct, or contact my developer ' +
+				`in my support server]({supportServerUrl})`,
 			success: `Yip! I've successfully imported {characterName}!`,
 		},
 	},
@@ -158,6 +180,9 @@ export default {
 			'information, you may be asked to authenticate again.',
 		interactions: {
 			success: `Yip! I've successfully updated {characterName}!`,
+			pathbuilderRequireId:
+				'Yip! In order to update your pathbuilder character, I need to to provide me ' +
+				'new JSON export id in the `/character update` command.',
 		},
 	},
 };
