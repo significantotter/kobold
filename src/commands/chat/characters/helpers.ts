@@ -151,6 +151,7 @@ export class CharacterHelpers {
 		};
 
 		const character = {
+			name: characterData.name,
 			charId,
 			isActiveCharacter: true,
 			characterData,

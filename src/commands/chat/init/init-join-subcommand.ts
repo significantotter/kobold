@@ -59,7 +59,7 @@ export class InitJoinSubCommand implements Command {
 			const matchedSkills = CharacterUtils.findPossibleSkillFromString(
 				activeCharacter,
 				match
-			).map(skill => ({ name: skill.Name, value: skill.Name }));
+			).map(skill => ({ name: skill.name, value: skill.name }));
 			//return the matched skills
 			return matchedSkills;
 		}

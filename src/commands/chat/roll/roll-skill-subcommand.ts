@@ -12,7 +12,7 @@ import { RateLimiter } from 'discord.js-rate-limiter';
 
 import { ChatArgs } from '../../../constants/index.js';
 import { EventData } from '../../../models/internal-models.js';
-import { InteractionUtils } from '../../../utils/index.js';
+import { InteractionUtils, StringUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
 import { DiceUtils } from '../../../utils/dice-utils.js';
@@ -20,6 +20,7 @@ import { RollBuilder } from '../../../utils/roll-builder.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Language } from '../../../models/enum-helpers/index.js';
 import { Creature } from '../../../utils/creature.js';
+import _ from 'lodash';
 
 export class RollSkillSubCommand implements Command {
 	public names = [Language.LL.commands.roll.skill.name()];
@@ -56,7 +57,7 @@ export class RollSkillSubCommand implements Command {
 			const matchedSkills = CharacterUtils.findPossibleSkillFromString(
 				activeCharacter,
 				match
-			).map(skill => ({ name: skill.Name, value: skill.Name }));
+			).map(skill => ({ name: skill.name, value: skill.name }));
 			//return the matched skills
 			return matchedSkills;
 		}
@@ -88,14 +89,21 @@ export class RollSkillSubCommand implements Command {
 			);
 			return;
 		}
-		const response = await DiceUtils.rollSimpleCreatureRoll({
-			userName: intr.user.username,
-			creature: Creature.fromCharacter(activeCharacter),
-			attributeName: skillChoice,
+
+		const creature = Creature.fromCharacter(activeCharacter);
+
+		const targetRoll = StringUtils.findBestValueByKeyMatch(skillChoice, creature.skillRolls);
+
+		const rollResult = await DiceUtils.rollSimpleCreatureRoll({
+			actorName: creature.sheet.info.name,
+			creature,
+			attributeName: targetRoll.name,
 			rollNote,
 			modifierExpression,
 			LL,
 		});
+
+		const embed = rollResult.compileEmbed();
 
 		if (notifyRoll) {
 			await InteractionUtils.send(
@@ -103,6 +111,6 @@ export class RollSkillSubCommand implements Command {
 				Language.LL.commands.roll.interactions.secretRollNotification()
 			);
 		}
-		await InteractionUtils.send(intr, response.compileEmbed(), isSecretRoll);
+		await InteractionUtils.send(intr, embed, isSecretRoll);
 	}
 }

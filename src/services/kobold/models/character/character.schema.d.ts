@@ -14,6 +14,10 @@ export interface Character {
 	 */
 	id?: number;
 	/**
+	 * The name of the character.
+	 */
+	name?: string;
+	/**
 	 * The external wanderer's guide character id.
 	 */
 	charId?: number;

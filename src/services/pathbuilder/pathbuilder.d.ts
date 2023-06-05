@@ -1,4 +1,5 @@
 export type ability = 'str' | 'dex' | 'con' | 'int' | 'wis' | 'cha';
+export type abilityUppercase = 'Str' | 'Dex' | 'Con' | 'Int' | 'Wis' | 'Cha';
 export type spellTradition = 'arcane' | 'divine' | 'occult' | 'primal';
 
 export namespace PathBuilder {
@@ -10,14 +11,15 @@ export namespace PathBuilder {
 	interface Character {
 		name: string;
 		class: string;
+		dualClass?: any;
 		level: number;
 		ancestry: string;
 		heritage: string;
 		background: string;
-		alignment: string;
-		gender: string;
-		age: number;
-		deity: string;
+		alignment?: string;
+		gender?: string;
+		age?: number;
+		deity?: string;
 		size: number;
 		keyability: string;
 		languages: string[];
@@ -25,6 +27,9 @@ export namespace PathBuilder {
 		attributes: Attributes;
 		abilities: Abilities;
 		proficiencies: Proficiencies;
+		mods: {
+			[bonusTarget: string]: { [bonusType: string]: number };
+		};
 		feats?: [
 			string,
 			string | null,
@@ -39,6 +44,7 @@ export namespace PathBuilder {
 		weapons: Weapon[];
 		money: Money;
 		armor: Armor[];
+		focusPoints: number;
 		focus: Focus;
 		spellCasters: SpellCasting[];
 		formula: [];
@@ -48,6 +54,7 @@ export namespace PathBuilder {
 			acAbilityBonus: number;
 			acItemBonus: number;
 			acTotal: number;
+			shieldBonus: number | null;
 		};
 	}
 	interface Attributes {
@@ -65,6 +72,16 @@ export namespace PathBuilder {
 		int: number;
 		wis: number;
 		cha: number;
+		breakdown: {
+			ancestryFree: abilityUppercase[];
+			ancestryBoosts: abilityUppercase[];
+			ancestryFlaws: abilityUppercase[];
+			backgroundBoosts: abilityUppercase[];
+			classBoosts: abilityUppercase[];
+			mapLevelledBoosts: {
+				[key: Number]: abilityUppercase[];
+			};
+		};
 	}
 	interface Proficiencies {
 		classDC?: number;
@@ -117,6 +134,9 @@ export namespace PathBuilder {
 		mat?: any;
 		display?: string;
 		runes?: any[];
+		attack: number;
+		damageBonus: number;
+		extraDamage: string[];
 	}
 	interface Money {
 		pp?: number;
@@ -141,6 +161,7 @@ export namespace PathBuilder {
 		abilityBonus: number;
 		proficiency: number;
 		itemBonus: number;
+		focusCantrips: string[];
 		focusSpells: string[];
 	}
 
@@ -154,7 +175,6 @@ export namespace PathBuilder {
 	}
 
 	interface Focus {
-		focusPoints: number;
 		arcane?: FocusCastingStat;
 		divine?: FocusCastingStat;
 		occult?: FocusCastingStat;
@@ -172,7 +192,6 @@ export namespace PathBuilder {
 		spellcastingType: string;
 		ability: ability;
 		proficiency: number;
-		focusPoints: number;
 		spells: SpellsAtLevel[];
 		perDay: [
 			number,

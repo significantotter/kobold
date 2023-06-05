@@ -214,6 +214,50 @@ export class Creature {
 			[rollName: string]: attackRoll;
 		} = {};
 
+		if (this.sheet.castingStats.arcaneAttack != null) {
+			rolls['arcane spell attack'] = {
+				name: 'Arcane Spell Attack',
+				type: 'attack',
+				toHit: this.sheet.castingStats.arcaneAttack,
+				damage: [],
+				traits: [],
+				tags: ['attack', 'spell', 'arcane'],
+			};
+		}
+
+		if (this.sheet.castingStats.divineAttack != null) {
+			rolls['divine spell attack'] = {
+				name: 'Divine Spell Attack',
+				type: 'attack',
+				toHit: this.sheet.castingStats.divineAttack,
+				damage: [],
+				traits: [],
+				tags: ['attack', 'spell', 'divine'],
+			};
+		}
+
+		if (this.sheet.castingStats.occultAttack != null) {
+			rolls['occult spell attack'] = {
+				name: 'Occult Spell Attack',
+				type: 'attack',
+				toHit: this.sheet.castingStats.occultAttack,
+				damage: [],
+				traits: [],
+				tags: ['attack', 'spell', 'occult'],
+			};
+		}
+
+		if (this.sheet.castingStats.primalAttack != null) {
+			rolls['primal spell attack'] = {
+				name: 'Primal Spell Attack',
+				type: 'attack',
+				toHit: this.sheet.castingStats.primalAttack,
+				damage: [],
+				traits: [],
+				tags: ['attack', 'spell', 'primal'],
+			};
+		}
+
 		for (const attack of this.sheet.attacks) {
 			rolls[attack.name.toLowerCase()] = {
 				name: attack.name,
@@ -221,9 +265,9 @@ export class Creature {
 				toHit: attack.toHit,
 				damage: attack.damage,
 				range: attack.range,
-				traits: attack.traits,
+				traits: attack.traits ?? [],
 				notes: attack.notes,
-				tags: _.uniq(['attack', ...attack.traits]),
+				tags: _.uniq(['attack', ...(attack.traits ?? [])]),
 			};
 		}
 		return rolls;
@@ -232,6 +276,7 @@ export class Creature {
 	public get keyedActions() {
 		return _.keyBy(this.sheet.actions, action => action.name);
 	}
+
 	public get abilityRolls(): {
 		[rollName: string]: roll;
 	} {
@@ -243,7 +288,7 @@ export class Creature {
 			rolls[ability] = {
 				name: ability.toLowerCase(),
 				type: 'ability',
-				bonus: this.sheet.abilities[ability],
+				bonus: this.mods[ability],
 				tags: ['ability', ability],
 			};
 		}
@@ -359,13 +404,20 @@ export class Creature {
 	}
 
 	public get mods() {
+		const parseMod = (score: number) => Math.floor((score - 10) / 2);
 		return {
-			str: Math.floor((this.sheet.abilities.strength - 10) / 2),
-			dex: Math.floor((this.sheet.abilities.dexterity - 10) / 2),
-			con: Math.floor((this.sheet.abilities.constitution - 10) / 2),
-			int: Math.floor((this.sheet.abilities.intelligence - 10) / 2),
-			wis: Math.floor((this.sheet.abilities.wisdom - 10) / 2),
-			cha: Math.floor((this.sheet.abilities.charisma - 10) / 2),
+			str: parseMod(this.sheet.abilities.strength),
+			strength: parseMod(this.sheet.abilities.strength),
+			dex: parseMod(this.sheet.abilities.dexterity),
+			dexterity: parseMod(this.sheet.abilities.dexterity),
+			con: parseMod(this.sheet.abilities.constitution),
+			constitution: parseMod(this.sheet.abilities.constitution),
+			int: parseMod(this.sheet.abilities.intelligence),
+			intelligence: parseMod(this.sheet.abilities.intelligence),
+			wis: parseMod(this.sheet.abilities.wisdom),
+			wisdom: parseMod(this.sheet.abilities.wisdom),
+			cha: parseMod(this.sheet.abilities.charisma),
+			charisma: parseMod(this.sheet.abilities.charisma),
 		};
 	}
 

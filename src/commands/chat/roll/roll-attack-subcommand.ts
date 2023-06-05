@@ -57,8 +57,8 @@ export class RollAttackSubCommand implements Command {
 				activeCharacter,
 				match
 			).map(attack => ({
-				name: attack.Name,
-				value: attack.Name,
+				name: attack.name,
+				value: attack.name,
 			}));
 			//return the matched attacks
 			return matchedAttack;

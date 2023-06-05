@@ -8,6 +8,10 @@
 			"readOnly": true,
 			"description": "The id of the character record."
 		},
+		"name": {
+			"type": "string",
+			"description": "The name of the character."
+		},
 		"charId": {
 			"type": "integer",
 			"description": "The external wanderer's guide character id."

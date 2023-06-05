@@ -18,7 +18,26 @@ export class StringUtils {
 		return removeMarkdown(input);
 	}
 
-	public static generateSorterByWordDistance(targetWord, inputToStringFn) {
+	public static findBestValueByKeyMatch(
+		targetWord: string,
+		wordObject: { [key: string]: any }
+	): any {
+		if (!wordObject) return undefined;
+		const word = this.findClosestWord(targetWord, Object.keys(wordObject));
+		return wordObject[word];
+	}
+
+	public static findClosestWord(targetWord: string, wordArray: string[]): string {
+		if (!wordArray || wordArray.length === 0) return undefined;
+		return wordArray.sort(
+			StringUtils.generateSorterByWordDistance(targetWord, word => word)
+		)[0];
+	}
+
+	public static generateSorterByWordDistance(
+		targetWord: string,
+		inputToStringFn: (input: any) => string
+	) {
 		return (a, b) => {
 			const aDistance = StringUtils.levenshteinDistance(targetWord, inputToStringFn(a));
 			const bDistance = StringUtils.levenshteinDistance(targetWord, inputToStringFn(b));

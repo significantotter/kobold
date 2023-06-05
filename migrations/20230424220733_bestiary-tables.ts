@@ -26,6 +26,7 @@ export async function up(knex: Knex): Promise<void> {
 	});
 	await knex.schema.alterTable('character', function (table) {
 		table.jsonb('sheet').defaultTo({});
+		table.string('name');
 		table.string('import_source').defaultTo('wg');
 	});
 
@@ -45,7 +46,7 @@ export async function up(knex: Knex): Promise<void> {
 			characterUpdates.map(update => {
 				return knex('character')
 					.where('id', update.id)
-					.update({ sheet: JSON.stringify(update.sheet) })
+					.update({ sheet: JSON.stringify(update.sheet), name: update.sheet.info.name })
 					.transacting(trx);
 			})
 		);
@@ -69,5 +70,7 @@ export async function down(knex: Knex): Promise<void> {
 	});
 	await knex.schema.alterTable('character', function (table) {
 		table.dropColumn('sheet');
+		table.dropColumn('name');
+		table.dropColumn('import_source');
 	});
 }

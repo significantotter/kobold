@@ -62,7 +62,7 @@ export class AutocompleteUtils {
 
 		// add skills
 		const matchedSkills = CharacterUtils.findPossibleSkillFromString(character, matchText).map(
-			skill => skill.Name
+			skill => skill.name
 		);
 		for (const skill of matchedSkills) {
 			choices.add(_.capitalize(skill));
@@ -70,7 +70,7 @@ export class AutocompleteUtils {
 
 		// add saves
 		const matchedSaves = CharacterUtils.findPossibleSaveFromString(character, matchText).map(
-			save => save.Name
+			save => save.name
 		);
 		for (const save of matchedSaves) {
 			choices.add(_.capitalize(save));
@@ -79,7 +79,7 @@ export class AutocompleteUtils {
 		const matchedAbilities = CharacterUtils.findPossibleAbilityFromString(
 			character,
 			matchText
-		).map(ability => ability.Name);
+		).map(ability => ability.name);
 		for (const ability of matchedAbilities) {
 			choices.add(_.capitalize(ability));
 		}

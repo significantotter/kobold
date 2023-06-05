@@ -54,7 +54,7 @@ export class CharacterImportPathBuilderSubCommand implements Command {
 		const [pathBuilderChar, existingCharacter] = await Promise.all([
 			new PathBuilder().get({ characterJsonId: jsonId }),
 			Character.query().where({
-				charId: jsonId,
+				name: jsonId,
 				importSource: 'pathbuilder',
 				userId: intr.user.id,
 			}),
@@ -68,8 +68,9 @@ export class CharacterImportPathBuilderSubCommand implements Command {
 				})
 			);
 		}
+		console.log(existingCharacter, jsonId);
 
-		if (existingCharacter.length) {
+		if (false && existingCharacter.length) {
 			const character = existingCharacter[0];
 			await InteractionUtils.send(
 				intr,

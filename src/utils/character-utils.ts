@@ -153,11 +153,11 @@ export class CharacterUtils {
 
 		const creature = Creature.fromCharacter(targetCharacter);
 
-		const saves = _.values(creature.abilityRolls);
+		const attacks = _.values(creature.abilityRolls);
 
-		for (const save of saves) {
-			if (save.name.toLowerCase().includes(abilityText.toLowerCase())) {
-				matchedAbility.push(save);
+		for (const attack of attacks) {
+			if (attack.name.toLowerCase().includes(abilityText.toLowerCase())) {
+				matchedAbility.push(attack);
 			}
 		}
 		return matchedAbility;
@@ -172,14 +172,19 @@ export class CharacterUtils {
 	public static findPossibleAttackFromString(
 		targetCharacter: Character,
 		attackText: string
-	): WG.NamedBonus[] {
-		const matchedAttacks = [];
-		for (const attack of targetCharacter.calculatedStats.weapons) {
-			if (attack.Name.toLowerCase().includes(attackText.toLowerCase())) {
-				matchedAttacks.push(attack);
+	): roll[] {
+		const matchedAttack = [];
+
+		const creature = Creature.fromCharacter(targetCharacter);
+
+		const attacks = _.values(creature.attackRolls);
+
+		for (const attack of attacks) {
+			if (attack.name.toLowerCase().includes(attackText.toLowerCase())) {
+				matchedAttack.push(attack);
 			}
 		}
-		return matchedAttacks;
+		return matchedAttack;
 	}
 
 	/**

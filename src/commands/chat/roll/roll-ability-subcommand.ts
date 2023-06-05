@@ -59,8 +59,8 @@ export class RollAbilitySubCommand implements Command {
 				activeCharacter,
 				match
 			).map(ability => ({
-				name: ability.Name,
-				value: ability.Name,
+				name: ability.name,
+				value: ability.name,
 			}));
 			//return the matched abilities
 			return matchedAbilities;
@@ -94,10 +94,10 @@ export class RollAbilitySubCommand implements Command {
 
 		const creature = Creature.fromCharacter(activeCharacter);
 
-		const rolls = _.values(creature.abilityRolls);
-		const rollSorter = StringUtils.generateSorterByWordDistance(abilityChoice, a => a.name);
-		rolls.sort(rollSorter);
-		const targetRoll = rolls[0];
+		const targetRoll = StringUtils.findBestValueByKeyMatch(
+			abilityChoice,
+			creature.abilityRolls
+		);
 
 		const rollResult = await DiceUtils.rollSimpleCreatureRoll({
 			actorName: creature.sheet.info.name,

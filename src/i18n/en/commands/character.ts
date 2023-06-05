@@ -180,6 +180,7 @@ export default {
 			'information, you may be asked to authenticate again.',
 		interactions: {
 			success: `Yip! I've successfully updated {characterName}!`,
+			canceled: 'Yip! Canceled the request to update {characterName}!',
 			pathbuilderRequireId:
 				'Yip! In order to update your pathbuilder character, I need to to provide me ' +
 				'new JSON export id in the `/character update` command.',

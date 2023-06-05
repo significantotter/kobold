@@ -64,7 +64,7 @@ export class GameInitSubCommand implements Command {
 				const matchedSkills = CharacterUtils.findPossibleSkillFromString(
 					character,
 					match
-				).map(skill => skill.Name);
+				).map(skill => skill.name);
 				for (const skill of matchedSkills) {
 					choices.add(_.capitalize(skill));
 				}
