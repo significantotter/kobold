@@ -82,7 +82,7 @@ export class DiceUtils {
 			attributeObject =>
 				attributeObject.name.replace(trimRegex, '').toLowerCase() === attributeName
 		);
-		const staticAttribute = staticAttributes(creature).find(
+		const staticAttribute = staticAttributes(creature.sheet).find(
 			attributeObject =>
 				attributeObject.name.replace(trimRegex, '').toLowerCase() === attributeName
 		);
