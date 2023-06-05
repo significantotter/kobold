@@ -424,7 +424,7 @@ export function convertWanderersGuideCharToSheet(
 			const damageType = damageComponents.pop();
 			return {
 				name: weapon.Name,
-				toHit: weapon.Bonus,
+				toHit: Number(String(weapon.Bonus)), //sometimes wg sends "+1" instead :/
 				damage: [{ dice: damageComponents.join(' '), type: damageType }],
 				range: null,
 				traits: null,
