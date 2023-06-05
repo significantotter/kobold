@@ -192,12 +192,12 @@ export class Creature {
 			}
 			for (const attack of _.values(this.attackRolls)) {
 				let builtAttack = `**${_.capitalize(attack.name)}**`;
-				if (attack.toHit) builtAttack += ` +${attack.toHit}`;
+				if (attack.toHit) builtAttack += ` \`+${attack.toHit}\``;
 				if (attack.traits?.length) builtAttack += ` (${attack.traits.join(', ')})`;
 				builtAttack += `,`;
 				if (attack.damage?.length) {
 					builtAttack += ` **Damage:** ${attack.damage
-						.map(d => `${d.dice} ${d.type}`)
+						.map(d => `\`${d.dice} ${d.type}\``)
 						.join(', ')}`;
 				}
 				if (attacks.length) attacks += '\n';
