@@ -10,6 +10,7 @@ export function convertBestiaryCreatureToSheet(
 	options: { useStamina: boolean; challengeAdjustment?: number }
 ): Sheet {
 	let hpAdjustment = 0;
+	if (!options.challengeAdjustment) options.challengeAdjustment = 0;
 
 	if (options?.challengeAdjustment && options?.challengeAdjustment > 0) {
 		if (bestiaryEntry.level <= 1) {
