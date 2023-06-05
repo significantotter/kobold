@@ -183,17 +183,18 @@ export class Creature {
 			);
 			let attacks = '';
 			if (maxWeaponMod !== -99) {
-				attacks = `Melee (strength, best proficiency): \`+${
+				attacks = `**Melee** (strength, best proficiency): \`+${
 					maxWeaponMod + this.sheet.info.level + this.mods.str
 				}\`\n`;
-				attacks += `Ranged/Finesse (dexterity, best proficiency): \`+${
+				attacks += `**Ranged/Finesse** (dexterity, best proficiency): \`+${
 					maxWeaponMod + this.sheet.info.level + this.mods.dex
 				}\``;
 			}
 			for (const attack of _.values(this.attackRolls)) {
+				console.log(attack);
 				let builtAttack = `**${_.capitalize(attack.name)}**`;
 				if (attack.toHit) builtAttack += ` +${attack.toHit}`;
-				if (attack.traits) builtAttack += ` (${attack.traits.join(', ')})`;
+				if (attack.traits?.length) builtAttack += ` (${attack.traits.join(', ')})`;
 				builtAttack += `,`;
 				if (attack.damage?.length) {
 					builtAttack += ` **Damage:** ${attack.damage

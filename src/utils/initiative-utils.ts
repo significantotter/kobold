@@ -340,6 +340,7 @@ export class InitiativeUtils {
 			initiativeId: currentInit.id,
 			name: uniqueName,
 			characterId: character.id,
+			sheet: character.sheet,
 			userId,
 
 			actorGroup: {

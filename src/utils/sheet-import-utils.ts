@@ -700,7 +700,7 @@ export function convertPathBuilderToSheet(
 		},
 		attacks: pathBuilderSheet.weapons.map(weapon => {
 			const mainDamage = {
-				dice: weapon.pot + weapon.die + weapon.damageBonus,
+				dice: weapon.pot + 1 + weapon.die + ' + ' + weapon.damageBonus,
 				// base type isn't provided by pathbuilder
 			};
 			const extraDamage = weapon.extraDamage.map(damage => {
