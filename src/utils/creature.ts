@@ -529,7 +529,7 @@ export class Creature {
 
 		const lores = this.sheet.skills.lores.map(lore => ({
 			name: lore.name + ' lore',
-			value: lore.value,
+			value: lore.bonus,
 			tags: ['skill', lore.name, 'intelligence'],
 		}));
 		const nonLoreSkills: Character['attributes'] = [];
@@ -546,13 +546,13 @@ export class Creature {
 			abilities.push({
 				name: abilityName,
 				type: 'ability',
-				value: this.sheet.abilities[abilityName],
+				value: this.mods[abilityName],
 				tags: ['ability', abilityName],
 			});
 			abilities.push({
 				name: abilityName.slice(0, 3),
 				type: 'ability',
-				value: this.sheet.abilities[abilityName],
+				value: this.mods[abilityName],
 				tags: ['ability', abilityName],
 			});
 		}

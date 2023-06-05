@@ -81,7 +81,7 @@ export function parseBonusesForTagsFromModifiers(
 	tags: string[],
 	creature?: Creature
 ) {
-	const sanitizedTags = tags.map(tag => tag.toLocaleLowerCase().trim());
+	const sanitizedTags = tags.map(tag => (tag ?? '').toLocaleLowerCase().trim());
 	let bonuses = {};
 	let penalties = {};
 	const untyped = [];

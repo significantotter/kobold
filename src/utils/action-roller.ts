@@ -74,19 +74,20 @@ export class ActionRoller {
 			showTags: false,
 			rollType: 'attack',
 		});
-
-		// update the extra attributes for the next roll
-		['attackResult', 'attack', 'hit'].forEach(
-			name => (extraAttributes[name] = { name, value: result.results.total })
-		);
-		extraAttributes[`roll${rollCounter}`] = {
-			name: `roll${rollCounter}`,
-			value: result.results.total,
-		};
-		extraAttributes[`roll${rollCounter}Attack`] = {
-			name: `roll${rollCounter}Attack`,
-			value: result.results.total,
-		};
+		if (result?.results?.total) {
+			// update the extra attributes for the next roll
+			['attackResult', 'attack', 'hit'].forEach(
+				name => (extraAttributes[name] = { name, value: result.results.total })
+			);
+			extraAttributes[`roll${rollCounter}`] = {
+				name: `roll${rollCounter}`,
+				value: result.results.total,
+			};
+			extraAttributes[`roll${rollCounter}Attack`] = {
+				name: `roll${rollCounter}Attack`,
+				value: result.results.total,
+			};
+		}
 
 		return result;
 	}
