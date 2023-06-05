@@ -84,7 +84,6 @@ export class InitStatBlockSubCommand implements Command {
 		const actor = targetActor.actor;
 
 		let sheetEmbed: KoboldEmbed;
-		console.log(actor.sheet);
 		if (actor.sheet) {
 			const creature = new Creature(actor.sheet);
 			sheetEmbed = creature.compileSheetEmbed();

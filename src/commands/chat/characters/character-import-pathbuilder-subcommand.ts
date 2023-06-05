@@ -68,7 +68,6 @@ export class CharacterImportPathBuilderSubCommand implements Command {
 				})
 			);
 		}
-		console.log(existingCharacter, jsonId);
 
 		if (false && existingCharacter.length) {
 			const character = existingCharacter[0];

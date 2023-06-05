@@ -732,11 +732,6 @@ export function convertPathBuilderToSheet(
 	};
 
 	for (const spellcasting of pathBuilderSheet.spellCasters) {
-		console.log(
-			spellcasting.ability,
-			sheet.abilities[shorthandAbilityToLong[spellcasting.ability]],
-			scoreToBonus(sheet.abilities[shorthandAbilityToLong[spellcasting.ability]])
-		);
 		const spellAttack =
 			pathBuilderProfToScore(spellcasting.proficiency) +
 			scoreToBonus(sheet.abilities[shorthandAbilityToLong[spellcasting.ability]]);

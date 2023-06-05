@@ -172,20 +172,37 @@ export class Creature {
 			this.sheet.offense.simpleProfMod ||
 			this.sheet.offense.martialProfMod ||
 			this.sheet.offense.unarmedProfMod ||
-			this.sheet.offense.advancedProfMod
+			this.sheet.offense.advancedProfMod ||
+			this.sheet.attacks?.length
 		) {
 			const maxWeaponMod = Math.max(
-				this.sheet.offense.simpleProfMod,
-				this.sheet.offense.martialProfMod,
-				this.sheet.offense.unarmedProfMod,
-				this.sheet.offense.advancedProfMod
+				this.sheet.offense.simpleProfMod ?? -99,
+				this.sheet.offense.martialProfMod ?? -99,
+				this.sheet.offense.unarmedProfMod ?? -99,
+				this.sheet.offense.advancedProfMod ?? -99
 			);
-			let attacks = `Melee (strength, best proficiency): \`+${
-				maxWeaponMod + this.sheet.info.level + this.mods.str
-			}\`\n`;
-			attacks += `Ranged/Finesse (dexterity, best proficiency): \`+${
-				maxWeaponMod + this.sheet.info.level + this.mods.dex
-			}\``;
+			let attacks = '';
+			if (maxWeaponMod !== -99) {
+				attacks = `Melee (strength, best proficiency): \`+${
+					maxWeaponMod + this.sheet.info.level + this.mods.str
+				}\`\n`;
+				attacks += `Ranged/Finesse (dexterity, best proficiency): \`+${
+					maxWeaponMod + this.sheet.info.level + this.mods.dex
+				}\``;
+			}
+			for (const attack of _.values(this.attackRolls)) {
+				let builtAttack = `**${_.capitalize(attack.name)}**`;
+				if (attack.toHit) builtAttack += ` +${attack.toHit}`;
+				if (attack.traits) builtAttack += ` (${attack.traits.join(', ')})`;
+				builtAttack += `,`;
+				if (attack.damage?.length) {
+					builtAttack += ` **Damage:** ${attack.damage
+						.map(d => `${d.dice} ${d.type}`)
+						.join(', ')}`;
+				}
+				if (attacks.length) attacks += '\n';
+				attacks += builtAttack;
+			}
 			sheetEmbed.addFields([{ name: 'Attacks', value: attacks }]);
 		}
 

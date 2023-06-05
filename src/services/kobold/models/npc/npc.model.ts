@@ -24,10 +24,9 @@ export class Npc extends BaseModel {
 				.split('|');
 
 			if (originalCreatureName) {
-				let originalCreatureMatchesQuery = Npc.query().whereRaw(
-					'LOWER(name) ilike ?',
-					[`%${(originalCreatureName ?? '').toLowerCase()}%`]
-				);
+				let originalCreatureMatchesQuery = Npc.query().whereRaw('LOWER(name) ilike ?', [
+					`%${(originalCreatureName ?? '').toLowerCase()}%`,
+				]);
 				if (sourceFileName)
 					originalCreatureMatchesQuery = originalCreatureMatchesQuery.andWhereRaw(
 						'LOWER(source_file_name) ilike ?',
@@ -45,7 +44,6 @@ export class Npc extends BaseModel {
 				} else {
 					originalCreature = originalCreatureMatches[0];
 				}
-				console.log(originalCreature, originalCreatureName, this.data);
 				const mergedData = _.merge({}, originalCreature.data, this.data);
 				return mergedData as CreatureStatBlock;
 			}
