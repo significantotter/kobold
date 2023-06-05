@@ -186,41 +186,17 @@ export class CharacterUpdateSubCommand implements Command {
 			return;
 		}
 		//otherwise wanderer's guide
+		else {
+			//check for token access
+			const token = await WgToken.query().where({ charId: activeCharacter.charId });
 
-		//check for token access
-		const token = await WgToken.query().where({ charId: activeCharacter.charId });
-
-		if (!token.length) {
-			// The user needs to authenticate!
-			await InteractionUtils.send(
-				intr,
-				LL.commands.character.interactions.authenticationRequest({
-					action: 'update',
-				})
-			);
-			await InteractionUtils.send(
-				intr,
-				LL.commands.character.interactions.authenticationLink({
-					wgBaseUrl: Config.wanderersGuide.oauthBaseUrl,
-					charId: activeCharacter.charId,
-				}),
-				true
-			);
-			return;
-		}
-		let fetchedCharacter;
-		try {
-			fetchedCharacter = await CharacterHelpers.fetchWgCharacterFromToken(
-				activeCharacter.charId,
-				token[0].accessToken
-			);
-		} catch (err) {
-			if (err?.response?.status === 401) {
-				//token expired!
-				await WgToken.query().delete().where({ charId: activeCharacter.charId });
+			if (!token.length) {
+				// The user needs to authenticate!
 				await InteractionUtils.send(
 					intr,
-					LL.commands.character.interactions.expiredToken()
+					LL.commands.character.interactions.authenticationRequest({
+						action: 'update',
+					})
 				);
 				await InteractionUtils.send(
 					intr,
@@ -231,31 +207,61 @@ export class CharacterUpdateSubCommand implements Command {
 					true
 				);
 				return;
-			} else if (err.response.status === 429) {
-				await InteractionUtils.send(
-					intr,
-					LL.commands.character.interactions.tooManyWGRequests()
-				);
-				return;
-			} else {
-				//otherwise, something else went wrong that we want to be a real error
-				throw err;
 			}
+			let fetchedCharacter;
+			try {
+				fetchedCharacter = await CharacterHelpers.fetchWgCharacterFromToken(
+					activeCharacter.charId,
+					token[0].accessToken,
+					activeCharacter.sheet
+				);
+			} catch (err) {
+				console.log(err);
+				if (err?.response?.status === 401) {
+					//token expired!
+					await WgToken.query().delete().where({ charId: activeCharacter.charId });
+					await InteractionUtils.send(
+						intr,
+						LL.commands.character.interactions.expiredToken()
+					);
+					await InteractionUtils.send(
+						intr,
+						LL.commands.character.interactions.authenticationLink({
+							wgBaseUrl: Config.wanderersGuide.oauthBaseUrl,
+							charId: activeCharacter.charId,
+						}),
+						true
+					);
+					return;
+				} else if (err?.response?.status === 429) {
+					await InteractionUtils.send(
+						intr,
+						LL.commands.character.interactions.tooManyWGRequests()
+					);
+					return;
+				} else {
+					//otherwise, something else went wrong that we want to be a real error
+					throw err;
+				}
+			}
+
+			// store sheet in db
+			const updatedCharacter = await Character.query().updateAndFetchById(
+				activeCharacter.id,
+				{
+					userId: intr.user.id,
+					...fetchedCharacter,
+				}
+			);
+
+			//send success message
+
+			await InteractionUtils.send(
+				intr,
+				LL.commands.character.update.interactions.success({
+					characterName: updatedCharacter.name,
+				})
+			);
 		}
-
-		// store sheet in db
-		const updatedCharacter = await Character.query().updateAndFetchById(activeCharacter.id, {
-			userId: intr.user.id,
-			...fetchedCharacter,
-		});
-
-		//send success message
-
-		await InteractionUtils.send(
-			intr,
-			LL.commands.character.update.interactions.success({
-				characterName: updatedCharacter.sheet.info.name,
-			})
-		);
 	}
 }

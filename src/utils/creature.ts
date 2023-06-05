@@ -585,16 +585,16 @@ export class Creature {
 	public static preserveSheetTrackerValues(sheet: Sheet, updateFrom?: Sheet): Sheet {
 		if (updateFrom) {
 			sheet.general.currentHeroPoints =
-				updateFrom.general.currentHeroPoints ?? sheet.general.currentHeroPoints;
+				updateFrom?.general?.currentHeroPoints ?? sheet.general.currentHeroPoints;
 			sheet.general.currentFocusPoints =
-				updateFrom.general.currentFocusPoints ?? sheet.general.currentFocusPoints;
+				updateFrom?.general?.currentFocusPoints ?? sheet.general.currentFocusPoints;
 
-			sheet.defenses.currentHp = updateFrom.defenses.currentHp ?? sheet.defenses.currentHp;
+			sheet.defenses.currentHp = updateFrom?.defenses?.currentHp ?? sheet.defenses.currentHp;
 			sheet.defenses.currentResolve =
-				updateFrom.defenses.currentResolve ?? sheet.defenses.currentResolve;
+				updateFrom?.defenses?.currentResolve ?? sheet.defenses.currentResolve;
 			sheet.defenses.currentStamina =
-				updateFrom.defenses.currentStamina ?? sheet.defenses.currentStamina;
-			sheet.defenses.tempHp = updateFrom.defenses.tempHp ?? sheet.defenses.tempHp;
+				updateFrom?.defenses?.currentStamina ?? sheet.defenses.currentStamina;
+			sheet.defenses.tempHp = updateFrom?.defenses?.tempHp ?? sheet.defenses.tempHp;
 		}
 		return sheet;
 	}

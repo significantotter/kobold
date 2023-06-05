@@ -152,7 +152,6 @@ export function convertBestiaryCreatureToSheet(
 			traits: attack.traits,
 		});
 	}
-	console.log(fluffEntry);
 
 	const sheet: Sheet = {
 		info: {
@@ -346,7 +345,9 @@ export function convertWanderersGuideCharToSheet(
 			name: characterData.name,
 			description: null,
 			gender: characterData?.infoJSON?.gender,
-			age: characterData?.infoJSON?.age,
+			age: isNaN(Number(characterData?.infoJSON?.age))
+				? null
+				: Number(characterData?.infoJSON?.age),
 			alignment: characterData?.infoJSON?.alignment,
 			deity: characterData?.infoJSON?.beliefs,
 			imageURL: characterData?.infoJSON?.imageURL,
@@ -399,17 +400,25 @@ export function convertWanderersGuideCharToSheet(
 			advancedProfMod: calculatedStats.advancedWeaponProfMod,
 		},
 		castingStats: {
-			arcaneAttack: calculatedStats.arcaneSpellAttack,
-			arcaneDC: calculatedStats.arcaneSpellDC,
+			arcaneAttack: calculatedStats.arcaneSpellProfMod
+				? calculatedStats.arcaneSpellAttack
+				: null,
+			arcaneDC: calculatedStats.arcaneSpellProfMod ? calculatedStats.arcaneSpellDC : null,
 			arcaneProfMod: calculatedStats.arcaneSpellProfMod,
-			divineAttack: calculatedStats.divineSpellAttack,
-			divineDC: calculatedStats.divineSpellDC,
+			divineAttack: calculatedStats.divineSpellProfMod
+				? calculatedStats.divineSpellAttack
+				: null,
+			divineDC: calculatedStats.divineSpellProfMod ? calculatedStats.divineSpellDC : null,
 			divineProfMod: calculatedStats.divineSpellProfMod,
-			occultAttack: calculatedStats.occultSpellAttack,
-			occultDC: calculatedStats.occultSpellDC,
+			occultAttack: calculatedStats.occultSpellProfMod
+				? calculatedStats.occultSpellAttack
+				: null,
+			occultDC: calculatedStats.occultSpellProfMod ? calculatedStats.occultSpellDC : null,
 			occultProfMod: calculatedStats.occultSpellProfMod,
-			primalAttack: calculatedStats.primalSpellAttack,
-			primalDC: calculatedStats.primalSpellDC,
+			primalAttack: calculatedStats.primalSpellProfMod
+				? calculatedStats.primalSpellAttack
+				: null,
+			primalDC: calculatedStats.primalSpellProfMod ? calculatedStats.primalSpellDC : null,
 			primalProfMod: calculatedStats.primalSpellProfMod,
 		},
 		saves: {
@@ -427,7 +436,7 @@ export function convertWanderersGuideCharToSheet(
 				toHit: Number(String(weapon.Bonus)), //sometimes wg sends "+1" instead :/
 				damage: [{ dice: damageComponents.join(' '), type: damageType }],
 				range: null,
-				traits: null,
+				traits: [],
 				notes: null,
 			};
 		}),
