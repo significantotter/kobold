@@ -12,7 +12,8 @@ export class AutocompleteUtils {
 		matchText: string
 	) {
 		const targetNpcs = await Npc.query()
-			.whereRaw('LOWER(name) ilike ?', [`%${(matchText ?? '').toLowerCase()}%`])
+			.whereRaw('name ilike ?', [`%${matchText ?? ''}%`])
+			.orderByRaw('random()')
 			.limit(49);
 		return targetNpcs.map(npc => {
 			let name = npc.name;

@@ -45,19 +45,18 @@ export async function loadBestiaryFileIfNoMatchingHash(file: string, hash: strin
 		const loadedFile = (await BestiaryFilesLoaded.query().where('fileName', file))[0];
 		let load = false;
 
-		if (loadedFile && loadedFile.fileHash !== hash) {
-			// load the file if the hash doesn't match
-			load = true;
-			// delete the old records
-			await Promise.all([
-				loadedFile.$query().delete(),
-				Npc.query().delete().where('sourceFileName', file),
-			]);
-		} else if (!loadedFile) {
+		if (loadedFile?.fileHash !== hash) {
 			load = true;
 		}
 
 		if (load) {
+			const promises: any[] = [Npc.query().delete().where('sourceFileName', file)];
+			if (loadedFile) {
+				promises.push(loadedFile.$query().delete());
+			}
+			// delete the old records
+			await Promise.all(promises);
+
 			console.log('importing ' + file);
 
 			// load the file
@@ -65,7 +64,7 @@ export async function loadBestiaryFileIfNoMatchingHash(file: string, hash: strin
 				fs.readFileSync(path.join(__dirname, `/Pf2eTools/data/bestiary/${file}`), 'utf8')
 			) as { creature: { [k: string]: any }[] };
 
-			let npcFluff: { npcFluff?: any[] } = { npcFluff: [] };
+			let npcFluff: { creatureFluff?: any[] } = { creatureFluff: [] };
 			try {
 				npcFluff = JSON.parse(
 					fs.readFileSync(
@@ -81,8 +80,8 @@ export async function loadBestiaryFileIfNoMatchingHash(file: string, hash: strin
 			await Promise.all(
 				(npcs?.creature || []).map(npc => {
 					let fluff = {};
-					if (npcFluff?.npcFluff?.length) {
-						fluff = npcFluff.npcFluff.find(
+					if (npcFluff?.creatureFluff?.length) {
+						fluff = npcFluff.creatureFluff.find(
 							fluff =>
 								(fluff?.name || '').toLowerCase() ===
 								(npc?.name || '').toLowerCase()
@@ -91,7 +90,7 @@ export async function loadBestiaryFileIfNoMatchingHash(file: string, hash: strin
 					return Npc.query().insert({
 						name: npc?.name || 'unknown',
 						data: npc,
-						fluff,
+						fluff: fluff ?? {},
 						sourceFileName: file,
 					});
 				})

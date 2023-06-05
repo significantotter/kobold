@@ -191,7 +191,6 @@ export class Creature {
 				}\``;
 			}
 			for (const attack of _.values(this.attackRolls)) {
-				console.log(attack);
 				let builtAttack = `**${_.capitalize(attack.name)}**`;
 				if (attack.toHit) builtAttack += ` +${attack.toHit}`;
 				if (attack.traits?.length) builtAttack += ` (${attack.traits.join(', ')})`;

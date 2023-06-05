@@ -152,6 +152,7 @@ export function convertBestiaryCreatureToSheet(
 			traits: attack.traits,
 		});
 	}
+	console.log(fluffEntry);
 
 	const sheet: Sheet = {
 		info: {
