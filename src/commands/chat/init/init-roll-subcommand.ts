@@ -156,8 +156,6 @@ export class InitRollSubCommand implements Command {
 			});
 
 			embed = response.compileEmbed();
-
-			await InteractionUtils.send(intr, response.compileEmbed(), isSecretRoll);
 		} else if (targetRoll.type === 'attack') {
 			const response = DiceUtils.rollCreatureAttack({
 				creature: creature,

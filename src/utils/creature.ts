@@ -334,6 +334,15 @@ export class Creature {
 				tags: ['skill', skill, Creature.attributeAbilityMap[skill]].filter(t => t != null),
 			};
 		}
+		delete rolls.lores;
+		for (const lore of this.sheet.skills.lores || []) {
+			rolls[lore.name.toLocaleLowerCase() + ' lore'] = {
+				name: lore.name + ' lore',
+				type: 'skill',
+				bonus: lore.bonus,
+				tags: ['skill', lore.name, 'intelligence'],
+			};
+		}
 		return rolls;
 	}
 
