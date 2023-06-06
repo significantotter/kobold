@@ -12,7 +12,6 @@ export async function up(knex: Knex): Promise<void> {
         and w.id = t.id
     `);
 	await knex.schema.alterTable('character', function (table) {
-		table.dropUnique(['char_id']);
 		table.dropUnique(['user_id', 'char_id']);
 	});
 }
@@ -20,6 +19,5 @@ export async function up(knex: Knex): Promise<void> {
 export async function down(knex: Knex): Promise<void> {
 	await knex.schema.alterTable('character', function (table) {
 		table.unique(['user_id', 'char_id']);
-		table.unique(['char_id']);
 	});
 }
