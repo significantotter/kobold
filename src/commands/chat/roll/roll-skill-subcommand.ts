@@ -31,7 +31,7 @@ export class RollSkillSubCommand implements Command {
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
-	public cooldown = new RateLimiter(1, 5000);
+	public cooldown = new RateLimiter(1, 2000);
 	public deferType = CommandDeferType.NONE;
 	public requireClientPerms: PermissionsString[] = [];
 

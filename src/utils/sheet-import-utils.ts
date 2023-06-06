@@ -7,12 +7,13 @@ import { WG } from '../services/wanderers-guide/wanderers-guide.js';
 export function convertBestiaryCreatureToSheet(
 	bestiaryEntry: CreatureStatBlock,
 	fluffEntry: CreatureFluff,
-	options: { useStamina: boolean; challengeAdjustment?: number }
+	options: { useStamina?: boolean; template?: string; customName?: string }
 ): Sheet {
+	const challengeAdjustment =
+		0 + (options?.template === 'elite' ? 1 : 0) - (options?.template === 'weak' ? 1 : 0);
 	let hpAdjustment = 0;
-	if (!options.challengeAdjustment) options.challengeAdjustment = 0;
 
-	if (options?.challengeAdjustment && options?.challengeAdjustment > 0) {
+	if (challengeAdjustment > 0) {
 		if (bestiaryEntry.level <= 1) {
 			hpAdjustment = 10;
 		} else if (bestiaryEntry.level <= 4) {
@@ -22,7 +23,7 @@ export function convertBestiaryCreatureToSheet(
 		} else {
 			hpAdjustment = 30;
 		}
-	} else if (options?.challengeAdjustment && options.challengeAdjustment < 0) {
+	} else if (challengeAdjustment < 0) {
 		if (bestiaryEntry.level <= 2) {
 			hpAdjustment = -10;
 		} else if (bestiaryEntry.level <= 5) {
@@ -33,9 +34,9 @@ export function convertBestiaryCreatureToSheet(
 			hpAdjustment = -30;
 		}
 	}
-	hpAdjustment *= Math.abs(options?.challengeAdjustment) ?? 0;
+	hpAdjustment *= Math.abs(challengeAdjustment) ?? 0;
 
-	const rollAdjustment = 2 * options?.challengeAdjustment ?? 0;
+	const rollAdjustment = 2 * challengeAdjustment ?? 0;
 
 	const size = (bestiaryEntry.traits || ['medium']).filter(trait => {
 		return ['tiny', 'small', 'medium', 'large', 'huge', 'gargantuan', 'colossal'].includes(
@@ -140,7 +141,7 @@ export function convertBestiaryCreatureToSheet(
 		for (const damageSplit of splitDamage) {
 			const [dice, type] = damageSplit.split('}').map(d => d.trim());
 			damageRolls.push({
-				dice: dice + (rollAdjustment ? rollAdjustment : ''),
+				dice: dice + '+' + (rollAdjustment ? rollAdjustment : ''),
 				type,
 			});
 		}
@@ -155,7 +156,10 @@ export function convertBestiaryCreatureToSheet(
 
 	const sheet: Sheet = {
 		info: {
-			name: bestiaryEntry.name,
+			name:
+				options?.customName ??
+				(options?.template ? `${_.capitalize(options.template)} ` : '') +
+					bestiaryEntry.name,
 			description: bestiaryEntry.description,
 			url: `https://pf2etools.com/bestiary.html#${bestiaryEntry.name.replaceAll(
 				' ',
@@ -166,7 +170,7 @@ export function convertBestiaryCreatureToSheet(
 			alignment: null,
 			deity: null,
 			imageURL: fluffEntry?.images?.[0] ?? null,
-			level: bestiaryEntry.level,
+			level: bestiaryEntry.level + challengeAdjustment,
 			size: size?.[0] ?? 'medium',
 			class: null,
 			keyability: null,
@@ -174,7 +178,7 @@ export function convertBestiaryCreatureToSheet(
 			heritage: null,
 			background: null,
 			traits: bestiaryEntry.traits || [],
-			usesStamina: options.useStamina,
+			usesStamina: options.useStamina ?? false,
 		},
 		general: {
 			currentHeroPoints: 0,
@@ -185,7 +189,7 @@ export function convertBestiaryCreatureToSheet(
 			currentFocusPoints: focusPoints,
 			focusPoints,
 			classDC: null,
-			perception: bestiaryEntry.perception?.std,
+			perception: bestiaryEntry.perception?.std + rollAdjustment,
 			perceptionProfMod: null,
 			senses: (bestiaryEntry.senses || [])
 				.map(sense => sense?.name)
@@ -211,8 +215,12 @@ export function convertBestiaryCreatureToSheet(
 				: null,
 		},
 		defenses: {
-			currentHp: (bestiaryEntry.defenses?.hp || []).reduce((acc, hp) => acc + hp.hp, 0),
-			maxHp: (bestiaryEntry.defenses?.hp || []).reduce((acc, hp) => acc + hp.hp, 0),
+			currentHp:
+				(bestiaryEntry.defenses?.hp || []).reduce((acc, hp) => acc + hp.hp, 0) +
+				hpAdjustment,
+			maxHp:
+				(bestiaryEntry.defenses?.hp || []).reduce((acc, hp) => acc + hp.hp, 0) +
+				hpAdjustment,
 			tempHp: 0,
 			currentResolve: 0,
 			maxResolve: 0,
@@ -227,7 +235,7 @@ export function convertBestiaryCreatureToSheet(
 				type: weak.name,
 				amount: weak.amount,
 			})),
-			ac: bestiaryEntry.defenses?.ac?.std,
+			ac: bestiaryEntry.defenses?.ac?.std + rollAdjustment,
 			heavyProfMod: null,
 			mediumProfMod: null,
 			lightProfMod: null,
@@ -247,11 +255,11 @@ export function convertBestiaryCreatureToSheet(
 			...spellcastingTotals,
 		},
 		saves: {
-			fortitude: bestiaryEntry.defenses?.savingThrows?.fort?.std,
+			fortitude: bestiaryEntry.defenses?.savingThrows?.fort?.std + rollAdjustment,
 			fortitudeProfMod: null,
-			reflex: bestiaryEntry.defenses?.savingThrows?.ref?.std,
+			reflex: bestiaryEntry.defenses?.savingThrows?.ref?.std + rollAdjustment,
 			reflexProfMod: null,
-			will: bestiaryEntry.defenses?.savingThrows?.will?.std,
+			will: bestiaryEntry.defenses?.savingThrows?.will?.std + rollAdjustment,
 			willProfMod: null,
 		},
 		skills: {

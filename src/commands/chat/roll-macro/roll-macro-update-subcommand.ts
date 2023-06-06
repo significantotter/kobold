@@ -33,7 +33,7 @@ export class RollMacroUpdateSubCommand implements Command {
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
-	public cooldown = new RateLimiter(1, 5000);
+	public cooldown = new RateLimiter(1, 2000);
 	public deferType = CommandDeferType.PUBLIC;
 	public requireClientPerms: PermissionsString[] = [];
 
@@ -54,11 +54,10 @@ export class RollMacroUpdateSubCommand implements Command {
 		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
-		const rollMacroName = intr.options
-			.getString(RollMacroOptions.MACRO_NAME_OPTION.name)
-			.trim();
-		let macro = intr.options
-			.getString(RollMacroOptions.MACRO_VALUE_OPTION.name)
+		const rollMacroName = (
+			intr.options.getString(RollMacroOptions.MACRO_NAME_OPTION.name) ?? ''
+		).trim();
+		let macro = (intr.options.getString(RollMacroOptions.MACRO_VALUE_OPTION.name) ?? '')
 			.toLocaleLowerCase()
 			.trim();
 

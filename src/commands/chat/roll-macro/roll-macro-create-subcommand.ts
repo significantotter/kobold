@@ -25,7 +25,7 @@ export class RollMacroCreateSubCommand implements Command {
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
-	public cooldown = new RateLimiter(1, 5000);
+	public cooldown = new RateLimiter(1, 2000);
 	public deferType = CommandDeferType.PUBLIC;
 	public requireClientPerms: PermissionsString[] = [];
 
@@ -42,7 +42,7 @@ export class RollMacroCreateSubCommand implements Command {
 			);
 			return;
 		}
-		let name = intr.options.getString(RollMacroOptions.MACRO_NAME_OPTION.name).trim();
+		let name = (intr.options.getString(RollMacroOptions.MACRO_NAME_OPTION.name) ?? '').trim();
 		const macro = intr.options.getString(RollMacroOptions.MACRO_VALUE_OPTION.name);
 
 		// make sure the name does't already exist in the character's rollMacros

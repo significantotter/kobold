@@ -35,8 +35,8 @@ export class InitStatBlockSubCommand implements Command {
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
-	public cooldown = new RateLimiter(1, 5000);
-	public deferType = CommandDeferType.PUBLIC;
+	public cooldown = new RateLimiter(1, 2000);
+	public deferType = CommandDeferType.NONE;
 	public requireClientPerms: PermissionsString[] = [];
 
 	public async autocomplete(
@@ -58,6 +58,9 @@ export class InitStatBlockSubCommand implements Command {
 		LL: TranslationFunctions
 	): Promise<void> {
 		const targetCharacterName = intr.options.getString(ChatArgs.INIT_CHARACTER_OPTION.name);
+		const secretMessage = intr.options.getString(ChatArgs.ROLL_SECRET_OPTION.name);
+		const isSecretMessage =
+			secretMessage === Language.LL.commandOptions.statBlockSecret.choices.secret.value();
 
 		const currentInitResponse = await InitiativeUtils.getInitiativeForChannel(intr.channel, {
 			sendErrors: true,
@@ -92,6 +95,6 @@ export class InitStatBlockSubCommand implements Command {
 			sheetEmbed.setTitle(actor.name);
 			sheetEmbed.setDescription('No sheet found!');
 		}
-		await InteractionUtils.send(intr, sheetEmbed);
+		await InteractionUtils.send(intr, sheetEmbed, isSecretMessage);
 	}
 }

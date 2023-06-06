@@ -28,7 +28,7 @@ export class ModifierCreateSubCommand implements Command {
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
-	public cooldown = new RateLimiter(1, 5000);
+	public cooldown = new RateLimiter(1, 2000);
 	public deferType = CommandDeferType.PUBLIC;
 	public requireClientPerms: PermissionsString[] = [];
 
@@ -45,20 +45,19 @@ export class ModifierCreateSubCommand implements Command {
 			);
 			return;
 		}
-		let name = intr.options
-			.getString(ModifierOptions.MODIFIER_NAME_OPTION.name)
+		let name = (intr.options.getString(ModifierOptions.MODIFIER_NAME_OPTION.name) ?? '')
 			.trim()
 			.toLowerCase();
-		let modifierType = (intr.options.getString(ModifierOptions.MODIFIER_TYPE_OPTION.name) || '')
+		let modifierType = (intr.options.getString(ModifierOptions.MODIFIER_TYPE_OPTION.name) ?? '')
 			.trim()
 			.toLowerCase();
 		const description = intr.options.getString(
 			ModifierOptions.MODIFIER_DESCRIPTION_OPTION.name
 		);
 		const value = intr.options.getString(ModifierOptions.MODIFIER_VALUE_OPTION.name);
-		let targetTags = intr.options
-			.getString(ModifierOptions.MODIFIER_TARGET_TAGS_OPTION.name)
-			.trim();
+		let targetTags = (
+			intr.options.getString(ModifierOptions.MODIFIER_TARGET_TAGS_OPTION.name) ?? ''
+		).trim();
 
 		// make sure the name does't already exist in the character's modifiers
 		if (activeCharacter.getModifierByName(name)) {

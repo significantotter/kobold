@@ -350,6 +350,24 @@ export default {
 		name: 'value',
 		description: 'A value to set your initiative to. Overwrites any other init options.',
 	},
+	template: {
+		name: 'template',
+		description: 'Optionally apply a template to the added creature.',
+		choices: {
+			normal: {
+				name: 'normal',
+				value: 'normal',
+			},
+			elite: {
+				name: 'elite',
+				value: 'elite',
+			},
+			weak: {
+				name: 'weak',
+				value: 'weak',
+			},
+		},
+	},
 	initActor: {
 		name: 'name',
 		description: 'What to display the NPC/minion as in the initiative order.',
@@ -541,6 +559,22 @@ export default {
 				name: 'secret-and-notify',
 				value: 'secret-and-notify',
 				description: 'A secret roll that still notifies the channel that a roll was made.',
+			},
+		},
+	},
+	statBlockSecret: {
+		name: 'secret',
+		description: 'Whether to send the stat block in a hidden, temporary message.',
+		choices: {
+			public: {
+				name: 'public',
+				value: 'public',
+				description: 'A public stat block.',
+			},
+			secret: {
+				name: 'secret',
+				value: 'secret',
+				description: 'A temporary, hidden stat block message viewable only to you.',
 			},
 		},
 	},

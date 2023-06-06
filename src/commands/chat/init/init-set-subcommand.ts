@@ -33,7 +33,7 @@ export class InitSetSubCommand implements Command {
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
-	public cooldown = new RateLimiter(1, 5000);
+	public cooldown = new RateLimiter(1, 2000);
 	public deferType = CommandDeferType.PUBLIC;
 	public requireClientPerms: PermissionsString[] = [];
 
@@ -70,9 +70,9 @@ export class InitSetSubCommand implements Command {
 		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
-		const targetCharacterName = intr.options
-			.getString(ChatArgs.INIT_CHARACTER_OPTION.name)
-			.trim();
+		const targetCharacterName = (
+			intr.options.getString(ChatArgs.INIT_CHARACTER_OPTION.name) ?? ''
+		).trim();
 		const fieldToChange = intr.options.getString(ChatArgs.ACTOR_SET_OPTION.name).trim();
 		const newFieldValue = intr.options.getString(ChatArgs.ACTOR_SET_VALUE_OPTION.name).trim();
 

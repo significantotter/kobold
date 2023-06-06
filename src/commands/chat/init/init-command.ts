@@ -98,6 +98,7 @@ export class InitCommand implements Command {
 						...ChatArgs.INIT_VALUE_OPTION,
 						required: false,
 					},
+					ChatArgs.INIT_ADD_TEMPLATE_OPTION,
 				],
 			},
 			{
@@ -123,7 +124,13 @@ export class InitCommand implements Command {
 				name: Language.LL.commands.init.statBlock.name(),
 				description: Language.LL.commands.init.statBlock.description(),
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
-				options: [{ ...ChatArgs.INIT_CHARACTER_OPTION, required: true }],
+				options: [
+					{
+						...ChatArgs.INIT_CHARACTER_OPTION,
+						required: true,
+					},
+					ChatArgs.INIT_STAT_BLOCK_SECRET_OPTION,
+				],
 			},
 			{
 				name: Language.LL.commands.init.roll.name(),

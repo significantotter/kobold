@@ -34,7 +34,7 @@ export class ModifierUpdateSubCommand implements Command {
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
-	public cooldown = new RateLimiter(1, 5000);
+	public cooldown = new RateLimiter(1, 2000);
 	public deferType = CommandDeferType.PUBLIC;
 	public requireClientPerms: PermissionsString[] = [];
 
@@ -74,16 +74,15 @@ export class ModifierUpdateSubCommand implements Command {
 		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
-		const modifierName = intr.options
-			.getString(ModifierOptions.MODIFIER_NAME_OPTION.name)
-			.trim();
-		let fieldToChange = intr.options
-			.getString(ModifierOptions.MODIFIER_SET_OPTION.name)
+		const modifierName = (
+			intr.options.getString(ModifierOptions.MODIFIER_NAME_OPTION.name) ?? ''
+		).trim();
+		let fieldToChange = (intr.options.getString(ModifierOptions.MODIFIER_SET_OPTION.name) ?? '')
 			.toLocaleLowerCase()
 			.trim();
-		const newFieldValue = intr.options
-			.getString(ModifierOptions.MODIFIER_SET_VALUE_OPTION.name)
-			.trim();
+		const newFieldValue = (
+			intr.options.getString(ModifierOptions.MODIFIER_SET_VALUE_OPTION.name) ?? ''
+		).trim();
 
 		let updateValue: string | string[] | number;
 

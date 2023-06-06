@@ -650,7 +650,11 @@ export class Creature {
 	public static fromBestiaryEntry(
 		bestiaryEntry: CreatureStatBlock,
 		fluffEntry,
-		options: { useStamina: boolean } = { useStamina: false }
+		options: { useStamina?: boolean; template?: string; customName?: string } = {
+			useStamina: false,
+			template: '',
+			customName: '',
+		}
 	): Creature {
 		const sheet = convertBestiaryCreatureToSheet(bestiaryEntry, fluffEntry, options);
 

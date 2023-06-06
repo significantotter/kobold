@@ -25,6 +25,7 @@ import { Language } from '../../../models/enum-helpers/language.js';
 import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
 import { Npc, Sheet } from '../../../services/kobold/models/index.js';
 import { Creature } from '../../../utils/creature.js';
+import _ from 'lodash';
 
 export class InitAddSubCommand implements Command {
 	public names = [Language.LL.commands.init.add.name()];
@@ -35,7 +36,7 @@ export class InitAddSubCommand implements Command {
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
-	public cooldown = new RateLimiter(1, 5000);
+	public cooldown = new RateLimiter(1, 2000);
 	public deferType = CommandDeferType.PUBLIC;
 	public requireClientPerms: PermissionsString[] = [];
 
@@ -78,6 +79,9 @@ export class InitAddSubCommand implements Command {
 		const targetCreature = intr.options.getString(ChatArgs.INIT_CREATURE_OPTION.name);
 		const initiativeValue = intr.options.getNumber(ChatArgs.INIT_VALUE_OPTION.name);
 		const diceExpression = intr.options.getString(ChatArgs.ROLL_EXPRESSION_OPTION.name);
+		const template = (intr.options.getString(ChatArgs.INIT_ADD_TEMPLATE_OPTION.name) ?? '')
+			.trim()
+			.toLocaleLowerCase();
 
 		let creature: Creature = null;
 		let sheet: Sheet = null;
@@ -89,10 +93,14 @@ export class InitAddSubCommand implements Command {
 		} else {
 			const npc = await Npc.query().findOne({ id: targetCreature });
 			const variantData = await npc.fetchVariantDataIfExists();
-			creature = Creature.fromBestiaryEntry(variantData, npc.fluff);
+			if (!actorName) actorName = (template ? `${_.capitalize(template)} ` : '') + npc.name;
+			creature = Creature.fromBestiaryEntry(variantData, npc.fluff, {
+				useStamina: false,
+				template,
+				customName: actorName || undefined,
+			});
 			sheet = creature.sheet;
 			referenceNpcName = npc.name;
-			if (!actorName) actorName = npc.name;
 		}
 
 		let nameCount = 1;
