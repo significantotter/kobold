@@ -50,7 +50,7 @@ export class RollBuilder {
 		}
 
 		const actorText = actorName || this.creature?.sheet?.info?.name || '';
-		this.title = title || _.capitalize(`${actorText} ${this.rollDescription}`.trim());
+		this.title = title || `${actorText} ${this.rollDescription}`.trim();
 	}
 
 	/**

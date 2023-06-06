@@ -357,7 +357,7 @@ export class DiceUtils {
 			rollDescription:
 				description ||
 				LL.utils.dice.rolledAction({
-					actionName: roll.name,
+					actionName: _.startCase(roll.name),
 				}),
 		});
 		rollBuilder.addRoll({
