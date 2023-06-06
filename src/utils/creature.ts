@@ -197,7 +197,7 @@ export class Creature {
 				builtAttack += `,`;
 				if (attack.damage?.length) {
 					builtAttack += ` **Damage:** ${attack.damage
-						.map(d => `\`${d.dice} ${d.type}\``)
+						.map(d => `\`${d.dice}${d.type ? ` ${d.type}` : ''}\``)
 						.join(', ')}`;
 				}
 				if (attacks.length) attacks += '\n';

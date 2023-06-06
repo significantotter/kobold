@@ -39,7 +39,8 @@ export default {
 				`and make sure you copied it over correctly! Or just paste ` +
 				`in the character's id value instead.`,
 			characterAlreadyExists:
-				`Yip! {characterName} is already in the system!` + ` Did you mean to /update?`,
+				`Yip! You already have a character named {characterName}!` +
+				` Did you mean to /character update?`,
 			success: `Yip! I've successfully imported {characterName}!`,
 		},
 	},
@@ -57,7 +58,8 @@ export default {
 				`and make sure you copied it over correctly! Or just paste ` +
 				`in the character's id value instead.`,
 			characterAlreadyExists:
-				`Yip! {characterName} is already in the system!` + ` Did you mean to /update?`,
+				`Yip! You already have a character named {characterName}!` +
+				` Did you mean to /character update?`,
 			failedRequest:
 				'Yip! I ran into an issue importing that character. Try again later, ' +
 				'make sure that the json import id is correct, or contact my developer ' +

@@ -16,6 +16,7 @@ export class BaseModel extends Model {
 				allErrors: true,
 				validateSchema: true,
 				ownProperties: true,
+				allowUnionTypes: true,
 			},
 		});
 	}

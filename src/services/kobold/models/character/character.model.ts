@@ -26,13 +26,10 @@ export class Character extends BaseModel {
 	}
 
 	static queryLooseCharacterName(characterName, userId) {
-		return this.query().whereRaw(
-			`user_id=:userId AND (character_data->'name')::TEXT ILIKE :characterName`,
-			{
-				userId,
-				characterName: `%${characterName}%`,
-			}
-		);
+		return this.query().whereRaw(`user_id=:userId AND name::TEXT ILIKE :characterName`, {
+			userId,
+			characterName: `%${characterName}%`,
+		});
 	}
 
 	/**

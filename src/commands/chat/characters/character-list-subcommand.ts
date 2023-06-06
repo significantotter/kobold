@@ -59,7 +59,7 @@ export class CharacterListSubCommand implements Command {
 				characterFields.push({
 					name: LL.commands.character.list.interactions.characterListEmbed.characterFieldName(
 						{
-							characterName: character.sheet.info.name,
+							characterName: character.name,
 							activeText: character.isActiveCharacter ? ' (active)' : '',
 							serverDefaultText: isServerDefault ? ' (server default)' : '',
 						}

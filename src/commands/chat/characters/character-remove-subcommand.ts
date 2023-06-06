@@ -45,7 +45,7 @@ export class CharacterRemoveSubCommand implements Command {
 
 		const prompt = await intr.reply({
 			content: LL.commands.character.remove.interactions.removeConfirmation.text({
-				characterName: activeCharacter.sheet.info.name,
+				characterName: activeCharacter.name,
 			}),
 			components: [
 				{
@@ -120,7 +120,7 @@ export class CharacterRemoveSubCommand implements Command {
 
 			await InteractionUtils.send(intr, {
 				content: LL.commands.character.remove.interactions.success({
-					characterName: activeCharacter.sheet.info.name,
+					characterName: activeCharacter.name,
 				}),
 				components: [],
 			});
@@ -136,7 +136,7 @@ export class CharacterRemoveSubCommand implements Command {
 			// cancel
 			await InteractionUtils.send(intr, {
 				content: LL.commands.character.remove.interactions.cancelled({
-					characterName: activeCharacter.sheet.info.name,
+					characterName: activeCharacter.name,
 				}),
 				components: [],
 			});

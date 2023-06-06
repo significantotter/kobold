@@ -51,15 +51,7 @@ export class CharacterImportPathBuilderSubCommand implements Command {
 		}
 
 		//check if we have an existing character
-		const [pathBuilderChar, existingCharacter] = await Promise.all([
-			new PathBuilder().get({ characterJsonId: jsonId }),
-			Character.query().where({
-				name: jsonId,
-				importSource: 'pathbuilder',
-				userId: intr.user.id,
-			}),
-		]);
-
+		const pathBuilderChar = await new PathBuilder().get({ characterJsonId: jsonId });
 		if (!pathBuilderChar.success) {
 			await InteractionUtils.send(
 				intr,
@@ -69,7 +61,13 @@ export class CharacterImportPathBuilderSubCommand implements Command {
 			);
 		}
 
-		if (false && existingCharacter.length) {
+		const existingCharacter = await Character.query()
+			.where({
+				userId: intr.user.id,
+			})
+			.andWhereRaw('name ILIKE ?', pathBuilderChar?.build?.name.trim());
+
+		if (existingCharacter.length) {
 			const character = existingCharacter[0];
 			await InteractionUtils.send(
 				intr,
@@ -89,6 +87,7 @@ export class CharacterImportPathBuilderSubCommand implements Command {
 
 			// store sheet in db
 			const newCharacter = await Character.query().insertAndFetch({
+				name: creature.sheet.info.name,
 				charId: jsonId,
 				userId: intr.user.id,
 				sheet: creature.sheet,

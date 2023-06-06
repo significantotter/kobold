@@ -115,6 +115,19 @@ export class CharacterImportWanderersGuideSubCommand implements Command {
 					throw err;
 				}
 			}
+			const duplicateNameChar = await Character.query()
+				.first()
+				.where({ userId: intr.user.id })
+				.andWhereRaw('name ILIKE ?', character.sheet.info.name.trim());
+			if (duplicateNameChar) {
+				await InteractionUtils.send(
+					intr,
+					LL.commands.character.importWanderersGuide.interactions.characterAlreadyExists({
+						characterName: character.sheet.info.name,
+					})
+				);
+				return;
+			}
 
 			// set current characters owned by user to inactive state
 			await Character.query()
