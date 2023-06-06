@@ -362,49 +362,6 @@ export class Creature {
 		};
 	}
 
-	public get spellcastingRolls(): {
-		[rollName: string]: roll;
-	} {
-		const rolls: {
-			[rollName: string]: roll;
-		} = {};
-
-		// spellcasting
-		if (this.sheet.castingStats.arcaneAttack != null) {
-			rolls.arcaneAttack = {
-				name: 'arcane spell attack',
-				type: 'spell',
-				bonus: this.sheet.castingStats.arcaneAttack,
-				tags: ['spell', 'arcane', 'attack'],
-			};
-		}
-		if (this.sheet.castingStats.divineAttack != null) {
-			rolls.divineAttack = {
-				name: 'divine spell attack',
-				type: 'spell',
-				bonus: this.sheet.castingStats.divineAttack,
-				tags: ['spell', 'divine', 'attack'],
-			};
-		}
-		if (this.sheet.castingStats.occultAttack != null) {
-			rolls.occultAttack = {
-				name: 'occult spell attack',
-				type: 'spell',
-				bonus: this.sheet.castingStats.occultAttack,
-				tags: ['spell', 'occult', 'attack'],
-			};
-		}
-		if (this.sheet.castingStats.primalAttack != null) {
-			rolls.primalAttack = {
-				name: 'primal spell attack',
-				type: 'spell',
-				bonus: this.sheet.castingStats.primalAttack,
-				tags: ['spell', 'primal', 'attack'],
-			};
-		}
-		return rolls;
-	}
-
 	public get rolls(): {
 		[rollName: string]: roll;
 	} {
@@ -412,7 +369,6 @@ export class Creature {
 			...this.savingThrowRolls,
 			...this.abilityRolls,
 			...this.skillRolls,
-			...this.spellcastingRolls,
 		};
 	}
 
