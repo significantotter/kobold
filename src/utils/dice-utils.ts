@@ -39,6 +39,25 @@ export class DiceUtils {
 		return wgDamageField.replace(damageTypeMatch, '');
 	}
 
+	public static addNumberToDiceExpression(diceExpression: string, number: number): string {
+		if (isNaN(number)) return diceExpression;
+		// Use a regex to split out +/- a number at the end of the dice expression
+		const regex = / *(\+|-) *(\d+)$/;
+		const match = diceExpression.match(regex);
+		if (match) {
+			// If we have a match, convert the parsed value to a number, add it with our number, then replace it in the original string
+			const parsedNumber = Number(match[0].replaceAll(' ', ''));
+			const newNumber = parsedNumber + number;
+			return diceExpression.replace(
+				regex,
+				`${newNumber < 0 ? '-' : '+'}${Math.abs(newNumber)}`
+			);
+		} else {
+			// If we don't have a match, just add the number to the end of the string
+			return `${diceExpression}${number < 0 ? '-' : '+'}${Math.abs(number)}`;
+		}
+	}
+
 	public static buildDiceExpression(
 		baseDice?: string,
 		bonus?: string,

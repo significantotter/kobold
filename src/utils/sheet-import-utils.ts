@@ -3,6 +3,7 @@ import { Sheet } from '../services/kobold/models/index.js';
 import { PathBuilder } from '../services/pathbuilder/pathbuilder.js';
 import { CreatureFluff, CreatureStatBlock } from '../services/pf2etools/bestiaryType.js';
 import { WG } from '../services/wanderers-guide/wanderers-guide.js';
+import { DiceUtils } from './dice-utils.js';
 
 export function convertBestiaryCreatureToSheet(
 	bestiaryEntry: CreatureStatBlock,
@@ -141,7 +142,7 @@ export function convertBestiaryCreatureToSheet(
 		for (const damageSplit of splitDamage) {
 			const [dice, type] = damageSplit.split('}').map(d => d.trim());
 			damageRolls.push({
-				dice: dice + '+' + (rollAdjustment ? rollAdjustment : ''),
+				dice: DiceUtils.addNumberToDiceExpression(dice, rollAdjustment),
 				type,
 			});
 		}
