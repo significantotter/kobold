@@ -56,7 +56,9 @@ export class InitRemoveSubCommand implements Command {
 				currentInitResponse.init,
 				intr.user.id
 			);
-			actorOptions = actorOptions.filter(actor => actor.name.includes(match));
+			actorOptions = actorOptions.filter(actor =>
+				actor.name.toLocaleLowerCase().includes(match.toLocaleLowerCase())
+			);
 
 			//return the matched skills
 			return actorOptions.map(actor => ({
