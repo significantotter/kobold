@@ -6,7 +6,7 @@ export { CharacterSetServerDefaultSubCommand } from './characters/character-set-
 export { CharacterRemoveSubCommand } from './characters/character-remove-subcommand.js';
 export { CharacterUpdateSubCommand } from './characters/character-update-subcommand.js';
 export { CharacterImportWanderersGuideSubCommand } from './characters/character-import-wanderers-guide-subcommand.js';
-export { CharacterImportPathBuilderSubCommand } from './characters/character-import-pathbuilder-subcommand.js';
+export { CharacterimportPathbuilderSubCommand } from './characters/character-import-pathbuilder-subcommand.js';
 export { CharacterSheetSubCommand } from './characters/character-sheet-subcommand.js';
 
 // roll commands

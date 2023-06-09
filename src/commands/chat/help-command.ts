@@ -173,8 +173,12 @@ export class HelpCommand implements Command {
 						value: LL.commands.help.faq.interactions.embed.commandOptions.value(),
 					},
 					{
-						name: LL.commands.help.faq.interactions.embed.importCharacter.name(),
-						value: LL.commands.help.faq.interactions.embed.importCharacter.value(),
+						name: LL.commands.help.faq.interactions.embed.importWanderersGuideCharacter.name(),
+						value: LL.commands.help.faq.interactions.embed.importWanderersGuideCharacter.value(),
+					},
+					{
+						name: LL.commands.help.faq.interactions.embed.importPathbuilderCharacter.name(),
+						value: LL.commands.help.faq.interactions.embed.importPathbuilderCharacter.value(),
 					},
 					{
 						name: LL.commands.help.faq.interactions.embed.initiative.name(),
@@ -219,7 +223,7 @@ export class HelpCommand implements Command {
 						name: LL.commands.character.name(),
 						value:
 							`\`/${LL.commands.character.name()} ${LL.commands.character.importWanderersGuide.name()}\` ${LL.commands.character.importWanderersGuide.description()}\n` +
-							`\`/${LL.commands.character.name()} ${LL.commands.character.importPathBuilder.name()}\` ${LL.commands.character.importPathBuilder.description()}\n` +
+							`\`/${LL.commands.character.name()} ${LL.commands.character.importPathbuilder.name()}\` ${LL.commands.character.importPathbuilder.description()}\n` +
 							`\`/${LL.commands.character.name()} ${LL.commands.character.list.name()}\` ${LL.commands.character.list.description()}\n` +
 							`\`/${LL.commands.character.name()} ${LL.commands.character.remove.name()}\` ${LL.commands.character.remove.description()}\n` +
 							`\`/${LL.commands.character.name()} ${LL.commands.character.setActive.name()}\` ${LL.commands.character.setActive.description()}\n` +
@@ -244,6 +248,8 @@ export class HelpCommand implements Command {
 							`\`/${LL.commands.init.name()} ${LL.commands.init.start.name()}\` ${LL.commands.init.start.description()}\n` +
 							`\`/${LL.commands.init.name()} ${LL.commands.init.join.name()}\` ${LL.commands.init.join.description()}\n` +
 							`\`/${LL.commands.init.name()} ${LL.commands.init.add.name()}\` ${LL.commands.init.add.description()}\n` +
+							`\`/${LL.commands.init.name()} ${LL.commands.init.roll.name()}\` ${LL.commands.init.roll.description()}\n` +
+							`\`/${LL.commands.init.name()} ${LL.commands.init.statBlock.name()}\` ${LL.commands.init.statBlock.description()}\n` +
 							`\`/${LL.commands.init.name()} ${LL.commands.init.next.name()}\` ${LL.commands.init.next.description()}\n` +
 							`\`/${LL.commands.init.name()} ${LL.commands.init.prev.name()}\` ${LL.commands.init.prev.description()}\n` +
 							`\`/${LL.commands.init.name()} ${LL.commands.init.jumpTo.name()}\` ${LL.commands.init.jumpTo.description()}\n` +
@@ -315,7 +321,7 @@ export class HelpCommand implements Command {
 				embed.addFields(
 					[
 						LL.commands.character.importWanderersGuide.name(),
-						LL.commands.character.importPathBuilder.name(),
+						LL.commands.character.importPathbuilder.name(),
 						LL.commands.character.update.name(),
 						LL.commands.character.list.name(),
 						LL.commands.character.setActive.name(),
@@ -337,6 +343,8 @@ export class HelpCommand implements Command {
 						LL.commands.init.end.name(),
 						LL.commands.init.join.name(),
 						LL.commands.init.add.name(),
+						LL.commands.init.roll.name(),
+						LL.commands.init.statBlock.name(),
 						LL.commands.init.next.name(),
 						LL.commands.init.prev.name(),
 						LL.commands.init.jumpTo.name(),

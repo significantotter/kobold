@@ -22,12 +22,12 @@ import { PathBuilder } from '../../../services/pathbuilder/index.js';
 import { Creature } from '../../../utils/creature.js';
 import { refs } from '../../../i18n/en/common.js';
 
-export class CharacterImportPathBuilderSubCommand implements Command {
-	public names = [Language.LL.commands.character.importPathBuilder.name()];
+export class CharacterimportPathbuilderSubCommand implements Command {
+	public names = [Language.LL.commands.character.importPathbuilder.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.character.importPathBuilder.name(),
-		description: Language.LL.commands.character.importPathBuilder.description(),
+		name: Language.LL.commands.character.importPathbuilder.name(),
+		description: Language.LL.commands.character.importPathbuilder.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -43,7 +43,7 @@ export class CharacterImportPathBuilderSubCommand implements Command {
 		if (!_.isInteger(jsonId) || jsonId < 1) {
 			await InteractionUtils.send(
 				intr,
-				LL.commands.character.importPathBuilder.interactions.invalidUrl({
+				LL.commands.character.importPathbuilder.interactions.invalidUrl({
 					id: jsonId,
 				})
 			);
@@ -55,7 +55,7 @@ export class CharacterImportPathBuilderSubCommand implements Command {
 		if (!pathBuilderChar.success) {
 			await InteractionUtils.send(
 				intr,
-				LL.commands.character.importPathBuilder.interactions.failedRequest({
+				LL.commands.character.importPathbuilder.interactions.failedRequest({
 					supportServerUrl: refs.links.support,
 				})
 			);
@@ -71,7 +71,7 @@ export class CharacterImportPathBuilderSubCommand implements Command {
 			const character = existingCharacter[0];
 			await InteractionUtils.send(
 				intr,
-				LL.commands.character.importPathBuilder.interactions.characterAlreadyExists({
+				LL.commands.character.importPathbuilder.interactions.characterAlreadyExists({
 					characterName: character.sheet.info.name,
 				})
 			);
@@ -99,7 +99,7 @@ export class CharacterImportPathBuilderSubCommand implements Command {
 
 			await InteractionUtils.send(
 				intr,
-				LL.commands.character.importPathBuilder.interactions.success({
+				LL.commands.character.importPathbuilder.interactions.success({
 					characterName: newCharacter.sheet.info.name,
 				})
 			);

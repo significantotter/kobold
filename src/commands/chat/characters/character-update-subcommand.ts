@@ -67,7 +67,7 @@ export class CharacterUpdateSubCommand implements Command {
 			if (!pathBuilderChar.success) {
 				await InteractionUtils.send(
 					intr,
-					LL.commands.character.importPathBuilder.interactions.failedRequest({
+					LL.commands.character.importPathbuilder.interactions.failedRequest({
 						supportServerUrl: refs.links.support,
 					})
 				);

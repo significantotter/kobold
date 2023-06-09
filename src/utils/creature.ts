@@ -30,7 +30,7 @@ export interface attackRoll {
 }
 
 export class Creature {
-	constructor(public sheet: Sheet) {
+	constructor(public sheet: Sheet, private _name?: string) {
 		const sheetDefaults: Sheet = {
 			info: { traits: [] },
 			general: { senses: [], languages: [] },
@@ -49,17 +49,23 @@ export class Creature {
 		this.sheet = _.defaultsDeep(this.sheet, sheetDefaults);
 	}
 
+	public get name() {
+		return this._name ?? this.sheet.info.name;
+	}
+
 	public compileSheetEmbed(): KoboldEmbed {
 		const sheetEmbed = new KoboldEmbed();
 
 		// sheet metadata
-		sheetEmbed.setTitle(this.sheet.info.name);
+		sheetEmbed.setTitle(this.name);
 		if (this.sheet.url) sheetEmbed.setURL(this.sheet.url);
 		if (this.sheet.info.imageURL) sheetEmbed.setThumbnail(this.sheet.info.imageURL);
 
 		// general section
 		let generalText = '';
-		generalText += `HP: \`${this.sheet.defenses.currentHp}\`/\`${this.sheet.defenses.maxHp}\`\n`;
+		if (this.sheet.defenses?.maxHp) {
+			generalText += `HP: \`${this.sheet.defenses.currentHp}\`/\`${this.sheet.defenses.maxHp}\`\n`;
+		}
 		if (this.sheet.info.usesStamina) {
 			generalText += `Stamina: \`${this.sheet.defenses.currentStamina}/${this.sheet.defenses.maxStamina}\`\n`;
 			generalText += `Resolve: \`${this.sheet.defenses.currentResolve}/${this.sheet.defenses.maxResolve}\`\n`;
@@ -90,16 +96,19 @@ export class Creature {
 		if (this.sheet.info.background)
 			generalText += `\nBackground: ${this.sheet.info.background}`;
 
-		let generalTitleText = `Level ${this.sheet.info.level ?? 'unknown'}`;
+		let generalTitleText = '';
+		if (this.sheet.info.level) generalTitleText = `Level ${this.sheet.info.level ?? 'unknown'}`;
 		if (this.sheet.info.heritage) generalTitleText += ` ${this.sheet.info.heritage}`;
 		if (this.sheet.info.ancestry) generalTitleText += ` ${this.sheet.info.ancestry}`;
 		if (this.sheet.info.class) generalTitleText += ` ${this.sheet.info.class}`;
-		sheetEmbed.addFields([
-			{
-				name: generalTitleText,
-				value: generalText,
-			},
-		]);
+		if (generalTitleText.length) {
+			sheetEmbed.addFields([
+				{
+					name: generalTitleText,
+					value: generalText,
+				},
+			]);
+		}
 
 		// Abilities
 		let abilityTexts = [];

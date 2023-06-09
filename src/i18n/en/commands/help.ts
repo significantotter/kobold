@@ -32,15 +32,23 @@ export default {
 					name: "Where can I find a list of kobold's commands?",
 					value: 'Use the command `/help commands`',
 				},
-				importCharacter: {
-					name: "How do I import a wanderer's guide character?",
+				importWanderersGuideCharacter: {
+					name: "How do I import a Wanderer's Guide character?",
 					value:
-						"go to your character's webpage in wanderer's guide " +
+						"go to your character's webpage in Wanderer's Guide " +
 						'and copy the webpage URL.\n\n' +
 						'Then, start the `/character import-wanderers-guide` command, and enter that URL ' +
 						"in the command's url option. It may ask you to authenticate the " +
 						'character. If so, follow the link, complete the instructions, ' +
 						"and then `/character import-wanderers-guide` your character's url again.",
+				},
+				importPathbuilderCharacter: {
+					name: 'How do I import a Pathbuilder character?',
+					value:
+						"Open your character's sheet in Pathbuilder, open the menu, and select 'Export Character'. " +
+						'Copy the number listed under "Pathbuilder 2e JSON ID."\n\n' +
+						'Then, use the `/character import-pathbuilder <json-id>` command, and pasting the copied id ' +
+						'into the json-id option.',
 				},
 				initiative: {
 					name: 'How does initiative work?',
@@ -48,10 +56,8 @@ export default {
 						'To start initiative, use the command `/init start`. ' +
 						"An initiative is now running in the current channel, but it doesn't " +
 						'have any members yet. \n\nTo join initiative with your active character, ' +
-						'use `/init join`. If, instead, you want to join initiative with an NPC' +
-						'use `/init add`. You will be required to enter a name, and have options to' +
-						'either choose an initiative value to have them join on, or to provide a ' +
-						'dice expression for them to roll for their initiative value.',
+						'use `/init join`. If, instead, you want to add an NPC or bestiary creature to initiative, ' +
+						'use `/init add` and optionally select the creature from the pop-up. \n\n',
 				},
 			},
 		},
@@ -115,11 +121,11 @@ export default {
 				title: '/character Commands',
 				thumbnail: refs.links.thumbnail,
 				description:
-					'Character commands all assist with managing imported characters' +
-					"from Wanderer's guide. They allow you to update your character to" +
-					"reflect changes since you imported it, to display your character's sheet, " +
-					'and to switch between multiple active imported characters. Because ' +
-					"wanderer's guide requires OAuth access for a character, import/update" +
+					'Character commands assist with managing imported characters ' +
+					"from Wanderer's guide and Pathbuilder. You can to update your character to " +
+					"reflect any changes since you imported it, display your character's sheet, " +
+					'or switch between multiple active imported characters. Because ' +
+					"wanderer's guide requires OAuth access for a character, import/update " +
 					'commands may prompt you to authorize Kobold to read your character.',
 			},
 		},
@@ -189,10 +195,7 @@ export default {
 					'So BOTH attack and EITHER skill or dexterity must be in the roll\n\n\n' +
 					'**Advanced**\n\n' +
 					'To learn how to build target tags ' +
-					'you can also reference [this link](https://github.com/joewalnes/filtrex), although its fairly technical.', //+
-				// '`__hp < 50 and damage` - Damage, but only when your current health is below 50 (Yes, you can use ' +
-				// 'attributes in target tag expressions if you prefix them with "__"!)\n' +
-				// '`attack` - An attack roll! easy as that.',
+					'you can also reference [this link](https://github.com/joewalnes/filtrex), although its fairly technical.',
 			},
 		},
 	},

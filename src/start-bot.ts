@@ -12,7 +12,7 @@ import {
 	CharacterUpdateSubCommand,
 	CharacterRemoveSubCommand,
 	CharacterImportWanderersGuideSubCommand,
-	CharacterImportPathBuilderSubCommand,
+	CharacterimportPathbuilderSubCommand,
 	CharacterSheetSubCommand,
 	// roll
 	RollCommand,
@@ -136,7 +136,7 @@ async function start(): Promise<void> {
 			new CharacterSetActiveSubCommand(),
 			new CharacterSetServerDefaultSubCommand(),
 			new CharacterImportWanderersGuideSubCommand(),
-			new CharacterImportPathBuilderSubCommand(),
+			new CharacterimportPathbuilderSubCommand(),
 			new CharacterUpdateSubCommand(),
 			new CharacterRemoveSubCommand(),
 		]),

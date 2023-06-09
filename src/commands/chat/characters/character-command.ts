@@ -37,8 +37,8 @@ export class CharacterCommand implements Command {
 			},
 			{
 				// IMPORT PathBuilder
-				name: Language.LL.commands.character.importPathBuilder.name(),
-				description: Language.LL.commands.character.importPathBuilder.description(),
+				name: Language.LL.commands.character.importPathbuilder.name(),
+				description: Language.LL.commands.character.importPathbuilder.description(),
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
 				options: [
 					CharacterOptions.IMPORT_PATHBUILDER_OPTION,
