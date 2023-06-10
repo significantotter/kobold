@@ -83,9 +83,10 @@ export class InitCommand implements Command {
 				description: Language.LL.commands.init.add.description(),
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
 				options: [
+					ChatArgs.INIT_CREATURE_OPTION,
 					{
 						...ChatArgs.ACTOR_NAME_OPTION,
-						required: true,
+						required: false,
 					},
 					{
 						...ChatArgs.ROLL_EXPRESSION_OPTION,
@@ -97,6 +98,7 @@ export class InitCommand implements Command {
 						...ChatArgs.INIT_VALUE_OPTION,
 						required: false,
 					},
+					ChatArgs.INIT_ADD_TEMPLATE_OPTION,
 				],
 			},
 			{
@@ -117,6 +119,50 @@ export class InitCommand implements Command {
 				description: Language.LL.commands.init.remove.description(),
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
 				options: [{ ...ChatArgs.INIT_CHARACTER_OPTION, required: true }],
+			},
+			{
+				name: Language.LL.commands.init.statBlock.name(),
+				description: Language.LL.commands.init.statBlock.description(),
+				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				options: [
+					{
+						...ChatArgs.INIT_CHARACTER_OPTION,
+						required: true,
+					},
+					ChatArgs.INIT_STAT_BLOCK_SECRET_OPTION,
+				],
+			},
+			{
+				name: Language.LL.commands.init.roll.name(),
+				description: Language.LL.commands.init.roll.description(),
+				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				options: [
+					{
+						...ChatArgs.INIT_CHARACTER_OPTION,
+						required: true,
+					},
+					{
+						...ChatArgs.INIT_ROLL_CHOICE_OPTION,
+						required: true,
+					},
+					ChatArgs.ROLL_TARGET_AC_OPTION,
+					{
+						...ChatArgs.ROLL_MODIFIER_OPTION,
+						required: false,
+					},
+					{
+						...ChatArgs.DAMAGE_ROLL_MODIFIER_OPTION,
+						required: false,
+					},
+					{
+						...ChatArgs.ROLL_NOTE_OPTION,
+						required: false,
+					},
+					{
+						...ChatArgs.ROLL_SECRET_OPTION,
+						required: false,
+					},
+				],
 			},
 			{
 				name: Language.LL.commands.init.end.name(),

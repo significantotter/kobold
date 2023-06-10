@@ -8,6 +8,10 @@
 			"readOnly": true,
 			"description": "The id of the character record."
 		},
+		"name": {
+			"type": "string",
+			"description": "The name of the character."
+		},
 		"charId": {
 			"type": "integer",
 			"description": "The external wanderer's guide character id."
@@ -34,30 +38,6 @@
 		"attributes": {
 			"type": "array",
 			"description": "An array of attribute objects that can be used to apply character values to dice expressions. These attributes are set internally and uneditable.",
-			"items": {
-				"type": "object",
-				"properties": {
-					"name": {
-						"type": "string"
-					},
-					"type": {
-						"type": "string"
-					},
-					"value": {
-						"type": "number"
-					},
-					"tags": {
-						"type": "array",
-						"items": {
-							"type": "string"
-						}
-					}
-				}
-			}
-		},
-		"customAttributes": {
-			"type": "array",
-			"description": "An array of attribute objects that can be used to apply character values to dice expressions. These attributes are set by the user.",
 			"items": {
 				"type": "object",
 				"properties": {
@@ -175,9 +155,9 @@
 				}
 			}
 		},
-		"customActions": {
-			"type": "array",
-			"description": "An array of customizable actions set up for the user. These allow the user to make certain roll operations as a single command."
+		"pathBuilderData": {
+			"type": ["null", "object"],
+			"description": "The general character data from the PathBuilder json export"
 		},
 		"characterData": {
 			"type": "object",
@@ -288,7 +268,11 @@
 		},
 		"isActiveCharacter": {
 			"type": "boolean",
-			"description": "whether this is the active character for the user's character based commands"
+			"description": "Whether this is the active character for the user's character based commands"
+		},
+		"importSource": {
+			"type": "string",
+			"description": "What source website this character was imported from."
 		},
 		"createdAt": {
 			"type": "string",

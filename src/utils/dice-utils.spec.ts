@@ -1,6 +1,7 @@
 import { Language } from '../models/enum-helpers/language.js';
 import { CharacterFactory } from './../services/kobold/models/character/character.factory';
-import { RollBuilder, DiceUtils } from './dice-utils';
+import { DiceUtils } from './dice-utils';
+import { RollBuilder } from './roll-builder.js';
 describe('Dice Utils', function () {
 	describe('buildDiceExpression', function () {
 		test('builds a dice expression using a base expression, a bonus, and a modifier', function () {
@@ -88,9 +89,9 @@ describe('RollBuilder', function () {
 		rollBuilder.addRoll({ rollExpression: 'd6+1', rollTitle: 'testRoll' });
 		const result = rollBuilder.compileEmbed();
 		expect(result.data.title.toLowerCase()).toContain(
-			fakeCharacter.characterData.name.toLowerCase()
+			fakeCharacter.sheet.info.name.toLowerCase()
 		);
-		expect(result.data.thumbnail.url).toBe(fakeCharacter.characterData?.infoJSON?.imageURL);
+		expect(result.data.thumbnail.url).toBe(fakeCharacter.sheet.info.imageURL);
 	});
 	test(`allows a custom rollnote`, function () {
 		const rollBuilder = new RollBuilder({
@@ -109,7 +110,7 @@ describe('RollBuilder', function () {
 		});
 		rollBuilder.addRoll({ rollExpression: 'd6+1', rollTitle: 'testRoll' });
 		const result = rollBuilder.compileEmbed();
-		expect(result.data.title.toLowerCase()).not.toContain(fakeCharacter.characterData.name);
+		expect(result.data.title.toLowerCase()).not.toContain(fakeCharacter.sheet.info.name);
 		expect(result.data.title.toLowerCase()).not.toContain('some actor');
 		expect(result.data.title.toLowerCase()).toBe(`an entirely different title`);
 	});

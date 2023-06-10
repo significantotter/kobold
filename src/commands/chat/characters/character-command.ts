@@ -30,14 +30,19 @@ export class CharacterCommand implements Command {
 		options: [
 			{
 				// IMPORT
-				name: Language.LL.commands.character.import.name(),
-				description: Language.LL.commands.character.import.description(),
+				name: Language.LL.commands.character.importWanderersGuide.name(),
+				description: Language.LL.commands.character.importWanderersGuide.description(),
+				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				options: [CharacterOptions.IMPORT_OPTION],
+			},
+			{
+				// IMPORT PathBuilder
+				name: Language.LL.commands.character.importPathbuilder.name(),
+				description: Language.LL.commands.character.importPathbuilder.description(),
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
 				options: [
-					{
-						...CharacterOptions.IMPORT_OPTION,
-						required: true,
-					},
+					CharacterOptions.IMPORT_PATHBUILDER_OPTION,
+					CharacterOptions.IMPORT_USE_STAMINA_OPTION,
 				],
 			},
 			{
@@ -77,10 +82,11 @@ export class CharacterCommand implements Command {
 				name: Language.LL.commands.character.update.name(),
 				description: Language.LL.commands.character.update.description(),
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				options: [{ ...CharacterOptions.IMPORT_PATHBUILDER_OPTION, required: false }],
 			},
 		],
 	};
-	public cooldown = new RateLimiter(1, 5000);
+	public cooldown = new RateLimiter(1, 2000);
 	public deferType = CommandDeferType.PUBLIC;
 	public requireClientPerms: PermissionsString[] = [];
 

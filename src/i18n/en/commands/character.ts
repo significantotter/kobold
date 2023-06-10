@@ -20,8 +20,8 @@ export default {
 	},
 
 	// SUBCOMMANDS
-	import: {
-		name: 'import',
+	importWanderersGuide: {
+		name: 'import-wanderers-guide',
 		options: '[url]',
 		usage: "_[url]_: the url of your character sheet from wanderer's guide",
 		description: "Imports a Wanderer's Guide Character",
@@ -39,7 +39,34 @@ export default {
 				`and make sure you copied it over correctly! Or just paste ` +
 				`in the character's id value instead.`,
 			characterAlreadyExists:
-				`Yip! {characterName} is already in the system!` + ` Did you mean to /update?`,
+				`Yip! You already have a character named {characterName}!` +
+				` Did you mean to /character update?`,
+			success: `Yip! I've successfully imported {characterName}!`,
+		},
+	},
+	importPathbuilder: {
+		name: 'import-pathbuilder',
+		options: '[json-id] ',
+		usage: '_[json-id]_: the json export id for your Pathbuilder account',
+		description: 'Imports a PathBuilder 2E Character',
+		expandedDescription:
+			'Imports a character from PathBuilder 2E with ' +
+			'the provided json id. If the id is accurate, Kobold will make fetch the character. ' +
+			"NOTE that json ids are NOT unique for each character, they're unique for each Pathbuilder " +
+			'account. If you have multiple characters in PathBuilder, make sure that the character you want to import ' +
+			'is the one you most recently exported to json.',
+		interactions: {
+			invalidUrl:
+				`Yip! I couldn't find any character at the json id '{id}'. Check ` +
+				`and make sure you copied it over correctly! Or just paste ` +
+				`in the character's id value instead.`,
+			characterAlreadyExists:
+				`Yip! You already have a character named {characterName}!` +
+				` Did you mean to /character update?`,
+			failedRequest:
+				'Yip! I ran into an issue importing that character. Try again later, ' +
+				'make sure that the json import id is correct, or contact my developer ' +
+				`in my support server]({supportServerUrl})`,
 			success: `Yip! I've successfully imported {characterName}!`,
 		},
 	},
@@ -64,7 +91,7 @@ export default {
 		description: 'removes an already imported character',
 		expandedDescription:
 			'Attempts to remove your currently active character. ' +
-			"This has no effect on your character in Wanderer's Guide, Kobold simply " +
+			"This has no effect on your character in Pathbuilder or Wanderer's Guide, Kobold simply " +
 			'forgets about it. \n\nThe command will prompt you if you really wish to remove ' +
 			'your character. If you do, you can still import that character back to ' +
 			'Kobold in the future.',
@@ -153,11 +180,17 @@ export default {
 		description: 'updates an already imported character',
 		expandedDescription:
 			'Updates your currently active ' +
-			"character with any new information from Wanderer's guide. If some " +
-			"time has passed since you authorized kobold to read that character's " +
-			'information, you may be asked to authenticate again.',
+			"character with any new information from Pathbuilder or Wanderer's Guide. \n\nIf some " +
+			"time has passed since you authorized kobold to read a Wanderer's Guide character's " +
+			'information, you may be asked to authenticate again.\n\n If you are updating a ' +
+			'Pathbuilder character, you will need to provide the json export id for your pathbuilder account and' +
+			'make sure to export your character to json in Pathbuilder before using this command.',
 		interactions: {
 			success: `Yip! I've successfully updated {characterName}!`,
+			canceled: 'Yip! Canceled the request to update {characterName}!',
+			pathbuilderRequireId:
+				'Yip! In order to update your pathbuilder character, I need to to provide me ' +
+				'new JSON export id in the `/character update` command.',
 		},
 	},
 };

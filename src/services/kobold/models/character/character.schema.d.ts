@@ -14,6 +14,10 @@ export interface Character {
 	 */
 	id?: number;
 	/**
+	 * The name of the character.
+	 */
+	name?: string;
+	/**
 	 * The external wanderer's guide character id.
 	 */
 	charId?: number;
@@ -33,16 +37,6 @@ export interface Character {
 	 * An array of attribute objects that can be used to apply character values to dice expressions. These attributes are set internally and uneditable.
 	 */
 	attributes?: {
-		name?: string;
-		type?: string;
-		value?: number;
-		tags?: string[];
-		[k: string]: any;
-	}[];
-	/**
-	 * An array of attribute objects that can be used to apply character values to dice expressions. These attributes are set by the user.
-	 */
-	customAttributes?: {
 		name?: string;
 		type?: string;
 		value?: number;
@@ -122,9 +116,11 @@ export interface Character {
 		[k: string]: any;
 	}[];
 	/**
-	 * An array of customizable actions set up for the user. These allow the user to make certain roll operations as a single command.
+	 * The general character data from the PathBuilder json export
 	 */
-	customActions?: any[];
+	pathBuilderData?: null | {
+		[k: string]: any;
+	};
 	/**
 	 * The general character data from the Wanderer's guide API /character endpoint
 	 */
@@ -213,9 +209,13 @@ export interface Character {
 		[k: string]: any;
 	};
 	/**
-	 * whether this is the active character for the user's character based commands
+	 * Whether this is the active character for the user's character based commands
 	 */
 	isActiveCharacter?: boolean;
+	/**
+	 * What source website this character was imported from.
+	 */
+	importSource?: string;
 	/**
 	 * When the character was first imported
 	 */

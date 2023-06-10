@@ -30,7 +30,7 @@ export class ModifierToggleSubCommand implements Command {
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
-	public cooldown = new RateLimiter(1, 5000);
+	public cooldown = new RateLimiter(1, 2000);
 	public deferType = CommandDeferType.PUBLIC;
 	public requireClientPerms: PermissionsString[] = [];
 
@@ -70,8 +70,7 @@ export class ModifierToggleSubCommand implements Command {
 		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
-		let name = intr.options
-			.getString(ModifierOptions.MODIFIER_NAME_OPTION.name)
+		let name = (intr.options.getString(ModifierOptions.MODIFIER_NAME_OPTION.name) ?? '')
 			.trim()
 			.toLowerCase();
 
@@ -106,7 +105,7 @@ export class ModifierToggleSubCommand implements Command {
 		const updateEmbed = new KoboldEmbed();
 		updateEmbed.setTitle(
 			LL.commands.modifier.toggle.interactions.success({
-				characterName: activeCharacter.characterData.name,
+				characterName: activeCharacter.sheet.info.name,
 				modifierName: modifier.name,
 				activeSetting: activeText,
 			})

@@ -1,30 +1,8 @@
+import _ from 'lodash';
 import { WG } from '../services/wanderers-guide/wanderers-guide.js';
 import { Character } from './../services/kobold/models/character/character.model';
-
-// determines the distance between two strings
-// taken from stack overflow
-function levenshteinDistance(str1: string, str2: string) {
-	const track = Array(str2.length + 1)
-		.fill(null)
-		.map(() => Array(str1.length + 1).fill(null));
-	for (let i = 0; i <= str1.length; i += 1) {
-		track[0][i] = i;
-	}
-	for (let j = 0; j <= str2.length; j += 1) {
-		track[j][0] = j;
-	}
-	for (let j = 1; j <= str2.length; j += 1) {
-		for (let i = 1; i <= str1.length; i += 1) {
-			const indicator = str1[i - 1] === str2[j - 1] ? 0 : 1;
-			track[j][i] = Math.min(
-				track[j][i - 1] + 1, // deletion
-				track[j - 1][i] + 1, // insertion
-				track[j - 1][i - 1] + indicator // substitution
-			);
-		}
-	}
-	return track[str2.length][str1.length];
-}
+import { Creature, roll } from './creature.js';
+import { StringUtils } from './string-utils.js';
 
 interface NamedThing {
 	Name: string;
@@ -43,12 +21,12 @@ export class CharacterUtils {
 		if (matchTargets.length === 0) return null;
 
 		let lowestMatchTarget = matchTargets[0];
-		let lowestMatchTargetDistance = levenshteinDistance(
+		let lowestMatchTargetDistance = StringUtils.levenshteinDistance(
 			(matchTargets[0].Name || '').toLowerCase(),
 			name.toLowerCase()
 		);
 		for (let i = 1; i < matchTargets.length; i++) {
-			const currentMatchTargetDistance = levenshteinDistance(
+			const currentMatchTargetDistance = StringUtils.levenshteinDistance(
 				(matchTargets[i].Name || '').toLowerCase(),
 				name.toLowerCase()
 			);
@@ -69,14 +47,15 @@ export class CharacterUtils {
 	public static findPossibleSkillFromString(
 		targetCharacter: Character,
 		skillText: string
-	): WG.NamedBonus[] {
+	): roll[] {
 		const matchedSkills = [];
-		for (const skill of targetCharacter.calculatedStats.totalSkills.concat({
-			Name: 'Perception',
-			Bonus: targetCharacter.calculatedStats.totalPerception,
-		})) {
-			if (skill.Name.toLowerCase().includes(skillText.toLowerCase())) {
-				matchedSkills.push(skill);
+		const creature = Creature.fromCharacter(targetCharacter);
+
+		const saves = _.values(creature.skillRolls);
+
+		for (const save of saves) {
+			if (save.name.toLowerCase().includes(skillText.toLowerCase())) {
+				matchedSkills.push(save);
 			}
 		}
 		return matchedSkills;
@@ -88,13 +67,15 @@ export class CharacterUtils {
 	 * @param saveText the text to match to saves
 	 * @returns all saves that contain the given saveText
 	 */
-	public static findPossibleSaveFromString(
-		targetCharacter: Character,
-		saveText: string
-	): WG.NamedBonus[] {
+	public static findPossibleSaveFromString(targetCharacter: Character, saveText: string): roll[] {
 		const matchedSaves = [];
-		for (const save of targetCharacter.calculatedStats.totalSaves) {
-			if (save.Name.toLowerCase().includes(saveText.toLowerCase())) {
+
+		const creature = Creature.fromCharacter(targetCharacter);
+
+		const saves = _.values(creature.savingThrowRolls);
+
+		for (const save of saves) {
+			if (save.name.toLowerCase().includes(saveText.toLowerCase())) {
 				matchedSaves.push(save);
 			}
 		}
@@ -167,11 +148,16 @@ export class CharacterUtils {
 	public static findPossibleAbilityFromString(
 		targetCharacter: Character,
 		abilityText: string
-	): WG.NamedScore[] {
+	): roll[] {
 		const matchedAbility = [];
-		for (const ability of targetCharacter.calculatedStats.totalAbilityScores) {
-			if (ability.Name.toLowerCase().includes(abilityText.toLowerCase())) {
-				matchedAbility.push(ability);
+
+		const creature = Creature.fromCharacter(targetCharacter);
+
+		const attacks = _.values(creature.abilityRolls);
+
+		for (const attack of attacks) {
+			if (attack.name.toLowerCase().includes(abilityText.toLowerCase())) {
+				matchedAbility.push(attack);
 			}
 		}
 		return matchedAbility;
@@ -186,14 +172,19 @@ export class CharacterUtils {
 	public static findPossibleAttackFromString(
 		targetCharacter: Character,
 		attackText: string
-	): WG.NamedBonus[] {
-		const matchedAttacks = [];
-		for (const attack of targetCharacter.calculatedStats.weapons) {
-			if (attack.Name.toLowerCase().includes(attackText.toLowerCase())) {
-				matchedAttacks.push(attack);
+	): roll[] {
+		const matchedAttack = [];
+
+		const creature = Creature.fromCharacter(targetCharacter);
+
+		const attacks = _.values(creature.attackRolls);
+
+		for (const attack of attacks) {
+			if (attack.name.toLowerCase().includes(attackText.toLowerCase())) {
+				matchedAttack.push(attack);
 			}
 		}
-		return matchedAttacks;
+		return matchedAttack;
 	}
 
 	/**

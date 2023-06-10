@@ -40,7 +40,7 @@ export class ActionCreateSubCommand implements Command {
 			);
 			return;
 		}
-		let name = intr.options.getString(ActionOptions.ACTION_NAME_OPTION.name).trim();
+		let name = (intr.options.getString(ActionOptions.ACTION_NAME_OPTION.name) ?? '').trim();
 		const description =
 			intr.options.getString(ActionOptions.ACTION_DESCRIPTION_OPTION.name) ?? '';
 		const type = intr.options.getString(ActionOptions.ACTION_TYPE_OPTION.name);
@@ -56,7 +56,7 @@ export class ActionCreateSubCommand implements Command {
 				intr,
 				LL.commands.action.create.interactions.alreadyExists({
 					actionName: name,
-					characterName: activeCharacter.characterData.name,
+					characterName: activeCharacter.sheet.info.name,
 				})
 			);
 			return;
@@ -83,7 +83,7 @@ export class ActionCreateSubCommand implements Command {
 			intr,
 			LL.commands.action.create.interactions.created({
 				actionName: name,
-				characterName: activeCharacter.characterData.name,
+				characterName: activeCharacter.sheet.info.name,
 			})
 		);
 		return;

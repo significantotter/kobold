@@ -20,9 +20,9 @@ import { Language } from '../../../models/enum-helpers/index.js';
 import { RollMacroOptions } from './roll-macro-command-options.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
 import { Character } from '../../../services/kobold/models/index.js';
-import { compileExpression } from 'filtrex';
 import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
-import { DiceRollResult, RollBuilder } from '../../../utils/dice-utils.js';
+import { DiceRollResult } from '../../../utils/dice-utils.js';
+import { RollBuilder } from '../../../utils/roll-builder.js';
 
 export class RollMacroUpdateSubCommand implements Command {
 	public names = [Language.LL.commands.rollMacro.update.name()];
@@ -33,7 +33,7 @@ export class RollMacroUpdateSubCommand implements Command {
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
-	public cooldown = new RateLimiter(1, 5000);
+	public cooldown = new RateLimiter(1, 2000);
 	public deferType = CommandDeferType.PUBLIC;
 	public requireClientPerms: PermissionsString[] = [];
 
@@ -54,11 +54,10 @@ export class RollMacroUpdateSubCommand implements Command {
 		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
-		const rollMacroName = intr.options
-			.getString(RollMacroOptions.MACRO_NAME_OPTION.name)
-			.trim();
-		let macro = intr.options
-			.getString(RollMacroOptions.MACRO_VALUE_OPTION.name)
+		const rollMacroName = (
+			intr.options.getString(RollMacroOptions.MACRO_NAME_OPTION.name) ?? ''
+		).trim();
+		let macro = (intr.options.getString(RollMacroOptions.MACRO_VALUE_OPTION.name) ?? '')
 			.toLocaleLowerCase()
 			.trim();
 
@@ -105,7 +104,7 @@ export class RollMacroUpdateSubCommand implements Command {
 		const updateEmbed = new KoboldEmbed();
 		updateEmbed.setTitle(
 			LL.commands.rollMacro.update.interactions.successEmbed.title({
-				characterName: activeCharacter.characterData.name,
+				characterName: activeCharacter.sheet.info.name,
 				macroName: targetRollMacro.name,
 				newMacroValue: macro,
 			})

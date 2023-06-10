@@ -21,7 +21,9 @@ import { ModifierOptions } from './modifier-command-options.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
 import { Character } from '../../../services/kobold/models/index.js';
 import { compileExpression } from 'filtrex';
-import { DiceRollResult, DiceUtils, RollBuilder } from '../../../utils/dice-utils.js';
+import { DiceUtils } from '../../../utils/dice-utils.js';
+import { RollBuilder } from '../../../utils/roll-builder.js';
+import { Creature } from '../../../utils/creature.js';
 
 export class ModifierUpdateSubCommand implements Command {
 	public names = [Language.LL.commands.modifier.update.name()];
@@ -32,7 +34,7 @@ export class ModifierUpdateSubCommand implements Command {
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
-	public cooldown = new RateLimiter(1, 5000);
+	public cooldown = new RateLimiter(1, 2000);
 	public deferType = CommandDeferType.PUBLIC;
 	public requireClientPerms: PermissionsString[] = [];
 
@@ -72,16 +74,15 @@ export class ModifierUpdateSubCommand implements Command {
 		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
-		const modifierName = intr.options
-			.getString(ModifierOptions.MODIFIER_NAME_OPTION.name)
-			.trim();
-		let fieldToChange = intr.options
-			.getString(ModifierOptions.MODIFIER_SET_OPTION.name)
+		const modifierName = (
+			intr.options.getString(ModifierOptions.MODIFIER_NAME_OPTION.name) ?? ''
+		).trim();
+		let fieldToChange = (intr.options.getString(ModifierOptions.MODIFIER_SET_OPTION.name) ?? '')
 			.toLocaleLowerCase()
 			.trim();
-		const newFieldValue = intr.options
-			.getString(ModifierOptions.MODIFIER_SET_VALUE_OPTION.name)
-			.trim();
+		const newFieldValue = (
+			intr.options.getString(ModifierOptions.MODIFIER_SET_VALUE_OPTION.name) ?? ''
+		).trim();
 
 		let updateValue: string | string[] | number;
 
@@ -125,7 +126,7 @@ export class ModifierUpdateSubCommand implements Command {
 			// we must be able to evaluate the modifier as a roll for this character
 			const result = DiceUtils.parseAndEvaluateDiceExpression({
 				rollExpression: newFieldValue,
-				character: activeCharacter,
+				creature: Creature.fromCharacter(activeCharacter),
 				LL: Language.LL,
 			});
 
@@ -176,7 +177,7 @@ export class ModifierUpdateSubCommand implements Command {
 		const updateEmbed = new KoboldEmbed();
 		updateEmbed.setTitle(
 			LL.commands.modifier.update.interactions.successEmbed.title({
-				characterName: activeCharacter.characterData.name,
+				characterName: activeCharacter.sheet.info.name,
 				modifierName: nameBeforeUpdate,
 				fieldToChange,
 				newFieldValue,

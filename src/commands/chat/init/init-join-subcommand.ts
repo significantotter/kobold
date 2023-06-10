@@ -1,4 +1,4 @@
-import { RollBuilder } from './../../../utils/dice-utils';
+import { RollBuilder } from '../../../utils/roll-builder.js';
 import { InitiativeActor } from './../../../services/kobold/models/initiative-actor/initiative-actor.model';
 import {
 	ApplicationCommandType,
@@ -33,7 +33,7 @@ export class InitJoinSubCommand implements Command {
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
-	public cooldown = new RateLimiter(1, 5000);
+	public cooldown = new RateLimiter(1, 2000);
 	public deferType = CommandDeferType.PUBLIC;
 	public requireClientPerms: PermissionsString[] = [];
 
@@ -59,7 +59,7 @@ export class InitJoinSubCommand implements Command {
 			const matchedSkills = CharacterUtils.findPossibleSkillFromString(
 				activeCharacter,
 				match
-			).map(skill => ({ name: skill.Name, value: skill.Name }));
+			).map(skill => ({ name: skill.name, value: skill.name }));
 			//return the matched skills
 			return matchedSkills;
 		}
@@ -93,7 +93,7 @@ export class InitJoinSubCommand implements Command {
 			await InteractionUtils.send(
 				intr,
 				Language.LL.commands.init.join.interactions.characterAlreadyInInit({
-					characterName: activeCharacter.characterData.name,
+					characterName: activeCharacter.sheet.info.name,
 				})
 			);
 			return;

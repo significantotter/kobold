@@ -25,7 +25,7 @@ export class ModifierExportSubCommand implements Command {
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
-	public cooldown = new RateLimiter(1, 5000);
+	public cooldown = new RateLimiter(1, 2000);
 	public deferType = CommandDeferType.PUBLIC;
 	public requireClientPerms: PermissionsString[] = [];
 
@@ -46,13 +46,13 @@ export class ModifierExportSubCommand implements Command {
 
 		const pastebinPost = await new PasteBin({ apiKey: Config.pastebin.apiKey }).post({
 			code: JSON.stringify(modifiers),
-			name: `${activeCharacter.characterData.name}'s Modifiers`,
+			name: `${activeCharacter.sheet.info.name}'s Modifiers`,
 		});
 
 		await InteractionUtils.send(
 			intr,
 			LL.commands.modifier.export.interactions.success({
-				characterName: activeCharacter.characterData.name,
+				characterName: activeCharacter.sheet.info.name,
 				pasteBinLink: pastebinPost,
 			})
 		);

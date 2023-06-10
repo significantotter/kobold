@@ -14,13 +14,12 @@ import { ChatArgs } from '../../../constants/index.js';
 import { EventData } from '../../../models/internal-models.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
-import { WG } from '../../../services/wanderers-guide/wanderers-guide.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
-import { DiceUtils, RollBuilder } from '../../../utils/dice-utils.js';
+import { DiceUtils } from '../../../utils/dice-utils.js';
+import { RollBuilder } from '../../../utils/roll-builder.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Language } from '../../../models/enum-helpers/index.js';
-import { Character } from '../../../services/kobold/models/index.js';
-import { ActionRoller } from '../../../utils/action-roller.js';
+import { Creature } from '../../../utils/creature.js';
 
 export class RollAttackSubCommand implements Command {
 	public names = [Language.LL.commands.roll.attack.name()];
@@ -31,7 +30,7 @@ export class RollAttackSubCommand implements Command {
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
-	public cooldown = new RateLimiter(1, 5000);
+	public cooldown = new RateLimiter(1, 2000);
 	public deferType = CommandDeferType.NONE;
 	public requireClientPerms: PermissionsString[] = [];
 
@@ -58,8 +57,8 @@ export class RollAttackSubCommand implements Command {
 				activeCharacter,
 				match
 			).map(attack => ({
-				name: attack.Name,
-				value: attack.Name,
+				name: attack.name,
+				value: attack.name,
 			}));
 			//return the matched attacks
 			return matchedAttack;
@@ -98,70 +97,19 @@ export class RollAttackSubCommand implements Command {
 			return;
 		}
 
-		//use the first attack that matches the text of what we were sent, or preferably a perfect match
-		let targetAttack = CharacterUtils.getBestNameMatch(
-			attackChoice,
-			activeCharacter.calculatedStats.weapons as WG.NamedBonus[]
-		);
+		const creature = Creature.fromCharacter(activeCharacter);
 
-		console.log('here!!');
+		const rollBuilder = DiceUtils.rollCreatureAttack({
+			creature,
+			attackName: attackChoice,
+			rollNote,
+			attackModifierExpression,
+			damageModifierExpression,
+			targetAC,
+			LL,
+		});
 
-		console.log(
-			DiceUtils.buildDiceExpression(
-				'd20',
-				String(targetAttack.Bonus),
-				attackModifierExpression
-			),
-			'd20',
-			String(targetAttack.Bonus),
-			attackModifierExpression
-		);
-
-		// build a little action from the attack!
-
-		const action: Character['actions'][0] = {
-			name: targetAttack.Name,
-			type: 'attack',
-			actionCost: 'oneAction',
-			tags: [],
-			rolls: [
-				{
-					type: 'attack',
-					name: 'To Hit',
-					roll: DiceUtils.buildDiceExpression(
-						'd20',
-						String(targetAttack.Bonus),
-						attackModifierExpression
-					),
-					targetDC: 'AC',
-					allowRollModifiers: true,
-				},
-				{
-					type: 'damage',
-					name: 'Damage',
-					roll: DiceUtils.buildDiceExpression(
-						String(DiceUtils.parseDiceFromWgDamageField(targetAttack.Damage)),
-						null,
-						damageModifierExpression
-					),
-					allowRollModifiers: true,
-				},
-			],
-		};
-
-		const actionResult = new ActionRoller(action, activeCharacter)
-			.buildRoll(
-				rollNote,
-				Language.LL.commands.roll.attack.interactions.rollEmbed.rollDescription({
-					attackName: targetAttack.Name,
-				}),
-				{
-					targetDC: targetAC,
-				}
-			)
-			.compileEmbed({
-				forceFields: true,
-			});
+		const embed = rollBuilder.compileEmbed({ forceFields: true });
 
 		if (notifyRoll) {
 			await InteractionUtils.send(
@@ -169,6 +117,6 @@ export class RollAttackSubCommand implements Command {
 				Language.LL.commands.roll.interactions.secretRollNotification()
 			);
 		}
-		actionResult.sendBatches(intr, isSecretRoll);
+		embed.sendBatches(intr, isSecretRoll);
 	}
 }

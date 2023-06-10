@@ -23,7 +23,7 @@ export class ViewDateJoined implements Command {
 		default_member_permissions: undefined,
 		dm_permission: true,
 	};
-	public cooldown = new RateLimiter(1, 5000);
+	public cooldown = new RateLimiter(1, 2000);
 	public deferType = CommandDeferType.PUBLIC;
 	public requireClientPerms: PermissionsString[] = [];
 

@@ -1,6 +1,8 @@
 import { WanderersGuide } from '../../../services/wanderers-guide/index.js';
 import { Config } from '../../../config/config.js';
 import { WG } from '../../../services/wanderers-guide/wanderers-guide.js';
+import { Creature } from '../../../utils/creature.js';
+import { Sheet } from '../../../services/kobold/lib/sheet.schema.js';
 
 export const attributeAbilityMap = {
 	acrobatics: 'dexterity',
@@ -34,7 +36,7 @@ export const attributeAbilityMap = {
 };
 
 export class CharacterHelpers {
-	public static async fetchWgCharacterFromToken(charId: number, token: string) {
+	public static async fetchWgCharacterFromToken(charId: number, token: string, oldSheet?: Sheet) {
 		const WGTokenApi = new WanderersGuide({ token });
 
 		const WGApiKeyApi = new WanderersGuide({ apiKey: Config.wanderersGuide.apiKey });
@@ -62,6 +64,13 @@ export class CharacterHelpers {
 				totalSpeed: null,
 				totalAC: null,
 				totalPerception: null,
+				generalInfo: {
+					className: '',
+					heritageAncestryName: '',
+					backgroundName: '',
+					size: '',
+					traits: [],
+				},
 				totalSkills: [],
 				totalSaves: [],
 				totalAbilityScores: [],
@@ -144,10 +153,12 @@ export class CharacterHelpers {
 		};
 
 		const character = {
+			name: characterData.name,
 			charId,
 			isActiveCharacter: true,
 			characterData,
 			calculatedStats,
+			sheet: Creature.fromWandererersGuide(calculatedStats, characterData, oldSheet).sheet,
 		};
 
 		const attributes = this.parseAttributesForCharacter(character);

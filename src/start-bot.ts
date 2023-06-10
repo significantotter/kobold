@@ -11,7 +11,8 @@ import {
 	CharacterListSubCommand,
 	CharacterUpdateSubCommand,
 	CharacterRemoveSubCommand,
-	CharacterImportSubCommand,
+	CharacterImportWanderersGuideSubCommand,
+	CharacterimportPathbuilderSubCommand,
 	CharacterSheetSubCommand,
 	// roll
 	RollCommand,
@@ -27,6 +28,8 @@ import {
 	InitAddSubCommand,
 	InitSetSubCommand,
 	InitShowSubCommand,
+	InitStatBlockSubCommand,
+	InitRollSubCommand,
 	InitNextSubCommand,
 	InitPrevSubCommand,
 	InitJumpToSubCommand,
@@ -98,9 +101,13 @@ import { CommandRegistrationService, DBModel, JobService, Logger } from './servi
 import { Trigger } from './triggers/index.js';
 import { Config } from './config/config.js';
 import Logs from './config/lang/logs.json';
+import { checkAndLoadBestiaryFiles } from './services/pf2etools/bestiaryLoader.js';
 
 async function start(): Promise<void> {
 	DBModel.init(Config.database.url);
+
+	// asynchronously load the bestiary files
+	checkAndLoadBestiaryFiles();
 
 	// Client
 	let client = new CustomClient({
@@ -128,7 +135,8 @@ async function start(): Promise<void> {
 			new CharacterListSubCommand(),
 			new CharacterSetActiveSubCommand(),
 			new CharacterSetServerDefaultSubCommand(),
-			new CharacterImportSubCommand(),
+			new CharacterImportWanderersGuideSubCommand(),
+			new CharacterimportPathbuilderSubCommand(),
 			new CharacterUpdateSubCommand(),
 			new CharacterRemoveSubCommand(),
 		]),
@@ -150,6 +158,8 @@ async function start(): Promise<void> {
 			new InitSetSubCommand(),
 			new InitStartSubCommand(),
 			new InitShowSubCommand(),
+			new InitStatBlockSubCommand(),
+			new InitRollSubCommand(),
 			new InitNextSubCommand(),
 			new InitPrevSubCommand(),
 			new InitJumpToSubCommand(),

@@ -3,27 +3,33 @@ import type CharacterTypes from './character.schema.js';
 import { JSONSchema7 } from 'json-schema';
 import { BaseModel } from '../../lib/base-model.js';
 import CharacterSchema from './character.schema.json';
+import Sheet from '../../lib/sheet.schema.json';
+import SheetTypes from '../../lib/sheet.schema';
 import _ from 'lodash';
 import { parseBonusesForTagsFromModifiers } from '../../lib/helpers.js';
 
-export interface Character extends CharacterTypes.Character {}
+const characterSchemaWithSheet = {};
+
+export interface Character extends CharacterTypes.Character {
+	sheet?: SheetTypes.Sheet;
+}
 export class Character extends BaseModel {
 	static get tableName(): string {
 		return 'character';
 	}
 
 	static get jsonSchema(): JSONSchema7 {
-		return CharacterSchema as JSONSchema7;
+		return {
+			...CharacterSchema,
+			properties: { ...CharacterSchema.properties, sheet: Sheet },
+		} as JSONSchema7;
 	}
 
 	static queryLooseCharacterName(characterName, userId) {
-		return this.query().whereRaw(
-			`user_id=:userId AND (character_data->'name')::TEXT ILIKE :characterName`,
-			{
-				userId,
-				characterName: `%${characterName}%`,
-			}
-		);
+		return this.query().whereRaw(`user_id=:userId AND name::TEXT ILIKE :characterName`, {
+			userId,
+			characterName: `%${characterName}%`,
+		});
 	}
 
 	/**
@@ -58,57 +64,6 @@ export class Character extends BaseModel {
 		return this.actions.find(
 			action => action.name.toLocaleLowerCase().trim() === name.toLocaleLowerCase().trim()
 		);
-	}
-
-	/**
-	 * Gets a list of the applicable modifiers for any set of tags
-	 * @param tags the tags to check against a character's modifiers
-	 * @returns modifier[]
-	 */
-	public getModifiersFromTags(
-		tags: string[],
-		extraAttributes?: {
-			name: string;
-			value: number;
-			tags?: string[];
-		}[]
-	): Character['modifiers'] {
-		const { untyped, bonuses, penalties } = parseBonusesForTagsFromModifiers(
-			this.modifiers,
-			[
-				...(this.attributes as {
-					name: string;
-					value: number;
-					tags?: string[];
-				}[]),
-				...(extraAttributes || []),
-			],
-			tags,
-			this
-		);
-		return untyped.concat(_.values(bonuses), _.values(penalties));
-	}
-
-	/**
-	 * Uses a character's roll macros to expand a roll
-	 */
-	public expandRollWithMacros(rollExpression: string): string {
-		const characterRollMacros = this.rollMacros || [];
-		const maxDepth = 10;
-		let resultRollExpression = rollExpression.toLocaleLowerCase();
-		for (let i = 0; i < maxDepth; i++) {
-			let rollExpressionBeforeExpanding = resultRollExpression;
-			// replace every instance of each macro in the rollExpression with the macro's value
-			for (const macro of characterRollMacros) {
-				resultRollExpression = resultRollExpression.replaceAll(
-					`[${macro.name.toLocaleLowerCase()}]`,
-					macro.macro
-				);
-			}
-			// if we haven't changed the roll expression, then we're done checking macros
-			if (rollExpressionBeforeExpanding === resultRollExpression) break;
-		}
-		return resultRollExpression;
 	}
 
 	static get relationMappings() {

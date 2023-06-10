@@ -1,6 +1,8 @@
 import _ from 'lodash';
 import { Character, Initiative } from '../services/kobold/models/index.js';
-import { MultiRollResult, RollBuilder } from './dice-utils.js';
+import { MultiRollResult } from './dice-utils.js';
+import { RollBuilder } from './roll-builder.js';
+import { Creature } from './creature.js';
 
 type Action = Character['actions'][0];
 type Roll = Character['actions'][0]['rolls'][0];
@@ -29,7 +31,7 @@ export class ActionRoller {
 	public tags;
 	constructor(
 		public action: Action,
-		public character: Character,
+		public creature: Creature,
 		public initiative?: Initiative,
 		public options?: {
 			heightenLevel?: number;
@@ -37,7 +39,7 @@ export class ActionRoller {
 	) {
 		this.action = action;
 		this.tags = _.uniq([...action.tags, this.action.type]);
-		this.character = character;
+		this.creature = creature;
 		this.initiative = initiative;
 		this.options = options;
 	}
@@ -72,19 +74,20 @@ export class ActionRoller {
 			showTags: false,
 			rollType: 'attack',
 		});
-
-		// update the extra attributes for the next roll
-		['attackResult', 'attack', 'hit'].forEach(
-			name => (extraAttributes[name] = { name, value: result.results.total })
-		);
-		extraAttributes[`roll${rollCounter}`] = {
-			name: `roll${rollCounter}`,
-			value: result.results.total,
-		};
-		extraAttributes[`roll${rollCounter}Attack`] = {
-			name: `roll${rollCounter}Attack`,
-			value: result.results.total,
-		};
+		if (result?.results?.total) {
+			// update the extra attributes for the next roll
+			['attackResult', 'attack', 'hit'].forEach(
+				name => (extraAttributes[name] = { name, value: result.results.total })
+			);
+			extraAttributes[`roll${rollCounter}`] = {
+				name: `roll${rollCounter}`,
+				value: result.results.total,
+			};
+			extraAttributes[`roll${rollCounter}Attack`] = {
+				name: `roll${rollCounter}Attack`,
+				value: result.results.total,
+			};
+		}
 
 		return result;
 	}
@@ -128,7 +131,7 @@ export class ActionRoller {
 			if (options.targetDC) {
 				targetDcClause = `DC ${options.targetDC} `;
 			}
-			const text = `The target makes a ${targetDcClause}${roll.saveRollType} check VS. ${this.character.characterData.name}'s ${roll.saveTargetDC}`;
+			const text = `The target makes a ${targetDcClause}${roll.saveRollType} check VS. ${this.creature.sheet.info.name}'s ${roll.saveTargetDC}`;
 			rollBuilder.addText({ title, text, extraAttributes: currentExtraAttributes, tags });
 
 			extraAttributes[`roll${rollCounter}`] = {
@@ -242,6 +245,7 @@ export class ActionRoller {
 
 		const result = rollBuilder.addRoll({
 			rollTitle: roll.name || 'Damage',
+			damageType: roll?.damageType,
 			rollExpression,
 			tags,
 			extraAttributes: currentExtraAttributes,
@@ -310,6 +314,7 @@ export class ActionRoller {
 			if (rollCritSuccessExpression) {
 				rollExpressions.push({
 					name: 'critical success damage',
+					damageType: roll?.damageType,
 					rollExpression: rollCritSuccessExpression,
 					tags,
 					extraAttributes: currentExtraAttributes,
@@ -343,6 +348,7 @@ export class ActionRoller {
 
 			rollExpressions.push({
 				name: 'success damage',
+				damageType: roll?.damageType,
 				rollExpression: rollSuccessExpression,
 				tags,
 				extraAttributes: currentExtraAttributes,
@@ -375,6 +381,7 @@ export class ActionRoller {
 
 			rollExpressions.push({
 				name: 'failure damage',
+				damageType: roll?.damageType,
 				rollExpression: rollFailureExpression,
 				tags,
 				extraAttributes: currentExtraAttributes,
@@ -403,6 +410,7 @@ export class ActionRoller {
 
 			rollExpressions.push({
 				name: 'critical failure damage',
+				damageType: roll?.damageType,
 				rollExpression: rollCritFailureExpression,
 				tags,
 				extraAttributes: currentExtraAttributes,
@@ -515,18 +523,17 @@ export class ActionRoller {
 
 	public buildRoll(rollNote, rollDescription, options: BuildRollOptions): RollBuilder {
 		const rollBuilder = new RollBuilder({
-			character: this.character,
+			creature: this.creature,
 			rollNote,
 			rollDescription,
-			title:
-				options?.title ?? `${this.character.characterData.name} used ${this.action.name}!`,
+			title: options?.title ?? `${this.creature.sheet.info.name} used ${this.action.name}!`,
 		});
 
 		let abilityLevel = 1;
 
 		if (!options.heightenLevel) {
 			if (this.action.autoHeighten) {
-				abilityLevel = Math.ceil(this.character.characterData.level / 2);
+				abilityLevel = Math.ceil(this.creature.sheet.info.level / 2);
 			} else {
 				abilityLevel = this.action.baseLevel || 1;
 			}

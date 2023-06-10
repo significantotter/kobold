@@ -14,7 +14,7 @@ import { Command, CommandDeferType } from '../../index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Language } from '../../../models/enum-helpers/index.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
-import { DiceRollResult, RollBuilder } from '../../../utils/dice-utils.js';
+import { RollBuilder } from '../../../utils/roll-builder.js';
 
 export class RollMacroCreateSubCommand implements Command {
 	public names = [Language.LL.commands.rollMacro.create.name()];
@@ -25,7 +25,7 @@ export class RollMacroCreateSubCommand implements Command {
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
-	public cooldown = new RateLimiter(1, 5000);
+	public cooldown = new RateLimiter(1, 2000);
 	public deferType = CommandDeferType.PUBLIC;
 	public requireClientPerms: PermissionsString[] = [];
 
@@ -42,7 +42,7 @@ export class RollMacroCreateSubCommand implements Command {
 			);
 			return;
 		}
-		let name = intr.options.getString(RollMacroOptions.MACRO_NAME_OPTION.name).trim();
+		let name = (intr.options.getString(RollMacroOptions.MACRO_NAME_OPTION.name) ?? '').trim();
 		const macro = intr.options.getString(RollMacroOptions.MACRO_VALUE_OPTION.name);
 
 		// make sure the name does't already exist in the character's rollMacros
@@ -51,7 +51,7 @@ export class RollMacroCreateSubCommand implements Command {
 				intr,
 				LL.commands.rollMacro.create.interactions.alreadyExists({
 					macroName: name,
-					characterName: activeCharacter.characterData.name,
+					characterName: activeCharacter.sheet.info.name,
 				})
 			);
 			return;
@@ -60,8 +60,8 @@ export class RollMacroCreateSubCommand implements Command {
 		// test that the macro is a valid roll
 		const rollBuilder = new RollBuilder({ character: activeCharacter, LL });
 		rollBuilder.addRoll({ rollExpression: macro });
-		const result: DiceRollResult = rollBuilder.rollResults[0] as DiceRollResult;
-		if (result.results.errors.length > 0) {
+		const result = rollBuilder.rollResults[0];
+		if ((result as any)?.error || (result as any)?.results?.error?.length) {
 			await InteractionUtils.send(
 				intr,
 				LL.commands.rollMacro.interactions.doesntEvaluateError()
@@ -89,7 +89,7 @@ export class RollMacroCreateSubCommand implements Command {
 			intr,
 			LL.commands.rollMacro.create.interactions.created({
 				macroName: name,
-				characterName: activeCharacter.characterData.name,
+				characterName: activeCharacter.sheet.info.name,
 			})
 		);
 		return;

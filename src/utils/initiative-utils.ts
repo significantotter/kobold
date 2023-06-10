@@ -19,7 +19,9 @@ import _ from 'lodash';
 import { InteractionUtils } from './interaction-utils.js';
 import { CharacterUtils } from './character-utils.js';
 import { Language } from '../models/enum-helpers/index.js';
-import { DiceUtils, RollBuilder } from './dice-utils.js';
+import { DiceUtils } from './dice-utils.js';
+import { RollBuilder } from './roll-builder.js';
+import { Creature } from './creature.js';
 
 export class InitiativeBuilder {
 	public init: Initiative;
@@ -264,7 +266,7 @@ export class InitiativeUtils {
 			rollResultMessage = new KoboldEmbed()
 				.setTitle(
 					LL.commands.init.join.interactions.joinedEmbed.title({
-						characterName: character.characterData.name,
+						characterName: character.sheet.info.name,
 					})
 				)
 				.setDescription(
@@ -272,14 +274,14 @@ export class InitiativeUtils {
 						initValue: finalInitiative,
 					})
 				);
-			if (character.characterData.infoJSON?.imageURL) {
-				rollResultMessage.setThumbnail(character.characterData.infoJSON?.imageURL);
+			if (character.sheet.info.imageURL) {
+				rollResultMessage.setThumbnail(character.sheet.info.imageURL);
 			}
 		} else if (skillChoice) {
-			const response = await DiceUtils.rollSkill({
+			const response = await DiceUtils.rollSimpleCreatureRoll({
 				userName,
-				activeCharacter: character,
-				skillChoice,
+				creature: Creature.fromCharacter(character),
+				attributeName: skillChoice,
 				modifierExpression: diceExpression,
 				tags: ['initiative'],
 				LL,
@@ -299,10 +301,10 @@ export class InitiativeUtils {
 			finalInitiative = rollBuilder.getRollTotalArray()[0] || 0;
 			rollResultMessage = rollBuilder.compileEmbed();
 		} else {
-			const response = await DiceUtils.rollSkill({
+			const response = await DiceUtils.rollSimpleCreatureRoll({
 				userName,
-				activeCharacter: character,
-				skillChoice: 'Perception',
+				creature: Creature.fromCharacter(character),
+				attributeName: 'perception',
 				modifierExpression: diceExpression,
 				tags: ['initiative'],
 			});
@@ -321,16 +323,16 @@ export class InitiativeUtils {
 
 		let nameCount = 1;
 		let existingName = currentInit.actors.find(
-			actor => actor.name.toLowerCase() === character.characterData.name.toLowerCase()
+			actor => actor.name.toLowerCase() === character.sheet.info.name.toLowerCase()
 		);
-		let uniqueName = character.characterData.name;
+		let uniqueName = character.sheet.info.name;
 		if (existingName) {
 			while (
 				currentInit.actors.find(
 					actor => actor.name.toLowerCase() === uniqueName.toLowerCase()
 				)
 			) {
-				uniqueName = character.characterData.name + `-${nameCount++}`;
+				uniqueName = character.sheet.info.name + `-${nameCount++}`;
 			}
 		}
 
@@ -338,6 +340,7 @@ export class InitiativeUtils {
 			initiativeId: currentInit.id,
 			name: uniqueName,
 			characterId: character.id,
+			sheet: character.sheet,
 			userId,
 
 			actorGroup: {
@@ -375,6 +378,15 @@ export class InitiativeUtils {
 		if (!currentInit || currentInit.length === 0) {
 			errorMessage = LL.utils.initiative.noActiveInitError();
 			return { init: null, errorMessage: errorMessage };
+		}
+		// stick the actors in the groups here in their correct locations
+		for (let group of currentInit.actorGroups) {
+			group.actors = [];
+			for (const actor of currentInit.actors) {
+				if (actor.initiativeActorGroupId === group.id) {
+					group.actors.push(actor);
+				}
+			}
 		}
 		return { init: currentInit, errorMessage: errorMessage };
 	}

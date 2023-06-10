@@ -1,13 +1,13 @@
-import { Character } from '../services/kobold/models/index.js';
+import { Sheet } from '../services/kobold/models/index.js';
 
-export const staticAttributes = (character?: Character) => {
-	if (character && character?.characterData?.level) {
+export const staticAttributes = (sheet?: Sheet) => {
+	if (sheet && sheet?.info?.level) {
 		return [
-			{ name: 'untrained', value: character.characterData.level + 0 },
-			{ name: 'trained', value: character.characterData.level + 2 },
-			{ name: 'expert', value: character.characterData.level + 4 },
-			{ name: 'master', value: character.characterData.level + 6 },
-			{ name: 'legendary', value: character.characterData.level + 8 },
+			{ name: 'untrained', value: sheet.info.level + 0 },
+			{ name: 'trained', value: sheet.info.level + 2 },
+			{ name: 'expert', value: sheet.info.level + 4 },
+			{ name: 'master', value: sheet.info.level + 6 },
+			{ name: 'legendary', value: sheet.info.level + 8 },
 		];
 	} else {
 		return [

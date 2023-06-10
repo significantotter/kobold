@@ -1,4 +1,4 @@
-import { RollBuilder } from './../../../utils/dice-utils';
+import { RollBuilder } from '../../../utils/roll-builder.js';
 import { InitiativeActor } from './../../../services/kobold/models/initiative-actor/initiative-actor.model';
 import {
 	ApplicationCommandType,
@@ -35,7 +35,7 @@ export class GameInitSubCommand implements Command {
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
-	public cooldown = new RateLimiter(1, 5000);
+	public cooldown = new RateLimiter(1, 2000);
 	public deferType = CommandDeferType.PUBLIC;
 	public requireClientPerms: PermissionsString[] = [];
 
@@ -64,7 +64,7 @@ export class GameInitSubCommand implements Command {
 				const matchedSkills = CharacterUtils.findPossibleSkillFromString(
 					character,
 					match
-				).map(skill => skill.Name);
+				).map(skill => skill.name);
 				for (const skill of matchedSkills) {
 					choices.add(_.capitalize(skill));
 				}
@@ -139,7 +139,7 @@ export class GameInitSubCommand implements Command {
 				(targetCharacter &&
 					targetCharacter.toLocaleLowerCase().trim().length > 0 &&
 					targetCharacter.toLocaleLowerCase().trim() !==
-						character.characterData.name.toLocaleLowerCase().trim())
+						character.sheet.info.name.toLocaleLowerCase().trim())
 			) {
 				continue;
 			}
@@ -149,7 +149,7 @@ export class GameInitSubCommand implements Command {
 				diceExpression,
 				initiativeValue,
 				currentInit,
-				userName: character.characterData.name,
+				userName: character.sheet.info.name,
 				userId: character.userId,
 				LL,
 			});

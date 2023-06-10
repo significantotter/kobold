@@ -31,7 +31,7 @@ export class AdminCommand implements Command {
 		dm_permission: false,
 		default_member_permissions: undefined,
 	};
-	public cooldown = new RateLimiter(1, 5000);
+	public cooldown = new RateLimiter(1, 2000);
 	public deferType = CommandDeferType.HIDDEN;
 	public requireClientPerms: PermissionsString[] = [];
 	public restrictedGuilds = Config.adminGuilds || ([] as string[]);

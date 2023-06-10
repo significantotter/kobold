@@ -47,7 +47,7 @@ export class GameListSubCommand implements Command {
 			allGames.map(game => ({
 				name: game.name + (game.isActive ? ' (active)' : ''),
 				value:
-					game.characters.map(character => character.characterData.name).join('\n') ||
+					game.characters.map(character => character.sheet.info.name).join('\n') ||
 					LL.commands.game.list.interactions.gameListEmbed.noCharacters(),
 			}))
 		);

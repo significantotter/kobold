@@ -12,13 +12,17 @@ import { RateLimiter } from 'discord.js-rate-limiter';
 
 import { ChatArgs } from '../../../constants/index.js';
 import { EventData } from '../../../models/internal-models.js';
-import { InteractionUtils } from '../../../utils/index.js';
+import { InteractionUtils, StringUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { WG } from '../../../services/wanderers-guide/wanderers-guide.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
-import { DiceUtils, RollBuilder } from '../../../utils/dice-utils.js';
+import { DiceUtils } from '../../../utils/dice-utils.js';
+import { RollBuilder } from '../../../utils/roll-builder.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Language } from '../../../models/enum-helpers/index.js';
+import { Creature } from '../../../utils/creature.js';
+import _ from 'lodash';
+import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 
 export class RollSaveSubCommand implements Command {
 	public names = [Language.LL.commands.roll.save.name()];
@@ -29,7 +33,7 @@ export class RollSaveSubCommand implements Command {
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
-	public cooldown = new RateLimiter(1, 5000);
+	public cooldown = new RateLimiter(1, 2000);
 	public deferType = CommandDeferType.NONE;
 	public requireClientPerms: PermissionsString[] = [];
 
@@ -56,8 +60,8 @@ export class RollSaveSubCommand implements Command {
 				activeCharacter,
 				match
 			).map(save => ({
-				name: save.Name,
-				value: save.Name,
+				name: save.name,
+				value: save.name,
 			}));
 			//return the matched saves
 			return matchedSaves;
@@ -91,45 +95,23 @@ export class RollSaveSubCommand implements Command {
 			return;
 		}
 
-		//use the first save that matches the text of what we were sent, or preferably a perfect match
-		let targetSave = CharacterUtils.getBestNameMatch(
+		const creature = Creature.fromCharacter(activeCharacter);
+
+		const targetRoll = StringUtils.findBestValueByKeyMatch(
 			saveChoice,
-			activeCharacter.calculatedStats.totalSaves as WG.NamedBonus[]
+			creature.savingThrowRolls
 		);
 
-		const rollBuilder = new RollBuilder({
-			actorName: intr.user.username,
-			character: activeCharacter,
+		const rollResult = await DiceUtils.rollSimpleCreatureRoll({
+			actorName: creature.sheet.info.name,
+			creature,
+			attributeName: targetRoll.name,
 			rollNote,
-			rollDescription: Language.LL.commands.roll.interactions.rolledDice({
-				diceType: targetSave.Name,
-			}),
+			modifierExpression,
 			LL,
 		});
 
-		const tags = ['save', targetSave.Name.toLocaleLowerCase()];
-		// add the ability tag
-		// TODO this should be moved to a helper
-		// something like getTagsForSave()
-		if (['will', 'fortitude', 'reflex'].includes(targetSave.Name.toLocaleLowerCase())) {
-			tags.push(
-				{
-					will: 'wisdom',
-					fortitude: 'constitution',
-					reflex: 'dexterity',
-				}[targetSave.Name.toLocaleLowerCase()]
-			);
-		}
-
-		rollBuilder.addRoll({
-			rollExpression: DiceUtils.buildDiceExpression(
-				'd20',
-				String(targetSave.Bonus),
-				modifierExpression
-			),
-			tags,
-		});
-		const response = rollBuilder.compileEmbed();
+		const embed = rollResult.compileEmbed();
 
 		if (notifyRoll) {
 			await InteractionUtils.send(
@@ -137,6 +119,6 @@ export class RollSaveSubCommand implements Command {
 				Language.LL.commands.roll.interactions.secretRollNotification()
 			);
 		}
-		await InteractionUtils.send(intr, response, isSecretRoll);
+		await InteractionUtils.send(intr, embed, isSecretRoll);
 	}
 }

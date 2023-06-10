@@ -15,7 +15,9 @@ import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Language } from '../../../models/enum-helpers/index.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
 import { compileExpression } from 'filtrex';
-import { DiceRollResult, DiceUtils, RollBuilder } from '../../../utils/dice-utils.js';
+import { DiceRollResult, DiceUtils } from '../../../utils/dice-utils.js';
+import { RollBuilder } from '../../../utils/roll-builder.js';
+import { Creature } from '../../../utils/creature.js';
 
 export class ModifierCreateSubCommand implements Command {
 	public names = [Language.LL.commands.modifier.create.name()];
@@ -26,7 +28,7 @@ export class ModifierCreateSubCommand implements Command {
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
-	public cooldown = new RateLimiter(1, 5000);
+	public cooldown = new RateLimiter(1, 2000);
 	public deferType = CommandDeferType.PUBLIC;
 	public requireClientPerms: PermissionsString[] = [];
 
@@ -43,20 +45,19 @@ export class ModifierCreateSubCommand implements Command {
 			);
 			return;
 		}
-		let name = intr.options
-			.getString(ModifierOptions.MODIFIER_NAME_OPTION.name)
+		let name = (intr.options.getString(ModifierOptions.MODIFIER_NAME_OPTION.name) ?? '')
 			.trim()
 			.toLowerCase();
-		let modifierType = (intr.options.getString(ModifierOptions.MODIFIER_TYPE_OPTION.name) || '')
+		let modifierType = (intr.options.getString(ModifierOptions.MODIFIER_TYPE_OPTION.name) ?? '')
 			.trim()
 			.toLowerCase();
 		const description = intr.options.getString(
 			ModifierOptions.MODIFIER_DESCRIPTION_OPTION.name
 		);
 		const value = intr.options.getString(ModifierOptions.MODIFIER_VALUE_OPTION.name);
-		let targetTags = intr.options
-			.getString(ModifierOptions.MODIFIER_TARGET_TAGS_OPTION.name)
-			.trim();
+		let targetTags = (
+			intr.options.getString(ModifierOptions.MODIFIER_TARGET_TAGS_OPTION.name) ?? ''
+		).trim();
 
 		// make sure the name does't already exist in the character's modifiers
 		if (activeCharacter.getModifierByName(name)) {
@@ -64,7 +65,7 @@ export class ModifierCreateSubCommand implements Command {
 				intr,
 				LL.commands.modifier.create.interactions.alreadyExists({
 					modifierName: name,
-					characterName: activeCharacter.characterData.name,
+					characterName: activeCharacter.sheet.info.name,
 				})
 			);
 			return;
@@ -89,7 +90,7 @@ export class ModifierCreateSubCommand implements Command {
 		// we must be able to evaluate the modifier as a roll for this character
 		const result = DiceUtils.parseAndEvaluateDiceExpression({
 			rollExpression: value,
-			character: activeCharacter,
+			creature: Creature.fromCharacter(activeCharacter),
 			LL: Language.LL,
 		});
 
@@ -120,7 +121,7 @@ export class ModifierCreateSubCommand implements Command {
 			intr,
 			LL.commands.modifier.create.interactions.created({
 				modifierName: name,
-				characterName: activeCharacter.characterData.name,
+				characterName: activeCharacter.sheet.info.name,
 			})
 		);
 		return;

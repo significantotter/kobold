@@ -5,7 +5,8 @@ export { CharacterSetActiveSubCommand } from './characters/character-set-active-
 export { CharacterSetServerDefaultSubCommand } from './characters/character-set-server-default.subcommand.js';
 export { CharacterRemoveSubCommand } from './characters/character-remove-subcommand.js';
 export { CharacterUpdateSubCommand } from './characters/character-update-subcommand.js';
-export { CharacterImportSubCommand } from './characters/character-import-subcommand.js';
+export { CharacterImportWanderersGuideSubCommand } from './characters/character-import-wanderers-guide-subcommand.js';
+export { CharacterimportPathbuilderSubCommand } from './characters/character-import-pathbuilder-subcommand.js';
 export { CharacterSheetSubCommand } from './characters/character-sheet-subcommand.js';
 
 // roll commands
@@ -23,6 +24,8 @@ export { InitCommand } from './init/init-command.js';
 export { InitAddSubCommand } from './init/init-add-subcommand.js';
 export { InitSetSubCommand } from './init/init-set-subcommand.js';
 export { InitShowSubCommand } from './init/init-show-subcommand.js';
+export { InitStatBlockSubCommand } from './init/init-stat-block-subcommand.js';
+export { InitRollSubCommand } from './init/init-roll-subcommand.js';
 export { InitNextSubCommand } from './init/init-next-subcommand.js';
 export { InitPrevSubCommand } from './init/init-prev-subcommand.js';
 export { InitJumpToSubCommand } from './init/init-jump-to-subcommand.js';

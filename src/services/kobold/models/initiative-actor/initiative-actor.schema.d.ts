@@ -30,6 +30,10 @@ export interface InitiativeActor {
 	 */
 	characterId?: number | null;
 	/**
+	 * The name of the npc that this actor represents
+	 */
+	referenceNpcName?: string | null;
+	/**
 	 * the name of the actor
 	 */
 	name?: string;

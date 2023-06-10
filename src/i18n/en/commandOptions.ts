@@ -276,6 +276,15 @@ export default {
 		name: 'url',
 		description: "The url of your wanderer's guide character.",
 	},
+	pbJsonId: {
+		name: 'json-id',
+		description: 'The most recent json export id for your PathBuilder character.',
+	},
+	useStamina: {
+		name: 'use-stamina',
+		description:
+			'Whether the PathBuilder character should use the variant stamina/resolve systems.',
+	},
 	name: {
 		name: 'name',
 		description: "The name of your wanderer's guide character.",
@@ -341,13 +350,44 @@ export default {
 		name: 'value',
 		description: 'A value to set your initiative to. Overwrites any other init options.',
 	},
+	template: {
+		name: 'template',
+		description: 'Optionally apply a template to the added creature.',
+		choices: {
+			normal: {
+				name: 'normal',
+				value: 'normal',
+			},
+			elite: {
+				name: 'elite',
+				value: 'elite',
+			},
+			weak: {
+				name: 'weak',
+				value: 'weak',
+			},
+		},
+	},
 	initActor: {
 		name: 'name',
-		description: 'The name of the NPC/minion to add to initiative.',
+		description: 'What to display the NPC/minion as in the initiative order.',
 	},
 	initCharacter: {
 		name: 'character',
-		description: 'A character present in the initiative.',
+		description: 'A character or npc present in the initiative.',
+	},
+	initCreature: {
+		name: 'creature',
+		description: 'A creature to add to the initiative.',
+	},
+	initTargetActor: {
+		name: 'target-initiative-member',
+		description: 'Which member of the initiative to target.',
+	},
+	initRollChoice: {
+		name: 'roll',
+		description:
+			'What to have that initiative member roll. Choose the initiative member first!',
 	},
 	initSetOption: {
 		name: 'option',
@@ -360,6 +400,10 @@ export default {
 			actorName: {
 				name: 'name',
 				value: 'name',
+			},
+			isGm: {
+				name: 'player-is-gm',
+				value: 'player-is-gm',
 			},
 		},
 	},
@@ -515,6 +559,22 @@ export default {
 				name: 'secret-and-notify',
 				value: 'secret-and-notify',
 				description: 'A secret roll that still notifies the channel that a roll was made.',
+			},
+		},
+	},
+	statBlockSecret: {
+		name: 'secret',
+		description: 'Whether to send the stat block in a hidden, temporary message.',
+		choices: {
+			public: {
+				name: 'public',
+				value: 'public',
+				description: 'A public stat block.',
+			},
+			secret: {
+				name: 'secret',
+				value: 'secret',
+				description: 'A temporary, hidden stat block message viewable only to you.',
 			},
 		},
 	},

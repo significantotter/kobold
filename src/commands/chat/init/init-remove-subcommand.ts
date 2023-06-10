@@ -34,7 +34,7 @@ export class InitRemoveSubCommand implements Command {
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
-	public cooldown = new RateLimiter(1, 5000);
+	public cooldown = new RateLimiter(1, 2000);
 	public deferType = CommandDeferType.PUBLIC;
 	public requireClientPerms: PermissionsString[] = [];
 
@@ -56,7 +56,9 @@ export class InitRemoveSubCommand implements Command {
 				currentInitResponse.init,
 				intr.user.id
 			);
-			actorOptions = actorOptions.filter(actor => actor.name.includes(match));
+			actorOptions = actorOptions.filter(actor =>
+				actor.name.toLocaleLowerCase().includes(match.toLocaleLowerCase())
+			);
 
 			//return the matched skills
 			return actorOptions.map(actor => ({

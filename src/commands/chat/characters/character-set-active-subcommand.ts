@@ -44,8 +44,8 @@ export class CharacterSetActiveSubCommand implements Command {
 
 			//return the matched characters
 			return options.map(character => ({
-				name: character.characterData.name,
-				value: character.characterData.name,
+				name: character.name,
+				value: character.name,
 			}));
 		}
 	}
@@ -77,7 +77,7 @@ export class CharacterSetActiveSubCommand implements Command {
 			await InteractionUtils.send(
 				intr,
 				LL.commands.character.setActive.interactions.success({
-					characterName: targetCharacter.characterData.name,
+					characterName: targetCharacter.name,
 				})
 			);
 		} else {

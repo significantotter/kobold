@@ -56,7 +56,9 @@ export class ActionImportSubCommand implements Command {
 			.getString(ActionOptions.ACTION_IMPORT_MODE_OPTION.name)
 			.trim()
 			.toLowerCase();
-		let importUrl = intr.options.getString(ActionOptions.ACTION_IMPORT_URL_OPTION.name).trim();
+		let importUrl = (
+			intr.options.getString(ActionOptions.ACTION_IMPORT_URL_OPTION.name) ?? ''
+		).trim();
 
 		const importId = CharacterUtils.parsePastebinIdFromText(importUrl);
 
@@ -132,7 +134,7 @@ export class ActionImportSubCommand implements Command {
 		await InteractionUtils.send(
 			intr,
 			LL.commands.action.import.interactions.imported({
-				characterName: activeCharacter.characterData.name,
+				characterName: activeCharacter.sheet.info.name,
 			})
 		);
 		return;

@@ -1,4 +1,5 @@
-import { DiceUtils, RollBuilder } from '../../../utils/dice-utils';
+import { DiceUtils } from '../../../utils/dice-utils';
+import { RollBuilder } from '../../../utils/roll-builder.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -13,12 +14,14 @@ import { RateLimiter } from 'discord.js-rate-limiter';
 
 import { ChatArgs } from '../../../constants/index.js';
 import { EventData } from '../../../models/internal-models.js';
-import { InteractionUtils } from '../../../utils/index.js';
+import { InteractionUtils, StringUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { WG } from '../../../services/wanderers-guide/wanderers-guide.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Language } from '../../../models/enum-helpers/index.js';
+import { Creature } from '../../../utils/creature.js';
+import _ from 'lodash';
 
 export class RollAbilitySubCommand implements Command {
 	public names = [Language.LL.commands.roll.ability.name()];
@@ -29,7 +32,7 @@ export class RollAbilitySubCommand implements Command {
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
-	public cooldown = new RateLimiter(1, 5000);
+	public cooldown = new RateLimiter(1, 2000);
 	public deferType = CommandDeferType.NONE;
 	public requireClientPerms: PermissionsString[] = [];
 
@@ -56,8 +59,8 @@ export class RollAbilitySubCommand implements Command {
 				activeCharacter,
 				match
 			).map(ability => ({
-				name: ability.Name,
-				value: ability.Name,
+				name: ability.name,
+				value: ability.name,
 			}));
 			//return the matched abilities
 			return matchedAbilities;
@@ -89,37 +92,23 @@ export class RollAbilitySubCommand implements Command {
 			return;
 		}
 
-		//use the first ability that matches the text of what we were sent, or preferably a perfect match
-		let targetAbility = CharacterUtils.getBestNameMatch(
+		const creature = Creature.fromCharacter(activeCharacter);
+
+		const targetRoll = StringUtils.findBestValueByKeyMatch(
 			abilityChoice,
-			activeCharacter.calculatedStats.totalAbilityScores as WG.NamedScore[]
+			creature.abilityRolls
 		);
 
-		const scoreModifier = Math.floor((targetAbility.Score - 10) / 2);
-
-		// allow the modifier to only optionally start with +/- by wrapping it with +()
-		// because +(+1) is valid, but ++1 is not
-		let wrappedModifierExpression = '';
-		if (modifierExpression) wrappedModifierExpression = `+(${modifierExpression})`;
-		const diceExpression = `1d20+${scoreModifier}${wrappedModifierExpression}`;
-
-		const rollBuilder = new RollBuilder({
-			character: activeCharacter,
+		const rollResult = await DiceUtils.rollSimpleCreatureRoll({
+			actorName: creature.sheet.info.name,
+			creature,
+			attributeName: targetRoll.name,
 			rollNote,
-			rollDescription: Language.LL.commands.roll.interactions.rolledDice({
-				diceType: targetAbility.Name,
-			}),
+			modifierExpression,
 			LL,
 		});
-		rollBuilder.addRoll({
-			rollExpression: DiceUtils.buildDiceExpression(
-				'd20',
-				String(scoreModifier),
-				modifierExpression
-			),
-			tags: ['ability', abilityChoice.toLocaleLowerCase()],
-		});
-		const response = rollBuilder.compileEmbed();
+
+		const embed = rollResult.compileEmbed();
 
 		if (notifyRoll) {
 			await InteractionUtils.send(
@@ -127,6 +116,6 @@ export class RollAbilitySubCommand implements Command {
 				Language.LL.commands.roll.interactions.secretRollNotification()
 			);
 		}
-		await InteractionUtils.send(intr, response, isSecretRoll);
+		await InteractionUtils.send(intr, embed, isSecretRoll);
 	}
 }
