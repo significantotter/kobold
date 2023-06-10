@@ -557,7 +557,7 @@ export function convertPathBuilderToSheet(
 			climbSpeed: null,
 			currentFocusPoints: 0,
 			focusPoints: pathBuilderSheet.focusPoints,
-			classDC: 10 + pathBuilderProfToScore(pathBuilderSheet.proficiencies.classDC),
+			classDC: null, // filled in later as it uses the key ability
 			perception:
 				pathBuilderProfToScore(pathBuilderSheet.proficiencies.perception) +
 				pathBuilderSheet.abilities.wis +
@@ -749,6 +749,12 @@ export function convertPathBuilderToSheet(
 		wis: 'wisdom',
 		cha: 'charisma',
 	};
+
+	let keyabilityScore = sheet.abilities[shorthandAbilityToLong[pathBuilderSheet?.keyability]];
+	let keyabilityBonus = scoreToBonus(keyabilityScore ?? 10);
+
+	sheet.general.classDC =
+		10 + pathBuilderProfToScore(pathBuilderSheet.proficiencies?.classDC) + keyabilityBonus;
 
 	for (const spellcasting of pathBuilderSheet.spellCasters) {
 		const spellAttack =
