@@ -560,7 +560,7 @@ export function convertPathBuilderToSheet(
 			classDC: null, // filled in later as it uses the key ability
 			perception:
 				pathBuilderProfToScore(pathBuilderSheet.proficiencies.perception) +
-				pathBuilderSheet.abilities.wis +
+				scoreToBonus(pathBuilderSheet.abilities.wis) +
 				mods('perception'),
 			perceptionProfMod: pathBuilderSheet.proficiencies.perception,
 			languages: pathBuilderSheet.languages || [],
