@@ -64,6 +64,7 @@ export async function up(knex: Knex): Promise<void> {
 			.orderBy('id', 'asc')
 			.limit(1000)
 			.offset(offset);
+		offset += 1000;
 	}
 }
 
