@@ -229,6 +229,16 @@ export default {
 						'maxResolve',
 						'resolve',
 					],
+					attacks: [
+						'arcaneAttack',
+						'divineAttack',
+						'occultAttack',
+						'primalAttack',
+						'simpleAttack',
+						'martialAttack',
+						'advancedAttack',
+						'unarmedAttack',
+					],
 					ability: [
 						'strength',
 						'dexterity',
