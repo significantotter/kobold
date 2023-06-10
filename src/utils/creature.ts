@@ -508,6 +508,12 @@ export class Creature {
 		if (this.sheet.castingStats.arcaneAttack != null) {
 			baseAttributes.push(
 				{
+					name: 'arcane',
+					type: 'base',
+					value: this.profToLevel(this.sheet.castingStats.arcaneAttack || 0),
+					tags: ['arcane'],
+				},
+				{
 					name: 'arcaneAttack',
 					type: 'base',
 					value: this.profToLevel(this.sheet.castingStats.arcaneAttack || 0),
@@ -523,6 +529,12 @@ export class Creature {
 		}
 		if (this.sheet.castingStats.divineAttack != null) {
 			baseAttributes.push(
+				{
+					name: 'divine',
+					type: 'base',
+					value: this.profToLevel(this.sheet.castingStats.divineAttack || 0),
+					tags: ['divine'],
+				},
 				{
 					name: 'divineAttack',
 					type: 'base',
@@ -540,6 +552,12 @@ export class Creature {
 		if (this.sheet.castingStats.primalAttack != null) {
 			baseAttributes.push(
 				{
+					name: 'primal',
+					type: 'base',
+					value: this.profToLevel(this.sheet.castingStats.primalAttack || 0),
+					tags: ['primal'],
+				},
+				{
 					name: 'primalAttack',
 					type: 'base',
 					value: this.profToLevel(this.sheet.castingStats.primalAttack || 0),
@@ -555,6 +573,12 @@ export class Creature {
 		}
 		if (this.sheet.castingStats.occultAttack != null) {
 			baseAttributes.push(
+				{
+					name: 'occult',
+					type: 'base',
+					value: this.profToLevel(this.sheet.castingStats.occultAttack || 0),
+					tags: ['occult'],
+				},
 				{
 					name: 'occultAttack',
 					type: 'base',

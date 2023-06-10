@@ -1,4 +1,4 @@
-import { Character } from '../../../services/kobold/models/index.js';
+import { Character, InitiativeActor } from '../../../services/kobold/models/index.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -174,6 +174,9 @@ export class CharacterUpdateSubCommand implements Command {
 				isActiveCharacter: true,
 				importSource: 'pathbuilder',
 			});
+			await InitiativeActor.query()
+				.patch({ sheet: creature.sheet })
+				.where({ characterId: newCharacter.id });
 
 			//send success message
 
@@ -253,6 +256,9 @@ export class CharacterUpdateSubCommand implements Command {
 					...fetchedCharacter,
 				}
 			);
+			await InitiativeActor.query()
+				.patch({ sheet: fetchedCharacter.sheet })
+				.where({ characterId: updatedCharacter.id });
 
 			//send success message
 

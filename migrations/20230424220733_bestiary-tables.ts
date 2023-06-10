@@ -42,14 +42,20 @@ export async function up(knex: Knex): Promise<void> {
 		});
 		//perform and commit the batch attribute update
 		const trx = await knex.transaction();
-		await Promise.all(
-			characterUpdates.map(update => {
+		await Promise.all([
+			...characterUpdates.map(update => {
 				return knex('character')
 					.where('id', update.id)
 					.update({ sheet: JSON.stringify(update.sheet), name: update.sheet.info.name })
 					.transacting(trx);
-			})
-		);
+			}),
+			...characterUpdates.map(update => {
+				return knex('initiative_actor')
+					.where('character_id', update.id)
+					.update({ sheet: JSON.stringify(update.sheet) })
+					.transacting(trx);
+			}),
+		]);
 		await trx.commit();
 
 		//fetch the next page
