@@ -53,6 +53,11 @@ export class Creature {
 		return this._name ?? this.sheet.info.name;
 	}
 
+	public profToLevel(prof: number) {
+		if (prof > 0) return prof + this.sheet.info.level;
+		else return 0;
+	}
+
 	public compileSheetEmbed(): KoboldEmbed {
 		const sheetEmbed = new KoboldEmbed();
 
@@ -497,6 +502,246 @@ export class Creature {
 					type: 'base',
 					value: this.sheet.defenses.currentResolve || 0,
 					tags: ['resolve'],
+				}
+			);
+		}
+		if (this.sheet.castingStats.arcaneAttack != null) {
+			baseAttributes.push(
+				{
+					name: 'arcaneAttack',
+					type: 'base',
+					value: this.profToLevel(this.sheet.castingStats.arcaneAttack || 0),
+					tags: ['arcaneAttack'],
+				},
+				{
+					name: 'arcaneSpellAttack',
+					type: 'base',
+					value: this.profToLevel(this.sheet.castingStats.arcaneAttack || 0),
+					tags: ['arcaneSpellAttack'],
+				}
+			);
+		}
+		if (this.sheet.castingStats.divineAttack != null) {
+			baseAttributes.push(
+				{
+					name: 'divineAttack',
+					type: 'base',
+					value: this.profToLevel(this.sheet.castingStats.divineAttack || 0),
+					tags: ['divineAttack'],
+				},
+				{
+					name: 'divineSpellAttack',
+					type: 'base',
+					value: this.profToLevel(this.sheet.castingStats.divineAttack || 0),
+					tags: ['divineSpellAttack'],
+				}
+			);
+		}
+		if (this.sheet.castingStats.primalAttack != null) {
+			baseAttributes.push(
+				{
+					name: 'primalAttack',
+					type: 'base',
+					value: this.profToLevel(this.sheet.castingStats.primalAttack || 0),
+					tags: ['primalAttack'],
+				},
+				{
+					name: 'primalSpellAttack',
+					type: 'base',
+					value: this.profToLevel(this.sheet.castingStats.primalAttack || 0),
+					tags: ['primalSpellAttack'],
+				}
+			);
+		}
+		if (this.sheet.castingStats.occultAttack != null) {
+			baseAttributes.push(
+				{
+					name: 'occultAttack',
+					type: 'base',
+					value: this.profToLevel(this.sheet.castingStats.occultAttack || 0),
+					tags: ['occultAttack'],
+				},
+				{
+					name: 'occultSpellAttack',
+					type: 'base',
+					value: this.profToLevel(this.sheet.castingStats.occultAttack || 0),
+					tags: ['occultSpellAttack'],
+				}
+			);
+		}
+		if (this.sheet.castingStats.arcaneDC != null) {
+			baseAttributes.push(
+				{
+					name: 'arcaneDC',
+					type: 'base',
+					value: this.profToLevel(this.sheet.castingStats.arcaneDC || 0),
+					tags: ['arcaneDC'],
+				},
+				{
+					name: 'arcaneSpellDC',
+					type: 'base',
+					value: this.profToLevel(this.sheet.castingStats.arcaneDC || 0),
+					tags: ['arcaneSpellDC'],
+				}
+			);
+		}
+		if (this.sheet.castingStats.divineDC != null) {
+			baseAttributes.push(
+				{
+					name: 'divineDC',
+					type: 'base',
+					value: this.profToLevel(this.sheet.castingStats.divineDC || 0),
+					tags: ['divineDC'],
+				},
+				{
+					name: 'divineSpellDC',
+					type: 'base',
+					value: this.profToLevel(this.sheet.castingStats.divineDC || 0),
+					tags: ['divineSpellDC'],
+				}
+			);
+		}
+		if (this.sheet.castingStats.primalDC != null) {
+			baseAttributes.push(
+				{
+					name: 'primalDC',
+					type: 'base',
+					value: this.profToLevel(this.sheet.castingStats.primalDC || 0),
+					tags: ['primalDC'],
+				},
+				{
+					name: 'primalSpellDC',
+					type: 'base',
+					value: this.profToLevel(this.sheet.castingStats.primalDC || 0),
+					tags: ['primalSpellDC'],
+				}
+			);
+		}
+		if (this.sheet.castingStats.occultDC != null) {
+			baseAttributes.push(
+				{
+					name: 'occultDC',
+					type: 'base',
+					value: this.profToLevel(this.sheet.castingStats.occultDC || 0),
+					tags: ['occultDC'],
+				},
+				{
+					name: 'occultSpellDC',
+					type: 'base',
+					value: this.profToLevel(this.sheet.castingStats.occultDC || 0),
+					tags: ['occultSpellDC'],
+				}
+			);
+		}
+		if (this.sheet.offense.simpleProfMod) {
+			baseAttributes.push(
+				{
+					name: 'simpleProfMod',
+					type: 'base',
+					value: this.profToLevel(this.sheet.offense.simpleProfMod || 0),
+					tags: ['simpleProfMod'],
+				},
+				{
+					name: 'simple',
+					type: 'base',
+					value: this.profToLevel(this.sheet.offense.simpleProfMod || 0),
+					tags: ['simple'],
+				},
+				{
+					name: 'simpleWeapon',
+					type: 'base',
+					value: this.profToLevel(this.sheet.offense.simpleProfMod || 0),
+					tags: ['simpleWeapon'],
+				},
+				{
+					name: 'simpleAttack',
+					type: 'base',
+					value: this.profToLevel(this.sheet.offense.simpleProfMod || 0),
+					tags: ['simpleAttack'],
+				}
+			);
+		}
+		if (this.sheet.offense.martialProfMod) {
+			baseAttributes.push(
+				{
+					name: 'martialProfMod',
+					type: 'base',
+					value: this.profToLevel(this.sheet.offense.martialProfMod || 0),
+					tags: ['martialProfMod'],
+				},
+				{
+					name: 'martial',
+					type: 'base',
+					value: this.profToLevel(this.sheet.offense.martialProfMod || 0),
+					tags: ['martial'],
+				},
+				{
+					name: 'martialWeapon',
+					type: 'base',
+					value: this.profToLevel(this.sheet.offense.martialProfMod || 0),
+					tags: ['martialWeapon'],
+				},
+				{
+					name: 'martialAttack',
+					type: 'base',
+					value: this.profToLevel(this.sheet.offense.martialProfMod || 0),
+					tags: ['martialAttack'],
+				}
+			);
+		}
+		if (this.sheet.offense.unarmedProfMod) {
+			baseAttributes.push(
+				{
+					name: 'unarmedProfMod',
+					type: 'base',
+					value: this.profToLevel(this.sheet.offense.unarmedProfMod || 0),
+					tags: ['unarmedProfMod'],
+				},
+				{
+					name: 'unarmed',
+					type: 'base',
+					value: this.profToLevel(this.sheet.offense.unarmedProfMod || 0),
+					tags: ['unarmed'],
+				},
+				{
+					name: 'unarmedWeapon',
+					type: 'base',
+					value: this.profToLevel(this.sheet.offense.unarmedProfMod || 0),
+					tags: ['unarmedWeapon'],
+				},
+				{
+					name: 'unarmedAttack',
+					type: 'base',
+					value: this.profToLevel(this.sheet.offense.unarmedProfMod || 0),
+					tags: ['unarmedAttack'],
+				}
+			);
+		}
+		if (this.sheet.offense.advancedProfMod) {
+			baseAttributes.push(
+				{
+					name: 'advancedProfMod',
+					type: 'base',
+					value: this.profToLevel(this.sheet.offense.advancedProfMod || 0),
+					tags: ['advancedProfMod'],
+				},
+				{
+					name: 'advanced',
+					type: 'base',
+					value: this.profToLevel(this.sheet.offense.advancedProfMod || 0),
+					tags: ['advanced'],
+				},
+				{
+					name: 'advancedWeapon',
+					type: 'base',
+					value: this.profToLevel(this.sheet.offense.advancedProfMod || 0),
+					tags: ['advancedWeapon'],
+				},
+				{
+					name: 'advancedAttack',
+					type: 'base',
+					value: this.profToLevel(this.sheet.offense.advancedProfMod || 0),
+					tags: ['advancedAttack'],
 				}
 			);
 		}
