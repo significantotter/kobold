@@ -198,22 +198,27 @@ export function convertBestiaryCreatureToSheet(
 			languages: bestiaryEntry.languages?.languages || [],
 		},
 		abilities: {
-			strength: bestiaryEntry.abilityMods?.str
-				? bestiaryEntry.abilityMods.str * 2 + 10
-				: null,
-			dexterity: bestiaryEntry.abilityMods?.dex
-				? bestiaryEntry.abilityMods.dex * 2 + 10
-				: null,
-			constitution: bestiaryEntry.abilityMods?.con
-				? bestiaryEntry.abilityMods.con * 2 + 10
-				: null,
-			intelligence: bestiaryEntry.abilityMods?.int
-				? bestiaryEntry.abilityMods.int * 2 + 10
-				: null,
+			strength:
+				bestiaryEntry.abilityMods?.str != null
+					? bestiaryEntry.abilityMods.str * 2 + 10
+					: null,
+			dexterity:
+				bestiaryEntry.abilityMods?.dex != null
+					? bestiaryEntry.abilityMods.dex * 2 + 10
+					: null,
+			constitution:
+				bestiaryEntry.abilityMods?.con != null
+					? bestiaryEntry.abilityMods.con * 2 + 10
+					: null,
+			intelligence:
+				bestiaryEntry.abilityMods?.int != null
+					? bestiaryEntry.abilityMods.int * 2 + 10
+					: null,
 			wisdom: bestiaryEntry.abilityMods?.wis ? bestiaryEntry.abilityMods.wis * 2 + 10 : null,
-			charisma: bestiaryEntry.abilityMods?.cha
-				? bestiaryEntry.abilityMods.cha * 2 + 10
-				: null,
+			charisma:
+				bestiaryEntry.abilityMods?.cha != null
+					? bestiaryEntry.abilityMods.cha * 2 + 10
+					: null,
 		},
 		defenses: {
 			currentHp:
