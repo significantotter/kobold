@@ -718,8 +718,17 @@ export function convertPathBuilderToSheet(
 			})),
 		},
 		attacks: pathBuilderSheet.weapons.map(weapon => {
+			let numDice = 1;
+			if (weapon.str.toLocaleLowerCase() == 'striking') {
+				numDice = 2;
+			} else if (weapon.str.toLocaleLowerCase() == 'greaterstriking') {
+				numDice = 3;
+			} else if (weapon.str.toLocaleLowerCase() == 'majorstriking') {
+				numDice = 4;
+			}
+
 			const mainDamage = {
-				dice: weapon.pot + 1 + weapon.die + ' + ' + weapon.damageBonus,
+				dice: numDice + weapon.die + ' + ' + weapon.damageBonus,
 				// base type isn't provided by pathbuilder
 			};
 			const extraDamage = weapon.extraDamage.map(damage => {
