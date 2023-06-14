@@ -44,19 +44,18 @@ export class ActionListSubCommand implements Command {
 		const actions = activeCharacter.actions;
 		const fields = [];
 		for (const action of actions.sort((a, b) => (a.name || '').localeCompare(b.name))) {
-			const fieldValue = `${action.description}\n${action.rolls.map(
-				roll => `${roll.name}: ${roll.diceRoll} (${roll.tags})`
-			)}`;
+			let description = (action.description || '\u200B').substring(0, 1000);
+			if (action.description.length >= 1000) description += '...';
 			fields.push({
 				name: action.name,
-				value: action.description || '\u200B',
+				value: description,
 				inline: true,
 			});
 		}
 
 		const embed = await new KoboldEmbed();
 		embed.setCharacter(activeCharacter);
-		embed.setTitle(`${activeCharacter.characterData.name}'s Available Actions`);
+		embed.setTitle(`${activeCharacter.name}'s Available Actions`);
 		embed.addFields(fields);
 		await embed.sendBatches(intr);
 	}
