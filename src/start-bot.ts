@@ -1,6 +1,6 @@
 import './config/config.js';
 import { REST } from '@discordjs/rest';
-import { Options, GatewayIntentBits, Partials } from 'discord.js';
+import { Options, GatewayIntentBits, Partials, disableValidators } from 'discord.js';
 
 import { Button } from './buttons/index.js';
 import {
@@ -102,6 +102,10 @@ import { Trigger } from './triggers/index.js';
 import { Config } from './config/config.js';
 import Logs from './config/lang/logs.json';
 import { checkAndLoadBestiaryFiles } from './services/pf2etools/bestiaryLoader.js';
+
+// this is to prevent embeds breaking on "addFields" when adding more than an embed can hold
+// because we batch our embeds afterwards instead of before assigning fields
+disableValidators();
 
 async function start(): Promise<void> {
 	DBModel.init(Config.database.url);

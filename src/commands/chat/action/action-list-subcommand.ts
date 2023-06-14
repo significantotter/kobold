@@ -44,10 +44,11 @@ export class ActionListSubCommand implements Command {
 		const actions = activeCharacter.actions;
 		const fields = [];
 		for (const action of actions.sort((a, b) => (a.name || '').localeCompare(b.name))) {
-			let description = (action.description || '\u200B').substring(0, 1000);
-			if (action.description.length >= 1000) description += '...';
+			let description = action.description || '\u200B';
+			if (action.description?.length >= 1000)
+				description = description.substring(0, 1000) + '...';
 			fields.push({
-				name: action.name,
+				name: action.name || 'unnamed action',
 				value: description,
 				inline: true,
 			});
@@ -55,7 +56,7 @@ export class ActionListSubCommand implements Command {
 
 		const embed = await new KoboldEmbed();
 		embed.setCharacter(activeCharacter);
-		embed.setTitle(`${activeCharacter.name}'s Available Actions`);
+		embed.setTitle(`${activeCharacter?.name}'s Available Actions`);
 		embed.addFields(fields);
 		await embed.sendBatches(intr);
 	}

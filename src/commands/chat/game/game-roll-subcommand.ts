@@ -68,7 +68,7 @@ export class GameRollSubCommand implements Command {
 				const allRolls = [
 					..._.keys(creature.rolls),
 					..._.keys(creature.attackRolls),
-					...creature.actions.map(action => action.name),
+					...creature.actions.map(action => action?.name),
 				];
 
 				const matchedRolls = allRolls.filter(roll =>
