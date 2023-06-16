@@ -81,11 +81,7 @@ export class GameRollSubCommand implements Command {
 					}))
 				);
 			}
-			results = _.uniqBy(
-				results,
-				(resultA, resultB) =>
-					resultA.name === resultB.name && resultA.value === resultB.value
-			);
+			results = _.uniqBy(results, result => result.name);
 			return results;
 		}
 	}
