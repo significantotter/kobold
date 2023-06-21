@@ -18,7 +18,7 @@ export class CharacterOptions {
 		name: Language.LL.commandOptions.useStamina.name(),
 		description: Language.LL.commandOptions.useStamina.description(),
 		required: false,
-		type: ApplicationCommandOptionType.String,
+		type: ApplicationCommandOptionType.Boolean,
 	};
 	public static readonly SET_ACTIVE_NAME_OPTION: APIApplicationCommandBasicOption = {
 		name: Language.LL.commandOptions.name.name(),

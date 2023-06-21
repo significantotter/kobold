@@ -40,6 +40,7 @@ export class CharacterimportPathbuilderSubCommand implements Command {
 		LL: TranslationFunctions
 	): Promise<void> {
 		const jsonId = intr.options.getNumber(CharacterOptions.IMPORT_PATHBUILDER_OPTION.name);
+		const useStamina = intr.options.getBoolean(CharacterOptions.IMPORT_USE_STAMINA_OPTION.name);
 		if (!_.isInteger(jsonId) || jsonId < 1) {
 			await InteractionUtils.send(
 				intr,
@@ -78,7 +79,9 @@ export class CharacterimportPathbuilderSubCommand implements Command {
 			return;
 		} else {
 			// the character doesn't exist yet and we fetched it correctly
-			const creature = Creature.fromPathBuilder(pathBuilderChar.build);
+			const creature = Creature.fromPathBuilder(pathBuilderChar.build, null, {
+				useStamina,
+			});
 
 			// set current characters owned by user to inactive state
 			await Character.query()

@@ -352,6 +352,16 @@ export function convertWanderersGuideCharToSheet(
 		},
 		{ lores: [] }
 	);
+	let maxHp = calculatedStats.maxHP;
+
+	if (characterData.variantStamina === 1) {
+		let classHp =
+			(calculatedStats.maxStamina - abilities.constitution * characterData.level) /
+			characterData.level;
+		let expectedNormalMaxHp = (classHp * 2 + abilities.constitution) * characterData.level;
+		let hpDiff = expectedNormalMaxHp - maxHp;
+		maxHp = classHp * characterData.level + hpDiff;
+	}
 
 	const sheet: Sheet = {
 		info: {
