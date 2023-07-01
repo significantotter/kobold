@@ -1,4 +1,4 @@
-import { APIEmbed, EmbedBuilder, EmbedData } from 'discord.js';
+import { APIEmbed, ChatInputCommandInteraction, EmbedBuilder, EmbedData } from 'discord.js';
 import _ from 'lodash';
 import { TranslationFunctions } from '../i18n/i18n-types.js';
 import { Language } from '../models/enum-helpers/index.js';
@@ -20,6 +20,45 @@ export class KoboldEmbed extends EmbedBuilder {
 			this.setThumbnail(character.sheet.info.imageURL);
 		}
 		return this;
+	}
+
+	public static async sendInitiative(
+		intr: ChatInputCommandInteraction,
+		initiativeBuilder: InitiativeBuilder,
+		LL?: TranslationFunctions,
+		options: {
+			dmIfHiddenCreatures?: boolean;
+		} = { dmIfHiddenCreatures: false }
+	) {
+		const embed = await KoboldEmbed.roundFromInitiativeBuilder(initiativeBuilder, LL, {
+			showHiddenCreatureStats: false,
+		});
+		if (
+			initiativeBuilder.hasActorsWithHiddenStats() &&
+			initiativeBuilder.init.gmUserId &&
+			options.dmIfHiddenCreatures
+		) {
+			await KoboldEmbed.dmInitiativeWithHiddenStats(intr, initiativeBuilder, LL);
+		}
+
+		await InteractionUtils.send(intr, { embeds: [embed] });
+	}
+
+	public static async dmInitiativeWithHiddenStats(
+		intr: ChatInputCommandInteraction,
+		initiativeBuilder: InitiativeBuilder,
+		LL?: TranslationFunctions
+	) {
+		const embedWithHiddenStats = await KoboldEmbed.roundFromInitiativeBuilder(
+			initiativeBuilder,
+			LL,
+			{
+				showHiddenCreatureStats: true,
+			}
+		);
+		await intr.client.users.send(initiativeBuilder.init.gmUserId, {
+			embeds: [embedWithHiddenStats],
+		});
 	}
 
 	public static turnFromInitiativeBuilder(
@@ -57,7 +96,10 @@ export class KoboldEmbed extends EmbedBuilder {
 	}
 	public static roundFromInitiativeBuilder(
 		initiativeBuilder: InitiativeBuilder,
-		LL?: TranslationFunctions
+		LL?: TranslationFunctions,
+		options: {
+			showHiddenCreatureStats?: boolean;
+		} = { showHiddenCreatureStats: false }
 	) {
 		LL = LL || Language.LL;
 		const result = new KoboldEmbed().setTitle(
@@ -65,7 +107,7 @@ export class KoboldEmbed extends EmbedBuilder {
 				currentRound: initiativeBuilder.init?.currentRound || 0,
 			})
 		);
-		result.setDescription(initiativeBuilder.getAllGroupsTurnText());
+		result.setDescription(initiativeBuilder.getAllGroupsTurnText(options));
 		return result;
 	}
 	public determineEmbedMetaTextLength(): number {

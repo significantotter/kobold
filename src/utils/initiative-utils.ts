@@ -5,15 +5,7 @@ import {
 	Initiative,
 	Character,
 } from './../services/kobold/models/index.js';
-import {
-	CommandInteraction,
-	GuildTextBasedChannel,
-	Message,
-	EmbedBuilder,
-	User,
-	CacheType,
-	ChatInputCommandInteraction,
-} from 'discord.js';
+import { CommandInteraction, GuildTextBasedChannel, Message } from 'discord.js';
 import { KoboldEmbed } from './kobold-embed-utils.js';
 import _ from 'lodash';
 import { InteractionUtils } from './interaction-utils.js';
@@ -53,6 +45,10 @@ export class InitiativeBuilder {
 		if (comparison === 0) comparison = a.name.localeCompare(b.name);
 		if (comparison === 0) comparison = a.id - b.id;
 		return comparison;
+	}
+
+	public hasActorsWithHiddenStats() {
+		return _.some(this.init.actors, actor => actor.hideStats);
 	}
 
 	/**
@@ -188,10 +184,14 @@ export class InitiativeBuilder {
 	/**
 	 * Creates a string that displays information for all actor groups in an initiative display
 	 */
-	public getAllGroupsTurnText(): string {
+	public getAllGroupsTurnText(
+		options: {
+			showHiddenCreatureStats?: boolean;
+		} = { showHiddenCreatureStats: false }
+	): string {
 		let builtTurnText = '```md\n';
 		for (const group of this.groups) {
-			builtTurnText += this.getActorGroupTurnText(group);
+			builtTurnText += this.getActorGroupTurnText(group, options);
 		}
 		builtTurnText += '```';
 		if (this.groups.length === 0) {
@@ -204,7 +204,12 @@ export class InitiativeBuilder {
 	 * Creates a string that displays information for an actor group in an initiative display
 	 * @param actorGroup The actor group to generate text for
 	 */
-	public getActorGroupTurnText(actorGroup: InitiativeActorGroup): string {
+	public getActorGroupTurnText(
+		actorGroup: InitiativeActorGroup,
+		options: {
+			showHiddenCreatureStats?: boolean;
+		} = { showHiddenCreatureStats: false }
+	): string {
 		const actorsInGroup = this.actorsByGroup[actorGroup.id] || [];
 		const isActiveGroup = this.init.currentTurnGroupId === actorGroup.id;
 		let turnText = '';
@@ -216,18 +221,78 @@ export class InitiativeBuilder {
 		if (actorsInGroup.length === 1 && actorsInGroup[0].name === actorGroup.name) {
 			//We're just displaying the actor in its initiative slot
 			turnText += `${extraSymbol} ${actorGroup.initiativeResult}: ${actorGroup.name}`;
+			turnText += this.generateActorStatDisplayString(actorsInGroup[0], options);
 		} else {
 			turnText += `${extraSymbol} ${actorGroup.initiativeResult}: ${actorGroup.name}\n`;
 			const sortedActors = actorsInGroup.sort((a, b) => a.name.localeCompare(b.name));
 			for (let i = 0; i < sortedActors.length; i++) {
-				turnText += `       ${i}. ${sortedActors[i].name}\n`;
+				turnText += `       ${i}. ${sortedActors[i].name}`;
+				turnText += this.generateActorStatDisplayString(sortedActors[i], options);
+				turnText += `\n`;
 			}
 		}
 		return turnText;
 	}
 
+	public generateActorStatDisplayString(
+		actor: InitiativeActor,
+		options: {
+			showHiddenCreatureStats?: boolean;
+		} = { showHiddenCreatureStats: false }
+	): string {
+		let turnText = '';
+		// if the character doesn't have a full sheet, don't show stats
+		if (!actor.sheet?.info) return turnText;
+		// use a second line for an actor with a too-long name
+		if (actor.name.length > 40) {
+			turnText += '\n';
+		}
+		// if we should hide the creature's stats, do so
+		if (!options.showHiddenCreatureStats && actor.hideStats) {
+			const hp = actor.sheet.defenses.currentHp;
+			if (hp === 0) turnText += ` <HP 0/?>`;
+			else if (hp === actor.sheet.defenses.maxHp) turnText += ` <HP FULL>`;
+			else turnText += ` <HP ?/?>`;
+			if (actor.sheet.info?.usesStamina) {
+				const stamina = actor.sheet.defenses.currentStamina;
+				if (stamina === 0) turnText += ` <SP 0/?>`;
+				else if (stamina === actor.sheet.defenses.maxHp) turnText += ` <SP FULL>`;
+				else turnText += ` <SP ?/?>`;
+			}
+			if (actor.sheet.defenses.tempHp) {
+				turnText += `<THP ?/?>`;
+			}
+		}
+
+		// otherwise, display the creature's stats
+		else {
+			turnText += ` <HP ${actor.sheet.defenses.currentHp}`;
+			turnText += `/${actor.sheet.defenses.maxHp}`;
+			turnText += `>`;
+			if (actor.sheet.info?.usesStamina) {
+				turnText += `<SP ${actor.sheet.defenses.currentStamina}`;
+				turnText += `/${actor.sheet.defenses.maxStamina}`;
+				turnText += `>`;
+
+				turnText += `<RP ${actor.sheet.defenses.currentResolve}`;
+				turnText += `/${actor.sheet.defenses.maxResolve}`;
+				turnText += `>`;
+			}
+			if (actor.sheet.defenses.tempHp) {
+				turnText += `<THP ${actor.sheet.defenses.tempHp}>`;
+			}
+		}
+
+		return turnText;
+	}
+
 	get activeGroup() {
 		return this.groups.find(group => group.id === this.init.currentTurnGroupId);
+	}
+	get activeActors() {
+		return this.init.actors.filter(
+			actor => actor.initiativeActorGroupId === this.init.currentTurnGroupId
+		);
 	}
 }
 
@@ -248,6 +313,7 @@ export class InitiativeUtils {
 		initiativeValue,
 		userName,
 		userId,
+		hideStats,
 		LL,
 	}: {
 		character: Character;
@@ -257,6 +323,7 @@ export class InitiativeUtils {
 		initiativeValue?: number;
 		userName: string;
 		userId: string;
+		hideStats: boolean;
 		LL: TranslationFunctions;
 	}): Promise<KoboldEmbed> {
 		let finalInitiative = 0;
@@ -342,6 +409,7 @@ export class InitiativeUtils {
 			characterId: character.id,
 			sheet: character.sheet,
 			userId,
+			hideStats,
 
 			actorGroup: {
 				initiativeId: currentInit.id,

@@ -32,6 +32,10 @@
 			"type": "string",
 			"description": "the name of the actor"
 		},
+		"hideStats": {
+			"type": "boolean",
+			"description": "Whether or not to hide the stats of this actor in channel initiative displays"
+		},
 		"createdAt": {
 			"type": "string",
 			"format": "date-time",

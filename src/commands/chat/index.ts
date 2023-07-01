@@ -52,6 +52,11 @@ export { GameRollSubCommand } from './game/game-roll-subcommand.js';
 export { GameInitSubCommand } from './game/game-init-subcommand.js';
 export { GameListSubCommand } from './game/game-list-subcommand.js';
 
+// gameplay command
+export { GameplayCommand } from './gameplay/gameplay-command.js';
+export { GameplaySetSubCommand } from './gameplay/gameplay-set-subcommand.js';
+export { GameplayRecoverSubCommand } from './gameplay/gameplay-recover-subcommand.js';
+
 // action command
 export { ActionCommand } from './action/action-command.js';
 export { ActionListSubCommand } from './action/action-list-subcommand.js';

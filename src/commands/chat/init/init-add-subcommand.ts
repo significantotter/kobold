@@ -79,6 +79,7 @@ export class InitAddSubCommand implements Command {
 		const targetCreature = intr.options.getString(ChatArgs.INIT_CREATURE_OPTION.name);
 		const initiativeValue = intr.options.getNumber(ChatArgs.INIT_VALUE_OPTION.name);
 		const diceExpression = intr.options.getString(ChatArgs.ROLL_EXPRESSION_OPTION.name);
+		const hideStats = intr.options.getString(ChatArgs.INIT_HIDE_STATS_OPTION.name);
 		const template = (intr.options.getString(ChatArgs.INIT_ADD_TEMPLATE_OPTION.name) ?? '')
 			.trim()
 			.toLocaleLowerCase();
@@ -170,6 +171,7 @@ export class InitAddSubCommand implements Command {
 			userId: intr.user.id,
 			sheet: sheet,
 			referenceNpcName,
+			hideStats,
 
 			actorGroup: {
 				initiativeId: currentInit.id,

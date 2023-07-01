@@ -344,6 +344,47 @@ export default {
 		description: 'the dice roll if doing a custom roll, or a modifier to add to the roll.',
 	},
 
+	// GAMEPLAY
+
+	gameplaySetOption: {
+		name: 'option',
+		description: "What option to update on the target character's sheet",
+		choices: {
+			hp: {
+				name: 'hp',
+				value: 'hp',
+			},
+			tempHp: {
+				name: 'tempHp',
+				value: 'tempHp',
+			},
+			stamina: {
+				name: 'stamina',
+				value: 'stamina',
+			},
+			resolve: {
+				name: 'resolve',
+				value: 'resolve',
+			},
+			heroPoints: {
+				name: 'hero points',
+				value: 'hero-points',
+			},
+			focusPoints: {
+				name: 'focus points',
+				value: 'focus-points',
+			},
+		},
+	},
+	gameplaySetValue: {
+		name: 'value',
+		description: "The value to update to on the target character's sheet",
+	},
+	gameplayTargetCharacter: {
+		name: 'target-character',
+		description: 'What character to update. Defaults to your active character.',
+	},
+
 	// INIT
 
 	initValue: {
@@ -379,6 +420,10 @@ export default {
 	initCreature: {
 		name: 'creature',
 		description: 'A creature to add to the initiative.',
+	},
+	initHideStats: {
+		name: 'hide-stats',
+		description: 'Whether to hide the stats of the character/creature in the initiative.',
 	},
 	initTargetActor: {
 		name: 'target-initiative-member',

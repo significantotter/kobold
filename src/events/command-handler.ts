@@ -19,6 +19,7 @@ import Logs from './../config/lang/logs.json';
 import { Language } from '../models/enum-helpers/language.js';
 import { KoboldEmbed } from '../utils/kobold-embed-utils.js';
 import { refs } from '../i18n/en/common.js';
+import { KoboldError } from '../utils/KoboldError.js';
 
 export class CommandHandler implements EventHandler {
 	private rateLimiter = new RateLimiter(
@@ -142,6 +143,12 @@ export class CommandHandler implements EventHandler {
 				await command.execute(intr, data, LL);
 			}
 		} catch (error) {
+			// Kobold Errors are expected error messages encountered through regular use of the bot
+			// These result in a simple response message and no error logging
+			if (error instanceof KoboldError) {
+				await InteractionUtils.send(intr, error.responseMessage);
+				return;
+			}
 			await this.sendError(intr, data);
 
 			// Log command error

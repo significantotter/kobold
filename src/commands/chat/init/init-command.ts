@@ -76,6 +76,7 @@ export class InitCommand implements Command {
 						...ChatArgs.INIT_VALUE_OPTION,
 						required: false,
 					},
+					ChatArgs.INIT_HIDE_STATS_OPTION,
 				],
 			},
 			{
@@ -99,6 +100,7 @@ export class InitCommand implements Command {
 						required: false,
 					},
 					ChatArgs.INIT_ADD_TEMPLATE_OPTION,
+					ChatArgs.INIT_HIDE_STATS_OPTION,
 				],
 			},
 			{

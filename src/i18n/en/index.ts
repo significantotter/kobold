@@ -2,6 +2,7 @@ import type { BaseTranslation } from '../i18n-types';
 import AdminCommand from './commands/admin.js';
 import CharacterCommand from './commands/character.js';
 import GameCommand from './commands/game.js';
+import GameplayCommand from './commands/gameplay.js';
 import HelpCommand from './commands/help.js';
 import InitCommand from './commands/init.js';
 import ModifierCommand from './commands/modifier.js';
@@ -66,6 +67,7 @@ const en: BaseTranslation = {
 		roll: RollCommand,
 		rollMacro: RollMacroCommand,
 		game: GameCommand,
+		gameplay: GameplayCommand,
 	},
 	commandOptions: commandOptions,
 	utils: UtilsLang,

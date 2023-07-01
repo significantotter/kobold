@@ -101,6 +101,7 @@ export class InitJoinSubCommand implements Command {
 		const initiativeValue = intr.options.getNumber(ChatArgs.INIT_VALUE_OPTION.name);
 		const skillChoice = intr.options.getString(ChatArgs.SKILL_CHOICE_OPTION.name);
 		const diceExpression = intr.options.getString(ChatArgs.ROLL_EXPRESSION_OPTION.name);
+		const hideStats = intr.options.getBoolean(ChatArgs.INIT_HIDE_STATS_OPTION.name);
 
 		const rollResultMessage = await InitiativeUtils.addCharacterToInitiative({
 			character: activeCharacter,
@@ -110,6 +111,7 @@ export class InitJoinSubCommand implements Command {
 			diceExpression,
 			userName: intr.user.username,
 			userId: intr.user.id,
+			hideStats,
 			LL,
 		});
 

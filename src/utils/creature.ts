@@ -1,8 +1,8 @@
-import { Character, Sheet } from '../services/kobold/models/index.js';
+import { Character, InitiativeActor, Sheet } from '../services/kobold/models/index.js';
 import { PathBuilder } from '../services/pathbuilder/pathbuilder.js';
 import { CreatureStatBlock } from '../services/pf2etools/bestiaryType.js';
 import { WG } from '../services/wanderers-guide/wanderers-guide.js';
-import _ from 'lodash';
+import _, { update } from 'lodash';
 import {
 	convertBestiaryCreatureToSheet,
 	convertPathBuilderToSheet,
@@ -10,6 +10,15 @@ import {
 } from './sheet-import-utils.js';
 import { KoboldEmbed } from './kobold-embed-utils.js';
 import { parseBonusesForTagsFromModifiers } from '../services/kobold/lib/helpers.js';
+import { KoboldError } from './KoboldError.js';
+
+export type SettableSheetOption =
+	| 'tempHp'
+	| 'hp'
+	| 'stamina'
+	| 'resolve'
+	| 'heroPoints'
+	| 'focusPoints';
 
 export interface roll {
 	name: string;
@@ -234,6 +243,103 @@ export class Creature {
 		}
 
 		return sheetEmbed;
+	}
+
+	// Gameplay Options
+
+	public recover() {
+		const updates: { name: string; initialValue: number; updatedValue: number }[] = [];
+		if (this.sheet.defenses.tempHp > 0) {
+			updates.push({
+				name: 'Temp HP',
+				initialValue: this.sheet.defenses.tempHp,
+				updatedValue: 0,
+			});
+			this.sheet.defenses.tempHp = 0;
+		}
+		if (this.sheet.defenses.currentHp < this.sheet.defenses.maxHp) {
+			updates.push({
+				name: 'HP',
+				initialValue: this.sheet.defenses.currentHp,
+				updatedValue: this.sheet.defenses.maxHp,
+			});
+			this.sheet.defenses.currentHp = this.sheet.defenses.maxHp;
+		}
+		if (this.sheet.defenses.currentStamina < this.sheet.defenses.maxStamina) {
+			updates.push({
+				name: 'Stamina',
+				initialValue: this.sheet.defenses.currentStamina,
+				updatedValue: this.sheet.defenses.maxStamina,
+			});
+			this.sheet.defenses.currentStamina = this.sheet.defenses.maxStamina;
+		}
+		if (this.sheet.defenses.currentResolve < this.sheet.defenses.maxResolve) {
+			updates.push({
+				name: 'Resolve',
+				initialValue: this.sheet.defenses.currentResolve,
+				updatedValue: this.sheet.defenses.maxResolve,
+			});
+			this.sheet.defenses.currentResolve = this.sheet.defenses.maxResolve;
+		}
+		return updates;
+	}
+
+	/**
+	 *
+	 * @param option One of the settable sheet values
+	 * @param value A string representing the value to update the sheet with
+	 *  			A numeric string that can start with "+" or "-" to indicate a relative change
+	 * @returns An object with the initial and updated values
+	 */
+	public updateValue(option: SettableSheetOption, value: string) {
+		const computeNewValue = (
+			currentValue: number,
+			update: string,
+			min?: number,
+			max?: number
+		) => {
+			let finalValue: number;
+			if (update.trim().startsWith('+')) {
+				finalValue = currentValue + parseInt(update.trim().substring(1));
+			} else if (update.trim().startsWith('-')) {
+				finalValue = currentValue - parseInt(update.trim().substring(1));
+			} else {
+				finalValue = parseInt(update);
+			}
+			if (isNaN(finalValue)) throw new KoboldError(`Yip! I didn\'t understand "${value}"!`);
+			if (min != null && finalValue < min) finalValue = min;
+			if (max != null && finalValue > max) finalValue = max;
+			return finalValue;
+		};
+		let initialValue;
+		let updatedValue;
+
+		if (option === 'hp') {
+			initialValue = this.sheet.defenses.currentHp;
+			updatedValue = computeNewValue(initialValue, value, 0, this.sheet.defenses.maxHp);
+			this.sheet.defenses.currentHp = updatedValue;
+		} else if (option === 'tempHp') {
+			initialValue = this.sheet.defenses.tempHp;
+			updatedValue = computeNewValue(initialValue, value, 0);
+			this.sheet.defenses.tempHp = updatedValue;
+		} else if (option === 'stamina') {
+			initialValue = this.sheet.defenses.currentStamina;
+			updatedValue = computeNewValue(initialValue, value, 0, this.sheet.defenses.maxStamina);
+			this.sheet.defenses.currentStamina = updatedValue;
+		} else if (option === 'resolve') {
+			initialValue = this.sheet.defenses.currentResolve;
+			updatedValue = computeNewValue(initialValue, value, 0, this.sheet.defenses.maxResolve);
+			this.sheet.defenses.currentResolve = updatedValue;
+		} else if (option === 'heroPoints') {
+			initialValue = this.sheet.general.currentHeroPoints;
+			updatedValue = computeNewValue(initialValue, value, 0, 3);
+			this.sheet.general.currentHeroPoints = updatedValue;
+		} else if (option === 'focusPoints') {
+			initialValue = this.sheet.general.currentFocusPoints;
+			updatedValue = computeNewValue(initialValue, value, 0, 3);
+			this.sheet.general.currentFocusPoints = updatedValue;
+		}
+		return { initialValue, updatedValue };
 	}
 
 	// Roll Options
@@ -873,6 +979,10 @@ export class Creature {
 			wisdom: 'wisdom',
 			charisma: 'charisma',
 		};
+	}
+
+	public static fromInitActor(initActor: InitiativeActor): Creature {
+		return new Creature(initActor.sheet);
 	}
 
 	public static fromCharacter(character: Character): Creature {

@@ -44,7 +44,8 @@ export class InitShowSubCommand implements Command {
 		}
 
 		const initBuilder = new InitiativeBuilder({ initiative: initResult.init, LL });
-		const embed = await KoboldEmbed.roundFromInitiativeBuilder(initBuilder, LL);
-		await InteractionUtils.send(intr, { embeds: [embed] });
+		await KoboldEmbed.sendInitiative(intr, initBuilder, LL, {
+			dmIfHiddenCreatures: initBuilder.init.gmUserId === intr.user.id,
+		});
 	}
 }

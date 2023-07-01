@@ -54,6 +54,7 @@ export const InitiativeActorFactory = InitiativeActorFactoryClass.define(
 			userId: faker.datatype.uuid(),
 			name,
 			actorGroup,
+			hideStats: faker.datatype.boolean(),
 			initiativeActorGroupId: actorGroup?.id,
 			createdAt: faker.date.recent(30).toISOString(),
 			lastUpdatedAt: faker.date.recent(30).toISOString(),

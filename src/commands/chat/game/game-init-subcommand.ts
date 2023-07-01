@@ -151,6 +151,7 @@ export class GameInitSubCommand implements Command {
 				currentInit,
 				userName: character.sheet.info.name,
 				userId: character.userId,
+				hideStats: false,
 				LL,
 			});
 

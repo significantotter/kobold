@@ -103,5 +103,8 @@ export class InitJumpToSubCommand implements Command {
 			content: `<@!${activeGroup.userId}>`,
 			embeds: [currentTurnEmbed],
 		});
+		if (_.some(initBuilder.activeActors, actor => actor.hideStats)) {
+			await KoboldEmbed.dmInitiativeWithHiddenStats(intr, initBuilder, LL);
+		}
 	}
 }

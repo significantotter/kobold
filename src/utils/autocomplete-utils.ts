@@ -211,4 +211,42 @@ export class AutocompleteUtils {
 			value: guildMember.id.toString(),
 		}));
 	}
+
+	public static async getGameplayTargetCharacters(
+		intr: AutocompleteInteraction<CacheType>,
+		matchText: string
+	) {
+		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id, intr.guildId);
+		const currentInitResponse = await InitiativeUtils.getInitiativeForChannel(intr.channel);
+
+		let results = [];
+
+		//get the character matches
+		let actorOptions = InitiativeUtils.getControllableInitiativeActors(
+			currentInitResponse.init,
+			intr.user.id
+		);
+
+		//return the matched skills
+		results.push(
+			...actorOptions.map(actor => ({
+				name: actor.name,
+				value: 'init-' + actor.id.toString(),
+			}))
+		);
+
+		if (
+			activeCharacter &&
+			!actorOptions.find(actor => actor.characterId === activeCharacter.id)
+		) {
+			results.unshift({
+				name: activeCharacter.name,
+				value: 'char-' + activeCharacter.id.toString(),
+			});
+		}
+
+		return results.filter(result =>
+			result.name.toLowerCase().includes(matchText.toLowerCase())
+		);
+	}
 }

@@ -38,6 +38,10 @@ export interface InitiativeActor {
 	 */
 	name?: string;
 	/**
+	 * Whether or not to hide the stats of this actor in channel initiative displays
+	 */
+	hideStats?: boolean;
+	/**
 	 * When the initiative was first started
 	 */
 	createdAt?: string;

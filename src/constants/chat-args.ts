@@ -151,6 +151,13 @@ export class ChatArgs {
 			},
 		],
 	};
+	public static readonly INIT_HIDE_STATS_OPTION: APIApplicationCommandBasicOption = {
+		name: Language.LL.commandOptions.initHideStats.name(),
+		description: Language.LL.commandOptions.initHideStats.description(),
+		required: false,
+		autocomplete: true,
+		type: ApplicationCommandOptionType.Boolean,
+	};
 	public static readonly INIT_CHARACTER_OPTION: APIApplicationCommandBasicOption = {
 		name: Language.LL.commandOptions.initCharacter.name(),
 		description: Language.LL.commandOptions.initCharacter.description(),

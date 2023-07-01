@@ -53,6 +53,10 @@ import {
 	GameRollSubCommand,
 	GameInitSubCommand,
 	GameListSubCommand,
+	// gameplay
+	GameplayCommand,
+	GameplaySetSubCommand,
+	GameplayRecoverSubCommand,
 	// action
 	ActionCommand,
 	ActionListSubCommand,
@@ -191,6 +195,9 @@ async function start(): Promise<void> {
 			new GameListSubCommand(),
 			new GameManageSubCommand(),
 		]),
+
+		// Gameplay commands
+		new GameplayCommand([new GameplaySetSubCommand(), new GameplayRecoverSubCommand()]),
 
 		// Action commands
 		new ActionCommand([
