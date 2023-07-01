@@ -222,10 +222,7 @@ export class AutocompleteUtils {
 		let results = [];
 
 		//get the character matches
-		let actorOptions = InitiativeUtils.getControllableInitiativeActors(
-			currentInitResponse.init,
-			intr.user.id
-		);
+		let actorOptions = currentInitResponse.init.actors;
 
 		//return the matched skills
 		results.push(
