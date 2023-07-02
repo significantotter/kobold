@@ -66,11 +66,12 @@ export default {
 	},
 	join: {
 		name: 'join',
-		options: '[*skill*] [*dice*] [*value*]',
+		options: '[*skill*] [*dice*] [*value*] [*hide-stats*]',
 		usage:
 			'_[*skill*] optional_: The name of the skill ("perception") to use to join initiative.\n' +
 			'_[*dice*] optional_: The dice expression ("1d20+5") to use to join initiative.\n' +
-			'_[*value*] optional_: The static value ("15") to use to join initiative.',
+			'_[*value*] optional_: The static value ("15") to use to join initiative.' +
+			"_[*hide-stats*] optional_: Whether to hide the creature's stats. Defaults to not hiding.",
 		description:
 			'Joins initiative with your active character. ' + 'Defaults to rolling perception.',
 		expandedDescription:
@@ -93,12 +94,13 @@ export default {
 	},
 	add: {
 		name: 'add',
-		options: '[creature] [name] [*dice*] [*value*]',
+		options: '[creature] [name] [*dice*] [*value*] [*hide-stats*]',
 		usage:
 			'_[creature]_: The bestiary creature. Select "Custom NPC" for a simple initiative entry with no stats.\n' +
 			'_[*name*]_: The name to apply to the npc in the initiative.\n' +
 			'_[*dice*] optional_: The dice expression ("1d20+5") to use to join initiative.\n' +
-			'_[*value*] optional_: The static value ("15") to use to join initiative.',
+			'_[*value*] optional_: The static value ("15") to use to join initiative.\n' +
+			"_[*hide-stats*] optional_: Whether to hide the creature's stats. Defaults to hiding.",
 		description: `Adds an NPC or minion to initiative`,
 		expandedDescription:
 			'Adds a bestiary creature to the initiative. By default, the creature will ' +

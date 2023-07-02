@@ -303,6 +303,20 @@ export default {
 			},
 		},
 	},
+	gameplay: {
+		name: 'gameplay',
+		value: 'gameplay',
+		description: 'help for the /gameplay command.',
+		interactions: {
+			embed: {
+				title: '/gameplay Commands',
+				thumbnail: refs.links.thumbnail,
+				description:
+					'The gameplay commands are used to handle gameplay values for characters and initiative. ' +
+					'You can set hp, stamina, resolve, focus points, hero points, etc. using these commands. \n\n',
+			},
+		},
+	},
 	makingACustomAction: {
 		name: 'action-creation-walkthrough',
 		value: 'action-creation-walkthrough',

@@ -83,6 +83,12 @@ export class HelpCommand implements Command {
 				options: [],
 			},
 			{
+				name: Language.LL.commands.help.gameplay.name(),
+				description: Language.LL.commands.help.gameplay.description(),
+				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				options: [],
+			},
+			{
 				name: Language.LL.commands.help.attributesAndTags.name(),
 				description: Language.LL.commands.help.attributesAndTags.description(),
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
@@ -279,6 +285,12 @@ export class HelpCommand implements Command {
 							`\`/${LL.commands.game.name()} ${LL.commands.game.list.name()}\` ${LL.commands.game.list.description()}\n`,
 					},
 					{
+						name: LL.commands.gameplay.name(),
+						value:
+							`\`/${LL.commands.gameplay.name()} ${LL.commands.gameplay.set.name()}\` ${LL.commands.gameplay.set.description()}\n` +
+							`\`/${LL.commands.gameplay.name()} ${LL.commands.gameplay.recover.name()}\` ${LL.commands.gameplay.recover.description()}\n`,
+					},
+					{
 						name: LL.commands.action.name(),
 						value:
 							`\`/${LL.commands.action.name()} ${LL.commands.action.create.name()}\` ${LL.commands.action.create.description()}\n` +
@@ -405,6 +417,21 @@ export class HelpCommand implements Command {
 						LL.commands.game.list.name(),
 					].map(command =>
 						createCommandOperationHelpField(LL.commands.game.name(), command, LL)
+					)
+				);
+				break;
+			}
+			case Language.LL.commands.help.gameplay.name(): {
+				embed.setTitle(LL.commands.help.gameplay.interactions.embed.title());
+				embed.setDescription(LL.commands.help.gameplay.interactions.embed.description());
+				embed.addFields(
+					[LL.commands.gameplay.set.name(), LL.commands.gameplay.recover.name()].map(
+						command =>
+							createCommandOperationHelpField(
+								LL.commands.gameplay.name(),
+								command,
+								LL
+							)
 					)
 				);
 				break;
