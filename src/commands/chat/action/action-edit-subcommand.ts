@@ -43,10 +43,7 @@ export class ActionEditSubCommand implements Command {
 			const match = intr.options.getString(ActionOptions.ACTION_TARGET_OPTION.name);
 
 			//get the active character
-			const activeCharacter = await CharacterUtils.getActiveCharacter(
-				intr.user.id,
-				intr.guildId
-			);
+			const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
 			if (!activeCharacter) {
 				//no choices if we don't have a character to match against
 				return [];
@@ -73,7 +70,7 @@ export class ActionEditSubCommand implements Command {
 		const newValue = intr.options.getString(ActionOptions.ACTION_EDIT_VALUE.name, true);
 
 		//get the active character
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id, intr.guildId);
+		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
 		if (!activeCharacter) {
 			await InteractionUtils.send(
 				intr,

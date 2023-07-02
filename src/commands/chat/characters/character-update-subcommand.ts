@@ -41,7 +41,7 @@ export class CharacterUpdateSubCommand implements Command {
 		LL: TranslationFunctions
 	): Promise<void> {
 		//check if we have an active character
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id, intr.guildId);
+		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
 		if (!activeCharacter) {
 			await InteractionUtils.send(
 				intr,

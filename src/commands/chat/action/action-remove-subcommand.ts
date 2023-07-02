@@ -45,10 +45,7 @@ export class ActionRemoveSubCommand implements Command {
 			const match = intr.options.getString(ActionOptions.ACTION_TARGET_OPTION.name);
 
 			//get the active character
-			const activeCharacter = await CharacterUtils.getActiveCharacter(
-				intr.user.id,
-				intr.guildId
-			);
+			const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
 			if (!activeCharacter) {
 				//no choices if we don't have a character to match against
 				return [];
@@ -73,7 +70,7 @@ export class ActionRemoveSubCommand implements Command {
 	): Promise<void> {
 		const actionChoice = intr.options.getString(ActionOptions.ACTION_TARGET_OPTION.name);
 		//get the active character
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id, intr.guildId);
+		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
 		const targetAction = activeCharacter.getActionByName(actionChoice);
 		if (targetAction) {
 			// ask for confirmation

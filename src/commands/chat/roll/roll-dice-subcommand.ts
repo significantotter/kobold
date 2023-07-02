@@ -45,7 +45,7 @@ export class RollDiceSubCommand implements Command {
 
 		const rollNote = intr.options.getString(ChatArgs.ROLL_NOTE_OPTION.name);
 
-		let activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id, intr.guildId);
+		let activeCharacter = await CharacterUtils.getActiveCharacter(intr);
 
 		//only use the active character if the roll uses character attributes
 		if (!/(\[[\w \-_\.]{2,}\])/g.test(diceExpression)) {

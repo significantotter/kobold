@@ -293,6 +293,21 @@ export default {
 		name: 'character_id',
 		description: `The id of your wanderer's guide character.`,
 	},
+	setDefaultScope: {
+		name: 'default-for',
+		description:
+			'Where this is your default character. Either a specific channel, or the whole guild.',
+		choices: {
+			channel: {
+				name: 'channel',
+				value: 'channel',
+			},
+			server: {
+				name: 'server',
+				value: 'server',
+			},
+		},
+	},
 
 	// GAME
 

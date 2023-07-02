@@ -3,6 +3,7 @@ import { WG } from '../services/wanderers-guide/wanderers-guide.js';
 import { Character } from './../services/kobold/models/character/character.model';
 import { Creature, roll } from './creature.js';
 import { StringUtils } from './string-utils.js';
+import { AutocompleteInteraction, CacheType, ChatInputCommandInteraction } from 'discord.js';
 
 interface NamedThing {
 	Name: string;
@@ -193,22 +194,31 @@ export class CharacterUtils {
 	 * @returns the active character for the user, or null if one is not present
 	 */
 	public static async getActiveCharacter(
-		userId: string,
-		guildId?: string
+		intr: ChatInputCommandInteraction | AutocompleteInteraction<CacheType>
 	): Promise<Character | null> {
-		const [activeCharacter, GuildDefaultCharacter] = await Promise.all([
-			Character.query().where({
-				userId: userId,
-				isActiveCharacter: true,
-			}),
-			Character.query()
-				.joinRelated('guildDefaultCharacter')
-				.where({
-					'guildDefaultCharacter.userId': userId,
-					'guildDefaultCharacter.guildId': guildId ?? 0,
+		const { user, guildId, channelId } = intr;
+		const userId = user.id;
+		const [activeCharacter, GuildDefaultCharacter, ChannelDefaultCharacter] = await Promise.all(
+			[
+				Character.query().where({
+					userId: userId,
+					isActiveCharacter: true,
 				}),
-		]);
-		return GuildDefaultCharacter[0] ?? activeCharacter[0] ?? null;
+				Character.query()
+					.joinRelated('guildDefaultCharacter')
+					.where({
+						'guildDefaultCharacter.userId': userId,
+						'guildDefaultCharacter.guildId': guildId ?? 0,
+					}),
+				Character.query()
+					.joinRelated('channelDefaultCharacter')
+					.where({
+						'channelDefaultCharacter.userId': userId,
+						'channelDefaultCharacter.channelId': channelId ?? 0,
+					}),
+			]
+		);
+		return ChannelDefaultCharacter[0] ?? GuildDefaultCharacter[0] ?? activeCharacter[0] ?? null;
 	}
 
 	/**

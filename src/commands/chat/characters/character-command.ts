@@ -66,10 +66,13 @@ export class CharacterCommand implements Command {
 			},
 			{
 				// SET-SERVER-DEFAULT
-				name: Language.LL.commands.character.setServerDefault.name(),
-				description: Language.LL.commands.character.setServerDefault.description(),
+				name: Language.LL.commands.character.setDefault.name(),
+				description: Language.LL.commands.character.setDefault.description(),
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
-				options: [CharacterOptions.SET_ACTIVE_NAME_OPTION],
+				options: [
+					CharacterOptions.CHARACTER_SET_DEFAULT_SCOPE,
+					CharacterOptions.SET_ACTIVE_NAME_OPTION,
+				],
 			},
 			{
 				// SHEET

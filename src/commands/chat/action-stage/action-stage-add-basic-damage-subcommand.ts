@@ -63,7 +63,7 @@ export class ActionStageAddBasicDamageSubCommand implements Command {
 		if (allowRollModifiers === null) allowRollModifiers = true;
 
 		//get the active character
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id, intr.guildId);
+		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
 		if (!activeCharacter) {
 			await InteractionUtils.send(
 				intr,

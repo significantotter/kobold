@@ -73,7 +73,7 @@ export class ActionStageAddSaveSubCommand implements Command {
 		);
 
 		//get the active character
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id, intr.guildId);
+		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
 		if (!activeCharacter) {
 			await InteractionUtils.send(
 				intr,

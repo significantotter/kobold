@@ -247,7 +247,11 @@ describe('Character Utils', function () {
 				userId: '0',
 				isActiveCharacter: false,
 			});
-			const fetchedCharacter = await CharacterUtils.getActiveCharacter('0');
+			const fetchedCharacter = await CharacterUtils.getActiveCharacter({
+				user: { id: '0' },
+				channelId: '1',
+				guildId: '2',
+			} as any);
 			expect(activeCharacter.id).toBe(fetchedCharacter.id);
 		});
 		it(
@@ -262,7 +266,11 @@ describe('Character Utils', function () {
 					userId: '0',
 					isActiveCharacter: false,
 				});
-				const fetchedCharacter = await CharacterUtils.getActiveCharacter('0');
+				const fetchedCharacter = await CharacterUtils.getActiveCharacter({
+					user: { id: '0' },
+					channelId: '1',
+					guildId: '2',
+				} as any);
 				expect(activeCharacters.map(char => char.id)).toContain(fetchedCharacter.id);
 			}
 		);
@@ -280,7 +288,11 @@ describe('Character Utils', function () {
 				userId: '0',
 				guildId: 'foo',
 			});
-			const fetchedCharacter = await CharacterUtils.getActiveCharacter('0', 'foo');
+			const fetchedCharacter = await CharacterUtils.getActiveCharacter({
+				user: { id: '0' },
+				channelId: '1',
+				guildId: 'foo',
+			} as any);
 			expect(fetchedCharacter.id).toEqual(inactiveCharacters[4].id);
 		});
 		it('returns null if no active character is present', async function () {
@@ -288,7 +300,11 @@ describe('Character Utils', function () {
 				userId: '0',
 				isActiveCharacter: false,
 			});
-			const fetchedCharacter = await CharacterUtils.getActiveCharacter('0');
+			const fetchedCharacter = await CharacterUtils.getActiveCharacter({
+				user: { id: '0' },
+				channelId: '1',
+				guildId: '2',
+			} as any);
 			expect(fetchedCharacter).toBe(null);
 		});
 	});

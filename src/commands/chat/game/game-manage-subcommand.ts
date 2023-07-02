@@ -273,10 +273,7 @@ export class GameManageSubCommand implements Command {
 				name: value,
 			});
 			if (targetGames.length > 0) {
-				const activeCharacter = await CharacterUtils.getActiveCharacter(
-					intr.user.id,
-					intr.guildId
-				);
+				const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
 				if (!activeCharacter) {
 					//didn't find the game
 					await InteractionUtils.send(
@@ -314,10 +311,7 @@ export class GameManageSubCommand implements Command {
 				})
 				.andWhereNot({ gmUserId: intr.user.id });
 			if (targetGames.length > 0) {
-				const activeCharacter = await CharacterUtils.getActiveCharacter(
-					intr.user.id,
-					intr.guildId
-				);
+				const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
 				if (!activeCharacter) {
 					//didn't find the game
 					await InteractionUtils.send(

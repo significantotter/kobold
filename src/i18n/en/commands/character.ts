@@ -122,21 +122,23 @@ export default {
 				"Check what characters you've imported using /character list",
 		},
 	},
-	setServerDefault: {
-		name: 'set-server-default',
-		options: '[name]',
-		usage: '_[name]_: the name of the character in Kobold to set as the server default',
-		description: 'sets a character as the default character for the server',
+	setDefault: {
+		name: 'set-default',
+		options: '[default-for] [name]',
+		usage:
+			"_[default-for]_: Whether we're setting the default character for the channel or for the server.\n" +
+			'_[name]_: the name of the character in Kobold to set as the server default',
+		description: 'sets a character as the default character for the channel/server',
 		expandedDescription:
 			'Sets the character matching the provided name ' +
-			'as the default character used for commands in this server. This applies to ' +
-			'commands like /character sheet, /roll, /init, or /character update. Your server default ' +
-			'overrides your active character',
+			'as the default character used for commands in this channel/server. This applies to ' +
+			'commands like /character sheet, /roll, /init, or /character update. Your default ' +
+			'overrides your active character. A channel default character overrides a server default character.',
 		noneOption: '(None)',
 		interactions: {
-			success: 'Yip! {characterName} is now your default character on this server!',
+			success: 'Yip! {characterName} is now your default character on this {scope}!',
 			removed:
-				'Yip! I removed your default character for this server. This server will ' +
+				'Yip! I removed your default character for this {scope}. This {scope} will ' +
 				'now use your active character for commands again.',
 			notFound:
 				"Yip! I couldn't find a character matching that name! " +

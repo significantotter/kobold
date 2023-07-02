@@ -1,4 +1,4 @@
-import { GuildDefaultCharacter } from './../index.js';
+import { GuildDefaultCharacter, ChannelDefaultCharacter } from './../index.js';
 import type CharacterTypes from './character.schema.js';
 import { JSONSchema7 } from 'json-schema';
 import { BaseModel } from '../../lib/base-model.js';
@@ -74,6 +74,14 @@ export class Character extends BaseModel {
 				join: {
 					from: 'character.id',
 					to: 'guildDefaultCharacter.characterId',
+				},
+			},
+			channelDefaultCharacter: {
+				relation: BaseModel.HasManyRelation,
+				modelClass: ChannelDefaultCharacter,
+				join: {
+					from: 'character.id',
+					to: 'channelDefaultCharacter.characterId',
 				},
 			},
 		};

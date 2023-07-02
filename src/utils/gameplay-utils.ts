@@ -11,10 +11,7 @@ export class GameplayUtils {
 	): Promise<(Character | InitiativeActor)[]> {
 		let targetCharacters: (Character | InitiativeActor)[] = [];
 		if (!compositeId) {
-			const activeCharacter = await CharacterUtils.getActiveCharacter(
-				intr.user.id,
-				intr.guildId
-			);
+			const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
 			targetCharacters = [activeCharacter];
 		} else {
 			const [type, id] = compositeId.split('-');

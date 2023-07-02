@@ -46,10 +46,7 @@ export class ModifierRemoveSubCommand implements Command {
 			const match = intr.options.getString(ModifierOptions.MODIFIER_NAME_OPTION.name);
 
 			//get the active character
-			const activeCharacter = await CharacterUtils.getActiveCharacter(
-				intr.user.id,
-				intr.guildId
-			);
+			const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
 			if (!activeCharacter) {
 				//no choices if we don't have a character to match against
 				return [];
@@ -74,7 +71,7 @@ export class ModifierRemoveSubCommand implements Command {
 	): Promise<void> {
 		const modifierChoice = intr.options.getString(ModifierOptions.MODIFIER_NAME_OPTION.name);
 		//get the active character
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id, intr.guildId);
+		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
 		const targetModifier = activeCharacter.getModifierByName(modifierChoice);
 		if (targetModifier) {
 			// ask for confirmation

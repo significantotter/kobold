@@ -2,7 +2,7 @@
 export { CharacterCommand } from './characters/character-command';
 export { CharacterListSubCommand } from './characters/character-list-subcommand';
 export { CharacterSetActiveSubCommand } from './characters/character-set-active-subcommand.js';
-export { CharacterSetServerDefaultSubCommand } from './characters/character-set-server-default.subcommand.js';
+export { CharacterSetDefaultSubCommand } from './characters/character-set-default.subcommand.js';
 export { CharacterRemoveSubCommand } from './characters/character-remove-subcommand.js';
 export { CharacterUpdateSubCommand } from './characters/character-update-subcommand.js';
 export { CharacterImportWanderersGuideSubCommand } from './characters/character-import-wanderers-guide-subcommand.js';

@@ -31,7 +31,7 @@ export class AutocompleteUtils {
 		matchText: string
 	) {
 		//get the active character
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id, intr.guildId);
+		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
 		if (!activeCharacter) {
 			//no choices if we don't have a character to match against
 			return [];
@@ -56,7 +56,7 @@ export class AutocompleteUtils {
 		if (matchText === '' || 'dice'.includes(matchText.toLocaleLowerCase())) choices.add('Dice');
 
 		//get the active character
-		const character = await CharacterUtils.getActiveCharacter(intr.user.id, intr.guildId);
+		const character = await CharacterUtils.getActiveCharacter(intr);
 		if (!character) {
 			return [];
 		}
@@ -102,7 +102,7 @@ export class AutocompleteUtils {
 		matchText: string
 	) {
 		//get the active character
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id, intr.guildId);
+		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
 		if (!activeCharacter) {
 			//no choices if we don't have a character to match against
 			return [];
@@ -216,7 +216,7 @@ export class AutocompleteUtils {
 		intr: AutocompleteInteraction<CacheType>,
 		matchText: string
 	) {
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id, intr.guildId);
+		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
 		const currentInitResponse = await InitiativeUtils.getInitiativeForChannel(intr.channel);
 
 		let results = [];

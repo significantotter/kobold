@@ -2,6 +2,22 @@ import { APIApplicationCommandBasicOption, ApplicationCommandOptionType } from '
 import { Language } from '../../../models/enum-helpers/index.js';
 
 export class CharacterOptions {
+	public static readonly CHARACTER_SET_DEFAULT_SCOPE: APIApplicationCommandBasicOption = {
+		name: Language.LL.commandOptions.setDefaultScope.name(),
+		description: Language.LL.commandOptions.setDefaultScope.description(),
+		required: true,
+		type: ApplicationCommandOptionType.String,
+		choices: [
+			{
+				name: Language.LL.commandOptions.setDefaultScope.choices.channel.name(),
+				value: Language.LL.commandOptions.setDefaultScope.choices.channel.value(),
+			},
+			{
+				name: Language.LL.commandOptions.setDefaultScope.choices.server.name(),
+				value: Language.LL.commandOptions.setDefaultScope.choices.server.value(),
+			},
+		],
+	};
 	public static readonly IMPORT_OPTION: APIApplicationCommandBasicOption = {
 		name: Language.LL.commandOptions.wgUrl.name(),
 		description: Language.LL.commandOptions.wgUrl.description(),

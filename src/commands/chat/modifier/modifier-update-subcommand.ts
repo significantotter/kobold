@@ -48,10 +48,7 @@ export class ModifierUpdateSubCommand implements Command {
 			const match = intr.options.getString(ModifierOptions.MODIFIER_NAME_OPTION.name);
 
 			//get the active character
-			const activeCharacter = await CharacterUtils.getActiveCharacter(
-				intr.user.id,
-				intr.guildId
-			);
+			const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
 			if (!activeCharacter) {
 				//no choices if we don't have a character to match against
 				return [];
@@ -87,7 +84,7 @@ export class ModifierUpdateSubCommand implements Command {
 		let updateValue: string | string[] | number;
 
 		//check if we have an active character
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id, intr.guildId);
+		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
 		if (!activeCharacter) {
 			await InteractionUtils.send(
 				intr,

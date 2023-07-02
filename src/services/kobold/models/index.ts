@@ -4,6 +4,8 @@ export { Character } from './character/character.model.js';
 export { CharacterFactory } from './character/character.factory';
 export { GuildDefaultCharacter } from './guild-default-character/guild-default-character.model.js';
 export { GuildDefaultCharacterFactory } from './guild-default-character/guild-default-character.factory';
+export { ChannelDefaultCharacter } from './channel-default-character/channel-default-character.model.js';
+export { ChannelDefaultCharacterFactory } from './channel-default-character/channel-default-character.factory';
 export { Initiative } from './initiative/initiative.model';
 export { InitiativeActor } from './initiative-actor/initiative-actor.model';
 export { InitiativeActorGroup } from './initiative-actor-group/initiative-actor-group.model';

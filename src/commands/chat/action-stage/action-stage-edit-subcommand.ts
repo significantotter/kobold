@@ -42,10 +42,7 @@ export class ActionStageEditSubCommand implements Command {
 			const match = intr.options.getString(ActionStageOptions.ACTION_ROLL_TARGET_OPTION.name);
 
 			//get the active character
-			const activeCharacter = await CharacterUtils.getActiveCharacter(
-				intr.user.id,
-				intr.guildId
-			);
+			const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
 			if (!activeCharacter) {
 				//no choices if we don't have a character to match against
 				return [];
@@ -91,7 +88,7 @@ export class ActionStageEditSubCommand implements Command {
 		const [actionName, action] = actionRollTarget.split(' -- ').map(term => term.trim());
 
 		//get the active character
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id, intr.guildId);
+		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
 		if (!activeCharacter) {
 			await InteractionUtils.send(
 				intr,

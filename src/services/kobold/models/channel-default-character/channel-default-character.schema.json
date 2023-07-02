@@ -1,0 +1,20 @@
+{
+	"title": "ChannelDefaultCharacter",
+	"type": "object",
+	"description": "A record of a character set as the default for a user in a channel",
+	"properties": {
+		"channelId": {
+			"type": "string",
+			"readOnly": true,
+			"description": "The discord id of the channel for the default character."
+		},
+		"characterId": {
+			"type": "integer",
+			"description": "The internal id of the character."
+		},
+		"userId": {
+			"type": "string",
+			"description": "The discord id of the user who imported the character"
+		}
+	}
+}

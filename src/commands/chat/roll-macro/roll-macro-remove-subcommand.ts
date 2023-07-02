@@ -57,7 +57,7 @@ export class RollMacroRemoveSubCommand implements Command {
 	): Promise<void> {
 		const rollMacroChoice = intr.options.getString(RollMacroOptions.MACRO_NAME_OPTION.name);
 		//get the active character
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr.user.id, intr.guildId);
+		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
 		const targetRollMacro = activeCharacter.getRollMacroByName(rollMacroChoice);
 		if (targetRollMacro) {
 			// ask for confirmation
