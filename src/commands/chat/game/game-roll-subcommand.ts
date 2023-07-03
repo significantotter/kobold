@@ -66,8 +66,8 @@ export class GameRollSubCommand implements Command {
 				const creature = new Creature(character.sheet);
 
 				const allRolls = [
-					..._.keys(creature.rolls),
 					..._.keys(creature.attackRolls),
+					..._.keys(creature.rolls),
 					...creature.actions.map(action => action?.name),
 				];
 

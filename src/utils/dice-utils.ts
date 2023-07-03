@@ -21,6 +21,7 @@ export interface DiceRollResult extends APIEmbedField {
 export interface MultiRollResult {
 	results: Omit<DiceRollResult, 'type'>[];
 	name: string;
+	appliedDamage?: number;
 	type: 'multiDice';
 }
 export interface TextResult {
@@ -372,6 +373,7 @@ export class DiceUtils {
 	}
 	public static rollCreatureAttack({
 		creature,
+		targetCreature,
 		attackName,
 		rollNote,
 		attackModifierExpression,
@@ -380,13 +382,14 @@ export class DiceUtils {
 		LL,
 	}: {
 		creature: Creature;
+		targetCreature?: Creature;
 		attackName: string;
 		rollNote?: string;
 		attackModifierExpression?: string;
 		damageModifierExpression?: string;
 		targetAC?: number;
 		LL;
-	}): RollBuilder {
+	}): { actionRoller: ActionRoller; builtRoll: RollBuilder } {
 		const targetAttack = creature.attackRolls[attackName.toLowerCase()];
 
 		// build a little action from the attack!
@@ -439,15 +442,19 @@ export class DiceUtils {
 			});
 		}
 
-		return new ActionRoller(action, creature).buildRoll(
-			rollNote,
-			Language.LL.commands.roll.attack.interactions.rollEmbed.rollDescription({
-				attackName: targetAttack.name,
-			}),
-			{
-				targetDC: targetAC,
-			}
-		);
+		const actionRoller = new ActionRoller(action, creature, targetCreature);
+		return {
+			actionRoller,
+			builtRoll: actionRoller.buildRoll(
+				rollNote,
+				Language.LL.commands.roll.attack.interactions.rollEmbed.rollDescription({
+					attackName: targetAttack.name,
+				}),
+				{
+					targetDC: targetAC,
+				}
+			),
+		};
 	}
 	public static async rollCreatureDice(
 		creature: Creature,
@@ -488,7 +495,7 @@ export class DiceUtils {
 
 			return { error: false, message: response.compileEmbed() };
 		} else if (targetRoll.type === 'attack') {
-			const response = DiceUtils.rollCreatureAttack({
+			const { builtRoll, actionRoller } = DiceUtils.rollCreatureAttack({
 				creature: creature,
 				attackName: targetRoll.name,
 				rollNote: options.rollNote,
@@ -498,7 +505,7 @@ export class DiceUtils {
 				LL,
 			});
 
-			embed = response.compileEmbed({ forceFields: true });
+			embed = builtRoll.compileEmbed({ forceFields: true });
 		} else if (targetAction) {
 			const actionRoller = new ActionRoller(targetAction, creature, null);
 

@@ -54,6 +54,7 @@ export class ActionStageAddBasicDamageSubCommand implements Command {
 		const targetAction = intr.options.getString(ActionStageOptions.ACTION_TARGET_OPTION.name);
 		const rollType = 'damage';
 		const rollName = intr.options.getString(ActionStageOptions.ACTION_ROLL_NAME_OPTION.name);
+		const damageType = intr.options.getString(ActionStageOptions.ACTION_STAGE_DAMAGE_TYPE.name);
 		const basicDamageDiceRoll = intr.options.getString(
 			ActionStageOptions.ACTION_BASIC_DAMAGE_DICE_ROLL_OPTION.name
 		);
@@ -99,6 +100,7 @@ export class ActionStageAddBasicDamageSubCommand implements Command {
 			name: rollName,
 			type: rollType,
 			roll: basicDamageDiceRoll,
+			damageType: damageType,
 			allowRollModifiers,
 		});
 

@@ -78,6 +78,7 @@ export interface Character {
 			| {
 					name?: string;
 					type?: "damage";
+					damageType?: string | null;
 					roll?: string | null;
 					allowRollModifiers?: boolean;
 					[k: string]: any;
@@ -85,6 +86,7 @@ export interface Character {
 			| {
 					name?: string;
 					type?: "advanced-damage";
+					damageType?: string | null;
 					criticalSuccessRoll?: string | null;
 					criticalFailureRoll?: string | null;
 					successRoll?: string | null;

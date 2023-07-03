@@ -20,6 +20,7 @@ import _ from 'lodash';
 import { Initiative } from '../../../services/kobold/models/index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Language } from '../../../models/enum-helpers/index.js';
+import { InitOptions } from './init-command-options.js';
 
 export class InitJumpToSubCommand implements Command {
 	public names = [Language.LL.commands.init.jumpTo.name()];
@@ -39,9 +40,9 @@ export class InitJumpToSubCommand implements Command {
 		option: AutocompleteFocusedOption
 	): Promise<ApplicationCommandOptionChoiceData[]> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === ChatArgs.INIT_CHARACTER_OPTION.name) {
+		if (option.name === InitOptions.INIT_CHARACTER_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(ChatArgs.INIT_CHARACTER_OPTION.name);
+			const match = intr.options.getString(InitOptions.INIT_CHARACTER_OPTION.name);
 
 			const currentInitResponse = await InitiativeUtils.getInitiativeForChannel(intr.channel);
 			if (currentInitResponse.errorMessage) {
@@ -70,7 +71,7 @@ export class InitJumpToSubCommand implements Command {
 		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
-		const targetCharacterName = intr.options.getString(ChatArgs.INIT_CHARACTER_OPTION.name);
+		const targetCharacterName = intr.options.getString(InitOptions.INIT_CHARACTER_OPTION.name);
 		const initResult = await InitiativeUtils.getInitiativeForChannel(intr.channel, {
 			sendErrors: true,
 			LL,

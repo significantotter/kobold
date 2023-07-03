@@ -143,6 +143,29 @@ export class AutocompleteUtils {
 		}));
 	}
 
+	public static async getInitTargetOptions(
+		intr: AutocompleteInteraction<CacheType>,
+		matchText: string
+	) {
+		const currentInitResponse = await InitiativeUtils.getInitiativeForChannel(intr.channel);
+		if (currentInitResponse.errorMessage) {
+			return [];
+		}
+
+		const actorOptions = currentInitResponse.init.actors.filter(actor =>
+			actor.name.toLocaleLowerCase().includes(matchText.toLocaleLowerCase())
+		);
+
+		//return the matched actors
+		return [
+			{ name: '(None)', value: '__NONE__' },
+			...actorOptions.map(actor => ({
+				name: actor.name,
+				value: actor.name,
+			})),
+		];
+	}
+
 	public static async getMatchingRollsForInitiativeSheet(
 		intr: AutocompleteInteraction<CacheType>,
 		matchText: string,

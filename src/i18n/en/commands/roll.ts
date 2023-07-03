@@ -5,6 +5,7 @@ export default {
 		noActiveCharacter: "Yip! You don't have any active characters!",
 		secretRollNotification: "Yip! I'm rolling in secret!",
 		rolledDice: 'rolled {diceType}',
+		damageTaken: '{creatureName} took {damage} damage!',
 	},
 
 	dice: {

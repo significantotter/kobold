@@ -25,6 +25,8 @@ import { DiceUtils } from '../../../utils/dice-utils.js';
 import { RollBuilder } from '../../../utils/roll-builder.js';
 import { ActionRoller } from '../../../utils/action-roller.js';
 import { getEmoji } from '../../../constants/emoji.js';
+import { InitOptions } from './init-command-options.js';
+import { InitiativeActor } from '../../../services/kobold/models/index.js';
 
 export class InitRollSubCommand implements Command {
 	public names = [Language.LL.commands.init.roll.name()];
@@ -44,20 +46,32 @@ export class InitRollSubCommand implements Command {
 		option: AutocompleteFocusedOption
 	): Promise<ApplicationCommandOptionChoiceData[]> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === ChatArgs.INIT_CHARACTER_OPTION.name) {
+		if (option.name === InitOptions.INIT_CHARACTER_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(ChatArgs.INIT_CHARACTER_OPTION.name);
+			const match = intr.options.getString(InitOptions.INIT_CHARACTER_OPTION.name);
 
 			return await AutocompleteUtils.getAllControllableInitiativeActors(intr, match);
-		} else if (option.name === ChatArgs.INIT_ROLL_CHOICE_OPTION.name) {
-			const match = intr.options.getString(ChatArgs.INIT_ROLL_CHOICE_OPTION.name);
-			const targetCharacterName = intr.options.getString(ChatArgs.INIT_CHARACTER_OPTION.name);
+		} else if (option.name === InitOptions.INIT_CHARACTER_TARGET.name) {
+			//we don't need to autocomplete if we're just dealing with whitespace
+			const match = intr.options.getString(InitOptions.INIT_CHARACTER_TARGET.name);
+
+			return await AutocompleteUtils.getAllControllableInitiativeActors(intr, match);
+		} else if (option.name === InitOptions.INIT_ROLL_CHOICE_OPTION.name) {
+			const match = intr.options.getString(InitOptions.INIT_ROLL_CHOICE_OPTION.name);
+			const targetCharacterName = intr.options.getString(
+				InitOptions.INIT_CHARACTER_OPTION.name
+			);
 
 			return await AutocompleteUtils.getMatchingRollsForInitiativeSheet(
 				intr,
 				match,
 				targetCharacterName
 			);
+		} else if (option.name === InitOptions.INIT_CHARACTER_TARGET.name) {
+			//we don't need to autocomplete if we're just dealing with whitespace
+			const match = intr.options.getString(InitOptions.INIT_CHARACTER_TARGET.name);
+
+			return await AutocompleteUtils.getAllControllableInitiativeActors(intr, match);
 		}
 	}
 
@@ -66,8 +80,9 @@ export class InitRollSubCommand implements Command {
 		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
-		const rollChoice = intr.options.getString(ChatArgs.INIT_ROLL_CHOICE_OPTION.name);
-		const targetCharacterName = intr.options.getString(ChatArgs.INIT_CHARACTER_OPTION.name);
+		const rollChoice = intr.options.getString(InitOptions.INIT_ROLL_CHOICE_OPTION.name);
+		const targetCharacterName = intr.options.getString(InitOptions.INIT_CHARACTER_OPTION.name);
+		const targetInitActor = intr.options.getString(InitOptions.INIT_CHARACTER_TARGET.name);
 
 		const modifierExpression = intr.options.getString(ChatArgs.ROLL_MODIFIER_OPTION.name);
 		const damageModifierExpression = intr.options.getString(
@@ -133,6 +148,14 @@ export class InitRollSubCommand implements Command {
 		}
 		const creature = new Creature(actor.sheet);
 
+		let targetCreature: Creature | undefined;
+		let targetActor: InitiativeActor | undefined;
+
+		if (targetInitActor) {
+			targetActor = await InitiativeUtils.getInitActorByName(intr, targetInitActor);
+			targetCreature = Creature.fromInitActor(targetActor);
+		}
+
 		const targetRoll = creature.rolls[rollChoice] ?? creature.attackRolls[rollChoice];
 
 		const targetAction = creature.keyedActions[rollChoice];
@@ -157,7 +180,7 @@ export class InitRollSubCommand implements Command {
 
 			embed = response.compileEmbed();
 		} else if (targetRoll.type === 'attack') {
-			const response = DiceUtils.rollCreatureAttack({
+			const { builtRoll, actionRoller } = DiceUtils.rollCreatureAttack({
 				creature: creature,
 				attackName: targetRoll.name,
 				rollNote,
@@ -167,9 +190,9 @@ export class InitRollSubCommand implements Command {
 				LL,
 			});
 
-			embed = response.compileEmbed({ forceFields: true });
+			embed = builtRoll.compileEmbed({ forceFields: true });
 		} else if (targetAction) {
-			const actionRoller = new ActionRoller(targetAction, creature, null);
+			const actionRoller = new ActionRoller(targetAction, creature, targetCreature);
 
 			const builtRoll = actionRoller.buildRoll(rollNote, targetAction.description, {
 				attackModifierExpression: modifierExpression,

@@ -15,6 +15,7 @@ import { KoboldEmbed } from './kobold-embed-utils.js';
 
 export class RollBuilder {
 	private creature: Creature | null;
+	private targetCreature: Creature | null;
 	private rollDescription: string;
 	private rollNote: string;
 	public rollResults: ResultField[];
@@ -26,6 +27,7 @@ export class RollBuilder {
 		actorName,
 		character,
 		creature,
+		targetCreature,
 		rollDescription,
 		rollNote,
 		title,
@@ -34,6 +36,7 @@ export class RollBuilder {
 		actorName?: string;
 		character?: Character | null;
 		creature?: Creature;
+		targetCreature?: Creature;
 		rollDescription?: string;
 		rollNote?: string;
 		title?: string;
@@ -48,6 +51,7 @@ export class RollBuilder {
 		if (character && !this.creature) {
 			this.creature = Creature.fromCharacter(character);
 		}
+		this.targetCreature = targetCreature || null;
 
 		const actorText = actorName || this.creature?.sheet?.info?.name || '';
 		this.title = title || `${actorText} ${this.rollDescription}`.trim();
@@ -66,6 +70,7 @@ export class RollBuilder {
 		rollTitle,
 		rollExpressions,
 		showTags = true,
+		rollFromTarget = false,
 	}: {
 		rollTitle?: string;
 		rollExpressions: {
@@ -80,6 +85,7 @@ export class RollBuilder {
 				tags?: string[];
 			}[];
 		}[];
+		rollFromTarget?: boolean;
 		showTags?: boolean;
 	}) {
 		const title = rollTitle || '\u200B';
@@ -90,7 +96,7 @@ export class RollBuilder {
 				tags: rollExpression.tags,
 				extraAttributes: rollExpression.extraAttributes,
 				modifierMultiplier: rollExpression.modifierMultiplier,
-				creature: this.creature,
+				creature: rollFromTarget ? this.targetCreature : this.creature,
 				LL: this.LL,
 			}),
 			name: rollExpression.name,
@@ -149,6 +155,7 @@ export class RollBuilder {
 		multiplier = 1,
 		showTags = true,
 		rollType,
+		rollFromTarget = false,
 	}: {
 		rollExpression: string;
 		rollTitle?: string;
@@ -163,6 +170,7 @@ export class RollBuilder {
 		multiplier?: number;
 		showTags?: boolean;
 		rollType?: 'attack' | 'damage' | 'save';
+		rollFromTarget?: boolean;
 	}) {
 		const rollField = DiceUtils.parseAndEvaluateDiceExpression({
 			rollExpression,
@@ -170,7 +178,7 @@ export class RollBuilder {
 			tags,
 			extraAttributes,
 			multiplier,
-			creature: this.creature,
+			creature: rollFromTarget ? this.targetCreature : this.creature,
 			LL: this.LL,
 		});
 		const title = rollTitle || '\u200B';

@@ -24,6 +24,10 @@ import { ActionRoller } from '../../../utils/action-roller.js';
 import { getEmoji } from '../../../constants/emoji.js';
 import { Creature } from '../../../utils/creature.js';
 import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
+import { InitOptions } from '../init/init-command-options.js';
+import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
+import { Character, InitiativeActor } from '../../../services/kobold/models/index.js';
+import { InitiativeUtils } from '../../../utils/initiative-utils.js';
 
 export class RollActionSubCommand implements Command {
 	public names = [Language.LL.commands.roll.action.name()];
@@ -64,6 +68,12 @@ export class RollActionSubCommand implements Command {
 			//return the matched actions
 			return matchedActions;
 		}
+		if (option.name === InitOptions.INIT_CHARACTER_TARGET.name) {
+			//we don't need to autocomplete if we're just dealing with whitespace
+			const match = intr.options.getString(InitOptions.INIT_CHARACTER_TARGET.name);
+
+			return await AutocompleteUtils.getInitTargetOptions(intr, match);
+		}
 	}
 
 	public async execute(
@@ -72,6 +82,7 @@ export class RollActionSubCommand implements Command {
 		LL: TranslationFunctions
 	): Promise<void> {
 		const targetActionName = intr.options.getString(ActionOptions.ACTION_TARGET_OPTION.name);
+		const targetInitActor = intr.options.getString(InitOptions.INIT_CHARACTER_TARGET.name);
 		const attackModifierExpression = intr.options.getString(
 			ChatArgs.ATTACK_ROLL_MODIFIER_OPTION.name
 		);
@@ -105,8 +116,15 @@ export class RollActionSubCommand implements Command {
 		);
 
 		const creature = Creature.fromCharacter(activeCharacter);
+		let targetCreature: Creature | undefined;
+		let targetActor: InitiativeActor | undefined;
 
-		const actionRoller = new ActionRoller(targetAction, creature, null, {
+		if (targetInitActor && targetInitActor != '__NONE__') {
+			targetActor = await InitiativeUtils.getInitActorByName(intr, targetInitActor);
+			targetCreature = Creature.fromInitActor(targetActor);
+		}
+
+		const actionRoller = new ActionRoller(targetAction, creature, targetCreature, {
 			heightenLevel,
 		});
 
@@ -120,6 +138,8 @@ export class RollActionSubCommand implements Command {
 				targetAction.name
 			}!`,
 		});
+
+		const appliedDamage = actionRoller.totalDamageDealt;
 
 		const embed = builtRoll.compileEmbed({ forceFields: true, showTags: false });
 
@@ -138,5 +158,28 @@ export class RollActionSubCommand implements Command {
 			);
 		}
 		await response.sendBatches(intr, isSecretRoll);
+
+		if (
+			targetCreature &&
+			targetAction.rolls.some(
+				roll => roll.type === 'damage' || roll.type === 'advanced-damage'
+			)
+		) {
+			// apply any damage effects from the action to the creature
+			let promises = [targetActor.$query().patch({ sheet: targetCreature.sheet })];
+			if (targetActor.characterId) {
+				promises.push(
+					targetActor
+						.$relatedQuery<Character>('character')
+						.patch({ sheet: targetCreature.sheet })
+				);
+			}
+			await Promise.all(promises);
+
+			let message = actionRoller.buildResultText();
+
+			// inform the channel that damage was dealt
+			await InteractionUtils.send(intr, message);
+		}
 	}
 }

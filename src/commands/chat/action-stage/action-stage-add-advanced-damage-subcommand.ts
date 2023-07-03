@@ -54,6 +54,7 @@ export class ActionStageAddAdvancedDamageSubCommand implements Command {
 		const targetAction = intr.options.getString(ActionStageOptions.ACTION_TARGET_OPTION.name);
 		const rollType = 'advanced-damage';
 		const rollName = intr.options.getString(ActionStageOptions.ACTION_ROLL_NAME_OPTION.name);
+		const damageType = intr.options.getString(ActionStageOptions.ACTION_STAGE_DAMAGE_TYPE.name);
 		const successDiceRoll = intr.options.getString(
 			ActionStageOptions.ACTION_SUCCESS_DICE_ROLL_OPTION.name
 		);
@@ -120,6 +121,7 @@ export class ActionStageAddAdvancedDamageSubCommand implements Command {
 		action.rolls.push({
 			name: rollName,
 			type: rollType,
+			damageType,
 			successRoll: successDiceRoll,
 			criticalSuccessRoll: criticalSuccessDiceRoll,
 			criticalFailureRoll: criticalFailureDiceRoll,

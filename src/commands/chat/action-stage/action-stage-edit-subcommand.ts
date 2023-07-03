@@ -121,7 +121,8 @@ export class ActionStageEditSubCommand implements Command {
 				invalid = true;
 			}
 		} else if (roll.type === 'damage') {
-			if (!['name', 'roll', 'allowRollModifier'].includes(fieldToEdit)) {
+			console.log(fieldToEdit);
+			if (!['name', 'roll', 'allowRollModifier', 'damageType'].includes(fieldToEdit)) {
 				invalid = true;
 			}
 		} else if (roll.type === 'advanced-damage') {
@@ -180,6 +181,7 @@ export class ActionStageEditSubCommand implements Command {
 			[
 				'name',
 				'targetDC',
+				'damageType',
 				'roll',
 				'successRoll',
 				'failureRoll',
@@ -213,6 +215,7 @@ export class ActionStageEditSubCommand implements Command {
 				intr,
 				LL.commands.actionStage.edit.interactions.unknownField()
 			);
+			return;
 		}
 
 		if (moveTo === 'top') {

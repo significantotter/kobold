@@ -12,6 +12,12 @@ import { KoboldEmbed } from './kobold-embed-utils.js';
 import { parseBonusesForTagsFromModifiers } from '../services/kobold/lib/helpers.js';
 import { KoboldError } from './KoboldError.js';
 
+const damageTypeShorthands: { [shorthand: string]: string } = {
+	piercing: 'p',
+	slashing: 's',
+	bludgeoning: 'b',
+};
+
 export type SettableSheetOption =
 	| 'tempHp'
 	| 'hp'
@@ -340,6 +346,166 @@ export class Creature {
 			this.sheet.general.currentFocusPoints = updatedValue;
 		}
 		return { initialValue, updatedValue };
+	}
+
+	public matchingWeakness(damageType: string) {
+		const shorthandDamageType = damageTypeShorthands[damageType];
+		if (!damageType) return null;
+		for (const weakness of this.sheet.defenses.weaknesses) {
+			const shorthandWeaknessType = damageTypeShorthands[weakness.type];
+			if (
+				weakness.type.toLowerCase() === damageType.toLowerCase() ||
+				(shorthandDamageType && shorthandDamageType === weakness.type.toLowerCase()) ||
+				(shorthandWeaknessType && shorthandWeaknessType === damageType.toLowerCase())
+			)
+				return weakness;
+		}
+	}
+
+	public matchingResistance(damageType: string) {
+		const shorthandDamageType = damageTypeShorthands[damageType];
+		if (!damageType) return null;
+		for (const resistance of this.sheet.defenses.resistances) {
+			const shorthandResistanceType = damageTypeShorthands[resistance.type];
+			if (
+				resistance.type.toLowerCase() === damageType.toLowerCase() ||
+				(shorthandDamageType && shorthandDamageType === resistance.type.toLowerCase()) ||
+				(shorthandResistanceType && shorthandResistanceType === damageType.toLowerCase())
+			)
+				return resistance;
+		}
+	}
+
+	public matchingImmunities(damageType: string) {
+		const shorthandDamageType = damageTypeShorthands[damageType];
+		if (!damageType) return [];
+		for (const immunity of this.sheet.defenses.immunities) {
+			const shorthandImmunityType = damageTypeShorthands[immunity];
+			if (
+				immunity.toLowerCase() === damageType.toLowerCase() ||
+				(shorthandDamageType && shorthandDamageType === immunity.toLowerCase()) ||
+				(shorthandImmunityType && shorthandImmunityType === damageType.toLowerCase())
+			)
+				return [immunity];
+		}
+	}
+
+	/**
+	 * Takes typed damage, applies any weaknesses or resistances, alters the sheet, and returns the actual damage taken
+	 */
+	public applyDamage(damage: number, damageType?: string) {
+		let finalDamage = damage;
+		let appliedWeakness;
+		let appliedResistance;
+		let appliedImmunity;
+		if (damageType) {
+			// we import damage types that end up containing effects sentences, so split
+			// up the sentences into word tokens, then check each word against our weaknesses/resistances
+			const damageTypeWords = damageType.split(/\W+/);
+			const weakness = _.maxBy(
+				damageTypeWords
+					.map(word => this.matchingWeakness(word))
+					.filter(weakness => weakness != null),
+				weakness => weakness?.amount ?? 0
+			);
+			const resistance = _.maxBy(
+				damageTypeWords
+					.map(word => this.matchingResistance(word))
+					.filter(resistance => resistance != null),
+				resistances => resistances?.amount ?? 0
+			);
+			const immunities = damageTypeWords
+				.map(word => this.matchingImmunities(word))
+				.filter(immunity => !!immunity)
+				.flat();
+
+			if (weakness?.type) {
+				finalDamage = finalDamage + (weakness?.amount ?? 0);
+				appliedWeakness = weakness;
+			}
+			if (resistance?.type) {
+				console.log(finalDamage, resistance?.amount);
+				finalDamage = Math.max(0, finalDamage - (resistance?.amount ?? 0));
+				appliedResistance = resistance;
+			}
+			if (immunities.length) {
+				finalDamage = 0;
+				appliedImmunity = immunities[0];
+			}
+		}
+		let initialTempHp = this.sheet.defenses.tempHp;
+		let initialStamina = this.sheet.defenses.currentStamina;
+		let initialHp = this.sheet.defenses.currentHp;
+		let unappliedDamage = finalDamage;
+
+		// apply damage to temp hp first, then stamina, then hp
+		if (initialTempHp > 0) {
+			this.sheet.defenses.tempHp = Math.max(0, initialTempHp - unappliedDamage);
+			unappliedDamage -= Math.min(initialTempHp, unappliedDamage);
+		}
+		if (unappliedDamage > 0 && this.sheet.info.usesStamina && initialStamina > 0) {
+			this.sheet.defenses.currentStamina = Math.max(0, initialStamina - unappliedDamage);
+			unappliedDamage -= Math.min(initialStamina, unappliedDamage);
+		}
+		if (unappliedDamage > 0 && initialHp > 0) {
+			this.sheet.defenses.currentHp = Math.max(0, initialHp - unappliedDamage);
+			unappliedDamage -= Math.min(initialHp, unappliedDamage);
+		}
+
+		return {
+			totalDamage: finalDamage,
+			appliedWeakness,
+			appliedResistance,
+			appliedImmunity,
+			appliedDamage: finalDamage - unappliedDamage,
+		};
+	}
+
+	getDC(dcName: string): number | null {
+		const trimmedLowerDCName = dcName.toLowerCase().replace(/\W+/g, '');
+
+		if (['ac', 'armorclass', 'armor'].includes(trimmedLowerDCName))
+			return this.sheet.defenses.ac ?? 10;
+		if (['fort', 'fortitude'].includes(trimmedLowerDCName))
+			return this.sheet.saves.fortitude ?? 10;
+		if (['ref', 'reflex'].includes(trimmedLowerDCName)) return this.sheet.saves.reflex ?? 10;
+		if (['will'].includes(trimmedLowerDCName)) return this.sheet.saves.will ?? 10;
+		if (['perception', 'perceptiondc'].includes(trimmedLowerDCName))
+			return this.sheet.general.perception ?? 10;
+		if (['classdc', 'class'].includes(trimmedLowerDCName))
+			return this.sheet.general.classDC ?? 10;
+		for (const skill of _.keys(this.sheet.skills)) {
+			if (skill === 'lores') continue;
+			if (
+				skill.toLowerCase() === trimmedLowerDCName ||
+				skill.toLowerCase() + 'dc' === trimmedLowerDCName
+			)
+				return 10 + (this.sheet.skills[skill] ?? 0);
+		}
+		for (const skill of this.sheet.skills.lores) {
+			if (
+				skill.name.toLowerCase() === trimmedLowerDCName ||
+				skill.name.toLowerCase() + 'dc' === trimmedLowerDCName
+			)
+				return 10 + (skill.bonus ?? 0);
+		}
+		if (['arcane', 'arcanedc', 'arcanespelldc'].includes(trimmedLowerDCName))
+			return this.sheet.castingStats.arcaneDC ?? 10;
+		if (['divine', 'divinedc', 'divinespelldc'].includes(trimmedLowerDCName))
+			return this.sheet.castingStats.divineDC ?? 10;
+		if (['occult', 'occultdc', 'occultspelldc'].includes(trimmedLowerDCName))
+			return this.sheet.castingStats.occultDC ?? 10;
+		if (['primal', 'primaldc', 'primalspelldc'].includes(trimmedLowerDCName))
+			return this.sheet.castingStats.primalDC ?? 10;
+		if (['spell', 'spelldc'].includes(trimmedLowerDCName)) {
+			return Math.max(
+				this.sheet.castingStats.arcaneDC ?? 10,
+				this.sheet.castingStats.divineDC ?? 10,
+				this.sheet.castingStats.occultDC ?? 10,
+				this.sheet.castingStats.primalDC ?? 10
+			);
+		}
+		return null;
 	}
 
 	// Roll Options

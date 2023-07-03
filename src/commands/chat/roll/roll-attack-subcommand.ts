@@ -20,6 +20,10 @@ import { RollBuilder } from '../../../utils/roll-builder.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Language } from '../../../models/enum-helpers/index.js';
 import { Creature } from '../../../utils/creature.js';
+import { InitOptions } from '../init/init-command-options.js';
+import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
+import { InitiativeUtils } from '../../../utils/initiative-utils.js';
+import { Character, InitiativeActor } from '../../../services/kobold/models/index.js';
 
 export class RollAttackSubCommand implements Command {
 	public names = [Language.LL.commands.roll.attack.name()];
@@ -60,6 +64,12 @@ export class RollAttackSubCommand implements Command {
 			//return the matched attacks
 			return matchedAttack;
 		}
+		if (option.name === InitOptions.INIT_CHARACTER_TARGET.name) {
+			//we don't need to autocomplete if we're just dealing with whitespace
+			const match = intr.options.getString(InitOptions.INIT_CHARACTER_TARGET.name);
+
+			return await AutocompleteUtils.getInitTargetOptions(intr, match);
+		}
 	}
 
 	public async execute(
@@ -68,6 +78,7 @@ export class RollAttackSubCommand implements Command {
 		LL: TranslationFunctions
 	): Promise<void> {
 		const attackChoice = intr.options.getString(ChatArgs.ATTACK_CHOICE_OPTION.name);
+		const targetInitActor = intr.options.getString(InitOptions.INIT_CHARACTER_TARGET.name);
 		const attackModifierExpression = intr.options.getString(
 			ChatArgs.ATTACK_ROLL_MODIFIER_OPTION.name
 		);
@@ -96,8 +107,17 @@ export class RollAttackSubCommand implements Command {
 
 		const creature = Creature.fromCharacter(activeCharacter);
 
-		const rollBuilder = DiceUtils.rollCreatureAttack({
+		let targetCreature: Creature | undefined;
+		let targetActor: InitiativeActor | undefined;
+
+		if (targetInitActor && targetInitActor !== '__NONE__') {
+			targetActor = await InitiativeUtils.getInitActorByName(intr, targetInitActor);
+			targetCreature = Creature.fromInitActor(targetActor);
+		}
+
+		const { builtRoll, actionRoller } = DiceUtils.rollCreatureAttack({
 			creature,
+			targetCreature,
 			attackName: attackChoice,
 			rollNote,
 			attackModifierExpression,
@@ -106,7 +126,12 @@ export class RollAttackSubCommand implements Command {
 			LL,
 		});
 
-		const embed = rollBuilder.compileEmbed({ forceFields: true });
+		if (targetCreature) {
+			// apply any effects from the action to the creature
+			await targetActor.$query().patch({ sheet: targetCreature.sheet });
+		}
+
+		const embed = builtRoll.compileEmbed({ forceFields: true });
 
 		if (notifyRoll) {
 			await InteractionUtils.send(
@@ -114,6 +139,24 @@ export class RollAttackSubCommand implements Command {
 				Language.LL.commands.roll.interactions.secretRollNotification()
 			);
 		}
-		embed.sendBatches(intr, isSecretRoll);
+		await embed.sendBatches(intr, isSecretRoll);
+
+		if (targetCreature) {
+			// apply any damage effects from the action to the creature
+			let promises = [targetActor.$query().patch({ sheet: targetCreature.sheet })];
+			if (targetActor.characterId) {
+				promises.push(
+					targetActor
+						.$relatedQuery<Character>('character')
+						.patch({ sheet: targetCreature.sheet })
+				);
+			}
+			await Promise.all(promises);
+
+			let message = actionRoller.buildResultText();
+
+			// inform the channel that damage was dealt
+			await InteractionUtils.send(intr, message);
+		}
 	}
 }

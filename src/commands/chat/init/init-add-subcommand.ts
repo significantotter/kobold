@@ -26,6 +26,7 @@ import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
 import { Npc, Sheet } from '../../../services/kobold/models/index.js';
 import { Creature } from '../../../utils/creature.js';
 import _ from 'lodash';
+import { InitOptions } from './init-command-options.js';
 
 export class InitAddSubCommand implements Command {
 	public names = [Language.LL.commands.init.add.name()];
@@ -45,8 +46,8 @@ export class InitAddSubCommand implements Command {
 		option: AutocompleteFocusedOption
 	): Promise<ApplicationCommandOptionChoiceData[]> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === ChatArgs.INIT_CREATURE_OPTION.name) {
-			const match = intr.options.getString(ChatArgs.INIT_CREATURE_OPTION.name);
+		if (option.name === InitOptions.INIT_CREATURE_OPTION.name) {
+			const match = intr.options.getString(InitOptions.INIT_CREATURE_OPTION.name);
 			const npcs = await AutocompleteUtils.getBestiaryNpcs(intr, match);
 			if (npcs.length > 20) {
 				npcs.unshift({ name: 'Custom NPC', value: '-1' });
@@ -75,12 +76,12 @@ export class InitAddSubCommand implements Command {
 		}
 		const currentInit = currentInitResponse.init;
 
-		let actorName = intr.options.getString(ChatArgs.ACTOR_NAME_OPTION.name);
-		const targetCreature = intr.options.getString(ChatArgs.INIT_CREATURE_OPTION.name);
-		const initiativeValue = intr.options.getNumber(ChatArgs.INIT_VALUE_OPTION.name);
+		let actorName = intr.options.getString(InitOptions.ACTOR_NAME_OPTION.name);
+		const targetCreature = intr.options.getString(InitOptions.INIT_CREATURE_OPTION.name);
+		const initiativeValue = intr.options.getNumber(InitOptions.INIT_VALUE_OPTION.name);
 		const diceExpression = intr.options.getString(ChatArgs.ROLL_EXPRESSION_OPTION.name);
-		const hideStats = intr.options.getBoolean(ChatArgs.INIT_HIDE_STATS_OPTION.name) ?? true;
-		const template = (intr.options.getString(ChatArgs.INIT_ADD_TEMPLATE_OPTION.name) ?? '')
+		const hideStats = intr.options.getBoolean(InitOptions.INIT_HIDE_STATS_OPTION.name) ?? true;
+		const template = (intr.options.getString(InitOptions.INIT_ADD_TEMPLATE_OPTION.name) ?? '')
 			.trim()
 			.toLocaleLowerCase();
 

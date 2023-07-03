@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { Character, Initiative } from '../services/kobold/models/index.js';
+import { Character, Sheet } from '../services/kobold/models/index.js';
 import { MultiRollResult } from './dice-utils.js';
 import { RollBuilder } from './roll-builder.js';
 import { Creature } from './creature.js';
@@ -29,10 +29,14 @@ type MultiRollResultItem = MultiRollResult['results'][0] | null;
 
 export class ActionRoller {
 	public tags;
+	public totalDamageDealt = 0;
+	public triggeredWeaknesses: Sheet['defenses']['weaknesses'] = [];
+	public triggeredResistances: Sheet['defenses']['resistances'] = [];
+	public triggeredImmunities: Sheet['defenses']['immunities'] = [];
 	constructor(
 		public action: Action,
 		public creature: Creature,
-		public initiative?: Initiative,
+		public targetCreature?: Creature,
 		public options?: {
 			heightenLevel?: number;
 		}
@@ -40,8 +44,45 @@ export class ActionRoller {
 		this.action = action;
 		this.tags = _.uniq([...action.tags, this.action.type]);
 		this.creature = creature;
-		this.initiative = initiative;
 		this.options = options;
+	}
+
+	public buildResultText() {
+		let message = `${this.targetCreature.sheet.info.name} took ${this.totalDamageDealt} damage!`;
+		if (this.targetCreature.sheet.defenses.currentHp === 0) {
+			message += " They're down!";
+		}
+		if (this.triggeredWeaknesses.length > 0) {
+			let weaknessesMessage = this.triggeredWeaknesses[0].type;
+			let mappedWeaknesses = this.triggeredWeaknesses.map(resistance => resistance.type);
+			if (this.triggeredWeaknesses.length > 1) {
+				const lastResistance = mappedWeaknesses.pop();
+				const joinedWeaknesses = mappedWeaknesses.join(', ');
+				weaknessesMessage = joinedWeaknesses + ', and' + lastResistance;
+			}
+			message += `\nThey took extra damage from ${weaknessesMessage}!`;
+		}
+		if (this.triggeredResistances.length > 0) {
+			let resistancesMessage = this.triggeredResistances[0].type;
+			let mappedResistances = this.triggeredResistances.map(resistance => resistance.type);
+			if (this.triggeredResistances.length > 1) {
+				const lastResistance = mappedResistances.pop();
+				const joinedResistances = mappedResistances.join(', ');
+				resistancesMessage = joinedResistances + ', and' + lastResistance;
+			}
+			message += `\nThey took less damage from ${resistancesMessage}!`;
+		}
+		if (this.triggeredImmunities.length > 0) {
+			let immunitiesMessage = this.triggeredImmunities[0];
+			if (this.triggeredImmunities.length > 1) {
+				const lastImmunity = this.triggeredImmunities.pop();
+				const joinedImmunities = this.triggeredImmunities.join(', ');
+				immunitiesMessage = joinedImmunities + ', and' + lastImmunity;
+				this.triggeredImmunities.push(lastImmunity);
+			}
+			message += `\nThey took no damage from ${immunitiesMessage}!`;
+		}
+		return message;
 	}
 
 	public rollAttack(
@@ -99,17 +140,22 @@ export class ActionRoller {
 		rollCounter: number
 	) {
 		const tags = [...this.tags, 'save'];
+		let targetDcClause = '';
+		if (options.targetDC) {
+			targetDcClause = `DC ${options.targetDC} `;
+		}
 		let currentExtraAttributes = _.values(extraAttributes);
 		if (options.saveDiceRoll) {
 			// Roll the save
 			const result = rollBuilder.addRoll({
-				rollTitle: 'Save',
+				rollTitle: `${targetDcClause}${roll.saveRollType} check VS. ${roll.saveTargetDC}`,
 				rollExpression: options.saveDiceRoll,
 				tags,
 				extraAttributes: currentExtraAttributes,
 				targetDC: options.targetDC ?? null,
 				showTags: false,
 				rollType: 'save',
+				rollFromTarget: true,
 			});
 			// Just record text that there should be a save here
 			// update the extra attributes for the next roll
@@ -127,10 +173,6 @@ export class ActionRoller {
 			return result;
 		} else {
 			const title = roll.name || 'Save';
-			let targetDcClause = '';
-			if (options.targetDC) {
-				targetDcClause = `DC ${options.targetDC} `;
-			}
 			const text = `The target makes a ${targetDcClause}${roll.saveRollType} check VS. ${this.creature.sheet.info.name}'s ${roll.saveTargetDC}`;
 			rollBuilder.addText({ title, text, extraAttributes: currentExtraAttributes, tags });
 
@@ -517,13 +559,38 @@ export class ActionRoller {
 			name: `roll${rollCounter}CriticalFailureDamage`,
 			value: critFailureDamageResult?.results?.total || 0,
 		};
+		results.appliedDamage = appliedDamage;
 
 		return results;
+	}
+
+	public applyDamage(roll: Roll, damage: number) {
+		if (this.targetCreature) {
+			console.log(`Applying ${damage} ${roll.damageType} damage`);
+			const {
+				appliedDamage,
+				totalDamage,
+				appliedResistance,
+				appliedWeakness,
+				appliedImmunity,
+			} = this.targetCreature.applyDamage(damage, roll.damageType);
+			this.totalDamageDealt += appliedDamage;
+			if (appliedImmunity)
+				this.triggeredImmunities = _.uniq([...this.triggeredImmunities, appliedImmunity]);
+			if (appliedResistance)
+				this.triggeredResistances = _.uniq([
+					...this.triggeredResistances,
+					appliedResistance,
+				]);
+			if (appliedWeakness)
+				this.triggeredWeaknesses = _.uniq([...this.triggeredWeaknesses, appliedWeakness]);
+		}
 	}
 
 	public buildRoll(rollNote, rollDescription, options: BuildRollOptions): RollBuilder {
 		const rollBuilder = new RollBuilder({
 			creature: this.creature,
+			targetCreature: this.targetCreature,
 			rollNote,
 			rollDescription,
 			title: options?.title ?? `${this.creature.sheet.info.name} used ${this.action.name}!`,
@@ -563,10 +630,14 @@ export class ActionRoller {
 
 			// time for our state machine!
 			if (rollType === 'attack') {
+				let rollTargetValue = options.targetDC;
+				if (this.targetCreature) {
+					rollTargetValue = this.targetCreature.getDC(roll?.targetDC ?? 'ac');
+				}
 				const attackResult = this.rollAttack(
 					rollBuilder,
 					roll,
-					options,
+					{ ...options, targetDC: rollTargetValue },
 					extraAttributes,
 					rollCounter
 				);
@@ -575,10 +646,22 @@ export class ActionRoller {
 				lastTargetingResult = attackResult.success;
 				lastTargetingActionType = 'attack';
 			} else if (rollType === 'save') {
+				let rollTargetValue = options.targetDC;
+				let saveRoll = options.saveDiceRoll;
+				if (this.creature) {
+					rollTargetValue = this.creature.getDC(roll?.saveTargetDC) ?? rollTargetValue;
+				}
+				if (this.targetCreature) {
+					const saveRollBonus =
+						this.targetCreature.rolls[roll?.saveRollType.trim().toLowerCase()]?.bonus;
+					saveRoll = saveRollBonus ? `d20+${saveRollBonus}` : saveRoll;
+				}
+				console.log(roll?.saveTargetDC, options.saveDiceRoll, roll?.saveRollType);
+				console.log(rollTargetValue, saveRoll);
 				const saveResult = this.rollSave(
 					rollBuilder,
 					roll,
-					options,
+					{ ...options, targetDC: rollTargetValue, saveDiceRoll: saveRoll },
 					extraAttributes,
 					rollCounter
 				);
@@ -606,6 +689,7 @@ export class ActionRoller {
 					lastTargetingResult,
 					lastTargetingActionType
 				);
+				if (result?.results?.total) this.applyDamage(roll, result.results.total);
 			} else if (rollType === 'advanced-damage') {
 				const result = this.rollAdvancedDamage(
 					rollBuilder,
@@ -616,6 +700,7 @@ export class ActionRoller {
 					lastTargetingResult,
 					lastTargetingActionType
 				);
+				if (result?.appliedDamage) this.applyDamage(roll, result.appliedDamage);
 			}
 		}
 

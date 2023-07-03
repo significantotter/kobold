@@ -33,6 +33,10 @@ export class ActionStageOptions {
 				value: Language.LL.commandOptions.actionStageStageEditOption.choices.name.value(),
 			},
 			{
+				name: Language.LL.commandOptions.actionStageStageEditOption.choices.damageType.name(),
+				value: Language.LL.commandOptions.actionStageStageEditOption.choices.damageType.value(),
+			},
+			{
 				name: Language.LL.commandOptions.actionStageStageEditOption.choices.allowRollModifier.name(),
 				value: Language.LL.commandOptions.actionStageStageEditOption.choices.allowRollModifier.value(),
 			},
@@ -170,6 +174,12 @@ export class ActionStageOptions {
 		name: Language.LL.commandOptions.actionStageDiceRoll.name(),
 		description: Language.LL.commandOptions.actionStageDiceRoll.description(),
 		required: true,
+		type: ApplicationCommandOptionType.String,
+	};
+	public static readonly ACTION_STAGE_DAMAGE_TYPE: APIApplicationCommandBasicOption = {
+		name: Language.LL.commandOptions.actionStageDamageType.name(),
+		description: Language.LL.commandOptions.actionStageDamageType.description(),
+		required: false,
 		type: ApplicationCommandOptionType.String,
 	};
 	public static readonly ACTION_BASIC_DAMAGE_DICE_ROLL_OPTION: APIApplicationCommandBasicOption =

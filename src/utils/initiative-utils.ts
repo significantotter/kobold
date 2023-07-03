@@ -5,7 +5,12 @@ import {
 	Initiative,
 	Character,
 } from './../services/kobold/models/index.js';
-import { CommandInteraction, GuildTextBasedChannel, Message } from 'discord.js';
+import {
+	ChatInputCommandInteraction,
+	CommandInteraction,
+	GuildTextBasedChannel,
+	Message,
+} from 'discord.js';
 import { KoboldEmbed } from './kobold-embed-utils.js';
 import _ from 'lodash';
 import { InteractionUtils } from './interaction-utils.js';
@@ -14,6 +19,7 @@ import { Language } from '../models/enum-helpers/index.js';
 import { DiceUtils } from './dice-utils.js';
 import { RollBuilder } from './roll-builder.js';
 import { Creature } from './creature.js';
+import { KoboldError } from './KoboldError.js';
 
 export class InitiativeBuilder {
 	public init: Initiative;
@@ -573,5 +579,32 @@ export class InitiativeUtils {
 		);
 
 		return { group: result.value, errorMessage: result.errorMessage };
+	}
+
+	public static async getInitActorByName(
+		intr: ChatInputCommandInteraction,
+		name: string,
+		LL?: TranslationFunctions
+	) {
+		let currentInitResponse = await InitiativeUtils.getInitiativeForChannel(intr.channel, {
+			sendErrors: true,
+			LL,
+		});
+		if (currentInitResponse.errorMessage) {
+			throw new KoboldError(currentInitResponse.errorMessage);
+		}
+		let currentInit = currentInitResponse.init;
+
+		const actorResponse: { actor: InitiativeActor; errorMessage: string } =
+			await InitiativeUtils.getNameMatchActorFromInitiative(
+				intr.user.id,
+				currentInit,
+				name,
+				LL
+			);
+		if (actorResponse.errorMessage) {
+			throw new KoboldError(actorResponse.errorMessage);
+		}
+		return actorResponse.actor;
 	}
 }

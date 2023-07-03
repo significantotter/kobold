@@ -171,6 +171,10 @@ export default {
 		description:
 			'Whether to allow modifiers to alter the roll. (Default: true). Ex. set to false for bonus damage',
 	},
+	actionStageDamageType: {
+		name: 'damage-type',
+		description: 'The type of damage dealt by the action.',
+	},
 	actionStageBasicDamageDiceRoll: {
 		name: 'basic-damage-dice-roll',
 		description: 'A simple damage roll for an attack or save. Ignored if other rolls set.',
@@ -228,6 +232,7 @@ export default {
 		description: 'The option to edit.',
 		choices: {
 			name: { name: 'name', value: 'name' },
+			damageType: { name: 'damage-type', value: 'damageType' },
 			allowRollModifier: { name: 'allow-roll-modifier', value: 'allowRollModifier' },
 			attackTargetDC: { name: 'attack-target-dc', value: 'targetDC' },
 			attackRoll: { name: 'attack-roll', value: 'roll' },
@@ -431,6 +436,10 @@ export default {
 	initCharacter: {
 		name: 'character',
 		description: 'A character or npc present in the initiative.',
+	},
+	initCharacterTarget: {
+		name: 'target-character',
+		description: 'The character that the roll is performed against.',
 	},
 	initCreature: {
 		name: 'creature',
@@ -643,16 +652,16 @@ export default {
 		description: 'A dice expression to modify your roll. (e.g. "+ 1 + 1d4")',
 	},
 	rollTargetDc: {
-		name: 'target-dc',
-		description: 'The DC to roll attacks against.',
+		name: 'overwrite-dc',
+		description: 'Provide a custom DC to roll attacks against.',
 	},
 	rollTargetAC: {
-		name: 'target-ac',
-		description: 'The AC to roll the attack against.',
+		name: 'overwrite-ac',
+		description: 'Provide a custom AC to roll the attack against.',
 	},
 	rollSaveDiceRoll: {
-		name: 'save-dice-roll',
-		description: 'The dice roll to use for any saving throw in the action.',
+		name: 'overwrite-save-dice-roll',
+		description: 'Provide the dice roll to use for any saving throw in the action.',
 	},
 	attackRollModifier: {
 		name: 'attack_modifier',
