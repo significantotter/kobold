@@ -562,7 +562,7 @@ export function convertPathBuilderToSheet(
 			heritage: pathBuilderSheet.heritage.replace(' ' + pathBuilderSheet.ancestry, ''),
 			background: pathBuilderSheet.background,
 			traits: [],
-			usesStamina: options.useStamina,
+			usesStamina: options.useStamina ?? false,
 		},
 		general: {
 			currentHeroPoints: 0,
