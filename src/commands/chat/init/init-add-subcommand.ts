@@ -92,8 +92,8 @@ export class InitAddSubCommand implements Command {
 		let referenceNpcName = null;
 
 		if (targetCreature == '-1') {
-			sheet = {};
 			if (!actorName) actorName = 'unnamed enemy';
+			sheet = { info: { name: actorName } };
 		} else {
 			const npc = await Npc.query().findOne({ id: targetCreature });
 			const variantData = await npc.fetchVariantDataIfExists();

@@ -133,10 +133,10 @@ export class Creature {
 		if (this.sheet.info.heritage) generalTitleText += ` ${this.sheet.info.heritage}`;
 		if (this.sheet.info.ancestry) generalTitleText += ` ${this.sheet.info.ancestry}`;
 		if (this.sheet.info.class) generalTitleText += ` ${this.sheet.info.class}`;
-		if (generalTitleText.length) {
+		if (generalText.length) {
 			sheetEmbed.addFields([
 				{
-					name: generalTitleText,
+					name: generalTitleText ?? 'Sheet Info',
 					value: generalText,
 				},
 			]);
