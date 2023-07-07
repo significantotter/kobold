@@ -475,6 +475,18 @@ export function convertWanderersGuideCharToSheet(
 	return sheet;
 }
 
+export function generateStatOverrides(statList: { [k: string]: any }): Partial<Sheet> {
+	const partialSheet: Partial<Sheet> = {};
+	for (const stat in statList) {
+		const statValue = statList[stat];
+		switch (stat) {
+			case 'ac':
+				partialSheet.defenses.ac = statValue;
+		}
+	}
+	return {};
+}
+
 export function convertPathBuilderToSheet(
 	pathBuilderSheet: PathBuilder.Character,
 	options: {

@@ -35,6 +35,12 @@ export class InitOptions {
 		autocomplete: true,
 		type: ApplicationCommandOptionType.Boolean,
 	};
+	public static readonly INIT_CUSTOM_STATS_OPTION: APIApplicationCommandBasicOption = {
+		name: Language.LL.commandOptions.initCustomStats.name(),
+		description: Language.LL.commandOptions.initCustomStats.description(),
+		required: false,
+		type: ApplicationCommandOptionType.String,
+	};
 	public static readonly INIT_CHARACTER_OPTION: APIApplicationCommandBasicOption = {
 		name: Language.LL.commandOptions.initCharacter.name(),
 		description: Language.LL.commandOptions.initCharacter.description(),

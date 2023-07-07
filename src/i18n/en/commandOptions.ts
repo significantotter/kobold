@@ -461,6 +461,11 @@ export default {
 		name: 'hide-stats',
 		description: 'Whether to hide the stats of the character/creature in the initiative.',
 	},
+	initCustomStats: {
+		name: 'custom-stats',
+		description:
+			'Overrides for the custom stats. In the format "hp=35;ac=20;traits=undead,mindless;will=+7"',
+	},
 	initTargetActor: {
 		name: 'target-initiative-member',
 		description: 'Which member of the initiative to target.',

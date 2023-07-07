@@ -90,6 +90,7 @@ export class InitCommand implements Command {
 						...InitOptions.ACTOR_NAME_OPTION,
 						required: false,
 					},
+					InitOptions.INIT_CUSTOM_STATS_OPTION,
 					{
 						...ChatArgs.ROLL_EXPRESSION_OPTION,
 						description:
