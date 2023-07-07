@@ -274,6 +274,7 @@ export class EmbedUtils {
 		let message = '\u200b';
 		if (true || !hideStats) {
 			message = actionRoller.buildResultText() ?? '\u200b';
+			//turn this back on if we want to hide damage messages when stats are hidden
 		} else {
 			// DM the damage to the Initiative GM
 			const initResult = await InitiativeUtils.getInitiativeForChannel(intr.channel, {
@@ -292,7 +293,11 @@ export class EmbedUtils {
 			title = `${targetNameOverwrite ?? actionRoller.targetCreature.name} took${
 				actionRoller.totalDamageDealt === 0 ? ' no' : ''
 			} damage from ${sourceNameOverwrite ?? actionRoller.creature.name}`;
-			if (actionRoller.targetCreature.sheet?.defenses?.currentHp === 0) {
+			if (
+				//turn this back on if we want to hide damage messages when stats are hidden
+				!(hideStats || true) &&
+				actionRoller.targetCreature.sheet?.defenses?.currentHp === 0
+			) {
 				message += "\nYip! They're down!";
 			}
 		}
