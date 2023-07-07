@@ -149,7 +149,9 @@ export class GameRollSubCommand implements Command {
 				...creature.attackRolls,
 			};
 			const targetAction = character.actions.find(action => {
-				action.name.toLocaleLowerCase().trim() === rollType.toLocaleLowerCase().trim();
+				return (
+					action.name.toLocaleLowerCase().trim() === rollType.toLocaleLowerCase().trim()
+				);
 			});
 			if (targetAction) {
 				const actionRoller = new ActionRoller(targetAction, creature, targetCreature);
@@ -179,7 +181,6 @@ export class GameRollSubCommand implements Command {
 						targetNameOverwrite: targetActor.name,
 						LL,
 					});
-
 					embed.addFields(damageField);
 				}
 				embeds.push(embed);
@@ -225,7 +226,6 @@ export class GameRollSubCommand implements Command {
 				embeds.push(rollBuilder.compileEmbed());
 			}
 		}
-
 		if (notifyRoll) {
 			await InteractionUtils.send(
 				intr,

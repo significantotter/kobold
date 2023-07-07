@@ -273,7 +273,7 @@ export class EmbedUtils {
 	}) {
 		let message = '\u200b';
 		if (true || !hideStats) {
-			message = actionRoller.buildResultText();
+			message = actionRoller.buildResultText() ?? '\u200b';
 		} else {
 			// DM the damage to the Initiative GM
 			const initResult = await InitiativeUtils.getInitiativeForChannel(intr.channel, {
