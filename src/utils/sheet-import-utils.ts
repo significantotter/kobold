@@ -748,7 +748,7 @@ export function convertPathBuilderToSheet(
 				dice: numDice + weapon.die + ' + ' + weapon.damageBonus,
 				// base type isn't provided by pathbuilder
 			};
-			const extraDamage = weapon.extraDamage.map(damage => {
+			const extraDamage = (weapon.extraDamage ?? []).map(damage => {
 				const [dice, ...type] = damage.split(' ');
 				return {
 					dice,
