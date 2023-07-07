@@ -744,7 +744,7 @@ export class ActionRoller {
 				if (this.targetCreature) {
 					const saveRollBonus =
 						this.targetCreature.rolls[roll?.saveRollType.trim().toLowerCase()]?.bonus;
-					saveRoll = saveRollBonus ? `d20+${saveRollBonus}` : saveRoll;
+					saveRoll = DiceUtils.buildDiceExpression('d20', String(saveRollBonus ?? 0));
 				}
 				const saveResult = this.rollSave(
 					rollBuilder,

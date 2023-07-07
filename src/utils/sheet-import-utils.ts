@@ -649,7 +649,6 @@ export function generateStatOverrides(statString: string): Partial<Sheet> {
 		// everything else
 		else {
 			const statOption = _.find(statOptions, option => option.aliases.includes(stat));
-			console.log(statOption);
 			if (!statOption) {
 				throw new KoboldError(`Failed to find stat option for ${stat}`);
 			}
@@ -684,7 +683,6 @@ export function generateStatOverrides(statString: string): Partial<Sheet> {
 			}
 		}
 	}
-	console.log(partialSheet);
 	return partialSheet;
 }
 
