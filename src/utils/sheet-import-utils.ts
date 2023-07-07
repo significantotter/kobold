@@ -138,13 +138,15 @@ export function convertBestiaryCreatureToSheet(
 	let attacks: Sheet['attacks'] = [];
 	for (const attack of bestiaryEntry?.attacks || []) {
 		const damageRolls: Sheet['attacks'][0]['damage'] = [];
-		const splitDamage = attack.damage.split('{@damage').slice(1);
-		for (const damageSplit of splitDamage) {
-			const [dice, type] = damageSplit.split('}').map(d => d.trim());
-			damageRolls.push({
-				dice: DiceUtils.addNumberToDiceExpression(dice, rollAdjustment),
-				type,
-			});
+		if (attack.damage) {
+			const splitDamage = attack.damage.split('{@damage').slice(1);
+			for (const damageSplit of splitDamage) {
+				const [dice, type] = damageSplit.split('}').map(d => d.trim());
+				damageRolls.push({
+					dice: DiceUtils.addNumberToDiceExpression(dice, rollAdjustment),
+					type,
+				});
+			}
 		}
 		attacks.push({
 			name: attack.name,

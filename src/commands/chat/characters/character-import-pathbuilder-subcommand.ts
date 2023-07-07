@@ -66,14 +66,17 @@ export class CharacterimportPathbuilderSubCommand implements Command {
 			.where({
 				userId: intr.user.id,
 			})
-			.andWhereRaw('name ILIKE ?', pathBuilderChar?.build?.name.trim());
+			.andWhereRaw(
+				'name ILIKE ?',
+				(pathBuilderChar?.build?.name ?? 'unnamed character').trim()
+			);
 
 		if (existingCharacter.length) {
 			const character = existingCharacter[0];
 			await InteractionUtils.send(
 				intr,
 				LL.commands.character.importPathbuilder.interactions.characterAlreadyExists({
-					characterName: character.sheet.info.name,
+					characterName: character.name,
 				})
 			);
 			return;
@@ -90,7 +93,7 @@ export class CharacterimportPathbuilderSubCommand implements Command {
 
 			// store sheet in db
 			const newCharacter = await Character.query().insertAndFetch({
-				name: creature.sheet.info.name,
+				name: creature.name,
 				charId: jsonId,
 				userId: intr.user.id,
 				sheet: creature.sheet,
@@ -103,7 +106,7 @@ export class CharacterimportPathbuilderSubCommand implements Command {
 			await InteractionUtils.send(
 				intr,
 				LL.commands.character.importPathbuilder.interactions.success({
-					characterName: newCharacter.sheet.info.name,
+					characterName: newCharacter.name,
 				})
 			);
 		}
