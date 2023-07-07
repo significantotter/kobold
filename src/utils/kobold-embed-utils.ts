@@ -272,7 +272,7 @@ export class EmbedUtils {
 		LL: TranslationFunctions;
 	}) {
 		let message = '\u200b';
-		if (!hideStats) {
+		if (true || !hideStats) {
 			message = actionRoller.buildResultText();
 		} else {
 			// DM the damage to the Initiative GM
@@ -292,6 +292,9 @@ export class EmbedUtils {
 			title = `${targetNameOverwrite ?? actionRoller.targetCreature.name} took${
 				actionRoller.totalDamageDealt === 0 ? ' no' : ''
 			} damage from ${sourceNameOverwrite ?? actionRoller.creature.name}`;
+			if (actionRoller.targetCreature.sheet?.defenses?.currentHp === 0) {
+				message = "Yip! They're down!";
+			}
 		}
 
 		return {
