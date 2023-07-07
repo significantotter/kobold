@@ -1169,7 +1169,7 @@ export class Creature {
 	}
 
 	public static fromInitActor(initActor: InitiativeActor): Creature {
-		return new Creature(initActor.sheet);
+		return new Creature(initActor.sheet, initActor.name);
 	}
 
 	public static fromCharacter(character: Character): Creature {
