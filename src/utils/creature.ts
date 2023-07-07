@@ -91,6 +91,16 @@ export class Creature {
 			generalText += `Resolve: \`${this.sheet.defenses.currentResolve}/${this.sheet.defenses.maxResolve}\`\n`;
 		}
 		if (this.sheet.defenses.ac != null) generalText += `AC \`${this.sheet.defenses.ac}\`\n`;
+		if (this.sheet.defenses.resistances?.length)
+			generalText += `Resistances: ${this.sheet.defenses.resistances
+				.map(r => `${r.type} ${r.amount}`)
+				.join(', ')}\n`;
+		if (this.sheet.defenses.weaknesses?.length)
+			generalText += `Resistances: ${this.sheet.defenses.weaknesses
+				.map(w => `${w.type} ${w.amount}`)
+				.join(', ')}\n`;
+		if (this.sheet.defenses.immunities?.length)
+			generalText += `Immunities: ${this.sheet.defenses.immunities.join(', ')}\n`;
 		if (this.sheet.general.perception != null)
 			generalText += `Perception \`${this.sheet.general.perception}\` (DC ${
 				10 + this.sheet.general.perception
@@ -112,6 +122,8 @@ export class Creature {
 			generalText += ` Climb \`${this.sheet.general.climbSpeed}\`ft`;
 		if (this.sheet.general.swimSpeed)
 			generalText += ` Swim \`${this.sheet.general.swimSpeed}\`ft`;
+		if (this.sheet.info.traits?.length)
+			generalText += `\nTraits: ${this.sheet.info.traits.join(', ')}`;
 		if (hasASpeed) generalText += '\n';
 		if (this.sheet.info.background)
 			generalText += `\nBackground: ${this.sheet.info.background}`;
@@ -146,7 +158,9 @@ export class Creature {
 		for (const save in this.sheet.saves) {
 			if (save.includes('ProfMod') || this.sheet.saves[save] == null) continue;
 			saveTexts.push(
-				`${save} \`+${this.sheet.saves[save]}\` (DC ${10 + this.sheet.saves[save]})`
+				`${save} \`${this.sheet.saves[save] >= 0 ? '+' : ''}${
+					this.sheet.saves[save]
+				}\` (DC ${10 + this.sheet.saves[save]})`
 			);
 		}
 		if (saveTexts.length)
@@ -241,7 +255,9 @@ export class Creature {
 		for (const skill of _.keys(skillTotals).sort((a, b) => a.localeCompare(b))) {
 			if (skillTotals[skill] == null) continue;
 			//avoid null values
-			skillTexts.push(`${skill} \`+${skillTotals[skill]}\``);
+			skillTexts.push(
+				`${skill} \`${skillTotals[skill] >= 0 ? '+' : ''}${skillTotals[skill]}\``
+			);
 		}
 		const skillBatches = _.chunk(skillTexts, 7);
 		for (const skillGroup of skillBatches) {

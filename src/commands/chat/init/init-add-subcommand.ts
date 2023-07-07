@@ -27,6 +27,7 @@ import { Npc, Sheet } from '../../../services/kobold/models/index.js';
 import { Creature } from '../../../utils/creature.js';
 import _ from 'lodash';
 import { InitOptions } from './init-command-options.js';
+import { generateStatOverrides } from '../../../utils/sheet-import-utils.js';
 
 export class InitAddSubCommand implements Command {
 	public names = [Language.LL.commands.init.add.name()];
@@ -78,6 +79,7 @@ export class InitAddSubCommand implements Command {
 
 		let actorName = intr.options.getString(InitOptions.ACTOR_NAME_OPTION.name);
 		const targetCreature = intr.options.getString(InitOptions.INIT_CREATURE_OPTION.name);
+		const customStatsString = intr.options.getString(InitOptions.INIT_CUSTOM_STATS_OPTION.name);
 		const initiativeValue = intr.options.getNumber(InitOptions.INIT_VALUE_OPTION.name);
 		const diceExpression = intr.options.getString(ChatArgs.ROLL_EXPRESSION_OPTION.name);
 		const hideStats = intr.options.getBoolean(InitOptions.INIT_HIDE_STATS_OPTION.name) ?? true;
@@ -103,6 +105,11 @@ export class InitAddSubCommand implements Command {
 			});
 			sheet = creature.sheet;
 			referenceNpcName = npc.name;
+		}
+
+		if (customStatsString) {
+			const statOverrides = generateStatOverrides(customStatsString);
+			sheet = _.merge(sheet, statOverrides);
 		}
 
 		let nameCount = 1;

@@ -463,8 +463,7 @@ export default {
 	},
 	initCustomStats: {
 		name: 'custom-stats',
-		description:
-			'Overrides for the custom stats. In the format "hp=35;ac=20;traits=undead,mindless;will=+7"',
+		description: 'Overrides for the custom stats. In the format "hp=35;ac=20;will=7"',
 	},
 	initTargetActor: {
 		name: 'target-initiative-member',
