@@ -41,6 +41,18 @@ export class ActionStageCommand implements Command {
 				],
 			},
 			{
+				name: Language.LL.commands.actionStage.addSkillChallenge.name(),
+				description: Language.LL.commands.actionStage.addSkillChallenge.description(),
+				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				options: [
+					ActionStageOptions.ACTION_TARGET_OPTION,
+					ActionStageOptions.ACTION_ROLL_NAME_OPTION,
+					ActionStageOptions.ACTION_DICE_ROLL_OPTION,
+					{ ...ActionStageOptions.ACTION_ROLL_TARGET_DC_OPTION, autocomplete: true },
+					ActionStageOptions.ACTION_ROLL_ALLOW_MODIFIERS,
+				],
+			},
+			{
 				name: Language.LL.commands.actionStage.addBasicDamage.name(),
 				description: Language.LL.commands.actionStage.addBasicDamage.description(),
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
@@ -49,6 +61,7 @@ export class ActionStageCommand implements Command {
 					ActionStageOptions.ACTION_ROLL_NAME_OPTION,
 					ActionStageOptions.ACTION_BASIC_DAMAGE_DICE_ROLL_OPTION,
 					ActionStageOptions.ACTION_ROLL_ALLOW_MODIFIERS,
+					ActionStageOptions.ACTION_ROLL_HEAL_INSTEAD_OF_DAMAGE,
 				],
 			},
 			{
@@ -63,6 +76,7 @@ export class ActionStageCommand implements Command {
 					ActionStageOptions.ACTION_CRITICAL_FAILURE_DICE_ROLL_OPTION,
 					ActionStageOptions.ACTION_FAILURE_DICE_ROLL_OPTION,
 					ActionStageOptions.ACTION_ROLL_ALLOW_MODIFIERS,
+					ActionStageOptions.ACTION_ROLL_HEAL_INSTEAD_OF_DAMAGE,
 				],
 			},
 			{

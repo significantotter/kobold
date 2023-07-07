@@ -3,8 +3,9 @@ import _ from 'lodash';
 import { TranslationFunctions } from '../i18n/i18n-types.js';
 import { Language } from '../models/enum-helpers/index.js';
 import { Character, Sheet } from '../services/kobold/models/index.js';
-import { InitiativeBuilder } from './initiative-utils.js';
+import { InitiativeBuilder, InitiativeUtils } from './initiative-utils.js';
 import { InteractionUtils } from './interaction-utils.js';
+import { ActionRoller } from './action-roller.js';
 
 export class KoboldEmbed extends EmbedBuilder {
 	public constructor(data?: APIEmbed | EmbedData) {
@@ -254,5 +255,119 @@ export class EmbedUtils {
 		}
 		if (descriptionArr.length) embed.setDescription(descriptionArr.join('\n'));
 		return embed;
+	}
+	public static async getOrSendActionDamageField({
+		intr,
+		actionRoller,
+		hideStats,
+		targetNameOverwrite,
+		sourceNameOverwrite,
+		LL,
+	}: {
+		intr: ChatInputCommandInteraction;
+		actionRoller: ActionRoller;
+		hideStats: boolean;
+		targetNameOverwrite?: string;
+		sourceNameOverwrite?: string;
+		LL: TranslationFunctions;
+	}) {
+		let message = '\u200b';
+		if (!hideStats) {
+			message = actionRoller.buildResultText();
+		} else {
+			// DM the damage to the Initiative GM
+			const initResult = await InitiativeUtils.getInitiativeForChannel(intr.channel, {
+				sendErrors: true,
+				LL,
+			});
+			await intr.client.users.send(initResult.init.gmUserId, actionRoller.buildResultText());
+		}
+		let title = '';
+		let netDamage = actionRoller.totalDamageDealt - actionRoller.totalHealingDone;
+		if (netDamage < 0) {
+			title = `${targetNameOverwrite ?? actionRoller.targetCreature.name} healed ${
+				actionRoller.totalHealingDone
+			} health`;
+		} else {
+			title = `${targetNameOverwrite ?? actionRoller.targetCreature.name} took${
+				actionRoller.totalDamageDealt === 0 ? ' no' : ''
+			} damage from ${sourceNameOverwrite ?? actionRoller.creature.name}`;
+		}
+
+		return {
+			name: title,
+			value: message,
+		};
+	}
+
+	public static buildDamageResultText({
+		sourceCreatureName,
+		targetCreatureName,
+		totalDamageDealt,
+		targetCreatureSheet,
+		actionName,
+		triggeredWeaknesses,
+		triggeredResistances,
+		triggeredImmunities,
+	}: {
+		sourceCreatureName?: string;
+		targetCreatureName: string;
+		totalDamageDealt: number;
+		targetCreatureSheet: Sheet;
+		actionName?: string;
+		triggeredWeaknesses?: Sheet['defenses']['weaknesses'];
+		triggeredResistances?: Sheet['defenses']['resistances'];
+		triggeredImmunities?: Sheet['defenses']['immunities'];
+	}) {
+		let message = `${targetCreatureName} ${totalDamageDealt < 0 ? 'healed' : 'took'} ${Math.abs(
+			totalDamageDealt
+		)} ${totalDamageDealt < 0 ? 'health' : 'damage'}`;
+		if (sourceCreatureName || actionName) message += ' from';
+		if (sourceCreatureName) message += ` ${sourceCreatureName}'s`;
+		if (actionName) message += ` ${actionName}`;
+		message += '!';
+
+		const currentHp = targetCreatureSheet.defenses.currentHp;
+
+		if (totalDamageDealt < 0) {
+			if (currentHp === targetCreatureSheet.defenses.maxHp) {
+				message += " They're now at full health!";
+			}
+		} else {
+			if (currentHp === 0) {
+				message += " They're down!";
+			}
+			if (triggeredWeaknesses.length > 0) {
+				let weaknessesMessage = triggeredWeaknesses[0].type;
+				let mappedWeaknesses = triggeredWeaknesses.map(resistance => resistance.type);
+				if (triggeredWeaknesses.length > 1) {
+					const lastResistance = mappedWeaknesses.pop();
+					const joinedWeaknesses = mappedWeaknesses.join(', ');
+					weaknessesMessage = joinedWeaknesses + ', and' + lastResistance;
+				}
+				message += `\nThey took extra damage from ${weaknessesMessage}!`;
+			}
+			if (triggeredResistances.length > 0) {
+				let resistancesMessage = triggeredResistances[0].type;
+				let mappedResistances = triggeredResistances.map(resistance => resistance.type);
+				if (triggeredResistances.length > 1) {
+					const lastResistance = mappedResistances.pop();
+					const joinedResistances = mappedResistances.join(', ');
+					resistancesMessage = joinedResistances + ', and' + lastResistance;
+				}
+				message += `\nThey took less damage from ${resistancesMessage}!`;
+			}
+			if (triggeredImmunities.length > 0) {
+				let immunitiesMessage = triggeredImmunities[0];
+				if (triggeredImmunities.length > 1) {
+					const lastImmunity = triggeredImmunities.pop();
+					const joinedImmunities = triggeredImmunities.join(', ');
+					immunitiesMessage = joinedImmunities + ', and' + lastImmunity;
+					triggeredImmunities.push(lastImmunity);
+				}
+				message += `\nThey took no damage from ${immunitiesMessage}!`;
+			}
+		}
+		return message;
 	}
 }

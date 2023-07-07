@@ -121,7 +121,6 @@ export class ActionStageEditSubCommand implements Command {
 				invalid = true;
 			}
 		} else if (roll.type === 'damage') {
-			console.log(fieldToEdit);
 			if (!['name', 'roll', 'allowRollModifier', 'damageType'].includes(fieldToEdit)) {
 				invalid = true;
 			}

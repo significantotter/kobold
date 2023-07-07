@@ -25,6 +25,20 @@ export default {
 			optionNotANumber: 'Yip! The value you entered is not a number.',
 		},
 	},
+	damage: {
+		name: 'damage',
+		description:
+			'Applies damage to a character, effecting tempHp, stamina (if enabled), and hp.',
+		options: '[target-character] [amount] [*type*]',
+		usage:
+			'[target-character]: The target character that you control or is in the initiative. ' +
+			'[amount]: The amount of damage dealt. Use a negative number to heal.\n' +
+			"[type]: The damage type. If specified, the target's weaknesses/resistances/immunities will be checked \n",
+		expandedDescription:
+			'Updates a gameplay stat like hp for a character/npc.\n' +
+			'Sets the stat specified in the options to the value for the target character.\n' +
+			'Possible options are hp, tempHp, stamina, resolve, heroPoints, and focusPoints\n',
+	},
 	recover: {
 		name: 'recover',
 		options: '[*target-character*]',

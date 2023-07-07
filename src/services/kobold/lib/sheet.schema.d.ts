@@ -583,7 +583,7 @@ export interface Sheet {
 		rolls?: (
 			| {
 					name?: string | null;
-					type?: "attack" | null;
+					type?: ("attack" | "skill-challenge") | null;
 					targetDC?: string | null;
 					roll?: string | null;
 					allowRollModifiers?: boolean;
@@ -593,6 +593,7 @@ export interface Sheet {
 					name?: string | null;
 					type?: "damage" | null;
 					roll?: string | null;
+					healInsteadOfDamage?: boolean | null;
 					allowRollModifiers?: boolean;
 					[k: string]: any;
 			  }
@@ -603,6 +604,7 @@ export interface Sheet {
 					criticalFailureRoll?: string | null;
 					successRoll?: string | null;
 					failureRoll?: string | null;
+					healInsteadOfDamage?: boolean | null;
 					allowRollModifiers?: boolean;
 					[k: string]: any;
 			  }

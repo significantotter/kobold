@@ -169,7 +169,7 @@ export class RollBuilder {
 		targetDC?: number;
 		multiplier?: number;
 		showTags?: boolean;
-		rollType?: 'attack' | 'damage' | 'save';
+		rollType?: 'attack' | 'skill-challenge' | 'damage' | 'save';
 		rollFromTarget?: boolean;
 	}) {
 		const rollField = DiceUtils.parseAndEvaluateDiceExpression({
@@ -198,6 +198,12 @@ export class RollBuilder {
 				success: ' Hit!',
 				failure: ' Miss.',
 				'critical failure': ' Miss.',
+			};
+			const skillChallengeTitleAdditionText = {
+				'critical success': ' Critical Success!',
+				success: ' Success!',
+				failure: ' Failure.',
+				'critical failure': ' Failure.',
 			};
 
 			let natTwenty = null;
@@ -236,6 +242,8 @@ export class RollBuilder {
 			let titleAdditionText = '';
 			if (natTwenty) titleAdditionText += ` ${_.capitalize(natTwenty)}!`;
 			if (rollType === 'attack') titleAdditionText += attackTitleAdditionText[result];
+			else if (rollType === 'skill-challenge')
+				titleAdditionText += skillChallengeTitleAdditionText[result];
 			else if (rollType === 'save') titleAdditionText += saveTitleAdditionText[result];
 
 			rollResult.targetDC = targetDC;

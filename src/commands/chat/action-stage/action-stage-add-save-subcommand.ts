@@ -52,7 +52,9 @@ export class ActionStageAddSaveSubCommand implements Command {
 			const match = intr.options.getString(
 				ActionStageOptions.ACTION_ROLL_ABILITY_DC_OPTION.name
 			);
-			return await AutocompleteUtils.getAllMatchingRollsForActiveCharacter(intr, match);
+			return await AutocompleteUtils.getAllMatchingRollsForActiveCharacter(intr, match, [
+				'AC',
+			]);
 		}
 	}
 

@@ -69,6 +69,7 @@ export class GameCommand implements Command {
 					GameOptions.GAME_ROLL_TYPE,
 					GameOptions.GAME_DICE_ROLL_OR_MODIFIER,
 					GameOptions.GAME_TARGET_CHARACTER,
+					{ ...InitOptions.INIT_CHARACTER_TARGET, required: false },
 					ChatArgs.ROLL_SECRET_OPTION,
 				],
 			},

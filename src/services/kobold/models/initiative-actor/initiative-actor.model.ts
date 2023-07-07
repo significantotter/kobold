@@ -15,6 +15,19 @@ export interface InitiativeActor extends InitiativeActorTypes.InitiativeActor {
 	sheet?: SheetTypes.Sheet;
 }
 export class InitiativeActor extends BaseModel {
+	public async saveSheet(sheet: SheetTypes.Sheet) {
+		// apply any damage effects from the action to the creature
+		let promises: any[] = [this.$query().patch({ sheet })];
+		if (this.characterId) {
+			promises.push(
+				this.$relatedQuery<Character>('character').patch({
+					sheet,
+				})
+			);
+		}
+		return await Promise.all(promises);
+	}
+
 	static get tableName(): string {
 		return 'initiativeActor';
 	}

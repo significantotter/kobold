@@ -50,10 +50,10 @@ export class AutocompleteUtils {
 
 	public static async getAllMatchingRollsForActiveCharacter(
 		intr: AutocompleteInteraction<CacheType>,
-		matchText: string
+		matchText: string,
+		extraChoices: string[] = []
 	) {
-		const choices: Set<string> = new Set();
-		if (matchText === '' || 'dice'.includes(matchText.toLocaleLowerCase())) choices.add('Dice');
+		const choices: Set<string> = new Set(extraChoices);
 
 		//get the active character
 		const character = await CharacterUtils.getActiveCharacter(intr);
@@ -196,11 +196,12 @@ export class AutocompleteUtils {
 		}
 		const creature = new Creature(actor.sheet);
 
-		const allRolls = [
-			..._.keys(creature.rolls),
+		const allRolls = _.uniq([
 			..._.keys(creature.attackRolls),
 			...creature.actions.map(action => action.name),
-		];
+			...(actor.character?.actions ?? []).map(action => action.name),
+			..._.keys(creature.rolls),
+		]);
 
 		const matchedRolls = allRolls.filter(roll =>
 			roll.toLowerCase().includes(matchText.toLowerCase())

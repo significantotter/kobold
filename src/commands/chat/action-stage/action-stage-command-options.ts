@@ -15,6 +15,12 @@ export class ActionStageOptions {
 		required: false,
 		type: ApplicationCommandOptionType.Boolean,
 	};
+	public static readonly ACTION_ROLL_HEAL_INSTEAD_OF_DAMAGE: APIApplicationCommandBasicOption = {
+		name: Language.LL.commandOptions.actionStageRollHealInsteadOfDamage.name(),
+		description: Language.LL.commandOptions.actionStageRollHealInsteadOfDamage.description(),
+		required: false,
+		type: ApplicationCommandOptionType.Boolean,
+	};
 	public static readonly ACTION_ROLL_TARGET_OPTION: APIApplicationCommandBasicOption = {
 		name: Language.LL.commandOptions.actionStageRollTarget.name(),
 		description: Language.LL.commandOptions.actionStageRollTarget.description(),

@@ -65,7 +65,10 @@ export class InitSetSubCommand implements Command {
 			.getString(InitOptions.ACTOR_SET_VALUE_OPTION.name)
 			.trim();
 
-		if (!fieldToChange || !['initiative', 'name', 'player-is-gm'].includes(fieldToChange)) {
+		if (
+			!fieldToChange ||
+			!['initiative', 'name', 'player-is-gm', 'hide-stats'].includes(fieldToChange)
+		) {
 			await InteractionUtils.send(
 				intr,
 				LL.commands.init.set.interactions.invalidOptionError()
@@ -138,6 +141,11 @@ export class InitSetSubCommand implements Command {
 		if (fieldToChange === 'player-is-gm') {
 			finalValue = actor.userId;
 		}
+		if (fieldToChange === 'hide-stats') {
+			finalValue = ['true', 'yes', '1', 'ok', 'okay'].includes(
+				newFieldValue.toLocaleLowerCase().trim()
+			);
+		}
 
 		// perform the updates
 		if (fieldToChange === 'player-is-gm') {
@@ -155,6 +163,8 @@ export class InitSetSubCommand implements Command {
 					name: finalValue,
 				});
 			}
+		} else if (fieldToChange === 'hide-stats') {
+			await InitiativeActor.query().patchAndFetchById(actor.id, { hideStats: finalValue });
 		}
 		currentInitResponse = await InitiativeUtils.getInitiativeForChannel(intr.channel, {
 			sendErrors: true,

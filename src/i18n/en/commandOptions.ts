@@ -171,6 +171,10 @@ export default {
 		description:
 			'Whether to allow modifiers to alter the roll. (Default: true). Ex. set to false for bonus damage',
 	},
+	actionStageRollHealInsteadOfDamage: {
+		name: 'heal-instead-of-damage',
+		description: 'Whether to heal the target instead of doing damage',
+	},
 	actionStageDamageType: {
 		name: 'damage-type',
 		description: 'The type of damage dealt by the action.',
@@ -396,6 +400,14 @@ export default {
 			},
 		},
 	},
+	gameplayDamageAmount: {
+		name: 'amount',
+		description: 'The amount of damage to apply. A negative number heals the target.',
+	},
+	gameplayDamageType: {
+		name: 'type',
+		description: 'The type of damage to apply.',
+	},
 	gameplaySetValue: {
 		name: 'value',
 		description: "The value to update to on the target character's sheet",
@@ -439,7 +451,7 @@ export default {
 	},
 	initCharacterTarget: {
 		name: 'target-character',
-		description: 'The character that the roll is performed against.',
+		description: 'The character being targeted.',
 	},
 	initCreature: {
 		name: 'creature',
@@ -473,6 +485,10 @@ export default {
 			isGm: {
 				name: 'player-is-gm',
 				value: 'player-is-gm',
+			},
+			hideStats: {
+				name: 'hide-stats',
+				value: 'hide-stats',
 			},
 		},
 	},

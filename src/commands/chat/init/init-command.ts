@@ -148,7 +148,7 @@ export class InitCommand implements Command {
 						...InitOptions.INIT_ROLL_CHOICE_OPTION,
 						required: true,
 					},
-					InitOptions.INIT_CHARACTER_TARGET,
+					{ ...InitOptions.INIT_CHARACTER_TARGET, required: true },
 					{
 						...ChatArgs.ROLL_MODIFIER_OPTION,
 						required: false,

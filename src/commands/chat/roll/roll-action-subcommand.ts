@@ -23,11 +23,12 @@ import _ from 'lodash';
 import { ActionRoller } from '../../../utils/action-roller.js';
 import { getEmoji } from '../../../constants/emoji.js';
 import { Creature } from '../../../utils/creature.js';
-import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
+import { EmbedUtils, KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { InitOptions } from '../init/init-command-options.js';
 import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
 import { Character, InitiativeActor } from '../../../services/kobold/models/index.js';
 import { InitiativeUtils } from '../../../utils/initiative-utils.js';
+import action from '../../../i18n/en/commands/action.js';
 
 export class RollActionSubCommand implements Command {
 	public names = [Language.LL.commands.roll.action.name()];
@@ -138,9 +139,6 @@ export class RollActionSubCommand implements Command {
 				targetAction.name
 			}!`,
 		});
-
-		const appliedDamage = actionRoller.totalDamageDealt;
-
 		const embed = builtRoll.compileEmbed({ forceFields: true, showTags: false });
 
 		const response = EmbedUtils.describeActionResult({
@@ -157,29 +155,21 @@ export class RollActionSubCommand implements Command {
 				Language.LL.commands.roll.interactions.secretRollNotification()
 			);
 		}
-		await response.sendBatches(intr, isSecretRoll);
 
-		if (
-			targetCreature &&
-			targetAction.rolls.some(
-				roll => roll.type === 'damage' || roll.type === 'advanced-damage'
-			)
-		) {
-			// apply any damage effects from the action to the creature
-			let promises = [targetActor.$query().patch({ sheet: targetCreature.sheet })];
-			if (targetActor.characterId) {
-				promises.push(
-					targetActor
-						.$relatedQuery<Character>('character')
-						.patch({ sheet: targetCreature.sheet })
-				);
-			}
-			await Promise.all(promises);
+		if (targetCreature && actionRoller.shouldDisplayDamageText()) {
+			await targetActor.saveSheet(actionRoller.targetCreature.sheet);
 
-			let message = actionRoller.buildResultText();
+			const damageField = await EmbedUtils.getOrSendActionDamageField({
+				intr,
+				actionRoller,
+				hideStats: targetActor.hideStats,
+				targetNameOverwrite: targetActor.name,
+				LL,
+			});
 
-			// inform the channel that damage was dealt
-			await InteractionUtils.send(intr, message);
+			response.addFields(damageField);
 		}
+
+		await response.sendBatches(intr, isSecretRoll);
 	}
 }

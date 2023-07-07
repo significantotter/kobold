@@ -54,6 +54,7 @@ export { GameListSubCommand } from './game/game-list-subcommand.js';
 
 // gameplay command
 export { GameplayCommand } from './gameplay/gameplay-command.js';
+export { GameplayDamageSubCommand } from './gameplay/gameplay-damage-subcommand.js';
 export { GameplaySetSubCommand } from './gameplay/gameplay-set-subcommand.js';
 export { GameplayRecoverSubCommand } from './gameplay/gameplay-recover-subcommand.js';
 
@@ -70,6 +71,7 @@ export { ActionExportSubCommand } from './action/action-export-subcommand.js';
 // action stage command
 export { ActionStageCommand } from './action-stage/action-stage-command.js';
 export { ActionStageAddAttackSubCommand } from './action-stage/action-stage-add-attack-subcommand.js';
+export { ActionStageAddSkillChallengeSubCommand } from './action-stage/action-stage-add-skill-challenge-subcommand.js';
 export { ActionStageAddSaveSubCommand } from './action-stage/action-stage-add-save-subcommand.js';
 export { ActionStageAddTextSubCommand } from './action-stage/action-stage-add-text-subcommand.js';
 export { ActionStageAddBasicDamageSubCommand } from './action-stage/action-stage-add-basic-damage-subcommand.js';

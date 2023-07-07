@@ -24,6 +24,7 @@ import { InitOptions } from '../init/init-command-options.js';
 import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
 import { InitiativeUtils } from '../../../utils/initiative-utils.js';
 import { Character, InitiativeActor } from '../../../services/kobold/models/index.js';
+import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
 
 export class RollAttackSubCommand implements Command {
 	public names = [Language.LL.commands.roll.attack.name()];
@@ -139,24 +140,21 @@ export class RollAttackSubCommand implements Command {
 				Language.LL.commands.roll.interactions.secretRollNotification()
 			);
 		}
-		await embed.sendBatches(intr, isSecretRoll);
 
-		if (targetCreature) {
-			// apply any damage effects from the action to the creature
-			let promises = [targetActor.$query().patch({ sheet: targetCreature.sheet })];
-			if (targetActor.characterId) {
-				promises.push(
-					targetActor
-						.$relatedQuery<Character>('character')
-						.patch({ sheet: targetCreature.sheet })
-				);
-			}
-			await Promise.all(promises);
+		if (targetCreature && actionRoller.shouldDisplayDamageText()) {
+			await targetActor.saveSheet(actionRoller.targetCreature.sheet);
 
-			let message = actionRoller.buildResultText();
+			const damageField = await EmbedUtils.getOrSendActionDamageField({
+				intr,
+				actionRoller,
+				hideStats: targetActor.hideStats,
+				targetNameOverwrite: targetActor.name,
+				LL,
+			});
 
-			// inform the channel that damage was dealt
-			await InteractionUtils.send(intr, message);
+			embed.addFields(damageField);
 		}
+
+		await embed.sendBatches(intr, isSecretRoll);
 	}
 }

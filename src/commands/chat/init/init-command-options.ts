@@ -109,6 +109,10 @@ export class InitOptions {
 				name: Language.LL.commandOptions.initSetOption.choices.isGm.name(),
 				value: Language.LL.commandOptions.initSetOption.choices.isGm.value(),
 			},
+			{
+				name: Language.LL.commandOptions.initSetOption.choices.hideStats.name(),
+				value: Language.LL.commandOptions.initSetOption.choices.hideStats.value(),
+			},
 		],
 	};
 	public static readonly ACTOR_SET_VALUE_OPTION: APIApplicationCommandBasicOption = {

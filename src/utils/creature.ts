@@ -390,6 +390,12 @@ export class Creature {
 		}
 	}
 
+	public heal(amount: number) {
+		const currentHp = this.sheet.defenses.currentHp;
+		this.sheet.defenses.currentHp = Math.min(this.sheet.defenses.maxHp, currentHp + amount);
+		return { totalHealed: this.sheet.defenses.currentHp - currentHp };
+	}
+
 	/**
 	 * Takes typed damage, applies any weaknesses or resistances, alters the sheet, and returns the actual damage taken
 	 */
@@ -424,7 +430,6 @@ export class Creature {
 				appliedWeakness = weakness;
 			}
 			if (resistance?.type) {
-				console.log(finalDamage, resistance?.amount);
 				finalDamage = Math.max(0, finalDamage - (resistance?.amount ?? 0));
 				appliedResistance = resistance;
 			}
@@ -462,7 +467,7 @@ export class Creature {
 	}
 
 	getDC(dcName: string): number | null {
-		const trimmedLowerDCName = dcName.toLowerCase().replace(/\W+/g, '');
+		const trimmedLowerDCName = dcName.toLowerCase().replace(/[^_\[\]a-zA-Z-0-9]+/g, '');
 
 		if (['ac', 'armorclass', 'armor'].includes(trimmedLowerDCName))
 			return this.sheet.defenses.ac ?? 10;
@@ -1153,16 +1158,9 @@ export class Creature {
 
 	public static fromCharacter(character: Character): Creature {
 		let sheet = { ...character.sheet };
-		if (!character.sheet || !character.sheet?.info) {
-			// temporary fix until we migrate new sheets
-			sheet = Creature.fromWandererersGuide(
-				character.calculatedStats as any,
-				character.characterData as any
-			).sheet;
-		}
-		sheet.actions = [...sheet.actions, ...character.actions];
-		sheet.modifiers = [...sheet.modifiers, ...character.modifiers];
-		sheet.rollMacros = [...sheet.rollMacros, ...character.rollMacros];
+		sheet.actions = [...(sheet.actions ?? []), ...character.actions];
+		sheet.modifiers = [...(sheet.modifiers ?? []), ...character.modifiers];
+		sheet.rollMacros = [...(sheet.rollMacros ?? []), ...character.rollMacros];
 		return new Creature(sheet);
 	}
 
