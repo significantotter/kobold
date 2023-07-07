@@ -96,7 +96,7 @@ export class Creature {
 				.map(r => `${r.type} ${r.amount}`)
 				.join(', ')}\n`;
 		if (this.sheet.defenses.weaknesses?.length)
-			generalText += `Resistances: ${this.sheet.defenses.weaknesses
+			generalText += `Weaknesses: ${this.sheet.defenses.weaknesses
 				.map(w => `${w.type} ${w.amount}`)
 				.join(', ')}\n`;
 		if (this.sheet.defenses.immunities?.length)

@@ -293,7 +293,7 @@ export class EmbedUtils {
 				actionRoller.totalDamageDealt === 0 ? ' no' : ''
 			} damage from ${sourceNameOverwrite ?? actionRoller.creature.name}`;
 			if (actionRoller.targetCreature.sheet?.defenses?.currentHp === 0) {
-				message = "Yip! They're down!";
+				message += "Yip! They're down!";
 			}
 		}
 
