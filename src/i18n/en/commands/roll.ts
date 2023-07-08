@@ -71,16 +71,19 @@ export default {
 	},
 	attack: {
 		name: 'attack',
-		options: '[attack] [*attack_modifier*] [*damage_modifier*] [*note*] [*secret*]',
+		options:
+			'[attack] [target-character] [*attack_modifier*] [*damage_modifier*] [*note*] [*secret*] [*overwrite-ac*]',
 		usage:
 			'**[attack]**: The name of the attack to roll.\n' +
+			'**[target-character]**: The target character. Select (None) for no target.\n' +
 			'**[*attack\\_modifier*] optional**: A dice expression to roll ("1d20 - 1d4 + 3"). Added to ' +
 			'the end of the attack roll. Alternatively, a simple modifier value ("5" or "-3").\n' +
 			'**[*damage\\_modifier*] optional**: A dice expression to roll ("1d20 - 1d4 + 3"). Added to ' +
 			'the end of the damage roll. Alternatively, a simple modifier value ("5" or "-3").\n' +
 			'**[*note*] optional**: A note to add to the end of the dice roll.\n' +
 			'**[*secret*] optional**: Choose to either leave the roll public (default), hide the roll entirely, or ' +
-			'hide the roll, but publicly notify the channel that a roll has been made.',
+			'hide the roll, but publicly notify the channel that a roll has been made.\n' +
+			'**[*overwrite-ac*] optional**: Overwrite the AC of the attack.',
 		description: `rolls an attack for your active character`,
 		interactions: {
 			rollEmbed: {
@@ -92,7 +95,20 @@ export default {
 	},
 	action: {
 		name: 'action',
-		options: '[action] [*action_modifier*] [*damage_modifier*] [*note*] [*secret*]',
+		options:
+			'[action] [target-character] [*action_modifier*] [*damage_modifier*] [*note*] [*secret*] [*overwrite-dc*] [*overwrite-save-dice-roll*]',
+		usage:
+			'**[action]**: The name of the action to roll.\n' +
+			'**[target-character]**: The target character. Select (None) for no target.\n' +
+			'**[*attack\\_modifier*] optional**: A dice expression to roll ("1d20 - 1d4 + 3"). Added to ' +
+			'the end of the attack roll. Alternatively, a simple modifier value ("5" or "-3").\n' +
+			'**[*damage\\_modifier*] optional**: A dice expression to roll ("1d20 - 1d4 + 3"). Added to ' +
+			'the end of the damage roll. Alternatively, a simple modifier value ("5" or "-3").\n' +
+			'**[*note*] optional**: A note to add to the end of the dice roll.\n' +
+			'**[*secret*] optional**: Choose to either leave the roll public (default), hide the roll entirely, or ' +
+			'hide the roll, but publicly notify the channel that a roll has been made.' +
+			'**[*overwrite-dc*] optional**: Overwrite the DC of the action. Only works if the action has a DC.\n' +
+			'**[*overwrite-save-dice-roll*] optional**: Overwrite the dice roll of the save. Only works if the action has a save.',
 		description: `rolls an action for your active character`,
 		interactions: {
 			rollEmbed: {

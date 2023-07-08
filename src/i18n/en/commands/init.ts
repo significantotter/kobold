@@ -35,14 +35,18 @@ export default {
 	roll: {
 		name: 'roll',
 		description: `Rolls dice for an initiative member that you control`,
-		options: '[character] [init-roll-type] [*dice-roll-or-modifier*] [*secret*]',
+		options: '[character] [roll] [target-character] [*dice-roll-or-modifier*] [*secret*]',
 		usage:
 			'**[*character]** optional**: Which character in initiative to roll for.\n' +
-			'**[init-roll-type]**: The name of the ability to roll.\n' +
-			'**[*dice-roll-or-modifier*] optional**: A dice expression to roll ("1d20 - 1d4 + 3"). Added to the end ' +
-			'of the roll if choosing a skill/ability/save. Alternatively, a simple modifier value ("5" or "-3").\n' +
+			'**[roll]**: The name of the ability to roll.\n' +
+			'**[target-character]**: The target character. Select (None) for no target.\n' +
+			'**[*modifier*] optional**: A dice expression to modify a roll ("1d20 - 1d4 + 3"). The attack roll/save if ' +
+			'the roll is an attack or action.\n' +
+			'**[*damage_modifier*] optional**: A dice expression to modify a damage roll if the roll is ' +
+			'an attack or action ("1d20 - 1d4 + 3").\n' +
 			'**[*secret*] optional**: Choose to either leave the roll public (default), hide the roll entirely, or ' +
-			'hide the roll, but publicly notify the channel that a roll has been made.',
+			'hide the roll, but publicly notify the channel that a roll has been made.\n' +
+			'**[*overwrite-ac*] optional**: Overwrite the AC of the attack.',
 		interactions: {
 			noSheet:
 				"Yip! That character doesn't have any creature/character data associated with it. " +
@@ -94,13 +98,17 @@ export default {
 	},
 	add: {
 		name: 'add',
-		options: '[creature] [name] [*dice*] [*value*] [*hide-stats*]',
+		options: '[creature] [name] [*dice*] [*value*] [*hide-stats*] [*custom-stats*]',
 		usage:
 			'_[creature]_: The bestiary creature. Select "Custom NPC" for a simple initiative entry with no stats.\n' +
 			'_[*name*]_: The name to apply to the npc in the initiative.\n' +
 			'_[*dice*] optional_: The dice expression ("1d20+5") to use to join initiative.\n' +
 			'_[*value*] optional_: The static value ("15") to use to join initiative.\n' +
-			"_[*hide-stats*] optional_: Whether to hide the creature's stats. Defaults to hiding.",
+			"_[*hide-stats*] optional_: Whether to hide the creature's stats. Defaults to hiding." +
+			'_[*custom-stats*] optional_: Custom stats for a custom npc or to overwrite on a bestiary creature. ' +
+			'Enter values in the format statName=statValue, separated by semicolons. If the value is a list like with immunities, ' +
+			'separate each value with a comma. For weaknesses/resistances, follow this example: ' +
+			'"hp=30;ac=21;immunities=poison,electricity;weaknesses=fire:5,cold:10',
 		description: `Adds an NPC or minion to initiative`,
 		expandedDescription:
 			'Adds a bestiary creature to the initiative. By default, the creature will ' +

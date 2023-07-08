@@ -121,6 +121,10 @@ export class HelpCommand implements Command {
 								name: 'Gunslinger: Paired Shots (mutliple strikes with deadly crits)',
 								value: 'gunslingerPairedShots',
 							},
+							{
+								name: 'Battle Medicine (Heal with a Skill Challenge roll)',
+								value: 'battleMedicine',
+							},
 						],
 					},
 				],
@@ -288,6 +292,7 @@ export class HelpCommand implements Command {
 						name: LL.commands.gameplay.name(),
 						value:
 							`\`/${LL.commands.gameplay.name()} ${LL.commands.gameplay.set.name()}\` ${LL.commands.gameplay.set.description()}\n` +
+							`\`/${LL.commands.gameplay.name()} ${LL.commands.gameplay.damage.name()}\` ${LL.commands.gameplay.damage.description()}\n` +
 							`\`/${LL.commands.gameplay.name()} ${LL.commands.gameplay.recover.name()}\` ${LL.commands.gameplay.recover.description()}\n`,
 					},
 					{
@@ -305,6 +310,7 @@ export class HelpCommand implements Command {
 						name: LL.commands.actionStage.name(),
 						value:
 							`\`/${LL.commands.actionStage.name()} ${LL.commands.actionStage.addAttack.name()}\` ${LL.commands.actionStage.addAttack.description()}\n` +
+							`\`/${LL.commands.actionStage.name()} ${LL.commands.actionStage.addSkillChallenge.name()}\` ${LL.commands.actionStage.addSkillChallenge.description()}\n` +
 							`\`/${LL.commands.actionStage.name()} ${LL.commands.actionStage.addSave.name()}\` ${LL.commands.actionStage.addSave.description()}\n` +
 							`\`/${LL.commands.actionStage.name()} ${LL.commands.actionStage.addBasicDamage.name()}\` ${LL.commands.actionStage.addBasicDamage.description()}\n` +
 							`\`/${LL.commands.actionStage.name()} ${LL.commands.actionStage.addAdvancedDamage.name()}\` ${LL.commands.actionStage.addAdvancedDamage.description()}\n` +
@@ -425,13 +431,12 @@ export class HelpCommand implements Command {
 				embed.setTitle(LL.commands.help.gameplay.interactions.embed.title());
 				embed.setDescription(LL.commands.help.gameplay.interactions.embed.description());
 				embed.addFields(
-					[LL.commands.gameplay.set.name(), LL.commands.gameplay.recover.name()].map(
-						command =>
-							createCommandOperationHelpField(
-								LL.commands.gameplay.name(),
-								command,
-								LL
-							)
+					[
+						LL.commands.gameplay.set.name(),
+						LL.commands.gameplay.damage.name(),
+						LL.commands.gameplay.recover.name(),
+					].map(command =>
+						createCommandOperationHelpField(LL.commands.gameplay.name(), command, LL)
 					)
 				);
 				break;
@@ -461,17 +466,17 @@ export class HelpCommand implements Command {
 				embed.setDescription(LL.commands.help.actionStage.interactions.embed.description());
 				const actionStageFields = [
 					LL.commands.actionStage.addAttack.name(),
+					LL.commands.actionStage.addSkillChallenge.name(),
 					LL.commands.actionStage.addSave.name(),
 					LL.commands.actionStage.addBasicDamage.name(),
 					LL.commands.actionStage.addAdvancedDamage.name(),
-					LL.commands.actionStage.addText.name(),
 					LL.commands.actionStage.edit.name(),
 					LL.commands.actionStage.remove.name(),
 				].map(command =>
 					createCommandOperationHelpField(LL.commands.actionStage.name(), command, LL)
 				);
-				actionStageFields.splice(3, 0, {
-					name: LL.commands.actionStage.addText.name(),
+				actionStageFields.splice(4, 0, {
+					name: `\`/${command} ${LL.commands.actionStage.addText.name()}\``,
 					value: LL.commands.actionStage.addText.description({
 						addTextRollInput: '{{}}',
 					}),

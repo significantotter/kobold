@@ -348,7 +348,7 @@ export default {
 					"Finally, Produce Flame has a critical hit effect that applies persistent damage based on the spell level. We'll add this " +
 					"by using a text stage's critical success field and inlining spellLevel to print the number of dice\n\n" +
 					'`/action-stage add-text action:Produce Flame roll-name:Critical Effect critical-success-text:The target takes {inlineOne}d4 persistent fire damage.`\n\n' +
-					'Now, Lilac can roll the action (even choosing an AC threshold to beat!) by typing `/roll action action:Produce Flame target-dc:25`' +
+					'Now, Lilac can roll the action by typing `/roll action action:Produce Flame`' +
 					' and the bot will roll the attack and damage for her!',
 				fireball:
 					'Lilac Sootscale, a level 7 kobold sorceress, wants to make her spell Fireball as a custom action. \n\n' +
@@ -366,9 +366,8 @@ export default {
 					"Finally, fireball's damage is basic damage based on the save, so she adds a basic damage stage to the action. We reference" +
 					" the spell's level with the action's attribute [spellLevel], as fireball rolls 2d6 per spell level.\n\n" +
 					'`/action-stage add-basic-damage action:Fireball roll-name:Damage basic-damage-dice-roll:(2*[spellLevel])d6`\n\n' +
-					'Now, Lilac can roll Fireball! She sets the monster\'s roll at "d20+15" against her own primal spell DC of 25. ' +
-					'She heightens the spell to level 4. \n\n' +
-					'`/roll action action:Fireball save-dice-roll:d20+15 target-dc:25 heighten:4`',
+					'Now, Lilac can roll Fireball! She heightens the spell to level 4. \n\n' +
+					'`/roll action action:Fireball heighten:4`',
 				phantomPain:
 					'Portia, a level 7 anadi bard, wants to make the spell Phantom Pain as a custom action. \n\n' +
 					'She starts off by creating the action itself. The action\'s name is "Phantom Pain". It\'s a first level spell, so ' +
@@ -381,7 +380,7 @@ export default {
 					'`/action-stage add-text action:Phantom Pain roll-name:Details default-text:Range 30 feet; Targets 1 creature`\n\n' +
 					'The effects of Phantom Pain depend on whether the target succeeds or fails a will save against her occult spell DC. ' +
 					'So Portia adds a save stage to the action.\n\n' +
-					'`/action-stage add-save action:Phantom Pain roll-name:Save save-roll-type:Will save-dc-type:Occult Spell DC`\n\n' +
+					'`/action-stage add-save action:Phantom Pain roll-name:Save save-roll-type:d20+[will] save-dc-type:OccultDc`\n\n' +
 					"Now, we need to roll damage for Phantom Pain. The damage isn't basic save damage, so we need to add " +
 					'an advanced damage stage that can specify the damage based on the save result. We make sure to adjust the damage dice based ' +
 					'on the spell level. in this case, 2 dice per spell level, so ([spellLevel](2))d4\n\n' +
@@ -393,9 +392,8 @@ export default {
 					'persistent damage and becomes sickened 1. If they recover from sickened, the persistent damage ends. ' +
 					'critical-failure-text:The target takes {inlineOne} persistent damage and becomes sickened 2. ' +
 					'If they recover from sickened, the persistent damage ends.`\n\n' +
-					'Now, Portia can roll Phantom Pain. She sets the monster\'s roll at "d20+15" against her own occult spell DC of 25. ' +
-					'She heightens the spell to level 2. \n\n' +
-					'`/roll action action:Phantom Pain save-dice-roll:d20+15 target-dc:25 heighten:2`',
+					'Now, Portia can roll Phantom Pain. She heightens the spell to level 2. \n\n' +
+					'`/roll action action:Phantom Pain heighten:2`',
 				gunslingerPairedShots:
 					'Amethyst, a level 5 kobold pistolero, gunslinger wants to make a custom action for her Paired Shots ability. ' +
 					'She starts off by creating the action itself. The action\'s name is "Paired Shots". It\'s an attack rather than a spell.\n\n' +
@@ -419,8 +417,26 @@ export default {
 					'Now, she adds another attack stage and damage stage for the second strike.\n\n' +
 					'`/action-stage add-attack action:Paired Shots roll-name: Second Strike To Hit dice-roll: d20 + [slidePistolToHit] target-ac-save-or-skill: AC`\n\n' +
 					'`/action-stage add-advanced-damage action:Paired Shots roll-name:Second Strike Damage success-dice-roll:[slidePistolDamage] critical-success-dice-roll:[slidePistolCritDamage]`\n\n' +
-					'With both attack rolls and damage rolls, the action is ready! Amethyst can roll the action, setting an AC of 25, using the command:\n\n' +
-					'`/roll action action:Paired Shots target-dc:25`',
+					'With both attack rolls and damage rolls, the action is ready! Amethyst can roll the action using this command:\n\n' +
+					'`/roll action action:Paired Shots`',
+				battleMedicine:
+					'Anatase Lightclaw, a level 2 kobold monk, wants to make a custom action for her Battle Medicine skill action at the trained DC of 15. ' +
+					'She starts off by creating the action itself. The action\'s name will be "Battle Medicine (DC 15)". It\'s an "other" action that' +
+					' takes one action. Battle medicine has a different DC and heals differently for each ' +
+					'new DC option that you unlock as your proficiency goes up. I recommend making a new action for each.\n\n' +
+					'`/action create name:Battle Medicine (DC 15) action-type:other actions:one tags:medicine, skill`\n\n' +
+					'The Battle Medicine action allows Anatase to heal an ally in combat as if she were using the Treat Wounds medicine action. ' +
+					'This requires her to make a medicine roll against a DC that she can choose medicine. She chooses this action to be for the trained DC (15). ' +
+					'She adds a stage to the action that will roll the medicine check for her. This is a "skill-challenge" action stage, because it\'s ' +
+					'rolling against her own value.\n\n' +
+					'`/action-stage add-skill-challenge action: Battle Medicine roll-name: Medicine Check dice-roll: d20+[medicine] target-ac-save-or-skill: 15`\n\n' +
+					'Now we use an advanced damage stage to represent the healing. We toggle the damage stage to heal instead of doing damage.\n\n' +
+					'`/action-stage add-advanced-damage action:Battle Medicine roll-name:Healing critical-success-dice-roll:4d8 success-dice-roll:2d8 heal-instead-of-damage:True`\n\n' +
+					'However, on critically failing the roll, the target instead takes 1d8 damage! We use a new advanced damage stage to represent this.\n\n' +
+					'`/action-stage add-advanced-damage action:Battle Medicine roll-name:Critical Fail Damage! critical-failure-dice-roll:1d8`\n\n' +
+					'The action is ready! Anatase can roll the action using this command:\n\n' +
+					'`/roll action action:Battle Medicine`\n\n' +
+					"Once Anatase reaches expert in medicine, she'll make a second action with a DC of 20 and hp recovery of 2d8+10, etc. to choose between.",
 			},
 		},
 	},
@@ -457,7 +473,8 @@ export default {
 					'action succeeds or fails for the following result stages. Any success/failure/critical result from a ' +
 					'targeting stage carries through all result stages until another targeting stage is reached. ' +
 					'There are two types of targeting stages.\n\n' +
-					'An **Attack** action stage represents an attack roll. These allow you to target a certain type of DC, such as AC or an athletics DC.\n\n' +
+					'An **Attack** action stage represents an attack roll. These allow you to target enemy DCs, such as AC or an athletics DC.\n\n' +
+					'A **Skill Challenge** action stage represents a roll against your own DCs. This can also be a number, such as "20" for a Treat Wounds action.\n\n' +
 					'A **Save** action stage forces the target to make a saving throw. You can have them target a certain DC of yours, ' +
 					'and provide the type of roll they must make to meet that DC\n\n' +
 					'**Result Stages** are used to display the results or details of an action. There are three types of result stages.\n\n' +

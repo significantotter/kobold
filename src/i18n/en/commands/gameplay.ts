@@ -35,9 +35,7 @@ export default {
 			'[amount]: The amount of damage dealt. Use a negative number to heal.\n' +
 			"[type]: The damage type. If specified, the target's weaknesses/resistances/immunities will be checked \n",
 		expandedDescription:
-			'Updates a gameplay stat like hp for a character/npc.\n' +
-			'Sets the stat specified in the options to the value for the target character.\n' +
-			'Possible options are hp, tempHp, stamina, resolve, heroPoints, and focusPoints\n',
+			'Damages a  character/npc. Or, if given a negative number, heals them instead.\n',
 	},
 	recover: {
 		name: 'recover',
