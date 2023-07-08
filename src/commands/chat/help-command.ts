@@ -540,6 +540,6 @@ export class HelpCommand implements Command {
 				return;
 			}
 		}
-		await InteractionUtils.send(intr, embed);
+		await embed.sendBatches(intr, false, true);
 	}
 }

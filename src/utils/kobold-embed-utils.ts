@@ -1,4 +1,10 @@
-import { APIEmbed, ChatInputCommandInteraction, EmbedBuilder, EmbedData } from 'discord.js';
+import {
+	APIEmbed,
+	APIEmbedField,
+	ChatInputCommandInteraction,
+	EmbedBuilder,
+	EmbedData,
+} from 'discord.js';
 import _ from 'lodash';
 import { TranslationFunctions } from '../i18n/i18n-types.js';
 import { Language } from '../models/enum-helpers/index.js';
@@ -126,6 +132,61 @@ export class KoboldEmbed extends EmbedBuilder {
 			this.data?.fields?.length > 25
 		);
 	}
+
+	public splitField(field: APIEmbedField) {
+		// leave the name the same, adding 'cont\'d' to the end of split fields, splitting values on word boundaries if possible
+		const splitFields: APIEmbedField[] = [];
+
+		// first, split on newlines
+		const splitValues = field.value.split('\n');
+
+		// add values to a field until a value would make it too large. If a single value + a name is too large, split on spaces
+		let newField: APIEmbedField = {
+			name: field.name,
+			value: '',
+		};
+		for (const splitValue of splitValues) {
+			if (splitValue.length + field.name.length > 1024) {
+				// split the value on periods
+				const splitWords = splitValue.split('.');
+				for (const splitWord of splitWords) {
+					if (newField.value.length + splitWord.length > 1024) {
+						// add the new field to the list of fields
+						splitFields.push(newField);
+						// create a new field
+						newField = {
+							name: '\u200b',
+							value: '',
+						};
+					}
+					newField.value += splitWord + '.';
+				}
+			}
+			if (newField.value.length + splitValue.length > 1024) {
+				// add the new field to the list of fields
+				splitFields.push(newField);
+				// create a new field
+				newField = {
+					name: '\u200b',
+					value: '',
+				};
+			}
+			newField.value += splitValue + '\n';
+		}
+		if (newField.value.length > 0) splitFields.push(newField);
+		return splitFields;
+	}
+
+	public splitFieldsThatAreTooLong() {
+		for (let i = 0; i < this.data.fields.length; i++) {
+			const field = this.data.fields[i];
+			if (field.name.length + field.value.length > 1024) {
+				const splitFields = this.splitField(field);
+				this.data.fields.splice(i, 1, ...splitFields);
+			}
+		}
+	}
+
 	public determineEmbedFieldTextLength(): number {
 		return (
 			this.data?.fields?.reduce((acc, field) => {
@@ -198,7 +259,8 @@ export class KoboldEmbed extends EmbedBuilder {
 		const embedBatches: KoboldEmbed[][] = [];
 		return _.chunk(splitEmbeds, 1);
 	}
-	public async sendBatches(intr, isSecretRoll = false) {
+	public async sendBatches(intr, isSecretRoll = false, splitText = false) {
+		if (splitText) this.splitFieldsThatAreTooLong();
 		const splitEmbeds = this.splitEmbedIfTooLong();
 		for (const embed of splitEmbeds) {
 			await InteractionUtils.send(intr, embed, isSecretRoll);
