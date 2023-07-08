@@ -149,7 +149,7 @@ export class AutocompleteUtils {
 	) {
 		const currentInitResponse = await InitiativeUtils.getInitiativeForChannel(intr.channel);
 		if (currentInitResponse.errorMessage) {
-			return [];
+			return [{ name: '(None)', value: '__NONE__' }];
 		}
 
 		const actorOptions = currentInitResponse.init.actors.filter(actor =>
