@@ -134,6 +134,7 @@ export namespace PathBuilder {
 		mat?: any;
 		display?: string;
 		runes?: any[];
+		damageType: string;
 		attack: number;
 		damageBonus: number;
 		extraDamage: string[];

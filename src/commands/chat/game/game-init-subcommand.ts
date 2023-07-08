@@ -25,6 +25,7 @@ import { GameUtils } from '../../../utils/game-utils.js';
 import _ from 'lodash';
 import { Initiative } from '../../../services/kobold/models/index.js';
 import { GameOptions } from './game-command-options.js';
+import { InitOptions } from '../init/init-command-options.js';
 
 export class GameInitSubCommand implements Command {
 	public names = [Language.LL.commands.game.init.name()];
@@ -87,7 +88,7 @@ export class GameInitSubCommand implements Command {
 		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
-		const initiativeValue = intr.options.getNumber(ChatArgs.INIT_VALUE_OPTION.name);
+		const initiativeValue = intr.options.getNumber(InitOptions.INIT_VALUE_OPTION.name);
 		const skillChoice = intr.options.getString(ChatArgs.SKILL_CHOICE_OPTION.name);
 		const diceExpression = intr.options.getString(ChatArgs.ROLL_EXPRESSION_OPTION.name);
 		const targetCharacter = intr.options.getString(GameOptions.GAME_TARGET_CHARACTER.name);

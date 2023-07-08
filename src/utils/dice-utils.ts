@@ -21,6 +21,7 @@ export interface DiceRollResult extends APIEmbedField {
 export interface MultiRollResult {
 	results: Omit<DiceRollResult, 'type'>[];
 	name: string;
+	appliedDamage?: number;
 	type: 'multiDice';
 }
 export interface TextResult {
@@ -245,7 +246,7 @@ export class DiceUtils {
 		skipModifiers,
 		multiplier,
 		modifierMultiplier,
-		LL,
+		LL = Language.LL,
 	}: {
 		rollExpression: string;
 		damageType?: string;
@@ -259,7 +260,7 @@ export class DiceUtils {
 		skipModifiers?: boolean;
 		multiplier?: number;
 		modifierMultiplier?: number;
-		LL: TranslationFunctions;
+		LL?: TranslationFunctions;
 	}) {
 		const rollInformation: {
 			value: string;
@@ -372,6 +373,7 @@ export class DiceUtils {
 	}
 	public static rollCreatureAttack({
 		creature,
+		targetCreature,
 		attackName,
 		rollNote,
 		attackModifierExpression,
@@ -380,13 +382,14 @@ export class DiceUtils {
 		LL,
 	}: {
 		creature: Creature;
+		targetCreature?: Creature;
 		attackName: string;
 		rollNote?: string;
 		attackModifierExpression?: string;
 		damageModifierExpression?: string;
 		targetAC?: number;
 		LL;
-	}): RollBuilder {
+	}): { actionRoller: ActionRoller; builtRoll: RollBuilder } {
 		const targetAttack = creature.attackRolls[attackName.toLowerCase()];
 
 		// build a little action from the attack!
@@ -439,7 +442,8 @@ export class DiceUtils {
 			});
 		}
 
-		return new ActionRoller(action, creature).buildRoll(
+		const actionRoller = new ActionRoller(action, creature, targetCreature);
+		const builtRoll = actionRoller.buildRoll(
 			rollNote,
 			Language.LL.commands.roll.attack.interactions.rollEmbed.rollDescription({
 				attackName: targetAttack.name,
@@ -448,6 +452,10 @@ export class DiceUtils {
 				targetDC: targetAC,
 			}
 		);
+		return {
+			actionRoller,
+			builtRoll,
+		};
 	}
 	public static async rollCreatureDice(
 		creature: Creature,
@@ -459,13 +467,18 @@ export class DiceUtils {
 			modifierExpression?: string;
 			damageModifierExpression?: string;
 			targetAC?: number;
+			targetCreature?: Creature;
+			hideStats?: boolean;
+			targetNameOverwrite?: string;
+			sourceNameOverwrite?: string;
 			LL?: TranslationFunctions;
 		}
-	): Promise<{ error: boolean; message: string | KoboldEmbed }> {
+	): Promise<{ error: boolean; message: string | KoboldEmbed; actionRoller?: ActionRoller }> {
 		const LL = options.LL ?? Language.LL;
 		const targetRoll = creature.rolls[rollChoice] ?? creature.attackRolls[rollChoice];
 
 		const targetAction = creature.keyedActions[rollChoice];
+		let actionRoller: ActionRoller;
 
 		if (!targetRoll) {
 			return {
@@ -488,8 +501,9 @@ export class DiceUtils {
 
 			return { error: false, message: response.compileEmbed() };
 		} else if (targetRoll.type === 'attack') {
-			const response = DiceUtils.rollCreatureAttack({
-				creature: creature,
+			let attackResult = DiceUtils.rollCreatureAttack({
+				creature,
+				targetCreature: options.targetCreature,
 				attackName: targetRoll.name,
 				rollNote: options.rollNote,
 				attackModifierExpression: options.modifierExpression,
@@ -498,9 +512,11 @@ export class DiceUtils {
 				LL,
 			});
 
-			embed = response.compileEmbed({ forceFields: true });
+			actionRoller = attackResult.actionRoller;
+
+			embed = attackResult.builtRoll.compileEmbed({ forceFields: true });
 		} else if (targetAction) {
-			const actionRoller = new ActionRoller(targetAction, creature, null);
+			const actionRoller = new ActionRoller(targetAction, creature, options.targetCreature);
 
 			const builtRoll = actionRoller.buildRoll(options.rollNote, targetAction.description, {
 				attackModifierExpression: options.modifierExpression,
@@ -516,6 +532,18 @@ export class DiceUtils {
 				embed,
 				action: targetAction,
 			});
+
+			embed.addFields(
+				await EmbedUtils.getOrSendActionDamageField({
+					intr,
+					hideStats: options.hideStats,
+					actionRoller,
+					sourceNameOverwrite: options.sourceNameOverwrite,
+					targetNameOverwrite: options.targetNameOverwrite,
+					LL,
+				})
+			);
 		}
+		return { error: false, message: embed, actionRoller };
 	}
 }

@@ -18,14 +18,14 @@ export class GameUtils {
 		for (const character of activeGame.characters) {
 			if (
 				targetCharacterName === '' ||
-				character.sheet.info.name.toLowerCase().includes(targetCharacterName.toLowerCase())
+				character.name.toLowerCase().includes(targetCharacterName.toLowerCase())
 			) {
 				matches.push(character);
 			}
 		}
 		return matches.map(character => ({
-			name: character.sheet.info.name,
-			value: character.sheet.info.name,
+			name: character.name,
+			value: character.name,
 		}));
 	}
 }

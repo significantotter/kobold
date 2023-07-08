@@ -5,15 +5,21 @@ import {
 	Initiative,
 	Character,
 } from './../services/kobold/models/index.js';
-import { CommandInteraction, GuildTextBasedChannel, Message } from 'discord.js';
+import {
+	ChatInputCommandInteraction,
+	CommandInteraction,
+	GuildTextBasedChannel,
+	Message,
+} from 'discord.js';
 import { KoboldEmbed } from './kobold-embed-utils.js';
-import _ from 'lodash';
+import _, { max } from 'lodash';
 import { InteractionUtils } from './interaction-utils.js';
 import { CharacterUtils } from './character-utils.js';
 import { Language } from '../models/enum-helpers/index.js';
 import { DiceUtils } from './dice-utils.js';
 import { RollBuilder } from './roll-builder.js';
 import { Creature } from './creature.js';
+import { KoboldError } from './KoboldError.js';
 
 export class InitiativeBuilder {
 	public init: Initiative;
@@ -234,6 +240,21 @@ export class InitiativeBuilder {
 		return turnText;
 	}
 
+	public hpTextFromValue(currentHp: number, maxHp: number) {
+		if (currentHp === 0) return `DOWN`;
+		else if (currentHp / maxHp < 0.15) return `CRITICAL`;
+		else if (currentHp / maxHp < 0.5) return `BLOODIED`;
+		else if (currentHp < maxHp) return `INJURED`;
+		else return `HEALTHY`;
+	}
+	public staminaTextFromValue(currentStamina: number, maxStamina: number) {
+		if (currentStamina === 0) return `EXHAUSTED`;
+		else if (currentStamina / maxStamina < 0.15) return `DRAINED`;
+		else if (currentStamina / maxStamina < 0.5) return `TIRED`;
+		else if (currentStamina < maxStamina) return `SLOWING`;
+		else return `RESTED`;
+	}
+
 	public generateActorStatDisplayString(
 		actor: InitiativeActor,
 		options: {
@@ -250,14 +271,15 @@ export class InitiativeBuilder {
 		// if we should hide the creature's stats, do so
 		if (!options.showHiddenCreatureStats && actor.hideStats) {
 			const hp = actor.sheet.defenses.currentHp;
-			if (hp === 0) turnText += ` <HP 0/?>`;
-			else if (hp === actor.sheet.defenses.maxHp) turnText += ` <HP FULL>`;
-			else turnText += ` <HP ?/?>`;
+			turnText += ` <${this.hpTextFromValue(
+				actor.sheet.defenses.currentHp,
+				actor.sheet.defenses.maxHp
+			)}>`;
 			if (actor.sheet.info?.usesStamina) {
-				const stamina = actor.sheet.defenses.currentStamina;
-				if (stamina === 0) turnText += ` <SP 0/?>`;
-				else if (stamina === actor.sheet.defenses.maxHp) turnText += ` <SP FULL>`;
-				else turnText += ` <SP ?/?>`;
+				turnText += ` <${this.staminaTextFromValue(
+					actor.sheet.defenses.currentStamina,
+					actor.sheet.defenses.maxStamina
+				)}>`;
 			}
 			if (actor.sheet.defenses.tempHp) {
 				turnText += `<THP ?/?>`;
@@ -573,5 +595,32 @@ export class InitiativeUtils {
 		);
 
 		return { group: result.value, errorMessage: result.errorMessage };
+	}
+
+	public static async getInitActorByName(
+		intr: ChatInputCommandInteraction,
+		name: string,
+		LL?: TranslationFunctions
+	) {
+		let currentInitResponse = await InitiativeUtils.getInitiativeForChannel(intr.channel, {
+			sendErrors: true,
+			LL,
+		});
+		if (currentInitResponse.errorMessage) {
+			throw new KoboldError(currentInitResponse.errorMessage);
+		}
+		let currentInit = currentInitResponse.init;
+
+		const actorResponse: { actor: InitiativeActor; errorMessage: string } =
+			await InitiativeUtils.getNameMatchActorFromInitiative(
+				intr.user.id,
+				currentInit,
+				name,
+				LL
+			);
+		if (actorResponse.errorMessage) {
+			throw new KoboldError(actorResponse.errorMessage);
+		}
+		return actorResponse.actor;
 	}
 }

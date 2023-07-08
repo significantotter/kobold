@@ -15,6 +15,12 @@ export class ActionStageOptions {
 		required: false,
 		type: ApplicationCommandOptionType.Boolean,
 	};
+	public static readonly ACTION_ROLL_HEAL_INSTEAD_OF_DAMAGE: APIApplicationCommandBasicOption = {
+		name: Language.LL.commandOptions.actionStageRollHealInsteadOfDamage.name(),
+		description: Language.LL.commandOptions.actionStageRollHealInsteadOfDamage.description(),
+		required: false,
+		type: ApplicationCommandOptionType.Boolean,
+	};
 	public static readonly ACTION_ROLL_TARGET_OPTION: APIApplicationCommandBasicOption = {
 		name: Language.LL.commandOptions.actionStageRollTarget.name(),
 		description: Language.LL.commandOptions.actionStageRollTarget.description(),
@@ -31,6 +37,10 @@ export class ActionStageOptions {
 			{
 				name: Language.LL.commandOptions.actionStageStageEditOption.choices.name.name(),
 				value: Language.LL.commandOptions.actionStageStageEditOption.choices.name.value(),
+			},
+			{
+				name: Language.LL.commandOptions.actionStageStageEditOption.choices.damageType.name(),
+				value: Language.LL.commandOptions.actionStageStageEditOption.choices.damageType.value(),
 			},
 			{
 				name: Language.LL.commandOptions.actionStageStageEditOption.choices.allowRollModifier.name(),
@@ -170,6 +180,12 @@ export class ActionStageOptions {
 		name: Language.LL.commandOptions.actionStageDiceRoll.name(),
 		description: Language.LL.commandOptions.actionStageDiceRoll.description(),
 		required: true,
+		type: ApplicationCommandOptionType.String,
+	};
+	public static readonly ACTION_STAGE_DAMAGE_TYPE: APIApplicationCommandBasicOption = {
+		name: Language.LL.commandOptions.actionStageDamageType.name(),
+		description: Language.LL.commandOptions.actionStageDamageType.description(),
+		required: false,
 		type: ApplicationCommandOptionType.String,
 	};
 	public static readonly ACTION_BASIC_DAMAGE_DICE_ROLL_OPTION: APIApplicationCommandBasicOption =

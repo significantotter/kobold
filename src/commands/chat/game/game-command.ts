@@ -18,6 +18,7 @@ import { EventData } from '../../../models/internal-models.js';
 import { CommandUtils, InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { GameOptions } from './game-command-options.js';
+import { InitOptions } from '../init/init-command-options.js';
 
 export class GameCommand implements Command {
 	public names = [Language.LL.commands.game.name()];
@@ -54,7 +55,7 @@ export class GameCommand implements Command {
 						required: false,
 					},
 					{
-						...ChatArgs.INIT_VALUE_OPTION,
+						...InitOptions.INIT_VALUE_OPTION,
 						required: false,
 					},
 					GameOptions.GAME_TARGET_CHARACTER,
@@ -68,6 +69,7 @@ export class GameCommand implements Command {
 					GameOptions.GAME_ROLL_TYPE,
 					GameOptions.GAME_DICE_ROLL_OR_MODIFIER,
 					GameOptions.GAME_TARGET_CHARACTER,
+					{ ...InitOptions.INIT_CHARACTER_TARGET, required: false },
 					ChatArgs.ROLL_SECRET_OPTION,
 				],
 			},

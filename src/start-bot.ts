@@ -55,6 +55,7 @@ import {
 	GameListSubCommand,
 	// gameplay
 	GameplayCommand,
+	GameplayDamageSubCommand,
 	GameplaySetSubCommand,
 	GameplayRecoverSubCommand,
 	// action
@@ -69,6 +70,7 @@ import {
 	//action stage
 	ActionStageCommand,
 	ActionStageAddAttackSubCommand,
+	ActionStageAddSkillChallengeSubCommand,
 	ActionStageAddSaveSubCommand,
 	ActionStageAddTextSubCommand,
 	ActionStageAddBasicDamageSubCommand,
@@ -197,7 +199,11 @@ async function start(): Promise<void> {
 		]),
 
 		// Gameplay commands
-		new GameplayCommand([new GameplaySetSubCommand(), new GameplayRecoverSubCommand()]),
+		new GameplayCommand([
+			new GameplayDamageSubCommand(),
+			new GameplaySetSubCommand(),
+			new GameplayRecoverSubCommand(),
+		]),
 
 		// Action commands
 		new ActionCommand([
@@ -212,6 +218,7 @@ async function start(): Promise<void> {
 
 		new ActionStageCommand([
 			new ActionStageAddAttackSubCommand(),
+			new ActionStageAddSkillChallengeSubCommand(),
 			new ActionStageAddSaveSubCommand(),
 			new ActionStageAddTextSubCommand(),
 			new ActionStageAddBasicDamageSubCommand(),

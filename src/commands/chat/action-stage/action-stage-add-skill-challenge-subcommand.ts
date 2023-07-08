@@ -18,15 +18,16 @@ import { Language } from '../../../models/enum-helpers/index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { CollectorUtils } from '../../../utils/collector-utils.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
+import _ from 'lodash';
 import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
 import { ActionStageOptions } from './action-stage-command-options.js';
 
-export class ActionStageAddAdvancedDamageSubCommand implements Command {
-	public names = [Language.LL.commands.actionStage.addAdvancedDamage.name()];
+export class ActionStageAddSkillChallengeSubCommand implements Command {
+	public names = [Language.LL.commands.actionStage.addSkillChallenge.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.actionStage.addAdvancedDamage.name(),
-		description: Language.LL.commands.actionStage.addAdvancedDamage.description(),
+		name: Language.LL.commands.actionStage.addSkillChallenge.name(),
+		description: Language.LL.commands.actionStage.addSkillChallenge.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -41,8 +42,15 @@ export class ActionStageAddAdvancedDamageSubCommand implements Command {
 		if (option.name === ActionStageOptions.ACTION_TARGET_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
 			const match = intr.options.getString(ActionStageOptions.ACTION_TARGET_OPTION.name);
-
 			return await AutocompleteUtils.getTargetActionForActiveCharacter(intr, match);
+		} else if (option.name === ActionStageOptions.ACTION_ROLL_TARGET_DC_OPTION.name) {
+			//we don't need to autocomplete if we're just dealing with whitespace
+			const match = intr.options.getString(
+				ActionStageOptions.ACTION_ROLL_TARGET_DC_OPTION.name
+			);
+			return await AutocompleteUtils.getAllMatchingRollsForActiveCharacter(intr, match, [
+				'AC',
+			]);
 		}
 	}
 
@@ -52,23 +60,12 @@ export class ActionStageAddAdvancedDamageSubCommand implements Command {
 		LL: TranslationFunctions
 	): Promise<void> {
 		const targetAction = intr.options.getString(ActionStageOptions.ACTION_TARGET_OPTION.name);
-		const rollType = 'advanced-damage';
+		const rollType = 'skill-challenge';
 		const rollName = intr.options.getString(ActionStageOptions.ACTION_ROLL_NAME_OPTION.name);
-		const damageType = intr.options.getString(ActionStageOptions.ACTION_STAGE_DAMAGE_TYPE.name);
-		const healInsteadOfDamage = intr.options.getBoolean(
-			ActionStageOptions.ACTION_ROLL_HEAL_INSTEAD_OF_DAMAGE.name
-		);
-		const successDiceRoll = intr.options.getString(
-			ActionStageOptions.ACTION_SUCCESS_DICE_ROLL_OPTION.name
-		);
-		const criticalSuccessDiceRoll = intr.options.getString(
-			ActionStageOptions.ACTION_CRITICAL_SUCCESS_DICE_ROLL_OPTION.name
-		);
-		const criticalFailureDiceRoll = intr.options.getString(
-			ActionStageOptions.ACTION_CRITICAL_FAILURE_DICE_ROLL_OPTION.name
-		);
-		const failureDiceRoll = intr.options.getString(
-			ActionStageOptions.ACTION_FAILURE_DICE_ROLL_OPTION.name
+		const diceRoll = intr.options.getString(ActionStageOptions.ACTION_DICE_ROLL_OPTION.name);
+
+		const rollTargetDC = intr.options.getString(
+			ActionStageOptions.ACTION_ROLL_TARGET_DC_OPTION.name
 		);
 		let allowRollModifiers = intr.options.getBoolean(
 			ActionStageOptions.ACTION_ROLL_ALLOW_MODIFIERS.name
@@ -107,29 +104,12 @@ export class ActionStageAddAdvancedDamageSubCommand implements Command {
 			return;
 		}
 
-		if (
-			!successDiceRoll &&
-			!criticalSuccessDiceRoll &&
-			!criticalFailureDiceRoll &&
-			!failureDiceRoll
-		) {
-			await InteractionUtils.send(
-				intr,
-				LL.commands.actionStage.interactions.rollAlreadyExists()
-			);
-			return;
-		}
-
 		// create the roll
 		action.rolls.push({
 			name: rollName,
 			type: rollType,
-			damageType,
-			healInsteadOfDamage,
-			successRoll: successDiceRoll,
-			criticalSuccessRoll: criticalSuccessDiceRoll,
-			criticalFailureRoll: criticalFailureDiceRoll,
-			failureRoll: failureDiceRoll,
+			roll: diceRoll,
+			targetDC: rollTargetDC,
 			allowRollModifiers,
 		});
 
@@ -145,7 +125,7 @@ export class ActionStageAddAdvancedDamageSubCommand implements Command {
 			LL.commands.actionStage.interactions.rollAddSuccess({
 				actionName: action.name,
 				rollName: rollName,
-				rollType: 'advanced damage',
+				rollType: 'skill-challenge',
 			})
 		);
 	}

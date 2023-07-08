@@ -171,6 +171,14 @@ export default {
 		description:
 			'Whether to allow modifiers to alter the roll. (Default: true). Ex. set to false for bonus damage',
 	},
+	actionStageRollHealInsteadOfDamage: {
+		name: 'heal-instead-of-damage',
+		description: 'Whether to heal the target instead of doing damage',
+	},
+	actionStageDamageType: {
+		name: 'damage-type',
+		description: 'The type of damage dealt by the action.',
+	},
 	actionStageBasicDamageDiceRoll: {
 		name: 'basic-damage-dice-roll',
 		description: 'A simple damage roll for an attack or save. Ignored if other rolls set.',
@@ -228,6 +236,7 @@ export default {
 		description: 'The option to edit.',
 		choices: {
 			name: { name: 'name', value: 'name' },
+			damageType: { name: 'damage-type', value: 'damageType' },
 			allowRollModifier: { name: 'allow-roll-modifier', value: 'allowRollModifier' },
 			attackTargetDC: { name: 'attack-target-dc', value: 'targetDC' },
 			attackRoll: { name: 'attack-roll', value: 'roll' },
@@ -391,6 +400,14 @@ export default {
 			},
 		},
 	},
+	gameplayDamageAmount: {
+		name: 'amount',
+		description: 'The amount of damage to apply. A negative number heals the target.',
+	},
+	gameplayDamageType: {
+		name: 'type',
+		description: 'The type of damage to apply.',
+	},
 	gameplaySetValue: {
 		name: 'value',
 		description: "The value to update to on the target character's sheet",
@@ -432,6 +449,10 @@ export default {
 		name: 'character',
 		description: 'A character or npc present in the initiative.',
 	},
+	initCharacterTarget: {
+		name: 'target-character',
+		description: 'The character being targeted.',
+	},
 	initCreature: {
 		name: 'creature',
 		description: 'A creature to add to the initiative.',
@@ -439,6 +460,10 @@ export default {
 	initHideStats: {
 		name: 'hide-stats',
 		description: 'Whether to hide the stats of the character/creature in the initiative.',
+	},
+	initCustomStats: {
+		name: 'custom-stats',
+		description: 'Overrides for the custom stats. In the format "hp=35;ac=20;will=7"',
 	},
 	initTargetActor: {
 		name: 'target-initiative-member',
@@ -464,6 +489,10 @@ export default {
 			isGm: {
 				name: 'player-is-gm',
 				value: 'player-is-gm',
+			},
+			hideStats: {
+				name: 'hide-stats',
+				value: 'hide-stats',
 			},
 		},
 	},
@@ -643,16 +672,16 @@ export default {
 		description: 'A dice expression to modify your roll. (e.g. "+ 1 + 1d4")',
 	},
 	rollTargetDc: {
-		name: 'target-dc',
-		description: 'The DC to roll attacks against.',
+		name: 'overwrite-dc',
+		description: 'Provide a custom DC to roll attacks against.',
 	},
 	rollTargetAC: {
-		name: 'target-ac',
-		description: 'The AC to roll the attack against.',
+		name: 'overwrite-ac',
+		description: 'Provide a custom AC to roll the attack against.',
 	},
 	rollSaveDiceRoll: {
-		name: 'save-dice-roll',
-		description: 'The dice roll to use for any saving throw in the action.',
+		name: 'overwrite-save-dice-roll',
+		description: 'Provide the dice roll to use for any saving throw in the action.',
 	},
 	attackRollModifier: {
 		name: 'attack_modifier',

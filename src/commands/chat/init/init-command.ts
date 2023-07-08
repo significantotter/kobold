@@ -17,6 +17,7 @@ import { Language } from '../../../models/enum-helpers/index.js';
 import { EventData } from '../../../models/internal-models.js';
 import { CommandUtils, InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
+import { InitOptions } from './init-command-options.js';
 
 export class InitCommand implements Command {
 	public names = [Language.LL.commands.init.name()];
@@ -52,7 +53,7 @@ export class InitCommand implements Command {
 				name: Language.LL.commands.init.jumpTo.name(),
 				description: Language.LL.commands.init.jumpTo.description(),
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
-				options: [{ ...ChatArgs.INIT_CHARACTER_OPTION, required: true }],
+				options: [{ ...InitOptions.INIT_CHARACTER_OPTION, required: true }],
 			},
 			{
 				name: Language.LL.commands.init.join.name(),
@@ -73,10 +74,10 @@ export class InitCommand implements Command {
 						required: false,
 					},
 					{
-						...ChatArgs.INIT_VALUE_OPTION,
+						...InitOptions.INIT_VALUE_OPTION,
 						required: false,
 					},
-					ChatArgs.INIT_HIDE_STATS_OPTION,
+					InitOptions.INIT_HIDE_STATS_OPTION,
 				],
 			},
 			{
@@ -84,11 +85,12 @@ export class InitCommand implements Command {
 				description: Language.LL.commands.init.add.description(),
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
 				options: [
-					ChatArgs.INIT_CREATURE_OPTION,
+					InitOptions.INIT_CREATURE_OPTION,
 					{
-						...ChatArgs.ACTOR_NAME_OPTION,
+						...InitOptions.ACTOR_NAME_OPTION,
 						required: false,
 					},
+					InitOptions.INIT_CUSTOM_STATS_OPTION,
 					{
 						...ChatArgs.ROLL_EXPRESSION_OPTION,
 						description:
@@ -96,11 +98,11 @@ export class InitCommand implements Command {
 						required: false,
 					},
 					{
-						...ChatArgs.INIT_VALUE_OPTION,
+						...InitOptions.INIT_VALUE_OPTION,
 						required: false,
 					},
-					ChatArgs.INIT_ADD_TEMPLATE_OPTION,
-					ChatArgs.INIT_HIDE_STATS_OPTION,
+					InitOptions.INIT_ADD_TEMPLATE_OPTION,
+					InitOptions.INIT_HIDE_STATS_OPTION,
 				],
 			},
 			{
@@ -109,18 +111,18 @@ export class InitCommand implements Command {
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
 				options: [
 					{
-						...ChatArgs.INIT_CHARACTER_OPTION,
+						...InitOptions.INIT_CHARACTER_OPTION,
 						required: true,
 					},
-					ChatArgs.ACTOR_SET_OPTION,
-					ChatArgs.ACTOR_SET_VALUE_OPTION,
+					InitOptions.ACTOR_SET_OPTION,
+					InitOptions.ACTOR_SET_VALUE_OPTION,
 				],
 			},
 			{
 				name: Language.LL.commands.init.remove.name(),
 				description: Language.LL.commands.init.remove.description(),
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
-				options: [{ ...ChatArgs.INIT_CHARACTER_OPTION, required: true }],
+				options: [{ ...InitOptions.INIT_CHARACTER_OPTION, required: true }],
 			},
 			{
 				name: Language.LL.commands.init.statBlock.name(),
@@ -128,10 +130,10 @@ export class InitCommand implements Command {
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
 				options: [
 					{
-						...ChatArgs.INIT_CHARACTER_OPTION,
+						...InitOptions.INIT_CHARACTER_OPTION,
 						required: true,
 					},
-					ChatArgs.INIT_STAT_BLOCK_SECRET_OPTION,
+					InitOptions.INIT_STAT_BLOCK_SECRET_OPTION,
 				],
 			},
 			{
@@ -140,14 +142,14 @@ export class InitCommand implements Command {
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
 				options: [
 					{
-						...ChatArgs.INIT_CHARACTER_OPTION,
+						...InitOptions.INIT_CHARACTER_OPTION,
 						required: true,
 					},
 					{
-						...ChatArgs.INIT_ROLL_CHOICE_OPTION,
+						...InitOptions.INIT_ROLL_CHOICE_OPTION,
 						required: true,
 					},
-					ChatArgs.ROLL_TARGET_AC_OPTION,
+					{ ...InitOptions.INIT_CHARACTER_TARGET, required: true },
 					{
 						...ChatArgs.ROLL_MODIFIER_OPTION,
 						required: false,
@@ -164,6 +166,7 @@ export class InitCommand implements Command {
 						...ChatArgs.ROLL_SECRET_OPTION,
 						required: false,
 					},
+					ChatArgs.ROLL_TARGET_AC_OPTION,
 				],
 			},
 			{

@@ -25,6 +25,7 @@ import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Language } from '../../../models/enum-helpers/index.js';
 import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
 import { Creature } from '../../../utils/creature.js';
+import { InitOptions } from './init-command-options.js';
 
 export class InitStatBlockSubCommand implements Command {
 	public names = [Language.LL.commands.init.statBlock.name()];
@@ -44,9 +45,9 @@ export class InitStatBlockSubCommand implements Command {
 		option: AutocompleteFocusedOption
 	): Promise<ApplicationCommandOptionChoiceData[]> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === ChatArgs.INIT_CHARACTER_OPTION.name) {
+		if (option.name === InitOptions.INIT_CHARACTER_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(ChatArgs.INIT_CHARACTER_OPTION.name);
+			const match = intr.options.getString(InitOptions.INIT_CHARACTER_OPTION.name);
 
 			return await AutocompleteUtils.getAllControllableInitiativeActors(intr, match);
 		}
@@ -57,7 +58,7 @@ export class InitStatBlockSubCommand implements Command {
 		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
-		const targetCharacterName = intr.options.getString(ChatArgs.INIT_CHARACTER_OPTION.name);
+		const targetCharacterName = intr.options.getString(InitOptions.INIT_CHARACTER_OPTION.name);
 		const secretMessage = intr.options.getString(ChatArgs.ROLL_SECRET_OPTION.name);
 		const isSecretMessage =
 			secretMessage === Language.LL.commandOptions.statBlockSecret.choices.secret.value();

@@ -25,6 +25,8 @@ import { DiceUtils } from '../../../utils/dice-utils.js';
 import { RollBuilder } from '../../../utils/roll-builder.js';
 import { ActionRoller } from '../../../utils/action-roller.js';
 import { getEmoji } from '../../../constants/emoji.js';
+import { InitOptions } from './init-command-options.js';
+import { InitiativeActor } from '../../../services/kobold/models/index.js';
 
 export class InitRollSubCommand implements Command {
 	public names = [Language.LL.commands.init.roll.name()];
@@ -44,20 +46,27 @@ export class InitRollSubCommand implements Command {
 		option: AutocompleteFocusedOption
 	): Promise<ApplicationCommandOptionChoiceData[]> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === ChatArgs.INIT_CHARACTER_OPTION.name) {
+		if (option.name === InitOptions.INIT_CHARACTER_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(ChatArgs.INIT_CHARACTER_OPTION.name);
+			const match = intr.options.getString(InitOptions.INIT_CHARACTER_OPTION.name);
 
 			return await AutocompleteUtils.getAllControllableInitiativeActors(intr, match);
-		} else if (option.name === ChatArgs.INIT_ROLL_CHOICE_OPTION.name) {
-			const match = intr.options.getString(ChatArgs.INIT_ROLL_CHOICE_OPTION.name);
-			const targetCharacterName = intr.options.getString(ChatArgs.INIT_CHARACTER_OPTION.name);
+		} else if (option.name === InitOptions.INIT_ROLL_CHOICE_OPTION.name) {
+			const match = intr.options.getString(InitOptions.INIT_ROLL_CHOICE_OPTION.name);
+			const targetCharacterName = intr.options.getString(
+				InitOptions.INIT_CHARACTER_OPTION.name
+			);
 
 			return await AutocompleteUtils.getMatchingRollsForInitiativeSheet(
 				intr,
 				match,
 				targetCharacterName
 			);
+		} else if (option.name === InitOptions.INIT_CHARACTER_TARGET.name) {
+			//we don't need to autocomplete if we're just dealing with whitespace
+			const match = intr.options.getString(InitOptions.INIT_CHARACTER_TARGET.name);
+
+			return await AutocompleteUtils.getInitTargetOptions(intr, match);
 		}
 	}
 
@@ -66,8 +75,9 @@ export class InitRollSubCommand implements Command {
 		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
-		const rollChoice = intr.options.getString(ChatArgs.INIT_ROLL_CHOICE_OPTION.name);
-		const targetCharacterName = intr.options.getString(ChatArgs.INIT_CHARACTER_OPTION.name);
+		const rollChoice = intr.options.getString(InitOptions.INIT_ROLL_CHOICE_OPTION.name);
+		const targetCharacterName = intr.options.getString(InitOptions.INIT_CHARACTER_OPTION.name);
+		const targetInitActor = intr.options.getString(InitOptions.INIT_CHARACTER_TARGET.name);
 
 		const modifierExpression = intr.options.getString(ChatArgs.ROLL_MODIFIER_OPTION.name);
 		const damageModifierExpression = intr.options.getString(
@@ -106,6 +116,25 @@ export class InitRollSubCommand implements Command {
 
 		const actor = actorResponse.actor;
 
+		let targetCreature: Creature | undefined;
+		let targetActor: InitiativeActor | undefined;
+
+		if (targetInitActor && targetInitActor !== '__NONE__') {
+			const targetActorResponse = InitiativeUtils.getNameMatchActorFromInitiative(
+				initResult.init.gmUserId,
+				initResult.init,
+				targetInitActor,
+				LL
+			);
+			if (targetActorResponse.errorMessage) {
+				await InteractionUtils.send(intr, targetActorResponse.errorMessage);
+				return;
+			}
+
+			targetActor = targetActorResponse.actor;
+			targetCreature = Creature.fromInitActor(targetActor);
+		}
+
 		if (!actor.sheet) {
 			if (rollChoice.toLowerCase().trim() === 'dice') {
 				// a simple dice roll doesn't require a sheet
@@ -133,43 +162,22 @@ export class InitRollSubCommand implements Command {
 		}
 		const creature = new Creature(actor.sheet);
 
-		const targetRoll = creature.rolls[rollChoice] ?? creature.attackRolls[rollChoice];
+		const targetRoll = creature.attackRolls[rollChoice] ?? creature.rolls[rollChoice];
 
-		const targetAction = creature.keyedActions[rollChoice];
+		const targetAction =
+			(actor?.character?.actions ?? []).find(
+				action => action.name.toLowerCase().trim() === rollChoice.toLowerCase().trim()
+			) ?? creature.keyedActions[rollChoice];
 
-		if (!targetRoll) {
+		if (!targetRoll && !targetAction) {
 			await InteractionUtils.send(intr, LL.commands.init.roll.interactions.invalidRoll());
 			return;
 		}
 
 		let embed: KoboldEmbed;
 
-		if (['skill', 'ability', 'save', 'spell'].includes(targetRoll.type)) {
-			const response = await DiceUtils.rollSimpleCreatureRoll({
-				userName: intr.user.username,
-				actorName: actor.name,
-				creature,
-				attributeName: targetRoll.name,
-				rollNote,
-				modifierExpression,
-				LL,
-			});
-
-			embed = response.compileEmbed();
-		} else if (targetRoll.type === 'attack') {
-			const response = DiceUtils.rollCreatureAttack({
-				creature: creature,
-				attackName: targetRoll.name,
-				rollNote,
-				attackModifierExpression: modifierExpression,
-				damageModifierExpression,
-				targetAC,
-				LL,
-			});
-
-			embed = response.compileEmbed({ forceFields: true });
-		} else if (targetAction) {
-			const actionRoller = new ActionRoller(targetAction, creature, null);
+		if (targetAction) {
+			const actionRoller = new ActionRoller(targetAction, creature, targetCreature);
 
 			const builtRoll = actionRoller.buildRoll(rollNote, targetAction.description, {
 				attackModifierExpression: modifierExpression,
@@ -185,6 +193,59 @@ export class InitRollSubCommand implements Command {
 				embed,
 				action: targetAction,
 			});
+
+			if (targetCreature && actionRoller.shouldDisplayDamageText()) {
+				await targetActor.saveSheet(actionRoller.targetCreature.sheet);
+
+				const damageField = await EmbedUtils.getOrSendActionDamageField({
+					intr,
+					actionRoller,
+					hideStats: targetActor.hideStats,
+					targetNameOverwrite: targetActor.name,
+					LL,
+				});
+
+				embed.addFields(damageField);
+			}
+		} else if (['skill', 'ability', 'save', 'spell'].includes(targetRoll.type)) {
+			const response = await DiceUtils.rollSimpleCreatureRoll({
+				userName: intr.user.username,
+				actorName: actor.name,
+				creature,
+				attributeName: targetRoll.name,
+				rollNote,
+				modifierExpression,
+				LL,
+			});
+
+			embed = response.compileEmbed();
+		} else if (targetRoll.type === 'attack') {
+			const { builtRoll, actionRoller } = DiceUtils.rollCreatureAttack({
+				creature,
+				targetCreature,
+				attackName: targetRoll.name,
+				rollNote,
+				attackModifierExpression: modifierExpression,
+				damageModifierExpression,
+				targetAC,
+				LL,
+			});
+
+			embed = builtRoll.compileEmbed({ forceFields: true });
+
+			if (targetCreature && actionRoller.shouldDisplayDamageText()) {
+				await targetActor.saveSheet(actionRoller.targetCreature.sheet);
+
+				const damageField = await EmbedUtils.getOrSendActionDamageField({
+					intr,
+					actionRoller,
+					hideStats: targetActor.hideStats,
+					targetNameOverwrite: targetActor.name,
+					LL,
+				});
+
+				embed.addFields(damageField);
+			}
 		}
 		if (notifyRoll) {
 			await InteractionUtils.send(

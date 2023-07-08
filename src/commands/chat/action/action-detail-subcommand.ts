@@ -109,15 +109,19 @@ export class ActionDetailSubCommand implements Command {
 				actionDetailEmbed.addFields([field]);
 			} else if (roll.type === 'damage') {
 				let description = ``;
-				description += `\ndamage: ${roll.roll}`;
+				description += `\ndamage: ${roll.roll} ${roll.damageType ?? ''}`;
 				const field = { name: roll.name, value: description };
 				actionDetailEmbed.addFields([field]);
 			} else if (roll.type === 'advanced-damage') {
 				let description = ``;
-				description += `\nCritical Success: ${roll.criticalSuccessRoll ?? 'none'}`;
-				description += `\nSuccess: ${roll.successRoll ?? 'none'}`;
-				description += `\nFailure: ${roll.failureRoll ?? 'none'}`;
-				description += `\nCritical Failure: ${roll.criticalFailureRoll ?? 'none'}`;
+				description += `\nCritical Success: ${roll.criticalSuccessRoll ?? 'none'} ${
+					roll.damageType ?? ''
+				}`;
+				description += `\nSuccess: ${roll.successRoll ?? 'none'} ${roll.damageType ?? ''}`;
+				description += `\nFailure: ${roll.failureRoll ?? 'none'} ${roll.damageType ?? ''}`;
+				description += `\nCritical Failure: ${roll.criticalFailureRoll ?? 'none'} ${
+					roll.damageType ?? ''
+				}`;
 				const field = { name: roll.name, value: description };
 				actionDetailEmbed.addFields([field]);
 			} else if (roll.type === 'text') {

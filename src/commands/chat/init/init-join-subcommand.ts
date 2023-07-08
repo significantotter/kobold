@@ -23,6 +23,7 @@ import { DiceUtils } from '../../../utils/dice-utils.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Language } from '../../../models/enum-helpers/index.js';
+import { InitOptions } from './init-command-options.js';
 
 export class InitJoinSubCommand implements Command {
 	public names = [Language.LL.commands.init.join.name()];
@@ -95,10 +96,10 @@ export class InitJoinSubCommand implements Command {
 			);
 			return;
 		}
-		const initiativeValue = intr.options.getNumber(ChatArgs.INIT_VALUE_OPTION.name);
+		const initiativeValue = intr.options.getNumber(InitOptions.INIT_VALUE_OPTION.name);
 		const skillChoice = intr.options.getString(ChatArgs.SKILL_CHOICE_OPTION.name);
 		const diceExpression = intr.options.getString(ChatArgs.ROLL_EXPRESSION_OPTION.name);
-		const hideStats = intr.options.getBoolean(ChatArgs.INIT_HIDE_STATS_OPTION.name) ?? false;
+		const hideStats = intr.options.getBoolean(InitOptions.INIT_HIDE_STATS_OPTION.name) ?? false;
 
 		const rollResultMessage = await InitiativeUtils.addCharacterToInitiative({
 			character: activeCharacter,

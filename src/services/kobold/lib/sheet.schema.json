@@ -604,7 +604,10 @@
 									"type": "object",
 									"properties": {
 										"name": { "type": ["string", "null"] },
-										"type": { "type": ["string", "null"], "enum": ["attack"] },
+										"type": {
+											"type": ["string", "null"],
+											"enum": ["attack", "skill-challenge"]
+										},
 										"targetDC": { "type": ["string", "null"] },
 										"roll": { "type": ["string", "null"] },
 										"allowRollModifiers": { "type": "boolean" }
@@ -616,6 +619,7 @@
 										"name": { "type": ["string", "null"] },
 										"type": { "type": ["string", "null"], "enum": ["damage"] },
 										"roll": { "type": ["string", "null"] },
+										"healInsteadOfDamage": { "type": ["boolean", "null"] },
 										"allowRollModifiers": { "type": "boolean" }
 									}
 								},
@@ -631,6 +635,7 @@
 										"criticalFailureRoll": { "type": ["string", "null"] },
 										"successRoll": { "type": ["string", "null"] },
 										"failureRoll": { "type": ["string", "null"] },
+										"healInsteadOfDamage": { "type": ["boolean", "null"] },
 										"allowRollModifiers": { "type": "boolean" }
 									}
 								},

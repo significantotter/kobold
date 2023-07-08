@@ -10,7 +10,13 @@ export default {
 	},
 	addAttack: {
 		name: 'add-attack',
-		description: 'Adds an attack roll to an action',
+		description:
+			"Adds an attack roll to an action. Can also be any type of roll against an enemy's DCs",
+	},
+	addSkillChallenge: {
+		name: 'add-skill-challenge',
+		description:
+			'Adds a skill challenge roll to an action. This is any roll against your own DCs.',
 	},
 	addBasicDamage: {
 		name: 'add-basic-damage',

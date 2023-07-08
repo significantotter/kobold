@@ -17,6 +17,7 @@ import { EventData } from '../../../models/internal-models.js';
 import { CommandUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { GameplayOptions } from './gameplay-command-options.js';
+import { InitOptions } from '../init/init-command-options.js';
 
 export class GameplayCommand implements Command {
 	public names = [Language.LL.commands.gameplay.name()];
@@ -28,6 +29,16 @@ export class GameplayCommand implements Command {
 		default_member_permissions: undefined,
 
 		options: [
+			{
+				name: Language.LL.commands.gameplay.damage.name(),
+				description: Language.LL.commands.gameplay.damage.description(),
+				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				options: [
+					{ ...GameplayOptions.GAMEPLAY_TARGET_CHARACTER, required: true },
+					GameplayOptions.GAMEPLAY_DAMAGE_AMOUNT,
+					GameplayOptions.GAMEPLAY_DAMAGE_TYPE,
+				],
+			},
 			{
 				name: Language.LL.commands.gameplay.set.name(),
 				description: Language.LL.commands.gameplay.set.description(),

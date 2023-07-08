@@ -4,6 +4,143 @@ import { PathBuilder } from '../services/pathbuilder/pathbuilder.js';
 import { CreatureFluff, CreatureStatBlock } from '../services/pf2etools/bestiaryType.js';
 import { WG } from '../services/wanderers-guide/wanderers-guide.js';
 import { DiceUtils } from './dice-utils.js';
+import { KoboldError } from './KoboldError.js';
+
+// I also add the key, and compare values in lower case to the options
+const statOptions: {
+	[k: string]: { path: string; aliases: string[]; type: string; name: string };
+} = {
+	// defenses
+	ac: { path: 'defenses', aliases: ['armor class', 'armorClass'], type: 'number', name: 'ac' },
+	maxHp: {
+		path: 'defenses',
+		aliases: ['hp', 'hit points', 'max hit points', 'max hp'],
+		type: 'number',
+		name: 'maxHp',
+	},
+	tempHp: {
+		path: 'defenses',
+		aliases: ['temporary hit points', 'temp hit points', 'temporary hp', 'temp hp'],
+		type: 'number',
+		name: 'tempHp',
+	},
+	immunities: { path: 'defenses', aliases: ['immune'], type: 'string[]', name: 'immunities' },
+	maxResolve: {
+		path: 'defenses',
+		aliases: ['resolve', 'max resolve'],
+		type: 'number',
+		name: 'maxResolve',
+	},
+	maxStamina: {
+		path: 'defenses',
+		aliases: ['stamina', 'max stamina'],
+		type: 'number',
+		name: 'maxStamina',
+	},
+	weaknesses: {
+		path: 'defenses',
+		aliases: ['weakness', 'weak'],
+		type: 'weaknessOrResistance',
+		name: 'weaknesses',
+	},
+	resistances: {
+		path: 'defenses',
+		aliases: ['resistance', 'resist'],
+		type: 'weaknessOrResistance',
+		name: 'resistances',
+	},
+	// general
+	speed: { path: 'general', aliases: [], type: 'number', name: 'speed' },
+	swimSpeed: {
+		path: 'general',
+		aliases: ['swim', 'swim speed'],
+		type: 'number',
+		name: 'swimSpeed',
+	},
+	climbSpeed: {
+		path: 'general',
+		aliases: ['climb', 'climb speed'],
+		type: 'number',
+		name: 'climbSpeed',
+	},
+	flySpeed: { path: 'general', aliases: ['fly', 'fly speed'], type: 'number', name: 'flySpeed' },
+	senses: { path: 'general', aliases: ['vision', 'sight'], type: 'string[]', name: 'senses' },
+	classDc: { path: 'general', aliases: ['class dc'], type: 'number', name: 'classDc' },
+	languages: { path: 'general', aliases: [], type: 'string[]', name: 'languages' },
+	perception: { path: 'general', aliases: ['perc'], type: 'number', name: 'perception' },
+	focusPoints: {
+		path: 'general',
+		aliases: ['focus', 'focus points'],
+		type: 'number',
+		name: 'focusPoints',
+	},
+	// saves
+	fortitude: { path: 'saves', aliases: ['fort'], type: 'number', name: 'fortitude' },
+	reflex: { path: 'saves', aliases: ['ref'], type: 'number', name: 'reflex' },
+	will: { path: 'saves', aliases: [], type: 'number', name: 'will' },
+	// abilities
+	strength: { path: 'abilities', aliases: ['str'], type: 'number', name: 'strength' },
+	dexterity: { path: 'abilities', aliases: ['dex'], type: 'number', name: 'dexterity' },
+	constitution: { path: 'abilities', aliases: ['con'], type: 'number', name: 'constitution' },
+	intelligence: { path: 'abilities', aliases: ['int'], type: 'number', name: 'intelligence' },
+	wisdom: { path: 'abilities', aliases: ['wis'], type: 'number', name: 'wisdom' },
+	charisma: { path: 'abilities', aliases: ['cha'], type: 'number', name: 'charisma' },
+	// skills
+	acrobatics: { path: 'skills', aliases: [], type: 'number', name: 'acrobatics' },
+	arcana: { path: 'skills', aliases: [], type: 'number', name: 'arcana' },
+	athletics: { path: 'skills', aliases: [], type: 'number', name: 'athletics' },
+	crafting: { path: 'skills', aliases: ['craft'], type: 'number', name: 'crafting' },
+	deception: { path: 'skills', aliases: [], type: 'number', name: 'deception' },
+	diplomacy: { path: 'skills', aliases: ['diplo'], type: 'number', name: 'diplomacy' },
+	intimidation: { path: 'skills', aliases: ['intimidate'], type: 'number', name: 'intimidation' },
+	medicine: { path: 'skills', aliases: [], type: 'number', name: 'medicine' },
+	nature: { path: 'skills', aliases: [], type: 'number', name: 'nature' },
+	occultism: { path: 'skills', aliases: ['occult'], type: 'number', name: 'occultism' },
+	performance: {
+		path: 'skills',
+		aliases: ['perf', 'perform'],
+		type: 'number',
+		name: 'performance',
+	},
+	religion: { path: 'skills', aliases: [], type: 'number', name: 'religion' },
+	society: { path: 'skills', aliases: [], type: 'number', name: 'society' },
+	stealth: { path: 'skills', aliases: [], type: 'number', name: 'stealth' },
+	survival: { path: 'skills', aliases: [], type: 'number', name: 'survival' },
+	thievery: { path: 'skills', aliases: ['thief', 'thieving'], type: 'number', name: 'thievery' },
+	// casting stats
+	arcaneAttack: {
+		path: 'castingStats',
+		aliases: ['arcane attack', 'arcane'],
+		type: 'number',
+		name: 'arcaneAttack',
+	},
+	arcaneDc: { path: 'castingStats', aliases: ['arcane dc'], type: 'number', name: 'arcaneDc' },
+	divineAttack: {
+		path: 'castingStats',
+		aliases: ['divine attack', 'divine'],
+		type: 'number',
+		name: 'divineAttack',
+	},
+	divineDc: { path: 'castingStats', aliases: ['divine dc'], type: 'number', name: 'divineDc' },
+	occultAttack: {
+		path: 'castingStats',
+		aliases: ['occult attack', 'occult'],
+		type: 'number',
+		name: 'occultAttack',
+	},
+	occultDc: { path: 'castingStats', aliases: ['occult dc'], type: 'number', name: 'occultDc' },
+	primalAttack: {
+		path: 'castingStats',
+		aliases: ['primal attack', 'primal'],
+		type: 'number',
+		name: 'primalAttack',
+	},
+	primalDc: { path: 'castingStats', aliases: ['primal dc'], type: 'number', name: 'primalDc' },
+};
+_.mapValues(statOptions, (value, key) => {
+	value.aliases.push(key.toLowerCase());
+	return value;
+});
 
 export function convertBestiaryCreatureToSheet(
 	bestiaryEntry: CreatureStatBlock,
@@ -475,6 +612,80 @@ export function convertWanderersGuideCharToSheet(
 	return sheet;
 }
 
+export function generateStatOverrides(statString: string): Partial<Sheet> {
+	function parseStatNumber(input: string): number {
+		if (!input) throw new KoboldError(`Failed to parse stat number for ${input}`);
+		let number;
+		if (input?.includes('+')) {
+			number = Number(input.replace('+', ''));
+		} else if (input.includes('-')) {
+			number = Number(input.replace('-', '')) * -1;
+		} else number = Number(input);
+		if (isNaN(number))
+			throw new KoboldError(`Failed to convert ${input} to a number for ${input}`);
+		return number;
+	}
+
+	const statStringSplit = statString.split(';');
+	let statMap: { [k: string]: any } = {};
+	for (const stat of statStringSplit) {
+		const [key, value] = stat.split('=');
+		statMap[key] = value;
+	}
+
+	const partialSheet: Partial<Sheet> = {};
+	for (const stat in statMap) {
+		// lores are a special case
+		if (stat.includes('lore')) {
+			const loreName = stat.replaceAll('lore', '').replaceAll(/[\_\- ]/g, '');
+			partialSheet.skills = partialSheet.skills ?? {};
+			partialSheet.skills.lores = partialSheet.skills.lores ?? [];
+			partialSheet.skills.lores.push({
+				name: loreName,
+				bonus: parseStatNumber(statMap[stat]),
+				profMod: null,
+			});
+		}
+		// everything else
+		else {
+			const statOption = _.find(statOptions, option => option.aliases.includes(stat));
+			if (!statOption) {
+				throw new KoboldError(`Failed to find stat option for ${stat}`);
+			}
+			const statValue = statMap[stat];
+			partialSheet[statOption.path] = partialSheet[statOption.path] ?? {};
+			switch (statOption.type) {
+				case 'number':
+					partialSheet[statOption.path][statOption.name] = parseStatNumber(statValue);
+					if (statOption.name.startsWith('max')) {
+						partialSheet[statOption.path][
+							statOption.name.replaceAll('max', 'current')
+						] = parseStatNumber(statValue);
+					}
+					break;
+				case 'string[]':
+					partialSheet[statOption.path][statOption.name] = statValue
+						.split(',')
+						.map(s => s.trim());
+					break;
+				case 'weaknessOrResistance':
+					partialSheet[statOption.path][statOption.name] =
+						partialSheet[statOption.path][stat] ?? [];
+					const options = statValue.split(',');
+					options.forEach(option => {
+						const [type, amount] = option.split(':');
+						partialSheet[statOption.path][statOption.name].push({
+							type,
+							amount: parseStatNumber(amount),
+						});
+					});
+					break;
+			}
+		}
+	}
+	return partialSheet;
+}
+
 export function convertPathBuilderToSheet(
 	pathBuilderSheet: PathBuilder.Character,
 	options: {
@@ -746,6 +957,7 @@ export function convertPathBuilderToSheet(
 
 			const mainDamage = {
 				dice: numDice + weapon.die + ' + ' + weapon.damageBonus,
+				type: weapon.damageType,
 				// base type isn't provided by pathbuilder
 			};
 			const extraDamage = (weapon.extraDamage ?? []).map(damage => {

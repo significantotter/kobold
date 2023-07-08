@@ -48,7 +48,9 @@ export class ActionStageAddAttackSubCommand implements Command {
 			const match = intr.options.getString(
 				ActionStageOptions.ACTION_ROLL_TARGET_DC_OPTION.name
 			);
-			return await AutocompleteUtils.getAllMatchingRollsForActiveCharacter(intr, match);
+			return await AutocompleteUtils.getAllMatchingRollsForActiveCharacter(intr, match, [
+				'AC',
+			]);
 		}
 	}
 

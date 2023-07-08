@@ -34,6 +34,20 @@ export class GameplayOptions {
 			},
 		],
 	};
+	public static readonly GAMEPLAY_DAMAGE_AMOUNT: APIApplicationCommandBasicOption = {
+		name: Language.LL.commandOptions.gameplayDamageAmount.name(),
+		description: Language.LL.commandOptions.gameplayDamageAmount.description(),
+		required: true,
+		autocomplete: false,
+		type: ApplicationCommandOptionType.Number,
+	};
+	public static readonly GAMEPLAY_DAMAGE_TYPE: APIApplicationCommandBasicOption = {
+		name: Language.LL.commandOptions.gameplayDamageType.name(),
+		description: Language.LL.commandOptions.gameplayDamageType.description(),
+		required: false,
+		autocomplete: false,
+		type: ApplicationCommandOptionType.String,
+	};
 	public static readonly GAMEPLAY_SET_VALUE: APIApplicationCommandBasicOption = {
 		name: Language.LL.commandOptions.gameplaySetValue.name(),
 		description: Language.LL.commandOptions.gameplaySetValue.description(),

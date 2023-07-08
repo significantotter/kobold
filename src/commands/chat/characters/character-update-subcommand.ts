@@ -6,6 +6,8 @@ import {
 	PermissionsString,
 	ComponentType,
 	ButtonStyle,
+	ButtonInteraction,
+	CacheType,
 } from 'discord.js';
 
 import { EventData } from '../../../models/internal-models.js';
@@ -22,6 +24,7 @@ import { refs } from '../../../i18n/en/common.js';
 import { PathBuilder } from '../../../services/pathbuilder/index.js';
 import { Creature } from '../../../utils/creature.js';
 import { CollectorUtils } from '../../../utils/collector-utils.js';
+import { KoboldError } from '../../../utils/KoboldError.js';
 
 export class CharacterUpdateSubCommand implements Command {
 	public names = [Language.LL.commands.character.update.name()];
@@ -73,16 +76,26 @@ export class CharacterUpdateSubCommand implements Command {
 				);
 			}
 
-			const creature = Creature.fromPathBuilder(pathBuilderChar.build);
+			let creature: Creature;
+			try {
+				creature = Creature.fromPathBuilder(pathBuilderChar.build, activeCharacter.sheet);
+			} catch (err) {
+				// try to load the sheet without the previous character sheet
+				// if this fails, we accept the 500 error
+				creature = Creature.fromPathBuilder(pathBuilderChar.build);
+			}
 
-			let result;
+			let result: {
+				intr: ButtonInteraction<CacheType>;
+				value: string;
+			};
 
-			if (creature.sheet.info.name !== activeCharacter.sheet.info.name) {
+			if (creature.name !== activeCharacter.name) {
 				// confirm the update
 				const prompt = await intr.followUp({
 					content:
-						`**WARNING:** The character name on the target sheet ${creature.sheet.info.name} does not ` +
-						`match your active character's name ${activeCharacter.sheet.info.name}. Pathbuilder only ` +
+						`**WARNING:** The character name on the target sheet ${creature.name} does not ` +
+						`match your active character's name ${activeCharacter.name}. Pathbuilder only ` +
 						`remembers the **Last JSON export** you've done! If this sheet is not the one you want to update, ` +
 						`please re-export the correct pathbuilder character and try again.`,
 					components: [
@@ -136,7 +149,7 @@ export class CharacterUpdateSubCommand implements Command {
 						},
 					}
 				);
-				if (result !== 'update') {
+				if (result.value !== 'update') {
 					await InteractionUtils.editReply(intr, {
 						content: LL.sharedInteractions.choiceRegistered({
 							choice: 'Cancel',
@@ -146,7 +159,7 @@ export class CharacterUpdateSubCommand implements Command {
 					// cancel
 					await InteractionUtils.send(intr, {
 						content: LL.commands.character.update.interactions.canceled({
-							characterName: activeCharacter.sheet.info.name,
+							characterName: activeCharacter.name,
 						}),
 						components: [],
 					});

@@ -23,6 +23,8 @@ import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Language } from '../../../models/enum-helpers/index.js';
 import { Initiative } from '../../../services/kobold/models/index.js';
+import { InitOptions } from './init-command-options.js';
+import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
 
 export class InitSetSubCommand implements Command {
 	public names = [Language.LL.commands.init.set.name()];
@@ -42,28 +44,11 @@ export class InitSetSubCommand implements Command {
 		option: AutocompleteFocusedOption
 	): Promise<ApplicationCommandOptionChoiceData[]> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === ChatArgs.INIT_CHARACTER_OPTION.name) {
+		if (option.name === InitOptions.INIT_CHARACTER_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(ChatArgs.INIT_CHARACTER_OPTION.name);
+			const match = intr.options.getString(InitOptions.INIT_CHARACTER_OPTION.name);
 
-			const currentInitResponse = await InitiativeUtils.getInitiativeForChannel(intr.channel);
-			if (currentInitResponse.errorMessage) {
-				return [];
-			}
-			//get the actor matches
-			let actorOptions = InitiativeUtils.getControllableInitiativeActors(
-				currentInitResponse.init,
-				intr.user.id
-			);
-			actorOptions = actorOptions.filter(actor =>
-				actor.name.toLocaleLowerCase().includes(match.toLocaleLowerCase())
-			);
-
-			//return the matched actors
-			return actorOptions.map(actor => ({
-				name: actor.name,
-				value: actor.name,
-			}));
+			return await AutocompleteUtils.getInitTargetOptions(intr, match);
 		}
 	}
 
@@ -73,12 +58,17 @@ export class InitSetSubCommand implements Command {
 		LL: TranslationFunctions
 	): Promise<void> {
 		const targetCharacterName = (
-			intr.options.getString(ChatArgs.INIT_CHARACTER_OPTION.name) ?? ''
+			intr.options.getString(InitOptions.INIT_CHARACTER_OPTION.name) ?? ''
 		).trim();
-		const fieldToChange = intr.options.getString(ChatArgs.ACTOR_SET_OPTION.name).trim();
-		const newFieldValue = intr.options.getString(ChatArgs.ACTOR_SET_VALUE_OPTION.name).trim();
+		const fieldToChange = intr.options.getString(InitOptions.ACTOR_SET_OPTION.name).trim();
+		const newFieldValue = intr.options
+			.getString(InitOptions.ACTOR_SET_VALUE_OPTION.name)
+			.trim();
 
-		if (!fieldToChange || !['initiative', 'name', 'player-is-gm'].includes(fieldToChange)) {
+		if (
+			!fieldToChange ||
+			!['initiative', 'name', 'player-is-gm', 'hide-stats'].includes(fieldToChange)
+		) {
 			await InteractionUtils.send(
 				intr,
 				LL.commands.init.set.interactions.invalidOptionError()
@@ -151,6 +141,11 @@ export class InitSetSubCommand implements Command {
 		if (fieldToChange === 'player-is-gm') {
 			finalValue = actor.userId;
 		}
+		if (fieldToChange === 'hide-stats') {
+			finalValue = ['true', 'yes', '1', 'ok', 'okay'].includes(
+				newFieldValue.toLocaleLowerCase().trim()
+			);
+		}
 
 		// perform the updates
 		if (fieldToChange === 'player-is-gm') {
@@ -168,6 +163,8 @@ export class InitSetSubCommand implements Command {
 					name: finalValue,
 				});
 			}
+		} else if (fieldToChange === 'hide-stats') {
+			await InitiativeActor.query().patchAndFetchById(actor.id, { hideStats: finalValue });
 		}
 		currentInitResponse = await InitiativeUtils.getInitiativeForChannel(intr.channel, {
 			sendErrors: true,
