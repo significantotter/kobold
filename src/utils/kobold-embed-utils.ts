@@ -260,7 +260,7 @@ export class KoboldEmbed extends EmbedBuilder {
 		return _.chunk(splitEmbeds, 1);
 	}
 	public async sendBatches(intr, isSecretRoll = false, splitText = false) {
-		if (splitText) this.splitFieldsThatAreTooLong();
+		if (splitText && this.data?.fields) this.splitFieldsThatAreTooLong();
 		const splitEmbeds = this.splitEmbedIfTooLong();
 		for (const embed of splitEmbeds) {
 			await InteractionUtils.send(intr, embed, isSecretRoll);
