@@ -183,7 +183,8 @@ export class AutocompleteUtils {
 			initResult.init.gmUserId,
 			initResult.init,
 			targetCharacterName,
-			Language.LL
+			Language.LL,
+			false
 		);
 		if (actorResponse.errorMessage) {
 			return [];

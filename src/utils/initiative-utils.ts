@@ -561,13 +561,19 @@ export class InitiativeUtils {
 		userId: string,
 		initiative: Initiative,
 		characterName: string,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		requireControlled: boolean = false
 	): { actor: InitiativeActor; errorMessage: string } {
 		LL = LL || Language.LL;
 		let errorMessage = null;
 		let actor: InitiativeActor | null = null;
 		// get actor options that match the given name, were created by you, or you're the gm of
-		const actorOptions = InitiativeUtils.getControllableInitiativeActors(initiative, userId);
+		let actorOptions: InitiativeActor[] = [];
+		if (requireControlled) {
+			actorOptions = InitiativeUtils.getControllableInitiativeActors(initiative, userId);
+		} else {
+			actorOptions = initiative.actors;
+		}
 		const result = InitiativeUtils.nameMatchGeneric<InitiativeActor>(
 			actorOptions,
 			characterName,
@@ -616,7 +622,8 @@ export class InitiativeUtils {
 				intr.user.id,
 				currentInit,
 				name,
-				LL
+				LL,
+				false
 			);
 		if (actorResponse.errorMessage) {
 			throw new KoboldError(actorResponse.errorMessage);

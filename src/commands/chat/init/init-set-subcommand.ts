@@ -90,7 +90,8 @@ export class InitSetSubCommand implements Command {
 				intr.user.id,
 				currentInit,
 				targetCharacterName,
-				LL
+				LL,
+				true
 			);
 		if (actorResponse.errorMessage) {
 			await InteractionUtils.send(intr, actorResponse.errorMessage);

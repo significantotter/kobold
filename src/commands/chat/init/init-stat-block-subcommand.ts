@@ -77,7 +77,8 @@ export class InitStatBlockSubCommand implements Command {
 			intr.user.id,
 			currentInit,
 			targetCharacterName,
-			LL
+			LL,
+			true
 		);
 
 		if (targetActor.errorMessage) {

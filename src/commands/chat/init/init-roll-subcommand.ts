@@ -107,7 +107,8 @@ export class InitRollSubCommand implements Command {
 			initResult.init.gmUserId,
 			initResult.init,
 			targetCharacterName,
-			LL
+			LL,
+			true
 		);
 		if (actorResponse.errorMessage) {
 			await InteractionUtils.send(intr, actorResponse.errorMessage);
@@ -124,7 +125,8 @@ export class InitRollSubCommand implements Command {
 				initResult.init.gmUserId,
 				initResult.init,
 				targetInitActor,
-				LL
+				LL,
+				false
 			);
 			if (targetActorResponse.errorMessage) {
 				await InteractionUtils.send(intr, targetActorResponse.errorMessage);

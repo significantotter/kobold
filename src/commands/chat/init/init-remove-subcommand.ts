@@ -98,7 +98,8 @@ export class InitRemoveSubCommand implements Command {
 				intr.user.id,
 				currentInit,
 				targetCharacterName,
-				LL
+				LL,
+				true
 			);
 		}
 		if (actorResponse.errorMessage) {
