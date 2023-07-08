@@ -488,13 +488,14 @@ export class Creature {
 		if (['ac', 'armorclass', 'armor'].includes(trimmedLowerDCName))
 			return this.sheet.defenses.ac ?? 10;
 		if (['fort', 'fortitude'].includes(trimmedLowerDCName))
-			return this.sheet.saves.fortitude ?? 10;
-		if (['ref', 'reflex'].includes(trimmedLowerDCName)) return this.sheet.saves.reflex ?? 10;
-		if (['will'].includes(trimmedLowerDCName)) return this.sheet.saves.will ?? 10;
+			return (this.sheet.saves.fortitude ?? 0) + 10;
+		if (['ref', 'reflex'].includes(trimmedLowerDCName))
+			return (this.sheet.saves.reflex ?? 0) + 10;
+		if (['will'].includes(trimmedLowerDCName)) return (this.sheet.saves.will ?? 0) + 10;
 		if (['perception', 'perceptiondc'].includes(trimmedLowerDCName))
-			return this.sheet.general.perception ?? 10;
+			return (this.sheet.general.perception ?? 0) + 10;
 		if (['classdc', 'class'].includes(trimmedLowerDCName))
-			return this.sheet.general.classDC ?? 10;
+			return (this.sheet.general.classDC ?? 0) + 10;
 		for (const skill of _.keys(this.sheet.skills)) {
 			if (skill === 'lores') continue;
 			if (

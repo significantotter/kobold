@@ -1000,6 +1000,12 @@ export function convertPathBuilderToSheet(
 			scoreToBonus(sheet.abilities[shorthandAbilityToLong[spellcasting.ability]]);
 		const spellDC = 10 + spellAttack;
 
+		if (
+			sheet.castingStats[spellcasting.magicTradition + 'Attack'] &&
+			sheet.castingStats[spellcasting.magicTradition + 'Attack'] > spellAttack
+		)
+			continue;
+
 		sheet.castingStats[spellcasting.magicTradition + 'Attack'] = spellAttack;
 		sheet.castingStats[spellcasting.magicTradition + 'DC'] = spellDC;
 		sheet.castingStats[spellcasting.magicTradition + 'ProfMod'] = spellcasting.proficiency;
