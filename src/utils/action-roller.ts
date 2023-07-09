@@ -193,15 +193,15 @@ export class ActionRoller {
 			// Just record text that there should be a save here
 			// update the extra attributes for the next roll
 			['SaveResult', 'Save', 'savingThrow'].forEach(
-				name => (extraAttributes[name] = { name, value: result.results.total })
+				name => (extraAttributes[name] = { name, value: result.results?.total })
 			);
 			extraAttributes[`roll${rollCounter}`] = {
 				name: `roll${rollCounter}`,
-				value: result.results.total,
+				value: result.results?.total,
 			};
 			extraAttributes[`roll${rollCounter}Save`] = {
 				name: `roll${rollCounter}Save`,
-				value: result.results.total,
+				value: result.results?.total,
 			};
 			return result;
 		} else {
@@ -335,15 +335,15 @@ export class ActionRoller {
 
 		extraAttributes[`roll${rollCounter}`] = {
 			name: `roll${rollCounter}`,
-			value: result.results.total,
+			value: result.results?.total,
 		};
 		extraAttributes[`roll${rollCounter}${_.capitalize(effectTerm)}`] = {
 			name: `roll${rollCounter}${_.capitalize(effectTerm)}`,
-			value: result.results.total,
+			value: result.results?.total,
 		};
 		extraAttributes[`roll${rollCounter}Applied${_.capitalize(effectTerm)}`] = {
 			name: `roll${rollCounter}Applied${_.capitalize(effectTerm)}`,
-			value: result.results.total,
+			value: result.results?.total,
 		};
 
 		return result;
@@ -691,7 +691,7 @@ export class ActionRoller {
 							extraAttributes: _.values(extraAttributes),
 						});
 						if (!testRollResult.error) {
-							rollTargetValue = testRollResult.results.total;
+							rollTargetValue = testRollResult.results?.total;
 						}
 					}
 				}
@@ -721,7 +721,7 @@ export class ActionRoller {
 						extraAttributes: _.values(extraAttributes),
 					});
 					if (!testRollResult.error) {
-						rollTargetValue = testRollResult.results.total;
+						rollTargetValue = testRollResult.results?.total;
 					}
 				}
 				const skillChallengeResult = this.rollSkillChallenge(
