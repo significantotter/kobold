@@ -268,9 +268,12 @@ export class InitiativeBuilder {
 		if (actor.name.length > 40) {
 			turnText += '\n';
 		}
+		if (actor.sheet?.defenses?.currentHp === undefined) {
+			return turnText;
+		}
 		// if we should hide the creature's stats, do so
 		if (!options.showHiddenCreatureStats && actor.hideStats) {
-			const hp = actor.sheet.defenses.currentHp;
+			const hp = actor.sheet?.defenses?.currentHp;
 			turnText += ` <${this.hpTextFromValue(
 				actor.sheet.defenses.currentHp,
 				actor.sheet.defenses.maxHp
@@ -286,7 +289,7 @@ export class InitiativeBuilder {
 			}
 		}
 
-		// otherwise, display the creature's stats
+		// otherwise, display the creature's stats if we can
 		else {
 			turnText += ` <HP ${actor.sheet.defenses.currentHp}`;
 			turnText += `/${actor.sheet.defenses.maxHp}`;
