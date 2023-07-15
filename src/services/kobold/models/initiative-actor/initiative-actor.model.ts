@@ -17,15 +17,13 @@ export interface InitiativeActor extends InitiativeActorTypes.InitiativeActor {
 export class InitiativeActor extends BaseModel {
 	public async saveSheet(sheet: SheetTypes.Sheet) {
 		// apply any damage effects from the action to the creature
-		let promises: any[] = [this.$query().patch({ sheet })];
-		if (this.characterId) {
-			promises.push(
-				this.$relatedQuery<Character>('character').patch({
-					sheet,
-				})
-			);
-		}
-		return await Promise.all(promises);
+		let promises: any[] = [
+			this.$query().patch({ sheet }),
+			Character.query().patch({ sheet }).where('id', this.characterId),
+		];
+
+		await Promise.all(promises);
+		return;
 	}
 
 	static get tableName(): string {
@@ -65,7 +63,7 @@ export class InitiativeActor extends BaseModel {
 		};
 	}
 
-	static queryLooseCharacterName(characterName) {
+	static queryControlledCharacterByName(characterName) {
 		return this.query().whereRaw(`initiativeActor.name ILIKE :characterName`, {
 			charName: `%${characterName}%`,
 		});

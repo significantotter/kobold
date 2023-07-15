@@ -493,7 +493,7 @@ export class InitiativeUtils {
 	}
 
 	public static getControllableInitiativeActors(initiative: Initiative, userId: string) {
-		const actorOptions = initiative.actors;
+		const actorOptions = initiative?.actors ?? [];
 		const controllableActors = actorOptions.filter(
 			actor => initiative.gmUserId === userId || actor.userId === userId
 		);

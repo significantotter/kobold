@@ -40,7 +40,7 @@ export class CharacterSetActiveSubCommand implements Command {
 			const match = intr.options.getString(ChatArgs.SET_ACTIVE_NAME_OPTION.name);
 
 			//get the character matches
-			const options = await Character.queryLooseCharacterName(match, intr.user.id);
+			const options = await Character.queryControlledCharacterByName(match, intr.user.id);
 
 			//return the matched characters
 			return options.map(character => ({
@@ -59,7 +59,7 @@ export class CharacterSetActiveSubCommand implements Command {
 
 		// try and find that charcter
 		const targetCharacter = (
-			await Character.queryLooseCharacterName(charName, intr.user.id)
+			await Character.queryControlledCharacterByName(charName, intr.user.id)
 		)[0];
 
 		if (targetCharacter) {

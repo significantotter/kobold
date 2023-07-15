@@ -1,4 +1,4 @@
-import { GuildDefaultCharacter, ChannelDefaultCharacter } from './../index.js';
+import { GuildDefaultCharacter, ChannelDefaultCharacter, InitiativeActor } from './../index.js';
 import type CharacterTypes from './character.schema.js';
 import { JSONSchema7 } from 'json-schema';
 import { BaseModel } from '../../lib/base-model.js';
@@ -6,9 +6,6 @@ import CharacterSchema from './character.schema.json';
 import Sheet from '../../lib/sheet.schema.json';
 import SheetTypes from '../../lib/sheet.schema';
 import _ from 'lodash';
-import { parseBonusesForTagsFromModifiers } from '../../lib/helpers.js';
-
-const characterSchemaWithSheet = {};
 
 export interface Character extends CharacterTypes.Character {
 	sheet?: SheetTypes.Sheet;
@@ -25,11 +22,20 @@ export class Character extends BaseModel {
 		} as JSONSchema7;
 	}
 
-	static queryLooseCharacterName(characterName, userId) {
+	static queryControlledCharacterByName(characterName, userId) {
 		return this.query().whereRaw(`user_id=:userId AND name::TEXT ILIKE :characterName`, {
 			userId,
 			characterName: `%${characterName}%`,
 		});
+	}
+
+	async saveSheet(sheet: SheetTypes.Sheet) {
+		await Promise.all([
+			this.$query().patch({ sheet }),
+			InitiativeActor.query().patch({ sheet }).where('characterId', this.id),
+		]);
+
+		return;
 	}
 
 	/**
@@ -85,5 +91,10 @@ export class Character extends BaseModel {
 				},
 			},
 		};
+	}
+
+	// This helps us explicitly match the type ModelWithSheet
+	get hideStats(): boolean {
+		return false;
 	}
 }

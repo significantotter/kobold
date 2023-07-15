@@ -1,4 +1,9 @@
-import { Character, InitiativeActor, Sheet } from '../services/kobold/models/index.js';
+import {
+	Character,
+	InitiativeActor,
+	ModelWithSheet,
+	Sheet,
+} from '../services/kobold/models/index.js';
 import { PathBuilder } from '../services/pathbuilder/pathbuilder.js';
 import { CreatureStatBlock } from '../services/pf2etools/bestiaryType.js';
 import { WG } from '../services/wanderers-guide/wanderers-guide.js';
@@ -337,26 +342,38 @@ export class Creature {
 		let updatedValue;
 
 		if (option === 'hp') {
+			if (this.sheet?.defenses?.currentHp === undefined)
+				return { initialValue: 0, updatedValue: 0 };
 			initialValue = this.sheet.defenses.currentHp;
 			updatedValue = computeNewValue(initialValue, value, 0, this.sheet.defenses.maxHp);
 			this.sheet.defenses.currentHp = updatedValue;
 		} else if (option === 'tempHp') {
+			if (this.sheet?.defenses?.tempHp === undefined)
+				return { initialValue: 0, updatedValue: 0 };
 			initialValue = this.sheet.defenses.tempHp;
 			updatedValue = computeNewValue(initialValue, value, 0);
 			this.sheet.defenses.tempHp = updatedValue;
 		} else if (option === 'stamina') {
+			if (this.sheet?.defenses?.currentStamina === undefined)
+				return { initialValue: 0, updatedValue: 0 };
 			initialValue = this.sheet.defenses.currentStamina;
 			updatedValue = computeNewValue(initialValue, value, 0, this.sheet.defenses.maxStamina);
 			this.sheet.defenses.currentStamina = updatedValue;
 		} else if (option === 'resolve') {
+			if (this.sheet?.defenses?.currentResolve === undefined)
+				return { initialValue: 0, updatedValue: 0 };
 			initialValue = this.sheet.defenses.currentResolve;
 			updatedValue = computeNewValue(initialValue, value, 0, this.sheet.defenses.maxResolve);
 			this.sheet.defenses.currentResolve = updatedValue;
 		} else if (option === 'heroPoints') {
+			if (this.sheet?.general?.currentHeroPoints === undefined)
+				return { initialValue: 0, updatedValue: 0 };
 			initialValue = this.sheet.general.currentHeroPoints;
 			updatedValue = computeNewValue(initialValue, value, 0, 3);
 			this.sheet.general.currentHeroPoints = updatedValue;
 		} else if (option === 'focusPoints') {
+			if (this.sheet?.general?.currentFocusPoints === undefined)
+				return { initialValue: 0, updatedValue: 0 };
 			initialValue = this.sheet.general.currentFocusPoints;
 			updatedValue = computeNewValue(initialValue, value, 0, 3);
 			this.sheet.general.currentFocusPoints = updatedValue;
@@ -1169,7 +1186,7 @@ export class Creature {
 		};
 	}
 
-	public static fromInitActor(initActor: InitiativeActor): Creature {
+	public static fromModelWithSheet(initActor: ModelWithSheet): Creature {
 		return new Creature(initActor.sheet, initActor.name);
 	}
 

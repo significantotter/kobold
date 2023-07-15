@@ -44,7 +44,10 @@ export class CharacterSetDefaultSubCommand implements Command {
 			//we don't need to autocomplete if we're just dealing with whitespace
 			const match = intr.options.getString(ChatArgs.SET_ACTIVE_NAME_OPTION.name);
 
-			const matchedCharacters = await Character.queryLooseCharacterName(match, intr.user.id);
+			const matchedCharacters = await Character.queryControlledCharacterByName(
+				match,
+				intr.user.id
+			);
 			//get the character matches
 			const options = matchedCharacters.map(character => ({
 				name: character.name,
@@ -80,7 +83,7 @@ export class CharacterSetDefaultSubCommand implements Command {
 
 		// try and find that charcter
 		const targetCharacter = (
-			await Character.queryLooseCharacterName(charName, intr.user.id)
+			await Character.queryControlledCharacterByName(charName, intr.user.id)
 		)[0];
 
 		if (targetCharacter) {

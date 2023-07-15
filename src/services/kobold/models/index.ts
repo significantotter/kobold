@@ -18,3 +18,4 @@ export { BestiaryFilesLoaded } from './bestiary-files-loaded/bestiary-files-load
 export { Npc } from './npc/npc.model';
 
 export type { Sheet } from './../lib/sheet.schema';
+export type { ModelWithSheet } from './../lib/thing-with-sheet';

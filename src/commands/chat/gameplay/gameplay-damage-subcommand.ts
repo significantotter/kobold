@@ -16,10 +16,10 @@ import { Language } from '../../../models/enum-helpers/index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { InteractionUtils } from '../../../utils/interaction-utils.js';
 import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
-import { GameplayUtils } from '../../../utils/gameplay-utils.js';
 import _ from 'lodash';
 import { Creature } from '../../../utils/creature.js';
 import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
+import { GameUtils } from '../../../utils/game-utils.js';
 
 export class GameplayDamageSubCommand implements Command {
 	public names = [Language.LL.commands.gameplay.damage.name()];
@@ -39,7 +39,7 @@ export class GameplayDamageSubCommand implements Command {
 	): Promise<ApplicationCommandOptionChoiceData[]> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name) {
-			return await AutocompleteUtils.getGameplayTargetCharacters(intr, option.value);
+			return await AutocompleteUtils.getAllTargetOptions(intr, option.value);
 		}
 	}
 
@@ -48,12 +48,18 @@ export class GameplayDamageSubCommand implements Command {
 		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
-		const compositeId = intr.options.getString(GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name);
+		const targetCharacter = intr.options.getString(
+			GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name
+		);
 		const amount = intr.options.getNumber(GameplayOptions.GAMEPLAY_DAMAGE_AMOUNT.name);
 		const type = intr.options.getString(GameplayOptions.GAMEPLAY_DAMAGE_TYPE.name);
 
-		let targetCharacters = await GameplayUtils.fetchGameplayTargets(intr, compositeId);
-		const sheet = targetCharacters[0].sheet;
+		const { characterOrInitActorTargets } = await GameUtils.getCharacterOrInitActorTarget(
+			intr,
+			targetCharacter
+		);
+
+		const sheet = characterOrInitActorTargets[0].sheet;
 		const creature = new Creature(sheet);
 		let message = '';
 		if (amount >= 0) {
@@ -82,9 +88,7 @@ export class GameplayDamageSubCommand implements Command {
 				targetCreatureSheet: creature.sheet,
 			});
 		}
-		for (const target of targetCharacters) {
-			await target.$query().patch({ sheet });
-		}
+		await characterOrInitActorTargets[0].saveSheet(creature.sheet);
 
 		await InteractionUtils.send(intr, message);
 	}

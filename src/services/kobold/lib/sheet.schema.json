@@ -68,7 +68,7 @@
 				},
 				"traits": {
 					"description": "The character's traits.",
-					"type": "array",
+					"type": ["array"],
 					"items": { "type": ["string", "null"] }
 				},
 				"usesStamina": {
@@ -552,7 +552,7 @@
 					},
 					"traits": {
 						"description": "The attack traits.",
-						"type": "array",
+						"type": ["array", "null"],
 						"items": {
 							"type": ["string", "null"]
 						}

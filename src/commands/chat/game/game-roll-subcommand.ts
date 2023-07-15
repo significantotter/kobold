@@ -22,7 +22,11 @@ import { CharacterUtils } from '../../../utils/character-utils.js';
 import { GameUtils } from '../../../utils/game-utils.js';
 import _ from 'lodash';
 import { GameOptions } from './game-command-options.js';
-import { Character, InitiativeActor } from '../../../services/kobold/models/index.js';
+import {
+	Character,
+	InitiativeActor,
+	ModelWithSheet,
+} from '../../../services/kobold/models/index.js';
 import { EmbedUtils, KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { WG } from '../../../services/wanderers-guide/wanderers-guide.js';
 import { Creature } from '../../../utils/creature.js';
@@ -92,7 +96,7 @@ export class GameRollSubCommand implements Command {
 			//we don't need to autocomplete if we're just dealing with whitespace
 			const match = intr.options.getString(InitOptions.INIT_CHARACTER_TARGET.name);
 
-			return await AutocompleteUtils.getInitTargetOptions(intr, match);
+			return await AutocompleteUtils.getAllTargetOptions(intr, match);
 		}
 	}
 
@@ -104,8 +108,8 @@ export class GameRollSubCommand implements Command {
 		if (!intr.isChatInputCommand()) return;
 		const rollType = intr.options.getString(GameOptions.GAME_ROLL_TYPE.name);
 		const diceExpression = intr.options.getString(GameOptions.GAME_DICE_ROLL_OR_MODIFIER.name);
-		const targetCharacter = intr.options.getString(GameOptions.GAME_TARGET_CHARACTER.name);
-		const targetInitActor = intr.options.getString(InitOptions.INIT_CHARACTER_TARGET.name);
+		const targetCharacterName = intr.options.getString(GameOptions.GAME_TARGET_CHARACTER.name);
+		const targetInitActorName = intr.options.getString(InitOptions.INIT_CHARACTER_TARGET.name);
 
 		const secretRoll = intr.options.getString(ChatArgs.ROLL_SECRET_OPTION.name);
 		const isSecretRoll =
@@ -126,18 +130,20 @@ export class GameRollSubCommand implements Command {
 		const embeds: KoboldEmbed[] = [];
 
 		let targetCreature: Creature | undefined;
-		let targetActor: InitiativeActor | undefined;
+		let targetActor: ModelWithSheet | undefined;
 
-		if (targetInitActor && targetInitActor !== '__NONE__') {
-			targetActor = await InitiativeUtils.getInitActorByName(intr, targetInitActor);
-			targetCreature = Creature.fromInitActor(targetActor);
+		if (targetInitActorName && targetInitActorName !== '__NONE__') {
+			const { targetCharacter, targetInitActor } =
+				await GameUtils.getCharacterOrInitActorTarget(intr, targetInitActorName);
+			targetActor = targetInitActor ?? targetCharacter;
+			targetCreature = Creature.fromModelWithSheet(targetActor);
 		}
 
 		for (const character of activeGame.characters) {
 			if (
-				targetCharacter &&
-				targetCharacter.toLocaleLowerCase().trim().length > 0 &&
-				targetCharacter.toLocaleLowerCase().trim() !==
+				targetCharacterName &&
+				targetCharacterName.toLocaleLowerCase().trim().length > 0 &&
+				targetCharacterName.toLocaleLowerCase().trim() !==
 					character.sheet.info.name.toLocaleLowerCase().trim()
 			) {
 				continue;

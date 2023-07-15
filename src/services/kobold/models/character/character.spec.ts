@@ -36,7 +36,7 @@ describe('Character', () => {
 		expect(insertedCharacter.charId).toBe(builtCharacter.charId);
 	});
 
-	describe('queryLooseCharacterName', () => {
+	describe('queryControlledCharacterByName', () => {
 		beforeAll(async () => {
 			await Character.knex().raw('TRUNCATE Character CASCADE');
 		});
@@ -46,7 +46,7 @@ describe('Character', () => {
 				characterData: CharacterDataFactory.build({ name: 'aSdFqWeRtYuI' }),
 			});
 			const createdCharacter = await Character.query().insert(builtCharacter);
-			const looseFetch = await Character.queryLooseCharacterName('sDfQwE', 1);
+			const looseFetch = await Character.queryControlledCharacterByName('sDfQwE', 1);
 			expect(looseFetch).toHaveProperty('length', 1);
 			expect(looseFetch[0].characterData).toHaveProperty('name', 'aSdFqWeRtYuI');
 		});
