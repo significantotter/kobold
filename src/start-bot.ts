@@ -12,7 +12,7 @@ import {
 	CharacterUpdateSubCommand,
 	CharacterRemoveSubCommand,
 	CharacterImportWanderersGuideSubCommand,
-	CharacterimportPathbuilderSubCommand,
+	CharacterImportPathbuilderSubCommand,
 	CharacterSheetSubCommand,
 	// roll
 	RollCommand,
@@ -83,6 +83,9 @@ import {
 	RollMacroCreateSubCommand,
 	RollMacroUpdateSubCommand,
 	RollMacroRemoveSubCommand,
+	// settings
+	SettingsCommand,
+	SettingsSetSubCommand,
 
 	// help
 	HelpCommand,
@@ -146,7 +149,7 @@ async function start(): Promise<void> {
 			new CharacterSetActiveSubCommand(),
 			new CharacterSetDefaultSubCommand(),
 			new CharacterImportWanderersGuideSubCommand(),
-			new CharacterimportPathbuilderSubCommand(),
+			new CharacterImportPathbuilderSubCommand(),
 			new CharacterUpdateSubCommand(),
 			new CharacterRemoveSubCommand(),
 		]),
@@ -233,6 +236,8 @@ async function start(): Promise<void> {
 			new RollMacroUpdateSubCommand(),
 			new RollMacroRemoveSubCommand(),
 		]),
+
+		new SettingsCommand([new SettingsSetSubCommand()]),
 	];
 
 	// Buttons

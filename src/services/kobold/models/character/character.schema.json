@@ -20,6 +20,10 @@
 			"type": "string",
 			"description": "The discord id of the user who imported the character"
 		},
+		"trackerId": {
+			"type": "string",
+			"description": "The discord id of message set to track this character's stats."
+		},
 		"rollMacros": {
 			"type": "array",
 			"description": "An array of roll macro objects that allow the substituting of saved roll expressions for simple keywords.",

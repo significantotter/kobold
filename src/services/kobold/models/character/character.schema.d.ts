@@ -26,6 +26,10 @@ export interface Character {
 	 */
 	userId?: string;
 	/**
+	 * The discord id of message set to track this character's stats.
+	 */
+	trackerId?: string;
+	/**
 	 * An array of roll macro objects that allow the substituting of saved roll expressions for simple keywords.
 	 */
 	rollMacros?: {

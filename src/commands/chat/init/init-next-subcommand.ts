@@ -5,10 +5,6 @@ import {
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
 	ChatInputCommandInteraction,
 	PermissionsString,
-	AutocompleteFocusedOption,
-	AutocompleteInteraction,
-	CacheType,
-	ApplicationCommandOptionChoiceData,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 

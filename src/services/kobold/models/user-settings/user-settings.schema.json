@@ -1,0 +1,11 @@
+{
+	"title": "UserSettings",
+	"type": "object",
+	"description": "The settings for a user in Kobold.",
+	"properties": {
+		"userId": {
+			"type": "string",
+			"description": "The discord id of the user."
+		}
+	}
+}

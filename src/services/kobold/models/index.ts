@@ -16,6 +16,7 @@ export { Game } from './game/game.model';
 export { GameFactory } from './game/game.factory';
 export { BestiaryFilesLoaded } from './bestiary-files-loaded/bestiary-files-loaded.model';
 export { Npc } from './npc/npc.model';
+export { UserSettings } from './user-settings/user-settings.model';
 
 export type { Sheet } from './../lib/sheet.schema';
 export type { ModelWithSheet } from './../lib/thing-with-sheet';

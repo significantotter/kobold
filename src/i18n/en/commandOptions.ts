@@ -715,4 +715,21 @@ export default {
 		description:
 			'A mini-roll expression. Must be able to evaluate on its own. Ex. "5" or "d4+[str]"',
 	},
+
+	// SETTINGS
+
+	settingsSetOption: {
+		name: 'option',
+		description: 'The option to edit.',
+		choices: {
+			initTrackerNotifications: {
+				name: 'initiative-tracker-notifications',
+				value: 'initiative-tracker-notifications',
+			},
+		},
+	},
+	settingsSetValue: {
+		name: 'value',
+		description: 'The value to set the option to.',
+	},
 };
