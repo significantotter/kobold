@@ -21,6 +21,8 @@ import { Initiative } from '../../../services/kobold/models/index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Language } from '../../../models/enum-helpers/index.js';
 import { InitOptions } from './init-command-options.js';
+import { SettingsUtils } from '../../../utils/settings-utils.js';
+import { KoboldError } from '../../../utils/KoboldError.js';
 
 export class InitJumpToSubCommand implements Command {
 	public names = [Language.LL.commands.init.jumpTo.name()];
@@ -72,31 +74,47 @@ export class InitJumpToSubCommand implements Command {
 		LL: TranslationFunctions
 	): Promise<void> {
 		const targetCharacterName = intr.options.getString(InitOptions.INIT_CHARACTER_OPTION.name);
-		const initResult = await InitiativeUtils.getInitiativeForChannel(intr.channel, {
-			sendErrors: true,
-			LL,
-		});
+		const [initResult, userSettings] = await Promise.all([
+			InitiativeUtils.getInitiativeForChannel(intr.channel, {
+				sendErrors: true,
+				LL,
+			}),
+			SettingsUtils.getSettingsForUser(intr),
+		]);
 		if (initResult.errorMessage) {
 			await InteractionUtils.send(intr, initResult.errorMessage);
 			return;
 		}
 
+		const initBuilder = new InitiativeBuilder({
+			initiative: initResult.init,
+			userSettings,
+			LL,
+		});
+		const currentTurn = initBuilder.getCurrentTurnInfo();
+		const targetTurn = initBuilder.getJumpToTurnChanges(targetCharacterName);
 		const groupResponse = InitiativeUtils.getNameMatchGroupFromInitiative(
 			initResult.init,
 			initResult.init.gmUserId,
 			targetCharacterName,
 			LL
 		);
-		if (groupResponse.errorMessage) {
-			await InteractionUtils.send(intr, groupResponse.errorMessage);
-			return;
+		if (targetTurn.errorMessage) {
+			throw new KoboldError(groupResponse.errorMessage);
 		}
 
 		const updatedInitiative = await Initiative.query()
-			.patchAndFetchById(initResult.init.id, { currentTurnGroupId: groupResponse.group.id })
+			.patchAndFetchById(initBuilder.init.id, {
+				currentTurnGroupId: targetTurn.currentTurnGroupId,
+			})
 			.withGraphFetched('[actors.[character], actorGroups]');
 
-		const initBuilder = new InitiativeBuilder({ initiative: updatedInitiative, LL });
+		initBuilder.set({
+			initiative: updatedInitiative,
+			actors: updatedInitiative.actors,
+			groups: updatedInitiative.actorGroups,
+		});
+
 		const currentTurnEmbed = await KoboldEmbed.turnFromInitiativeBuilder(initBuilder);
 		const activeGroup = initBuilder.activeGroup;
 
@@ -105,7 +123,13 @@ export class InitJumpToSubCommand implements Command {
 			embeds: [currentTurnEmbed],
 		});
 		if (_.some(initBuilder.activeActors, actor => actor.hideStats)) {
-			await KoboldEmbed.dmInitiativeWithHiddenStats(intr, initBuilder, LL);
+			await KoboldEmbed.dmInitiativeWithHiddenStats({
+				intr,
+				initBuilder,
+				currentTurn,
+				targetTurn,
+				LL,
+			});
 		}
 	}
 }

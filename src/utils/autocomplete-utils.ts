@@ -22,7 +22,7 @@ export class AutocompleteUtils {
 				name = `${npc.name} (${npc.data?.source})`;
 			}
 
-			return { name: name, value: npc.id.toString() };
+			return { name: name, value: name };
 		});
 	}
 

@@ -18,6 +18,17 @@ export class StringUtils {
 		return removeMarkdown(input);
 	}
 
+	public static findClosestInObjectArray<T extends object>(
+		targetWord: string,
+		wordArray: T[],
+		propertyName
+	): T {
+		if (!wordArray || wordArray.length === 0) return undefined;
+		return wordArray.sort(
+			StringUtils.generateSorterByWordDistance(targetWord, word => word[propertyName])
+		)[0];
+	}
+
 	public static findBestValueByKeyMatch(
 		targetWord: string,
 		wordObject: { [key: string]: any }

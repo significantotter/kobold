@@ -6,6 +6,16 @@
 		"userId": {
 			"type": "string",
 			"description": "The discord id of the user."
+		},
+		"initStatsNotification": {
+			"type": "string",
+			"description": "When to notify the GM in initiative of the status of characters with hidden stats.",
+			"enum": ["never", "every_turn", "every_round", "whenever_hidden"]
+		},
+		"rollCompactMode": {
+			"type": "string",
+			"description": "Whether to roll in compact mode.",
+			"enum": ["compact", "normal"]
 		}
 	}
 }

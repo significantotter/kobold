@@ -9,7 +9,7 @@ import _ from 'lodash';
 import { TranslationFunctions } from '../i18n/i18n-types.js';
 import { Language } from '../models/enum-helpers/index.js';
 import { Character, Sheet } from '../services/kobold/models/index.js';
-import { InitiativeBuilder, InitiativeUtils } from './initiative-utils.js';
+import { InitiativeBuilder, InitiativeUtils, TurnData } from './initiative-utils.js';
 import { InteractionUtils } from './interaction-utils.js';
 import { ActionRoller } from './action-roller.js';
 
@@ -45,27 +45,62 @@ export class KoboldEmbed extends EmbedBuilder {
 			initiativeBuilder.init.gmUserId &&
 			options.dmIfHiddenCreatures
 		) {
-			await KoboldEmbed.dmInitiativeWithHiddenStats(intr, initiativeBuilder, LL);
+			const embedWithHiddenStats = await KoboldEmbed.roundFromInitiativeBuilder(
+				initiativeBuilder,
+				LL,
+				{
+					showHiddenCreatureStats: true,
+				}
+			);
+			if (initiativeBuilder.userSettings?.initStatsNotification !== 'never') {
+				await intr.client.users.send(initiativeBuilder.init.gmUserId, {
+					embeds: [embedWithHiddenStats],
+				});
+			}
 		}
 
 		await InteractionUtils.send(intr, { embeds: [embed] });
 	}
 
-	public static async dmInitiativeWithHiddenStats(
-		intr: ChatInputCommandInteraction,
-		initiativeBuilder: InitiativeBuilder,
-		LL?: TranslationFunctions
-	) {
-		const embedWithHiddenStats = await KoboldEmbed.roundFromInitiativeBuilder(
-			initiativeBuilder,
-			LL,
-			{
-				showHiddenCreatureStats: true,
-			}
-		);
-		await intr.client.users.send(initiativeBuilder.init.gmUserId, {
-			embeds: [embedWithHiddenStats],
+	public static async dmInitiativeWithHiddenStats({
+		intr,
+		initBuilder,
+		currentTurn,
+		targetTurn,
+		LL,
+	}: {
+		intr: ChatInputCommandInteraction;
+		initBuilder: InitiativeBuilder;
+		currentTurn?: TurnData;
+		targetTurn?: TurnData;
+		LL?: TranslationFunctions;
+	}) {
+		const embedWithHiddenStats = await KoboldEmbed.roundFromInitiativeBuilder(initBuilder, LL, {
+			showHiddenCreatureStats: true,
 		});
+		const initStatsNotificationSetting = initBuilder.userSettings.initStatsNotification;
+		let dmMessage = false;
+		switch (initStatsNotificationSetting) {
+			case 'every_turn':
+				dmMessage = true;
+				break;
+			case 'every_round':
+				if (targetTurn.currentRound > currentTurn.currentRound) dmMessage = true;
+				break;
+			case 'whenever_hidden':
+				if (
+					initBuilder.actorsByGroup[targetTurn.currentTurnGroupId] &&
+					initBuilder.actorsByGroup[targetTurn.currentTurnGroupId].some(
+						actor => actor.hideStats
+					)
+				)
+					dmMessage = true;
+		}
+		if (dmMessage) {
+			await intr.client.users.send(initBuilder.init.gmUserId, {
+				embeds: [embedWithHiddenStats],
+			});
+		}
 	}
 
 	public static turnFromInitiativeBuilder(

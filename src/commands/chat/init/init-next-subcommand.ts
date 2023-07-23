@@ -16,6 +16,7 @@ import { Initiative } from '../../../services/kobold/models/index.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Language } from '../../../models/enum-helpers/index.js';
+import { SettingsUtils } from '../../../utils/settings-utils.js';
 
 export class InitNextSubCommand implements Command {
 	public names = [Language.LL.commands.init.next.name()];
@@ -35,16 +36,24 @@ export class InitNextSubCommand implements Command {
 		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
-		const initResult = await InitiativeUtils.getInitiativeForChannel(intr.channel, {
-			sendErrors: true,
-			LL,
-		});
+		const [initResult, userSettings] = await Promise.all([
+			InitiativeUtils.getInitiativeForChannel(intr.channel, {
+				sendErrors: true,
+				LL,
+			}),
+			SettingsUtils.getSettingsForUser(intr),
+		]);
 		if (initResult.errorMessage) {
 			await InteractionUtils.send(intr, initResult.errorMessage);
 			return;
 		}
 
-		const initBuilder = new InitiativeBuilder({ initiative: initResult.init, LL });
+		const initBuilder = new InitiativeBuilder({
+			initiative: initResult.init,
+			userSettings,
+			LL,
+		});
+		const currentTurn = initBuilder.getCurrentTurnInfo();
 		const nextTurn = initBuilder.getNextTurnChanges();
 		if (nextTurn.errorMessage) {
 			await InteractionUtils.send(intr, nextTurn.errorMessage);
@@ -69,7 +78,13 @@ export class InitNextSubCommand implements Command {
 			embeds: [currentTurnEmbed],
 		});
 		if (_.some(initBuilder.activeActors, actor => actor.hideStats)) {
-			await KoboldEmbed.dmInitiativeWithHiddenStats(intr, initBuilder, LL);
+			await KoboldEmbed.dmInitiativeWithHiddenStats({
+				intr,
+				initBuilder,
+				currentTurn,
+				targetTurn: nextTurn,
+				LL,
+			});
 		}
 	}
 }

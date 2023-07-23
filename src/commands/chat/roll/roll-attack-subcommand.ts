@@ -119,8 +119,6 @@ export class RollAttackSubCommand implements Command {
 			targetCreature = Creature.fromModelWithSheet(targetActor);
 		}
 
-		console.log(creature.sheet.attacks, targetCreature.sheet.attacks);
-
 		const { builtRoll, actionRoller } = DiceUtils.rollCreatureAttack({
 			creature,
 			targetCreature,

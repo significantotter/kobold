@@ -60,25 +60,36 @@ export class SettingsSetSubCommand implements Command {
 		const value = intr.options.getString(SettingsOptions.SETTINGS_SET_VALUE.name);
 
 		// validate
-		let trimmedOptionName = option.trim().toLowerCase().replaceAll(' ', '_');
+		let trimmedOptionName = _.camelCase(option.trim());
+		let settingDbName: string;
+		let parsedValue: string;
 
-		if (trimmedOptionName === 'initiative-tracker-notifications') {
+		if (trimmedOptionName === 'initiativeTrackerNotifications') {
+			settingDbName = 'initStatsNotification';
 			if (!['never', 'every turn', 'every round', 'whenever hidden'].includes(value)) {
 				throw new KoboldError(
-					'Yip! The value for "initiative-tracker-notifications" must be one of "never", ' +
+					'Yip! The value for "initiativeTrackerNotifications" must be one of "never", ' +
 						'"every turn", "every round", or "whenever hidden".'
 				);
 			}
+			parsedValue = value.replaceAll(' ', '_');
 		} else {
 			throw new KoboldError(`Yip! "${option}" is not a valid option.`);
 		}
 
-		// insert
+		// fetch the value to determine whether to insert or update
+		const existingSetting = await UserSettings.query().findOne({ userId: intr.user.id });
 
-		UserSettings.query().upsertGraph({
-			userId: intr.user.id,
-			[trimmedOptionName]: value,
-		});
+		let result;
+		if (existingSetting) {
+			existingSetting[settingDbName] = parsedValue;
+			result = await existingSetting.$query().patch();
+		} else {
+			result = await UserSettings.query().insert({
+				userId: intr.user.id,
+				[settingDbName]: parsedValue,
+			});
+		}
 
 		await InteractionUtils.send(intr, `Yip! "${option}" has been set to "${value}".`);
 	}
