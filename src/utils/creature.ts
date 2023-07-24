@@ -121,11 +121,7 @@ export class Creature {
 			const DCs = [];
 			if (this.sheet.defenses.ac != null) DCs.push(`AC \`${this.sheet.defenses.ac}\``);
 			if (this.sheet.general.classDC != null)
-				DCs.push(
-					`${this.sheet.info?.class ? this.sheet.info?.class + ' ' : ''}Class DC \`${
-						this.sheet.general.classDC
-					}\``
-				);
+				DCs.push(`Class DC \`${this.sheet.general.classDC}\``);
 			if (this.sheet.general.perception != null)
 				DCs.push(
 					`Perception \`${this.sheet.general.perception}\` (DC ${

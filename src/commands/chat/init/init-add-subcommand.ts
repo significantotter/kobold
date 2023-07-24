@@ -28,6 +28,7 @@ import { Creature } from '../../../utils/creature.js';
 import _ from 'lodash';
 import { InitOptions } from './init-command-options.js';
 import { generateStatOverrides } from '../../../utils/sheet-import-utils.js';
+import { KoboldError } from '../../../utils/KoboldError.js';
 
 export class InitAddSubCommand implements Command {
 	public names = [Language.LL.commands.init.add.name()];
@@ -96,7 +97,8 @@ export class InitAddSubCommand implements Command {
 			sheet = { info: { name: actorName } };
 		} else {
 			const npcNameSourceRegex = /(.*) \((.*)\)/;
-			const [matchedName, matchedSource] = npcNameSourceRegex.exec(targetCreature) ?? [];
+			const [fullMatch, matchedName, matchedSource] =
+				npcNameSourceRegex.exec(targetCreature) ?? [];
 			let name = targetCreature;
 			let source = undefined;
 			if (matchedName && matchedSource) {
@@ -107,10 +109,12 @@ export class InitAddSubCommand implements Command {
 			let npcPromise = Npc.query().whereRaw('name ilike ?', [`%${name ?? ''}%`]);
 			// if we're targeting a specific source book, add that to the search
 			if (source)
-				npcPromise = npcPromise.andWhereRaw('jsonColumn:data.source ilike ?', [
+				npcPromise = npcPromise.andWhereRaw("(data->'source')::TEXT ilike ?", [
 					`%${source ?? ''}%`,
 				]);
 			const npcs = await npcPromise;
+			if (!npcPromise)
+				throw new KoboldError(`Yip! I couldn't find ${fullMatch} in the bestiary!`);
 			const npc = StringUtils.findClosestInObjectArray(name, npcs, 'name');
 			const variantData = await npc.fetchVariantDataIfExists();
 			if (!actorName) actorName = (template ? `${_.capitalize(template)} ` : '') + npc.name;
