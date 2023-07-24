@@ -61,7 +61,7 @@ export class GameplayTrackerSubCommand implements Command {
 	): Promise<void> {
 		const targetCharacterName = intr.options.getString(ChatArgs.SET_ACTIVE_NAME_OPTION.name);
 		const trackerMode =
-			intr.options.getString(GameplayOptions.GAMEPLAY_TRACKER_MODE.name) ?? 'counters_only';
+			intr.options.getString(GameplayOptions.GAMEPLAY_TRACKER_MODE.name) ?? 'basic_stats';
 		const gameplayTargetChannel = intr.options.getChannel(
 			GameplayOptions.GAMEPLAY_TARGET_CHANNEL.name,
 			false,
@@ -77,9 +77,37 @@ export class GameplayTrackerSubCommand implements Command {
 		} else {
 			targetCharacter = await CharacterUtils.getActiveCharacter(intr);
 		}
+
 		if (targetCharacter.trackerMessageId) {
 			// if we already have a tracker, confirm that we want to make a new one
 			// then edit the old one to mark it as outdated
+			if (
+				targetCharacter.trackerMessageId &&
+				targetCharacter.trackerChannelId &&
+				targetCharacter.trackerGuildId
+			) {
+				// allow this to be async. We don't need to rush
+				intr.client.guilds.fetch(targetCharacter.trackerGuildId).then(guild => {
+					return guild.channels.fetch(targetCharacter.trackerChannelId).then(channel => {
+						if (channel.isTextBased()) {
+							return channel.messages
+								.fetch(targetCharacter.trackerMessageId)
+								.then(message => {
+									return message.edit({
+										content:
+											`\`\`\`ansi
+\u001b[0;33mYip! This tracker is outdated and will no longer update.\u001b[0;0m
+\`\`\`\n` + message.content,
+									});
+								});
+						}
+					});
+				});
+				targetCharacter.trackerMessageId,
+					targetCharacter.trackerChannelId,
+					targetCharacter.trackerGuildId,
+					'Yip! This tracker is outdated. Please ignore it.';
+			}
 		}
 
 		const sheet = targetCharacter.sheet;

@@ -516,7 +516,7 @@ export function convertWanderersGuideCharToSheet(
 			imageURL: characterData?.infoJSON?.imageURL,
 			level: characterData.level,
 			size: calculatedStats.generalInfo?.size,
-			class: calculatedStats.generalInf?.className,
+			class: calculatedStats.generalInfo?.className,
 			keyability: null,
 			ancestry,
 			heritage,

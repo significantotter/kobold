@@ -93,18 +93,17 @@ export class Creature {
 			counters += `HP: \`${this.sheet.defenses.currentHp}\`/\`${this.sheet.defenses.maxHp}\``;
 
 			if (this.sheet.defenses?.tempHp) {
-				counters += `temp: \`${this.sheet.defenses.tempHp}\`\n`;
+				counters += `, temp: \`${this.sheet.defenses.tempHp}\`\n`;
 			} else counters += '\n';
 		}
 		if (this.sheet.info.usesStamina) {
 			counters += `Stamina: \`${this.sheet.defenses.currentStamina}\`/\`${this.sheet.defenses.maxStamina}\` `;
 			counters += `Resolve: \`${this.sheet.defenses.currentResolve}\`/\`${this.sheet.defenses.maxResolve}\`\n`;
 		}
-		counters += `Hero Points: \`${this.sheet.general.currentHeroPoints}\`/\`3\`\n`;
-		counters += `Focus Points: \`${this.sheet.general.currentFocusPoints}\`/\`${this.sheet.general.focusPoints}\`\n`;
-		if (this.sheet.general.focusPoints === null) {
-			counters += `(Yip! Wanderer's Guide doesn't tell me your focus points)\n`;
-		}
+		counters += `Hero Points: \`${this.sheet.general.currentHeroPoints}\`/\`3\`, `;
+		counters += `Focus Points: \`${this.sheet.general.currentFocusPoints ?? 0}\``;
+		if (this.sheet.general.focusPoints) counters += `/\`${this.sheet.general.focusPoints}\``;
+		counters += '\n';
 
 		let basicStats = '';
 		if (mode === 'basic_stats') {
@@ -124,7 +123,9 @@ export class Creature {
 					10 + this.sheet.general.perception
 				})\n`;
 			if (this.sheet.general.classDC != null)
-				basicStats += `${this.sheet.info.class} Class DC \`${this.sheet.general.classDC}\`\n`;
+				basicStats += `${
+					this.sheet.info?.class ? this.sheet.info?.class + ' ' : ''
+				}Class DC \`${this.sheet.general.classDC}\`\n`;
 
 			let saveTexts = [];
 			for (const save in this.sheet.saves) {
@@ -200,13 +201,21 @@ export class Creature {
 		// general section
 		let generalText = '';
 		if (this.sheet.defenses?.maxHp) {
-			generalText += `HP: \`${this.sheet.defenses.currentHp}\`/\`${this.sheet.defenses.maxHp}\`\n`;
+			generalText += `HP: \`${this.sheet.defenses.currentHp}\`/\`${this.sheet.defenses.maxHp}\``;
+
+			if (this.sheet.defenses?.tempHp) {
+				generalText += `, temp: \`${this.sheet.defenses.tempHp}\`\n`;
+			} else generalText += '\n';
 		}
 		if (this.sheet.info.usesStamina) {
 			generalText += `Stamina: \`${this.sheet.defenses.currentStamina}/${this.sheet.defenses.maxStamina}\`\n`;
 			generalText += `Resolve: \`${this.sheet.defenses.currentResolve}/${this.sheet.defenses.maxResolve}\`\n`;
 		}
 		if (this.sheet.defenses.ac != null) generalText += `AC \`${this.sheet.defenses.ac}\`\n`;
+		generalText += `Hero Points: \`${this.sheet.general.currentHeroPoints}\`/\`3\`\n`;
+		generalText += `Focus Points: \`${this.sheet.general.currentFocusPoints ?? 0}\``;
+		if (this.sheet.general.focusPoints) generalText += `/\`${this.sheet.general.focusPoints}\``;
+		generalText += '\n';
 		if (this.sheet.defenses.resistances?.length)
 			generalText += `Resistances: ${this.sheet.defenses.resistances
 				.map(r => `${r.type} ${r.amount}`)
@@ -292,40 +301,40 @@ export class Creature {
 			this.sheet.castingStats.primalDC != null ||
 			this.sheet.castingStats.occultDC != null
 		) {
-			let castingStats = '';
+			let castingStats = [];
 			if (this.sheet.castingStats.arcaneAttack || this.sheet.castingStats.arcaneDC) {
-				castingStats += `Arcane: `;
+				let arcane = `Arcane `;
 				if (this.sheet.castingStats.arcaneAttack)
-					castingStats += ` \`+${this.sheet.castingStats.arcaneAttack}\``;
+					arcane += ` \`+${this.sheet.castingStats.arcaneAttack}\``;
 				if (this.sheet.castingStats.arcaneDC)
-					castingStats += ` (DC ${this.sheet.castingStats.arcaneDC})`;
-				castingStats += '\n';
+					arcane += ` (DC ${this.sheet.castingStats.arcaneDC})`;
+				castingStats.push(arcane);
 			}
 			if (this.sheet.castingStats.divineAttack || this.sheet.castingStats.divineDC) {
-				castingStats += `Divine: `;
+				let divine = `Divine `;
 				if (this.sheet.castingStats.divineAttack)
-					castingStats += ` \`+${this.sheet.castingStats.divineAttack}\``;
+					divine += ` \`+${this.sheet.castingStats.divineAttack}\``;
 				if (this.sheet.castingStats.divineDC)
-					castingStats += ` (DC ${this.sheet.castingStats.divineDC})`;
-				castingStats += '\n';
+					divine += ` (DC ${this.sheet.castingStats.divineDC})`;
+				castingStats.push(divine);
 			}
 			if (this.sheet.castingStats.occultAttack || this.sheet.castingStats.occultDC) {
-				castingStats += `Occult: `;
+				let occult = `Occult `;
 				if (this.sheet.castingStats.occultAttack)
-					castingStats += ` \`+${this.sheet.castingStats.occultAttack}\``;
+					occult += ` \`+${this.sheet.castingStats.occultAttack}\``;
 				if (this.sheet.castingStats.occultDC)
-					castingStats += ` (DC ${this.sheet.castingStats.occultDC})`;
-				castingStats += '\n';
+					occult += ` (DC ${this.sheet.castingStats.occultDC})`;
+				castingStats.push(occult);
 			}
 			if (this.sheet.castingStats.primalAttack || this.sheet.castingStats.primalDC) {
-				castingStats += `Primal: `;
+				let primal = `Primal `;
 				if (this.sheet.castingStats.primalAttack)
-					castingStats += ` \`+${this.sheet.castingStats.primalAttack}\``;
+					primal += ` \`+${this.sheet.castingStats.primalAttack}\``;
 				if (this.sheet.castingStats.primalDC)
-					castingStats += ` (DC ${this.sheet.castingStats.primalDC})`;
-				castingStats += '\n';
+					primal += ` (DC ${this.sheet.castingStats.primalDC})`;
+				castingStats.push(primal);
 			}
-			sheetEmbed.addFields([{ name: 'Spellcasting', value: castingStats }]);
+			sheetEmbed.addFields([{ name: 'Spellcasting', value: castingStats.join(', ') }]);
 		}
 		if (
 			this.sheet.offense.simpleProfMod ||
