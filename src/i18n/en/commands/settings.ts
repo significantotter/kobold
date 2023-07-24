@@ -5,5 +5,9 @@ export default {
 	set: {
 		name: 'set',
 		description: 'Set a user setting.',
+		options: '[option] [value]',
+		usage:
+			'**[option]**: Which setting to change.\n' +
+			'**[value]**: What to update the setting to.\n',
 	},
 };

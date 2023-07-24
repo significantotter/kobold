@@ -502,7 +502,19 @@ export default {
 			embed: {
 				title: '/roll-macro Commands',
 				thumbnail: refs.links.thumbnail,
-				description: 'Roll macros!',
+				description:
+					'Roll macros store dice rolls that can be accessed in any other roll in [] brackets.',
+			},
+		},
+	},
+	settings: {
+		name: 'settings',
+		value: 'settings',
+		description: 'Help for the /settings command',
+		interactions: {
+			embed: {
+				title: '/settings Commands',
+				description: 'Settings commands configure kobold to your liking!',
 			},
 		},
 	},
