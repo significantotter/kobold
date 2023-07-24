@@ -7,7 +7,7 @@ import {
 import { PathBuilder } from '../services/pathbuilder/pathbuilder.js';
 import { CreatureStatBlock } from '../services/pf2etools/bestiaryType.js';
 import { WG } from '../services/wanderers-guide/wanderers-guide.js';
-import _, { update } from 'lodash';
+import _ from 'lodash';
 import {
 	convertBestiaryCreatureToSheet,
 	convertPathBuilderToSheet,
@@ -16,12 +16,7 @@ import {
 import { KoboldEmbed } from './kobold-embed-utils.js';
 import { parseBonusesForTagsFromModifiers } from '../services/kobold/lib/helpers.js';
 import { KoboldError } from './KoboldError.js';
-import {
-	BaseMessageOptions,
-	MessageCreateOptions,
-	MessageEditOptions,
-	MessagePayload,
-} from 'discord.js';
+import { BaseMessageOptions } from 'discord.js';
 import { MessageOptions } from 'child_process';
 
 const damageTypeShorthands: { [shorthand: string]: string } = {
@@ -107,6 +102,9 @@ export class Creature {
 		}
 		counters += `Hero Points: \`${this.sheet.general.currentHeroPoints}\`/\`3\`\n`;
 		counters += `Focus Points: \`${this.sheet.general.currentFocusPoints}\`/\`${this.sheet.general.focusPoints}\`\n`;
+		if (this.sheet.general.focusPoints === null) {
+			counters += `(Yip! Wanderer's Guide doesn't tell me your focus points)\n`;
+		}
 
 		let basicStats = '';
 		if (mode === 'basic_stats') {
@@ -488,7 +486,12 @@ export class Creature {
 			if (this.sheet?.general?.currentFocusPoints === undefined)
 				return { initialValue: 0, updatedValue: 0 };
 			initialValue = this.sheet.general.currentFocusPoints;
-			updatedValue = computeNewValue(initialValue, value, 0, 3);
+			updatedValue = computeNewValue(
+				initialValue,
+				value,
+				0,
+				this.sheet.general?.focusPoints ?? 3
+			);
 			this.sheet.general.currentFocusPoints = updatedValue;
 		}
 		return { initialValue, updatedValue };
