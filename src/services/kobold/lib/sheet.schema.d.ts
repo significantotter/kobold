@@ -544,7 +544,7 @@ export interface Sheet {
 		/**
 		 * The attack traits.
 		 */
-		traits?: (string | null)[];
+		traits?: (string | null)[] | null;
 		/**
 		 * The attack notes.
 		 */

@@ -17,8 +17,8 @@ import { GameplayOptions } from './gameplay-command-options.js';
 import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
 import { GameplayUtils } from '../../../utils/gameplay-utils.js';
 import { InteractionUtils } from '../../../utils/interaction-utils.js';
-import { CharacterUtils } from '../../../utils/character-utils.js';
-import { Character, InitiativeActor } from '../../../services/kobold/models/index.js';
+import { InitiativeActor } from '../../../services/kobold/models/index.js';
+import { GameUtils } from '../../../utils/game-utils.js';
 
 export class GameplayRecoverSubCommand implements Command {
 	public names = [Language.LL.commands.gameplay.recover.name()];
@@ -38,7 +38,7 @@ export class GameplayRecoverSubCommand implements Command {
 	): Promise<ApplicationCommandOptionChoiceData[]> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name) {
-			return await AutocompleteUtils.getGameplayTargetCharacters(intr, option.value);
+			return await AutocompleteUtils.getAllTargetOptions(intr, option.value);
 		}
 	}
 
@@ -47,21 +47,29 @@ export class GameplayRecoverSubCommand implements Command {
 		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
-		const compositeId = intr.options.getString(GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name);
+		const targetCharacter = intr.options.getString(
+			GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name
+		);
 
-		let targetCharacters = await GameplayUtils.fetchGameplayTargets(intr, compositeId);
+		const { characterOrInitActorTargets } = await GameUtils.getCharacterOrInitActorTarget(
+			intr,
+			targetCharacter
+		);
 
-		const recoverValues = await GameplayUtils.recoverGameplayStats(targetCharacters);
+		const recoverValues = await GameplayUtils.recoverGameplayStats(
+			intr,
+			characterOrInitActorTargets
+		);
 		if (!recoverValues.length) {
 			await InteractionUtils.send(
 				intr,
-				`Yip! I tried to recover ${targetCharacters[0].name}'s stats, but their stats are already full!`
+				`Yip! I tried to recover ${characterOrInitActorTargets[0].name}'s stats, but their stats are already full!`
 			);
 			return;
 		} else {
 			let recoveredStats;
 			if (
-				targetCharacters.some(
+				characterOrInitActorTargets.some(
 					character => character instanceof InitiativeActor && character.hideStats
 				)
 			) {
@@ -79,7 +87,9 @@ export class GameplayRecoverSubCommand implements Command {
 			}
 			await InteractionUtils.send(
 				intr,
-				`Yip! ${targetCharacters[0].name} recovered! ${recoveredStats.join(', ')}`
+				`Yip! ${characterOrInitActorTargets[0].name} recovered! ${recoveredStats.join(
+					', '
+				)}`
 			);
 		}
 	}

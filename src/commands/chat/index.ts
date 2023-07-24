@@ -6,7 +6,7 @@ export { CharacterSetDefaultSubCommand } from './characters/character-set-defaul
 export { CharacterRemoveSubCommand } from './characters/character-remove-subcommand.js';
 export { CharacterUpdateSubCommand } from './characters/character-update-subcommand.js';
 export { CharacterImportWanderersGuideSubCommand } from './characters/character-import-wanderers-guide-subcommand.js';
-export { CharacterimportPathbuilderSubCommand } from './characters/character-import-pathbuilder-subcommand.js';
+export { CharacterImportPathbuilderSubCommand } from './characters/character-import-pathbuilder-subcommand.js';
 export { CharacterSheetSubCommand } from './characters/character-sheet-subcommand.js';
 
 // roll commands
@@ -57,6 +57,7 @@ export { GameplayCommand } from './gameplay/gameplay-command.js';
 export { GameplayDamageSubCommand } from './gameplay/gameplay-damage-subcommand.js';
 export { GameplaySetSubCommand } from './gameplay/gameplay-set-subcommand.js';
 export { GameplayRecoverSubCommand } from './gameplay/gameplay-recover-subcommand.js';
+export { GameplayTrackerSubCommand } from './gameplay/gameplay-tracker-subcommand.js';
 
 // action command
 export { ActionCommand } from './action/action-command.js';
@@ -85,6 +86,10 @@ export { RollMacroListSubCommand } from './roll-macro/roll-macro-list-subcommand
 export { RollMacroCreateSubCommand } from './roll-macro/roll-macro-create-subcommand.js';
 export { RollMacroRemoveSubCommand } from './roll-macro/roll-macro-remove-subcommand.js';
 export { RollMacroUpdateSubCommand } from './roll-macro/roll-macro-update-subcommand.js';
+
+// settings command
+export { SettingsCommand } from './settings/settings-command.js';
+export { SettingsSetSubCommand } from './settings/settings-set-subcommand.js';
 
 // help command
 export { HelpCommand } from './help-command';

@@ -8,10 +8,12 @@
 					{
 						"name": "Important Commands",
 						"value": [
-							"**/character import <url>** - imports a character from wanderer's guide",
-							"**/character update** - updates your character to reflect any changes on wanderer's guide",
-							"**/character  set-active <character name>** - sets a certain character as your active character",
-							"**/character  sheet** - view your active character's sheet",
+							"**/character import-wanderers-guide <url>** - imports a character from Wanderer's Guide",
+							"**/character import-pathbuilder <json export id>** - imports a character from Pathbuilder 2E",
+							"**/character import <url>** - imports a character from Wanderer's Guide",
+							"**/character update** - updates your character to reflect any changes on the source website",
+							"**/character set-active <character name>** - sets a certain character as your active character",
+							"**/character sheet** - view your active character's sheet",
 							"**/roll dice <dice expression>** - rolls some dice!",
 							"**/roll skill <skill name>** - rolls a skill on your active character",
 							"**/help init** - see the help page for the initiative tracker",

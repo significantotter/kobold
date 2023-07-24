@@ -1,8 +1,13 @@
-import { Character, InitiativeActor, Sheet } from '../services/kobold/models/index.js';
+import {
+	Character,
+	InitiativeActor,
+	ModelWithSheet,
+	Sheet,
+} from '../services/kobold/models/index.js';
 import { PathBuilder } from '../services/pathbuilder/pathbuilder.js';
 import { CreatureStatBlock } from '../services/pf2etools/bestiaryType.js';
 import { WG } from '../services/wanderers-guide/wanderers-guide.js';
-import _, { update } from 'lodash';
+import _ from 'lodash';
 import {
 	convertBestiaryCreatureToSheet,
 	convertPathBuilderToSheet,
@@ -11,6 +16,8 @@ import {
 import { KoboldEmbed } from './kobold-embed-utils.js';
 import { parseBonusesForTagsFromModifiers } from '../services/kobold/lib/helpers.js';
 import { KoboldError } from './KoboldError.js';
+import { BaseMessageOptions } from 'discord.js';
+import { MessageOptions } from 'child_process';
 
 const damageTypeShorthands: { [shorthand: string]: string } = {
 	piercing: 'p',
@@ -73,6 +80,116 @@ export class Creature {
 		else return 0;
 	}
 
+	public compileTracker(mode: string): BaseMessageOptions {
+		let title = `${this.name} Tracker \``;
+		if (this.sheet.info.level) title += `Level ${this.sheet.info.level ?? 'unknown'}`;
+		if (this.sheet.info.heritage) title += ` ${this.sheet.info.heritage}`;
+		if (this.sheet.info.ancestry) title += ` ${this.sheet.info.ancestry}`;
+		if (this.sheet.info.class) title += ` ${this.sheet.info.class}`;
+		title += '`\n';
+
+		let counters = '';
+		if (this.sheet.defenses?.maxHp) {
+			counters += `HP: \`${this.sheet.defenses.currentHp}\`/\`${this.sheet.defenses.maxHp}\``;
+
+			if (this.sheet.defenses?.tempHp) {
+				counters += `, temp: \`${this.sheet.defenses.tempHp}\`\n`;
+			} else counters += '\n';
+		}
+		if (this.sheet.info.usesStamina) {
+			counters += `Stamina: \`${this.sheet.defenses.currentStamina}\`/\`${this.sheet.defenses.maxStamina}\` `;
+			counters += `Resolve: \`${this.sheet.defenses.currentResolve}\`/\`${this.sheet.defenses.maxResolve}\`\n`;
+		}
+		counters += `Hero Points: \`${this.sheet.general.currentHeroPoints}\`/\`3\`, `;
+		counters += `Focus Points: \`${this.sheet.general.currentFocusPoints ?? 0}\``;
+		if (this.sheet.general.focusPoints) counters += `/\`${this.sheet.general.focusPoints}\``;
+		counters += '\n';
+
+		let basicStats = '';
+		if (mode === 'basic_stats') {
+			basicStats += '\n';
+			if (this.sheet.defenses.resistances?.length)
+				basicStats += `Resistances: ${this.sheet.defenses.resistances
+					.map(r => `${r.type} ${r.amount}`)
+					.join(', ')}\n`;
+			if (this.sheet.defenses.weaknesses?.length)
+				basicStats += `Weaknesses: ${this.sheet.defenses.weaknesses
+					.map(w => `${w.type} ${w.amount}`)
+					.join(', ')}\n`;
+			if (this.sheet.defenses.immunities?.length)
+				basicStats += `Immunities: ${this.sheet.defenses.immunities.join(', ')}\n`;
+			if (this.sheet.general.perception != null)
+				basicStats += `Perception \`${this.sheet.general.perception}\` (DC ${
+					10 + this.sheet.general.perception
+				})\n`;
+			if (this.sheet.general.classDC != null)
+				basicStats += `${
+					this.sheet.info?.class ? this.sheet.info?.class + ' ' : ''
+				}Class DC \`${this.sheet.general.classDC}\`\n`;
+
+			let saveTexts = [];
+			for (const save in this.sheet.saves) {
+				if (save.includes('ProfMod') || this.sheet.saves[save] == null) continue;
+				saveTexts.push(
+					`${save} \`${this.sheet.saves[save] >= 0 ? '+' : ''}${
+						this.sheet.saves[save]
+					}\` (DC ${10 + this.sheet.saves[save]})`
+				);
+			}
+			if (saveTexts.length) basicStats += `Saves: ${saveTexts.join(', ')}\n`;
+
+			if (
+				this.sheet.castingStats.arcaneAttack != null ||
+				this.sheet.castingStats.divineAttack != null ||
+				this.sheet.castingStats.primalAttack != null ||
+				this.sheet.castingStats.occultAttack != null ||
+				this.sheet.castingStats.arcaneDC != null ||
+				this.sheet.castingStats.divineDC != null ||
+				this.sheet.castingStats.primalDC != null ||
+				this.sheet.castingStats.occultDC != null
+			) {
+				let castingStats = [];
+				if (this.sheet.castingStats.arcaneAttack || this.sheet.castingStats.arcaneDC) {
+					let arcane = `Arcane `;
+					if (this.sheet.castingStats.arcaneAttack)
+						arcane += ` \`+${this.sheet.castingStats.arcaneAttack}\``;
+					if (this.sheet.castingStats.arcaneDC)
+						arcane += ` (DC ${this.sheet.castingStats.arcaneDC})`;
+					castingStats.push(arcane);
+				}
+				if (this.sheet.castingStats.divineAttack || this.sheet.castingStats.divineDC) {
+					let divine = `Divine `;
+					if (this.sheet.castingStats.divineAttack)
+						divine += ` \`+${this.sheet.castingStats.divineAttack}\``;
+					if (this.sheet.castingStats.divineDC)
+						divine += ` (DC ${this.sheet.castingStats.divineDC})`;
+					castingStats.push(divine);
+				}
+				if (this.sheet.castingStats.occultAttack || this.sheet.castingStats.occultDC) {
+					let occult = `Occult `;
+					if (this.sheet.castingStats.occultAttack)
+						occult += ` \`+${this.sheet.castingStats.occultAttack}\``;
+					if (this.sheet.castingStats.occultDC)
+						occult += ` (DC ${this.sheet.castingStats.occultDC})`;
+					castingStats.push(occult);
+				}
+				if (this.sheet.castingStats.primalAttack || this.sheet.castingStats.primalDC) {
+					let primal = `Primal `;
+					if (this.sheet.castingStats.primalAttack)
+						primal += ` \`+${this.sheet.castingStats.primalAttack}\``;
+					if (this.sheet.castingStats.primalDC)
+						primal += ` (DC ${this.sheet.castingStats.primalDC})`;
+					castingStats.push(primal);
+				}
+				basicStats += `Spellcasting: ${castingStats.join(', ')}\n`;
+			}
+		} else if (mode === 'full_sheet') {
+			//full sheet
+			return { embeds: [this.compileSheetEmbed()] };
+		}
+		return { content: title + counters + basicStats, embeds: [] };
+	}
+
 	public compileSheetEmbed(): KoboldEmbed {
 		const sheetEmbed = new KoboldEmbed();
 
@@ -84,13 +201,21 @@ export class Creature {
 		// general section
 		let generalText = '';
 		if (this.sheet.defenses?.maxHp) {
-			generalText += `HP: \`${this.sheet.defenses.currentHp}\`/\`${this.sheet.defenses.maxHp}\`\n`;
+			generalText += `HP: \`${this.sheet.defenses.currentHp}\`/\`${this.sheet.defenses.maxHp}\``;
+
+			if (this.sheet.defenses?.tempHp) {
+				generalText += `, temp: \`${this.sheet.defenses.tempHp}\`\n`;
+			} else generalText += '\n';
 		}
 		if (this.sheet.info.usesStamina) {
 			generalText += `Stamina: \`${this.sheet.defenses.currentStamina}/${this.sheet.defenses.maxStamina}\`\n`;
 			generalText += `Resolve: \`${this.sheet.defenses.currentResolve}/${this.sheet.defenses.maxResolve}\`\n`;
 		}
 		if (this.sheet.defenses.ac != null) generalText += `AC \`${this.sheet.defenses.ac}\`\n`;
+		generalText += `Hero Points: \`${this.sheet.general.currentHeroPoints}\`/\`3\`\n`;
+		generalText += `Focus Points: \`${this.sheet.general.currentFocusPoints ?? 0}\``;
+		if (this.sheet.general.focusPoints) generalText += `/\`${this.sheet.general.focusPoints}\``;
+		generalText += '\n';
 		if (this.sheet.defenses.resistances?.length)
 			generalText += `Resistances: ${this.sheet.defenses.resistances
 				.map(r => `${r.type} ${r.amount}`)
@@ -176,40 +301,40 @@ export class Creature {
 			this.sheet.castingStats.primalDC != null ||
 			this.sheet.castingStats.occultDC != null
 		) {
-			let castingStats = '';
+			let castingStats = [];
 			if (this.sheet.castingStats.arcaneAttack || this.sheet.castingStats.arcaneDC) {
-				castingStats += `Arcane: `;
+				let arcane = `Arcane `;
 				if (this.sheet.castingStats.arcaneAttack)
-					castingStats += ` \`+${this.sheet.castingStats.arcaneAttack}\``;
+					arcane += ` \`+${this.sheet.castingStats.arcaneAttack}\``;
 				if (this.sheet.castingStats.arcaneDC)
-					castingStats += ` (DC ${this.sheet.castingStats.arcaneDC})`;
-				castingStats += '\n';
+					arcane += ` (DC ${this.sheet.castingStats.arcaneDC})`;
+				castingStats.push(arcane);
 			}
 			if (this.sheet.castingStats.divineAttack || this.sheet.castingStats.divineDC) {
-				castingStats += `Divine: `;
+				let divine = `Divine `;
 				if (this.sheet.castingStats.divineAttack)
-					castingStats += ` \`+${this.sheet.castingStats.divineAttack}\``;
+					divine += ` \`+${this.sheet.castingStats.divineAttack}\``;
 				if (this.sheet.castingStats.divineDC)
-					castingStats += ` (DC ${this.sheet.castingStats.divineDC})`;
-				castingStats += '\n';
+					divine += ` (DC ${this.sheet.castingStats.divineDC})`;
+				castingStats.push(divine);
 			}
 			if (this.sheet.castingStats.occultAttack || this.sheet.castingStats.occultDC) {
-				castingStats += `Occult: `;
+				let occult = `Occult `;
 				if (this.sheet.castingStats.occultAttack)
-					castingStats += ` \`+${this.sheet.castingStats.occultAttack}\``;
+					occult += ` \`+${this.sheet.castingStats.occultAttack}\``;
 				if (this.sheet.castingStats.occultDC)
-					castingStats += ` (DC ${this.sheet.castingStats.occultDC})`;
-				castingStats += '\n';
+					occult += ` (DC ${this.sheet.castingStats.occultDC})`;
+				castingStats.push(occult);
 			}
 			if (this.sheet.castingStats.primalAttack || this.sheet.castingStats.primalDC) {
-				castingStats += `Primal: `;
+				let primal = `Primal `;
 				if (this.sheet.castingStats.primalAttack)
-					castingStats += ` \`+${this.sheet.castingStats.primalAttack}\``;
+					primal += ` \`+${this.sheet.castingStats.primalAttack}\``;
 				if (this.sheet.castingStats.primalDC)
-					castingStats += ` (DC ${this.sheet.castingStats.primalDC})`;
-				castingStats += '\n';
+					primal += ` (DC ${this.sheet.castingStats.primalDC})`;
+				castingStats.push(primal);
 			}
-			sheetEmbed.addFields([{ name: 'Spellcasting', value: castingStats }]);
+			sheetEmbed.addFields([{ name: 'Spellcasting', value: castingStats.join(', ') }]);
 		}
 		if (
 			this.sheet.offense.simpleProfMod ||
@@ -337,28 +462,45 @@ export class Creature {
 		let updatedValue;
 
 		if (option === 'hp') {
+			if (this.sheet?.defenses?.currentHp === undefined)
+				return { initialValue: 0, updatedValue: 0 };
 			initialValue = this.sheet.defenses.currentHp;
 			updatedValue = computeNewValue(initialValue, value, 0, this.sheet.defenses.maxHp);
 			this.sheet.defenses.currentHp = updatedValue;
 		} else if (option === 'tempHp') {
+			if (this.sheet?.defenses?.tempHp === undefined)
+				return { initialValue: 0, updatedValue: 0 };
 			initialValue = this.sheet.defenses.tempHp;
 			updatedValue = computeNewValue(initialValue, value, 0);
 			this.sheet.defenses.tempHp = updatedValue;
 		} else if (option === 'stamina') {
+			if (this.sheet?.defenses?.currentStamina === undefined)
+				return { initialValue: 0, updatedValue: 0 };
 			initialValue = this.sheet.defenses.currentStamina;
 			updatedValue = computeNewValue(initialValue, value, 0, this.sheet.defenses.maxStamina);
 			this.sheet.defenses.currentStamina = updatedValue;
 		} else if (option === 'resolve') {
+			if (this.sheet?.defenses?.currentResolve === undefined)
+				return { initialValue: 0, updatedValue: 0 };
 			initialValue = this.sheet.defenses.currentResolve;
 			updatedValue = computeNewValue(initialValue, value, 0, this.sheet.defenses.maxResolve);
 			this.sheet.defenses.currentResolve = updatedValue;
 		} else if (option === 'heroPoints') {
+			if (this.sheet?.general?.currentHeroPoints === undefined)
+				return { initialValue: 0, updatedValue: 0 };
 			initialValue = this.sheet.general.currentHeroPoints;
 			updatedValue = computeNewValue(initialValue, value, 0, 3);
 			this.sheet.general.currentHeroPoints = updatedValue;
 		} else if (option === 'focusPoints') {
+			if (this.sheet?.general?.currentFocusPoints === undefined)
+				return { initialValue: 0, updatedValue: 0 };
 			initialValue = this.sheet.general.currentFocusPoints;
-			updatedValue = computeNewValue(initialValue, value, 0, 3);
+			updatedValue = computeNewValue(
+				initialValue,
+				value,
+				0,
+				this.sheet.general?.focusPoints ?? 3
+			);
 			this.sheet.general.currentFocusPoints = updatedValue;
 		}
 		return { initialValue, updatedValue };
@@ -1169,7 +1311,7 @@ export class Creature {
 		};
 	}
 
-	public static fromInitActor(initActor: InitiativeActor): Creature {
+	public static fromModelWithSheet(initActor: ModelWithSheet): Creature {
 		return new Creature(initActor.sheet, initActor.name);
 	}
 

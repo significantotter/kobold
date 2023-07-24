@@ -1,4 +1,8 @@
-import { APIApplicationCommandBasicOption, ApplicationCommandOptionType } from 'discord.js';
+import {
+	APIApplicationCommandBasicOption,
+	ApplicationCommandOptionType,
+	ChannelType,
+} from 'discord.js';
 import { Language } from '../../../models/enum-helpers/index.js';
 
 export class GameplayOptions {
@@ -61,5 +65,33 @@ export class GameplayOptions {
 		required: false,
 		autocomplete: true,
 		type: ApplicationCommandOptionType.String,
+	};
+	public static readonly GAMEPLAY_TARGET_CHANNEL: APIApplicationCommandBasicOption = {
+		name: Language.LL.commandOptions.gameplayTargetChannel.name(),
+		description: Language.LL.commandOptions.gameplayTargetChannel.description(),
+		required: false,
+		autocomplete: true,
+		type: ApplicationCommandOptionType.Channel,
+		channel_types: [ChannelType.GuildText],
+	};
+	public static readonly GAMEPLAY_TRACKER_MODE: APIApplicationCommandBasicOption = {
+		name: Language.LL.commandOptions.gameplayTrackerMode.name(),
+		description: Language.LL.commandOptions.gameplayTrackerMode.description(),
+		required: false,
+		type: ApplicationCommandOptionType.String,
+		choices: [
+			{
+				name: Language.LL.commandOptions.gameplayTrackerMode.choices.countersOnly.name(),
+				value: Language.LL.commandOptions.gameplayTrackerMode.choices.countersOnly.value(),
+			},
+			{
+				name: Language.LL.commandOptions.gameplayTrackerMode.choices.basicStats.name(),
+				value: Language.LL.commandOptions.gameplayTrackerMode.choices.basicStats.value(),
+			},
+			{
+				name: Language.LL.commandOptions.gameplayTrackerMode.choices.fullSheet.name(),
+				value: Language.LL.commandOptions.gameplayTrackerMode.choices.fullSheet.value(),
+			},
+		],
 	};
 }

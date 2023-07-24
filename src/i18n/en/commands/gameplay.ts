@@ -47,4 +47,15 @@ export default {
 			'Resets all of a character/npc\'s "recoverable" stats (hp, stamina, resolve) to their maximum values.',
 		expandedDescription: 'Recovers hp, stamina, and resolve for the target-character.\n',
 	},
+	tracker: {
+		name: 'tracker',
+		options: '[*target-character*] [*target-channel*]',
+		usage:
+			'_[*target-character*] optional_: The target character that you control. Defaults to your active character.' +
+			'_[*target-channel*] optional_: The target channel that you have access to. Defaults to the current channel.',
+		description:
+			'Sets up a tracker to follow the changing statistics of one of your characters.',
+		expandedDescription:
+			'Sets up a tracker to follow the changing statistics of one of your characters. Only one is allowed per character.',
+	},
 };

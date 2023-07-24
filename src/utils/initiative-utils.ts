@@ -4,6 +4,7 @@ import {
 	InitiativeActor,
 	Initiative,
 	Character,
+	UserSettings,
 } from './../services/kobold/models/index.js';
 import {
 	ChatInputCommandInteraction,
@@ -12,7 +13,7 @@ import {
 	Message,
 } from 'discord.js';
 import { KoboldEmbed } from './kobold-embed-utils.js';
-import _, { max } from 'lodash';
+import _ from 'lodash';
 import { InteractionUtils } from './interaction-utils.js';
 import { CharacterUtils } from './character-utils.js';
 import { Language } from '../models/enum-helpers/index.js';
@@ -21,21 +22,30 @@ import { RollBuilder } from './roll-builder.js';
 import { Creature } from './creature.js';
 import { KoboldError } from './KoboldError.js';
 
+export type TurnData = {
+	currentRound?: number;
+	currentTurnGroupId?: number;
+	errorMessage?: string;
+};
+
 export class InitiativeBuilder {
 	public init: Initiative;
 	public actorsByGroup: { [key: number]: InitiativeActor[] };
 	public groups: InitiativeActorGroup[];
+	public userSettings: UserSettings;
 	private LL: TranslationFunctions;
 
 	constructor({
 		initiative,
 		actors,
 		groups,
+		userSettings,
 		LL,
 	}: {
 		initiative?: Initiative;
 		actors?: InitiativeActor[];
 		groups?: InitiativeActorGroup[];
+		userSettings?: UserSettings;
 		LL?: TranslationFunctions;
 	}) {
 		this.LL = LL || Language.LL;
@@ -44,6 +54,7 @@ export class InitiativeBuilder {
 		if (initiative && !groups) groups = initiative.actorGroups;
 		this.actorsByGroup = _.groupBy(actors || [], actor => actor.initiativeActorGroupId);
 		this.groups = (groups || []).sort(InitiativeBuilder.groupSortFunction);
+		this.userSettings = userSettings;
 	}
 
 	public static groupSortFunction(a: InitiativeActorGroup, b: InitiativeActorGroup) {
@@ -84,14 +95,31 @@ export class InitiativeBuilder {
 	}
 
 	/**
+	 * Gets the changed initiative data when going to the a target group's turn in the built initiative
+	 * @returns An object containing updates to the initiative, or an error message
+	 */
+	getJumpToTurnChanges(groupName: string): TurnData {
+		let errorMessage = null;
+		let group: InitiativeActorGroup | null = null;
+		// get group options that match the given name, were created by you, or you're the gm of
+		const result = InitiativeUtils.nameMatchGeneric<InitiativeActorGroup>(
+			this.groups,
+			groupName,
+			this.LL.utils.initiative.characterNameNotFoundError()
+		);
+
+		return {
+			currentRound: this.init.currentRound || 1,
+			currentTurnGroupId: result.value.id,
+			errorMessage: result.errorMessage,
+		};
+	}
+
+	/**
 	 * Gets the changed initiative data when going to the previous turn in the built initiative
 	 * @returns An object containing updates to the initiative, or an error message
 	 */
-	getPreviousTurnChanges(): {
-		currentRound?: number;
-		currentTurnGroupId?: number;
-		errorMessage?: string;
-	} {
+	getPreviousTurnChanges(): TurnData {
 		if (!this.groups.length) {
 			return {
 				errorMessage: this.LL.utils.initiative.prevTurnInitEmptyError(),
@@ -127,16 +155,18 @@ export class InitiativeBuilder {
 			}
 		}
 	}
+	getCurrentTurnInfo(): TurnData {
+		return {
+			currentRound: this.init.currentRound || 1,
+			currentTurnGroupId: this.init.currentTurnGroupId,
+		};
+	}
 
 	/**
 	 * Gets the changed initiative data when going to the next turn in the built initiative
 	 * @returns An object containing updates to the initiative, or an error message
 	 */
-	getNextTurnChanges(): {
-		currentRound?: number;
-		currentTurnGroupId?: number;
-		errorMessage?: string;
-	} {
+	getNextTurnChanges(): TurnData {
 		if (!this.groups.length) {
 			return {
 				errorMessage: this.LL.utils.initiative.nextTurnInitEmptyError(),
@@ -493,7 +523,7 @@ export class InitiativeUtils {
 	}
 
 	public static getControllableInitiativeActors(initiative: Initiative, userId: string) {
-		const actorOptions = initiative.actors;
+		const actorOptions = initiative?.actors ?? [];
 		const controllableActors = actorOptions.filter(
 			actor => initiative.gmUserId === userId || actor.userId === userId
 		);

@@ -27,6 +27,7 @@ import { ActionRoller } from '../../../utils/action-roller.js';
 import { getEmoji } from '../../../constants/emoji.js';
 import { InitOptions } from './init-command-options.js';
 import { InitiativeActor } from '../../../services/kobold/models/index.js';
+import { GameUtils } from '../../../utils/game-utils.js';
 
 export class InitRollSubCommand implements Command {
 	public names = [Language.LL.commands.init.roll.name()];
@@ -66,7 +67,7 @@ export class InitRollSubCommand implements Command {
 			//we don't need to autocomplete if we're just dealing with whitespace
 			const match = intr.options.getString(InitOptions.INIT_CHARACTER_TARGET.name);
 
-			return await AutocompleteUtils.getInitTargetOptions(intr, match);
+			return await AutocompleteUtils.getAllTargetOptions(intr, match);
 		}
 	}
 
@@ -77,7 +78,7 @@ export class InitRollSubCommand implements Command {
 	): Promise<void> {
 		const rollChoice = intr.options.getString(InitOptions.INIT_ROLL_CHOICE_OPTION.name);
 		const targetCharacterName = intr.options.getString(InitOptions.INIT_CHARACTER_OPTION.name);
-		const targetInitActor = intr.options.getString(InitOptions.INIT_CHARACTER_TARGET.name);
+		const targetInitActorName = intr.options.getString(InitOptions.INIT_CHARACTER_TARGET.name);
 
 		const modifierExpression = intr.options.getString(ChatArgs.ROLL_MODIFIER_OPTION.name);
 		const damageModifierExpression = intr.options.getString(
@@ -120,21 +121,11 @@ export class InitRollSubCommand implements Command {
 		let targetCreature: Creature | undefined;
 		let targetActor: InitiativeActor | undefined;
 
-		if (targetInitActor && targetInitActor !== '__NONE__') {
-			const targetActorResponse = InitiativeUtils.getNameMatchActorFromInitiative(
-				initResult.init.gmUserId,
-				initResult.init,
-				targetInitActor,
-				LL,
-				false
-			);
-			if (targetActorResponse.errorMessage) {
-				await InteractionUtils.send(intr, targetActorResponse.errorMessage);
-				return;
-			}
-
-			targetActor = targetActorResponse.actor;
-			targetCreature = Creature.fromInitActor(targetActor);
+		if (targetInitActorName && targetInitActorName !== '__NONE__') {
+			const { targetCharacter, targetInitActor } =
+				await GameUtils.getCharacterOrInitActorTarget(intr, targetInitActorName);
+			targetActor = targetInitActor ?? targetCharacter;
+			targetCreature = Creature.fromModelWithSheet(targetActor);
 		}
 
 		if (!actor.sheet) {
@@ -197,7 +188,7 @@ export class InitRollSubCommand implements Command {
 			});
 
 			if (targetCreature && actionRoller.shouldDisplayDamageText()) {
-				await targetActor.saveSheet(actionRoller.targetCreature.sheet);
+				await targetActor.saveSheet(intr, actionRoller.targetCreature.sheet);
 
 				const damageField = await EmbedUtils.getOrSendActionDamageField({
 					intr,
@@ -236,7 +227,7 @@ export class InitRollSubCommand implements Command {
 			embed = builtRoll.compileEmbed({ forceFields: true });
 
 			if (targetCreature && actionRoller.shouldDisplayDamageText()) {
-				await targetActor.saveSheet(actionRoller.targetCreature.sheet);
+				await targetActor.saveSheet(intr, actionRoller.targetCreature.sheet);
 
 				const damageField = await EmbedUtils.getOrSendActionDamageField({
 					intr,

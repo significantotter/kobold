@@ -25,6 +25,7 @@ import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
 import { InitiativeUtils } from '../../../utils/initiative-utils.js';
 import { Character, InitiativeActor } from '../../../services/kobold/models/index.js';
 import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
+import { GameUtils } from '../../../utils/game-utils.js';
 
 export class RollAttackSubCommand implements Command {
 	public names = [Language.LL.commands.roll.attack.name()];
@@ -69,7 +70,7 @@ export class RollAttackSubCommand implements Command {
 			//we don't need to autocomplete if we're just dealing with whitespace
 			const match = intr.options.getString(InitOptions.INIT_CHARACTER_TARGET.name);
 
-			return await AutocompleteUtils.getInitTargetOptions(intr, match);
+			return await AutocompleteUtils.getAllTargetOptions(intr, match);
 		}
 	}
 
@@ -79,7 +80,7 @@ export class RollAttackSubCommand implements Command {
 		LL: TranslationFunctions
 	): Promise<void> {
 		const attackChoice = intr.options.getString(ChatArgs.ATTACK_CHOICE_OPTION.name);
-		const targetInitActor = intr.options.getString(InitOptions.INIT_CHARACTER_TARGET.name);
+		const targetInitActorName = intr.options.getString(InitOptions.INIT_CHARACTER_TARGET.name);
 		const attackModifierExpression = intr.options.getString(
 			ChatArgs.ATTACK_ROLL_MODIFIER_OPTION.name
 		);
@@ -111,9 +112,11 @@ export class RollAttackSubCommand implements Command {
 		let targetCreature: Creature | undefined;
 		let targetActor: InitiativeActor | undefined;
 
-		if (targetInitActor && targetInitActor !== '__NONE__') {
-			targetActor = await InitiativeUtils.getInitActorByName(intr, targetInitActor);
-			targetCreature = Creature.fromInitActor(targetActor);
+		if (targetInitActorName && targetInitActorName !== '__NONE__') {
+			const { targetCharacter, targetInitActor } =
+				await GameUtils.getCharacterOrInitActorTarget(intr, targetInitActorName);
+			targetActor = targetInitActor ?? targetCharacter;
+			targetCreature = Creature.fromModelWithSheet(targetActor);
 		}
 
 		const { builtRoll, actionRoller } = DiceUtils.rollCreatureAttack({
@@ -142,7 +145,7 @@ export class RollAttackSubCommand implements Command {
 		}
 
 		if (targetCreature && actionRoller.shouldDisplayDamageText()) {
-			await targetActor.saveSheet(actionRoller.targetCreature.sheet);
+			await targetActor.saveSheet(intr, actionRoller.targetCreature.sheet);
 
 			const damageField = await EmbedUtils.getOrSendActionDamageField({
 				intr,

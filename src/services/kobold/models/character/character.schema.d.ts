@@ -26,6 +26,22 @@ export interface Character {
 	 */
 	userId?: string;
 	/**
+	 * The discord id of message set to track this character's stats.
+	 */
+	trackerMessageId?: string | null;
+	/**
+	 * The discord id of the channel containing the message set to track this character's stats.
+	 */
+	trackerChannelId?: string | null;
+	/**
+	 * The discord id of the guild with the channel set to track this character's stats.
+	 */
+	trackerGuildId?: string | null;
+	/**
+	 * The mode of the tracker message. Either counters_only', 'basic_stats', or 'full_sheet.
+	 */
+	trackerMode?: "counters_only" | "basic_stats" | "full_sheet";
+	/**
 	 * An array of roll macro objects that allow the substituting of saved roll expressions for simple keywords.
 	 */
 	rollMacros?: {

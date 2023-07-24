@@ -1,6 +1,6 @@
 import { AutocompleteInteraction, CacheType } from 'discord.js';
 import _ from 'lodash';
-import { Npc } from '../services/kobold/models/index.js';
+import { Character, Game, InitiativeActor, Npc } from '../services/kobold/models/index.js';
 import { CharacterUtils } from './character-utils.js';
 import { InitiativeUtils } from './initiative-utils.js';
 import { Creature } from './creature.js';
@@ -22,7 +22,7 @@ export class AutocompleteUtils {
 				name = `${npc.name} (${npc.data?.source})`;
 			}
 
-			return { name: name, value: npc.id.toString() };
+			return { name: name, value: name };
 		});
 	}
 
@@ -124,7 +124,7 @@ export class AutocompleteUtils {
 		matchText: string
 	) {
 		const currentInitResponse = await InitiativeUtils.getInitiativeForChannel(intr.channel);
-		if (!currentInitResponse) {
+		if (currentInitResponse?.errorMessage || !currentInitResponse?.init) {
 			return [];
 		}
 		//get the character matches
@@ -141,6 +141,41 @@ export class AutocompleteUtils {
 			name: actor.name,
 			value: actor.name,
 		}));
+	}
+
+	public static async getAllTargetOptions(
+		intr: AutocompleteInteraction<CacheType>,
+		matchText: string
+	) {
+		const [currentInitResponse, targetGames, activeCharacter] = await Promise.all([
+			InitiativeUtils.getInitiativeForChannel(intr.channel),
+			Game.queryWhereUserHasCharacter(intr.user.id, intr.guildId),
+			CharacterUtils.getActiveCharacter(intr),
+		]);
+
+		// the character options can be any game character or the user's active character
+		const characterOptions = targetGames
+			.flatMap(game => game.characters)
+			// flat map can give us undefined values, so filter them out
+			.filter(result => !!result)
+			.concat(activeCharacter)
+			.map(character => ({ name: character.name, value: character.name }));
+
+		const actorOptions = (currentInitResponse?.init?.actors ?? [])
+			.filter(actor => actor.name.toLocaleLowerCase().includes(matchText.toLocaleLowerCase()))
+			.map(actor => ({
+				name: actor.name,
+				value: actor.name,
+			}));
+
+		const allOptions = [
+			{ name: '(None)', value: '__NONE__' },
+			...characterOptions,
+			...actorOptions,
+		];
+
+		//return the matched actors, removing any duplicates
+		return _.uniqBy(allOptions, 'name');
 	}
 
 	public static async getInitTargetOptions(

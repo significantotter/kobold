@@ -147,6 +147,12 @@ export class HelpCommand implements Command {
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
 				options: [],
 			},
+			{
+				name: Language.LL.commands.help.settings.name(),
+				description: Language.LL.commands.help.settings.description(),
+				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				options: [],
+			},
 		],
 	};
 	public deferType = CommandDeferType.PUBLIC;
@@ -293,7 +299,8 @@ export class HelpCommand implements Command {
 						value:
 							`\`/${LL.commands.gameplay.name()} ${LL.commands.gameplay.set.name()}\` ${LL.commands.gameplay.set.description()}\n` +
 							`\`/${LL.commands.gameplay.name()} ${LL.commands.gameplay.damage.name()}\` ${LL.commands.gameplay.damage.description()}\n` +
-							`\`/${LL.commands.gameplay.name()} ${LL.commands.gameplay.recover.name()}\` ${LL.commands.gameplay.recover.description()}\n`,
+							`\`/${LL.commands.gameplay.name()} ${LL.commands.gameplay.recover.name()}\` ${LL.commands.gameplay.recover.description()}\n` +
+							`\`/${LL.commands.gameplay.name()} ${LL.commands.gameplay.tracker.name()}\` ${LL.commands.gameplay.tracker.description()}\n`,
 					},
 					{
 						name: LL.commands.action.name(),
@@ -329,6 +336,10 @@ export class HelpCommand implements Command {
 							`\`/${LL.commands.rollMacro.name()} ${LL.commands.rollMacro.update.name()}\` ${LL.commands.rollMacro.update.description()}\n` +
 							`\`/${LL.commands.rollMacro.name()} ${LL.commands.rollMacro.list.name()}\` ${LL.commands.rollMacro.list.description()}\n` +
 							`\`/${LL.commands.rollMacro.name()} ${LL.commands.rollMacro.remove.name()}\` ${LL.commands.rollMacro.remove.description()}\n`,
+					},
+					{
+						name: LL.commands.settings.name(),
+						value: `\`/${LL.commands.settings.name()} ${LL.commands.settings.set.name()}\` ${LL.commands.settings.set.description()}\n`,
 					},
 				]);
 				break;
@@ -435,6 +446,7 @@ export class HelpCommand implements Command {
 						LL.commands.gameplay.set.name(),
 						LL.commands.gameplay.damage.name(),
 						LL.commands.gameplay.recover.name(),
+						LL.commands.gameplay.tracker.name(),
 					].map(command =>
 						createCommandOperationHelpField(LL.commands.gameplay.name(), command, LL)
 					)
@@ -496,6 +508,17 @@ export class HelpCommand implements Command {
 						LL.commands.rollMacro.remove.name(),
 					].map(command =>
 						createCommandOperationHelpField(LL.commands.rollMacro.name(), command, LL)
+					)
+				);
+				break;
+			}
+
+			case Language.LL.commands.help.settings.name(): {
+				embed.setTitle(LL.commands.help.settings.interactions.embed.title());
+				embed.setDescription(LL.commands.help.settings.interactions.embed.description());
+				embed.addFields(
+					[LL.commands.settings.set.name()].map(command =>
+						createCommandOperationHelpField(LL.commands.settings.name(), command, LL)
 					)
 				);
 				break;

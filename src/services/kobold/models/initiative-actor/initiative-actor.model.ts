@@ -7,6 +7,7 @@ import { Initiative } from '../initiative/initiative.model.js';
 import SheetTypes from '../../lib/sheet.schema';
 import { InitiativeActorGroup } from '../initiative-actor-group/initiative-actor-group.model.js';
 import { Character } from '../character/character.model.js';
+import { ChatInputCommandInteraction, Client } from 'discord.js';
 
 export interface InitiativeActor extends InitiativeActorTypes.InitiativeActor {
 	initiative?: Initiative;
@@ -15,17 +16,22 @@ export interface InitiativeActor extends InitiativeActorTypes.InitiativeActor {
 	sheet?: SheetTypes.Sheet;
 }
 export class InitiativeActor extends BaseModel {
-	public async saveSheet(sheet: SheetTypes.Sheet) {
+	public async saveSheet(intr: ChatInputCommandInteraction, sheet: SheetTypes.Sheet) {
 		// apply any damage effects from the action to the creature
-		let promises: any[] = [this.$query().patch({ sheet })];
-		if (this.characterId) {
-			promises.push(
-				this.$relatedQuery<Character>('character').patch({
-					sheet,
-				})
-			);
+		let promises: any[] = [
+			this.$query().patch({ sheet }).execute(),
+			Character.query().patch({ sheet }).where('id', this.characterId).execute(),
+		];
+		if (this.character?.trackerChannelId) {
+			promises.push(this.character.updateTracker(intr, sheet));
 		}
-		return await Promise.all(promises);
+		if (this.characterId && !this.character) {
+			const character = await Character.query().findOne({ id: this.characterId });
+			promises.push(character.updateTracker(intr, sheet));
+		}
+
+		await Promise.all(promises);
+		return;
 	}
 
 	static get tableName(): string {
@@ -65,7 +71,7 @@ export class InitiativeActor extends BaseModel {
 		};
 	}
 
-	static queryLooseCharacterName(characterName) {
+	static queryControlledCharacterByName(characterName) {
 		return this.query().whereRaw(`initiativeActor.name ILIKE :characterName`, {
 			charName: `%${characterName}%`,
 		});

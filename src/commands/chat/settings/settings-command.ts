@@ -1,4 +1,4 @@
-import { Language } from '../../../models/enum-helpers/language';
+import { Language } from './../../../models/enum-helpers/language';
 import {
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
@@ -16,54 +16,23 @@ import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { EventData } from '../../../models/internal-models.js';
 import { CommandUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
-import { GameplayOptions } from './gameplay-command-options.js';
-import { ChatArgs } from '../../../constants/chat-args.js';
+import { SettingsOptions } from './settings-command-options.js';
 
-export class GameplayCommand implements Command {
-	public names = [Language.LL.commands.gameplay.name()];
+export class SettingsCommand implements Command {
+	public names = [Language.LL.commands.settings.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.gameplay.name(),
-		description: Language.LL.commands.gameplay.description(),
+		name: Language.LL.commands.settings.name(),
+		description: Language.LL.commands.settings.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 
 		options: [
 			{
-				name: Language.LL.commands.gameplay.damage.name(),
-				description: Language.LL.commands.gameplay.damage.description(),
+				name: Language.LL.commands.settings.set.name(),
+				description: Language.LL.commands.settings.set.description(),
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
-				options: [
-					{ ...GameplayOptions.GAMEPLAY_TARGET_CHARACTER, required: true },
-					GameplayOptions.GAMEPLAY_DAMAGE_AMOUNT,
-					GameplayOptions.GAMEPLAY_DAMAGE_TYPE,
-				],
-			},
-			{
-				name: Language.LL.commands.gameplay.set.name(),
-				description: Language.LL.commands.gameplay.set.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
-				options: [
-					GameplayOptions.GAMEPLAY_SET_OPTION,
-					GameplayOptions.GAMEPLAY_SET_VALUE,
-					GameplayOptions.GAMEPLAY_TARGET_CHARACTER,
-				],
-			},
-			{
-				name: Language.LL.commands.gameplay.recover.name(),
-				description: Language.LL.commands.gameplay.recover.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
-				options: [GameplayOptions.GAMEPLAY_TARGET_CHARACTER],
-			},
-			{
-				name: Language.LL.commands.gameplay.tracker.name(),
-				description: Language.LL.commands.gameplay.tracker.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
-				options: [
-					{ ...ChatArgs.SET_ACTIVE_NAME_OPTION, required: false },
-					GameplayOptions.GAMEPLAY_TARGET_CHANNEL,
-					GameplayOptions.GAMEPLAY_TRACKER_MODE,
-				],
+				options: [SettingsOptions.SETTINGS_SET_OPTION, SettingsOptions.SETTINGS_SET_VALUE],
 			},
 		],
 	};

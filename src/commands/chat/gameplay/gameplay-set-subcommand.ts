@@ -21,6 +21,7 @@ import _ from 'lodash';
 import { SettableSheetOption } from '../../../utils/creature.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
 import { Character, InitiativeActor } from '../../../services/kobold/models/index.js';
+import { GameUtils } from '../../../utils/game-utils.js';
 
 export class GameplaySetSubCommand implements Command {
 	public names = [Language.LL.commands.gameplay.set.name()];
@@ -40,7 +41,7 @@ export class GameplaySetSubCommand implements Command {
 	): Promise<ApplicationCommandOptionChoiceData[]> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name) {
-			return await AutocompleteUtils.getGameplayTargetCharacters(intr, option.value);
+			return await AutocompleteUtils.getAllTargetOptions(intr, option.value);
 		}
 	}
 
@@ -49,23 +50,29 @@ export class GameplaySetSubCommand implements Command {
 		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
-		const compositeId = intr.options.getString(GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name);
+		const targetCharacter = intr.options.getString(
+			GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name
+		);
 		const option = _.camelCase(
 			intr.options.getString(GameplayOptions.GAMEPLAY_SET_OPTION.name)
 		) as SettableSheetOption;
 		const value = intr.options.getString(GameplayOptions.GAMEPLAY_SET_VALUE.name);
 
-		let targetCharacters = await GameplayUtils.fetchGameplayTargets(intr, compositeId);
+		const { characterOrInitActorTargets } = await GameUtils.getCharacterOrInitActorTarget(
+			intr,
+			targetCharacter
+		);
 
 		const { initialValue, updatedValue } = await GameplayUtils.setGameplayStats(
-			targetCharacters,
+			intr,
+			characterOrInitActorTargets,
 			option,
 			value
 		);
 		let message;
 
 		if (
-			targetCharacters.some(
+			characterOrInitActorTargets.some(
 				character => character instanceof InitiativeActor && character.hideStats
 			)
 		) {
@@ -74,11 +81,11 @@ export class GameplaySetSubCommand implements Command {
 			if (diff < 0) {
 				verbed = 'decreased';
 			}
-			message = `Yip! I ${verbed} ${targetCharacters[0].name}'s ${option} by ${Math.abs(
-				diff
-			)}.`;
+			message = `Yip! I ${verbed} ${
+				characterOrInitActorTargets[0].name
+			}'s ${option} by ${Math.abs(diff)}.`;
 		} else {
-			message = `Yip! I updated ${targetCharacters[0].name}'s ${option} from ${initialValue} to ${updatedValue}.`;
+			message = `Yip! I updated ${characterOrInitActorTargets[0].name}'s ${option} from ${initialValue} to ${updatedValue}.`;
 		}
 		if (option === 'hp' && updatedValue == 0) {
 			message += " They're down!";

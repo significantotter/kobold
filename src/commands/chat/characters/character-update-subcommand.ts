@@ -179,7 +179,7 @@ export class CharacterUpdateSubCommand implements Command {
 				.where({ userId: intr.user.id });
 
 			// store sheet in db
-			const newCharacter = await Character.query().patchAndFetchById(activeCharacter.id, {
+			const updatedCharacter = await Character.query().patchAndFetchById(activeCharacter.id, {
 				name: creature.sheet.info.name,
 				charId: jsonId,
 				userId: intr.user.id,
@@ -189,14 +189,16 @@ export class CharacterUpdateSubCommand implements Command {
 			});
 			await InitiativeActor.query()
 				.patch({ sheet: creature.sheet })
-				.where({ characterId: newCharacter.id });
+				.where({ characterId: updatedCharacter.id });
+
+			await updatedCharacter.updateTracker(intr, creature.sheet);
 
 			//send success message
 
 			await InteractionUtils.send(
 				intr,
 				LL.commands.character.update.interactions.success({
-					characterName: newCharacter.sheet.info.name,
+					characterName: updatedCharacter.sheet.info.name,
 				}) + newSheetUpdateWarning
 			);
 			return;
@@ -272,6 +274,8 @@ export class CharacterUpdateSubCommand implements Command {
 			await InitiativeActor.query()
 				.patch({ sheet: fetchedCharacter.sheet })
 				.where({ characterId: updatedCharacter.id });
+
+			await updatedCharacter.updateTracker(intr, fetchedCharacter.sheet);
 
 			//send success message
 

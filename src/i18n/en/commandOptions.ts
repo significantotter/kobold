@@ -296,11 +296,11 @@ export default {
 	},
 	name: {
 		name: 'name',
-		description: "The name of your wanderer's guide character.",
+		description: 'The name of your character.',
 	},
 	id: {
 		name: 'character_id',
-		description: `The id of your wanderer's guide character.`,
+		description: `The id of your character.`,
 	},
 	setDefaultScope: {
 		name: 'default-for',
@@ -415,6 +415,28 @@ export default {
 	gameplayTargetCharacter: {
 		name: 'target-character',
 		description: 'What character to update. Defaults to your active character.',
+	},
+	gameplayTargetChannel: {
+		name: 'target-channel',
+		description: 'What channel to send the tracker to. Defaults to your current channel.',
+	},
+	gameplayTrackerMode: {
+		name: 'tracker-mode',
+		description: 'How much data to track for the character?',
+		choices: {
+			countersOnly: {
+				name: 'counters-only',
+				value: 'counters_only',
+			},
+			basicStats: {
+				name: 'basic-stats',
+				value: 'basic_stats',
+			},
+			fullSheet: {
+				name: 'full-sheet',
+				value: 'full_sheet',
+			},
+		},
 	},
 
 	// INIT
@@ -714,5 +736,22 @@ export default {
 		name: 'value',
 		description:
 			'A mini-roll expression. Must be able to evaluate on its own. Ex. "5" or "d4+[str]"',
+	},
+
+	// SETTINGS
+
+	settingsSetOption: {
+		name: 'option',
+		description: 'The option to edit.',
+		choices: {
+			initTrackerNotifications: {
+				name: 'initiative-tracker-notifications',
+				value: 'initiative-tracker-notifications',
+			},
+		},
+	},
+	settingsSetValue: {
+		name: 'value',
+		description: 'The value to set the option to.',
 	},
 };

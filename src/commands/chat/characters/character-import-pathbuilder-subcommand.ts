@@ -22,7 +22,7 @@ import { PathBuilder } from '../../../services/pathbuilder/index.js';
 import { Creature } from '../../../utils/creature.js';
 import { refs } from '../../../i18n/en/common.js';
 
-export class CharacterimportPathbuilderSubCommand implements Command {
+export class CharacterImportPathbuilderSubCommand implements Command {
 	public names = [Language.LL.commands.character.importPathbuilder.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,

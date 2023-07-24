@@ -6,10 +6,8 @@ import {
 	PermissionsString,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
-import { raw } from 'objection';
 
 import { EventData } from '../../../models/internal-models.js';
-import { Initiative } from '../../../services/kobold/models/index.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { InitiativeUtils, InitiativeBuilder } from '../../../utils/initiative-utils.js';
 import { Command, CommandDeferType } from '../../index.js';

@@ -51,12 +51,12 @@ export class InitAddSubCommand implements Command {
 			const match = intr.options.getString(InitOptions.INIT_CREATURE_OPTION.name);
 			const npcs = await AutocompleteUtils.getBestiaryNpcs(intr, match);
 			if (npcs.length > 20) {
-				npcs.unshift({ name: 'Custom NPC', value: '-1' });
+				npcs.unshift({ name: 'Custom NPC', value: 'Custom NPC' });
 			} else {
-				npcs.splice(1, 0, { name: 'Custom NPC', value: '-1' });
 				const sorter = StringUtils.generateSorterByWordDistance(match, c => c.name);
-
-				return npcs.sort(sorter);
+				npcs.sort(sorter);
+				npcs.push({ name: 'Custom NPC', value: 'Custom NPC' });
+				return npcs;
 			}
 			return npcs;
 		}
@@ -91,11 +91,27 @@ export class InitAddSubCommand implements Command {
 		let sheet: Sheet = null;
 		let referenceNpcName = null;
 
-		if (targetCreature == '-1') {
+		if (targetCreature.toLowerCase().trim() == 'custom npc') {
 			if (!actorName) actorName = 'unnamed enemy';
 			sheet = { info: { name: actorName } };
 		} else {
-			const npc = await Npc.query().findOne({ id: targetCreature });
+			const npcNameSourceRegex = /(.*) \((.*)\)/;
+			const [matchedName, matchedSource] = npcNameSourceRegex.exec(targetCreature) ?? [];
+			let name = targetCreature;
+			let source = undefined;
+			if (matchedName && matchedSource) {
+				name = matchedName;
+				source = matchedSource;
+			}
+			// search for the npc's name case insensitively
+			let npcPromise = Npc.query().whereRaw('name ilike ?', [`%${name ?? ''}%`]);
+			// if we're targeting a specific source book, add that to the search
+			if (source)
+				npcPromise = npcPromise.andWhereRaw('jsonColumn:data.source ilike ?', [
+					`%${source ?? ''}%`,
+				]);
+			const npcs = await npcPromise;
+			const npc = StringUtils.findClosestInObjectArray(name, npcs, 'name');
 			const variantData = await npc.fetchVariantDataIfExists();
 			if (!actorName) actorName = (template ? `${_.capitalize(template)} ` : '') + npc.name;
 			creature = Creature.fromBestiaryEntry(variantData, npc.fluff, {
