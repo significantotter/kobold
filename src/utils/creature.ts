@@ -16,6 +16,13 @@ import {
 import { KoboldEmbed } from './kobold-embed-utils.js';
 import { parseBonusesForTagsFromModifiers } from '../services/kobold/lib/helpers.js';
 import { KoboldError } from './KoboldError.js';
+import {
+	BaseMessageOptions,
+	MessageCreateOptions,
+	MessageEditOptions,
+	MessagePayload,
+} from 'discord.js';
+import { MessageOptions } from 'child_process';
 
 const damageTypeShorthands: { [shorthand: string]: string } = {
 	piercing: 'p',
@@ -76,6 +83,112 @@ export class Creature {
 	public profToLevel(prof: number) {
 		if (prof > 0) return prof + this.sheet.info.level;
 		else return 0;
+	}
+
+	public compileTracker(mode: string): BaseMessageOptions {
+		let title = `${this.name} Tracker \``;
+		if (this.sheet.info.level) title += `Level ${this.sheet.info.level ?? 'unknown'}`;
+		if (this.sheet.info.heritage) title += ` ${this.sheet.info.heritage}`;
+		if (this.sheet.info.ancestry) title += ` ${this.sheet.info.ancestry}`;
+		if (this.sheet.info.class) title += ` ${this.sheet.info.class}`;
+		title += '`\n';
+
+		let counters = '';
+		if (this.sheet.defenses?.maxHp) {
+			counters += `HP: \`${this.sheet.defenses.currentHp}\`/\`${this.sheet.defenses.maxHp}\``;
+
+			if (this.sheet.defenses?.tempHp) {
+				counters += `temp: \`${this.sheet.defenses.tempHp}\`\n`;
+			} else counters += '\n';
+		}
+		if (this.sheet.info.usesStamina) {
+			counters += `Stamina: \`${this.sheet.defenses.currentStamina}\`/\`${this.sheet.defenses.maxStamina}\` `;
+			counters += `Resolve: \`${this.sheet.defenses.currentResolve}\`/\`${this.sheet.defenses.maxResolve}\`\n`;
+		}
+		counters += `Hero Points: \`${this.sheet.general.currentHeroPoints}\`/\`3\`\n`;
+		counters += `Focus Points: \`${this.sheet.general.currentFocusPoints}\`/\`${this.sheet.general.focusPoints}\`\n`;
+
+		let basicStats = '';
+		if (mode === 'basic_stats') {
+			basicStats += '\n';
+			if (this.sheet.defenses.resistances?.length)
+				basicStats += `Resistances: ${this.sheet.defenses.resistances
+					.map(r => `${r.type} ${r.amount}`)
+					.join(', ')}\n`;
+			if (this.sheet.defenses.weaknesses?.length)
+				basicStats += `Weaknesses: ${this.sheet.defenses.weaknesses
+					.map(w => `${w.type} ${w.amount}`)
+					.join(', ')}\n`;
+			if (this.sheet.defenses.immunities?.length)
+				basicStats += `Immunities: ${this.sheet.defenses.immunities.join(', ')}\n`;
+			if (this.sheet.general.perception != null)
+				basicStats += `Perception \`${this.sheet.general.perception}\` (DC ${
+					10 + this.sheet.general.perception
+				})\n`;
+			if (this.sheet.general.classDC != null)
+				basicStats += `${this.sheet.info.class} Class DC \`${this.sheet.general.classDC}\`\n`;
+
+			let saveTexts = [];
+			for (const save in this.sheet.saves) {
+				if (save.includes('ProfMod') || this.sheet.saves[save] == null) continue;
+				saveTexts.push(
+					`${save} \`${this.sheet.saves[save] >= 0 ? '+' : ''}${
+						this.sheet.saves[save]
+					}\` (DC ${10 + this.sheet.saves[save]})`
+				);
+			}
+			if (saveTexts.length) basicStats += `Saves: ${saveTexts.join(', ')}\n`;
+
+			if (
+				this.sheet.castingStats.arcaneAttack != null ||
+				this.sheet.castingStats.divineAttack != null ||
+				this.sheet.castingStats.primalAttack != null ||
+				this.sheet.castingStats.occultAttack != null ||
+				this.sheet.castingStats.arcaneDC != null ||
+				this.sheet.castingStats.divineDC != null ||
+				this.sheet.castingStats.primalDC != null ||
+				this.sheet.castingStats.occultDC != null
+			) {
+				let castingStats = [];
+				if (this.sheet.castingStats.arcaneAttack || this.sheet.castingStats.arcaneDC) {
+					let arcane = `Arcane `;
+					if (this.sheet.castingStats.arcaneAttack)
+						arcane += ` \`+${this.sheet.castingStats.arcaneAttack}\``;
+					if (this.sheet.castingStats.arcaneDC)
+						arcane += ` (DC ${this.sheet.castingStats.arcaneDC})`;
+					castingStats.push(arcane);
+				}
+				if (this.sheet.castingStats.divineAttack || this.sheet.castingStats.divineDC) {
+					let divine = `Divine `;
+					if (this.sheet.castingStats.divineAttack)
+						divine += ` \`+${this.sheet.castingStats.divineAttack}\``;
+					if (this.sheet.castingStats.divineDC)
+						divine += ` (DC ${this.sheet.castingStats.divineDC})`;
+					castingStats.push(divine);
+				}
+				if (this.sheet.castingStats.occultAttack || this.sheet.castingStats.occultDC) {
+					let occult = `Occult `;
+					if (this.sheet.castingStats.occultAttack)
+						occult += ` \`+${this.sheet.castingStats.occultAttack}\``;
+					if (this.sheet.castingStats.occultDC)
+						occult += ` (DC ${this.sheet.castingStats.occultDC})`;
+					castingStats.push(occult);
+				}
+				if (this.sheet.castingStats.primalAttack || this.sheet.castingStats.primalDC) {
+					let primal = `Primal `;
+					if (this.sheet.castingStats.primalAttack)
+						primal += ` \`+${this.sheet.castingStats.primalAttack}\``;
+					if (this.sheet.castingStats.primalDC)
+						primal += ` (DC ${this.sheet.castingStats.primalDC})`;
+					castingStats.push(primal);
+				}
+				basicStats += `Spellcasting: ${castingStats.join(', ')}\n`;
+			}
+		} else if (mode === 'full_sheet') {
+			//full sheet
+			return { embeds: [this.compileSheetEmbed()] };
+		}
+		return { content: title + counters + basicStats, embeds: [] };
 	}
 
 	public compileSheetEmbed(): KoboldEmbed {

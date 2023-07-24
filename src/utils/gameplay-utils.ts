@@ -1,4 +1,4 @@
-import { ChatInputCommandInteraction } from 'discord.js';
+import { ChatInputCommandInteraction, Client } from 'discord.js';
 import { Character, InitiativeActor, ModelWithSheet } from '../services/kobold/models/index.js';
 import { KoboldError } from './KoboldError.js';
 import { Creature, SettableSheetOption } from './creature.js';
@@ -30,17 +30,21 @@ export class GameplayUtils {
 		}
 		return targetCharacters;
 	}
-	public static async recoverGameplayStats(targets: ModelWithSheet[]) {
+	public static async recoverGameplayStats(
+		intr: ChatInputCommandInteraction,
+		targets: ModelWithSheet[]
+	) {
 		const promises = [];
 		const creature = new Creature(targets[0]?.sheet);
 		let recoverValues: ReturnType<Creature['recover']>;
 		if (creature) {
 			recoverValues = creature.recover();
 		} else throw new KoboldError("Yip! I couldn't find a sheet to target.");
-		await targets[0].saveSheet(creature.sheet);
+		await targets[0].saveSheet(intr, creature.sheet);
 		return recoverValues;
 	}
 	public static async setGameplayStats(
+		intr: ChatInputCommandInteraction,
 		targets: ModelWithSheet[],
 		option: SettableSheetOption,
 		value: string
@@ -52,7 +56,7 @@ export class GameplayUtils {
 		if (creature) {
 			updateValues = creature.updateValue(option, value);
 		} else throw new KoboldError("Yip! I couldn't find a sheet to target.");
-		await targets[0].saveSheet(creature.sheet);
+		await targets[0].saveSheet(intr, creature.sheet);
 		return updateValues;
 	}
 }

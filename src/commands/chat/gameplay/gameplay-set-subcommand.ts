@@ -64,6 +64,7 @@ export class GameplaySetSubCommand implements Command {
 		);
 
 		const { initialValue, updatedValue } = await GameplayUtils.setGameplayStats(
+			intr,
 			characterOrInitActorTargets,
 			option,
 			value

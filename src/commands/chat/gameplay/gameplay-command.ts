@@ -17,7 +17,7 @@ import { EventData } from '../../../models/internal-models.js';
 import { CommandUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { GameplayOptions } from './gameplay-command-options.js';
-import { InitOptions } from '../init/init-command-options.js';
+import { ChatArgs } from '../../../constants/chat-args.js';
 
 export class GameplayCommand implements Command {
 	public names = [Language.LL.commands.gameplay.name()];
@@ -54,6 +54,16 @@ export class GameplayCommand implements Command {
 				description: Language.LL.commands.gameplay.recover.description(),
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
 				options: [GameplayOptions.GAMEPLAY_TARGET_CHARACTER],
+			},
+			{
+				name: Language.LL.commands.gameplay.tracker.name(),
+				description: Language.LL.commands.gameplay.tracker.description(),
+				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				options: [
+					{ ...ChatArgs.SET_ACTIVE_NAME_OPTION, required: false },
+					GameplayOptions.GAMEPLAY_TARGET_CHANNEL,
+					GameplayOptions.GAMEPLAY_TRACKER_MODE,
+				],
 			},
 		],
 	};

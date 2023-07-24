@@ -188,7 +188,7 @@ export class InitRollSubCommand implements Command {
 			});
 
 			if (targetCreature && actionRoller.shouldDisplayDamageText()) {
-				await targetActor.saveSheet(actionRoller.targetCreature.sheet);
+				await targetActor.saveSheet(intr, actionRoller.targetCreature.sheet);
 
 				const damageField = await EmbedUtils.getOrSendActionDamageField({
 					intr,
@@ -227,7 +227,7 @@ export class InitRollSubCommand implements Command {
 			embed = builtRoll.compileEmbed({ forceFields: true });
 
 			if (targetCreature && actionRoller.shouldDisplayDamageText()) {
-				await targetActor.saveSheet(actionRoller.targetCreature.sheet);
+				await targetActor.saveSheet(intr, actionRoller.targetCreature.sheet);
 
 				const damageField = await EmbedUtils.getOrSendActionDamageField({
 					intr,

@@ -56,7 +56,10 @@ export class GameplayRecoverSubCommand implements Command {
 			targetCharacter
 		);
 
-		const recoverValues = await GameplayUtils.recoverGameplayStats(characterOrInitActorTargets);
+		const recoverValues = await GameplayUtils.recoverGameplayStats(
+			intr,
+			characterOrInitActorTargets
+		);
 		if (!recoverValues.length) {
 			await InteractionUtils.send(
 				intr,

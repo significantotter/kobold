@@ -58,6 +58,7 @@ import {
 	GameplayDamageSubCommand,
 	GameplaySetSubCommand,
 	GameplayRecoverSubCommand,
+	GameplayTrackerSubCommand,
 	// action
 	ActionCommand,
 	ActionListSubCommand,
@@ -206,6 +207,7 @@ async function start(): Promise<void> {
 			new GameplayDamageSubCommand(),
 			new GameplaySetSubCommand(),
 			new GameplayRecoverSubCommand(),
+			new GameplayTrackerSubCommand(),
 		]),
 
 		// Action commands

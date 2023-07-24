@@ -145,7 +145,7 @@ export class RollAttackSubCommand implements Command {
 		}
 
 		if (targetCreature && actionRoller.shouldDisplayDamageText()) {
-			await targetActor.saveSheet(actionRoller.targetCreature.sheet);
+			await targetActor.saveSheet(intr, actionRoller.targetCreature.sheet);
 
 			const damageField = await EmbedUtils.getOrSendActionDamageField({
 				intr,

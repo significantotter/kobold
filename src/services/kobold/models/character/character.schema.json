@@ -20,9 +20,22 @@
 			"type": "string",
 			"description": "The discord id of the user who imported the character"
 		},
-		"trackerId": {
-			"type": "string",
+		"trackerMessageId": {
+			"type": ["string", "null"],
 			"description": "The discord id of message set to track this character's stats."
+		},
+		"trackerChannelId": {
+			"type": ["string", "null"],
+			"description": "The discord id of the channel containing the message set to track this character's stats."
+		},
+		"trackerGuildId": {
+			"type": ["string", "null"],
+			"description": "The discord id of the guild with the channel set to track this character's stats."
+		},
+		"trackerMode": {
+			"type": "string",
+			"description": "The mode of the tracker message. Either counters_only', 'basic_stats', or 'full_sheet.",
+			"enum": ["counters_only", "basic_stats", "full_sheet"]
 		},
 		"rollMacros": {
 			"type": "array",

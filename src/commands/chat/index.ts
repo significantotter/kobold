@@ -57,6 +57,7 @@ export { GameplayCommand } from './gameplay/gameplay-command.js';
 export { GameplayDamageSubCommand } from './gameplay/gameplay-damage-subcommand.js';
 export { GameplaySetSubCommand } from './gameplay/gameplay-set-subcommand.js';
 export { GameplayRecoverSubCommand } from './gameplay/gameplay-recover-subcommand.js';
+export { GameplayTrackerSubCommand } from './gameplay/gameplay-tracker-subcommand.js';
 
 // action command
 export { ActionCommand } from './action/action-command.js';

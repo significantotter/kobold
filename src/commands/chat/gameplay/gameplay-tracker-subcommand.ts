@@ -7,6 +7,8 @@ import {
 	ChatInputCommandInteraction,
 	PermissionsString,
 	ApplicationCommandOptionChoiceData,
+	ChannelType,
+	Message,
 } from 'discord.js';
 
 import { GameplayOptions } from './gameplay-command-options.js';
@@ -15,18 +17,18 @@ import { Command, CommandDeferType } from '../../index.js';
 import { Language } from '../../../models/enum-helpers/index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { InteractionUtils } from '../../../utils/interaction-utils.js';
-import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
 import _ from 'lodash';
 import { Creature } from '../../../utils/creature.js';
-import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
-import { GameUtils } from '../../../utils/game-utils.js';
+import { Character } from '../../../services/kobold/models/index.js';
+import { ChatArgs } from '../../../constants/chat-args.js';
+import { CharacterUtils } from '../../../utils/character-utils.js';
 
 export class GameplayTrackerSubCommand implements Command {
-	public names = [Language.LL.commands.gameplay.damage.name()];
+	public names = [Language.LL.commands.gameplay.tracker.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.gameplay.damage.name(),
-		description: Language.LL.commands.gameplay.damage.description(),
+		name: Language.LL.commands.gameplay.tracker.name(),
+		description: Language.LL.commands.gameplay.tracker.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -38,8 +40,17 @@ export class GameplayTrackerSubCommand implements Command {
 		option: AutocompleteFocusedOption
 	): Promise<ApplicationCommandOptionChoiceData[]> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name) {
-			return await AutocompleteUtils.getAllTargetOptions(intr, option.value);
+		if (option.name === ChatArgs.SET_ACTIVE_NAME_OPTION.name) {
+			const match = intr.options.getString(ChatArgs.SET_ACTIVE_NAME_OPTION.name);
+
+			//get the character matches
+			const options = await Character.queryControlledCharacterByName(match, intr.user.id);
+
+			//return the matched characters
+			return options.map(character => ({
+				name: character.name,
+				value: character.name,
+			}));
 		}
 	}
 
@@ -48,18 +59,47 @@ export class GameplayTrackerSubCommand implements Command {
 		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
-		const targetCharacter = intr.options.getString(
-			GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name
+		const targetCharacterName = intr.options.getString(ChatArgs.SET_ACTIVE_NAME_OPTION.name);
+		const trackerMode =
+			intr.options.getString(GameplayOptions.GAMEPLAY_TRACKER_MODE.name) ?? 'counters_only';
+		const gameplayTargetChannel = intr.options.getChannel(
+			GameplayOptions.GAMEPLAY_TARGET_CHANNEL.name,
+			false,
+			[ChannelType.GuildText]
 		);
 
-		const { characterOrInitActorTargets } = await GameUtils.getCharacterOrInitActorTarget(
-			intr,
-			targetCharacter
-		);
+		// try and find that charcter
+		let targetCharacter: Character;
+		if (targetCharacterName) {
+			targetCharacter = (
+				await Character.queryControlledCharacterByName(targetCharacterName, intr.user.id)
+			)[0];
+		} else {
+			targetCharacter = await CharacterUtils.getActiveCharacter(intr);
+		}
+		if (targetCharacter.trackerMessageId) {
+			// if we already have a tracker, confirm that we want to make a new one
+			// then edit the old one to mark it as outdated
+		}
 
-		const sheet = characterOrInitActorTargets[0].sheet;
+		const sheet = targetCharacter.sheet;
 		const creature = new Creature(sheet);
-		let message = '';
-		await InteractionUtils.send(intr, message);
+
+		const trackerDisplay = creature.compileTracker(trackerMode);
+
+		let trackerResponse: Message<boolean>;
+		if (!gameplayTargetChannel) {
+			trackerResponse = await InteractionUtils.send(intr, trackerDisplay);
+		} else {
+			trackerResponse = await gameplayTargetChannel.send(trackerDisplay);
+			await InteractionUtils.send(intr, `Yip! I created the tracker for ${creature.name}.`);
+		}
+
+		await targetCharacter.$query().patch({
+			trackerMessageId: trackerResponse.id,
+			trackerGuildId: trackerResponse.guildId,
+			trackerChannelId: trackerResponse.channelId,
+			trackerMode: trackerMode,
+		});
 	}
 }

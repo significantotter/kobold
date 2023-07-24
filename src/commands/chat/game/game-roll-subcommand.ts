@@ -178,7 +178,7 @@ export class GameRollSubCommand implements Command {
 				});
 
 				if (targetCreature && actionRoller.shouldDisplayDamageText()) {
-					await targetActor.saveSheet(actionRoller.targetCreature.sheet);
+					await targetActor.saveSheet(intr, actionRoller.targetCreature.sheet);
 
 					const damageField = await EmbedUtils.getOrSendActionDamageField({
 						intr,
@@ -208,7 +208,7 @@ export class GameRollSubCommand implements Command {
 					rollResult.actionRoller &&
 					rollResult.actionRoller.shouldDisplayDamageText()
 				) {
-					await targetActor.saveSheet(rollResult.actionRoller.targetCreature.sheet);
+					await targetActor.saveSheet(intr, rollResult.actionRoller.targetCreature.sheet);
 
 					const damageField = await EmbedUtils.getOrSendActionDamageField({
 						intr,

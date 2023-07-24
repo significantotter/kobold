@@ -88,7 +88,7 @@ export class GameplayDamageSubCommand implements Command {
 				targetCreatureSheet: creature.sheet,
 			});
 		}
-		await characterOrInitActorTargets[0].saveSheet(creature.sheet);
+		await characterOrInitActorTargets[0].saveSheet(intr, creature.sheet);
 
 		await InteractionUtils.send(intr, message);
 	}

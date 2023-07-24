@@ -6,6 +6,9 @@ import CharacterSchema from './character.schema.json';
 import Sheet from '../../lib/sheet.schema.json';
 import SheetTypes from '../../lib/sheet.schema';
 import _ from 'lodash';
+import { Creature } from '../../../../utils/creature.js';
+import { ChatInputCommandInteraction, Client } from 'discord.js';
+import { ClientUtils } from '../../../../utils/client-utils.js';
 
 export interface Character extends CharacterTypes.Character {
 	sheet?: SheetTypes.Sheet;
@@ -29,11 +32,35 @@ export class Character extends BaseModel {
 		});
 	}
 
-	async saveSheet(sheet: SheetTypes.Sheet) {
-		await Promise.all([
-			this.$query().patch({ sheet }),
-			InitiativeActor.query().patch({ sheet }).where('characterId', this.id),
-		]);
+	async updateTracker(intr: ChatInputCommandInteraction, sheet: SheetTypes.Sheet) {
+		const creature = new Creature(sheet);
+		const tracker = await creature.compileTracker(this.trackerMode ?? 'counters_only');
+		try {
+			const trackerGuild = await intr.client.guilds.fetch(this.trackerGuildId);
+			const trackerChannel = await trackerGuild.channels.fetch(this.trackerChannelId);
+			if (trackerChannel.isTextBased()) {
+				const trackerMessage = await trackerChannel.messages.fetch(this.trackerMessageId);
+				await trackerMessage.edit(tracker);
+			}
+		} catch (e) {
+			if (e.code === 10008) {
+				// unknown message. Clear the tracker so we don't keep trying every time
+				await this.$query()
+					.patch({ trackerMessageId: null, trackerChannelId: null, trackerGuildId: null })
+					.execute();
+			} else console.error(e);
+		}
+	}
+
+	async saveSheet(intr: ChatInputCommandInteraction, sheet: SheetTypes.Sheet) {
+		let promises: Promise<any>[] = [
+			this.$query().patch({ sheet }).execute(),
+			InitiativeActor.query().patch({ sheet }).where('characterId', this.id).execute(),
+		];
+		if (this.trackerMessageId) {
+			promises.push(this.updateTracker(intr, sheet));
+		}
+		await Promise.all(promises);
 
 		return;
 	}
