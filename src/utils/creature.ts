@@ -118,14 +118,27 @@ export class Creature {
 					.join(', ')}\n`;
 			if (this.sheet.defenses.immunities?.length)
 				basicStats += `Immunities: ${this.sheet.defenses.immunities.join(', ')}\n`;
-			if (this.sheet.general.perception != null)
-				basicStats += `Perception \`${this.sheet.general.perception}\` (DC ${
-					10 + this.sheet.general.perception
-				})\n`;
+			const DCs = [];
+			if (this.sheet.defenses.ac != null) DCs.push(`AC \`${this.sheet.defenses.ac}\``);
 			if (this.sheet.general.classDC != null)
-				basicStats += `${
-					this.sheet.info?.class ? this.sheet.info?.class + ' ' : ''
-				}Class DC \`${this.sheet.general.classDC}\`\n`;
+				DCs.push(
+					`${this.sheet.info?.class ? this.sheet.info?.class + ' ' : ''}Class DC \`${
+						this.sheet.general.classDC
+					}\``
+				);
+			if (this.sheet.general.perception != null)
+				DCs.push(
+					`Perception \`${this.sheet.general.perception}\` (DC ${
+						10 + this.sheet.general.perception
+					})`
+				);
+			if (this.sheet.skills.athletics != null)
+				DCs.push(
+					`Athletics \`${this.sheet.skills.athletics}\` (DC ${
+						10 + this.sheet.skills.athletics
+					})`
+				);
+			if (DCs.length) basicStats += `${DCs.join(', ')}\n`;
 
 			let saveTexts = [];
 			for (const save in this.sheet.saves) {
