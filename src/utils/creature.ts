@@ -886,8 +886,8 @@ export class Creature {
 
 	public get attributes() {
 		const baseAttributes = [
-			{ name: 'level', type: 'base', value: this.sheet.general.level, tags: ['level'] },
-			{ name: 'maxHp', type: 'base', value: this.sheet.defenses.maxHP, tags: ['maxHp'] },
+			{ name: 'level', type: 'base', value: this.sheet.info.level, tags: ['level'] },
+			{ name: 'maxHp', type: 'base', value: this.sheet.defenses.maxHp, tags: ['maxHp'] },
 			{
 				name: 'hp',
 				type: 'base',
@@ -1267,7 +1267,7 @@ export class Creature {
 				tags: ['save', 'reflex', 'dexterity'],
 			}
 		);
-		return [...baseAttributes, ...lores, ...nonLoreSkills, ...abilities];
+		return [...baseAttributes, ...lores, ...saves, ...nonLoreSkills, ...abilities];
 	}
 
 	public static preserveSheetTrackerValues(sheet: Sheet, updateFrom?: Sheet): Sheet {
