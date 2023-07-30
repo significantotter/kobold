@@ -40,9 +40,9 @@ export default {
 			},
 		},
 	},
-	create: {
-		name: 'create',
-		description: 'Creates a modifier for the active character.',
+	createRollModifier: {
+		name: 'create-roll-modifier',
+		description: 'Creates a roll modifier for the active character.',
 		interactions: {
 			created: 'Yip! I created the modifier {modifierName} for {characterName}.',
 			alreadyExists:
@@ -53,6 +53,10 @@ export default {
 				'See [this link](https://github.com/joewalnes/filtrex) for more details.',
 			doesntEvaluateError: 'Yip! That modifier is not a valid number or dice roll.',
 		},
+	},
+	createSheetModifier: {
+		name: 'create-sheet-modifier',
+		description: 'Creates a sheet modifier for the active character.',
 	},
 	remove: {
 		name: 'remove',

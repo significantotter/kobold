@@ -52,6 +52,12 @@ export class ModifierOptions {
 		required: true,
 		type: ApplicationCommandOptionType.String,
 	};
+	public static readonly MODIFIER_SHEET_VALUES_OPTION: APIApplicationCommandBasicOption = {
+		name: Language.LL.commandOptions.modifierSheetValues.name(),
+		description: Language.LL.commandOptions.modifierSheetValues.description(),
+		required: true,
+		type: ApplicationCommandOptionType.String,
+	};
 
 	public static readonly MODIFIER_SET_OPTION: APIApplicationCommandBasicOption = {
 		name: Language.LL.commandOptions.modifierSetOption.name(),

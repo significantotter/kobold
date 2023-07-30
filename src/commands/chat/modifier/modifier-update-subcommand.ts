@@ -130,7 +130,7 @@ export class ModifierUpdateSubCommand implements Command {
 			if (result.error) {
 				await InteractionUtils.send(
 					intr,
-					LL.commands.modifier.create.interactions.doesntEvaluateError()
+					LL.commands.modifier.createRollModifier.interactions.doesntEvaluateError()
 				);
 				return;
 			} else updateValue = newFieldValue;
@@ -143,7 +143,7 @@ export class ModifierUpdateSubCommand implements Command {
 				// the tags are in an invalid format
 				await InteractionUtils.send(
 					intr,
-					LL.commands.modifier.create.interactions.invalidTags()
+					LL.commands.modifier.createRollModifier.interactions.invalidTags()
 				);
 				return;
 			}

@@ -547,6 +547,10 @@ export default {
 		description:
 			'A set of tags for the rolls that this modifier applies to. For example "skill or attack or save"',
 	},
+	modifierSheetValues: {
+		name: 'sheet-values',
+		description: 'How to alter the sheet values. For example "maxHp+5;ac=20;will-1"',
+	},
 	modifierSetOption: {
 		name: 'option',
 		description: 'The modifier option to alter.',

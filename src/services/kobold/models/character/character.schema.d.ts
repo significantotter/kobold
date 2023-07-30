@@ -67,8 +67,17 @@ export interface Character {
 		isActive?: boolean;
 		description?: string | null;
 		type?: string;
-		targetTags?: string;
-		value?: number | string;
+		targetTags?: string | null;
+		value?: number | string | null;
+		modifierType?: "roll" | "sheet";
+		sheetAdjustments?:
+			| {
+					property?: string;
+					operation?: "+" | "-" | "=";
+					value?: number;
+					[k: string]: any;
+			  }[]
+			| null;
 		[k: string]: any;
 	}[];
 	/**
