@@ -421,7 +421,10 @@ export class Creature {
 			});
 			this.sheet.defenses.currentHp = this.sheet.defenses.maxHp;
 		}
-		if (this.sheet.defenses.currentStamina < this.sheet.defenses.maxStamina) {
+		if (
+			this.sheet.info.usesStamina &&
+			this.sheet.defenses.currentStamina < this.sheet.defenses.maxStamina
+		) {
 			updates.push({
 				name: 'Stamina',
 				initialValue: this.sheet.defenses.currentStamina,
@@ -429,7 +432,10 @@ export class Creature {
 			});
 			this.sheet.defenses.currentStamina = this.sheet.defenses.maxStamina;
 		}
-		if (this.sheet.defenses.currentResolve < this.sheet.defenses.maxResolve) {
+		if (
+			this.sheet.info.usesStamina &&
+			this.sheet.defenses.currentResolve < this.sheet.defenses.maxResolve
+		) {
 			updates.push({
 				name: 'Resolve',
 				initialValue: this.sheet.defenses.currentResolve,
