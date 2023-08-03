@@ -652,7 +652,7 @@ export class Creature {
 		if (['perception', 'perceptiondc'].includes(trimmedLowerDCName))
 			return (this.sheet.general.perception ?? 0) + 10;
 		if (['classdc', 'class'].includes(trimmedLowerDCName))
-			return (this.sheet.general.classDC ?? 0) + 10;
+			return this.sheet.general.classDC ?? 10;
 		for (const skill of _.keys(this.sheet.skills)) {
 			if (skill === 'lores') continue;
 			if (
