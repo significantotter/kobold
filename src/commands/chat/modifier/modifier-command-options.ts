@@ -85,6 +85,10 @@ export class ModifierOptions {
 				name: Language.LL.commandOptions.modifierSetOption.choices.targetTags.name(),
 				value: Language.LL.commandOptions.modifierSetOption.choices.targetTags.value(),
 			},
+			{
+				name: Language.LL.commandOptions.modifierSetOption.choices.sheetValues.name(),
+				value: Language.LL.commandOptions.modifierSetOption.choices.sheetValues.value(),
+			},
 		],
 	};
 	public static readonly MODIFIER_SET_VALUE_OPTION: APIApplicationCommandBasicOption = {

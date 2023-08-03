@@ -11,7 +11,7 @@ import {
 import { RateLimiter } from 'discord.js-rate-limiter';
 
 import { EventData } from '../../../models/internal-models.js';
-import { InteractionUtils } from '../../../utils/index.js';
+import { InteractionUtils, StringUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import _ from 'lodash';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
@@ -24,6 +24,7 @@ import { compileExpression } from 'filtrex';
 import { DiceUtils } from '../../../utils/dice-utils.js';
 import { RollBuilder } from '../../../utils/roll-builder.js';
 import { Creature } from '../../../utils/creature.js';
+import { KoboldError } from '../../../utils/KoboldError.js';
 
 export class ModifierUpdateSubCommand implements Command {
 	public names = [Language.LL.commands.modifier.update.name()];
@@ -81,7 +82,7 @@ export class ModifierUpdateSubCommand implements Command {
 			intr.options.getString(ModifierOptions.MODIFIER_SET_VALUE_OPTION.name) ?? ''
 		).trim();
 
-		let updateValue: string | string[] | number;
+		let updateValue: string | string[] | number | Character['modifiers'][0]['sheetAdjustments'];
 
 		//check if we have an active character
 		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
@@ -120,6 +121,11 @@ export class ModifierUpdateSubCommand implements Command {
 				updateValue = newFieldValue;
 			}
 		} else if (fieldToChange === 'value') {
+			if (targetModifier.modifierType === 'sheet') {
+				throw new KoboldError(
+					'Yip! Sheet modifiers don\'t have a "value". You probably meant to update the "sheet-values" field.'
+				);
+			}
 			// we must be able to evaluate the modifier as a roll for this character
 			const result = DiceUtils.parseAndEvaluateDiceExpression({
 				rollExpression: newFieldValue,
@@ -135,6 +141,9 @@ export class ModifierUpdateSubCommand implements Command {
 				return;
 			} else updateValue = newFieldValue;
 		} else if (fieldToChange === 'target-tags') {
+			if (targetModifier.modifierType === 'sheet') {
+				throw new KoboldError('Yip! Sheet modifiers don\'t have "target tags".');
+			}
 			fieldToChange = 'targetTags';
 			// parse the target tags
 			try {
@@ -151,6 +160,14 @@ export class ModifierUpdateSubCommand implements Command {
 		} else if (['type', 'description'].includes(fieldToChange)) {
 			if (!newFieldValue) updateValue = null;
 			else updateValue = newFieldValue;
+		} else if (fieldToChange === 'sheet-values') {
+			if (targetModifier.modifierType === 'roll') {
+				throw new KoboldError(
+					'Yip! Roll modifiers don\'t have "sheet values". Maybe you meant to update "value"?'
+				);
+			}
+			const creature = new Creature(activeCharacter.sheet);
+			updateValue = StringUtils.parseSheetModifiers(newFieldValue, creature);
 		} else {
 			// if a field wasn't provided, or the field isn't present in our options, send an error
 			await InteractionUtils.send(

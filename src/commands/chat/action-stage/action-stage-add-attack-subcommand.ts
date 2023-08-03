@@ -50,6 +50,11 @@ export class ActionStageAddAttackSubCommand implements Command {
 			);
 			return await AutocompleteUtils.getAllMatchingRollsForActiveCharacter(intr, match, [
 				'AC',
+				'Class DC',
+				'Arcane DC',
+				'Divine DC',
+				'Occult DC',
+				'Primal DC',
 			]);
 		}
 	}

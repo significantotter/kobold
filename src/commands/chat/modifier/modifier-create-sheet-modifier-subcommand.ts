@@ -9,7 +9,7 @@ import { RateLimiter } from 'discord.js-rate-limiter';
 
 import { EventData } from '../../../models/internal-models.js';
 import { Character } from '../../../services/kobold/models/index.js';
-import { InteractionUtils } from '../../../utils/index.js';
+import { InteractionUtils, StringUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Language } from '../../../models/enum-helpers/index.js';
@@ -18,7 +18,7 @@ import { compileExpression } from 'filtrex';
 import { DiceUtils } from '../../../utils/dice-utils.js';
 import { Creature } from '../../../utils/creature.js';
 
-export class ModifierCreateRollModifierSubCommand implements Command {
+export class ModifierCreateSheetModifierSubCommand implements Command {
 	public names = [Language.LL.commands.modifier.createSheetModifier.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
@@ -57,7 +57,10 @@ export class ModifierCreateRollModifierSubCommand implements Command {
 			ModifierOptions.MODIFIER_SHEET_VALUES_OPTION.name
 		);
 
-		const parsedSheetValues: Character['modifiers'][0]['sheetAdjustments'] = [];
+		const creature = new Creature(activeCharacter.sheet);
+
+		const parsedSheetValues: Character['modifiers'][0]['sheetAdjustments'] =
+			StringUtils.parseSheetModifiers(modifierSheetValues, creature);
 
 		// make sure the name does't already exist in the character's modifiers
 		if (activeCharacter.getModifierByName(name)) {
@@ -79,6 +82,7 @@ export class ModifierCreateRollModifierSubCommand implements Command {
 					isActive: true,
 					description,
 					type: modifierType,
+					sheetAdjustments: parsedSheetValues,
 					modifierType: 'sheet',
 				},
 			],

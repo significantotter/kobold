@@ -93,14 +93,26 @@ export class ModifierDetailSubCommand implements Command {
 				modifierIsActive: modifier.isActive ? ' (active)' : '',
 			})
 		);
-		embed.setDescription(
-			LL.commands.modifier.interactions.detailBody({
+		let modifierDescription: string;
+		if (modifier.modifierType === 'roll') {
+			modifierDescription = LL.commands.modifier.interactions.detailBodyRoll({
 				modifierDescriptionText: modifier.description,
 				modifierType: modifier.type || 'untyped',
 				modifierValue: modifier.value,
 				modifierTargetTags: modifier.targetTags,
-			})
-		);
+			});
+		} else {
+			modifierDescription = LL.commands.modifier.interactions.detailBodySheet({
+				modifierDescriptionText: modifier.description,
+				modifierType: modifier.type || 'untyped',
+				modifierSheetValues: modifier.sheetAdjustments
+					.map(sheetAdjustment => {
+						return `${sheetAdjustment.property} ${sheetAdjustment.operation} ${sheetAdjustment.value}`;
+					})
+					.join(', '),
+			});
+		}
+		embed.setDescription(modifierDescription);
 
 		await InteractionUtils.send(intr, { embeds: [embed] });
 	}

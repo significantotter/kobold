@@ -25,7 +25,7 @@ export class Game extends BaseModel {
 		return options.filter(
 			option =>
 				option.characters.filter(char => char.userId === userId && char.isActiveCharacter)
-					.length > 0
+					.length > 0 || option.gmUserId === userId
 		);
 	}
 	static async queryWhereUserLacksCharacter(userId, guildId) {

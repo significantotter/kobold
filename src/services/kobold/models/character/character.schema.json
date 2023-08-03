@@ -97,7 +97,7 @@
 							"properties": {
 								"property": { "type": "string" },
 								"operation": { "type": "string", "enum": ["+", "-", "="] },
-								"value": { "type": "number" }
+								"value": { "type": "string" }
 							}
 						}
 					}

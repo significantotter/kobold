@@ -17,12 +17,20 @@ import { KoboldEmbed } from './kobold-embed-utils.js';
 import { parseBonusesForTagsFromModifiers } from '../services/kobold/lib/helpers.js';
 import { KoboldError } from './KoboldError.js';
 import { BaseMessageOptions } from 'discord.js';
-import { MessageOptions } from 'child_process';
 
 const damageTypeShorthands: { [shorthand: string]: string } = {
 	piercing: 'p',
 	slashing: 's',
 	bludgeoning: 'b',
+};
+
+const abilityShorthands: { [shorthand: string]: string } = {
+	str: 'strength',
+	dex: 'dexterity',
+	con: 'constitution',
+	int: 'intelligence',
+	wis: 'wisdom',
+	cha: 'charisma',
 };
 
 export type SettableSheetOption =
@@ -51,8 +59,138 @@ export interface attackRoll {
 	tags: string[];
 }
 
+type typedSheetAdjustment = Character['modifiers'][0]['sheetAdjustments'][0] & { type: string };
+
+export const creatureHelpers = {
+	applySheetAdjustmentToProperty(
+		property: string | number,
+		modifier: Character['modifiers'][0]['sheetAdjustments'][0]
+	) {
+		if (modifier.operation === '=') {
+			return modifier.value;
+		}
+		if (!isNaN(Number(property)) && modifier.operation === '+') {
+			return Number(property) + Number(modifier.value);
+		} else if (!isNaN(Number(property)) && modifier.operation === '-') {
+			return Number(property) - Number(modifier.value);
+		} else {
+			return property;
+		}
+	},
+	reduceSheetAdjustmentsByType(typedSheetAdjustments: typedSheetAdjustment[]) {
+		const positiveTypedSheetAdjustments: {
+			[type: string]: {
+				[property: string]: string | number;
+			};
+		} = {};
+		const negativeTypedSheetAdjustments: {
+			[type: string]: {
+				[property: string]: string | number;
+			};
+		} = {};
+		const overwriteSheetAdjustments: {
+			[type: string]: {
+				[property: string]: string | number;
+			};
+		} = {};
+		for (const sheetAdjustment of typedSheetAdjustments) {
+			let typedSheetAdjustments =
+				sheetAdjustment.operation === '='
+					? overwriteSheetAdjustments
+					: sheetAdjustment.operation === '+'
+					? positiveTypedSheetAdjustments
+					: negativeTypedSheetAdjustments;
+			if (typedSheetAdjustments[sheetAdjustment.type] === undefined)
+				typedSheetAdjustments[sheetAdjustment.type] = {};
+			if (
+				typedSheetAdjustments[sheetAdjustment.type][sheetAdjustment.property] !== undefined
+			) {
+				// if we've already adjusted this property, we need to combine the sheetAdjustments based on the operation
+				if (sheetAdjustment.operation === '=') {
+					// overwrite
+					typedSheetAdjustments[sheetAdjustment.type][sheetAdjustment.property] =
+						sheetAdjustment.value;
+				} else if (sheetAdjustment.operation === '+') {
+					// max
+					typedSheetAdjustments[sheetAdjustment.type][sheetAdjustment.property] =
+						Math.max(
+							Number(
+								typedSheetAdjustments[sheetAdjustment.type][
+									sheetAdjustment.property
+								]
+							),
+							Number(sheetAdjustment.value)
+						);
+				} else {
+					// min
+					typedSheetAdjustments[sheetAdjustment.type][sheetAdjustment.property] =
+						Math.min(
+							Number(
+								typedSheetAdjustments[sheetAdjustment.type][
+									sheetAdjustment.property
+								]
+							),
+							Number(sheetAdjustment.value)
+						);
+				}
+			}
+		}
+		//now join the three types. Start with the positive value. Subtract the negative if needed. Then overwrite if necessary.
+		const reducedSheetAdjustments: {
+			[property: string]: string | number;
+		} = {};
+		for (const type in positiveTypedSheetAdjustments) {
+			for (const property in positiveTypedSheetAdjustments[type]) {
+				if (reducedSheetAdjustments[property] === undefined)
+					reducedSheetAdjustments[property] = 0;
+				reducedSheetAdjustments[property] =
+					Number(reducedSheetAdjustments[property]) +
+					Number(positiveTypedSheetAdjustments[type][property]);
+			}
+		}
+		for (const type in negativeTypedSheetAdjustments) {
+			for (const property in negativeTypedSheetAdjustments[type]) {
+				if (reducedSheetAdjustments[property] === undefined)
+					reducedSheetAdjustments[property] = 0;
+				reducedSheetAdjustments[property] =
+					Number(reducedSheetAdjustments[property]) -
+					Number(negativeTypedSheetAdjustments[type][property]);
+			}
+		}
+		for (const type in overwriteSheetAdjustments) {
+			for (const property in overwriteSheetAdjustments[type]) {
+				if (reducedSheetAdjustments[property] === undefined)
+					reducedSheetAdjustments[property] = 0;
+				reducedSheetAdjustments[property] = overwriteSheetAdjustments[type][property];
+			}
+		}
+		return reducedSheetAdjustments;
+	},
+	typeAndFlattenSheetAdjustmentsFromModifiers(modifiers: Character['modifiers']) {
+		const typedSheetAdjustments: typedSheetAdjustment[] = [];
+		for (const modifier of modifiers) {
+			if (modifier.modifierType === 'sheet') {
+				for (const sheetAdjustment of modifier.sheetAdjustments) {
+					typedSheetAdjustments.push({
+						...sheetAdjustment,
+						type: modifier.type,
+					});
+				}
+			}
+		}
+		return typedSheetAdjustments;
+	},
+	spreadSheetAdjustmentGroups(sheetAdjustments: typedSheetAdjustment[]) {
+		// we have types of sheet adjustment group based on attribute
+		// and then those attributes are grouped by type
+		// the attributes are any of Strength, Dexterity, Constitution, Intelligence, Wisdom, Charisma or their shorthands
+		// the type are any of skills, checks, dcs, or saves
+	},
+	applySheetModifier(sheet: Sheet, modifier: Character['modifiers'][0]) {},
+};
+
 export class Creature {
-	constructor(public sheet: Sheet, private _name?: string) {
+	constructor(public _sheet: Sheet, private _name?: string) {
 		const sheetDefaults: Sheet = {
 			info: { traits: [] },
 			general: { senses: [], languages: [] },
@@ -68,7 +206,17 @@ export class Creature {
 			modifiers: [],
 			sourceData: {},
 		};
-		this.sheet = _.defaultsDeep(this.sheet, sheetDefaults);
+		this._sheet = _.defaultsDeep(this._sheet, sheetDefaults);
+	}
+
+	public get sheet() {
+		let sheet = _.cloneDeep(this._sheet);
+		for (const modifier of this.modifiers) {
+			if (modifier.modifierType === 'sheet') {
+				creatureHelpers.applySheetModifier(sheet, modifier);
+			}
+		}
+		return this._sheet;
 	}
 
 	public get name() {
@@ -888,6 +1036,67 @@ export class Creature {
 	}
 	public get rollMacros() {
 		return this.sheet?.rollMacros;
+	}
+
+	public get sheetPropertyGroups() {
+		return _.flatMap(
+			['strength', 'dexterity', 'constitution', 'intelligence', 'wisdom', 'charisma'].map(
+				attribute => {
+					return ['skills', 'checks', 'dcs', 'saves'].map(
+						group => `${attribute} ${group}`
+					);
+				}
+			)
+		);
+	}
+	public static sheetPropertyValid(propertyName: string): boolean {
+		//parse groups
+		const groups = _.kebabCase(propertyName).split('-');
+		if (groups.length === 1) {
+			// check against direct property names
+		} else if (groups[groups.length - 1] === 'lore') {
+			// arbitrary lore names are valid
+			return true;
+		} else if (groups.length === 2) {
+			// must be a combination of attribute and group type (e.g. strength skills)
+		} else {
+			return false;
+		}
+		return;
+	}
+
+	public get sheetProperties() {
+		return [
+			...Object.keys(this.sheet.info),
+			...Object.keys(this.sheet.general),
+			...Object.keys(this.sheet.defenses),
+			...Object.keys(this.sheet.skills),
+			...Object.keys(this.sheet.saves),
+			...Object.keys(this.sheet.abilities),
+			...Object.keys(this.sheet.castingStats),
+			...Object.keys(this.sheet.offense),
+		]
+			.filter(key => !['name', 'level', 'languages', 'senses'].includes(key))
+			.map(property => _.camelCase(property));
+	}
+	public get numericSheetProperties() {
+		return [
+			'age',
+			..._.without(Object.keys(this.sheet.general), 'languages', 'senses'),
+			..._.without(
+				Object.keys(this.sheet.defenses),
+				'immunities',
+				'resistances',
+				'weaknesses'
+			),
+			..._.without(Object.keys(this.sheet.skills), 'lores'),
+			...Object.keys(this.sheet.saves),
+			...Object.keys(this.sheet.abilities),
+			...Object.keys(this.sheet.castingStats),
+			...Object.keys(this.sheet.offense),
+		]
+			.filter(key => !['level'].includes(key))
+			.map(property => _.camelCase(property));
 	}
 
 	public get attributes() {

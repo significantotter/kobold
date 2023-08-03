@@ -40,6 +40,7 @@ import {
 	// modifier
 	ModifierCommand,
 	ModifierCreateRollModifierSubCommand,
+	ModifierCreateSheetModifierSubCommand,
 	ModifierRemoveSubCommand,
 	ModifierListSubCommand,
 	ModifierDetailSubCommand,
@@ -185,6 +186,7 @@ async function start(): Promise<void> {
 		// Modifier commands
 		new ModifierCommand([
 			new ModifierCreateRollModifierSubCommand(),
+			new ModifierCreateSheetModifierSubCommand(),
 			new ModifierRemoveSubCommand(),
 			new ModifierListSubCommand(),
 			new ModifierDetailSubCommand(),

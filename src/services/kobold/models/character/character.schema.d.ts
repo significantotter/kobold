@@ -74,7 +74,7 @@ export interface Character {
 			| {
 					property?: string;
 					operation?: "+" | "-" | "=";
-					value?: number;
+					value?: string;
 					[k: string]: any;
 			  }[]
 			| null;

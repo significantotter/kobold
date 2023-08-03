@@ -575,6 +575,10 @@ export default {
 				name: 'target-tags',
 				value: 'target-tags',
 			},
+			sheetValues: {
+				name: 'sheet-values',
+				value: 'sheet-values',
+			},
 		},
 	},
 	modifierSetValue: {

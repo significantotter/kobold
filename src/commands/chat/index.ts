@@ -37,6 +37,7 @@ export { InitRemoveSubCommand } from './init/init-remove-subcommand.js';
 // modifier commands
 export { ModifierCommand } from './modifier/modifier-command.js';
 export { ModifierCreateRollModifierSubCommand } from './modifier/modifier-create-roll-modifier-subcommand.js';
+export { ModifierCreateSheetModifierSubCommand } from './modifier/modifier-create-sheet-modifier-subcommand.js';
 export { ModifierRemoveSubCommand } from './modifier/modifier-remove-subcommand.js';
 export { ModifierListSubCommand } from './modifier/modifier-list-subcommand.js';
 export { ModifierDetailSubCommand } from './modifier/modifier-detail-subcommand.js';
