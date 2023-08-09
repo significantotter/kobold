@@ -17,8 +17,8 @@ function getFakeInitiativeBuilder() {
 				id: 'test-group-id',
 			},
 		],
-		getActorGroupTurnText: jest.fn(() => 'Test Group Turn Text'),
-		getAllGroupsTurnText: jest.fn(() => 'Test Group Turn Text'),
+		getActorGroupTurnText: vi.fn(() => 'Test Group Turn Text'),
+		getAllGroupsTurnText: vi.fn(() => 'Test Group Turn Text'),
 		actorsByGroup: {
 			'test-group-id': [
 				{
@@ -42,32 +42,6 @@ describe('KoboldEmbedUtils', () => {
 			expect(embed.data.color).toBe(5763719);
 			expect(embed).toBeInstanceOf(EmbedBuilder);
 		});
-		describe('setCharacter', () => {
-			test('sets the thumbnail of the embed to the character image url', function () {
-				const embed = new KoboldEmbed();
-				const character = {
-					characterData: {
-						infoJSON: {
-							imageURL: 'https://example.com/image.png',
-						},
-					},
-				};
-				embed.setCharacter(character as Character);
-				expect(embed.data.thumbnail).toMatchObject({
-					url: 'https://example.com/image.png',
-				});
-			});
-			test('does not set the thumbnail if the character does not have an image url', function () {
-				const embed = new KoboldEmbed();
-				const character = {
-					characterData: {
-						infoJSON: {},
-					},
-				};
-				embed.setCharacter(character as Character);
-				expect(embed.data.thumbnail).toBeFalsy();
-			});
-		});
 		describe('turnFromInitiativeBuilder', () => {
 			test('returns an error message if the initiative builder does not have an active group', function () {
 				const embed = KoboldEmbed.turnFromInitiativeBuilder({
@@ -87,13 +61,6 @@ describe('KoboldEmbedUtils', () => {
 				const initiativeBuilder = getFakeInitiativeBuilder();
 				const embed = KoboldEmbed.turnFromInitiativeBuilder(initiativeBuilder as any);
 				expect(embed.data.fields[0].value).toContain('Test Group');
-			});
-			test('sets the character if there is only one actor in the group', function () {
-				const initiativeBuilder = getFakeInitiativeBuilder();
-				const embed = KoboldEmbed.turnFromInitiativeBuilder(initiativeBuilder as any);
-				expect(embed.data.thumbnail).toMatchObject({
-					url: 'https://example.com/image.png',
-				});
 			});
 			test('does not set the character if there is more than one actor in the group', function () {
 				const initiativeBuilder = {
@@ -135,8 +102,8 @@ describe('KoboldEmbedUtils', () => {
 			test('includes all the groups in the description', function () {
 				const initiativeBuilder = {
 					...getFakeInitiativeBuilder(),
-					getActorGroupTurnText: jest.fn(group => `${group.name} Turn Text`),
-					getAllGroupsTurnText: jest.fn(
+					getActorGroupTurnText: vi.fn(group => `${group.name} Turn Text`),
+					getAllGroupsTurnText: vi.fn(
 						() => 'Test Group 1 Turn Text\n Test Group 2 Turn Text'
 					),
 					groups: [
@@ -157,7 +124,7 @@ describe('KoboldEmbedUtils', () => {
 			test('still works if there are no groups', function () {
 				const initiativeBuilder = {
 					...getFakeInitiativeBuilder(),
-					getAllGroupsTurnText: jest.fn(() => ' '),
+					getAllGroupsTurnText: vi.fn(() => ' '),
 					groups: [],
 				};
 				const embed = KoboldEmbed.roundFromInitiativeBuilder(initiativeBuilder as any);

@@ -1,4 +1,4 @@
-import { ModifierOptions } from './modifier-command-options';
+import { ModifierOptions } from './modifier-command-options.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,

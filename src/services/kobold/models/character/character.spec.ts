@@ -1,13 +1,13 @@
 import Ajv from 'ajv';
 import { CharacterFactory, createRandomModifiers } from './character.factory.js';
 import { Character } from './character.model.js';
-import CharacterSchema from './character.schema.json';
+import CharacterSchema from './character.schema.json' assert { type: 'json' };
 import addFormats from 'ajv-formats';
 import { CharacterDataFactory } from '../../../wanderers-guide/character-api/factories/characterData.factory.js';
-const ajv = new Ajv({ allowUnionTypes: true });
-addFormats(ajv);
+const ajv = new Ajv.default({ allowUnionTypes: true });
+addFormats.default(ajv);
 
-describe('Character', () => {
+describe.only('Character', () => {
 	test('validates a built factory', () => {
 		const builtCharacter = CharacterFactory.build();
 		const valid = ajv.validate(CharacterSchema, builtCharacter);
@@ -43,10 +43,11 @@ describe('Character', () => {
 		test('fetches a character by name with case insensitivity', async () => {
 			const builtCharacter = CharacterFactory.build({
 				userId: '1',
+				name: 'aSdFqWeRtYuI',
 				characterData: CharacterDataFactory.build({ name: 'aSdFqWeRtYuI' }),
 			});
 			const createdCharacter = await Character.query().insert(builtCharacter);
-			const looseFetch = await Character.queryControlledCharacterByName('sDfQwE', 1);
+			const looseFetch = await Character.queryControlledCharacterByName('sDfQwE', '1');
 			expect(looseFetch).toHaveProperty('length', 1);
 			expect(looseFetch[0].characterData).toHaveProperty('name', 'aSdFqWeRtYuI');
 		});

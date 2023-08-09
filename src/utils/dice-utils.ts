@@ -1,4 +1,4 @@
-import { Character } from './../services/kobold/models/character/character.model';
+import { Character } from './../services/kobold/models/character/character.model.js';
 import { APIEmbedField, ChatInputCommandInteraction } from 'discord.js';
 import { Dice, DiceResult } from 'dice-typescript';
 import _ from 'lodash';
@@ -102,7 +102,7 @@ export class DiceUtils {
 			attributeObject =>
 				attributeObject.name.replace(trimRegex, '').toLowerCase() === attributeName
 		);
-		const staticAttribute = staticAttributes(creature.sheet).find(
+		const staticAttribute = staticAttributes(creature?.sheet).find(
 			attributeObject =>
 				attributeObject.name.replace(trimRegex, '').toLowerCase() === attributeName
 		);
@@ -155,7 +155,7 @@ export class DiceUtils {
 				finalExpression += token;
 			}
 		}
-		return [finalExpression, newTags];
+		return [finalExpression, _.uniq(newTags)];
 	}
 
 	public static parseDiceExpression({

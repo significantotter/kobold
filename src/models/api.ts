@@ -5,7 +5,7 @@ import { Controller } from '../controllers/index.js';
 import { checkAuth, handleError } from '../middleware/index.js';
 import { Logger } from '../services/index.js';
 import { Config } from './../config/config.js';
-import Logs from './../config/lang/logs.json';
+import Logs from './../config/lang/logs.json' assert { type: 'json' };
 
 export class Api {
 	private app: Express;

@@ -1,8 +1,8 @@
 {
 	"compilerOptions": {
-		"target": "es2021",
-		"module": "CommonJS",
-		"moduleResolution": "Node",
+		"target": "ESNext",
+		"module": "ESNext",
+		"moduleResolution": "Node16",
 		"composite": true,
 		"lib": ["es2021"],
 		"declaration": true,
@@ -16,7 +16,8 @@
 		"emitDecoratorMetadata": true,
 		"skipLibCheck": true,
 		"forceConsistentCasingInFileNames": true,
-		"disableSizeLimit": true
+		"disableSizeLimit": true,
+		"types": ["vitest/globals"]
 	},
 	"include": ["src/**/*.ts", "src/**/*.json", "types.d.ts"],
 	"exclude": [
@@ -24,8 +25,6 @@
 		"src/migrations",
 		"node_modules",
 		"tests",
-		"jest.config.ts",
-		"jest.setup.ts",
 		"knexfile.ts"
 	]
 }

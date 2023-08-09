@@ -1,11 +1,11 @@
-import type GameTypes from './game.schema.js';
+import type { Game as GameType } from './game.schema.js';
 import { JSONSchema7 } from 'json-schema';
 import { BaseModel } from '../../lib/base-model.js';
-import GameSchema from './game.schema.json';
+import GameSchema from './game.schema.json' assert { type: 'json' };
 import { Model, RelationMappings } from 'objection';
 import { Character } from '../character/character.model.js';
 
-export interface Game extends GameTypes.Game {
+export interface Game extends GameType {
 	characters: Character[];
 }
 export class Game extends BaseModel {

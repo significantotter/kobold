@@ -1,22 +1,22 @@
-import type InitiativeActorTypes from './initiative-actor.schema.js';
+import type { InitiativeActor as InitiativeActorType } from './initiative-actor.schema.js';
 import { JSONSchema7 } from 'json-schema';
 import { BaseModel } from '../../lib/base-model.js';
-import InitiativeActorSchema from './initiative-actor.schema.json';
+import InitiativeActorSchema from './initiative-actor.schema.json' assert { type: 'json' };
 import { Model, RelationMappings } from 'objection';
 import { Initiative } from '../initiative/initiative.model.js';
-import SheetTypes from '../../lib/sheet.schema';
+import { Sheet as SheetType } from '../../lib/sheet.schema.js';
 import { InitiativeActorGroup } from '../initiative-actor-group/initiative-actor-group.model.js';
 import { Character } from '../character/character.model.js';
 import { ChatInputCommandInteraction, Client } from 'discord.js';
 
-export interface InitiativeActor extends InitiativeActorTypes.InitiativeActor {
+export interface InitiativeActor extends InitiativeActorType {
 	initiative?: Initiative;
 	actorGroup?: InitiativeActorGroup;
 	character?: Character;
-	sheet?: SheetTypes.Sheet;
+	sheet?: SheetType;
 }
 export class InitiativeActor extends BaseModel {
-	public async saveSheet(intr: ChatInputCommandInteraction, sheet: SheetTypes.Sheet) {
+	public async saveSheet(intr: ChatInputCommandInteraction, sheet: SheetType) {
 		// apply any damage effects from the action to the creature
 		let promises: any[] = [
 			this.$query().patch({ sheet }).execute(),

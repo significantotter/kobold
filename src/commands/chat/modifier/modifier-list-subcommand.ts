@@ -1,4 +1,4 @@
-import { KoboldEmbed } from './../../../utils/kobold-embed-utils';
+import { KoboldEmbed } from './../../../utils/kobold-embed-utils.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,

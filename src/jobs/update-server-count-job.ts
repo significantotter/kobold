@@ -6,7 +6,7 @@ import { HttpService, Lang, Logger } from '../services/index.js';
 import { ShardUtils } from '../utils/index.js';
 import { Job } from './index.js';
 import { Config } from './../config/config.js';
-import Logs from './../config/lang/logs.json';
+import Logs from './../config/lang/logs.json' assert { type: 'json' };
 
 let BotSites: BotSite[] = [];
 

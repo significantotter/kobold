@@ -3,7 +3,7 @@ import { Response } from 'node-fetch';
 import pino from 'pino';
 import { Config } from './../config/config.js';
 
-let logger = pino(
+let logger = pino.default(
 	{
 		formatters: {
 			level: label => {

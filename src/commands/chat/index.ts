@@ -1,6 +1,6 @@
 // character commands
-export { CharacterCommand } from './characters/character-command';
-export { CharacterListSubCommand } from './characters/character-list-subcommand';
+export { CharacterCommand } from './characters/character-command.js';
+export { CharacterListSubCommand } from './characters/character-list-subcommand.js';
 export { CharacterSetActiveSubCommand } from './characters/character-set-active-subcommand.js';
 export { CharacterSetDefaultSubCommand } from './characters/character-set-default.subcommand.js';
 export { CharacterRemoveSubCommand } from './characters/character-remove-subcommand.js';
@@ -93,7 +93,7 @@ export { SettingsCommand } from './settings/settings-command.js';
 export { SettingsSetSubCommand } from './settings/settings-set-subcommand.js';
 
 // help command
-export { HelpCommand } from './help-command';
+export { HelpCommand } from './help-command.js';
 
 // admin command
-export { AdminCommand } from './admin-command';
+export { AdminCommand } from './admin-command.js';

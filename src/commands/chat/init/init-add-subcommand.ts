@@ -1,6 +1,6 @@
-import { DiceUtils } from './../../../utils/dice-utils';
+import { DiceUtils } from './../../../utils/dice-utils.js';
 import { RollBuilder } from '../../../utils/roll-builder.js';
-import { InitiativeActor } from './../../../services/kobold/models/initiative-actor/initiative-actor.model';
+import { InitiativeActor } from './../../../services/kobold/models/initiative-actor/initiative-actor.model.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,

@@ -1,4 +1,4 @@
-import { Command } from './../commands/command';
+import { Command } from './../commands/command.js';
 import { REST } from '@discordjs/rest';
 import {
 	APIApplicationCommand,
@@ -10,7 +10,7 @@ import {
 
 import { Logger } from './logger.js';
 import { Config } from './../config/config.js';
-import Logs from './../config/lang/logs.json';
+import Logs from './../config/lang/logs.json' assert { type: 'json' };
 
 export class CommandRegistrationService {
 	constructor(private rest: REST) {}

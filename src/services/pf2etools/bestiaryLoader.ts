@@ -3,6 +3,10 @@ import xxhash from 'xxhashjs';
 import { BestiaryFilesLoaded, Npc } from '../kobold/models/index.js';
 import { transaction } from 'objection';
 import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export async function hashBestiaryFiles() {
 	// Find all files named with "creatures-" in the pf2etools bestiary directory

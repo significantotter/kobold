@@ -1,4 +1,4 @@
-import { WanderersGuide } from './../index';
+import { WanderersGuide } from './../index.js';
 import type { WG } from './../wanderers-guide.js';
 import axios from 'axios';
 
@@ -12,21 +12,21 @@ export class HeritageApi {
 	}
 
 	async get(heritageId: number): Promise<WG.AncestryHeritage> {
-		const response = await axios.get(`${this.baseURL}?id=${heritageId}`, {
+		const response = await axios.default.get(`${this.baseURL}?id=${heritageId}`, {
 			headers: this.wg.headers,
 		});
 		return response.data as WG.AncestryHeritage;
 	}
 
 	async getName(heritageName: string): Promise<WG.AncestryHeritage> {
-		const response = await axios.get(`${this.baseURL}?name=${heritageName}`, {
+		const response = await axios.default.get(`${this.baseURL}?name=${heritageName}`, {
 			headers: this.wg.headers,
 		});
 		return response.data as WG.AncestryHeritage;
 	}
 
 	async getAll(): Promise<WG.AncestryHeritage[]> {
-		const response = await axios.get(`${this.baseURL}/all}`, {
+		const response = await axios.default.get(`${this.baseURL}/all}`, {
 			headers: this.wg.headers,
 		});
 		return response.data as WG.AncestryHeritage[];

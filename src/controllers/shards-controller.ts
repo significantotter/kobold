@@ -13,7 +13,7 @@ import {
 import { Logger } from '../services/index.js';
 import { Controller } from './index.js';
 import { Config } from './../config/config.js';
-import Logs from './../config/lang/logs.json';
+import Logs from './../config/lang/logs.json' assert { type: 'json' };
 
 export class ShardsController implements Controller {
 	public path = '/shards';

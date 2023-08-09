@@ -9,7 +9,7 @@ export class DBModel {
 	static knex: KnexType;
 
 	static init(databaseUrl: string, pool_size_min: number = 2, pool_size_max: number = 10): void {
-		DBModel.knex = Knex({
+		DBModel.knex = Knex.default({
 			client: 'postgresql',
 			connection: databaseUrl,
 			pool: {

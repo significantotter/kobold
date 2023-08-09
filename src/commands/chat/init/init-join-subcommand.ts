@@ -1,5 +1,5 @@
 import { RollBuilder } from '../../../utils/roll-builder.js';
-import { InitiativeActor } from './../../../services/kobold/models/initiative-actor/initiative-actor.model';
+import { InitiativeActor } from './../../../services/kobold/models/initiative-actor/initiative-actor.model.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -19,7 +19,6 @@ import { Command, CommandDeferType } from '../../index.js';
 import { InitiativeUtils, InitiativeBuilder } from '../../../utils/initiative-utils.js';
 import { ChatArgs } from '../../../constants/chat-args.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
-import { DiceUtils } from '../../../utils/dice-utils.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Language } from '../../../models/enum-helpers/index.js';

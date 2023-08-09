@@ -12,6 +12,7 @@
 		"./dist/start-bot.js",
 		"./dist/start-manager.js"
 	],
+	"type": "module",
 	"scripts": {
 		"lint": "eslint . --cache --ext .js,.jsx,.ts,.tsx",
 		"lint:fix": "eslint . --fix --cache --ext .js,.jsx,.ts,.tsx",
@@ -34,12 +35,11 @@
 		"pm2:start": "pm2 start process.json",
 		"pm2:stop": "pm2 stop process.json",
 		"pm2:delete": "pm2 delete process.json",
-		"api-knex": "TS_NODE_COMPILER_OPTIONS='{ \"module\": \"commonjs\" }' knex --knexfile=./knexfile.ts",
-		"typesafe-i18n": "NODE_OPTIONS='--max-old-space-size=4096' TS_NODE_COMPILER_OPTIONS='{ \"module\": \"commonjs\" }' typesafe-i18n --no-watch",
-		"typesafe-i18n:watch": "TS_NODE_COMPILER_OPTIONS='{ \"module\": \"commonjs\" }' typesafe-i18n",
-		"migrate": "NODE_OPTIONS='--max-old-space-size=4096' knex migrate:latest",
-		"migrate:test": "NODE_ENV=TEST knex migrate:latest",
-		"test": "jest --coverage src/",
+		"typesafe-i18n": "NODE_OPTIONS='--max-old-space-size=4096' typesafe-i18n --no-watch",
+		"typesafe-i18n:watch": "typesafe-i18n",
+		"migrate": "NODE_OPTIONS='--max-old-space-size=4096' NODE_OPTIONS='--loader ts-node/esm' knex migrate:latest",
+		"migrate:test": "NODE_ENV=TEST NODE_OPTIONS='--loader ts-node/esm' knex migrate:latest",
+		"test": "vitest",
 		"replace-i18n-types": "cp ./src/i18n/i18n-types.prod.ts ./src/i18n/i18n-types.ts",
 		"build-prod": "NODE_OPTIONS='--max-old-space-size=4096' npm run replace-i18n-types && npm run build-types && tsc --project tsconfig.json",
 		"commands:clear-prod": "NODE_OPTIONS='--max-old-space-size=4096' node dist/start-bot.js commands clear ",
@@ -79,7 +79,7 @@
 		"pm2": "^5.2.0",
 		"reflect-metadata": "^0.1.13",
 		"remove-markdown": "0.5.0",
-		"typesafe-i18n": "^5.16.3",
+		"typesafe-i18n": "^5.26.0",
 		"xxhashjs": "^0.2.2"
 	},
 	"devDependencies": {
@@ -102,6 +102,7 @@
 		"sqlite3": "^5.1.1",
 		"ts-jest": "^29.0.1",
 		"ts-node": "^10.9.1",
-		"typescript": "^4.7.4"
+		"typescript": "^4.7.4",
+		"vitest": "^0.34.1"
 	}
 }

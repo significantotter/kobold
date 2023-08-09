@@ -1,5 +1,5 @@
-import { CharacterDataFactory } from './../../../wanderers-guide/character-api/factories/characterData.factory';
-import { CalculatedStatsFactory } from './../../../wanderers-guide/character-api/factories/calculatedStats.factory';
+import { CharacterDataFactory } from './../../../wanderers-guide/character-api/factories/characterData.factory.js';
+import { CalculatedStatsFactory } from './../../../wanderers-guide/character-api/factories/calculatedStats.factory.js';
 import { Factory } from 'fishery';
 import type { DeepPartial } from 'fishery';
 import { Character } from './character.model.js';
@@ -15,7 +15,7 @@ export function createRandomModifiers(times: number): Character['modifiers'] {
 			isActive: faker.datatype.boolean(),
 			type: faker.helpers.arrayElement(['status', 'circumstance', 'item']),
 			targetTags: 'attack or skill',
-			value: faker.datatype.number(),
+			value: faker.datatype.number() + '',
 		};
 		modifiers.push(modifier);
 	}
@@ -80,11 +80,14 @@ export const CharacterFactory = CharacterFactoryClass.define(({ onCreate, transi
 	}
 
 	const characterDataOptions = transientParams.characterDataOptions;
+	const name = faker.name.fullName();
 	const characterData: DeepPartial<Character> = {
+		name,
+		trackerMode: faker.helpers.arrayElement(['counters_only', 'basic_stats', 'full_sheet']),
 		charId: faker.datatype.number(),
 		userId: faker.datatype.uuid(),
-		attributes: createRandomAttributes(faker.datatype.number({ max: 50 })),
-		customAttributes: createRandomAttributes(faker.datatype.number({ max: 50 })),
+		attributes: [], //createRandomAttributes(faker.datatype.number({ max: 50 })),
+		customAttributes: [], //createRandomAttributes(faker.datatype.number({ max: 50 })),
 		modifiers: createRandomModifiers(faker.datatype.number({ max: 50 })),
 		actions: [],
 		customActions: [],
@@ -94,6 +97,21 @@ export const CharacterFactory = CharacterFactoryClass.define(({ onCreate, transi
 		isActiveCharacter: faker.datatype.boolean(),
 		createdAt: faker.date.recent(30).toISOString(),
 		lastUpdatedAt: faker.date.recent(30).toISOString(),
+		sheet: {
+			info: { traits: [], name },
+			general: { senses: [], languages: [] },
+			abilities: {},
+			defenses: { resistances: [], immunities: [], weaknesses: [] },
+			offense: {},
+			castingStats: {},
+			saves: {},
+			skills: { lores: [] },
+			attacks: [],
+			rollMacros: [],
+			actions: [],
+			modifiers: [],
+			sourceData: {},
+		},
 	};
 
 	return Character.fromDatabaseJson(characterData);

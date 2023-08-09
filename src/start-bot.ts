@@ -111,7 +111,7 @@ import { Reaction } from './reactions/index.js';
 import { CommandRegistrationService, DBModel, JobService, Logger } from './services/index.js';
 import { Trigger } from './triggers/index.js';
 import { Config } from './config/config.js';
-import Logs from './config/lang/logs.json';
+import Logs from './config/lang/logs.json' assert { type: 'json' };
 import { checkAndLoadBestiaryFiles } from './services/pf2etools/bestiaryLoader.js';
 
 // this is to prevent embeds breaking on "addFields" when adding more than an embed can hold

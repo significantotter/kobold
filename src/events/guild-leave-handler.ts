@@ -2,7 +2,7 @@ import { Guild } from 'discord.js';
 
 import { Logger } from '../services/index.js';
 import { EventHandler } from './index.js';
-import Logs from './../config/lang/logs.json';
+import Logs from './../config/lang/logs.json' assert { type: 'json' };
 
 export class GuildLeaveHandler implements EventHandler {
 	public async process(guild: Guild): Promise<void> {

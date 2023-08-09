@@ -1,17 +1,17 @@
 import { GuildDefaultCharacter, ChannelDefaultCharacter, InitiativeActor } from './../index.js';
-import type CharacterTypes from './character.schema.js';
+import type { Character as CharacterType } from './character.schema.js';
 import { JSONSchema7 } from 'json-schema';
 import { BaseModel } from '../../lib/base-model.js';
-import CharacterSchema from './character.schema.json';
-import Sheet from '../../lib/sheet.schema.json';
-import SheetTypes from '../../lib/sheet.schema';
+import CharacterSchema from './character.schema.json' assert { type: 'json' };
+import Sheet from '../../lib/sheet.schema.json' assert { type: 'json' };
+import { Sheet as SheetType } from '../../lib/sheet.schema.js';
 import _ from 'lodash';
 import { Creature } from '../../../../utils/creature.js';
 import { ChatInputCommandInteraction, Client } from 'discord.js';
 import { ClientUtils } from '../../../../utils/client-utils.js';
 
-export interface Character extends CharacterTypes.Character {
-	sheet?: SheetTypes.Sheet;
+export interface Character extends CharacterType {
+	sheet?: SheetType;
 }
 export class Character extends BaseModel {
 	static get tableName(): string {
@@ -32,7 +32,7 @@ export class Character extends BaseModel {
 		});
 	}
 
-	async updateTracker(intr: ChatInputCommandInteraction, sheet: SheetTypes.Sheet) {
+	async updateTracker(intr: ChatInputCommandInteraction, sheet: SheetType) {
 		const creature = new Creature(sheet);
 		const tracker = await creature.compileTracker(this.trackerMode ?? 'counters_only');
 		try {
@@ -52,7 +52,7 @@ export class Character extends BaseModel {
 		}
 	}
 
-	async saveSheet(intr: ChatInputCommandInteraction, sheet: SheetTypes.Sheet) {
+	async saveSheet(intr: ChatInputCommandInteraction, sheet: SheetType) {
 		let promises: Promise<any>[] = [
 			this.$query().patch({ sheet }).execute(),
 			InitiativeActor.query().patch({ sheet }).where('characterId', this.id).execute(),

@@ -4,7 +4,7 @@ import {
 	ignoreOnConflict,
 	renameOnConflict,
 	overwriteOnConflict,
-} from '../../../utils/import-utils.js';
+} from './../../../utils/import-utils.js';
 
 describe('Modifier Helpers', () => {
 	describe('replaceAll', () => {

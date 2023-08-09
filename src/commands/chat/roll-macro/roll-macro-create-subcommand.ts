@@ -1,4 +1,4 @@
-import { RollMacroOptions } from './roll-macro-command-options';
+import { RollMacroOptions } from './roll-macro-command-options.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,

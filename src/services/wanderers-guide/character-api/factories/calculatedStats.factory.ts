@@ -1,5 +1,5 @@
-import { AttackFactory } from './attack.factory';
-import { skills, abilities, saves } from './../../../../constants/pathfinder';
+import { AttackFactory } from './attack.factory.js';
+import { skills, abilities, saves } from './../../../../constants/pathfinder.js';
 import { Factory } from 'fishery';
 import type { DeepPartial } from 'fishery';
 import type { WG } from '../../wanderers-guide.js';

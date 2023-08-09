@@ -1,5 +1,4 @@
-import { Language } from '../../../models/enum-helpers/language';
-import { Lang } from '../../../services/lang';
+import { Language } from '../../../models/enum-helpers/language.js';
 import { Character } from '../../../services/kobold/models/index.js';
 import {
 	ApplicationCommandType,

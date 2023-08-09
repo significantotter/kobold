@@ -1,6 +1,6 @@
-import { KoboldEmbed } from './../../../utils/kobold-embed-utils';
-import { InitiativeUtils, InitiativeBuilder } from '../../../utils/initiative-utils';
-import { ChatArgs } from '../../../constants/chat-args';
+import { KoboldEmbed } from './../../../utils/kobold-embed-utils.js';
+import { InitiativeUtils, InitiativeBuilder } from '../../../utils/initiative-utils.js';
+import { ChatArgs } from '../../../constants/chat-args.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,

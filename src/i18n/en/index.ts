@@ -1,4 +1,4 @@
-import type { BaseTranslation } from '../i18n-types';
+import type { BaseTranslation } from '../i18n-types.js';
 import AdminCommand from './commands/admin.js';
 import CharacterCommand from './commands/character.js';
 import GameCommand from './commands/game.js';

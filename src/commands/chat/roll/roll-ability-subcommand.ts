@@ -1,4 +1,4 @@
-import { DiceUtils } from '../../../utils/dice-utils';
+import { DiceUtils } from '../../../utils/dice-utils.js';
 import { RollBuilder } from '../../../utils/roll-builder.js';
 import {
 	ApplicationCommandType,

@@ -1,5 +1,5 @@
-import { InitiativeUtils, InitiativeBuilder } from '../../../utils/initiative-utils';
-import { ChatArgs } from '../../../constants/chat-args';
+import { InitiativeUtils, InitiativeBuilder } from '../../../utils/initiative-utils.js';
+import { ChatArgs } from '../../../constants/chat-args.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,

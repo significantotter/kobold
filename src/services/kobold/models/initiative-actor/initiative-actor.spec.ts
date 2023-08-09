@@ -1,11 +1,11 @@
-import { InitiativeActorGroupFactory } from './../initiative-actor-group/initiative-actor-group.factory';
+import { InitiativeActorGroupFactory } from './../initiative-actor-group/initiative-actor-group.factory.js';
 import Ajv from 'ajv';
 import { InitiativeActorFactory } from './initiative-actor.factory.js';
 import { InitiativeActor } from './initiative-actor.model.js';
-import InitiativeActorSchema from './initiative-actor.schema.json';
+import InitiativeActorSchema from './initiative-actor.schema.json' assert { type: 'json' };
 import addFormats from 'ajv-formats';
-const ajv = new Ajv({ allowUnionTypes: true });
-addFormats(ajv);
+const ajv = new Ajv.default({ allowUnionTypes: true });
+addFormats.default(ajv);
 
 describe('Initiative Actor', () => {
 	test('validates a built factory', () => {

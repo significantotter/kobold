@@ -1,7 +1,7 @@
 import { ErrorRequestHandler } from 'express';
 
 import { Logger } from '../services/index.js';
-import Logs from './../config/lang/logs.json';
+import Logs from './../config/lang/logs.json' assert { type: 'json' };
 
 export function handleError(): ErrorRequestHandler {
 	return (error, req, res, _next) => {

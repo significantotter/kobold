@@ -1,5 +1,6 @@
 {
-   "adapter": "node",
-   "$schema": "https://unpkg.com/typesafe-i18n@5.16.3/schema/typesafe-i18n.json",
-   "baseLocale": "en"
+	"adapter": "node",
+	"$schema": "https://unpkg.com/typesafe-i18n@5.26.0/schema/typesafe-i18n.json",
+	"baseLocale": "en",
+	"esmImports": true
 }

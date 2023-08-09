@@ -1,4 +1,4 @@
-import { TranslationFunctions } from './../i18n/i18n-types';
+import { TranslationFunctions } from './../i18n/i18n-types.js';
 import {
 	InitiativeActorGroup,
 	InitiativeActor,

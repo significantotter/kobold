@@ -1,10 +1,10 @@
 import Ajv from 'ajv';
 import { InitiativeFactory } from './initiative.factory.js';
 import { Initiative } from './initiative.model.js';
-import InitiativeSchema from './initiative.schema.json';
+import InitiativeSchema from './initiative.schema.json' assert { type: 'json' };
 import addFormats from 'ajv-formats';
-const ajv = new Ajv({ allowUnionTypes: true });
-addFormats(ajv);
+const ajv = new Ajv.default({ allowUnionTypes: true });
+addFormats.default(ajv);
 
 describe('Initiative', () => {
 	test('validates a built factory', () => {

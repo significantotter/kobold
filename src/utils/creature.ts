@@ -1,9 +1,4 @@
-import {
-	Character,
-	InitiativeActor,
-	ModelWithSheet,
-	Sheet,
-} from '../services/kobold/models/index.js';
+import { Character, ModelWithSheet, Sheet } from '../services/kobold/models/index.js';
 import { PathBuilder } from '../services/pathbuilder/pathbuilder.js';
 import { CreatureStatBlock } from '../services/pf2etools/bestiaryType.js';
 import { WG } from '../services/wanderers-guide/wanderers-guide.js';
@@ -17,6 +12,7 @@ import { KoboldEmbed } from './kobold-embed-utils.js';
 import { parseBonusesForTagsFromModifiers } from '../services/kobold/lib/helpers.js';
 import { KoboldError } from './KoboldError.js';
 import { BaseMessageOptions } from 'discord.js';
+import { SheetUtils } from './sheet-utils.js';
 
 const damageTypeShorthands: { [shorthand: string]: string } = {
 	piercing: 'p',
@@ -59,136 +55,6 @@ export interface attackRoll {
 	tags: string[];
 }
 
-type typedSheetAdjustment = Character['modifiers'][0]['sheetAdjustments'][0] & { type: string };
-
-export const creatureHelpers = {
-	applySheetAdjustmentToProperty(
-		property: string | number,
-		modifier: Character['modifiers'][0]['sheetAdjustments'][0]
-	) {
-		if (modifier.operation === '=') {
-			return modifier.value;
-		}
-		if (!isNaN(Number(property)) && modifier.operation === '+') {
-			return Number(property) + Number(modifier.value);
-		} else if (!isNaN(Number(property)) && modifier.operation === '-') {
-			return Number(property) - Number(modifier.value);
-		} else {
-			return property;
-		}
-	},
-	reduceSheetAdjustmentsByType(typedSheetAdjustments: typedSheetAdjustment[]) {
-		const positiveTypedSheetAdjustments: {
-			[type: string]: {
-				[property: string]: string | number;
-			};
-		} = {};
-		const negativeTypedSheetAdjustments: {
-			[type: string]: {
-				[property: string]: string | number;
-			};
-		} = {};
-		const overwriteSheetAdjustments: {
-			[type: string]: {
-				[property: string]: string | number;
-			};
-		} = {};
-		for (const sheetAdjustment of typedSheetAdjustments) {
-			let typedSheetAdjustments =
-				sheetAdjustment.operation === '='
-					? overwriteSheetAdjustments
-					: sheetAdjustment.operation === '+'
-					? positiveTypedSheetAdjustments
-					: negativeTypedSheetAdjustments;
-			if (typedSheetAdjustments[sheetAdjustment.type] === undefined)
-				typedSheetAdjustments[sheetAdjustment.type] = {};
-			if (
-				typedSheetAdjustments[sheetAdjustment.type][sheetAdjustment.property] !== undefined
-			) {
-				// if we've already adjusted this property, we need to combine the sheetAdjustments based on the operation
-				if (sheetAdjustment.operation === '=') {
-					// overwrite
-					typedSheetAdjustments[sheetAdjustment.type][sheetAdjustment.property] =
-						sheetAdjustment.value;
-				} else if (sheetAdjustment.operation === '+') {
-					// max
-					typedSheetAdjustments[sheetAdjustment.type][sheetAdjustment.property] =
-						Math.max(
-							Number(
-								typedSheetAdjustments[sheetAdjustment.type][
-									sheetAdjustment.property
-								]
-							),
-							Number(sheetAdjustment.value)
-						);
-				} else {
-					// min
-					typedSheetAdjustments[sheetAdjustment.type][sheetAdjustment.property] =
-						Math.min(
-							Number(
-								typedSheetAdjustments[sheetAdjustment.type][
-									sheetAdjustment.property
-								]
-							),
-							Number(sheetAdjustment.value)
-						);
-				}
-			}
-		}
-		//now join the three types. Start with the positive value. Subtract the negative if needed. Then overwrite if necessary.
-		const reducedSheetAdjustments: {
-			[property: string]: string | number;
-		} = {};
-		for (const type in positiveTypedSheetAdjustments) {
-			for (const property in positiveTypedSheetAdjustments[type]) {
-				if (reducedSheetAdjustments[property] === undefined)
-					reducedSheetAdjustments[property] = 0;
-				reducedSheetAdjustments[property] =
-					Number(reducedSheetAdjustments[property]) +
-					Number(positiveTypedSheetAdjustments[type][property]);
-			}
-		}
-		for (const type in negativeTypedSheetAdjustments) {
-			for (const property in negativeTypedSheetAdjustments[type]) {
-				if (reducedSheetAdjustments[property] === undefined)
-					reducedSheetAdjustments[property] = 0;
-				reducedSheetAdjustments[property] =
-					Number(reducedSheetAdjustments[property]) -
-					Number(negativeTypedSheetAdjustments[type][property]);
-			}
-		}
-		for (const type in overwriteSheetAdjustments) {
-			for (const property in overwriteSheetAdjustments[type]) {
-				if (reducedSheetAdjustments[property] === undefined)
-					reducedSheetAdjustments[property] = 0;
-				reducedSheetAdjustments[property] = overwriteSheetAdjustments[type][property];
-			}
-		}
-		return reducedSheetAdjustments;
-	},
-	typeAndFlattenSheetAdjustmentsFromModifiers(modifiers: Character['modifiers']) {
-		const typedSheetAdjustments: typedSheetAdjustment[] = [];
-		for (const modifier of modifiers) {
-			if (modifier.modifierType === 'sheet') {
-				for (const sheetAdjustment of modifier.sheetAdjustments) {
-					typedSheetAdjustments.push({
-						...sheetAdjustment,
-						type: modifier.type,
-					});
-				}
-			}
-		}
-		return typedSheetAdjustments;
-	},
-	spreadSheetAdjustmentGroups(sheetAdjustments: typedSheetAdjustment[]) {
-		// we have types of sheet adjustment group based on attribute
-		// and then those attributes are grouped by type
-		// the attributes are any of Strength, Dexterity, Constitution, Intelligence, Wisdom, Charisma or their shorthands
-		// the type are any of skills, checks, dcs, or saves
-	},
-	applySheetModifier(sheet: Sheet, modifier: Character['modifiers'][0]) {},
-};
-
 export class Creature {
 	constructor(public _sheet: Sheet, private _name?: string) {
 		const sheetDefaults: Sheet = {
@@ -210,12 +76,12 @@ export class Creature {
 	}
 
 	public get sheet() {
-		let sheet = _.cloneDeep(this._sheet);
-		for (const modifier of this.modifiers) {
-			if (modifier.modifierType === 'sheet') {
-				creatureHelpers.applySheetModifier(sheet, modifier);
-			}
-		}
+		// let sheet = _.cloneDeep(this._sheet);
+		// for (const modifier of this.modifiers) {
+		// 	if (modifier.modifierType === 'sheet') {
+		// 		SheetUtils.applySheetModifier(sheet, modifier);
+		// 	}
+		// }
 		return this._sheet;
 	}
 

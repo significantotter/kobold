@@ -1,6 +1,6 @@
-import { InitiativeActorGroup } from './../../../services/kobold/models/initiative-actor-group/initiative-actor-group.model';
-import { InitiativeActor } from '../../../services/kobold/models/initiative-actor/initiative-actor.model';
-import { ChatArgs } from '../../../constants/chat-args';
+import { InitiativeActorGroup } from './../../../services/kobold/models/initiative-actor-group/initiative-actor-group.model.js';
+import { InitiativeActor } from '../../../services/kobold/models/initiative-actor/initiative-actor.model.js';
+import { ChatArgs } from '../../../constants/chat-args.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,

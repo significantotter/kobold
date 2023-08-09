@@ -1,4 +1,4 @@
-import { Language } from './../../../models/enum-helpers/language';
+import { Language } from './../../../models/enum-helpers/language.js';
 import {
 	ApplicationCommandOptionType,
 	ApplicationCommandType,

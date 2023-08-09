@@ -1,12 +1,12 @@
-import type InitiativeTypes from './initiative.schema.js';
+import type { Initiative as InitiativeType } from './initiative.schema.js';
 import { JSONSchema7 } from 'json-schema';
 import { BaseModel } from '../../lib/base-model.js';
-import InitiativeSchema from './initiative.schema.json';
+import InitiativeSchema from './initiative.schema.json' assert { type: 'json' };
 import { Model, RelationMappings } from 'objection';
 import { InitiativeActorGroup } from '../initiative-actor-group/initiative-actor-group.model.js';
 import { InitiativeActor } from '../initiative-actor/initiative-actor.model.js';
 
-export interface Initiative extends InitiativeTypes.Initiative {
+export interface Initiative extends InitiativeType {
 	currentTurnGroup?: InitiativeActorGroup;
 	actorGroups?: InitiativeActorGroup[];
 	actors?: InitiativeActor[];

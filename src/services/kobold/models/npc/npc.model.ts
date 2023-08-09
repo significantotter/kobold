@@ -1,15 +1,15 @@
-import type CreatureTypes from './npc.schema';
+import type { Npc as NpcType } from './npc.schema.js';
 import { JSONSchema7 } from 'json-schema';
 import { BaseModel } from '../../lib/base-model.js';
-import npc from './npc.schema.json';
-import Sheet from '../../lib/sheet.schema.json';
-import SheetTypes from '../../lib/sheet.schema';
+import npc from './npc.schema.json' assert { type: 'json' };
+import Sheet from '../../lib/sheet.schema.json' assert { type: 'json' };
+import { Sheet as SheetType } from '../../lib/sheet.schema.js';
 import _ from 'lodash';
 import { CreatureStatBlock } from '../../../pf2etools/bestiaryType.js';
 import { StringUtils } from '../../../../utils/string-utils.js';
 
-export interface Npc extends CreatureTypes.Npc {
-	sheet?: SheetTypes.Sheet;
+export interface Npc extends NpcType {
+	sheet?: SheetType;
 }
 export class Npc extends BaseModel {
 	static get tableName(): string {

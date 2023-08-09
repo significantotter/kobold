@@ -26,7 +26,7 @@ import {
 import { JobService, Logger } from '../services/index.js';
 import { PartialUtils } from '../utils/index.js';
 import { Config } from './../config/config.js';
-import Logs from './../config/lang/logs.json';
+import Logs from './../config/lang/logs.json' assert { type: 'json' };
 
 export class Bot {
 	private ready = false;

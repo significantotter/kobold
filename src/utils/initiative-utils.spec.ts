@@ -29,11 +29,8 @@ function setupInitiativeActorsAndGroupsForTests(initiative) {
 	return { actors, groups, firstGroup, secondGroup, thirdGroup };
 }
 
-// setup jest tests for each function in ./initiative-utils.ts
+// setup vitest tests for each function in ./initiative-utils.ts
 describe('initiative-utils', function () {
-	afterEach(function () {
-		jest.restoreAllMocks();
-	});
 	describe('InitiativeBuilder', function () {
 		test('creates an empty initiative', function () {
 			const builder = new InitiativeBuilder({});
@@ -382,7 +379,7 @@ describe('initiative-utils', function () {
 	describe('InitiativeUtils.getInitiativeForChannel', function () {
 		beforeAll(async function () {
 			await Initiative.query().delete().where({ channelId: 'testChannelId' });
-			return await InitiativeFactory.create({ channelId: 'testChannelId' });
+			await InitiativeFactory.create({ channelId: 'testChannelId' });
 		});
 		test('returns the initiative for the channel', async function () {
 			const result = await InitiativeUtils.getInitiativeForChannel({
@@ -417,8 +414,8 @@ describe('initiative-utils', function () {
 					},
 				},
 			};
-			jest.spyOn(InteractionUtils, 'send').mockResolvedValueOnce('success!' as any);
-			jest.spyOn(Initiative, 'query').mockImplementationOnce((): any => {
+			vi.spyOn(InteractionUtils, 'send').mockResolvedValueOnce('success!' as any);
+			vi.spyOn(Initiative, 'query').mockImplementationOnce((): any => {
 				return {
 					updateAndFetchById(id, obj) {
 						return initiative;
