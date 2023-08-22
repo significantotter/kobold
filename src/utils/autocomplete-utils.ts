@@ -154,13 +154,17 @@ export class AutocompleteUtils {
 		]);
 
 		// the character options can be any game character or the user's active character
-		const characterOptions = targetGames
+		let characterOptions = targetGames
 			.flatMap(game => game.characters)
 			// flat map can give us undefined values, so filter them out
 			.filter(result => !!result)
-			.concat(activeCharacter)
 			.map(character => ({ name: character.name, value: character.name }));
-
+		if (activeCharacter) {
+			characterOptions = characterOptions.concat({
+				name: activeCharacter.name,
+				value: activeCharacter.name,
+			});
+		}
 		const actorOptions = (currentInitResponse?.init?.actors ?? [])
 			.filter(actor => actor.name.toLocaleLowerCase().includes(matchText.toLocaleLowerCase()))
 			.map(actor => ({

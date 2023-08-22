@@ -116,7 +116,6 @@ export function parseBonusesForTagsFromModifiers(
 			// Otherwise, we just add the full modifier to the dice roll as if it were an untyped numeric modifier.
 
 			const modifierType = modifier.type.toLocaleLowerCase().trim();
-			console.log(penalties[modifierType], parsedModifier);
 			if (
 				modifierHasDice ||
 				!modifier.type ||
@@ -144,8 +143,6 @@ export function parseBonusesForTagsFromModifiers(
 					penalties[modifierType] = parsedModifier;
 				}
 			}
-			console.log(penalties[modifierType]);
-			console.log('\n');
 		}
 	}
 	return { bonuses, penalties, untyped };

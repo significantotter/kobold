@@ -56,6 +56,7 @@ export interface attackRoll {
 }
 
 export class Creature {
+	private _adjustedSheet: Sheet;
 	constructor(public _sheet: Sheet, private _name?: string) {
 		const sheetDefaults: Sheet = {
 			info: { traits: [] },
@@ -73,16 +74,16 @@ export class Creature {
 			sourceData: {},
 		};
 		this._sheet = _.defaultsDeep(this._sheet, sheetDefaults);
+		const sheetAdjustments = SheetUtils.parseSheetModifiers(this._sheet, this._sheet.modifiers);
+		this._adjustedSheet = SheetUtils.applySheetAdjustments(
+			this._sheet,
+			sheetAdjustments.overwriteSheetAdjustments,
+			sheetAdjustments.modifySheetAdjustments
+		);
 	}
 
 	public get sheet() {
-		// let sheet = _.cloneDeep(this._sheet);
-		// for (const modifier of this.modifiers) {
-		// 	if (modifier.modifierType === 'sheet') {
-		// 		SheetUtils.applySheetModifier(sheet, modifier);
-		// 	}
-		// }
-		return this._sheet;
+		return this._adjustedSheet;
 	}
 
 	public get name() {
@@ -253,9 +254,10 @@ export class Creature {
 			generalText += `Perception \`${this.sheet.general.perception}\` (DC ${
 				10 + this.sheet.general.perception
 			})\n`;
-		if (this.sheet.general.classDC != null)
-			generalText += `Class DC \`${this.sheet.general.classDC}\`\n`;
-
+		if (this.sheet.general.classDC != null) {
+			generalText += `Class DC \`${this.sheet.general.classDC}\`, `;
+			generalText += `Class Attack \`${this.sheet.general.classAttack}\`\n`;
+		}
 		const hasASpeed =
 			this.sheet.general.speed != null ||
 			this.sheet.general.flySpeed != null ||
@@ -905,15 +907,7 @@ export class Creature {
 	}
 
 	public get sheetPropertyGroups() {
-		return _.flatMap(
-			['strength', 'dexterity', 'constitution', 'intelligence', 'wisdom', 'charisma'].map(
-				attribute => {
-					return ['skills', 'checks', 'dcs', 'saves'].map(
-						group => `${attribute} ${group}`
-					);
-				}
-			)
-		);
+		return SheetUtils.sheetPropertyGroups;
 	}
 	public static sheetPropertyValid(propertyName: string): boolean {
 		//parse groups
@@ -993,8 +987,14 @@ export class Creature {
 			{
 				name: 'classDc',
 				type: 'base',
-				value: this.sheet.general.classDC || 0,
+				value: this.sheet.general.classDC || 10,
 				tags: ['classDc'],
+			},
+			{
+				name: 'classAttack',
+				type: 'base',
+				value: this.sheet.general.classAttack || 0,
+				tags: ['classAttack'],
 			},
 			{
 				name: 'perception',

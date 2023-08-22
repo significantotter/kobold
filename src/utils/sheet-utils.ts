@@ -1,6 +1,132 @@
+import _, { property } from 'lodash';
 import { Character, Sheet } from '../services/kobold/models/index.js';
 
-type typedSheetAdjustment = Character['modifiers'][0]['sheetAdjustments'][0] & { type: string };
+const sheetPropertyLocations = {
+	name: 'info',
+	url: 'info',
+	description: 'info',
+	gender: 'info',
+	age: 'info',
+	alignment: 'info',
+	deity: 'info',
+	imageURL: 'info',
+	size: 'info',
+
+	strength: 'abilities',
+	dexterity: 'abilities',
+	constitution: 'abilities',
+	intelligence: 'abilities',
+	wisdom: 'abilities',
+	charisma: 'abilities',
+
+	currentHeroPoints: 'general',
+	speed: 'general',
+	flySpeed: 'general',
+	swimSpeed: 'general',
+	climbSpeed: 'general',
+	currentFocusPoints: 'general',
+	focusPoints: 'general',
+	classDC: 'general',
+	classAttack: 'general',
+	perception: 'general',
+	perceptionProfMod: 'general',
+
+	maxHp: 'defenses',
+	maxResolve: 'defenses',
+	maxStamina: 'defenses',
+	ac: 'defenses',
+	heavyProfMod: 'defenses',
+	mediumProfMod: 'defenses',
+	lightProfMod: 'defenses',
+	unarmoredProfMod: 'defenses',
+
+	arcaneAttack: 'castingStats',
+	arcaneDC: 'castingStats',
+	arcaneProfMod: 'castingStats',
+	divineAttack: 'castingStats',
+	divineDC: 'castingStats',
+	divineProfMod: 'castingStats',
+	occultAttack: 'castingStats',
+	occultDC: 'castingStats',
+	occultProfMod: 'castingStats',
+	primalAttack: 'castingStats',
+	primalDC: 'castingStats',
+	primalProfMod: 'castingStats',
+
+	fortitude: 'saves',
+	fortitudeProfMod: 'saves',
+	reflex: 'saves',
+	reflexProfMod: 'saves',
+	will: 'saves',
+	willProfMod: 'saves',
+
+	acrobatics: 'skills',
+	acrobaticsProfMod: 'skills',
+	arcanaProfMod: 'skills',
+	athletics: 'skills',
+	athleticsProfMod: 'skills',
+	crafting: 'skills',
+	craftingProfMod: 'skills',
+	deception: 'skills',
+	deceptionProfMod: 'skills',
+	diplomacy: 'skills',
+	diplomacyProfMod: 'skills',
+	intimidation: 'skills',
+	intimidationProfMod: 'skills',
+	medicine: 'skills',
+	medicineProfMod: 'skills',
+	nature: 'skills',
+	natureProfMod: 'skills',
+	occultism: 'skills',
+	occultismProfMod: 'skills',
+	performance: 'skills',
+	performanceProfMod: 'skills',
+	religion: 'skills',
+	religionProfMod: 'skills',
+	society: 'skills',
+	societyProfMod: 'skills',
+	stealth: 'skills',
+	stealthProfMod: 'skills',
+	survival: 'skills',
+	survivalProfMod: 'skills',
+	thievery: 'skills',
+	thieveryProfMod: 'skills',
+};
+
+// we only want to calculate this once
+const sheetPropertyGroups = _.flatMap(
+	[
+		'strength',
+		'dexterity',
+		'constitution',
+		'intelligence',
+		'wisdom',
+		'charisma',
+		'str',
+		'dex',
+		'con',
+		'int',
+		'wis',
+		'cha',
+		'',
+	].map(attribute => {
+		if (attribute === '') {
+			return ['skills', 'checks', 'saves'];
+		}
+		return ['Skills', 'Checks', 'Saves'].map(group => `${attribute}${group}`);
+	})
+);
+export type typedSheetAdjustment = Character['modifiers'][0]['sheetAdjustments'][0] & {
+	type: string;
+};
+export type reducedSheetAdjustment = {
+	[type: string]: {
+		[property: string]: string | number;
+	};
+};
+export type untypedAdjustment = {
+	[property: string]: string | number;
+};
 
 export class SheetUtils {
 	public static defaultSheet = {
@@ -20,6 +146,9 @@ export class SheetUtils {
 	};
 	public static typedSheet = {};
 
+	/**
+	 * Applies the value of a modifier to the target property
+	 */
 	static applySheetAdjustmentToProperty(
 		property: string | number,
 		modifier: Character['modifiers'][0]['sheetAdjustments'][0]
@@ -35,64 +164,54 @@ export class SheetUtils {
 			return property;
 		}
 	}
-	static reduceSheetAdjustmentsByType(typedSheetAdjustments: typedSheetAdjustment[]) {
-		const positiveTypedSheetAdjustments: {
-			[type: string]: {
-				[property: string]: string | number;
-			};
-		} = {};
-		const negativeTypedSheetAdjustments: {
-			[type: string]: {
-				[property: string]: string | number;
-			};
-		} = {};
-		const overwriteSheetAdjustments: {
-			[type: string]: {
-				[property: string]: string | number;
-			};
-		} = {};
+	static bucketSheetAdjustmentsByType(typedSheetAdjustments: typedSheetAdjustment[]) {
+		const positiveTypedSheetAdjustments: reducedSheetAdjustment = {};
+		const negativeTypedSheetAdjustments: reducedSheetAdjustment = {};
+		const overwriteSheetAdjustments: untypedAdjustment = {};
+
 		for (const sheetAdjustment of typedSheetAdjustments) {
+			// if the operation is "=", we just overwrite the value
+			if (sheetAdjustment.operation === '=') {
+				overwriteSheetAdjustments[sheetAdjustment.property] = sheetAdjustment.value;
+				continue;
+			}
+
 			let typedSheetAdjustments =
-				sheetAdjustment.operation === '='
-					? overwriteSheetAdjustments
-					: sheetAdjustment.operation === '+'
+				sheetAdjustment.operation === '+'
 					? positiveTypedSheetAdjustments
 					: negativeTypedSheetAdjustments;
 
 			const adjustmentType = sheetAdjustment.type;
 			const targetProperty = sheetAdjustment.property;
-			const newValue = sheetAdjustment.value;
 
-			if (typedSheetAdjustments[adjustmentType] === undefined) {
-				typedSheetAdjustments[adjustmentType] = {};
+			// Sign the value
+			const newValue = sheetAdjustment.operation + sheetAdjustment.value;
+
+			if (typedSheetAdjustments[targetProperty] === undefined) {
+				typedSheetAdjustments[targetProperty] = {};
 			}
-			const currentValue = typedSheetAdjustments[adjustmentType][targetProperty] ?? 0;
-			if (sheetAdjustment.operation === '=' || !currentValue) {
-				// overwrites always overwrite no matter the current value, type, etc.
-				// alternatively, if we don't already have a value in place, we just overwrite
-				typedSheetAdjustments[adjustmentType][targetProperty] = newValue;
+			const currentValue = typedSheetAdjustments[targetProperty][adjustmentType] ?? 0;
+
+			if (!currentValue) {
+				// if we don't already have a value in place, we just overwrite
+				typedSheetAdjustments[targetProperty][adjustmentType] = newValue;
 			} else if (currentValue !== undefined) {
 				// if we've already adjusted this property, we need to combine the sheetAdjustments based on the type / operation
-				if (['untyped', 'none', 'null'].includes(adjustmentType) || !adjustmentType) {
+				if (['untyped', 'none', 'null', ''].includes(adjustmentType) || !adjustmentType) {
 					// untyped adjustments all stack with one another
-					if (sheetAdjustment.operation === '+') {
-						typedSheetAdjustments[adjustmentType][targetProperty] =
-							Number(currentValue) + Number(newValue);
-					} else if (sheetAdjustment.operation === '-') {
-						typedSheetAdjustments[adjustmentType][targetProperty] =
-							Number(currentValue) - Number(newValue);
-					}
+					typedSheetAdjustments[targetProperty][adjustmentType] =
+						Number(currentValue) + Number(newValue);
 				} else {
 					// other types take the max positive value and the min negative value of each adjustment
 					if (sheetAdjustment.operation === '+') {
 						// max
-						typedSheetAdjustments[adjustmentType][targetProperty] = Math.max(
+						typedSheetAdjustments[targetProperty][adjustmentType] = Math.max(
 							Number(currentValue),
 							Number(newValue)
 						);
 					} else {
 						// min
-						typedSheetAdjustments[adjustmentType][targetProperty] = Math.min(
+						typedSheetAdjustments[targetProperty][adjustmentType] = Math.min(
 							Number(currentValue),
 							Number(newValue)
 						);
@@ -100,56 +219,337 @@ export class SheetUtils {
 				}
 			}
 		}
+		return {
+			positiveTypedSheetAdjustments,
+			negativeTypedSheetAdjustments,
+			overwriteSheetAdjustments,
+		};
+	}
+	static reduceSheetAdjustmentsByType(
+		positiveTypedSheetAdjustments: reducedSheetAdjustment,
+		negativeTypedSheetAdjustments: reducedSheetAdjustment,
+		overwriteSheetAdjustments: untypedAdjustment
+	) {
 		//now join the three types. Start with the positive value. Subtract the negative if needed. Then overwrite if necessary.
-		const reducedSheetAdjustments: {
+		const modifySheetAdjustments: {
 			[property: string]: string | number;
 		} = {};
-		for (const type in positiveTypedSheetAdjustments) {
-			for (const property in positiveTypedSheetAdjustments[type]) {
-				if (reducedSheetAdjustments[property] === undefined)
-					reducedSheetAdjustments[property] = 0;
-				reducedSheetAdjustments[property] =
-					Number(reducedSheetAdjustments[property]) +
-					Number(positiveTypedSheetAdjustments[type][property]);
+		const allProperties = _.uniq(
+			Object.keys(positiveTypedSheetAdjustments).concat(
+				Object.keys(negativeTypedSheetAdjustments)
+			)
+		);
+
+		for (const property of allProperties) {
+			modifySheetAdjustments[property] = 0;
+			if (positiveTypedSheetAdjustments[property] !== undefined) {
+				const summedPositiveAdjustments = Object.values(
+					positiveTypedSheetAdjustments[property]
+				).reduce((a, b) => Number(a) + Number(b), 0);
+				modifySheetAdjustments[property] =
+					Number(modifySheetAdjustments[property]) + Number(summedPositiveAdjustments);
+			}
+			if (negativeTypedSheetAdjustments[property] !== undefined) {
+				const summedNegativeAdjustments = Object.values(
+					negativeTypedSheetAdjustments[property]
+				).reduce((a, b) => Number(a) + Number(b), 0);
+				modifySheetAdjustments[property] =
+					Number(modifySheetAdjustments[property]) + Number(summedNegativeAdjustments);
 			}
 		}
-		for (const type in negativeTypedSheetAdjustments) {
-			for (const property in negativeTypedSheetAdjustments[type]) {
-				if (reducedSheetAdjustments[property] === undefined)
-					reducedSheetAdjustments[property] = 0;
-				reducedSheetAdjustments[property] =
-					Number(reducedSheetAdjustments[property]) -
-					Number(negativeTypedSheetAdjustments[type][property]);
-			}
-		}
-		for (const type in overwriteSheetAdjustments) {
-			for (const property in overwriteSheetAdjustments[type]) {
-				if (reducedSheetAdjustments[property] === undefined)
-					reducedSheetAdjustments[property] = 0;
-				reducedSheetAdjustments[property] = overwriteSheetAdjustments[type][property];
-			}
-		}
-		return reducedSheetAdjustments;
+		return { modifySheetAdjustments, overwriteSheetAdjustments };
 	}
-	static typeAndFlattenSheetAdjustmentsFromModifiers(modifiers: Character['modifiers']) {
-		const typedSheetAdjustments: typedSheetAdjustment[] = [];
-		for (const modifier of modifiers) {
-			if (modifier.modifierType === 'sheet') {
-				for (const sheetAdjustment of modifier.sheetAdjustments) {
-					typedSheetAdjustments.push({
+	static spreadSheetAdjustmentGroups(sheetAdjustments: typedSheetAdjustment[], sheet: Sheet) {
+		const newSheetAdjustments: typedSheetAdjustment[] = [];
+		for (const sheetAdjustment of sheetAdjustments) {
+			// we have types of sheet adjustment group based on attribute
+			// and then those attributes are grouped by type
+			// the attributes are any of Strength, Dexterity, Constitution, Intelligence, Wisdom, Charisma or their shorthands
+			// the type are any of skills, checks, dcs, or saves
+			if (SheetUtils.sheetPropertyGroups.includes(_.camelCase(sheetAdjustment.property))) {
+				// if we have a property group, we need to spread the adjustment across all of the properties in that group
+				let [attribute, group] = _.snakeCase(sheetAdjustment.property).split('_');
+				if (!group && attribute) {
+					// this is actually the case where we have the group but no attribute, but the split
+					// only recognizes a single value, so it slots it into attribute
+					group = attribute;
+					attribute = null;
+				}
+
+				const attributeNames: string[] = [];
+				// skills and saves are both types of checks, so we can double up
+				if (group === 'checks' || group === 'skills') {
+					if (!attribute || attribute === 'int' || attribute === 'intelligence') {
+						attributeNames.push(
+							'arcana',
+							'crafting',
+							'lores',
+							'medicine',
+							'occultism',
+							'society'
+						);
+						if (sheet.skills.lores.length) {
+							attributeNames.push(
+								...sheet.skills.lores.map(lore => `${lore.name} lore`)
+							);
+						}
+					}
+					if (!attribute || attribute === 'wis' || attribute === 'wisdom') {
+						attributeNames.push('medicine', 'nature', 'survival', 'religion');
+					}
+					if (!attribute || attribute === 'cha' || attribute === 'charisma') {
+						attributeNames.push(
+							'diplomacy',
+							'intimidation',
+							'performance',
+							'deception'
+						);
+					}
+					if (!attribute || attribute === 'str' || attribute === 'strength') {
+						attributeNames.push('athletics');
+					}
+					if (!attribute || attribute === 'dex' || attribute === 'dexterity') {
+						attributeNames.push('acrobatics', 'stealth', 'thievery');
+					}
+				}
+				if (group === 'checks' || group === 'saves') {
+					if (!attribute || attribute === 'wis' || attribute === 'wisdom') {
+						attributeNames.push('will');
+					}
+					if (!attribute || attribute === 'con' || attribute === 'constitution') {
+						attributeNames.push('fortitude');
+					}
+					if (!attribute || attribute === 'dex' || attribute === 'dexterity') {
+						attributeNames.push('reflex');
+					}
+				}
+				if (group === 'checks') {
+					if (!attribute || attribute === 'wis' || attribute === 'wisdom') {
+						attributeNames.push('perception');
+					}
+				}
+				// we need to create a new sheet adjustment for each attribute
+				for (const attributeName of attributeNames) {
+					newSheetAdjustments.push({
 						...sheetAdjustment,
-						type: modifier.type,
+						property: attributeName,
 					});
+				}
+			} else {
+				newSheetAdjustments.push(sheetAdjustment);
+			}
+		}
+		return newSheetAdjustments;
+	}
+	static parseSheetModifiers(sheet: Sheet, modifiers: Character['modifiers']) {
+		const activeSheetModifiers = modifiers.filter(
+			modifier => modifier.isActive && modifier.modifierType === 'sheet'
+		);
+		const activeSheetAdjustments: typedSheetAdjustment[] = activeSheetModifiers.reduce(
+			(a, b) => {
+				return a.concat(
+					b.sheetAdjustments.map(adjustment => ({ ...adjustment, type: b.type }))
+				);
+			},
+			[]
+		);
+		const spreadSheetAdjustments = SheetUtils.spreadSheetAdjustmentGroups(
+			activeSheetAdjustments,
+			sheet
+		);
+		const bucketedSheetAdjustments =
+			SheetUtils.bucketSheetAdjustmentsByType(spreadSheetAdjustments);
+		const { modifySheetAdjustments, overwriteSheetAdjustments } =
+			SheetUtils.reduceSheetAdjustmentsByType(
+				bucketedSheetAdjustments.positiveTypedSheetAdjustments,
+				bucketedSheetAdjustments.negativeTypedSheetAdjustments,
+				bucketedSheetAdjustments.overwriteSheetAdjustments
+			);
+		return { modifySheetAdjustments, overwriteSheetAdjustments };
+	}
+	static applySheetAdjustments(
+		sheet: Sheet,
+		overwriteSheetAdjustments: untypedAdjustment,
+		modifySheetAdjustments: untypedAdjustment
+	): Sheet {
+		const newSheet = _.cloneDeep(sheet);
+		const allProperties = _.uniq(
+			Object.keys(overwriteSheetAdjustments).concat(Object.keys(modifySheetAdjustments))
+		);
+
+		// if it's a simple property overwrite
+		for (const property of allProperties) {
+			if (sheetPropertyLocations[property] !== undefined) {
+				const location = sheetPropertyLocations[property];
+				const baseValue =
+					overwriteSheetAdjustments[property] ?? newSheet[location][property] ?? 0;
+				const adjustBy = modifySheetAdjustments[property];
+
+				if (adjustBy) {
+					newSheet[location][property] = Number(baseValue) + Number(adjustBy);
+				} else {
+					newSheet[location][property] = baseValue;
+				}
+				continue;
+			}
+
+			// Special cases
+
+			// lores
+
+			const loreRegex = /(.*) lore$/;
+			const loreMatch = property.match(loreRegex);
+			if (loreMatch) {
+				const loreName = loreMatch[1];
+				const lore = newSheet.skills.lores.find(lore => lore.name === loreName);
+				if (lore) {
+					const baseValue = overwriteSheetAdjustments[property] ?? lore.bonus ?? 0;
+					const adjustBy = modifySheetAdjustments[property];
+					if (adjustBy) {
+						lore.bonus = Number(baseValue) + Number(adjustBy);
+					} else {
+						lore.bonus = Number(baseValue);
+					}
+				}
+				continue;
+			}
+
+			// attacks
+			if (property === 'attack') {
+				for (const attack in newSheet.attacks) {
+					const baseValue =
+						overwriteSheetAdjustments[property] ?? newSheet.attacks[attack].toHit ?? 0;
+					const adjustBy = modifySheetAdjustments[property] ?? 0;
+					newSheet.attacks[attack].toHit = Number(baseValue) + Number(adjustBy);
+				}
+				continue;
+			}
+
+			// resistances
+			const resistanceRegex = /([A-Za-z ]+) resistance/;
+			if (property.match(resistanceRegex)) {
+				const resistanceType = property.match(resistanceRegex)[1];
+				let found = false;
+				for (const resistanceIndex in newSheet.defenses.resistances) {
+					if (newSheet.defenses.resistances[resistanceIndex].name === resistanceType) {
+						const baseValue =
+							overwriteSheetAdjustments[property] ??
+							sheet.defenses.resistances[resistanceIndex].amount ??
+							0;
+						const adjustBy = modifySheetAdjustments[property] ?? 0;
+						newSheet.defenses.resistances[resistanceIndex].amount =
+							Number(baseValue) + Number(adjustBy);
+						found = true;
+					}
+				}
+
+				if (!found) {
+					newSheet.defenses.resistances.push({
+						name: resistanceType,
+						amount:
+							Number(overwriteSheetAdjustments[property] ?? 0) +
+							Number(modifySheetAdjustments[property] ?? 0),
+					});
+				}
+				continue;
+			}
+
+			// weaknesses
+			const weaknessRegex = /([A-Za-z ]+) weakness/;
+			if (property.match(weaknessRegex)) {
+				const weaknessType = property.match(weaknessRegex)[1];
+				let found = false;
+				for (const weaknessIndex in newSheet.defenses.weaknesses) {
+					if (newSheet.defenses.weaknesses[weaknessIndex].name === weaknessType) {
+						const baseValue =
+							overwriteSheetAdjustments[property] ??
+							newSheet.defenses.weaknesses[weaknessIndex].amount ??
+							0;
+						const adjustBy = modifySheetAdjustments[property] ?? 0;
+						newSheet.defenses.weaknesses[weaknessIndex].amount =
+							Number(baseValue) + Number(adjustBy);
+						found = true;
+					}
+				}
+
+				if (!found) {
+					newSheet.defenses.weaknesses.push({
+						name: weaknessType,
+						amount:
+							Number(overwriteSheetAdjustments[property] ?? 0) +
+							Number(modifySheetAdjustments[property] ?? 0),
+					});
+				}
+				continue;
+			}
+
+			// immunities
+			const immunityRegex = /([A-Za-z ]+) immunity/;
+			if (property.match(immunityRegex)) {
+				const immunityType = property.match(immunityRegex)[1];
+				const value =
+					overwriteSheetAdjustments[property] ?? modifySheetAdjustments[property];
+				if (value !== undefined) {
+					const activate =
+						(!isNaN(Number(value)) && Number(value) > 0) ||
+						!['no', 'false', 'null'].includes(String(value));
+					if (activate) {
+						newSheet.defenses.immunities.push(immunityType);
+						newSheet.defenses.immunities = _.uniq(newSheet.defenses.immunities);
+					} else {
+						newSheet.defenses.immunities = newSheet.defenses.immunities.filter(
+							immunity => immunity !== immunityType
+						);
+					}
+				}
+			}
+
+			// senses
+			const senseRegex = /([A-Za-z ]+) sense/;
+			if (property.match(senseRegex)) {
+				const senseType = property.match(senseRegex)[1];
+				const value =
+					overwriteSheetAdjustments[property] ?? modifySheetAdjustments[property];
+				if (value !== undefined) {
+					const activate =
+						(!isNaN(Number(value)) && Number(value) > 0) ||
+						(isNaN(Number(value)) && !['no', 'false', 'null'].includes(String(value)));
+					if (activate) {
+						newSheet.general.senses.push(senseType);
+						newSheet.general.senses = _.uniq(newSheet.general.senses);
+					} else {
+						newSheet.general.senses = newSheet.general.senses.filter(
+							sense => sense !== senseType
+						);
+					}
+				}
+			}
+
+			// languages
+			const languageRegex = /([A-Za-z ]+) language/;
+			if (property.match(languageRegex)) {
+				const languageType = property.match(languageRegex)[1];
+				const value =
+					overwriteSheetAdjustments[property] ?? modifySheetAdjustments[property];
+				if (value !== undefined) {
+					const activate =
+						(!isNaN(Number(value)) && Number(value) > 0) ||
+						(isNaN(Number(value)) && !['no', 'false', 'null'].includes(String(value)));
+					if (activate) {
+						newSheet.general.languages.push(languageType);
+						newSheet.general.languages = _.uniq(newSheet.general.languages);
+					} else {
+						newSheet.general.languages = newSheet.general.languages.filter(
+							language => language !== languageType
+						);
+					}
 				}
 			}
 		}
-		return typedSheetAdjustments;
+		return newSheet;
 	}
-	static spreadSheetAdjustmentGroups(sheetAdjustments: typedSheetAdjustment[]) {
-		// we have types of sheet adjustment group based on attribute
-		// and then those attributes are grouped by type
-		// the attributes are any of Strength, Dexterity, Constitution, Intelligence, Wisdom, Charisma or their shorthands
-		// the type are any of skills, checks, dcs, or saves
+
+	static get sheetPropertyGroups() {
+		return sheetPropertyGroups;
 	}
-	static applySheetModifier(sheet: Sheet, modifier: Character['modifiers'][0]) {}
 }
