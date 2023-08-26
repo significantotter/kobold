@@ -1,7 +1,90 @@
 import _, { property } from 'lodash';
 import { Character, Sheet } from '../services/kobold/models/index.js';
 
-const sheetPropertyLocations = {
+export const loreRegex = /(.*) lore$/;
+export const immunityRegex = /([A-Za-z ]+) immunity/;
+export const resistanceRegex = /([A-Za-z ]+) resistance/;
+export const weaknessRegex = /([A-Za-z ]+) weakness/;
+export const languageRegex = /([A-Za-z ]+) language/;
+export const senseRegex = /([A-Za-z ]+) sense/;
+
+export const numericSheetProperties = [
+	'age',
+	'strength',
+	'dexterity',
+	'constitution',
+	'intelligence',
+	'wisdom',
+	'charisma',
+	'speed',
+	'flySpeed',
+	'swimSpeed',
+	'climbSpeed',
+	'focusPoints',
+	'classDC',
+	'classAttack',
+	'perception',
+	'perceptionProfMod',
+	'maxHp',
+	'maxResolve',
+	'maxStamina',
+	'ac',
+	'heavyProfMod',
+	'mediumProfMod',
+	'lightProfMod',
+	'unarmoredProfMod',
+	'arcaneAttack',
+	'arcaneDC',
+	'arcaneProfMod',
+	'divineAttack',
+	'divineDC',
+	'divineProfMod',
+	'occultAttack',
+	'occultDC',
+	'occultProfMod',
+	'primalAttack',
+	'primalDC',
+	'primalProfMod',
+	'fortitude',
+	'fortitudeProfMod',
+	'reflex',
+	'reflexProfMod',
+	'will',
+	'willProfMod',
+	'acrobatics',
+	'acrobaticsProfMod',
+	'arcanaProfMod',
+	'athletics',
+	'athleticsProfMod',
+	'crafting',
+	'craftingProfMod',
+	'deception',
+	'deceptionProfMod',
+	'diplomacy',
+	'diplomacyProfMod',
+	'intimidation',
+	'intimidationProfMod',
+	'medicine',
+	'medicineProfMod',
+	'nature',
+	'natureProfMod',
+	'occultism',
+	'occultismProfMod',
+	'performance',
+	'performanceProfMod',
+	'religion',
+	'religionProfMod',
+	'society',
+	'societyProfMod',
+	'stealth',
+	'stealthProfMod',
+	'survival',
+	'survivalProfMod',
+	'thievery',
+	'thieveryProfMod',
+];
+
+export const sheetPropertyLocations = {
 	name: 'info',
 	url: 'info',
 	description: 'info',
@@ -19,12 +102,10 @@ const sheetPropertyLocations = {
 	wisdom: 'abilities',
 	charisma: 'abilities',
 
-	currentHeroPoints: 'general',
 	speed: 'general',
 	flySpeed: 'general',
 	swimSpeed: 'general',
 	climbSpeed: 'general',
-	currentFocusPoints: 'general',
 	focusPoints: 'general',
 	classDC: 'general',
 	classAttack: 'general',
@@ -93,8 +174,51 @@ const sheetPropertyLocations = {
 	thieveryProfMod: 'skills',
 };
 
+export const sheetPropertyPseudonyms = {
+	imageurl: 'imageURL',
+	image: 'imageURL',
+	avatar: 'imageURL',
+	avatarurl: 'imageURL',
+
+	fly: 'flySpeed',
+	climb: 'climbSpeed',
+	swim: 'swimSpeed',
+
+	totalfocuspoints: 'focusPoints',
+	maxfocuspoints: 'focusPoints',
+
+	hp: 'maxHp',
+	maxhp: 'maxHp',
+	hitpoints: 'maxHp',
+	totalhp: 'maxHp',
+
+	armor: 'ac',
+	ac: 'ac',
+	armorclass: 'ac',
+
+	classdc: 'classDC',
+	classattack: 'classAttack',
+
+	arcanedc: 'arcaneDC',
+	arcaneattack: 'arcaneAttack',
+	occultdc: 'occultDC',
+	occultattack: 'occultAttack',
+	primaldc: 'primalDC',
+	primalattack: 'primalAttack',
+	divinedc: 'divineDC',
+	divineattack: 'divineAttack',
+
+	fort: 'fortitude',
+	ref: 'reflex',
+	fortitudesave: 'fortitude',
+	reflexsave: 'reflex',
+	willsave: 'will',
+	fortsave: 'fortitude',
+	refsave: 'reflex',
+};
+
 // we only want to calculate this once
-const sheetPropertyGroups = _.flatMap(
+export const sheetPropertyGroups = _.flatMap(
 	[
 		'strength',
 		'dexterity',
@@ -144,7 +268,60 @@ export class SheetUtils {
 		modifiers: [],
 		sourceData: {},
 	};
-	public static typedSheet = {};
+
+	// we aren't validating, so we default to returning the property if we can't apply the pseudonym
+	static standardizeSheetProperty(property: string): string {
+		let camelCaseCheck = _.camelCase(property);
+		if (sheetPropertyLocations[camelCaseCheck] !== undefined) return camelCaseCheck;
+
+		let lowerCaseCheck = property
+			.toLowerCase()
+			.replaceAll(' ', '')
+			.replaceAll('_', '')
+			.replaceAll('-', '');
+		if (sheetPropertyLocations[lowerCaseCheck] !== undefined) return lowerCaseCheck;
+
+		if (sheetPropertyPseudonyms[lowerCaseCheck] !== undefined)
+			return sheetPropertyPseudonyms[lowerCaseCheck];
+
+		return property;
+	}
+
+	static validateSheetProperty(property: string): boolean {
+		// basic sheet property
+		if (sheetPropertyLocations[SheetUtils.standardizeSheetProperty(property)] !== undefined)
+			return true;
+		// property groups
+		if (sheetPropertyGroups.includes(_.camelCase(property))) return true;
+		// extra properties
+		if (['attacks', 'attack'].includes(property)) return true;
+		// regexes
+		if (
+			property.match(loreRegex) ||
+			property.match(immunityRegex) ||
+			property.match(resistanceRegex) ||
+			property.match(weaknessRegex) ||
+			property.match(languageRegex) ||
+			property.match(senseRegex)
+		)
+			return true;
+
+		return false;
+	}
+
+	static sheetPropertyIsNumeric(property: string): boolean {
+		if (sheetPropertyGroups.includes(_.camelCase(property))) return true;
+		if (numericSheetProperties.includes(SheetUtils.standardizeSheetProperty(property)))
+			return true;
+		if (['attacks', 'attack'].includes(property)) return true;
+		if (
+			property.match(loreRegex) ||
+			property.match(resistanceRegex) ||
+			property.match(weaknessRegex)
+		)
+			return true;
+		return false;
+	}
 
 	/**
 	 * Applies the value of a modifier to the target property
@@ -164,6 +341,7 @@ export class SheetUtils {
 			return property;
 		}
 	}
+
 	static bucketSheetAdjustmentsByType(typedSheetAdjustments: typedSheetAdjustment[]) {
 		const positiveTypedSheetAdjustments: reducedSheetAdjustment = {};
 		const negativeTypedSheetAdjustments: reducedSheetAdjustment = {};
@@ -348,7 +526,11 @@ export class SheetUtils {
 		const activeSheetAdjustments: typedSheetAdjustment[] = activeSheetModifiers.reduce(
 			(a, b) => {
 				return a.concat(
-					b.sheetAdjustments.map(adjustment => ({ ...adjustment, type: b.type }))
+					b.sheetAdjustments.map(adjustment => ({
+						...adjustment,
+						property: SheetUtils.standardizeSheetProperty(adjustment.property),
+						type: b.type,
+					}))
 				);
 			},
 			[]
@@ -357,8 +539,16 @@ export class SheetUtils {
 			activeSheetAdjustments,
 			sheet
 		);
-		const bucketedSheetAdjustments =
-			SheetUtils.bucketSheetAdjustmentsByType(spreadSheetAdjustments);
+		const standardizedSheetAdjustments = _.map(
+			spreadSheetAdjustments,
+			(adjustment: typedSheetAdjustment) => ({
+				...adjustment,
+				property: SheetUtils.standardizeSheetProperty(adjustment.property),
+			})
+		);
+		const bucketedSheetAdjustments = SheetUtils.bucketSheetAdjustmentsByType(
+			standardizedSheetAdjustments
+		);
 		const { modifySheetAdjustments, overwriteSheetAdjustments } =
 			SheetUtils.reduceSheetAdjustmentsByType(
 				bucketedSheetAdjustments.positiveTypedSheetAdjustments,
@@ -397,7 +587,6 @@ export class SheetUtils {
 
 			// lores
 
-			const loreRegex = /(.*) lore$/;
 			const loreMatch = property.match(loreRegex);
 			if (loreMatch) {
 				const loreName = loreMatch[1];
@@ -415,7 +604,7 @@ export class SheetUtils {
 			}
 
 			// attacks
-			if (property === 'attack') {
+			if (property === 'attack' || property === 'attacks') {
 				for (const attack in newSheet.attacks) {
 					const baseValue =
 						overwriteSheetAdjustments[property] ?? newSheet.attacks[attack].toHit ?? 0;
@@ -426,12 +615,11 @@ export class SheetUtils {
 			}
 
 			// resistances
-			const resistanceRegex = /([A-Za-z ]+) resistance/;
 			if (property.match(resistanceRegex)) {
 				const resistanceType = property.match(resistanceRegex)[1];
 				let found = false;
 				for (const resistanceIndex in newSheet.defenses.resistances) {
-					if (newSheet.defenses.resistances[resistanceIndex].name === resistanceType) {
+					if (newSheet.defenses.resistances[resistanceIndex].type === resistanceType) {
 						const baseValue =
 							overwriteSheetAdjustments[property] ??
 							sheet.defenses.resistances[resistanceIndex].amount ??
@@ -445,7 +633,7 @@ export class SheetUtils {
 
 				if (!found) {
 					newSheet.defenses.resistances.push({
-						name: resistanceType,
+						type: resistanceType,
 						amount:
 							Number(overwriteSheetAdjustments[property] ?? 0) +
 							Number(modifySheetAdjustments[property] ?? 0),
@@ -455,12 +643,11 @@ export class SheetUtils {
 			}
 
 			// weaknesses
-			const weaknessRegex = /([A-Za-z ]+) weakness/;
 			if (property.match(weaknessRegex)) {
 				const weaknessType = property.match(weaknessRegex)[1];
 				let found = false;
 				for (const weaknessIndex in newSheet.defenses.weaknesses) {
-					if (newSheet.defenses.weaknesses[weaknessIndex].name === weaknessType) {
+					if (newSheet.defenses.weaknesses[weaknessIndex].type === weaknessType) {
 						const baseValue =
 							overwriteSheetAdjustments[property] ??
 							newSheet.defenses.weaknesses[weaknessIndex].amount ??
@@ -474,7 +661,7 @@ export class SheetUtils {
 
 				if (!found) {
 					newSheet.defenses.weaknesses.push({
-						name: weaknessType,
+						type: weaknessType,
 						amount:
 							Number(overwriteSheetAdjustments[property] ?? 0) +
 							Number(modifySheetAdjustments[property] ?? 0),
@@ -484,7 +671,6 @@ export class SheetUtils {
 			}
 
 			// immunities
-			const immunityRegex = /([A-Za-z ]+) immunity/;
 			if (property.match(immunityRegex)) {
 				const immunityType = property.match(immunityRegex)[1];
 				const value =
@@ -505,7 +691,6 @@ export class SheetUtils {
 			}
 
 			// senses
-			const senseRegex = /([A-Za-z ]+) sense/;
 			if (property.match(senseRegex)) {
 				const senseType = property.match(senseRegex)[1];
 				const value =
@@ -526,7 +711,6 @@ export class SheetUtils {
 			}
 
 			// languages
-			const languageRegex = /([A-Za-z ]+) language/;
 			if (property.match(languageRegex)) {
 				const languageType = property.match(languageRegex)[1];
 				const value =

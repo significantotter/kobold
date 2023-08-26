@@ -8,6 +8,55 @@ import { SheetUtils } from './sheet-utils.js';
 import { Character, Sheet } from '../services/kobold/models/index.js';
 
 describe('SheetUtils', () => {
+	describe('standardizeSheetProperty', () => {
+		it('should return the standard property name for a given property given the property name', () => {
+			expect(SheetUtils.standardizeSheetProperty('arcaneDC')).toBe('arcaneDC');
+			expect(SheetUtils.standardizeSheetProperty('arcane_attack')).toBe('arcaneAttack');
+			expect(SheetUtils.standardizeSheetProperty('class_d_c')).toBe('classDC');
+		});
+		it('should return shorthands ignoring case and the presence of " ", "_", or "-"', () => {
+			expect(SheetUtils.standardizeSheetProperty('armor')).toBe('ac');
+			expect(SheetUtils.standardizeSheetProperty('A R_MO-R')).toBe('ac');
+			expect(SheetUtils.standardizeSheetProperty('a c')).toBe('ac');
+			expect(SheetUtils.standardizeSheetProperty('a-c')).toBe('ac');
+			expect(SheetUtils.standardizeSheetProperty('a_c')).toBe('ac');
+		});
+	});
+	describe('validateSheetProperty', () => {
+		it('should return true if the property is valid', () => {
+			expect(SheetUtils.validateSheetProperty('ac')).toBe(true);
+			expect(SheetUtils.validateSheetProperty('classDC')).toBe(true);
+			expect(SheetUtils.validateSheetProperty('arcaneAttack')).toBe(true);
+			expect(SheetUtils.validateSheetProperty('fire weakness')).toBe(true);
+			expect(SheetUtils.validateSheetProperty('cold weakness')).toBe(true);
+			expect(SheetUtils.validateSheetProperty('darkvision sense')).toBe(true);
+			expect(SheetUtils.validateSheetProperty('sonic immunity')).toBe(true);
+			expect(SheetUtils.validateSheetProperty('common language')).toBe(true);
+			expect(SheetUtils.validateSheetProperty('a c')).toBe(true);
+			expect(SheetUtils.validateSheetProperty('str skills')).toBe(true);
+			expect(SheetUtils.validateSheetProperty('checks')).toBe(true);
+		});
+		it('should return false if the property is invalid', () => {
+			expect(SheetUtils.validateSheetProperty('foo checks')).toBe(false);
+			expect(SheetUtils.validateSheetProperty('str foo')).toBe(false);
+			expect(SheetUtils.validateSheetProperty('bar')).toBe(false);
+		});
+	});
+	describe('sheetPropertyIsNumeric', () => {
+		it('should return true if the property is numeric', () => {
+			expect(SheetUtils.sheetPropertyIsNumeric('ac')).toBe(true);
+			expect(SheetUtils.sheetPropertyIsNumeric('classDC')).toBe(true);
+			expect(SheetUtils.sheetPropertyIsNumeric('arcaneAttack')).toBe(true);
+			expect(SheetUtils.sheetPropertyIsNumeric('fire weakness')).toBe(true);
+			expect(SheetUtils.sheetPropertyIsNumeric('darkvision sense')).toBe(false);
+			expect(SheetUtils.sheetPropertyIsNumeric('sonic immunity')).toBe(false);
+			expect(SheetUtils.sheetPropertyIsNumeric('common language')).toBe(false);
+			expect(SheetUtils.sheetPropertyIsNumeric('a c')).toBe(true);
+			expect(SheetUtils.sheetPropertyIsNumeric('str skills')).toBe(true);
+			expect(SheetUtils.sheetPropertyIsNumeric('checks')).toBe(true);
+			expect(SheetUtils.sheetPropertyIsNumeric('imageURL')).toBe(false);
+		});
+	});
 	describe('applySheetAdjustmentToProperty', () => {
 		it('should return the value of the modifier if the operation is "="', () => {
 			expect(
@@ -401,7 +450,7 @@ describe('SheetUtils', () => {
 			};
 			const expectedOverwriteSheetAdjustments: untypedAdjustment = {
 				ac: '18',
-				imageUrl: 'https://foo.com/bar.png',
+				imageURL: 'https://foo.com/bar.png',
 			};
 
 			const results = SheetUtils.parseSheetModifiers(SheetUtils.defaultSheet, modifiers);

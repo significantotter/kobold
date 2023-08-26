@@ -20,15 +20,6 @@ const damageTypeShorthands: { [shorthand: string]: string } = {
 	bludgeoning: 'b',
 };
 
-const abilityShorthands: { [shorthand: string]: string } = {
-	str: 'strength',
-	dex: 'dexterity',
-	con: 'constitution',
-	int: 'intelligence',
-	wis: 'wisdom',
-	cha: 'charisma',
-};
-
 export type SettableSheetOption =
 	| 'tempHp'
 	| 'hp'
@@ -256,7 +247,9 @@ export class Creature {
 			})\n`;
 		if (this.sheet.general.classDC != null) {
 			generalText += `Class DC \`${this.sheet.general.classDC}\`, `;
-			generalText += `Class Attack \`${this.sheet.general.classAttack}\`\n`;
+			generalText += `Class Attack \`${
+				this.sheet.general.classAttack ?? this.sheet.general.classDC - 10
+			}\`\n`;
 		}
 		const hasASpeed =
 			this.sheet.general.speed != null ||

@@ -3,6 +3,7 @@ import { Character } from '../services/kobold/models/index.js';
 import { KoboldError } from './KoboldError.js';
 import { Creature } from './creature.js';
 import _ from 'lodash';
+import { SheetUtils } from './sheet-utils.js';
 
 export class StringUtils {
 	public static parseSheetModifiers(
@@ -14,7 +15,7 @@ export class StringUtils {
 			throw new KoboldError("Yip! I didn't find any modifiers in what you sent me!");
 		}
 		const modifiers = modifierList.map(modifier => {
-			const modifierRegex = /([A-Za-z _]+)\s*([\+\-\=])\s*([0-9]+)/g;
+			const modifierRegex = /([A-Za-z _-]+)\s*([\+\-\=])\s*(.+)/g;
 			const match = modifierRegex.exec(modifier);
 			if (!match) {
 				throw new KoboldError(
@@ -22,14 +23,11 @@ export class StringUtils {
 						`in the format "Attribute Name + 1; Other Attribute - 1;final attribute = 1". Spaces are optional.`
 				);
 			}
-			const [, attributeName, operator, value] = match;
+			let [, attributeName, operator, value] = match.map(result => result.trim());
 
 			// validate each result
-			// attributeName must be a valid attribute for the character
-			if (
-				!creature.sheetProperties.includes(_.camelCase(attributeName)) ||
-				creature.sheetPropertyGroups.includes(_.camelCase(attributeName))
-			) {
+			// attributeName must be a valid sheet property
+			if (!SheetUtils.validateSheetProperty(attributeName)) {
 				throw new KoboldError(
 					`Yip! I couldn't find a sheet attribute named "${attributeName}".`
 				);
@@ -41,17 +39,13 @@ export class StringUtils {
 				);
 			}
 			// value must be a number if it's a numeric value
-			if (
-				(creature.numericSheetProperties.includes(_.camelCase(attributeName)) ||
-					creature.sheetPropertyGroups.includes(_.camelCase(attributeName))) &&
-				isNaN(Number(value))
-			) {
+			if (SheetUtils.sheetPropertyIsNumeric(attributeName) && isNaN(Number(value))) {
 				throw new KoboldError(
 					`Yip! ${attributeName} "${value}" couldn't be converted to a number.`
 				);
 			}
 			return {
-				property: _.camelCase(attributeName),
+				property: attributeName,
 				operation: operator as '+' | '-' | '=',
 				value: value,
 			};
