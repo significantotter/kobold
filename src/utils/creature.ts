@@ -1460,7 +1460,7 @@ export class Creature {
 		}[]
 	): Sheet['modifiers'] {
 		const { untyped, bonuses, penalties } = parseBonusesForTagsFromModifiers(
-			this.modifiers,
+			this.modifiers.filter(modifier => modifier.modifierType === 'roll'),
 			[
 				...(this.attributes as {
 					name: string;

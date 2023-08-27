@@ -9,6 +9,7 @@ export function isModifierValidForTags(
 	attributes: Character['attributes'],
 	tags: string[]
 ): boolean {
+	if (modifier.modifierType === 'sheet') return false;
 	// compile the modifier's target tags
 	const tagExpression = compileExpression(modifier.targetTags);
 
