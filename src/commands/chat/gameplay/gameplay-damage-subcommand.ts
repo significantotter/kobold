@@ -66,6 +66,7 @@ export class GameplayDamageSubCommand implements Command {
 			const damageResult = creature.applyDamage(amount, type);
 
 			message = EmbedUtils.buildDamageResultText({
+				initialDamageAmount: amount,
 				targetCreatureName: creature.name,
 				totalDamageDealt: damageResult.appliedDamage,
 				targetCreatureSheet: creature.sheet,
@@ -83,6 +84,7 @@ export class GameplayDamageSubCommand implements Command {
 			const healingResult = creature.heal(Math.abs(amount));
 
 			message = EmbedUtils.buildDamageResultText({
+				initialDamageAmount: amount,
 				targetCreatureName: creature.name,
 				totalDamageDealt: -healingResult.totalHealed,
 				targetCreatureSheet: creature.sheet,

@@ -55,6 +55,20 @@ export class GameplayRecoverSubCommand implements Command {
 			intr,
 			targetCharacter
 		);
+		if (!characterOrInitActorTargets?.length) {
+			if (!targetCharacter) {
+				await InteractionUtils.send(
+					intr,
+					`Yip! I couldn't find an active character to target! Specify a "target-character" to target something else.`
+				);
+			} else {
+				await InteractionUtils.send(
+					intr,
+					`Yip! I couldn't find any characters or initiative actors named ${targetCharacter}!`
+				);
+			}
+			return;
+		}
 
 		const recoverValues = await GameplayUtils.recoverGameplayStats(
 			intr,

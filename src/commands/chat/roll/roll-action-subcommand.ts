@@ -121,7 +121,11 @@ export class RollActionSubCommand implements Command {
 		let targetCreature: Creature | undefined;
 		let targetActor: InitiativeActor | undefined;
 
-		if (targetInitActorName && targetInitActorName != '__NONE__') {
+		if (
+			targetInitActorName &&
+			targetInitActorName.trim().toLocaleLowerCase() != '__none__' &&
+			targetInitActorName.trim().toLocaleLowerCase() != '(none)'
+		) {
 			const { targetCharacter, targetInitActor } =
 				await GameUtils.getCharacterOrInitActorTarget(intr, targetInitActorName);
 			targetActor = targetInitActor ?? targetCharacter;

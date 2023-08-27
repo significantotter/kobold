@@ -677,7 +677,7 @@ export class ActionRoller {
 			// time for our state machine!
 			if (rollType === 'attack') {
 				let rollTargetValue = options.targetDC;
-				if (this.targetCreature) {
+				if (this.targetCreature && !rollTargetValue) {
 					rollTargetValue = this.targetCreature.getDC(roll?.targetDC ?? 'ac');
 
 					if (!rollTargetValue) {
@@ -708,7 +708,8 @@ export class ActionRoller {
 				lastTargetingActionType = 'attack';
 			}
 			if (rollType === 'skill-challenge') {
-				let rollTargetValue = this.creature.getDC(roll?.targetDC ?? 'ac');
+				let rollTargetValue =
+					options.targetDC ?? this.creature.getDC(roll?.targetDC ?? 'ac');
 
 				if (!rollTargetValue) {
 					// try evaluating it as a dice expression.

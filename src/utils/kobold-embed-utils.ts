@@ -406,6 +406,7 @@ export class EmbedUtils {
 	}
 
 	public static buildDamageResultText({
+		initialDamageAmount,
 		sourceCreatureName,
 		targetCreatureName,
 		totalDamageDealt,
@@ -415,6 +416,7 @@ export class EmbedUtils {
 		triggeredResistances,
 		triggeredImmunities,
 	}: {
+		initialDamageAmount?: number;
 		sourceCreatureName?: string;
 		targetCreatureName: string;
 		totalDamageDealt: number;
@@ -438,11 +440,13 @@ export class EmbedUtils {
 			if (currentHp === targetCreatureSheet.defenses.maxHp) {
 				message += " They're now at full health!";
 			}
+		} else if (initialDamageAmount < 0 && totalDamageDealt === 0) {
+			message = `Yip! I tried to heal ${targetCreatureName}, but they're already at full health!`;
 		} else {
 			if (currentHp === 0) {
 				message += " They're down!";
 			}
-			if (triggeredWeaknesses.length > 0) {
+			if ((triggeredWeaknesses ?? []).length > 0) {
 				let weaknessesMessage = triggeredWeaknesses[0].type;
 				let mappedWeaknesses = triggeredWeaknesses.map(resistance => resistance.type);
 				if (triggeredWeaknesses.length > 1) {
@@ -452,7 +456,7 @@ export class EmbedUtils {
 				}
 				message += `\nThey took extra damage from ${weaknessesMessage}!`;
 			}
-			if (triggeredResistances.length > 0) {
+			if ((triggeredResistances ?? []).length > 0) {
 				let resistancesMessage = triggeredResistances[0].type;
 				let mappedResistances = triggeredResistances.map(resistance => resistance.type);
 				if (triggeredResistances.length > 1) {
@@ -462,7 +466,7 @@ export class EmbedUtils {
 				}
 				message += `\nThey took less damage from ${resistancesMessage}!`;
 			}
-			if (triggeredImmunities.length > 0) {
+			if ((triggeredImmunities ?? []).length > 0) {
 				let immunitiesMessage = triggeredImmunities[0];
 				if (triggeredImmunities.length > 1) {
 					const lastImmunity = triggeredImmunities.pop();
