@@ -23,13 +23,12 @@ import _ from 'lodash';
 import { ActionRoller } from '../../../utils/action-roller.js';
 import { getEmoji } from '../../../constants/emoji.js';
 import { Creature } from '../../../utils/creature.js';
-import { EmbedUtils, KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
+import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
 import { InitOptions } from '../init/init-command-options.js';
 import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
 import { Character, InitiativeActor } from '../../../services/kobold/models/index.js';
-import { InitiativeUtils } from '../../../utils/initiative-utils.js';
-import action from '../../../i18n/en/commands/action.js';
 import { GameUtils } from '../../../utils/game-utils.js';
+import { SettingsUtils } from '../../../utils/settings-utils.js';
 
 export class RollActionSubCommand implements Command {
 	public names = [Language.LL.commands.roll.action.name()];
@@ -97,18 +96,16 @@ export class RollActionSubCommand implements Command {
 		const rollNote = intr.options.getString(ChatArgs.ROLL_NOTE_OPTION.name);
 
 		const secretRoll = intr.options.getString(ChatArgs.ROLL_SECRET_OPTION.name);
-		const isSecretRoll =
-			secretRoll === Language.LL.commandOptions.rollSecret.choices.secret.value() ||
-			secretRoll === Language.LL.commandOptions.rollSecret.choices.secretAndNotify.value();
-		const notifyRoll =
-			secretRoll === Language.LL.commandOptions.rollSecret.choices.secretAndNotify.value();
 
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
+		const [activeCharacter, userSettings, activeGame] = await Promise.all([
+			CharacterUtils.getActiveCharacter(intr),
+			SettingsUtils.getSettingsForUser(intr),
+			GameUtils.getActiveGame(intr.user.id, intr.guildId),
+		]);
 		if (!activeCharacter) {
 			await InteractionUtils.send(
 				intr,
-				Language.LL.commands.roll.interactions.noActiveCharacter(),
-				isSecretRoll
+				Language.LL.commands.roll.interactions.noActiveCharacter()
 			);
 			return;
 		}
@@ -132,9 +129,15 @@ export class RollActionSubCommand implements Command {
 			targetCreature = Creature.fromModelWithSheet(targetActor);
 		}
 
-		const actionRoller = new ActionRoller(targetAction, creature, targetCreature, {
-			heightenLevel,
-		});
+		const actionRoller = new ActionRoller(
+			userSettings,
+			targetAction,
+			creature,
+			targetCreature,
+			{
+				heightenLevel,
+			}
+		);
 
 		const builtRoll = actionRoller.buildRoll(rollNote, targetAction.description, {
 			heightenLevel,
@@ -156,13 +159,6 @@ export class RollActionSubCommand implements Command {
 			targetDC,
 		});
 
-		if (notifyRoll) {
-			await InteractionUtils.send(
-				intr,
-				Language.LL.commands.roll.interactions.secretRollNotification()
-			);
-		}
-
 		if (targetCreature && actionRoller.shouldDisplayDamageText()) {
 			await targetActor.saveSheet(intr, actionRoller.targetCreature.sheet);
 
@@ -176,7 +172,6 @@ export class RollActionSubCommand implements Command {
 
 			response.addFields(damageField);
 		}
-
-		await response.sendBatches(intr, isSecretRoll);
+		await EmbedUtils.dispatchEmbeds(intr, [response], secretRoll, activeGame.gmUserId);
 	}
 }

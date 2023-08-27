@@ -28,6 +28,7 @@ import { getEmoji } from '../../../constants/emoji.js';
 import { InitOptions } from './init-command-options.js';
 import { InitiativeActor } from '../../../services/kobold/models/index.js';
 import { GameUtils } from '../../../utils/game-utils.js';
+import { SettingsUtils } from '../../../utils/settings-utils.js';
 
 export class InitRollSubCommand implements Command {
 	public names = [Language.LL.commands.init.roll.name()];
@@ -87,18 +88,17 @@ export class InitRollSubCommand implements Command {
 		const targetAC = intr.options.getInteger(ChatArgs.ROLL_TARGET_AC_OPTION.name);
 
 		const secretRoll = intr.options.getString(ChatArgs.ROLL_SECRET_OPTION.name);
-		const isSecretRoll =
-			secretRoll === Language.LL.commandOptions.rollSecret.choices.secret.value() ||
-			secretRoll === Language.LL.commandOptions.rollSecret.choices.secretAndNotify.value();
-		const notifyRoll =
-			secretRoll === Language.LL.commandOptions.rollSecret.choices.secretAndNotify.value();
 
 		const rollNote = intr.options.getString(ChatArgs.ROLL_NOTE_OPTION.name);
 
-		const initResult = await InitiativeUtils.getInitiativeForChannel(intr.channel, {
-			sendErrors: true,
-			LL,
-		});
+		const [initResult, userSettings, activeGame] = await Promise.all([
+			InitiativeUtils.getInitiativeForChannel(intr.channel, {
+				sendErrors: true,
+				LL,
+			}),
+			SettingsUtils.getSettingsForUser(intr),
+			GameUtils.getActiveGame(intr.user.id, intr.guildId),
+		]);
 		if (initResult.errorMessage) {
 			await InteractionUtils.send(intr, initResult.errorMessage);
 			return;
@@ -136,17 +136,13 @@ export class InitRollSubCommand implements Command {
 					actorName: intr.user.username,
 					rollDescription: LL.commands.roll.dice.interactions.rolledDice(),
 					rollNote,
+					userSettings,
 					LL,
 				});
 				rollBuilder.addRoll({ rollExpression: modifierExpression ?? 'd20' });
 				const response = rollBuilder.compileEmbed();
 
-				if (notifyRoll) {
-					await InteractionUtils.send(
-						intr,
-						Language.LL.commands.roll.interactions.secretRollNotification()
-					);
-				} else await InteractionUtils.send(intr, response, isSecretRoll);
+				await EmbedUtils.dispatchEmbeds(intr, [response], secretRoll, activeGame.gmUserId);
 				return;
 			} else {
 				await InteractionUtils.send(intr, LL.commands.init.roll.interactions.noSheet());
@@ -170,7 +166,12 @@ export class InitRollSubCommand implements Command {
 		let embed: KoboldEmbed;
 
 		if (targetAction) {
-			const actionRoller = new ActionRoller(targetAction, creature, targetCreature);
+			const actionRoller = new ActionRoller(
+				userSettings,
+				targetAction,
+				creature,
+				targetCreature
+			);
 
 			const builtRoll = actionRoller.buildRoll(rollNote, targetAction.description, {
 				attackModifierExpression: modifierExpression,
@@ -208,6 +209,7 @@ export class InitRollSubCommand implements Command {
 				attributeName: targetRoll.name,
 				rollNote,
 				modifierExpression,
+				userSettings,
 				LL,
 			});
 
@@ -221,6 +223,7 @@ export class InitRollSubCommand implements Command {
 				attackModifierExpression: modifierExpression,
 				damageModifierExpression,
 				targetAC,
+				userSettings,
 				LL,
 			});
 
@@ -240,13 +243,6 @@ export class InitRollSubCommand implements Command {
 				embed.addFields(damageField);
 			}
 		}
-		if (notifyRoll) {
-			await InteractionUtils.send(
-				intr,
-				Language.LL.commands.roll.interactions.secretRollNotification()
-			);
-		}
-
-		await embed.sendBatches(intr, isSecretRoll);
+		await EmbedUtils.dispatchEmbeds(intr, [embed], secretRoll, activeGame?.gmUserId);
 	}
 }

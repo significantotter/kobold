@@ -37,6 +37,7 @@
 		"pm2:delete": "pm2 delete process.json",
 		"typesafe-i18n": "NODE_OPTIONS='--max-old-space-size=4096' typesafe-i18n --no-watch",
 		"typesafe-i18n:watch": "typesafe-i18n",
+		"knex": "NODE_OPTIONS='--max-old-space-size=4096' NODE_OPTIONS='--loader ts-node/esm' knex",
 		"migrate": "NODE_OPTIONS='--max-old-space-size=4096' NODE_OPTIONS='--loader ts-node/esm' knex migrate:latest",
 		"migrate:test": "NODE_ENV=TEST NODE_OPTIONS='--loader ts-node/esm' knex migrate:latest",
 		"test": "vitest",

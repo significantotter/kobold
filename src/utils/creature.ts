@@ -794,9 +794,9 @@ export class Creature {
 
 		rolls.perception = {
 			name: 'perception',
-			type: 'skill',
+			type: 'check',
 			bonus: this.sheet.general.perception,
-			tags: ['skill', 'perception', 'wisdom'],
+			tags: ['check', 'perception', 'wisdom'],
 		};
 
 		for (const skill in this.sheet.skills) {

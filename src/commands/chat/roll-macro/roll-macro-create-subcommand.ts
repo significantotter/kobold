@@ -8,7 +8,7 @@ import {
 import { RateLimiter } from 'discord.js-rate-limiter';
 
 import { EventData } from '../../../models/internal-models.js';
-import { Character, Initiative } from '../../../services/kobold/models/index.js';
+import { Character } from '../../../services/kobold/models/index.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';

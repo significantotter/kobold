@@ -22,7 +22,6 @@ import { CharacterUtils } from '../../../utils/character-utils.js';
 import { Character } from '../../../services/kobold/models/index.js';
 import { compileExpression } from 'filtrex';
 import { DiceUtils } from '../../../utils/dice-utils.js';
-import { RollBuilder } from '../../../utils/roll-builder.js';
 import { Creature } from '../../../utils/creature.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
 

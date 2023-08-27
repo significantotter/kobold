@@ -1,8 +1,7 @@
-import { APIEmbedField } from 'discord.js';
 import _ from 'lodash';
 import { TranslationFunctions } from '../i18n/i18n-types.js';
 import { Language } from '../models/enum-helpers/language.js';
-import { Character } from '../services/kobold/models/index.js';
+import { Character, UserSettings } from '../services/kobold/models/index.js';
 import { Creature } from './creature.js';
 import {
 	DiceUtils,
@@ -12,8 +11,10 @@ import {
 	ResultField,
 } from './dice-utils.js';
 import { KoboldEmbed } from './kobold-embed-utils.js';
+import { UserSettingsFactory } from '../services/kobold/models/user-settings/user-settings.factory.js';
 
 export class RollBuilder {
+	private userSettings: UserSettings | null;
 	private creature: Creature | null;
 	private targetCreature: Creature | null;
 	private rollDescription: string;
@@ -31,6 +32,7 @@ export class RollBuilder {
 		rollDescription,
 		rollNote,
 		title,
+		userSettings,
 		LL,
 	}: {
 		actorName?: string;
@@ -40,6 +42,7 @@ export class RollBuilder {
 		rollDescription?: string;
 		rollNote?: string;
 		title?: string;
+		userSettings?: UserSettings;
 		LL?: TranslationFunctions;
 	}) {
 		this.rollResults = [];
@@ -52,6 +55,14 @@ export class RollBuilder {
 			this.creature = Creature.fromCharacter(character);
 		}
 		this.targetCreature = targetCreature || null;
+		this.userSettings =
+			userSettings ??
+			UserSettingsFactory.build({
+				userId: '',
+				inlineRollsDisplay: 'detailed',
+				rollCompactMode: 'normal',
+				initStatsNotification: 'every_round',
+			});
 
 		const actorText = actorName || this.creature?.sheet?.info?.name || '';
 		this.title = title || `${actorText} ${this.rollDescription}`.trim();
@@ -176,7 +187,7 @@ export class RollBuilder {
 			rollExpression,
 			damageType,
 			tags,
-			extraAttributes,
+			extraAttributes: extraAttributes ?? [],
 			multiplier,
 			creature: rollFromTarget ? this.targetCreature : this.creature,
 			LL: this.LL,
@@ -262,13 +273,11 @@ export class RollBuilder {
 		return rollResult;
 	}
 
-	addText({
-		title,
+	evaluateRollsInText({
 		text,
 		extraAttributes,
 		tags,
 	}: {
-		title: string;
 		text: string;
 		extraAttributes?: {
 			name: string;
@@ -289,9 +298,13 @@ export class RollBuilder {
 					extraAttributes,
 					creature: this.creature,
 					LL: this.LL,
+					tags,
 				});
 				let resultText = '';
-				if (rollResult.results.renderedExpression == rollResult.results.total.toString()) {
+				if (
+					this.userSettings.inlineRollsDisplay === 'compact' ||
+					rollResult.results.renderedExpression == rollResult.results.total.toString()
+				) {
 					resultText = '`' + rollResult.results.total.toString() + '`';
 				} else {
 					resultText = `\`${
@@ -303,7 +316,26 @@ export class RollBuilder {
 				finalString.push(splitText[i]);
 			}
 		}
-		const result: TextResult = { name: title, type: 'text', value: finalString.join('') };
+		return finalString.join('');
+	}
+
+	addText({
+		title,
+		text,
+		extraAttributes,
+		tags,
+	}: {
+		title: string;
+		text: string;
+		extraAttributes?: {
+			name: string;
+			value: number;
+			tags?: string[];
+		}[];
+		tags?: string[];
+	}) {
+		const parsedString = this.evaluateRollsInText({ text, extraAttributes, tags });
+		const result: TextResult = { name: title, type: 'text', value: parsedString };
 
 		this.rollResults.push(result);
 		return result;
@@ -388,7 +420,7 @@ export class RollBuilder {
 		const rollNote = this.rollNote ? this.rollNote + '\n\n' : '';
 		const footer = this.footer || '';
 		if ((rollNote + footer).length) {
-			response.setFooter({ text: rollNote + footer });
+			response.setFooter({ text: this.evaluateRollsInText({ text: rollNote + footer }) });
 		}
 
 		return response;

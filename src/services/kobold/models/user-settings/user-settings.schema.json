@@ -16,6 +16,11 @@
 			"type": "string",
 			"description": "Whether to roll in compact mode.",
 			"enum": ["compact", "normal"]
+		},
+		"inlineRollsDisplay": {
+			"type": "string",
+			"description": "How detailed to display inline rolls.",
+			"enum": ["compact", "detailed"]
 		}
 	}
 }

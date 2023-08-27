@@ -21,6 +21,8 @@ import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Language } from '../../../models/enum-helpers/index.js';
 import { Creature } from '../../../utils/creature.js';
 import _ from 'lodash';
+import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
+import { GameUtils } from '../../../utils/game-utils.js';
 
 export class RollSkillSubCommand implements Command {
 	public names = [Language.LL.commands.roll.skill.name()];
@@ -71,18 +73,15 @@ export class RollSkillSubCommand implements Command {
 		const rollNote = intr.options.getString(ChatArgs.ROLL_NOTE_OPTION.name);
 
 		const secretRoll = intr.options.getString(ChatArgs.ROLL_SECRET_OPTION.name);
-		const isSecretRoll =
-			secretRoll === Language.LL.commandOptions.rollSecret.choices.secret.value() ||
-			secretRoll === Language.LL.commandOptions.rollSecret.choices.secretAndNotify.value();
-		const notifyRoll =
-			secretRoll === Language.LL.commandOptions.rollSecret.choices.secretAndNotify.value();
 
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
+		const [activeCharacter, activeGame] = await Promise.all([
+			CharacterUtils.getActiveCharacter(intr),
+			GameUtils.getActiveGame(intr.user.id, intr.guildId),
+		]);
 		if (!activeCharacter) {
 			await InteractionUtils.send(
 				intr,
-				Language.LL.commands.roll.interactions.noActiveCharacter(),
-				isSecretRoll
+				Language.LL.commands.roll.interactions.noActiveCharacter()
 			);
 			return;
 		}
@@ -102,12 +101,6 @@ export class RollSkillSubCommand implements Command {
 
 		const embed = rollResult.compileEmbed();
 
-		if (notifyRoll) {
-			await InteractionUtils.send(
-				intr,
-				Language.LL.commands.roll.interactions.secretRollNotification()
-			);
-		}
-		await InteractionUtils.send(intr, embed, isSecretRoll);
+		await EmbedUtils.dispatchEmbeds(intr, [embed], secretRoll, activeGame?.gmUserId);
 	}
 }

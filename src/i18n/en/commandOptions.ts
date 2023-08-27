@@ -679,6 +679,11 @@ export default {
 				value: 'secret-and-notify',
 				description: 'A secret roll that still notifies the channel that a roll was made.',
 			},
+			sendToGm: {
+				name: 'send-to-gm',
+				value: 'send-to-gm',
+				description: 'Only works if in a "game" in this server. Sends the roll to the GM.',
+			},
 		},
 	},
 	statBlockSecret: {
@@ -755,6 +760,10 @@ export default {
 			initTrackerNotifications: {
 				name: 'initiative-tracker-notifications',
 				value: 'initiative-tracker-notifications',
+			},
+			inlineRollsDisplay: {
+				name: 'inline-rolls-display',
+				value: 'inline-rolls-display',
 			},
 		},
 	},

@@ -1,5 +1,3 @@
-import { RollBuilder } from '../../../utils/roll-builder.js';
-import { InitiativeActor } from './../../../services/kobold/models/initiative-actor/initiative-actor.model.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -26,6 +24,7 @@ import _ from 'lodash';
 import { Initiative } from '../../../services/kobold/models/index.js';
 import { GameOptions } from './game-command-options.js';
 import { InitOptions } from '../init/init-command-options.js';
+import { SettingsUtils } from '../../../utils/settings-utils.js';
 
 export class GameInitSubCommand implements Command {
 	public names = [Language.LL.commands.game.init.name()];
@@ -93,12 +92,13 @@ export class GameInitSubCommand implements Command {
 		const diceExpression = intr.options.getString(ChatArgs.ROLL_EXPRESSION_OPTION.name);
 		const targetCharacter = intr.options.getString(GameOptions.GAME_TARGET_CHARACTER.name);
 
-		let [currentInitResponse, activeGame] = await Promise.all([
+		let [currentInitResponse, activeGame, userSettings] = await Promise.all([
 			InitiativeUtils.getInitiativeForChannel(intr.channel, {
 				sendErrors: true,
 				LL,
 			}),
-			await GameUtils.getActiveGame(intr.user.id, intr.guildId),
+			GameUtils.getActiveGame(intr.user.id, intr.guildId),
+			SettingsUtils.getSettingsForUser(intr),
 		]);
 		if (!activeGame) {
 			await InteractionUtils.send(
@@ -153,6 +153,7 @@ export class GameInitSubCommand implements Command {
 				userName: character.sheet.info.name,
 				userId: character.userId,
 				hideStats: false,
+				userSettings,
 				LL,
 			});
 

@@ -23,6 +23,7 @@ export const UserSettingsFactory = UserSettingsFactoryClass.define(
 				'every_round',
 				'whenever_hidden',
 			]),
+			inlineRollsDisplay: faker.helpers.arrayElement(['detailed', 'compact']),
 			rollCompactMode: faker.helpers.arrayElement(['compact', 'normal']),
 		};
 

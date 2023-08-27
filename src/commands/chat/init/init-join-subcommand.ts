@@ -1,5 +1,3 @@
-import { RollBuilder } from '../../../utils/roll-builder.js';
-import { InitiativeActor } from './../../../services/kobold/models/initiative-actor/initiative-actor.model.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -23,6 +21,7 @@ import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Language } from '../../../models/enum-helpers/index.js';
 import { InitOptions } from './init-command-options.js';
+import { SettingsUtils } from '../../../utils/settings-utils.js';
 
 export class InitJoinSubCommand implements Command {
 	public names = [Language.LL.commands.init.join.name()];
@@ -67,12 +66,13 @@ export class InitJoinSubCommand implements Command {
 		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
-		const [currentInitResponse, activeCharacter] = await Promise.all([
+		const [currentInitResponse, activeCharacter, userSettings] = await Promise.all([
 			InitiativeUtils.getInitiativeForChannel(intr.channel, {
 				sendErrors: true,
 				LL,
 			}),
 			CharacterUtils.getActiveCharacter(intr),
+			SettingsUtils.getSettingsForUser(intr),
 		]);
 		if (currentInitResponse.errorMessage) {
 			await InteractionUtils.send(intr, currentInitResponse.errorMessage);
@@ -109,6 +109,7 @@ export class InitJoinSubCommand implements Command {
 			userName: intr.user.username,
 			userId: intr.user.id,
 			hideStats,
+			userSettings,
 			LL,
 		});
 

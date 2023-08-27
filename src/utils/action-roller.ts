@@ -1,9 +1,15 @@
 import _ from 'lodash';
-import { Character, InitiativeActor, Sheet } from '../services/kobold/models/index.js';
+import {
+	Character,
+	InitiativeActor,
+	Sheet,
+	UserSettings,
+} from '../services/kobold/models/index.js';
 import { DiceUtils, MultiRollResult } from './dice-utils.js';
 import { RollBuilder } from './roll-builder.js';
 import { Creature } from './creature.js';
 import { EmbedUtils } from './kobold-embed-utils.js';
+import { UserSettingsFactory } from '../services/kobold/models/user-settings/user-settings.factory.js';
 
 type Action = Character['actions'][0];
 type Roll = Character['actions'][0]['rolls'][0];
@@ -38,6 +44,7 @@ export class ActionRoller {
 	public triggeredResistances: Sheet['defenses']['resistances'] = [];
 	public triggeredImmunities: Sheet['defenses']['immunities'] = [];
 	constructor(
+		public userSettings?: UserSettings,
 		public action?: Action,
 		public creature?: Creature,
 		public targetCreature?: Creature,
@@ -49,6 +56,15 @@ export class ActionRoller {
 		this.tags = _.uniq([...(action?.tags ?? []), this.action?.type]);
 		this.creature = creature;
 		this.options = options;
+
+		if (!userSettings) {
+			this.userSettings = UserSettingsFactory.build({
+				userId: '',
+				inlineRollsDisplay: 'detailed',
+				rollCompactMode: 'normal',
+				initStatsNotification: 'every_round',
+			});
+		}
 	}
 
 	public shouldDisplayDamageText() {
@@ -640,6 +656,7 @@ export class ActionRoller {
 			rollNote,
 			rollDescription,
 			title: options?.title ?? `${this.creature.sheet.info.name} used ${this.action.name}!`,
+			userSettings: this.userSettings,
 		});
 
 		let abilityLevel = 1;

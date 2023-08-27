@@ -12,6 +12,10 @@ export class SettingsOptions {
 				name: Language.LL.commandOptions.settingsSetOption.choices.initTrackerNotifications.name(),
 				value: Language.LL.commandOptions.settingsSetOption.choices.initTrackerNotifications.value(),
 			},
+			{
+				name: Language.LL.commandOptions.settingsSetOption.choices.inlineRollsDisplay.name(),
+				value: Language.LL.commandOptions.settingsSetOption.choices.inlineRollsDisplay.value(),
+			},
 		],
 	};
 	public static readonly SETTINGS_SET_VALUE: APIApplicationCommandBasicOption = {

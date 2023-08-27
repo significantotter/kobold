@@ -18,23 +18,17 @@ import { DiceUtils } from '../../../utils/dice-utils.js';
 import { RollBuilder } from '../../../utils/roll-builder.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Language } from '../../../models/enum-helpers/index.js';
-import { CharacterUtils } from '../../../utils/character-utils.js';
 import { GameUtils } from '../../../utils/game-utils.js';
 import _ from 'lodash';
 import { GameOptions } from './game-command-options.js';
-import {
-	Character,
-	InitiativeActor,
-	ModelWithSheet,
-} from '../../../services/kobold/models/index.js';
+import { ModelWithSheet } from '../../../services/kobold/models/index.js';
 import { EmbedUtils, KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
-import { WG } from '../../../services/wanderers-guide/wanderers-guide.js';
 import { Creature } from '../../../utils/creature.js';
 import { InitOptions } from '../init/init-command-options.js';
-import { InitiativeUtils } from '../../../utils/initiative-utils.js';
 import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
 import { ActionRoller } from '../../../utils/action-roller.js';
 import { getEmoji } from '../../../constants/emoji.js';
+import { SettingsUtils } from '../../../utils/settings-utils.js';
 
 export class GameRollSubCommand implements Command {
 	public names = [Language.LL.commands.game.roll.name()];
@@ -112,13 +106,11 @@ export class GameRollSubCommand implements Command {
 		const targetInitActorName = intr.options.getString(InitOptions.INIT_CHARACTER_TARGET.name);
 
 		const secretRoll = intr.options.getString(ChatArgs.ROLL_SECRET_OPTION.name);
-		const isSecretRoll =
-			secretRoll === Language.LL.commandOptions.rollSecret.choices.secret.value() ||
-			secretRoll === Language.LL.commandOptions.rollSecret.choices.secretAndNotify.value();
-		const notifyRoll =
-			secretRoll === Language.LL.commandOptions.rollSecret.choices.secretAndNotify.value();
 
-		const activeGame = await GameUtils.getActiveGame(intr.user.id, intr.guildId);
+		const [activeGame, userSettings] = await Promise.all([
+			GameUtils.getActiveGame(intr.user.id, intr.guildId),
+			SettingsUtils.getSettingsForUser(intr),
+		]);
 
 		if (!activeGame) {
 			await InteractionUtils.send(
@@ -160,7 +152,12 @@ export class GameRollSubCommand implements Command {
 				);
 			});
 			if (targetAction) {
-				const actionRoller = new ActionRoller(targetAction, creature, targetCreature);
+				const actionRoller = new ActionRoller(
+					userSettings,
+					targetAction,
+					creature,
+					targetCreature
+				);
 
 				const builtRoll = actionRoller.buildRoll(null, targetAction.description, {
 					attackModifierExpression: diceExpression,
@@ -226,22 +223,13 @@ export class GameRollSubCommand implements Command {
 					creature: creature,
 					actorName: intr.user.username,
 					rollDescription: LL.commands.roll.dice.interactions.rolledDice(),
+					userSettings,
 					LL,
 				});
 				rollBuilder.addRoll({ rollExpression: diceExpression });
 				embeds.push(rollBuilder.compileEmbed());
 			}
 		}
-		if (notifyRoll) {
-			await InteractionUtils.send(
-				intr,
-				Language.LL.commands.roll.interactions.secretRollNotification()
-			);
-		}
-		if (intr.replied) {
-			intr.followUp({ embeds: embeds, ephemeral: isSecretRoll });
-		} else {
-			intr.reply({ embeds: embeds, ephemeral: isSecretRoll });
-		}
+		await EmbedUtils.dispatchEmbeds(intr, embeds, secretRoll, activeGame.gmUserId);
 	}
 }

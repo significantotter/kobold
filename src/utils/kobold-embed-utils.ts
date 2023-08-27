@@ -12,6 +12,7 @@ import { Character, Sheet } from '../services/kobold/models/index.js';
 import { InitiativeBuilder, InitiativeUtils, TurnData } from './initiative-utils.js';
 import { InteractionUtils } from './interaction-utils.js';
 import { ActionRoller } from './action-roller.js';
+import { KoboldError } from './KoboldError.js';
 
 export class KoboldEmbed extends EmbedBuilder {
 	public constructor(data?: APIEmbed | EmbedData) {
@@ -294,16 +295,64 @@ export class KoboldEmbed extends EmbedBuilder {
 		const embedBatches: KoboldEmbed[][] = [];
 		return _.chunk(splitEmbeds, 1);
 	}
-	public async sendBatches(intr, isSecretRoll = false, splitText = false) {
+	public static prepareEmbeds(embeds: KoboldEmbed[]) {
+		const finalEmbeds: KoboldEmbed[] = [];
+		for (const embed of embeds) {
+			embed.splitEmbedIfTooLong();
+			const splitEmbeds = embed.splitEmbedIfTooLong();
+			finalEmbeds.push(...splitEmbeds);
+		}
+		return finalEmbeds;
+	}
+	public async sendBatches(intr, isEphemeral = false, splitText = false) {
 		if (splitText && this.data?.fields) this.splitFieldsThatAreTooLong();
 		const splitEmbeds = this.splitEmbedIfTooLong();
 		for (const embed of splitEmbeds) {
-			await InteractionUtils.send(intr, embed, isSecretRoll);
+			await InteractionUtils.send(intr, embed, isEphemeral);
 		}
 	}
 }
 
 export class EmbedUtils {
+	public static async dispatchEmbeds(
+		intr: ChatInputCommandInteraction,
+		embeds: KoboldEmbed[],
+		secretStatus: string,
+		gmUserId?: string
+	) {
+		const isEphemeral =
+			secretStatus === Language.LL.commandOptions.rollSecret.choices.secret.value() ||
+			secretStatus ===
+				Language.LL.commandOptions.rollSecret.choices.secretAndNotify.value() ||
+			secretStatus === Language.LL.commandOptions.rollSecret.choices.sendToGm.value();
+		const notifyRoll =
+			secretStatus ===
+				Language.LL.commandOptions.rollSecret.choices.secretAndNotify.value() ||
+			secretStatus === Language.LL.commandOptions.rollSecret.choices.sendToGm.value();
+		const sendToGm =
+			secretStatus === Language.LL.commandOptions.rollSecret.choices.sendToGm.value();
+
+		if (notifyRoll) {
+			await InteractionUtils.send(
+				intr,
+				Language.LL.commands.roll.interactions.secretRollNotification()
+			);
+		}
+		const finalEmbeds = KoboldEmbed.prepareEmbeds(embeds);
+		if (sendToGm && gmUserId) {
+			await intr.client.users.send(gmUserId, { embeds: finalEmbeds });
+		} else if (sendToGm && !gmUserId) {
+			throw new KoboldError(
+				"Yip! You can't send a secret roll to the GM if you aren't in a game! See `/help game` for more info!"
+			);
+		} else {
+			if (intr.replied) {
+				intr.followUp({ embeds: finalEmbeds, ephemeral: isEphemeral });
+			} else {
+				intr.reply({ embeds: finalEmbeds, ephemeral: isEphemeral });
+			}
+		}
+	}
 	public static describeActionResult({
 		embed,
 		action,
