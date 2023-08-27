@@ -89,7 +89,8 @@ export function parseBonusesForTagsFromModifiers(
 	// for each modifier, check if it targets any tags for this roll
 	for (const modifier of modifiers) {
 		// if this modifier isn't active, move to the next one
-		if (!modifier.isActive || modifier.modifierType === 'sheet') continue;
+		if (!modifier.isActive || modifier.modifierType === 'sheet' || modifier.value == null)
+			continue;
 
 		const modifierValidForTags = isModifierValidForTags(modifier, attributes, sanitizedTags);
 
