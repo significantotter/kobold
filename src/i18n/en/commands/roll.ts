@@ -30,8 +30,8 @@ export default {
 			'**[*dice*] optional**: A dice expression to roll ("1d20 - 1d4 + 3"). Added to the end ' +
 			'of the skill roll. Alternatively, a simple modifier value ("5" or "-3").\n' +
 			'**[*note*] optional**: A note to add to the end of the dice roll.\n' +
-			'**[*secret*] optional**: Choose to either leave the roll public (default), hide the roll entirely, or ' +
-			'hide the roll, but publicly notify the channel that a roll has been made.',
+			'**[*secret*] optional**: Choose to either leave the roll public (default), hide the roll entirely, ' +
+			'hide the roll, but publicly notify the channel that a roll has been made, or send the roll to your gm.',
 		description: `rolls a skill for your active character`,
 	},
 	perception: {
@@ -41,8 +41,8 @@ export default {
 			'**[*dice*] optional**: A dice expression to roll ("1d20 - 1d4 + 3"). Added to the end ' +
 			'of the perception roll. Alternatively, a simple modifier value ("5" or "-3").\n' +
 			'**[*note*] optional**: A note to add to the end of the dice roll.\n' +
-			'**[*secret*] optional**: Choose to either leave the roll public (default), hide the roll entirely, or ' +
-			'hide the roll, but publicly notify the channel that a roll has been made.',
+			'**[*secret*] optional**: Choose to either leave the roll public (default), hide the roll entirely, ' +
+			'hide the roll, but publicly notify the channel that a roll has been made, or send the roll to your gm.',
 		description: `rolls perception for your active character`,
 	},
 	save: {
@@ -53,8 +53,8 @@ export default {
 			'**[*dice*] optional**: A dice expression to roll ("1d20 - 1d4 + 3"). Added to the end ' +
 			'of the save roll. Alternatively, a simple modifier value ("5" or "-3").\n' +
 			'**[*note*] optional**: A note to add to the end of the dice roll.\n' +
-			'**[*secret*] optional**: Choose to either leave the roll public (default), hide the roll entirely, or ' +
-			'hide the roll, but publicly notify the channel that a roll has been made.',
+			'**[*secret*] optional**: Choose to either leave the roll public (default), hide the roll entirely, ' +
+			'hide the roll, but publicly notify the channel that a roll has been made, or send the roll to your gm.',
 		description: `rolls a saving throw for your active character`,
 	},
 	ability: {
@@ -65,8 +65,8 @@ export default {
 			'**[*dice*] optional**: A dice expression to roll ("1d20 - 1d4 + 3"). Added to the end ' +
 			'of the ability roll. Alternatively, a simple modifier value ("5" or "-3").\n' +
 			'**[*note*] optional**: A note to add to the end of the dice roll.\n' +
-			'**[*secret*] optional**: Choose to either leave the roll public (default), hide the roll entirely, or ' +
-			'hide the roll, but publicly notify the channel that a roll has been made.',
+			'**[*secret*] optional**: Choose to either leave the roll public (default), hide the roll entirely, ' +
+			'hide the roll, but publicly notify the channel that a roll has been made, or send the roll to your gm.',
 		description: `rolls an ability for your active character`,
 	},
 	attack: {
@@ -81,8 +81,8 @@ export default {
 			'**[*damage\\_modifier*] optional**: A dice expression to roll ("1d20 - 1d4 + 3"). Added to ' +
 			'the end of the damage roll. Alternatively, a simple modifier value ("5" or "-3").\n' +
 			'**[*note*] optional**: A note to add to the end of the dice roll.\n' +
-			'**[*secret*] optional**: Choose to either leave the roll public (default), hide the roll entirely, or ' +
-			'hide the roll, but publicly notify the channel that a roll has been made.\n' +
+			'**[*secret*] optional**: Choose to either leave the roll public (default), hide the roll entirely, ' +
+			'hide the roll, but publicly notify the channel that a roll has been made, or send the roll to your gm.\n' +
 			'**[*overwrite-ac*] optional**: Overwrite the AC of the attack.',
 		description: `rolls an attack for your active character`,
 		interactions: {
@@ -105,8 +105,8 @@ export default {
 			'**[*damage\\_modifier*] optional**: A dice expression to roll ("1d20 - 1d4 + 3"). Added to ' +
 			'the end of the damage roll. Alternatively, a simple modifier value ("5" or "-3").\n' +
 			'**[*note*] optional**: A note to add to the end of the dice roll.\n' +
-			'**[*secret*] optional**: Choose to either leave the roll public (default), hide the roll entirely, or ' +
-			'hide the roll, but publicly notify the channel that a roll has been made.' +
+			'**[*secret*] optional**: Choose to either leave the roll public (default), hide the roll entirely, ' +
+			'hide the roll, but publicly notify the channel that a roll has been made, or send the roll to your gm.' +
 			'**[*overwrite-dc*] optional**: Overwrite the DC of the action. Only works if the action has a DC.\n' +
 			'**[*overwrite-save-dice-roll*] optional**: Overwrite the dice roll of the save. Only works if the action has a save.',
 		description: `rolls an action for your active character`,

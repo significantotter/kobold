@@ -277,6 +277,7 @@ export class HelpCommand implements Command {
 					{
 						name: LL.commands.modifier.name(),
 						value:
+							`\`/${LL.commands.modifier.name()} ${LL.commands.modifier.createSheetModifier.name()}\` ${LL.commands.modifier.createSheetModifier.description()}\n` +
 							`\`/${LL.commands.modifier.name()} ${LL.commands.modifier.createRollModifier.name()}\` ${LL.commands.modifier.createRollModifier.description()}\n` +
 							`\`/${LL.commands.modifier.name()} ${LL.commands.modifier.toggle.name()}\` ${LL.commands.modifier.toggle.description()}\n` +
 							`\`/${LL.commands.modifier.name()} ${LL.commands.modifier.list.name()}\` ${LL.commands.modifier.list.description()}\n` +
@@ -409,6 +410,7 @@ export class HelpCommand implements Command {
 				embed.setDescription(LL.commands.help.modifier.interactions.embed.description());
 				embed.addFields(
 					[
+						LL.commands.modifier.createSheetModifier.name(),
 						LL.commands.modifier.createRollModifier.name(),
 						LL.commands.modifier.toggle.name(),
 						LL.commands.modifier.list.name(),
