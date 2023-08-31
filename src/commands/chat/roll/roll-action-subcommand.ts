@@ -172,6 +172,6 @@ export class RollActionSubCommand implements Command {
 
 			response.addFields(damageField);
 		}
-		await EmbedUtils.dispatchEmbeds(intr, [response], secretRoll, activeGame.gmUserId);
+		await EmbedUtils.dispatchEmbeds(intr, [response], secretRoll, activeGame?.gmUserId);
 	}
 }

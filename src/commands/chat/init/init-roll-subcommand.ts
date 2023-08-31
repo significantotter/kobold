@@ -142,7 +142,7 @@ export class InitRollSubCommand implements Command {
 				rollBuilder.addRoll({ rollExpression: modifierExpression ?? 'd20' });
 				const response = rollBuilder.compileEmbed();
 
-				await EmbedUtils.dispatchEmbeds(intr, [response], secretRoll, activeGame.gmUserId);
+				await EmbedUtils.dispatchEmbeds(intr, [response], secretRoll, activeGame?.gmUserId);
 				return;
 			} else {
 				await InteractionUtils.send(intr, LL.commands.init.roll.interactions.noSheet());

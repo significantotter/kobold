@@ -65,6 +65,6 @@ export class RollDiceSubCommand implements Command {
 		rollBuilder.addRoll({ rollExpression: diceExpression });
 		const response = rollBuilder.compileEmbed();
 
-		await EmbedUtils.dispatchEmbeds(intr, [response], secretRoll, activeGame.gmUserId);
+		await EmbedUtils.dispatchEmbeds(intr, [response], secretRoll, activeGame?.gmUserId);
 	}
 }

@@ -75,6 +75,6 @@ export class RollPerceptionSubCommand implements Command {
 		});
 		const response = rollBuilder.compileEmbed();
 
-		await EmbedUtils.dispatchEmbeds(intr, [response], secretRoll, activeGame.gmUserId);
+		await EmbedUtils.dispatchEmbeds(intr, [response], secretRoll, activeGame?.gmUserId);
 	}
 }

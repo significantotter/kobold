@@ -230,6 +230,6 @@ export class GameRollSubCommand implements Command {
 				embeds.push(rollBuilder.compileEmbed());
 			}
 		}
-		await EmbedUtils.dispatchEmbeds(intr, embeds, secretRoll, activeGame.gmUserId);
+		await EmbedUtils.dispatchEmbeds(intr, embeds, secretRoll, activeGame?.gmUserId);
 	}
 }
