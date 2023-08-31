@@ -1,4 +1,4 @@
-import { KoboldEmbed } from './../../../utils/kobold-embed-utils';
+import { KoboldEmbed } from './../../../utils/kobold-embed-utils.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -44,17 +44,32 @@ export class ModifierListSubCommand implements Command {
 		const modifiers = activeCharacter.modifiers;
 		const fields = [];
 		for (const modifier of modifiers.sort((a, b) => (a.name || '').localeCompare(b.name))) {
+			let value: string;
+			if (modifier.modifierType === 'roll') {
+				value = LL.commands.modifier.interactions.detailBodyRoll({
+					modifierDescriptionText: modifier.description,
+					modifierType: modifier.type || 'untyped',
+					modifierValue: modifier.value,
+					modifierTargetTags: modifier.targetTags,
+				});
+			} else {
+				value = LL.commands.modifier.interactions.detailBodySheet({
+					modifierDescriptionText: modifier.description,
+					modifierType: modifier.type || 'untyped',
+					modifierSheetValues: modifier.sheetAdjustments
+						.map(sheetAdjustment => {
+							return `${sheetAdjustment.property} ${sheetAdjustment.operation} ${sheetAdjustment.value}`;
+						})
+						.join(', '),
+				});
+			}
+
 			fields.push({
 				name: LL.commands.modifier.interactions.detailHeader({
 					modifierName: modifier.name,
 					modifierIsActive: modifier.isActive ? ' (active)' : '',
 				}),
-				value: LL.commands.modifier.interactions.detailBody({
-					modifierDescriptionText: modifier.description,
-					modifierType: modifier.type || 'untyped',
-					modifierValue: modifier.value,
-					modifierTargetTags: modifier.targetTags,
-				}),
+				value,
 				inline: true,
 			});
 		}

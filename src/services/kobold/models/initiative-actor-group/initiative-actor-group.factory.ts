@@ -1,5 +1,5 @@
-import { InitiativeActorFactory } from './../initiative-actor/initiative-actor.factory';
-import { InitiativeFactory } from './../initiative/initiative.factory';
+import { InitiativeActorFactory } from './../initiative-actor/initiative-actor.factory.js';
+import { InitiativeFactory } from './../initiative/initiative.factory.js';
 import { Factory } from 'fishery';
 import type { DeepPartial } from 'fishery';
 import { InitiativeActorGroup } from './initiative-actor-group.model.js';

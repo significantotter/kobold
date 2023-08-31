@@ -86,8 +86,21 @@
 					"isActive": { "type": "boolean" },
 					"description": { "type": ["string", "null"] },
 					"type": { "type": "string" },
-					"targetTags": { "type": "string" },
-					"value": { "type": ["number", "string"] }
+					"targetTags": { "type": ["string", "null"] },
+					"value": { "type": ["number", "string", "null"] },
+
+					"modifierType": { "type": "string", "enum": ["roll", "sheet"] },
+					"sheetAdjustments": {
+						"type": ["array", "null"],
+						"items": {
+							"type": "object",
+							"properties": {
+								"property": { "type": "string" },
+								"operation": { "type": "string", "enum": ["+", "-", "="] },
+								"value": { "type": "string" }
+							}
+						}
+					}
 				}
 			}
 		},

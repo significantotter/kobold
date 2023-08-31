@@ -1,4 +1,4 @@
-import { Character } from './../services/kobold/models/character/character.model';
+import { Character } from './../services/kobold/models/character/character.model.js';
 import { APIEmbedField, ChatInputCommandInteraction } from 'discord.js';
 import { Dice, DiceResult } from 'dice-typescript';
 import _ from 'lodash';
@@ -10,6 +10,7 @@ import { Creature } from './creature.js';
 import { ActionRoller } from './action-roller.js';
 import { getEmoji } from '../constants/emoji.js';
 import { EmbedUtils, KoboldEmbed } from './kobold-embed-utils.js';
+import { UserSettings } from '../services/kobold/models/index.js';
 
 export interface DiceRollResult extends APIEmbedField {
 	results: DiceResult | null;
@@ -64,7 +65,6 @@ export class DiceUtils {
 		bonus?: string,
 		modifierExpression?: string
 	) {
-		let builtDice = '';
 		//if we have a bonus, and the bonus does not start with + or -
 		if (bonus?.length && !['-', '+'].includes(bonus.charAt(0))) {
 			//add a sign to the bonus
@@ -102,7 +102,7 @@ export class DiceUtils {
 			attributeObject =>
 				attributeObject.name.replace(trimRegex, '').toLowerCase() === attributeName
 		);
-		const staticAttribute = staticAttributes(creature.sheet).find(
+		const staticAttribute = staticAttributes(creature?.sheet).find(
 			attributeObject =>
 				attributeObject.name.replace(trimRegex, '').toLowerCase() === attributeName
 		);
@@ -155,7 +155,7 @@ export class DiceUtils {
 				finalExpression += token;
 			}
 		}
-		return [finalExpression, newTags];
+		return [finalExpression, _.uniq(newTags)];
 	}
 
 	public static parseDiceExpression({
@@ -334,6 +334,7 @@ export class DiceUtils {
 		modifierExpression,
 		description,
 		tags,
+		userSettings,
 		LL,
 	}: {
 		userName?: string;
@@ -344,6 +345,7 @@ export class DiceUtils {
 		modifierExpression?: string;
 		description?: string;
 		tags?: string[];
+		userSettings?: UserSettings;
 		LL?: TranslationFunctions;
 	}): RollBuilder {
 		LL = LL || Language.LL;
@@ -360,6 +362,7 @@ export class DiceUtils {
 				LL.utils.dice.rolledAction({
 					actionName: _.startCase(roll.name),
 				}),
+			userSettings,
 		});
 		rollBuilder.addRoll({
 			rollExpression: DiceUtils.buildDiceExpression(
@@ -379,6 +382,7 @@ export class DiceUtils {
 		attackModifierExpression,
 		damageModifierExpression,
 		targetAC,
+		userSettings,
 		LL,
 	}: {
 		creature: Creature;
@@ -388,6 +392,7 @@ export class DiceUtils {
 		attackModifierExpression?: string;
 		damageModifierExpression?: string;
 		targetAC?: number;
+		userSettings?: UserSettings;
 		LL;
 	}): { actionRoller: ActionRoller; builtRoll: RollBuilder } {
 		const targetAttack = creature.attackRolls[attackName.toLowerCase()];
@@ -442,7 +447,7 @@ export class DiceUtils {
 			});
 		}
 
-		const actionRoller = new ActionRoller(action, creature, targetCreature);
+		const actionRoller = new ActionRoller(userSettings, action, creature, targetCreature);
 		const builtRoll = actionRoller.buildRoll(
 			rollNote,
 			Language.LL.commands.roll.attack.interactions.rollEmbed.rollDescription({
@@ -471,6 +476,7 @@ export class DiceUtils {
 			hideStats?: boolean;
 			targetNameOverwrite?: string;
 			sourceNameOverwrite?: string;
+			userSettings?: UserSettings;
 			LL?: TranslationFunctions;
 		}
 	): Promise<{ error: boolean; message: string | KoboldEmbed; actionRoller?: ActionRoller }> {
@@ -516,7 +522,12 @@ export class DiceUtils {
 
 			embed = attackResult.builtRoll.compileEmbed({ forceFields: true });
 		} else if (targetAction) {
-			const actionRoller = new ActionRoller(targetAction, creature, options.targetCreature);
+			const actionRoller = new ActionRoller(
+				options.userSettings,
+				targetAction,
+				creature,
+				options.targetCreature
+			);
 
 			const builtRoll = actionRoller.buildRoll(options.rollNote, targetAction.description, {
 				attackModifierExpression: options.modifierExpression,

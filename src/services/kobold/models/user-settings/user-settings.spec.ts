@@ -2,10 +2,10 @@ import { CharacterFactory } from './../character/character.factory.js';
 import Ajv from 'ajv';
 import { UserSettingsFactory } from './user-settings.factory.js';
 import { UserSettings } from './user-settings.model.js';
-import UserSettingsSchema from './user-settings.schema.json';
+import UserSettingsSchema from './user-settings.schema.json' assert { type: 'json' };
 import addFormats from 'ajv-formats';
-const ajv = new Ajv({ allowUnionTypes: true });
-addFormats(ajv);
+const ajv = new Ajv.default({ allowUnionTypes: true });
+addFormats.default(ajv);
 
 describe('UserSettings', () => {
 	test('validates a built factory', () => {
@@ -16,21 +16,9 @@ describe('UserSettings', () => {
 	test('validates a created factory object', async () => {
 		const character = await CharacterFactory.create();
 		const createdUserSettings = await UserSettingsFactory.create({
-			characterId: character.id,
+			userId: 'foo',
 		});
 		const valid = ajv.validate(UserSettingsSchema, createdUserSettings);
 		expect(valid).toBe(true);
-	});
-	test('Model successfully inserts and retrieves a created character', async () => {
-		const character = await CharacterFactory.create();
-		const builtUserSettings = UserSettingsFactory.build({
-			characterId: character.id,
-		});
-		await UserSettings.query().insert(builtUserSettings);
-		const fetchedUserSettings = await UserSettings.query();
-		const insertedUserSettings = fetchedUserSettings.find(
-			guildDefaultChars => guildDefaultChars.characterId === builtUserSettings.characterId
-		);
-		expect(insertedUserSettings.characterId).toBe(builtUserSettings.characterId);
 	});
 });

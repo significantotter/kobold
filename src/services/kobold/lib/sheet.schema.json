@@ -143,6 +143,10 @@
 					"description": "The character's class DC.",
 					"type": ["integer", "null"]
 				},
+				"classAttack": {
+					"description": "The character's class attack roll.",
+					"type": ["integer", "null"]
+				},
 				"perception": {
 					"description": "The character's perception.",
 					"type": ["integer", "null"]
@@ -574,12 +578,25 @@
 			"items": {
 				"type": "object",
 				"properties": {
-					"name": { "type": ["string", "null"] },
+					"name": { "type": "string" },
 					"isActive": { "type": "boolean" },
 					"description": { "type": ["string", "null"] },
-					"type": { "type": ["string", "null"] },
+					"type": { "type": "string" },
 					"targetTags": { "type": ["string", "null"] },
-					"value": { "type": ["number", "string"] }
+					"value": { "type": ["number", "string", "null"] },
+
+					"modifierType": { "type": "string", "enum": ["roll", "sheet"] },
+					"sheetAdjustments": {
+						"type": ["array", "null"],
+						"items": {
+							"type": "object",
+							"properties": {
+								"property": { "type": "string" },
+								"operation": { "type": "string", "enum": ["+", "-", "="] },
+								"value": { "type": "string" }
+							}
+						}
+					}
 				}
 			}
 		},

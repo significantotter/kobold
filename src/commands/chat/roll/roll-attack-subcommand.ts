@@ -16,16 +16,15 @@ import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
 import { DiceUtils } from '../../../utils/dice-utils.js';
-import { RollBuilder } from '../../../utils/roll-builder.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Language } from '../../../models/enum-helpers/index.js';
 import { Creature } from '../../../utils/creature.js';
 import { InitOptions } from '../init/init-command-options.js';
 import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
-import { InitiativeUtils } from '../../../utils/initiative-utils.js';
-import { Character, InitiativeActor } from '../../../services/kobold/models/index.js';
+import { InitiativeActor } from '../../../services/kobold/models/index.js';
 import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
 import { GameUtils } from '../../../utils/game-utils.js';
+import { SettingsUtils } from '../../../utils/settings-utils.js';
 
 export class RollAttackSubCommand implements Command {
 	public names = [Language.LL.commands.roll.attack.name()];
@@ -91,18 +90,16 @@ export class RollAttackSubCommand implements Command {
 		const targetAC = intr.options.getInteger(ChatArgs.ROLL_TARGET_AC_OPTION.name);
 
 		const secretRoll = intr.options.getString(ChatArgs.ROLL_SECRET_OPTION.name);
-		const isSecretRoll =
-			secretRoll === Language.LL.commandOptions.rollSecret.choices.secret.value() ||
-			secretRoll === Language.LL.commandOptions.rollSecret.choices.secretAndNotify.value();
-		const notifyRoll =
-			secretRoll === Language.LL.commandOptions.rollSecret.choices.secretAndNotify.value();
 
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
+		const [activeCharacter, userSettings, activeGame] = await Promise.all([
+			CharacterUtils.getActiveCharacter(intr),
+			SettingsUtils.getSettingsForUser(intr),
+			GameUtils.getActiveGame(intr.user.id, intr.guildId),
+		]);
 		if (!activeCharacter) {
 			await InteractionUtils.send(
 				intr,
-				Language.LL.commands.roll.interactions.noActiveCharacter(),
-				isSecretRoll
+				Language.LL.commands.roll.interactions.noActiveCharacter()
 			);
 			return;
 		}
@@ -112,7 +109,11 @@ export class RollAttackSubCommand implements Command {
 		let targetCreature: Creature | undefined;
 		let targetActor: InitiativeActor | undefined;
 
-		if (targetInitActorName && targetInitActorName !== '__NONE__') {
+		if (
+			targetInitActorName &&
+			targetInitActorName.trim().toLocaleLowerCase() != '__none__' &&
+			targetInitActorName.trim().toLocaleLowerCase() != '(none)'
+		) {
 			const { targetCharacter, targetInitActor } =
 				await GameUtils.getCharacterOrInitActorTarget(intr, targetInitActorName);
 			targetActor = targetInitActor ?? targetCharacter;
@@ -127,6 +128,7 @@ export class RollAttackSubCommand implements Command {
 			attackModifierExpression,
 			damageModifierExpression,
 			targetAC,
+			userSettings,
 			LL,
 		});
 
@@ -136,13 +138,6 @@ export class RollAttackSubCommand implements Command {
 		}
 
 		const embed = builtRoll.compileEmbed({ forceFields: true });
-
-		if (notifyRoll) {
-			await InteractionUtils.send(
-				intr,
-				Language.LL.commands.roll.interactions.secretRollNotification()
-			);
-		}
 
 		if (targetCreature && actionRoller.shouldDisplayDamageText()) {
 			await targetActor.saveSheet(intr, actionRoller.targetCreature.sheet);
@@ -158,6 +153,6 @@ export class RollAttackSubCommand implements Command {
 			embed.addFields(damageField);
 		}
 
-		await embed.sendBatches(intr, isSecretRoll);
+		await EmbedUtils.dispatchEmbeds(intr, [embed], secretRoll, activeGame?.gmUserId);
 	}
 }

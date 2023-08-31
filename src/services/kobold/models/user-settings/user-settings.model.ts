@@ -1,9 +1,9 @@
-import type UserSettingsTypes from './user-settings.schema.js';
+import type { UserSettings as UserSettingsType } from './user-settings.schema.js';
 import { JSONSchema7 } from 'json-schema';
 import { BaseModel } from '../../lib/base-model.js';
-import UserSettingsSchema from './user-settings.schema.json';
+import UserSettingsSchema from './user-settings.schema.json' assert { type: 'json' };
 
-export interface UserSettings extends UserSettingsTypes.UserSettings {}
+export interface UserSettings extends UserSettingsType {}
 export class UserSettings extends BaseModel {
 	static get idColumn() {
 		return ['userId'];

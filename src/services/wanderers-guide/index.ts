@@ -1,9 +1,9 @@
 import { CharacterApi } from './character-api/index.js';
 import { ClassApi } from './class-api/index.js';
 import { AncestryApi } from './ancestry-api/index.js';
-import { BackgroundApi } from './background-api/index';
+import { BackgroundApi } from './background-api/index.js';
 import { HeritageApi } from './heritage-api/index.js';
-import { VHeritageApi } from './v-heritage-api/index';
+import { VHeritageApi } from './v-heritage-api/index.js';
 
 interface httpHeaders {
 	[key: string]: number | string;

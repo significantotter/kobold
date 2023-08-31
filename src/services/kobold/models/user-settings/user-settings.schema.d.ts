@@ -21,5 +21,9 @@ export interface UserSettings {
 	 * Whether to roll in compact mode.
 	 */
 	rollCompactMode?: "compact" | "normal";
+	/**
+	 * How detailed to display inline rolls.
+	 */
+	inlineRollsDisplay?: "compact" | "detailed";
 	[k: string]: any;
 }

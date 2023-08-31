@@ -15,7 +15,7 @@ import { Lang, Logger } from '../services/index.js';
 import { CommandUtils, InteractionUtils } from '../utils/index.js';
 import { EventHandler } from './index.js';
 import { Config } from './../config/config.js';
-import Logs from './../config/lang/logs.json';
+import Logs from './../config/lang/logs.json' assert { type: 'json' };
 import { Language } from '../models/enum-helpers/language.js';
 import { KoboldEmbed } from '../utils/kobold-embed-utils.js';
 import { refs } from '../i18n/en/common.js';

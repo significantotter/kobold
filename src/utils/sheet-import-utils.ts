@@ -329,6 +329,7 @@ export function convertBestiaryCreatureToSheet(
 			currentFocusPoints: focusPoints,
 			focusPoints,
 			classDC: null,
+			classAttack: null,
 			perception: bestiaryEntry.perception?.std + rollAdjustment,
 			perceptionProfMod: null,
 			senses: (bestiaryEntry.senses || [])
@@ -533,6 +534,7 @@ export function convertWanderersGuideCharToSheet(
 			currentFocusPoints: null,
 			focusPoints: null,
 			classDC: calculatedStats.totalClassDC,
+			classAttack: calculatedStats.totalClassDC - 10,
 			perception: calculatedStats.totalPerception,
 			perceptionProfMod: calculatedStats.primalSpellProfMod,
 			languages: [],
@@ -786,6 +788,7 @@ export function convertPathBuilderToSheet(
 			currentFocusPoints: 0,
 			focusPoints: pathBuilderSheet.focusPoints,
 			classDC: null, // filled in later as it uses the key ability
+			classAttack: null, // filled in later as it uses the key ability
 			perception:
 				pathBuilderProfToScore(pathBuilderSheet.proficiencies.perception) +
 				scoreToBonus(pathBuilderSheet.abilities.wis) +
@@ -993,6 +996,8 @@ export function convertPathBuilderToSheet(
 
 	sheet.general.classDC =
 		10 + pathBuilderProfToScore(pathBuilderSheet.proficiencies?.classDC) + keyabilityBonus;
+
+	sheet.general.classAttack = sheet.general.classDC - 10;
 
 	for (const spellcasting of pathBuilderSheet.spellCasters) {
 		const spellAttack =

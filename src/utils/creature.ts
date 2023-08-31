@@ -1,9 +1,4 @@
-import {
-	Character,
-	InitiativeActor,
-	ModelWithSheet,
-	Sheet,
-} from '../services/kobold/models/index.js';
+import { Character, ModelWithSheet, Sheet } from '../services/kobold/models/index.js';
 import { PathBuilder } from '../services/pathbuilder/pathbuilder.js';
 import { CreatureStatBlock } from '../services/pf2etools/bestiaryType.js';
 import { WG } from '../services/wanderers-guide/wanderers-guide.js';
@@ -17,7 +12,7 @@ import { KoboldEmbed } from './kobold-embed-utils.js';
 import { parseBonusesForTagsFromModifiers } from '../services/kobold/lib/helpers.js';
 import { KoboldError } from './KoboldError.js';
 import { BaseMessageOptions } from 'discord.js';
-import { MessageOptions } from 'child_process';
+import { SheetUtils } from './sheet-utils.js';
 
 const damageTypeShorthands: { [shorthand: string]: string } = {
 	piercing: 'p',
@@ -52,7 +47,8 @@ export interface attackRoll {
 }
 
 export class Creature {
-	constructor(public sheet: Sheet, private _name?: string) {
+	private _adjustedSheet: Sheet;
+	constructor(public _sheet: Sheet, private _name?: string) {
 		const sheetDefaults: Sheet = {
 			info: { traits: [] },
 			general: { senses: [], languages: [] },
@@ -68,7 +64,17 @@ export class Creature {
 			modifiers: [],
 			sourceData: {},
 		};
-		this.sheet = _.defaultsDeep(this.sheet, sheetDefaults);
+		this._sheet = _.defaultsDeep(this._sheet, sheetDefaults);
+		const sheetAdjustments = SheetUtils.parseSheetModifiers(this._sheet, this._sheet.modifiers);
+		this._adjustedSheet = SheetUtils.applySheetAdjustments(
+			this._sheet,
+			sheetAdjustments.overwriteSheetAdjustments,
+			sheetAdjustments.modifySheetAdjustments
+		);
+	}
+
+	public get sheet() {
+		return this._adjustedSheet;
 	}
 
 	public get name() {
@@ -239,9 +245,12 @@ export class Creature {
 			generalText += `Perception \`${this.sheet.general.perception}\` (DC ${
 				10 + this.sheet.general.perception
 			})\n`;
-		if (this.sheet.general.classDC != null)
-			generalText += `Class DC \`${this.sheet.general.classDC}\`\n`;
-
+		if (this.sheet.general.classDC != null) {
+			generalText += `Class DC \`${this.sheet.general.classDC}\`, `;
+			generalText += `Class Attack \`${
+				this.sheet.general.classAttack ?? this.sheet.general.classDC - 10
+			}\`\n`;
+		}
 		const hasASpeed =
 			this.sheet.general.speed != null ||
 			this.sheet.general.flySpeed != null ||
@@ -785,9 +794,9 @@ export class Creature {
 
 		rolls.perception = {
 			name: 'perception',
-			type: 'skill',
+			type: 'check',
 			bonus: this.sheet.general.perception,
-			tags: ['skill', 'perception', 'wisdom'],
+			tags: ['check', 'perception', 'wisdom'],
 		};
 
 		for (const skill in this.sheet.skills) {
@@ -890,6 +899,59 @@ export class Creature {
 		return this.sheet?.rollMacros;
 	}
 
+	public get sheetPropertyGroups() {
+		return SheetUtils.sheetPropertyGroups;
+	}
+	public static sheetPropertyValid(propertyName: string): boolean {
+		//parse groups
+		const groups = _.kebabCase(propertyName).split('-');
+		if (groups.length === 1) {
+			// check against direct property names
+		} else if (groups[groups.length - 1] === 'lore') {
+			// arbitrary lore names are valid
+			return true;
+		} else if (groups.length === 2) {
+			// must be a combination of attribute and group type (e.g. strength skills)
+		} else {
+			return false;
+		}
+		return;
+	}
+
+	public get sheetProperties() {
+		return [
+			...Object.keys(this.sheet.info),
+			...Object.keys(this.sheet.general),
+			...Object.keys(this.sheet.defenses),
+			...Object.keys(this.sheet.skills),
+			...Object.keys(this.sheet.saves),
+			...Object.keys(this.sheet.abilities),
+			...Object.keys(this.sheet.castingStats),
+			...Object.keys(this.sheet.offense),
+		]
+			.filter(key => !['name', 'level', 'languages', 'senses'].includes(key))
+			.map(property => _.camelCase(property));
+	}
+	public get numericSheetProperties() {
+		return [
+			'age',
+			..._.without(Object.keys(this.sheet.general), 'languages', 'senses'),
+			..._.without(
+				Object.keys(this.sheet.defenses),
+				'immunities',
+				'resistances',
+				'weaknesses'
+			),
+			..._.without(Object.keys(this.sheet.skills), 'lores'),
+			...Object.keys(this.sheet.saves),
+			...Object.keys(this.sheet.abilities),
+			...Object.keys(this.sheet.castingStats),
+			...Object.keys(this.sheet.offense),
+		]
+			.filter(key => !['level'].includes(key))
+			.map(property => _.camelCase(property));
+	}
+
 	public get attributes() {
 		const baseAttributes = [
 			{ name: 'level', type: 'base', value: this.sheet.info.level, tags: ['level'] },
@@ -918,8 +980,14 @@ export class Creature {
 			{
 				name: 'classDc',
 				type: 'base',
-				value: this.sheet.general.classDC || 0,
+				value: this.sheet.general.classDC || 10,
 				tags: ['classDc'],
+			},
+			{
+				name: 'classAttack',
+				type: 'base',
+				value: this.sheet.general.classAttack || 0,
+				tags: ['classAttack'],
 			},
 			{
 				name: 'perception',
@@ -1392,7 +1460,7 @@ export class Creature {
 		}[]
 	): Sheet['modifiers'] {
 		const { untyped, bonuses, penalties } = parseBonusesForTagsFromModifiers(
-			this.modifiers,
+			this.modifiers.filter(modifier => modifier.modifierType === 'roll'),
 			[
 				...(this.attributes as {
 					name: string;

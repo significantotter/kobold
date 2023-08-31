@@ -1,10 +1,10 @@
 import Ajv from 'ajv';
 import { WgTokenFactory } from './wg-token.factory.js';
 import { WgToken } from './wg-token.model.js';
-import WgTokenSchema from './wg-token.schema.json';
+import WgTokenSchema from './wg-token.schema.json' assert { type: 'json' };
 import addFormats from 'ajv-formats';
-const ajv = new Ajv({ allowUnionTypes: true });
-addFormats(ajv);
+const ajv = new Ajv.default({ allowUnionTypes: true });
+addFormats.default(ajv);
 
 describe('WG Token', () => {
 	test('validates a built factory', () => {

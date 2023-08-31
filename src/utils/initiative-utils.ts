@@ -1,4 +1,4 @@
-import { TranslationFunctions } from './../i18n/i18n-types';
+import { TranslationFunctions } from './../i18n/i18n-types.js';
 import {
 	InitiativeActorGroup,
 	InitiativeActor,
@@ -369,6 +369,7 @@ export class InitiativeUtils {
 		userName,
 		userId,
 		hideStats,
+		userSettings,
 		LL,
 	}: {
 		character: Character;
@@ -379,6 +380,7 @@ export class InitiativeUtils {
 		userName: string;
 		userId: string;
 		hideStats: boolean;
+		userSettings: UserSettings;
 		LL: TranslationFunctions;
 	}): Promise<KoboldEmbed> {
 		let finalInitiative = 0;
@@ -414,6 +416,7 @@ export class InitiativeUtils {
 			const rollBuilder = new RollBuilder({
 				character: character,
 				rollDescription: LL.commands.init.join.interactions.joinedEmbed.rollDescription(),
+				userSettings,
 				LL,
 			});
 			rollBuilder.addRoll({
@@ -429,7 +432,10 @@ export class InitiativeUtils {
 				attributeName: 'perception',
 				modifierExpression: diceExpression,
 				tags: ['initiative'],
+				userSettings,
 			});
+			if (response.rollResults[0]['error'])
+				throw new KoboldError(response.rollResults[0]['value']);
 			finalInitiative = response.getRollTotalArray()[0] || 0;
 			rollResultMessage = response.compileEmbed();
 		}

@@ -56,8 +56,8 @@ export default {
 			'of the roll if choosing a skill/ability/save. Alternatively, a simple modifier value ("5" or "-3").\n' +
 			'**[*game-target-character*] optional**: Restricts the roll to just the specified character.\n' +
 			'**[target-character] optional**: The target character for an attack or action. Select (None) for no target.\n' +
-			'**[*secret*] optional**: Choose to either leave the roll public (default), hide the roll entirely, or ' +
-			'hide the roll, but publicly notify the channel that a roll has been made.',
+			'**[*secret*] optional**: Choose to either leave the roll public (default), hide the roll entirely, ' +
+			'hide the roll, but publicly notify the channel that a roll has been made, or send the roll to your gm.',
 	},
 	list: {
 		name: 'list',

@@ -1,6 +1,7 @@
 import { Language } from '../models/enum-helpers/language.js';
-import { CharacterFactory } from './../services/kobold/models/character/character.factory';
-import { DiceUtils } from './dice-utils';
+import { CharacterFactory } from './../services/kobold/models/character/character.factory.js';
+import { Creature } from './creature.js';
+import { DiceUtils } from './dice-utils.js';
 import { RollBuilder } from './roll-builder.js';
 describe('Dice Utils', function () {
 	describe('buildDiceExpression', function () {
@@ -88,10 +89,7 @@ describe('RollBuilder', function () {
 		});
 		rollBuilder.addRoll({ rollExpression: 'd6+1', rollTitle: 'testRoll' });
 		const result = rollBuilder.compileEmbed();
-		expect(result.data.title.toLowerCase()).toContain(
-			fakeCharacter.sheet.info.name.toLowerCase()
-		);
-		expect(result.data.thumbnail.url).toBe(fakeCharacter.sheet.info.imageURL);
+		expect(result.data.title.toLowerCase()).toContain(fakeCharacter.name.toLowerCase());
 	});
 	test(`allows a custom rollnote`, function () {
 		const rollBuilder = new RollBuilder({
@@ -110,7 +108,7 @@ describe('RollBuilder', function () {
 		});
 		rollBuilder.addRoll({ rollExpression: 'd6+1', rollTitle: 'testRoll' });
 		const result = rollBuilder.compileEmbed();
-		expect(result.data.title.toLowerCase()).not.toContain(fakeCharacter.sheet.info.name);
+		expect(result.data.title.toLowerCase()).not.toContain(fakeCharacter.name);
 		expect(result.data.title.toLowerCase()).not.toContain('some actor');
 		expect(result.data.title.toLowerCase()).toBe(`an entirely different title`);
 	});
@@ -144,99 +142,44 @@ describe('RollBuilder', function () {
 	});
 	test('parses an attribute', function () {
 		const character = CharacterFactory.build({
-			attributes: [
-				{
-					name: 'test',
-					type: 'base',
-					value: 7,
-					tags: [],
+			sheet: {
+				abilities: {
+					strength: 22,
 				},
-			],
-			customAttributes: [],
+			},
 		});
-		const rollBuilder = new RollBuilder({ character });
-		expect(DiceUtils.parseAttribute('[test]')).toStrictEqual([7, []]);
-	});
-	test('parses a custom attribute', function () {
-		const character = CharacterFactory.build({
-			customAttributes: [
-				{
-					name: 'custom',
-					type: 'base',
-					value: 3,
-					tags: ['a', 'b', 'c'],
-				},
-			],
-			attributes: [],
-		});
-		const rollBuilder = new RollBuilder({ character });
-		expect(DiceUtils.parseAttribute('[custom]')).toStrictEqual([3, ['a', 'b', 'c']]);
-	});
-	test('parses custom over base when multiple attributes are present', function () {
-		const character = CharacterFactory.build({
-			attributes: [
-				{
-					name: 'same',
-					type: 'base',
-					value: 8,
-					tags: ['asdf', 'qwer'],
-				},
-			],
-			customAttributes: [
-				{
-					name: 'same',
-					type: 'base',
-					value: 4,
-					tags: [],
-				},
-			],
-		});
-		const rollBuilder = new RollBuilder({ character });
-		expect(DiceUtils.parseAttribute('[same]')).toStrictEqual([4, []]);
+		expect(
+			DiceUtils.parseAttribute('[strength]', Creature.fromCharacter(character))
+		).toStrictEqual([6, ['ability', 'strength']]);
 	});
 	test('fails to parse an invalid attribute', function () {
-		const rollBuilder = new RollBuilder({});
-		expect(() => DiceUtils.parseAttribute('[same]')).toThrowError();
+		expect(DiceUtils.parseAttribute('[same]')).toStrictEqual([0, []]);
 	});
 	test('parses an attribute using a shorthand value', function () {
 		const character = CharacterFactory.build({
-			attributes: [
-				{
-					name: 'strength',
-					type: 'base',
-					value: 11,
-					tags: ['ability', 'strength'],
+			sheet: {
+				abilities: {
+					strength: 15,
 				},
-			],
+			},
 			customAttributes: [],
 		});
-		const rollBuilder = new RollBuilder({ character });
-		expect(DiceUtils.parseAttribute('[str]')).toStrictEqual([11, ['ability', 'strength']]);
+		expect(DiceUtils.parseAttribute('[str]', Creature.fromCharacter(character))).toStrictEqual([
+			2,
+			['ability', 'strength'],
+		]);
 	});
 	test('parses all attributes in a dice expression', function () {
 		const character = CharacterFactory.build({
-			attributes: [
-				{
-					name: 'base',
-					type: 'base',
-					value: 8,
-					tags: [],
+			sheet: {
+				abilities: {
+					strength: 15,
 				},
-			],
-			customAttributes: [
-				{
-					name: 'custom',
-					type: 'base',
-					value: 4,
-					tags: [],
-				},
-			],
+			},
 		});
-		const rollBuilder = new RollBuilder({ character });
-		expect(DiceUtils.parseAttributes('[custom]d20 + [base] - [custom]')).toStrictEqual([
-			'4d20 + 8 - 4',
-			[],
-		]);
+		expect(
+			DiceUtils.parseAttributes('[str]d20 + [str]', Creature.fromCharacter(character))
+		).toStrictEqual(['2d20 + 2', ['ability', 'strength']]);
 	});
 	test('rolls dice using parsed character attributes', function () {
 		const character = CharacterFactory.build({

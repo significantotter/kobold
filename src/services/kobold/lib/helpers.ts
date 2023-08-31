@@ -9,6 +9,7 @@ export function isModifierValidForTags(
 	attributes: Character['attributes'],
 	tags: string[]
 ): boolean {
+	if (modifier.modifierType === 'sheet') return false;
 	// compile the modifier's target tags
 	const tagExpression = compileExpression(modifier.targetTags);
 
@@ -88,7 +89,8 @@ export function parseBonusesForTagsFromModifiers(
 	// for each modifier, check if it targets any tags for this roll
 	for (const modifier of modifiers) {
 		// if this modifier isn't active, move to the next one
-		if (!modifier.isActive) continue;
+		if (!modifier.isActive || modifier.modifierType === 'sheet' || modifier.value == null)
+			continue;
 
 		const modifierValidForTags = isModifierValidForTags(modifier, attributes, sanitizedTags);
 
@@ -129,7 +131,7 @@ export function parseBonusesForTagsFromModifiers(
 			else if (modifierSubRoll.results.total > 0) {
 				// apply a bonus
 				if (bonuses[modifierType]) {
-					if (parsedModifier.value > bonuses[modifierType].value)
+					if (Number(parsedModifier.value) > Number(bonuses[modifierType].value))
 						bonuses[modifierType] = parsedModifier;
 				} else {
 					bonuses[modifierType] = parsedModifier;
@@ -137,7 +139,7 @@ export function parseBonusesForTagsFromModifiers(
 			} else if (modifierSubRoll.results.total < 0) {
 				// apply a penalty
 				if (penalties[modifierType]) {
-					if (parsedModifier.value < penalties[modifierType].value)
+					if (Number(parsedModifier.value) < Number(penalties[modifierType].value))
 						penalties[modifierType] = parsedModifier;
 				} else {
 					penalties[modifierType] = parsedModifier;

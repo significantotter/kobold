@@ -10,7 +10,7 @@ export class BaseModel extends Model {
 	static createValidator() {
 		return new AjvValidator({
 			onCreateAjv: ajv => {
-				addFormats(ajv);
+				addFormats.default(ajv);
 			},
 			options: {
 				allErrors: true,

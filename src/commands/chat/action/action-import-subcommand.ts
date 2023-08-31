@@ -24,8 +24,8 @@ import {
 	ignoreOnConflict,
 } from '../../../utils/import-utils.js';
 import { ActionOptions } from '../action/action-command-options.js';
-import characterSchema from './../../../services/kobold/models/character/character.schema.json';
-const ajv = new Ajv({ allowUnionTypes: true });
+import characterSchema from './../../../services/kobold/models/character/character.schema.json' assert { type: 'json' };
+const ajv = new Ajv.default({ allowUnionTypes: true });
 
 export class ActionImportSubCommand implements Command {
 	public names = [Language.LL.commands.action.import.name()];

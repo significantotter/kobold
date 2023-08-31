@@ -150,6 +150,10 @@ export interface Sheet {
 		 */
 		classDC?: number | null;
 		/**
+		 * The character's class attack roll.
+		 */
+		classAttack?: number | null;
+		/**
 		 * The character's perception.
 		 */
 		perception?: number | null;
@@ -561,12 +565,21 @@ export interface Sheet {
 	 * An array of toggleable modifier objects that apply dice expression values to rolls with certain tags.
 	 */
 	modifiers?: {
-		name?: string | null;
+		name?: string;
 		isActive?: boolean;
 		description?: string | null;
-		type?: string | null;
+		type?: string;
 		targetTags?: string | null;
-		value?: number | string;
+		value?: number | string | null;
+		modifierType?: "roll" | "sheet";
+		sheetAdjustments?:
+			| {
+					property?: string;
+					operation?: "+" | "-" | "=";
+					value?: string;
+					[k: string]: any;
+			  }[]
+			| null;
 		[k: string]: any;
 	}[];
 	/**

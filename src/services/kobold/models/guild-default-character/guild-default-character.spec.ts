@@ -2,10 +2,10 @@ import { CharacterFactory } from './../character/character.factory.js';
 import Ajv from 'ajv';
 import { GuildDefaultCharacterFactory } from './guild-default-character.factory.js';
 import { GuildDefaultCharacter } from './guild-default-character.model.js';
-import GuildDefaultCharacterSchema from './guild-default-character.schema.json';
+import GuildDefaultCharacterSchema from './guild-default-character.schema.json' assert { type: 'json' };
 import addFormats from 'ajv-formats';
-const ajv = new Ajv({ allowUnionTypes: true });
-addFormats(ajv);
+const ajv = new Ajv.default({ allowUnionTypes: true });
+addFormats.default(ajv);
 
 describe('GuildDefaultCharacter', () => {
 	test('validates a built factory', () => {

@@ -1,6 +1,5 @@
 import _ from 'lodash';
-import { WG } from '../services/wanderers-guide/wanderers-guide.js';
-import { Character } from './../services/kobold/models/character/character.model';
+import { Character } from './../services/kobold/models/character/character.model.js';
 import { Creature, roll } from './creature.js';
 import { StringUtils } from './string-utils.js';
 import { AutocompleteInteraction, CacheType, ChatInputCommandInteraction } from 'discord.js';

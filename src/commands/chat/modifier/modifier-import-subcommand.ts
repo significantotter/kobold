@@ -1,4 +1,4 @@
-import { ModifierOptions } from './modifier-command-options';
+import { ModifierOptions } from './modifier-command-options.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -16,7 +16,7 @@ import { Language } from '../../../models/enum-helpers/index.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
 import { compileExpression } from 'filtrex';
 import { PasteBin } from '../../../services/pastebin/index.js';
-import characterSchema from './../../../services/kobold/models/character/character.schema.json';
+import characterSchema from './../../../services/kobold/models/character/character.schema.json' assert { type: 'json' };
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 import _ from 'lodash';
@@ -26,8 +26,8 @@ import {
 	renameOnConflict,
 	replaceAll,
 } from '../../../utils/import-utils.js';
-const ajv = new Ajv({ allowUnionTypes: true });
-addFormats(ajv);
+const ajv = new Ajv.default({ allowUnionTypes: true });
+addFormats.default(ajv);
 
 export class ModifierImportSubCommand implements Command {
 	public names = [Language.LL.commands.modifier.import.name()];

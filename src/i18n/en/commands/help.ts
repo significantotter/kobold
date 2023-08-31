@@ -173,29 +173,12 @@ export default {
 				title: '/modifier Commands',
 				thumbnail: refs.links.thumbnail,
 				description:
-					'Modifiers are conditional bonuses or penalties that apply to certain dice rolls. ' +
-					'Which dice rolls are affected is based on a system of "tags." For example, every attack roll has ' +
-					'the `attack` tag and every skill roll has the `skill` tag. A full list of tags are available under ' +
-					'`/help attributes-and-tags`. \n\nModifiers can be toggled active or inactive. When inactive, a ' +
-					'modifier will never apply to a roll, even if it applies to the given tags.\n\n\n' +
-					'**How to target rolls with target-tags**\n\n' +
-					'\t**or**\n\n' +
-					'`or` means you need EITHER tag in the roll.\n\n' +
-					'`attack or save` means that the roll can either be an attack roll OR a save roll\n\n\n' +
-					'\t**and**\n\n' +
-					'`and` means you needs BOTH tags in the roll.\n\n' +
-					"`attack and save` means the roll must be an attack roll AND a save roll, which doesn't happen!!\n\n" +
-					'`skill and intimidation` would be true on any intimidation roll, because intimidation also has the skill tag!\n\n' +
-					'\t**not**\n\n' +
-					'`not` means that the roll applies to things that are not that tag \n\n' +
-					'`skill and not strength` applies to skill rolls that are NOT strength skills\n\n\n' +
-					'\t**Parentheses**\n\n' +
-					'Parentheses group tags. () \n\n' +
-					'`attack and (skill or dexterity)` requires attack and for the group to be valid! ' +
-					'So BOTH attack and EITHER skill or dexterity must be in the roll\n\n\n' +
-					'**Advanced**\n\n' +
-					'To learn how to build target tags ' +
-					'you can also reference [this link](https://github.com/joewalnes/filtrex), although its fairly technical.',
+					'Modifiers are ways of applying bonuses or penalties to your sheet or rolls or just ' +
+					'straight up changing values on your sheet itself.' +
+					'All modifiers can be toggled, and roll modifiers can be conditional based on the type of the roll.' +
+					'Sheet modifiers and Roll modifiers are typed (or untyped), but ' +
+					'these types DO NOT interact with each other. A +1 circumstance sheet modifier to ' +
+					'athletics will stack with a +1 circumstance roll modifier to athletics. Be careful mixing them!',
 			},
 		},
 	},

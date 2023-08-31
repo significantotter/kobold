@@ -16,9 +16,15 @@ export const UserSettingsFactory = UserSettingsFactoryClass.define(
 		onCreate(async builtUserSettings => UserSettings.query().insert(builtUserSettings));
 
 		const characterData: DeepPartial<UserSettings> = {
-			characterId: faker.datatype.number(),
 			userId: faker.datatype.uuid(),
-			guildId: faker.datatype.uuid(),
+			initStatsNotification: faker.helpers.arrayElement([
+				'never',
+				'every_turn',
+				'every_round',
+				'whenever_hidden',
+			]),
+			inlineRollsDisplay: faker.helpers.arrayElement(['detailed', 'compact']),
+			rollCompactMode: faker.helpers.arrayElement(['compact', 'normal']),
 		};
 
 		return UserSettings.fromDatabaseJson(characterData);

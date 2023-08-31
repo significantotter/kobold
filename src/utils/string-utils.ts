@@ -1,6 +1,58 @@
 import removeMarkdown from 'remove-markdown';
+import { Character } from '../services/kobold/models/index.js';
+import { KoboldError } from './KoboldError.js';
+import { Creature } from './creature.js';
+import _ from 'lodash';
+import { SheetUtils } from './sheet-utils.js';
 
 export class StringUtils {
+	public static parseSheetModifiers(
+		input: string,
+		creature: Creature
+	): Character['modifiers'][0]['sheetAdjustments'] {
+		const modifierList = input.split(';').filter(result => result.trim() !== '');
+		if (!modifierList.length) {
+			throw new KoboldError("Yip! I didn't find any modifiers in what you sent me!");
+		}
+		const modifiers = modifierList.map(modifier => {
+			const modifierRegex = /([A-Za-z _-]+)\s*([\+\-\=])\s*(.+)/g;
+			const match = modifierRegex.exec(modifier);
+			if (!match) {
+				throw new KoboldError(
+					`Yip! I couldn't understand the modifier "${modifier}". Modifiers must be ` +
+						`in the format "Attribute Name + 1; Other Attribute - 1;final attribute = 1". Spaces are optional.`
+				);
+			}
+			let [, attributeName, operator, value] = match.map(result => result.trim());
+
+			// validate each result
+			// attributeName must be a valid sheet property
+			if (!SheetUtils.validateSheetProperty(attributeName)) {
+				throw new KoboldError(
+					`Yip! I couldn't find a sheet attribute named "${attributeName}".`
+				);
+			}
+			// operator must be +, -, or =
+			if (!['+', '-', '='].includes(operator)) {
+				throw new KoboldError(
+					`Yip! I couldn't understand the operator "${operator}". Operators must be +, -, or =.`
+				);
+			}
+			// value must be a number if it's a numeric value
+			if (SheetUtils.sheetPropertyIsNumeric(attributeName) && isNaN(Number(value))) {
+				throw new KoboldError(
+					`Yip! ${attributeName} "${value}" couldn't be converted to a number.`
+				);
+			}
+			return {
+				property: attributeName,
+				operation: operator as '+' | '-' | '=',
+				value: value,
+			};
+		});
+		return modifiers;
+	}
+
 	public static truncate(input: string, length: number, addEllipsis: boolean = false): string {
 		if (input.length <= length) {
 			return input;

@@ -1,10 +1,10 @@
 import Ajv from 'ajv';
 import { GameFactory } from './game.factory.js';
 import { Game } from './game.model.js';
-import GameSchema from './game.schema.json';
+import GameSchema from './game.schema.json' assert { type: 'json' };
 import addFormats from 'ajv-formats';
-const ajv = new Ajv({ allowUnionTypes: true });
-addFormats(ajv);
+const ajv = new Ajv.default({ allowUnionTypes: true });
+addFormats.default(ajv);
 
 describe('Game', () => {
 	test('validates a built factory', () => {

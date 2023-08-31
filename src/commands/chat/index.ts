@@ -1,6 +1,6 @@
 // character commands
-export { CharacterCommand } from './characters/character-command';
-export { CharacterListSubCommand } from './characters/character-list-subcommand';
+export { CharacterCommand } from './characters/character-command.js';
+export { CharacterListSubCommand } from './characters/character-list-subcommand.js';
 export { CharacterSetActiveSubCommand } from './characters/character-set-active-subcommand.js';
 export { CharacterSetDefaultSubCommand } from './characters/character-set-default.subcommand.js';
 export { CharacterRemoveSubCommand } from './characters/character-remove-subcommand.js';
@@ -36,7 +36,8 @@ export { InitRemoveSubCommand } from './init/init-remove-subcommand.js';
 
 // modifier commands
 export { ModifierCommand } from './modifier/modifier-command.js';
-export { ModifierCreateSubCommand } from './modifier/modifier-create-subcommand.js';
+export { ModifierCreateRollModifierSubCommand } from './modifier/modifier-create-roll-modifier-subcommand.js';
+export { ModifierCreateSheetModifierSubCommand } from './modifier/modifier-create-sheet-modifier-subcommand.js';
 export { ModifierRemoveSubCommand } from './modifier/modifier-remove-subcommand.js';
 export { ModifierListSubCommand } from './modifier/modifier-list-subcommand.js';
 export { ModifierDetailSubCommand } from './modifier/modifier-detail-subcommand.js';
@@ -92,7 +93,7 @@ export { SettingsCommand } from './settings/settings-command.js';
 export { SettingsSetSubCommand } from './settings/settings-set-subcommand.js';
 
 // help command
-export { HelpCommand } from './help-command';
+export { HelpCommand } from './help-command.js';
 
 // admin command
-export { AdminCommand } from './admin-command';
+export { AdminCommand } from './admin-command.js';

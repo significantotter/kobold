@@ -1,4 +1,4 @@
-import { Language } from '../../../models/enum-helpers/language';
+import { Language } from '../../../models/enum-helpers/language.js';
 import {
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
@@ -55,8 +55,19 @@ export class ModifierCommand implements Command {
 				],
 			},
 			{
-				name: Language.LL.commands.modifier.create.name(),
-				description: Language.LL.commands.modifier.create.description(),
+				name: Language.LL.commands.modifier.createSheetModifier.name(),
+				description: Language.LL.commands.modifier.createSheetModifier.description(),
+				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				options: [
+					ModifierOptions.MODIFIER_NAME_OPTION,
+					ModifierOptions.MODIFIER_TYPE_OPTION,
+					ModifierOptions.MODIFIER_SHEET_VALUES_OPTION,
+					ModifierOptions.MODIFIER_DESCRIPTION_OPTION,
+				],
+			},
+			{
+				name: Language.LL.commands.modifier.createRollModifier.name(),
+				description: Language.LL.commands.modifier.createRollModifier.description(),
 				type: ApplicationCommandOptionType.Subcommand.valueOf(),
 				options: [
 					ModifierOptions.MODIFIER_NAME_OPTION,

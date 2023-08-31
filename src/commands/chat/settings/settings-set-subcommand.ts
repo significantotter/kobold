@@ -48,6 +48,15 @@ export class SettingsSetSubCommand implements Command {
 				name: choice,
 				value: choice,
 			}));
+		} else if (
+			option.name === SettingsOptions.SETTINGS_SET_VALUE.name &&
+			intr.options.getString(SettingsOptions.SETTINGS_SET_OPTION.name) ===
+				'inline-rolls-display'
+		) {
+			return ['detailed', 'compact'].map(choice => ({
+				name: choice,
+				value: choice,
+			}));
 		}
 	}
 
@@ -68,8 +77,16 @@ export class SettingsSetSubCommand implements Command {
 			settingDbName = 'initStatsNotification';
 			if (!['never', 'every turn', 'every round', 'whenever hidden'].includes(value)) {
 				throw new KoboldError(
-					'Yip! The value for "initiativeTrackerNotifications" must be one of "never", ' +
+					'Yip! The value for "initiative-tracker-notifications" must be one of "never", ' +
 						'"every turn", "every round", or "whenever hidden".'
+				);
+			}
+			parsedValue = value.replaceAll(' ', '_');
+		} else if (trimmedOptionName === 'inlineRollsDisplay') {
+			settingDbName = 'inlineRollsDisplay';
+			if (!['compact', 'detailed'].includes(value)) {
+				throw new KoboldError(
+					'Yip! The value for "inline-rolls-display" must be one of "compact", or "detailed".'
 				);
 			}
 			parsedValue = value.replaceAll(' ', '_');

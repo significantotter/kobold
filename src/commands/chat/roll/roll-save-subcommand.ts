@@ -14,15 +14,15 @@ import { ChatArgs } from '../../../constants/index.js';
 import { EventData } from '../../../models/internal-models.js';
 import { InteractionUtils, StringUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
-import { WG } from '../../../services/wanderers-guide/wanderers-guide.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
 import { DiceUtils } from '../../../utils/dice-utils.js';
-import { RollBuilder } from '../../../utils/roll-builder.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Language } from '../../../models/enum-helpers/index.js';
 import { Creature } from '../../../utils/creature.js';
 import _ from 'lodash';
-import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
+import { SettingsUtils } from '../../../utils/settings-utils.js';
+import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
+import { GameUtils } from '../../../utils/game-utils.js';
 
 export class RollSaveSubCommand implements Command {
 	public names = [Language.LL.commands.roll.save.name()];
@@ -76,19 +76,14 @@ export class RollSaveSubCommand implements Command {
 		const rollNote = intr.options.getString(ChatArgs.ROLL_NOTE_OPTION.name);
 
 		const secretRoll = intr.options.getString(ChatArgs.ROLL_SECRET_OPTION.name);
-		const isSecretRoll =
-			secretRoll === Language.LL.commandOptions.rollSecret.choices.secret.value() ||
-			secretRoll === Language.LL.commandOptions.rollSecret.choices.secretAndNotify.value();
-		const notifyRoll =
-			secretRoll === Language.LL.commandOptions.rollSecret.choices.secretAndNotify.value();
 
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
+		const [activeCharacter, userSettings, activeGame] = await Promise.all([
+			CharacterUtils.getActiveCharacter(intr),
+			SettingsUtils.getSettingsForUser(intr),
+			GameUtils.getActiveGame(intr.user.id, intr.guildId),
+		]);
 		if (!activeCharacter) {
-			await InteractionUtils.send(
-				intr,
-				LL.commands.roll.interactions.noActiveCharacter(),
-				isSecretRoll
-			);
+			await InteractionUtils.send(intr, LL.commands.roll.interactions.noActiveCharacter());
 			return;
 		}
 
@@ -105,17 +100,12 @@ export class RollSaveSubCommand implements Command {
 			attributeName: targetRoll.name,
 			rollNote,
 			modifierExpression,
+			userSettings,
 			LL,
 		});
 
 		const embed = rollResult.compileEmbed();
 
-		if (notifyRoll) {
-			await InteractionUtils.send(
-				intr,
-				Language.LL.commands.roll.interactions.secretRollNotification()
-			);
-		}
-		await InteractionUtils.send(intr, embed, isSecretRoll);
+		await EmbedUtils.dispatchEmbeds(intr, [embed], secretRoll, activeGame?.gmUserId);
 	}
 }

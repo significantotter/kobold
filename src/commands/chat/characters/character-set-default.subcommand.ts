@@ -1,4 +1,4 @@
-import { WanderersGuide } from '../../../services/wanderers-guide/index';
+import { WanderersGuide } from '../../../services/wanderers-guide/index.js';
 import {
 	ChannelDefaultCharacter,
 	Character,

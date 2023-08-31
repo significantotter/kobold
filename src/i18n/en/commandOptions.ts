@@ -547,6 +547,10 @@ export default {
 		description:
 			'A set of tags for the rolls that this modifier applies to. For example "skill or attack or save"',
 	},
+	modifierSheetValues: {
+		name: 'sheet-values',
+		description: 'How to alter the sheet values. For example "maxHp+5;ac=20;will-1"',
+	},
 	modifierSetOption: {
 		name: 'option',
 		description: 'The modifier option to alter.',
@@ -570,6 +574,10 @@ export default {
 			targetTags: {
 				name: 'target-tags',
 				value: 'target-tags',
+			},
+			sheetValues: {
+				name: 'sheet-values',
+				value: 'sheet-values',
 			},
 		},
 	},
@@ -671,6 +679,11 @@ export default {
 				value: 'secret-and-notify',
 				description: 'A secret roll that still notifies the channel that a roll was made.',
 			},
+			sendToGm: {
+				name: 'send-to-gm',
+				value: 'send-to-gm',
+				description: 'Only works if in a "game" in this server. Sends the roll to the GM.',
+			},
 		},
 	},
 	statBlockSecret: {
@@ -747,6 +760,10 @@ export default {
 			initTrackerNotifications: {
 				name: 'initiative-tracker-notifications',
 				value: 'initiative-tracker-notifications',
+			},
+			inlineRollsDisplay: {
+				name: 'inline-rolls-display',
+				value: 'inline-rolls-display',
 			},
 		},
 	},

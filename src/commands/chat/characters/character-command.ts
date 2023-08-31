@@ -1,4 +1,4 @@
-import { CharacterOptions } from './command-options';
+import { CharacterOptions } from './command-options.js';
 import {
 	ApplicationCommandOptionType,
 	ApplicationCommandType,

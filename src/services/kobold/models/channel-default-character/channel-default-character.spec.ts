@@ -2,10 +2,10 @@ import { CharacterFactory } from '../character/character.factory.js';
 import Ajv from 'ajv';
 import { ChannelDefaultCharacterFactory } from './channel-default-character.factory.js';
 import { ChannelDefaultCharacter } from './channel-default-character.model.js';
-import ChannelDefaultCharacterSchema from './channel-default-character.schema.json';
+import ChannelDefaultCharacterSchema from './channel-default-character.schema.json' assert { type: 'json' };
 import addFormats from 'ajv-formats';
-const ajv = new Ajv({ allowUnionTypes: true });
-addFormats(ajv);
+const ajv = new Ajv.default({ allowUnionTypes: true });
+addFormats.default(ajv);
 
 describe('ChannelDefaultCharacter', () => {
 	test('validates a built factory', () => {

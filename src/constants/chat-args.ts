@@ -47,6 +47,10 @@ export class ChatArgs {
 				name: Language.LL.commandOptions.rollSecret.choices.secretAndNotify.name(),
 				value: Language.LL.commandOptions.rollSecret.choices.secretAndNotify.value(),
 			},
+			{
+				name: Language.LL.commandOptions.rollSecret.choices.sendToGm.name(),
+				value: Language.LL.commandOptions.rollSecret.choices.sendToGm.value(),
+			},
 		],
 	};
 	public static readonly SKILL_CHOICE_OPTION: APIApplicationCommandBasicOption = {

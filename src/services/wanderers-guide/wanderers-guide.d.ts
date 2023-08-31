@@ -1,5 +1,5 @@
-import { VHeritageApi } from './v-heritage-api/index';
-import { Language } from './../../models/enum-helpers/language';
+import { VHeritageApi } from './v-heritage-api/index.js';
+import { Language } from './../../models/enum-helpers/language.js';
 export namespace WG {
 	/**
 	 * CHARACTER API

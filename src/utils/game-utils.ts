@@ -59,15 +59,15 @@ export class GameUtils {
 			return {
 				joinedGames,
 				init: initResult.init,
-				characterOrInitActorTargets: [activeCharacter],
+				characterOrInitActorTargets: activeCharacter ? [activeCharacter] : [],
 				activeCharacter,
 				targetCharacter: activeCharacter,
 				targetInitActor: undefined,
 			};
 
-		const characterOptions = joinedGames
-			.flatMap(game => game.characters)
-			.concat(activeCharacter);
+		let characterOptions = joinedGames.flatMap(game => game.characters);
+
+		if (activeCharacter) characterOptions = characterOptions.concat(activeCharacter);
 
 		// find a match from the game characters or active character
 		let matchedCharacter = characterOptions.find(

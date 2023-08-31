@@ -14,6 +14,8 @@ const config: { [key: string]: Knex.Config } = {
 		},
 		migrations: {
 			tableName: 'knex_migrations',
+			directory: './migrations',
+			loadExtensions: ['.js', '.ts'],
 		},
 	},
 
@@ -26,8 +28,9 @@ const config: { [key: string]: Knex.Config } = {
 		},
 		migrations: {
 			tableName: 'knex_migrations',
+			directory: './migrations',
+			loadExtensions: ['.js', '.ts'],
 		},
 	},
 };
-
-module.exports = config;
+export default config;

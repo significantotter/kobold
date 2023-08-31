@@ -1,6 +1,6 @@
-import { DiceUtils } from './../../../utils/dice-utils';
+import { DiceUtils } from './../../../utils/dice-utils.js';
 import { RollBuilder } from '../../../utils/roll-builder.js';
-import { InitiativeActor } from './../../../services/kobold/models/initiative-actor/initiative-actor.model';
+import { InitiativeActor } from './../../../services/kobold/models/initiative-actor/initiative-actor.model.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -29,6 +29,7 @@ import _ from 'lodash';
 import { InitOptions } from './init-command-options.js';
 import { generateStatOverrides } from '../../../utils/sheet-import-utils.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
+import { SettingsUtils } from '../../../utils/settings-utils.js';
 
 export class InitAddSubCommand implements Command {
 	public names = [Language.LL.commands.init.add.name()];
@@ -68,10 +69,13 @@ export class InitAddSubCommand implements Command {
 		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
-		const currentInitResponse = await InitiativeUtils.getInitiativeForChannel(intr.channel, {
-			sendErrors: true,
-			LL,
-		});
+		const [currentInitResponse, userSettings] = await Promise.all([
+			InitiativeUtils.getInitiativeForChannel(intr.channel, {
+				sendErrors: true,
+				LL,
+			}),
+			SettingsUtils.getSettingsForUser(intr),
+		]);
 		if (currentInitResponse.errorMessage) {
 			await InteractionUtils.send(intr, currentInitResponse.errorMessage);
 			return;
@@ -166,6 +170,7 @@ export class InitAddSubCommand implements Command {
 				title: Language.LL.commands.init.add.interactions.joinedEmbed.rolledTitle({
 					actorName,
 				}),
+				userSettings,
 				LL,
 			});
 			rollBuilder.addRoll({
