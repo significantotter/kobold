@@ -10,14 +10,47 @@ import { CharacterUtils } from './character-utils.js';
 import { InitiativeUtils } from './initiative-utils.js';
 
 export class GameUtils {
-	public static async getActiveGame(userId, guildId) {
-		const games = await Game.query().withGraphFetched('characters').where({
-			gmUserId: userId,
-			guildId,
-			isActive: true,
-		});
-		if (!games.length) return null;
-		else return games[0];
+	public static async getActiveGame(userId: string, guildId: string, channelId?: string) {
+		const games = await Game.query()
+			.withGraphFetched('characters.[guildDefaultCharacter, channelDefaultCharacter]')
+			.where({
+				guildId,
+			});
+		const activeGmGame = games.find(game => game.gmUserId === userId && game.isActive);
+		if (activeGmGame) return activeGmGame;
+		const defaultChannelPlayerGame = games.find(
+			game =>
+				game.isActive &&
+				game.characters.find(
+					character =>
+						character.userId === userId &&
+						character.channelDefaultCharacter.find(
+							defaultChar => (defaultChar as any).channelId === channelId
+						)
+				)
+		);
+		if (defaultChannelPlayerGame) return defaultChannelPlayerGame;
+		const defaultGuildPlayerGame = games.find(
+			game =>
+				game.isActive &&
+				game.characters.find(
+					character =>
+						character.userId === userId &&
+						character.guildDefaultCharacter.find(
+							defaultChar => (defaultChar as any).guildId === guildId
+						)
+				)
+		);
+		if (defaultGuildPlayerGame) return defaultGuildPlayerGame;
+		const activeCharacterGame = games.find(
+			game =>
+				game.isActive &&
+				game.characters.find(
+					character => character.userId === userId && character.isActiveCharacter
+				)
+		);
+		if (activeCharacterGame) return activeCharacterGame;
+		return null;
 	}
 
 	public static async autocompleteGameCharacter(targetCharacterName, activeGame) {

@@ -298,6 +298,7 @@ export class KoboldEmbed extends EmbedBuilder {
 	public static prepareEmbeds(embeds: KoboldEmbed[]) {
 		const finalEmbeds: KoboldEmbed[] = [];
 		for (const embed of embeds) {
+			if (!embed) continue;
 			embed.splitEmbedIfTooLong();
 			const splitEmbeds = embed.splitEmbedIfTooLong();
 			finalEmbeds.push(...splitEmbeds);

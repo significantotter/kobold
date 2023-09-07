@@ -795,7 +795,8 @@ export class ActionRoller {
 					lastTargetingResult,
 					lastTargetingActionType
 				);
-				if (result?.results?.total) this.applyDamage(roll, result.results.total);
+				if (result?.results?.total && !roll.healInsteadOfDamage)
+					this.applyDamage(roll, result.results.total);
 				else if (result?.results?.total && roll.healInsteadOfDamage)
 					this.applyHealing(roll, result.results.total);
 			} else if (rollType === 'advanced-damage') {
