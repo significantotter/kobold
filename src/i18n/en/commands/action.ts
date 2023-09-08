@@ -4,7 +4,6 @@ export default {
 	interactions: {
 		notFound: "Yip! I couldn't find a action with that name.",
 		rollNotFound: "Yip! I couldn't find a stage of the action with that name.",
-		tooMany: "Yip! A character can't have over 50 actions!",
 		rollAlreadyExists: 'Yip! A roll with that name already exists for this action.',
 		rollAddSuccess: 'Yip! I added the {rollType} roll {rollName} to the action {actionName}.',
 	},

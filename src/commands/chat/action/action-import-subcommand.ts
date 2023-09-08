@@ -92,10 +92,6 @@ export class ActionImportSubCommand implements Command {
 			);
 			return;
 		}
-		if (activeCharacter.actions.length + newActions.length > 50) {
-			await InteractionUtils.send(intr, LL.commands.action.interactions.tooMany());
-			return;
-		}
 		const currentActions = activeCharacter.actions;
 
 		let finalActions: Character['actions'] = [];

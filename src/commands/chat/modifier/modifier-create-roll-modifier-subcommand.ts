@@ -81,10 +81,6 @@ export class ModifierCreateRollModifierSubCommand implements Command {
 			);
 			return;
 		}
-		if (activeCharacter.modifiers.length + 1 > 50) {
-			await InteractionUtils.send(intr, LL.commands.modifier.interactions.tooMany());
-			return;
-		}
 
 		// we must be able to evaluate the modifier as a roll for this character
 		const result = DiceUtils.parseAndEvaluateDiceExpression({

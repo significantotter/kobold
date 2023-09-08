@@ -5,7 +5,6 @@ export default {
 	interactions: {
 		doesntEvaluateError: 'Yip! That macro causes an error when I try to evaluate it.',
 		emptyValueError: "Yip! You can't use an empty value!",
-		tooMany: "Yip! A character can't have over 50 roll macros!",
 		notFound: "Yip! I couldn't find a modifier with that name.",
 	},
 	list: {

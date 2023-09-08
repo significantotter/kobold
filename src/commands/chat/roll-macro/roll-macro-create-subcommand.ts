@@ -69,11 +69,6 @@ export class RollMacroCreateSubCommand implements Command {
 			return;
 		}
 
-		if (activeCharacter.rollMacros.length + 1 > 50) {
-			await InteractionUtils.send(intr, LL.commands.rollMacro.interactions.tooMany());
-			return;
-		}
-
 		await Character.query().updateAndFetchById(activeCharacter.id, {
 			rollMacros: [
 				...activeCharacter.rollMacros,

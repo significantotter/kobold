@@ -98,10 +98,6 @@ export class ModifierImportSubCommand implements Command {
 			);
 			return;
 		}
-		if (activeCharacter.modifiers.length + newModifiers.length > 50) {
-			await InteractionUtils.send(intr, LL.commands.modifier.interactions.tooMany());
-			return;
-		}
 		const currentModifiers = activeCharacter.modifiers;
 
 		let finalModifiers: Character['modifiers'] = [];
