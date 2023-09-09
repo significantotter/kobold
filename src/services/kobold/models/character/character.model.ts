@@ -7,8 +7,8 @@ import Sheet from '../../lib/sheet.schema.json' assert { type: 'json' };
 import { Sheet as SheetType } from '../../lib/sheet.schema.js';
 import _ from 'lodash';
 import { Creature } from '../../../../utils/creature.js';
-import { ChatInputCommandInteraction, Client } from 'discord.js';
-import { ClientUtils } from '../../../../utils/client-utils.js';
+import { ChatInputCommandInteraction } from 'discord.js';
+import { StringUtils } from '../../../../utils/string-utils.js';
 
 export interface Character extends CharacterType {
 	sheet?: SheetType;
@@ -25,11 +25,19 @@ export class Character extends BaseModel {
 		} as JSONSchema7;
 	}
 
-	static queryControlledCharacterByName(characterName, userId) {
-		return this.query().whereRaw(`user_id=:userId AND name::TEXT ILIKE :characterName`, {
-			userId,
-			characterName: `%${characterName}%`,
-		});
+	static async queryControlledCharacterByName(characterName, userId): Promise<Character[]> {
+		const results = await this.query().whereRaw(
+			`user_id=:userId AND name::TEXT ILIKE :characterName`,
+			{
+				userId,
+				characterName: `%${characterName}%`,
+			}
+		);
+		const closestByName = StringUtils.generateSorterByWordDistance(
+			characterName,
+			character => character.name
+		);
+		return results.sort(closestByName);
 	}
 
 	async updateTracker(intr: ChatInputCommandInteraction, sheet: SheetType) {

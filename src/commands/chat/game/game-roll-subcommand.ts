@@ -130,8 +130,15 @@ export class GameRollSubCommand implements Command {
 			targetActor = targetInitActor ?? targetCharacter;
 			targetCreature = Creature.fromModelWithSheet(targetActor);
 		}
+		if (activeGame.characters.length === 0) {
+			await InteractionUtils.send(
+				intr,
+				`You have no characters in this game. Have players join using \`/game manage manage-option:join manage-value:${activeGame.name}\`.`
+			);
+			return;
+		}
 
-		for (const character of activeGame.characters) {
+		for (const character of _.uniqBy(activeGame.characters, 'id')) {
 			if (
 				targetCharacterName &&
 				targetCharacterName.toLocaleLowerCase().trim().length > 0 &&

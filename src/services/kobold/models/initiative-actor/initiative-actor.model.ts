@@ -8,6 +8,8 @@ import { Sheet as SheetType } from '../../lib/sheet.schema.js';
 import { InitiativeActorGroup } from '../initiative-actor-group/initiative-actor-group.model.js';
 import { Character } from '../character/character.model.js';
 import { ChatInputCommandInteraction, Client } from 'discord.js';
+import { StringUtils } from '../../../../utils/index.js';
+import _ from 'lodash';
 
 export interface InitiativeActor extends InitiativeActorType {
 	initiative?: Initiative;
@@ -71,9 +73,14 @@ export class InitiativeActor extends BaseModel {
 		};
 	}
 
-	static queryControlledCharacterByName(characterName) {
-		return this.query().whereRaw(`initiativeActor.name ILIKE :characterName`, {
+	static async queryControlledCharacterByName(characterName) {
+		const results = await this.query().whereRaw(`initiativeActor.name ILIKE :characterName`, {
 			charName: `%${characterName}%`,
 		});
+		const closestByName = StringUtils.generateSorterByWordDistance(
+			characterName,
+			character => character.name
+		);
+		return results.sort(closestByName);
 	}
 }

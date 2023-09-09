@@ -107,6 +107,13 @@ export class GameInitSubCommand implements Command {
 			);
 			return;
 		}
+		if (activeGame.characters.length === 0) {
+			await InteractionUtils.send(
+				intr,
+				`You have no characters in this game. Have players join using \`/game manage manage-option:join manage-value:${activeGame.name}\`.`
+			);
+			return;
+		}
 
 		let currentInit = currentInitResponse.init;
 		if (currentInitResponse.errorMessage) {
@@ -132,7 +139,7 @@ export class GameInitSubCommand implements Command {
 			LL,
 		});
 
-		for (const character of activeGame.characters) {
+		for (const character of _.uniqBy(activeGame.characters, 'id')) {
 			if (
 				// the character is already in the init
 				currentInit.actors.find(actor => actor.characterId === character.id) ||

@@ -55,7 +55,7 @@ export class GameManageSubCommand implements Command {
 				const options: ApplicationCommandOptionChoiceData[] = [];
 				for (const game of targetGames) {
 					for (const character of game.characters || []) {
-						const option = game.name + ' - ' + character.sheet.info.name;
+						const option = game.name + ' - ' + character.name;
 						if (value == '' || option.toLocaleLowerCase().trim().includes(value)) {
 							options.push({
 								name: option,
@@ -225,7 +225,9 @@ export class GameManageSubCommand implements Command {
 				if (targetGames.length) {
 					const targetGame = targetGames[0];
 					const targetCharacters = (targetGame.characters || []).filter(
-						character => character.sheet.info.name === characterName
+						character =>
+							character.name.trim().toLocaleLowerCase() ===
+							characterName.trim().toLocaleLowerCase()
 					);
 					if (targetCharacters.length) {
 						await targetGame
@@ -280,6 +282,15 @@ export class GameManageSubCommand implements Command {
 						intr,
 						LL.commands.character.interactions.noActiveCharacter()
 					);
+				} else if (
+					(targetGames[0].characters || []).filter(
+						character => character.id === activeCharacter.id
+					).length > 0
+				) {
+					await InteractionUtils.send(
+						intr,
+						`${activeCharacter.name} is already in ${targetGames[0].name}!`
+					);
 				} else {
 					//relate the two!
 					const result = await targetGames[0]
@@ -288,7 +299,7 @@ export class GameManageSubCommand implements Command {
 					await InteractionUtils.send(
 						intr,
 						LL.commands.game.manage.interactions.joinSuccess({
-							characterName: activeCharacter.sheet.info.name,
+							characterName: activeCharacter.name,
 							gameName: targetGames[0].name,
 						})
 					);
@@ -326,7 +337,7 @@ export class GameManageSubCommand implements Command {
 					await InteractionUtils.send(
 						intr,
 						LL.commands.game.manage.interactions.characterNotInGame({
-							characterName: activeCharacter.sheet.info.name,
+							characterName: activeCharacter.name,
 							gameName: targetGames[0].name,
 						})
 					);
@@ -339,7 +350,7 @@ export class GameManageSubCommand implements Command {
 					await InteractionUtils.send(
 						intr,
 						LL.commands.game.manage.interactions.leaveSuccess({
-							characterName: activeCharacter.sheet.info.name,
+							characterName: activeCharacter.name,
 							gameName: targetGames[0].name,
 						})
 					);

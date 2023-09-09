@@ -12,6 +12,7 @@ import { Command, CommandDeferType } from '../../index.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { Language } from '../../../models/enum-helpers/index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
+import _ from 'lodash';
 
 export class GameListSubCommand implements Command {
 	public names = [Language.LL.commands.game.list.name()];
@@ -47,7 +48,9 @@ export class GameListSubCommand implements Command {
 			allGames.map(game => ({
 				name: game.name + (game.isActive ? ' (active)' : ''),
 				value:
-					game.characters.map(character => character.name).join('\n') ||
+					_.uniqBy(game.characters, 'id')
+						.map(character => character.name)
+						.join('\n') ||
 					LL.commands.game.list.interactions.gameListEmbed.noCharacters(),
 			}))
 		);
