@@ -495,7 +495,7 @@ export class DiceUtils {
 
 		let embed: KoboldEmbed;
 
-		if (['skill', 'ability', 'save', 'spell'].includes(targetRoll.type)) {
+		if (['skill', 'ability', 'save', 'spell', 'check'].includes(targetRoll.type)) {
 			const response = await DiceUtils.rollSimpleCreatureRoll({
 				actorName: options.overwriteCreatureName,
 				creature,
