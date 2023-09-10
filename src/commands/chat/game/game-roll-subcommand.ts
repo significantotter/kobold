@@ -235,6 +235,13 @@ export class GameRollSubCommand implements Command {
 				});
 				rollBuilder.addRoll({ rollExpression: diceExpression });
 				embeds.push(rollBuilder.compileEmbed());
+			} else {
+				const noRollFoundEmbed = new KoboldEmbed();
+				noRollFoundEmbed.setCharacter(character);
+				noRollFoundEmbed.setTitle(
+					`Yip! ${character.name} doesn't have a roll named ${rollType}.`
+				);
+				embeds.push(noRollFoundEmbed);
 			}
 		}
 		await EmbedUtils.dispatchEmbeds(intr, embeds, secretRoll, activeGame?.gmUserId);

@@ -70,7 +70,6 @@ export class GameplayOptions {
 		name: Language.LL.commandOptions.gameplayTargetChannel.name(),
 		description: Language.LL.commandOptions.gameplayTargetChannel.description(),
 		required: false,
-		autocomplete: true,
 		type: ApplicationCommandOptionType.Channel,
 		channel_types: [ChannelType.GuildText],
 	};

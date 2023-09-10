@@ -44,6 +44,7 @@ export class Character extends BaseModel {
 		const creature = new Creature(sheet);
 		const tracker = await creature.compileTracker(this.trackerMode ?? 'counters_only');
 		try {
+			if (!intr?.client?.guilds) return;
 			const trackerGuild = await intr.client.guilds.fetch(this.trackerGuildId);
 			const trackerChannel = await trackerGuild.channels.fetch(this.trackerChannelId);
 			if (trackerChannel.isTextBased()) {
