@@ -53,6 +53,7 @@ export const numericSheetProperties = [
 	'willProfMod',
 	'acrobatics',
 	'acrobaticsProfMod',
+	'arcana',
 	'arcanaProfMod',
 	'athletics',
 	'athleticsProfMod',
