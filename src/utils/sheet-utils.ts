@@ -144,6 +144,7 @@ export const sheetPropertyLocations = {
 
 	acrobatics: 'skills',
 	acrobaticsProfMod: 'skills',
+	arcana: 'skills',
 	arcanaProfMod: 'skills',
 	athletics: 'skills',
 	athleticsProfMod: 'skills',
