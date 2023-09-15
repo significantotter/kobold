@@ -31,24 +31,30 @@ export class ModifierCommand implements Command {
 			{
 				name: Language.LL.commands.modifier.list.name(),
 				description: Language.LL.commands.modifier.list.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 			},
 			{
 				name: Language.LL.commands.modifier.detail.name(),
 				description: Language.LL.commands.modifier.detail.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
-				options: [{ ...ModifierOptions.MODIFIER_NAME_OPTION, autocomplete: true }],
+				type: ApplicationCommandOptionType.Subcommand,
+				options: [
+					{
+						...ModifierOptions.MODIFIER_NAME_OPTION,
+						autocomplete: true,
+						choices: undefined,
+					},
+				],
 			},
 			{
 				name: Language.LL.commands.modifier.export.name(),
 				description: Language.LL.commands.modifier.export.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [],
 			},
 			{
 				name: Language.LL.commands.modifier.import.name(),
 				description: Language.LL.commands.modifier.import.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					ModifierOptions.MODIFIER_IMPORT_URL,
 					ModifierOptions.MODIFIER_IMPORT_MODE,
@@ -57,7 +63,7 @@ export class ModifierCommand implements Command {
 			{
 				name: Language.LL.commands.modifier.createSheetModifier.name(),
 				description: Language.LL.commands.modifier.createSheetModifier.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					ModifierOptions.MODIFIER_NAME_OPTION,
 					ModifierOptions.MODIFIER_TYPE_OPTION,
@@ -68,7 +74,7 @@ export class ModifierCommand implements Command {
 			{
 				name: Language.LL.commands.modifier.createRollModifier.name(),
 				description: Language.LL.commands.modifier.createRollModifier.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					ModifierOptions.MODIFIER_NAME_OPTION,
 					ModifierOptions.MODIFIER_TYPE_OPTION,
@@ -80,15 +86,25 @@ export class ModifierCommand implements Command {
 			{
 				name: Language.LL.commands.modifier.toggle.name(),
 				description: Language.LL.commands.modifier.toggle.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
-				options: [{ ...ModifierOptions.MODIFIER_NAME_OPTION, autocomplete: true }],
+				type: ApplicationCommandOptionType.Subcommand,
+				options: [
+					{
+						...ModifierOptions.MODIFIER_NAME_OPTION,
+						autocomplete: true,
+						choices: undefined,
+					},
+				],
 			},
 			{
 				name: Language.LL.commands.modifier.update.name(),
 				description: Language.LL.commands.modifier.update.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
-					{ ...ModifierOptions.MODIFIER_NAME_OPTION, autocomplete: true },
+					{
+						...ModifierOptions.MODIFIER_NAME_OPTION,
+						autocomplete: true,
+						choices: undefined,
+					},
 					ModifierOptions.MODIFIER_SET_OPTION,
 					ModifierOptions.MODIFIER_SET_VALUE_OPTION,
 				],
@@ -96,8 +112,14 @@ export class ModifierCommand implements Command {
 			{
 				name: Language.LL.commands.modifier.remove.name(),
 				description: Language.LL.commands.modifier.remove.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
-				options: [{ ...ModifierOptions.MODIFIER_NAME_OPTION, autocomplete: true }],
+				type: ApplicationCommandOptionType.Subcommand,
+				options: [
+					{
+						...ModifierOptions.MODIFIER_NAME_OPTION,
+						autocomplete: true,
+						choices: undefined,
+					},
+				],
 			},
 		],
 	};

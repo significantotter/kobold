@@ -1,6 +1,5 @@
 import { GuildDefaultCharacter, ChannelDefaultCharacter, InitiativeActor } from './../index.js';
 import type { Character as CharacterType } from './character.schema.js';
-import { JSONSchema7 } from 'json-schema';
 import { BaseModel } from '../../lib/base-model.js';
 import CharacterSchema from './character.schema.json' assert { type: 'json' };
 import Sheet from '../../lib/sheet.schema.json' assert { type: 'json' };
@@ -9,6 +8,7 @@ import _ from 'lodash';
 import { Creature } from '../../../../utils/creature.js';
 import { ChatInputCommandInteraction } from 'discord.js';
 import { StringUtils } from '../../../../utils/string-utils.js';
+import Objection from 'objection';
 
 export interface Character extends CharacterType {
 	sheet?: SheetType;
@@ -18,11 +18,11 @@ export class Character extends BaseModel {
 		return 'character';
 	}
 
-	static get jsonSchema(): JSONSchema7 {
+	static get jsonSchema(): Objection.JSONSchema {
 		return {
 			...CharacterSchema,
 			properties: { ...CharacterSchema.properties, sheet: Sheet },
-		} as JSONSchema7;
+		} as Objection.JSONSchema;
 	}
 
 	static async queryControlledCharacterByName(characterName, userId): Promise<Character[]> {

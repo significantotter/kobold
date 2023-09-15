@@ -621,7 +621,7 @@ export class SheetUtils {
 				const resistanceType = property.match(resistanceRegex)[1];
 				let found = false;
 				for (const resistanceIndex in newSheet.defenses.resistances) {
-					if (newSheet.defenses.resistances[resistanceIndex].type === resistanceType) {
+					if (newSheet.defenses.resistances[resistanceIndex].name === resistanceType) {
 						const baseValue =
 							overwriteSheetAdjustments[property] ??
 							sheet.defenses.resistances[resistanceIndex].amount ??
@@ -635,7 +635,7 @@ export class SheetUtils {
 
 				if (!found) {
 					newSheet.defenses.resistances.push({
-						type: resistanceType,
+						name: resistanceType,
 						amount:
 							Number(overwriteSheetAdjustments[property] ?? 0) +
 							Number(modifySheetAdjustments[property] ?? 0),
@@ -649,7 +649,7 @@ export class SheetUtils {
 				const weaknessType = property.match(weaknessRegex)[1];
 				let found = false;
 				for (const weaknessIndex in newSheet.defenses.weaknesses) {
-					if (newSheet.defenses.weaknesses[weaknessIndex].type === weaknessType) {
+					if (newSheet.defenses.weaknesses[weaknessIndex].name === weaknessType) {
 						const baseValue =
 							overwriteSheetAdjustments[property] ??
 							newSheet.defenses.weaknesses[weaknessIndex].amount ??
@@ -663,7 +663,7 @@ export class SheetUtils {
 
 				if (!found) {
 					newSheet.defenses.weaknesses.push({
-						type: weaknessType,
+						name: weaknessType,
 						amount:
 							Number(overwriteSheetAdjustments[property] ?? 0) +
 							Number(modifySheetAdjustments[property] ?? 0),

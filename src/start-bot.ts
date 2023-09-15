@@ -1,5 +1,5 @@
 import './config/config.js';
-import { REST } from '@discordjs/rest';
+import { REST } from 'discord.js';
 import { Options, GatewayIntentBits, Partials, disableValidators } from 'discord.js';
 
 import { Button } from './buttons/index.js';

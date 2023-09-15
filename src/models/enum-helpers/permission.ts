@@ -215,5 +215,30 @@ export class Permission {
 				return Lang.getRef('permissions.ViewGuildInsights', langCode);
 			},
 		},
+		ManageGuildExpressions: {
+			displayName(langCode: Locale): string {
+				return 'Manage Guild Expressions';
+			},
+		},
+		ViewCreatorMonetizationAnalytics: {
+			displayName(langCode: Locale): string {
+				return 'View Creator Monetization Analytics';
+			},
+		},
+		UseSoundboard: {
+			displayName(langCode: Locale): string {
+				return 'Use Soundboard';
+			},
+		},
+		UseExternalSounds: {
+			displayName(langCode: Locale): string {
+				return 'Use External Sounds';
+			},
+		},
+		SendVoiceMessages: {
+			displayName(langCode: Locale): string {
+				return 'Send Voice Messages';
+			},
+		},
 	};
 }

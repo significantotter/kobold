@@ -8,7 +8,7 @@ type InitiativeTransientParams = {};
 class InitiativeFactoryClass extends Factory<Initiative, InitiativeTransientParams, Initiative> {
 	withFakeId() {
 		return this.params({
-			id: faker.datatype.number(),
+			id: faker.number.int(2147483647),
 		});
 	}
 }
@@ -17,13 +17,13 @@ export const InitiativeFactory = InitiativeFactoryClass.define(({ onCreate }) =>
 	onCreate(async builtInitiative => Initiative.query().insert(builtInitiative));
 
 	const initiativeData: DeepPartial<Initiative> = {
-		channelId: faker.datatype.uuid(),
-		gmUserId: faker.datatype.uuid(),
+		channelId: faker.string.uuid(),
+		gmUserId: faker.string.uuid(),
 		roundMessageIds: [],
-		currentRound: faker.datatype.number(11),
+		currentRound: faker.number.int(11),
 		currentTurnGroupId: null,
-		createdAt: faker.date.recent(30).toISOString(),
-		lastUpdatedAt: faker.date.recent(30).toISOString(),
+		createdAt: faker.date.recent({ days: 30 }).toISOString(),
+		lastUpdatedAt: faker.date.recent({ days: 30 }).toISOString(),
 	};
 
 	return Initiative.fromDatabaseJson(initiativeData);

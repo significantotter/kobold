@@ -18,9 +18,9 @@ export const ChannelDefaultCharacterFactory = ChannelDefaultCharacterFactoryClas
 		);
 
 		const characterData: DeepPartial<ChannelDefaultCharacter> = {
-			characterId: faker.datatype.number(),
-			userId: faker.datatype.uuid(),
-			channelId: faker.datatype.uuid(),
+			characterId: faker.number.int(2147483647),
+			userId: faker.string.uuid(),
+			channelId: faker.string.uuid(),
 		};
 
 		return ChannelDefaultCharacter.fromDatabaseJson(characterData);

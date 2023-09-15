@@ -2,7 +2,7 @@ import type { InitiativeActorGroup as InitiativeActorGroupType } from './initiat
 import { JSONSchema7 } from 'json-schema';
 import { BaseModel } from '../../lib/base-model.js';
 import InitiativeActorGroupSchema from './initiative-actor-group.schema.json' assert { type: 'json' };
-import { Model, RelationMappings } from 'objection';
+import Objection, { Model, RelationMappings } from 'objection';
 import { Initiative } from '../initiative/initiative.model.js';
 import { InitiativeActor } from '../initiative-actor/initiative-actor.model.js';
 
@@ -15,8 +15,8 @@ export class InitiativeActorGroup extends BaseModel {
 		return 'initiativeActorGroup';
 	}
 
-	static get jsonSchema(): JSONSchema7 {
-		return InitiativeActorGroupSchema as JSONSchema7;
+	static get jsonSchema(): Objection.JSONSchema {
+		return InitiativeActorGroupSchema as Objection.JSONSchema;
 	}
 
 	static get relationMappings(): RelationMappings {

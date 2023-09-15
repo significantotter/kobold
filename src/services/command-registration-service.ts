@@ -1,5 +1,5 @@
 import { Command } from './../commands/command.js';
-import { REST } from '@discordjs/rest';
+import { REST } from 'discord.js';
 import {
 	APIApplicationCommand,
 	RESTGetAPIApplicationCommandsResult,

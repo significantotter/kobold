@@ -31,28 +31,38 @@ export class RollMacroCommand implements Command {
 			{
 				name: Language.LL.commands.rollMacro.list.name(),
 				description: Language.LL.commands.rollMacro.list.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 			},
 			{
 				name: Language.LL.commands.rollMacro.create.name(),
 				description: Language.LL.commands.rollMacro.create.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [RollMacroOptions.MACRO_NAME_OPTION, RollMacroOptions.MACRO_VALUE_OPTION],
 			},
 			{
 				name: Language.LL.commands.rollMacro.update.name(),
 				description: Language.LL.commands.rollMacro.update.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
-					{ ...RollMacroOptions.MACRO_NAME_OPTION, autocomplete: true },
+					{
+						...RollMacroOptions.MACRO_NAME_OPTION,
+						autocomplete: true,
+						choices: undefined,
+					},
 					RollMacroOptions.MACRO_VALUE_OPTION,
 				],
 			},
 			{
 				name: Language.LL.commands.rollMacro.remove.name(),
 				description: Language.LL.commands.rollMacro.remove.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
-				options: [{ ...RollMacroOptions.MACRO_NAME_OPTION, autocomplete: true }],
+				type: ApplicationCommandOptionType.Subcommand,
+				options: [
+					{
+						...RollMacroOptions.MACRO_NAME_OPTION,
+						autocomplete: true,
+						choices: undefined,
+					},
+				],
 			},
 		],
 	};

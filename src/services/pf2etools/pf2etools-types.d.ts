@@ -1,39 +1,13 @@
-type spellLevelKeys = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10';
+export type spellLevelKeys = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10';
 
-interface Stat {
-	std: number;
-	note?: string;
-	[key: string]: any;
-}
-interface SpellLevel {
-	level: number;
-	slots?: number;
-	spells: {
-		name: string;
-		amount?: string | number;
-		source?: string;
-		notes?: string[];
-	}[];
-}
+export type spellcastingMap = { [key in spellLevelKeys]?: SpellLevel };
 
-interface Ritual {
-	tradition: string;
-	DC: number | string;
-	rituals: {
-		name: string;
-		level?: number;
-		amount?: string | number;
-		source?: string;
-		notes?: string[];
-	};
-}
-
-interface ListEntry {
+export interface ListEntry {
 	type: 'list';
 	items: Entry[];
 }
 
-interface SuccessDegreeEntry {
+export interface SuccessDegreeEntry {
 	type: 'successDegree';
 	entries: {
 		'Critical Success': string;
@@ -43,16 +17,14 @@ interface SuccessDegreeEntry {
 	};
 }
 
-interface DataEntry {
+export interface DataEntry {
 	type: 'data';
 	tag: string;
 	name: string;
 	source: string;
 }
 
-type Entry = string | ListEntry | DataEntry | SuccessDegreeEntry | Ability | Affliction;
-
-interface Ability {
+export interface Ability {
 	activity?: {
 		number: number;
 		unit: string;
@@ -70,7 +42,7 @@ interface Ability {
 	traits?: string[];
 }
 
-interface Affliction {
+export interface Affliction {
 	type: 'affliction';
 	name: string;
 	onset?: string;
@@ -84,6 +56,51 @@ interface Affliction {
 		duration: string;
 	}[];
 }
+
+export interface Item {
+	type: 'item';
+	name: 'Armor of Insight ({@skill Perception})';
+	entries: Entry[];
+}
+
+export interface Pf2Options {
+	type: 'pf2-options';
+	items: Item[];
+}
+
+export interface Pf2Sidebar {
+	type: 'pf2-sidebar';
+	name: string;
+	source: string;
+	page: number;
+	entries: FluffEntry[];
+}
+
+export interface Pf2H2 {
+	type: 'pf2-h2';
+	name: string;
+	collapsible: boolean;
+	source: string;
+	page: number;
+	entries: FluffEntry[];
+}
+
+export interface Pf2H3 {
+	type: 'pf2-h3';
+	name: string;
+	entries: FluffEntry[];
+}
+
+export type Entry =
+	| string
+	| ListEntry
+	| DataEntry
+	| Pf2Options
+	| SuccessDegreeEntry
+	| Ability
+	| Affliction;
+export type FluffEntry = Pf2Sidebar | Pf2H2 | Pf2H3 | ListEntry | DataEntry | string;
+
 export interface BestiaryEntry {
 	_meta: {
 		dependencies: {
@@ -179,43 +196,72 @@ export interface CreatureStatBlock {
 		fp?: number;
 		attack?: number;
 		entry: {
-			constant?: {
-				[k: spellLevelKeys]: SpellLevel;
-			};
-			[k: spellLevelKeys]: SpellLevel;
-		};
+			constant?: spellcastingMap;
+		} & spellcastingMap;
 	}[];
-}
-
-type fluffEntry = Pf2Sidebar | Pf2H2 | ListEntry | DataEntry | string;
-
-interface Pf2Sidebar {
-	type: 'pf2-sidebar';
-	name: string;
-	source: string;
-	page: number;
-	entries: fluffEntry[];
-}
-
-interface Pf2H2 {
-	type: 'pf2-h2';
-	name: string;
-	collapsible: boolean;
-	source: string;
-	page: number;
-	entries: fluffEntry[];
-}
-
-interface Pf2H2 {
-	type: 'pf2-h3';
-	name: string;
-	entries: fluffEntry[];
 }
 
 export interface CreatureFluff {
 	name: string;
 	source: string;
-	entries: fluffEntry[];
+	entries: FluffEntry[];
 	images: string[];
 	_copy?: any;
+}
+
+export interface Stat {
+	std: number;
+	note?: string;
+	[key: string]: any;
+}
+export interface SpellLevel {
+	level: number;
+	slots?: number;
+	spells: {
+		name: string;
+		amount?: string | number;
+		source?: string;
+		notes?: string[];
+	}[];
+}
+
+export interface Ritual {
+	tradition: string;
+	DC: number | string;
+	rituals: {
+		name: string;
+		level?: number;
+		amount?: string | number;
+		source?: string;
+		notes?: string[];
+	};
+}
+
+export interface ActionFooter {
+	name: string;
+	entries: Entry[];
+}
+
+export interface Action {
+	name: string;
+	source: string;
+	activity?: {
+		number: number;
+		unit: string;
+	};
+	page?: number;
+	traits: string[];
+	frequency?: {
+		number: number;
+		unit: string;
+	};
+	actionType?: {
+		class?: string[];
+		archetype?: string[];
+	};
+	trigger: string;
+	requirements?: string;
+	entries?: Entry[];
+	special?: string[];
+	footer?: ActionFooter[];
 }

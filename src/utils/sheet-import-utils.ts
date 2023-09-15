@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { Sheet } from '../services/kobold/models/index.js';
 import { PathBuilder } from '../services/pathbuilder/pathbuilder.js';
-import { CreatureFluff, CreatureStatBlock } from '../services/pf2etools/bestiaryType.js';
+import { CreatureFluff, CreatureStatBlock } from '../services/pf2etools/pf2etools-types.js';
 import { WG } from '../services/wanderers-guide/wanderers-guide.js';
 import { DiceUtils } from './dice-utils.js';
 import { KoboldError } from './KoboldError.js';

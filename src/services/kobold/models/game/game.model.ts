@@ -2,7 +2,7 @@ import type { Game as GameType } from './game.schema.js';
 import { JSONSchema7 } from 'json-schema';
 import { BaseModel } from '../../lib/base-model.js';
 import GameSchema from './game.schema.json' assert { type: 'json' };
-import { Model, RelationMappings } from 'objection';
+import Objection, { Model, RelationMappings } from 'objection';
 import { Character } from '../character/character.model.js';
 
 export interface Game extends GameType {
@@ -13,8 +13,8 @@ export class Game extends BaseModel {
 		return 'game';
 	}
 
-	static get jsonSchema(): JSONSchema7 {
-		return GameSchema as JSONSchema7;
+	static get jsonSchema(): Objection.JSONSchema {
+		return GameSchema as Objection.JSONSchema;
 	}
 
 	static async queryWhereUserHasCharacter(userId, guildId) {

@@ -30,6 +30,7 @@ export let refs = {
 			support: `[Join Kobold's Support Server on Discord](${links.support})`,
 			template: `[Built with Kevin Novak's Discord Bot TypeScript Template](${links.template})`,
 			vote: `[Vote for Kobold!](${links.vote})`,
+			pathbuilder: `[Pathbuilder 2E](https://pathbuilder2e.com)`,
 			wanderersGuide: `[Wanderer's Guide](https://wanderersguide.app)`,
 		},
 	},
@@ -43,5 +44,6 @@ export const embedLinks = {
 	supportEmbed: `[Join Support Server]${refs.links.support})`,
 	templateEmbed: `[Discord Bot TypeScript Template]${refs.links.template})`,
 	voteEmbed: `[Vote for ${refs.bot.name}!]${refs.links.vote})`,
+	pathbuilderEmbed: `[Pathbuilder 2E](https://pathbuilder2e.com)`,
 	wgEmbed: `[Wanderer's Guide](https://wanderersguide.app)`,
 };

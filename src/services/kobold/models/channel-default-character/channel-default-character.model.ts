@@ -3,6 +3,7 @@ import type { ChannelDefaultCharacter as ChannelDefaultCharacterType } from './c
 import { JSONSchema7 } from 'json-schema';
 import { BaseModel } from '../../lib/base-model.js';
 import ChannelDefaultCharacterSchema from './channel-default-character.schema.json' assert { type: 'json' };
+import Objection from 'objection';
 
 export interface ChannelDefaultCharacter extends ChannelDefaultCharacterType {}
 export class ChannelDefaultCharacter extends BaseModel {
@@ -14,8 +15,8 @@ export class ChannelDefaultCharacter extends BaseModel {
 		return 'channelDefaultCharacter';
 	}
 
-	static get jsonSchema(): JSONSchema7 {
-		return ChannelDefaultCharacterSchema as JSONSchema7;
+	static get jsonSchema(): Objection.JSONSchema {
+		return ChannelDefaultCharacterSchema as Objection.JSONSchema;
 	}
 
 	static get RelationMappings() {

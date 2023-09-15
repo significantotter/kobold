@@ -16,12 +16,12 @@ class InitiativeActorFactoryClass extends Factory<
 > {
 	withFakeId() {
 		return this.params({
-			id: faker.datatype.number(),
+			id: faker.number.int(2147483647),
 		});
 	}
 	withFakeInitiativeId() {
 		return this.params({
-			initiativeId: faker.datatype.number(),
+			initiativeId: faker.number.int(2147483647),
 		});
 	}
 }
@@ -44,20 +44,20 @@ export const InitiativeActorFactory = InitiativeActorFactoryClass.define(
 				{ allowRefs: true }
 			);
 		});
-		const name = faker.name.firstName();
+		const name = faker.person.firstName();
 		let actorGroup;
 		if (transientParams.includeGroup) {
 			actorGroup = InitiativeActorGroupFactory.withFakeId().build({ name });
 		}
 
 		const actorData: DeepPartial<InitiativeActor> = {
-			userId: faker.datatype.uuid(),
+			userId: faker.string.uuid(),
 			name,
 			actorGroup,
 			hideStats: faker.datatype.boolean(),
 			initiativeActorGroupId: actorGroup?.id,
-			createdAt: faker.date.recent(30).toISOString(),
-			lastUpdatedAt: faker.date.recent(30).toISOString(),
+			createdAt: faker.date.recent({ days: 30 }).toISOString(),
+			lastUpdatedAt: faker.date.recent({ days: 30 }).toISOString(),
 		};
 
 		return InitiativeActor.fromDatabaseJson(actorData);

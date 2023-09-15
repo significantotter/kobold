@@ -31,19 +31,19 @@ export class ActionCommand implements Command {
 			{
 				name: Language.LL.commands.action.list.name(),
 				description: Language.LL.commands.action.list.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [],
 			},
 			{
 				name: Language.LL.commands.action.detail.name(),
 				description: Language.LL.commands.action.detail.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [ActionOptions.ACTION_TARGET_OPTION],
 			},
 			{
 				name: Language.LL.commands.action.create.name(),
 				description: Language.LL.commands.action.create.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					ActionOptions.ACTION_NAME_OPTION,
 					ActionOptions.ACTION_TYPE_OPTION,
@@ -57,13 +57,19 @@ export class ActionCommand implements Command {
 			{
 				name: Language.LL.commands.action.remove.name(),
 				description: Language.LL.commands.action.remove.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
-				options: [{ ...ActionOptions.ACTION_TARGET_OPTION, autocomplete: true }],
+				type: ApplicationCommandOptionType.Subcommand,
+				options: [
+					{
+						...ActionOptions.ACTION_TARGET_OPTION,
+						autocomplete: true,
+						choices: undefined,
+					},
+				],
 			},
 			{
 				name: Language.LL.commands.action.edit.name(),
 				description: Language.LL.commands.action.edit.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					ActionOptions.ACTION_TARGET_OPTION,
 					ActionOptions.ACTION_EDIT_OPTION,
@@ -73,7 +79,7 @@ export class ActionCommand implements Command {
 			{
 				name: Language.LL.commands.action.import.name(),
 				description: Language.LL.commands.action.import.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					ActionOptions.ACTION_IMPORT_URL_OPTION,
 					ActionOptions.ACTION_IMPORT_MODE_OPTION,
@@ -82,7 +88,7 @@ export class ActionCommand implements Command {
 			{
 				name: Language.LL.commands.action.export.name(),
 				description: Language.LL.commands.action.export.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [],
 			},
 		],

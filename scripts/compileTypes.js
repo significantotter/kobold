@@ -1,9 +1,9 @@
-import Glob from 'glob'
+import {glob} from 'glob'
 import path from 'path'
 import fs from 'fs'
 import {compile} from 'json-schema-to-typescript';
 
-const files = Glob.sync('src/**/*.schema.json');
+const files = glob.sync('src/**/*.schema.json');
 
 for (const file of files) {
 	const filePath = path.parse(file);

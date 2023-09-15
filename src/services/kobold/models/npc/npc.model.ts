@@ -5,8 +5,9 @@ import npc from './npc.schema.json' assert { type: 'json' };
 import Sheet from '../../lib/sheet.schema.json' assert { type: 'json' };
 import { Sheet as SheetType } from '../../lib/sheet.schema.js';
 import _ from 'lodash';
-import { CreatureStatBlock } from '../../../pf2etools/bestiaryType.js';
+import { CreatureStatBlock } from '../../../pf2etools/pf2etools-types.js';
 import { StringUtils } from '../../../../utils/string-utils.js';
+import Objection from 'objection';
 
 export interface Npc extends NpcType {
 	sheet?: SheetType;
@@ -51,7 +52,7 @@ export class Npc extends BaseModel {
 		return this.data as CreatureStatBlock;
 	}
 
-	static get jsonSchema(): JSONSchema7 {
-		return { ...npc, properties: { ...npc.properties, sheet: Sheet } } as JSONSchema7;
+	static get jsonSchema(): Objection.JSONSchema {
+		return { ...npc, properties: { ...npc.properties, sheet: Sheet } } as Objection.JSONSchema;
 	}
 }

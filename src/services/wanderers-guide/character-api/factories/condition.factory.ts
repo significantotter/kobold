@@ -12,10 +12,10 @@ class ConditionFactoryClass extends Factory<
 > {}
 
 export const ConditionFactory = ConditionFactoryClass.define(() => ({
-	conditionID: faker.datatype.number({ max: 999 }),
-	name: faker.random.words(1),
-	entryID: faker.datatype.number({ max: 999 }),
-	parentEntryID: faker.datatype.number({ max: 999 }),
-	sourceText: faker.random.words(5),
-	value: faker.datatype.number({ max: 30 }),
+	conditionID: faker.number.int({ max: 999 }),
+	name: faker.word.words(1),
+	entryID: faker.number.int({ max: 999 }),
+	parentEntryID: faker.number.int({ max: 999 }),
+	sourceText: faker.word.words(5),
+	value: faker.number.int({ max: 30 }),
 }));

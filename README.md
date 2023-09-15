@@ -9,7 +9,7 @@
 
 ## Introduction
 
-Kobold was developed to integrate my preferred character management tool -- Wanderer's Guide -- with discord play by post 2E games. pf2.tools has a lot of flexibility, but it can be annoying to manage, difficult for players to lear to use, and finnicky to get right. More unfortunately, the Wayfinder bot that integrates with pf2.tools is no longer being maintained.
+Kobold integrates the character management tools Pathbuilder 2E and Wanderer's guide into a discord play by post bot. pf2.tools has a lot of flexibility, but it can be annoying to manage, difficult for players to lear to use, and finnicky to get right. More unfortunately, the Wayfinder bot that integrates with pf2.tools is no longer being maintained.
 
 Kobold is being developed with a focus on ease of playing with minimal configuration. However, although the base usage should be simple, I intend to allow as much complexity as a player wishes to utilize with it.
 
@@ -23,11 +23,11 @@ For help using this bot, reporting bugs, or suggesting features, feel free to [j
 
 ### Built-In Bot Features:
 
--   Imports and manages multiple characters from Wanderer's Guide.
--   Rolls complex dice
+-   Imports and manages multiple characters from Pathbuilder 2E or Wanderer's Guide.
+-   Rolls complex dice and create macros and custom actions
 -   Rolls skills, abilities, saves, and attacks generated for your wanderer's guide characters
--   Tracks initiative with Wanderer's Guide characters
--   Allows dummy characters without Wanderer's Guide sheets in initiative
+-   Tracks initiative with characters and monsters imported from pf2etools
+-   Manage conditions and modifiers to characters such as raising shields, or inspire courage
 
 ### About:
 

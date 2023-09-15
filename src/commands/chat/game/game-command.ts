@@ -33,13 +33,13 @@ export class GameCommand implements Command {
 			{
 				name: Language.LL.commands.game.manage.name(),
 				description: Language.LL.commands.game.manage.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [GameOptions.GAME_MANAGE_OPTION, GameOptions.GAME_MANAGE_VALUE],
 			},
 			{
 				name: Language.LL.commands.game.init.name(),
 				description: Language.LL.commands.game.init.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					{
 						...ChatArgs.SKILL_CHOICE_OPTION,
@@ -64,7 +64,7 @@ export class GameCommand implements Command {
 			{
 				name: Language.LL.commands.game.roll.name(),
 				description: Language.LL.commands.game.roll.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					GameOptions.GAME_ROLL_TYPE,
 					GameOptions.GAME_DICE_ROLL_OR_MODIFIER,
@@ -76,7 +76,7 @@ export class GameCommand implements Command {
 			{
 				name: Language.LL.commands.game.list.name(),
 				description: Language.LL.commands.game.list.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [],
 			},
 		],

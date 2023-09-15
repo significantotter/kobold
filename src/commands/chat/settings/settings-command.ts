@@ -31,7 +31,7 @@ export class SettingsCommand implements Command {
 			{
 				name: Language.LL.commands.settings.set.name(),
 				description: Language.LL.commands.settings.set.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [SettingsOptions.SETTINGS_SET_OPTION, SettingsOptions.SETTINGS_SET_VALUE],
 			},
 		],

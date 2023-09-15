@@ -1,6 +1,6 @@
 import { Character, ModelWithSheet, Sheet } from '../services/kobold/models/index.js';
 import { PathBuilder } from '../services/pathbuilder/pathbuilder.js';
-import { CreatureStatBlock } from '../services/pf2etools/bestiaryType.js';
+import { CreatureStatBlock } from '../services/pf2etools/pf2etools-types.js';
 import { WG } from '../services/wanderers-guide/wanderers-guide.js';
 import _ from 'lodash';
 import {
@@ -48,7 +48,10 @@ export interface attackRoll {
 
 export class Creature {
 	private _adjustedSheet: Sheet;
-	constructor(public _sheet: Sheet, private _name?: string) {
+	constructor(
+		public _sheet: Sheet,
+		private _name?: string
+	) {
 		const sheetDefaults: Sheet = {
 			info: { traits: [] },
 			general: { senses: [], languages: [] },

@@ -8,7 +8,7 @@ type GameTransientParams = {};
 class GameFactoryClass extends Factory<Game, GameTransientParams, Game> {
 	withFakeId() {
 		return this.params({
-			id: faker.datatype.number(),
+			id: faker.number.int(2147483647),
 		});
 	}
 }
@@ -17,9 +17,9 @@ export const GameFactory = GameFactoryClass.define(({ onCreate }) => {
 	onCreate(async builtGame => Game.query().insert(builtGame));
 
 	const gameData: DeepPartial<Game> = {
-		name: faker.random.word(),
-		guildId: faker.datatype.uuid(),
-		gmUserId: faker.datatype.uuid(),
+		name: faker.word.noun(),
+		guildId: faker.string.uuid(),
+		gmUserId: faker.string.uuid(),
 		isActive: Math.random() > 0.5,
 	};
 

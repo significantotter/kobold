@@ -32,7 +32,7 @@ export class GameplayCommand implements Command {
 			{
 				name: Language.LL.commands.gameplay.damage.name(),
 				description: Language.LL.commands.gameplay.damage.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					{ ...GameplayOptions.GAMEPLAY_TARGET_CHARACTER, required: true },
 					GameplayOptions.GAMEPLAY_DAMAGE_AMOUNT,
@@ -42,7 +42,7 @@ export class GameplayCommand implements Command {
 			{
 				name: Language.LL.commands.gameplay.set.name(),
 				description: Language.LL.commands.gameplay.set.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					GameplayOptions.GAMEPLAY_SET_OPTION,
 					GameplayOptions.GAMEPLAY_SET_VALUE,
@@ -52,13 +52,13 @@ export class GameplayCommand implements Command {
 			{
 				name: Language.LL.commands.gameplay.recover.name(),
 				description: Language.LL.commands.gameplay.recover.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [GameplayOptions.GAMEPLAY_TARGET_CHARACTER],
 			},
 			{
 				name: Language.LL.commands.gameplay.tracker.name(),
 				description: Language.LL.commands.gameplay.tracker.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					{ ...ChatArgs.SET_ACTIVE_NAME_OPTION, required: false },
 					GameplayOptions.GAMEPLAY_TARGET_CHANNEL,

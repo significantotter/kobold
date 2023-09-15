@@ -1,14 +1,14 @@
 {
 	"compilerOptions": {
 		"target": "ESNext",
-		"module": "ESNext",
-		"moduleResolution": "Node16",
+		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
 		"composite": true,
 		"lib": ["es2021"],
 		"declaration": true,
 		"sourceMap": true,
 		"outDir": "./dist",
-		"rootDir": "./src",
+		"rootDir": "./",
 		"strict": false,
 		"resolveJsonModule": true,
 		"esModuleInterop": true,

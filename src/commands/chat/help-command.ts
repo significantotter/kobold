@@ -40,64 +40,64 @@ export class HelpCommand implements Command {
 			{
 				name: Language.LL.commands.help.faq.name(),
 				description: Language.LL.commands.help.faq.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 			},
 			{
 				name: Language.LL.commands.help.about.name(),
 				description: Language.LL.commands.help.about.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 			},
 			{
 				name: Language.LL.commands.help.commands.name(),
 				description: Language.LL.commands.help.commands.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 			},
 			{
 				name: Language.LL.commands.help.character.name(),
 				description: Language.LL.commands.help.character.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [],
 			},
 			{
 				name: Language.LL.commands.help.init.name(),
 				description: Language.LL.commands.help.init.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [],
 			},
 			{
 				name: Language.LL.commands.help.roll.name(),
 				description: Language.LL.commands.help.roll.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [],
 			},
 			{
 				name: Language.LL.commands.help.modifier.name(),
 				description: Language.LL.commands.help.modifier.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [],
 			},
 			{
 				name: Language.LL.commands.help.game.name(),
 				description: Language.LL.commands.help.game.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [],
 			},
 			{
 				name: Language.LL.commands.help.gameplay.name(),
 				description: Language.LL.commands.help.gameplay.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [],
 			},
 			{
 				name: Language.LL.commands.help.attributesAndTags.name(),
 				description: Language.LL.commands.help.attributesAndTags.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [],
 			},
 			{
 				name: Language.LL.commands.help.makingACustomAction.name(),
 				description: Language.LL.commands.help.makingACustomAction.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					{
 						name: 'example-choice',
@@ -132,25 +132,25 @@ export class HelpCommand implements Command {
 			{
 				name: Language.LL.commands.help.rollMacro.name(),
 				description: Language.LL.commands.help.rollMacro.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [],
 			},
 			{
 				name: Language.LL.commands.help.action.name(),
 				description: Language.LL.commands.help.action.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [],
 			},
 			{
 				name: Language.LL.commands.help.actionStage.name(),
 				description: Language.LL.commands.help.actionStage.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [],
 			},
 			{
 				name: Language.LL.commands.help.settings.name(),
 				description: Language.LL.commands.help.settings.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [],
 			},
 		],
@@ -165,7 +165,7 @@ export class HelpCommand implements Command {
 		// look through our options that are subcommands
 		const targetSubcommand = intr.options.getSubcommand();
 		const allSubcommands = this.metadata.options
-			.filter(option => option.type === ApplicationCommandOptionType.Subcommand.valueOf())
+			.filter(option => option.type === ApplicationCommandOptionType.Subcommand)
 			.map(option => option.name);
 
 		const command = _.findLast(allSubcommands, command => command == targetSubcommand) || 'faq';

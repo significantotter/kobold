@@ -18,9 +18,9 @@ export const GuildDefaultCharacterFactory = GuildDefaultCharacterFactoryClass.de
 		);
 
 		const characterData: DeepPartial<GuildDefaultCharacter> = {
-			characterId: faker.datatype.number(),
-			userId: faker.datatype.uuid(),
-			guildId: faker.datatype.uuid(),
+			characterId: faker.number.int(2147483647),
+			userId: faker.string.uuid(),
+			guildId: faker.string.uuid(),
 		};
 
 		return GuildDefaultCharacter.fromDatabaseJson(characterData);

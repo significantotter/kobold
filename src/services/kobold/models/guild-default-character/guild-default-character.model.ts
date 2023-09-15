@@ -3,6 +3,7 @@ import type { GuildDefaultCharacter as GuildDefaultCharacterType } from './guild
 import { JSONSchema7 } from 'json-schema';
 import { BaseModel } from '../../lib/base-model.js';
 import GuildDefaultCharacterSchema from './guild-default-character.schema.json' assert { type: 'json' };
+import Objection from 'objection';
 
 export interface GuildDefaultCharacter extends GuildDefaultCharacterType {}
 export class GuildDefaultCharacter extends BaseModel {
@@ -14,8 +15,8 @@ export class GuildDefaultCharacter extends BaseModel {
 		return 'guildDefaultCharacter';
 	}
 
-	static get jsonSchema(): JSONSchema7 {
-		return GuildDefaultCharacterSchema as JSONSchema7;
+	static get jsonSchema(): Objection.JSONSchema {
+		return GuildDefaultCharacterSchema as Objection.JSONSchema;
 	}
 
 	static get RelationMappings() {

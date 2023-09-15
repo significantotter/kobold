@@ -33,7 +33,7 @@ export class RollCommand implements Command {
 			{
 				name: Language.LL.commands.roll.ability.name(),
 				description: Language.LL.commands.roll.ability.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					{
 						...ChatArgs.ABILITY_CHOICE_OPTION,
@@ -56,7 +56,7 @@ export class RollCommand implements Command {
 			{
 				name: Language.LL.commands.roll.action.name(),
 				description: Language.LL.commands.roll.action.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					{
 						...ActionOptions.ACTION_TARGET_OPTION,
@@ -87,7 +87,7 @@ export class RollCommand implements Command {
 			{
 				name: Language.LL.commands.roll.attack.name(),
 				description: Language.LL.commands.roll.attack.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					{
 						...ChatArgs.ATTACK_CHOICE_OPTION,
@@ -116,7 +116,7 @@ export class RollCommand implements Command {
 			{
 				name: Language.LL.commands.roll.dice.name(),
 				description: Language.LL.commands.roll.dice.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					{
 						...ChatArgs.ROLL_EXPRESSION_OPTION,
@@ -135,7 +135,7 @@ export class RollCommand implements Command {
 			{
 				name: Language.LL.commands.roll.perception.name(),
 				description: Language.LL.commands.roll.perception.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					{
 						...ChatArgs.ROLL_MODIFIER_OPTION,
@@ -154,7 +154,7 @@ export class RollCommand implements Command {
 			{
 				name: Language.LL.commands.roll.save.name(),
 				description: Language.LL.commands.roll.save.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					{
 						...ChatArgs.SAVE_CHOICE_OPTION,
@@ -177,7 +177,7 @@ export class RollCommand implements Command {
 			{
 				name: Language.LL.commands.roll.skill.name(),
 				description: Language.LL.commands.roll.skill.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					{
 						...ChatArgs.SKILL_CHOICE_OPTION,

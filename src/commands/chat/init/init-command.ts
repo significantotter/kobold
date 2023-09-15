@@ -32,33 +32,33 @@ export class InitCommand implements Command {
 			{
 				name: Language.LL.commands.init.start.name(),
 				description: Language.LL.commands.init.start.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 			},
 			{
 				name: Language.LL.commands.init.show.name(),
 				description: Language.LL.commands.init.show.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 			},
 			{
 				name: Language.LL.commands.init.next.name(),
 				description: Language.LL.commands.init.next.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 			},
 			{
 				name: Language.LL.commands.init.prev.name(),
 				description: Language.LL.commands.init.prev.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 			},
 			{
 				name: Language.LL.commands.init.jumpTo.name(),
 				description: Language.LL.commands.init.jumpTo.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [{ ...InitOptions.INIT_CHARACTER_OPTION, required: true }],
 			},
 			{
 				name: Language.LL.commands.init.join.name(),
 				description: Language.LL.commands.init.join.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					{
 						...ChatArgs.SKILL_CHOICE_OPTION,
@@ -83,7 +83,7 @@ export class InitCommand implements Command {
 			{
 				name: Language.LL.commands.init.add.name(),
 				description: Language.LL.commands.init.add.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					InitOptions.INIT_CREATURE_OPTION,
 					{
@@ -108,7 +108,7 @@ export class InitCommand implements Command {
 			{
 				name: Language.LL.commands.init.set.name(),
 				description: Language.LL.commands.init.set.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					{
 						...InitOptions.INIT_CHARACTER_OPTION,
@@ -121,13 +121,13 @@ export class InitCommand implements Command {
 			{
 				name: Language.LL.commands.init.remove.name(),
 				description: Language.LL.commands.init.remove.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [{ ...InitOptions.INIT_CHARACTER_OPTION, required: true }],
 			},
 			{
 				name: Language.LL.commands.init.statBlock.name(),
 				description: Language.LL.commands.init.statBlock.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					{
 						...InitOptions.INIT_CHARACTER_OPTION,
@@ -139,7 +139,7 @@ export class InitCommand implements Command {
 			{
 				name: Language.LL.commands.init.roll.name(),
 				description: Language.LL.commands.init.roll.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					{
 						...InitOptions.INIT_CHARACTER_OPTION,
@@ -172,7 +172,7 @@ export class InitCommand implements Command {
 			{
 				name: Language.LL.commands.init.end.name(),
 				description: Language.LL.commands.init.end.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 			},
 		],
 	};

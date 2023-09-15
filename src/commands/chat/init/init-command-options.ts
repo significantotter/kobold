@@ -32,7 +32,6 @@ export class InitOptions {
 		name: Language.LL.commandOptions.initHideStats.name(),
 		description: Language.LL.commandOptions.initHideStats.description(),
 		required: false,
-		autocomplete: true,
 		type: ApplicationCommandOptionType.Boolean,
 	};
 	public static readonly INIT_CUSTOM_STATS_OPTION: APIApplicationCommandBasicOption = {

@@ -14,12 +14,12 @@ class InitiativeActorGroupFactoryClass extends Factory<
 > {
 	withFakeId() {
 		return this.params({
-			id: faker.datatype.number(),
+			id: faker.number.int(2147483647),
 		});
 	}
 	withFakeInitiativeId() {
 		return this.params({
-			initiativeId: faker.datatype.number(),
+			initiativeId: faker.number.int(2147483647),
 		});
 	}
 }
@@ -34,11 +34,11 @@ export const InitiativeActorGroupFactory = InitiativeActorGroupFactoryClass.defi
 		});
 
 		const actorGroupData: DeepPartial<InitiativeActorGroup> = {
-			userId: faker.datatype.uuid(),
-			name: faker.name.firstName(),
-			initiativeResult: faker.datatype.number(40),
-			createdAt: faker.date.recent(30).toISOString(),
-			lastUpdatedAt: faker.date.recent(30).toISOString(),
+			userId: faker.string.uuid(),
+			name: faker.person.firstName(),
+			initiativeResult: faker.number.int(40),
+			createdAt: faker.date.recent({ days: 30 }).toISOString(),
+			lastUpdatedAt: faker.date.recent({ days: 30 }).toISOString(),
 		};
 
 		return InitiativeActorGroup.fromDatabaseJson(actorGroupData);

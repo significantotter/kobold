@@ -31,31 +31,39 @@ export class ActionStageCommand implements Command {
 			{
 				name: Language.LL.commands.actionStage.addAttack.name(),
 				description: Language.LL.commands.actionStage.addAttack.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					ActionStageOptions.ACTION_TARGET_OPTION,
 					ActionStageOptions.ACTION_ROLL_NAME_OPTION,
 					ActionStageOptions.ACTION_DICE_ROLL_OPTION,
-					{ ...ActionStageOptions.ACTION_ROLL_TARGET_DC_OPTION, autocomplete: true },
+					{
+						...ActionStageOptions.ACTION_ROLL_TARGET_DC_OPTION,
+						autocomplete: true,
+						choices: undefined,
+					},
 					ActionStageOptions.ACTION_ROLL_ALLOW_MODIFIERS,
 				],
 			},
 			{
 				name: Language.LL.commands.actionStage.addSkillChallenge.name(),
 				description: Language.LL.commands.actionStage.addSkillChallenge.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					ActionStageOptions.ACTION_TARGET_OPTION,
 					ActionStageOptions.ACTION_ROLL_NAME_OPTION,
 					ActionStageOptions.ACTION_DICE_ROLL_OPTION,
-					{ ...ActionStageOptions.ACTION_ROLL_TARGET_DC_OPTION, autocomplete: true },
+					{
+						...ActionStageOptions.ACTION_ROLL_TARGET_DC_OPTION,
+						autocomplete: true,
+						choices: undefined,
+					},
 					ActionStageOptions.ACTION_ROLL_ALLOW_MODIFIERS,
 				],
 			},
 			{
 				name: Language.LL.commands.actionStage.addBasicDamage.name(),
 				description: Language.LL.commands.actionStage.addBasicDamage.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					ActionStageOptions.ACTION_TARGET_OPTION,
 					ActionStageOptions.ACTION_ROLL_NAME_OPTION,
@@ -67,7 +75,7 @@ export class ActionStageCommand implements Command {
 			{
 				name: Language.LL.commands.actionStage.addAdvancedDamage.name(),
 				description: Language.LL.commands.actionStage.addAdvancedDamage.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					ActionStageOptions.ACTION_TARGET_OPTION,
 					ActionStageOptions.ACTION_ROLL_NAME_OPTION,
@@ -84,7 +92,7 @@ export class ActionStageCommand implements Command {
 				description: Language.LL.commands.actionStage.addText.description({
 					addTextRollInput: '{{}}',
 				}),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					ActionStageOptions.ACTION_TARGET_OPTION,
 					ActionStageOptions.ACTION_ROLL_NAME_OPTION,
@@ -99,7 +107,7 @@ export class ActionStageCommand implements Command {
 			{
 				name: Language.LL.commands.actionStage.addSave.name(),
 				description: Language.LL.commands.actionStage.addSave.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					ActionStageOptions.ACTION_TARGET_OPTION,
 					ActionStageOptions.ACTION_ROLL_NAME_OPTION,
@@ -110,7 +118,7 @@ export class ActionStageCommand implements Command {
 			{
 				name: Language.LL.commands.actionStage.edit.name(),
 				description: Language.LL.commands.actionStage.edit.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					ActionStageOptions.ACTION_ROLL_TARGET_OPTION,
 					ActionStageOptions.ACTION_STAGE_EDIT_OPTION,
@@ -121,7 +129,7 @@ export class ActionStageCommand implements Command {
 			{
 				name: Language.LL.commands.actionStage.remove.name(),
 				description: Language.LL.commands.actionStage.remove.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [ActionStageOptions.ACTION_ROLL_TARGET_OPTION],
 			},
 		],

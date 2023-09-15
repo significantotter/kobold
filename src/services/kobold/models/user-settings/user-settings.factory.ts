@@ -16,7 +16,7 @@ export const UserSettingsFactory = UserSettingsFactoryClass.define(
 		onCreate(async builtUserSettings => UserSettings.query().insert(builtUserSettings));
 
 		const characterData: DeepPartial<UserSettings> = {
-			userId: faker.datatype.uuid(),
+			userId: faker.string.uuid(),
 			initStatsNotification: faker.helpers.arrayElement([
 				'never',
 				'every_turn',
