@@ -1,18 +1,17 @@
 import { CommandInteraction, GuildChannel, ThreadChannel } from 'discord.js';
 
 import { Command } from '../commands/index.js';
-import { Permission } from '../models/enum-helpers/index.js';
-import { EventData } from '../models/internal-models.js';
-import { Lang } from '../services/index.js';
 import { FormatUtils, InteractionUtils } from './index.js';
+import { KoboldEmbed } from './kobold-embed-utils.js';
+import { refs } from '../constants/common-text.js';
 
 export class CommandUtils {
-	public static getSubCommandByName(commands: Command[], input: string): Command {
+	public static getSubCommandByName(commands: Command[], input: string): Command | undefined {
 		return commands.find(command => command.names.includes(input));
 	}
-	public static findCommand(commands: Command[], commandParts: string[]): Command {
+	public static findCommand(commands: Command[], commandParts: string[]): Command | undefined {
 		let found = [...commands];
-		let closestMatch: Command;
+		let closestMatch: Command | undefined = undefined;
 		for (let [index, commandPart] of commandParts.entries()) {
 			found = found.filter(command => command.names[index] === commandPart);
 			if (found.length === 0) {
@@ -30,19 +29,16 @@ export class CommandUtils {
 		}
 		return closestMatch;
 	}
-	public static async runChecks(
-		command: Command,
-		intr: CommandInteraction,
-		data: EventData
-	): Promise<boolean> {
+	public static async runChecks(command: Command, intr: CommandInteraction): Promise<boolean> {
 		if (command.cooldown) {
 			let limited = command.cooldown.take(intr.user.id);
 			if (limited) {
 				await InteractionUtils.send(
 					intr,
-					Lang.getEmbed('validationEmbeds.cooldownHit', data.lang(), {
-						AMOUNT: command.cooldown.amount.toLocaleString(),
-						INTERVAL: FormatUtils.duration(command.cooldown.interval, data.lang()),
+					new KoboldEmbed({
+						description: `You can only run this command ${command.cooldown.amount.toLocaleString()} time(s) every ${FormatUtils.duration(
+							command.cooldown.interval
+						)}. Please wait before attempting this command again.`,
 					})
 				);
 				return false;
@@ -51,14 +47,18 @@ export class CommandUtils {
 
 		if (
 			(intr.channel instanceof GuildChannel || intr.channel instanceof ThreadChannel) &&
-			!intr.channel.permissionsFor(intr.client.user).has(command.requireClientPerms)
+			!intr.channel?.permissionsFor?.(intr.client.user)?.has?.(command.requireClientPerms)
 		) {
 			await InteractionUtils.send(
 				intr,
-				Lang.getEmbed('validationEmbeds.missingClientPerms', data.lang(), {
-					PERMISSIONS: command.requireClientPerms
-						.map(perm => `**${Permission.Data[perm].displayName(data.lang())}**`)
-						.join(', '),
+				new KoboldEmbed({
+					description: [
+						'I don`t have all permissions required to run that command here! Please check the server and channel permissions to make sure I have the following permissions.',
+						``,
+						`Required permissions: ${command.requireClientPerms
+							.map(perm => `**${refs.permissions[perm]}**`)
+							.join(', ')}`,
+					].join('\n'),
 				})
 			);
 			return false;

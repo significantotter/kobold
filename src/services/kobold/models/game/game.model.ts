@@ -4,6 +4,7 @@ import { BaseModel } from '../../lib/base-model.js';
 import GameSchema from './game.schema.json' assert { type: 'json' };
 import Objection, { Model, RelationMappings } from 'objection';
 import { Character } from '../character/character.model.js';
+import { removeRequired } from '../../lib/helpers.js';
 
 export interface Game extends GameType {
 	characters: Character[];
@@ -14,10 +15,10 @@ export class Game extends BaseModel {
 	}
 
 	static get jsonSchema(): Objection.JSONSchema {
-		return GameSchema as Objection.JSONSchema;
+		return removeRequired(GameSchema as unknown as Objection.JSONSchema);
 	}
 
-	static async queryWhereUserHasCharacter(userId, guildId) {
+	static async queryWhereUserHasCharacter(userId: string, guildId: string | null) {
 		const options = await this.query()
 			.withGraphJoined('characters')
 			.where({ guildId: guildId });
@@ -28,7 +29,7 @@ export class Game extends BaseModel {
 					.length > 0 || option.gmUserId === userId
 		);
 	}
-	static async queryWhereUserLacksCharacter(userId, guildId) {
+	static async queryWhereUserLacksCharacter(userId: string, guildId: string) {
 		const options = await this.query().withGraphFetched('characters').where('guildId', guildId);
 		// Filter out the games that the user is already in
 		return options.filter(

@@ -8,7 +8,7 @@ type EmojiOptions =
 	| 'reaction'
 	| 'freeAction';
 
-const emojiMap = {
+const emojiMap: { [k: string]: string } = {
 	oneAction: '1095183665404837989',
 	twoActions: '1095183667854315583',
 	threeActions: '1095183667409735770',
@@ -16,8 +16,10 @@ const emojiMap = {
 	freeAction: '1095183664721178745',
 };
 
-export function getEmoji(intr: ChatInputCommandInteraction, emoji: EmojiOptions | string) {
-	const emojiCache = intr.client.guilds.cache.get('1095180951522377808').emojis.cache;
+export function getEmoji(intr: ChatInputCommandInteraction, emoji?: EmojiOptions | string | null) {
+	if (!emoji) return ''; //if we don't have an emoji, return nothing
+	const emojiCache = intr?.client?.guilds?.cache?.get?.('1095180951522377808')?.emojis?.cache;
+	if (!emojiCache) return '';
 	if (emoji === 'variableActions') {
 		return (
 			(emojiCache.get(emojiMap['oneAction']) ?? '').toString() +

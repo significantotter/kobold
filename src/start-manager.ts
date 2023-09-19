@@ -10,6 +10,7 @@ import { DBModel, HttpService, JobService, Logger, MasterApiService } from './se
 import { MathUtils, ShardUtils } from './utils/index.js';
 import { Config } from './config/config.js';
 import Logs from './config/lang/logs.json' assert { type: 'json' };
+import { filterNotNullOrUndefined } from './utils/type-guards.js';
 
 async function start(): Promise<void> {
 	Logger.info(Logs.info.appStarted);
@@ -61,7 +62,7 @@ async function start(): Promise<void> {
 	let jobs: Job[] = [
 		Config.clustering.enabled ? undefined : new UpdateServerCountJob(shardManager, httpService),
 		// TODO: Add new jobs here
-	].filter(Boolean);
+	].filter(filterNotNullOrUndefined);
 
 	let manager = new Manager(shardManager, new JobService(jobs));
 

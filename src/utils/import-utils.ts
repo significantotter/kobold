@@ -1,7 +1,7 @@
 import _ from 'lodash';
 
 export interface NamedThing {
-	name?: string;
+	name: string;
 	[key: string]: any;
 }
 

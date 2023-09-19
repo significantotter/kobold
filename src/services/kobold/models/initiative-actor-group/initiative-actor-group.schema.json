@@ -34,5 +34,6 @@
 			"format": "date-time",
 			"description": "When the initiative was last interacted with"
 		}
-	}
+	},
+	"required": ["id", "initiativeResult", "initiativeId", "userId", "name"]
 }

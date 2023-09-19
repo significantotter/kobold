@@ -1,4 +1,3 @@
-import { Language } from '../../../models/enum-helpers/language.js';
 import {
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
@@ -13,25 +12,25 @@ import {
 import { RateLimiter } from 'discord.js-rate-limiter';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 
-import { EventData } from '../../../models/internal-models.js';
 import { CommandUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { GameplayOptions } from './gameplay-command-options.js';
 import { ChatArgs } from '../../../constants/chat-args.js';
+import L from '../../../i18n/i18n-node.js';
 
 export class GameplayCommand implements Command {
-	public names = [Language.LL.commands.gameplay.name()];
+	public names = [L.en.commands.gameplay.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.gameplay.name(),
-		description: Language.LL.commands.gameplay.description(),
+		name: L.en.commands.gameplay.name(),
+		description: L.en.commands.gameplay.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 
 		options: [
 			{
-				name: Language.LL.commands.gameplay.damage.name(),
-				description: Language.LL.commands.gameplay.damage.description(),
+				name: L.en.commands.gameplay.damage.name(),
+				description: L.en.commands.gameplay.damage.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					{ ...GameplayOptions.GAMEPLAY_TARGET_CHARACTER, required: true },
@@ -40,8 +39,8 @@ export class GameplayCommand implements Command {
 				],
 			},
 			{
-				name: Language.LL.commands.gameplay.set.name(),
-				description: Language.LL.commands.gameplay.set.description(),
+				name: L.en.commands.gameplay.set.name(),
+				description: L.en.commands.gameplay.set.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					GameplayOptions.GAMEPLAY_SET_OPTION,
@@ -50,14 +49,14 @@ export class GameplayCommand implements Command {
 				],
 			},
 			{
-				name: Language.LL.commands.gameplay.recover.name(),
-				description: Language.LL.commands.gameplay.recover.description(),
+				name: L.en.commands.gameplay.recover.name(),
+				description: L.en.commands.gameplay.recover.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [GameplayOptions.GAMEPLAY_TARGET_CHARACTER],
 			},
 			{
-				name: Language.LL.commands.gameplay.tracker.name(),
-				description: Language.LL.commands.gameplay.tracker.description(),
+				name: L.en.commands.gameplay.tracker.name(),
+				description: L.en.commands.gameplay.tracker.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					{ ...ChatArgs.SET_ACTIVE_NAME_OPTION, required: false },
@@ -76,7 +75,7 @@ export class GameplayCommand implements Command {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption
-	): Promise<ApplicationCommandOptionChoiceData[]> {
+	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 
 		const command = CommandUtils.getSubCommandByName(
@@ -92,7 +91,6 @@ export class GameplayCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
 		if (!intr.isChatInputCommand()) return;
@@ -104,9 +102,9 @@ export class GameplayCommand implements Command {
 			return;
 		}
 
-		const passesChecks = await CommandUtils.runChecks(command, intr, data);
+		const passesChecks = await CommandUtils.runChecks(command, intr);
 		if (passesChecks) {
-			await command.execute(intr, data, LL);
+			await command.execute(intr, LL);
 		}
 	}
 }

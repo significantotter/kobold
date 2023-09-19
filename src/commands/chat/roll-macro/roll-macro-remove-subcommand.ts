@@ -12,24 +12,25 @@ import {
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 
-import { EventData } from '../../../models/internal-models.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { Character } from '../../../services/kobold/models/index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { Language } from '../../../models/enum-helpers/index.js';
+import L from '../../../i18n/i18n-node.js';
 import { CollectorUtils } from '../../../utils/collector-utils.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
 import { RollMacroOptions } from './roll-macro-command-options.js';
 import _ from 'lodash';
 import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
+import { KoboldError } from '../../../utils/KoboldError.js';
+import { refs } from '../../../constants/common-text.js';
 
 export class RollMacroRemoveSubCommand implements Command {
-	public names = [Language.LL.commands.rollMacro.remove.name()];
+	public names = [L.en.commands.rollMacro.remove.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.rollMacro.remove.name(),
-		description: Language.LL.commands.rollMacro.remove.description(),
+		name: L.en.commands.rollMacro.remove.name(),
+		description: L.en.commands.rollMacro.remove.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -40,11 +41,11 @@ export class RollMacroRemoveSubCommand implements Command {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption
-	): Promise<ApplicationCommandOptionChoiceData[]> {
+	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === RollMacroOptions.MACRO_NAME_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(RollMacroOptions.MACRO_NAME_OPTION.name);
+			const match = intr.options.getString(RollMacroOptions.MACRO_NAME_OPTION.name) ?? '';
 
 			return await AutocompleteUtils.getAllMatchingRollsMacrosForCharacter(intr, match);
 		}
@@ -52,12 +53,21 @@ export class RollMacroRemoveSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
-		const rollMacroChoice = intr.options.getString(RollMacroOptions.MACRO_NAME_OPTION.name);
+		const rollMacroChoice = intr.options.getString(
+			RollMacroOptions.MACRO_NAME_OPTION.name,
+			true
+		);
 		//get the active character
 		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
+		if (!activeCharacter) {
+			await InteractionUtils.send(
+				intr,
+				LL.commands.rollMacro.interactions.requiresActiveCharacter()
+			);
+			return;
+		}
 		const targetRollMacro = activeCharacter.getRollMacroByName(rollMacroChoice);
 		if (targetRollMacro) {
 			// ask for confirmation
@@ -117,14 +127,16 @@ export class RollMacroRemoveSubCommand implements Command {
 					},
 				}
 			);
-			await InteractionUtils.editReply(intr, {
-				content: LL.sharedInteractions.choiceRegistered({
-					choice: _.capitalize(result.value),
-				}),
-				components: [],
-			});
+			if (result) {
+				await InteractionUtils.editReply(intr, {
+					content: LL.sharedInteractions.choiceRegistered({
+						choice: _.capitalize(result.value),
+					}),
+					components: [],
+				});
+			}
 			// remove the rollMacro
-			if (result.value === 'remove') {
+			if (result && result.value === 'remove') {
 				const rollMacrosWithoutRemoved = _.filter(
 					activeCharacter.rollMacros,
 					rollMacro =>

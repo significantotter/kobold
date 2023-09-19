@@ -10,13 +10,12 @@ import {
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 
-import { EventData } from '../../../models/internal-models.js';
 import { InteractionUtils, StringUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import _ from 'lodash';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { Language } from '../../../models/enum-helpers/index.js';
+import L from '../../../i18n/i18n-node.js';
 import { ModifierOptions } from './modifier-command-options.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
 import { Character } from '../../../services/kobold/models/index.js';
@@ -26,11 +25,11 @@ import { Creature } from '../../../utils/creature.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
 
 export class ModifierUpdateSubCommand implements Command {
-	public names = [Language.LL.commands.modifier.update.name()];
+	public names = [L.en.commands.modifier.update.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.modifier.update.name(),
-		description: Language.LL.commands.modifier.update.description(),
+		name: L.en.commands.modifier.update.name(),
+		description: L.en.commands.modifier.update.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -41,11 +40,11 @@ export class ModifierUpdateSubCommand implements Command {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption
-	): Promise<ApplicationCommandOptionChoiceData[]> {
+	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === ModifierOptions.MODIFIER_NAME_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(ModifierOptions.MODIFIER_NAME_OPTION.name);
+			const match = intr.options.getString(ModifierOptions.MODIFIER_NAME_OPTION.name) ?? '';
 
 			//get the active character
 			const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
@@ -68,18 +67,18 @@ export class ModifierUpdateSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
-		const modifierName = (
-			intr.options.getString(ModifierOptions.MODIFIER_NAME_OPTION.name) ?? ''
-		).trim();
-		let fieldToChange = (intr.options.getString(ModifierOptions.MODIFIER_SET_OPTION.name) ?? '')
+		const modifierName = intr.options
+			.getString(ModifierOptions.MODIFIER_NAME_OPTION.name, true)
+			.trim();
+		let fieldToChange = intr.options
+			.getString(ModifierOptions.MODIFIER_SET_OPTION.name, true)
 			.toLocaleLowerCase()
 			.trim();
-		const newFieldValue = (
-			intr.options.getString(ModifierOptions.MODIFIER_SET_VALUE_OPTION.name) ?? ''
-		).trim();
+		const newFieldValue = intr.options
+			.getString(ModifierOptions.MODIFIER_SET_VALUE_OPTION.name, true)
+			.trim();
 
 		let updateValue: string | string[] | number | Character['modifiers'][0]['sheetAdjustments'];
 
@@ -125,20 +124,21 @@ export class ModifierUpdateSubCommand implements Command {
 					'Yip! Sheet modifiers don\'t have a "value". You probably meant to update the "sheet-values" field.'
 				);
 			}
-			// we must be able to evaluate the modifier as a roll for this character
-			const result = DiceUtils.parseAndEvaluateDiceExpression({
-				rollExpression: newFieldValue,
-				creature: Creature.fromCharacter(activeCharacter),
-				LL: Language.LL,
-			});
-
-			if (result.error) {
+			try {
+				// we must be able to evaluate the modifier as a roll for this character
+				DiceUtils.parseAndEvaluateDiceExpression({
+					rollExpression: newFieldValue,
+					creature: Creature.fromCharacter(activeCharacter),
+					LL: L.en,
+				});
+				updateValue = newFieldValue;
+			} catch (err) {
 				await InteractionUtils.send(
 					intr,
 					LL.commands.modifier.createRollModifier.interactions.doesntEvaluateError()
 				);
 				return;
-			} else updateValue = newFieldValue;
+			}
 		} else if (fieldToChange === 'target-tags') {
 			if (targetModifier.modifierType === 'sheet') {
 				throw new KoboldError('Yip! Sheet modifiers don\'t have "target tags".');

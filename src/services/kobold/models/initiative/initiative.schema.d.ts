@@ -12,27 +12,23 @@ export interface Initiative {
 	/**
 	 * The id of the initiative.
 	 */
-	id?: number;
+	id: number;
 	/**
 	 * The id of the channel initiative is taking place in.
 	 */
-	channelId?: string;
+	channelId: string;
 	/**
 	 * The discord id of the user who started the initiative
 	 */
-	gmUserId?: string;
+	gmUserId: string;
 	/**
-	 * The message ids for the header of the most recent round. Ordered by round #.
+	 * The id of the group whose turn it is
 	 */
-	roundMessageIds?: any[] | null;
+	currentTurnGroupId: number | null;
 	/**
 	 * The current round number
 	 */
-	currentRound?: number;
-	/**
-	 * The current initiative value
-	 */
-	currentInitiative?: number | null;
+	currentRound: number;
 	/**
 	 * When the initiative was first started
 	 */

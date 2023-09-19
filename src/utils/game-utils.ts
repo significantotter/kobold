@@ -24,8 +24,8 @@ export class GameUtils {
 				game.characters.find(
 					character =>
 						character.userId === userId &&
-						character.channelDefaultCharacter.find(
-							defaultChar => (defaultChar as any).channelId === channelId
+						(character.channelDefaultCharacter ?? []).find(
+							defaultChar => defaultChar.channelId === channelId
 						)
 				)
 		);
@@ -36,8 +36,8 @@ export class GameUtils {
 				game.characters.find(
 					character =>
 						character.userId === userId &&
-						character.guildDefaultCharacter.find(
-							defaultChar => (defaultChar as any).guildId === guildId
+						(character.guildDefaultCharacter ?? []).find(
+							defaultChar => defaultChar.guildId === guildId
 						)
 				)
 		);
@@ -53,8 +53,11 @@ export class GameUtils {
 		return null;
 	}
 
-	public static async autocompleteGameCharacter(targetCharacterName, activeGame) {
-		if (!activeGame.characters) return [];
+	public static async autocompleteGameCharacter(
+		targetCharacterName: String,
+		activeGame?: Game | null
+	) {
+		if (!activeGame?.characters) return [];
 
 		const matches: Character[] = [];
 		for (const character of activeGame.characters) {
@@ -73,29 +76,29 @@ export class GameUtils {
 
 	public static async getCharacterOrInitActorTarget(
 		intr: ChatInputCommandInteraction<CacheType> | AutocompleteInteraction<CacheType>,
-		targetName: string
+		targetName?: string | null
 	): Promise<{
 		joinedGames: Game[];
-		init?: Initiative;
+		init: Initiative | null;
 		characterOrInitActorTargets: ModelWithSheet[];
-		activeCharacter: Character;
-		targetCharacter?: Character;
-		targetInitActor?: InitiativeActor;
+		activeCharacter: Character | null;
+		targetCharacter: Character | null;
+		targetInitActor: InitiativeActor | null;
 	}> {
 		const [joinedGames, initResult, activeCharacter] = await Promise.all([
-			Game.queryWhereUserHasCharacter(intr.user.id, intr.guildId),
-			InitiativeUtils.getInitiativeForChannel(intr.channel),
+			Game.queryWhereUserHasCharacter(intr.user.id, intr.guildId ?? null),
+			InitiativeUtils.getInitiativeForChannelOrNull(intr.channel),
 			CharacterUtils.getActiveCharacter(intr),
 		]);
 
 		if (!targetName)
 			return {
 				joinedGames,
-				init: initResult.init,
+				init: initResult,
 				characterOrInitActorTargets: activeCharacter ? [activeCharacter] : [],
 				activeCharacter,
 				targetCharacter: activeCharacter,
-				targetInitActor: undefined,
+				targetInitActor: null,
 			};
 
 		let characterOptions = joinedGames.flatMap(game => game.characters);
@@ -108,12 +111,12 @@ export class GameUtils {
 		);
 
 		// find a match in the init actors
-		let matchedInitActor: InitiativeActor;
-		if (!initResult.errorMessage) {
-			matchedInitActor = initResult.init.actors.find(
+		let matchedInitActor: InitiativeActor | null;
+
+		matchedInitActor =
+			(initResult?.actors ?? []).find(
 				actor => actor.name.trim().toLowerCase() === targetName.trim().toLowerCase()
-			);
-		}
+			) ?? null;
 
 		// if we found an init actor but not a character, and the init actor has a character associated with it
 		// add in that character
@@ -127,10 +130,10 @@ export class GameUtils {
 
 		return {
 			joinedGames,
-			init: initResult.init,
+			init: initResult,
 			characterOrInitActorTargets: targets,
 			activeCharacter,
-			targetCharacter: matchedCharacter,
+			targetCharacter: matchedCharacter ?? null,
 			targetInitActor: matchedInitActor,
 		};
 	}

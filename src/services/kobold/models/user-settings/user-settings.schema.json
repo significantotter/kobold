@@ -22,5 +22,6 @@
 			"description": "How detailed to display inline rolls.",
 			"enum": ["compact", "detailed"]
 		}
-	}
+	},
+	"required": ["userId", "initStatsNotification", "rollCompactMode", "inlineRollsDisplay"]
 }

@@ -6,6 +6,7 @@ export default {
 		secretRollNotification: "Yip! I'm rolling in secret!",
 		rolledDice: 'rolled {diceType}',
 		damageTaken: '{creatureName} took {damage} damage!',
+		targetNotFound: 'Yip! I couldn\'t find a target named "{targetName}"',
 	},
 
 	dice: {

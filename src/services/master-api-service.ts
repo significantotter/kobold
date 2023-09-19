@@ -11,7 +11,9 @@ import { Config } from './../config/config.js';
 export class MasterApiService {
 	private clusterId: string;
 
-	constructor(private httpService: HttpService) {}
+	constructor(private httpService: HttpService) {
+		this.clusterId = '';
+	}
 
 	public async register(): Promise<void> {
 		let reqBody: RegisterClusterRequest = {

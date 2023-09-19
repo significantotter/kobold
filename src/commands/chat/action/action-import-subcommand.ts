@@ -6,14 +6,10 @@ import {
 	PermissionsString,
 } from 'discord.js';
 
-import { EventData } from '../../../models/internal-models.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
-import { Language } from '../../../models/enum-helpers/index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import Ajv from 'ajv';
-import addFormats from 'ajv-formats';
-import { compileExpression } from 'filtrex';
 import _ from 'lodash';
 import { PasteBin } from '../../../services/pastebin/index.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
@@ -24,15 +20,16 @@ import {
 	ignoreOnConflict,
 } from '../../../utils/import-utils.js';
 import { ActionOptions } from '../action/action-command-options.js';
-import characterSchema from './../../../services/kobold/models/character/character.schema.json' assert { type: 'json' };
+import actionsSchema from './../../../services/kobold/lib/shared-schemas/action.schema.json' assert { type: 'json' };
+import L from '../../../i18n/i18n-node.js';
 const ajv = new Ajv.default({ allowUnionTypes: true });
 
 export class ActionImportSubCommand implements Command {
-	public names = [Language.LL.commands.action.import.name()];
+	public names = [L.en.commands.action.import.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.action.import.name(),
-		description: Language.LL.commands.action.import.description(),
+		name: L.en.commands.action.import.name(),
+		description: L.en.commands.action.import.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -41,7 +38,6 @@ export class ActionImportSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
 		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
@@ -53,12 +49,12 @@ export class ActionImportSubCommand implements Command {
 			return;
 		}
 		let importMode = intr.options
-			.getString(ActionOptions.ACTION_IMPORT_MODE_OPTION.name)
+			.getString(ActionOptions.ACTION_IMPORT_MODE_OPTION.name, true)
 			.trim()
 			.toLowerCase();
-		let importUrl = (
-			intr.options.getString(ActionOptions.ACTION_IMPORT_URL_OPTION.name) ?? ''
-		).trim();
+		let importUrl = intr.options
+			.getString(ActionOptions.ACTION_IMPORT_URL_OPTION.name, true)
+			.trim();
 
 		const importId = CharacterUtils.parsePastebinIdFromText(importUrl);
 
@@ -77,7 +73,7 @@ export class ActionImportSubCommand implements Command {
 			} else {
 				newActions = JSON.parse(actionsText);
 			}
-			const valid = ajv.validate(characterSchema.properties.actions, newActions);
+			const valid = ajv.validate(actionsSchema, newActions);
 			if (!valid) {
 				invalidJson = true;
 			}
@@ -96,22 +92,16 @@ export class ActionImportSubCommand implements Command {
 
 		let finalActions: Character['actions'] = [];
 
-		if (
-			importMode === Language.LL.commandOptions.actionImportMode.choices.fullyReplace.value()
-		) {
+		if (importMode === L.en.commandOptions.actionImportMode.choices.fullyReplace.value()) {
 			finalActions = replaceAll(currentActions, newActions);
-		} else if (
-			importMode === Language.LL.commandOptions.actionImportMode.choices.overwrite.value()
-		) {
+		} else if (importMode === L.en.commandOptions.actionImportMode.choices.overwrite.value()) {
 			finalActions = overwriteOnConflict(currentActions, newActions);
 		} else if (
-			importMode ===
-			Language.LL.commandOptions.actionImportMode.choices.renameOnConflict.value()
+			importMode === L.en.commandOptions.actionImportMode.choices.renameOnConflict.value()
 		) {
 			finalActions = renameOnConflict(currentActions, newActions);
 		} else if (
-			importMode ===
-			Language.LL.commandOptions.actionImportMode.choices.ignoreOnConflict.value()
+			importMode === L.en.commandOptions.actionImportMode.choices.ignoreOnConflict.value()
 		) {
 			finalActions = ignoreOnConflict(currentActions, newActions);
 		} else {

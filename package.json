@@ -20,7 +20,7 @@
 		"format:fix": "prettier --write .",
 		"clean": "git clean -xdf --exclude=\"/src/config/**/*\"",
 		"clean:dry": "git clean -xdf --exclude=\"/src/config/**/*\" --dry-run",
-		"build-types": "NODE_OPTIONS='--max-old-space-size=4096' node scripts/compileTypes.js",
+		"build-types": "NODE_OPTIONS='--max-old-space-size=4096' node src/scripts/compileTypes.js",
 		"build": "NODE_OPTIONS='--max-old-space-size=4096' npm run typesafe-i18n && npm run build-types && tsc --project tsconfig.json",
 		"commands:view": "npm run build && node --enable-source-maps dist/src/start-bot.js commands view",
 		"commands:register": "NODE_OPTIONS='--max-old-space-size=4096' npm run build && node --enable-source-maps dist/src/start-bot.js commands register",
@@ -47,7 +47,7 @@
 		"commands:register-prod": "NODE_OPTIONS='--max-old-space-size=4096' node dist/src/start-bot.js commands register",
 		"start:bot-prod": "NODE_OPTIONS='--max-old-space-size=4096' node dist/src/start-bot.js",
 		"start:manager-prod": "NODE_OPTIONS='--max-old-space-size=4096' node dist/src/start-manager.js",
-		"build-types:pf2etools": "typescript-json-schema src/services/pf2etools/pf2etools-types.d.ts *",
+		"build-types:pf2etools": "ts-to-zod src/services/pf2etools/pf2etools-types.d.ts src/services/pf2etools/pf2etools.zod.ts",
 		"setup:pf2etools": "drizzle-kit push:sqlite --config='./drizzle.config.ts' && npm run build-types:pf2etools *",
 		"import:pf2etools": "npm run setup:pf2etools && tsc --project tsconfig.json && node dist/src/services/pf2etools/pf2etools-loader.js"
 	},
@@ -84,6 +84,8 @@
 		"pm2": "^5.3.0",
 		"reflect-metadata": "^0.1.13",
 		"remove-markdown": "0.5.0",
+		"ts-json-schema-generator": "^1.3.0",
+		"type-fest": "^4.3.1",
 		"typesafe-i18n": "^5.26.2",
 		"xxhashjs": "^0.2.2"
 	},
@@ -92,7 +94,9 @@
 		"@types/luxon": "3.3.2",
 		"@types/node": "^20.6.0",
 		"@types/node-schedule": "2.1.0",
+		"@types/pg": "^8.10.2",
 		"@types/remove-markdown": "0.3.1",
+		"@types/xxhashjs": "^0.2.2",
 		"@typescript-eslint/eslint-plugin": "^6.7.0",
 		"@typescript-eslint/parser": "^6.7.0",
 		"ajv": "^8.12.0",
@@ -101,13 +105,13 @@
 		"eslint-plugin-import": "^2.28.1",
 		"eslint-plugin-unicorn": "^48.0.1",
 		"glob": "^10.3.4",
-		"minimatch": "^9.0.3",
 		"json-schema-to-typescript": "^13.1.1",
+		"minimatch": "^9.0.3",
 		"prettier": "^3.0.3",
 		"sqlite3": "^5.1.6",
 		"ts-node": "^10.9.1",
+		"ts-to-zod": "^3.1.3",
 		"typescript": "^5.2",
-		"typescript-json-schema": "^0.61.0",
 		"vitest": "^0.34.4"
 	}
 }

@@ -1,3 +1,4 @@
+import { Modifier } from '../models/index.js';
 import { isModifierValidForTags, parseBonusesForTagsFromModifiers } from './helpers.js';
 
 describe('isModifierValidForTags', () => {
@@ -8,6 +9,9 @@ describe('isModifierValidForTags', () => {
 				type: 'status',
 				value: '2',
 				targetTags: 'attack and (fire or bludgeoning)',
+				isActive: false,
+				description: null,
+				modifierType: 'roll',
 			},
 			[],
 			['attack', 'bludgeoning']
@@ -21,6 +25,9 @@ describe('isModifierValidForTags', () => {
 				type: 'status',
 				value: '2',
 				targetTags: 'attack and (fire or bludgeoning)',
+				isActive: false,
+				description: null,
+				modifierType: 'roll',
 			},
 			[],
 			['attack', 'electricity']
@@ -35,6 +42,9 @@ describe('isModifierValidForTags', () => {
 				value: '2',
 				targetTags:
 					'attack and (fire or bludgeoning) or __foo not in (3, 6) or abs(max(__foo, 6)) == ceil(min(7, 4.6)) or floor(log(10)) < 5 or round(random()) == sqrt(4)',
+				isActive: false,
+				description: null,
+				modifierType: 'roll',
 			},
 			[
 				{
@@ -56,6 +66,9 @@ describe('isModifierValidForTags', () => {
 					type: 'status',
 					value: '2',
 					targetTags: '__foo = 5',
+					isActive: false,
+					description: null,
+					modifierType: 'roll',
 				},
 				[
 					{
@@ -73,13 +86,16 @@ describe('isModifierValidForTags', () => {
 
 describe('parseBonusesForTagsFromModifiers', () => {
 	test('properly parses bonuses, penalties, and untyped modifiers', () => {
-		let modifiers = [
+		let modifiers: Modifier[] = [
 			{
 				name: 'statusBonus',
 				isActive: true,
 				type: 'status',
 				value: '2',
 				targetTags: 'attack and (fire or bludgeoning)',
+
+				description: null,
+				modifierType: 'roll',
 			},
 			{
 				name: 'statusBonus2',
@@ -87,6 +103,9 @@ describe('parseBonusesForTagsFromModifiers', () => {
 				type: 'status',
 				value: '1',
 				targetTags: 'attack and (fire or bludgeoning)',
+
+				description: null,
+				modifierType: 'roll',
 			},
 			{
 				name: 'statusBonus3',
@@ -94,6 +113,9 @@ describe('parseBonusesForTagsFromModifiers', () => {
 				type: 'status',
 				value: '-1',
 				targetTags: 'attack and (fire or bludgeoning)',
+
+				description: null,
+				modifierType: 'roll',
 			},
 			{
 				name: 'statusBonus4',
@@ -101,6 +123,9 @@ describe('parseBonusesForTagsFromModifiers', () => {
 				type: 'status',
 				value: '-2',
 				targetTags: 'attack and (fire or bludgeoning)',
+
+				description: null,
+				modifierType: 'roll',
 			},
 			{
 				name: 'untypedBonus',
@@ -108,6 +133,9 @@ describe('parseBonusesForTagsFromModifiers', () => {
 				type: 'untyped',
 				value: '2',
 				targetTags: 'attack and (fire or bludgeoning)',
+
+				description: null,
+				modifierType: 'roll',
 			},
 			{
 				name: 'untypedBonus2',
@@ -115,6 +143,9 @@ describe('parseBonusesForTagsFromModifiers', () => {
 				type: 'untyped',
 				value: '1',
 				targetTags: 'attack and (fire or bludgeoning)',
+
+				description: null,
+				modifierType: 'roll',
 			},
 			{
 				name: 'untypedBonus3',
@@ -122,6 +153,9 @@ describe('parseBonusesForTagsFromModifiers', () => {
 				type: 'untyped',
 				value: '-1',
 				targetTags: 'attack and (fire or bludgeoning)',
+
+				description: null,
+				modifierType: 'roll',
 			},
 			{
 				name: 'untypedBonus4',
@@ -129,6 +163,9 @@ describe('parseBonusesForTagsFromModifiers', () => {
 				type: 'untyped',
 				value: '-2',
 				targetTags: 'attack and (fire or bludgeoning)',
+
+				description: null,
+				modifierType: 'roll',
 			},
 			{
 				name: 'fooBonus',
@@ -136,6 +173,9 @@ describe('parseBonusesForTagsFromModifiers', () => {
 				type: 'foo',
 				value: '2',
 				targetTags: 'attack and (fire or bludgeoning)',
+
+				description: null,
+				modifierType: 'roll',
 			},
 			{
 				name: 'fooBonus2',
@@ -143,6 +183,9 @@ describe('parseBonusesForTagsFromModifiers', () => {
 				type: 'foo',
 				value: '1',
 				targetTags: 'attack and (fire or bludgeoning)',
+
+				description: null,
+				modifierType: 'roll',
 			},
 			{
 				name: 'fooBonus3',
@@ -150,6 +193,9 @@ describe('parseBonusesForTagsFromModifiers', () => {
 				type: 'foo',
 				value: '-1',
 				targetTags: 'attack and (fire or bludgeoning)',
+
+				description: null,
+				modifierType: 'roll',
 			},
 			{
 				name: 'foo bonus 4',
@@ -157,6 +203,9 @@ describe('parseBonusesForTagsFromModifiers', () => {
 				type: 'foo',
 				value: '-2',
 				targetTags: 'attack and (fire or bludgeoning)',
+
+				description: null,
+				modifierType: 'roll',
 			},
 			{
 				name: 'unmatchingBonus',
@@ -164,6 +213,9 @@ describe('parseBonusesForTagsFromModifiers', () => {
 				type: 'foo',
 				value: '3',
 				targetTags: 'attack and (fire and bludgeoning)',
+
+				description: null,
+				modifierType: 'roll',
 			},
 			{
 				name: 'unmatchingPenalty',
@@ -171,6 +223,9 @@ describe('parseBonusesForTagsFromModifiers', () => {
 				type: 'foo',
 				value: '-3',
 				targetTags: 'attack and (fire and bludgeoning)',
+
+				description: null,
+				modifierType: 'roll',
 			},
 			{
 				name: 'unmatchingUntyped',
@@ -178,6 +233,9 @@ describe('parseBonusesForTagsFromModifiers', () => {
 				type: 'foo',
 				value: '3',
 				targetTags: 'attack and (fire and bludgeoning)',
+
+				description: null,
+				modifierType: 'roll',
 			},
 			{
 				name: 'not active',
@@ -185,6 +243,9 @@ describe('parseBonusesForTagsFromModifiers', () => {
 				type: 'foo',
 				value: '3',
 				targetTags: 'attack and (fire and bludgeoning)',
+
+				description: null,
+				modifierType: 'roll',
 			},
 		];
 		let attributes = [
@@ -210,6 +271,9 @@ describe('parseBonusesForTagsFromModifiers', () => {
 				type: 'foo',
 				value: '2',
 				targetTags: 'attack and (fire or bludgeoning)',
+
+				description: null,
+				modifierType: 'roll',
 			},
 
 			status: {
@@ -218,6 +282,9 @@ describe('parseBonusesForTagsFromModifiers', () => {
 				type: 'status',
 				value: '2',
 				targetTags: 'attack and (fire or bludgeoning)',
+
+				description: null,
+				modifierType: 'roll',
 			},
 		});
 		expect(penalties).toStrictEqual({
@@ -227,6 +294,9 @@ describe('parseBonusesForTagsFromModifiers', () => {
 				type: 'foo',
 				value: '-2',
 				targetTags: 'attack and (fire or bludgeoning)',
+
+				description: null,
+				modifierType: 'roll',
 			},
 
 			status: {
@@ -235,6 +305,9 @@ describe('parseBonusesForTagsFromModifiers', () => {
 				type: 'status',
 				value: '-2',
 				targetTags: 'attack and (fire or bludgeoning)',
+
+				description: null,
+				modifierType: 'roll',
 			},
 		});
 		expect(untyped).toStrictEqual([
@@ -244,6 +317,9 @@ describe('parseBonusesForTagsFromModifiers', () => {
 				type: 'untyped',
 				value: '2',
 				targetTags: 'attack and (fire or bludgeoning)',
+
+				description: null,
+				modifierType: 'roll',
 			},
 			{
 				name: 'untypedBonus2',
@@ -251,6 +327,9 @@ describe('parseBonusesForTagsFromModifiers', () => {
 				type: 'untyped',
 				value: '1',
 				targetTags: 'attack and (fire or bludgeoning)',
+
+				description: null,
+				modifierType: 'roll',
 			},
 			{
 				name: 'untypedBonus3',
@@ -258,6 +337,9 @@ describe('parseBonusesForTagsFromModifiers', () => {
 				type: 'untyped',
 				value: '-1',
 				targetTags: 'attack and (fire or bludgeoning)',
+
+				description: null,
+				modifierType: 'roll',
 			},
 			{
 				name: 'untypedBonus4',
@@ -265,6 +347,9 @@ describe('parseBonusesForTagsFromModifiers', () => {
 				type: 'untyped',
 				value: '-2',
 				targetTags: 'attack and (fire or bludgeoning)',
+
+				description: null,
+				modifierType: 'roll',
 			},
 		]);
 	});

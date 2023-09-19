@@ -5,17 +5,19 @@ import type { DeepPartial } from 'fishery';
 import { Character } from './character.model.js';
 import { faker } from '@faker-js/faker';
 import { WG } from '../../../wanderers-guide/wanderers-guide.js';
+import { Modifier } from '../index.js';
 
-export function createRandomModifiers(times: number): Character['modifiers'] {
-	const modifiers = [];
+export function createRandomModifiers(times: number): Modifier[] {
+	const modifiers: Modifier[] = [];
 	for (let i = 0; i < times; i++) {
-		const modifier = {
+		const modifier: Modifier = {
 			name: faker.word.noun(),
 			description: faker.word.words(5),
 			isActive: faker.datatype.boolean(),
 			type: faker.helpers.arrayElement(['status', 'circumstance', 'item']),
 			targetTags: 'attack or skill',
 			value: faker.number.int(2147483647) + '',
+			modifierType: 'roll',
 		};
 		modifiers.push(modifier);
 	}
@@ -32,7 +34,7 @@ class CharacterFactoryClass extends Factory<Character, CharacterTransientParams,
 			id: faker.number.int(2147483647),
 		});
 	}
-	withName(name) {
+	withName(name: string) {
 		return this.transient({
 			characterDataOptions: {
 				name,

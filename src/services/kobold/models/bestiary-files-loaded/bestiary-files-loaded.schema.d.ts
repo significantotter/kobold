@@ -12,15 +12,15 @@ export interface BestiaryFilesLoaded {
 	/**
 	 * The id of the character record.
 	 */
-	id?: number;
+	id: number;
 	/**
 	 * The name of the file that was imported
 	 */
-	fileName?: string;
+	fileName: string;
 	/**
 	 * The most recent hash of the file that was imported
 	 */
-	fileHash?: string;
+	fileHash: string;
 	/**
 	 * When the character was first imported
 	 */

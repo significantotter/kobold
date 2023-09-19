@@ -10,24 +10,21 @@ import {
 } from 'discord.js';
 
 import { SettingsOptions } from './settings-command-options.js';
-import { EventData } from '../../../models/internal-models.js';
+
 import { Command, CommandDeferType } from '../../index.js';
-import { Language } from '../../../models/enum-helpers/index.js';
+import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { InteractionUtils } from '../../../utils/interaction-utils.js';
-import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
 import _ from 'lodash';
-import { SettableSheetOption } from '../../../utils/creature.js';
-import { InitiativeActor, UserSettings } from '../../../services/kobold/models/index.js';
-import { GameUtils } from '../../../utils/game-utils.js';
+import { UserSettings } from '../../../services/kobold/models/index.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
 
 export class SettingsSetSubCommand implements Command {
-	public names = [Language.LL.commands.settings.set.name()];
+	public names = [L.en.commands.settings.set.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.settings.set.name(),
-		description: Language.LL.commands.settings.set.description(),
+		name: L.en.commands.settings.set.name(),
+		description: L.en.commands.settings.set.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -37,7 +34,7 @@ export class SettingsSetSubCommand implements Command {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption
-	): Promise<ApplicationCommandOptionChoiceData[]> {
+	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (
 			option.name === SettingsOptions.SETTINGS_SET_VALUE.name &&
@@ -62,11 +59,10 @@ export class SettingsSetSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
-		const option = intr.options.getString(SettingsOptions.SETTINGS_SET_OPTION.name);
-		const value = intr.options.getString(SettingsOptions.SETTINGS_SET_VALUE.name);
+		const option = intr.options.getString(SettingsOptions.SETTINGS_SET_OPTION.name, true);
+		const value = intr.options.getString(SettingsOptions.SETTINGS_SET_VALUE.name, true);
 
 		// validate
 		let trimmedOptionName = _.camelCase(option.trim());

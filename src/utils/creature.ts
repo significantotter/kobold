@@ -1,6 +1,12 @@
-import { Character, ModelWithSheet, Sheet } from '../services/kobold/models/index.js';
+import {
+	Attribute,
+	Character,
+	ModelWithSheet,
+	Modifier,
+	Sheet,
+} from '../services/kobold/models/index.js';
 import { PathBuilder } from '../services/pathbuilder/pathbuilder.js';
-import { CreatureStatBlock } from '../services/pf2etools/pf2etools-types.js';
+import { CreatureFluff, CreatureStatBlock } from '../services/pf2etools/pf2etools-types.js';
 import { WG } from '../services/wanderers-guide/wanderers-guide.js';
 import _ from 'lodash';
 import {
@@ -28,6 +34,8 @@ export type SettableSheetOption =
 	| 'heroPoints'
 	| 'focusPoints';
 
+export type rollable = roll | attackRoll;
+
 export interface roll {
 	name: string;
 	type: string;
@@ -38,11 +46,11 @@ export interface roll {
 export interface attackRoll {
 	name: string;
 	type: 'attack';
-	toHit: string | number;
-	damage: { dice?: string; type?: string }[];
-	range?: string;
+	toHit: string | number | null;
+	damage: { dice: string; type?: string | null }[];
+	range?: string | null;
 	traits: string[];
-	notes?: string;
+	notes?: string | null;
 	tags: string[];
 }
 
@@ -53,14 +61,128 @@ export class Creature {
 		private _name?: string
 	) {
 		const sheetDefaults: Sheet = {
-			info: { traits: [] },
-			general: { senses: [], languages: [] },
-			abilities: {},
-			defenses: { resistances: [], immunities: [], weaknesses: [] },
-			offense: {},
-			castingStats: {},
-			saves: {},
-			skills: { lores: [] },
+			info: {
+				traits: [],
+				name: '',
+				url: null,
+				description: null,
+				gender: null,
+				age: null,
+				alignment: null,
+				deity: null,
+				imageURL: null,
+				level: null,
+				size: null,
+				class: null,
+				keyability: null,
+				ancestry: null,
+				heritage: null,
+				background: null,
+				usesStamina: false,
+			},
+			general: {
+				senses: [],
+				languages: [],
+				currentHeroPoints: null,
+				speed: null,
+				flySpeed: null,
+				swimSpeed: null,
+				climbSpeed: null,
+				currentFocusPoints: null,
+				focusPoints: null,
+				classDC: null,
+				classAttack: null,
+				perception: null,
+				perceptionProfMod: null,
+			},
+			abilities: {
+				strength: null,
+				dexterity: null,
+				constitution: null,
+				intelligence: null,
+				wisdom: null,
+				charisma: null,
+			},
+			defenses: {
+				resistances: [],
+				immunities: [],
+				weaknesses: [],
+				currentHp: null,
+				maxHp: null,
+				tempHp: null,
+				currentResolve: null,
+				maxResolve: null,
+				currentStamina: null,
+				maxStamina: null,
+				ac: null,
+				heavyProfMod: null,
+				mediumProfMod: null,
+				lightProfMod: null,
+				unarmoredProfMod: null,
+			},
+			offense: {
+				martialProfMod: null,
+				simpleProfMod: null,
+				unarmedProfMod: null,
+				advancedProfMod: null,
+			},
+			castingStats: {
+				arcaneAttack: null,
+				arcaneDC: null,
+				arcaneProfMod: null,
+				divineAttack: null,
+				divineDC: null,
+				divineProfMod: null,
+				occultAttack: null,
+				occultDC: null,
+				occultProfMod: null,
+				primalAttack: null,
+				primalDC: null,
+				primalProfMod: null,
+			},
+			saves: {
+				fortitude: null,
+				fortitudeProfMod: null,
+				reflex: null,
+				reflexProfMod: null,
+				will: null,
+				willProfMod: null,
+			},
+			skills: {
+				lores: [],
+				acrobatics: null,
+				acrobaticsProfMod: null,
+				arcana: null,
+				arcanaProfMod: null,
+				athletics: null,
+				athleticsProfMod: null,
+				crafting: null,
+				craftingProfMod: null,
+				deception: null,
+				deceptionProfMod: null,
+				diplomacy: null,
+				diplomacyProfMod: null,
+				intimidation: null,
+				intimidationProfMod: null,
+				medicine: null,
+				medicineProfMod: null,
+				nature: null,
+				natureProfMod: null,
+				occultism: null,
+				occultismProfMod: null,
+				performance: null,
+				performanceProfMod: null,
+				religion: null,
+				religionProfMod: null,
+				society: null,
+				societyProfMod: null,
+				stealth: null,
+				stealthProfMod: null,
+				survival: null,
+				survivalProfMod: null,
+				thievery: null,
+				thieveryProfMod: null,
+			},
 			attacks: [],
 			rollMacros: [],
 			actions: [],
@@ -80,12 +202,16 @@ export class Creature {
 		return this._adjustedSheet;
 	}
 
-	public get name() {
+	// convenience helpers
+	public get name(): string {
 		return this._name ?? this.sheet.info.name;
 	}
+	public get level(): number {
+		return this.sheet.info.level ?? 0;
+	}
 
-	public profToLevel(prof: number) {
-		if (prof > 0) return prof + this.sheet.info.level;
+	public profToLevel(prof: number): number {
+		if (prof > 0) return prof + (this.sheet.info.level ?? 0);
 		else return 0;
 	}
 
@@ -372,11 +498,12 @@ export class Creature {
 			);
 			let attacks = '';
 			if (maxWeaponMod !== -99) {
+				const level = this.sheet.info.level ?? 0;
 				attacks = `**Melee** (strength, best proficiency): \`+${
-					maxWeaponMod + this.sheet.info.level + this.mods.str
+					maxWeaponMod + level + this.mods.str
 				}\`\n`;
 				attacks += `**Ranged/Finesse** (dexterity, best proficiency): \`+${
-					maxWeaponMod + this.sheet.info.level + this.mods.dex
+					maxWeaponMod + level + this.mods.dex
 				}\``;
 			}
 			for (const attack of _.values(this.attackRolls)) {
@@ -417,43 +544,43 @@ export class Creature {
 
 	public recover() {
 		const updates: { name: string; initialValue: number; updatedValue: number }[] = [];
-		if (this.sheet.defenses.tempHp > 0) {
+		if (Number(this.sheet.defenses.tempHp) > 0) {
 			updates.push({
 				name: 'Temp HP',
-				initialValue: this.sheet.defenses.tempHp,
+				initialValue: Number(this.sheet.defenses.tempHp),
 				updatedValue: 0,
 			});
 			this.sheet.defenses.tempHp = 0;
 		}
-		if (this.sheet.defenses.currentHp < this.sheet.defenses.maxHp) {
+		if (Number(this.sheet.defenses.currentHp) < Number(this.sheet.defenses.maxHp)) {
 			updates.push({
 				name: 'HP',
-				initialValue: this.sheet.defenses.currentHp,
-				updatedValue: this.sheet.defenses.maxHp,
+				initialValue: Number(this.sheet.defenses.currentHp),
+				updatedValue: Number(this.sheet.defenses.maxHp),
 			});
-			this.sheet.defenses.currentHp = this.sheet.defenses.maxHp;
+			this.sheet.defenses.currentHp = Number(this.sheet.defenses.maxHp);
 		}
 		if (
 			this.sheet.info.usesStamina &&
-			this.sheet.defenses.currentStamina < this.sheet.defenses.maxStamina
+			Number(this.sheet.defenses.currentStamina) < Number(this.sheet.defenses.maxStamina)
 		) {
 			updates.push({
 				name: 'Stamina',
-				initialValue: this.sheet.defenses.currentStamina,
-				updatedValue: this.sheet.defenses.maxStamina,
+				initialValue: Number(this.sheet.defenses.currentStamina),
+				updatedValue: Number(this.sheet.defenses.maxStamina),
 			});
-			this.sheet.defenses.currentStamina = this.sheet.defenses.maxStamina;
+			this.sheet.defenses.currentStamina = Number(this.sheet.defenses.maxStamina);
 		}
 		if (
 			this.sheet.info.usesStamina &&
-			this.sheet.defenses.currentResolve < this.sheet.defenses.maxResolve
+			Number(this.sheet.defenses.currentResolve) < Number(this.sheet.defenses.maxResolve)
 		) {
 			updates.push({
 				name: 'Resolve',
-				initialValue: this.sheet.defenses.currentResolve,
-				updatedValue: this.sheet.defenses.maxResolve,
+				initialValue: Number(this.sheet.defenses.currentResolve),
+				updatedValue: Number(this.sheet.defenses.maxResolve),
 			});
-			this.sheet.defenses.currentResolve = this.sheet.defenses.maxResolve;
+			this.sheet.defenses.currentResolve = Number(this.sheet.defenses.maxResolve);
 		}
 		return updates;
 	}
@@ -489,37 +616,47 @@ export class Creature {
 		let updatedValue;
 
 		if (option === 'hp') {
-			if (this.sheet?.defenses?.currentHp === undefined)
+			if (this.sheet?.defenses?.currentHp == undefined)
 				return { initialValue: 0, updatedValue: 0 };
 			initialValue = this.sheet.defenses.currentHp;
-			updatedValue = computeNewValue(initialValue, value, 0, this.sheet.defenses.maxHp);
+			updatedValue = computeNewValue(initialValue, value, 0, this.sheet.defenses.maxHp ?? 0);
 			this.sheet.defenses.currentHp = updatedValue;
 		} else if (option === 'tempHp') {
-			if (this.sheet?.defenses?.tempHp === undefined)
+			if (this.sheet?.defenses?.tempHp == undefined)
 				return { initialValue: 0, updatedValue: 0 };
 			initialValue = this.sheet.defenses.tempHp;
 			updatedValue = computeNewValue(initialValue, value, 0);
 			this.sheet.defenses.tempHp = updatedValue;
 		} else if (option === 'stamina') {
-			if (this.sheet?.defenses?.currentStamina === undefined)
+			if (this.sheet?.defenses?.currentStamina == undefined)
 				return { initialValue: 0, updatedValue: 0 };
 			initialValue = this.sheet.defenses.currentStamina;
-			updatedValue = computeNewValue(initialValue, value, 0, this.sheet.defenses.maxStamina);
+			updatedValue = computeNewValue(
+				initialValue,
+				value,
+				0,
+				this.sheet.defenses.maxStamina ?? 0
+			);
 			this.sheet.defenses.currentStamina = updatedValue;
 		} else if (option === 'resolve') {
-			if (this.sheet?.defenses?.currentResolve === undefined)
+			if (this.sheet?.defenses?.currentResolve == undefined)
 				return { initialValue: 0, updatedValue: 0 };
 			initialValue = this.sheet.defenses.currentResolve;
-			updatedValue = computeNewValue(initialValue, value, 0, this.sheet.defenses.maxResolve);
+			updatedValue = computeNewValue(
+				initialValue,
+				value,
+				0,
+				this.sheet.defenses.maxResolve ?? 0
+			);
 			this.sheet.defenses.currentResolve = updatedValue;
 		} else if (option === 'heroPoints') {
-			if (this.sheet?.general?.currentHeroPoints === undefined)
+			if (this.sheet?.general?.currentHeroPoints == undefined)
 				return { initialValue: 0, updatedValue: 0 };
 			initialValue = this.sheet.general.currentHeroPoints;
 			updatedValue = computeNewValue(initialValue, value, 0, 3);
 			this.sheet.general.currentHeroPoints = updatedValue;
 		} else if (option === 'focusPoints') {
-			if (this.sheet?.general?.currentFocusPoints === undefined)
+			if (this.sheet?.general?.currentFocusPoints == undefined)
 				return { initialValue: 0, updatedValue: 0 };
 			initialValue = this.sheet.general.currentFocusPoints;
 			updatedValue = computeNewValue(
@@ -576,8 +713,11 @@ export class Creature {
 	}
 
 	public heal(amount: number) {
-		const currentHp = this.sheet.defenses.currentHp;
-		this.sheet.defenses.currentHp = Math.min(this.sheet.defenses.maxHp, currentHp + amount);
+		const currentHp = this.sheet.defenses.currentHp ?? 0;
+		this.sheet.defenses.currentHp = Math.min(
+			this.sheet.defenses.maxHp ?? 0,
+			currentHp + amount
+		);
 		return { totalHealed: this.sheet.defenses.currentHp - currentHp };
 	}
 
@@ -623,9 +763,9 @@ export class Creature {
 				appliedImmunity = immunities[0];
 			}
 		}
-		let initialTempHp = this.sheet.defenses.tempHp;
-		let initialStamina = this.sheet.defenses.currentStamina;
-		let initialHp = this.sheet.defenses.currentHp;
+		let initialTempHp = this.sheet.defenses.tempHp ?? 0;
+		let initialStamina = this.sheet.defenses.currentStamina ?? 0;
+		let initialHp = this.sheet.defenses.currentHp ?? 0;
 		let unappliedDamage = finalDamage;
 
 		// apply damage to temp hp first, then stamina, then hp
@@ -757,7 +897,7 @@ export class Creature {
 				name: attack.name,
 				type: 'attack',
 				toHit: attack.toHit,
-				damage: attack.damage,
+				damage: attack.damage ?? [],
 				range: attack.range,
 				traits: attack.traits ?? [],
 				notes: attack.notes,
@@ -798,7 +938,7 @@ export class Creature {
 		rolls.perception = {
 			name: 'perception',
 			type: 'check',
-			bonus: this.sheet.general.perception,
+			bonus: this.sheet.general.perception ?? 0,
 			tags: ['check', 'perception', 'wisdom'],
 		};
 
@@ -816,7 +956,7 @@ export class Creature {
 			rolls[lore.name.toLocaleLowerCase() + ' lore'] = {
 				name: lore.name + ' lore',
 				type: 'skill',
-				bonus: lore.bonus,
+				bonus: lore.bonus ?? 0,
 				tags: ['skill', lore.name, 'intelligence'],
 			};
 		}
@@ -830,19 +970,19 @@ export class Creature {
 			fortitude: {
 				name: 'fortitude',
 				type: 'save',
-				bonus: this.sheet.saves.fortitude,
+				bonus: this.sheet.saves.fortitude ?? 0,
 				tags: ['save', 'fortitude', 'constitution'],
 			},
 			reflex: {
 				name: 'reflex',
 				type: 'save',
-				bonus: this.sheet.saves.reflex,
+				bonus: this.sheet.saves.reflex ?? 0,
 				tags: ['save', 'reflex', 'dexterity'],
 			},
 			will: {
 				name: 'will',
 				type: 'save',
-				bonus: this.sheet.saves.will,
+				bonus: this.sheet.saves.will ?? 0,
 				tags: ['save', 'will', 'wisdom'],
 			},
 		};
@@ -862,21 +1002,21 @@ export class Creature {
 		return _.keys(this.rolls);
 	}
 
-	public get mods() {
+	public get mods(): { [k: string]: number } {
 		const parseMod = (score: number) => Math.floor((score - 10) / 2);
 		return {
-			str: parseMod(this.sheet.abilities.strength),
-			strength: parseMod(this.sheet.abilities.strength),
-			dex: parseMod(this.sheet.abilities.dexterity),
-			dexterity: parseMod(this.sheet.abilities.dexterity),
-			con: parseMod(this.sheet.abilities.constitution),
-			constitution: parseMod(this.sheet.abilities.constitution),
-			int: parseMod(this.sheet.abilities.intelligence),
-			intelligence: parseMod(this.sheet.abilities.intelligence),
-			wis: parseMod(this.sheet.abilities.wisdom),
-			wisdom: parseMod(this.sheet.abilities.wisdom),
-			cha: parseMod(this.sheet.abilities.charisma),
-			charisma: parseMod(this.sheet.abilities.charisma),
+			str: parseMod(this.sheet.abilities.strength ?? 10),
+			strength: parseMod(this.sheet.abilities.strength ?? 10),
+			dex: parseMod(this.sheet.abilities.dexterity ?? 10),
+			dexterity: parseMod(this.sheet.abilities.dexterity ?? 10),
+			con: parseMod(this.sheet.abilities.constitution ?? 10),
+			constitution: parseMod(this.sheet.abilities.constitution ?? 10),
+			int: parseMod(this.sheet.abilities.intelligence ?? 10),
+			intelligence: parseMod(this.sheet.abilities.intelligence ?? 10),
+			wis: parseMod(this.sheet.abilities.wisdom ?? 10),
+			wisdom: parseMod(this.sheet.abilities.wisdom ?? 10),
+			cha: parseMod(this.sheet.abilities.charisma ?? 10),
+			charisma: parseMod(this.sheet.abilities.charisma ?? 10),
 		};
 	}
 
@@ -893,32 +1033,17 @@ export class Creature {
 	}
 
 	public get actions() {
-		return this.sheet?.actions;
+		return this.sheet.actions ?? [];
 	}
 	public get modifiers() {
-		return this.sheet?.modifiers;
+		return this.sheet.modifiers ?? [];
 	}
 	public get rollMacros() {
-		return this.sheet?.rollMacros;
+		return this.sheet.rollMacros ?? [];
 	}
 
 	public get sheetPropertyGroups() {
 		return SheetUtils.sheetPropertyGroups;
-	}
-	public static sheetPropertyValid(propertyName: string): boolean {
-		//parse groups
-		const groups = _.kebabCase(propertyName).split('-');
-		if (groups.length === 1) {
-			// check against direct property names
-		} else if (groups[groups.length - 1] === 'lore') {
-			// arbitrary lore names are valid
-			return true;
-		} else if (groups.length === 2) {
-			// must be a combination of attribute and group type (e.g. strength skills)
-		} else {
-			return false;
-		}
-		return;
 	}
 
 	public get sheetProperties() {
@@ -955,7 +1080,7 @@ export class Creature {
 			.map(property => _.camelCase(property));
 	}
 
-	public get attributes() {
+	public get attributes(): Attribute[] {
 		const baseAttributes = [
 			{ name: 'level', type: 'base', value: this.sheet.info.level, tags: ['level'] },
 			{ name: 'maxHp', type: 'base', value: this.sheet.defenses.maxHp, tags: ['maxHp'] },
@@ -1364,7 +1489,7 @@ export class Creature {
 		return sheet;
 	}
 
-	public static attributeAbilityMap(): { [skillName: string]: string } {
+	public static get attributeAbilityMap(): { [skillName: string]: string } {
 		return {
 			acrobatics: 'dexterity',
 			arcana: 'intelligence',
@@ -1397,6 +1522,11 @@ export class Creature {
 		};
 	}
 
+	public static fromDefault(sheetOverrides: Partial<Sheet> = {}): Creature {
+		const sheet = _.defaults(SheetUtils.defaultSheet, sheetOverrides);
+		return new Creature(sheet);
+	}
+
 	public static fromModelWithSheet(initActor: ModelWithSheet): Creature {
 		return new Creature(initActor.sheet, initActor.name);
 	}
@@ -1411,7 +1541,7 @@ export class Creature {
 
 	public static fromBestiaryEntry(
 		bestiaryEntry: CreatureStatBlock,
-		fluffEntry,
+		fluffEntry: CreatureFluff,
 		options: { useStamina?: boolean; template?: string; customName?: string } = {
 			useStamina: false,
 			template: '',
@@ -1454,28 +1584,14 @@ export class Creature {
 	 * @param tags the tags to check against a character's modifiers
 	 * @returns modifier[]
 	 */
-	public getModifiersFromTags(
-		tags: string[],
-		extraAttributes?: {
-			name: string;
-			value: number;
-			tags?: string[];
-		}[]
-	): Sheet['modifiers'] {
+	public getModifiersFromTags(tags: string[], extraAttributes?: Attribute[]): Modifier[] {
 		const { untyped, bonuses, penalties } = parseBonusesForTagsFromModifiers(
 			this.modifiers.filter(modifier => modifier.modifierType === 'roll'),
-			[
-				...(this.attributes as {
-					name: string;
-					value: number;
-					tags?: string[];
-				}[]),
-				...(extraAttributes || []),
-			],
+			[...(this.attributes as Attribute[]), ...(extraAttributes || [])],
 			tags,
 			this
 		);
-		return untyped.concat(_.values(bonuses), _.values(penalties));
+		return untyped.concat(_.flatten(_.values(bonuses)), _.flatten(_.values(penalties)));
 	}
 
 	/**

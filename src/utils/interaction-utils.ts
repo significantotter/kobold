@@ -29,7 +29,7 @@ export class InteractionUtils {
 	public static async sendEphemeral(
 		intr: CommandInteraction | MessageComponentInteraction | ModalSubmitInteraction,
 		content: string | EmbedBuilder | InteractionReplyOptions
-	): Promise<Message> {
+	): Promise<Message | undefined> {
 		try {
 			let options: InteractionReplyOptions =
 				typeof content === 'string'
@@ -65,7 +65,7 @@ export class InteractionUtils {
 	public static async deferReply(
 		intr: CommandInteraction | MessageComponentInteraction | ModalSubmitInteraction,
 		hidden: boolean = false
-	): Promise<InteractionResponse> {
+	): Promise<InteractionResponse | undefined> {
 		try {
 			return await intr.deferReply({
 				ephemeral: hidden,
@@ -85,7 +85,7 @@ export class InteractionUtils {
 
 	public static async deferUpdate(
 		intr: MessageComponentInteraction | ModalSubmitInteraction
-	): Promise<InteractionResponse> {
+	): Promise<InteractionResponse | undefined> {
 		try {
 			return await intr.deferUpdate();
 		} catch (error) {
@@ -105,7 +105,7 @@ export class InteractionUtils {
 		intr: CommandInteraction | MessageComponentInteraction | ModalSubmitInteraction,
 		content: string | EmbedBuilder | InteractionReplyOptions,
 		hidden: boolean = false
-	): Promise<Message> {
+	): Promise<Message | undefined> {
 		try {
 			let options: InteractionReplyOptions =
 				typeof content === 'string'
@@ -160,7 +160,7 @@ export class InteractionUtils {
 	public static async editReply(
 		intr: CommandInteraction | MessageComponentInteraction | ModalSubmitInteraction,
 		content: string | EmbedBuilder | WebhookMessageEditOptions
-	): Promise<Message> {
+	): Promise<Message | undefined> {
 		try {
 			let options: WebhookMessageEditOptions =
 				typeof content === 'string'
@@ -185,7 +185,7 @@ export class InteractionUtils {
 	public static async update(
 		intr: MessageComponentInteraction,
 		content: string | EmbedBuilder | InteractionUpdateOptions
-	): Promise<Message> {
+	): Promise<Message | undefined> {
 		try {
 			let options: InteractionUpdateOptions =
 				typeof content === 'string'

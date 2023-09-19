@@ -4,6 +4,7 @@ import { JSONSchema7 } from 'json-schema';
 import { BaseModel } from '../../lib/base-model.js';
 import GuildDefaultCharacterSchema from './guild-default-character.schema.json' assert { type: 'json' };
 import Objection from 'objection';
+import { removeRequired } from '../../lib/helpers.js';
 
 export interface GuildDefaultCharacter extends GuildDefaultCharacterType {}
 export class GuildDefaultCharacter extends BaseModel {
@@ -16,7 +17,7 @@ export class GuildDefaultCharacter extends BaseModel {
 	}
 
 	static get jsonSchema(): Objection.JSONSchema {
-		return GuildDefaultCharacterSchema as Objection.JSONSchema;
+		return removeRequired(GuildDefaultCharacterSchema as unknown as Objection.JSONSchema);
 	}
 
 	static get RelationMappings() {

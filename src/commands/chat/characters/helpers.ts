@@ -2,38 +2,7 @@ import { WanderersGuide } from '../../../services/wanderers-guide/index.js';
 import { Config } from '../../../config/config.js';
 import { WG } from '../../../services/wanderers-guide/wanderers-guide.js';
 import { Creature } from '../../../utils/creature.js';
-import { Sheet } from '../../../services/kobold/lib/sheet.schema.js';
-
-export const attributeAbilityMap = {
-	acrobatics: 'dexterity',
-	arcana: 'intelligence',
-	athletics: 'strength',
-	crafting: 'intelligence',
-	deception: 'charisma',
-	diplomacy: 'charisma',
-	intimidation: 'charisma',
-	medicine: 'wisdom',
-	nature: 'wisdom',
-	occultism: 'intelligence',
-	performance: 'charisma',
-	religion: 'wisdom',
-	society: 'intelligence',
-	stealth: 'dexterity',
-	survival: 'wisdom',
-	thievery: 'dexterity',
-	perception: 'wisdom',
-
-	fortitude: 'constitution',
-	reflex: 'dexterity',
-	will: 'wisdom',
-
-	strength: 'strength',
-	dexterity: 'dexterity',
-	constitution: 'constitution',
-	intelligence: 'intelligence',
-	wisdom: 'wisdom',
-	charisma: 'charisma',
-};
+import { Attribute, Sheet } from '../../../services/kobold/models/index.js';
 
 export class CharacterHelpers {
 	public static async fetchWgCharacterFromToken(charId: number, token: string, oldSheet?: Sheet) {
@@ -173,21 +142,15 @@ export class CharacterHelpers {
 		[k: string]: any;
 		characterData: WG.CharacterApiResponse;
 		calculatedStats: WG.CharacterCalculatedStatsApiResponse;
-	}): {
-		[k: string]: any;
-		name?: string;
-		type?: string;
-		value?: number;
-		tags?: string[];
-	}[] {
+	}): Attribute[] {
 		const { characterData, calculatedStats } = character;
-		const attributes = [
+		const attributes: Attribute[] = [
 			{ name: 'level', type: 'base', value: characterData.level, tags: ['level'] },
-			{ name: 'maxHp', type: 'base', value: calculatedStats.maxHP, tags: ['maxHp'] },
+			{ name: 'maxHp', type: 'base', value: calculatedStats.maxHP ?? 0, tags: ['maxHp'] },
 			{
 				name: 'hp',
 				type: 'base',
-				value: characterData.currentHealth ?? calculatedStats.maxHP,
+				value: characterData.currentHealth ?? calculatedStats.maxHP ?? 0,
 				tags: ['hp'],
 			},
 			{
@@ -196,25 +159,30 @@ export class CharacterHelpers {
 				value: characterData.tempHealth ?? 0,
 				tags: ['tempHp'],
 			},
-			{ name: 'ac', type: 'base', value: calculatedStats.totalAC, tags: ['ac'] },
+			{ name: 'ac', type: 'base', value: calculatedStats.totalAC ?? 10, tags: ['ac'] },
 			{
 				name: 'heroPoints',
 				type: 'base',
-				value: characterData.heroPoints,
+				value: characterData.heroPoints ?? 0,
 				tags: ['heroPoints'],
 			},
 
-			{ name: 'speed', type: 'base', value: calculatedStats.totalSpeed, tags: ['speed'] },
+			{
+				name: 'speed',
+				type: 'base',
+				value: calculatedStats.totalSpeed ?? 0,
+				tags: ['speed'],
+			},
 			{
 				name: 'classDc',
 				type: 'base',
-				value: calculatedStats.totalClassDC,
+				value: calculatedStats.totalClassDC ?? 0,
 				tags: ['classDc'],
 			},
 			{
 				name: 'perception',
 				type: 'skill',
-				value: calculatedStats.totalPerception,
+				value: calculatedStats.totalPerception ?? 0,
 				tags: ['skill', 'perception'],
 			},
 		];
@@ -223,13 +191,13 @@ export class CharacterHelpers {
 				{
 					name: 'maxStamina',
 					type: 'base',
-					value: calculatedStats.maxStamina,
+					value: calculatedStats.maxStamina ?? 0,
 					tags: ['maxStamina'],
 				},
 				{
 					name: 'maxResolve',
 					type: 'base',
-					value: calculatedStats.maxResolve,
+					value: calculatedStats.maxResolve ?? 0,
 					tags: ['maxResolve'],
 				},
 				{
@@ -249,7 +217,7 @@ export class CharacterHelpers {
 		for (const abilityScore of calculatedStats.totalAbilityScores) {
 			attributes.push({
 				name: abilityScore.Name,
-				value: Math.floor((abilityScore.Score - 10) / 2),
+				value: Math.floor(((abilityScore.Score ?? 10) - 10) / 2),
 				type: 'ability',
 				tags: ['ability', abilityScore.Name.toLocaleLowerCase()],
 			});
@@ -261,8 +229,8 @@ export class CharacterHelpers {
 				type: 'save',
 				tags: ['save', save.Name.toLocaleLowerCase()],
 			};
-			if (attributeAbilityMap[save.Name.toLocaleLowerCase()])
-				attr.tags.push(attributeAbilityMap[save.Name.toLocaleLowerCase()]);
+			if (Creature.attributeAbilityMap[save.Name.toLocaleLowerCase()])
+				attr.tags.push(Creature.attributeAbilityMap[save.Name.toLocaleLowerCase()]);
 			attributes.push(attr);
 		}
 		for (const skill of calculatedStats.totalSkills) {
@@ -272,8 +240,11 @@ export class CharacterHelpers {
 				type: 'skill',
 				tags: ['skill', skill.Name.toLocaleLowerCase()],
 			};
-			if (attributeAbilityMap[skill.Name.toLocaleLowerCase()])
-				attr.tags.push(attributeAbilityMap[skill.Name.toLocaleLowerCase()]);
+			if (Creature.attributeAbilityMap[skill.Name.toLocaleLowerCase()])
+				attr.tags.push(Creature.attributeAbilityMap[skill.Name.toLocaleLowerCase()]);
+			if ((skill.Name as string).toLocaleLowerCase().includes('esoteric')) {
+				attr.tags.push('charisma');
+			}
 			if ((skill.Name as string).toLocaleLowerCase().includes('lore'))
 				attr.tags.push('intelligence');
 			attributes.push(attr);

@@ -23,6 +23,7 @@ export class ShardUtils {
 		} else if (shardInterface instanceof ShardClientUtil) {
 			return shardInterface.ids;
 		}
+		return [];
 	}
 
 	public static shardId(guildId: number | string, shardCount: number): number {

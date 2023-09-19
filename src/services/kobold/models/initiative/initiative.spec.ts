@@ -28,6 +28,6 @@ describe('Initiative', () => {
 		const insertedInitiative = fetchedInitiatives.find(
 			factory => factory.charId === builtInitiative.charId
 		);
-		expect(insertedInitiative.charId).toBe(builtInitiative.charId);
+		expect(insertedInitiative?.charId).toBe(builtInitiative.charId);
 	});
 });

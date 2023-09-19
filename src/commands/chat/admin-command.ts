@@ -4,12 +4,11 @@ import djs, {
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
 	ChatInputCommandInteraction,
 	PermissionsString,
+	Locale,
 } from 'discord.js';
 import os from 'node:os';
 import { RateLimiter } from 'discord.js-rate-limiter';
 import { TranslationFunctions } from '../../i18n/i18n-types.js';
-import { Language } from '../../models/enum-helpers/language.js';
-import { EventData } from '../../models/internal-models.js';
 import { InteractionUtils } from '../../utils/interaction-utils.js';
 import { Command, CommandDeferType } from '../command.js';
 import { Config } from './../../config/config.js';
@@ -17,17 +16,17 @@ import fs from 'fs';
 import typescript from 'typescript';
 import { filesize } from 'filesize';
 import { ShardUtils } from '../../utils/shard-utils.js';
-import { Lang } from '../../services/lang.js';
 import _ from 'lodash';
+import L from '../../i18n/i18n-node.js';
 
 const tsConfig = JSON.parse(fs.readFileSync('./tsconfig.json').toString());
 
 export class AdminCommand implements Command {
-	public names = [Language.LL.commands.admin.name()];
+	public names = [L.en.commands.admin.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.admin.name(),
-		description: Language.LL.commands.admin.description(),
+		name: L.en.commands.admin.name(),
+		description: L.en.commands.admin.description(),
 		dm_permission: false,
 		default_member_permissions: undefined,
 	};
@@ -38,13 +37,12 @@ export class AdminCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
 		if (!intr.isChatInputCommand()) return;
 		if (
 			!Config.developers.includes(intr.user.id) ||
-			!this.restrictedGuilds.includes(intr.guildId)
+			!this.restrictedGuilds.includes(intr.guildId ?? '')
 		) {
 			await InteractionUtils.send(intr, 'Yip! This is a kobold admin command. Sorry!');
 			return;
@@ -55,11 +53,10 @@ export class AdminCommand implements Command {
 			try {
 				serverCount = await ShardUtils.serverCount(intr.client.shard);
 			} catch (error) {
-				if (error.name.includes('ShardingInProcess')) {
-					await InteractionUtils.send(
-						intr,
-						Lang.getEmbed('errorEmbeds.startupInProcess', data.lang())
-					);
+				if (error instanceof Error && error.name.includes('ShardingInProcess')) {
+					const embed = new KoboldEmbed();
+					embed.setTitle('Yip! Kobold is still starting up. Try again later.');
+					await InteractionUtils.send(intr, embed);
 					return;
 				} else {
 					throw error;
@@ -70,37 +67,53 @@ export class AdminCommand implements Command {
 		}
 
 		let memory = process.memoryUsage();
-		const embed = Lang.getEmbed('displayEmbeds.dev', data.lang(), {
-			NODE_VERSION: process.version,
-			TS_VERSION: `v${typescript.version}`,
-			ES_VERSION: tsConfig.compilerOptions.target,
-			DJS_VERSION: `v${djs.version}`,
-			SHARD_COUNT: shardCount.toLocaleString(data.lang()),
-			SERVER_COUNT: serverCount.toLocaleString(data.lang()),
-			SERVER_COUNT_PER_SHARD: Math.round(serverCount / shardCount).toLocaleString(
-				data.lang()
-			),
-			RSS_SIZE: filesize(memory.rss),
-			RSS_SIZE_PER_SERVER:
-				serverCount > 0
-					? filesize(memory.rss / serverCount)
-					: Lang.getRef('other.na', data.lang()),
-			HEAP_TOTAL_SIZE: filesize(memory.heapTotal),
-			HEAP_TOTAL_SIZE_PER_SERVER:
-				serverCount > 0
-					? filesize(memory.heapTotal / serverCount)
-					: Lang.getRef('other.na', data.lang()),
-			HEAP_USED_SIZE: filesize(memory.heapUsed),
-			HEAP_USED_SIZE_PER_SERVER:
-				serverCount > 0
-					? filesize(memory.heapUsed / serverCount)
-					: Lang.getRef('other.na', data.lang()),
-			HOSTNAME: os.hostname(),
-			SHARD_ID: (intr.guild?.shardId ?? 0).toString(),
-			SERVER_ID: intr.guild?.id ?? Lang.getRef('other.na', data.lang()),
-			BOT_ID: intr.client.user?.id,
-			USER_ID: intr.user.id,
-			GUILD_COUNT: `${intr.client.guilds.cache.size}`,
+		const embed = new KoboldEmbed({
+			title: `Kobold - Developer Info`,
+			fields: [
+				{
+					name: `Versions`,
+					value: [
+						`**Node.js**: ${process.version}`,
+						`**TypeScript**: v${typescript.version}`,
+						`**ECMAScript**: ${tsConfig.compilerOptions.target}`,
+						`**discord.js**: v${djs.version}`,
+					].join('\n'),
+				},
+				{
+					name: `Stats`,
+					value: [
+						`**Shards**: ${shardCount.toLocaleString(Locale.EnglishUS)}`,
+						`**Servers**: ${serverCount.toLocaleString(Locale.EnglishUS)} (${Math.round(
+							serverCount / shardCount
+						).toLocaleString(Locale.EnglishUS)}/Shard)`,
+						`**Guild Count**: ${intr.client.guilds.cache.size} `,
+					].join('\n'),
+				},
+				{
+					name: `Memory`,
+					value: [
+						`**RSS**: ${filesize(memory.rss)} (${
+							serverCount > 0 ? filesize(memory.rss / serverCount) : 'N/A'
+						}/Server)`,
+						`**Heap**: ${filesize(memory.heapTotal)} (${
+							serverCount > 0 ? filesize(memory.heapTotal / serverCount) : 'N/A'
+						}/Server)`,
+						`**Used**: ${filesize(memory.heapUsed)} (${
+							serverCount > 0 ? filesize(memory.heapUsed / serverCount) : 'N/A'
+						}/Server)`,
+					].join('\n'),
+				},
+				{
+					name: `IDs`,
+					value: [
+						`**Hostname**: ${os.hostname()}`,
+						`**Shard ID**: ${(intr.guild?.shardId ?? 0).toString()}`,
+						`**Server ID**: ${intr.guild?.id ?? 'N/A'}`,
+						`**Bot ID**: ${intr.client.user?.id}`,
+						`**User ID**: ${intr.user.id}`,
+					].join('\n'),
+				},
+			],
 		});
 		await InteractionUtils.send(intr, embed);
 		return;

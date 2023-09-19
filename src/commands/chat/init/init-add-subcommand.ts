@@ -14,14 +14,12 @@ import {
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 
-import { EventData } from '../../../models/internal-models.js';
 import { InteractionUtils, StringUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { InitiativeUtils, InitiativeBuilder } from '../../../utils/initiative-utils.js';
 import { ChatArgs } from '../../../constants/chat-args.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { Language } from '../../../models/enum-helpers/language.js';
 import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
 import { Npc, Sheet } from '../../../services/kobold/models/index.js';
 import { Creature } from '../../../utils/creature.js';
@@ -30,13 +28,16 @@ import { InitOptions } from './init-command-options.js';
 import { generateStatOverrides } from '../../../utils/sheet-import-utils.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
 import { SettingsUtils } from '../../../utils/settings-utils.js';
+import L from '../../../i18n/i18n-node.js';
+import { DeepPartial } from 'fishery';
+import { CreatureFluff } from '../../../services/pf2etools/pf2etools-types.js';
 
 export class InitAddSubCommand implements Command {
-	public names = [Language.LL.commands.init.add.name()];
+	public names = [L.en.commands.init.add.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.init.add.name(),
-		description: Language.LL.commands.init.add.description(),
+		name: L.en.commands.init.add.name(),
+		description: L.en.commands.init.add.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -47,15 +48,18 @@ export class InitAddSubCommand implements Command {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption
-	): Promise<ApplicationCommandOptionChoiceData[]> {
-		if (!intr.isAutocomplete()) return;
+	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
+		if (!intr.isAutocomplete()) return [];
 		if (option.name === InitOptions.INIT_CREATURE_OPTION.name) {
 			const match = intr.options.getString(InitOptions.INIT_CREATURE_OPTION.name);
-			const npcs = await AutocompleteUtils.getBestiaryNpcs(intr, match);
+			const npcs = await AutocompleteUtils.getBestiaryNpcs(intr, match ?? '');
 			if (npcs.length > 20) {
 				npcs.unshift({ name: 'Custom NPC', value: 'Custom NPC' });
 			} else {
-				const sorter = StringUtils.generateSorterByWordDistance(match, c => c.name);
+				const sorter = StringUtils.generateSorterByWordDistance<{
+					name: string;
+					value: string;
+				}>(match ?? '', c => c.name);
 				npcs.sort(sorter);
 				npcs.push({ name: 'Custom NPC', value: 'Custom NPC' });
 				return npcs;
@@ -66,24 +70,15 @@ export class InitAddSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
-		const [currentInitResponse, userSettings] = await Promise.all([
-			InitiativeUtils.getInitiativeForChannel(intr.channel, {
-				sendErrors: true,
-				LL,
-			}),
+		const [currentInit, userSettings] = await Promise.all([
+			InitiativeUtils.getInitiativeForChannel(intr.channel),
 			SettingsUtils.getSettingsForUser(intr),
 		]);
-		if (currentInitResponse.errorMessage) {
-			await InteractionUtils.send(intr, currentInitResponse.errorMessage);
-			return;
-		}
-		const currentInit = currentInitResponse.init;
 
 		let actorName = intr.options.getString(InitOptions.ACTOR_NAME_OPTION.name);
-		const targetCreature = intr.options.getString(InitOptions.INIT_CREATURE_OPTION.name);
+		const targetCreature = intr.options.getString(InitOptions.INIT_CREATURE_OPTION.name, true);
 		const customStatsString = intr.options.getString(InitOptions.INIT_CUSTOM_STATS_OPTION.name);
 		const initiativeValue = intr.options.getNumber(InitOptions.INIT_VALUE_OPTION.name);
 		const diceExpression = intr.options.getString(ChatArgs.ROLL_EXPRESSION_OPTION.name);
@@ -92,14 +87,10 @@ export class InitAddSubCommand implements Command {
 			.trim()
 			.toLocaleLowerCase();
 
-		let creature: Creature = null;
-		let sheet: Sheet = null;
+		let sheet: DeepPartial<Sheet> = {};
 		let referenceNpcName = null;
 
-		if (targetCreature.toLowerCase().trim() == 'custom npc') {
-			if (!actorName) actorName = 'unnamed enemy';
-			sheet = { info: { name: actorName } };
-		} else {
+		if (targetCreature.toLowerCase().trim() != 'custom npc') {
 			const npcNameSourceRegex = /(.*) \((.*)\)/;
 			const [fullMatch, matchedName, matchedSource] =
 				npcNameSourceRegex.exec(targetCreature) ?? [];
@@ -117,19 +108,29 @@ export class InitAddSubCommand implements Command {
 					`%${source ?? ''}%`,
 				]);
 			const npcs = await npcPromise;
-			if (!npcPromise)
+			if (!npcs.length)
 				throw new KoboldError(`Yip! I couldn't find ${fullMatch} in the bestiary!`);
-			const npc = StringUtils.findClosestInObjectArray(name, npcs, 'name');
+			// we know there's at least 1, so there will be a match
+			const npc = StringUtils.findClosestInObjectArray(name, npcs, 'name') as Npc;
 			const variantData = await npc.fetchVariantDataIfExists();
 			if (!actorName) actorName = (template ? `${_.capitalize(template)} ` : '') + npc.name;
-			creature = Creature.fromBestiaryEntry(variantData, npc.fluff, {
-				useStamina: false,
-				template,
-				customName: actorName || undefined,
-			});
+			const creature = Creature.fromBestiaryEntry(
+				variantData,
+				(npc.fluff as CreatureFluff) ?? undefined,
+				{
+					useStamina: false,
+					template,
+					customName: actorName || undefined,
+				}
+			);
 			sheet = creature.sheet;
 			referenceNpcName = npc.name;
 		}
+
+		if (!actorName) actorName = 'unnamed enemy';
+		sheet = _.merge(sheet, { info: { name: actorName } });
+
+		let finalName: string = actorName;
 
 		if (customStatsString) {
 			const statOverrides = generateStatOverrides(customStatsString);
@@ -138,37 +139,38 @@ export class InitAddSubCommand implements Command {
 
 		let nameCount = 1;
 		let existingName = currentInit.actors.find(
-			actor => actor.name.toLowerCase() === actorName.toLowerCase()
+			actor => actor.name.toLowerCase() === finalName.toLowerCase()
 		);
-		const baseName = actorName;
+
 		if (existingName) {
 			while (
 				currentInit.actors.find(
-					actor => actor.name.toLowerCase() === actorName.toLowerCase()
+					actor => actor.name.toLowerCase() === finalName.toLowerCase()
 				)
 			) {
-				actorName = baseName + `-${nameCount++}`;
+				finalName = actorName + `-${nameCount++}`;
 			}
 		}
 		let finalInitiative = 0;
 		let rollResultMessage: EmbedBuilder;
+
 		if (initiativeValue) {
 			finalInitiative = initiativeValue;
 			rollResultMessage = new KoboldEmbed()
 				.setTitle(
-					Language.LL.commands.init.add.interactions.joinedEmbed.joinedTitle({
-						actorName,
+					L.en.commands.init.add.interactions.joinedEmbed.joinedTitle({
+						actorName: finalName,
 					})
 				)
 				.setDescription(
-					Language.LL.commands.init.add.interactions.joinedEmbed.description({
+					L.en.commands.init.add.interactions.joinedEmbed.description({
 						finalInitiative,
 					})
 				);
 		} else {
 			const rollBuilder = new RollBuilder({
-				title: Language.LL.commands.init.add.interactions.joinedEmbed.rolledTitle({
-					actorName,
+				title: L.en.commands.init.add.interactions.joinedEmbed.rolledTitle({
+					actorName: finalName,
 				}),
 				userSettings,
 				LL,
@@ -185,24 +187,11 @@ export class InitAddSubCommand implements Command {
 			rollResultMessage = rollBuilder.compileEmbed();
 		}
 
-		const targetMessageId = currentInit.roundMessageIds[currentInit.currentRound || 0];
-		if (targetMessageId) {
-			const targetMessage = await intr.channel.messages.fetch(targetMessageId);
-			rollResultMessage.addFields([
-				{
-					name: Language.LL.commands.init.add.interactions.joinedEmbed.roundField.name(),
-					value: Language.LL.commands.init.add.interactions.joinedEmbed.roundField.value({
-						currentRound: currentInit.currentRound,
-						url: targetMessage.url,
-					}),
-				},
-			]);
-		}
 		const newActor = await InitiativeActor.query().insertGraphAndFetch({
 			initiativeId: currentInit.id,
 			name: actorName,
 			userId: intr.user.id,
-			sheet: sheet,
+			sheet,
 			referenceNpcName,
 			hideStats,
 
@@ -214,10 +203,12 @@ export class InitAddSubCommand implements Command {
 			},
 		});
 
+		const finalActorGroups = currentInit.actorGroups;
+		if (newActor.actorGroup) finalActorGroups.push(newActor.actorGroup);
 		const initBuilder = new InitiativeBuilder({
 			initiative: currentInit,
 			actors: currentInit.actors.concat(newActor),
-			groups: currentInit.actorGroups.concat(newActor.actorGroup),
+			groups: finalActorGroups,
 			LL,
 		});
 		await InitiativeUtils.sendNewRoundMessage(intr, initBuilder);

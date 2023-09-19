@@ -15,16 +15,14 @@ export class ThreadUtils {
 	public static async archive(
 		thread: ThreadChannel,
 		archived: boolean = true
-	): Promise<ThreadChannel> {
+	): Promise<ThreadChannel | undefined> {
 		try {
 			return await thread.setArchived(archived);
 		} catch (error) {
-			if (
-				error instanceof DiscordAPIError &&
-				typeof error.code == 'number' &&
-				IGNORED_ERRORS.includes(error.code)
-			) {
-				return;
+			if (error instanceof DiscordAPIError) {
+				if (typeof error.code == 'number' && IGNORED_ERRORS.includes(error.code)) {
+					return;
+				}
 			} else {
 				throw error;
 			}
@@ -34,7 +32,7 @@ export class ThreadUtils {
 	public static async lock(
 		thread: ThreadChannel,
 		locked: boolean = true
-	): Promise<ThreadChannel> {
+	): Promise<ThreadChannel | undefined> {
 		try {
 			return await thread.setLocked(locked);
 		} catch (error) {

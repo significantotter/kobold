@@ -3,93 +3,93 @@ import {
 	ApplicationCommandOptionType,
 	ChannelType,
 } from 'discord.js';
-import { Language } from '../../../models/enum-helpers/index.js';
+import L from '../../../i18n/i18n-node.js';
 
 export class GameplayOptions {
 	public static readonly GAMEPLAY_SET_OPTION: APIApplicationCommandBasicOption = {
-		name: Language.LL.commandOptions.gameplaySetOption.name(),
-		description: Language.LL.commandOptions.gameplaySetOption.description(),
+		name: L.en.commandOptions.gameplaySetOption.name(),
+		description: L.en.commandOptions.gameplaySetOption.description(),
 		required: true,
 		type: ApplicationCommandOptionType.String,
 		choices: [
 			{
-				name: Language.LL.commandOptions.gameplaySetOption.choices.hp.name(),
-				value: Language.LL.commandOptions.gameplaySetOption.choices.hp.value(),
+				name: L.en.commandOptions.gameplaySetOption.choices.hp.name(),
+				value: L.en.commandOptions.gameplaySetOption.choices.hp.value(),
 			},
 			{
-				name: Language.LL.commandOptions.gameplaySetOption.choices.tempHp.name(),
-				value: Language.LL.commandOptions.gameplaySetOption.choices.tempHp.value(),
+				name: L.en.commandOptions.gameplaySetOption.choices.tempHp.name(),
+				value: L.en.commandOptions.gameplaySetOption.choices.tempHp.value(),
 			},
 			{
-				name: Language.LL.commandOptions.gameplaySetOption.choices.stamina.name(),
-				value: Language.LL.commandOptions.gameplaySetOption.choices.stamina.value(),
+				name: L.en.commandOptions.gameplaySetOption.choices.stamina.name(),
+				value: L.en.commandOptions.gameplaySetOption.choices.stamina.value(),
 			},
 			{
-				name: Language.LL.commandOptions.gameplaySetOption.choices.resolve.name(),
-				value: Language.LL.commandOptions.gameplaySetOption.choices.resolve.value(),
+				name: L.en.commandOptions.gameplaySetOption.choices.resolve.name(),
+				value: L.en.commandOptions.gameplaySetOption.choices.resolve.value(),
 			},
 			{
-				name: Language.LL.commandOptions.gameplaySetOption.choices.heroPoints.name(),
-				value: Language.LL.commandOptions.gameplaySetOption.choices.heroPoints.value(),
+				name: L.en.commandOptions.gameplaySetOption.choices.heroPoints.name(),
+				value: L.en.commandOptions.gameplaySetOption.choices.heroPoints.value(),
 			},
 			{
-				name: Language.LL.commandOptions.gameplaySetOption.choices.focusPoints.name(),
-				value: Language.LL.commandOptions.gameplaySetOption.choices.focusPoints.value(),
+				name: L.en.commandOptions.gameplaySetOption.choices.focusPoints.name(),
+				value: L.en.commandOptions.gameplaySetOption.choices.focusPoints.value(),
 			},
 		],
 	};
 	public static readonly GAMEPLAY_DAMAGE_AMOUNT: APIApplicationCommandBasicOption = {
-		name: Language.LL.commandOptions.gameplayDamageAmount.name(),
-		description: Language.LL.commandOptions.gameplayDamageAmount.description(),
+		name: L.en.commandOptions.gameplayDamageAmount.name(),
+		description: L.en.commandOptions.gameplayDamageAmount.description(),
 		required: true,
 		autocomplete: false,
 		type: ApplicationCommandOptionType.Number,
 	};
 	public static readonly GAMEPLAY_DAMAGE_TYPE: APIApplicationCommandBasicOption = {
-		name: Language.LL.commandOptions.gameplayDamageType.name(),
-		description: Language.LL.commandOptions.gameplayDamageType.description(),
+		name: L.en.commandOptions.gameplayDamageType.name(),
+		description: L.en.commandOptions.gameplayDamageType.description(),
 		required: false,
 		autocomplete: false,
 		type: ApplicationCommandOptionType.String,
 	};
 	public static readonly GAMEPLAY_SET_VALUE: APIApplicationCommandBasicOption = {
-		name: Language.LL.commandOptions.gameplaySetValue.name(),
-		description: Language.LL.commandOptions.gameplaySetValue.description(),
+		name: L.en.commandOptions.gameplaySetValue.name(),
+		description: L.en.commandOptions.gameplaySetValue.description(),
 		required: true,
 		autocomplete: false,
 		type: ApplicationCommandOptionType.String,
 	};
 	public static readonly GAMEPLAY_TARGET_CHARACTER: APIApplicationCommandBasicOption = {
-		name: Language.LL.commandOptions.gameplayTargetCharacter.name(),
-		description: Language.LL.commandOptions.gameplayTargetCharacter.description(),
+		name: L.en.commandOptions.gameplayTargetCharacter.name(),
+		description: L.en.commandOptions.gameplayTargetCharacter.description(),
 		required: false,
 		autocomplete: true,
 		type: ApplicationCommandOptionType.String,
 	};
 	public static readonly GAMEPLAY_TARGET_CHANNEL: APIApplicationCommandBasicOption = {
-		name: Language.LL.commandOptions.gameplayTargetChannel.name(),
-		description: Language.LL.commandOptions.gameplayTargetChannel.description(),
+		name: L.en.commandOptions.gameplayTargetChannel.name(),
+		description: L.en.commandOptions.gameplayTargetChannel.description(),
 		required: false,
 		type: ApplicationCommandOptionType.Channel,
 		channel_types: [ChannelType.GuildText],
 	};
 	public static readonly GAMEPLAY_TRACKER_MODE: APIApplicationCommandBasicOption = {
-		name: Language.LL.commandOptions.gameplayTrackerMode.name(),
-		description: Language.LL.commandOptions.gameplayTrackerMode.description(),
+		name: L.en.commandOptions.gameplayTrackerMode.name(),
+		description: L.en.commandOptions.gameplayTrackerMode.description(),
 		required: false,
 		type: ApplicationCommandOptionType.String,
 		choices: [
 			{
-				name: Language.LL.commandOptions.gameplayTrackerMode.choices.countersOnly.name(),
-				value: Language.LL.commandOptions.gameplayTrackerMode.choices.countersOnly.value(),
+				name: L.en.commandOptions.gameplayTrackerMode.choices.countersOnly.name(),
+				value: L.en.commandOptions.gameplayTrackerMode.choices.countersOnly.value(),
 			},
 			{
-				name: Language.LL.commandOptions.gameplayTrackerMode.choices.basicStats.name(),
-				value: Language.LL.commandOptions.gameplayTrackerMode.choices.basicStats.value(),
+				name: L.en.commandOptions.gameplayTrackerMode.choices.basicStats.name(),
+				value: L.en.commandOptions.gameplayTrackerMode.choices.basicStats.value(),
 			},
 			{
-				name: Language.LL.commandOptions.gameplayTrackerMode.choices.fullSheet.name(),
-				value: Language.LL.commandOptions.gameplayTrackerMode.choices.fullSheet.value(),
+				name: L.en.commandOptions.gameplayTrackerMode.choices.fullSheet.name(),
+				value: L.en.commandOptions.gameplayTrackerMode.choices.fullSheet.value(),
 			},
 		],
 	};

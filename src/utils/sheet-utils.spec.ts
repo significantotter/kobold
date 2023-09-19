@@ -1,9 +1,5 @@
 import _ from 'lodash';
-import type {
-	reducedSheetAdjustment,
-	typedSheetAdjustment,
-	untypedAdjustment,
-} from './sheet-utils.js';
+import type { typedSheetAdjustment, untypedAdjustment } from './sheet-utils.js';
 import { SheetUtils } from './sheet-utils.js';
 import { Character, Sheet } from '../services/kobold/models/index.js';
 
@@ -60,17 +56,29 @@ describe('SheetUtils', () => {
 	describe('applySheetAdjustmentToProperty', () => {
 		it('should return the value of the modifier if the operation is "="', () => {
 			expect(
-				SheetUtils.applySheetAdjustmentToProperty(1, { operation: '=', value: '2' })
+				SheetUtils.applySheetAdjustmentToProperty(1, {
+					property: 'foo',
+					operation: '=',
+					value: '2',
+				})
 			).toBe('2');
 		});
 		it('should return the sum of the property and the modifier if the operation is "+"', () => {
 			expect(
-				SheetUtils.applySheetAdjustmentToProperty(1, { operation: '+', value: '2' })
+				SheetUtils.applySheetAdjustmentToProperty(1, {
+					property: 'foo',
+					operation: '+',
+					value: '2',
+				})
 			).toBe(3);
 		});
 		it('should return the difference of the property and the modifier if the operation is "-"', () => {
 			expect(
-				SheetUtils.applySheetAdjustmentToProperty(1, { operation: '-', value: '2' })
+				SheetUtils.applySheetAdjustmentToProperty(1, {
+					property: 'foo',
+					operation: '-',
+					value: '2',
+				})
 			).toBe(-1);
 		});
 		it('should return the property if the operation is not "=" or "+" or "-"', () => {
@@ -283,7 +291,7 @@ describe('SheetUtils', () => {
 					value: '3',
 				})) as typedSheetAdjustment[]),
 			];
-			const sheet = SheetUtils.defaultSheet;
+			const sheet: Sheet = SheetUtils.defaultSheet;
 			const result = SheetUtils.spreadSheetAdjustmentGroups(sheetAdjustments, sheet);
 			expect(result).toEqual(expect.arrayContaining(expectedResult));
 			expect(expectedResult).toEqual(expect.arrayContaining(result));
@@ -482,25 +490,18 @@ describe('SheetUtils', () => {
 				overwriteSheetAdjustments,
 				modifySheetAdjustments
 			);
-			const resultSheet: Sheet = {
-				info: { traits: [], imageURL: 'https://foo.com/bar.png' },
-				general: {
-					senses: [],
-					languages: [],
-					perception: 1,
+			const resultSheet: Sheet = _.defaultsDeep(
+				{
+					info: { imageURL: 'https://foo.com/bar.png' },
+					general: {
+						perception: 1,
+					},
+					defenses: { ac: 20 },
+					saves: { reflex: 1 },
+					skills: { acrobatics: 4, stealth: 5, thievery: 2 },
 				},
-				abilities: {},
-				defenses: { resistances: [], immunities: [], weaknesses: [], ac: 20 },
-				offense: {},
-				castingStats: {},
-				saves: { reflex: 1 },
-				skills: { lores: [], acrobatics: 4, stealth: 5, thievery: 2 },
-				attacks: [],
-				rollMacros: [],
-				actions: [],
-				modifiers: [],
-				sourceData: {},
-			};
+				SheetUtils.defaultSheet
+			);
 			expect(results).toEqual(resultSheet);
 		});
 		it('Applies lores modifiers to a sheet', () => {
@@ -536,6 +537,7 @@ describe('SheetUtils', () => {
 				{
 					name: 'bite',
 					toHit: 1,
+					range: null,
 					traits: ['agile', 'finesse', 'reach', 'unarmed'],
 					actions: ['one'],
 					proficiency: 'expert',
@@ -545,6 +547,7 @@ describe('SheetUtils', () => {
 				{
 					name: 'claw',
 					toHit: 3,
+					range: null,
 					traits: ['agile', 'finesse', 'reach', 'unarmed'],
 					actions: ['one'],
 					proficiency: 'expert',
@@ -584,12 +587,15 @@ describe('SheetUtils', () => {
 		});
 		it('Applies weakness, resistance, and immunity modifiers to a sheet', () => {
 			const sheet: Sheet = _.cloneDeep(SheetUtils.defaultSheet);
-			sheet.defenses = {
-				resistances: [{ name: 'fire', amount: 5 }],
-				immunities: ['poison', 'bleed'],
-				weaknesses: [{ name: 'cold', amount: 10 }],
-				ac: 14,
-			};
+			sheet.defenses = _.defaultsDeep(
+				{
+					resistances: [{ name: 'fire', amount: 5 }],
+					immunities: ['poison', 'bleed'],
+					weaknesses: [{ name: 'cold', amount: 10 }],
+					ac: 14,
+				},
+				sheet.defenses
+			);
 			const overwriteSheetAdjustments: untypedAdjustment = {
 				'fire resistance': 2,
 				'cold weakness': 5,
@@ -619,10 +625,13 @@ describe('SheetUtils', () => {
 		});
 		it('Applies sense and language modifiers to a sheet', () => {
 			const sheet: Sheet = _.cloneDeep(SheetUtils.defaultSheet);
-			sheet.general = {
-				senses: ['low light vision', 'tremorsense'],
-				languages: ['common'],
-			};
+			sheet.general = _.defaultsDeep(
+				{
+					senses: ['low light vision', 'tremorsense'],
+					languages: ['common'],
+				},
+				sheet.general
+			);
 			const overwriteSheetAdjustments: untypedAdjustment = {
 				'darkvision sense': 2,
 				'low light vision sense': 'no',

@@ -12,23 +12,23 @@ export interface InitiativeActorGroup {
 	/**
 	 * The id of the initiative actor.
 	 */
-	id?: number;
+	id: number;
 	/**
 	 * The id of the initiative the actor belongs to.
 	 */
-	initiativeId?: number;
+	initiativeId: number;
 	/**
 	 * The discord id of the user who controls the group
 	 */
-	userId?: string;
+	userId: string;
 	/**
 	 * the name of the group of actors
 	 */
-	name?: string;
+	name: string;
 	/**
 	 * The initiative result value for the group
 	 */
-	initiativeResult?: number;
+	initiativeResult: number;
 	/**
 	 * When the initiative was first started
 	 */

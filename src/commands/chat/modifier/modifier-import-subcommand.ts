@@ -7,16 +7,15 @@ import {
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 
-import { EventData } from '../../../models/internal-models.js';
-import { Character } from '../../../services/kobold/models/index.js';
+import { Character, Modifier } from '../../../services/kobold/models/index.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { Language } from '../../../models/enum-helpers/index.js';
+import L from '../../../i18n/i18n-node.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
 import { compileExpression } from 'filtrex';
 import { PasteBin } from '../../../services/pastebin/index.js';
-import characterSchema from './../../../services/kobold/models/character/character.schema.json' assert { type: 'json' };
+import modifierSchema from './../../../services/kobold/lib/shared-schemas/modifier.schema.json' assert { type: 'json' };
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 import _ from 'lodash';
@@ -30,11 +29,11 @@ const ajv = new Ajv.default({ allowUnionTypes: true });
 addFormats.default(ajv);
 
 export class ModifierImportSubCommand implements Command {
-	public names = [Language.LL.commands.modifier.import.name()];
+	public names = [L.en.commands.modifier.import.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.modifier.import.name(),
-		description: Language.LL.commands.modifier.import.description(),
+		name: L.en.commands.modifier.import.name(),
+		description: L.en.commands.modifier.import.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -44,7 +43,6 @@ export class ModifierImportSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
 		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
@@ -56,10 +54,12 @@ export class ModifierImportSubCommand implements Command {
 			return;
 		}
 		let importMode = intr.options
-			.getString(ModifierOptions.MODIFIER_IMPORT_MODE.name)
+			.getString(ModifierOptions.MODIFIER_IMPORT_MODE.name, true)
 			.trim()
 			.toLowerCase();
-		let importUrl = intr.options.getString(ModifierOptions.MODIFIER_IMPORT_URL.name).trim();
+		let importUrl = intr.options
+			.getString(ModifierOptions.MODIFIER_IMPORT_URL.name, true)
+			.trim();
 
 		const importId = CharacterUtils.parsePastebinIdFromText(importUrl);
 
@@ -68,7 +68,7 @@ export class ModifierImportSubCommand implements Command {
 			return;
 		}
 
-		let newModifiers = [];
+		let newModifiers: Modifier[] = [];
 
 		let invalidJson = false;
 		try {
@@ -78,13 +78,15 @@ export class ModifierImportSubCommand implements Command {
 			} else {
 				newModifiers = JSON.parse(modifiersText);
 			}
-			const valid = ajv.validate(characterSchema.properties.modifiers, newModifiers);
+			const valid = ajv.validate(modifierSchema, newModifiers);
 			if (!valid) {
 				invalidJson = true;
 			} else {
 				for (const modifier of newModifiers) {
-					// throws an error on an invalid expression
-					compileExpression(modifier.targetTags);
+					if (modifier.modifierType === 'roll') {
+						// throws an error on an invalid expression
+						compileExpression(modifier.targetTags ?? '');
+					}
 				}
 			}
 		} catch (err) {
@@ -102,23 +104,18 @@ export class ModifierImportSubCommand implements Command {
 
 		let finalModifiers: Character['modifiers'] = [];
 
-		if (
-			importMode ===
-			Language.LL.commandOptions.modifierImportMode.choices.fullyReplace.value()
-		) {
+		if (importMode === L.en.commandOptions.modifierImportMode.choices.fullyReplace.value()) {
 			finalModifiers = replaceAll(currentModifiers, newModifiers);
 		} else if (
-			importMode === Language.LL.commandOptions.modifierImportMode.choices.overwrite.value()
+			importMode === L.en.commandOptions.modifierImportMode.choices.overwrite.value()
 		) {
 			finalModifiers = overwriteOnConflict(currentModifiers, newModifiers);
 		} else if (
-			importMode ===
-			Language.LL.commandOptions.modifierImportMode.choices.renameOnConflict.value()
+			importMode === L.en.commandOptions.modifierImportMode.choices.renameOnConflict.value()
 		) {
 			finalModifiers = renameOnConflict(currentModifiers, newModifiers);
 		} else if (
-			importMode ===
-			Language.LL.commandOptions.modifierImportMode.choices.ignoreOnConflict.value()
+			importMode === L.en.commandOptions.modifierImportMode.choices.ignoreOnConflict.value()
 		) {
 			finalModifiers = ignoreOnConflict(currentModifiers, newModifiers);
 		} else {

@@ -10,7 +10,6 @@ import {
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 
-import { EventData } from '../../../models/internal-models.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { InitiativeUtils, InitiativeBuilder } from '../../../utils/initiative-utils.js';
@@ -18,20 +17,26 @@ import { ChatArgs } from '../../../constants/chat-args.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { Language } from '../../../models/enum-helpers/index.js';
+import L from '../../../i18n/i18n-node.js';
 import { GameUtils } from '../../../utils/game-utils.js';
 import _ from 'lodash';
-import { Initiative } from '../../../services/kobold/models/index.js';
+import {
+	Character,
+	InitWithActorsAndGroups,
+	Initiative,
+	InitiativeActor,
+	InitiativeActorGroup,
+} from '../../../services/kobold/models/index.js';
 import { GameOptions } from './game-command-options.js';
 import { InitOptions } from '../init/init-command-options.js';
 import { SettingsUtils } from '../../../utils/settings-utils.js';
 
 export class GameInitSubCommand implements Command {
-	public names = [Language.LL.commands.game.init.name()];
+	public names = [L.en.commands.game.init.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.game.init.name(),
-		description: Language.LL.commands.game.init.description(),
+		name: L.en.commands.game.init.name(),
+		description: L.en.commands.game.init.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -42,19 +47,20 @@ export class GameInitSubCommand implements Command {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption
-	): Promise<ApplicationCommandOptionChoiceData[]> {
+	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === GameOptions.GAME_TARGET_CHARACTER.name) {
-			const targetCharacter = intr.options.getString(GameOptions.GAME_TARGET_CHARACTER.name);
+			const targetCharacter =
+				intr.options.getString(GameOptions.GAME_TARGET_CHARACTER.name) ?? '';
 
-			const activeGame = await GameUtils.getActiveGame(intr.user.id, intr.guildId);
+			const activeGame = await GameUtils.getActiveGame(intr.user.id, intr.guildId ?? '');
 			return GameUtils.autocompleteGameCharacter(targetCharacter, activeGame);
 		} else if (option.name === ChatArgs.SKILL_CHOICE_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(ChatArgs.SKILL_CHOICE_OPTION.name);
+			const match = intr.options.getString(ChatArgs.SKILL_CHOICE_OPTION.name) ?? '';
 
 			//get the active game
-			const game = await GameUtils.getActiveGame(intr.user.id, intr.guildId);
+			const game = await GameUtils.getActiveGame(intr.user.id, intr.guildId ?? '');
 			if (!game) {
 				//no choices if we don't have a character to match against
 				return [];
@@ -84,7 +90,6 @@ export class GameInitSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
 		const initiativeValue = intr.options.getNumber(InitOptions.INIT_VALUE_OPTION.name);
@@ -92,19 +97,13 @@ export class GameInitSubCommand implements Command {
 		const diceExpression = intr.options.getString(ChatArgs.ROLL_EXPRESSION_OPTION.name);
 		const targetCharacter = intr.options.getString(GameOptions.GAME_TARGET_CHARACTER.name);
 
-		let [currentInitResponse, activeGame, userSettings] = await Promise.all([
-			InitiativeUtils.getInitiativeForChannel(intr.channel, {
-				sendErrors: true,
-				LL,
-			}),
-			GameUtils.getActiveGame(intr.user.id, intr.guildId),
+		let [currentInit, activeGame, userSettings] = await Promise.all([
+			InitiativeUtils.getInitiativeForChannelOrNull(intr.channel),
+			GameUtils.getActiveGame(intr.user.id, intr.guildId ?? ''),
 			SettingsUtils.getSettingsForUser(intr),
 		]);
 		if (!activeGame) {
-			await InteractionUtils.send(
-				intr,
-				Language.LL.commands.game.interactions.activeGameNotFound()
-			);
+			await InteractionUtils.send(intr, L.en.commands.game.interactions.activeGameNotFound());
 			return;
 		}
 		if (activeGame.characters.length === 0) {
@@ -115,22 +114,25 @@ export class GameInitSubCommand implements Command {
 			return;
 		}
 
-		let currentInit = currentInitResponse.init;
-		if (currentInitResponse.errorMessage) {
-			try {
-				currentInit = await Initiative.query()
-					.withGraphFetched('[actors, actorGroups]')
-					.insertAndFetch({
-						gmUserId: intr.user.id,
-						channelId: intr.channel.id,
-						roundMessageIds: [],
-					});
-			} catch (err) {
-				await InteractionUtils.send(intr, LL.commands.init.start.interactions.otherError());
+		const embeds: KoboldEmbed[] = [];
+
+		if (!currentInit) {
+			if (!intr.channel || !intr.channel.id) {
+				await InteractionUtils.send(
+					intr,
+					LL.commands.init.start.interactions.notServerChannelError()
+				);
 				return;
 			}
+			currentInit = (await Initiative.query()
+				.insertAndFetch({
+					gmUserId: intr.user.id,
+					channelId: intr.channel.id,
+					currentTurnGroupId: null,
+					currentRound: 0,
+				} as Initiative)
+				.first()) as InitWithActorsAndGroups;
 		}
-		const embeds: KoboldEmbed[] = [];
 
 		const initBuilder = new InitiativeBuilder({
 			initiative: currentInit,

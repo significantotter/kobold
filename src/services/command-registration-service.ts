@@ -38,7 +38,7 @@ export class CommandRegistrationService {
 			commands.find(
 				command =>
 					command.metadata.name === existingCommand.name &&
-					!command.restrictedGuilds.includes(existingCommand.guild_id)
+					!(command.restrictedGuilds ?? []).includes(existingCommand.guild_id ?? '')
 			)
 		);
 

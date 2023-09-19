@@ -38,5 +38,6 @@
 			"format": "date-time",
 			"description": "When the character was last updated"
 		}
-	}
+	},
+	"required": ["id", "data", "name", "referenceNpcName", "sourceFileName"]
 }

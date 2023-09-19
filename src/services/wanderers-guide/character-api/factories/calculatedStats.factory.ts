@@ -16,7 +16,7 @@ class CalculatedStatsFactoryClass extends Factory<
 > {}
 
 export const CalculatedStatsFactory = CalculatedStatsFactoryClass.define(() => {
-	const calculatedStatsData: DeepPartial<WG.CharacterCalculatedStatsApiResponse> = {
+	return {
 		charID: faker.number.int({ max: 30 }),
 		maxHP: faker.number.int({ max: 30 }), //add 5% chance of null
 		maxStamina: faker.number.int({ max: 30 }),
@@ -30,6 +30,7 @@ export const CalculatedStatsFactory = CalculatedStatsFactoryClass.define(() => {
 		totalSaves: saves.map(save => NamedBonusFactory.build({ Name: save })),
 		totalAbilityScores: abilities.map(ability => NamedScoreFactory.build({ Name: ability })),
 		weapons: Array.from({ length: faker.number.int(10) }, () => AttackFactory.build()),
+		generalInfo: {},
 
 		perceptionProfMod: faker.number.int({ max: 30 }),
 		unarmedProfMod: faker.number.int({ max: 30 }),
@@ -53,6 +54,4 @@ export const CalculatedStatsFactory = CalculatedStatsFactoryClass.define(() => {
 		createdAt: faker.date.recent({ days: 30 }).toISOString(),
 		updatedAt: faker.date.recent({ days: 30 }).toISOString(),
 	};
-
-	return calculatedStatsData;
 });

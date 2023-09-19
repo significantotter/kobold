@@ -12,14 +12,14 @@ export interface GuildDefaultCharacter {
 	/**
 	 * The discord id of the guild for the default character.
 	 */
-	guildId?: string;
+	guildId: string;
 	/**
 	 * The internal id of the character.
 	 */
-	characterId?: number;
+	characterId: number;
 	/**
 	 * The discord id of the user who imported the character
 	 */
-	userId?: string;
+	userId: string;
 	[k: string]: any;
 }

@@ -12,19 +12,19 @@ export interface Character {
 	/**
 	 * The id of the character record.
 	 */
-	id?: number;
+	id: number;
 	/**
 	 * The name of the character.
 	 */
-	name?: string;
+	name: string;
 	/**
 	 * The external wanderer's guide character id.
 	 */
-	charId?: number;
+	charId: number;
 	/**
 	 * The discord id of the user who imported the character
 	 */
-	userId?: string;
+	userId: string;
 	/**
 	 * The discord id of message set to track this character's stats.
 	 */
@@ -40,110 +40,7 @@ export interface Character {
 	/**
 	 * The mode of the tracker message. Either counters_only', 'basic_stats', or 'full_sheet.
 	 */
-	trackerMode?: "counters_only" | "basic_stats" | "full_sheet";
-	/**
-	 * An array of roll macro objects that allow the substituting of saved roll expressions for simple keywords.
-	 */
-	rollMacros?: {
-		name?: string;
-		macro?: string;
-		[k: string]: any;
-	}[];
-	/**
-	 * An array of attribute objects that can be used to apply character values to dice expressions. These attributes are set internally and uneditable.
-	 */
-	attributes?: {
-		name?: string;
-		type?: string;
-		value?: number;
-		tags?: string[];
-		[k: string]: any;
-	}[];
-	/**
-	 * An array of toggleable modifier objects that apply dice expression values to rolls with certain tags.
-	 */
-	modifiers?: {
-		name?: string;
-		isActive?: boolean;
-		description?: string | null;
-		type?: string;
-		targetTags?: string | null;
-		value?: number | string | null;
-		modifierType?: "roll" | "sheet";
-		sheetAdjustments?:
-			| {
-					property?: string;
-					operation?: "+" | "-" | "=";
-					value?: string;
-					[k: string]: any;
-			  }[]
-			| null;
-		[k: string]: any;
-	}[];
-	/**
-	 * An array of default actions set up for the user. These allow the user to make certain roll operations as a single command.
-	 */
-	actions?: {
-		name?: string;
-		description?: string;
-		type?: string;
-		actionCost?: string | null;
-		baseLevel?: number | null;
-		autoHeighten?: boolean;
-		tags?: string[];
-		rolls?: (
-			| {
-					name?: string;
-					type?: "attack" | "skill-challenge";
-					targetDC?: string | null;
-					roll?: string | null;
-					allowRollModifiers?: boolean;
-					[k: string]: any;
-			  }
-			| {
-					name?: string;
-					type?: "damage";
-					damageType?: string | null;
-					healInsteadOfDamage?: boolean | null;
-					roll?: string | null;
-					allowRollModifiers?: boolean;
-					[k: string]: any;
-			  }
-			| {
-					name?: string;
-					type?: "advanced-damage";
-					damageType?: string | null;
-					healInsteadOfDamage?: boolean | null;
-					criticalSuccessRoll?: string | null;
-					criticalFailureRoll?: string | null;
-					successRoll?: string | null;
-					failureRoll?: string | null;
-					allowRollModifiers?: boolean;
-					[k: string]: any;
-			  }
-			| {
-					name?: string;
-					type?: "save";
-					saveRollType?: string | null;
-					saveTargetDC?: string | null;
-					allowRollModifiers?: boolean;
-					[k: string]: any;
-			  }
-			| {
-					name?: string;
-					type?: "text";
-					defaultText?: string | null;
-					criticalSuccessText?: string | null;
-					criticalFailureText?: string | null;
-					successText?: string | null;
-					failureText?: string | null;
-					allowRollModifiers?: boolean;
-					extraTags?: string[];
-					[k: string]: any;
-			  }
-		)[];
-		[k: string]: any;
-	}[];
+	trackerMode: "counters_only" | "basic_stats" | "full_sheet";
 	/**
 	 * The general character data from the PathBuilder json export
 	 */
@@ -154,12 +51,12 @@ export interface Character {
 	 * The general character data from the Wanderer's guide API /character endpoint
 	 */
 	characterData?: {
-		id?: number;
-		userID?: number;
+		id: number;
+		userID: number;
 		buildID?: null | number;
-		name?: string;
-		level?: number;
-		experience?: number;
+		name: string;
+		level: number;
+		experience: number;
 		currentHealth?: null | number;
 		tempHealth?: null | number;
 		heroPoints?: null | number;
@@ -169,12 +66,12 @@ export interface Character {
 		backgroundID?: null | number;
 		classID?: null | number;
 		classID_2?: null | number;
-		inventoryID?: number;
-		notes?: any;
-		rollHistoryJSON?: any;
-		details?: any;
-		customCode?: any;
-		infoJSON?: null | {
+		inventoryID: number;
+		notes: any;
+		rollHistoryJSON: any;
+		details: any;
+		customCode: any;
+		infoJSON: null | {
 			imageURL?: string;
 			pronouns?: any;
 			[k: string]: any;
@@ -196,10 +93,10 @@ export interface Character {
 		variantStamina?: number;
 		variantAutoBonusProgression?: number;
 		variantGradualAbilityBoosts?: number;
-		enabledSources?: any;
-		enabledHomebrew?: any;
-		createdAt?: string;
-		updatedAt?: string;
+		enabledSources: any;
+		enabledHomebrew: any;
+		createdAt: string;
+		updatedAt: string;
 		[k: string]: any;
 	};
 	/**
@@ -213,22 +110,22 @@ export interface Character {
 		totalAC?: number | null;
 		totalPerception?: number | null;
 		totalSkills?: {
-			Name?: string;
-			Bonus?: string | number | null;
+			Name: string;
+			Bonus: string | number | null;
 			[k: string]: any;
 		}[];
 		totalSaves?: {
-			Name?: string;
-			Bonus?: string | number | null;
+			Name: string;
+			Bonus: string | number | null;
 			[k: string]: any;
 		}[];
 		totalAbilityScores?: {
-			Name?: string;
-			Score?: number | null;
+			Name: string;
+			Score: number | null;
 			[k: string]: any;
 		}[];
 		weapons?: {
-			Name?: string;
+			Name: string;
 			Bonus?: string | number | null;
 			Damage?: string | number | null;
 			[k: string]: any;
@@ -240,11 +137,11 @@ export interface Character {
 	/**
 	 * Whether this is the active character for the user's character based commands
 	 */
-	isActiveCharacter?: boolean;
+	isActiveCharacter: boolean;
 	/**
 	 * What source website this character was imported from.
 	 */
-	importSource?: string;
+	importSource: string;
 	/**
 	 * When the character was first imported
 	 */

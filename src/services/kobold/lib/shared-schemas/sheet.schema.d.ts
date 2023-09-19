@@ -12,505 +12,505 @@ export interface Sheet {
 	/**
 	 * The general character sheet formation.
 	 */
-	info?: {
+	info: {
 		/**
 		 * The character's name.
 		 */
-		name?: string;
+		name: string;
 		/**
 		 * The url to open the character.
 		 */
-		url?: string | null;
+		url: string | null;
 		/**
 		 * The character's description.
 		 */
-		description?: string | null;
+		description: string | null;
 		/**
 		 * The character's gender
 		 */
-		gender?: string | null;
+		gender: string | null;
 		/**
 		 * The character's age
 		 */
-		age?: number | null;
+		age: number | null;
 		/**
 		 * The character's alignment
 		 */
-		alignment?: string | null;
+		alignment: string | null;
 		/**
 		 * The character's deity
 		 */
-		deity?: string | null;
+		deity: string | null;
 		/**
 		 * The character's portrait image URL.
 		 */
-		imageURL?: string | null;
+		imageURL: string | null;
 		/**
 		 * The character's level.
 		 */
-		level?: number | null;
+		level: number | null;
 		/**
 		 * The character's size category.
 		 */
-		size?: string | null;
+		size: string | null;
 		/**
 		 * The character's class.
 		 */
-		class?: string | null;
+		class: string | null;
 		/**
 		 * The character's key ability.
 		 */
-		keyability?: string | null;
+		keyability: string | null;
 		/**
 		 * The character's ancestry.
 		 */
-		ancestry?: string | null;
+		ancestry: string | null;
 		/**
 		 * The character's heritage.
 		 */
-		heritage?: string | null;
+		heritage: string | null;
 		/**
 		 * The character's background.
 		 */
-		background?: string | null;
+		background: string | null;
 		/**
 		 * The character's traits.
 		 */
-		traits?: (string | null)[];
+		traits: (string | null)[];
 		/**
 		 * Whether the character follows alternate stamina rules.
 		 */
-		usesStamina?: boolean;
+		usesStamina: boolean;
 		[k: string]: any;
 	};
 	/**
 	 * The character's primary ability scores.
 	 */
-	abilities?: {
+	abilities: {
 		/**
 		 * The character's strength score.
 		 */
-		strength?: number | null;
+		strength: number | null;
 		/**
 		 * The character's dexterity score.
 		 */
-		dexterity?: number | null;
+		dexterity: number | null;
 		/**
 		 * The character's constitution score.
 		 */
-		constitution?: number | null;
+		constitution: number | null;
 		/**
 		 * The character's intelligence score.
 		 */
-		intelligence?: number | null;
+		intelligence: number | null;
 		/**
 		 * The character's wisdom score.
 		 */
-		wisdom?: number | null;
+		wisdom: number | null;
 		/**
 		 * The character's charisma score.
 		 */
-		charisma?: number | null;
+		charisma: number | null;
 		[k: string]: any;
 	};
 	/**
 	 * The general attributes for the character.
 	 */
-	general?: {
+	general: {
 		/**
 		 * The character's current hero points.
 		 */
-		currentHeroPoints?: number | null;
+		currentHeroPoints: number | null;
 		/**
 		 * The character's land speed.
 		 */
-		speed?: number | null;
+		speed: number | null;
 		/**
 		 * The character's fly speed.
 		 */
-		flySpeed?: number | null;
+		flySpeed: number | null;
 		/**
 		 * The character's swim speed.
 		 */
-		swimSpeed?: number | null;
+		swimSpeed: number | null;
 		/**
 		 * The character's climb speed.
 		 */
-		climbSpeed?: number | null;
+		climbSpeed: number | null;
 		/**
 		 * The character's current focus points.
 		 */
-		currentFocusPoints?: number | null;
+		currentFocusPoints: number | null;
 		/**
 		 * The character's maximum focus points.
 		 */
-		focusPoints?: number | null;
+		focusPoints: number | null;
 		/**
 		 * The character's class DC.
 		 */
-		classDC?: number | null;
+		classDC: number | null;
 		/**
 		 * The character's class attack roll.
 		 */
-		classAttack?: number | null;
+		classAttack: number | null;
 		/**
 		 * The character's perception.
 		 */
-		perception?: number | null;
+		perception: number | null;
 		/**
 		 * The character's perception proficiency modifier.
 		 */
-		perceptionProfMod?: number | null;
+		perceptionProfMod: number | null;
 		/**
 		 * The character's spoken languages.
 		 */
-		languages?: (string | null)[];
+		languages: (string | null)[];
 		/**
 		 * The character's senses.
 		 */
-		senses?: (string | null)[];
+		senses: (string | null)[];
 		[k: string]: any;
 	};
 	/**
 	 * The character defensive attributes.
 	 */
-	defenses?: {
+	defenses: {
 		/**
 		 * The character's current hit points.
 		 */
-		currentHp?: number | null;
+		currentHp: number | null;
 		/**
 		 * The character's maximum hit points.
 		 */
-		maxHp?: number | null;
+		maxHp: number | null;
 		/**
 		 * The character's temporary hit points.
 		 */
-		tempHp?: number | null;
+		tempHp: number | null;
 		/**
 		 * The character's current resolve points.
 		 */
-		currentResolve?: number | null;
+		currentResolve: number | null;
 		/**
 		 * The character's maximum resolve points.
 		 */
-		maxResolve?: number | null;
+		maxResolve: number | null;
 		/**
 		 * The character's current stamina points.
 		 */
-		currentStamina?: number | null;
+		currentStamina: number | null;
 		/**
 		 * The character's maximum stamina points.
 		 */
-		maxStamina?: number | null;
+		maxStamina: number | null;
 		/**
 		 * The character's immunities.
 		 */
-		immunities?: (string | null)[];
+		immunities: string[];
 		/**
 		 * The character's resistances.
 		 */
-		resistances?: {
+		resistances: {
 			/**
 			 * the amount of resistance for this type of damage
 			 */
-			amount?: number | null;
+			amount: number;
 			/**
 			 * the damage type that's resisted
 			 */
-			type?: string | null;
+			type: string;
 			[k: string]: any;
 		}[];
 		/**
 		 * The character's weaknesses.
 		 */
-		weaknesses?: {
+		weaknesses: {
 			/**
 			 * the amount of weakness for this type of damage
 			 */
-			amount?: number | null;
+			amount: number;
 			/**
 			 * the damage type that of the weakness
 			 */
-			type?: string | null;
+			type: string;
 			[k: string]: any;
 		}[];
 		/**
 		 * The character's armor class
 		 */
-		ac?: number | null;
+		ac: number | null;
 		/**
 		 * The character's heavy armor proficiency modifier.
 		 */
-		heavyProfMod?: number | null;
+		heavyProfMod: number | null;
 		/**
 		 * The character's medium armor proficiency modifier.
 		 */
-		mediumProfMod?: number | null;
+		mediumProfMod: number | null;
 		/**
 		 * The character's light armor proficiency modifier.
 		 */
-		lightProfMod?: number | null;
+		lightProfMod: number | null;
 		/**
 		 * The character's unarmored proficiency modifier.
 		 */
-		unarmoredProfMod?: number | null;
+		unarmoredProfMod: number | null;
 		[k: string]: any;
 	};
 	/**
 	 * The character's offensive attributes.
 	 */
-	offense?: {
+	offense: {
 		/**
 		 * The character's martial weapon proficiency modifier.
 		 */
-		martialProfMod?: number | null;
+		martialProfMod: number | null;
 		/**
 		 * The character's simple weapon proficiency modifier.
 		 */
-		simpleProfMod?: number | null;
+		simpleProfMod: number | null;
 		/**
 		 * The character's unarmed weapon proficiency modifier.
 		 */
-		unarmedProfMod?: number | null;
+		unarmedProfMod: number | null;
 		/**
 		 * The character's advanced weapon proficiency modifier.
 		 */
-		advancedProfMod?: number | null;
+		advancedProfMod: number | null;
 		[k: string]: any;
 	};
 	/**
 	 * The character's casting stats.
 	 */
-	castingStats?: {
+	castingStats: {
 		/**
 		 * The character's arcane casting attack bonus.
 		 */
-		arcaneAttack?: number | null;
+		arcaneAttack: number | null;
 		/**
 		 * The character's arcane casting DC.
 		 */
-		arcaneDC?: number | null;
+		arcaneDC: number | null;
 		/**
 		 * The character's arcane casting proficiency modifier.
 		 */
-		arcaneProfMod?: number | null;
+		arcaneProfMod: number | null;
 		/**
 		 * The character's divine casting stat.
 		 */
-		divineAttack?: number | null;
+		divineAttack: number | null;
 		/**
 		 * The character's divine casting stat.
 		 */
-		divineDC?: number | null;
+		divineDC: number | null;
 		/**
 		 * The character's divine casting proficiency modifier.
 		 */
-		divineProfMod?: number | null;
+		divineProfMod: number | null;
 		/**
 		 * The character's occult casting stat.
 		 */
-		occultAttack?: number | null;
+		occultAttack: number | null;
 		/**
 		 * The character's occult casting stat.
 		 */
-		occultDC?: number | null;
+		occultDC: number | null;
 		/**
 		 * The character's occult casting proficiency modifier.
 		 */
-		occultProfMod?: number | null;
+		occultProfMod: number | null;
 		/**
 		 * The character's primal casting stat.
 		 */
-		primalAttack?: number | null;
+		primalAttack: number | null;
 		/**
 		 * The character's primal casting stat.
 		 */
-		primalDC?: number | null;
+		primalDC: number | null;
 		/**
 		 * The character's primal casting proficiency modifier.
 		 */
-		primalProfMod?: number | null;
+		primalProfMod: number | null;
 		[k: string]: any;
 	};
 	/**
 	 * The character's saving throw attributes.
 	 */
-	saves?: {
+	saves: {
 		/**
 		 * The character's fortitude save.
 		 */
-		fortitude?: number | null;
+		fortitude: number | null;
 		/**
 		 * The character's fortitude proficiency modifier.
 		 */
-		fortitudeProfMod?: number | null;
+		fortitudeProfMod: number | null;
 		/**
 		 * The character's reflex save.
 		 */
-		reflex?: number | null;
+		reflex: number | null;
 		/**
 		 * The character's reflex proficiency modifier.
 		 */
-		reflexProfMod?: number | null;
+		reflexProfMod: number | null;
 		/**
 		 * The character's will save.
 		 */
-		will?: number | null;
+		will: number | null;
 		/**
 		 * The character's will proficiency modifier.
 		 */
-		willProfMod?: number | null;
+		willProfMod: number | null;
 		[k: string]: any;
 	};
 	/**
 	 * The character's skill attributes.
 	 */
-	skills?: {
+	skills: {
 		/**
 		 * The character's acrobatics skill.
 		 */
-		acrobatics?: number | null;
+		acrobatics: number | null;
 		/**
 		 * The character's acrobatics proficiency modifier.
 		 */
-		acrobaticsProfMod?: number | null;
+		acrobaticsProfMod: number | null;
 		/**
 		 * The character's arcana skill.
 		 */
-		arcana?: number | null;
+		arcana: number | null;
 		/**
 		 * The character's arcana proficiency modifier.
 		 */
-		arcanaProfMod?: number | null;
+		arcanaProfMod: number | null;
 		/**
 		 * The character's athletics skill.
 		 */
-		athletics?: number | null;
+		athletics: number | null;
 		/**
 		 * The character's athletics proficiency modifier.
 		 */
-		athleticsProfMod?: number | null;
+		athleticsProfMod: number | null;
 		/**
 		 * The character's crafting skill.
 		 */
-		crafting?: number | null;
+		crafting: number | null;
 		/**
 		 * The character's crafting proficiency modifier.
 		 */
-		craftingProfMod?: number | null;
+		craftingProfMod: number | null;
 		/**
 		 * The character's deception skill.
 		 */
-		deception?: number | null;
+		deception: number | null;
 		/**
 		 * The character's deception proficiency modifier.
 		 */
-		deceptionProfMod?: number | null;
+		deceptionProfMod: number | null;
 		/**
 		 * The character's diplomacy skill.
 		 */
-		diplomacy?: number | null;
+		diplomacy: number | null;
 		/**
 		 * The character's diplomacy proficiency modifier.
 		 */
-		diplomacyProfMod?: number | null;
+		diplomacyProfMod: number | null;
 		/**
 		 * The character's intimidation skill.
 		 */
-		intimidation?: number | null;
+		intimidation: number | null;
 		/**
 		 * The character's intimidation proficiency modifier.
 		 */
-		intimidationProfMod?: number | null;
+		intimidationProfMod: number | null;
 		/**
 		 * The character's medicine skill.
 		 */
-		medicine?: number | null;
+		medicine: number | null;
 		/**
 		 * The character's medicine proficiency modifier.
 		 */
-		medicineProfMod?: number | null;
+		medicineProfMod: number | null;
 		/**
 		 * The character's nature skill.
 		 */
-		nature?: number | null;
+		nature: number | null;
 		/**
 		 * The character's nature proficiency modifier.
 		 */
-		natureProfMod?: number | null;
+		natureProfMod: number | null;
 		/**
 		 * The character's occultism skill.
 		 */
-		occultism?: number | null;
+		occultism: number | null;
 		/**
 		 * The character's occultism proficiency modifier.
 		 */
-		occultismProfMod?: number | null;
+		occultismProfMod: number | null;
 		/**
 		 * The character's performance skill.
 		 */
-		performance?: number | null;
+		performance: number | null;
 		/**
 		 * The character's performance proficiency modifier.
 		 */
-		performanceProfMod?: number | null;
+		performanceProfMod: number | null;
 		/**
 		 * The character's religion skill.
 		 */
-		religion?: number | null;
+		religion: number | null;
 		/**
 		 * The character's religion proficiency modifier.
 		 */
-		religionProfMod?: number | null;
+		religionProfMod: number | null;
 		/**
 		 * The character's society skill.
 		 */
-		society?: number | null;
+		society: number | null;
 		/**
 		 * The character's society proficiency modifier.
 		 */
-		societyProfMod?: number | null;
+		societyProfMod: number | null;
 		/**
 		 * The character's stealth skill.
 		 */
-		stealth?: number | null;
+		stealth: number | null;
 		/**
 		 * The character's stealth proficiency modifier.
 		 */
-		stealthProfMod?: number | null;
+		stealthProfMod: number | null;
 		/**
 		 * The character's survival skill.
 		 */
-		survival?: number | null;
+		survival: number | null;
 		/**
 		 * The character's survival proficiency modifier.
 		 */
-		survivalProfMod?: number | null;
+		survivalProfMod: number | null;
 		/**
 		 * The character's thievery skill.
 		 */
-		thievery?: number | null;
+		thievery: number | null;
 		/**
 		 * The character's thievery proficiency modifier.
 		 */
-		thieveryProfMod?: number | null;
+		thieveryProfMod: number | null;
 		/**
 		 * The character's lore skills.
 		 */
-		lores?: {
+		lores: {
 			/**
 			 * The lore name.
 			 */
-			name?: string | null;
+			name: string;
 			/**
 			 * The lore bonus.
 			 */
-			bonus?: number | null;
+			bonus: number | null;
 			/**
 			 * The lore proficiencyModifer.
 			 */
-			profMod?: number | null;
+			profMod: number | null;
 			[k: string]: any;
 		}[];
 		[k: string]: any;
@@ -518,41 +518,41 @@ export interface Sheet {
 	/**
 	 * The character's attacks.
 	 */
-	attacks?: {
+	attacks: {
 		/**
 		 * The attack name.
 		 */
-		name?: string | null;
+		name: string;
 		/**
 		 * The attack toHit.
 		 */
-		toHit?: number | null;
+		toHit: number | null;
 		/**
 		 * The attack damage.
 		 */
-		damage?: {
+		damage: {
 			/**
 			 * The attack damage dice.
 			 */
-			dice?: string | null;
+			dice: string;
 			/**
 			 * The attack damage type.
 			 */
-			type?: string | null;
+			type: string | null;
 			[k: string]: any;
 		}[];
 		/**
 		 * The attack range.
 		 */
-		range?: string | null;
+		range: string | null;
 		/**
 		 * The attack traits.
 		 */
-		traits?: (string | null)[] | null;
+		traits: string[] | null;
 		/**
 		 * The attack notes.
 		 */
-		notes?: string | null;
+		notes: string | null;
 		[k: string]: any;
 	}[];
 	/**
@@ -564,92 +564,19 @@ export interface Sheet {
 	/**
 	 * An array of toggleable modifier objects that apply dice expression values to rolls with certain tags.
 	 */
-	modifiers?: {
-		name?: string;
-		isActive?: boolean;
-		description?: string | null;
-		type?: string;
-		targetTags?: string | null;
-		value?: number | string | null;
-		modifierType?: "roll" | "sheet";
-		sheetAdjustments?:
-			| {
-					property?: string;
-					operation?: "+" | "-" | "=";
-					value?: string;
-					[k: string]: any;
-			  }[]
-			| null;
-		[k: string]: any;
-	}[];
+	modifiers?: any[];
 	/**
 	 * An array of default actions set up for the user. These allow the user to make certain roll operations as a single command.
 	 */
 	actions?: {
-		name?: string | null;
-		description?: string | null;
-		type?: string | null;
-		actionCost?: string | null;
-		baseLevel?: number | null;
-		autoHeighten?: boolean;
-		tags?: (string | null)[];
-		rolls?: (
-			| {
-					name?: string | null;
-					type?: ("attack" | "skill-challenge") | null;
-					targetDC?: string | null;
-					roll?: string | null;
-					allowRollModifiers?: boolean;
-					[k: string]: any;
-			  }
-			| {
-					name?: string | null;
-					type?: "damage" | null;
-					roll?: string | null;
-					healInsteadOfDamage?: boolean | null;
-					allowRollModifiers?: boolean;
-					[k: string]: any;
-			  }
-			| {
-					name?: string | null;
-					type?: "advanced-damage" | null;
-					criticalSuccessRoll?: string | null;
-					criticalFailureRoll?: string | null;
-					successRoll?: string | null;
-					failureRoll?: string | null;
-					healInsteadOfDamage?: boolean | null;
-					allowRollModifiers?: boolean;
-					[k: string]: any;
-			  }
-			| {
-					name?: string | null;
-					type?: "save" | null;
-					saveRollType?: string | null;
-					saveTargetDC?: string | null;
-					allowRollModifiers?: boolean;
-					[k: string]: any;
-			  }
-			| {
-					name?: string | null;
-					type?: "text" | null;
-					defaultText?: string | null;
-					criticalSuccessText?: string | null;
-					criticalFailureText?: string | null;
-					successText?: string | null;
-					failureText?: string | null;
-					allowRollModifiers?: boolean;
-					extraTags?: (string | null)[];
-					[k: string]: any;
-			  }
-		)[];
 		[k: string]: any;
 	}[];
 	/**
 	 * An array of roll macro objects that allow the substituting of saved roll expressions for simple keywords.
 	 */
 	rollMacros?: {
-		name?: string | null;
-		macro?: string | null;
+		name: string | null;
+		macro: string | null;
 		[k: string]: any;
 	}[];
 	[k: string]: any;

@@ -1,4 +1,4 @@
-import { ShardingManager, ActivityType } from 'discord.js';
+import { ShardingManager, ActivityType, Client } from 'discord.js';
 import { Request, Response, Router } from 'express';
 import router from 'express-promise-router';
 
@@ -66,10 +66,18 @@ export class ShardsController implements Controller {
 		let reqBody: SetShardPresencesRequest = res.locals.input;
 
 		await this.shardManager.broadcastEval(
-			(client: CustomClient, context) => {
-				return client.setPresence(context.type, context.name, context.url);
+			(client: Client, context) => {
+				return client instanceof CustomClient
+					? client.setPresence(context.type as any, context.name, context.url)
+					: null;
 			},
-			{ context: { type: ActivityType[reqBody.type], name: reqBody.name, url: reqBody.url } }
+			{
+				context: {
+					type: ActivityType[Number(reqBody.type)],
+					name: reqBody.name,
+					url: reqBody.url,
+				},
+			}
 		);
 
 		res.sendStatus(200);

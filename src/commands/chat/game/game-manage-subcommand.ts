@@ -10,20 +10,20 @@ import {
 } from 'discord.js';
 
 import { GameOptions } from './game-command-options.js';
-import { EventData } from '../../../models/internal-models.js';
+
 import { Command, CommandDeferType } from '../../index.js';
-import { Language } from '../../../models/enum-helpers/index.js';
+import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Game } from '../../../services/kobold/models/index.js';
 import { InteractionUtils } from '../../../utils/interaction-utils.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
 
 export class GameManageSubCommand implements Command {
-	public names = [Language.LL.commands.game.manage.name()];
+	public names = [L.en.commands.game.manage.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.game.manage.name(),
-		description: Language.LL.commands.game.manage.description(),
+		name: L.en.commands.game.manage.name(),
+		description: L.en.commands.game.manage.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -33,17 +33,16 @@ export class GameManageSubCommand implements Command {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption
-	): Promise<ApplicationCommandOptionChoiceData[]> {
+	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === GameOptions.GAME_MANAGE_VALUE.name) {
-			const option = intr.options.getString(GameOptions.GAME_MANAGE_OPTION.name);
-			const value = intr.options
-				.getString(GameOptions.GAME_MANAGE_VALUE.name)
+			const option = intr.options.getString(GameOptions.GAME_MANAGE_OPTION.name) ?? '';
+			const value = (intr.options.getString(GameOptions.GAME_MANAGE_VALUE.name) ?? '')
 				.trim()
 				.toLocaleLowerCase();
 
 			let targetGames: Game[] = [];
-			if (option === Language.LL.commandOptions.gameManageOption.choices.kick.name()) {
+			if (option === L.en.commandOptions.gameManageOption.choices.kick.name()) {
 				targetGames = await Game.query()
 					.withGraphFetched('characters')
 					.where('guildId', intr.guildId)
@@ -66,22 +65,19 @@ export class GameManageSubCommand implements Command {
 				}
 
 				return options;
-			} else if (option === Language.LL.commandOptions.gameManageOption.choices.join.name()) {
-				targetGames = await Game.queryWhereUserLacksCharacter(intr.user.id, intr.guildId);
-			} else if (
-				option === Language.LL.commandOptions.gameManageOption.choices.setActive.name()
-			) {
+			} else if (option === L.en.commandOptions.gameManageOption.choices.join.name()) {
+				targetGames = await Game.queryWhereUserLacksCharacter(
+					intr.user.id,
+					intr.guildId ?? ''
+				);
+			} else if (option === L.en.commandOptions.gameManageOption.choices.setActive.name()) {
 				targetGames = await Game.query().where({
 					gmUserId: intr.user.id,
 					guildId: intr.guildId,
 				});
-			} else if (
-				option === Language.LL.commandOptions.gameManageOption.choices.leave.name()
-			) {
+			} else if (option === L.en.commandOptions.gameManageOption.choices.leave.name()) {
 				targetGames = await Game.queryWhereUserHasCharacter(intr.user.id, intr.guildId);
-			} else if (
-				option === Language.LL.commandOptions.gameManageOption.choices.delete.name()
-			) {
+			} else if (option === L.en.commandOptions.gameManageOption.choices.delete.name()) {
 				targetGames = await Game.query().where({
 					gmUserId: intr.user.id,
 					guildId: intr.guildId,
@@ -104,13 +100,12 @@ export class GameManageSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
-		const option = intr.options.getString(GameOptions.GAME_MANAGE_OPTION.name);
-		const value = intr.options.getString(GameOptions.GAME_MANAGE_VALUE.name);
+		const option = intr.options.getString(GameOptions.GAME_MANAGE_OPTION.name, true);
+		const value = intr.options.getString(GameOptions.GAME_MANAGE_VALUE.name, true);
 
-		if (option === Language.LL.commandOptions.gameManageOption.choices.create.name()) {
+		if (option === L.en.commandOptions.gameManageOption.choices.create.name()) {
 			// ensure it's not a duplicate name
 			const existingGame = await Game.query()
 				.where('guildId', 'ilike', intr.guildId)
@@ -159,9 +154,7 @@ export class GameManageSubCommand implements Command {
 				})
 			);
 			return;
-		} else if (
-			option === Language.LL.commandOptions.gameManageOption.choices.setActive.name()
-		) {
+		} else if (option === L.en.commandOptions.gameManageOption.choices.setActive.name()) {
 			// set target game to active
 			const updated = await Game.query()
 				.patch({ isActive: true })
@@ -190,7 +183,7 @@ export class GameManageSubCommand implements Command {
 				);
 			}
 			return;
-		} else if (option === Language.LL.commandOptions.gameManageOption.choices.delete.name()) {
+		} else if (option === L.en.commandOptions.gameManageOption.choices.delete.name()) {
 			const deletedRows = await Game.query().delete().where({
 				gmUserId: intr.user.id,
 				guildId: intr.guildId,
@@ -212,7 +205,7 @@ export class GameManageSubCommand implements Command {
 				);
 			}
 			return;
-		} else if (option === Language.LL.commandOptions.gameManageOption.choices.kick.name()) {
+		} else if (option === L.en.commandOptions.gameManageOption.choices.kick.name()) {
 			const [gameName, ...characterNameSections] = value.split(' - ');
 			//just in case a character name has ' - ' in it
 			const characterName = characterNameSections.join(' - ');
@@ -269,7 +262,7 @@ export class GameManageSubCommand implements Command {
 					LL.commands.game.manage.interactions.kickParseFailed()
 				);
 			}
-		} else if (option === Language.LL.commandOptions.gameManageOption.choices.join.name()) {
+		} else if (option === L.en.commandOptions.gameManageOption.choices.join.name()) {
 			const targetGames = await Game.query().where({
 				guildId: intr.guildId,
 				name: value,
@@ -314,7 +307,7 @@ export class GameManageSubCommand implements Command {
 				);
 			}
 			return;
-		} else if (option === Language.LL.commandOptions.gameManageOption.choices.leave.name()) {
+		} else if (option === L.en.commandOptions.gameManageOption.choices.leave.name()) {
 			const targetGames = await Game.query()
 				.where({
 					guildId: intr.guildId,

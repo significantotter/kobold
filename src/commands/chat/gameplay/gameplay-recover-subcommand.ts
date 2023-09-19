@@ -9,9 +9,8 @@ import {
 	CacheType,
 } from 'discord.js';
 
-import { EventData } from '../../../models/internal-models.js';
 import { Command, CommandDeferType } from '../../index.js';
-import { Language } from '../../../models/enum-helpers/index.js';
+import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { GameplayOptions } from './gameplay-command-options.js';
 import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
@@ -21,11 +20,11 @@ import { InitiativeActor } from '../../../services/kobold/models/index.js';
 import { GameUtils } from '../../../utils/game-utils.js';
 
 export class GameplayRecoverSubCommand implements Command {
-	public names = [Language.LL.commands.gameplay.recover.name()];
+	public names = [L.en.commands.gameplay.recover.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.gameplay.recover.name(),
-		description: Language.LL.commands.gameplay.recover.description(),
+		name: L.en.commands.gameplay.recover.name(),
+		description: L.en.commands.gameplay.recover.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -35,7 +34,7 @@ export class GameplayRecoverSubCommand implements Command {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption
-	): Promise<ApplicationCommandOptionChoiceData[]> {
+	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name) {
 			return await AutocompleteUtils.getAllTargetOptions(intr, option.value);
@@ -44,7 +43,6 @@ export class GameplayRecoverSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
 		const targetCharacter = intr.options.getString(

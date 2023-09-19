@@ -12,14 +12,14 @@ export interface ChannelDefaultCharacter {
 	/**
 	 * The discord id of the channel for the default character.
 	 */
-	channelId?: string;
+	channelId: string;
 	/**
 	 * The internal id of the character.
 	 */
-	characterId?: number;
+	characterId: number;
 	/**
 	 * The discord id of the user who imported the character
 	 */
-	userId?: string;
+	userId: string;
 	[k: string]: any;
 }

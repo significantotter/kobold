@@ -5,7 +5,10 @@ import { Config } from './../config/config.js';
 import Logs from './../config/lang/logs.json' assert { type: 'json' };
 
 export class Manager {
-	constructor(private shardManager: ShardingManager, private jobService: JobService) {}
+	constructor(
+		private shardManager: ShardingManager,
+		private jobService: JobService
+	) {}
 
 	public async start(): Promise<void> {
 		this.registerListeners();

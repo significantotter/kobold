@@ -70,38 +70,44 @@ export class StringUtils {
 		return removeMarkdown(input);
 	}
 
-	public static findClosestInObjectArray<T extends object>(
+	public static findClosestInObjectArray<T extends { [k: string]: any }>(
 		targetWord: string,
-		wordArray: T[],
-		propertyName
-	): T {
-		if (!wordArray || wordArray.length === 0) return undefined;
-		return wordArray.sort(
-			StringUtils.generateSorterByWordDistance(targetWord, word => word[propertyName])
+		objectArray: T[],
+		propertyName: string
+	): T | undefined {
+		if (!objectArray || objectArray.length === 0) return undefined;
+		return objectArray.sort(
+			StringUtils.generateSorterByWordDistance<T>(targetWord, obj =>
+				_.isString(obj[propertyName]) ? obj[propertyName] : null
+			)
 		)[0];
 	}
 
 	public static findBestValueByKeyMatch(
 		targetWord: string,
-		wordObject: { [key: string]: any }
+		wordObject: { [key: string]: unknown }
 	): any {
 		if (!wordObject) return undefined;
 		const word = this.findClosestWord(targetWord, Object.keys(wordObject));
+		if (!word) return undefined;
 		return wordObject[word];
 	}
 
-	public static findClosestWord(targetWord: string, wordArray: string[]): string {
+	public static findClosestWord(targetWord: string, wordArray: string[]): string | undefined {
 		if (!wordArray || wordArray.length === 0) return undefined;
 		return wordArray.sort(
-			StringUtils.generateSorterByWordDistance(targetWord, word => word)
+			StringUtils.generateSorterByWordDistance<string>(targetWord, word => word)
 		)[0];
 	}
 
-	public static generateSorterByWordDistance(
+	public static generateSorterByWordDistance<T>(
 		targetWord: string,
-		inputToStringFn: (input: any) => string
+		inputToStringFn: (input: T) => string
 	) {
-		return (a, b) => {
+		return (a: T | null, b: T | null) => {
+			if (a === null && b === null) return 0;
+			if (a === null) return 1;
+			if (b === null) return -1;
 			const aDistance = StringUtils.levenshteinDistance(targetWord, inputToStringFn(a));
 			const bDistance = StringUtils.levenshteinDistance(targetWord, inputToStringFn(b));
 			return aDistance - bDistance;

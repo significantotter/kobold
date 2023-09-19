@@ -32,6 +32,6 @@ describe('Initiative Actor', () => {
 		});
 		const fetchedActors = await InitiativeActor.query();
 		const insertedActor = fetchedActors.find(factory => factory.charId === builtActor.charId);
-		expect(insertedActor.charId).toBe(builtActor.charId);
+		expect(insertedActor?.charId).toBe(builtActor.charId);
 	});
 });

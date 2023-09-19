@@ -1,4 +1,4 @@
-import { Language } from '../models/enum-helpers/language.js';
+import L from '../i18n/i18n-node.js';
 import { CharacterFactory } from './../services/kobold/models/character/character.factory.js';
 import { Creature } from './creature.js';
 import { DiceUtils } from './dice-utils.js';
@@ -63,11 +63,11 @@ describe('RollBuilder', function () {
 		rollBuilder.addRoll({ rollExpression: 'd20+1', rollTitle: 'testRoll' });
 		rollBuilder.addRoll({ rollExpression: 'd4+1', rollTitle: 'testRoll2' });
 		const result = rollBuilder.compileEmbed();
-		const diceField1 = result.data.fields.find(field => field.name === 'testRoll');
-		const diceField2 = result.data.fields.find(field => field.name === 'testRoll2');
-		expect(diceField1.value).toContain('d20+1');
-		expect(diceField2.value).toContain('d4+1');
-		expect(result.data.title.toLowerCase()).toContain('testname');
+		const diceField1 = (result.data.fields ?? []).find(field => field.name === 'testRoll');
+		const diceField2 = (result.data.fields ?? []).find(field => field.name === 'testRoll2');
+		expect(diceField1?.value).toContain('d20+1');
+		expect(diceField2?.value).toContain('d4+1');
+		expect(String(result?.data?.title).toLowerCase()).toContain('testname');
 	});
 	test(`making a single roll puts the roll value in the description and ignores the title`, function () {
 		const rollBuilder = new RollBuilder({
@@ -77,8 +77,8 @@ describe('RollBuilder', function () {
 		rollBuilder.addRoll({ rollExpression: 'd20+1', rollTitle: 'testRoll' });
 		const result = rollBuilder.compileEmbed();
 		const diceField = (result.data?.fields || []).find(field => field.name === 'testRoll');
-		expect(result.data.title.toLowerCase()).toContain('testname');
-		expect(result.data.title.toLowerCase()).not.toContain('testRoll');
+		expect(String(result.data.title).toLowerCase()).toContain('testname');
+		expect(String(result.data.title).toLowerCase()).not.toContain('testRoll');
 		expect(result.data.description).toContain('d20+1');
 		expect(diceField).toBeUndefined();
 	});
@@ -89,7 +89,7 @@ describe('RollBuilder', function () {
 		});
 		rollBuilder.addRoll({ rollExpression: 'd6+1', rollTitle: 'testRoll' });
 		const result = rollBuilder.compileEmbed();
-		expect(result.data.title.toLowerCase()).toContain(fakeCharacter.name.toLowerCase());
+		expect(String(result.data.title).toLowerCase()).toContain(fakeCharacter.name.toLowerCase());
 	});
 	test(`allows a custom rollnote`, function () {
 		const rollBuilder = new RollBuilder({
@@ -97,7 +97,7 @@ describe('RollBuilder', function () {
 		});
 		rollBuilder.addRoll({ rollExpression: 'd6+1', rollTitle: 'testRoll' });
 		const result = rollBuilder.compileEmbed();
-		expect(result.data.footer.text).toBe('testing!\n\n');
+		expect(result.data?.footer?.text).toBe('testing!\n\n');
 	});
 	test(`allows a title that will overwrite any otherwise generated title`, function () {
 		const fakeCharacter = CharacterFactory.build();
@@ -108,9 +108,9 @@ describe('RollBuilder', function () {
 		});
 		rollBuilder.addRoll({ rollExpression: 'd6+1', rollTitle: 'testRoll' });
 		const result = rollBuilder.compileEmbed();
-		expect(result.data.title.toLowerCase()).not.toContain(fakeCharacter.name);
-		expect(result.data.title.toLowerCase()).not.toContain('some actor');
-		expect(result.data.title.toLowerCase()).toBe(`an entirely different title`);
+		expect(String(result.data.title).toLowerCase()).not.toContain(fakeCharacter.name);
+		expect(String(result.data.title).toLowerCase()).not.toContain('some actor');
+		expect(String(result.data.title).toLowerCase()).toBe(`an entirely different title`);
 	});
 	test('records errors if something causes a thrown error', function () {
 		const rollBuilder = new RollBuilder({});
@@ -121,9 +121,9 @@ describe('RollBuilder', function () {
 		rollBuilder.addRoll({ rollExpression: 'dd6++1', rollTitle: 'errorRoll' });
 		console.warn = temp;
 		const result = rollBuilder.compileEmbed();
-		const errorRollField = result.data.fields.find(field => field.name === 'errorRoll');
-		expect(errorRollField.value).toContain(
-			Language.LL.utils.dice.diceRollError({ rollExpression: 'dd6++1' })
+		const errorRollField = (result.data.fields ?? []).find(field => field.name === 'errorRoll');
+		expect(errorRollField?.value).toContain(
+			L.en.utils.dice.diceRollError({ rollExpression: 'dd6++1' })
 		);
 	});
 	test('records errors if the dice expression is not allowed', function () {
@@ -131,9 +131,9 @@ describe('RollBuilder', function () {
 		rollBuilder.addRoll({ rollExpression: 'd10', rollTitle: 'testRoll' });
 		rollBuilder.addRoll({ rollExpression: '500d6', rollTitle: 'errorRoll' });
 		const result = rollBuilder.compileEmbed();
-		const errorRollField = result.data.fields.find(field => field.name === 'errorRoll');
-		expect(errorRollField.value).toContain(
-			Language.LL.utils.dice
+		const errorRollField = (result.data.fields ?? []).find(field => field.name === 'errorRoll');
+		expect(errorRollField?.value).toContain(
+			L.en.utils.dice
 				.diceRollError({
 					rollExpression: '',
 				})

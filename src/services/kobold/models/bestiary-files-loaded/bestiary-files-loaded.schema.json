@@ -26,5 +26,6 @@
 			"format": "date-time",
 			"description": "When the character was last updated"
 		}
-	}
+	},
+	"required": ["id", "fileName", "fileHash"]
 }

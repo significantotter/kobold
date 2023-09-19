@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { Character } from './../services/kobold/models/character/character.model.js';
-import { Creature, roll } from './creature.js';
+import { Creature, roll, rollable } from './creature.js';
 import { StringUtils } from './string-utils.js';
 import { AutocompleteInteraction, CacheType, ChatInputCommandInteraction } from 'discord.js';
 
@@ -17,7 +17,10 @@ export class CharacterUtils {
 	 * @param matchTargets the targets of the match with property .Name
 	 * @returns the closest matchTarget to name
 	 */
-	public static getBestNameMatch<T extends NamedThing>(name: string, matchTargets: T[]): T {
+	public static getBestNameMatch<T extends NamedThing>(
+		name: string,
+		matchTargets: T[]
+	): T | null {
 		if (matchTargets.length === 0) return null;
 
 		let lowestMatchTarget = matchTargets[0];
@@ -172,7 +175,7 @@ export class CharacterUtils {
 	public static findPossibleAttackFromString(
 		targetCharacter: Character,
 		attackText: string
-	): roll[] {
+	): rollable[] {
 		const matchedAttack = [];
 
 		const creature = Creature.fromCharacter(targetCharacter);

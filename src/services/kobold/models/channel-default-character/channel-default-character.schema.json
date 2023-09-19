@@ -16,5 +16,6 @@
 			"type": "string",
 			"description": "The discord id of the user who imported the character"
 		}
-	}
+	},
+	"required": ["channelId", "characterId", "userId"]
 }

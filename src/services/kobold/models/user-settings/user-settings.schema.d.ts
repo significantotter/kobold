@@ -12,18 +12,18 @@ export interface UserSettings {
 	/**
 	 * The discord id of the user.
 	 */
-	userId?: string;
+	userId: string;
 	/**
 	 * When to notify the GM in initiative of the status of characters with hidden stats.
 	 */
-	initStatsNotification?: "never" | "every_turn" | "every_round" | "whenever_hidden";
+	initStatsNotification: "never" | "every_turn" | "every_round" | "whenever_hidden";
 	/**
 	 * Whether to roll in compact mode.
 	 */
-	rollCompactMode?: "compact" | "normal";
+	rollCompactMode: "compact" | "normal";
 	/**
 	 * How detailed to display inline rolls.
 	 */
-	inlineRollsDisplay?: "compact" | "detailed";
+	inlineRollsDisplay: "compact" | "detailed";
 	[k: string]: any;
 }

@@ -2,7 +2,6 @@ import { ButtonInteraction } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 
 import { Button, ButtonDeferType } from '../buttons/index.js';
-import { EventData } from '../models/internal-models.js';
 import { InteractionUtils } from '../utils/index.js';
 import { EventHandler } from './index.js';
 import { Config } from './../config/config.js';
@@ -63,14 +62,11 @@ export class ButtonHandler implements EventHandler {
 			return;
 		}
 
-		// TODO: Get data from database
-		let data = new EventData();
-
 		// Execute the button
-		await button.execute(intr, data);
+		await button.execute(intr);
 	}
 
-	private findButton(id: string): Button {
+	private findButton(id: string): Button | undefined {
 		return this.buttons.find(button => button.ids.includes(id));
 	}
 }

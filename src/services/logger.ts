@@ -54,6 +54,7 @@ export class Logger {
 				resText = await obj.text();
 			} catch {
 				// Ignore
+				resText = '';
 			}
 			logger
 				.child({

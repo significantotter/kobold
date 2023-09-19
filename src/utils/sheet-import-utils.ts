@@ -1,10 +1,13 @@
 import _ from 'lodash';
-import { Sheet } from '../services/kobold/models/index.js';
+import { Lore, Sheet } from '../services/kobold/models/index.js';
 import { PathBuilder } from '../services/pathbuilder/pathbuilder.js';
 import { CreatureFluff, CreatureStatBlock } from '../services/pf2etools/pf2etools-types.js';
 import { WG } from '../services/wanderers-guide/wanderers-guide.js';
 import { DiceUtils } from './dice-utils.js';
 import { KoboldError } from './KoboldError.js';
+import { SheetUtils } from './sheet-utils.js';
+import { PartialDeep } from 'type-fest';
+import { Abilities } from '../services/pf2etools/models/Abilities.js';
 
 // I also add the key, and compare values in lower case to the options
 const statOptions: {
@@ -152,7 +155,7 @@ export function convertBestiaryCreatureToSheet(
 	let hpAdjustment = 0;
 
 	if (challengeAdjustment > 0) {
-		if (bestiaryEntry.level <= 1) {
+		if (!bestiaryEntry.level || bestiaryEntry.level <= 1) {
 			hpAdjustment = 10;
 		} else if (bestiaryEntry.level <= 4) {
 			hpAdjustment = 15;
@@ -162,7 +165,7 @@ export function convertBestiaryCreatureToSheet(
 			hpAdjustment = 30;
 		}
 	} else if (challengeAdjustment < 0) {
-		if (bestiaryEntry.level <= 2) {
+		if (!bestiaryEntry.level || bestiaryEntry.level <= 2) {
 			hpAdjustment = -10;
 		} else if (bestiaryEntry.level <= 5) {
 			hpAdjustment = -15;
@@ -181,13 +184,14 @@ export function convertBestiaryCreatureToSheet(
 			trait
 		);
 	});
-	let focusPoints = 0;
+	let focusPoints: number | null = 0;
 	for (const castingType of bestiaryEntry?.spellcasting || []) {
 		if (castingType.fp) {
 			focusPoints += castingType.fp;
 		}
 		if (focusPoints > 3) focusPoints = 3;
 	}
+	if (focusPoints === 0) focusPoints = null;
 
 	let spellcastingTotals: {
 		arcaneAttack?: number;
@@ -249,7 +253,7 @@ export function convertBestiaryCreatureToSheet(
 			}
 		}
 	}
-	let skills: Sheet['skills'] = { lores: [] };
+	let skills: Sheet['skills'] = _.defaultsDeep({ lores: [] }, SheetUtils.defaultSheet.skills);
 	for (const skill in bestiaryEntry.skills) {
 		const splitSkill = skill.split(' ');
 		if (splitSkill.length > 1) {
@@ -290,7 +294,8 @@ export function convertBestiaryCreatureToSheet(
 			range: attack.range,
 			toHit: attack.attack + rollAdjustment,
 			damage: damageRolls,
-			traits: attack.traits,
+			traits: attack.traits ?? [],
+			notes: null,
 		});
 	}
 
@@ -300,7 +305,7 @@ export function convertBestiaryCreatureToSheet(
 				options?.customName ??
 				(options?.template ? `${_.capitalize(options.template)} ` : '') +
 					bestiaryEntry.name,
-			description: bestiaryEntry.description,
+			description: bestiaryEntry.description ?? null,
 			url: `https://pf2etools.com/bestiary.html#${bestiaryEntry.name.replaceAll(
 				' ',
 				'%20'
@@ -310,7 +315,7 @@ export function convertBestiaryCreatureToSheet(
 			alignment: null,
 			deity: null,
 			imageURL: fluffEntry?.images?.[0] ?? null,
-			level: bestiaryEntry.level + challengeAdjustment,
+			level: (bestiaryEntry.level ?? 0) + challengeAdjustment,
 			size: size?.[0] ?? 'medium',
 			class: null,
 			keyability: null,
@@ -321,16 +326,16 @@ export function convertBestiaryCreatureToSheet(
 			usesStamina: options.useStamina ?? false,
 		},
 		general: {
-			currentHeroPoints: 0,
-			speed: bestiaryEntry.speed?.walk,
-			flySpeed: bestiaryEntry.speed?.fly,
-			swimSpeed: bestiaryEntry.speed?.swim,
-			climbSpeed: bestiaryEntry.speed?.climb,
+			currentHeroPoints: null,
+			speed: bestiaryEntry.speed?.walk ?? null,
+			flySpeed: bestiaryEntry.speed?.fly ?? null,
+			swimSpeed: bestiaryEntry.speed?.swim ?? null,
+			climbSpeed: bestiaryEntry.speed?.climb ?? null,
 			currentFocusPoints: focusPoints,
 			focusPoints,
 			classDC: null,
 			classAttack: null,
-			perception: bestiaryEntry.perception?.std + rollAdjustment,
+			perception: (bestiaryEntry.perception?.std ?? 0) + rollAdjustment,
 			perceptionProfMod: null,
 			senses: (bestiaryEntry.senses || [])
 				.map(sense => sense?.name)
@@ -372,7 +377,7 @@ export function convertBestiaryCreatureToSheet(
 			maxResolve: 0,
 			currentStamina: 0,
 			maxStamina: 0,
-			immunities: bestiaryEntry.defenses?.immunities,
+			immunities: bestiaryEntry.defenses?.immunities ?? [],
 			resistances: (bestiaryEntry.defenses?.resistances || []).map(res => ({
 				type: res.name,
 				amount: res.amount,
@@ -381,7 +386,7 @@ export function convertBestiaryCreatureToSheet(
 				type: weak.name,
 				amount: weak.amount,
 			})),
-			ac: bestiaryEntry.defenses?.ac?.std + rollAdjustment,
+			ac: (bestiaryEntry.defenses?.ac?.std ?? 10) + rollAdjustment,
 			heavyProfMod: null,
 			mediumProfMod: null,
 			lightProfMod: null,
@@ -394,18 +399,26 @@ export function convertBestiaryCreatureToSheet(
 			advancedProfMod: null,
 		},
 		castingStats: {
+			arcaneAttack: null,
+			arcaneDC: null,
 			arcaneProfMod: null,
+			divineAttack: null,
+			divineDC: null,
 			divineProfMod: null,
+			occultAttack: null,
+			occultDC: null,
 			occultProfMod: null,
+			primalAttack: null,
+			primalDC: null,
 			primalProfMod: null,
 			...spellcastingTotals,
 		},
 		saves: {
-			fortitude: bestiaryEntry.defenses?.savingThrows?.fort?.std + rollAdjustment,
+			fortitude: (bestiaryEntry.defenses?.savingThrows?.fort?.std ?? 0) + rollAdjustment,
 			fortitudeProfMod: null,
-			reflex: bestiaryEntry.defenses?.savingThrows?.ref?.std + rollAdjustment,
+			reflex: (bestiaryEntry.defenses?.savingThrows?.ref?.std ?? 0) + rollAdjustment,
 			reflexProfMod: null,
-			will: bestiaryEntry.defenses?.savingThrows?.will?.std + rollAdjustment,
+			will: (bestiaryEntry.defenses?.savingThrows?.will?.std ?? 0) + rollAdjustment,
 			willProfMod: null,
 		},
 		skills: {
@@ -473,11 +486,12 @@ export function convertWanderersGuideCharToSheet(
 			// catch lores which are named "Foo Lore"
 			let loreSplit = skill.Name.split(' ');
 			if (loreSplit.length > 1) {
-				let lores = acc.lores;
+				if (!acc.lores) acc.lores = [];
+				let lores: Lore[] = acc.lores;
 				lores.push({
 					name: loreSplit[0].toLowerCase(),
-					bonus: skill.Bonus,
-					profMod: skill.ProficiencyMod,
+					bonus: skill.Bonus === null ? null : Number(skill.Bonus),
+					profMod: skill.ProficiencyMod === null ? null : Number(skill.ProficiencyMod),
 				});
 				return {
 					...acc,
@@ -490,15 +504,15 @@ export function convertWanderersGuideCharToSheet(
 				[skill.Name.toLowerCase() + 'ProfMod']: skill.ProficiencyMod,
 			};
 		},
-		{ lores: [] }
+		{ lores: [] } as Partial<Sheet['skills']>
 	);
-	let maxHp = calculatedStats.maxHP;
+	let maxHp = calculatedStats.maxHP ?? 0;
 
-	if (characterData.variantStamina === 1) {
+	if (characterData.variantStamina === 1 && calculatedStats.maxStamina !== null) {
+		const conMod = Math.floor((abilities.constitution ?? 10 - 10) / 2);
 		let classHp =
-			(calculatedStats.maxStamina - abilities.constitution * characterData.level) /
-			characterData.level;
-		let expectedNormalMaxHp = (classHp * 2 + abilities.constitution) * characterData.level;
+			(calculatedStats.maxStamina - conMod * characterData.level) / characterData.level;
+		let expectedNormalMaxHp = (classHp * 2 + conMod) * characterData.level;
 		let hpDiff = expectedNormalMaxHp - maxHp;
 		maxHp = classHp * characterData.level + hpDiff;
 	}
@@ -508,21 +522,21 @@ export function convertWanderersGuideCharToSheet(
 			url: `https://wanderersguide.app/profile/characters/${characterData.id}`,
 			name: characterData.name,
 			description: null,
-			gender: characterData?.infoJSON?.gender,
+			gender: characterData?.infoJSON?.gender ?? null,
 			age: isNaN(Number(characterData?.infoJSON?.age))
 				? null
 				: Number(characterData?.infoJSON?.age),
-			alignment: characterData?.infoJSON?.alignment,
-			deity: characterData?.infoJSON?.beliefs,
-			imageURL: characterData?.infoJSON?.imageURL,
+			alignment: characterData?.infoJSON?.alignment ?? null,
+			deity: characterData?.infoJSON?.beliefs ?? null,
+			imageURL: characterData?.infoJSON?.imageURL ?? null,
 			level: characterData.level,
-			size: calculatedStats.generalInfo?.size,
-			class: calculatedStats.generalInfo?.className,
+			size: calculatedStats.generalInfo?.size ?? null,
+			class: calculatedStats.generalInfo?.className ?? null,
 			keyability: null,
 			ancestry,
 			heritage,
-			background: calculatedStats.generalInfo?.backgroundName,
-			traits: calculatedStats.generalInfo?.traits,
+			background: calculatedStats.generalInfo?.backgroundName ?? null,
+			traits: calculatedStats.generalInfo?.traits ?? [],
 			usesStamina: characterData.variantStamina === 1,
 		},
 		general: {
@@ -534,9 +548,9 @@ export function convertWanderersGuideCharToSheet(
 			currentFocusPoints: null,
 			focusPoints: null,
 			classDC: calculatedStats.totalClassDC,
-			classAttack: calculatedStats.totalClassDC - 10,
+			classAttack: (calculatedStats.totalClassDC ?? 10) - 10,
 			perception: calculatedStats.totalPerception,
-			perceptionProfMod: calculatedStats.primalSpellProfMod,
+			perceptionProfMod: calculatedStats.primalSpellProfMod ?? null,
 			languages: [],
 			senses: [],
 		},
@@ -559,47 +573,58 @@ export function convertWanderersGuideCharToSheet(
 			unarmoredProfMod: null,
 		},
 		offense: {
-			martialProfMod: calculatedStats.martialWeaponProfMod,
-			simpleProfMod: calculatedStats.simpleWeaponProfMod,
-			unarmedProfMod: calculatedStats.unarmedProfMod,
-			advancedProfMod: calculatedStats.advancedWeaponProfMod,
+			martialProfMod: calculatedStats.martialWeaponProfMod ?? null,
+			simpleProfMod: calculatedStats.simpleWeaponProfMod ?? null,
+			unarmedProfMod: calculatedStats.unarmedProfMod ?? null,
+			advancedProfMod: calculatedStats.advancedWeaponProfMod ?? null,
 		},
 		castingStats: {
 			arcaneAttack: calculatedStats.arcaneSpellProfMod
-				? calculatedStats.arcaneSpellAttack
+				? calculatedStats.arcaneSpellAttack ?? 0
 				: null,
-			arcaneDC: calculatedStats.arcaneSpellProfMod ? calculatedStats.arcaneSpellDC : null,
-			arcaneProfMod: calculatedStats.arcaneSpellProfMod,
+			arcaneDC: calculatedStats.arcaneSpellProfMod
+				? calculatedStats.arcaneSpellDC ?? 10
+				: null,
+			arcaneProfMod: calculatedStats.arcaneSpellProfMod ?? null,
 			divineAttack: calculatedStats.divineSpellProfMod
-				? calculatedStats.divineSpellAttack
+				? calculatedStats.divineSpellAttack ?? 0
 				: null,
-			divineDC: calculatedStats.divineSpellProfMod ? calculatedStats.divineSpellDC : null,
-			divineProfMod: calculatedStats.divineSpellProfMod,
+			divineDC: calculatedStats.divineSpellProfMod
+				? calculatedStats.divineSpellDC ?? 10
+				: null,
+			divineProfMod: calculatedStats.divineSpellProfMod ?? null,
 			occultAttack: calculatedStats.occultSpellProfMod
-				? calculatedStats.occultSpellAttack
+				? calculatedStats.occultSpellAttack ?? 0
 				: null,
-			occultDC: calculatedStats.occultSpellProfMod ? calculatedStats.occultSpellDC : null,
-			occultProfMod: calculatedStats.occultSpellProfMod,
+			occultDC: calculatedStats.occultSpellProfMod
+				? calculatedStats.occultSpellDC ?? 10
+				: null,
+			occultProfMod: calculatedStats.occultSpellProfMod ?? null,
 			primalAttack: calculatedStats.primalSpellProfMod
-				? calculatedStats.primalSpellAttack
+				? calculatedStats.primalSpellAttack ?? 0
 				: null,
-			primalDC: calculatedStats.primalSpellProfMod ? calculatedStats.primalSpellDC : null,
-			primalProfMod: calculatedStats.primalSpellProfMod,
+			primalDC: calculatedStats.primalSpellProfMod
+				? calculatedStats.primalSpellDC ?? 10
+				: null,
+			primalProfMod: calculatedStats.primalSpellProfMod ?? null,
 		},
 		saves: {
 			...saves,
 		},
-		skills: {
-			...skills,
-		},
+		skills: _.defaultsDeep(
+			{
+				...skills,
+			},
+			SheetUtils.defaultSheet.skills
+		),
 		attacks: calculatedStats.weapons.map(weapon => {
 			//remove the damage type from the damage string
-			const damageComponents = weapon.Damage.split(' ');
+			const damageComponents = (weapon.Damage ?? '').split(' ');
 			const damageType = damageComponents.pop();
 			return {
 				name: weapon.Name,
 				toHit: Number(String(weapon.Bonus)), //sometimes wg sends "+1" instead :/
-				damage: [{ dice: damageComponents.join(' '), type: damageType }],
+				damage: [{ dice: damageComponents.join(' '), type: damageType ?? null }],
 				range: null,
 				traits: [],
 				notes: null,
@@ -614,7 +639,7 @@ export function convertWanderersGuideCharToSheet(
 	return sheet;
 }
 
-export function generateStatOverrides(statString: string): Partial<Sheet> {
+export function generateStatOverrides(statString: string): PartialDeep<Sheet> {
 	function parseStatNumber(input: string): number {
 		if (!input) throw new KoboldError(`Failed to parse stat number for ${input}`);
 		let number;
@@ -629,19 +654,19 @@ export function generateStatOverrides(statString: string): Partial<Sheet> {
 	}
 
 	const statStringSplit = statString.split(';');
-	let statMap: { [k: string]: any } = {};
+	let statMap: { [k: string]: string } = {};
 	for (const stat of statStringSplit) {
 		const [key, value] = stat.split('=');
 		statMap[key] = value;
 	}
 
-	const partialSheet: Partial<Sheet> = {};
+	const partialSheet: PartialDeep<Sheet> = {};
 	for (const stat in statMap) {
 		// lores are a special case
 		if (stat.includes('lore')) {
 			const loreName = stat.replaceAll('lore', '').replaceAll(/[\_\- ]/g, '');
-			partialSheet.skills = partialSheet.skills ?? {};
-			partialSheet.skills.lores = partialSheet.skills.lores ?? [];
+			if (!partialSheet.skills) partialSheet.skills = {};
+			partialSheet.skills.lores = partialSheet.skills?.lores ?? ([] as Lore[]);
 			partialSheet.skills.lores.push({
 				name: loreName,
 				bonus: parseStatNumber(statMap[stat]),
@@ -721,9 +746,9 @@ export function convertPathBuilderToSheet(
 				return 'medium';
 		}
 	};
-	const pathBuilderProfToScore = function (prof: number) {
-		if (prof > 0) return prof + pathBuilderSheet.level;
-		else return 0;
+	const pathBuilderProfToScore = function (prof?: number) {
+		if (!prof || prof < 0) return 0;
+		return prof + pathBuilderSheet.level;
 	};
 	const scoreToBonus = function (score: number) {
 		return Math.floor((score - 10) / 2);
@@ -737,7 +762,7 @@ export function convertPathBuilderToSheet(
 				pathBuilderSheet.attributes.bonushpPerLevel) *
 				pathBuilderSheet.level;
 		maxStamina = (pathBuilderSheet.attributes.classhp / 2 + conMod) * pathBuilderSheet.level;
-		maxResolve = pathBuilderSheet.abilities[pathBuilderSheet.keyability];
+		maxResolve = pathBuilderSheet.abilities[pathBuilderSheet.keyability as keyof Abilities];
 	} else {
 		hp =
 			pathBuilderSheet.attributes.ancestryhp +
@@ -764,10 +789,13 @@ export function convertPathBuilderToSheet(
 			name: pathBuilderSheet.name,
 			description: null,
 			url: '',
-			gender: pathBuilderSheet.gender,
-			age: isNaN(pathBuilderSheet.age) ? null : Number(pathBuilderSheet.age),
-			alignment: pathBuilderSheet.alignment,
-			deity: pathBuilderSheet.deity,
+			gender: pathBuilderSheet.gender ?? null,
+			age:
+				!pathBuilderSheet.age && pathBuilderSheet.age !== 0
+					? null
+					: Number(pathBuilderSheet.age),
+			alignment: pathBuilderSheet.alignment ?? null,
+			deity: pathBuilderSheet.deity ?? null,
 			imageURL: '',
 			level: pathBuilderSheet.level,
 			size: sizeToString(pathBuilderSheet.size),
@@ -793,7 +821,7 @@ export function convertPathBuilderToSheet(
 				pathBuilderProfToScore(pathBuilderSheet.proficiencies.perception) +
 				scoreToBonus(pathBuilderSheet.abilities.wis) +
 				mods('perception'),
-			perceptionProfMod: pathBuilderSheet.proficiencies.perception,
+			perceptionProfMod: pathBuilderSheet.proficiencies.perception ?? 0,
 			languages: pathBuilderSheet.languages || [],
 			senses: [],
 		},
@@ -817,131 +845,131 @@ export function convertPathBuilderToSheet(
 			resistances: [],
 			weaknesses: [],
 			ac: pathBuilderSheet.acTotal.acTotal,
-			heavyProfMod: pathBuilderSheet.proficiencies.heavy,
-			mediumProfMod: pathBuilderSheet.proficiencies.medium,
-			lightProfMod: pathBuilderSheet.proficiencies.light,
-			unarmoredProfMod: pathBuilderSheet.proficiencies.unarmored,
+			heavyProfMod: pathBuilderSheet.proficiencies.heavy ?? 0,
+			mediumProfMod: pathBuilderSheet.proficiencies.medium ?? 0,
+			lightProfMod: pathBuilderSheet.proficiencies.light ?? 0,
+			unarmoredProfMod: pathBuilderSheet.proficiencies.unarmored ?? 0,
 		},
 		offense: {
-			martialProfMod: pathBuilderSheet.proficiencies.martial,
-			simpleProfMod: pathBuilderSheet.proficiencies.simple,
-			unarmedProfMod: pathBuilderSheet.proficiencies.unarmed,
-			advancedProfMod: pathBuilderSheet.proficiencies.advanced,
+			martialProfMod: pathBuilderSheet.proficiencies.martial ?? 0,
+			simpleProfMod: pathBuilderSheet.proficiencies.simple ?? 0,
+			unarmedProfMod: pathBuilderSheet.proficiencies.unarmed ?? 0,
+			advancedProfMod: pathBuilderSheet.proficiencies.advanced ?? 0,
 		},
 		castingStats: {
 			arcaneAttack: null,
 			arcaneDC: null,
-			arcaneProfMod: pathBuilderSheet.proficiencies.castingArcane,
+			arcaneProfMod: pathBuilderSheet.proficiencies.castingArcane ?? 0,
 			divineAttack: null,
 			divineDC: null,
-			divineProfMod: pathBuilderSheet.proficiencies.castingDivine,
+			divineProfMod: pathBuilderSheet.proficiencies.castingDivine ?? 0,
 			occultAttack: null,
 			occultDC: null,
-			occultProfMod: pathBuilderSheet.proficiencies.castingOccult,
+			occultProfMod: pathBuilderSheet.proficiencies.castingOccult ?? 0,
 			primalAttack: null,
 			primalDC: null,
-			primalProfMod: pathBuilderSheet.proficiencies.castingPrimal,
+			primalProfMod: pathBuilderSheet.proficiencies.castingPrimal ?? 0,
 		},
 		saves: {
 			fortitude:
 				pathBuilderProfToScore(pathBuilderSheet.proficiencies.fortitude) +
 				scoreToBonus(pathBuilderSheet.abilities.con) +
 				mods('fortitude'),
-			fortitudeProfMod: pathBuilderSheet.proficiencies.fortitude,
+			fortitudeProfMod: pathBuilderSheet.proficiencies.fortitude ?? 0,
 			reflex:
 				pathBuilderProfToScore(pathBuilderSheet.proficiencies.reflex) +
 				scoreToBonus(pathBuilderSheet.abilities.dex) +
 				mods('reflex'),
-			reflexProfMod: pathBuilderSheet.proficiencies.reflex,
+			reflexProfMod: pathBuilderSheet.proficiencies.reflex ?? 0,
 			will:
 				pathBuilderProfToScore(pathBuilderSheet.proficiencies.will) +
 				scoreToBonus(pathBuilderSheet.abilities.wis),
-			willProfMod: pathBuilderSheet.proficiencies.will + mods('will'),
+			willProfMod: pathBuilderSheet.proficiencies.will ?? 0 + mods('will'),
 		},
 		skills: {
 			acrobatics:
 				pathBuilderProfToScore(pathBuilderSheet.proficiencies.acrobatics) +
 				scoreToBonus(pathBuilderSheet.abilities.dex) +
 				mods('acrobatics'),
-			acrobaticsProfMod: pathBuilderSheet.proficiencies.acrobatics,
+			acrobaticsProfMod: pathBuilderSheet.proficiencies.acrobatics ?? 0,
 			arcana:
 				pathBuilderProfToScore(pathBuilderSheet.proficiencies.arcana) +
 				scoreToBonus(pathBuilderSheet.abilities.int) +
 				mods('arcana'),
-			arcanaProfMod: pathBuilderSheet.proficiencies.arcana,
+			arcanaProfMod: pathBuilderSheet.proficiencies.arcana ?? 0,
 			athletics:
 				pathBuilderProfToScore(pathBuilderSheet.proficiencies.athletics) +
 				scoreToBonus(pathBuilderSheet.abilities.str) +
 				mods('athletics'),
-			athleticsProfMod: pathBuilderSheet.proficiencies.athletics,
+			athleticsProfMod: pathBuilderSheet.proficiencies.athletics ?? 0,
 			crafting:
 				pathBuilderProfToScore(pathBuilderSheet.proficiencies.crafting) +
 				scoreToBonus(pathBuilderSheet.abilities.int) +
 				mods('crafting'),
-			craftingProfMod: pathBuilderSheet.proficiencies.crafting,
+			craftingProfMod: pathBuilderSheet.proficiencies.crafting ?? 0,
 			deception:
 				pathBuilderProfToScore(pathBuilderSheet.proficiencies.deception) +
 				scoreToBonus(pathBuilderSheet.abilities.cha) +
 				mods('deception'),
-			deceptionProfMod: pathBuilderSheet.proficiencies.deception,
+			deceptionProfMod: pathBuilderSheet.proficiencies.deception ?? 0,
 			diplomacy:
 				pathBuilderProfToScore(pathBuilderSheet.proficiencies.diplomacy) +
 				scoreToBonus(pathBuilderSheet.abilities.cha) +
 				mods('diplomacy'),
-			diplomacyProfMod: pathBuilderSheet.proficiencies.diplomacy,
+			diplomacyProfMod: pathBuilderSheet.proficiencies.diplomacy ?? 0,
 			intimidation:
 				pathBuilderProfToScore(pathBuilderSheet.proficiencies.intimidation) +
 				scoreToBonus(pathBuilderSheet.abilities.cha) +
 				mods('intimidation'),
-			intimidationProfMod: pathBuilderSheet.proficiencies.intimidation,
+			intimidationProfMod: pathBuilderSheet.proficiencies.intimidation ?? 0,
 			medicine:
 				pathBuilderProfToScore(pathBuilderSheet.proficiencies.medicine) +
 				scoreToBonus(pathBuilderSheet.abilities.wis) +
 				mods('medicine'),
-			medicineProfMod: pathBuilderSheet.proficiencies.medicine,
+			medicineProfMod: pathBuilderSheet.proficiencies.medicine ?? 0,
 			nature:
 				pathBuilderProfToScore(pathBuilderSheet.proficiencies.nature) +
 				scoreToBonus(pathBuilderSheet.abilities.wis) +
 				mods('nature'),
-			natureProfMod: pathBuilderSheet.proficiencies.nature,
+			natureProfMod: pathBuilderSheet.proficiencies.nature ?? 0,
 			occultism:
 				pathBuilderProfToScore(pathBuilderSheet.proficiencies.occultism) +
 				scoreToBonus(pathBuilderSheet.abilities.int) +
 				mods('occultism'),
-			occultismProfMod: pathBuilderSheet.proficiencies.occultism,
+			occultismProfMod: pathBuilderSheet.proficiencies.occultism ?? 0,
 			performance:
 				pathBuilderProfToScore(pathBuilderSheet.proficiencies.performance) +
 				scoreToBonus(pathBuilderSheet.abilities.cha) +
 				mods('performance'),
-			performanceProfMod: pathBuilderSheet.proficiencies.performance,
+			performanceProfMod: pathBuilderSheet.proficiencies.performance ?? 0,
 			religion:
 				pathBuilderProfToScore(pathBuilderSheet.proficiencies.religion) +
 				scoreToBonus(pathBuilderSheet.abilities.wis) +
 				mods('religion'),
-			religionProfMod: pathBuilderSheet.proficiencies.religion,
+			religionProfMod: pathBuilderSheet.proficiencies.religion ?? 0,
 			society:
 				pathBuilderProfToScore(pathBuilderSheet.proficiencies.society) +
 				scoreToBonus(pathBuilderSheet.abilities.int) +
 				mods('society'),
-			societyProfMod: pathBuilderSheet.proficiencies.society,
+			societyProfMod: pathBuilderSheet.proficiencies.society ?? 0,
 			stealth:
 				pathBuilderProfToScore(pathBuilderSheet.proficiencies.stealth) +
 				scoreToBonus(pathBuilderSheet.abilities.dex) +
 				mods('stealth'),
-			stealthProfMod: pathBuilderSheet.proficiencies.stealth,
+			stealthProfMod: pathBuilderSheet.proficiencies.stealth ?? 0,
 			survival:
 				pathBuilderProfToScore(pathBuilderSheet.proficiencies.survival) +
 				scoreToBonus(pathBuilderSheet.abilities.wis) +
 				mods('survival'),
-			survivalProfMod: pathBuilderSheet.proficiencies.survival,
+			survivalProfMod: pathBuilderSheet.proficiencies.survival ?? 0,
 			thievery:
 				pathBuilderProfToScore(pathBuilderSheet.proficiencies.thievery) +
 				scoreToBonus(pathBuilderSheet.abilities.dex) +
 				mods('thievery'),
-			thieveryProfMod: pathBuilderSheet.proficiencies.thievery,
-			lores: pathBuilderSheet.lores.map(lore => ({
-				name: lore[0],
-				profMod: lore[1],
+			thieveryProfMod: pathBuilderSheet.proficiencies.thievery ?? 0,
+			lores: (pathBuilderSheet.lores ?? []).map(lore => ({
+				name: String(lore[0]),
+				profMod: Number(lore[1]),
 				bonus:
 					pathBuilderProfToScore(lore[1]) +
 					scoreToBonus(pathBuilderSheet.abilities.int) +
@@ -950,16 +978,16 @@ export function convertPathBuilderToSheet(
 		},
 		attacks: pathBuilderSheet.weapons.map(weapon => {
 			let numDice = 1;
-			if (weapon.str.toLocaleLowerCase() == 'striking') {
+			if (String(weapon.str).toLocaleLowerCase() == 'striking') {
 				numDice = 2;
-			} else if (weapon.str.toLocaleLowerCase() == 'greaterstriking') {
+			} else if (String(weapon.str).toLocaleLowerCase() == 'greaterstriking') {
 				numDice = 3;
-			} else if (weapon.str.toLocaleLowerCase() == 'majorstriking') {
+			} else if (String(weapon.str).toLocaleLowerCase() == 'majorstriking') {
 				numDice = 4;
 			}
 
 			const mainDamage = {
-				dice: numDice + weapon.die + ' + ' + weapon.damageBonus,
+				dice: numDice + (weapon.die ?? '') + ' + ' + weapon.damageBonus,
 				type: weapon.damageType,
 				// base type isn't provided by pathbuilder
 			};
@@ -971,10 +999,13 @@ export function convertPathBuilderToSheet(
 				};
 			});
 			return {
-				name: weapon.name,
+				name: String(weapon.name),
 				toHit: weapon.attack,
 				damage: [mainDamage, ...extraDamage],
-			};
+				range: null,
+				traits: [],
+				notes: null,
+			} satisfies Sheet['attacks'][number];
 		}),
 		rollMacros: [],
 		actions: [],
@@ -982,7 +1013,7 @@ export function convertPathBuilderToSheet(
 		sourceData: pathBuilderSheet,
 	};
 
-	const shorthandAbilityToLong = {
+	const shorthandAbilityToLong: { [k: string]: string | undefined } = {
 		str: 'strength',
 		dex: 'dexterity',
 		con: 'constitution',
@@ -991,7 +1022,8 @@ export function convertPathBuilderToSheet(
 		cha: 'charisma',
 	};
 
-	let keyabilityScore = sheet.abilities[shorthandAbilityToLong[pathBuilderSheet?.keyability]];
+	let keyabilityScore =
+		sheet.abilities[shorthandAbilityToLong[pathBuilderSheet?.keyability] ?? ''];
 	let keyabilityBonus = scoreToBonus(keyabilityScore ?? 10);
 
 	sheet.general.classDC =
@@ -1002,7 +1034,7 @@ export function convertPathBuilderToSheet(
 	for (const spellcasting of pathBuilderSheet.spellCasters) {
 		const spellAttack =
 			pathBuilderProfToScore(spellcasting.proficiency) +
-			scoreToBonus(sheet.abilities[shorthandAbilityToLong[spellcasting.ability]]);
+			scoreToBonus(sheet.abilities[shorthandAbilityToLong[spellcasting.ability ?? ''] ?? '']);
 		const spellDC = 10 + spellAttack;
 
 		if (
@@ -1017,15 +1049,16 @@ export function convertPathBuilderToSheet(
 	}
 	for (const focusCastingTradition in pathBuilderSheet.focus) {
 		if (!sheet.castingStats[focusCastingTradition + 'DC']) {
-			const focusCasting = pathBuilderSheet.focus[focusCastingTradition];
+			const focusCasting =
+				pathBuilderSheet.focus[focusCastingTradition as keyof PathBuilder.Focus];
 			const allSpellcastingAbilities: { attack: number; proficiency: number }[] =
 				Object.values(
 					_.mapValues(focusCasting, (value, key) => ({
 						attack:
-							pathBuilderProfToScore(value.proficiency) +
-							value.abilityBonus +
-							value.itemBonus,
-						proficiency: value.proficiency,
+							pathBuilderProfToScore(value?.proficiency ?? 0) +
+							(value?.abilityBonus ?? 0) +
+							(value?.itemBonus ?? 0),
+						proficiency: value?.proficiency ?? 0,
 					}))
 				);
 			const highestSpellcastingAbility = _.maxBy<{ attack: number; proficiency: number }>(
@@ -1034,11 +1067,11 @@ export function convertPathBuilderToSheet(
 			);
 			if (!sheet.castingStats[focusCastingTradition + 'Attack']) {
 				sheet.castingStats[focusCastingTradition + 'Attack'] =
-					highestSpellcastingAbility.attack;
+					highestSpellcastingAbility?.attack ?? 0;
 				sheet.castingStats[focusCastingTradition + 'DC'] =
-					10 + highestSpellcastingAbility.attack;
+					10 + (highestSpellcastingAbility?.attack ?? 0);
 				sheet.castingStats[focusCastingTradition + 'ProfMod'] =
-					10 + highestSpellcastingAbility.proficiency;
+					10 + (highestSpellcastingAbility?.proficiency ?? 0);
 			}
 		}
 	}

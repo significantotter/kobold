@@ -5,27 +5,28 @@ import {
 	Initiative,
 	Character,
 	UserSettings,
+	InitWithActorsAndGroups,
 } from './../services/kobold/models/index.js';
 import {
 	ChatInputCommandInteraction,
 	CommandInteraction,
-	GuildTextBasedChannel,
 	Message,
+	TextBasedChannel,
 } from 'discord.js';
 import { KoboldEmbed } from './kobold-embed-utils.js';
 import _ from 'lodash';
 import { InteractionUtils } from './interaction-utils.js';
 import { CharacterUtils } from './character-utils.js';
-import { Language } from '../models/enum-helpers/index.js';
 import { DiceUtils } from './dice-utils.js';
 import { RollBuilder } from './roll-builder.js';
 import { Creature } from './creature.js';
 import { KoboldError } from './KoboldError.js';
+import { SettingsUtils } from './settings-utils.js';
+import L from '../i18n/i18n-node.js';
 
 export type TurnData = {
-	currentRound?: number;
-	currentTurnGroupId?: number;
-	errorMessage?: string;
+	currentRound: number;
+	currentTurnGroupId: number | null;
 };
 
 export class InitiativeBuilder {
@@ -42,19 +43,19 @@ export class InitiativeBuilder {
 		userSettings,
 		LL,
 	}: {
-		initiative?: Initiative;
+		initiative: Initiative;
 		actors?: InitiativeActor[];
 		groups?: InitiativeActorGroup[];
 		userSettings?: UserSettings;
 		LL?: TranslationFunctions;
 	}) {
-		this.LL = LL || Language.LL;
+		this.LL = LL || L.en;
 		this.init = initiative;
 		if (initiative && !actors) actors = initiative.actors;
 		if (initiative && !groups) groups = initiative.actorGroups;
 		this.actorsByGroup = _.groupBy(actors || [], actor => actor.initiativeActorGroupId);
 		this.groups = (groups || []).sort(InitiativeBuilder.groupSortFunction);
-		this.userSettings = userSettings;
+		this.userSettings = _.defaults(userSettings, SettingsUtils.defaultSettings);
 	}
 
 	public static groupSortFunction(a: InitiativeActorGroup, b: InitiativeActorGroup) {
@@ -66,6 +67,10 @@ export class InitiativeBuilder {
 
 	public hasActorsWithHiddenStats() {
 		return _.some(this.init.actors, actor => actor.hideStats);
+	}
+
+	public get currentTurnGroup() {
+		return this.groups.find(group => group.id === this.init.currentTurnGroupId) ?? null;
 	}
 
 	/**
@@ -104,14 +109,13 @@ export class InitiativeBuilder {
 		// get group options that match the given name, were created by you, or you're the gm of
 		const result = InitiativeUtils.nameMatchGeneric<InitiativeActorGroup>(
 			this.groups,
-			groupName,
-			this.LL.utils.initiative.characterNameNotFoundError()
+			groupName
 		);
+		if (!result) throw new KoboldError(this.LL.utils.initiative.characterNameNotFoundError());
 
 		return {
 			currentRound: this.init.currentRound || 1,
 			currentTurnGroupId: result.value.id,
-			errorMessage: result.errorMessage,
 		};
 	}
 
@@ -121,14 +125,10 @@ export class InitiativeBuilder {
 	 */
 	getPreviousTurnChanges(): TurnData {
 		if (!this.groups.length) {
-			return {
-				errorMessage: this.LL.utils.initiative.prevTurnInitEmptyError(),
-			};
+			throw new KoboldError(this.LL.utils.initiative.prevTurnInitEmptyError());
 		}
 		if (!this.init.currentTurnGroupId) {
-			return {
-				errorMessage: this.LL.utils.initiative.prevTurnInitNotStartedError(),
-			};
+			throw new KoboldError(this.LL.utils.initiative.prevTurnInitNotStartedError());
 		} else {
 			const currentTurnIndex = _.findIndex(
 				this.groups,
@@ -136,21 +136,17 @@ export class InitiativeBuilder {
 			);
 			if (!this.groups[currentTurnIndex - 1]) {
 				if (this.init.currentRound === 1) {
-					return {
-						errorMessage: this.LL.utils.initiative.prevTurnNotPossibleError(),
-					};
+					throw new KoboldError(this.LL.utils.initiative.prevTurnNotPossibleError());
 				}
 				//move to the previous round!
 				return {
 					currentRound: (this.init.currentRound || 1) - 1,
 					currentTurnGroupId: this.groups[this.groups.length - 1].id,
-					errorMessage: undefined,
 				};
 			} else {
 				return {
 					currentRound: this.init.currentRound || 1,
 					currentTurnGroupId: this.groups[currentTurnIndex - 1].id,
-					errorMessage: undefined,
 				};
 			}
 		}
@@ -168,15 +164,12 @@ export class InitiativeBuilder {
 	 */
 	getNextTurnChanges(): TurnData {
 		if (!this.groups.length) {
-			return {
-				errorMessage: this.LL.utils.initiative.nextTurnInitEmptyError(),
-			};
+			throw new KoboldError(this.LL.utils.initiative.nextTurnInitEmptyError());
 		}
 		if (!this.init.currentTurnGroupId) {
 			return {
 				currentRound: this.init.currentRound || 1,
 				currentTurnGroupId: this.groups[0].id,
-				errorMessage: undefined,
 			};
 		} else {
 			const currentTurnIndex = _.findIndex(
@@ -188,13 +181,11 @@ export class InitiativeBuilder {
 				return {
 					currentRound: (this.init.currentRound || 1) + 1,
 					currentTurnGroupId: this.groups[0].id,
-					errorMessage: undefined,
 				};
 			} else {
 				return {
 					currentRound: this.init.currentRound || 1,
 					currentTurnGroupId: this.groups[currentTurnIndex + 1].id,
-					errorMessage: undefined,
 				};
 			}
 		}
@@ -305,13 +296,13 @@ export class InitiativeBuilder {
 		if (!options.showHiddenCreatureStats && actor.hideStats) {
 			const hp = actor.sheet?.defenses?.currentHp;
 			turnText += ` <${this.hpTextFromValue(
-				actor.sheet.defenses.currentHp,
-				actor.sheet.defenses.maxHp
+				actor.sheet.defenses.currentHp ?? 0,
+				actor.sheet.defenses.maxHp ?? 0
 			)}>`;
 			if (actor.sheet.info?.usesStamina) {
 				turnText += ` <${this.staminaTextFromValue(
-					actor.sheet.defenses.currentStamina,
-					actor.sheet.defenses.maxStamina
+					actor.sheet.defenses.currentStamina ?? 0,
+					actor.sheet.defenses.maxStamina ?? 0
 				)}>`;
 			}
 			if (actor.sheet.defenses.tempHp) {
@@ -345,9 +336,11 @@ export class InitiativeBuilder {
 		return this.groups.find(group => group.id === this.init.currentTurnGroupId);
 	}
 	get activeActors() {
-		return this.init.actors.filter(
-			actor => actor.initiativeActorGroupId === this.init.currentTurnGroupId
-		);
+		return (
+			this.init?.actors ??
+			_.flatten(_.values(this.actorsByGroup)) ??
+			([] as InitiativeActor[])
+		).filter(actor => actor.initiativeActorGroupId === this.init.currentTurnGroupId);
 	}
 }
 
@@ -374,17 +367,18 @@ export class InitiativeUtils {
 	}: {
 		character: Character;
 		currentInit: Initiative;
-		skillChoice?: string;
-		diceExpression: string;
-		initiativeValue?: number;
+		skillChoice?: string | null;
+		diceExpression?: string | null;
+		initiativeValue?: number | null;
 		userName: string;
 		userId: string;
 		hideStats: boolean;
 		userSettings: UserSettings;
 		LL: TranslationFunctions;
 	}): Promise<KoboldEmbed> {
-		let finalInitiative = 0;
+		let finalInitiative: number = 0;
 		let rollResultMessage: KoboldEmbed;
+		let rollBuilderResponse: RollBuilder;
 		if (initiativeValue) {
 			finalInitiative = initiativeValue;
 			rollResultMessage = new KoboldEmbed()
@@ -402,7 +396,7 @@ export class InitiativeUtils {
 				rollResultMessage.setThumbnail(character.sheet.info.imageURL);
 			}
 		} else if (skillChoice) {
-			const response = await DiceUtils.rollSimpleCreatureRoll({
+			rollBuilderResponse = await DiceUtils.rollSimpleCreatureRoll({
 				userName,
 				creature: Creature.fromCharacter(character),
 				attributeName: skillChoice,
@@ -410,23 +404,24 @@ export class InitiativeUtils {
 				tags: ['initiative'],
 				LL,
 			});
-			finalInitiative = response.getRollTotalArray()[0] || 0;
-			rollResultMessage = response.compileEmbed();
+			finalInitiative = rollBuilderResponse.getRollTotalArray()[0] ?? 0;
+			rollResultMessage = rollBuilderResponse.compileEmbed();
 		} else if (diceExpression) {
-			const rollBuilder = new RollBuilder({
+			rollBuilderResponse = new RollBuilder({
 				character: character,
 				rollDescription: LL.commands.init.join.interactions.joinedEmbed.rollDescription(),
 				userSettings,
 				LL,
 			});
-			rollBuilder.addRoll({
+			rollBuilderResponse.addRoll({
+				rollTitle: 'Initiative',
 				rollExpression: diceExpression,
 				tags: ['initiative'],
 			});
-			finalInitiative = rollBuilder.getRollTotalArray()[0] || 0;
-			rollResultMessage = rollBuilder.compileEmbed();
+			finalInitiative = rollBuilderResponse.getRollTotalArray()[0] ?? 0;
+			rollResultMessage = rollBuilderResponse.compileEmbed();
 		} else {
-			const response = await DiceUtils.rollSimpleCreatureRoll({
+			rollBuilderResponse = await DiceUtils.rollSimpleCreatureRoll({
 				userName,
 				creature: Creature.fromCharacter(character),
 				attributeName: 'perception',
@@ -434,10 +429,9 @@ export class InitiativeUtils {
 				tags: ['initiative'],
 				userSettings,
 			});
-			if (response.rollResults[0]['error'])
-				throw new KoboldError(response.rollResults[0]['value']);
-			finalInitiative = response.getRollTotalArray()[0] || 0;
-			rollResultMessage = response.compileEmbed();
+			finalInitiative = rollBuilderResponse.getRollTotalArray()[0] ?? 0;
+
+			rollResultMessage = rollBuilderResponse.compileEmbed();
 		}
 
 		rollResultMessage.addFields([
@@ -450,13 +444,13 @@ export class InitiativeUtils {
 		]);
 
 		let nameCount = 1;
-		let existingName = currentInit.actors.find(
+		let existingName = (currentInit.actors ?? []).find(
 			actor => actor.name.toLowerCase() === character.sheet.info.name.toLowerCase()
 		);
 		let uniqueName = character.sheet.info.name;
 		if (existingName) {
 			while (
-				currentInit.actors.find(
+				(currentInit.actors ?? []).find(
 					actor => actor.name.toLowerCase() === uniqueName.toLowerCase()
 				)
 			) {
@@ -480,50 +474,48 @@ export class InitiativeUtils {
 			},
 		});
 
-		currentInit.actors = currentInit.actors.concat(newActor);
-		currentInit.actorGroups = currentInit.actorGroups.concat(newActor.actorGroup);
+		currentInit.actors = (currentInit.actors ?? []).concat(newActor);
+		currentInit.actorGroups = (currentInit.actorGroups ?? []).concat(
+			newActor.actorGroup as InitiativeActorGroup
+		);
 
 		return rollResultMessage;
 	}
 
-	public static async getInitiativeForChannel(
-		channel: GuildTextBasedChannel,
-		options = { sendErrors: true, LL: Language.LL }
-	) {
-		const LL = options.LL;
+	public static async getInitiativeForChannel(channel: TextBasedChannel | null) {
 		let errorMessage = null;
 		if (!channel || !channel.id) {
-			errorMessage = LL.utils.initiative.initOutsideServerChannelError();
-			return { init: null, errorMessage: errorMessage };
+			throw new KoboldError(L.en.utils.initiative.initOutsideServerChannelError());
 		}
 		const channelId = channel.id;
 
-		const currentInit = await Initiative.query()
-			.withGraphFetched('[actors.[character], actorGroups]')
-			.where({
-				channelId,
-			})
-			.first();
+		const currentInit = await Initiative.queryGraphFromChannel(channelId).first();
 		if (!currentInit || currentInit.length === 0) {
-			errorMessage = LL.utils.initiative.noActiveInitError();
-			return { init: null, errorMessage: errorMessage };
+			throw new KoboldError(L.en.utils.initiative.noActiveInitError());
 		}
 		// stick the actors in the groups here in their correct locations
-		for (let group of currentInit.actorGroups) {
+		for (let group of currentInit.actorGroups ?? []) {
 			group.actors = [];
-			for (const actor of currentInit.actors) {
+			for (const actor of currentInit.actors ?? []) {
 				if (actor.initiativeActorGroupId === group.id) {
 					group.actors.push(actor);
 				}
 			}
 		}
-		return { init: currentInit, errorMessage: errorMessage };
+		return currentInit;
+	}
+	public static async getInitiativeForChannelOrNull(channel: TextBasedChannel | null) {
+		try {
+			return await this.getInitiativeForChannel(channel);
+		} catch (err) {
+			return null;
+		}
 	}
 
 	public static async sendNewRoundMessage(
 		intr: CommandInteraction,
 		initBuilder: InitiativeBuilder
-	): Promise<Message<boolean>> {
+	): Promise<Message<boolean> | undefined> {
 		const embed = await KoboldEmbed.roundFromInitiativeBuilder(initBuilder);
 		return await InteractionUtils.send(intr, embed);
 	}
@@ -536,7 +528,7 @@ export class InitiativeUtils {
 		return controllableActors;
 	}
 	public static getControllableInitiativeGroups(initiative: Initiative, userId: string) {
-		const actorGroupOptions = initiative.actorGroups;
+		const actorGroupOptions = initiative.actorGroups ?? [];
 		const controllableGroups = actorGroupOptions.filter(
 			group => initiative.gmUserId === userId || group.userId === userId
 		);
@@ -548,9 +540,9 @@ export class InitiativeUtils {
 		userId: string,
 		LL: TranslationFunctions
 	) {
-		LL = Language.LL;
-		let actor: InitiativeActor = null;
-		let errorMessage: string = null;
+		LL = L.en;
+		let actor: InitiativeActor | null = null;
+		let errorMessage: string | null = null;
 		for (const possibleActor of initiative?.actors || []) {
 			const actorCharacter = possibleActor.character;
 			if (
@@ -563,63 +555,52 @@ export class InitiativeUtils {
 			}
 		}
 		if (!actor) {
-			return {
-				actor,
-				errorMessage: LL.utils.initiative.activeCharacterNotInInitError(),
-			};
+			throw new KoboldError(LL.utils.initiative.activeCharacterNotInInitError());
 		}
-		return { actor, errorMessage };
+		return actor;
 	}
 
 	public static nameMatchGeneric<T extends LowerNamedThing>(
 		options: T[],
-		name: string,
-		noChoicesError: string
-	): { value: T; errorMessage: string } {
-		let thing;
-		let errorMessage;
+		name: string
+	): T | null {
+		let thing: T | null;
 		if (options.length === 0) {
-			return {
-				value: null,
-				errorMessage: noChoicesError,
-			};
+			return null;
 		} else {
 			const nameMatch = CharacterUtils.getBestNameMatch<{ Name: string; thing: T }>(
 				name,
 				options.map(thing => ({
-					Name: thing.name,
+					Name: String(thing.name),
 					thing: thing,
 				}))
 			);
-			thing = nameMatch.thing;
+			thing = nameMatch?.thing ?? null;
 		}
-		return { value: thing, errorMessage: '' };
+		return thing;
 	}
 
 	public static getNameMatchActorFromInitiative(
 		userId: string,
 		initiative: Initiative,
 		characterName: string,
-		LL: TranslationFunctions,
+		LL?: TranslationFunctions,
 		requireControlled: boolean = false
-	): { actor: InitiativeActor; errorMessage: string } {
-		LL = LL || Language.LL;
-		let errorMessage = null;
-		let actor: InitiativeActor | null = null;
+	): InitiativeActor {
+		LL = LL ?? L.en;
 		// get actor options that match the given name, were created by you, or you're the gm of
 		let actorOptions: InitiativeActor[] = [];
 		if (requireControlled) {
 			actorOptions = InitiativeUtils.getControllableInitiativeActors(initiative, userId);
 		} else {
-			actorOptions = initiative.actors;
+			actorOptions = initiative.actors ?? [];
 		}
 		const result = InitiativeUtils.nameMatchGeneric<InitiativeActor>(
 			actorOptions,
-			characterName,
-			LL.utils.initiative.characterNameNotFoundError()
+			characterName
 		);
-
-		return { actor: result.value, errorMessage: result.errorMessage };
+		if (!result) throw new KoboldError(LL.utils.initiative.characterNameNotFoundError());
+		return result;
 	}
 
 	public static getNameMatchGroupFromInitiative(
@@ -627,19 +608,17 @@ export class InitiativeUtils {
 		userId: string,
 		groupName: string,
 		LL: TranslationFunctions
-	): { group: InitiativeActorGroup; errorMessage: string } {
-		LL = LL || Language.LL;
-		let errorMessage = null;
-		let group: InitiativeActorGroup | null = null;
+	): InitiativeActorGroup {
+		LL = LL || L.en;
 		// get group options that match the given name, were created by you, or you're the gm of
 		const groupOptions = InitiativeUtils.getControllableInitiativeGroups(initiative, userId);
 		const result = InitiativeUtils.nameMatchGeneric<InitiativeActorGroup>(
 			groupOptions,
-			groupName,
-			LL.utils.initiative.characterNameNotFoundError()
+			groupName
 		);
+		if (!result) throw new KoboldError(LL.utils.initiative.characterNameNotFoundError());
 
-		return { group: result.value, errorMessage: result.errorMessage };
+		return result;
 	}
 
 	public static async getInitActorByName(
@@ -647,26 +626,16 @@ export class InitiativeUtils {
 		name: string,
 		LL?: TranslationFunctions
 	) {
-		let currentInitResponse = await InitiativeUtils.getInitiativeForChannel(intr.channel, {
-			sendErrors: true,
-			LL,
-		});
-		if (currentInitResponse.errorMessage) {
-			throw new KoboldError(currentInitResponse.errorMessage);
-		}
-		let currentInit = currentInitResponse.init;
+		let currentInit = await InitiativeUtils.getInitiativeForChannelOrNull(intr.channel);
+		if (!currentInit) return null;
 
-		const actorResponse: { actor: InitiativeActor; errorMessage: string } =
-			await InitiativeUtils.getNameMatchActorFromInitiative(
-				intr.user.id,
-				currentInit,
-				name,
-				LL,
-				false
-			);
-		if (actorResponse.errorMessage) {
-			throw new KoboldError(actorResponse.errorMessage);
-		}
-		return actorResponse.actor;
+		const actor = await InitiativeUtils.getNameMatchActorFromInitiative(
+			intr.user.id,
+			currentInit,
+			name,
+			LL,
+			false
+		);
+		return actor;
 	}
 }

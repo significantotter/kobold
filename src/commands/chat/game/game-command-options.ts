@@ -1,63 +1,63 @@
 import { APIApplicationCommandBasicOption, ApplicationCommandOptionType } from 'discord.js';
-import { Language } from '../../../models/enum-helpers/index.js';
+import L from '../../../i18n/i18n-node.js';
 
 export class GameOptions {
 	public static readonly GAME_MANAGE_OPTION: APIApplicationCommandBasicOption = {
-		name: Language.LL.commandOptions.gameManageOption.name(),
-		description: Language.LL.commandOptions.gameManageOption.description(),
+		name: L.en.commandOptions.gameManageOption.name(),
+		description: L.en.commandOptions.gameManageOption.description(),
 		required: true,
 		type: ApplicationCommandOptionType.String,
 		choices: [
 			{
-				name: Language.LL.commandOptions.gameManageOption.choices.create.name(),
-				value: Language.LL.commandOptions.gameManageOption.choices.create.value(),
+				name: L.en.commandOptions.gameManageOption.choices.create.name(),
+				value: L.en.commandOptions.gameManageOption.choices.create.value(),
 			},
 			{
-				name: Language.LL.commandOptions.gameManageOption.choices.join.name(),
-				value: Language.LL.commandOptions.gameManageOption.choices.join.value(),
+				name: L.en.commandOptions.gameManageOption.choices.join.name(),
+				value: L.en.commandOptions.gameManageOption.choices.join.value(),
 			},
 			{
-				name: Language.LL.commandOptions.gameManageOption.choices.setActive.name(),
-				value: Language.LL.commandOptions.gameManageOption.choices.setActive.value(),
+				name: L.en.commandOptions.gameManageOption.choices.setActive.name(),
+				value: L.en.commandOptions.gameManageOption.choices.setActive.value(),
 			},
 			{
-				name: Language.LL.commandOptions.gameManageOption.choices.leave.name(),
-				value: Language.LL.commandOptions.gameManageOption.choices.leave.value(),
+				name: L.en.commandOptions.gameManageOption.choices.leave.name(),
+				value: L.en.commandOptions.gameManageOption.choices.leave.value(),
 			},
 			{
-				name: Language.LL.commandOptions.gameManageOption.choices.kick.name(),
-				value: Language.LL.commandOptions.gameManageOption.choices.kick.value(),
+				name: L.en.commandOptions.gameManageOption.choices.kick.name(),
+				value: L.en.commandOptions.gameManageOption.choices.kick.value(),
 			},
 			{
-				name: Language.LL.commandOptions.gameManageOption.choices.delete.name(),
-				value: Language.LL.commandOptions.gameManageOption.choices.delete.value(),
+				name: L.en.commandOptions.gameManageOption.choices.delete.name(),
+				value: L.en.commandOptions.gameManageOption.choices.delete.value(),
 			},
 		],
 	};
 	public static readonly GAME_MANAGE_VALUE: APIApplicationCommandBasicOption = {
-		name: Language.LL.commandOptions.gameManageValue.name(),
-		description: Language.LL.commandOptions.gameManageValue.description(),
+		name: L.en.commandOptions.gameManageValue.name(),
+		description: L.en.commandOptions.gameManageValue.description(),
 		required: true,
 		autocomplete: true,
 		type: ApplicationCommandOptionType.String,
 	};
 	public static readonly GAME_ROLL_TYPE: APIApplicationCommandBasicOption = {
-		name: Language.LL.commandOptions.gameRollType.name(),
-		description: Language.LL.commandOptions.gameRollType.description(),
+		name: L.en.commandOptions.gameRollType.name(),
+		description: L.en.commandOptions.gameRollType.description(),
 		required: true,
 		autocomplete: true,
 		type: ApplicationCommandOptionType.String,
 	};
 	public static readonly GAME_TARGET_CHARACTER: APIApplicationCommandBasicOption = {
-		name: Language.LL.commandOptions.gameTargetCharacter.name(),
-		description: Language.LL.commandOptions.gameTargetCharacter.description(),
+		name: L.en.commandOptions.gameTargetCharacter.name(),
+		description: L.en.commandOptions.gameTargetCharacter.description(),
 		required: false,
 		autocomplete: true,
 		type: ApplicationCommandOptionType.String,
 	};
 	public static readonly GAME_DICE_ROLL_OR_MODIFIER: APIApplicationCommandBasicOption = {
-		name: Language.LL.commandOptions.gameDiceRollOrModifier.name(),
-		description: Language.LL.commandOptions.gameDiceRollOrModifier.description(),
+		name: L.en.commandOptions.gameDiceRollOrModifier.name(),
+		description: L.en.commandOptions.gameDiceRollOrModifier.description(),
 		required: false,
 		type: ApplicationCommandOptionType.String,
 	};

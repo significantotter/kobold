@@ -16,17 +16,13 @@
 			"type": "string",
 			"description": "The discord id of the user who started the initiative"
 		},
-		"roundMessageIds": {
-			"type": ["array", "null"],
-			"description": "The message ids for the header of the most recent round. Ordered by round #."
+		"currentTurnGroupId": {
+			"type": ["integer", "null"],
+			"description": "The id of the group whose turn it is"
 		},
 		"currentRound": {
 			"type": "number",
 			"description": "The current round number"
-		},
-		"currentInitiative": {
-			"type": ["number", "null"],
-			"description": "The current initiative value"
 		},
 		"createdAt": {
 			"type": "string",
@@ -38,5 +34,6 @@
 			"format": "date-time",
 			"description": "When the initiative was last interacted with"
 		}
-	}
+	},
+	"required": ["id", "currentTurnGroupId", "channelId", "gmUserId", "currentRound"]
 }

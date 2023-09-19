@@ -11,27 +11,27 @@ import {
 import { RateLimiter } from 'discord.js-rate-limiter';
 
 import { ChatArgs } from '../../../constants/index.js';
-import { EventData } from '../../../models/internal-models.js';
+
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
 import { DiceUtils } from '../../../utils/dice-utils.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { Language } from '../../../models/enum-helpers/index.js';
+import L from '../../../i18n/i18n-node.js';
 import { Creature } from '../../../utils/creature.js';
 import { InitOptions } from '../init/init-command-options.js';
 import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
-import { InitiativeActor } from '../../../services/kobold/models/index.js';
+import { Character, InitiativeActor } from '../../../services/kobold/models/index.js';
 import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
 import { GameUtils } from '../../../utils/game-utils.js';
 import { SettingsUtils } from '../../../utils/settings-utils.js';
 
 export class RollAttackSubCommand implements Command {
-	public names = [Language.LL.commands.roll.attack.name()];
+	public names = [L.en.commands.roll.attack.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.roll.attack.name(),
-		description: Language.LL.commands.roll.attack.description(),
+		name: L.en.commands.roll.attack.name(),
+		description: L.en.commands.roll.attack.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -42,11 +42,11 @@ export class RollAttackSubCommand implements Command {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption
-	): Promise<ApplicationCommandOptionChoiceData[]> {
+	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === ChatArgs.ATTACK_CHOICE_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(ChatArgs.ATTACK_CHOICE_OPTION.name);
+			const match = intr.options.getString(ChatArgs.ATTACK_CHOICE_OPTION.name) ?? '';
 
 			//get the active character
 			const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
@@ -67,7 +67,7 @@ export class RollAttackSubCommand implements Command {
 		}
 		if (option.name === InitOptions.INIT_CHARACTER_TARGET.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(InitOptions.INIT_CHARACTER_TARGET.name);
+			const match = intr.options.getString(InitOptions.INIT_CHARACTER_TARGET.name) ?? '';
 
 			return await AutocompleteUtils.getAllTargetOptions(intr, match);
 		}
@@ -75,39 +75,38 @@ export class RollAttackSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
-		const attackChoice = intr.options.getString(ChatArgs.ATTACK_CHOICE_OPTION.name);
-		const targetInitActorName = intr.options.getString(InitOptions.INIT_CHARACTER_TARGET.name);
-		const attackModifierExpression = intr.options.getString(
-			ChatArgs.ATTACK_ROLL_MODIFIER_OPTION.name
+		const attackChoice = intr.options.getString(ChatArgs.ATTACK_CHOICE_OPTION.name, true);
+		const targetInitActorName = intr.options.getString(
+			InitOptions.INIT_CHARACTER_TARGET.name,
+			true
 		);
-		const damageModifierExpression = intr.options.getString(
-			ChatArgs.DAMAGE_ROLL_MODIFIER_OPTION.name
-		);
-		const rollNote = intr.options.getString(ChatArgs.ROLL_NOTE_OPTION.name);
+		const attackModifierExpression =
+			intr.options.getString(ChatArgs.ATTACK_ROLL_MODIFIER_OPTION.name) ?? '';
+		const damageModifierExpression =
+			intr.options.getString(ChatArgs.DAMAGE_ROLL_MODIFIER_OPTION.name) ?? '';
+		const rollNote = intr.options.getString(ChatArgs.ROLL_NOTE_OPTION.name) ?? '';
 		const targetAC = intr.options.getInteger(ChatArgs.ROLL_TARGET_AC_OPTION.name);
 
-		const secretRoll = intr.options.getString(ChatArgs.ROLL_SECRET_OPTION.name);
+		const secretRoll =
+			intr.options.getString(ChatArgs.ROLL_SECRET_OPTION.name) ??
+			L.en.commandOptions.rollSecret.choices.public.value();
 
 		const [activeCharacter, userSettings, activeGame] = await Promise.all([
 			CharacterUtils.getActiveCharacter(intr),
 			SettingsUtils.getSettingsForUser(intr),
-			GameUtils.getActiveGame(intr.user.id, intr.guildId),
+			GameUtils.getActiveGame(intr.user.id, intr.guildId ?? ''),
 		]);
 		if (!activeCharacter) {
-			await InteractionUtils.send(
-				intr,
-				Language.LL.commands.roll.interactions.noActiveCharacter()
-			);
+			await InteractionUtils.send(intr, L.en.commands.roll.interactions.noActiveCharacter());
 			return;
 		}
 
 		const creature = Creature.fromCharacter(activeCharacter);
 
 		let targetCreature: Creature | undefined;
-		let targetActor: InitiativeActor | undefined;
+		let targetActor: InitiativeActor | Character | null;
 
 		if (
 			targetInitActorName &&
@@ -117,7 +116,18 @@ export class RollAttackSubCommand implements Command {
 			const { targetCharacter, targetInitActor } =
 				await GameUtils.getCharacterOrInitActorTarget(intr, targetInitActorName);
 			targetActor = targetInitActor ?? targetCharacter;
+			if (!targetActor) {
+				await InteractionUtils.send(
+					intr,
+					L.en.commands.roll.interactions.targetNotFound({
+						targetName: targetInitActorName,
+					})
+				);
+				return;
+			}
 			targetCreature = Creature.fromModelWithSheet(targetActor);
+		} else {
+			targetActor = null;
 		}
 
 		const { builtRoll, actionRoller } = DiceUtils.rollCreatureAttack({
@@ -127,20 +137,21 @@ export class RollAttackSubCommand implements Command {
 			rollNote,
 			attackModifierExpression,
 			damageModifierExpression,
-			targetAC,
+			targetAC: targetAC ?? undefined,
 			userSettings,
 			LL,
 		});
 
-		if (targetCreature) {
+		if (targetCreature && targetActor) {
 			// apply any effects from the action to the creature
 			await targetActor.$query().patch({ sheet: targetCreature.sheet });
 		}
 
 		const embed = builtRoll.compileEmbed({ forceFields: true });
 
-		if (targetCreature && actionRoller.shouldDisplayDamageText()) {
-			await targetActor.saveSheet(intr, actionRoller.targetCreature.sheet);
+		if (targetActor && targetCreature && actionRoller.shouldDisplayDamageText()) {
+			//overwrite this as Creature, because it can't be null if targetCreature is defined
+			await targetActor.saveSheet(intr, (actionRoller.targetCreature as Creature).sheet);
 
 			const damageField = await EmbedUtils.getOrSendActionDamageField({
 				intr,

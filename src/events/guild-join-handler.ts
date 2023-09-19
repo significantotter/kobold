@@ -1,10 +1,34 @@
-import { Guild } from 'discord.js';
+import { Guild, Locale } from 'discord.js';
 
-import { Language } from '../models/enum-helpers/index.js';
-import { Lang, Logger } from '../services/index.js';
+import { Logger } from '../services/index.js';
 import { ClientUtils, MessageUtils } from '../utils/index.js';
 import { EventHandler } from './index.js';
 import Logs from './../config/lang/logs.json' assert { type: 'json' };
+import { KoboldEmbed } from '../utils/kobold-embed-utils.js';
+import { refs } from '../constants/common-text.js';
+import _ from 'lodash';
+
+const welcomeEmbed = new KoboldEmbed({
+	title: 'Yip! Thank you for using Kobold.',
+	description: refs.bot.description,
+	fields: [
+		{
+			name: 'Important Commands',
+			value: refs.importantCommands.join('\n'),
+		},
+		{
+			name: 'Links',
+			value: [
+				refs.embedLinks.invite,
+				refs.embedLinks.donate,
+				refs.embedLinks.support,
+				refs.embedLinks.vote,
+				refs.embedLinks.pathbuilder,
+				refs.embedLinks.wanderersGuide,
+			].join('\n'),
+		},
+	],
+});
 
 export class GuildJoinHandler implements EventHandler {
 	public async process(guild: Guild): Promise<void> {
@@ -18,31 +42,9 @@ export class GuildJoinHandler implements EventHandler {
 		// let data = new EventData();
 
 		// Send welcome message to the server's notify channel
-		// TODO: Replace "Language.Default" here with the server's language
-		let guildLang = Language.Default;
-		let notifyChannel = await ClientUtils.findNotifyChannel(guild, guildLang);
+		let notifyChannel = await ClientUtils.findNotifyChannel(guild, Locale.EnglishUS);
 		if (notifyChannel) {
-			await MessageUtils.send(
-				notifyChannel,
-				Lang.getEmbed('displayEmbeds.welcome', guildLang).setAuthor({
-					name: guild.name,
-					iconURL: guild.iconURL(),
-				})
-			);
-		}
-
-		// Send welcome message to owner
-		// TODO: Replace "Language.Default" here with the owner's language
-		let ownerLang = Language.Default;
-		let owner = await guild.fetchOwner();
-		if (owner) {
-			await MessageUtils.send(
-				owner.user,
-				Lang.getEmbed('displayEmbeds.welcome', ownerLang).setAuthor({
-					name: guild.name,
-					iconURL: guild.iconURL(),
-				})
-			);
+			await MessageUtils.send(notifyChannel, welcomeEmbed);
 		}
 	}
 }

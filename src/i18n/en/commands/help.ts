@@ -1,4 +1,4 @@
-import { refs } from '../common.js';
+import { refs } from '../../../constants/common-text.js';
 
 export default {
 	name: 'help',
@@ -14,7 +14,7 @@ export default {
 				thumbnail: refs.links.thumbnail,
 				addToServer: {
 					name: 'How do I add Kobold to a server?',
-					value: refs.links.embed.invite,
+					value: refs.embedLinks.invite,
 				},
 				slashCommands: {
 					name: 'How do commands work?',
@@ -90,13 +90,13 @@ export default {
 				linksField: {
 					name: 'Links',
 					value:
-						refs.links.embed.invite +
+						refs.embedLinks.invite +
 						'\n' +
-						refs.links.embed.donate +
+						refs.embedLinks.donate +
 						'\n' +
-						refs.links.embed.support +
+						refs.embedLinks.support +
 						'\n' +
-						refs.links.embed.source,
+						refs.embedLinks.source,
 				},
 			},
 		},

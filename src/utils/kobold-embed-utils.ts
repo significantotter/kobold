@@ -2,17 +2,18 @@ import {
 	APIEmbed,
 	APIEmbedField,
 	ChatInputCommandInteraction,
+	CommandInteraction,
 	EmbedBuilder,
 	EmbedData,
 } from 'discord.js';
 import _ from 'lodash';
 import { TranslationFunctions } from '../i18n/i18n-types.js';
-import { Language } from '../models/enum-helpers/index.js';
-import { Character, Sheet } from '../services/kobold/models/index.js';
-import { InitiativeBuilder, InitiativeUtils, TurnData } from './initiative-utils.js';
+import { Action, Character, Sheet } from '../services/kobold/models/index.js';
+import { InitiativeBuilder, TurnData } from './initiative-utils.js';
 import { InteractionUtils } from './interaction-utils.js';
 import { ActionRoller } from './action-roller.js';
 import { KoboldError } from './KoboldError.js';
+import L from '../i18n/i18n-node.js';
 
 export class KoboldEmbed extends EmbedBuilder {
 	public constructor(data?: APIEmbed | EmbedData) {
@@ -72,9 +73,9 @@ export class KoboldEmbed extends EmbedBuilder {
 	}: {
 		intr: ChatInputCommandInteraction;
 		initBuilder: InitiativeBuilder;
-		currentTurn?: TurnData;
-		targetTurn?: TurnData;
-		LL?: TranslationFunctions;
+		currentTurn: TurnData;
+		targetTurn: TurnData;
+		LL: TranslationFunctions;
 	}) {
 		const embedWithHiddenStats = await KoboldEmbed.roundFromInitiativeBuilder(initBuilder, LL, {
 			showHiddenCreatureStats: true,
@@ -90,8 +91,8 @@ export class KoboldEmbed extends EmbedBuilder {
 				break;
 			case 'whenever_hidden':
 				if (
-					initBuilder.actorsByGroup[targetTurn.currentTurnGroupId] &&
-					initBuilder.actorsByGroup[targetTurn.currentTurnGroupId].some(
+					initBuilder.currentTurnGroup &&
+					initBuilder.actorsByGroup[initBuilder.currentTurnGroup.id].some(
 						actor => actor.hideStats
 					)
 				)
@@ -108,7 +109,7 @@ export class KoboldEmbed extends EmbedBuilder {
 		initiativeBuilder: InitiativeBuilder,
 		LL?: TranslationFunctions
 	) {
-		LL = LL || Language.LL;
+		LL = LL || L.en;
 		const result = new KoboldEmbed();
 		const groupTurn = initiativeBuilder.activeGroup;
 		if (!groupTurn) {
@@ -144,7 +145,7 @@ export class KoboldEmbed extends EmbedBuilder {
 			showHiddenCreatureStats?: boolean;
 		} = { showHiddenCreatureStats: false }
 	) {
-		LL = LL || Language.LL;
+		LL = LL || L.en;
 		const result = new KoboldEmbed().setTitle(
 			LL.utils.koboldEmbed.roundTitle({
 				currentRound: initiativeBuilder.init?.currentRound || 0,
@@ -165,7 +166,7 @@ export class KoboldEmbed extends EmbedBuilder {
 	public isOverSized() {
 		return (
 			this.determineEmbedFieldTextLength() + this.determineEmbedMetaTextLength() > 6000 ||
-			this.data?.fields?.length > 25
+			(this.data?.fields ?? []).length > 25
 		);
 	}
 
@@ -214,6 +215,7 @@ export class KoboldEmbed extends EmbedBuilder {
 	}
 
 	public splitFieldsThatAreTooLong() {
+		if (!this.data.fields) return;
 		for (let i = 0; i < this.data.fields.length; i++) {
 			const field = this.data.fields[i];
 			if (field.name.length + field.value.length > 1024) {
@@ -240,6 +242,10 @@ export class KoboldEmbed extends EmbedBuilder {
 		if (length + fieldLength < 6000) {
 			//we're within normal embed size, so we can just return ourselves.
 			return [cloneOfThis];
+		} else if (length > 6000) {
+			throw new KoboldError(
+				`Yip! That command would have returned a message that was way too long!`
+			);
 		}
 
 		// if the embed isn't oversized, we can fit at least 1 embed with the static text
@@ -247,8 +253,8 @@ export class KoboldEmbed extends EmbedBuilder {
 		let extraEmbeds: KoboldEmbed[] = [];
 		while (cloneOfThis.isOverSized()) {
 			// splice the field to move off of the end of this embed
-			const splicedField = cloneOfThis.data.fields.splice(
-				cloneOfThis.data.fields.length - 1,
+			const splicedField = (cloneOfThis.data.fields ?? []).splice(
+				(cloneOfThis.data.fields ?? []).length - 1,
 				1
 			)[0];
 			// check the most recent extra embed to see if the field can be added to it
@@ -256,7 +262,7 @@ export class KoboldEmbed extends EmbedBuilder {
 			if (extraEmbeds.length > 0) {
 				const mostRecentExtraEmbed = extraEmbeds[0];
 				canAddFieldToEmbed =
-					mostRecentExtraEmbed.data.fields.length < 25 &&
+					(mostRecentExtraEmbed.data.fields ?? []).length < 25 &&
 					mostRecentExtraEmbed.determineEmbedFieldTextLength() +
 						splicedField.name.length +
 						splicedField.value.length <
@@ -305,7 +311,7 @@ export class KoboldEmbed extends EmbedBuilder {
 		}
 		return finalEmbeds;
 	}
-	public async sendBatches(intr, isEphemeral = false, splitText = false) {
+	public async sendBatches(intr: CommandInteraction, isEphemeral = false, splitText = false) {
 		if (splitText && this.data?.fields) this.splitFieldsThatAreTooLong();
 		const splitEmbeds = this.splitEmbedIfTooLong();
 		for (const embed of splitEmbeds) {
@@ -322,21 +328,18 @@ export class EmbedUtils {
 		gmUserId?: string
 	) {
 		const isEphemeral =
-			secretStatus === Language.LL.commandOptions.rollSecret.choices.secret.value() ||
-			secretStatus ===
-				Language.LL.commandOptions.rollSecret.choices.secretAndNotify.value() ||
-			secretStatus === Language.LL.commandOptions.rollSecret.choices.sendToGm.value();
+			secretStatus === L.en.commandOptions.rollSecret.choices.secret.value() ||
+			secretStatus === L.en.commandOptions.rollSecret.choices.secretAndNotify.value() ||
+			secretStatus === L.en.commandOptions.rollSecret.choices.sendToGm.value();
 		const notifyRoll =
-			secretStatus ===
-				Language.LL.commandOptions.rollSecret.choices.secretAndNotify.value() ||
-			secretStatus === Language.LL.commandOptions.rollSecret.choices.sendToGm.value();
-		const sendToGm =
-			secretStatus === Language.LL.commandOptions.rollSecret.choices.sendToGm.value();
+			secretStatus === L.en.commandOptions.rollSecret.choices.secretAndNotify.value() ||
+			secretStatus === L.en.commandOptions.rollSecret.choices.sendToGm.value();
+		const sendToGm = secretStatus === L.en.commandOptions.rollSecret.choices.sendToGm.value();
 
 		if (notifyRoll) {
 			await InteractionUtils.send(
 				intr,
-				Language.LL.commands.roll.interactions.secretRollNotification()
+				L.en.commands.roll.interactions.secretRollNotification()
 			);
 		}
 		const finalEmbeds = KoboldEmbed.prepareEmbeds(embeds);
@@ -362,7 +365,7 @@ export class EmbedUtils {
 		targetDC,
 	}: {
 		embed: KoboldEmbed;
-		action: Sheet['actions'][0];
+		action: Action;
 		heightenLevel?: number;
 		saveRollType?: string;
 		targetDC?: number;
@@ -424,26 +427,24 @@ export class EmbedUtils {
 			//turn this back on if we want to hide damage messages when stats are hidden
 		} else {
 			// DM the damage to the Initiative GM
-			const initResult = await InitiativeUtils.getInitiativeForChannel(intr.channel, {
-				sendErrors: true,
-				LL,
-			});
-			await intr.client.users.send(initResult.init.gmUserId, actionRoller.buildResultText());
+			// const currentInit = await InitiativeUtils.getInitiativeForChannelOrNull(intr.channel);
+			// if (currentInit) {
+			// 	await intr.client.users.send(currentInit.gmUserId, actionRoller.buildResultText());
+			// }
 		}
 		let title = '';
 		let netDamage = actionRoller.totalDamageDealt - actionRoller.totalHealingDone;
-		if (netDamage < 0) {
+		if (actionRoller.targetCreature && netDamage < 0) {
 			title = `${targetNameOverwrite ?? actionRoller.targetCreature.name} healed ${
 				actionRoller.totalHealingDone
 			} health`;
-		} else {
+		} else if (actionRoller.targetCreature) {
 			title = `${targetNameOverwrite ?? actionRoller.targetCreature.name} took${
 				actionRoller.totalDamageDealt === 0 ? ' no' : ''
-			} damage from ${sourceNameOverwrite ?? actionRoller.creature.name}`;
+			} damage from ${sourceNameOverwrite ?? actionRoller.creature?.name ?? ''}`;
 			if (
 				//turn this back on if we want to hide damage messages when stats are hidden
-				!(hideStats || true) &&
-				actionRoller.targetCreature.sheet?.defenses?.currentHp === 0
+				actionRoller.targetCreature?.sheet?.defenses?.currentHp === 0
 			) {
 				message += "\nYip! They're down!";
 			}
@@ -481,7 +482,7 @@ export class EmbedUtils {
 		)} ${totalDamageDealt < 0 ? 'health' : 'damage'}`;
 		if (sourceCreatureName || actionName) message += ' from';
 		if (sourceCreatureName) message += ` ${sourceCreatureName}'s`;
-		if (actionName) message += ` ${actionName}`;
+		if (actionName) message += ` ${actionName ?? 'action'}`;
 		message += '!';
 
 		const currentHp = targetCreatureSheet.defenses.currentHp;
@@ -490,13 +491,13 @@ export class EmbedUtils {
 			if (currentHp === targetCreatureSheet.defenses.maxHp) {
 				message += " They're now at full health!";
 			}
-		} else if (initialDamageAmount < 0 && totalDamageDealt === 0) {
+		} else if ((initialDamageAmount ?? 0) < 0 && totalDamageDealt === 0) {
 			message = `Yip! I tried to heal ${targetCreatureName}, but they're already at full health!`;
 		} else {
 			if (currentHp === 0) {
 				message += " They're down!";
 			}
-			if ((triggeredWeaknesses ?? []).length > 0) {
+			if (triggeredWeaknesses && triggeredWeaknesses?.length > 0) {
 				let weaknessesMessage = triggeredWeaknesses[0].type;
 				let mappedWeaknesses = triggeredWeaknesses.map(resistance => resistance.type);
 				if (triggeredWeaknesses.length > 1) {
@@ -506,7 +507,7 @@ export class EmbedUtils {
 				}
 				message += `\nThey took extra damage from ${weaknessesMessage}!`;
 			}
-			if ((triggeredResistances ?? []).length > 0) {
+			if (triggeredResistances && triggeredResistances.length > 0) {
 				let resistancesMessage = triggeredResistances[0].type;
 				let mappedResistances = triggeredResistances.map(resistance => resistance.type);
 				if (triggeredResistances.length > 1) {
@@ -516,13 +517,15 @@ export class EmbedUtils {
 				}
 				message += `\nThey took less damage from ${resistancesMessage}!`;
 			}
-			if ((triggeredImmunities ?? []).length > 0) {
+			if (triggeredImmunities && triggeredImmunities.length > 0) {
 				let immunitiesMessage = triggeredImmunities[0];
 				if (triggeredImmunities.length > 1) {
 					const lastImmunity = triggeredImmunities.pop();
 					const joinedImmunities = triggeredImmunities.join(', ');
-					immunitiesMessage = joinedImmunities + ', and' + lastImmunity;
-					triggeredImmunities.push(lastImmunity);
+					if (lastImmunity) {
+						immunitiesMessage = joinedImmunities + ', and' + lastImmunity;
+						triggeredImmunities.push(lastImmunity);
+					}
 				}
 				message += `\nThey took no damage from ${immunitiesMessage}!`;
 			}

@@ -3,39 +3,37 @@ import {
 	InitiativeActorFactory,
 	InitiativeActorGroupFactory,
 	Initiative,
+	InitiativeActorGroup,
 } from '../services/kobold/models/index.js';
 import { InitiativeUtils, InitiativeBuilder } from './initiative-utils.js';
 import { CommandInteraction } from 'discord.js';
 import { KoboldEmbed } from './kobold-embed-utils.js';
 import { InteractionUtils } from './interaction-utils.js';
-import { Language } from '../models/enum-helpers/index.js';
+import L from '../i18n/i18n-node.js';
+import { KoboldError } from './KoboldError.js';
 
-function setupInitiativeActorsAndGroupsForTests(initiative) {
+function setupInitiativeActorsAndGroupsForTests(initiative: Initiative) {
 	const actors = InitiativeActorFactory.withFakeId().buildList(
 		3,
 		{},
 		{ transient: { includeGroup: true } }
 	);
-	const groups = actors.map(actor => actor.actorGroup);
-	const firstGroup = groups[2];
+	const groups = actors.map(actor => actor.actorGroup as InitiativeActorGroup);
+	const firstGroup = groups[2] as InitiativeActorGroup;
 	firstGroup.initiativeResult = 30;
-	const secondGroup = groups[0];
+	const secondGroup = groups[0] as InitiativeActorGroup;
 	secondGroup.initiativeResult = 20;
-	const thirdGroup = groups[1];
+	const thirdGroup = groups[1] as InitiativeActorGroup;
 	thirdGroup.initiativeResult = 10;
 
 	initiative.actors = actors;
-	initiative.actorGroups = groups;
+	initiative.actorGroups = groups as InitiativeActorGroup[];
 	return { actors, groups, firstGroup, secondGroup, thirdGroup };
 }
 
 // setup vitest tests for each function in ./initiative-utils.ts
 describe('initiative-utils', function () {
 	describe('InitiativeBuilder', function () {
-		test('creates an empty initiative', function () {
-			const builder = new InitiativeBuilder({});
-			expect(builder).toBeDefined();
-		});
 		test('orders initiative actors by initiative result', function () {
 			const initiative = InitiativeFactory.build();
 			const { actors, groups, firstGroup, secondGroup, thirdGroup } =
@@ -65,9 +63,7 @@ describe('initiative-utils', function () {
 					groups,
 				});
 
-				expect(builder.getPreviousTurnChanges().errorMessage).toBeDefined();
-				expect(builder.getPreviousTurnChanges().currentTurnGroupId).not.toBeDefined();
-				expect(builder.getPreviousTurnChanges().currentRound).not.toBeDefined();
+				expect(builder.getPreviousTurnChanges()).toThrowError();
 			});
 			test('fails to move to the previous turn before the initiative has started', function () {
 				const initiative = InitiativeFactory.build({
@@ -83,9 +79,7 @@ describe('initiative-utils', function () {
 					groups,
 				});
 
-				expect(builder.getPreviousTurnChanges().errorMessage).toBeDefined();
-				expect(builder.getPreviousTurnChanges().currentTurnGroupId).not.toBeDefined();
-				expect(builder.getPreviousTurnChanges().currentRound).not.toBeDefined();
+				expect(builder.getPreviousTurnChanges()).toThrowError();
 			});
 			test('moves to the previous turn after initiative has started', function () {
 				const initiative = InitiativeFactory.build({
@@ -104,7 +98,6 @@ describe('initiative-utils', function () {
 
 				expect(builder.getPreviousTurnChanges().currentTurnGroupId).toBe(firstGroup.id);
 				expect(builder.getPreviousTurnChanges().currentRound).toBe(1);
-				expect(builder.getPreviousTurnChanges().errorMessage).not.toBeDefined();
 			});
 		});
 		describe('getNextTurnChanges', function () {
@@ -125,7 +118,6 @@ describe('initiative-utils', function () {
 
 				expect(builder.getPreviousTurnChanges().currentRound).toBe(1);
 				expect(builder.getPreviousTurnChanges().currentTurnGroupId).toBe(thirdGroup.id);
-				expect(builder.getPreviousTurnChanges().errorMessage).not.toBeDefined();
 			});
 			test('moves to the next turn before initiative has started', function () {
 				const initiative = InitiativeFactory.build({
@@ -143,7 +135,6 @@ describe('initiative-utils', function () {
 
 				expect(builder.getNextTurnChanges().currentTurnGroupId).toBe(firstGroup.id);
 				expect(builder.getNextTurnChanges().currentRound).toBe(1);
-				expect(builder.getNextTurnChanges().errorMessage).not.toBeDefined();
 			});
 			test('moves to the next turn after initiative has started', function () {
 				const initiative = InitiativeFactory.build({
@@ -162,7 +153,6 @@ describe('initiative-utils', function () {
 
 				expect(builder.getNextTurnChanges().currentTurnGroupId).toBe(thirdGroup.id);
 				expect(builder.getNextTurnChanges().currentRound).toBe(1);
-				expect(builder.getNextTurnChanges().errorMessage).not.toBeDefined();
 			});
 			test('moves to the next round on the last turn in a round', function () {
 				const initiative = InitiativeFactory.build({
@@ -181,7 +171,6 @@ describe('initiative-utils', function () {
 
 				expect(builder.getNextTurnChanges().currentRound).toBe(2);
 				expect(builder.getNextTurnChanges().currentTurnGroupId).toBe(firstGroup.id);
-				expect(builder.getNextTurnChanges().errorMessage).not.toBeDefined();
 			});
 		});
 		describe('removeActor', function () {
@@ -388,14 +377,22 @@ describe('initiative-utils', function () {
 			expect(result).toBeTruthy();
 		});
 		test('returns null if there is no initiative for the channel', async function () {
-			const result = await InitiativeUtils.getInitiativeForChannel({
-				id: 'nonexistentChannelId',
-			} as any);
-			expect(result.errorMessage).toBeTruthy();
+			try {
+				await InitiativeUtils.getInitiativeForChannel({
+					id: 'nonexistentChannelId',
+				} as any);
+				expect('should not reach this line').toBe(false);
+			} catch (err) {
+				expect(err).toBeInstanceOf(KoboldError);
+			}
 		});
 		test('returns an error message if a channel is not provided', async function () {
-			const result = await InitiativeUtils.getInitiativeForChannel(null as any);
-			expect(result.errorMessage).toBeTruthy();
+			try {
+				const result = await InitiativeUtils.getInitiativeForChannel(null as any);
+				expect('should not reach this line').toBe(false);
+			} catch (err) {
+				expect(err).toBeInstanceOf(KoboldError);
+			}
 		});
 		afterAll(async function () {
 			await Initiative.query().delete().where({ channelId: 'testChannelId' });
@@ -404,12 +401,11 @@ describe('initiative-utils', function () {
 	describe('InitiativeUtils.sendNewRoundMessage', function () {
 		test('sends a new initiative round message if it does not exist', async function () {
 			const initiative = await InitiativeFactory.create({
-				roundMessageIds: [],
 				currentRound: 0,
 			});
 			const fakeIntr = {
 				channel: {
-					send(content) {
+					send(content: string) {
 						return 'success! ' + content;
 					},
 				},
@@ -417,7 +413,7 @@ describe('initiative-utils', function () {
 			vi.spyOn(InteractionUtils, 'send').mockResolvedValueOnce('success!' as any);
 			vi.spyOn(Initiative, 'query').mockImplementationOnce((): any => {
 				return {
-					updateAndFetchById(id, obj) {
+					updateAndFetchById(id: any, obj: any) {
 						return initiative;
 					},
 				};
@@ -509,12 +505,8 @@ describe('initiative-utils', function () {
 				isActiveCharacter: true,
 			} as any;
 
-			const result = InitiativeUtils.getActiveCharacterActor(
-				initiative,
-				'testUserId',
-				Language.LL
-			);
-			expect(result.actor).toBe(actors[2]);
+			const result = InitiativeUtils.getActiveCharacterActor(initiative, 'testUserId', L.en);
+			expect(result).toBe(actors[2]);
 		});
 		test('returns an error message if the user does not have an active character', function () {
 			const initiative = InitiativeFactory.build();
@@ -533,12 +525,16 @@ describe('initiative-utils', function () {
 				isActiveCharacter: false,
 			} as any;
 
-			const result = InitiativeUtils.getActiveCharacterActor(
-				initiative,
-				'testUserId',
-				Language.LL
-			);
-			expect(result.errorMessage).toBeTruthy();
+			try {
+				const result = InitiativeUtils.getActiveCharacterActor(
+					initiative,
+					'testUserId',
+					L.en
+				);
+				expect('this should not').toBe('be reached');
+			} catch (err) {
+				expect(err).toBeInstanceOf(KoboldError);
+			}
 		});
 	});
 	describe('InitiativeUtils.nameMatchGeneric', function () {
@@ -551,13 +547,13 @@ describe('initiative-utils', function () {
 				{ name: 'anotherName' },
 				{ name: 'yetAnotherName' },
 			];
-			const result = InitiativeUtils.nameMatchGeneric(names, 'another', '');
-			expect(result.value).toBe(names[1]);
+			const result = InitiativeUtils.nameMatchGeneric(names, 'another');
+			expect(result?.name).toBe(names[1]);
 		});
 		test('returns an error message if no match is found', function () {
-			const names = [];
-			const result = InitiativeUtils.nameMatchGeneric(names, 'notFound', 'error');
-			expect(result.errorMessage).toBe('error');
+			const names: any[] = [];
+			const result = InitiativeUtils.nameMatchGeneric(names, 'notFound');
+			expect(result.errorMessage).toBe(null);
 		});
 	});
 	describe('InitiativeUtils.getNameMatchActorFromInitiative', function () {
@@ -576,7 +572,7 @@ describe('initiative-utils', function () {
 				'testUserId',
 				initiative,
 				'another',
-				Language.LL
+				L.en
 			);
 			expect(result.actor).toBe(actors[1]);
 		});
@@ -590,7 +586,7 @@ describe('initiative-utils', function () {
 				'testUserId',
 				initiative,
 				'notFound',
-				Language.LL
+				L.en
 			);
 			expect(result.errorMessage).toBeTruthy();
 		});
@@ -611,7 +607,7 @@ describe('initiative-utils', function () {
 				initiative,
 				'testUserId',
 				'another',
-				Language.LL
+				L.en
 			);
 			expect(result.group).toBe(secondGroup);
 		});
@@ -630,7 +626,7 @@ describe('initiative-utils', function () {
 				initiative,
 				'testUserId',
 				'notFound',
-				Language.LL
+				L.en
 			);
 			expect(result.errorMessage).toBeTruthy();
 		});

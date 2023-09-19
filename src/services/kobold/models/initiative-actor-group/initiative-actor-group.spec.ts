@@ -33,6 +33,6 @@ describe('Initiative Actor', () => {
 		const insertedActor = fetchedActors.find(
 			factory => factory.charId === builtActorGroup.charId
 		);
-		expect(insertedActor.charId).toBe(builtActorGroup.charId);
+		expect(insertedActor?.charId).toBe(builtActorGroup.charId);
 	});
 });

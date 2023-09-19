@@ -1,13 +1,11 @@
 import { InitiativeActorGroup } from './../../../services/kobold/models/initiative-actor-group/initiative-actor-group.model.js';
 import { InitiativeUtils, InitiativeBuilder } from './../../../utils/initiative-utils.js';
 import { InitiativeActor } from '../../../services/kobold/models/initiative-actor/initiative-actor.model.js';
-import { ChatArgs } from '../../../constants/chat-args.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
 	ChatInputCommandInteraction,
 	PermissionsString,
-	EmbedBuilder,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
@@ -15,23 +13,22 @@ import {
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 
-import { EventData } from '../../../models/internal-models.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import _ from 'lodash';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { Language } from '../../../models/enum-helpers/index.js';
+import L from '../../../i18n/i18n-node.js';
 import { Initiative } from '../../../services/kobold/models/index.js';
 import { InitOptions } from './init-command-options.js';
 import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
 
 export class InitSetSubCommand implements Command {
-	public names = [Language.LL.commands.init.set.name()];
+	public names = [L.en.commands.init.set.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.init.set.name(),
-		description: Language.LL.commands.init.set.description(),
+		name: L.en.commands.init.set.name(),
+		description: L.en.commands.init.set.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -42,11 +39,11 @@ export class InitSetSubCommand implements Command {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption
-	): Promise<ApplicationCommandOptionChoiceData[]> {
+	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === InitOptions.INIT_CHARACTER_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(InitOptions.INIT_CHARACTER_OPTION.name);
+			const match = intr.options.getString(InitOptions.INIT_CHARACTER_OPTION.name) ?? '';
 
 			return await AutocompleteUtils.getInitTargetOptions(intr, match);
 		}
@@ -54,15 +51,16 @@ export class InitSetSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
-		const targetCharacterName = (
-			intr.options.getString(InitOptions.INIT_CHARACTER_OPTION.name) ?? ''
-		).trim();
-		const fieldToChange = intr.options.getString(InitOptions.ACTOR_SET_OPTION.name).trim();
+		const targetCharacterName = intr.options
+			.getString(InitOptions.INIT_CHARACTER_OPTION.name, true)
+			.trim();
+		const fieldToChange = intr.options
+			.getString(InitOptions.ACTOR_SET_OPTION.name, true)
+			.trim();
 		const newFieldValue = intr.options
-			.getString(InitOptions.ACTOR_SET_VALUE_OPTION.name)
+			.getString(InitOptions.ACTOR_SET_VALUE_OPTION.name, true)
 			.trim();
 
 		if (
@@ -75,29 +73,15 @@ export class InitSetSubCommand implements Command {
 			);
 			return;
 		}
-		let currentInitResponse = await InitiativeUtils.getInitiativeForChannel(intr.channel, {
-			sendErrors: true,
-			LL,
-		});
-		if (currentInitResponse.errorMessage) {
-			await InteractionUtils.send(intr, currentInitResponse.errorMessage);
-			return;
-		}
-		let currentInit = currentInitResponse.init;
+		let currentInit = await InitiativeUtils.getInitiativeForChannel(intr.channel);
 
-		const actorResponse: { actor: InitiativeActor; errorMessage: string } =
-			await InitiativeUtils.getNameMatchActorFromInitiative(
-				intr.user.id,
-				currentInit,
-				targetCharacterName,
-				LL,
-				true
-			);
-		if (actorResponse.errorMessage) {
-			await InteractionUtils.send(intr, actorResponse.errorMessage);
-			return;
-		}
-		const actor = actorResponse.actor;
+		const actor = await InitiativeUtils.getNameMatchActorFromInitiative(
+			intr.user.id,
+			currentInit,
+			targetCharacterName,
+			LL,
+			true
+		);
 		const actorsInGroup = _.filter(
 			currentInit.actors,
 			possibleActor => possibleActor.initiativeActorGroupId === actor.initiativeActorGroupId
@@ -167,15 +151,7 @@ export class InitSetSubCommand implements Command {
 		} else if (fieldToChange === 'hide-stats') {
 			await InitiativeActor.query().patchAndFetchById(actor.id, { hideStats: finalValue });
 		}
-		currentInitResponse = await InitiativeUtils.getInitiativeForChannel(intr.channel, {
-			sendErrors: true,
-			LL,
-		});
-		if (currentInitResponse.errorMessage) {
-			await InteractionUtils.send(intr, currentInitResponse.errorMessage);
-			return;
-		}
-		currentInit = currentInitResponse.init;
+		currentInit = await InitiativeUtils.getInitiativeForChannel(intr.channel);
 
 		const updateEmbed = new KoboldEmbed();
 		updateEmbed.setTitle(

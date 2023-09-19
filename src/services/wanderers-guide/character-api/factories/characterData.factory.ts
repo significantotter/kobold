@@ -16,36 +16,47 @@ export const CharacterDataFactory = CharacterDataFactoryClass.define(() => {
 	return {
 		id: faker.number.int(2147483647),
 		userID: faker.number.int(2147483647),
-		buildID: faker.helpers.maybe(() => faker.number.int(2147483647), { probability: 0.1 }),
+		buildID:
+			faker.helpers.maybe(() => faker.number.int(2147483647), { probability: 0.1 }) ?? null,
 		name: faker.person.firstName(),
 		level: faker.number.int({ min: 1, max: 20 }),
 		experience: faker.number.int({ min: 0, max: 999 }),
 		currentHealth: faker.number.int({ min: 0, max: maxHealth }),
-		tempHealth: faker.helpers.maybe(() => faker.number.int({ min: 1, max: 10 }), {
-			probability: 0.1,
-		}),
+		tempHealth:
+			faker.helpers.maybe(() => faker.number.int({ min: 1, max: 10 }), {
+				probability: 0.1,
+			}) ?? null,
 		heroPoints: faker.number.int({ min: 0, max: 3 }),
-		ancestryID: faker.helpers.maybe(() => faker.number.int(2147483647), { probability: 0.1 }),
-		heritageID: faker.helpers.maybe(() => faker.number.int(2147483647), { probability: 0.1 }),
-		uniHeritageID: faker.helpers.maybe(() => faker.number.int(2147483647), {
-			probability: 0.1,
-		}),
-		backgroundID: faker.helpers.maybe(() => faker.number.int(2147483647), { probability: 0.1 }),
-		classID: faker.helpers.maybe(() => faker.number.int(2147483647), { probability: 0.1 }),
-		classID_2: faker.helpers.maybe(() => faker.number.int(2147483647), { probability: 0.1 }),
+		ancestryID:
+			faker.helpers.maybe(() => faker.number.int(2147483647), { probability: 0.1 }) ?? null,
+		heritageID:
+			faker.helpers.maybe(() => faker.number.int(2147483647), { probability: 0.1 }) ?? null,
+		uniHeritageID:
+			faker.helpers.maybe(() => faker.number.int(2147483647), {
+				probability: 0.1,
+			}) ?? null,
+		backgroundID:
+			faker.helpers.maybe(() => faker.number.int(2147483647), { probability: 0.1 }) ?? null,
+		classID:
+			faker.helpers.maybe(() => faker.number.int(2147483647), { probability: 0.1 }) ?? null,
+		classID_2:
+			faker.helpers.maybe(() => faker.number.int(2147483647), { probability: 0.1 }) ?? null,
 		inventoryID: faker.number.int(2147483647),
 		notes: null,
 		infoJSON: { imageURL: faker.internet.url(), pronouns: faker.word.words(2) },
 		rollHistoryJSON: {},
 		details: {},
 		customCode: {},
-		dataID: faker.helpers.maybe(() => faker.number.int(2147483647), { probability: 0.1 }),
-		currentStamina: faker.helpers.maybe(() => faker.number.int({ max: 20 }), {
-			probability: 0.1,
-		}),
-		currentResolve: faker.helpers.maybe(() => faker.number.int({ max: 20 }), {
-			probability: 0.1,
-		}),
+		dataID:
+			faker.helpers.maybe(() => faker.number.int(2147483647), { probability: 0.1 }) ?? null,
+		currentStamina:
+			faker.helpers.maybe(() => faker.number.int({ max: 20 }), {
+				probability: 0.1,
+			}) ?? null,
+		currentResolve:
+			faker.helpers.maybe(() => faker.number.int({ max: 20 }), {
+				probability: 0.1,
+			}) ?? null,
 		builderByLevel: faker.number.int({ min: 0, max: 1 }),
 		optionAutoDetectPreReqs: faker.number.int({ min: 0, max: 1 }),
 		optionAutoHeightenSpells: faker.number.int({ min: 0, max: 1 }),

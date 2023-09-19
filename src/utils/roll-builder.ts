@@ -1,7 +1,6 @@
 import _ from 'lodash';
 import { TranslationFunctions } from '../i18n/i18n-types.js';
-import { Language } from '../models/enum-helpers/language.js';
-import { Character, UserSettings } from '../services/kobold/models/index.js';
+import { Attribute, Character, UserSettings } from '../services/kobold/models/index.js';
 import { Creature } from './creature.js';
 import {
 	DiceUtils,
@@ -9,16 +8,20 @@ import {
 	MultiRollResult,
 	TextResult,
 	ResultField,
+	DiceRollError,
+	ErrorResult,
 } from './dice-utils.js';
 import { KoboldEmbed } from './kobold-embed-utils.js';
 import { UserSettingsFactory } from '../services/kobold/models/user-settings/user-settings.factory.js';
+import { APIEmbedField } from 'discord.js';
+import L from '../i18n/i18n-node.js';
 
 export class RollBuilder {
 	private userSettings: UserSettings | null;
 	private creature: Creature | null;
 	private targetCreature: Creature | null;
-	private rollDescription: string;
-	private rollNote: string;
+	private rollDescription: string | null;
+	private rollNote: string | null;
 	public rollResults: ResultField[];
 	private footer: string;
 	private title: string;
@@ -46,9 +49,9 @@ export class RollBuilder {
 		LL?: TranslationFunctions;
 	}) {
 		this.rollResults = [];
-		this.rollNote = rollNote;
-		this.rollDescription = rollDescription;
-		this.LL = LL || Language.LL;
+		this.rollNote = rollNote ?? null;
+		this.rollDescription = rollDescription ?? null;
+		this.LL = LL || L.en;
 		this.footer = '';
 		this.creature = creature || null;
 		if (character && !this.creature) {
@@ -90,11 +93,7 @@ export class RollBuilder {
 			rollExpression: string;
 			tags?: string[];
 			modifierMultiplier?: number;
-			extraAttributes?: {
-				name: string;
-				value: number;
-				tags?: string[];
-			}[];
+			extraAttributes?: Attribute[];
 		}[];
 		rollFromTarget?: boolean;
 		showTags?: boolean;
@@ -107,7 +106,7 @@ export class RollBuilder {
 				tags: rollExpression.tags,
 				extraAttributes: rollExpression.extraAttributes,
 				modifierMultiplier: rollExpression.modifierMultiplier,
-				creature: rollFromTarget ? this.targetCreature : this.creature,
+				creature: (rollFromTarget ? this.targetCreature : this.creature) ?? undefined,
 				LL: this.LL,
 			}),
 			name: rollExpression.name,
@@ -118,7 +117,8 @@ export class RollBuilder {
 		return rollResult;
 	}
 
-	public determineNatOneOrNatTwenty(node) {
+	public determineNatOneOrNatTwenty(node: any): 'nat 1' | 'nat 20' | null {
+		if (!node) return null;
 		// depth first search for nat 20s or nat 1s
 		// each node has a children array of expression nodes
 		// if the node has an 'attributes' object with a 'sides' property of 20, it's a d20
@@ -145,6 +145,7 @@ export class RollBuilder {
 				if (result) return result;
 			}
 		}
+		return null;
 	}
 
 	/**
@@ -172,73 +173,69 @@ export class RollBuilder {
 		rollTitle?: string;
 		damageType?: string;
 		tags?: string[];
-		extraAttributes?: {
-			name: string;
-			value: number;
-			tags?: string[];
-		}[];
+		extraAttributes?: Attribute[];
 		targetDC?: number;
 		multiplier?: number;
 		showTags?: boolean;
 		rollType?: 'attack' | 'skill-challenge' | 'damage' | 'save';
 		rollFromTarget?: boolean;
-	}) {
-		const rollField = DiceUtils.parseAndEvaluateDiceExpression({
-			rollExpression,
-			damageType,
-			tags,
-			extraAttributes: extraAttributes ?? [],
-			multiplier,
-			creature: rollFromTarget ? this.targetCreature : this.creature,
-			LL: this.LL,
-		});
-		const title = rollTitle || '\u200B';
-		let totalTags = tags || [];
+	}): DiceRollResult | ErrorResult {
+		try {
+			const rollField = DiceUtils.parseAndEvaluateDiceExpression({
+				rollExpression,
+				damageType,
+				tags,
+				extraAttributes: extraAttributes ?? [],
+				multiplier,
+				creature: (rollFromTarget ? this.targetCreature : this.creature) ?? undefined,
+				LL: this.LL,
+			});
+			const title = rollTitle || '\u200B';
+			let totalTags = tags || [];
 
-		let rollResult: DiceRollResult = { ...rollField, name: title, type: 'dice' };
+			let rollResult: DiceRollResult = { ...rollField, name: title, type: 'dice' };
 
-		if (targetDC) {
-			const saveTitleAdditionText = {
-				'critical success': ' Critical Success.',
-				success: ' Success.',
-				failure: ' Failure!',
-				'critical failure': ' Critical Failure!',
-			};
-			const attackTitleAdditionText = {
-				'critical success': ' Critical Hit!',
-				success: ' Hit!',
-				failure: ' Miss.',
-				'critical failure': ' Miss.',
-			};
-			const skillChallengeTitleAdditionText = {
-				'critical success': ' Critical Success!',
-				success: ' Success!',
-				failure: ' Failure.',
-				'critical failure': ' Failure.',
-			};
+			if (targetDC) {
+				const saveTitleAdditionText = {
+					'critical success': ' Critical Success.',
+					success: ' Success.',
+					failure: ' Failure!',
+					'critical failure': ' Critical Failure!',
+				};
+				const attackTitleAdditionText = {
+					'critical success': ' Critical Hit!',
+					success: ' Hit!',
+					failure: ' Miss.',
+					'critical failure': ' Miss.',
+				};
+				const skillChallengeTitleAdditionText = {
+					'critical success': ' Critical Success!',
+					success: ' Success!',
+					failure: ' Failure.',
+					'critical failure': ' Failure.',
+				};
 
-			let natTwenty = null;
-			try {
-				natTwenty = this.determineNatOneOrNatTwenty(rollResult.results.reducedExpression);
-			} catch (err) {
-				console.log(err);
-			}
+				let natTwenty = null;
+				try {
+					natTwenty = this.determineNatOneOrNatTwenty(
+						rollResult.results?.reducedExpression
+					);
+				} catch (err) {
+					console.log(err);
+				}
 
-			let result: 'critical success' | 'success' | 'failure' | 'critical failure' | null =
-				null;
-			let numericResult = -1;
+				let result: 'critical success' | 'success' | 'failure' | 'critical failure';
+				let numericResult;
 
-			if (rollResult.results.total >= targetDC + 10) {
-				numericResult = 4;
-			} else if (rollResult.results.total >= targetDC) {
-				numericResult = 3;
-			} else if (rollResult.results.total <= targetDC - 10) {
-				numericResult = 1;
-			} else if (rollResult.results.total < targetDC) {
-				numericResult = 2;
-			}
+				if (rollResult.results.total >= targetDC + 10) {
+					numericResult = 4;
+				} else if (rollResult.results.total >= targetDC) {
+					numericResult = 3;
+				} else if (rollResult.results.total <= targetDC - 10) {
+					numericResult = 1;
+				} //if (rollResult.results.total < targetDC)
+				else numericResult = 2;
 
-			if (numericResult !== -1) {
 				if (natTwenty === 'nat 20') {
 					numericResult = Math.min(numericResult + 1, 4);
 				} else if (natTwenty === 'nat 1') {
@@ -247,30 +244,43 @@ export class RollBuilder {
 				if (numericResult === 1) result = 'critical failure';
 				else if (numericResult === 2) result = 'failure';
 				else if (numericResult === 3) result = 'success';
-				else if (numericResult === 4) result = 'critical success';
+				//if (numericResult === 4)
+				else result = 'critical success';
+
+				let titleAdditionText = '';
+				if (natTwenty) titleAdditionText += ` ${_.capitalize(natTwenty)}!`;
+				if (rollType === 'attack') titleAdditionText += attackTitleAdditionText[result];
+				else if (rollType === 'skill-challenge')
+					titleAdditionText += skillChallengeTitleAdditionText[result];
+				else if (rollType === 'save') titleAdditionText += saveTitleAdditionText[result];
+
+				rollResult.targetDC = targetDC;
+				rollResult.success = result ?? undefined;
+				rollResult.name = `${rollResult.name}.${titleAdditionText}`;
 			}
 
-			let titleAdditionText = '';
-			if (natTwenty) titleAdditionText += ` ${_.capitalize(natTwenty)}!`;
-			if (rollType === 'attack') titleAdditionText += attackTitleAdditionText[result];
-			else if (rollType === 'skill-challenge')
-				titleAdditionText += skillChallengeTitleAdditionText[result];
-			else if (rollType === 'save') titleAdditionText += saveTitleAdditionText[result];
+			this.rollResults.push(rollResult);
 
-			rollResult.targetDC = targetDC;
-			rollResult.success = result;
-			rollResult.name = `${rollResult.name}.${titleAdditionText}`;
+			if (totalTags?.length && showTags) {
+				const rollTagsText = rollTitle ? `${rollTitle} tags` : 'tags';
+				this.footer = this.footer
+					? `${this.footer}\n${rollTagsText}: ${totalTags.join(', ')}`
+					: `${rollTagsText}: ${totalTags.join(', ')}`;
+			}
+			return rollResult;
+		} catch (err) {
+			if (err instanceof DiceRollError) {
+				return {
+					type: 'error',
+					value: err.message,
+				};
+			} else {
+				return {
+					type: 'error',
+					value: `failed to roll ${rollExpression}`,
+				};
+			}
 		}
-
-		this.rollResults.push(rollResult);
-
-		if (totalTags?.length && showTags) {
-			const rollTagsText = rollTitle ? `${rollTitle} tags` : 'tags';
-			this.footer = this.footer
-				? `${this.footer}\n${rollTagsText}: ${totalTags.join(', ')}`
-				: `${rollTagsText}: ${totalTags.join(', ')}`;
-		}
-		return rollResult;
 	}
 
 	evaluateRollsInText({
@@ -279,11 +289,7 @@ export class RollBuilder {
 		tags,
 	}: {
 		text: string;
-		extraAttributes?: {
-			name: string;
-			value: number;
-			tags?: string[];
-		}[];
+		extraAttributes?: Attribute[];
 		tags?: string[];
 	}) {
 		// parse and evaluate any rolls in the text
@@ -293,25 +299,34 @@ export class RollBuilder {
 		for (let i = 0; i < splitText.length; i++) {
 			if (splitText[i].indexOf('}}') !== -1) {
 				const [rollExpression, postRollExpressionText] = splitText[i].split('}}');
-				const rollResult = DiceUtils.parseAndEvaluateDiceExpression({
-					rollExpression,
-					extraAttributes,
-					creature: this.creature,
-					LL: this.LL,
-					tags,
-				});
-				let resultText = '';
-				if (
-					this.userSettings.inlineRollsDisplay === 'compact' ||
-					rollResult.results.renderedExpression == rollResult.results.total.toString()
-				) {
-					resultText = '`' + rollResult.results.total.toString() + '`';
-				} else {
-					resultText = `\`${
-						rollResult.results.total
-					}="${rollResult.results.renderedExpression.toString()}"\``;
+				try {
+					const rollResult = DiceUtils.parseAndEvaluateDiceExpression({
+						rollExpression,
+						extraAttributes,
+						creature: this.creature ?? undefined,
+						LL: this.LL,
+						tags,
+					});
+					let resultText = '';
+					if (
+						this.userSettings?.inlineRollsDisplay === 'compact' ||
+						rollResult.results.renderedExpression == rollResult.results.total.toString()
+					) {
+						resultText = '`' + rollResult.results.total.toString() + '`';
+					} else {
+						resultText = `\`${
+							rollResult.results.total
+						}="${rollResult.results.renderedExpression.toString()}"\``;
+					}
+					finalString.push(resultText, postRollExpressionText);
+				} catch (err) {
+					if (err instanceof DiceRollError)
+						return `Failed to parse ${err.diceExpression}`;
+					else {
+						console.warn(err);
+						return `Failed to parse the provided roll`;
+					}
 				}
-				finalString.push(resultText, postRollExpressionText);
 			} else {
 				finalString.push(splitText[i]);
 			}
@@ -327,11 +342,7 @@ export class RollBuilder {
 	}: {
 		title: string;
 		text: string;
-		extraAttributes?: {
-			name: string;
-			value: number;
-			tags?: string[];
-		}[];
+		extraAttributes?: Attribute[];
 		tags?: string[];
 	}) {
 		const parsedString = this.evaluateRollsInText({ text, extraAttributes, tags });
@@ -344,15 +355,19 @@ export class RollBuilder {
 	/**
 	 * Returns an array of all of the final numeric results of the roll or multiroll fields
 	 */
-	public getRollTotalArray(): number[] {
-		const resultArray: number[] = [];
+	public getRollTotalArray(): (number | null)[] {
+		const resultArray: (number | null)[] = [];
 		for (const result of this.rollResults) {
-			if (result.type === 'dice') {
+			if (result.type === 'dice' && result?.results?.total) {
 				resultArray.push(result.results.total);
 			} else if (result.type === 'multiDice') {
 				for (const subResult of result.results) {
-					resultArray.push(subResult.results.total);
+					if (subResult?.results?.total) {
+						resultArray.push(subResult.results.total);
+					}
 				}
+			} else {
+				resultArray.push(null);
 			}
 		}
 		return resultArray;
@@ -363,9 +378,10 @@ export class RollBuilder {
 	 * @param result The result field to convert to an embed field
 	 * @returns
 	 */
-	public convertResultToEmbedField(result: ResultField) {
+	public convertResultToEmbedField(result: ResultField): APIEmbedField {
+		let convertedResult: APIEmbedField;
 		if (result.type === 'multiDice') {
-			return {
+			convertedResult = {
 				name: result.name,
 				value: result.results
 					.map(
@@ -377,16 +393,18 @@ export class RollBuilder {
 					.join('\n'),
 			};
 		} else if (result.type === 'text') {
-			return {
+			convertedResult = {
 				name: result.name,
 				value: result.value,
 			};
-		} else if (result.type === 'dice') {
-			return {
+		} else {
+			//if (result.type === 'dice')
+			convertedResult = {
 				name: result.name,
 				value: result.value.replaceAll('*', '\\*').replaceAll('_', '\\_'),
 			};
 		}
+		return convertedResult;
 	}
 
 	/**

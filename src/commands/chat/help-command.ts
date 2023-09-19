@@ -8,14 +8,18 @@ import {
 } from 'discord.js';
 
 import { TranslationFunctions } from '../../i18n/i18n-types.js';
-import { Language } from '../../models/enum-helpers/index.js';
-import { EventData } from '../../models/internal-models.js';
-import { InteractionUtils } from '../../utils/index.js';
 import { Command, CommandDeferType } from '../index.js';
 import _ from 'lodash';
+import L from '../../i18n/i18n-node.js';
 
-function createCommandOperationHelpField(command, operation, LL) {
-	const langBase = LL.commands[_.camelCase(command)][_.camelCase(operation)];
+function createCommandOperationHelpField(
+	command: string,
+	operation: string,
+	LL: TranslationFunctions
+) {
+	const langBase = (LL.commands as { [k: string]: any })[_.camelCase(command)][
+		_.camelCase(operation)
+	];
 
 	let fieldName = `\`/${command} ${operation}`;
 	if (langBase.options()) fieldName += ` ${langBase.options()}`;
@@ -29,74 +33,74 @@ function createCommandOperationHelpField(command, operation, LL) {
 }
 
 export class HelpCommand implements Command {
-	public names = [Language.LL.commands.help.name()];
+	public names = [L.en.commands.help.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.help.name(),
-		description: Language.LL.commands.help.description(),
+		name: L.en.commands.help.name(),
+		description: L.en.commands.help.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 		options: [
 			{
-				name: Language.LL.commands.help.faq.name(),
-				description: Language.LL.commands.help.faq.description(),
+				name: L.en.commands.help.faq.name(),
+				description: L.en.commands.help.faq.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 			},
 			{
-				name: Language.LL.commands.help.about.name(),
-				description: Language.LL.commands.help.about.description(),
+				name: L.en.commands.help.about.name(),
+				description: L.en.commands.help.about.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 			},
 			{
-				name: Language.LL.commands.help.commands.name(),
-				description: Language.LL.commands.help.commands.description(),
+				name: L.en.commands.help.commands.name(),
+				description: L.en.commands.help.commands.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 			},
 			{
-				name: Language.LL.commands.help.character.name(),
-				description: Language.LL.commands.help.character.description(),
-				type: ApplicationCommandOptionType.Subcommand,
-				options: [],
-			},
-			{
-				name: Language.LL.commands.help.init.name(),
-				description: Language.LL.commands.help.init.description(),
+				name: L.en.commands.help.character.name(),
+				description: L.en.commands.help.character.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [],
 			},
 			{
-				name: Language.LL.commands.help.roll.name(),
-				description: Language.LL.commands.help.roll.description(),
+				name: L.en.commands.help.init.name(),
+				description: L.en.commands.help.init.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [],
 			},
 			{
-				name: Language.LL.commands.help.modifier.name(),
-				description: Language.LL.commands.help.modifier.description(),
+				name: L.en.commands.help.roll.name(),
+				description: L.en.commands.help.roll.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [],
 			},
 			{
-				name: Language.LL.commands.help.game.name(),
-				description: Language.LL.commands.help.game.description(),
+				name: L.en.commands.help.modifier.name(),
+				description: L.en.commands.help.modifier.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [],
 			},
 			{
-				name: Language.LL.commands.help.gameplay.name(),
-				description: Language.LL.commands.help.gameplay.description(),
+				name: L.en.commands.help.game.name(),
+				description: L.en.commands.help.game.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [],
 			},
 			{
-				name: Language.LL.commands.help.attributesAndTags.name(),
-				description: Language.LL.commands.help.attributesAndTags.description(),
+				name: L.en.commands.help.gameplay.name(),
+				description: L.en.commands.help.gameplay.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [],
 			},
 			{
-				name: Language.LL.commands.help.makingACustomAction.name(),
-				description: Language.LL.commands.help.makingACustomAction.description(),
+				name: L.en.commands.help.attributesAndTags.name(),
+				description: L.en.commands.help.attributesAndTags.description(),
+				type: ApplicationCommandOptionType.Subcommand,
+				options: [],
+			},
+			{
+				name: L.en.commands.help.makingACustomAction.name(),
+				description: L.en.commands.help.makingACustomAction.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					{
@@ -130,26 +134,26 @@ export class HelpCommand implements Command {
 				],
 			},
 			{
-				name: Language.LL.commands.help.rollMacro.name(),
-				description: Language.LL.commands.help.rollMacro.description(),
+				name: L.en.commands.help.rollMacro.name(),
+				description: L.en.commands.help.rollMacro.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [],
 			},
 			{
-				name: Language.LL.commands.help.action.name(),
-				description: Language.LL.commands.help.action.description(),
+				name: L.en.commands.help.action.name(),
+				description: L.en.commands.help.action.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [],
 			},
 			{
-				name: Language.LL.commands.help.actionStage.name(),
-				description: Language.LL.commands.help.actionStage.description(),
+				name: L.en.commands.help.actionStage.name(),
+				description: L.en.commands.help.actionStage.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [],
 			},
 			{
-				name: Language.LL.commands.help.settings.name(),
-				description: Language.LL.commands.help.settings.description(),
+				name: L.en.commands.help.settings.name(),
+				description: L.en.commands.help.settings.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [],
 			},
@@ -159,12 +163,11 @@ export class HelpCommand implements Command {
 	public requireClientPerms: PermissionsString[] = [];
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
 		// look through our options that are subcommands
 		const targetSubcommand = intr.options.getSubcommand();
-		const allSubcommands = this.metadata.options
+		const allSubcommands = (this.metadata.options ?? [])
 			.filter(option => option.type === ApplicationCommandOptionType.Subcommand)
 			.map(option => option.name);
 
@@ -173,7 +176,7 @@ export class HelpCommand implements Command {
 		let embed = new KoboldEmbed();
 		embed.setThumbnail(LL.commands.help.about.interactions.embed.thumbnail());
 		switch (command) {
-			case Language.LL.commands.help.faq.name(): {
+			case L.en.commands.help.faq.name(): {
 				embed.setTitle(LL.commands.help.about.interactions.embed.title());
 				embed.addFields([
 					{
@@ -203,7 +206,7 @@ export class HelpCommand implements Command {
 				]);
 				break;
 			}
-			case Language.LL.commands.help.about.name(): {
+			case L.en.commands.help.about.name(): {
 				embed.setTitle(LL.commands.help.about.interactions.embed.title());
 				embed.setDescription(LL.commands.help.about.interactions.embed.description());
 				embed.addFields([
@@ -222,7 +225,7 @@ export class HelpCommand implements Command {
 				]);
 				break;
 			}
-			case Language.LL.commands.help.commands.name(): {
+			case L.en.commands.help.commands.name(): {
 				embed.setTitle(LL.commands.help.commands.interactions.embed.title());
 				embed.addFields([
 					{
@@ -345,7 +348,7 @@ export class HelpCommand implements Command {
 				]);
 				break;
 			}
-			case Language.LL.commands.help.character.name(): {
+			case L.en.commands.help.character.name(): {
 				embed.setTitle(LL.commands.help.character.interactions.embed.title());
 				embed.setDescription(LL.commands.help.character.interactions.embed.description());
 				embed.addFields(
@@ -364,7 +367,7 @@ export class HelpCommand implements Command {
 				);
 				break;
 			}
-			case Language.LL.commands.help.init.name(): {
+			case L.en.commands.help.init.name(): {
 				embed.setTitle(LL.commands.help.init.interactions.embed.title());
 				embed.setDescription(LL.commands.help.init.interactions.embed.description());
 				embed.addFields(
@@ -387,7 +390,7 @@ export class HelpCommand implements Command {
 				);
 				break;
 			}
-			case Language.LL.commands.help.roll.name(): {
+			case L.en.commands.help.roll.name(): {
 				embed.setTitle(LL.commands.help.roll.interactions.embed.title());
 				embed.setDescription(LL.commands.help.roll.interactions.embed.description());
 				embed.addFields(
@@ -405,7 +408,7 @@ export class HelpCommand implements Command {
 				);
 				break;
 			}
-			case Language.LL.commands.help.modifier.name(): {
+			case L.en.commands.help.modifier.name(): {
 				embed.setTitle(LL.commands.help.modifier.interactions.embed.title());
 				embed.setDescription(LL.commands.help.modifier.interactions.embed.description());
 				embed.addFields(
@@ -425,7 +428,7 @@ export class HelpCommand implements Command {
 				);
 				break;
 			}
-			case Language.LL.commands.help.game.name(): {
+			case L.en.commands.help.game.name(): {
 				embed.setTitle(LL.commands.help.game.interactions.embed.title());
 				embed.setDescription(LL.commands.help.game.interactions.embed.description());
 				embed.addFields(
@@ -440,7 +443,7 @@ export class HelpCommand implements Command {
 				);
 				break;
 			}
-			case Language.LL.commands.help.gameplay.name(): {
+			case L.en.commands.help.gameplay.name(): {
 				embed.setTitle(LL.commands.help.gameplay.interactions.embed.title());
 				embed.setDescription(LL.commands.help.gameplay.interactions.embed.description());
 				embed.addFields(
@@ -456,7 +459,7 @@ export class HelpCommand implements Command {
 				break;
 			}
 
-			case Language.LL.commands.help.action.name(): {
+			case L.en.commands.help.action.name(): {
 				embed.setTitle(LL.commands.help.action.interactions.embed.title());
 				embed.setDescription(LL.commands.help.action.interactions.embed.description());
 				embed.addFields(
@@ -475,7 +478,7 @@ export class HelpCommand implements Command {
 				break;
 			}
 
-			case Language.LL.commands.help.actionStage.name(): {
+			case L.en.commands.help.actionStage.name(): {
 				embed.setTitle(LL.commands.help.actionStage.interactions.embed.title());
 				embed.setDescription(LL.commands.help.actionStage.interactions.embed.description());
 				const actionStageFields = [
@@ -499,7 +502,7 @@ export class HelpCommand implements Command {
 				break;
 			}
 
-			case Language.LL.commands.help.rollMacro.name(): {
+			case L.en.commands.help.rollMacro.name(): {
 				embed.setTitle(LL.commands.help.rollMacro.interactions.embed.title());
 				embed.setDescription(LL.commands.help.rollMacro.interactions.embed.description());
 				embed.addFields(
@@ -515,7 +518,7 @@ export class HelpCommand implements Command {
 				break;
 			}
 
-			case Language.LL.commands.help.settings.name(): {
+			case L.en.commands.help.settings.name(): {
 				embed.setTitle(LL.commands.help.settings.interactions.embed.title());
 				embed.setDescription(LL.commands.help.settings.interactions.embed.description());
 				embed.addFields(
@@ -526,7 +529,7 @@ export class HelpCommand implements Command {
 				break;
 			}
 
-			case Language.LL.commands.help.attributesAndTags.name(): {
+			case L.en.commands.help.attributesAndTags.name(): {
 				embed.setTitle(LL.commands.help.attributesAndTags.interactions.embed.title());
 				embed.setDescription(
 					LL.commands.help.attributesAndTags.interactions.embed.description()
@@ -545,8 +548,8 @@ export class HelpCommand implements Command {
 				);
 				break;
 			}
-			case Language.LL.commands.help.makingACustomAction.name(): {
-				const actionChoice = intr.options.getString('example-choice').trim();
+			case L.en.commands.help.makingACustomAction.name(): {
+				const actionChoice = String(intr.options.getString('example-choice')).trim();
 
 				const i18nOptionsByActionChoice = {
 					produceFlame: { inlineOne: '{{[spellLevel]}}' },
@@ -555,8 +558,8 @@ export class HelpCommand implements Command {
 				embed.setTitle(LL.commands.help.makingACustomAction.interactions.embed.title());
 
 				embed.setDescription(
-					LL.commands.help.makingACustomAction.interactions.embed[actionChoice](
-						i18nOptionsByActionChoice[actionChoice]
+					(LL.commands.help.makingACustomAction.interactions.embed as any)[actionChoice](
+						(i18nOptionsByActionChoice as any)[actionChoice]
 					)
 				);
 				break;

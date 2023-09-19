@@ -11,21 +11,25 @@ export class GameplayUtils {
 	): Promise<ModelWithSheet[]> {
 		let targetCharacters: ModelWithSheet[] = [];
 		if (!compositeId) {
-			const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
-			targetCharacters = [activeCharacter];
+			if (intr) {
+				const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
+				if (activeCharacter) targetCharacters = [activeCharacter];
+			}
 		} else {
 			const [type, id] = compositeId.split('-');
 			if (type === 'init') {
 				const initResult = await InitiativeActor.query()
 					.withGraphFetched('character')
 					.findOne({ id });
-				targetCharacters.push(initResult);
-				if (initResult.character) {
-					targetCharacters.push(initResult.character);
+				if (initResult) {
+					targetCharacters.push(initResult);
+					if (initResult.character) {
+						targetCharacters.push(initResult.character);
+					}
 				}
 			} else if (type === 'char') {
 				const charResult = await Character.query().findOne({ id });
-				targetCharacters.push(charResult);
+				if (charResult) targetCharacters.push(charResult);
 			}
 		}
 		return targetCharacters;
@@ -35,7 +39,7 @@ export class GameplayUtils {
 		targets: ModelWithSheet[]
 	) {
 		const promises = [];
-		const creature = new Creature(targets[0]?.sheet);
+		const creature = targets[0]?.sheet ? new Creature(targets[0]?.sheet) : undefined;
 		let recoverValues: ReturnType<Creature['recover']>;
 		if (creature) {
 			recoverValues = creature.recover();
@@ -51,7 +55,7 @@ export class GameplayUtils {
 	) {
 		const promises = [];
 		// sheets should be exact duplicates, so we only do our updates on one sheet, but write it onto both locations
-		const creature = new Creature(targets[0]?.sheet);
+		const creature = targets[0]?.sheet ? new Creature(targets[0]?.sheet) : undefined;
 		let updateValues: ReturnType<Creature['updateValue']>;
 		if (creature) {
 			updateValues = creature.updateValue(option, value);

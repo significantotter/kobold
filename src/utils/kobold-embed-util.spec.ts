@@ -60,7 +60,7 @@ describe('KoboldEmbedUtils', () => {
 			test('sets the description to the active group turn text', function () {
 				const initiativeBuilder = getFakeInitiativeBuilder();
 				const embed = KoboldEmbed.turnFromInitiativeBuilder(initiativeBuilder as any);
-				expect(embed.data.fields[0].value).toContain('Test Group');
+				expect((embed.data.fields ?? [])[0].value).toContain('Test Group');
 			});
 			test('does not set the character if there is more than one actor in the group', function () {
 				const initiativeBuilder = {
@@ -128,7 +128,7 @@ describe('KoboldEmbedUtils', () => {
 					groups: [],
 				};
 				const embed = KoboldEmbed.roundFromInitiativeBuilder(initiativeBuilder as any);
-				expect(embed.data.description.trim()).toBe('');
+				expect(String(embed.data.description).trim()).toBe('');
 			});
 			test('works if the initiative has no current round', function () {
 				const initiativeBuilder = {

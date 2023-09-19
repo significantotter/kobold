@@ -32,7 +32,7 @@ describe('ChannelDefaultCharacter', () => {
 			guildDefaultChars =>
 				guildDefaultChars.characterId === builtChannelDefaultCharacter.characterId
 		);
-		expect(insertedChannelDefaultCharacter.characterId).toBe(
+		expect(insertedChannelDefaultCharacter?.characterId).toBe(
 			builtChannelDefaultCharacter.characterId
 		);
 	});

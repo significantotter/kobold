@@ -10,22 +10,21 @@ import {
 	CacheType,
 } from 'discord.js';
 
-import { EventData } from '../../../models/internal-models.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
-import { Language } from '../../../models/enum-helpers/index.js';
+import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { CollectorUtils } from '../../../utils/collector-utils.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
 import { ActionStageOptions } from './action-stage-command-options.js';
 
 export class ActionStageRemoveSubCommand implements Command {
-	public names = [Language.LL.commands.actionStage.remove.name()];
+	public names = [L.en.commands.actionStage.remove.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.actionStage.remove.name(),
-		description: Language.LL.commands.actionStage.remove.description(),
+		name: L.en.commands.actionStage.remove.name(),
+		description: L.en.commands.actionStage.remove.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -35,11 +34,12 @@ export class ActionStageRemoveSubCommand implements Command {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption
-	): Promise<ApplicationCommandOptionChoiceData[]> {
+	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === ActionStageOptions.ACTION_ROLL_TARGET_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(ActionStageOptions.ACTION_ROLL_TARGET_OPTION.name);
+			const match =
+				intr.options.getString(ActionStageOptions.ACTION_ROLL_TARGET_OPTION.name) ?? '';
 
 			//get the active character
 			const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
@@ -69,7 +69,6 @@ export class ActionStageRemoveSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
 		const actionRollTarget = intr.options.getString(

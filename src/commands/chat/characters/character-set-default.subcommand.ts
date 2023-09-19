@@ -1,4 +1,3 @@
-import { WanderersGuide } from '../../../services/wanderers-guide/index.js';
 import {
 	ChannelDefaultCharacter,
 	Character,
@@ -16,19 +15,19 @@ import {
 } from 'discord.js';
 
 import { ChatArgs } from '../../../constants/index.js';
-import { EventData } from '../../../models/internal-models.js';
+
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
-import { Language } from '../../../models/enum-helpers/index.js';
+import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { CharacterOptions } from './command-options.js';
 
 export class CharacterSetDefaultSubCommand implements Command {
-	public names = [Language.LL.commands.character.setDefault.name()];
+	public names = [L.en.commands.character.setDefault.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.character.setDefault.name(),
-		description: Language.LL.commands.character.setDefault.description(),
+		name: L.en.commands.character.setDefault.name(),
+		description: L.en.commands.character.setDefault.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -38,11 +37,11 @@ export class CharacterSetDefaultSubCommand implements Command {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption
-	): Promise<ApplicationCommandOptionChoiceData[]> {
+	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === ChatArgs.SET_ACTIVE_NAME_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(ChatArgs.SET_ACTIVE_NAME_OPTION.name);
+			const match = intr.options.getString(ChatArgs.SET_ACTIVE_NAME_OPTION.name) ?? '';
 
 			const matchedCharacters = await Character.queryControlledCharacterByName(
 				match,
@@ -54,12 +53,9 @@ export class CharacterSetDefaultSubCommand implements Command {
 				value: character.name,
 			}));
 
-			if (
-				match == '' ||
-				Language.LL.commands.character.setDefault.noneOption().includes(match)
-			) {
+			if (match == '' || L.en.commands.character.setDefault.noneOption().includes(match)) {
 				options.push({
-					name: Language.LL.commands.character.setDefault.noneOption().toString(),
+					name: L.en.commands.character.setDefault.noneOption().toString(),
 					value: '__NONE__',
 				});
 			}
@@ -71,13 +67,13 @@ export class CharacterSetDefaultSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
 		const defaultScope = intr.options.getString(
-			CharacterOptions.CHARACTER_SET_DEFAULT_SCOPE.name
+			CharacterOptions.CHARACTER_SET_DEFAULT_SCOPE.name,
+			true
 		);
-		const charName = intr.options.getString(ChatArgs.SET_ACTIVE_NAME_OPTION.name);
+		const charName = intr.options.getString(ChatArgs.SET_ACTIVE_NAME_OPTION.name, true);
 		const currentGuildId = intr.guildId;
 		const currentChannelId = intr.channelId;
 
@@ -87,9 +83,7 @@ export class CharacterSetDefaultSubCommand implements Command {
 		)[0];
 
 		if (targetCharacter) {
-			if (
-				defaultScope === Language.LL.commandOptions.setDefaultScope.choices.channel.value()
-			) {
+			if (defaultScope === L.en.commandOptions.setDefaultScope.choices.channel.value()) {
 				//set all other characters as not the default for this user in this channel
 				await ChannelDefaultCharacter.query()
 					.delete()
@@ -102,7 +96,7 @@ export class CharacterSetDefaultSubCommand implements Command {
 					characterId: targetCharacter.id,
 				});
 			} else if (
-				defaultScope === Language.LL.commandOptions.setDefaultScope.choices.server.value()
+				defaultScope === L.en.commandOptions.setDefaultScope.choices.server.value()
 			) {
 				//set all other characters as not the default for this user in this guild
 				await GuildDefaultCharacter.query()
@@ -127,16 +121,12 @@ export class CharacterSetDefaultSubCommand implements Command {
 		} else {
 			if ('__NONE__'.includes(charName)) {
 				//unset the server default character.
-				if (
-					defaultScope ===
-					Language.LL.commandOptions.setDefaultScope.choices.channel.value()
-				) {
+				if (defaultScope === L.en.commandOptions.setDefaultScope.choices.channel.value()) {
 					await ChannelDefaultCharacter.query()
 						.delete()
 						.where({ userId: intr.user.id, channelId: currentChannelId });
 				} else if (
-					defaultScope ===
-					Language.LL.commandOptions.setDefaultScope.choices.server.value()
+					defaultScope === L.en.commandOptions.setDefaultScope.choices.server.value()
 				) {
 					await GuildDefaultCharacter.query()
 						.delete()

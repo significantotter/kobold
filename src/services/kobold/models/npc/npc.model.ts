@@ -2,12 +2,13 @@ import type { Npc as NpcType } from './npc.schema.js';
 import { JSONSchema7 } from 'json-schema';
 import { BaseModel } from '../../lib/base-model.js';
 import npc from './npc.schema.json' assert { type: 'json' };
-import Sheet from '../../lib/sheet.schema.json' assert { type: 'json' };
-import { Sheet as SheetType } from '../../lib/sheet.schema.js';
+import Sheet from '../../lib/shared-schemas/sheet.schema.json' assert { type: 'json' };
+import { Sheet as SheetType } from '../../lib/type-helpers.js';
 import _ from 'lodash';
 import { CreatureStatBlock } from '../../../pf2etools/pf2etools-types.js';
 import { StringUtils } from '../../../../utils/string-utils.js';
 import Objection from 'objection';
+import { removeRequired } from '../../lib/helpers.js';
 
 export interface Npc extends NpcType {
 	sheet?: SheetType;
@@ -34,10 +35,10 @@ export class Npc extends BaseModel {
 						[`%${(sourceFileName ?? '').toLowerCase()}%`]
 					);
 				const originalCreatureMatches = await originalCreatureMatchesQuery;
-				let originalCreature: Npc = null;
+				let originalCreature: Npc | null = null;
 				if (originalCreatureMatches.length > 1) {
 					// find the best name match
-					const sorter = StringUtils.generateSorterByWordDistance(
+					const sorter = StringUtils.generateSorterByWordDistance<Npc>(
 						originalCreatureName,
 						c => c.name
 					);
@@ -53,6 +54,9 @@ export class Npc extends BaseModel {
 	}
 
 	static get jsonSchema(): Objection.JSONSchema {
-		return { ...npc, properties: { ...npc.properties, sheet: Sheet } } as Objection.JSONSchema;
+		return removeRequired({
+			...npc,
+			properties: { ...npc.properties, sheet: Sheet },
+		} as unknown as Objection.JSONSchema);
 	}
 }

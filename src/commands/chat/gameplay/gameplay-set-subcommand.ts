@@ -10,9 +10,9 @@ import {
 } from 'discord.js';
 
 import { GameplayOptions } from './gameplay-command-options.js';
-import { EventData } from '../../../models/internal-models.js';
+
 import { Command, CommandDeferType } from '../../index.js';
-import { Language } from '../../../models/enum-helpers/index.js';
+import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { InteractionUtils } from '../../../utils/interaction-utils.js';
 import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
@@ -22,13 +22,14 @@ import { SettableSheetOption } from '../../../utils/creature.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
 import { Character, InitiativeActor } from '../../../services/kobold/models/index.js';
 import { GameUtils } from '../../../utils/game-utils.js';
+import { KoboldError } from '../../../utils/KoboldError.js';
 
 export class GameplaySetSubCommand implements Command {
-	public names = [Language.LL.commands.gameplay.set.name()];
+	public names = [L.en.commands.gameplay.set.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.gameplay.set.name(),
-		description: Language.LL.commands.gameplay.set.description(),
+		name: L.en.commands.gameplay.set.name(),
+		description: L.en.commands.gameplay.set.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -38,7 +39,7 @@ export class GameplaySetSubCommand implements Command {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption
-	): Promise<ApplicationCommandOptionChoiceData[]> {
+	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name) {
 			return await AutocompleteUtils.getAllTargetOptions(intr, option.value);
@@ -47,16 +48,16 @@ export class GameplaySetSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
 		const targetCharacter = intr.options.getString(
-			GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name
+			GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name,
+			true
 		);
 		const option = _.camelCase(
-			intr.options.getString(GameplayOptions.GAMEPLAY_SET_OPTION.name)
+			intr.options.getString(GameplayOptions.GAMEPLAY_SET_OPTION.name, true)
 		) as SettableSheetOption;
-		const value = intr.options.getString(GameplayOptions.GAMEPLAY_SET_VALUE.name);
+		const value = intr.options.getString(GameplayOptions.GAMEPLAY_SET_VALUE.name, true);
 
 		const { characterOrInitActorTargets } = await GameUtils.getCharacterOrInitActorTarget(
 			intr,
@@ -69,6 +70,11 @@ export class GameplaySetSubCommand implements Command {
 			option,
 			value
 		);
+		if (!initialValue || !updatedValue) {
+			throw new KoboldError(
+				`Yip! Something went wrong! I couldn't update the property ${option} to ${value}.}`
+			);
+		}
 		let message;
 
 		if (

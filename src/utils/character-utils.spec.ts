@@ -1,7 +1,11 @@
 import { CharacterFactory } from './../services/kobold/models/character/character.factory.js';
 import { CharacterUtils } from './character-utils.js';
 import { WG } from './../services/wanderers-guide/wanderers-guide.js';
-import { Character, GuildDefaultCharacterFactory } from '../services/kobold/models/index.js';
+import {
+	Character,
+	GuildDefaultCharacterFactory,
+	Modifier,
+} from '../services/kobold/models/index.js';
 import { afterEach } from 'vitest';
 
 describe('Character Utils', function () {
@@ -20,7 +24,7 @@ describe('Character Utils', function () {
 				target,
 				[oneOff, twoOff, twoOffAgain, threeOff].map(str => ({ Name: str }))
 			);
-			expect(match.Name).toBe(oneOff);
+			expect(match?.Name).toBe(oneOff);
 		});
 		it('finds the an exact match on multiple close possibilities', function () {
 			const target = 'stealth';
@@ -32,27 +36,36 @@ describe('Character Utils', function () {
 				target,
 				[oneOff, twoOff, twoOffAgain, threeOff, target].map(str => ({ Name: str }))
 			);
-			expect(match.Name).toBe(target);
+			expect(match?.Name).toBe(target);
 		});
 	});
 	describe('CharacterUtils.findPossibleModifierFromString', function () {
 		it('fetches possible skill targets from a character', function () {
 			const fakeCharacter = CharacterFactory.build();
-			const targetModifier: Character['modifiers'][0] = {
+			const targetModifier: Modifier = {
+				isActive: true,
+				targetTags: '',
+				modifierType: 'roll',
 				name: 'FakeModifier',
 				description: 'description',
 				tags: ['foo', 'bar'],
 				type: 'custom',
 				value: 10,
 			};
-			const otherTargetModifier: Character['modifiers'][0] = {
+			const otherTargetModifier: Modifier = {
+				isActive: true,
+				targetTags: '',
+				modifierType: 'roll',
 				name: 'qwer FakeModifier asdf',
 				description: 'description',
 				tags: ['foo', 'bar'],
 				type: 'custom',
 				value: 10,
 			};
-			const unmatchedModifier: Character['modifiers'][0] = {
+			const unmatchedModifier: Modifier = {
+				isActive: true,
+				targetTags: '',
+				modifierType: 'roll',
 				name: 'akeAbilit',
 				description: 'description',
 				tags: ['foo', 'bar'],
@@ -70,21 +83,30 @@ describe('Character Utils', function () {
 		});
 		it("fails to fetch skills that don't match from a character", function () {
 			const fakeCharacter = CharacterFactory.build();
-			const firstModifier: Character['modifiers'][0] = {
+			const firstModifier: Modifier = {
+				isActive: true,
+				targetTags: '',
+				modifierType: 'roll',
 				name: 'FakeModifier',
 				description: 'description',
 				tags: ['foo', 'bar'],
 				type: 'custom',
 				value: 10,
 			};
-			const secondModifier: Character['modifiers'][0] = {
+			const secondModifier: Modifier = {
+				isActive: true,
+				targetTags: '',
+				modifierType: 'roll',
 				name: 'qwer FakeModifier asdf',
 				description: 'description',
 				tags: ['foo', 'bar'],
 				type: 'custom',
 				value: 10,
 			};
-			const thirdModifier: Character['modifiers'][0] = {
+			const thirdModifier: Modifier = {
+				isActive: true,
+				targetTags: '',
+				modifierType: 'roll',
 				name: 'akeAbilit',
 				description: 'description',
 				tags: ['foo', 'bar'],
@@ -105,7 +127,7 @@ describe('Character Utils', function () {
 				userId: '0',
 				isActiveCharacter: true,
 			});
-			const inactiveCharacters = await CharacterFactory.createList(10, {
+			await CharacterFactory.createList(10, {
 				userId: '0',
 				isActiveCharacter: false,
 			});
@@ -114,7 +136,7 @@ describe('Character Utils', function () {
 				channelId: '1',
 				guildId: '2',
 			} as any);
-			expect(activeCharacter.id).toBe(fetchedCharacter.id);
+			expect(activeCharacter.id).toBe(fetchedCharacter?.id);
 		});
 		it(
 			'gets one of multiple characters if we have an issue' +
@@ -133,7 +155,7 @@ describe('Character Utils', function () {
 					channelId: '1',
 					guildId: '2',
 				} as any);
-				expect(activeCharacters.map(char => char.id)).toContain(fetchedCharacter.id);
+				expect(activeCharacters.map(char => char.id)).toContain(fetchedCharacter?.id);
 			}
 		);
 		it('fetches a default character for a guild even when an active character is present', async function () {
@@ -155,7 +177,7 @@ describe('Character Utils', function () {
 				channelId: '1',
 				guildId: 'foo',
 			} as any);
-			expect(fetchedCharacter.id).toEqual(inactiveCharacters[4].id);
+			expect(fetchedCharacter?.id).toEqual(inactiveCharacters[4].id);
 		});
 		it('returns null if no active character is present', async function () {
 			const inactiveCharacters = await CharacterFactory.createList(10, {

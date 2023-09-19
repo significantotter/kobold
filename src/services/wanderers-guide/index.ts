@@ -13,7 +13,7 @@ interface WanderersGuideConstructorParams {
 	apiKey?: string;
 }
 export class WanderersGuide {
-	headers: httpHeaders;
+	headers?: httpHeaders;
 	constructor({ token: accessToken, apiKey }: WanderersGuideConstructorParams) {
 		if (accessToken) {
 			this.headers = { authorization: `Bearer ${accessToken}` };

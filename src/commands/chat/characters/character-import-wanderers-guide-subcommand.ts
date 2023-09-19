@@ -1,4 +1,3 @@
-import { Language } from '../../../models/enum-helpers/language.js';
 import { Character } from '../../../services/kobold/models/index.js';
 import {
 	ApplicationCommandType,
@@ -6,8 +5,8 @@ import {
 	ChatInputCommandInteraction,
 	PermissionsString,
 } from 'discord.js';
+import { default as axios } from 'axios';
 
-import { EventData } from '../../../models/internal-models.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { WgToken } from '../../../services/kobold/models/index.js';
@@ -16,13 +15,14 @@ import { Config } from '../../../config/config.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
 import { CharacterOptions } from './command-options.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
+import L from '../../../i18n/i18n-node.js';
 
 export class CharacterImportWanderersGuideSubCommand implements Command {
-	public names = [Language.LL.commands.character.importWanderersGuide.name()];
+	public names = [L.en.commands.character.importWanderersGuide.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.character.importWanderersGuide.name(),
-		description: Language.LL.commands.character.importWanderersGuide.description(),
+		name: L.en.commands.character.importWanderersGuide.name(),
+		description: L.en.commands.character.importWanderersGuide.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -31,10 +31,9 @@ export class CharacterImportWanderersGuideSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
-		const url = intr.options.getString(CharacterOptions.IMPORT_OPTION.name).trim();
+		const url = intr.options.getString(CharacterOptions.IMPORT_OPTION.name, true).trim();
 		let charId = CharacterUtils.parseCharacterIdFromText(url);
 		if (charId === null) {
 			await InteractionUtils.send(
@@ -87,7 +86,7 @@ export class CharacterImportWanderersGuideSubCommand implements Command {
 			try {
 				character = await CharacterHelpers.fetchWgCharacterFromToken(charId, token);
 			} catch (err) {
-				if (err.response.status === 401) {
+				if ((axios.default ?? axios).isAxiosError(err) && err.response?.status === 401) {
 					//token expired!
 					await WgToken.query().delete().where({ charId });
 					await InteractionUtils.send(
@@ -103,7 +102,10 @@ export class CharacterImportWanderersGuideSubCommand implements Command {
 						true
 					);
 					return;
-				} else if (err.response.status === 429) {
+				} else if (
+					(axios.default ?? axios).isAxiosError(err) &&
+					err.response?.status === 429
+				) {
 					await InteractionUtils.send(
 						intr,
 						LL.commands.character.interactions.tooManyWGRequests()

@@ -10,16 +10,16 @@ import { RateLimiter } from 'discord.js-rate-limiter';
 
 import { Command, CommandDeferType } from '../commands/index.js';
 import { DiscordLimits } from '../constants/index.js';
-import { EventData } from '../models/internal-models.js';
-import { Lang, Logger } from '../services/index.js';
+import { Logger } from '../services/index.js';
 import { CommandUtils, InteractionUtils } from '../utils/index.js';
 import { EventHandler } from './index.js';
 import { Config } from './../config/config.js';
 import Logs from './../config/lang/logs.json' assert { type: 'json' };
-import { Language } from '../models/enum-helpers/language.js';
 import { KoboldEmbed } from '../utils/kobold-embed-utils.js';
-import { refs } from '../i18n/en/common.js';
+import { refs } from '../constants/common-text.js';
 import { KoboldError } from '../utils/KoboldError.js';
+import L from '../i18n/i18n-node.js';
+import { filterNotNullOrUndefined } from '../utils/type-guards.js';
 
 export class CommandHandler implements EventHandler {
 	private rateLimiter = new RateLimiter(
@@ -41,7 +41,7 @@ export class CommandHandler implements EventHandler {
 						intr.commandName,
 						intr.options.getSubcommandGroup(false),
 						intr.options.getSubcommand(false),
-				  ].filter(Boolean)
+				  ].filter(filterNotNullOrUndefined)
 				: [intr.commandName];
 		let commandName = commandParts.join(' ');
 
@@ -86,8 +86,8 @@ export class CommandHandler implements EventHandler {
 								.replaceAll('{USER_ID}', intr.user.id)
 								.replaceAll('{CHANNEL_NAME}', intr.channel.name)
 								.replaceAll('{CHANNEL_ID}', intr.channel.id)
-								.replaceAll('{GUILD_NAME}', intr.guild?.name)
-								.replaceAll('{GUILD_ID}', intr.guild?.id)
+								.replaceAll('{GUILD_NAME}', intr.guild?.name ?? '')
+								.replaceAll('{GUILD_ID}', intr.guild?.id ?? '')
 						: Logs.error.autocompleteOther
 								.replaceAll('{INTERACTION_ID}', intr.id)
 								.replaceAll('{OPTION_NAME}', commandName)
@@ -112,7 +112,7 @@ export class CommandHandler implements EventHandler {
 		if (intr instanceof ChatInputCommandInteraction && command?.commands) {
 			const subCommandName = intr.options.getSubcommand();
 			const subCommand = CommandUtils.getSubCommandByName(command?.commands, subCommandName);
-			if (subCommand.deferType !== undefined) deferType = subCommand.deferType;
+			if (subCommand && subCommand.deferType !== undefined) deferType = subCommand.deferType;
 		}
 
 		switch (deferType) {
@@ -131,16 +131,13 @@ export class CommandHandler implements EventHandler {
 			return;
 		}
 
-		// TODO: Get data from database
-		let data = new EventData();
-
 		try {
 			// Check if interaction passes command checks
-			let passesChecks = await CommandUtils.runChecks(command, intr, data);
+			let passesChecks = await CommandUtils.runChecks(command, intr);
 			if (passesChecks) {
 				// Execute the command
-				const LL = Language.localize(data.lang());
-				await command.execute(intr, data, LL);
+				const LL = L.en;
+				await command.execute(intr, LL);
 			}
 		} catch (error) {
 			// Kobold Errors are expected error messages encountered through regular use of the bot
@@ -149,7 +146,7 @@ export class CommandHandler implements EventHandler {
 				await InteractionUtils.send(intr, error.responseMessage);
 				return;
 			}
-			await this.sendError(intr, data);
+			await this.sendError(intr);
 
 			// Log command error
 			Logger.error(
@@ -163,8 +160,8 @@ export class CommandHandler implements EventHandler {
 							.replaceAll('{USER_ID}', intr.user.id)
 							.replaceAll('{CHANNEL_NAME}', intr.channel.name)
 							.replaceAll('{CHANNEL_ID}', intr.channel.id)
-							.replaceAll('{GUILD_NAME}', intr.guild?.name)
-							.replaceAll('{GUILD_ID}', intr.guild?.id)
+							.replaceAll('{GUILD_NAME}', intr.guild?.name ?? '')
+							.replaceAll('{GUILD_ID}', intr.guild?.id ?? '')
 					: Logs.error.commandOther
 							.replaceAll('{INTERACTION_ID}', intr.id)
 							.replaceAll('{COMMAND_NAME}', commandName)
@@ -175,16 +172,16 @@ export class CommandHandler implements EventHandler {
 		}
 	}
 
-	private async sendError(intr: CommandInteraction, data: EventData): Promise<void> {
+	private async sendError(intr: CommandInteraction): Promise<void> {
 		try {
 			const embed = new KoboldEmbed();
 			embed.setTitle('Something went Wrong!');
 			embed.setDescription(
-				`Kobold ran into an unexpected error. If you want to report this issue, let my creator know on [my support server](${refs.links.support}).`
+				`Kobold ran into an unexpected error. ${refs.embedLinks.errorReport}`
 			);
 			await InteractionUtils.send(intr, embed);
 		} catch {
-			// Ignore
+			console.error('Failed to send error message!');
 		}
 	}
 }

@@ -1,7 +1,6 @@
 import { Message } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 
-import { EventData } from '../models/internal-models.js';
 import { Trigger } from '../triggers/index.js';
 import { Config } from './../config/config.js';
 
@@ -38,12 +37,9 @@ export class TriggerHandler {
 			return;
 		}
 
-		// TODO: Get data from database
-		let data = new EventData();
-
 		// Execute triggers
 		for (let trigger of triggers) {
-			await trigger.execute(msg, data);
+			await trigger.execute(msg);
 		}
 	}
 }

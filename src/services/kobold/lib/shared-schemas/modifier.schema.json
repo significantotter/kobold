@@ -1,0 +1,46 @@
+{
+	"title": "modifier",
+	"type": "object",
+	"description": "A modifier is a bonus or penalty that can be applied to a roll or sheet property.",
+	"allOf": [
+		{
+			"properties": {
+				"name": { "type": "string" },
+				"isActive": { "type": "boolean" },
+				"description": { "type": ["string", "null"] },
+				"type": { "type": "string" }
+			},
+			"required": ["name", "isActive", "description", "type"]
+		},
+		{
+			"oneOf": [
+				{
+					"properties": {
+						"modifierType": { "type": "string", "enum": ["roll"] },
+						"value": { "type": ["number", "string"] },
+						"targetTags": { "type": ["string", "null"] }
+					},
+					"required": ["value", "modifierType", "targetTags"]
+				},
+				{
+					"properties": {
+						"modifierType": { "type": "string", "enum": ["sheet"] },
+						"sheetAdjustments": {
+							"type": ["array"],
+							"items": {
+								"type": "object",
+								"properties": {
+									"property": { "type": "string" },
+									"operation": { "type": "string", "enum": ["+", "-", "="] },
+									"value": { "type": "string" }
+								},
+								"required": ["property", "operation", "value"]
+							}
+						}
+					},
+					"required": ["sheetAdjustments", "modifierType"]
+				}
+			]
+		}
+	]
+}

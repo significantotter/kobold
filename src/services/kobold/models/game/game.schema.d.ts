@@ -12,30 +12,30 @@ export interface Game {
 	/**
 	 * The id of the game.
 	 */
-	id?: number;
+	id: number;
 	/**
 	 * The discord id of the GM of the game.
 	 */
-	gmUserId?: string;
+	gmUserId: string;
 	/**
 	 * The name of the game.
 	 */
-	name?: string;
+	name: string;
 	/**
 	 * Whether the game is the gm's active game on the server
 	 */
-	isActive?: boolean;
+	isActive: boolean;
 	/**
 	 * The discord guild id of the game.
 	 */
-	guildId?: string;
+	guildId: string;
 	/**
 	 * When the initiative was first started
 	 */
-	createdAt?: string;
+	createdAt: string;
 	/**
 	 * When the initiative was last interacted with
 	 */
-	lastUpdatedAt?: string;
+	lastUpdatedAt: string;
 	[k: string]: any;
 }

@@ -26,6 +26,6 @@ describe('Game', () => {
 		await Game.query().insert(builtGame);
 		const fetchedGames = await Game.query();
 		const insertedGame = fetchedGames.find(factory => factory.charId === builtGame.charId);
-		expect(insertedGame.charId).toBe(builtGame.charId);
+		expect(insertedGame?.charId).toBe(builtGame.charId);
 	});
 });

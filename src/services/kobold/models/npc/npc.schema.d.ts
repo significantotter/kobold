@@ -12,17 +12,17 @@ export interface Npc {
 	/**
 	 * The id of the npc record.
 	 */
-	id?: number;
+	id: number;
 	/**
 	 * The pf2etools json data of the npc.
 	 */
-	data?: {
+	data: {
 		[k: string]: any;
 	};
 	/**
 	 * The name of the npc.
 	 */
-	name?: string;
+	name: string;
 	/**
 	 * The fluff data of the npc.
 	 */
@@ -32,11 +32,11 @@ export interface Npc {
 	/**
 	 * The name of the npc that serves as the source for this npc's statistics.
 	 */
-	referenceNpcName?: string;
+	referenceNpcName: string;
 	/**
 	 * The name of the source file that the npc was imported from.
 	 */
-	sourceFileName?: string;
+	sourceFileName: string;
 	/**
 	 * When the character was first imported
 	 */

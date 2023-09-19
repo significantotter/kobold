@@ -1,5 +1,7 @@
-import _, { property } from 'lodash';
-import { Character, Sheet } from '../services/kobold/models/index.js';
+import _ from 'lodash';
+import { Modifier, SheetAdjustment } from '../services/kobold/models/index.js';
+import { Sheet } from '../services/kobold/models/index.js';
+import { SheetModifier } from '../services/kobold/lib/type-helpers.js';
 
 export const loreRegex = /(.*) lore$/;
 export const immunityRegex = /([A-Za-z ]+) immunity/;
@@ -8,7 +10,7 @@ export const weaknessRegex = /([A-Za-z ]+) weakness/;
 export const languageRegex = /([A-Za-z ]+) language/;
 export const senseRegex = /([A-Za-z ]+) sense/;
 
-export const numericSheetProperties = [
+export const numericSheetProperties: string[] = [
 	'age',
 	'strength',
 	'dexterity',
@@ -85,7 +87,7 @@ export const numericSheetProperties = [
 	'thieveryProfMod',
 ];
 
-export const sheetPropertyLocations = {
+export const sheetPropertyLocations: { [k: string]: string } = {
 	name: 'info',
 	url: 'info',
 	description: 'info',
@@ -176,7 +178,7 @@ export const sheetPropertyLocations = {
 	thieveryProfMod: 'skills',
 };
 
-export const sheetPropertyPseudonyms = {
+export const sheetPropertyPseudonyms: { [k: string]: string } = {
 	imageurl: 'imageURL',
 	image: 'imageURL',
 	avatar: 'imageURL',
@@ -242,7 +244,7 @@ export const sheetPropertyGroups = _.flatMap(
 		return ['Skills', 'Checks', 'Saves'].map(group => `${attribute}${group}`);
 	})
 );
-export type typedSheetAdjustment = Character['modifiers'][0]['sheetAdjustments'][0] & {
+export type typedSheetAdjustment = SheetAdjustment & {
 	type: string;
 };
 export type reducedSheetAdjustment = {
@@ -255,15 +257,129 @@ export type untypedAdjustment = {
 };
 
 export class SheetUtils {
-	public static defaultSheet = {
-		info: { traits: [] },
-		general: { senses: [], languages: [] },
-		abilities: {},
-		defenses: { resistances: [], immunities: [], weaknesses: [] },
-		offense: {},
-		castingStats: {},
-		saves: {},
-		skills: { lores: [] },
+	public static defaultSheet: Sheet = {
+		info: {
+			traits: [],
+			name: '',
+			url: null,
+			description: null,
+			gender: null,
+			age: null,
+			alignment: null,
+			deity: null,
+			imageURL: null,
+			level: null,
+			size: null,
+			class: null,
+			keyability: null,
+			ancestry: null,
+			heritage: null,
+			background: null,
+			usesStamina: false,
+		},
+		general: {
+			senses: [],
+			languages: [],
+			currentHeroPoints: null,
+			speed: null,
+			flySpeed: null,
+			swimSpeed: null,
+			climbSpeed: null,
+			currentFocusPoints: null,
+			focusPoints: null,
+			classDC: null,
+			classAttack: null,
+			perception: null,
+			perceptionProfMod: null,
+		},
+		abilities: {
+			strength: null,
+			dexterity: null,
+			constitution: null,
+			intelligence: null,
+			wisdom: null,
+			charisma: null,
+		},
+		defenses: {
+			resistances: [],
+			immunities: [],
+			weaknesses: [],
+			currentHp: null,
+			maxHp: null,
+			tempHp: null,
+			currentResolve: null,
+			maxResolve: null,
+			currentStamina: null,
+			maxStamina: null,
+			ac: null,
+			heavyProfMod: null,
+			mediumProfMod: null,
+			lightProfMod: null,
+			unarmoredProfMod: null,
+		},
+		offense: {
+			martialProfMod: null,
+			simpleProfMod: null,
+			unarmedProfMod: null,
+			advancedProfMod: null,
+		},
+		castingStats: {
+			arcaneAttack: null,
+			arcaneDC: null,
+			arcaneProfMod: null,
+			divineAttack: null,
+			divineDC: null,
+			divineProfMod: null,
+			occultAttack: null,
+			occultDC: null,
+			occultProfMod: null,
+			primalAttack: null,
+			primalDC: null,
+			primalProfMod: null,
+		},
+		saves: {
+			fortitude: null,
+			fortitudeProfMod: null,
+			reflex: null,
+			reflexProfMod: null,
+			will: null,
+			willProfMod: null,
+		},
+		skills: {
+			lores: [],
+			acrobatics: null,
+			acrobaticsProfMod: null,
+			arcana: null,
+			arcanaProfMod: null,
+			athletics: null,
+			athleticsProfMod: null,
+			crafting: null,
+			craftingProfMod: null,
+			deception: null,
+			deceptionProfMod: null,
+			diplomacy: null,
+			diplomacyProfMod: null,
+			intimidation: null,
+			intimidationProfMod: null,
+			medicine: null,
+			medicineProfMod: null,
+			nature: null,
+			natureProfMod: null,
+			occultism: null,
+			occultismProfMod: null,
+			performance: null,
+			performanceProfMod: null,
+			religion: null,
+			religionProfMod: null,
+			society: null,
+			societyProfMod: null,
+			stealth: null,
+			stealthProfMod: null,
+			survival: null,
+			survivalProfMod: null,
+			thievery: null,
+			thieveryProfMod: null,
+		},
 		attacks: [],
 		rollMacros: [],
 		actions: [],
@@ -328,10 +444,7 @@ export class SheetUtils {
 	/**
 	 * Applies the value of a modifier to the target property
 	 */
-	static applySheetAdjustmentToProperty(
-		property: string | number,
-		modifier: Character['modifiers'][0]['sheetAdjustments'][0]
-	) {
+	static applySheetAdjustmentToProperty(property: string | number, modifier: SheetAdjustment) {
 		if (modifier.operation === '=') {
 			return modifier.value;
 		}
@@ -448,7 +561,9 @@ export class SheetUtils {
 			// the type are any of skills, checks, dcs, or saves
 			if (SheetUtils.sheetPropertyGroups.includes(_.camelCase(sheetAdjustment.property))) {
 				// if we have a property group, we need to spread the adjustment across all of the properties in that group
-				let [attribute, group] = _.snakeCase(sheetAdjustment.property).split('_');
+				let splitValues = _.snakeCase(sheetAdjustment.property).split('_');
+				let attribute: string | null = splitValues[0];
+				let group: string | null = splitValues[1];
 				if (!group && attribute) {
 					// this is actually the case where we have the group but no attribute, but the split
 					// only recognizes a single value, so it slots it into attribute
@@ -521,21 +636,22 @@ export class SheetUtils {
 		}
 		return newSheetAdjustments;
 	}
-	static parseSheetModifiers(sheet: Sheet, modifiers: Character['modifiers']) {
-		const activeSheetModifiers = modifiers.filter(
-			modifier => modifier.isActive && modifier.modifierType === 'sheet'
+	static parseSheetModifiers(sheet: Sheet, modifiers: Modifier[]) {
+		const activeSheetModifiers: SheetModifier[] = modifiers.filter(
+			(modifier): modifier is SheetModifier =>
+				modifier.isActive && modifier.modifierType === 'sheet'
 		);
 		const activeSheetAdjustments: typedSheetAdjustment[] = activeSheetModifiers.reduce(
 			(a, b) => {
 				return a.concat(
-					b.sheetAdjustments.map(adjustment => ({
+					(b.sheetAdjustments ?? []).map(adjustment => ({
 						...adjustment,
 						property: SheetUtils.standardizeSheetProperty(adjustment.property),
 						type: b.type,
 					}))
 				);
 			},
-			[]
+			[] as typedSheetAdjustment[]
 		);
 		const spreadSheetAdjustments = SheetUtils.spreadSheetAdjustmentGroups(
 			activeSheetAdjustments,
@@ -617,8 +733,9 @@ export class SheetUtils {
 			}
 
 			// resistances
-			if (property.match(resistanceRegex)) {
-				const resistanceType = property.match(resistanceRegex)[1];
+			const resistanceMatch = property.match(resistanceRegex);
+			if (resistanceMatch) {
+				const resistanceType = resistanceMatch[1];
 				let found = false;
 				for (const resistanceIndex in newSheet.defenses.resistances) {
 					if (newSheet.defenses.resistances[resistanceIndex].name === resistanceType) {
@@ -635,7 +752,7 @@ export class SheetUtils {
 
 				if (!found) {
 					newSheet.defenses.resistances.push({
-						name: resistanceType,
+						type: resistanceType,
 						amount:
 							Number(overwriteSheetAdjustments[property] ?? 0) +
 							Number(modifySheetAdjustments[property] ?? 0),
@@ -645,8 +762,9 @@ export class SheetUtils {
 			}
 
 			// weaknesses
-			if (property.match(weaknessRegex)) {
-				const weaknessType = property.match(weaknessRegex)[1];
+			const weaknessMatch = property.match(weaknessRegex);
+			if (weaknessMatch) {
+				const weaknessType = weaknessMatch[1];
 				let found = false;
 				for (const weaknessIndex in newSheet.defenses.weaknesses) {
 					if (newSheet.defenses.weaknesses[weaknessIndex].name === weaknessType) {
@@ -663,7 +781,7 @@ export class SheetUtils {
 
 				if (!found) {
 					newSheet.defenses.weaknesses.push({
-						name: weaknessType,
+						type: weaknessType,
 						amount:
 							Number(overwriteSheetAdjustments[property] ?? 0) +
 							Number(modifySheetAdjustments[property] ?? 0),
@@ -673,8 +791,9 @@ export class SheetUtils {
 			}
 
 			// immunities
-			if (property.match(immunityRegex)) {
-				const immunityType = property.match(immunityRegex)[1];
+			const immunityMatch = property.match(immunityRegex);
+			if (immunityMatch) {
+				const immunityType = immunityMatch[1];
 				const value =
 					overwriteSheetAdjustments[property] ?? modifySheetAdjustments[property];
 				if (value !== undefined) {
@@ -693,8 +812,9 @@ export class SheetUtils {
 			}
 
 			// senses
-			if (property.match(senseRegex)) {
-				const senseType = property.match(senseRegex)[1];
+			const senseMatch = property.match(senseRegex);
+			if (senseMatch) {
+				const senseType = senseMatch[1];
 				const value =
 					overwriteSheetAdjustments[property] ?? modifySheetAdjustments[property];
 				if (value !== undefined) {
@@ -713,8 +833,9 @@ export class SheetUtils {
 			}
 
 			// languages
-			if (property.match(languageRegex)) {
-				const languageType = property.match(languageRegex)[1];
+			const languageMatch = property.match(languageRegex);
+			if (languageMatch) {
+				const languageType = languageMatch[1];
 				const value =
 					overwriteSheetAdjustments[property] ?? modifySheetAdjustments[property];
 				if (value !== undefined) {

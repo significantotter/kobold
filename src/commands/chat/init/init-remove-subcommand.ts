@@ -1,12 +1,10 @@
 import { InitiativeActorGroup } from './../../../services/kobold/models/initiative-actor-group/initiative-actor-group.model.js';
 import { InitiativeActor } from '../../../services/kobold/models/initiative-actor/initiative-actor.model.js';
-import { ChatArgs } from '../../../constants/chat-args.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
 	ChatInputCommandInteraction,
 	PermissionsString,
-	EmbedBuilder,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
@@ -14,25 +12,24 @@ import {
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 
-import { EventData } from '../../../models/internal-models.js';
-import { CharacterUtils } from '../../../utils/character-utils.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { InitiativeUtils, InitiativeBuilder } from '../../../utils/initiative-utils.js';
 import { Command, CommandDeferType } from '../../index.js';
 import _ from 'lodash';
-import { Initiative } from '../../../services/kobold/models/index.js';
+import { Character, Initiative } from '../../../services/kobold/models/index.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { Language } from '../../../models/enum-helpers/index.js';
+import L from '../../../i18n/i18n-node.js';
 import { InitOptions } from './init-command-options.js';
 import { SettingsUtils } from '../../../utils/settings-utils.js';
+import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
 
 export class InitRemoveSubCommand implements Command {
-	public names = [Language.LL.commands.init.remove.name()];
+	public names = [L.en.commands.init.remove.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.init.remove.name(),
-		description: Language.LL.commands.init.remove.description(),
+		name: L.en.commands.init.remove.name(),
+		description: L.en.commands.init.remove.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -43,54 +40,28 @@ export class InitRemoveSubCommand implements Command {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption
-	): Promise<ApplicationCommandOptionChoiceData[]> {
+	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === InitOptions.INIT_CHARACTER_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(InitOptions.INIT_CHARACTER_OPTION.name);
+			const match = intr.options.getString(InitOptions.INIT_CHARACTER_OPTION.name) ?? '';
 
-			const currentInitResponse = await InitiativeUtils.getInitiativeForChannel(intr.channel);
-			if (!currentInitResponse) {
-				return [];
-			}
-			//get the character matches
-			let actorOptions = InitiativeUtils.getControllableInitiativeActors(
-				currentInitResponse.init,
-				intr.user.id
-			);
-			actorOptions = actorOptions.filter(actor =>
-				actor.name.toLocaleLowerCase().includes(match.toLocaleLowerCase())
-			);
-
-			//return the matched skills
-			return actorOptions.map(actor => ({
-				name: actor.name,
-				value: actor.name,
-			}));
+			return AutocompleteUtils.getAllControllableInitiativeActors(intr, match);
 		}
 	}
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
 		const targetCharacterName = intr.options.getString(InitOptions.INIT_CHARACTER_OPTION.name);
 
-		const [initResult, userSettings] = await Promise.all([
-			InitiativeUtils.getInitiativeForChannel(intr.channel, {
-				sendErrors: true,
-				LL,
-			}),
+		const [currentInit, userSettings] = await Promise.all([
+			InitiativeUtils.getInitiativeForChannel(intr.channel),
 			SettingsUtils.getSettingsForUser(intr),
 		]);
-		if (initResult.errorMessage) {
-			await InteractionUtils.send(intr, initResult.errorMessage);
-			return;
-		}
-		const currentInit = initResult.init;
 
-		let actorResponse: { actor: InitiativeActor; errorMessage: string };
+		let actorResponse: InitiativeActor;
 		if (!targetCharacterName) {
 			actorResponse = await InitiativeUtils.getActiveCharacterActor(
 				currentInit,
@@ -106,11 +77,8 @@ export class InitRemoveSubCommand implements Command {
 				true
 			);
 		}
-		if (actorResponse.errorMessage) {
-			await InteractionUtils.send(intr, actorResponse.errorMessage);
-			return;
-		}
-		const actor = actorResponse.actor;
+
+		const actor = actorResponse;
 		const actorsInGroup = _.filter(
 			currentInit.actors,
 			possibleActor => possibleActor.initiativeActorGroupId === actor.initiativeActorGroupId
@@ -146,9 +114,6 @@ export class InitRemoveSubCommand implements Command {
 			});
 			let currentTurn = initBuilder.getCurrentTurnInfo();
 			let previousTurn = initBuilder.getPreviousTurnChanges();
-			if (previousTurn.errorMessage) {
-				previousTurn = initBuilder.getNextTurnChanges();
-			}
 
 			const updatedInitiative = await Initiative.query()
 				.patchAndFetchById(currentInit.id, previousTurn)
@@ -168,7 +133,7 @@ export class InitRemoveSubCommand implements Command {
 			}
 
 			await InteractionUtils.send(intr, {
-				content: `<@!${activeGroup.userId}>`,
+				content: activeGroup ? `<@!${activeGroup.userId}>` : undefined,
 				embeds: [currentTurnEmbed],
 			});
 			if (_.some(initBuilder.activeActors, actor => actor.hideStats)) {

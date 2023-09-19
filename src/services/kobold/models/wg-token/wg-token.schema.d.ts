@@ -12,26 +12,26 @@ export interface WgToken {
 	/**
 	 * The id of the token request.
 	 */
-	id?: number;
+	id: number;
 	/**
 	 * The external wanderer's guide character id.
 	 */
-	charId?: number;
+	charId: number;
 	/**
 	 * the wanderer's guide oauth access token
 	 */
-	accessToken?: string;
+	accessToken: string;
 	/**
 	 * when the token expires
 	 */
-	expiresAt?: string;
+	expiresAt: string;
 	/**
 	 * the rights granted for the character
 	 */
-	accessRights?: string;
+	accessRights: string;
 	/**
 	 * the OAUTH token type
 	 */
-	tokenType?: string;
+	tokenType: string;
 	[k: string]: any;
 }

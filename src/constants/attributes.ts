@@ -20,7 +20,7 @@ export const staticAttributes = (sheet?: Sheet) => {
 	}
 };
 
-export const attributeShorthands = {
+export const attributeShorthands: { [k: string]: string } = {
 	str: 'strength',
 	dex: 'dexterity',
 	con: 'constitution',

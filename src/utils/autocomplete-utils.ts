@@ -4,7 +4,8 @@ import { Character, Game, InitiativeActor, Npc } from '../services/kobold/models
 import { CharacterUtils } from './character-utils.js';
 import { InitiativeUtils } from './initiative-utils.js';
 import { Creature } from './creature.js';
-import { Language } from '../models/enum-helpers/language.js';
+import { filterNotNullOrUndefined } from './type-guards.js';
+import L from '../i18n/i18n-node.js';
 
 export class AutocompleteUtils {
 	public static async getBestiaryNpcs(
@@ -119,21 +120,34 @@ export class AutocompleteUtils {
 		return matchedRollMacros;
 	}
 
+	public static async getAllInitMembers(
+		intr: AutocompleteInteraction<CacheType>,
+		matchText?: string | null
+	) {
+		const currentInit = await InitiativeUtils.getInitiativeForChannelOrNull(intr.channel);
+		if (!currentInit) return [];
+		//get the character matches
+
+		return currentInit.actorGroups
+			.filter(actor => actor.name.toLowerCase().includes((matchText ?? '').toLowerCase()))
+			.map(actor => ({
+				name: actor.name,
+				value: actor.name,
+			}));
+	}
 	public static async getAllControllableInitiativeActors(
 		intr: AutocompleteInteraction<CacheType>,
-		matchText: string
+		matchText?: string | null
 	) {
-		const currentInitResponse = await InitiativeUtils.getInitiativeForChannel(intr.channel);
-		if (currentInitResponse?.errorMessage || !currentInitResponse?.init) {
-			return [];
-		}
+		const currentInit = await InitiativeUtils.getInitiativeForChannelOrNull(intr.channel);
+		if (!currentInit) return [];
 		//get the character matches
 		let actorOptions = InitiativeUtils.getControllableInitiativeActors(
-			currentInitResponse.init,
+			currentInit,
 			intr.user.id
 		);
 		actorOptions = actorOptions.filter(actor =>
-			actor.name.toLowerCase().includes(matchText.toLowerCase())
+			actor.name.toLowerCase().includes((matchText ?? '').toLowerCase())
 		);
 
 		//return the matched skills
@@ -147,8 +161,8 @@ export class AutocompleteUtils {
 		intr: AutocompleteInteraction<CacheType>,
 		matchText: string
 	) {
-		const [currentInitResponse, targetGames, activeCharacter] = await Promise.all([
-			InitiativeUtils.getInitiativeForChannel(intr.channel),
+		const [currentInit, targetGames, activeCharacter] = await Promise.all([
+			InitiativeUtils.getInitiativeForChannelOrNull(intr.channel),
 			Game.queryWhereUserHasCharacter(intr.user.id, intr.guildId),
 			CharacterUtils.getActiveCharacter(intr),
 		]);
@@ -165,7 +179,7 @@ export class AutocompleteUtils {
 				value: activeCharacter.name,
 			});
 		}
-		const actorOptions = (currentInitResponse?.init?.actors ?? [])
+		const actorOptions = (currentInit?.actors ?? [])
 			.filter(actor => actor.name.toLocaleLowerCase().includes(matchText.toLocaleLowerCase()))
 			.map(actor => ({
 				name: actor.name,
@@ -186,12 +200,10 @@ export class AutocompleteUtils {
 		intr: AutocompleteInteraction<CacheType>,
 		matchText: string
 	) {
-		const currentInitResponse = await InitiativeUtils.getInitiativeForChannel(intr.channel);
-		if (currentInitResponse.errorMessage) {
-			return [{ name: '(None)', value: '__NONE__' }];
-		}
+		const currentInit = await InitiativeUtils.getInitiativeForChannelOrNull(intr.channel);
+		if (!currentInit) return [];
 
-		const actorOptions = currentInitResponse.init.actors.filter(actor =>
+		const actorOptions = currentInit.actors.filter(actor =>
 			actor.name.toLocaleLowerCase().includes(matchText.toLocaleLowerCase())
 		);
 
@@ -210,26 +222,16 @@ export class AutocompleteUtils {
 		matchText: string,
 		targetCharacterName: string
 	) {
-		const initResult = await InitiativeUtils.getInitiativeForChannel(intr.channel, {
-			sendErrors: true,
-			LL: Language.LL,
-		});
-		if (initResult.errorMessage) {
-			return [];
-		}
+		const currentInit = await InitiativeUtils.getInitiativeForChannelOrNull(intr.channel);
+		if (!currentInit) return [];
 
-		const actorResponse = InitiativeUtils.getNameMatchActorFromInitiative(
-			initResult.init.gmUserId,
-			initResult.init,
+		const actor = InitiativeUtils.getNameMatchActorFromInitiative(
+			currentInit.gmUserId,
+			currentInit,
 			targetCharacterName,
-			Language.LL,
+			L.en,
 			false
-		);
-		if (actorResponse.errorMessage) {
-			return [];
-		}
-
-		const actor = actorResponse.actor;
+		) as InitiativeActor & { character: Character };
 
 		if (!actor?.sheet) {
 			return [];
@@ -256,21 +258,23 @@ export class AutocompleteUtils {
 		intr: AutocompleteInteraction<CacheType>,
 		matchText: string
 	) {
-		const currentInitResponse = await InitiativeUtils.getInitiativeForChannel(intr.channel);
-		if (!currentInitResponse) {
+		const currentInit = await InitiativeUtils.getInitiativeForChannelOrNull(intr.channel);
+		if (!currentInit) {
 			return [];
 		}
 		//get the character matches
 		let actorOptions = InitiativeUtils.getControllableInitiativeActors(
-			currentInitResponse.init,
+			currentInit,
 			intr.user.id
 		);
 
 		const guildMemberOptions = actorOptions.map(actor => {
-			return intr.guild.members.cache.find(guildMember => guildMember.id === actor.userId);
+			return intr.guild?.members?.cache?.find?.(
+				guildMember => guildMember.id === actor.userId
+			);
 		});
 
-		return guildMemberOptions.map(guildMember => ({
+		return guildMemberOptions.filter(filterNotNullOrUndefined).map(guildMember => ({
 			name: guildMember.displayName,
 			value: guildMember.id.toString(),
 		}));
@@ -281,12 +285,12 @@ export class AutocompleteUtils {
 		matchText: string
 	) {
 		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
-		const currentInitResponse = await InitiativeUtils.getInitiativeForChannel(intr.channel);
+		const currentInit = await InitiativeUtils.getInitiativeForChannelOrNull(intr.channel);
 
 		let results = [];
 
 		//get the character matches
-		let actorOptions = currentInitResponse.init.actors;
+		let actorOptions = currentInit?.actors ?? [];
 
 		//return the matched skills
 		results.push(

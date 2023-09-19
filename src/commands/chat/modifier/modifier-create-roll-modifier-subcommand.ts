@@ -7,23 +7,22 @@ import {
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 
-import { EventData } from '../../../models/internal-models.js';
 import { Character } from '../../../services/kobold/models/index.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { Language } from '../../../models/enum-helpers/index.js';
+import L from '../../../i18n/i18n-node.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
 import { compileExpression } from 'filtrex';
 import { DiceUtils } from '../../../utils/dice-utils.js';
 import { Creature } from '../../../utils/creature.js';
 
 export class ModifierCreateRollModifierSubCommand implements Command {
-	public names = [Language.LL.commands.modifier.createRollModifier.name()];
+	public names = [L.en.commands.modifier.createRollModifier.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.modifier.createRollModifier.name(),
-		description: Language.LL.commands.modifier.createRollModifier.description(),
+		name: L.en.commands.modifier.createRollModifier.name(),
+		description: L.en.commands.modifier.createRollModifier.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -33,7 +32,6 @@ export class ModifierCreateRollModifierSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
 		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
@@ -44,19 +42,21 @@ export class ModifierCreateRollModifierSubCommand implements Command {
 			);
 			return;
 		}
-		let name = (intr.options.getString(ModifierOptions.MODIFIER_NAME_OPTION.name) ?? '')
+		let name = intr.options
+			.getString(ModifierOptions.MODIFIER_NAME_OPTION.name, true)
 			.trim()
 			.toLowerCase();
-		let modifierType = (intr.options.getString(ModifierOptions.MODIFIER_TYPE_OPTION.name) ?? '')
+		let modifierType = intr.options
+			.getString(ModifierOptions.MODIFIER_TYPE_OPTION.name, true)
 			.trim()
 			.toLowerCase();
 		const description = intr.options.getString(
 			ModifierOptions.MODIFIER_DESCRIPTION_OPTION.name
 		);
 		const value = intr.options.getString(ModifierOptions.MODIFIER_VALUE_OPTION.name);
-		let targetTags = (
-			intr.options.getString(ModifierOptions.MODIFIER_TARGET_TAGS_OPTION.name) ?? ''
-		).trim();
+		let targetTags = intr.options
+			.getString(ModifierOptions.MODIFIER_TARGET_TAGS_OPTION.name, true)
+			.trim();
 
 		// make sure the name does't already exist in the character's modifiers
 		if (activeCharacter.getModifierByName(name)) {
@@ -83,13 +83,13 @@ export class ModifierCreateRollModifierSubCommand implements Command {
 		}
 
 		// we must be able to evaluate the modifier as a roll for this character
-		const result = DiceUtils.parseAndEvaluateDiceExpression({
-			rollExpression: value,
-			creature: Creature.fromCharacter(activeCharacter),
-			LL: Language.LL,
-		});
-
-		if (result.error) {
+		try {
+			DiceUtils.parseAndEvaluateDiceExpression({
+				rollExpression: String(value),
+				creature: Creature.fromCharacter(activeCharacter),
+				LL: L.en,
+			});
+		} catch (err) {
 			await InteractionUtils.send(
 				intr,
 				LL.commands.modifier.createRollModifier.interactions.doesntEvaluateError()

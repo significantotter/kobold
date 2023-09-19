@@ -8,21 +8,22 @@ import {
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 
-import { EventData } from '../../../models/internal-models.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { InitiativeUtils } from '../../../utils/initiative-utils.js';
 import { Initiative } from '../../../services/kobold/models/index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { Language } from '../../../models/enum-helpers/index.js';
+import L from '../../../i18n/i18n-node.js';
 import { CollectorUtils } from '../../../utils/collector-utils.js';
+import { refs } from '../../../constants/common-text.js';
+import { KoboldError } from '../../../utils/KoboldError.js';
 
 export class InitEndSubCommand implements Command {
-	public names = [Language.LL.commands.init.end.name()];
+	public names = [L.en.commands.init.end.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.init.end.name(),
-		description: Language.LL.commands.init.end.description(),
+		name: L.en.commands.init.end.name(),
+		description: L.en.commands.init.end.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -32,18 +33,9 @@ export class InitEndSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
-		const currentInitResponse = await InitiativeUtils.getInitiativeForChannel(intr.channel, {
-			sendErrors: true,
-			LL,
-		});
-		if (currentInitResponse.errorMessage) {
-			await InteractionUtils.send(intr, currentInitResponse.errorMessage);
-			return;
-		}
-		const currentInit = currentInitResponse.init;
+		const currentInit = await InitiativeUtils.getInitiativeForChannel(intr.channel);
 
 		const prompt = await intr.reply({
 			content: LL.commands.init.end.interactions.confirmation.text(),
@@ -97,16 +89,16 @@ export class InitEndSubCommand implements Command {
 				},
 			}
 		);
-		if (result.value === 'cancel') {
+		if (result && result.value === 'cancel') {
 			await InteractionUtils.editReply(intr, {
 				content: LL.sharedInteractions.choiceRegistered({
 					choice: 'Cancel',
 				}),
 				components: [],
 			});
-			await InteractionUtils.send(intr, Language.LL.commands.init.end.interactions.cancel());
+			await InteractionUtils.send(intr, L.en.commands.init.end.interactions.cancel());
 			return;
-		} else if (result.value === 'end') {
+		} else if (result && result.value === 'end') {
 			await InteractionUtils.editReply(intr, {
 				content: LL.sharedInteractions.choiceRegistered({
 					choice: 'End',
@@ -115,16 +107,10 @@ export class InitEndSubCommand implements Command {
 			});
 			try {
 				await Initiative.query().deleteById(currentInit.id);
-				await InteractionUtils.send(
-					intr,
-					Language.LL.commands.init.end.interactions.success()
-				);
+				await InteractionUtils.send(intr, L.en.commands.init.end.interactions.success());
 				return;
 			} catch (err) {
-				await InteractionUtils.send(
-					intr,
-					Language.LL.commands.init.end.interactions.error()
-				);
+				await InteractionUtils.send(intr, L.en.commands.init.end.interactions.error());
 				console.error(err);
 			}
 		} else {

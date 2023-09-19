@@ -1,11 +1,6 @@
 import _ from 'lodash';
-import {
-	Character,
-	InitiativeActor,
-	Sheet,
-	UserSettings,
-} from '../services/kobold/models/index.js';
-import { DiceUtils, MultiRollResult } from './dice-utils.js';
+import { Attribute, Character, Sheet, UserSettings } from '../services/kobold/models/index.js';
+import { DiceRollError, DiceUtils, MultiRollResult } from './dice-utils.js';
 import { RollBuilder } from './roll-builder.js';
 import { Creature } from './creature.js';
 import { EmbedUtils } from './kobold-embed-utils.js';
@@ -24,7 +19,6 @@ type BuildRollOptions = {
 	damageModifierExpression?: string;
 	title?: string;
 };
-type Attribute = { name: string; value: number; tags?: string[] };
 
 type TargetingResult =
 	| 'critical success'
@@ -43,18 +37,20 @@ export class ActionRoller {
 	public triggeredWeaknesses: Sheet['defenses']['weaknesses'] = [];
 	public triggeredResistances: Sheet['defenses']['resistances'] = [];
 	public triggeredImmunities: Sheet['defenses']['immunities'] = [];
+	public creature: Creature;
 	constructor(
-		public userSettings?: UserSettings,
-		public action?: Action,
-		public creature?: Creature,
+		public userSettings: UserSettings | null,
+		public action: Action,
+		creature?: Creature,
 		public targetCreature?: Creature,
 		public options?: {
 			heightenLevel?: number;
 		}
 	) {
 		this.action = action;
-		this.tags = _.uniq([...(action?.tags ?? []), this.action?.type]);
-		this.creature = creature;
+		this.tags = _.uniq([...(action?.tags ?? [])]);
+		if (this.action?.type) this.tags.push(this.action.type);
+		this.creature = creature ?? Creature.fromDefault();
 		this.options = options;
 
 		if (!userSettings) {
@@ -77,11 +73,12 @@ export class ActionRoller {
 	}
 
 	public buildResultText() {
+		if (!this.targetCreature) return '';
 		return EmbedUtils.buildDamageResultText({
 			sourceCreatureName: this.creature.name,
 			targetCreatureName: this.targetCreature.name,
 			totalDamageDealt: this.totalDamageDealt - this.totalHealingDone,
-			actionName: this.action.name,
+			actionName: this.action?.name,
 			targetCreatureSheet: this.targetCreature.sheet,
 			triggeredResistances: this.triggeredResistances,
 			triggeredWeaknesses: this.triggeredWeaknesses,
@@ -112,22 +109,32 @@ export class ActionRoller {
 			rollExpression,
 			tags,
 			extraAttributes: currentExtraAttributes,
-			targetDC: options.targetDC ?? null,
+			targetDC: options.targetDC,
 			showTags: false,
 			rollType: 'skill-challenge',
 		});
-		if (result?.results?.total) {
+		if (result.type !== 'error') {
 			// update the extra attributes for the next roll
 			['challengeResult', 'challenge', 'hit'].forEach(
-				name => (extraAttributes[name] = { name, value: result.results.total })
+				name =>
+					(extraAttributes[name] = {
+						name,
+						value: result.results.total,
+						type: 'rollResult',
+						tags: [],
+					})
 			);
 			extraAttributes[`roll${rollCounter}`] = {
 				name: `roll${rollCounter}`,
 				value: result.results.total,
+				type: 'rollResult',
+				tags: [],
 			};
 			extraAttributes[`roll${rollCounter}Attack`] = {
 				name: `roll${rollCounter}Attack`,
 				value: result.results.total,
+				type: 'rollResult',
+				tags: [],
 			};
 		}
 
@@ -160,22 +167,34 @@ export class ActionRoller {
 			rollExpression,
 			tags,
 			extraAttributes: currentExtraAttributes,
-			targetDC: options.targetDC ?? null,
+			targetDC: options.targetDC,
 			showTags: false,
 			rollType: 'attack',
 		});
-		if (result?.results?.total) {
+		if (result.type !== 'error' && result.results.total) {
 			// update the extra attributes for the next roll
 			['attackResult', 'attack', 'hit'].forEach(
-				name => (extraAttributes[name] = { name, value: result.results.total })
+				name =>
+					(extraAttributes[name] = {
+						name,
+						value: result.results.total,
+						type: 'rollResult',
+						tags: [],
+					})
 			);
 			extraAttributes[`roll${rollCounter}`] = {
 				name: `roll${rollCounter}`,
 				value: result.results.total,
+
+				type: 'rollResult',
+				tags: [],
 			};
 			extraAttributes[`roll${rollCounter}Attack`] = {
 				name: `roll${rollCounter}Attack`,
 				value: result.results.total,
+
+				type: 'rollResult',
+				tags: [],
 			};
 		}
 
@@ -201,37 +220,53 @@ export class ActionRoller {
 				rollExpression: options.saveDiceRoll,
 				tags,
 				extraAttributes: currentExtraAttributes,
-				targetDC: options.targetDC ?? null,
+				targetDC: options.targetDC,
 				showTags: false,
 				rollType: 'save',
 				rollFromTarget: true,
 			});
-			// Just record text that there should be a save here
-			// update the extra attributes for the next roll
-			['SaveResult', 'Save', 'savingThrow'].forEach(
-				name => (extraAttributes[name] = { name, value: result.results?.total })
-			);
-			extraAttributes[`roll${rollCounter}`] = {
-				name: `roll${rollCounter}`,
-				value: result.results?.total,
-			};
-			extraAttributes[`roll${rollCounter}Save`] = {
-				name: `roll${rollCounter}Save`,
-				value: result.results?.total,
-			};
+			if (result.type !== 'error') {
+				// Just record text that there should be a save here
+				// update the extra attributes for the next roll
+				['SaveResult', 'Save', 'savingThrow'].forEach(
+					name =>
+						(extraAttributes[name] = {
+							name,
+							value: result.results?.total,
+							type: 'rollResult',
+							tags: [],
+						})
+				);
+				extraAttributes[`roll${rollCounter}`] = {
+					name: `roll${rollCounter}`,
+					value: result.results?.total,
+					type: 'rollResult',
+					tags: [],
+				};
+				extraAttributes[`roll${rollCounter}Save`] = {
+					name: `roll${rollCounter}Save`,
+					value: result.results?.total,
+					type: 'rollResult',
+					tags: [],
+				};
+			}
 			return result;
 		} else {
 			const title = roll.name || 'Save';
-			const text = `The target makes a ${targetDcClause}${roll.saveRollType} check VS. ${this.creature.sheet.info.name}'s ${roll.saveTargetDC}`;
+			const text = `The target makes a ${targetDcClause}${roll.saveRollType} check VS. ${this.creature.name}'s ${roll.saveTargetDC}`;
 			rollBuilder.addText({ title, text, extraAttributes: currentExtraAttributes, tags });
 
 			extraAttributes[`roll${rollCounter}`] = {
 				name: `roll${rollCounter}`,
 				value: 0,
+				type: 'rollResult',
+				tags: [],
 			};
 			extraAttributes[`roll${rollCounter}Save`] = {
 				name: `roll${rollCounter}Save`,
 				value: 0,
+				type: 'rollResult',
+				tags: [],
 			};
 
 			return null;
@@ -349,18 +384,26 @@ export class ActionRoller {
 			showTags: false,
 		});
 
-		extraAttributes[`roll${rollCounter}`] = {
-			name: `roll${rollCounter}`,
-			value: result.results?.total,
-		};
-		extraAttributes[`roll${rollCounter}${_.capitalize(effectTerm)}`] = {
-			name: `roll${rollCounter}${_.capitalize(effectTerm)}`,
-			value: result.results?.total,
-		};
-		extraAttributes[`roll${rollCounter}Applied${_.capitalize(effectTerm)}`] = {
-			name: `roll${rollCounter}Applied${_.capitalize(effectTerm)}`,
-			value: result.results?.total,
-		};
+		if (result.type !== 'error') {
+			extraAttributes[`roll${rollCounter}`] = {
+				name: `roll${rollCounter}`,
+				value: result.results.total,
+				type: 'rollResult',
+				tags: [],
+			};
+			extraAttributes[`roll${rollCounter}${_.capitalize(effectTerm)}`] = {
+				name: `roll${rollCounter}${_.capitalize(effectTerm)}`,
+				value: result.results.total,
+				type: 'rollResult',
+				tags: [],
+			};
+			extraAttributes[`roll${rollCounter}Applied${_.capitalize(effectTerm)}`] = {
+				name: `roll${rollCounter}Applied${_.capitalize(effectTerm)}`,
+				value: result.results.total,
+				type: 'rollResult',
+				tags: [],
+			};
+		}
 
 		return result;
 	}
@@ -526,7 +569,9 @@ export class ActionRoller {
 				`roll${rollCounter}${_.capitalize(effectTerm)}`,
 				`roll${rollCounter}Critical${_.capitalize(effectTerm)}`,
 				`roll${rollCounter}Applied${_.capitalize(effectTerm)}`,
-			].forEach(name => (extraAttributes[name] = { name, value: 0 }));
+			].forEach(
+				name => (extraAttributes[name] = { name, value: 0, type: 'rollResult', tags: [] })
+			);
 			return null;
 		}
 
@@ -590,30 +635,44 @@ export class ActionRoller {
 		extraAttributes[`roll${rollCounter}`] = {
 			name: `roll${rollCounter}`,
 			value: appliedDamage,
+			type: 'rollResult',
+			tags: [],
 		};
 		extraAttributes[`roll${rollCounter}${_.capitalize(effectTerm)}`] = {
 			name: `roll${rollCounter}${_.capitalize(effectTerm)}`,
 			value: appliedDamage,
+			type: 'rollResult',
+			tags: [],
 		};
 		extraAttributes[`roll${rollCounter}Applied${_.capitalize(effectTerm)}`] = {
 			name: `roll${rollCounter}Applied${_.capitalize(effectTerm)}`,
 			value: appliedDamage,
+			type: 'rollResult',
+			tags: [],
 		};
 		extraAttributes[`roll${rollCounter}CriticalSuccess${_.capitalize(effectTerm)}`] = {
 			name: `roll${rollCounter}CriticalSuccess${_.capitalize(effectTerm)}`,
 			value: critSuccessDamageResult?.results?.total || 0,
+			type: 'rollResult',
+			tags: [],
 		};
 		extraAttributes[`roll${rollCounter}Success${_.capitalize(effectTerm)}`] = {
 			name: `roll${rollCounter}Success${_.capitalize(effectTerm)}`,
 			value: damageResult?.results?.total || 0,
+			type: 'rollResult',
+			tags: [],
 		};
 		extraAttributes[`roll${rollCounter}Failure${_.capitalize(effectTerm)}`] = {
 			name: `roll${rollCounter}Failure${_.capitalize(effectTerm)}`,
 			value: failureDamageResult?.results?.total || 0,
+			type: 'rollResult',
+			tags: [],
 		};
 		extraAttributes[`roll${rollCounter}CriticalFailure${_.capitalize(effectTerm)}`] = {
 			name: `roll${rollCounter}CriticalFailure${_.capitalize(effectTerm)}`,
 			value: critFailureDamageResult?.results?.total || 0,
+			type: 'rollResult',
+			tags: [],
 		};
 		results.appliedDamage = appliedDamage;
 
@@ -649,21 +708,38 @@ export class ActionRoller {
 		}
 	}
 
-	public buildRoll(rollNote, rollDescription, options: BuildRollOptions): RollBuilder {
+	public buildRoll(
+		rollNote: string,
+		rollDescription: string,
+		options: BuildRollOptions
+	): RollBuilder {
+		let title: string;
+		const overwriteTargetDc = options?.targetDC;
+
+		if (options?.title) {
+			title = options.title;
+		} else if (this.creature && this.action?.name) {
+			title = `${this.creature.name} used ${this.action.name} on ${this.creature.name}!`;
+		} else if (this.creature) {
+			title = `${this.creature.name} used ${this.action.name}!`;
+		} else {
+			title = `${this.action.name}`;
+		}
+
 		const rollBuilder = new RollBuilder({
 			creature: this.creature,
 			targetCreature: this.targetCreature,
 			rollNote,
 			rollDescription,
-			title: options?.title ?? `${this.creature.sheet.info.name} used ${this.action.name}!`,
-			userSettings: this.userSettings,
+			title,
+			userSettings: this.userSettings ?? undefined,
 		});
 
 		let abilityLevel = 1;
 
 		if (!options.heightenLevel) {
-			if (this.action.autoHeighten) {
-				abilityLevel = Math.ceil(this.creature.sheet.info.level / 2);
+			if (this.action?.autoHeighten) {
+				abilityLevel = Math.ceil(this.creature.level / 2);
 			} else {
 				abilityLevel = this.action.baseLevel || 1;
 			}
@@ -675,12 +751,26 @@ export class ActionRoller {
 
 		// allow a bunch of aliases for the heighten level attribute
 		['heightenLevel', 'spellLevel', 'abilityLevel', 'heighten', '_level'].forEach(
-			name => (extraAttributes[name] = { name, value: abilityLevel })
+			name =>
+				(extraAttributes[name] = {
+					name,
+					value: abilityLevel,
+					type: 'rollResult',
+					tags: [],
+				})
 		);
 
-		['dc', 'targetDC', 'target'].forEach(
-			name => (extraAttributes[name] = { name, value: options.targetDC })
-		);
+		if (overwriteTargetDc) {
+			['dc', 'targetDC', 'target'].forEach(
+				name =>
+					(extraAttributes[name] = {
+						name,
+						value: overwriteTargetDc,
+						type: 'rollResult',
+						tags: [],
+					})
+			);
+		}
 
 		let lastTargetingResult: TargetingResult;
 		let lastTargetingActionType: ContestedRollTypes = 'none';
@@ -693,22 +783,27 @@ export class ActionRoller {
 
 			// time for our state machine!
 			if (rollType === 'attack') {
-				let rollTargetValue = options.targetDC;
+				let rollTargetValue = overwriteTargetDc;
 				if (this.targetCreature && !rollTargetValue) {
-					rollTargetValue = this.targetCreature.getDC(roll?.targetDC ?? 'ac');
+					rollTargetValue =
+						this.targetCreature.getDC(roll?.targetDC ?? 'ac') ?? undefined;
 
 					if (!rollTargetValue) {
-						// try evaluating it as a dice expression.
-						// this allows players to set static DCs, or use proficiency-based
-						// target values like for medicine checks
-						const testRollResult = DiceUtils.parseAndEvaluateDiceExpression({
-							rollExpression: roll?.targetDC,
-							creature: this.creature,
-							tags: this.tags,
-							extraAttributes: _.values(extraAttributes),
-						});
-						if (!testRollResult.error) {
-							rollTargetValue = testRollResult.results?.total;
+						try {
+							// try evaluating it as a dice expression.
+							// this allows players to set static DCs, or use proficiency-based
+							// target values like for medicine checks
+							const testRollResult = DiceUtils.parseAndEvaluateDiceExpression({
+								rollExpression: roll?.targetDC ?? '',
+								creature: this.creature,
+								tags: this.tags,
+								extraAttributes: _.values(extraAttributes),
+							});
+							rollTargetValue = testRollResult.results.total;
+						} catch (err) {
+							if (err instanceof DiceRollError) {
+								console.warn(err);
+							}
 						}
 					}
 				}
@@ -719,27 +814,35 @@ export class ActionRoller {
 					extraAttributes,
 					rollCounter
 				);
-
 				// note the current success status for future damage rolls
-				lastTargetingResult = attackResult.success;
-				lastTargetingActionType = 'attack';
+				if (attackResult.type != 'error') {
+					lastTargetingResult = attackResult.success;
+					lastTargetingActionType = 'attack';
+				} else {
+					lastTargetingResult = null;
+					lastTargetingActionType = 'attack';
+				}
 			}
 			if (rollType === 'skill-challenge') {
 				let rollTargetValue =
-					options.targetDC ?? this.creature.getDC(roll?.targetDC ?? 'ac');
+					overwriteTargetDc ?? this.creature.getDC(roll?.targetDC ?? 'ac') ?? undefined;
 
 				if (!rollTargetValue) {
-					// try evaluating it as a dice expression.
-					// this allows players to set static DCs, or use proficiency-based
-					// target values like for medicine checks
-					const testRollResult = DiceUtils.parseAndEvaluateDiceExpression({
-						rollExpression: roll?.targetDC,
-						creature: this.creature,
-						tags: this.tags,
-						extraAttributes: _.values(extraAttributes),
-					});
-					if (!testRollResult.error) {
-						rollTargetValue = testRollResult.results?.total;
+					try {
+						// try evaluating it as a dice expression.
+						// this allows players to set static DCs, or use proficiency-based
+						// target values like for medicine checks
+						const testRollResult = DiceUtils.parseAndEvaluateDiceExpression({
+							rollExpression: roll?.targetDC ?? '',
+							creature: this.creature,
+							tags: this.tags,
+							extraAttributes: _.values(extraAttributes),
+						});
+						rollTargetValue = testRollResult.results.total;
+					} catch (err) {
+						if (err instanceof DiceRollError) {
+							console.warn(err);
+						}
 					}
 				}
 				const skillChallengeResult = this.rollSkillChallenge(
@@ -749,19 +852,25 @@ export class ActionRoller {
 					extraAttributes,
 					rollCounter
 				);
-
 				// note the current success status for future damage rolls
-				lastTargetingResult = skillChallengeResult.success;
-				lastTargetingActionType = 'skill-challenge';
+				if (skillChallengeResult.type !== 'error') {
+					lastTargetingResult = skillChallengeResult.success;
+					lastTargetingActionType = 'skill-challenge';
+				} else {
+					lastTargetingResult = null;
+					lastTargetingActionType = 'skill-challenge';
+				}
 			} else if (rollType === 'save') {
-				let rollTargetValue = options.targetDC;
+				let rollTargetValue = overwriteTargetDc;
 				let saveRoll = options.saveDiceRoll;
 				if (this.creature) {
-					rollTargetValue = this.creature.getDC(roll?.saveTargetDC) ?? rollTargetValue;
+					rollTargetValue =
+						this.creature.getDC(roll.saveTargetDC ?? '') ?? rollTargetValue;
 				}
 				if (this.targetCreature) {
 					const saveRollBonus =
-						this.targetCreature.rolls[roll?.saveRollType.trim().toLowerCase()]?.bonus;
+						this.targetCreature.rolls[(roll.saveRollType ?? '').trim().toLowerCase()]
+							?.bonus;
 					saveRoll = DiceUtils.buildDiceExpression('d20', String(saveRollBonus ?? 0));
 				}
 				const saveResult = this.rollSave(
@@ -771,12 +880,16 @@ export class ActionRoller {
 					extraAttributes,
 					rollCounter
 				);
-
-				// note the current success status for future damage rolls
-				lastTargetingResult = saveResult?.success;
-				lastTargetingActionType = 'save';
+				if (saveResult?.type === 'dice') {
+					// note the current success status for future damage rolls
+					lastTargetingResult = saveResult?.success;
+					lastTargetingActionType = 'save';
+				} else {
+					lastTargetingActionType = 'save';
+					lastTargetingResult = null;
+				}
 			} else if (rollType === 'text') {
-				const textResult = this.rollText(
+				this.rollText(
 					rollBuilder,
 					roll,
 					options,
@@ -795,10 +908,12 @@ export class ActionRoller {
 					lastTargetingResult,
 					lastTargetingActionType
 				);
-				if (result?.results?.total && !roll.healInsteadOfDamage)
-					this.applyDamage(roll, result.results.total);
-				else if (result?.results?.total && roll.healInsteadOfDamage)
-					this.applyHealing(roll, result.results.total);
+				if (result && result.type !== 'error') {
+					if (result?.results?.total && !roll.healInsteadOfDamage)
+						this.applyDamage(roll, result.results.total);
+					else if (result?.results?.total && roll.healInsteadOfDamage)
+						this.applyHealing(roll, result.results.total);
+				}
 			} else if (rollType === 'advanced-damage') {
 				const result = this.rollAdvancedDamage(
 					rollBuilder,
@@ -809,10 +924,12 @@ export class ActionRoller {
 					lastTargetingResult,
 					lastTargetingActionType
 				);
-				if (result?.appliedDamage && !roll.healInsteadOfDamage)
-					this.applyDamage(roll, result?.appliedDamage);
-				else if (result?.appliedDamage && roll.healInsteadOfDamage)
-					this.applyHealing(roll, result?.appliedDamage);
+				if (result) {
+					if (result?.appliedDamage && !roll.healInsteadOfDamage)
+						this.applyDamage(roll, result?.appliedDamage);
+					else if (result?.appliedDamage && roll.healInsteadOfDamage)
+						this.applyHealing(roll, result?.appliedDamage);
+				}
 			}
 		}
 

@@ -26,6 +26,6 @@ describe('WG Token', () => {
 		await WgToken.query().insert(builtToken);
 		const fetchedTokens = await WgToken.query();
 		const insertedToken = fetchedTokens.find(token => token.charId === builtToken.charId);
-		expect(insertedToken.charId).toBe(builtToken.charId);
+		expect(insertedToken?.charId).toBe(builtToken.charId);
 	});
 });

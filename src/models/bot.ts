@@ -3,6 +3,7 @@ import {
 	CommandInteraction,
 	ButtonInteraction,
 	Client,
+	Events,
 	Guild,
 	Interaction,
 	Message,
@@ -10,9 +11,8 @@ import {
 	PartialMessageReaction,
 	PartialUser,
 	RateLimitData,
-	User,
-	Events,
 	RESTEvents,
+	User,
 } from 'discord.js';
 
 import {
@@ -50,8 +50,10 @@ export class Bot {
 
 	private registerListeners(): void {
 		this.client.on(Events.ClientReady, () => this.onReady());
-		this.client.on(Events.ShardReady, (shardId: number, unavailableGuilds: Set<string>) =>
-			this.onShardReady(shardId, unavailableGuilds)
+		this.client.on(
+			Events.ShardReady,
+			(shardId: number, unavailableGuilds: Set<string> | undefined) =>
+				this.onShardReady(shardId, unavailableGuilds ?? new Set())
 		);
 		this.client.on(Events.GuildCreate, (guild: Guild) => this.onGuildJoin(guild));
 		this.client.on(Events.GuildDelete, (guild: Guild) => this.onGuildLeave(guild));
@@ -62,7 +64,6 @@ export class Bot {
 			(messageReaction: MessageReaction | PartialMessageReaction, user: User | PartialUser) =>
 				this.onReaction(messageReaction, user)
 		);
-		// for some reason this enum got removed?
 		this.client.rest.on(RESTEvents.RateLimited, (rateLimitData: RateLimitData) =>
 			this.onRateLimit(rateLimitData)
 		);
@@ -78,7 +79,7 @@ export class Bot {
 	}
 
 	private async onReady(): Promise<void> {
-		let userTag = this.client.user?.tag;
+		let userTag = this.client.user?.tag ?? '';
 		Logger.info(Logs.info.clientLogin.replaceAll('{USER_TAG}', userTag));
 
 		if (!Config.debug.dummyMode.enabled) {
@@ -121,18 +122,18 @@ export class Bot {
 		if (
 			!this.ready ||
 			(Config.debug.dummyMode.enabled &&
-				!Config.debug.dummyMode.whiteList.includes(msg.author.id))
+				!(Config.debug.dummyMode.whiteList ?? []).includes(msg.author.id))
 		) {
 			return;
 		}
 
-		msg = await PartialUtils.fillMessage(msg);
-		if (!msg) {
-			return;
-		}
-
 		try {
-			await this.messageHandler.process(msg);
+			const filledMessage = await PartialUtils.fillMessage(msg);
+			if (!filledMessage) {
+				return;
+			}
+
+			await this.messageHandler.process(filledMessage);
 		} catch (error) {
 			Logger.error(Logs.error.message, error);
 		}
@@ -142,7 +143,7 @@ export class Bot {
 		if (
 			!this.ready ||
 			(Config.debug.dummyMode.enabled &&
-				!Config.debug.dummyMode.whiteList.includes(intr.user.id))
+				!(Config.debug.dummyMode.whiteList ?? []).includes(intr.user.id))
 		) {
 			return;
 		}
@@ -169,26 +170,26 @@ export class Bot {
 		if (
 			!this.ready ||
 			(Config.debug.dummyMode.enabled &&
-				!Config.debug.dummyMode.whiteList.includes(reactor.id))
+				!(Config.debug.dummyMode.whiteList ?? []).includes(reactor.id))
 		) {
 			return;
 		}
 
-		msgReaction = await PartialUtils.fillReaction(msgReaction);
-		if (!msgReaction) {
-			return;
-		}
-
-		reactor = await PartialUtils.fillUser(reactor);
-		if (!reactor) {
-			return;
-		}
-
 		try {
+			const filledReaction = await PartialUtils.fillReaction(msgReaction);
+			if (!filledReaction) {
+				return;
+			}
+
+			const filledReactor = await PartialUtils.fillUser(reactor);
+			if (!filledReactor) {
+				return;
+			}
+
 			await this.reactionHandler.process(
-				msgReaction,
+				filledReaction,
 				msgReaction.message as Message,
-				reactor
+				filledReactor
 			);
 		} catch (error) {
 			Logger.error(Logs.error.reaction, error);

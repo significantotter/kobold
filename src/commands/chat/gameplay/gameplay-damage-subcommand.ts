@@ -10,9 +10,9 @@ import {
 } from 'discord.js';
 
 import { GameplayOptions } from './gameplay-command-options.js';
-import { EventData } from '../../../models/internal-models.js';
+
 import { Command, CommandDeferType } from '../../index.js';
-import { Language } from '../../../models/enum-helpers/index.js';
+import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { InteractionUtils } from '../../../utils/interaction-utils.js';
 import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
@@ -22,11 +22,11 @@ import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
 import { GameUtils } from '../../../utils/game-utils.js';
 
 export class GameplayDamageSubCommand implements Command {
-	public names = [Language.LL.commands.gameplay.damage.name()];
+	public names = [L.en.commands.gameplay.damage.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.gameplay.damage.name(),
-		description: Language.LL.commands.gameplay.damage.description(),
+		name: L.en.commands.gameplay.damage.name(),
+		description: L.en.commands.gameplay.damage.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -36,23 +36,25 @@ export class GameplayDamageSubCommand implements Command {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption
-	): Promise<ApplicationCommandOptionChoiceData[]> {
+	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name) {
-			return await AutocompleteUtils.getAllTargetOptions(intr, option.value);
+			const match =
+				intr.options.getString(GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name) ?? '';
+			return await AutocompleteUtils.getAllTargetOptions(intr, match);
 		}
 	}
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
 		const targetCharacter = intr.options.getString(
-			GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name
+			GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name,
+			true
 		);
-		const amount = intr.options.getNumber(GameplayOptions.GAMEPLAY_DAMAGE_AMOUNT.name);
-		const type = intr.options.getString(GameplayOptions.GAMEPLAY_DAMAGE_TYPE.name);
+		const amount = intr.options.getNumber(GameplayOptions.GAMEPLAY_DAMAGE_AMOUNT.name, true);
+		const type = intr.options.getString(GameplayOptions.GAMEPLAY_DAMAGE_TYPE.name, true);
 
 		const { characterOrInitActorTargets } = await GameUtils.getCharacterOrInitActorTarget(
 			intr,

@@ -1,4 +1,3 @@
-import { Language } from '../../../models/enum-helpers/language.js';
 import { Character } from '../../../services/kobold/models/index.js';
 import {
 	ApplicationCommandType,
@@ -7,26 +6,22 @@ import {
 	PermissionsString,
 } from 'discord.js';
 
-import { EventData } from '../../../models/internal-models.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
-import { WgToken } from '../../../services/kobold/models/index.js';
-import { CharacterHelpers } from './helpers.js';
-import { Config } from '../../../config/config.js';
-import { CharacterUtils } from '../../../utils/character-utils.js';
 import { CharacterOptions } from './command-options.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import _ from 'lodash';
 import { PathBuilder } from '../../../services/pathbuilder/index.js';
 import { Creature } from '../../../utils/creature.js';
-import { refs } from '../../../i18n/en/common.js';
+import { refs } from '../../../constants/common-text.js';
+import L from '../../../i18n/i18n-node.js';
 
 export class CharacterImportPathbuilderSubCommand implements Command {
-	public names = [Language.LL.commands.character.importPathbuilder.name()];
+	public names = [L.en.commands.character.importPathbuilder.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.character.importPathbuilder.name(),
-		description: Language.LL.commands.character.importPathbuilder.description(),
+		name: L.en.commands.character.importPathbuilder.name(),
+		description: L.en.commands.character.importPathbuilder.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -35,11 +30,14 @@ export class CharacterImportPathbuilderSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
-		const jsonId = intr.options.getNumber(CharacterOptions.IMPORT_PATHBUILDER_OPTION.name);
-		const useStamina = intr.options.getBoolean(CharacterOptions.IMPORT_USE_STAMINA_OPTION.name);
+		const jsonId = intr.options.getNumber(
+			CharacterOptions.IMPORT_PATHBUILDER_OPTION.name,
+			true
+		);
+		const useStamina =
+			intr.options.getBoolean(CharacterOptions.IMPORT_USE_STAMINA_OPTION.name) ?? false;
 		if (!_.isInteger(jsonId) || jsonId < 1) {
 			await InteractionUtils.send(
 				intr,
@@ -81,7 +79,7 @@ export class CharacterImportPathbuilderSubCommand implements Command {
 			return;
 		} else {
 			// the character doesn't exist yet and we fetched it correctly
-			const creature = Creature.fromPathBuilder(pathBuilderChar.build, null, {
+			const creature = Creature.fromPathBuilder(pathBuilderChar.build, undefined, {
 				useStamina,
 			});
 

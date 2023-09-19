@@ -8,20 +8,21 @@ import {
 	ComponentType,
 } from 'discord.js';
 
-import { EventData } from '../../../models/internal-models.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
 import { CollectorUtils } from './../../../utils/collector-utils.js';
-import { Language } from '../../../models/enum-helpers/index.js';
+import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
+import { refs } from '../../../constants/common-text.js';
+import { KoboldError } from '../../../utils/KoboldError.js';
 
 export class CharacterRemoveSubCommand implements Command {
-	public names = [Language.LL.commands.character.remove.name()];
+	public names = [L.en.commands.character.remove.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.character.remove.name(),
-		description: Language.LL.commands.character.remove.description(),
+		name: L.en.commands.character.remove.name(),
+		description: L.en.commands.character.remove.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -30,7 +31,6 @@ export class CharacterRemoveSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
 		//check if we have an active character
@@ -98,7 +98,7 @@ export class CharacterRemoveSubCommand implements Command {
 				},
 			}
 		);
-		if (result.value === 'remove') {
+		if (result && result.value === 'remove') {
 			await InteractionUtils.editReply(intr, {
 				content: LL.sharedInteractions.choiceRegistered({
 					choice: 'Remove',

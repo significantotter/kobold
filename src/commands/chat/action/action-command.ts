@@ -10,39 +10,38 @@ import {
 	ApplicationCommandOptionChoiceData,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
-import { Language } from '../../../models/enum-helpers/index.js';
 
-import { EventData } from '../../../models/internal-models.js';
 import { CommandUtils, InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { ActionOptions } from './action-command-options.js';
+import L from '../../../i18n/i18n-node.js';
 
 export class ActionCommand implements Command {
-	public names = [Language.LL.commands.action.name()];
+	public names = [L.en.commands.action.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.action.name(),
-		description: Language.LL.commands.action.description(),
+		name: L.en.commands.action.name(),
+		description: L.en.commands.action.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 
 		options: [
 			{
-				name: Language.LL.commands.action.list.name(),
-				description: Language.LL.commands.action.list.description(),
+				name: L.en.commands.action.list.name(),
+				description: L.en.commands.action.list.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [],
 			},
 			{
-				name: Language.LL.commands.action.detail.name(),
-				description: Language.LL.commands.action.detail.description(),
+				name: L.en.commands.action.detail.name(),
+				description: L.en.commands.action.detail.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [ActionOptions.ACTION_TARGET_OPTION],
 			},
 			{
-				name: Language.LL.commands.action.create.name(),
-				description: Language.LL.commands.action.create.description(),
+				name: L.en.commands.action.create.name(),
+				description: L.en.commands.action.create.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					ActionOptions.ACTION_NAME_OPTION,
@@ -55,8 +54,8 @@ export class ActionCommand implements Command {
 				],
 			},
 			{
-				name: Language.LL.commands.action.remove.name(),
-				description: Language.LL.commands.action.remove.description(),
+				name: L.en.commands.action.remove.name(),
+				description: L.en.commands.action.remove.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					{
@@ -67,8 +66,8 @@ export class ActionCommand implements Command {
 				],
 			},
 			{
-				name: Language.LL.commands.action.edit.name(),
-				description: Language.LL.commands.action.edit.description(),
+				name: L.en.commands.action.edit.name(),
+				description: L.en.commands.action.edit.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					ActionOptions.ACTION_TARGET_OPTION,
@@ -77,8 +76,8 @@ export class ActionCommand implements Command {
 				],
 			},
 			{
-				name: Language.LL.commands.action.import.name(),
-				description: Language.LL.commands.action.import.description(),
+				name: L.en.commands.action.import.name(),
+				description: L.en.commands.action.import.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					ActionOptions.ACTION_IMPORT_URL_OPTION,
@@ -86,8 +85,8 @@ export class ActionCommand implements Command {
 				],
 			},
 			{
-				name: Language.LL.commands.action.export.name(),
-				description: Language.LL.commands.action.export.description(),
+				name: L.en.commands.action.export.name(),
+				description: L.en.commands.action.export.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [],
 			},
@@ -102,7 +101,7 @@ export class ActionCommand implements Command {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption
-	): Promise<ApplicationCommandOptionChoiceData[]> {
+	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 
 		let command = CommandUtils.getSubCommandByName(this.commands, intr.options.getSubcommand());
@@ -115,7 +114,6 @@ export class ActionCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
 		if (!intr.isChatInputCommand()) return;
@@ -124,9 +122,9 @@ export class ActionCommand implements Command {
 			return;
 		}
 
-		let passesChecks = await CommandUtils.runChecks(command, intr, data);
+		let passesChecks = await CommandUtils.runChecks(command, intr);
 		if (passesChecks) {
-			await command.execute(intr, data, LL);
+			await command.execute(intr, LL);
 		}
 	}
 }

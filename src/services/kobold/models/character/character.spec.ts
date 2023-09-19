@@ -24,7 +24,7 @@ describe('Character', () => {
 	});
 	test('builds a character with a given name', async () => {
 		const builtCharacter = CharacterFactory.withName('testName').build();
-		expect(builtCharacter.characterData.name).toBe('testName');
+		expect(builtCharacter.characterData?.name).toBe('testName');
 	});
 	test('Model successfully inserts and retrieves a created character', async () => {
 		const builtCharacter = CharacterFactory.build();
@@ -33,7 +33,7 @@ describe('Character', () => {
 		const insertedCharacter = fetchedCharacters.find(
 			character => character.charId === builtCharacter.charId
 		);
-		expect(insertedCharacter.charId).toBe(builtCharacter.charId);
+		expect(insertedCharacter?.charId).toBe(builtCharacter.charId);
 	});
 
 	// describe('queryControlledCharacterByName', () => {

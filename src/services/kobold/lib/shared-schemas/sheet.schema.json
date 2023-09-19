@@ -75,7 +75,26 @@
 					"description": "Whether the character follows alternate stamina rules.",
 					"type": "boolean"
 				}
-			}
+			},
+			"required": [
+				"name",
+				"url",
+				"description",
+				"gender",
+				"age",
+				"alignment",
+				"deity",
+				"imageURL",
+				"level",
+				"size",
+				"class",
+				"keyability",
+				"ancestry",
+				"heritage",
+				"background",
+				"traits",
+				"usesStamina"
+			]
 		},
 		"abilities": {
 			"description": "The character's primary ability scores.",
@@ -105,7 +124,15 @@
 					"description": "The character's charisma score.",
 					"type": ["integer", "null"]
 				}
-			}
+			},
+			"required": [
+				"strength",
+				"dexterity",
+				"constitution",
+				"intelligence",
+				"wisdom",
+				"charisma"
+			]
 		},
 		"general": {
 			"description": "The general attributes for the character.",
@@ -165,7 +192,22 @@
 					"type": "array",
 					"items": { "type": ["string", "null"] }
 				}
-			}
+			},
+			"required": [
+				"currentHeroPoints",
+				"speed",
+				"flySpeed",
+				"swimSpeed",
+				"climbSpeed",
+				"currentFocusPoints",
+				"focusPoints",
+				"classDC",
+				"classAttack",
+				"perception",
+				"perceptionProfMod",
+				"languages",
+				"senses"
+			]
 		},
 		"defenses": {
 			"description": "The character defensive attributes.",
@@ -202,7 +244,7 @@
 				"immunities": {
 					"description": "The character's immunities.",
 					"type": "array",
-					"items": { "type": ["string", "null"] }
+					"items": { "type": ["string"] }
 				},
 				"resistances": {
 					"description": "The character's resistances.",
@@ -212,13 +254,14 @@
 						"properties": {
 							"amount": {
 								"description": "the amount of resistance for this type of damage",
-								"type": ["integer", "null"]
+								"type": ["integer"]
 							},
 							"type": {
 								"description": "the damage type that's resisted",
-								"type": ["string", "null"]
+								"type": ["string"]
 							}
-						}
+						},
+						"required": ["amount", "type"]
 					}
 				},
 				"weaknesses": {
@@ -229,13 +272,14 @@
 						"properties": {
 							"amount": {
 								"description": "the amount of weakness for this type of damage",
-								"type": ["integer", "null"]
+								"type": ["integer"]
 							},
 							"type": {
 								"description": "the damage type that of the weakness",
-								"type": ["string", "null"]
+								"type": ["string"]
 							}
-						}
+						},
+						"required": ["amount", "type"]
 					}
 				},
 				"ac": { "description": "The character's armor class", "type": ["integer", "null"] },
@@ -255,7 +299,24 @@
 					"description": "The character's unarmored proficiency modifier.",
 					"type": ["integer", "null"]
 				}
-			}
+			},
+			"required": [
+				"currentHp",
+				"maxHp",
+				"tempHp",
+				"currentResolve",
+				"maxResolve",
+				"currentStamina",
+				"maxStamina",
+				"immunities",
+				"resistances",
+				"weaknesses",
+				"ac",
+				"heavyProfMod",
+				"mediumProfMod",
+				"lightProfMod",
+				"unarmoredProfMod"
+			]
 		},
 		"offense": {
 			"description": "The character's offensive attributes.",
@@ -277,7 +338,8 @@
 					"description": "The character's advanced weapon proficiency modifier.",
 					"type": ["integer", "null"]
 				}
-			}
+			},
+			"required": ["martialProfMod", "simpleProfMod", "unarmedProfMod", "advancedProfMod"]
 		},
 		"castingStats": {
 			"description": "The character's casting stats.",
@@ -331,7 +393,21 @@
 					"description": "The character's primal casting proficiency modifier.",
 					"type": ["integer", "null"]
 				}
-			}
+			},
+			"required": [
+				"arcaneAttack",
+				"arcaneDC",
+				"arcaneProfMod",
+				"divineAttack",
+				"divineDC",
+				"divineProfMod",
+				"occultAttack",
+				"occultDC",
+				"occultProfMod",
+				"primalAttack",
+				"primalDC",
+				"primalProfMod"
+			]
 		},
 		"saves": {
 			"description": "The character's saving throw attributes.",
@@ -361,7 +437,15 @@
 					"description": "The character's will proficiency modifier.",
 					"type": ["integer", "null"]
 				}
-			}
+			},
+			"required": [
+				"fortitude",
+				"fortitudeProfMod",
+				"reflex",
+				"reflexProfMod",
+				"will",
+				"willProfMod"
+			]
 		},
 		"skills": {
 			"description": "The character's skill attributes.",
@@ -503,7 +587,7 @@
 						"properties": {
 							"name": {
 								"description": "The lore name.",
-								"type": ["string", "null"]
+								"type": ["string"]
 							},
 							"bonus": {
 								"description": "The lore bonus.",
@@ -513,10 +597,46 @@
 								"description": "The lore proficiencyModifer.",
 								"type": ["integer", "null"]
 							}
-						}
+						},
+						"required": ["name", "bonus", "profMod"]
 					}
 				}
-			}
+			},
+			"required": [
+				"acrobatics",
+				"acrobaticsProfMod",
+				"arcana",
+				"arcanaProfMod",
+				"athletics",
+				"athleticsProfMod",
+				"crafting",
+				"craftingProfMod",
+				"deception",
+				"deceptionProfMod",
+				"diplomacy",
+				"diplomacyProfMod",
+				"intimidation",
+				"intimidationProfMod",
+				"medicine",
+				"medicineProfMod",
+				"nature",
+				"natureProfMod",
+				"occultism",
+				"occultismProfMod",
+				"performance",
+				"performanceProfMod",
+				"religion",
+				"religionProfMod",
+				"society",
+				"societyProfMod",
+				"stealth",
+				"stealthProfMod",
+				"survival",
+				"survivalProfMod",
+				"thievery",
+				"thieveryProfMod",
+				"lores"
+			]
 		},
 		"attacks": {
 			"description": "The character's attacks.",
@@ -526,7 +646,7 @@
 				"properties": {
 					"name": {
 						"description": "The attack name.",
-						"type": ["string", "null"]
+						"type": ["string"]
 					},
 					"toHit": {
 						"description": "The attack toHit.",
@@ -541,13 +661,14 @@
 							"properties": {
 								"dice": {
 									"description": "The attack damage dice.",
-									"type": ["string", "null"]
+									"type": ["string"]
 								},
 								"type": {
 									"description": "The attack damage type.",
 									"type": ["string", "null"]
 								}
-							}
+							},
+							"required": ["dice", "type"]
 						}
 					},
 					"range": {
@@ -558,14 +679,15 @@
 						"description": "The attack traits.",
 						"type": ["array", "null"],
 						"items": {
-							"type": ["string", "null"]
+							"type": ["string"]
 						}
 					},
 					"notes": {
 						"description": "The attack notes.",
 						"type": ["string", "null"]
 					}
-				}
+				},
+				"required": ["name", "toHit", "damage", "range", "traits", "notes"]
 			}
 		},
 		"sourceData": {
@@ -574,119 +696,13 @@
 		},
 		"modifiers": {
 			"type": "array",
-			"description": "An array of toggleable modifier objects that apply dice expression values to rolls with certain tags.",
-			"items": {
-				"type": "object",
-				"properties": {
-					"name": { "type": "string" },
-					"isActive": { "type": "boolean" },
-					"description": { "type": ["string", "null"] },
-					"type": { "type": "string" },
-					"targetTags": { "type": ["string", "null"] },
-					"value": { "type": ["number", "string", "null"] },
-
-					"modifierType": { "type": "string", "enum": ["roll", "sheet"] },
-					"sheetAdjustments": {
-						"type": ["array", "null"],
-						"items": {
-							"type": "object",
-							"properties": {
-								"property": { "type": "string" },
-								"operation": { "type": "string", "enum": ["+", "-", "="] },
-								"value": { "type": "string" }
-							}
-						}
-					}
-				}
-			}
+			"description": "An array of toggleable modifier objects that apply dice expression values to rolls with certain tags."
 		},
 		"actions": {
 			"type": "array",
 			"description": "An array of default actions set up for the user. These allow the user to make certain roll operations as a single command.",
 			"items": {
-				"type": "object",
-				"properties": {
-					"name": { "type": ["string", "null"] },
-					"description": { "type": ["string", "null"] },
-					"type": { "type": ["string", "null"] },
-					"actionCost": { "type": ["string", "null"] },
-					"baseLevel": { "type": ["number", "null"] },
-					"autoHeighten": { "type": ["boolean"] },
-					"tags": { "type": "array", "items": { "type": ["string", "null"] } },
-					"rolls": {
-						"type": "array",
-						"items": {
-							"oneOf": [
-								{
-									"type": "object",
-									"properties": {
-										"name": { "type": ["string", "null"] },
-										"type": {
-											"type": ["string", "null"],
-											"enum": ["attack", "skill-challenge"]
-										},
-										"targetDC": { "type": ["string", "null"] },
-										"roll": { "type": ["string", "null"] },
-										"allowRollModifiers": { "type": "boolean" }
-									}
-								},
-								{
-									"type": "object",
-									"properties": {
-										"name": { "type": ["string", "null"] },
-										"type": { "type": ["string", "null"], "enum": ["damage"] },
-										"roll": { "type": ["string", "null"] },
-										"healInsteadOfDamage": { "type": ["boolean", "null"] },
-										"allowRollModifiers": { "type": "boolean" }
-									}
-								},
-								{
-									"type": "object",
-									"properties": {
-										"name": { "type": ["string", "null"] },
-										"type": {
-											"type": ["string", "null"],
-											"enum": ["advanced-damage"]
-										},
-										"criticalSuccessRoll": { "type": ["string", "null"] },
-										"criticalFailureRoll": { "type": ["string", "null"] },
-										"successRoll": { "type": ["string", "null"] },
-										"failureRoll": { "type": ["string", "null"] },
-										"healInsteadOfDamage": { "type": ["boolean", "null"] },
-										"allowRollModifiers": { "type": "boolean" }
-									}
-								},
-								{
-									"type": "object",
-									"properties": {
-										"name": { "type": ["string", "null"] },
-										"type": { "type": ["string", "null"], "enum": ["save"] },
-										"saveRollType": { "type": ["string", "null"] },
-										"saveTargetDC": { "type": ["string", "null"] },
-										"allowRollModifiers": { "type": "boolean" }
-									}
-								},
-								{
-									"type": "object",
-									"properties": {
-										"name": { "type": ["string", "null"] },
-										"type": { "type": ["string", "null"], "enum": ["text"] },
-										"defaultText": { "type": ["string", "null"] },
-										"criticalSuccessText": { "type": ["string", "null"] },
-										"criticalFailureText": { "type": ["string", "null"] },
-										"successText": { "type": ["string", "null"] },
-										"failureText": { "type": ["string", "null"] },
-										"allowRollModifiers": { "type": "boolean" },
-										"extraTags": {
-											"type": "array",
-											"items": { "type": ["string", "null"] }
-										}
-									}
-								}
-							]
-						}
-					}
-				}
+				"type": "object"
 			}
 		},
 		"rollMacros": {
@@ -701,8 +717,20 @@
 					"macro": {
 						"type": ["string", "null"]
 					}
-				}
+				},
+				"required": ["name", "macro"]
 			}
 		}
-	}
+	},
+	"required": [
+		"info",
+		"abilities",
+		"general",
+		"defenses",
+		"offense",
+		"castingStats",
+		"saves",
+		"skills",
+		"attacks"
+	]
 }

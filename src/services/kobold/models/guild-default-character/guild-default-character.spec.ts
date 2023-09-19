@@ -32,7 +32,7 @@ describe('GuildDefaultCharacter', () => {
 			guildDefaultChars =>
 				guildDefaultChars.characterId === builtGuildDefaultCharacter.characterId
 		);
-		expect(insertedGuildDefaultCharacter.characterId).toBe(
+		expect(insertedGuildDefaultCharacter?.characterId).toBe(
 			builtGuildDefaultCharacter.characterId
 		);
 	});

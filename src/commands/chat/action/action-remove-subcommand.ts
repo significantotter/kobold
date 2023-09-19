@@ -1,4 +1,4 @@
-import { Character, Game, GuildDefaultCharacter } from '../../../services/kobold/models/index.js';
+import { Character } from '../../../services/kobold/models/index.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -12,23 +12,22 @@ import {
 	ButtonStyle,
 } from 'discord.js';
 
-import { EventData } from '../../../models/internal-models.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
-import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
-import { Language } from '../../../models/enum-helpers/index.js';
+import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { CollectorUtils } from '../../../utils/collector-utils.js';
 import { ActionOptions } from './action-command-options.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
 import _ from 'lodash';
+import { KoboldError } from '../../../utils/KoboldError.js';
 
 export class ActionRemoveSubCommand implements Command {
-	public names = [Language.LL.commands.action.remove.name()];
+	public names = [L.en.commands.action.remove.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.action.remove.name(),
-		description: Language.LL.commands.action.remove.description(),
+		name: L.en.commands.action.remove.name(),
+		description: L.en.commands.action.remove.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -38,11 +37,11 @@ export class ActionRemoveSubCommand implements Command {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption
-	): Promise<ApplicationCommandOptionChoiceData[]> {
+	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === ActionOptions.ACTION_TARGET_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(ActionOptions.ACTION_TARGET_OPTION.name);
+			const match = intr.options.getString(ActionOptions.ACTION_TARGET_OPTION.name) ?? '';
 
 			//get the active character
 			const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
@@ -65,12 +64,14 @@ export class ActionRemoveSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
-		const actionChoice = intr.options.getString(ActionOptions.ACTION_TARGET_OPTION.name);
+		const actionChoice = intr.options.getString(ActionOptions.ACTION_TARGET_OPTION.name, true);
 		//get the active character
 		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
+		if (!activeCharacter) {
+			throw new KoboldError(LL.commands.character.interactions.noActiveCharacter());
+		}
 		const targetAction = activeCharacter.getActionByName(actionChoice);
 		if (targetAction) {
 			// ask for confirmation
@@ -130,14 +131,16 @@ export class ActionRemoveSubCommand implements Command {
 					},
 				}
 			);
-			await InteractionUtils.editReply(intr, {
-				content: LL.sharedInteractions.choiceRegistered({
-					choice: _.capitalize(result.value),
-				}),
-				components: [],
-			});
+			if (result) {
+				await InteractionUtils.editReply(intr, {
+					content: LL.sharedInteractions.choiceRegistered({
+						choice: _.capitalize(result.value),
+					}),
+					components: [],
+				});
+			}
 			// remove the action
-			if (result.value === 'remove') {
+			if (result && result.value === 'remove') {
 				const actionsWithoutRemoved = _.filter(
 					activeCharacter.actions,
 					action => action.name.toLocaleLowerCase() !== actionChoice.toLocaleLowerCase()

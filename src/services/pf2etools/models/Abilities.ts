@@ -18,17 +18,9 @@ export class Abilities {
 				abilityJSON.ability.map(ability => ({
 					name: ability.name,
 					data: ability,
-					tags: [].concat(ability.traits ?? []),
+					tags: ability.traits ?? [],
 				}))
 			)
 			.run();
-		console.log(
-			'imported!',
-			abilityJSON.ability.map(ability => ({
-				name: ability.name,
-				data: ability,
-				tags: [].concat(ability.traits ?? []),
-			}))[5]
-		);
 	}
 }

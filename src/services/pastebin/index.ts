@@ -2,7 +2,7 @@ import axios from 'axios';
 import FormData from 'form-data';
 
 export class PasteBin {
-	apiKey: string;
+	public apiKey?: string;
 	constructor({ apiKey }: { apiKey?: string }) {
 		this.apiKey = apiKey;
 	}
@@ -22,7 +22,7 @@ export class PasteBin {
 		).data;
 	}
 
-	public async get({ paste_key }) {
+	public async get({ paste_key }: { paste_key: string }) {
 		return (await axios.default.get('https://pastebin.com/raw/' + paste_key)).data;
 	}
 }

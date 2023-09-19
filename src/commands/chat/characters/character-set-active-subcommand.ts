@@ -1,4 +1,3 @@
-import { WanderersGuide } from '../../../services/wanderers-guide/index.js';
 import { Character } from '../../../services/kobold/models/index.js';
 import {
 	ApplicationCommandType,
@@ -12,18 +11,18 @@ import {
 } from 'discord.js';
 
 import { ChatArgs } from '../../../constants/index.js';
-import { EventData } from '../../../models/internal-models.js';
+
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
-import { Language } from '../../../models/enum-helpers/index.js';
+import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 
 export class CharacterSetActiveSubCommand implements Command {
-	public names = [Language.LL.commands.character.setActive.name()];
+	public names = [L.en.commands.character.setActive.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.character.setActive.name(),
-		description: Language.LL.commands.character.setActive.description(),
+		name: L.en.commands.character.setActive.name(),
+		description: L.en.commands.character.setActive.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -33,11 +32,11 @@ export class CharacterSetActiveSubCommand implements Command {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption
-	): Promise<ApplicationCommandOptionChoiceData[]> {
+	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === ChatArgs.SET_ACTIVE_NAME_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(ChatArgs.SET_ACTIVE_NAME_OPTION.name);
+			const match = intr.options.getString(ChatArgs.SET_ACTIVE_NAME_OPTION.name) ?? '';
 
 			//get the character matches
 			const options = await Character.queryControlledCharacterByName(match, intr.user.id);
@@ -52,10 +51,9 @@ export class CharacterSetActiveSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
-		const charName = intr.options.getString(ChatArgs.SET_ACTIVE_NAME_OPTION.name);
+		const charName = intr.options.getString(ChatArgs.SET_ACTIVE_NAME_OPTION.name, true);
 
 		// try and find that charcter
 		const targetCharacter = (

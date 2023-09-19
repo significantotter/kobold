@@ -11,34 +11,33 @@ import {
 	ApplicationCommandOptionChoiceData,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
-import { Language } from '../../../models/enum-helpers/index.js';
+import L from '../../../i18n/i18n-node.js';
 
-import { EventData } from '../../../models/internal-models.js';
-import { CommandUtils, InteractionUtils } from '../../../utils/index.js';
+import { CommandUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 
 export class CharacterCommand implements Command {
-	public names = [Language.LL.commands.character.name()];
+	public names = [L.en.commands.character.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.character.name(),
-		description: Language.LL.commands.character.description(),
+		name: L.en.commands.character.name(),
+		description: L.en.commands.character.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 
 		options: [
 			{
 				// IMPORT
-				name: Language.LL.commands.character.importWanderersGuide.name(),
-				description: Language.LL.commands.character.importWanderersGuide.description(),
+				name: L.en.commands.character.importWanderersGuide.name(),
+				description: L.en.commands.character.importWanderersGuide.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [CharacterOptions.IMPORT_OPTION],
 			},
 			{
 				// IMPORT PathBuilder
-				name: Language.LL.commands.character.importPathbuilder.name(),
-				description: Language.LL.commands.character.importPathbuilder.description(),
+				name: L.en.commands.character.importPathbuilder.name(),
+				description: L.en.commands.character.importPathbuilder.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					CharacterOptions.IMPORT_PATHBUILDER_OPTION,
@@ -47,27 +46,27 @@ export class CharacterCommand implements Command {
 			},
 			{
 				// LIST
-				name: Language.LL.commands.character.list.name(),
-				description: Language.LL.commands.character.list.description(),
+				name: L.en.commands.character.list.name(),
+				description: L.en.commands.character.list.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 			},
 			{
 				// REMOVE
-				name: Language.LL.commands.character.remove.name(),
-				description: Language.LL.commands.character.remove.description(),
+				name: L.en.commands.character.remove.name(),
+				description: L.en.commands.character.remove.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 			},
 			{
 				// SET-ACTIVE
-				name: Language.LL.commands.character.setActive.name(),
-				description: Language.LL.commands.character.setActive.description(),
+				name: L.en.commands.character.setActive.name(),
+				description: L.en.commands.character.setActive.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [CharacterOptions.SET_ACTIVE_NAME_OPTION],
 			},
 			{
-				// SET-SERVER-DEFAULT
-				name: Language.LL.commands.character.setDefault.name(),
-				description: Language.LL.commands.character.setDefault.description(),
+				// SET-DEFAULT
+				name: L.en.commands.character.setDefault.name(),
+				description: L.en.commands.character.setDefault.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					CharacterOptions.CHARACTER_SET_DEFAULT_SCOPE,
@@ -76,14 +75,14 @@ export class CharacterCommand implements Command {
 			},
 			{
 				// SHEET
-				name: Language.LL.commands.character.sheet.name(),
-				description: Language.LL.commands.character.sheet.description(),
+				name: L.en.commands.character.sheet.name(),
+				description: L.en.commands.character.sheet.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 			},
 			{
 				// UPDATE
-				name: Language.LL.commands.character.update.name(),
-				description: Language.LL.commands.character.update.description(),
+				name: L.en.commands.character.update.name(),
+				description: L.en.commands.character.update.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [{ ...CharacterOptions.IMPORT_PATHBUILDER_OPTION, required: false }],
 			},
@@ -98,7 +97,7 @@ export class CharacterCommand implements Command {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption
-	): Promise<ApplicationCommandOptionChoiceData[]> {
+	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 
 		let command = CommandUtils.getSubCommandByName(this.commands, intr.options.getSubcommand());
@@ -111,7 +110,6 @@ export class CharacterCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
 		if (!intr.isChatInputCommand()) return;
@@ -120,9 +118,9 @@ export class CharacterCommand implements Command {
 			return;
 		}
 
-		let passesChecks = await CommandUtils.runChecks(command, intr, data);
+		let passesChecks = await CommandUtils.runChecks(command, intr);
 		if (passesChecks) {
-			await command.execute(intr, data, LL);
+			await command.execute(intr, LL);
 		}
 	}
 }

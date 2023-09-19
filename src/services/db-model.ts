@@ -27,7 +27,7 @@ export class DBModel {
 }
 
 // Globally turn of automatic date parsing from PG
-function parseDateTime(val: string): string {
+function parseDateTime(val: string): string | null {
 	/* TODO, this introduces a lot of extra conversions.
 	 * The JSON-Schema->class interface currently only knows to convert date-time to string type, not Date type
 	 * Additionally, postgres strings format as `2021-02-05 19:29:38.362+00` but javascript formats as `2021-02-05T19:29:38.362Z`
@@ -40,7 +40,7 @@ function parseDateTime(val: string): string {
 	return new Date(val).toISOString();
 }
 
-function parseDate(val: string): string {
+function parseDate(val: string): string | null {
 	if (val === null) return null;
 	return format(new Date(val), 'YYYY-MM-DD');
 }

@@ -2,16 +2,37 @@ import { GuildDefaultCharacter, ChannelDefaultCharacter, InitiativeActor } from 
 import type { Character as CharacterType } from './character.schema.js';
 import { BaseModel } from '../../lib/base-model.js';
 import CharacterSchema from './character.schema.json' assert { type: 'json' };
-import Sheet from '../../lib/sheet.schema.json' assert { type: 'json' };
-import { Sheet as SheetType } from '../../lib/sheet.schema.js';
+import Sheet from '../../lib/shared-schemas/sheet.schema.json' assert { type: 'json' };
+import { Sheet as SheetType } from '../../lib/type-helpers.js';
+import Action from '../../lib/shared-schemas/action.schema.json' assert { type: 'json' };
+import { Action as ActionType } from '../../lib/shared-schemas/action.schema.d.js';
+import Modifier from '../../lib/shared-schemas/modifier.schema.json' assert { type: 'json' };
+import { Modifier as ModifierType } from '../../lib/shared-schemas/modifier.schema.d.js';
+import RollMacro from '../../lib/shared-schemas/roll-macro.schema.json' assert { type: 'json' };
+import { RollMacro as RollMacroType } from '../../lib/shared-schemas/roll-macro.schema.d.js';
 import _ from 'lodash';
 import { Creature } from '../../../../utils/creature.js';
 import { ChatInputCommandInteraction } from 'discord.js';
 import { StringUtils } from '../../../../utils/string-utils.js';
 import Objection from 'objection';
+import { removeRequired } from '../../lib/helpers.js';
+
+interface ErrorWithCode<T extends number = number> extends Error {
+	code: T;
+}
+function isErrorWithCode<T extends number>(
+	err: ErrorWithCode<T> | unknown
+): err is ErrorWithCode<T> {
+	return err instanceof Error && 'code' in err;
+}
 
 export interface Character extends CharacterType {
-	sheet?: SheetType;
+	sheet: SheetType;
+	actions: ActionType[];
+	modifiers: ModifierType[];
+	rollMacros: RollMacroType[];
+	guildDefaultCharacter?: GuildDefaultCharacter[];
+	channelDefaultCharacter?: ChannelDefaultCharacter[];
 }
 export class Character extends BaseModel {
 	static get tableName(): string {
@@ -19,13 +40,22 @@ export class Character extends BaseModel {
 	}
 
 	static get jsonSchema(): Objection.JSONSchema {
-		return {
+		return removeRequired({
 			...CharacterSchema,
-			properties: { ...CharacterSchema.properties, sheet: Sheet },
-		} as Objection.JSONSchema;
+			properties: {
+				...CharacterSchema.properties,
+				sheet: Sheet,
+				actions: { type: 'array', items: Action },
+				modifiers: { type: 'array', items: Modifier },
+				rollMacros: { type: 'array', items: RollMacro },
+			},
+		} as unknown as Objection.JSONSchema);
 	}
 
-	static async queryControlledCharacterByName(characterName, userId): Promise<Character[]> {
+	static async queryControlledCharacterByName(
+		characterName: string,
+		userId: string
+	): Promise<Character[]> {
 		const results = await this.query().whereRaw(
 			`user_id=:userId AND name::TEXT ILIKE :characterName`,
 			{
@@ -33,7 +63,7 @@ export class Character extends BaseModel {
 				characterName: `%${characterName}%`,
 			}
 		);
-		const closestByName = StringUtils.generateSorterByWordDistance(
+		const closestByName = StringUtils.generateSorterByWordDistance<Character>(
 			characterName,
 			character => character.name
 		);
@@ -44,15 +74,21 @@ export class Character extends BaseModel {
 		const creature = new Creature(sheet);
 		const tracker = await creature.compileTracker(this.trackerMode ?? 'counters_only');
 		try {
-			if (!intr?.client?.guilds) return;
+			if (
+				!intr?.client?.guilds ||
+				!this.trackerGuildId ||
+				!this.trackerChannelId ||
+				!this.trackerMessageId
+			)
+				return;
 			const trackerGuild = await intr.client.guilds.fetch(this.trackerGuildId);
 			const trackerChannel = await trackerGuild.channels.fetch(this.trackerChannelId);
-			if (trackerChannel.isTextBased()) {
+			if (trackerChannel && trackerChannel.isTextBased()) {
 				const trackerMessage = await trackerChannel.messages.fetch(this.trackerMessageId);
 				await trackerMessage.edit(tracker);
 			}
 		} catch (e) {
-			if (e.code === 10008) {
+			if (isErrorWithCode(e) && e.code === 10008) {
 				// unknown message. Clear the tracker so we don't keep trying every time
 				await this.$query()
 					.patch({ trackerMessageId: null, trackerChannelId: null, trackerGuildId: null })
@@ -79,7 +115,7 @@ export class Character extends BaseModel {
 	 * @param name the name of the roll macro
 	 * @returns the roll macro
 	 */
-	public getRollMacroByName(name: string): Character['rollMacros'][0] | null {
+	public getRollMacroByName(name: string): Character['rollMacros'][0] | undefined {
 		return this.rollMacros.find(
 			rollMacro =>
 				rollMacro.name.toLocaleLowerCase().trim() === name.toLocaleLowerCase().trim()
@@ -91,7 +127,7 @@ export class Character extends BaseModel {
 	 * @param name the name of the modifier
 	 * @returns the modifier
 	 */
-	public getModifierByName(name: string): Character['modifiers'][0] | null {
+	public getModifierByName(name: string): Character['modifiers'][0] | undefined {
 		return this.modifiers.find(
 			modifier => modifier.name.toLocaleLowerCase().trim() === name.toLocaleLowerCase().trim()
 		);
@@ -102,7 +138,7 @@ export class Character extends BaseModel {
 	 * @param name the name of the action
 	 * @returns the action
 	 */
-	public getActionByName(name: string): Character['actions'][0] | null {
+	public getActionByName(name: string): Character['actions'][0] | undefined {
 		return this.actions.find(
 			action => action.name.toLocaleLowerCase().trim() === name.toLocaleLowerCase().trim()
 		);

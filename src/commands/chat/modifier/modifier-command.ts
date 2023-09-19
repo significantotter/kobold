@@ -1,4 +1,3 @@
-import { Language } from '../../../models/enum-helpers/language.js';
 import {
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
@@ -14,28 +13,28 @@ import { RateLimiter } from 'discord.js-rate-limiter';
 import { ModifierOptions } from './modifier-command-options.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 
-import { EventData } from '../../../models/internal-models.js';
 import { CommandUtils, InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
+import L from '../../../i18n/i18n-node.js';
 
 export class ModifierCommand implements Command {
-	public names = [Language.LL.commands.modifier.name()];
+	public names = [L.en.commands.modifier.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.modifier.name(),
-		description: Language.LL.commands.modifier.description(),
+		name: L.en.commands.modifier.name(),
+		description: L.en.commands.modifier.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 
 		options: [
 			{
-				name: Language.LL.commands.modifier.list.name(),
-				description: Language.LL.commands.modifier.list.description(),
+				name: L.en.commands.modifier.list.name(),
+				description: L.en.commands.modifier.list.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 			},
 			{
-				name: Language.LL.commands.modifier.detail.name(),
-				description: Language.LL.commands.modifier.detail.description(),
+				name: L.en.commands.modifier.detail.name(),
+				description: L.en.commands.modifier.detail.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					{
@@ -46,14 +45,14 @@ export class ModifierCommand implements Command {
 				],
 			},
 			{
-				name: Language.LL.commands.modifier.export.name(),
-				description: Language.LL.commands.modifier.export.description(),
+				name: L.en.commands.modifier.export.name(),
+				description: L.en.commands.modifier.export.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [],
 			},
 			{
-				name: Language.LL.commands.modifier.import.name(),
-				description: Language.LL.commands.modifier.import.description(),
+				name: L.en.commands.modifier.import.name(),
+				description: L.en.commands.modifier.import.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					ModifierOptions.MODIFIER_IMPORT_URL,
@@ -61,8 +60,8 @@ export class ModifierCommand implements Command {
 				],
 			},
 			{
-				name: Language.LL.commands.modifier.createSheetModifier.name(),
-				description: Language.LL.commands.modifier.createSheetModifier.description(),
+				name: L.en.commands.modifier.createSheetModifier.name(),
+				description: L.en.commands.modifier.createSheetModifier.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					ModifierOptions.MODIFIER_NAME_OPTION,
@@ -72,8 +71,8 @@ export class ModifierCommand implements Command {
 				],
 			},
 			{
-				name: Language.LL.commands.modifier.createRollModifier.name(),
-				description: Language.LL.commands.modifier.createRollModifier.description(),
+				name: L.en.commands.modifier.createRollModifier.name(),
+				description: L.en.commands.modifier.createRollModifier.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					ModifierOptions.MODIFIER_NAME_OPTION,
@@ -84,8 +83,8 @@ export class ModifierCommand implements Command {
 				],
 			},
 			{
-				name: Language.LL.commands.modifier.toggle.name(),
-				description: Language.LL.commands.modifier.toggle.description(),
+				name: L.en.commands.modifier.toggle.name(),
+				description: L.en.commands.modifier.toggle.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					{
@@ -96,8 +95,8 @@ export class ModifierCommand implements Command {
 				],
 			},
 			{
-				name: Language.LL.commands.modifier.update.name(),
-				description: Language.LL.commands.modifier.update.description(),
+				name: L.en.commands.modifier.update.name(),
+				description: L.en.commands.modifier.update.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					{
@@ -110,8 +109,8 @@ export class ModifierCommand implements Command {
 				],
 			},
 			{
-				name: Language.LL.commands.modifier.remove.name(),
-				description: Language.LL.commands.modifier.remove.description(),
+				name: L.en.commands.modifier.remove.name(),
+				description: L.en.commands.modifier.remove.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					{
@@ -132,7 +131,7 @@ export class ModifierCommand implements Command {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption
-	): Promise<ApplicationCommandOptionChoiceData[]> {
+	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 
 		const command = CommandUtils.getSubCommandByName(
@@ -148,7 +147,6 @@ export class ModifierCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
 		if (!intr.isChatInputCommand()) return;
@@ -160,9 +158,9 @@ export class ModifierCommand implements Command {
 			return;
 		}
 
-		const passesChecks = await CommandUtils.runChecks(command, intr, data);
+		const passesChecks = await CommandUtils.runChecks(command, intr);
 		if (passesChecks) {
-			await command.execute(intr, data, LL);
+			await command.execute(intr, LL);
 		}
 	}
 }

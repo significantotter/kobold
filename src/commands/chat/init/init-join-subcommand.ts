@@ -11,7 +11,6 @@ import {
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 
-import { EventData } from '../../../models/internal-models.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { InitiativeUtils, InitiativeBuilder } from '../../../utils/initiative-utils.js';
@@ -19,16 +18,16 @@ import { ChatArgs } from '../../../constants/chat-args.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { Language } from '../../../models/enum-helpers/index.js';
+import L from '../../../i18n/i18n-node.js';
 import { InitOptions } from './init-command-options.js';
 import { SettingsUtils } from '../../../utils/settings-utils.js';
 
 export class InitJoinSubCommand implements Command {
-	public names = [Language.LL.commands.init.join.name()];
+	public names = [L.en.commands.init.join.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.init.join.name(),
-		description: Language.LL.commands.init.join.description(),
+		name: L.en.commands.init.join.name(),
+		description: L.en.commands.init.join.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -39,11 +38,11 @@ export class InitJoinSubCommand implements Command {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption
-	): Promise<ApplicationCommandOptionChoiceData[]> {
+	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === ChatArgs.SKILL_CHOICE_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(ChatArgs.SKILL_CHOICE_OPTION.name);
+			const match = intr.options.getString(ChatArgs.SKILL_CHOICE_OPTION.name) ?? '';
 
 			//get the active character
 			const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
@@ -63,33 +62,21 @@ export class InitJoinSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
 		LL: TranslationFunctions
 	): Promise<void> {
-		const [currentInitResponse, activeCharacter, userSettings] = await Promise.all([
-			InitiativeUtils.getInitiativeForChannel(intr.channel, {
-				sendErrors: true,
-				LL,
-			}),
+		const [currentInit, activeCharacter, userSettings] = await Promise.all([
+			InitiativeUtils.getInitiativeForChannel(intr.channel),
 			CharacterUtils.getActiveCharacter(intr),
 			SettingsUtils.getSettingsForUser(intr),
 		]);
-		if (currentInitResponse.errorMessage) {
-			await InteractionUtils.send(intr, currentInitResponse.errorMessage);
-			return;
-		}
-		const currentInit = currentInitResponse.init;
 		if (!activeCharacter) {
-			await InteractionUtils.send(
-				intr,
-				Language.LL.commands.init.interactions.noActiveCharacter()
-			);
+			await InteractionUtils.send(intr, L.en.commands.init.interactions.noActiveCharacter());
 			return;
 		}
 		if (currentInit.actors.find(actor => actor.characterId === activeCharacter.id)) {
 			await InteractionUtils.send(
 				intr,
-				Language.LL.commands.init.join.interactions.characterAlreadyInInit({
+				L.en.commands.init.join.interactions.characterAlreadyInInit({
 					characterName: activeCharacter.sheet.info.name,
 				})
 			);

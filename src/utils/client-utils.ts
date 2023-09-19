@@ -14,20 +14,20 @@ import {
 	VoiceChannel,
 } from 'discord.js';
 
-import { Lang } from '../services/index.js';
 import { PermissionUtils, RegexUtils } from './index.js';
 
 const FETCH_MEMBER_LIMIT = 20;
+const channelRegex = /bot|command|cmd/i;
 
 export class ClientUtils {
-	public static async getGuild(client: Client, discordId: string): Promise<Guild> {
-		discordId = RegexUtils.discordId(discordId);
-		if (!discordId) {
+	public static async getGuild(client: Client, discordId: string): Promise<Guild | undefined> {
+		const matchedDiscordId = RegexUtils.discordId(discordId);
+		if (!matchedDiscordId) {
 			return;
 		}
 
 		try {
-			return await client.guilds.fetch(discordId);
+			return await client.guilds.fetch(matchedDiscordId);
 		} catch (error) {
 			if (
 				error instanceof DiscordAPIError &&
@@ -41,14 +41,17 @@ export class ClientUtils {
 		}
 	}
 
-	public static async getChannel(client: Client, discordId: string): Promise<Channel> {
-		discordId = RegexUtils.discordId(discordId);
-		if (!discordId) {
+	public static async getChannel(
+		client: Client,
+		discordId: string
+	): Promise<Channel | undefined> {
+		const matchedDiscordId = RegexUtils.discordId(discordId);
+		if (!matchedDiscordId) {
 			return;
 		}
 
 		try {
-			return await client.channels.fetch(discordId);
+			return (await client.channels.fetch(matchedDiscordId)) || undefined;
 		} catch (error) {
 			if (
 				error instanceof DiscordAPIError &&
@@ -62,14 +65,14 @@ export class ClientUtils {
 		}
 	}
 
-	public static async getUser(client: Client, discordId: string): Promise<User> {
-		discordId = RegexUtils.discordId(discordId);
-		if (!discordId) {
+	public static async getUser(client: Client, discordId: string): Promise<User | undefined> {
+		const matchedDiscordId = RegexUtils.discordId(discordId);
+		if (!matchedDiscordId) {
 			return;
 		}
 
 		try {
-			return await client.users.fetch(discordId);
+			return await client.users.fetch(matchedDiscordId);
 		} catch (error) {
 			if (
 				error instanceof DiscordAPIError &&
@@ -83,14 +86,14 @@ export class ClientUtils {
 		}
 	}
 
-	public static async findMember(guild: Guild, input: string): Promise<GuildMember> {
+	public static async findMember(guild: Guild, input: string): Promise<GuildMember | undefined> {
 		try {
-			let discordId = RegexUtils.discordId(input);
-			if (discordId) {
-				return await guild.members.fetch(discordId);
+			const matchedDiscordId = RegexUtils.discordId(input);
+			if (matchedDiscordId) {
+				return await guild.members.fetch(matchedDiscordId);
 			}
 
-			let tag = RegexUtils.tag(input);
+			const tag = RegexUtils.tag(input);
 			if (tag) {
 				return (
 					await guild.members.fetch({ query: tag.username, limit: FETCH_MEMBER_LIMIT })
@@ -111,11 +114,11 @@ export class ClientUtils {
 		}
 	}
 
-	public static async findRole(guild: Guild, input: string): Promise<Role> {
+	public static async findRole(guild: Guild, input: string): Promise<Role | undefined> {
 		try {
-			let discordId = RegexUtils.discordId(input);
-			if (discordId) {
-				return await guild.roles.fetch(discordId);
+			const matchedDiscordId = RegexUtils.discordId(input);
+			if (matchedDiscordId) {
+				return (await guild.roles.fetch(matchedDiscordId)) || undefined;
 			}
 
 			let search = input.trim().toLowerCase().replace(/^@/, '');
@@ -140,11 +143,11 @@ export class ClientUtils {
 	public static async findTextChannel(
 		guild: Guild,
 		input: string
-	): Promise<NewsChannel | TextChannel> {
+	): Promise<NewsChannel | TextChannel | undefined> {
 		try {
-			let discordId = RegexUtils.discordId(input);
-			if (discordId) {
-				let channel = await guild.channels.fetch(discordId);
+			const matchedDiscordId = RegexUtils.discordId(input);
+			if (matchedDiscordId) {
+				let channel = await guild.channels.fetch(matchedDiscordId);
 				if (channel instanceof NewsChannel || channel instanceof TextChannel) {
 					return channel;
 				} else {
@@ -176,11 +179,11 @@ export class ClientUtils {
 	public static async findVoiceChannel(
 		guild: Guild,
 		input: string
-	): Promise<VoiceChannel | StageChannel> {
+	): Promise<VoiceChannel | StageChannel | undefined> {
 		try {
-			let discordId = RegexUtils.discordId(input);
-			if (discordId) {
-				let channel = await guild.channels.fetch(discordId);
+			const matchedDiscordId = RegexUtils.discordId(input);
+			if (matchedDiscordId) {
+				let channel = await guild.channels.fetch(matchedDiscordId);
 				if (channel instanceof VoiceChannel || channel instanceof StageChannel) {
 					return channel;
 				} else {
@@ -226,7 +229,7 @@ export class ClientUtils {
 			channel =>
 				(channel instanceof TextChannel || channel instanceof NewsChannel) &&
 				PermissionUtils.canSend(channel, true) &&
-				Lang.getRegex('channelRegexes.bot', langCode).test(channel.name)
+				channelRegex.test(channel.name)
 		) as TextChannel | NewsChannel;
 	}
 }

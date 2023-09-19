@@ -12,19 +12,19 @@ export interface InitiativeActor {
 	/**
 	 * The id of the initiative actor.
 	 */
-	id?: number;
+	id: number;
 	/**
 	 * The id of the initiative the actor belongs to.
 	 */
-	initiativeId?: number;
+	initiativeId: number;
 	/**
 	 * The id of the initiative actor group the actor belongs to.
 	 */
-	initiativeActorGroupId?: number;
+	initiativeActorGroupId: number;
 	/**
 	 * The discord id of the user who controls the actor
 	 */
-	userId?: string;
+	userId: string;
 	/**
 	 * The id of the character that this actor represents
 	 */
@@ -36,11 +36,11 @@ export interface InitiativeActor {
 	/**
 	 * the name of the actor
 	 */
-	name?: string;
+	name: string;
 	/**
 	 * Whether or not to hide the stats of this actor in channel initiative displays
 	 */
-	hideStats?: boolean;
+	hideStats: boolean;
 	/**
 	 * When the initiative was first started
 	 */
