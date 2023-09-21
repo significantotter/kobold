@@ -790,10 +790,7 @@ export function convertPathBuilderToSheet(
 			description: null,
 			url: '',
 			gender: pathBuilderSheet.gender ?? null,
-			age:
-				!pathBuilderSheet.age && pathBuilderSheet.age !== 0
-					? null
-					: Number(pathBuilderSheet.age),
+			age: isNaN(Number(pathBuilderSheet.age)) ? null : Number(pathBuilderSheet.age),
 			alignment: pathBuilderSheet.alignment ?? null,
 			deity: pathBuilderSheet.deity ?? null,
 			imageURL: '',

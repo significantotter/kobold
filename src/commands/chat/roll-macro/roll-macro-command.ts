@@ -16,6 +16,7 @@ import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { CommandUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { L } from '../../../i18n/i18n-node.js';
+import { InjectedServices } from '../../command.js';
 
 export class RollMacroCommand implements Command {
 	public names = [L.en.commands.rollMacro.name()];
@@ -90,7 +91,9 @@ export class RollMacroCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{},
+		services: InjectedServices
 	): Promise<void> {
 		if (!intr.isChatInputCommand()) return;
 		const command = CommandUtils.getSubCommandByName(
@@ -101,9 +104,10 @@ export class RollMacroCommand implements Command {
 			return;
 		}
 
-		const passesChecks = await CommandUtils.runChecks(command, intr);
+		let passesChecks = await CommandUtils.runChecks(command, intr);
 		if (passesChecks) {
-			await command.execute(intr, LL);
+			const data = await command.fetchInjectedDataForCommand?.(intr);
+			await command.execute(intr, LL, data, services);
 		}
 	}
 }

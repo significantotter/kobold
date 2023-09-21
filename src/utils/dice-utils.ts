@@ -301,9 +301,9 @@ export class DiceUtils {
 			}
 
 			if (multiplier !== undefined && multiplier !== 1) {
-				results.total = Math.floor(roll.total * multiplier);
 				results.renderedExpression = `(${roll.renderedExpression.toString()}) * ${multiplier}`;
 			}
+			results.total = Math.floor(roll.total * (multiplier ?? 1));
 
 			const message = LL.utils.dice.rollResult({
 				rollExpression: displayExpression,

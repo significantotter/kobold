@@ -58,20 +58,6 @@ export class ActionCreateSubCommand implements Command {
 			);
 			return;
 		}
-		console.log([
-			...activeCharacter.actions,
-			{
-				name,
-				description,
-				type: type,
-				actionCost,
-				baseLevel,
-				autoHeighten,
-				rolls: [],
-				tags: tags ? tags.split(',').map(tag => tag.trim()) : [],
-			},
-		] as Action[]);
-
 		await Character.query().updateAndFetchById(activeCharacter.id, {
 			actions: [
 				...activeCharacter.actions,

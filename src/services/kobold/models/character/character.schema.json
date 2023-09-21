@@ -37,10 +37,6 @@
 			"description": "The mode of the tracker message. Either counters_only', 'basic_stats', or 'full_sheet.",
 			"enum": ["counters_only", "basic_stats", "full_sheet"]
 		},
-		"pathBuilderData": {
-			"type": ["null", "object"],
-			"description": "The general character data from the PathBuilder json export"
-		},
 		"characterData": {
 			"type": "object",
 			"description": "The general character data from the Wanderer's guide API /character endpoint",

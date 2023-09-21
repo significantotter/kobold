@@ -17,6 +17,7 @@ import L from '../../../i18n/i18n-node.js';
 import { CommandUtils, InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { InitOptions } from './init-command-options.js';
+import { InjectedServices } from '../../command.js';
 
 export class InitCommand implements Command {
 	public names = [L.en.commands.init.name()];
@@ -197,7 +198,9 @@ export class InitCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{},
+		services: InjectedServices
 	): Promise<void> {
 		if (!intr.isChatInputCommand()) return;
 		let command = CommandUtils.getSubCommandByName(this.commands, intr.options.getSubcommand());
@@ -207,7 +210,8 @@ export class InitCommand implements Command {
 
 		let passesChecks = await CommandUtils.runChecks(command, intr);
 		if (passesChecks) {
-			await command.execute(intr, LL);
+			const data = await command.fetchInjectedDataForCommand?.(intr);
+			await command.execute(intr, LL, data, services);
 		}
 	}
 }

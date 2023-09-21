@@ -11,11 +11,12 @@ import {
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 
-import { CommandUtils, InteractionUtils } from '../../../utils/index.js';
+import { CommandUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { ActionOptions } from './action-command-options.js';
 import L from '../../../i18n/i18n-node.js';
+import { InjectedServices } from '../../command.js';
 
 export class ActionCommand implements Command {
 	public names = [L.en.commands.action.name()];
@@ -114,7 +115,9 @@ export class ActionCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{},
+		services: InjectedServices
 	): Promise<void> {
 		if (!intr.isChatInputCommand()) return;
 		let command = CommandUtils.getSubCommandByName(this.commands, intr.options.getSubcommand());
@@ -124,7 +127,8 @@ export class ActionCommand implements Command {
 
 		let passesChecks = await CommandUtils.runChecks(command, intr);
 		if (passesChecks) {
-			await command.execute(intr, LL);
+			const data = await command.fetchInjectedDataForCommand?.(intr);
+			await command.execute(intr, LL, data, services);
 		}
 	}
 }

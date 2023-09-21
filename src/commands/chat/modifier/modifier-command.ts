@@ -16,6 +16,7 @@ import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { CommandUtils, InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import L from '../../../i18n/i18n-node.js';
+import { InjectedServices } from '../../command.js';
 
 export class ModifierCommand implements Command {
 	public names = [L.en.commands.modifier.name()];
@@ -147,7 +148,9 @@ export class ModifierCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{},
+		services: InjectedServices
 	): Promise<void> {
 		if (!intr.isChatInputCommand()) return;
 		const command = CommandUtils.getSubCommandByName(
@@ -158,9 +161,10 @@ export class ModifierCommand implements Command {
 			return;
 		}
 
-		const passesChecks = await CommandUtils.runChecks(command, intr);
+		let passesChecks = await CommandUtils.runChecks(command, intr);
 		if (passesChecks) {
-			await command.execute(intr, LL);
+			const data = await command.fetchInjectedDataForCommand?.(intr);
+			await command.execute(intr, LL, data, services);
 		}
 	}
 }

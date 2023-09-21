@@ -48,7 +48,7 @@
 		"start:bot-prod": "NODE_OPTIONS='--max-old-space-size=4096' node dist/src/start-bot.js",
 		"start:manager-prod": "NODE_OPTIONS='--max-old-space-size=4096' node dist/src/start-manager.js",
 		"build-types:pf2etools": "ts-to-zod src/services/pf2etools/pf2etools-types.d.ts src/services/pf2etools/pf2etools.zod.ts",
-		"setup:pf2etools": "drizzle-kit push:sqlite --config='./drizzle.config.ts' && npm run build-types:pf2etools *",
+		"setup:pf2etools": "drizzle-kit push:sqlite --config='./drizzle.sqlite.config.ts' && npm run build-types:pf2etools *",
 		"import:pf2etools": "npm run setup:pf2etools && tsc --project tsconfig.json && node dist/src/services/pf2etools/pf2etools-loader.js"
 	},
 	"dependencies": {
@@ -106,6 +106,7 @@
 		"eslint-plugin-unicorn": "^48.0.1",
 		"glob": "^10.3.4",
 		"json-schema-to-typescript": "^13.1.1",
+		"json-schema-to-zod": "^1.1.1",
 		"minimatch": "^9.0.3",
 		"prettier": "^3.0.3",
 		"sqlite3": "^5.1.6",

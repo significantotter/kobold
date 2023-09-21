@@ -10,7 +10,7 @@ import os from 'node:os';
 import { RateLimiter } from 'discord.js-rate-limiter';
 import { TranslationFunctions } from '../../i18n/i18n-types.js';
 import { InteractionUtils } from '../../utils/interaction-utils.js';
-import { Command, CommandDeferType } from '../command.js';
+import { Command, CommandDeferType, InjectedServices } from '../command.js';
 import { Config } from './../../config/config.js';
 import fs from 'fs';
 import typescript from 'typescript';
@@ -37,7 +37,9 @@ export class AdminCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{},
+		services: InjectedServices
 	): Promise<void> {
 		if (!intr.isChatInputCommand()) return;
 		if (

@@ -1,21 +1,15 @@
 import { GuildDefaultCharacter, ChannelDefaultCharacter, InitiativeActor } from './../index.js';
 import type { Character as CharacterType } from './character.schema.js';
 import { BaseModel } from '../../lib/base-model.js';
-import CharacterSchema from './character.schema.json' assert { type: 'json' };
-import Sheet from '../../lib/shared-schemas/sheet.schema.json' assert { type: 'json' };
 import { Sheet as SheetType } from '../../lib/type-helpers.js';
-import Action from '../../lib/shared-schemas/action.schema.json' assert { type: 'json' };
 import { Action as ActionType } from '../../lib/shared-schemas/action.schema.d.js';
-import Modifier from '../../lib/shared-schemas/modifier.schema.json' assert { type: 'json' };
 import { Modifier as ModifierType } from '../../lib/shared-schemas/modifier.schema.d.js';
-import RollMacro from '../../lib/shared-schemas/roll-macro.schema.json' assert { type: 'json' };
 import { RollMacro as RollMacroType } from '../../lib/shared-schemas/roll-macro.schema.d.js';
 import _ from 'lodash';
 import { Creature } from '../../../../utils/creature.js';
 import { ChatInputCommandInteraction } from 'discord.js';
 import { StringUtils } from '../../../../utils/string-utils.js';
-import Objection from 'objection';
-import { removeRequired } from '../../lib/helpers.js';
+import { zCharacter } from './character.zod.js';
 
 interface ErrorWithCode<T extends number = number> extends Error {
 	code: T;
@@ -39,17 +33,10 @@ export class Character extends BaseModel {
 		return 'character';
 	}
 
-	static get jsonSchema(): Objection.JSONSchema {
-		return removeRequired({
-			...CharacterSchema,
-			properties: {
-				...CharacterSchema.properties,
-				sheet: Sheet,
-				actions: { type: 'array', items: Action },
-				modifiers: { type: 'array', items: Modifier },
-				rollMacros: { type: 'array', items: RollMacro },
-			},
-		} as unknown as Objection.JSONSchema);
+	public $z = zCharacter;
+
+	public parse() {
+		return this.$z.parse(this.toJSON());
 	}
 
 	static async queryControlledCharacterByName(

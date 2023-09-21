@@ -42,12 +42,6 @@ export interface Character {
 	 */
 	trackerMode: "counters_only" | "basic_stats" | "full_sheet";
 	/**
-	 * The general character data from the PathBuilder json export
-	 */
-	pathBuilderData?: null | {
-		[k: string]: any;
-	};
-	/**
 	 * The general character data from the Wanderer's guide API /character endpoint
 	 */
 	characterData?: {

@@ -8,7 +8,7 @@
 		"type": { "type": "string" },
 		"actionCost": { "type": ["string", "null"] },
 		"baseLevel": { "type": ["number", "null"] },
-		"autoHeighten": { "type": ["boolean"] },
+		"autoHeighten": { "type": "boolean" },
 		"tags": { "type": "array", "items": { "type": "string" } },
 		"rolls": {
 			"type": "array",

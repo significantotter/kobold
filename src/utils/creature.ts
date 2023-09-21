@@ -19,6 +19,7 @@ import { parseBonusesForTagsFromModifiers } from '../services/kobold/lib/helpers
 import { KoboldError } from './KoboldError.js';
 import { BaseMessageOptions } from 'discord.js';
 import { SheetUtils } from './sheet-utils.js';
+import { ZCharacter } from '../services/kobold/models/character/character.drizzle.js';
 
 const damageTypeShorthands: { [shorthand: string]: string } = {
 	piercing: 'p',
@@ -235,9 +236,13 @@ export class Creature {
 			counters += `Stamina: \`${this.sheet.defenses.currentStamina}\`/\`${this.sheet.defenses.maxStamina}\` `;
 			counters += `Resolve: \`${this.sheet.defenses.currentResolve}\`/\`${this.sheet.defenses.maxResolve}\`\n`;
 		}
-		counters += `Hero Points: \`${this.sheet.general.currentHeroPoints}\`/\`3\`, `;
-		counters += `Focus Points: \`${this.sheet.general.currentFocusPoints ?? 0}\``;
-		if (this.sheet.general.focusPoints) counters += `/\`${this.sheet.general.focusPoints}\``;
+		if (this.sheet.general.currentHeroPoints != null) {
+			counters += `Hero Points: \`${this.sheet.general.currentHeroPoints}\`/\`3\`, `;
+		}
+		if (this.sheet.general.focusPoints != null) {
+			counters += `Focus Points: \`${this.sheet.general.currentFocusPoints ?? 0}\``;
+			counters += `/\`${this.sheet.general.focusPoints}\``;
+		}
 		counters += '\n';
 
 		let basicStats = '';

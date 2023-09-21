@@ -96,15 +96,15 @@ export class InitRollSubCommand implements Command {
 
 		const rollNote = intr.options.getString(ChatArgs.ROLL_NOTE_OPTION.name) ?? '';
 
-		const [initResult, userSettings, activeGame] = await Promise.all([
+		const [currentInit, userSettings, activeGame] = await Promise.all([
 			InitiativeUtils.getInitiativeForChannel(intr.channel),
 			SettingsUtils.getSettingsForUser(intr),
 			GameUtils.getActiveGame(intr.user.id, intr.guildId ?? ''),
 		]);
 
 		const actor = InitiativeUtils.getNameMatchActorFromInitiative(
-			initResult.init.gmUserId,
-			initResult.init,
+			currentInit.gmUserId,
+			currentInit,
 			targetCharacterName,
 			LL,
 			true

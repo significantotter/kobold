@@ -15,8 +15,6 @@ import { Initiative } from '../../../services/kobold/models/index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import L from '../../../i18n/i18n-node.js';
 import { CollectorUtils } from '../../../utils/collector-utils.js';
-import { refs } from '../../../constants/common-text.js';
-import { KoboldError } from '../../../utils/KoboldError.js';
 
 export class InitEndSubCommand implements Command {
 	public names = [L.en.commands.init.end.name()];

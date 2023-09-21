@@ -11,6 +11,7 @@ import { TranslationFunctions } from '../../i18n/i18n-types.js';
 import { Command, CommandDeferType } from '../index.js';
 import _ from 'lodash';
 import L from '../../i18n/i18n-node.js';
+import { InjectedServices } from '../command.js';
 
 function createCommandOperationHelpField(
 	command: string,
@@ -163,7 +164,9 @@ export class HelpCommand implements Command {
 	public requireClientPerms: PermissionsString[] = [];
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{},
+		services: InjectedServices
 	): Promise<void> {
 		// look through our options that are subcommands
 		const targetSubcommand = intr.options.getSubcommand();

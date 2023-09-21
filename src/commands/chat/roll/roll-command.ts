@@ -18,6 +18,7 @@ import { Command, CommandDeferType } from '../../index.js';
 import { ActionOptions } from '../action/action-command-options.js';
 import { InitOptions } from '../init/init-command-options.js';
 import L from '../../../i18n/i18n-node.js';
+import { InjectedServices } from '../../command.js';
 
 export class RollCommand implements Command {
 	public names = [L.en.commands.roll.name()];
@@ -223,7 +224,9 @@ export class RollCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{},
+		services: InjectedServices
 	): Promise<void> {
 		if (!intr.isChatInputCommand()) return;
 		const command = CommandUtils.getSubCommandByName(
@@ -234,9 +237,10 @@ export class RollCommand implements Command {
 			return;
 		}
 
-		const passesChecks = await CommandUtils.runChecks(command, intr);
+		let passesChecks = await CommandUtils.runChecks(command, intr);
 		if (passesChecks) {
-			await command.execute(intr, LL);
+			const data = await command.fetchInjectedDataForCommand?.(intr);
+			await command.execute(intr, LL, data, services);
 		}
 	}
 }

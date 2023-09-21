@@ -16,6 +16,7 @@ import { CommandUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { SettingsOptions } from './settings-command-options.js';
 import L from '../../../i18n/i18n-node.js';
+import { InjectedServices } from '../../command.js';
 
 export class SettingsCommand implements Command {
 	public names = [L.en.commands.settings.name()];
@@ -60,7 +61,9 @@ export class SettingsCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{},
+		services: InjectedServices
 	): Promise<void> {
 		if (!intr.isChatInputCommand()) return;
 		const command = CommandUtils.getSubCommandByName(
@@ -71,9 +74,10 @@ export class SettingsCommand implements Command {
 			return;
 		}
 
-		const passesChecks = await CommandUtils.runChecks(command, intr);
+		let passesChecks = await CommandUtils.runChecks(command, intr);
 		if (passesChecks) {
-			await command.execute(intr, LL);
+			const data = await command.fetchInjectedDataForCommand?.(intr);
+			await command.execute(intr, LL, data, services);
 		}
 	}
 }

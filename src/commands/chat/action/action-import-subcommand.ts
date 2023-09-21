@@ -1,4 +1,4 @@
-import { Character, Game, GuildDefaultCharacter } from '../../../services/kobold/models/index.js';
+import { Action, Character } from '../../../services/kobold/models/index.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -9,7 +9,6 @@ import {
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import Ajv from 'ajv';
 import _ from 'lodash';
 import { PasteBin } from '../../../services/pastebin/index.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
@@ -20,9 +19,9 @@ import {
 	ignoreOnConflict,
 } from '../../../utils/import-utils.js';
 import { ActionOptions } from '../action/action-command-options.js';
-import actionsSchema from './../../../services/kobold/lib/shared-schemas/action.schema.json' assert { type: 'json' };
 import L from '../../../i18n/i18n-node.js';
-const ajv = new Ajv.default({ allowUnionTypes: true });
+import { zAction } from '../../../services/kobold/models/character/character.zod.js';
+import { z } from 'zod';
 
 export class ActionImportSubCommand implements Command {
 	public names = [L.en.commands.action.import.name()];
@@ -63,7 +62,7 @@ export class ActionImportSubCommand implements Command {
 			return;
 		}
 
-		let newActions: Character['actions'] = [];
+		let newActions: Action[] = [];
 
 		let invalidJson = false;
 		try {
@@ -73,10 +72,7 @@ export class ActionImportSubCommand implements Command {
 			} else {
 				newActions = JSON.parse(actionsText);
 			}
-			const valid = ajv.validate(actionsSchema, newActions);
-			if (!valid) {
-				invalidJson = true;
-			}
+			newActions = z.array(zAction).parse(newActions);
 		} catch (err) {
 			console.warn(err);
 			invalidJson = true;

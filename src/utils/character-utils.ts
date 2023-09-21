@@ -2,7 +2,12 @@ import _ from 'lodash';
 import { Character } from './../services/kobold/models/character/character.model.js';
 import { Creature, roll, rollable } from './creature.js';
 import { StringUtils } from './string-utils.js';
-import { AutocompleteInteraction, CacheType, ChatInputCommandInteraction } from 'discord.js';
+import {
+	AutocompleteInteraction,
+	CacheType,
+	ChatInputCommandInteraction,
+	CommandInteraction,
+} from 'discord.js';
 
 interface NamedThing {
 	Name: string;
@@ -196,7 +201,7 @@ export class CharacterUtils {
 	 * @returns the active character for the user, or null if one is not present
 	 */
 	public static async getActiveCharacter(
-		intr: ChatInputCommandInteraction | AutocompleteInteraction<CacheType>
+		intr: CommandInteraction | AutocompleteInteraction<CacheType>
 	): Promise<Character | null> {
 		const { user, guildId, channelId } = intr;
 		const userId = user.id;
