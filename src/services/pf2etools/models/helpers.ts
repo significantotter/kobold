@@ -12,9 +12,7 @@ export function fetchOneJsonFile(fileName: string) {
 }
 export function fetchOneJsonFileAndEscape(fileName: string) {
 	return JSON.parse(
-		fs
-			.readFileSync(path.join(currentDirectory, `../Pf2eTools/data/${fileName}.json`), 'utf8')
-			.replaceAll("'", "''")
+		fs.readFileSync(path.join(currentDirectory, `../Pf2eTools/data/${fileName}.json`), 'utf8')
 	);
 }
 
@@ -47,12 +45,10 @@ export function fetchManyJsonFiles(folderName: string) {
 	);
 	return Object.values(JSON.parse(indexFile)).map(filePath =>
 		JSON.parse(
-			fs
-				.readFileSync(
-					path.join(currentDirectory, `../Pf2eTools/data/${folderName}/${filePath}`),
-					'utf8'
-				)
-				.replaceAll("'", "''")
+			fs.readFileSync(
+				path.join(currentDirectory, `../Pf2eTools/data/${folderName}/${filePath}`),
+				'utf8'
+			)
 		)
 	);
 }
