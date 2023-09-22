@@ -1,6 +1,16 @@
-export type spellLevelKeys = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10';
-
-export type spellcastingMap = { [key in spellLevelKeys]?: SpellLevel };
+export type spellcastingMap = {
+	'0'?: SpellLevel;
+	'1'?: SpellLevel;
+	'2'?: SpellLevel;
+	'3'?: SpellLevel;
+	'4'?: SpellLevel;
+	'5'?: SpellLevel;
+	'6'?: SpellLevel;
+	'7'?: SpellLevel;
+	'8'?: SpellLevel;
+	'9'?: SpellLevel;
+	'10'?: SpellLevel;
+};
 
 export interface ListEntry {
 	type: 'list';
@@ -44,17 +54,18 @@ export interface Ability {
 
 export interface Affliction {
 	type: 'affliction';
-	name: string;
+	name?: string;
 	onset?: string;
 	notes?: string[];
 	traits?: string[];
 	DC: number | string;
 	savingThrow: string;
-	stages: {
+	stages?: {
 		stage: number;
 		entry: Entry;
 		duration: string;
 	}[];
+	entries?: Entry[];
 }
 
 export interface Item {

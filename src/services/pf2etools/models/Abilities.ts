@@ -1,26 +1,22 @@
-import { db } from '../pf2eTools-db.js';
-import { abilities } from '../schema.js';
-import { Ability } from '../pf2etools-types.js';
-import { fetchOneJsonFile } from './helpers.js';
+import { Neboa, Collection } from 'neboa';
+import { Ability, zAbilitySchema } from '../pf2etools.zod.js';
+import { fetchOneJsonFileAndEscape, importData } from './helpers.js';
+import { Model } from './Model.js';
 
-export class Abilities {
-	static get model() {
-		return abilities;
+export class Abilities extends Model<typeof zAbilitySchema> {
+	public collection: Collection<Ability>;
+	constructor(private db: Neboa) {
+		super();
+		this.collection = this.db.collection<Ability>('abilities');
 	}
-	static async import() {
-		await db.delete(abilities).run();
-
-		const abilityJSON = fetchOneJsonFile('abilities') as { ability: Ability[] };
-
-		await db
-			.insert(abilities)
-			.values(
-				abilityJSON.ability.map(ability => ({
-					name: ability.name,
-					data: ability,
-					tags: ability.traits ?? [],
-				}))
-			)
-			.run();
+	public z = zAbilitySchema;
+	public getFiles(): any[] {
+		return [fetchOneJsonFileAndEscape('abilities')];
+	}
+	public resourceListFromFile(file: any): any[] {
+		return file.ability;
+	}
+	public async import() {
+		await this._importData();
 	}
 }

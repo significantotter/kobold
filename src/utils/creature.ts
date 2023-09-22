@@ -19,7 +19,7 @@ import { parseBonusesForTagsFromModifiers } from '../services/kobold/lib/helpers
 import { KoboldError } from './KoboldError.js';
 import { BaseMessageOptions } from 'discord.js';
 import { SheetUtils } from './sheet-utils.js';
-import { ZCharacter } from '../services/kobold/models/character/character.drizzle.js';
+import { ZCharacter } from '../services/kobold/models/character/character.model.js';
 
 const damageTypeShorthands: { [shorthand: string]: string } = {
 	piercing: 'p',
@@ -1534,6 +1534,14 @@ export class Creature {
 
 	public static fromModelWithSheet(initActor: ModelWithSheet): Creature {
 		return new Creature(initActor.sheet, initActor.name);
+	}
+
+	public static fromZCharacter(character: ZCharacter): Creature {
+		let sheet = { ...character.sheet };
+		sheet.actions = [...(sheet.actions ?? []), ...character.actions];
+		sheet.modifiers = [...(sheet.modifiers ?? []), ...character.modifiers];
+		sheet.rollMacros = [...(sheet.rollMacros ?? []), ...character.rollMacros];
+		return new Creature(sheet);
 	}
 
 	public static fromCharacter(character: Character): Creature {

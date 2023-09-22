@@ -10,6 +10,8 @@ import { Creature } from '../../../../utils/creature.js';
 import { ChatInputCommandInteraction } from 'discord.js';
 import { StringUtils } from '../../../../utils/string-utils.js';
 import { zCharacter } from './character.zod.js';
+import { z } from 'zod';
+export type ZCharacter = z.infer<typeof zCharacter>;
 
 interface ErrorWithCode<T extends number = number> extends Error {
 	code: T;

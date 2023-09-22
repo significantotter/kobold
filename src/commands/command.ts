@@ -13,6 +13,7 @@ import { Character } from '../services/kobold/models/index.js';
 import { ConditionalPick } from 'type-fest';
 import { CharacterUtils } from '../utils/character-utils.js';
 import _ from 'lodash';
+import { ZCharacter } from '../services/kobold/models/character/character.model.js';
 
 export interface InjectedCommandData {
 	kobold: Kobold;
@@ -40,13 +41,11 @@ export interface Command {
 	): Promise<void>;
 }
 
-export interface InjectedServices {
-	kobold: Kobold;
-}
+export interface InjectedServices {}
 
 export interface InjectData {
-	activeCharacter: Character | null;
-	ownedCharacters: Character[];
+	activeCharacter: ZCharacter | null;
+	ownedCharacters: ZCharacter[];
 }
 
 export interface InjectableCommandData {
@@ -60,27 +59,27 @@ export function UsingData<T extends InjectableCommandData>(usesData: T) {
 		public usesData: T = usesData;
 
 		public async fetchInjectedDataForCommand(intr: CommandInteraction): Promise<targetData> {
-			let activeCharacterPromise: Promise<InjectData['activeCharacter']> | undefined =
-				undefined;
+			let activeCharacterPromise: Promise<Character | null> | undefined = undefined;
 			if (this.usesData.activeCharacter) {
 				activeCharacterPromise = CharacterUtils.getActiveCharacter(intr);
 			}
-			let ownedCharactersPromise: Promise<InjectData['ownedCharacters']> | undefined =
-				undefined;
+			let ownedCharactersPromise: Promise<Character[]> | undefined = undefined;
 			if (this.usesData.ownedCharacters) {
 				ownedCharactersPromise = Character.query().where({
 					userId: intr.user.id,
 				}) as any as Promise<Character[]>;
 			}
-			const [activeCharacter, ownedCharacters] = await Promise.all([
+			let [activeCharacter, ownedCharacters] = await Promise.all([
 				activeCharacterPromise,
 				ownedCharactersPromise,
 			]);
+			const parsedOwnedCharacters = ownedCharacters?.map?.(character => character.parse());
+			const parsedActiveCharacter = activeCharacter?.parse?.() ?? null;
 
 			return _.pickBy(
 				{
-					activeCharacter,
-					ownedCharacters,
+					activeCharacter: parsedActiveCharacter,
+					ownedCharacters: parsedOwnedCharacters,
 				},
 				_.identity
 			) as targetData;

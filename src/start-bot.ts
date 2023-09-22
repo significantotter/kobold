@@ -113,7 +113,6 @@ import { Trigger } from './triggers/index.js';
 import { Config } from './config/config.js';
 import Logs from './config/lang/logs.json' assert { type: 'json' };
 import { checkAndLoadBestiaryFiles } from './services/pf2etools/bestiaryLoader.js';
-import { DrizzleDb } from './services/drizzle.db.js';
 import { Kobold } from './services/kobold/models/koboldORM.js';
 
 // this is to prevent embeds breaking on "addFields" when adding more than an embed can hold
@@ -122,8 +121,7 @@ disableValidators();
 
 async function start(): Promise<void> {
 	DBModel.init(Config.database.url);
-	await DrizzleDb.init(Config.database.url);
-	const kobold = new Kobold(DrizzleDb);
+	// const kobold = new Kobold();
 
 	// asynchronously load the bestiary files
 	checkAndLoadBestiaryFiles();
@@ -270,7 +268,7 @@ async function start(): Promise<void> {
 	// Event handlers
 	let guildJoinHandler = new GuildJoinHandler();
 	let guildLeaveHandler = new GuildLeaveHandler();
-	let commandHandler = new CommandHandler(commands, { kobold });
+	let commandHandler = new CommandHandler(commands, {});
 	let buttonHandler = new ButtonHandler(buttons);
 	let triggerHandler = new TriggerHandler(triggers);
 	let messageHandler = new MessageHandler(triggerHandler);

@@ -1,6 +1,5 @@
 import { z } from 'zod';
 import { SheetUtils } from '../../../../utils/sheet-utils.js';
-import { zPathBuilderCharacterSchema } from '../../../pathbuilder/pathbuilder.zod.js';
 
 export const zCharacterData = z
 	.object({

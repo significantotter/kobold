@@ -8,7 +8,7 @@ export class ZodValidator extends Validator {
 
 		// The properties to validate. After validation these values will
 		// be merged into `model` by objection.
-		const json = args.json;
+		let json = args.json;
 
 		// `ModelOptions` object. If your custom validator sets default
 		// values or has the concept of required properties, you need to
@@ -23,7 +23,19 @@ export class ZodValidator extends Validator {
 
 		// Do your validation here and throw any exception if the
 		// validation fails.
-		const parsedJSON = model.$z.safeParse(json);
+		const idColumns = [model.prototype?.constructor?.idColumn as string | string[]].flat();
+		const $zInsert = model.$z.omit(
+			idColumns.reduce((acc, key) => ({ ...acc, [key]: true }), {})
+		);
+		const $zUpdate = $zInsert.partial();
+
+		// there's no way to check if it's an insert vs a select in here,
+		// so we'll settle for id fields always validating as optional, unfortunately
+		if (opt.patch) {
+			json = $zUpdate.safeParse(json);
+		} else {
+			json = $zInsert.safeParse(json);
+		}
 
 		// You need to return the (possibly modified) json.
 		return json;

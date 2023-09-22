@@ -11,12 +11,10 @@ import { MathUtils, ShardUtils } from './utils/index.js';
 import { Config } from './config/config.js';
 import Logs from './config/lang/logs.json' assert { type: 'json' };
 import { filterNotNullOrUndefined } from './utils/type-guards.js';
-import { DrizzleDb } from './services/drizzle.db.js';
 
 async function start(): Promise<void> {
 	Logger.info(Logs.info.appStarted);
 	DBModel.init(Config.database.url);
-	await DrizzleDb.init(Config.database.url);
 
 	// Dependencies
 	let httpService = new HttpService();

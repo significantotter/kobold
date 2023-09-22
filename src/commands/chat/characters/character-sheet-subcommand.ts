@@ -10,10 +10,8 @@ import { Command, CommandDeferType } from '../../index.js';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Creature } from '../../../utils/creature.js';
-import { Character } from '../../../services/kobold/models/index.js';
 import { UsingData } from '../../command.js';
-import { Kobold } from '../../../services/kobold/models/koboldORM.js';
-import { ZCharacter } from '../../../services/kobold/models/character/character.drizzle.js';
+import { ZCharacter } from '../../../services/kobold/models/character/character.model.js';
 
 export class CharacterSheetSubCommand
 	extends UsingData({ activeCharacter: true })
@@ -33,8 +31,7 @@ export class CharacterSheetSubCommand
 	public async execute(
 		intr: ChatInputCommandInteraction,
 		LL: TranslationFunctions,
-		{ activeCharacter }: { activeCharacter: Character },
-		{ kobold }: { kobold: Kobold }
+		{ activeCharacter }: { activeCharacter: ZCharacter }
 	): Promise<void> {
 		// const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
 		if (!activeCharacter) {
@@ -44,11 +41,8 @@ export class CharacterSheetSubCommand
 			);
 			return;
 		}
-		const result = activeCharacter.toJSON();
-		console.log(result as ZCharacter);
-		console.log(result.actions[0]);
 
-		const creature = Creature.fromCharacter(activeCharacter);
+		const creature = Creature.fromZCharacter(activeCharacter);
 		const embed = creature.compileSheetEmbed();
 
 		await InteractionUtils.send(intr, embed);
