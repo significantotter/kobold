@@ -1,5 +1,5 @@
 import { Neboa, Collection } from 'neboa';
-import { fetchOneJsonFileAndEscape } from './lib/helpers.js';
+import { fetchOneJsonFile } from './lib/helpers.js';
 import { Model } from './lib/Model.js';
 import { zRenderDemoSchema, RenderDemo } from './RenderDemo.zod.js';
 
@@ -11,7 +11,7 @@ export class RenderDemos extends Model<typeof zRenderDemoSchema> {
 	}
 	public z = zRenderDemoSchema;
 	public getFiles(): any[] {
-		return [fetchOneJsonFileAndEscape('renderDemos')];
+		return [fetchOneJsonFile('renderDemos')];
 	}
 	public resourceListFromFile(file: any): any[] {
 		return file.renderDemo;

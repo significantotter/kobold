@@ -1,5 +1,5 @@
 import { Neboa, Collection } from 'neboa';
-import { fetchOneJsonFileAndEscape } from './lib/helpers.js';
+import { fetchOneJsonFile } from './lib/helpers.js';
 import { Model } from './lib/Model.js';
 import { zRelicGiftSchema, RelicGift } from './RelicGifts.zod.js';
 
@@ -11,7 +11,7 @@ export class RelicGifts extends Model<typeof zRelicGiftSchema> {
 	}
 	public z = zRelicGiftSchema;
 	public getFiles(): any[] {
-		return [fetchOneJsonFileAndEscape('relicGifts')];
+		return [fetchOneJsonFile('relicGifts')];
 	}
 	public resourceListFromFile(file: any): any[] {
 		return file.relicGift;

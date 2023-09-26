@@ -1,19 +1,10 @@
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
-import { Model } from './Model.js';
-import { z } from 'zod';
+
 const currentDirectory = path.dirname(fileURLToPath(import.meta.url));
 
 export function fetchOneJsonFile(fileName: string) {
-	return JSON.parse(
-		fs.readFileSync(
-			path.join(currentDirectory, `../../Pf2eTools/data/${fileName}.json`),
-			'utf8'
-		)
-	);
-}
-export function fetchOneJsonFileAndEscape(fileName: string) {
 	return JSON.parse(
 		fs.readFileSync(
 			path.join(currentDirectory, `../../Pf2eTools/data/${fileName}.json`),

@@ -1,18 +1,12 @@
 import { z } from 'zod';
-import { zOtherSourceSchema, zSpeedSchema } from '../helpers.zod.js';
-import { zAbilityEntrySchema, zAttackEntrySchema } from '../entries.zod.js';
-
-const zDeityAttack = zAttackEntrySchema.extend({
-	range: z.string().or(z.number()).optional(),
-	rangedIncrement: z.boolean().optional(),
-	reload: z.number().optional(),
-	damageType: z.string().optional(),
-	damage2: z.string().optional(),
-	damageType2: z.string().optional(),
-	preciousMetal: z.string().array().optional(),
-	traitNote: z.string().optional(),
-	note: z.string().optional(),
-});
+import { zActivitySchema, zOtherSourceSchema, zSpeedSchema } from '../helpers.zod.js';
+import {
+	zAbilityEntrySchema,
+	zAttackEntrySchema,
+	zCopySchema,
+	zEntrySchema,
+	zFluffSchema,
+} from '../entries.zod.js';
 
 export type Deity = z.infer<typeof zDeitySchema>;
 export const zDeitySchema = z
@@ -67,8 +61,8 @@ export const zDeitySchema = z
 				ignoreTerrain: z.boolean().optional(),
 				shield: z.number().optional(),
 				immune: z.array(z.string()).optional(),
-				melee: z.array(zDeityAttack).optional(),
-				ranged: z.array(zDeityAttack).optional(),
+				melee: z.array(zAttackEntrySchema).optional(),
+				ranged: z.array(zAttackEntrySchema).optional(),
 				ability: z.array(zAbilityEntrySchema).optional(),
 				preface: z.string().optional(),
 			})
@@ -82,3 +76,6 @@ export const zDeitySchema = z
 			.optional(),
 	})
 	.strict();
+
+export type DeityFluff = z.infer<typeof zDeityFluffSchema>;
+export const zDeityFluffSchema = zFluffSchema;

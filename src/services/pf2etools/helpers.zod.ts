@@ -1,5 +1,60 @@
 import { z } from 'zod';
 
+export const zTargetValueRecordSchema = z.record(
+	z.string(),
+	z.union([z.number(), z.string(), z.record(z.string(), z.string().or(z.number()))])
+);
+
+export const zDefensesSchema = z.object({
+	ac: z
+		.object({ std: z.number().optional(), default: z.number().optional() })
+		.catchall(z.number())
+		.optional(),
+	savingThrows: z
+		.object({
+			fort: z
+				.object({
+					std: z.number().optional(),
+					default: z.number().optional(),
+					abilities: z.array(z.string()).optional(),
+				})
+				.or(z.number())
+				.optional(),
+			ref: z
+				.object({ std: z.number().optional(), default: z.number().optional() })
+				.or(z.number())
+				.optional(),
+			will: z
+				.object({ std: z.number().optional(), default: z.number().optional() })
+				.or(z.number())
+				.optional(),
+			abilities: z.array(z.string()).optional(),
+		})
+		.optional(),
+	hardness: zTargetValueRecordSchema.optional(),
+	hp: zTargetValueRecordSchema.optional(),
+	bt: zTargetValueRecordSchema.optional(),
+	immunities: z.array(z.string()).optional(),
+	weaknesses: z
+		.object({
+			name: z.string(),
+			amount: z.number().optional(),
+			note: z.string().optional(),
+		})
+		.or(z.string())
+		.array()
+		.optional(),
+	resistances: z
+		.object({
+			name: z.string(),
+			amount: z.number().optional(),
+			note: z.string().optional(),
+		})
+		.or(z.string())
+		.array()
+		.optional(),
+});
+
 export const zSpeedSchema = z.object({
 	abilities: z.array(z.string()).optional(),
 	walk: z.number().optional(),
@@ -65,11 +120,37 @@ export const zOtherSourceSchema = z.object({
 });
 
 export const zWeaponDataSchema = z.object({
+	type: z.string().optional(),
+	ammunition: z.string().optional(),
+	reload: z.number().or(z.string()).optional(),
+	range: z.number().optional(),
 	damage: z.string(),
 	damageType: z.string(),
+	damage2: z.string().optional(),
+	damageType2: z.string().optional(),
 	group: z.string(),
 	hands: z.union([z.number(), z.string()]).optional(),
+	traits: z.string().array().optional(),
 });
+
+export const zArmorDataSchema = z.object({
+	ac: z.number(),
+	dexCap: z.number(),
+	str: z.number().optional(),
+	checkPen: z.number(),
+	speedPen: z.number().optional(),
+	group: z.string(),
+});
+export const zSheildDataSchema = z
+	.object({
+		hardness: z.number(),
+		hp: z.number(),
+		bt: z.number(),
+		ac: z.number().optional(),
+		ac2: z.number().optional(),
+		speedPen: z.number().optional(),
+	})
+	.optional();
 
 export const zActivateSchema = z.union([
 	z.object({

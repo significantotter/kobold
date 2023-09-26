@@ -1,7 +1,7 @@
 import { Neboa, Collection } from 'neboa';
-import { fetchOneJsonFileAndEscape } from './lib/helpers.js';
+import { fetchOneJsonFile } from './lib/helpers.js';
 import { Model } from './lib/Model.js';
-import { zRitualSchema, Ritual } from '../helpers.zod.js';
+import { zRitualSchema, Ritual } from './Rituals.zod.js';
 
 export class Rituals extends Model<typeof zRitualSchema> {
 	public collection: Collection<Ritual>;
@@ -11,7 +11,7 @@ export class Rituals extends Model<typeof zRitualSchema> {
 	}
 	public z = zRitualSchema;
 	public getFiles(): any[] {
-		return [fetchOneJsonFileAndEscape('rituals')];
+		return [fetchOneJsonFile('rituals')];
 	}
 	public resourceListFromFile(file: any): any[] {
 		return file.ritual;

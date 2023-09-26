@@ -1,5 +1,5 @@
 import { Neboa, Collection } from 'neboa';
-import { fetchOneJsonFileAndEscape } from './lib/helpers.js';
+import { fetchOneJsonFile } from './lib/helpers.js';
 import { Model } from './lib/Model.js';
 import { zGroupSchema, Group } from './Groups.zod.js';
 
@@ -11,7 +11,7 @@ export class Groups extends Model<typeof zGroupSchema> {
 	}
 	public z = zGroupSchema;
 	public getFiles(): any[] {
-		return [fetchOneJsonFileAndEscape('groups')];
+		return [fetchOneJsonFile('groups')];
 	}
 	public resourceListFromFile(file: any): any[] {
 		return file.group;

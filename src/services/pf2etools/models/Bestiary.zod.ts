@@ -3,6 +3,7 @@ import {
 	Entry,
 	zAbilityListEntrySchema,
 	zAttackEntrySchema,
+	zCopySchema,
 	zEntrySchema,
 	zModSchema,
 } from '../entries.zod.js';
@@ -134,13 +135,7 @@ export const zCreatureFluffSchema = z
 		page: z.number().optional(),
 		images: z.array(z.string()).optional(),
 		entries: z.array(zEntrySchema).optional(),
-		_copy: z
-			.object({
-				name: z.string(),
-				source: z.string(),
-				_mod: zModSchema.optional(),
-			})
-			.optional(),
+		_copy: zCopySchema.optional(),
 	})
 	.strict();
 

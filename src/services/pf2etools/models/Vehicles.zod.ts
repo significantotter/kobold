@@ -1,6 +1,11 @@
 import { z } from 'zod';
 import { zAbilityListEntrySchema } from '../entries.zod.js';
-import { zTypedNumberSchema } from '../helpers.zod.js';
+import {
+	zDefensesSchema,
+	zSpeedSchema,
+	zTargetValueRecordSchema,
+	zTypedNumberSchema,
+} from '../helpers.zod.js';
 
 export type Vehicle = z.infer<typeof zVehicleSchema>;
 export const zVehicleSchema = z
@@ -10,7 +15,7 @@ export const zVehicleSchema = z
 		page: z.number(),
 		level: z.number(),
 		traits: z.array(z.string()),
-		price: z.object({ coin: z.string(), amount: z.number() }),
+		price: z.object({ coin: z.string(), amount: z.number() }).optional(),
 		space: z.object({
 			long: zTypedNumberSchema,
 			wide: zTypedNumberSchema,
@@ -22,27 +27,30 @@ export const zVehicleSchema = z
 				z.object({ type: z.string(), number: z.number(), entry: z.string() }),
 			])
 		),
-		passengers: z.number(),
-		pilotingCheck: z.array(z.object({ skill: z.string(), dc: z.number() })),
-		defenses: z.object({
-			ac: z.object({ default: z.number() }),
-			savingThrows: z.object({ fort: z.number() }),
-			hardness: z.object({ default: z.number() }),
-			hp: z.object({ default: z.number() }),
-			bt: z.object({ default: z.number() }),
-			immunities: z.array(z.string()),
-			weaknesses: z.array(
-				z.object({ name: z.string(), amount: z.number(), note: z.string() })
-			),
-		}),
-		speed: z.array(
-			z.object({
-				type: z.string(),
-				speed: z.number(),
-				traits: z.array(z.string()),
-			})
+		passengers: z.number().optional(),
+		pilotingCheck: z.array(
+			z.object({ skill: z.string(), dc: z.number(), entry: z.string().optional() })
 		),
-		collision: z.object({ damage: z.string(), dc: z.number() }),
-		abilities: zAbilityListEntrySchema,
+		defenses: zDefensesSchema.optional(),
+		speed: zSpeedSchema.or(
+			z
+				.object({
+					type: z.string(),
+					entry: z.string().optional(),
+					speed: z.number().optional(),
+					note: z.string().optional(),
+					traits: z.string().array().optional(),
+				})
+				.array()
+		),
+		collision: z.object({
+			damage: z.string().optional(),
+			dc: z.number().optional(),
+			entries: z.string().optional(),
+		}),
+		abilities: zAbilityListEntrySchema.optional(),
+		entries: z.array(z.string()).optional(),
+		destruction: z.string().array().optional(),
+		passengersNote: z.string().optional(),
 	})
 	.strict();

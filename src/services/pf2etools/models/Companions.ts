@@ -1,6 +1,6 @@
 import { Neboa, Collection } from 'neboa';
 import { zCompanionSchema, Companion } from './Companions.zod.js';
-import { fetchOneJsonFileAndEscape } from './lib/helpers.js';
+import { fetchOneJsonFile } from './lib/helpers.js';
 import { Model } from './lib/Model.js';
 
 export class Companions extends Model<typeof zCompanionSchema> {
@@ -11,7 +11,7 @@ export class Companions extends Model<typeof zCompanionSchema> {
 	}
 	public z = zCompanionSchema;
 	public getFiles(): any[] {
-		return [fetchOneJsonFileAndEscape('companionsfamiliars')];
+		return [fetchOneJsonFile('companionsfamiliars')];
 	}
 	public resourceListFromFile(file: any): any[] {
 		return file.companion;

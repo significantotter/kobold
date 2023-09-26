@@ -1,6 +1,6 @@
 import { Neboa, Collection } from 'neboa';
 import { zEventSchema, Event } from './Events.zod.js';
-import { fetchOneJsonFileAndEscape } from './lib/helpers.js';
+import { fetchOneJsonFile } from './lib/helpers.js';
 import { Model } from './lib/Model.js';
 
 export class Events extends Model<typeof zEventSchema> {
@@ -11,7 +11,7 @@ export class Events extends Model<typeof zEventSchema> {
 	}
 	public z = zEventSchema;
 	public getFiles(): any[] {
-		return [fetchOneJsonFileAndEscape('events')];
+		return [fetchOneJsonFile('events')];
 	}
 	public resourceListFromFile(file: any): any[] {
 		return file.event ?? [];

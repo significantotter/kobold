@@ -7,6 +7,6 @@ export const zSkillSchema = z
 		name: z.string(),
 		source: z.string(),
 		page: z.number(),
-		entries: zEntrySchema,
+		entries: zEntrySchema.array(),
 	})
 	.strict();

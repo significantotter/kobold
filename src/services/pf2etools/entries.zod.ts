@@ -21,15 +21,24 @@ export const zPf2EKeyAbilitySchema = z.object({
 
 export const zBaseAttackEntrySchema = z.object({
 	type: z.string().optional(),
-	range: z.string(),
+	range: z.string().or(z.number()).optional(),
 	name: z.string(),
 	attack: z.number().optional(),
 	bonus: z.number().optional(),
 	damage: z.string().or(z.string().array()).optional(),
+	damageType: z.string().optional(),
+	damage2: z.string().optional(),
+	damageType2: z.string().optional(),
 	types: z.array(z.string()).optional(),
 	traits: z.array(z.string()).optional(),
 	noMAP: z.boolean().optional(),
 	activity: zActivitySchema.optional(),
+
+	rangedIncrement: z.boolean().optional(),
+	reload: z.number().optional(),
+	preciousMetal: z.string().array().optional(),
+	traitNote: z.string().optional(),
+	note: z.string().optional(),
 });
 export type AttackEntry = z.infer<typeof zBaseAttackEntrySchema> & { effects?: Entry[] };
 export const zAttackEntrySchema: z.ZodType<AttackEntry> = zBaseAttackEntrySchema.extend({
@@ -81,6 +90,8 @@ export const baseZAbilityEntrySchema = z.object({
 	idName: z.string().optional(),
 	style: z.string().optional(),
 	name: z.string().optional(),
+	source: z.string().optional(),
+	page: z.number().optional(),
 	cost: z.string().optional(),
 	traits: z.string().array().optional(),
 	activity: zActivitySchema.optional(),
@@ -90,6 +101,7 @@ export const baseZAbilityEntrySchema = z.object({
 	requirements: z.string().optional(),
 	components: z.string().array().optional(),
 	generic: z.object({ tag: z.string(), source: z.string().optional() }).optional(),
+	special: z.string().array().optional(),
 });
 export type AbilityEntry = z.infer<typeof baseZAbilityEntrySchema> & { entries?: Entry[] };
 export const zAbilityEntrySchema: z.ZodType<AbilityEntry> = baseZAbilityEntrySchema.extend({
@@ -111,6 +123,7 @@ export const zTableEntrySchema = z.object({
 	type: z.literal('table'),
 	id: z.string().optional(),
 	name: z.string().optional(),
+	alias: z.string().array().optional(),
 	caption: z.string().optional(),
 	intro: z.string().array().optional(),
 	outro: z.string().array().optional(),
@@ -135,6 +148,7 @@ export const zTableEntrySchema = z.object({
 	rollable: z.boolean().optional(),
 	spans: z.number().array().array().array().optional(),
 	labelRowIdx: z.number().array().optional(),
+	labelColIdx: z.number().array().optional(),
 	rowLabelIdx: z.number().array().optional(),
 	colSizes: z.number().array().optional(),
 	rows: z.union([z.union([z.string(), z.number()]).array(), zMultiRowSchema]).array(),
@@ -270,6 +284,7 @@ export const zSemanticEntrySchema: z.ZodType<SemanticEntry> = baseZSemanticEntry
 export type QuoteEntry = z.infer<typeof zQuoteEntrySchema>;
 const zQuoteEntrySchema = z.object({
 	type: z.literal('quote'),
+	from: z.string().optional(),
 	by: z.string(),
 	entries: z.string().array(),
 });
@@ -323,4 +338,19 @@ const zVariantModEntry = z
 export const zModSchema = z.object({
 	entries: z.union([zVariantModEntry, zVariantModEntry.array()]).optional(),
 	entriesMode: z.string().optional(),
+});
+
+export const zCopySchema = z.object({
+	name: z.string(),
+	source: z.string(),
+	_mod: zModSchema.optional(),
+});
+
+export const zFluffSchema = z.object({
+	name: z.string(),
+	source: z.string(),
+	page: z.number().optional(),
+	entries: z.array(zEntrySchema).optional(),
+	lore: z.array(zEntrySchema).optional(),
+	_copy: zCopySchema.optional(),
 });

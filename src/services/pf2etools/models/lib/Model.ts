@@ -25,7 +25,6 @@ export abstract class Model<T extends z.ZodTypeAny> {
 					console.dir(parse.error.format(), { depth: null });
 					console.dir(resource, { depth: null });
 					throw new Error();
-					return;
 				}
 				await this.collection.insert(parse.data);
 			}

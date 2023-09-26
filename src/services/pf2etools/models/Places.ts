@@ -1,5 +1,5 @@
 import { Neboa, Collection } from 'neboa';
-import { fetchOneJsonFileAndEscape } from './lib/helpers.js';
+import { fetchOneJsonFile } from './lib/helpers.js';
 import { Model } from './lib/Model.js';
 import { zPlaceSchema, Place } from './Places.zod.js';
 
@@ -11,7 +11,7 @@ export class Places extends Model<typeof zPlaceSchema> {
 	}
 	public z = zPlaceSchema;
 	public getFiles(): any[] {
-		return [fetchOneJsonFileAndEscape('places')];
+		return [fetchOneJsonFile('places')];
 	}
 	public resourceListFromFile(file: any): any[] {
 		return file.place;

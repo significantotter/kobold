@@ -1,6 +1,6 @@
 import { Neboa, Collection } from 'neboa';
-import { zItemSchema, Item } from './Items.zod.js';
-import { fetchManyJsonFiles } from './lib/helpers.js';
+import { zItemSchema, Item, ItemFluff, zItemFluffSchema } from './Items.zod.js';
+import { fetchManyJsonFiles, fetchOneJsonFile } from './lib/helpers.js';
 import { Model } from './lib/Model.js';
 
 export class Items extends Model<typeof zItemSchema> {
@@ -11,10 +11,28 @@ export class Items extends Model<typeof zItemSchema> {
 	}
 	public z = zItemSchema;
 	public getFiles(): any[] {
-		return fetchManyJsonFiles('items');
+		return fetchManyJsonFiles('items').concat(fetchOneJsonFile('items/baseitems'));
 	}
 	public resourceListFromFile(file: any): any[] {
-		return file.item ?? [];
+		return file.item ?? file.baseitem ?? [];
+	}
+	public async import() {
+		await this._importData();
+	}
+}
+
+export class ItemsFluff extends Model<typeof zItemFluffSchema> {
+	public collection: Collection<ItemFluff>;
+	constructor(private db: Neboa) {
+		super();
+		this.collection = this.db.collection<ItemFluff>('itemsFluff');
+	}
+	public z = zItemFluffSchema;
+	public getFiles(): any[] {
+		return fetchManyJsonFiles('items', 'fluff-index.json');
+	}
+	public resourceListFromFile(file: any): any[] {
+		return file.itemFluff ?? [];
 	}
 	public async import() {
 		await this._importData();

@@ -1,6 +1,6 @@
 import { Neboa, Collection } from 'neboa';
 import { zAfflictionSchema, Affliction } from './Afflictions.zod.js';
-import { fetchOneJsonFileAndEscape } from './lib/helpers.js';
+import { fetchOneJsonFile } from './lib/helpers.js';
 import { Model } from './lib/Model.js';
 
 export class Afflictions extends Model<typeof zAfflictionSchema> {
@@ -11,7 +11,7 @@ export class Afflictions extends Model<typeof zAfflictionSchema> {
 	}
 	public z = zAfflictionSchema;
 	public getFiles(): any[] {
-		return [fetchOneJsonFileAndEscape('afflictions')];
+		return [fetchOneJsonFile('afflictions')];
 	}
 	public resourceListFromFile(file: any): any[] {
 		return file.disease.concat(file.curse);

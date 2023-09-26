@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { zEntrySchema, zModSchema } from '../entries.zod.js';
+import { zEntrySchema, zFluffSchema, zModSchema } from '../entries.zod.js';
 import {
 	zActivateSchema,
 	zOtherSourceSchema,
@@ -8,16 +8,9 @@ import {
 	zFrequencySchema,
 	zWeaponDataSchema,
 	zTypedNumberSchema,
+	zArmorDataSchema,
+	zSheildDataSchema,
 } from '../helpers.zod.js';
-
-const zSheildDataSchema = z
-	.object({
-		hardness: z.number(),
-		hp: z.number(),
-		bt: z.number(),
-		ac: z.number().optional(),
-	})
-	.optional();
 
 const zSiegeWeaponDataSchema = z.object({
 	crew: z.object({ min: z.number(), max: z.number().optional() }).optional(),
@@ -98,6 +91,7 @@ export const zItemSchema = z
 		cost: z.string().optional(),
 		ammunition: z.union([z.string().array(), z.string()]).optional(),
 		entries: zEntrySchema.array(),
+		genericItem: z.string().optional(),
 		shieldData: zSheildDataSchema.optional(),
 		siegeWeaponData: zSiegeWeaponDataSchema.optional(),
 		prerequisites: z.string().optional(),
@@ -107,6 +101,7 @@ export const zItemSchema = z
 		hasFluff: z.boolean().optional(),
 		special: z.string().array().optional(),
 		weaponData: zWeaponDataSchema.optional(),
+		armorData: zArmorDataSchema.optional(),
 		comboWeaponData: zWeaponDataSchema.optional(),
 		contract: z
 			.object({
@@ -165,3 +160,6 @@ export const zItemSchema = z
 		savingThrows: z.object({ Will: z.object({ default: z.number() }) }).optional(),
 	})
 	.strict();
+
+export type ItemFluff = z.infer<typeof zItemFluffSchema>;
+export const zItemFluffSchema = zFluffSchema;

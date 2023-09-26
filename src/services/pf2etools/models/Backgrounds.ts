@@ -1,6 +1,6 @@
 import { Neboa, Collection } from 'neboa';
 import { zBackgroundSchema, Background } from './Backgrounds.zod.js';
-import { fetchManyJsonFiles, fetchOneJsonFileAndEscape } from './lib/helpers.js';
+import { fetchManyJsonFiles, fetchOneJsonFile } from './lib/helpers.js';
 import { Model } from './lib/Model.js';
 
 export class Backgrounds extends Model<typeof zBackgroundSchema> {

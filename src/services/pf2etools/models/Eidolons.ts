@@ -1,5 +1,5 @@
 import { Neboa, Collection } from 'neboa';
-import { fetchOneJsonFileAndEscape } from './lib/helpers.js';
+import { fetchOneJsonFile } from './lib/helpers.js';
 import { Model } from './lib/Model.js';
 import { zEidolonSchema, Eidolon } from './Eidolons.zod.js';
 
@@ -11,7 +11,7 @@ export class Eidolons extends Model<typeof zEidolonSchema> {
 	}
 	public z = zEidolonSchema;
 	public getFiles(): any[] {
-		return [fetchOneJsonFileAndEscape('companionsfamiliars')];
+		return [fetchOneJsonFile('companionsfamiliars')];
 	}
 	public resourceListFromFile(file: any): any[] {
 		return file.eidolon;

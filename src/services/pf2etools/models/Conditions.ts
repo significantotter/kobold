@@ -1,5 +1,5 @@
 import { Neboa, Collection } from 'neboa';
-import { fetchOneJsonFileAndEscape } from './lib/helpers.js';
+import { fetchOneJsonFile } from './lib/helpers.js';
 import { Model } from './lib/Model.js';
 import { zConditionSchema, Condition } from './Conditions.zod.js';
 
@@ -11,7 +11,7 @@ export class Conditions extends Model<typeof zConditionSchema> {
 	}
 	public z = zConditionSchema;
 	public getFiles(): any[] {
-		return [fetchOneJsonFileAndEscape('conditions')];
+		return [fetchOneJsonFile('conditions')];
 	}
 	public resourceListFromFile(file: any): any[] {
 		return file.condition ?? [];

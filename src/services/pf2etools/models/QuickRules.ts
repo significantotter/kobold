@@ -1,5 +1,5 @@
 import { Neboa, Collection } from 'neboa';
-import { fetchOneJsonFileAndEscape } from './lib/helpers.js';
+import { fetchOneJsonFile } from './lib/helpers.js';
 import { Model } from './lib/Model.js';
 import { zQuickRuleSchema, QuickRule } from './QuickRules.zod.js';
 import { z } from 'zod';
@@ -12,7 +12,7 @@ export class QuickRules extends Model<typeof zQuickRuleSchema> {
 	}
 	public z = zQuickRuleSchema;
 	public getFiles(): any[] {
-		return [fetchOneJsonFileAndEscape('quickRules')];
+		return [fetchOneJsonFile('quickRules')];
 	}
 	public resourceListFromFile(file: any): any[] {
 		return file.quickRule;
@@ -22,18 +22,20 @@ export class QuickRules extends Model<typeof zQuickRuleSchema> {
 		const ids = await this.collection.query().find();
 		await this.collection.deleteMany(ids.map(id => id._id));
 
-		const jsonFiles = this.getFiles();
+		const jsonFiles = await this.getFiles();
 
 		for (const jsonFile of jsonFiles) {
-			const quickRules = jsonFile.quickRule;
-
-			const parse = this.z.safeParse(quickRules);
-
-			if (!parse.success) {
-				console.dir(parse.error.format(), { depth: null });
-				return;
+			const quickRules = jsonFile.quickRules;
+			for (const quickRule in quickRules) {
+				console.log(quickRule);
+				const parse = this.z.safeParse({ [quickRule]: quickRules[quickRule] });
+				if (!parse.success) {
+					console.dir(parse.error.format(), { depth: null });
+					console.dir({ [quickRule]: quickRules[quickRule] }, { depth: null });
+					throw new Error();
+				}
+				await this.collection.insert(parse.data);
 			}
-			await this.collection.insert(parse.data);
 		}
 	}
 }

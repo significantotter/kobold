@@ -46,7 +46,8 @@
 		"commands:clear-prod": "NODE_OPTIONS='--max-old-space-size=4096' node dist/src/start-bot.js commands clear ",
 		"commands:register-prod": "NODE_OPTIONS='--max-old-space-size=4096' node dist/src/start-bot.js commands register",
 		"start:bot-prod": "NODE_OPTIONS='--max-old-space-size=4096' node dist/src/start-bot.js",
-		"start:manager-prod": "NODE_OPTIONS='--max-old-space-size=4096' node dist/src/start-manager.js"
+		"start:manager-prod": "NODE_OPTIONS='--max-old-space-size=4096' node dist/src/start-manager.js",
+		"import:pf2etools": "NODE_OPTIONS='--max-old-space-size=4096' npm run build && node dist/src/services/pf2etools/pf2eTools-import.js"
 	},
 	"dependencies": {
 		"@faker-js/faker": "^8.0.2",

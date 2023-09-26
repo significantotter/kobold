@@ -1,6 +1,6 @@
 import { Neboa, Collection } from 'neboa';
 import { zArchetypeSchema, Archetype } from './Archetypes.zod.js';
-import { fetchOneJsonFileAndEscape } from './lib/helpers.js';
+import { fetchOneJsonFile } from './lib/helpers.js';
 import { Model } from './lib/Model.js';
 
 export class Archetypes extends Model<typeof zArchetypeSchema> {
@@ -11,7 +11,7 @@ export class Archetypes extends Model<typeof zArchetypeSchema> {
 	}
 	public z = zArchetypeSchema;
 	public getFiles(): any[] {
-		return [fetchOneJsonFileAndEscape('archetypes')];
+		return [fetchOneJsonFile('archetypes')];
 	}
 	public resourceListFromFile(file: any): any[] {
 		return file.archetype ?? [];

@@ -1,11 +1,6 @@
 import { Neboa, Collection } from 'neboa';
-import {
-	zCreatureSchema,
-	Creature,
-	zCreatureFluffSchema,
-	CreatureFluff as CreatureFluffType,
-} from './Bestiary.zod.js';
-import { fetchManyJsonFiles, fetchOneJsonFileAndEscape } from './lib/helpers.js';
+import { zCreatureSchema, Creature, zCreatureFluffSchema, CreatureFluff } from './Bestiary.zod.js';
+import { fetchManyJsonFiles } from './lib/helpers.js';
 import { Model } from './lib/Model.js';
 
 export class Creatures extends Model<typeof zCreatureSchema> {
@@ -26,11 +21,11 @@ export class Creatures extends Model<typeof zCreatureSchema> {
 	}
 }
 
-export class CreatureFluff extends Model<typeof zCreatureFluffSchema> {
-	public collection: Collection<CreatureFluffType>;
+export class CreaturesFluff extends Model<typeof zCreatureFluffSchema> {
+	public collection: Collection<CreatureFluff>;
 	constructor(private db: Neboa) {
 		super();
-		this.collection = this.db.collection<CreatureFluffType>('creatureFluff');
+		this.collection = this.db.collection<CreatureFluff>('creaturesFluff');
 	}
 	public z = zCreatureFluffSchema;
 	public getFiles(): any[] {

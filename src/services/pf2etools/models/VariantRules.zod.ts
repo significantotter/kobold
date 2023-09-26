@@ -7,5 +7,7 @@ export const zVariantRuleSchema = z.object({
 	source: z.string(),
 	page: z.number(),
 	category: z.string(),
+	subCategory: z.string().optional(),
+	rarity: z.string().optional(),
 	entries: zEntrySchema.array(),
 });

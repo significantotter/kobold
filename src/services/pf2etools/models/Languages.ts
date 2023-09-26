@@ -1,5 +1,5 @@
 import { Neboa, Collection } from 'neboa';
-import { fetchOneJsonFileAndEscape } from './lib/helpers.js';
+import { fetchOneJsonFile } from './lib/helpers.js';
 import { Model } from './lib/Model.js';
 import { Language, zLanguageSchema } from './Languages.zod.js';
 
@@ -11,7 +11,7 @@ export class Languages extends Model<typeof zLanguageSchema> {
 	}
 	public z = zLanguageSchema;
 	public getFiles(): any[] {
-		return [fetchOneJsonFileAndEscape('languages')];
+		return [fetchOneJsonFile('languages')];
 	}
 	public resourceListFromFile(file: any): any[] {
 		return file.language;

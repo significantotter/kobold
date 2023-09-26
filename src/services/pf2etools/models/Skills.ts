@@ -1,5 +1,5 @@
 import { Neboa, Collection } from 'neboa';
-import { fetchOneJsonFileAndEscape } from './lib/helpers.js';
+import { fetchOneJsonFile } from './lib/helpers.js';
 import { Model } from './lib/Model.js';
 import { zSkillSchema, Skill } from './Skills.zod.js';
 
@@ -11,7 +11,7 @@ export class Skills extends Model<typeof zSkillSchema> {
 	}
 	public z = zSkillSchema;
 	public getFiles(): any[] {
-		return [fetchOneJsonFileAndEscape('skills')];
+		return [fetchOneJsonFile('skills')];
 	}
 	public resourceListFromFile(file: any): any[] {
 		return file.skill;

@@ -1,6 +1,6 @@
 import { Neboa, Collection } from 'neboa';
 import { zActionSchema, Action } from './Actions.zod.js';
-import { fetchOneJsonFileAndEscape } from './lib/helpers.js';
+import { fetchOneJsonFile } from './lib/helpers.js';
 import { Model } from './lib/Model.js';
 
 export class Actions extends Model<typeof zActionSchema> {
@@ -11,7 +11,7 @@ export class Actions extends Model<typeof zActionSchema> {
 	}
 	public z = zActionSchema;
 	public getFiles(): any[] {
-		return [fetchOneJsonFileAndEscape('actions')];
+		return [fetchOneJsonFile('actions')];
 	}
 	public resourceListFromFile(file: any): any[] {
 		return file.action;
