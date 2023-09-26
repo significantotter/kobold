@@ -11,6 +11,7 @@ import { ChatInputCommandInteraction } from 'discord.js';
 import { StringUtils } from '../../../../utils/string-utils.js';
 import { zCharacter } from './character.zod.js';
 import { z } from 'zod';
+import { ZodValidator } from '../../lib/zod-validator.js';
 export type ZCharacter = z.infer<typeof zCharacter>;
 
 interface ErrorWithCode<T extends number = number> extends Error {
@@ -33,6 +34,11 @@ export interface Character extends CharacterType {
 export class Character extends BaseModel {
 	static get tableName(): string {
 		return 'character';
+	}
+	// enable ajv formats to  validate the date field when inserting in database
+	static createValidator() {
+		console.warn('creating validator');
+		return new ZodValidator();
 	}
 
 	public $z = zCharacter;

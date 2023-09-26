@@ -1,7 +1,7 @@
 import { Neboa, Collection } from 'neboa';
-import { zItemSchema, Item } from '../pf2etools.zod.js';
-import { fetchManyJsonFiles } from './helpers.js';
-import { Model } from './Model.js';
+import { zItemSchema, Item } from './Items.zod.js';
+import { fetchManyJsonFiles } from './lib/helpers.js';
+import { Model } from './lib/Model.js';
 
 export class Items extends Model<typeof zItemSchema> {
 	public collection: Collection<Item>;

@@ -1,6 +1,5 @@
-import { Collection, Neboa } from 'neboa';
+import { Collection } from 'neboa';
 import { z } from 'zod';
-import { fetchOneJsonFileAndEscape } from './helpers.js';
 
 export abstract class Model<T extends z.ZodTypeAny> {
 	public abstract collection: Collection<z.infer<T>>;
@@ -15,7 +14,6 @@ export abstract class Model<T extends z.ZodTypeAny> {
 		const ids = await this.collection.query().find();
 		await this.collection.deleteMany(ids.map(id => id._id));
 
-		const actionsInsert: z.infer<T>[] = [];
 		const jsonFiles = this.getFiles();
 
 		for (const jsonFile of jsonFiles) {
@@ -24,8 +22,9 @@ export abstract class Model<T extends z.ZodTypeAny> {
 				const parse = this.z.safeParse(resource);
 
 				if (!parse.success) {
-					console.dir(resource, { depth: null });
 					console.dir(parse.error.format(), { depth: null });
+					console.dir(resource, { depth: null });
+					throw new Error();
 					return;
 				}
 				await this.collection.insert(parse.data);

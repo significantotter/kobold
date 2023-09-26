@@ -1,7 +1,7 @@
 import { Neboa, Collection } from 'neboa';
-import { Ability, zAbilitySchema } from '../pf2etools.zod.js';
-import { fetchOneJsonFileAndEscape, importData } from './helpers.js';
-import { Model } from './Model.js';
+import { Ability, zAbilitySchema } from './Abilities.zod.js';
+import { fetchOneJsonFileAndEscape } from './lib/helpers.js';
+import { Model } from './lib/Model.js';
 
 export class Abilities extends Model<typeof zAbilitySchema> {
 	public collection: Collection<Ability>;

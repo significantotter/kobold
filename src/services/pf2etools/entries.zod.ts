@@ -1,15 +1,47 @@
 import { z } from 'zod';
-import { zActivitySchema, zFrequencySchema } from './helpers.zod.js';
+import { zActivitySchema, zFrequencySchema, zTypedNumberSchema } from './helpers.zod.js';
 
 export type SuccessDegreeEntry = z.infer<typeof zSuccessDegreeEntrySchema>;
 export const zSuccessDegreeEntrySchema = z.object({
-	type: z.literal('successDegree'),
+	type: z.literal('successDegree').or(z.literal('suceessDegree')), //handle the misspelling
 	entries: z.object({
 		'Critical Success': z.union([z.string(), z.string().array()]).optional(),
 		Success: z.union([z.string(), z.string().array()]).optional(),
 		Failure: z.union([z.string(), z.string().array()]).optional(),
 		'Critical Failure': z.union([z.string(), z.string().array()]).optional(),
 	}),
+});
+
+type Pf2EKeyAbility = z.infer<typeof zPf2EKeyAbilitySchema>;
+export const zPf2EKeyAbilitySchema = z.object({
+	type: z.literal('pf2-key-ability'),
+	ability: z.string().array(),
+	hp: z.string().array(),
+});
+
+export const zBaseAttackEntrySchema = z.object({
+	type: z.string().optional(),
+	range: z.string(),
+	name: z.string(),
+	attack: z.number().optional(),
+	bonus: z.number().optional(),
+	damage: z.string().or(z.string().array()).optional(),
+	types: z.array(z.string()).optional(),
+	traits: z.array(z.string()).optional(),
+	noMAP: z.boolean().optional(),
+	activity: zActivitySchema.optional(),
+});
+export type AttackEntry = z.infer<typeof zBaseAttackEntrySchema> & { effects?: Entry[] };
+export const zAttackEntrySchema: z.ZodType<AttackEntry> = zBaseAttackEntrySchema.extend({
+	effects: z.lazy(() => zEntrySchema.array()).optional(),
+});
+
+export type ImageEntry = z.infer<typeof zImageEntrySchema>;
+const zImageEntrySchema = z.object({
+	type: z.literal('image'),
+	href: z.object({ type: z.string(), path: z.string() }),
+	maxRes: z.object({ type: z.string(), path: z.string() }).optional(),
+	style: z.string(),
 });
 
 const baseZStageSchema = z.object({
@@ -24,6 +56,7 @@ export const zStageSchema: z.ZodType<Stage> = baseZStageSchema.extend({
 
 export const baseZAfflictionEntrySchema = z.object({
 	type: z.literal('affliction'),
+	note: z.string().optional(),
 	name: z.string().optional(),
 	onset: z.string().optional(),
 	notes: z.array(z.string()).optional(),
@@ -48,36 +81,26 @@ export const baseZAbilityEntrySchema = z.object({
 	idName: z.string().optional(),
 	style: z.string().optional(),
 	name: z.string().optional(),
+	cost: z.string().optional(),
 	traits: z.string().array().optional(),
 	activity: zActivitySchema.optional(),
 	frequency: zFrequencySchema.optional(),
+	range: zTypedNumberSchema.optional(),
 	trigger: z.string().optional(),
 	requirements: z.string().optional(),
 	components: z.string().array().optional(),
+	generic: z.object({ tag: z.string(), source: z.string().optional() }).optional(),
 });
-export type AbilityEntry = z.infer<typeof baseZAbilityEntrySchema> & { entries: Entry[] };
-const zAbilityEntrySchema: z.ZodType<AbilityEntry> = baseZAbilityEntrySchema.extend({
-	entries: z.lazy(() => zEntrySchema.array()),
-});
-
-const baseZListEntrySchema = z.object({
-	type: z.literal('list'),
-	style: z.string().optional(),
-});
-export type ListEntry = z.infer<typeof baseZListEntrySchema> & { items: Entry[] };
-const zListEntrySchema: z.ZodType<ListEntry> = baseZListEntrySchema.extend({
-	items: z.lazy(() => zEntrySchema.array()),
+export type AbilityEntry = z.infer<typeof baseZAbilityEntrySchema> & { entries?: Entry[] };
+export const zAbilityEntrySchema: z.ZodType<AbilityEntry> = baseZAbilityEntrySchema.extend({
+	entries: z.lazy(() => zEntrySchema.array()).optional(),
 });
 
-const baseZHREntrySchema = z.object({
-	type: z.literal('hr'),
-	style: z.string().optional(),
+export const zAbilityListEntrySchema = z.object({
+	top: z.array(z.union([zAbilityEntrySchema, zAfflictionEntrySchema])).optional(),
+	mid: z.array(z.union([zAbilityEntrySchema, zAfflictionEntrySchema])).optional(),
+	bot: z.array(z.union([zAbilityEntrySchema, zAfflictionEntrySchema])).optional(),
 });
-export type HREntry = z.infer<typeof baseZHREntrySchema> & { entries: Entry[] };
-const zHREntrySchema: z.ZodType<HREntry> = baseZHREntrySchema.extend({
-	entries: z.lazy(() => zEntrySchema.array()),
-});
-
 export const zMultiRowSchema = z.object({
 	type: z.literal('multiRow'),
 	rows: z.union([z.string(), z.number()]).array().array(),
@@ -86,33 +109,84 @@ export const zMultiRowSchema = z.object({
 export type TableEntry = z.infer<typeof zTableEntrySchema>;
 export const zTableEntrySchema = z.object({
 	type: z.literal('table'),
+	id: z.string().optional(),
+	name: z.string().optional(),
+	caption: z.string().optional(),
+	intro: z.string().array().optional(),
+	outro: z.string().array().optional(),
+	style: z.string().optional(),
 	source: z.string().optional(),
 	page: z.number().int().optional(),
+	minimizeTo: z.number().array().optional(),
+	colLabels: z.string().array().optional(),
 	colStyles: z.union([z.string(), z.number()]).array().optional(),
-	rowStyles: z.union([z.string(), z.number()]).array().optional(),
+	rowStyles: z
+		.union([z.string(), z.number(), z.object({ row: z.number(), style: z.string() })])
+		.array()
+		.optional(),
+	cellStyles: z
+		.union([
+			z.string(),
+			z.number(),
+			z.object({ row: z.number(), col: z.number(), style: z.string() }),
+		])
+		.array()
+		.optional(),
+	rollable: z.boolean().optional(),
 	spans: z.number().array().array().array().optional(),
 	labelRowIdx: z.number().array().optional(),
+	rowLabelIdx: z.number().array().optional(),
 	colSizes: z.number().array().optional(),
 	rows: z.union([z.union([z.string(), z.number()]).array(), zMultiRowSchema]).array(),
+	footnotes: z.string().array().optional(),
+	footStyles: z.string().array().optional(),
+});
+
+export type TableGroupEntry = z.infer<typeof zTableGroupEntrySchema>;
+export const zTableGroupEntrySchema = z.object({
+	type: z.literal('tableGroup'),
+	source: z.string().optional(),
+	page: z.number().optional(),
+	tables: zTableEntrySchema.array(),
 });
 
 const basePf2eOptions = z.object({
 	type: z.literal('pf2-options'),
+	skipSort: z.boolean().optional(),
+	noColon: z.boolean().optional(),
+	style: z.string().optional(),
 });
-export type Pf2eOptions = z.infer<typeof basePf2eOptions> & { items: ItemEntry[] };
+export type Pf2eOptions = z.infer<typeof basePf2eOptions> & { items: Entry[] };
 export const zPf2eOptionsSchema: z.ZodType<Pf2eOptions> = basePf2eOptions.extend({
-	items: z.lazy(() => zItemEntrySchema.array()),
+	items: z.lazy(() => zEntrySchema.array()),
 });
+
+const baseZDataContentEntrySchema = z.object({
+	name: z.string().optional(),
+	traits: z.string().array().optional(),
+	category: z.string().optional(),
+	level: z.string().optional(),
+});
+export type DataContentEntry = z.infer<typeof baseZDataContentEntrySchema> & {
+	sections?: Entry[][][];
+};
+export const zDataContentEntrySchema: z.ZodType<DataContentEntry> =
+	baseZDataContentEntrySchema.extend({
+		sections: z.lazy(() => zEntrySchema.array().array().array().optional()),
+	});
 
 const baseZDataEntrySchema = z.object({
 	type: z.literal('data'),
+	style: z.string().optional(),
 	tag: z.string(),
 	name: z.string().optional(),
 	source: z.string().optional(),
 });
-export type DataEntry = z.infer<typeof baseZDataEntrySchema> & { data?: Entry };
+export type DataEntry = z.infer<typeof baseZDataEntrySchema> & {
+	data?: Entry | DataContentEntry | any;
+};
 export const zDataEntrySchema: z.ZodType<DataEntry> = baseZDataEntrySchema.extend({
-	data: z.lazy(() => zEntrySchema.optional()),
+	data: z.lazy(() => zEntrySchema.or(zDataContentEntrySchema).or(z.any()).optional()),
 });
 
 export type LevelEffectEntry = z.infer<typeof zLevelEffectEntrySchema>;
@@ -126,133 +200,127 @@ export const zLevelEffectEntrySchema = z.object({
 		.array(),
 });
 
-const baseZPf2eSampleBoxEntrySchema = z.object({
-	name: z.string(),
-	type: z.literal('pf2-sample-box'),
-});
-type Pf2eSampleBoxEntry = z.infer<typeof baseZPf2eSampleBoxEntrySchema> & { entries: Entry[] };
-export const zPf2eSampleBoxEntrySchema: z.ZodType<Pf2eSampleBoxEntry> =
-	baseZPf2eSampleBoxEntrySchema.extend({
-		entries: z.lazy(() => zEntrySchema.array()),
-	});
-
-const baseZItemEntrySchema = z.object({
-	type: z.literal('item'),
-	name: z.string(),
-});
-export type ItemEntry = z.infer<typeof baseZItemEntrySchema> & { entries?: Entry[]; entry?: Entry };
-export const zItemEntrySchema: z.ZodType<ItemEntry> = baseZItemEntrySchema.extend({
-	entries: z.lazy(() => zEntrySchema.array()).optional(),
-	entry: z.lazy(() => zEntrySchema).optional(),
-});
-
-const baseZPf2HSchema = z.object({
+const baseZSemanticEntrySchema = z.object({
 	type: z.union([
+		z.literal('list'),
+		z.literal('entries'),
+		z.literal('section'),
+		z.literal('text'),
+		z.literal('item'),
+		z.literal('homebrew'),
+		z.literal('entriesOtherSource'),
 		z.literal('pf2-h1'),
 		z.literal('pf2-h1-flavor'),
 		z.literal('pf2-h2'),
 		z.literal('pf2-h3'),
 		z.literal('pf2-h4'),
+		z.literal('pf2-h5'),
+		z.literal('pf2-inset'),
+		z.literal('pf2-beige-box'),
 		z.literal('pf2-brown-box'),
+		z.literal('pf2-red-box'),
 		z.literal('pf2-sample-box'),
+		z.literal('pf2-tips-box'),
+		z.literal('pf2-key-box'),
+		z.literal('pf2-sidebar'),
+		z.literal('pf2-title'),
+		z.literal('inline'),
+		z.literal('hr'),
+		z.literal('paper'),
 	]),
+	title: z.string().optional(),
+	style: z.string().optional(),
+	head: z.string().array().optional(),
+	noIndentLastEntry: z.boolean().optional(),
+	level: z.number().optional(),
 	name: z.string().optional(),
+	blue: z.boolean().optional(),
+	reference: z
+		.object({
+			auto: z.boolean().optional(),
+			index: z.number().optional(),
+			entry: z.string().optional(),
+		})
+		.optional(),
+	alias: z.string().array().optional(),
 	collapsible: z.boolean().optional(),
 	source: z.string().optional(),
 	page: z.number().optional(),
+	step: z.string().or(z.number()).optional(),
+	columns: z.number().optional(),
+	column: z.number().optional(),
+	data: z
+		.object({ quickrefIndex: z.boolean().optional(), quickref: z.number().optional() })
+		.optional(),
+	signature: z.string().array().optional(),
+	oldEntries: z.string().array().optional(), // homebrew
+	movedTo: z.string().optional(), // homebrew
 });
-export type Pf2H = z.infer<typeof baseZPf2HSchema> & { entries: Entry[] };
-export const zPf2HSchema: z.ZodType<Pf2H> = baseZPf2HSchema.extend({
-	entries: z.lazy(() => zEntrySchema.array()),
+export type SemanticEntry = z.infer<typeof baseZSemanticEntrySchema> & {
+	entries?: Entry[];
+	entry?: Entry;
+	items?: Entry[];
+};
+export const zSemanticEntrySchema: z.ZodType<SemanticEntry> = baseZSemanticEntrySchema.extend({
+	entries: z.lazy(() => zEntrySchema.array()).optional(),
+	items: z.lazy(() => zEntrySchema.array()).optional(),
+	entry: z.lazy(() => zEntrySchema).optional(),
 });
 
-const basePf2eSidebarSchema = z.object({
-	type: z.literal('pf2-sidebar'),
-	name: z.string(),
-	source: z.string(),
-	page: z.number(),
-});
-export type Pf2eSidebar = z.infer<typeof basePf2eSidebarSchema> & { entries: Entry[] };
-export const zPf2eSidebarSchema: z.ZodType<Pf2eSidebar> = basePf2eSidebarSchema.extend({
-	entries: z.lazy(() => zEntrySchema.array()),
+export type QuoteEntry = z.infer<typeof zQuoteEntrySchema>;
+const zQuoteEntrySchema = z.object({
+	type: z.literal('quote'),
+	by: z.string(),
+	entries: z.string().array(),
 });
 
 export type Entry =
 	| string
-	| ListEntry
 	| DataEntry
 	| Pf2eOptions
-	| ItemEntry
 	| SuccessDegreeEntry
+	| AttackEntry
 	| AbilityEntry
 	| AfflictionEntry
 	| TableEntry
+	| TableGroupEntry
+	| ImageEntry
 	| LevelEffectEntry
-	| Pf2eSampleBoxEntry
-	| Pf2H
-	| Pf2eSidebar
-	| HREntry;
+	| SemanticEntry
+	| QuoteEntry
+	| Pf2EKeyAbility;
 export const zEntrySchema: z.ZodType<Entry> = z.lazy(() =>
 	z.union([
 		z.string(),
 		zAbilityEntrySchema,
-		zListEntrySchema,
 		zDataEntrySchema,
 		zPf2eOptionsSchema,
-		zItemEntrySchema,
 		zSuccessDegreeEntrySchema,
+		zAttackEntrySchema,
 		zTableEntrySchema,
+		zTableGroupEntrySchema,
+		zImageEntrySchema,
 		zLevelEffectEntrySchema,
-		zPf2eSampleBoxEntrySchema,
 		zAfflictionEntrySchema,
-		zPf2HSchema,
-		zPf2eSidebarSchema,
-		zHREntrySchema,
+		zSemanticEntrySchema,
+		zQuoteEntrySchema,
+		zPf2EKeyAbilitySchema,
 	])
 );
 
-const test: Entry[] = [
-	{
-		type: 'pf2-sample-box',
-		name: 'Sample Balance Tasks',
-		entries: [
-			{
-				type: 'list',
-				style: 'list-hang-notitle',
-				items: [
-					{
-						type: 'item',
-						name: 'Untrained',
-						entry: 'tangled roots, uneven cobblestones',
-					},
-					{ type: 'item', name: 'Trained', entry: 'wooden beam' },
-					{
-						type: 'item',
-						name: 'Expert',
-						entry: 'deep, loose gravel',
-					},
-					{
-						type: 'item',
-						name: 'Master',
-						entry: 'tightrope, smooth sheet of ice',
-					},
-					{
-						type: 'item',
-						name: 'Legendary',
-						entry: "razor's edge, chunks of floor falling in midair",
-					},
-				],
-			},
-		],
-	},
-];
+const zVariantModEntry = z
+	.object({
+		mode: z.string().optional(),
+		replaceTags: z.boolean().optional(),
+		replace: z.union([z.string(), z.object({ index: z.number() })]).optional(),
+		with: z.string().optional(),
+		items: z.union([zEntrySchema, zEntrySchema.array()]).optional(),
+		joiner: z.string().optional(),
+		str: z.string().optional(),
+	})
+	.strict();
 
-// const parse = zItemFluffEntrySchema.safeParse(test); // zFluffEntrySchema.array().safeParse(test);
-
-// if (!parse.success) {
-// 	console.dir(test, { depth: null });
-// 	console.dir(parse.error.format(), { depth: null });
-// 	throw new Error();
-// }
-// console.log('parsed!!!');
-// throw new Error();
+export const zModSchema = z.object({
+	entries: z.union([zVariantModEntry, zVariantModEntry.array()]).optional(),
+	entriesMode: z.string().optional(),
+});

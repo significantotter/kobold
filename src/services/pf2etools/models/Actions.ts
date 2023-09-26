@@ -1,7 +1,7 @@
 import { Neboa, Collection } from 'neboa';
-import { zActionSchema, Action } from '../pf2etools.zod.js';
-import { fetchOneJsonFileAndEscape, importData } from './helpers.js';
-import { Model } from './Model.js';
+import { zActionSchema, Action } from './Actions.zod.js';
+import { fetchOneJsonFileAndEscape } from './lib/helpers.js';
+import { Model } from './lib/Model.js';
 
 export class Actions extends Model<typeof zActionSchema> {
 	public collection: Collection<Action>;

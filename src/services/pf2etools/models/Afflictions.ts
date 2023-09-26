@@ -1,7 +1,7 @@
 import { Neboa, Collection } from 'neboa';
-import { zAfflictionSchema, Affliction } from '../pf2etools.zod.js';
-import { fetchOneJsonFileAndEscape, importData } from './helpers.js';
-import { Model } from './Model.js';
+import { zAfflictionSchema, Affliction } from './Afflictions.zod.js';
+import { fetchOneJsonFileAndEscape } from './lib/helpers.js';
+import { Model } from './lib/Model.js';
 
 export class Afflictions extends Model<typeof zAfflictionSchema> {
 	public collection: Collection<Affliction>;

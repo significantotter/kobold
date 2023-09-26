@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { zAbilityScoreSchema } from '../pf2etools/helpers.zod.js';
 
 export const zAbilitySchema = z.union([
 	z.literal('str'),
@@ -34,22 +35,18 @@ export const zPathBuilderAttributesSchema = z.object({
 	speedBonus: z.number(),
 });
 
-export const zPathBuilderAbilitiesSchema = z.object({
-	str: z.number(),
-	dex: z.number(),
-	con: z.number(),
-	int: z.number(),
-	wis: z.number(),
-	cha: z.number(),
-	breakdown: z.object({
-		ancestryFree: z.array(zAbilityUppercaseSchema),
-		ancestryBoosts: z.array(zAbilityUppercaseSchema),
-		ancestryFlaws: z.array(zAbilityUppercaseSchema),
-		backgroundBoosts: z.array(zAbilityUppercaseSchema),
-		classBoosts: z.array(zAbilityUppercaseSchema),
-		mapLevelledBoosts: z.record(z.array(zAbilityUppercaseSchema)),
-	}),
-});
+export const zPathBuilderAbilitiesSchema = z
+	.object({
+		breakdown: z.object({
+			ancestryFree: z.array(zAbilityUppercaseSchema),
+			ancestryBoosts: z.array(zAbilityUppercaseSchema),
+			ancestryFlaws: z.array(zAbilityUppercaseSchema),
+			backgroundBoosts: z.array(zAbilityUppercaseSchema),
+			classBoosts: z.array(zAbilityUppercaseSchema),
+			mapLevelledBoosts: z.record(z.array(zAbilityUppercaseSchema)),
+		}),
+	})
+	.extend(zAbilityScoreSchema.shape);
 
 export const zPathBuilderProficienciesSchema = z.object({
 	classDC: z.number().optional(),
