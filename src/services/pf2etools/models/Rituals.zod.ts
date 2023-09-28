@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { zEntrySchema } from '../entries.zod.js';
-import { zDuration, zTypedNumberSchema } from '../helpers.zod.js';
+import { zEntrySchema } from './lib/entries.zod.js';
+import { zDurationSchema, zTypedNumberSchema } from './lib/helpers.zod.js';
 
 export type Ritual = z.infer<typeof zRitualSchema>;
 export const zRitualSchema = z
@@ -48,7 +48,7 @@ export const zRitualSchema = z
 			.optional(),
 		area: z.object({ types: z.array(z.string()), entry: z.string() }).optional(),
 		entries: zEntrySchema.array(),
-		duration: zDuration.optional(),
+		duration: zDurationSchema.optional(),
 		heightened: z
 			.object({
 				plusX: z.record(z.union([z.number(), z.string()]), zEntrySchema.array()).optional(),

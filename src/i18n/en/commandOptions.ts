@@ -771,4 +771,11 @@ export default {
 		name: 'value',
 		description: 'The value to set the option to.',
 	},
+
+	// COMPENDIUM
+
+	commandSearch: {
+		name: 'search',
+		description: "The name of the thing you're searching for.",
+	},
 };

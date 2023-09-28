@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { zEntrySchema } from '../entries.zod.js';
+import { zEntrySchema } from './lib/entries.zod.js';
 
 export type Event = z.infer<typeof zEventSchema>;
 export const zEventSchema = z

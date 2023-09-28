@@ -14,6 +14,9 @@ import {
 	CharacterImportWanderersGuideSubCommand,
 	CharacterImportPathbuilderSubCommand,
 	CharacterSheetSubCommand,
+	// compendium
+	CompendiumCommand,
+	CompendiumCreatureSubCommand,
 	// roll
 	RollCommand,
 	RollDiceSubCommand,
@@ -114,6 +117,8 @@ import { Config } from './config/config.js';
 import Logs from './config/lang/logs.json' assert { type: 'json' };
 import { checkAndLoadBestiaryFiles } from './services/pf2etools/bestiaryLoader.js';
 import { Kobold } from './services/kobold/models/koboldORM.js';
+import { Pf2eToolsModel } from './services/pf2etools/pf2eTools.model.js';
+import { db } from './services/pf2etools/pf2eTools-db.js';
 
 // this is to prevent embeds breaking on "addFields" when adding more than an embed can hold
 // because we batch our embeds afterwards instead of before assigning fields
@@ -121,6 +126,7 @@ disableValidators();
 
 async function start(): Promise<void> {
 	DBModel.init(Config.database.url);
+	const compendium = new Pf2eToolsModel(db);
 	// const kobold = new Kobold();
 
 	// asynchronously load the bestiary files
@@ -161,6 +167,9 @@ async function start(): Promise<void> {
 			new CharacterUpdateSubCommand(),
 			new CharacterRemoveSubCommand(),
 		]),
+
+		// Compendium Commands
+		new CompendiumCommand([new CompendiumCreatureSubCommand()]),
 
 		//Roll Commands
 		new RollCommand([
@@ -268,7 +277,7 @@ async function start(): Promise<void> {
 	// Event handlers
 	let guildJoinHandler = new GuildJoinHandler();
 	let guildLeaveHandler = new GuildLeaveHandler();
-	let commandHandler = new CommandHandler(commands, {});
+	let commandHandler = new CommandHandler(commands, { compendium });
 	let buttonHandler = new ButtonHandler(buttons);
 	let triggerHandler = new TriggerHandler(triggers);
 	let messageHandler = new MessageHandler(triggerHandler);

@@ -9,6 +9,10 @@ export { CharacterImportWanderersGuideSubCommand } from './characters/character-
 export { CharacterImportPathbuilderSubCommand } from './characters/character-import-pathbuilder-subcommand.js';
 export { CharacterSheetSubCommand } from './characters/character-sheet-subcommand.js';
 
+// compendium commands
+export { CompendiumCommand } from './compendium/compendium-command.js';
+export { CompendiumCreatureSubCommand } from './compendium/compendium-creature-subcommand.js';
+
 // roll commands
 export { RollCommand } from './roll/roll-command.js';
 export { RollDiceSubCommand } from './roll/roll-dice-subcommand.js';

@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { zEntrySchema } from '../entries.zod.js';
-import { zAbilityScoreSchema } from '../helpers.zod.js';
+import { zEntrySchema } from './lib/entries.zod.js';
+import { zAbilityScoreSchema } from './lib/helpers.zod.js';
 
 export type Eidolon = z.infer<typeof zEidolonSchema>;
 export const zEidolonSchema = z.object({

@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { Entry, zEntrySchema } from '../entries.zod.js';
-import { zOtherSourceSchema, zFrequencySchema, zTypedNumberSchema } from '../helpers.zod.js';
+import { Entry, zEntrySchema } from './lib/entries.zod.js';
+import { zOtherSourceSchema, zFrequencySchema, zTypedNumberSchema } from './lib/helpers.zod.js';
 
 const baseFeatSchema = z.object({
 	name: z.string(),

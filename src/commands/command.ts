@@ -14,6 +14,7 @@ import { ConditionalPick } from 'type-fest';
 import { CharacterUtils } from '../utils/character-utils.js';
 import _ from 'lodash';
 import { ZCharacter } from '../services/kobold/models/character/character.model.js';
+import { Pf2eToolsModel } from '../services/pf2etools/pf2eTools.model.js';
 
 export interface InjectedCommandData {
 	kobold: Kobold;
@@ -31,7 +32,8 @@ export interface Command {
 	fetchInjectedDataForCommand?(intr: CommandInteraction): any;
 	autocomplete?(
 		intr: AutocompleteInteraction,
-		option: AutocompleteFocusedOption
+		option: AutocompleteFocusedOption,
+		services?: Partial<InjectedServices>
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined>;
 	execute(
 		intr: CommandInteraction,
@@ -41,7 +43,9 @@ export interface Command {
 	): Promise<void>;
 }
 
-export interface InjectedServices {}
+export interface InjectedServices {
+	compendium: Pf2eToolsModel;
+}
 
 export interface InjectData {
 	activeCharacter: ZCharacter | null;

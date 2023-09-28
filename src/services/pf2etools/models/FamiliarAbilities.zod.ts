@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { zEntrySchema } from '../entries.zod.js';
+import { zEntrySchema } from './lib/entries.zod.js';
 
 export type FamiliarAbility = z.infer<typeof zFamiliarAbilitySchema>;
 export const zFamiliarAbilitySchema = z

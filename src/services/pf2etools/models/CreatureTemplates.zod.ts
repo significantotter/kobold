@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { zAbilityEntrySchema, zCopySchema, zEntrySchema, zModSchema } from '../entries.zod.js';
-import { zTypedNumberSchema } from '../helpers.zod.js';
+import { zAbilityEntrySchema, zCopySchema, zEntrySchema, zModSchema } from './lib/entries.zod.js';
+import { zTypedNumberSchema } from './lib/helpers.zod.js';
 
 export type CreatureTemplate = z.infer<typeof zCreatureTemplateSchema>;
 export const zCreatureTemplateSchema = z

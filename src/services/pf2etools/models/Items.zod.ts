@@ -1,16 +1,16 @@
 import { z } from 'zod';
-import { zEntrySchema, zFluffSchema, zModSchema } from '../entries.zod.js';
+import { zEntrySchema, zFluffSchema, zModSchema } from './lib/entries.zod.js';
 import {
 	zActivateSchema,
 	zOtherSourceSchema,
 	zPriceSchema,
-	zDuration,
+	zDurationSchema,
 	zFrequencySchema,
 	zWeaponDataSchema,
 	zTypedNumberSchema,
 	zArmorDataSchema,
 	zSheildDataSchema,
-} from '../helpers.zod.js';
+} from './lib/helpers.zod.js';
 
 const zSiegeWeaponDataSchema = z.object({
 	crew: z.object({ min: z.number(), max: z.number().optional() }).optional(),
@@ -78,7 +78,7 @@ export const zItemSchema = z
 		equipment: z.boolean().optional(),
 		price: zPriceSchema,
 		onset: z.string().optional(),
-		duration: zDuration.optional(),
+		duration: zDurationSchema.optional(),
 		category: z.union([z.string(), z.string().array()]).optional(),
 		subCategory: z.union([z.string(), z.string().array()]).optional(),
 		group: z.string().optional(),

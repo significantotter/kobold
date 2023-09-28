@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { zEntrySchema } from '../entries.zod.js';
-import { zOtherSourceSchema, zDuration, zTypedNumberSchema } from '../helpers.zod.js';
+import { zEntrySchema } from './lib/entries.zod.js';
+import { zOtherSourceSchema, zDurationSchema, zTypedNumberSchema } from './lib/helpers.zod.js';
 
 export type Spell = z.infer<typeof zSpellSchema>;
 export const zSpellSchema = z
@@ -28,7 +28,7 @@ export const zSpellSchema = z
 		range: zTypedNumberSchema.optional(),
 		targets: z.string().optional(),
 		savingThrow: z.object({ type: z.array(z.string()) }).optional(),
-		duration: zDuration.optional(),
+		duration: zDurationSchema.optional(),
 		cost: z.string().optional(),
 		entries: zEntrySchema.array(),
 		heightened: z

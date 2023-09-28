@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { zEntrySchema } from '../entries.zod.js';
-import { zFrequencySchema } from '../helpers.zod.js';
+import { zEntrySchema } from './lib/entries.zod.js';
+import { zFrequencySchema } from './lib/helpers.zod.js';
 
 export type RelicGift = z.infer<typeof zRelicGiftSchema>;
 export const zRelicGiftSchema = z

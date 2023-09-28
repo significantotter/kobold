@@ -1,11 +1,11 @@
 import { z } from 'zod';
-import {
-	zAbilityScoreSchema,
-	zSenseSchema,
-	zSpeedSchema,
-	zTypedNumberSchema,
-} from '../helpers.zod.js';
-import { zAttackEntrySchema, zEntrySchema } from '../entries.zod.js';
+import { zAbilityScoreSchema, zSpeedSchema, zTypedNumberSchema } from './lib/helpers.zod.js';
+import { zAttackEntrySchema, zEntrySchema } from './lib/entries.zod.js';
+
+export const zCompanionSenseSchema = z.object({
+	imprecise: z.string().array().optional(),
+	other: z.string().array().optional(),
+});
 
 export type Companion = z.infer<typeof zCompanionSchema>;
 export const zCompanionSchema = z
@@ -21,7 +21,7 @@ export const zCompanionSchema = z
 		abilityMods: zAbilityScoreSchema,
 		hp: z.number(),
 		skill: z.string(),
-		senses: zSenseSchema.optional(),
+		senses: zCompanionSenseSchema.optional(),
 		speed: zSpeedSchema,
 		support: z.string(),
 		maneuver: z.object({

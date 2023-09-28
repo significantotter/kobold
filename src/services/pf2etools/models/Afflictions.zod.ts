@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { zEntrySchema } from '../entries.zod.js';
+import { zEntrySchema } from './lib/entries.zod.js';
 
 export type Affliction = z.infer<typeof zAfflictionSchema>;
 export const zAfflictionSchema = z

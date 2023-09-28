@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { zActivitySchema, zFrequencySchema, zOtherSourceSchema } from '../helpers.zod.js';
-import { Entry, zEntrySchema } from '../entries.zod.js';
+import { zActivitySchema, zFrequencySchema, zOtherSourceSchema } from './lib/helpers.zod.js';
+import { Entry, zEntrySchema } from './lib/entries.zod.js';
 
 const baseAbilitySchema = z.object({
 	activity: zActivitySchema.optional(),

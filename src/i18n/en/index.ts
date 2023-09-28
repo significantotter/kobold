@@ -14,6 +14,7 @@ import commandOptions from './commandOptions.js';
 import ActionCommand from './commands/action.js';
 import ActionStageCommand from './commands/actionStage.js';
 import SharedInteractions from './sharedInteractions.js';
+import CompendiumCommand from './commands/compendium.js';
 
 const en: BaseTranslation = {
 	terms: {
@@ -24,6 +25,7 @@ const en: BaseTranslation = {
 		admin: AdminCommand,
 		action: ActionCommand,
 		actionStage: ActionStageCommand,
+		compendium: CompendiumCommand,
 		help: HelpCommand,
 		character: CharacterCommand,
 		init: InitCommand,

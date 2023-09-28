@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { zDefensesSchema, zSpeedSchema, zTargetValueRecordSchema } from '../helpers.zod.js';
-import { zAbilityEntrySchema, zAttackEntrySchema, zEntrySchema } from '../entries.zod.js';
+import { zDefensesSchema, zSpeedSchema } from './lib/helpers.zod.js';
+import { zAbilityEntrySchema, zAttackEntrySchema, zEntrySchema } from './lib/entries.zod.js';
 
 export type Hazard = z.infer<typeof zHazardSchema>;
 export const zHazardSchema = z
