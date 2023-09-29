@@ -66,7 +66,7 @@ export const zCalculatedStats = z
 		totalPerception: z.union([z.number(), z.null()]).optional(),
 		totalSkills: z
 			.array(
-				z.object({
+				z.strictObject({
 					Name: z.string(),
 					Bonus: z.union([z.string(), z.number(), z.null()]),
 				})
@@ -74,7 +74,7 @@ export const zCalculatedStats = z
 			.optional(),
 		totalSaves: z
 			.array(
-				z.object({
+				z.strictObject({
 					Name: z.string(),
 					Bonus: z.union([z.string(), z.number(), z.null()]),
 				})
@@ -82,7 +82,7 @@ export const zCalculatedStats = z
 			.optional(),
 		totalAbilityScores: z
 			.array(
-				z.object({
+				z.strictObject({
 					Name: z.string(),
 					Score: z.union([z.number(), z.null()]),
 				})
@@ -90,7 +90,7 @@ export const zCalculatedStats = z
 			.optional(),
 		weapons: z
 			.array(
-				z.object({
+				z.strictObject({
 					Name: z.string(),
 					Bonus: z.union([z.string(), z.number(), z.null()]).optional(),
 					Damage: z.union([z.string(), z.number(), z.null()]).optional(),
@@ -104,7 +104,7 @@ export const zCalculatedStats = z
 		"The computed base stat block from the Wanderer's guide API /character/calculated-stats endpoint"
 	);
 
-const zRoll = z.object({
+const zRoll = z.strictObject({
 	name: z.string(),
 	allowRollModifiers: z.boolean().default(false),
 });
@@ -165,7 +165,7 @@ export const zAction = z
 	})
 	.describe('An custom sheet action');
 
-const zAttribute = z.object({
+const zAttribute = z.strictObject({
 	name: z.string(),
 	type: z.string(),
 	value: z.number(),
@@ -176,7 +176,7 @@ const zModifier = z
 	.record(z.any())
 	.and(
 		z.intersection(
-			z.object({
+			z.strictObject({
 				name: z.string(),
 				isActive: z.boolean(),
 				description: z.union([z.string(), z.null()]),
@@ -467,7 +467,7 @@ export const zSheet = z
 				immunities: z.array(z.string()).describe("The character's immunities."),
 				resistances: z
 					.array(
-						z.object({
+						z.strictObject({
 							amount: z
 
 								.number()
@@ -480,7 +480,7 @@ export const zSheet = z
 					.describe("The character's resistances."),
 				weaknesses: z
 					.array(
-						z.object({
+						z.strictObject({
 							amount: z
 								.number()
 								.int()
@@ -921,7 +921,7 @@ export const zSheet = z
 					.describe("The character's thievery proficiency modifier."),
 				lores: z
 					.array(
-						z.object({
+						z.strictObject({
 							name: z.string().describe('The lore name.'),
 							bonus: z
 								.union([z.number().int(), z.null()])
@@ -939,7 +939,7 @@ export const zSheet = z
 			.describe("The character's skill attributes."),
 		attacks: z
 			.array(
-				z.object({
+				z.strictObject({
 					name: z.string().describe('The attack name.'),
 					toHit: z
 						.union([
@@ -983,7 +983,10 @@ export const zSheet = z
 				})
 			)
 			.describe("The character's attacks."),
-		sourceData: z.object({}).describe('The source data the sheet was parsed from').default({}),
+		sourceData: z
+			.strictObject({})
+			.describe('The source data the sheet was parsed from')
+			.default({}),
 		modifiers: z
 			.array(zModifier)
 			.describe(
@@ -998,7 +1001,7 @@ export const zSheet = z
 			.default([]),
 		rollMacros: z
 			.array(
-				z.object({
+				z.strictObject({
 					name: z.string(),
 					macro: z.string(),
 				})
@@ -1085,7 +1088,7 @@ export const zCharacter = z
 		attributes: z.array(zAttribute).describe('The character attributes.'),
 		actions: z.array(zAction),
 		modifiers: z.array(zModifier),
-		rollMacros: z.array(z.object({ name: z.string(), macro: z.string() })),
+		rollMacros: z.array(z.strictObject({ name: z.string(), macro: z.string() })),
 		sheet: zSheet.default(SheetUtils.defaultSheet),
 	})
 	.describe('An imported character');

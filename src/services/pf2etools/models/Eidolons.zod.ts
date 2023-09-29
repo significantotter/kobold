@@ -3,7 +3,7 @@ import { zEntrySchema } from './lib/entries.zod.js';
 import { zAbilityScoreSchema } from './lib/helpers.zod.js';
 
 export type Eidolon = z.infer<typeof zEidolonSchema>;
-export const zEidolonSchema = z.object({
+export const zEidolonSchema = z.strictObject({
 	name: z.string(),
 	type: z.string(),
 	source: z.string(),
@@ -17,16 +17,16 @@ export const zEidolonSchema = z.object({
 	size: z.array(z.string()),
 	suggestedAttacks: z.array(z.string()),
 	stats: z.array(
-		z.object({
+		z.strictObject({
 			name: z.string(),
 			abilityScores: zAbilityScoreSchema,
-			ac: z.object({ number: z.number(), dexCap: z.number() }),
+			ac: z.strictObject({ number: z.number(), dexCap: z.number() }),
 		})
 	),
 	skills: z.array(z.string()),
-	senses: z.object({ other: z.array(z.string()) }),
+	senses: z.strictObject({ other: z.array(z.string()) }),
 	languages: z.array(z.string()),
-	speed: z.object({ walk: z.number() }),
+	speed: z.strictObject({ walk: z.number() }),
 	abilities: z
 		.object({
 			type: z.union([

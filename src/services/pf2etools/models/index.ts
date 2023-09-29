@@ -29,6 +29,9 @@ import { Traits } from './Traits.js';
 import { VariantRules } from './VariantRules.js';
 import { Vehicles } from './Vehicles.js';
 import { Domains } from './Domains.js';
+import { Classes } from './Classes.js';
+import { ClassFeatures } from './ClassFeatures.js';
+import { SubclassFeatures } from './SubclassFeatures.js';
 
 export { Abilities } from './Abilities.js';
 export { Ability } from './Abilities.zod.js';
@@ -44,6 +47,10 @@ export { Creatures, CreaturesFluff } from './Bestiary.js';
 export { Creature, CreatureFluff, CreatureSense } from './Bestiary.zod.js';
 export { Books } from './Books.js';
 export { Book } from './Books.zod.js';
+export { Classes } from './Classes.js';
+export { Class } from './Classes.zod.js';
+export { ClassFeatures } from './ClassFeatures.js';
+export { ClassFeature } from './ClassFeatures.zod.js';
 export { CompanionAbilities } from './CompanionAbilities.js';
 export { CompanionAbility } from './CompanionAbilities.zod.js';
 export { Companions } from './Companions.js';
@@ -92,6 +99,8 @@ export { Rituals } from './Rituals.js';
 export { Ritual } from './Rituals.zod.js';
 export { Skills } from './Skills.js';
 export { Skill } from './Skills.zod.js';
+export { SubclassFeatures } from './SubclassFeatures.js';
+export { SubclassFeature } from './SubclassFeatures.zod.js';
 export { Sources } from './Sources.js';
 export { Source } from './Sources.zod.js';
 export { Spells } from './Spells.js';
@@ -113,6 +122,8 @@ export const Models = [
 	Afflictions,
 	Archetypes,
 	Backgrounds,
+	Classes,
+	ClassFeatures,
 	Creatures,
 	CreaturesFluff,
 	CreatureTemplates,
@@ -139,6 +150,7 @@ export const Models = [
 	Skills,
 	Sources,
 	Spells,
+	SubclassFeatures,
 	Tables,
 	Traits,
 	VariantRules,

@@ -26,7 +26,7 @@ export const zSpellTraditionSchema = z.union([
 	z.literal('primal'),
 ]);
 
-export const zPathBuilderAttributesSchema = z.object({
+export const zPathBuilderAttributesSchema = z.strictObject({
 	ancestryhp: z.number(),
 	classhp: z.number(),
 	bonushp: z.number(),
@@ -37,7 +37,7 @@ export const zPathBuilderAttributesSchema = z.object({
 
 export const zPathBuilderAbilitiesSchema = z
 	.object({
-		breakdown: z.object({
+		breakdown: z.strictObject({
 			ancestryFree: z.array(zAbilityUppercaseSchema),
 			ancestryBoosts: z.array(zAbilityUppercaseSchema),
 			ancestryFlaws: z.array(zAbilityUppercaseSchema),
@@ -48,7 +48,7 @@ export const zPathBuilderAbilitiesSchema = z
 	})
 	.extend(zAbilityScoreSchema.shape);
 
-export const zPathBuilderProficienciesSchema = z.object({
+export const zPathBuilderProficienciesSchema = z.strictObject({
 	classDC: z.number().optional(),
 	perception: z.number().optional(),
 	fortitude: z.number().optional(),
@@ -84,14 +84,14 @@ export const zPathBuilderProficienciesSchema = z.object({
 	thievery: z.number().optional(),
 });
 
-export const zPathBuilderSpecificProficienciesSchema = z.object({
+export const zPathBuilderSpecificProficienciesSchema = z.strictObject({
 	trained: z.array(z.any()),
 	expert: z.array(z.any()),
 	master: z.array(z.any()),
 	legendary: z.array(z.any()),
 });
 
-export const zPathBuilderWeaponSchema = z.object({
+export const zPathBuilderWeaponSchema = z.strictObject({
 	name: z.string().optional(),
 	qty: z.number().optional(),
 	prof: z.string().optional(),
@@ -107,14 +107,14 @@ export const zPathBuilderWeaponSchema = z.object({
 	extraDamage: z.array(z.string()),
 });
 
-export const zPathBuilderMoneySchema = z.object({
+export const zPathBuilderMoneySchema = z.strictObject({
 	pp: z.number().optional(),
 	gp: z.number().optional(),
 	sp: z.number().optional(),
 	cp: z.number().optional(),
 });
 
-export const zPathBuilderArmorSchema = z.object({
+export const zPathBuilderArmorSchema = z.strictObject({
 	name: z.string().optional(),
 	qty: z.number().optional(),
 	prof: z.string().optional(),
@@ -127,7 +127,7 @@ export const zPathBuilderArmorSchema = z.object({
 	runes: z.array(z.any()).optional(),
 });
 
-export const zPathBuilderFocusCastingSchema = z.object({
+export const zPathBuilderFocusCastingSchema = z.strictObject({
 	abilityBonus: z.number(),
 	proficiency: z.number(),
 	itemBonus: z.number(),
@@ -135,7 +135,7 @@ export const zPathBuilderFocusCastingSchema = z.object({
 	focusSpells: z.array(z.string()),
 });
 
-export const zPathBuilderFocusCastingStatSchema = z.object({
+export const zPathBuilderFocusCastingStatSchema = z.strictObject({
 	str: zPathBuilderFocusCastingSchema.optional(),
 	dex: zPathBuilderFocusCastingSchema.optional(),
 	con: zPathBuilderFocusCastingSchema.optional(),
@@ -144,19 +144,19 @@ export const zPathBuilderFocusCastingStatSchema = z.object({
 	cha: zPathBuilderFocusCastingSchema.optional(),
 });
 
-export const zPathBuilderFocusSchema = z.object({
+export const zPathBuilderFocusSchema = z.strictObject({
 	arcane: zPathBuilderFocusCastingStatSchema.optional(),
 	divine: zPathBuilderFocusCastingStatSchema.optional(),
 	occult: zPathBuilderFocusCastingStatSchema.optional(),
 	primal: zPathBuilderFocusCastingStatSchema.optional(),
 });
 
-export const zPathBuilderSpellsAtLevelSchema = z.object({
+export const zPathBuilderSpellsAtLevelSchema = z.strictObject({
 	spellLevel: z.number(),
 	list: z.array(z.string()),
 });
 
-export const zPathBuilderSpellCastingSchema = z.object({
+export const zPathBuilderSpellCastingSchema = z.strictObject({
 	name: z.string(),
 	magicTradition: zSpellTraditionSchema,
 	spellcastingType: z.string(),
@@ -178,7 +178,7 @@ export const zPathBuilderSpellCastingSchema = z.object({
 	]),
 });
 
-export const zPathBuilderPetsSchema = z.object({
+export const zPathBuilderPetsSchema = z.strictObject({
 	type: z.string(),
 	name: z.string(),
 	specific: z.any().optional(),
@@ -192,12 +192,12 @@ export const zPathBuilderPetsSchema = z.object({
 	equipment: z.array(z.tuple([z.string(), z.number().nullable(), z.any()])),
 });
 
-export const zPathBuilderFormulaSchema = z.object({
+export const zPathBuilderFormulaSchema = z.strictObject({
 	type: z.string(),
 	known: z.array(z.string()),
 });
 
-export const zPathBuilderCharacterSchema = z.object({
+export const zPathBuilderCharacterSchema = z.strictObject({
 	name: z.string(),
 	class: z.string(),
 	dualClass: z.any().optional(),
@@ -239,7 +239,7 @@ export const zPathBuilderCharacterSchema = z.object({
 	spellCasters: z.array(zPathBuilderSpellCastingSchema),
 	formula: z.tuple([]),
 	pets: z.tuple([]),
-	acTotal: z.object({
+	acTotal: z.strictObject({
 		acProfBonus: z.number(),
 		acAbilityBonus: z.number(),
 		acItemBonus: z.number(),
@@ -248,7 +248,7 @@ export const zPathBuilderCharacterSchema = z.object({
 	}),
 });
 
-export const pathBuilderJsonExportSchema = z.object({
+export const pathBuilderJsonExportSchema = z.strictObject({
 	success: z.boolean(),
 	build: zPathBuilderCharacterSchema,
 });

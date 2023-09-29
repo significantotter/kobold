@@ -7,25 +7,28 @@ export const zTargetValueRecordSchema = z.record(
 );
 
 export type Speed = z.infer<typeof zSpeedSchema>;
-export const zSpeedSchema = z.object({
-	abilities: z.array(z.string()).optional(),
-	walk: z.number().optional(),
-	climb: z.number().optional(),
-	burrow: z.number().optional(),
-	fly: z.number().optional(),
-	swim: z.number().optional(),
-	dimensional: z.number().optional(),
-});
+export const zSpeedSchema = z
+	.strictObject({
+		abilities: z.array(z.string()).optional(),
+		walk: z.number().optional(),
+		climb: z.number().optional(),
+		burrow: z.number().optional(),
+		fly: z.number().optional(),
+		swim: z.number().optional(),
+		dimensional: z.number().optional(),
+		speedNote: z.string().optional(),
+	})
+	.catchall(z.number());
 
 export type TypedNumber = z.infer<typeof zTypedNumberSchema>;
-export const zTypedNumberSchema = z.object({
+export const zTypedNumberSchema = z.strictObject({
 	unit: z.string().optional(),
 	customUnit: z.string().optional(),
 	number: z.number().or(z.string()).optional(),
 	entry: z.string().optional(),
 });
 
-export const zAbilityScoreSchema = z.object({
+export const zAbilityScoreSchema = z.strictObject({
 	str: z.number(),
 	dex: z.number(),
 	con: z.number(),
@@ -50,12 +53,19 @@ export const zFrequencySchema = z
 		customUnit: z.string().optional(),
 		interval: z.number().optional(),
 	})
-	.or(z.object({ special: z.string() }));
+	.or(z.strictObject({ special: z.string() }));
 
 export type Duration = z.infer<typeof zDurationSchema>;
 export const zDurationSchema = z.union([
-	zTypedNumberSchema,
-	z.object({
+	z.strictObject({
+		unit: z.string().optional(),
+		customUnit: z.string().optional(),
+		number: z.number().or(z.string()).optional(),
+		entry: z.string().optional(),
+		dismiss: z.boolean().optional(),
+		sustained: z.boolean().optional(),
+	}),
+	z.strictObject({
 		type: z.string(),
 		entry: z.string(),
 		duration: zTypedNumberSchema,
@@ -69,21 +79,21 @@ export const zActivitySchema = z
 		number: z.number(),
 	})
 	.or(
-		z.object({
+		z.strictObject({
 			unit: z.string(),
 			entry: z.string(),
 		})
 	);
 
 export type OtherSource = z.infer<typeof zOtherSourceSchema>;
-export const zOtherSourceSchema = z.object({
+export const zOtherSourceSchema = z.strictObject({
 	Expanded: z.string().array().optional(),
 	Reprinted: z.string().array().optional(),
 	Originally: z.string().array().optional(),
 });
 
 export type WeaponData = z.infer<typeof zWeaponDataSchema>;
-export const zWeaponDataSchema = z.object({
+export const zWeaponDataSchema = z.strictObject({
 	type: z.string().optional(),
 	ammunition: z.string().optional(),
 	reload: z.number().or(z.string()).optional(),
@@ -98,7 +108,7 @@ export const zWeaponDataSchema = z.object({
 });
 
 export type ArmorData = z.infer<typeof zArmorDataSchema>;
-export const zArmorDataSchema = z.object({
+export const zArmorDataSchema = z.strictObject({
 	ac: z.number(),
 	dexCap: z.number(),
 	str: z.number().optional(),
@@ -121,10 +131,14 @@ export const zSheildDataSchema = z
 
 export type Activate = z.infer<typeof zActivateSchema>;
 export const zActivateSchema = z.union([
-	z.object({
+	z.strictObject({
 		activity: zActivitySchema.optional(),
 		components: z.array(z.string()).optional(),
 		trigger: z.string().optional(),
+		requirements: z.string().optional(),
+		traits: z.string().array().optional(),
+		note: z.string().optional(),
+		prerequisites: z.string().optional(),
 	}),
 	z.null(),
 ]);
@@ -142,7 +156,7 @@ export const zStatSchema = z
 
 const stat: Stat = {};
 
-export const zSubRitualSchema = z.object({
+export const zSubRitualSchema = z.strictObject({
 	name: z.string(),
 	level: z.number().optional(),
 	amount: z.union([z.string(), z.number()]).optional(),
@@ -151,29 +165,25 @@ export const zSubRitualSchema = z.object({
 });
 
 export type Ritual = z.infer<typeof zRitualSchema>;
-export const zRitualSchema = z
-	.object({
-		tradition: z.string().optional(),
-		DC: z.union([z.number(), z.string()]).optional(),
-		rituals: zSubRitualSchema.or(zSubRitualSchema.array()),
-	})
-	.strict();
+export const zRitualSchema = z.strictObject({
+	tradition: z.string().optional(),
+	DC: z.union([z.number(), z.string()]).optional(),
+	rituals: zSubRitualSchema.or(zSubRitualSchema.array()),
+});
 
 export type SpellLevel = z.infer<typeof zSpellLevelSchema>;
-export const zSpellLevelSchema = z
-	.object({
-		level: z.number().optional(),
-		slots: z.number().optional(),
-		spells: z.array(
-			z.object({
-				name: z.string(),
-				amount: z.union([z.string(), z.number()]).optional(),
-				source: z.string().optional(),
-				notes: z.array(z.string()).optional(),
-			})
-		),
-	})
-	.strict();
+export const zSpellLevelSchema = z.strictObject({
+	level: z.number().optional(),
+	slots: z.number().optional(),
+	spells: z.array(
+		z.strictObject({
+			name: z.string(),
+			amount: z.union([z.string(), z.number()]).optional(),
+			source: z.string().optional(),
+			notes: z.array(z.string()).optional(),
+		})
+	),
+});
 
 const spellCastingLevels = {
 	'0': zSpellLevelSchema.optional(),
@@ -190,30 +200,29 @@ const spellCastingLevels = {
 };
 
 export type SpellcastingMap = z.infer<typeof zSpellcastingMapSchema>;
-export const zSpellcastingMapSchema = z
-	.object({
-		...spellCastingLevels,
-		constant: z
-			.object({
-				...spellCastingLevels,
-			})
-			.optional(),
-	})
-	.strict();
+export const zSpellcastingMapSchema = z.strictObject({
+	...spellCastingLevels,
+	constant: z
+		.object({
+			...spellCastingLevels,
+		})
+		.optional(),
+});
 
 export type Spellcasting = z.infer<typeof zSpellcastingSchema>;
-export const zSpellcastingSchema = z.object({
+export const zSpellcastingSchema = z.strictObject({
 	name: z.string().optional(),
 	type: z.string().optional(),
 	tradition: z.string().optional(),
 	DC: z.number().optional(),
+	note: z.string().optional(),
 	fp: z.number().optional(),
 	attack: z.number().optional(),
 	entry: zSpellcastingMapSchema.optional(),
 });
 
 export type Defenses = z.infer<typeof zDefensesSchema>;
-export const zDefensesSchema = z.object({
+export const zDefensesSchema = z.strictObject({
 	ac: zStatSchema.catchall(z.number()).optional(),
 	savingThrows: z
 		.object({
@@ -227,14 +236,17 @@ export const zDefensesSchema = z.object({
 	hp: zTargetValueRecordSchema
 		.or(
 			z.array(
-				z.object({
+				z.strictObject({
 					hp: z.number(),
+					name: z.string().optional(),
+					notes: z.string().array().optional(),
 					abilities: z.array(z.string()).optional(),
 				})
 			)
 		)
 		.optional(),
 	bt: zTargetValueRecordSchema.optional(),
+	thresholds: z.strictObject({ value: z.number(), squares: z.number() }).array().optional(),
 	immunities: z.array(z.string()).optional(),
 	weaknesses: z
 		.object({

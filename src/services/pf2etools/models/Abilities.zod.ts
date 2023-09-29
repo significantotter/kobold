@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { zActivitySchema, zFrequencySchema, zOtherSourceSchema } from './lib/helpers.zod.js';
 import { Entry, zEntrySchema } from './lib/entries.zod.js';
 
-const baseAbilitySchema = z.object({
+const baseAbilitySchema = z.strictObject({
 	activity: zActivitySchema.optional(),
 	components: z.string().array().optional(),
 	creature: z.string().array().optional(),
@@ -23,8 +23,6 @@ const baseAbilitySchema = z.object({
 });
 export type Ability = z.infer<typeof baseAbilitySchema> & { entries: Entry[] };
 
-export const zAbilitySchema = baseAbilitySchema
-	.extend({
-		entries: z.lazy<z.ZodType<Entry[]>>(() => zEntrySchema.array()),
-	})
-	.strict();
+export const zAbilitySchema = baseAbilitySchema.extend({
+	entries: z.lazy<z.ZodType<Entry[]>>(() => zEntrySchema.array()),
+});

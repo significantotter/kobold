@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { Entry, zEntrySchema } from './lib/entries.zod.js';
 import { zOtherSourceSchema, zFrequencySchema, zTypedNumberSchema } from './lib/helpers.zod.js';
 
-const baseFeatSchema = z.object({
+const baseFeatSchema = z.strictObject({
 	name: z.string(),
 	source: z.string(),
 	page: z.number().optional(),
@@ -24,13 +24,11 @@ const baseFeatSchema = z.object({
 			skill: z.string().array().optional(),
 		})
 		.optional(),
-	amp: z.object({ entries: zEntrySchema.array() }).optional(),
+	amp: z.strictObject({ entries: zEntrySchema.array() }).optional(),
 	footer: z.record(z.string(), z.string()).optional(),
 	special: z.union([z.string().array(), z.null()]).optional(),
 });
 export type Feat = z.infer<typeof baseFeatSchema> & { entries: Entry[] };
-export const zFeatSchema: z.ZodType<Feat> = baseFeatSchema
-	.extend({
-		entries: z.lazy(() => zEntrySchema.array()),
-	})
-	.strict();
+export const zFeatSchema: z.ZodType<Feat> = baseFeatSchema.extend({
+	entries: z.lazy(() => zEntrySchema.array()),
+});

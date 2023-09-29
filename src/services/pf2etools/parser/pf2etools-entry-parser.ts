@@ -3,9 +3,18 @@ import {
 	AbilityEntry,
 	AfflictionEntry,
 	AttackEntry,
+	DataEntry,
 	Entry,
 	ImageEntry,
+	LevelEffectEntry,
+	Pf2EKeyAbility,
+	Pf2eOptions,
+	QuoteEntry,
+	RefEntry,
+	SemanticEntry,
 	SuccessDegreeEntry,
+	TableEntry,
+	TableGroupEntry,
 } from '../models/index.js';
 import { Pf2eToolsModel } from '../pf2eTools.model.js';
 import { SharedParsers, applyOperatorIfNumber } from './pf2etools-parser-helpers.js';
@@ -23,21 +32,128 @@ export class EntryParser {
 
 	public parseEntry(entry: Entry): string {
 		if (_.isString(entry)) return entry;
-		if (entry.type === 'successDegree')
+		else if (entry.type === 'successDegree')
 			return this.parseSuccessDegree(entry as SuccessDegreeEntry);
-		if (entry.type === 'affliction') return this.parseAfflictionEntry(entry as AfflictionEntry);
-		if (entry.type === 'ability') return this.parseAbilityEntry(entry as AbilityEntry);
-		if (entry.type === 'attack') return this.parseAttackEntry(entry);
-		return '';
+		else if (entry.type === 'affliction')
+			return this.parseAfflictionEntry(entry as AfflictionEntry);
+		else if (entry.type === 'ability') return this.parseAbilityEntry(entry as AbilityEntry);
+		else if (entry.type === 'attack') return this.parseAttackEntry(entry as AttackEntry);
+		else if (entry.type === 'quote') return this.parseQuoteEntry(entry as QuoteEntry);
+		else if (entry.type === 'lvlEffect')
+			return this.parseLevelEffectEntry(entry as LevelEffectEntry);
+		else if (entry.type === 'pf2-options')
+			return this.parsePf2eOptionsEntry(entry as Pf2eOptions);
+		else if (entry.type === 'data') return this.parseDataEntry(entry as DataEntry);
+		else if (entry.type === 'image') return this.parseImageEntry(entry as ImageEntry);
+		else if (entry.type === 'table') return this.parseTableEntry(entry as TableEntry);
+		else if (entry.type === 'tableGroup')
+			return this.parseTableGroupEntry(entry as TableGroupEntry);
+		else if (entry.type === 'pf2-key-ability')
+			return this.parsePf2KeyAbilityEntry(entry as Pf2EKeyAbility);
+		else if (entry.type === 'refClassFeature') return this.parseRefEntry(entry as RefEntry);
+		else if (
+			[
+				'list',
+				'entries',
+				'section',
+				'text',
+				'item',
+				'homebrew',
+				'entriesOtherSource',
+				'pf2-h1',
+				'pf2-h1-flavor',
+				'pf2-h2',
+				'pf2-h3',
+				'pf2-h4',
+				'pf2-h5',
+				'pf2-inset',
+				'pf2-beige-box',
+				'pf2-brown-box',
+				'pf2-red-box',
+				'pf2-sample-box',
+				'pf2-tips-box',
+				'pf2-key-box',
+				'pf2-sidebar',
+				'pf2-title',
+				'inline',
+				'hr',
+				'paper',
+			].includes(entry.type ?? '')
+		)
+			return this.parseSemanticEntry(entry as SemanticEntry);
+		else return this.parseAbilityEntry(entry as AbilityEntry);
 	}
 
-	public imageEntry(entry: ImageEntry) {
+	public parseImageEntry(entry: ImageEntry) {
 		// This only exists in "Book" resources and has local image file refs.
 		// 100% not worth the effort to implement.
 		return '';
 	}
-	public pf2KeyAbilityEntry(entry: AbilityEntry) {
+	public parsePf2KeyAbilityEntry(entry: Pf2EKeyAbility) {
 		// This is used a single time, only in the render demo.
+		return '';
+	}
+
+	public parseTableEntry(tableEntry: TableEntry) {
+		// Also not worth it.
+		return '';
+	}
+	public parseTableGroupEntry(tableGroupEntry: TableGroupEntry) {
+		// Also not worth it.
+		return '';
+	}
+
+	public parsePf2eOptionsEntry(entry: Pf2eOptions) {
+		return entry.items.map(this.parseEntry).join('\n');
+	}
+
+	public parseDataEntry(entry: DataEntry) {
+		// TODO:
+		return '';
+	}
+
+	public parseLevelEffectEntry(entry: LevelEffectEntry) {
+		return entry.entries
+			.map(level => {
+				return `**${level.range}** ${level.entry}}`;
+			})
+			.join('\n');
+	}
+
+	public parseSemanticEntry(entry: SemanticEntry) {
+		let semanticString = '';
+		if (entry.step) {
+			semanticString += `**Step ${entry.step}** `;
+		}
+		if (entry.name) {
+			semanticString += `**${entry.name}** `;
+		}
+		if (entry.level) {
+			semanticString += ` (Level ${entry.level})`;
+		}
+		if (entry.traits) {
+			semanticString += ` (${entry.traits.join(', ')})`;
+		}
+		if (entry.entries) {
+			semanticString += entry.entries.map(this.parseEntry).join('\n');
+		}
+		return semanticString;
+	}
+
+	public parseQuoteEntry(entry: QuoteEntry): string {
+		let semanticString = '';
+		if (entry.from) {
+			semanticString += `from ${entry.from}\n`;
+		}
+		semanticString = entry.entries.map(this.parseEntry).join('\n');
+		if (entry.by) {
+			semanticString += `${semanticString}\n-- ${entry.by}`;
+		}
+		return semanticString;
+	}
+
+	public parseRefEntry(entry: RefEntry): string {
+		// Todo if I parse class features/classes
 		return '';
 	}
 
@@ -54,6 +170,9 @@ export class EntryParser {
 		}
 		if (entry.entries['Critical Failure']) {
 			successDegreeString += `**Critical Failure** ${entry.entries['Critical Failure']}\n`;
+		}
+		if (entry.entries.Special) {
+			successDegreeString += `**Special** ${entry.entries.Special}\n`;
 		}
 		return `\n${successDegreeString}}`;
 	}
@@ -179,7 +298,7 @@ export class EntryParser {
 			attackString += ` (${traits.join(', ').replaceAll(/[\<\>]/g, '')})`;
 		}
 		if (attack.damage) {
-			let attackString = ', **Damage**: ';
+			attackString += ', **Damage**: ';
 			if (_.isArray(attack.damage)) {
 				attackString += attack.damage.join(', ');
 			} else {
@@ -197,7 +316,7 @@ export class EntryParser {
 			}
 		}
 		if (attack.damage2) {
-			let attackString = ', ';
+			attackString += ', ';
 			if (_.isArray(attack.damage2)) {
 				attackString += attack.damage2.join(', ');
 			} else {

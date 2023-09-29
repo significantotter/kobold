@@ -87,6 +87,9 @@ export class SharedParsers {
 		if (spellcasting.fp) {
 			spellcastingString += `, ${spellcasting.fp} focus points`;
 		}
+		if (spellcasting.note) {
+			spellcastingString += `, ${spellcasting.note}`;
+		}
 		spellcastingString += ';';
 
 		if (spellcasting.entry) {
@@ -196,13 +199,17 @@ export class SharedParsers {
 		if (sense.type) {
 			builtSense += ` (${sense.type})`;
 		}
-		if (sense.range) {
-			builtSense += ` ${this.parseTypedNumber(sense.range)}`;
+		const range = sense.range ?? sense.number;
+		if (range) {
+			builtSense += ` ${this.parseTypedNumber(range)}`;
+		}
+		if (sense.unit) {
+			builtSense += ` ${sense.unit}`;
 		}
 		return builtSense;
 	}
 	public parseLanguages(languages: Creature['languages']): string {
-		let languageString = '';
+		let languageString = '**Languages** ';
 		if (languages?.languages?.length) {
 			languageString += languages.languages.join(', ');
 		}
@@ -352,8 +359,12 @@ export class SharedParsers {
 			const hpGroups: string[] = [];
 			for (const hpValue of defenses.hp) {
 				let hpLine = hpValue.hp.toString();
+				if (hpValue.name) hpLine = ` **${hpValue.name}**s` + hpLine;
 				if (hpValue.abilities) {
 					hpLine += ` (${hpValue.abilities.join(', ')})`;
+				}
+				if (hpValue.notes?.length) {
+					hpLine += ` (${hpValue.notes.join(', ')})`;
 				}
 				hpGroups.push(hpLine);
 			}
@@ -366,6 +377,16 @@ export class SharedParsers {
 		}
 		if (defenses.hardness) {
 			addDefenseToGroups('Hardness', defenses.hardness);
+		}
+		if (defenses.thresholds?.length) {
+			defaultHpLine.push(
+				defenses.thresholds
+					.map(
+						threshold =>
+							`**Thresholds** ${threshold.value} (${threshold.squares} squares)`
+					)
+					.join(',')
+			);
 		}
 		if (defenses.resistances?.length) {
 			const resistances: string[] = [];
@@ -423,9 +444,26 @@ export class SharedParsers {
 		if (speed.dimensional)
 			speeds.push(`dimensional ${this.parseTypedNumber(speed.dimensional)} feet`);
 		let speedString = speeds.join(', ');
+		if (speed.speedNote) speedString += ` (${speed.speedNote})`;
 		if (speed.abilities) {
 			speedString += `; ${speed.abilities.join(', ')}`;
 		}
+		const otherSpeeds = Object.keys(speed).filter((key: string) =>
+			[
+				'walk',
+				'climb',
+				'burrow',
+				'fly',
+				'swim',
+				'dimensional',
+				'abilities',
+				'speedNote',
+			].includes(key)
+		);
+		for (const speedType of otherSpeeds) {
+			speedString += `; ${speedType} ${this.parseTypedNumber(speed[speedType])}`;
+		}
+
 		return `**Speed** ${speedString}`;
 	}
 }

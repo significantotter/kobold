@@ -2,17 +2,15 @@ import { z } from 'zod';
 import { Entry, zEntrySchema } from './lib/entries.zod.js';
 import { zActivitySchema, zFrequencySchema } from './lib/helpers.zod.js';
 
-const baseZActionFooterSchema = z.object({
+const baseZActionFooterSchema = z.strictObject({
 	name: z.string(),
 });
 export type ActionFooter = z.infer<typeof baseZActionFooterSchema> & { entries: Entry[] };
-export const zActionFooterSchema: z.ZodType<ActionFooter> = baseZActionFooterSchema
-	.extend({
-		entries: z.lazy(() => zEntrySchema.array()),
-	})
-	.strict();
+export const zActionFooterSchema: z.ZodType<ActionFooter> = baseZActionFooterSchema.extend({
+	entries: z.lazy(() => zEntrySchema.array()),
+});
 
-const baseZActionSchema = z.object({
+const baseZActionSchema = z.strictObject({
 	name: z.string(),
 	alias: z.string().array().optional(),
 	source: z.string(),
@@ -51,10 +49,8 @@ export type Action = z.infer<typeof baseZActionSchema> & {
 	info?: Entry[];
 	footer?: ActionFooter[];
 };
-export const zActionSchema: z.ZodType<Action> = baseZActionSchema
-	.extend({
-		entries: z.lazy(() => zEntrySchema.array()),
-		info: z.lazy(() => zEntrySchema.array()).optional(),
-		footer: z.lazy(() => zActionFooterSchema.array()).optional(),
-	})
-	.strict();
+export const zActionSchema: z.ZodType<Action> = baseZActionSchema.extend({
+	entries: z.lazy(() => zEntrySchema.array()),
+	info: z.lazy(() => zEntrySchema.array()).optional(),
+	footer: z.lazy(() => zActionFooterSchema.array()).optional(),
+});

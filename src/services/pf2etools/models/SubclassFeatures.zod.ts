@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { zEntrySchema } from './index.js';
 
 export type SubclassFeature = z.infer<typeof zSubclassFeatureSchema>;
-export const zSubclassFeatureSchema = z.object({
+export const zSubclassFeatureSchema = z.strictObject({
 	name: z.string(),
 	source: z.string(),
 	page: z.number(),
