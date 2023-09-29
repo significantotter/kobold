@@ -43,8 +43,13 @@ export const zPriceSchema = z
 	.optional();
 
 export type Frequency = z.infer<typeof zFrequencySchema>;
-export const zFrequencySchema = zTypedNumberSchema
-	.extend({ interval: z.number().optional() })
+export const zFrequencySchema = z
+	.object({
+		number: z.number().or(z.string()),
+		unit: z.string().optional(),
+		customUnit: z.string().optional(),
+		interval: z.number().optional(),
+	})
 	.or(z.object({ special: z.string() }));
 
 export type Duration = z.infer<typeof zDurationSchema>;

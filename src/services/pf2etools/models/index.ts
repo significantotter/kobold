@@ -28,6 +28,7 @@ import { Tables } from './Tables.js';
 import { Traits } from './Traits.js';
 import { VariantRules } from './VariantRules.js';
 import { Vehicles } from './Vehicles.js';
+import { Domains } from './Domains.js';
 
 export { Abilities } from './Abilities.js';
 export { Ability } from './Abilities.zod.js';
@@ -54,6 +55,8 @@ export { CreatureTemplate } from './CreatureTemplates.zod.js';
 export { CreatureTemplatesFluff } from './CreatureTemplates.js';
 export { CreatureTemplateFluff } from './CreatureTemplates.zod.js';
 export { Deities, DeitiesFluff } from './Deities.js';
+export { Domains } from './Domains.js';
+export { Domain } from './Domains.zod.js';
 export { Deity, DeityFluff } from './Deities.zod.js';
 export { Eidolons } from './Eidolons.js';
 export { Eidolon } from './Eidolons.zod.js';
@@ -116,6 +119,7 @@ export const Models = [
 	CreatureTemplatesFluff,
 	Deities,
 	DeitiesFluff,
+	Domains,
 	Eidolons,
 	Events,
 	FamiliarAbilities,

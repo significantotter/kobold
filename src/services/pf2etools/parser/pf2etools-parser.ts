@@ -4,16 +4,21 @@ import { Pf2eToolsModel } from '../pf2eTools.model.js';
 import _ from 'lodash';
 import { SharedParsers } from './pf2etools-parser-helpers.js';
 import { EntryParser } from './pf2etools-entry-parser.js';
+import { AttachmentBuilder } from 'discord.js';
 
 export class Pf2eToolsEmbedParser {
 	private helpers: SharedParsers;
 	private entries: EntryParser;
+	private embed: KoboldEmbed;
+	public files: AttachmentBuilder[];
 	constructor(
 		private model: Pf2eToolsModel,
 		private emojiConverter: { (emoji: string): string }
 	) {
-		this.helpers = new SharedParsers(this.model, this.emojiConverter);
-		this.entries = new EntryParser(this.model, this.emojiConverter);
+		this.embed = new KoboldEmbed();
+		this.files = [];
+		this.helpers = new SharedParsers(this.model, this.emojiConverter, this.files);
+		this.entries = new EntryParser(this.model, this.emojiConverter, this.files);
 	}
 	public async parseCreature(creature: Creature): Promise<KoboldEmbed> {
 		const fluffResults = await this.model.creaturesFluff.collection

@@ -4,16 +4,19 @@ import {
 	AfflictionEntry,
 	AttackEntry,
 	Entry,
+	ImageEntry,
 	SuccessDegreeEntry,
 } from '../models/index.js';
 import { Pf2eToolsModel } from '../pf2eTools.model.js';
 import { SharedParsers, applyOperatorIfNumber } from './pf2etools-parser-helpers.js';
+import { AttachmentBuilder } from 'discord.js';
 
 export class EntryParser {
 	helpers: SharedParsers;
 	constructor(
 		private model: Pf2eToolsModel,
-		private emojiConverter: { (emoji: string): string }
+		private emojiConverter: { (emoji: string): string },
+		private files: AttachmentBuilder[] = []
 	) {
 		this.helpers = new SharedParsers(this.model, this.emojiConverter);
 	}
@@ -25,6 +28,16 @@ export class EntryParser {
 		if (entry.type === 'affliction') return this.parseAfflictionEntry(entry as AfflictionEntry);
 		if (entry.type === 'ability') return this.parseAbilityEntry(entry as AbilityEntry);
 		if (entry.type === 'attack') return this.parseAttackEntry(entry);
+		return '';
+	}
+
+	public imageEntry(entry: ImageEntry) {
+		// This only exists in "Book" resources and has local image file refs.
+		// 100% not worth the effort to implement.
+		return '';
+	}
+	public pf2KeyAbilityEntry(entry: AbilityEntry) {
+		// This is used a single time, only in the render demo.
 		return '';
 	}
 
@@ -47,8 +60,8 @@ export class EntryParser {
 
 	public parseAbilityEntry(ability: AbilityEntry) {
 		let abilityString = '';
-		if (ability.name) {
-			abilityString += `**${ability.name}** `;
+		if (ability.title ?? ability.name) {
+			abilityString += `**${ability.title ?? ability.name}** `;
 		}
 		if (ability.activity) {
 			abilityString += this.helpers.parseActivity(ability.activity);
@@ -56,16 +69,40 @@ export class EntryParser {
 		if (ability.traits) {
 			abilityString += ` (${ability.traits.join(', ')})`;
 		}
+		if (ability.note) {
+			abilityString += ` ${ability.note}`;
+		}
+		if (ability.components) {
+			abilityString += ` ${ability.components.join(', ')}`;
+		}
 		if (ability.cost) {
 			abilityString += ` **Cost** ${ability.cost}`;
 		}
-		if (ability.requirements) {
-			abilityString += ` **Requirements** ${ability.requirements}`;
+		if (ability.prerequisites) {
+			abilityString += ` **Prerequisites** ${ability.prerequisites}`;
 		}
+		if (ability.trigger) {
+			abilityString += ` **Trigger** ${ability.trigger}`;
+		}
+		if (ability.requirements ?? ability.requirement) {
+			abilityString += ` **Requirements** ${ability.requirements ?? ability.requirement}`;
+		}
+		if (ability.frequency) {
+			abilityString += this.helpers.parseFrequency(ability.frequency);
+		}
+		if (ability.area) {
+			abilityString += ` **Area** ${ability.area.entry} (${ability.area.types.join(', ')})`;
+		}
+		// ignore range, it's only used on generic abilities attached to attacks
+		// ignore entries_as_xyz, it repeats the data of another source of the ability
+		// ignore generic, it tells you where to find the text of a common ability
+		// ignore actionType, it's only used in archetypes/ancestries to reference the action source
+
 		if (ability.entries?.length) abilityString += ' **Effect** ';
 		for (const entry of ability.entries ?? []) {
 			abilityString += this.parseEntry(entry);
 		}
+		if (ability.special) abilityString += `; **Special** ${ability.special}`;
 		return abilityString;
 	}
 
@@ -134,8 +171,9 @@ export class EntryParser {
 		if (attack.activity) {
 			attackString += ' ' + this.helpers.parseActivity(attack.activity);
 		}
-		if (attack.attack) {
-			attackString += ` ${applyOperatorIfNumber(attack.attack)} `;
+		const toHit: number | undefined = attack.attack ?? attack.bonus;
+		if (toHit) {
+			attackString += ` ${applyOperatorIfNumber(toHit)} `;
 		}
 		if (traits?.length) {
 			attackString += ` (${traits.join(', ').replaceAll(/[\<\>]/g, '')})`;

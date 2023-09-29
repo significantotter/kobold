@@ -4,6 +4,7 @@ import {
 	Creature,
 	CreatureSense,
 	Defenses,
+	Frequency,
 	Speed,
 	SpellLevel,
 	Spellcasting,
@@ -13,6 +14,7 @@ import {
 	TypedNumber,
 } from '../models/index.js';
 import { Pf2eToolsModel } from '../pf2eTools.model.js';
+import { AttachmentBuilder } from 'discord.js';
 
 function nth(n: number) {
 	if (isNaN(Number(n))) return n.toString();
@@ -37,7 +39,8 @@ export function applyOperatorIfNumber(target: string | number): string {
 export class SharedParsers {
 	constructor(
 		private model: Pf2eToolsModel,
-		private emojiConverter: { (emoji: string): string }
+		private emojiConverter: { (emoji: string): string },
+		private files: AttachmentBuilder[] = []
 	) {}
 
 	public parseSpellcastingLevel(spellcastingLevel: SpellLevel | undefined): string {
@@ -143,6 +146,28 @@ export class SharedParsers {
 			}
 		}
 		return `${activity.number} ${activity.unit}`;
+	}
+
+	public parseFrequency(frequency: Frequency) {
+		let frequencyString = '**Frequency** ';
+		if ('special' in frequency) {
+			return frequencyString + frequency.special;
+		}
+		if (_.isString(frequency.number)) frequencyString += ` ${frequency.number}`;
+		else
+			frequencyString += ` ${frequency.number}${
+				frequency.number > 1 ? ' times' : ' time'
+			} per`;
+
+		if (frequency.interval) {
+			frequencyString += ` ${frequency.interval} `;
+		}
+		if (frequency.unit ?? frequency.customUnit) {
+			frequencyString += ` ${frequency.unit ?? frequency.customUnit}${
+				(frequency?.interval ?? 0) > 1 ? 's' : ''
+			}`;
+		}
+		return frequencyString;
 	}
 
 	public parseTypedNumber(typedNumber: TypedNumber | number | string) {
