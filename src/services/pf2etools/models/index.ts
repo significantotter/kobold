@@ -13,7 +13,7 @@ import { Familiars } from './Familiars.js';
 import { Feats } from './Feats.js';
 import { Groups } from './Groups.js';
 import { Hazards } from './Hazards.js';
-import { Items } from './Items.js';
+import { Items, ItemsFluff } from './Items.js';
 import { Languages } from './Languages.js';
 import { OptionalFeatures } from './OptionalFeatures.js';
 import { Organizations, OrganizationsFluff } from './Organizations.js';
@@ -33,12 +33,53 @@ import { Classes } from './Classes.js';
 import { ClassFeatures } from './ClassFeatures.js';
 import { SubclassFeatures } from './SubclassFeatures.js';
 
+import { zAbilitySchema } from './Abilities.zod.js';
+import { zActionSchema } from './Actions.zod.js';
+import { zAfflictionSchema } from './Afflictions.zod.js';
+import { zArchetypeSchema } from './Archetypes.zod.js';
+import { zBackgroundSchema } from './Backgrounds.zod.js';
+import { zCreatureSchema, zCreatureFluffSchema } from './Bestiary.zod.js';
+import { zBookSchema } from './Books.zod.js';
+import { zClassFeatureSchema } from './ClassFeatures.zod.js';
+import { zClassSchema } from './Classes.zod.js';
+import { zCompanionAbilitySchema } from './CompanionAbilities.zod.js';
+import { zCompanionSchema } from './Companions.zod.js';
+import { zConditionSchema } from './Conditions.zod.js';
+import { zCreatureTemplateSchema, zCreatureTemplateFluffSchema } from './CreatureTemplates.zod.js';
+import { zDeitySchema, zDeityFluffSchema } from './Deities.zod.js';
+import { zDomainSchema } from './Domains.zod.js';
+import { zEidolonSchema } from './Eidolons.zod.js';
+import { zEventSchema } from './Events.zod.js';
+import { zFamiliarAbilitySchema } from './FamiliarAbilities.zod.js';
+import { zFamiliarSchema } from './Familiars.zod.js';
+import { zFeatSchema } from './Feats.zod.js';
+import { zGroupSchema } from './Groups.zod.js';
+import { zHazardSchema } from './Hazards.zod.js';
+import { zItemFluffSchema, zItemSchema } from './Items.zod.js';
+import { zLanguageSchema } from './Languages.zod.js';
+import { zOptionalFeatureSchema } from './OptionalFeatures.zod.js';
+import { zOrganizationSchema, zOrganizationFluffSchema } from './Organizations.zod.js';
+import { zPlaceSchema } from './Places.zod.js';
+import { zQuickRuleSchema } from './QuickRules.zod.js';
+import { zRelicGiftSchema } from './RelicGifts.zod.js';
+import { zRitualSchema } from './Rituals.zod.js';
+import { zSkillSchema } from './Skills.zod.js';
+import { zSourceSchema } from './Sources.zod.js';
+import { zSpellSchema } from './Spells.zod.js';
+import { zSubclassFeatureSchema } from './SubclassFeatures.zod.js';
+import { zTableSchema } from './Tables.zod.js';
+import { zTraitSchema } from './Traits.zod.js';
+import { zVariantRuleSchema } from './VariantRules.zod.js';
+import { zVehicleSchema } from './Vehicles.zod.js';
+
 export { Abilities } from './Abilities.js';
 export { Ability } from './Abilities.zod.js';
 export { Actions } from './Actions.js';
 export { Action } from './Actions.zod.js';
 export { Afflictions } from './Afflictions.js';
 export { Affliction } from './Afflictions.zod.js';
+export { Ancestries } from './Ancestries.js';
+export { Ancestry } from './Ancestries.zod.js';
 export { Archetypes } from './Archetypes.js';
 export { Archetype } from './Archetypes.zod.js';
 export { Backgrounds } from './Backgrounds.js';
@@ -80,6 +121,7 @@ export { Group } from './Groups.zod.js';
 export { Hazards } from './Hazards.js';
 export { Hazard } from './Hazards.zod.js';
 export { Items } from './Items.js';
+export { ItemsFluff } from './Items.js';
 export { Item } from './Items.zod.js';
 export { Languages } from './Languages.js';
 export { Language } from './Languages.zod.js';
@@ -95,6 +137,8 @@ export { QuickRules } from './QuickRules.js';
 export { QuickRule } from './QuickRules.zod.js';
 export { RelicGifts } from './RelicGifts.js';
 export { RelicGift } from './RelicGifts.zod.js';
+export { RenderDemos } from './RenderDemos.js';
+export { RenderDemo } from './RenderDemos.zod.js';
 export { Rituals } from './Rituals.js';
 export { Ritual } from './Rituals.zod.js';
 export { Skills } from './Skills.js';
@@ -139,6 +183,7 @@ export const Models = [
 	Groups,
 	Hazards,
 	Items,
+	ItemsFluff,
 	Languages,
 	OptionalFeatures,
 	Organizations,
@@ -155,4 +200,50 @@ export const Models = [
 	Traits,
 	VariantRules,
 	Vehicles,
+];
+
+export const schemas = [
+	zAbilitySchema,
+	zActionSchema,
+	zAfflictionSchema,
+	zArchetypeSchema,
+	zBackgroundSchema,
+	zCreatureSchema,
+	zCreatureFluffSchema,
+	zBookSchema,
+	zClassSchema,
+	zClassFeatureSchema,
+	zCompanionAbilitySchema,
+	zCompanionSchema,
+	zConditionSchema,
+	zCreatureTemplateSchema,
+	zCreatureTemplateFluffSchema,
+	zDomainSchema,
+	zDeitySchema,
+	zDeityFluffSchema,
+	zEidolonSchema,
+	zEventSchema,
+	zFamiliarAbilitySchema,
+	zFamiliarSchema,
+	zFeatSchema,
+	zGroupSchema,
+	zHazardSchema,
+	zItemSchema,
+	zItemFluffSchema,
+	zLanguageSchema,
+	zOptionalFeatureSchema,
+	zOrganizationSchema,
+	zOrganizationFluffSchema,
+	zPlaceSchema,
+	zQuickRuleSchema,
+	zRelicGiftSchema,
+	zRitualSchema,
+	zSkillSchema,
+	zSubclassFeatureSchema,
+	zSourceSchema,
+	zSpellSchema,
+	zTableSchema,
+	zTraitSchema,
+	zVariantRuleSchema,
+	zVehicleSchema,
 ];

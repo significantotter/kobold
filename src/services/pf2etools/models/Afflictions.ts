@@ -1,13 +1,12 @@
-import { Neboa, Collection } from 'neboa';
+import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import { zAfflictionSchema, Affliction } from './Afflictions.zod.js';
 import { fetchOneJsonFile } from './lib/helpers.js';
 import { Model } from './lib/Model.js';
+import * as schema from '../pf2eTools.schema.js';
 
-export class Afflictions extends Model<typeof zAfflictionSchema> {
-	public collection: Collection<Affliction>;
-	constructor(private db: Neboa) {
+export class Afflictions extends Model<typeof zAfflictionSchema, typeof schema.Afflictions> {
+	constructor(public db: BetterSQLite3Database<typeof schema>) {
 		super();
-		this.collection = this.db.collection<Affliction>('afflictions');
 	}
 	public z = zAfflictionSchema;
 	public getFiles(): any[] {
@@ -15,6 +14,13 @@ export class Afflictions extends Model<typeof zAfflictionSchema> {
 	}
 	public resourceListFromFile(file: any): any[] {
 		return file.disease.concat(file.curse);
+	}
+	public table = schema.Afflictions;
+	public generateSearchText(resource: Affliction): string {
+		return `Affliction: ${resource.name}`;
+	}
+	public generateTags(resource: Affliction): string[] {
+		return [];
 	}
 	public async import() {
 		await this._importData();

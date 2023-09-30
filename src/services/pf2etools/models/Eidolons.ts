@@ -1,13 +1,19 @@
-import { Neboa, Collection } from 'neboa';
+import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import { fetchOneJsonFile } from './lib/helpers.js';
 import { Model } from './lib/Model.js';
+import * as schema from '../pf2eTools.schema.js';
 import { zEidolonSchema, Eidolon } from './Eidolons.zod.js';
 
-export class Eidolons extends Model<typeof zEidolonSchema> {
-	public collection: Collection<Eidolon>;
-	constructor(private db: Neboa) {
+export class Eidolons extends Model<typeof zEidolonSchema, typeof schema.Eidolons> {
+	public table = schema.Eidolons;
+	public generateSearchText(resource: Eidolon): string {
+		return `Eidolon: ${resource.name}`;
+	}
+	public generateTags(resource: Eidolon): string[] {
+		return [];
+	}
+	constructor(public db: BetterSQLite3Database<typeof schema>) {
 		super();
-		this.collection = this.db.collection<Eidolon>('eidolons');
 	}
 	public z = zEidolonSchema;
 	public getFiles(): any[] {

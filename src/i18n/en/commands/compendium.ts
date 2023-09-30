@@ -1,9 +1,9 @@
 export default {
 	name: 'compendium',
 	description: 'Commands for fetching information about PF2E.',
-	creature: {
-		name: 'creature',
-		description: 'Display the statblock of a creature from pf2etools',
+	search: {
+		name: 'search',
+		description: 'Display pathfinder 2E data from pf2etools',
 	},
 	all: {},
 };

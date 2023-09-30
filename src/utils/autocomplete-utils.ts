@@ -6,8 +6,54 @@ import { InitiativeUtils } from './initiative-utils.js';
 import { Creature } from './creature.js';
 import { filterNotNullOrUndefined } from './type-guards.js';
 import L from '../i18n/i18n-node.js';
+import { CompendiumModel } from '../services/pf2etools/compendium.model.js';
+import { StringUtils } from './string-utils.js';
+import { TableConfig } from 'drizzle-orm';
+import { DrizzleUtils } from '../services/pf2etools/utils/drizzle-utils.js';
+import { Model } from '../services/pf2etools/models/lib/Model.js';
+import { z } from 'zod';
+import { SQLiteTable } from 'drizzle-orm/sqlite-core';
 
 export class AutocompleteUtils {
+	public static async searchCompendium(
+		intr: AutocompleteInteraction<CacheType>,
+		matchText: string,
+		compendium: CompendiumModel
+	) {
+		const abilities = await compendium.abilities.db.query.Abilities.findMany({
+			where: DrizzleUtils.ilike(compendium.abilities.table.search, `%${matchText}%`),
+		});
+		const actions = await compendium.actions.db.query.Actions.findMany({
+			where: DrizzleUtils.ilike(compendium.actions.table.search, `%${matchText}%`),
+		});
+		const creatures = await compendium.creatures.db.query.Creatures.findMany({
+			where: DrizzleUtils.ilike(compendium.creatures.table.search, `%${matchText}%`),
+		});
+
+		function toSearchable<
+			T extends z.ZodTypeAny,
+			K extends SQLiteTable<TableConfig>,
+			M extends Model<T, K>,
+		>(model: M) {
+			return (resource: { data: z.infer<T> }) => {
+				const searchText = model.generateSearchText(resource.data);
+				return { name: searchText, value: searchText };
+			};
+		}
+
+		const actionChoices = actions.map(toSearchable(compendium.actions));
+		const abilityChoices = abilities.map(toSearchable(compendium.abilities));
+		const creatureChoices = creatures.map(toSearchable(compendium.creatures));
+
+		const choices = actionChoices.concat(creatureChoices).concat(abilityChoices);
+
+		const sorter = StringUtils.generateSorterByWordDistance<{
+			name: string;
+			value: string;
+		}>(matchText, c => c.name);
+		return choices.sort(sorter).slice(0, 50);
+	}
+
 	public static async getBestiaryNpcs(
 		intr: AutocompleteInteraction<CacheType>,
 		matchText: string

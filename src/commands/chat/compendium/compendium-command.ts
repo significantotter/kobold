@@ -29,8 +29,8 @@ export class CompendiumCommand implements Command {
 
 		options: [
 			{
-				name: L.en.commands.compendium.creature.name(),
-				description: L.en.commands.compendium.creature.description(),
+				name: L.en.commands.compendium.search.name(),
+				description: L.en.commands.compendium.search.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [CompendiumOptions.COMPENDIUM_SEARCH_OPTION],
 			},

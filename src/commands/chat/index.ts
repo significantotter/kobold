@@ -11,7 +11,7 @@ export { CharacterSheetSubCommand } from './characters/character-sheet-subcomman
 
 // compendium commands
 export { CompendiumCommand } from './compendium/compendium-command.js';
-export { CompendiumCreatureSubCommand } from './compendium/compendium-creature-subcommand.js';
+export { CompendiumSearchSubCommand } from './compendium/compendium-search-subcommand.js';
 
 // roll commands
 export { RollCommand } from './roll/roll-command.js';

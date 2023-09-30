@@ -16,7 +16,7 @@ import {
 	CharacterSheetSubCommand,
 	// compendium
 	CompendiumCommand,
-	CompendiumCreatureSubCommand,
+	CompendiumSearchSubCommand,
 	// roll
 	RollCommand,
 	RollDiceSubCommand,
@@ -117,8 +117,8 @@ import { Config } from './config/config.js';
 import Logs from './config/lang/logs.json' assert { type: 'json' };
 import { checkAndLoadBestiaryFiles } from './services/pf2etools/bestiaryLoader.js';
 import { Kobold } from './services/kobold/models/koboldORM.js';
-import { Pf2eToolsModel } from './services/pf2etools/pf2eTools.model.js';
-import { db } from './services/pf2etools/pf2eTools-db.js';
+import { CompendiumModel } from './services/pf2etools/compendium.model.js';
+import { db } from './services/pf2etools/pf2eTools.db.js';
 
 // this is to prevent embeds breaking on "addFields" when adding more than an embed can hold
 // because we batch our embeds afterwards instead of before assigning fields
@@ -126,7 +126,8 @@ disableValidators();
 
 async function start(): Promise<void> {
 	DBModel.init(Config.database.url);
-	const compendium = new Pf2eToolsModel(db);
+
+	const compendium = new CompendiumModel(db);
 	// const kobold = new Kobold();
 
 	// asynchronously load the bestiary files
@@ -169,7 +170,7 @@ async function start(): Promise<void> {
 		]),
 
 		// Compendium Commands
-		new CompendiumCommand([new CompendiumCreatureSubCommand()]),
+		new CompendiumCommand([new CompendiumSearchSubCommand()]),
 
 		//Roll Commands
 		new RollCommand([

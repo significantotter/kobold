@@ -1,13 +1,19 @@
-import { Neboa, Collection } from 'neboa';
+import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import { fetchOneJsonFile } from './lib/helpers.js';
 import { Model } from './lib/Model.js';
+import * as schema from '../pf2eTools.schema.js';
 import { Familiar, zFamiliarSchema } from './Familiars.zod.js';
 
-export class Familiars extends Model<typeof zFamiliarSchema> {
-	public collection: Collection<Familiar>;
-	constructor(private db: Neboa) {
+export class Familiars extends Model<typeof zFamiliarSchema, typeof schema.Familiars> {
+	public table = schema.Familiars;
+	public generateSearchText(resource: Familiar): string {
+		return `Familiar: ${resource.name}`;
+	}
+	public generateTags(resource: Familiar): string[] {
+		return [];
+	}
+	constructor(public db: BetterSQLite3Database<typeof schema>) {
 		super();
-		this.collection = this.db.collection<Familiar>('familiars');
 	}
 	public z = zFamiliarSchema;
 	public getFiles(): any[] {

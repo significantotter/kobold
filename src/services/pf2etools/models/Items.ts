@@ -1,13 +1,19 @@
-import { Neboa, Collection } from 'neboa';
+import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import { zItemSchema, Item, ItemFluff, zItemFluffSchema } from './Items.zod.js';
 import { fetchManyJsonFiles, fetchOneJsonFile } from './lib/helpers.js';
 import { Model } from './lib/Model.js';
+import * as schema from '../pf2eTools.schema.js';
 
-export class Items extends Model<typeof zItemSchema> {
-	public collection: Collection<Item>;
-	constructor(private db: Neboa) {
+export class Items extends Model<typeof zItemSchema, typeof schema.Items> {
+	public table = schema.Items;
+	public generateSearchText(resource: Item): string {
+		return `Item: ${resource.name}`;
+	}
+	public generateTags(resource: Item): string[] {
+		return [];
+	}
+	constructor(public db: BetterSQLite3Database<typeof schema>) {
 		super();
-		this.collection = this.db.collection<Item>('items');
 	}
 	public z = zItemSchema;
 	public getFiles(): any[] {
@@ -21,11 +27,16 @@ export class Items extends Model<typeof zItemSchema> {
 	}
 }
 
-export class ItemsFluff extends Model<typeof zItemFluffSchema> {
-	public collection: Collection<ItemFluff>;
-	constructor(private db: Neboa) {
+export class ItemsFluff extends Model<typeof zItemFluffSchema, typeof schema.ItemsFluff> {
+	public table = schema.ItemsFluff;
+	public generateSearchText(resource: ItemFluff): string {
+		return `ItemFluff: ${resource.name}`;
+	}
+	public generateTags(resource: ItemFluff): string[] {
+		return [];
+	}
+	constructor(public db: BetterSQLite3Database<typeof schema>) {
 		super();
-		this.collection = this.db.collection<ItemFluff>('itemsFluff');
 	}
 	public z = zItemFluffSchema;
 	public getFiles(): any[] {

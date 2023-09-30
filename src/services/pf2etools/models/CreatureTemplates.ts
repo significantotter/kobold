@@ -1,18 +1,28 @@
-import { Neboa, Collection } from 'neboa';
+import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import { fetchOneJsonFile } from './lib/helpers.js';
 import { Model } from './lib/Model.js';
+import * as schema from '../pf2eTools.schema.js';
 import {
 	zCreatureTemplateSchema,
 	CreatureTemplate,
 	zCreatureTemplateFluffSchema,
 	CreatureTemplateFluff as CreatureTemplateFluffType,
+	CreatureTemplateFluff,
 } from './CreatureTemplates.zod.js';
 
-export class CreatureTemplates extends Model<typeof zCreatureTemplateSchema> {
-	public collection: Collection<CreatureTemplate>;
-	constructor(private db: Neboa) {
+export class CreatureTemplates extends Model<
+	typeof zCreatureTemplateSchema,
+	typeof schema.CreatureTemplates
+> {
+	public table = schema.CreatureTemplates;
+	public generateSearchText(resource: CreatureTemplate): string {
+		return `CreatureTemplate: ${resource.name}`;
+	}
+	public generateTags(resource: CreatureTemplate): string[] {
+		return [];
+	}
+	constructor(public db: BetterSQLite3Database<typeof schema>) {
 		super();
-		this.collection = this.db.collection<CreatureTemplate>('creatureTemplates');
 	}
 	public z = zCreatureTemplateSchema;
 	public getFiles(): any[] {
@@ -26,11 +36,19 @@ export class CreatureTemplates extends Model<typeof zCreatureTemplateSchema> {
 	}
 }
 
-export class CreatureTemplatesFluff extends Model<typeof zCreatureTemplateFluffSchema> {
-	public collection: Collection<CreatureTemplateFluffType>;
-	constructor(private db: Neboa) {
+export class CreatureTemplatesFluff extends Model<
+	typeof zCreatureTemplateFluffSchema,
+	typeof schema.CreatureTemplatesFluff
+> {
+	public table = schema.CreatureTemplatesFluff;
+	public generateSearchText(resource: CreatureTemplateFluff): string {
+		return `CreatureTemplateFluff: ${resource.name}`;
+	}
+	public generateTags(resource: CreatureTemplateFluff): string[] {
+		return [];
+	}
+	constructor(public db: BetterSQLite3Database<typeof schema>) {
 		super();
-		this.collection = this.db.collection<CreatureTemplateFluffType>('creatureTemplatesFluff');
 	}
 	public z = zCreatureTemplateFluffSchema;
 	public getFiles(): any[] {

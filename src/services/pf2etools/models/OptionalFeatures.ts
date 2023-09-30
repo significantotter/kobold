@@ -1,13 +1,22 @@
-import { Neboa, Collection } from 'neboa';
+import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import { fetchOneJsonFile } from './lib/helpers.js';
 import { Model } from './lib/Model.js';
+import * as schema from '../pf2eTools.schema.js';
 import { zOptionalFeatureSchema, OptionalFeature } from './OptionalFeatures.zod.js';
 
-export class OptionalFeatures extends Model<typeof zOptionalFeatureSchema> {
-	public collection: Collection<OptionalFeature>;
-	constructor(private db: Neboa) {
+export class OptionalFeatures extends Model<
+	typeof zOptionalFeatureSchema,
+	typeof schema.OptionalFeatures
+> {
+	public table = schema.OptionalFeatures;
+	public generateSearchText(resource: OptionalFeature): string {
+		return `OptionalFeature: ${resource.name}`;
+	}
+	public generateTags(resource: OptionalFeature): string[] {
+		return [];
+	}
+	constructor(public db: BetterSQLite3Database<typeof schema>) {
 		super();
-		this.collection = this.db.collection<OptionalFeature>('optionalFeatures');
 	}
 	public z = zOptionalFeatureSchema;
 	public getFiles(): any[] {

@@ -311,8 +311,8 @@ export class KoboldEmbed extends EmbedBuilder {
 		}
 		return finalEmbeds;
 	}
-	public async sendBatches(intr: CommandInteraction, isEphemeral = false, splitText = false) {
-		if (splitText && this.data?.fields) this.splitFieldsThatAreTooLong();
+	public async sendBatches(intr: CommandInteraction, isEphemeral = false) {
+		this.splitFieldsThatAreTooLong();
 		const splitEmbeds = this.splitEmbedIfTooLong();
 		for (const embed of splitEmbeds) {
 			await InteractionUtils.send(intr, embed, isEphemeral);

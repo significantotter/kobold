@@ -1,13 +1,19 @@
-import { Neboa, Collection } from 'neboa';
+import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import { fetchOneJsonFile } from './lib/helpers.js';
 import { Model } from './lib/Model.js';
+import * as schema from '../pf2eTools.schema.js';
 import { zPlaceSchema, Place } from './Places.zod.js';
 
-export class Places extends Model<typeof zPlaceSchema> {
-	public collection: Collection<Place>;
-	constructor(private db: Neboa) {
+export class Places extends Model<typeof zPlaceSchema, typeof schema.Places> {
+	public table = schema.Places;
+	public generateSearchText(resource: Place): string {
+		return `Place: ${resource.name}`;
+	}
+	public generateTags(resource: Place): string[] {
+		return [];
+	}
+	constructor(public db: BetterSQLite3Database<typeof schema>) {
 		super();
-		this.collection = this.db.collection<Place>('places');
 	}
 	public z = zPlaceSchema;
 	public getFiles(): any[] {

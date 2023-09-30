@@ -1,28 +1,5 @@
 import { z } from 'zod';
-import { zActivitySchema, zFrequencySchema, zOtherSourceSchema } from './lib/helpers.zod.js';
-import { Entry, zEntrySchema } from './lib/entries.zod.js';
+import { zAbilityEntrySchema } from './lib/entries.zod.js';
 
-const baseAbilitySchema = z.strictObject({
-	activity: zActivitySchema.optional(),
-	components: z.string().array().optional(),
-	creature: z.string().array().optional(),
-	name: z.string().optional(),
-	add_hash: z.string().optional(),
-	otherSources: zOtherSourceSchema.optional(),
-	generic: z
-		.object({
-			tag: z.string(),
-		})
-		.optional(),
-	source: z.string().optional(),
-	page: z.number().optional(),
-	trigger: z.string().optional(),
-	frequency: zFrequencySchema.optional(),
-	requirements: z.string().optional(),
-	traits: z.array(z.string()).optional(),
-});
-export type Ability = z.infer<typeof baseAbilitySchema> & { entries: Entry[] };
-
-export const zAbilitySchema = baseAbilitySchema.extend({
-	entries: z.lazy<z.ZodType<Entry[]>>(() => zEntrySchema.array()),
-});
+export type Ability = z.infer<typeof zAbilitySchema>;
+export const zAbilitySchema = zAbilityEntrySchema;

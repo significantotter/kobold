@@ -1,13 +1,19 @@
-import { Neboa, Collection } from 'neboa';
+import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import { fetchOneJsonFile } from './lib/helpers.js';
 import { Model } from './lib/Model.js';
+import * as schema from '../pf2eTools.schema.js';
 import { zRelicGiftSchema, RelicGift } from './RelicGifts.zod.js';
 
-export class RelicGifts extends Model<typeof zRelicGiftSchema> {
-	public collection: Collection<RelicGift>;
-	constructor(private db: Neboa) {
+export class RelicGifts extends Model<typeof zRelicGiftSchema, typeof schema.RelicGifts> {
+	public table = schema.RelicGifts;
+	public generateSearchText(resource: RelicGift): string {
+		return `RelicGift: ${resource.name}`;
+	}
+	public generateTags(resource: RelicGift): string[] {
+		return [];
+	}
+	constructor(public db: BetterSQLite3Database<typeof schema>) {
 		super();
-		this.collection = this.db.collection<RelicGift>('relicGifts');
 	}
 	public z = zRelicGiftSchema;
 	public getFiles(): any[] {

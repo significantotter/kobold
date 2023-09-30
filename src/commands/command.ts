@@ -14,7 +14,7 @@ import { ConditionalPick } from 'type-fest';
 import { CharacterUtils } from '../utils/character-utils.js';
 import _ from 'lodash';
 import { ZCharacter } from '../services/kobold/models/character/character.model.js';
-import { Pf2eToolsModel } from '../services/pf2etools/pf2eTools.model.js';
+import { CompendiumModel } from '../services/pf2etools/compendium.model.js';
 
 export interface InjectedCommandData {
 	kobold: Kobold;
@@ -44,7 +44,7 @@ export interface Command {
 }
 
 export interface InjectedServices {
-	compendium: Pf2eToolsModel;
+	compendium: CompendiumModel;
 }
 
 export interface InjectData {

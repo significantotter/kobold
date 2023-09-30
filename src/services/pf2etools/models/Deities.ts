@@ -1,13 +1,19 @@
-import { Neboa, Collection } from 'neboa';
+import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import { fetchOneJsonFile } from './lib/helpers.js';
 import { Model } from './lib/Model.js';
+import * as schema from '../pf2eTools.schema.js';
 import { zDeitySchema, Deity, zDeityFluffSchema, DeityFluff } from './Deities.zod.js';
 
-export class Deities extends Model<typeof zDeitySchema> {
-	public collection: Collection<Deity>;
-	constructor(private db: Neboa) {
+export class Deities extends Model<typeof zDeitySchema, typeof schema.Deities> {
+	public table = schema.Deities;
+	public generateSearchText(resource: Deity): string {
+		return `Deity: ${resource.name}`;
+	}
+	public generateTags(resource: Deity): string[] {
+		return [];
+	}
+	constructor(public db: BetterSQLite3Database<typeof schema>) {
 		super();
-		this.collection = this.db.collection<Deity>('deities');
 	}
 	public z = zDeitySchema;
 	public getFiles(): any[] {
@@ -21,11 +27,16 @@ export class Deities extends Model<typeof zDeitySchema> {
 	}
 }
 
-export class DeitiesFluff extends Model<typeof zDeityFluffSchema> {
-	public collection: Collection<DeityFluff>;
-	constructor(private db: Neboa) {
+export class DeitiesFluff extends Model<typeof zDeityFluffSchema, typeof schema.DeitiesFluff> {
+	public table = schema.DeitiesFluff;
+	public generateSearchText(resource: DeityFluff): string {
+		return `DeityFluff: ${resource.name}`;
+	}
+	public generateTags(resource: DeityFluff): string[] {
+		return [];
+	}
+	constructor(public db: BetterSQLite3Database<typeof schema>) {
 		super();
-		this.collection = this.db.collection<DeityFluff>('deitiesFluff');
 	}
 	public z = zDeityFluffSchema;
 	public getFiles(): any[] {

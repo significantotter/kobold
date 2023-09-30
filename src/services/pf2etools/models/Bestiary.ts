@@ -1,13 +1,19 @@
-import { Neboa, Collection } from 'neboa';
+import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import { zCreatureSchema, Creature, zCreatureFluffSchema, CreatureFluff } from './Bestiary.zod.js';
 import { fetchManyJsonFiles } from './lib/helpers.js';
 import { Model } from './lib/Model.js';
+import * as schema from '../pf2eTools.schema.js';
 
-export class Creatures extends Model<typeof zCreatureSchema> {
-	public collection: Collection<Creature>;
-	constructor(private db: Neboa) {
+export class Creatures extends Model<typeof zCreatureSchema, typeof schema.Creatures> {
+	public table = schema.Creatures;
+	public generateSearchText(resource: Creature): string {
+		return `Creature: ${resource.name}${resource.level ? ` (Lvl ${resource.level})` : ''}`;
+	}
+	public generateTags(resource: Creature): string[] {
+		return [];
+	}
+	constructor(public db: BetterSQLite3Database<typeof schema>) {
 		super();
-		this.collection = this.db.collection<Creature>('creatures');
 	}
 	public z = zCreatureSchema;
 	public getFiles(): any[] {
@@ -21,11 +27,12 @@ export class Creatures extends Model<typeof zCreatureSchema> {
 	}
 }
 
-export class CreaturesFluff extends Model<typeof zCreatureFluffSchema> {
-	public collection: Collection<CreatureFluff>;
-	constructor(private db: Neboa) {
+export class CreaturesFluff extends Model<
+	typeof zCreatureFluffSchema,
+	typeof schema.CreaturesFluff
+> {
+	constructor(public db: BetterSQLite3Database<typeof schema>) {
 		super();
-		this.collection = this.db.collection<CreatureFluff>('creaturesFluff');
 	}
 	public z = zCreatureFluffSchema;
 	public getFiles(): any[] {
@@ -33,6 +40,13 @@ export class CreaturesFluff extends Model<typeof zCreatureFluffSchema> {
 	}
 	public resourceListFromFile(file: any): any[] {
 		return file.creatureFluff ?? [];
+	}
+	public table = schema.CreaturesFluff;
+	public generateSearchText(resource: CreatureFluff): string {
+		return `CreatureFluff: ${resource.name}`;
+	}
+	public generateTags(resource: CreatureFluff): string[] {
+		return [];
 	}
 	public async import() {
 		await this._importData();

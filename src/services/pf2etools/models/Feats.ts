@@ -1,13 +1,19 @@
-import { Neboa, Collection } from 'neboa';
+import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import { zFeatSchema, Feat } from './Feats.zod.js';
 import { fetchManyJsonFiles } from './lib/helpers.js';
 import { Model } from './lib/Model.js';
+import * as schema from '../pf2eTools.schema.js';
 
-export class Feats extends Model<typeof zFeatSchema> {
-	public collection: Collection<Feat>;
-	constructor(private db: Neboa) {
+export class Feats extends Model<typeof zFeatSchema, typeof schema.Feats> {
+	public table = schema.Feats;
+	public generateSearchText(resource: Feat): string {
+		return `Feat: ${resource.name}`;
+	}
+	public generateTags(resource: Feat): string[] {
+		return [];
+	}
+	constructor(public db: BetterSQLite3Database<typeof schema>) {
 		super();
-		this.collection = this.db.collection<Feat>('feats');
 	}
 	public z = zFeatSchema;
 	public getFiles(): any[] {

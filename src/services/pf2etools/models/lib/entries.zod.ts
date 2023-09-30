@@ -2,6 +2,7 @@ import { z } from 'zod';
 import {
 	zActivitySchema,
 	zFrequencySchema,
+	zOtherSourceSchema,
 	zSpellcastingMapSchema,
 	zTypedNumberSchema,
 } from './helpers.zod.js';
@@ -133,6 +134,10 @@ export const baseZAbilityEntrySchema = z.strictObject({
 		.optional(),
 	note: z.string().optional(),
 	special: z.string().array().optional(),
+
+	creature: z.string().array().optional(),
+	add_hash: z.string().optional(),
+	otherSources: zOtherSourceSchema.optional(),
 });
 export type AbilityEntry = z.infer<typeof baseZAbilityEntrySchema> & {
 	entries?: Entry[];
@@ -399,6 +404,7 @@ export const zFluffSchema = z.strictObject({
 	source: z.string(),
 	page: z.number().optional(),
 	entries: z.array(zEntrySchema).optional(),
+	images: z.string().array().optional(),
 	lore: z.array(zEntrySchema).optional(),
 	_copy: zCopySchema.optional(),
 });
