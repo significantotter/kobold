@@ -7,6 +7,7 @@ import { AttachmentBuilder } from 'discord.js';
 import { parseCreature } from './parsers/creature-parser.js';
 import { parseAbility } from './parsers/ability-parser.js';
 import { parseAction } from './parsers/action-parser.js';
+import { parseAffliction } from './parsers/affliction-parser.js';
 
 export class CompendiumEmbedParser {
 	public helpers: SharedParsers;
@@ -24,5 +25,6 @@ export class CompendiumEmbedParser {
 	}
 	public parseAbility = parseAbility;
 	public parseAction = parseAction;
+	public parseAffliction = parseAffliction;
 	public parseCreature = parseCreature;
 }

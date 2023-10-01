@@ -1,8 +1,11 @@
 import _ from 'lodash';
 import { KoboldEmbed } from '../../../../utils/kobold-embed-utils.js';
-import { Creature, CreatureFluff, CreatureSense } from '../../models/index.js';
+import { Ability, Affliction, Creature, CreatureFluff, CreatureSense } from '../../models/index.js';
 import { CompendiumEmbedParser } from '../compendium-parser.js';
 import { DrizzleUtils } from '../../utils/drizzle-utils.js';
+
+const abilityIsAffliction = (ability: Ability | Affliction): ability is Affliction =>
+	ability.type === 'affliction' || ability.type === 'Disease' || ability.type === 'Curse';
 
 export async function parseCreature(
 	this: CompendiumEmbedParser,
@@ -69,7 +72,7 @@ export async function parseCreature(
 		topBlock.push(
 			creature.abilities.top
 				.map(ability => {
-					if (ability.type === 'affliction') {
+					if (abilityIsAffliction(ability)) {
 						return `**${ability.name}** ${(ability.entries ?? []).join(', ')}`;
 					} else {
 						return `${this.entries.parseAbilityEntry(ability)}`;
@@ -96,7 +99,7 @@ export async function parseCreature(
 		midBlock.push(
 			creature.abilities.mid
 				.map(ability => {
-					if (ability.type === 'affliction') {
+					if (abilityIsAffliction(ability)) {
 						return `**${ability.name}** ${(ability.entries ?? []).join(', ')}`;
 					} else {
 						return `${this.entries.parseAbilityEntry(ability)}`;
@@ -129,7 +132,7 @@ export async function parseCreature(
 		bottomBlock.push(
 			creature.abilities.bot
 				.map(ability => {
-					if (ability.type === 'affliction') {
+					if (abilityIsAffliction(ability)) {
 						return this.entries.parseAfflictionEntry(ability);
 					} else {
 						return this.entries.parseAbilityEntry(ability);

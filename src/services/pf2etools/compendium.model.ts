@@ -5,6 +5,8 @@ import {
 	Archetypes,
 	Backgrounds,
 	Books,
+	Classes,
+	ClassFeatures,
 	CompanionAbilities,
 	Companions,
 	Conditions,
@@ -14,6 +16,7 @@ import {
 	CreatureTemplatesFluff,
 	Deities,
 	DeitiesFluff,
+	Domains,
 	Eidolons,
 	Events,
 	FamiliarAbilities,
@@ -33,6 +36,7 @@ import {
 	Skills,
 	Sources,
 	Spells,
+	SubclassFeatures,
 	Tables,
 	Traits,
 	VariantRules,
@@ -50,6 +54,8 @@ export class CompendiumModel {
 	public readonly creatures: Creatures;
 	public readonly creaturesFluff: CreaturesFluff;
 	public readonly books: Books;
+	public readonly classFeatures: ClassFeatures;
+	public readonly classes: Classes;
 	public readonly companionAbilities: CompanionAbilities;
 	public readonly companions: Companions;
 	public readonly conditions: Conditions;
@@ -57,6 +63,7 @@ export class CompendiumModel {
 	public readonly creatureTemplatesFluff: CreatureTemplatesFluff;
 	public readonly deities: Deities;
 	public readonly deitiesFluff: DeitiesFluff;
+	public readonly domains: Domains;
 	public readonly eidolons: Eidolons;
 	public readonly events: Events;
 	public readonly familiarAbilities: FamiliarAbilities;
@@ -74,12 +81,14 @@ export class CompendiumModel {
 	public readonly relicGifts: RelicGifts;
 	public readonly rituals: Rituals;
 	public readonly skills: Skills;
+	public readonly subclassFeatures: SubclassFeatures;
 	public readonly sources: Sources;
 	public readonly spells: Spells;
 	public readonly tables: Tables;
 	public readonly traits: Traits;
 	public readonly variantRules: VariantRules;
 	public readonly vehicles: Vehicles;
+	public readonly search: typeof schema.Search;
 	public readonly db: BetterSQLite3Database<typeof schema>;
 
 	constructor(db: BetterSQLite3Database<typeof schema>) {
@@ -92,6 +101,8 @@ export class CompendiumModel {
 		this.creatures = new Creatures(db);
 		this.creaturesFluff = new CreaturesFluff(db);
 		this.books = new Books(db);
+		this.classFeatures = new ClassFeatures(db);
+		this.classes = new Classes(db);
 		this.companionAbilities = new CompanionAbilities(db);
 		this.companions = new Companions(db);
 		this.conditions = new Conditions(db);
@@ -99,6 +110,7 @@ export class CompendiumModel {
 		this.creatureTemplatesFluff = new CreatureTemplatesFluff(db);
 		this.deities = new Deities(db);
 		this.deitiesFluff = new DeitiesFluff(db);
+		this.domains = new Domains(db);
 		this.eidolons = new Eidolons(db);
 		this.events = new Events(db);
 		this.familiarAbilities = new FamiliarAbilities(db);
@@ -116,11 +128,13 @@ export class CompendiumModel {
 		this.relicGifts = new RelicGifts(db);
 		this.rituals = new Rituals(db);
 		this.skills = new Skills(db);
+		this.subclassFeatures = new SubclassFeatures(db);
 		this.sources = new Sources(db);
 		this.spells = new Spells(db);
 		this.tables = new Tables(db);
 		this.traits = new Traits(db);
 		this.variantRules = new VariantRules(db);
 		this.vehicles = new Vehicles(db);
+		this.search = schema.Search;
 	}
 }

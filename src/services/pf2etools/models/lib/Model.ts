@@ -1,7 +1,8 @@
 import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import { z } from 'zod';
-import { SQLiteTable, TableConfig } from 'drizzle-orm/sqlite-core';
+import { SQLiteTable, SQLiteTableWithColumns, TableConfig } from 'drizzle-orm/sqlite-core';
 import * as schema from '../../pf2eTools.schema.js';
+import { getTableName } from 'drizzle-orm';
 
 export abstract class Model<T extends z.ZodTypeAny, K extends SQLiteTable<TableConfig>> {
 	public abstract db: BetterSQLite3Database<typeof schema>;
@@ -31,15 +32,24 @@ export abstract class Model<T extends z.ZodTypeAny, K extends SQLiteTable<TableC
 					throw new Error();
 				}
 				const result = parse.data;
-				await this.db
+				const search = this.generateSearchText(result);
+				const tags = this.generateTags(result);
+				const insertedData = await this.db
 					.insert(this.table)
 					.values({
 						name: result.name,
-						search: this.generateSearchText(result),
-						tags: this.generateTags(result),
+						search,
+						tags,
 						data: result,
 					} as any)
 					.run();
+				await this.db.insert(schema.Search).values({
+					id: Number(insertedData.lastInsertRowid),
+					table: getTableName(this.table),
+					name: result.name,
+					search,
+					tags,
+				});
 			}
 		}
 	}

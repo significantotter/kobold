@@ -231,10 +231,11 @@ export class EntryParser {
 		return abilityString;
 	}
 
-	public parseAfflictionEntry(affliction: AfflictionEntry): string {
+	public parseAfflictionEntry(affliction: AfflictionEntry, inline: boolean = true): string {
 		let afflictionString = '';
-		if (affliction.name) {
-			afflictionString += `**${affliction.name}** `;
+		let delimiter = inline ? ' ' : '\n';
+		if (affliction.name && inline) {
+			afflictionString += `**${affliction.name}**${delimiter}`;
 		}
 		if (affliction.traits) {
 			afflictionString += ` (${affliction.traits.join(', ')})`;
@@ -242,7 +243,8 @@ export class EntryParser {
 		if (affliction.note) {
 			afflictionString += ` ${affliction.note}`;
 		}
-		if (affliction.DC || affliction.savingThrow) afflictionString += ' **Saving Throw**';
+		if (affliction.DC || affliction.savingThrow)
+			afflictionString += `${delimiter}**Saving Throw**`;
 		if (affliction.DC) {
 			afflictionString += ` ${affliction.DC}`;
 		}
@@ -269,10 +271,17 @@ export class EntryParser {
 			}
 			afflictionStringSegments.push(stageString);
 		}
+		if (affliction.entries?.length) {
+			afflictionStringSegments.push(
+				`${affliction.entries
+					.map(entry => this.parseEntry(entry))
+					.join(inline ? ', ' : '\n')}`
+			);
+		}
 		const footer = affliction.temptedCurse
 			? `\n**Tempted Curse** ${affliction.temptedCurse.join(', ')}`
 			: '';
-		return afflictionStringSegments.join('; ') + footer;
+		return afflictionStringSegments.join(inline ? '; ' : '\n') + footer;
 	}
 
 	public parseAttackEntry(attack: AttackEntry) {

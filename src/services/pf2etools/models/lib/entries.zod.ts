@@ -70,8 +70,10 @@ export const zStageSchema: z.ZodType<Stage> = baseZStageSchema.extend({
 });
 
 export const baseZAfflictionEntrySchema = z.strictObject({
-	type: z.literal('affliction'),
+	type: z.union([z.literal('affliction'), z.literal('Disease'), z.literal('Curse')]),
 	number: z.any().optional().describe('ignored by pf2etools'),
+	source: z.string().optional(),
+	page: z.number().optional(),
 	level: z.number().or(z.string()).optional(),
 	note: z.string().optional(),
 	name: z.string().optional(),

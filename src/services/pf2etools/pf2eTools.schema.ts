@@ -43,7 +43,7 @@ import {
 	RenderDemo,
 	OrganizationFluff,
 	CreatureTemplateFluff,
-} from './models/index.js';
+} from './models/index-types.js';
 import { ItemFluff } from './models/Items.zod.js';
 
 const standardFields = {
@@ -83,16 +83,6 @@ export const Backgrounds = sqliteTable('Backgrounds', {
 	data: text('data', { mode: 'json' }).notNull().$type<Background>(),
 });
 
-export const Creatures = sqliteTable('Creatures', {
-	...standardFields,
-	data: text('data', { mode: 'json' }).notNull().$type<Creature>(),
-});
-
-export const CreaturesFluff = sqliteTable('CreaturesFluff', {
-	...standardFields,
-	data: text('data', { mode: 'json' }).notNull().$type<CreatureFluff>(),
-});
-
 export const Books = sqliteTable('Books', {
 	...standardFields,
 	data: text('data', { mode: 'json' }).notNull().$type<Book>(),
@@ -121,6 +111,16 @@ export const Companions = sqliteTable('Companions', {
 export const Conditions = sqliteTable('Conditions', {
 	...standardFields,
 	data: text('data', { mode: 'json' }).notNull().$type<Condition>(),
+});
+
+export const Creatures = sqliteTable('Creatures', {
+	...standardFields,
+	data: text('data', { mode: 'json' }).notNull().$type<Creature>(),
+});
+
+export const CreaturesFluff = sqliteTable('CreaturesFluff', {
+	...standardFields,
+	data: text('data', { mode: 'json' }).notNull().$type<CreatureFluff>(),
 });
 
 export const CreatureTemplates = sqliteTable('CreatureTemplates', {
@@ -276,4 +276,12 @@ export const VariantRules = sqliteTable('VariantRules', {
 export const Vehicles = sqliteTable('Vehicles', {
 	...standardFields,
 	data: text('data', { mode: 'json' }).notNull().$type<Vehicle>(),
+});
+
+export const Search = sqliteTable('Search', {
+	id: integer('id').notNull(),
+	name: text('name').notNull(),
+	search: text('search').notNull(),
+	tags: text('tags', { mode: 'json' }).notNull().$type<string[]>(),
+	table: text('table').notNull(),
 });

@@ -571,6 +571,6 @@ export class HelpCommand implements Command {
 				return;
 			}
 		}
-		await embed.sendBatches(intr, false, true);
+		await embed.sendBatches(intr, false);
 	}
 }
