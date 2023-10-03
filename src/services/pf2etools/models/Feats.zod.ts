@@ -1,13 +1,13 @@
 import { z } from 'zod';
 import { Entry, zEntrySchema } from './lib/entries.zod.js';
-import { zOtherSourceSchema, zFrequencySchema, zTypedNumberSchema } from './lib/helpers.zod.js';
+import { zOtherSourceSchema, zFrequencySchema, zActivitySchema } from './lib/helpers.zod.js';
 
 const baseFeatSchema = z.strictObject({
 	name: z.string(),
 	source: z.string(),
 	page: z.number().optional(),
 	add_hash: z.union([z.string(), z.string().array()]).optional(),
-	activity: zTypedNumberSchema.optional(),
+	activity: zActivitySchema.optional(),
 	trigger: z.string().optional(),
 	level: z.number(),
 	traits: z.string().array(),

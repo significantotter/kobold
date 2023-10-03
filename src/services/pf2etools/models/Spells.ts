@@ -6,12 +6,6 @@ import * as schema from '../pf2eTools.schema.js';
 
 export class Spells extends Model<typeof zSpellSchema, typeof schema.Spells> {
 	public table = schema.Spells;
-	public generateSearchText(resource: Spell): string {
-		return `Spell: ${resource.name}`;
-	}
-	public generateTags(resource: Spell): string[] {
-		return [];
-	}
 	constructor(public db: BetterSQLite3Database<typeof schema>) {
 		super();
 	}
@@ -21,6 +15,15 @@ export class Spells extends Model<typeof zSpellSchema, typeof schema.Spells> {
 	}
 	public resourceListFromFile(file: any): any[] {
 		return file.spell ?? [];
+	}
+	public generateSearchText(spell: Spell): string {
+		return `Spell: ${spell.name}`;
+	}
+	public generateTags(spell: Spell): string[] {
+		return [spell.source]
+			.concat(spell.traits ?? [])
+			.concat(spell.domains?.length ? spell.domains?.map(domain => `domain-${domain}`) : [])
+			.concat(spell.traditions ?? []);
 	}
 	public async import() {
 		await this._importData();

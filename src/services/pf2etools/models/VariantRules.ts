@@ -6,12 +6,6 @@ import { zVariantRuleSchema, VariantRule } from './VariantRules.zod.js';
 
 export class VariantRules extends Model<typeof zVariantRuleSchema, typeof schema.VariantRules> {
 	public table = schema.VariantRules;
-	public generateSearchText(resource: VariantRule): string {
-		return `VariantRule: ${resource.name}`;
-	}
-	public generateTags(resource: VariantRule): string[] {
-		return [];
-	}
 	constructor(public db: BetterSQLite3Database<typeof schema>) {
 		super();
 	}
@@ -21,6 +15,12 @@ export class VariantRules extends Model<typeof zVariantRuleSchema, typeof schema
 	}
 	public resourceListFromFile(file: any): any[] {
 		return file.variantrule;
+	}
+	public generateSearchText(variantRule: VariantRule): string {
+		return `VariantRule: ${variantRule.name}`;
+	}
+	public generateTags(variantRule: VariantRule): string[] {
+		return [variantRule.source];
 	}
 	public async import() {
 		await this._importData();

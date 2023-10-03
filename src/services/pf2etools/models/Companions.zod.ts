@@ -1,5 +1,11 @@
 import { z } from 'zod';
-import { zAbilityScoreSchema, zSpeedSchema, zTypedNumberSchema } from './lib/helpers.zod.js';
+import {
+	zAbilityScoreSchema,
+	zActivitySchema,
+	zFrequencySchema,
+	zSpeedSchema,
+	zTypedNumberSchema,
+} from './lib/helpers.zod.js';
 import { zAttackEntrySchema, zEntrySchema } from './lib/entries.zod.js';
 
 export const zCompanionSenseSchema = z.strictObject({
@@ -30,8 +36,8 @@ export const zCompanionSchema = z.strictObject({
 		requirements: z.string().optional(),
 		traits: z.string().array().optional(),
 		trigger: z.string().optional(),
-		activity: zTypedNumberSchema,
-		frequency: zTypedNumberSchema.optional(),
+		activity: zActivitySchema,
+		frequency: zFrequencySchema.optional(),
 		entries: zEntrySchema.array(),
 	}),
 	traits: z.array(z.string()).optional(),

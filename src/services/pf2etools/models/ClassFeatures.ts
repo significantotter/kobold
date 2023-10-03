@@ -6,12 +6,6 @@ import { zClassFeatureSchema, ClassFeature } from './ClassFeatures.zod.js';
 
 export class ClassFeatures extends Model<typeof zClassFeatureSchema, typeof schema.ClassFeatures> {
 	public table = schema.ClassFeatures;
-	public generateSearchText(resource: ClassFeature): string {
-		return `ClassFeature: ${resource.name}`;
-	}
-	public generateTags(resource: ClassFeature): string[] {
-		return [];
-	}
 	constructor(public db: BetterSQLite3Database<typeof schema>) {
 		super();
 	}
@@ -21,6 +15,12 @@ export class ClassFeatures extends Model<typeof zClassFeatureSchema, typeof sche
 	}
 	public resourceListFromFile(file: any): any[] {
 		return file.classFeature;
+	}
+	public generateSearchText(classFeature: ClassFeature): string {
+		return `${classFeature.className} Feature: ${classFeature.name}`;
+	}
+	public generateTags(classFeature: ClassFeature): string[] {
+		return [classFeature.source];
 	}
 	public async import() {
 		await this._importData();

@@ -9,12 +9,6 @@ export class OptionalFeatures extends Model<
 	typeof schema.OptionalFeatures
 > {
 	public table = schema.OptionalFeatures;
-	public generateSearchText(resource: OptionalFeature): string {
-		return `OptionalFeature: ${resource.name}`;
-	}
-	public generateTags(resource: OptionalFeature): string[] {
-		return [];
-	}
 	constructor(public db: BetterSQLite3Database<typeof schema>) {
 		super();
 	}
@@ -24,6 +18,12 @@ export class OptionalFeatures extends Model<
 	}
 	public resourceListFromFile(file: any): any[] {
 		return file.optionalfeature ?? [];
+	}
+	public generateSearchText(optionalFeature: OptionalFeature): string {
+		return `Optional Feature: ${optionalFeature.name}`;
+	}
+	public generateTags(optionalFeature: OptionalFeature): string[] {
+		return [optionalFeature.source].concat(optionalFeature.traits ?? []);
 	}
 	public async import() {
 		await this._importData();

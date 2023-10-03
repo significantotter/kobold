@@ -15,7 +15,9 @@ export const zBookSchema = z.strictObject({
 		z.strictObject({
 			name: z.string(),
 			headers: z.array(z.string()).optional(),
-			ordinal: z.strictObject({ type: z.string(), identifier: z.number() }).optional(),
+			ordinal: z
+				.strictObject({ type: z.string(), identifier: z.number().or(z.string()) })
+				.optional(),
 		})
 	),
 });

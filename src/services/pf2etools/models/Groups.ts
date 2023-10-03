@@ -6,12 +6,6 @@ import { zGroupSchema, Group } from './Groups.zod.js';
 
 export class Groups extends Model<typeof zGroupSchema, typeof schema.Groups> {
 	public table = schema.Groups;
-	public generateSearchText(resource: Group): string {
-		return `Group: ${resource.name}`;
-	}
-	public generateTags(resource: Group): string[] {
-		return [];
-	}
 	constructor(public db: BetterSQLite3Database<typeof schema>) {
 		super();
 	}
@@ -21,6 +15,12 @@ export class Groups extends Model<typeof zGroupSchema, typeof schema.Groups> {
 	}
 	public resourceListFromFile(file: any): any[] {
 		return file.group;
+	}
+	public generateSearchText(group: Group): string {
+		return `Category: ${group.name} ${group.type}`;
+	}
+	public generateTags(group: Group): string[] {
+		return [group.source];
 	}
 	public async import() {
 		await this._importData();

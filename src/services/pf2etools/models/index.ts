@@ -3,6 +3,7 @@ import { Abilities } from './Abilities.js';
 import { Actions } from './Actions.js';
 import { Afflictions } from './Afflictions.js';
 import { Archetypes } from './Archetypes.js';
+import { Ancestries, VersatileHeritages } from './Ancestries.js';
 import { Backgrounds } from './Backgrounds.js';
 import { Creatures, CreaturesFluff } from './Bestiary.js';
 import { CreatureTemplates, CreatureTemplatesFluff } from './CreatureTemplates.js';
@@ -71,6 +72,11 @@ import { zTableSchema } from './Tables.zod.js';
 import { zTraitSchema } from './Traits.zod.js';
 import { zVariantRuleSchema } from './VariantRules.zod.js';
 import { zVehicleSchema } from './Vehicles.zod.js';
+import { zAncestrySchema, zVersatileHeritageSchema } from './Ancestries.zod.js';
+import { Books } from './Books.js';
+import { CompanionAbilities } from './CompanionAbilities.js';
+import { Conditions } from './Conditions.js';
+import { Companions } from './Companions.js';
 
 export { Abilities } from './Abilities.js';
 export { Ability } from './Abilities.zod.js';
@@ -78,8 +84,8 @@ export { Actions } from './Actions.js';
 export { Action } from './Actions.zod.js';
 export { Afflictions } from './Afflictions.js';
 export { Affliction } from './Afflictions.zod.js';
-export { Ancestries } from './Ancestries.js';
-export { Ancestry } from './Ancestries.zod.js';
+export { Ancestries, VersatileHeritages } from './Ancestries.js';
+export { Ancestry, VersatileHeritage } from './Ancestries.zod.js';
 export { Archetypes } from './Archetypes.js';
 export { Archetype } from './Archetypes.zod.js';
 export { Backgrounds } from './Backgrounds.js';
@@ -165,13 +171,19 @@ export const Models = [
 	Actions,
 	Afflictions,
 	Archetypes,
+	Ancestries,
+	VersatileHeritages,
 	Backgrounds,
+	Books,
 	Classes,
 	ClassFeatures,
 	Creatures,
 	CreaturesFluff,
 	CreatureTemplates,
 	CreatureTemplatesFluff,
+	CompanionAbilities,
+	Companions,
+	Conditions,
 	Deities,
 	DeitiesFluff,
 	Domains,
@@ -207,6 +219,8 @@ export const schemas = [
 	zActionSchema,
 	zAfflictionSchema,
 	zArchetypeSchema,
+	zAncestrySchema,
+	zVersatileHeritageSchema,
 	zBackgroundSchema,
 	zCreatureSchema,
 	zCreatureFluffSchema,

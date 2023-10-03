@@ -6,12 +6,6 @@ import { zSourceSchema, Source } from './Sources.zod.js';
 
 export class Sources extends Model<typeof zSourceSchema, typeof schema.Sources> {
 	public table = schema.Sources;
-	public generateSearchText(resource: Source): string {
-		return `Source: ${resource.name}`;
-	}
-	public generateTags(resource: Source): string[] {
-		return [];
-	}
 	constructor(public db: BetterSQLite3Database<typeof schema>) {
 		super();
 	}
@@ -21,6 +15,12 @@ export class Sources extends Model<typeof zSourceSchema, typeof schema.Sources> 
 	}
 	public resourceListFromFile(file: any): any[] {
 		return file.source;
+	}
+	public generateSearchText(source: Source): string {
+		return `Source: ${source.name}`;
+	}
+	public generateTags(source: Source): string[] {
+		return [source.source];
 	}
 	public async import() {
 		await this._importData();

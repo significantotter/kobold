@@ -6,12 +6,6 @@ import { zVehicleSchema, Vehicle } from './Vehicles.zod.js';
 
 export class Vehicles extends Model<typeof zVehicleSchema, typeof schema.Vehicles> {
 	public table = schema.Vehicles;
-	public generateSearchText(resource: Vehicle): string {
-		return `Vehicle: ${resource.name}`;
-	}
-	public generateTags(resource: Vehicle): string[] {
-		return [];
-	}
 	constructor(public db: BetterSQLite3Database<typeof schema>) {
 		super();
 	}
@@ -21,6 +15,12 @@ export class Vehicles extends Model<typeof zVehicleSchema, typeof schema.Vehicle
 	}
 	public resourceListFromFile(file: any): any[] {
 		return file.vehicle;
+	}
+	public generateSearchText(vehicle: Vehicle): string {
+		return `Vehicle: ${vehicle.name}`;
+	}
+	public generateTags(vehicle: Vehicle): string[] {
+		return [vehicle.source].concat(vehicle.traits ?? []);
 	}
 	public async import() {
 		await this._importData();

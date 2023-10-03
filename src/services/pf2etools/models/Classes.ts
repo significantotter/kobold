@@ -1,17 +1,11 @@
 import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
-import { fetchManyJsonFiles, fetchOneJsonFile } from './lib/helpers.js';
+import { fetchManyJsonFiles } from './lib/helpers.js';
 import { Model } from './lib/Model.js';
 import * as schema from '../pf2eTools.schema.js';
 import { zClassSchema, Class } from './Classes.zod.js';
 
 export class Classes extends Model<typeof zClassSchema, typeof schema.Classes> {
 	public table = schema.Classes;
-	public generateSearchText(resource: Class): string {
-		return `Class: ${resource.name}`;
-	}
-	public generateTags(resource: Class): string[] {
-		return [];
-	}
 	constructor(public db: BetterSQLite3Database<typeof schema>) {
 		super();
 	}
@@ -21,6 +15,12 @@ export class Classes extends Model<typeof zClassSchema, typeof schema.Classes> {
 	}
 	public resourceListFromFile(file: any): any[] {
 		return file.class;
+	}
+	public generateSearchText(resource: Class): string {
+		return `Class: ${resource.name}`;
+	}
+	public generateTags(resource: Class): string[] {
+		return [resource.rarity ?? 'common'];
 	}
 	public async import() {
 		await this._importData();

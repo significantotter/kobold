@@ -5,6 +5,7 @@ import {
 	AttackEntry,
 	DataEntry,
 	Entry,
+	Feat,
 	ImageEntry,
 	LevelEffectEntry,
 	Pf2EKeyAbility,
@@ -16,41 +17,49 @@ import {
 	TableEntry,
 	TableGroupEntry,
 } from '../models/index.js';
-import { CompendiumModel } from '../compendium.model.js';
 import { SharedParsers, applyOperatorIfNumber } from './compendium-parser-helpers.js';
-import { AttachmentBuilder } from 'discord.js';
+import { table } from 'table';
 
 export class EntryParser {
 	helpers: SharedParsers;
+	delimiter: string;
 	constructor(
-		private model: CompendiumModel,
-		private emojiConverter: { (emoji: string): string },
-		private files: AttachmentBuilder[] = []
+		parserHelper: SharedParsers,
+		options: {
+			delimiter?: string;
+		}
 	) {
-		this.helpers = new SharedParsers(this.model, this.emojiConverter);
+		this.delimiter = options.delimiter ?? ', ';
+		this.helpers = parserHelper;
 	}
 
-	public parseEntry(entry: Entry): string {
+	public parseEntry(entry: Entry, showTitle: boolean = true): string {
 		if (_.isString(entry)) return entry;
 		else if (entry.type === 'successDegree')
-			return this.parseSuccessDegree(entry as SuccessDegreeEntry);
+			return this.parseSuccessDegree(entry as SuccessDegreeEntry, showTitle);
 		else if (entry.type === 'affliction')
-			return this.parseAfflictionEntry(entry as AfflictionEntry);
-		else if (entry.type === 'ability') return this.parseAbilityEntry(entry as AbilityEntry);
-		else if (entry.type === 'attack') return this.parseAttackEntry(entry as AttackEntry);
-		else if (entry.type === 'quote') return this.parseQuoteEntry(entry as QuoteEntry);
+			return this.parseAfflictionEntry(entry as AfflictionEntry, showTitle);
+		else if (entry.type === 'ability')
+			return this.parseAbilityEntry(entry as AbilityEntry, showTitle);
+		else if (entry.type === 'attack')
+			return this.parseAttackEntry(entry as AttackEntry, showTitle);
+		else if (entry.type === 'quote')
+			return this.parseQuoteEntry(entry as QuoteEntry, showTitle);
 		else if (entry.type === 'lvlEffect')
-			return this.parseLevelEffectEntry(entry as LevelEffectEntry);
+			return this.parseLevelEffectEntry(entry as LevelEffectEntry, showTitle);
 		else if (entry.type === 'pf2-options')
-			return this.parsePf2eOptionsEntry(entry as Pf2eOptions);
-		else if (entry.type === 'data') return this.parseDataEntry(entry as DataEntry);
-		else if (entry.type === 'image') return this.parseImageEntry(entry as ImageEntry);
-		else if (entry.type === 'table') return this.parseTableEntry(entry as TableEntry);
+			return this.parsePf2eOptionsEntry(entry as Pf2eOptions, showTitle);
+		else if (entry.type === 'data') return this.parseDataEntry(entry as DataEntry, showTitle);
+		else if (entry.type === 'image')
+			return this.parseImageEntry(entry as ImageEntry, showTitle);
+		else if (entry.type === 'table')
+			return this.parseTableEntry(entry as TableEntry, showTitle);
 		else if (entry.type === 'tableGroup')
-			return this.parseTableGroupEntry(entry as TableGroupEntry);
+			return this.parseTableGroupEntry(entry as TableGroupEntry, showTitle);
 		else if (entry.type === 'pf2-key-ability')
-			return this.parsePf2KeyAbilityEntry(entry as Pf2EKeyAbility);
-		else if (entry.type === 'refClassFeature') return this.parseRefEntry(entry as RefEntry);
+			return this.parsePf2KeyAbilityEntry(entry as Pf2EKeyAbility, showTitle);
+		else if (entry.type === 'refClassFeature')
+			return this.parseRefEntry(entry as RefEntry, showTitle);
 		else if (
 			[
 				'list',
@@ -80,212 +89,253 @@ export class EntryParser {
 				'paper',
 			].includes(entry.type ?? '')
 		)
-			return this.parseSemanticEntry(entry as SemanticEntry);
-		else return this.parseAbilityEntry(entry as AbilityEntry);
+			return this.parseSemanticEntry(entry as SemanticEntry, showTitle);
+		else return this.parseAbilityEntry(entry as AbilityEntry, showTitle);
 	}
 
-	public parseImageEntry(entry: ImageEntry) {
+	public parseEntries = (entries: Entry[], showTitle: boolean = true): string => {
+		return (
+			entries
+				.map(entry => this.parseEntry(entry, showTitle))
+				// remove any empty string results
+				.filter(entry => entry && entry != this.delimiter)
+				.join(this.delimiter)
+		);
+	};
+
+	public parseImageEntry(entry: ImageEntry, showTitle: boolean = true): string {
 		// This only exists in "Book" resources and has local image file refs.
 		// 100% not worth the effort to implement.
 		return '';
 	}
-	public parsePf2KeyAbilityEntry(entry: Pf2EKeyAbility) {
+	public parsePf2KeyAbilityEntry(entry: Pf2EKeyAbility, showTitle: boolean = true): string {
 		// This is used a single time, only in the render demo.
 		return '';
 	}
 
-	public parseTableEntry(tableEntry: TableEntry) {
-		// Also not worth it.
-		return '';
+	public parseTableEntry(tableEntry: TableEntry, showTitle: boolean = true): string {
+		const entryParser = new EntryParser(this.helpers, { delimiter: '\n\n' });
+		const tableRows = tableEntry.rows.map(row => {
+			if (_.isArray(row)) return row.map(_.toString);
+			else {
+				const innerRows: string[] = [];
+				for (let i = 0; i < row.rows.length; i++) {
+					innerRows[i] = row.rows.map(innerRow => innerRow[i]).join(', ');
+				}
+				return row.rows.map(row => row.map(_.toString).join('; '));
+			}
+		});
+		const colOptions = [];
+		for (const col in tableRows[0]) {
+			colOptions.push({
+				width: Math.min(Math.max(...tableRows.map(row => row[col].length)), 18),
+			});
+		}
+		const result = table(tableRows, {
+			border: {
+				topLeft: ``,
+				topRight: ``,
+				bottomLeft: ``,
+				bottomRight: ``,
+				bodyLeft: ``,
+				bodyRight: ``,
+				joinLeft: ``,
+				joinRight: ``,
+			},
+		});
+		return '```' + result + '```';
 	}
-	public parseTableGroupEntry(tableGroupEntry: TableGroupEntry) {
+	public parseTableGroupEntry(
+		tableGroupEntry: TableGroupEntry,
+		showTitle: boolean = true
+	): string {
 		// Also not worth it.
 		return '';
 	}
 
-	public parsePf2eOptionsEntry(entry: Pf2eOptions) {
-		return entry.items.map(this.parseEntry).join('\n');
+	public parsePf2eOptionsEntry(entry: Pf2eOptions, showTitle: boolean = true): string {
+		return this.parseEntries(entry.items);
 	}
 
-	public parseDataEntry(entry: DataEntry) {
+	public parseDataEntry(entry: DataEntry, showTitle: boolean = true): string {
 		// TODO:
 		return '';
 	}
 
-	public parseLevelEffectEntry(entry: LevelEffectEntry) {
+	public parseLevelEffectEntry(entry: LevelEffectEntry, showTitle: boolean = true): string {
 		return entry.entries
 			.map(level => {
 				return `**${level.range}** ${level.entry}`;
 			})
-			.join('\n');
+			.join(this.delimiter);
 	}
 
-	public parseSemanticEntry(entry: SemanticEntry) {
-		let semanticString = '';
+	public parseSemanticEntry(entry: SemanticEntry, showTitle: boolean = true): string {
+		let semanticLines: string[] = [];
 		if (entry.step) {
-			semanticString += `**Step ${entry.step}** `;
+			semanticLines.push(`**Step ${entry.step}** `);
 		}
 		if (entry.name) {
-			semanticString += `**${entry.name}** `;
+			semanticLines.push(`**${entry.name}** `);
 		}
 		if (entry.level) {
-			semanticString += ` (Level ${entry.level})`;
+			semanticLines.push(` (Level ${entry.level})`);
 		}
 		if (entry.traits) {
-			semanticString += ` (${entry.traits.join(', ')})`;
+			semanticLines.push(` (${entry.traits.join(', ')})`);
 		}
 		if (entry.entries) {
-			semanticString += entry.entries.map(this.parseEntry).join('\n');
+			semanticLines.push(this.parseEntries(entry.entries));
 		}
-		return semanticString;
+		if (entry.items) {
+			semanticLines.push(this.parseEntries(entry.items));
+		}
+		return semanticLines.join(this.delimiter);
 	}
 
-	public parseQuoteEntry(entry: QuoteEntry): string {
-		let semanticString = '';
+	public parseQuoteEntry(entry: QuoteEntry, showTitle: boolean = true): string {
+		let semanticLines: string[] = [];
 		if (entry.from) {
-			semanticString += `from ${entry.from}\n`;
+			semanticLines.push(`from ${entry.from}`);
 		}
-		semanticString = entry.entries.map(this.parseEntry).join('\n');
+		semanticLines.push(this.parseEntries(entry.entries));
 		if (entry.by) {
-			semanticString += `${semanticString}\n-- ${entry.by}`;
+			semanticLines.push(
+				`${this.delimiter.includes('\n') ? this.delimiter : ''}-- ${entry.by}`
+			);
 		}
-		return semanticString;
+		return semanticLines.join(this.delimiter);
 	}
 
-	public parseRefEntry(entry: RefEntry): string {
+	public parseRefEntry(entry: RefEntry, showTitle: boolean = true): string {
 		// Todo if I parse class features/classes
 		return '';
 	}
 
-	public parseSuccessDegree(entry: SuccessDegreeEntry) {
-		let successDegreeString = '';
+	public parseSuccessDegree(entry: SuccessDegreeEntry, showTitle: boolean = true): string {
+		let successDegreeLines = [];
 		if (entry.entries['Critical Success']) {
-			successDegreeString += `**Critical Success** ${entry.entries['Critical Success']}\n`;
+			successDegreeLines.push(`**Critical Success** ${entry.entries['Critical Success']}`);
 		}
 		if (entry.entries['Success']) {
-			successDegreeString += `**Success** ${entry.entries['Success']}\n`;
+			successDegreeLines.push(`**Success** ${entry.entries['Success']}`);
 		}
 		if (entry.entries['Failure']) {
-			successDegreeString += `**Failure** ${entry.entries['Failure']}\n`;
+			successDegreeLines.push(`**Failure** ${entry.entries['Failure']}`);
 		}
 		if (entry.entries['Critical Failure']) {
-			successDegreeString += `**Critical Failure** ${entry.entries['Critical Failure']}\n`;
+			successDegreeLines.push(`**Critical Failure** ${entry.entries['Critical Failure']}`);
 		}
 		if (entry.entries.Special) {
-			successDegreeString += `**Special** ${entry.entries.Special}\n`;
+			successDegreeLines.push(`**Special** ${entry.entries.Special}`);
 		}
-		return `\n${successDegreeString}`;
+		return this.delimiter + successDegreeLines.join(this.delimiter);
 	}
 
-	public parseAbilityEntry(ability: AbilityEntry, inline = true) {
-		let abilityString = '';
-		if ((ability.title ?? ability.name) && inline) {
-			abilityString += `**${ability.title ?? ability.name}** `;
-		}
-		if (ability.activity && inline) {
-			abilityString += this.helpers.parseActivity(ability.activity);
-		}
-		if (ability.traits) {
-			abilityString += ` (${ability.traits.join(', ')})`;
-			if (!inline) abilityString += '\n';
-		}
-		const delimiter = inline ? ' ' : '\n';
-		if (ability.note) {
-			abilityString += ` ${ability.note}`;
-		}
-		if (ability.components) {
-			abilityString += ` ${ability.components.join(', ')}`;
-		}
-		if (ability.cost) {
-			abilityString += `${delimiter}**Cost** ${ability.cost}`;
-		}
-		if (ability.prerequisites) {
-			abilityString += `${delimiter}**Prerequisites** ${ability.prerequisites}`;
-		}
-		if (ability.trigger) {
-			abilityString += `${delimiter}**Trigger** ${ability.trigger}`;
-		}
-		if (ability.requirements ?? ability.requirement) {
-			abilityString += `${delimiter}**Requirements** ${
-				ability.requirements ?? ability.requirement
-			}`;
-		}
-		if (ability.frequency) {
-			abilityString += delimiter + this.helpers.parseFrequency(ability.frequency);
-		}
-		if (ability.area) {
-			abilityString += `${delimiter}**Area** ${ability.area.entry} (${ability.area.types.join(
-				', '
-			)})`;
-		}
+	public parseAbilityEntryTitle(ability: AbilityEntry): string {
+		let abilityTitle = `**${ability.title ?? ability.name ?? 'Activate'}** `;
+		if (ability.activity) abilityTitle += this.helpers.parseActivity(ability.activity);
+		return abilityTitle;
+	}
+
+	public parseAbilityEntry(ability: AbilityEntry, showTitle: boolean = true): string {
+		const abilityLines: string[] = [];
+		let abilityTitle = '';
+
+		console.log(abilityTitle);
+		let abilityTraitString = '';
+		if (ability.traits) abilityTraitString += ` (${ability.traits.join(', ')})`;
+		if (ability.note) abilityTraitString += ` ${ability.note}`;
+
+		if (showTitle) abilityLines.push(this.parseAbilityEntryTitle(ability) + abilityTraitString);
+		else if (abilityTraitString) abilityLines.push(abilityTraitString.trim());
+
+		if (ability.components)
+			abilityLines.push(`**Components** ${ability.components.join(', ')}`);
+
+		if (ability.cost) abilityLines.push(`**Cost** ${ability.cost}`);
+
+		if (ability.prerequisites) abilityLines.push(`**Prerequisites** ${ability.prerequisites}`);
+
+		if (ability.trigger) abilityLines.push(`**Trigger** ${ability.trigger}`);
+
+		if (ability.requirements ?? ability.requirement)
+			abilityLines.push(`**Requirements** ${ability.requirements ?? ability.requirement}`);
+
+		if (ability.frequency) abilityLines.push(this.helpers.parseFrequency(ability.frequency));
+
+		if (ability.area)
+			abilityLines.push(`**Area** ${ability.area.entry} (${ability.area.types.join(', ')})`);
+
 		// ignore range, it's only used on generic abilities attached to attacks
 		// ignore entries_as_xyz, it repeats the data of another source of the ability
 		// ignore generic, it tells you where to find the text of a common ability
 		// ignore actionType, it's only used in archetypes/ancestries to reference the action source
+		if (ability.entries?.length) abilityLines.push(this.parseEntries(ability.entries));
 
-		if (ability.entries?.length) abilityString += delimiter + '**Effect** ';
-		for (const entry of ability.entries ?? []) {
-			abilityString += this.parseEntry(entry);
-		}
-		if (ability.special) abilityString += `;${delimiter}**Special** ${ability.special}`;
-		return abilityString;
+		if (ability.special) abilityLines.push(`;**Special** ${ability.special}`);
+		return abilityLines.join(this.delimiter);
 	}
 
-	public parseAfflictionEntry(affliction: AfflictionEntry, inline: boolean = true): string {
+	public parseAfflictionEntry(affliction: AfflictionEntry, showTitle: boolean = true): string {
 		let afflictionString = '';
-		let delimiter = inline ? ' ' : '\n';
-		if (affliction.name && inline) {
-			afflictionString += `**${affliction.name}**${delimiter}`;
+		const afflictionLines: string[] = [];
+		let afflictionTitle = '';
+		if (affliction.name) afflictionTitle += `**${affliction.name}**`;
+
+		let afflictionTraitString = '';
+		if (affliction.traits) afflictionTraitString += ` (${affliction.traits.join(', ')})`;
+		let afflictionNoteString = '';
+		if (affliction.note) afflictionNoteString += ` ${affliction.note}`;
+
+		if (showTitle) {
+			afflictionLines.push(afflictionTitle + afflictionTraitString + afflictionNoteString);
+		} else {
+			if (afflictionTraitString) afflictionLines.push(afflictionTraitString.trim());
+			if (afflictionNoteString) afflictionLines.push(afflictionNoteString.trim());
 		}
-		if (affliction.traits) {
-			afflictionString += ` (${affliction.traits.join(', ')})`;
-		}
-		if (affliction.note) {
-			afflictionString += ` ${affliction.note}`;
-		}
-		if (affliction.DC || affliction.savingThrow)
-			afflictionString += `${delimiter}**Saving Throw**`;
+
+		let savingThrowString = '';
+		if (affliction.DC || affliction.savingThrow) savingThrowString += `**Saving Throw**`;
 		if (affliction.DC) {
-			afflictionString += ` ${affliction.DC}`;
+			savingThrowString += ` ${affliction.DC}`;
 		}
 		if (affliction.savingThrow) {
-			afflictionString += ` ${affliction.savingThrow}`;
+			savingThrowString += ` ${affliction.savingThrow}`;
 		}
-		const afflictionStringSegments: string[] = [];
-		afflictionStringSegments.push(afflictionString);
+		if (savingThrowString) afflictionLines.push(savingThrowString);
+
+		afflictionLines.push(afflictionString);
 		if (affliction.onset) {
-			afflictionStringSegments.push(`**Onset** ${affliction.onset}`);
+			afflictionLines.push(`**Onset** ${affliction.onset}`);
 		}
 		if (affliction.maxDuration) {
-			afflictionStringSegments.push(`**Maximum Duration** ${affliction.maxDuration}`);
+			afflictionLines.push(`**Maximum Duration** ${affliction.maxDuration}`);
 		}
 		for (const stage of affliction.stages ?? []) {
 			let stageString = `**Stage ${stage.stage}**`;
-			if (stage.entries?.length) {
-				const entries = stage.entries.map(entry => this.parseEntry(entry));
-				if (stage.entry) entries.push(this.parseEntry(stage.entry));
-				stageString += entries.join(', ');
-			}
 			if (stage.duration) {
 				stageString += ` (${stage.duration})`;
 			}
-			afflictionStringSegments.push(stageString);
+			if (stage.entries?.length || stage.entry) {
+				stageString +=
+					this.delimiter +
+					this.parseEntries(
+						(stage.entries ?? []).concat(stage.entry ? [stage.entry] : [])
+					);
+			}
+			afflictionLines.push(stageString);
 		}
 		if (affliction.entries?.length) {
-			afflictionStringSegments.push(
-				`${affliction.entries
-					.map(entry => this.parseEntry(entry))
-					.join(inline ? ', ' : '\n')}`
-			);
+			afflictionLines.push(this.parseEntries(affliction.entries));
 		}
-		const footer = affliction.temptedCurse
-			? `\n**Tempted Curse** ${affliction.temptedCurse.join(', ')}`
-			: '';
-		return afflictionStringSegments.join(inline ? '; ' : '\n') + footer;
+		if (affliction.temptedCurse)
+			afflictionLines.push(`**Tempted Curse** ${affliction.temptedCurse.join(', ')}`);
+		return afflictionLines.join(this.delimiter);
 	}
 
-	public parseAttackEntry(attack: AttackEntry) {
-		let attackString = '';
+	public parseAttackEntry(attack: AttackEntry, showTitle: boolean = true): string {
+		const attackLine = [];
 		const traits = [
 			...(attack.traits ?? []),
 			attack.preciousMetal,
@@ -295,29 +345,30 @@ export class EntryParser {
 			.filter(_.isString);
 		if (attack.range) {
 			if (_.isNumber(attack.range) && attack.range > 5) {
-				attackString += `**Ranged** ${attack.range} ft.}`;
+				attackLine.push(`**Ranged** ${attack.range} ft.`);
 			} else if (_.isNumber(attack.range) && attack.range <= 5) {
-				attackString += `**Melee**`;
+				attackLine.push(`**Melee**`);
 			} else {
-				attackString += `**${attack.range}**`;
+				attackLine.push(`**${attack.range}**`);
 			}
 		}
-		if (attack.activity) {
-			attackString += ' ' + this.helpers.parseActivity(attack.activity);
-		}
+		attackLine.push(
+			' ' + this.helpers.parseActivity(attack.activity ?? { number: 1, unit: 'action' })
+		);
+		attackLine.push(`${attack.name}`);
 		const toHit: number | undefined = attack.attack ?? attack.bonus;
 		if (toHit) {
-			attackString += ` ${applyOperatorIfNumber(toHit)} `;
+			attackLine.push(`${applyOperatorIfNumber(toHit)} `);
 		}
 		if (traits?.length) {
-			attackString += ` (${traits.join(', ').replaceAll(/[\<\>]/g, '')})`;
+			attackLine.push(`(${traits.join(', ').replaceAll(/[\<\>]/g, '')})`);
 		}
 		if (attack.damage) {
-			attackString += ', **Damage**: ';
+			let damageString = ', **Damage**: ';
 			if (_.isArray(attack.damage)) {
-				attackString += attack.damage.join(', ');
+				damageString += attack.damage.join(', ');
 			} else {
-				attackString += attack.damage;
+				damageString += attack.damage;
 			}
 			if (
 				attack.damageType &&
@@ -327,15 +378,17 @@ export class EntryParser {
 					.join(' ')
 					.includes(attack.damageType.toLowerCase())
 			) {
-				attackString += ` ${attack.damageType}`;
+				damageString += `${attack.damageType}`;
 			}
+			if (attack.damage2) damageString += ', ';
+			attackLine.push(damageString);
 		}
 		if (attack.damage2) {
-			attackString += ', ';
+			let damageString = '';
 			if (_.isArray(attack.damage2)) {
-				attackString += attack.damage2.join(', ');
+				damageString += attack.damage2.join(', ');
 			} else {
-				attackString += attack.damage2;
+				damageString += attack.damage2;
 			}
 			if (
 				attack.damageType2 &&
@@ -345,18 +398,56 @@ export class EntryParser {
 					.join(' ')
 					.includes(attack.damageType2.toLowerCase())
 			) {
-				attackString += ` ${attack.damageType2}`;
+				damageString += `${attack.damageType2}`;
 			}
+			attackLine.push(damageString);
 		}
 		if (attack.traitNote) {
-			attackString += ` ${attack.traitNote}`;
+			attackLine.push(`${attack.traitNote}`);
 		}
 		if (attack.note) {
-			attackString += ` ${attack.note}`;
+			attackLine.push(`${attack.note}`);
 		}
 		if (attack.effects) {
-			attackString += ` Effects: ${attack.effects.map(entry => this.parseEntry(entry))}`;
+			attackLine.push(
+				`Effects: ${attack.effects
+					.map(entry => this.parseEntry(entry))
+					.filter(entry => entry != this.delimiter)
+					.join(', ')}`
+			);
 		}
-		return attackString;
+		return attackLine.join(' ');
+	}
+
+	parseFeat(feat: Feat, showTitle: boolean = true): { name: string; value: string } {
+		const activity = feat.activity ? ' ' + this.helpers.parseActivity(feat.activity) : '';
+		const name = `**${feat.name}**${activity} (Feat ${feat.level})`;
+
+		const descriptionLines: string[] = [];
+		if (showTitle) descriptionLines.push(name);
+		if (feat.traits) descriptionLines.push(`**Traits** ${feat.traits.join(', ')}`);
+		if (feat.frequency) descriptionLines.push(this.helpers.parseFrequency(feat.frequency));
+		if (feat.access) descriptionLines.push(`**Access** ${feat.access}`);
+		if (feat.cost) descriptionLines.push(`**Cost** ${feat.cost}`);
+		if (feat.prerequisites) descriptionLines.push(`**Prerequisites** ${feat.prerequisites}`);
+		if (feat.access) descriptionLines.push(`**Access** ${feat.access}`);
+
+		if (feat.entries) descriptionLines.push(this.parseEntries(feat.entries));
+
+		if (feat.amp?.entries) {
+			descriptionLines.push(this.parseEntries(feat.amp.entries));
+		}
+		if (feat.leadsTo)
+			descriptionLines.push(
+				`**Leads To** ${feat.leadsTo.map(otherFeat => `__${otherFeat}__`).join(', ')}`
+			);
+		if (feat.footer)
+			descriptionLines.push(
+				Object.entries(feat.footer)
+					.map((key, value) => `**${key}** ${value}`)
+					.join(this.delimiter)
+			);
+		if (feat.special) descriptionLines.push(`**Special** ${feat.special.join('; ')}`);
+		return { name, value: descriptionLines.join(this.delimiter) };
 	}
 }

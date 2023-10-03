@@ -6,12 +6,6 @@ import { zDomainSchema, Domain } from './Domains.zod.js';
 
 export class Domains extends Model<typeof zDomainSchema, typeof schema.Domains> {
 	public table = schema.Domains;
-	public generateSearchText(resource: Domain): string {
-		return `Domain: ${resource.name}`;
-	}
-	public generateTags(resource: Domain): string[] {
-		return [];
-	}
 	constructor(public db: BetterSQLite3Database<typeof schema>) {
 		super();
 	}
@@ -21,6 +15,12 @@ export class Domains extends Model<typeof zDomainSchema, typeof schema.Domains> 
 	}
 	public resourceListFromFile(file: any): any[] {
 		return file.domain ?? [];
+	}
+	public generateSearchText(domain: Domain): string {
+		return `Domain: ${domain.name}`;
+	}
+	public generateTags(domain: Domain): string[] {
+		return [domain.source];
 	}
 	public async import() {
 		await this._importData();

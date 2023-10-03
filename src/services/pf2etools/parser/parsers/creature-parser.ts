@@ -2,6 +2,7 @@ import _ from 'lodash';
 import { KoboldEmbed } from '../../../../utils/kobold-embed-utils.js';
 import { Ability, Affliction, Creature, CreatureFluff, CreatureSense } from '../../models/index.js';
 import { CompendiumEmbedParser } from '../compendium-parser.js';
+import { EntryParser } from '../compendium-entry-parser.js';
 import { DrizzleUtils } from '../../utils/drizzle-utils.js';
 
 const abilityIsAffliction = (ability: Ability | Affliction): ability is Affliction =>
@@ -11,6 +12,9 @@ export async function parseCreature(
 	this: CompendiumEmbedParser,
 	creature: Creature
 ): Promise<KoboldEmbed> {
+	const delimiter = '\n';
+	const entryParser = new EntryParser(this.helpers, { delimiter });
+	const inlineEntryParser = new EntryParser(this.helpers, { delimiter: '; ' });
 	const fluffResultRaw = await this.model.db.query.CreaturesFluff.findFirst({
 		where: DrizzleUtils.ilike(this.model.creaturesFluff.table.name, creature.name),
 	});
@@ -75,10 +79,15 @@ export async function parseCreature(
 					if (abilityIsAffliction(ability)) {
 						return `**${ability.name}** ${(ability.entries ?? []).join(', ')}`;
 					} else {
-						return `${this.entries.parseAbilityEntry(ability)}`;
+						return inlineEntryParser
+							.parseAbilityEntry(ability)
+							.replace('**', '')
+							.replace('**', '')
+							.replace('; **Effect**', ' ');
 					}
 				})
-				.join('\n')
+				.filter(_.identity)
+				.join(delimiter)
 		);
 	}
 
@@ -88,7 +97,7 @@ export async function parseCreature(
 			creature.source ? `_${encodeURIComponent(creature.source)}` : ''
 		}`,
 		thumbnail: fluffResult?.images?.[0] ? { url: fluffResult.images[0] } : undefined,
-		description: topBlock.join('\n'),
+		description: topBlock.join(delimiter),
 	});
 
 	const midBlock: string[] = [];
@@ -102,10 +111,11 @@ export async function parseCreature(
 					if (abilityIsAffliction(ability)) {
 						return `**${ability.name}** ${(ability.entries ?? []).join(', ')}`;
 					} else {
-						return `${this.entries.parseAbilityEntry(ability)}`;
+						return `${entryParser.parseAbilityEntry(ability)}`;
 					}
 				})
-				.join('\n')
+				.filter(_.identity)
+				.join(delimiter)
 		);
 	}
 	const bottomBlock: string[] = [];
@@ -115,7 +125,7 @@ export async function parseCreature(
 	}
 	for (const attack of creature.attacks ?? []) {
 		if (attack) {
-			midBlock.push(this.entries.parseAttackEntry(attack));
+			midBlock.push(inlineEntryParser.parseAttackEntry(attack));
 		}
 	}
 	if (creature.spellcasting?.length) {
@@ -124,8 +134,8 @@ export async function parseCreature(
 				.map(spellcasting => {
 					return this.helpers.parseSpellcasting(spellcasting);
 				})
-				.filter(_.isString)
-				.join('\n')
+				.filter(_.identity)
+				.join(delimiter)
 		);
 	}
 	if (creature.abilities?.bot) {
@@ -133,23 +143,24 @@ export async function parseCreature(
 			creature.abilities.bot
 				.map(ability => {
 					if (abilityIsAffliction(ability)) {
-						return this.entries.parseAfflictionEntry(ability);
+						return entryParser.parseAfflictionEntry(ability);
 					} else {
-						return this.entries.parseAbilityEntry(ability);
+						return entryParser.parseAbilityEntry(ability);
 					}
 				})
-				.join('\n')
+				.filter(_.identity)
+				.join(delimiter)
 		);
 	}
 
 	embed.addFields(
 		{
 			name: '\u200B',
-			value: midBlock.join('\n'),
+			value: midBlock.join(delimiter),
 		},
 		{
 			name: '\u200B',
-			value: bottomBlock.join('\n'),
+			value: bottomBlock.join(delimiter),
 		}
 	);
 

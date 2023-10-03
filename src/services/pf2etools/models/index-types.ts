@@ -1,6 +1,6 @@
 export { Ability } from './Abilities.zod.js';
 export { Action } from './Actions.zod.js';
-export { Ancestry } from './Ancestries.zod.js';
+export { Ancestry, VersatileHeritage } from './Ancestries.zod.js';
 export { Affliction } from './Afflictions.zod.js';
 export { Archetype } from './Archetypes.zod.js';
 export { Background } from './Backgrounds.zod.js';

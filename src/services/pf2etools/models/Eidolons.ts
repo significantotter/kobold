@@ -6,12 +6,6 @@ import { zEidolonSchema, Eidolon } from './Eidolons.zod.js';
 
 export class Eidolons extends Model<typeof zEidolonSchema, typeof schema.Eidolons> {
 	public table = schema.Eidolons;
-	public generateSearchText(resource: Eidolon): string {
-		return `Eidolon: ${resource.name}`;
-	}
-	public generateTags(resource: Eidolon): string[] {
-		return [];
-	}
 	constructor(public db: BetterSQLite3Database<typeof schema>) {
 		super();
 	}
@@ -21,6 +15,12 @@ export class Eidolons extends Model<typeof zEidolonSchema, typeof schema.Eidolon
 	}
 	public resourceListFromFile(file: any): any[] {
 		return file.eidolon;
+	}
+	public generateSearchText(eidolon: Eidolon): string {
+		return `Eidolon: ${eidolon.name}`;
+	}
+	public generateTags(eidolon: Eidolon): string[] {
+		return [eidolon.source].concat(eidolon.traits ?? []);
 	}
 	public async import() {
 		await this._importData();

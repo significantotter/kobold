@@ -23,7 +23,7 @@ export class Abilities extends Model<typeof zAbilitySchema, typeof schema.Abilit
 		return `Ability: ${ability.name}${activityShorthand ? ` (${activityShorthand})` : ''}`;
 	}
 	public generateTags(ability: Ability): string[] {
-		return [];
+		return ability.traits ?? [];
 	}
 	public import(): Promise<void> {
 		return this._importData();

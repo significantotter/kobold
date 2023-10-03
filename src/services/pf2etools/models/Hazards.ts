@@ -6,12 +6,6 @@ import { Hazard, zHazardSchema } from './Hazards.zod.js';
 
 export class Hazards extends Model<typeof zHazardSchema, typeof schema.Hazards> {
 	public table = schema.Hazards;
-	public generateSearchText(resource: Hazard): string {
-		return `Hazard: ${resource.name}`;
-	}
-	public generateTags(resource: Hazard): string[] {
-		return [];
-	}
 	constructor(public db: BetterSQLite3Database<typeof schema>) {
 		super();
 	}
@@ -21,6 +15,12 @@ export class Hazards extends Model<typeof zHazardSchema, typeof schema.Hazards> 
 	}
 	public resourceListFromFile(file: any): any[] {
 		return file.hazard;
+	}
+	public generateSearchText(hazard: Hazard): string {
+		return `Hazard ${hazard.level}: ${hazard.name}`;
+	}
+	public generateTags(hazard: Hazard): string[] {
+		return [hazard.source].concat(hazard.traits ?? []);
 	}
 	public async import() {
 		await this._importData();

@@ -6,12 +6,6 @@ import * as schema from '../pf2eTools.schema.js';
 
 export class Creatures extends Model<typeof zCreatureSchema, typeof schema.Creatures> {
 	public table = schema.Creatures;
-	public generateSearchText(resource: Creature): string {
-		return `Creature: ${resource.name}${resource.level ? ` (Lvl ${resource.level})` : ''}`;
-	}
-	public generateTags(resource: Creature): string[] {
-		return [];
-	}
 	constructor(public db: BetterSQLite3Database<typeof schema>) {
 		super();
 	}
@@ -21,6 +15,12 @@ export class Creatures extends Model<typeof zCreatureSchema, typeof schema.Creat
 	}
 	public resourceListFromFile(file: any): any[] {
 		return file.creature ?? [];
+	}
+	public generateSearchText(creature: Creature): string {
+		return `Creature${creature.level ? ` ${creature.level}` : ''}: ${creature.name}`;
+	}
+	public generateTags(creature: Creature): string[] {
+		return creature.traits ?? [];
 	}
 	public async import() {
 		await this._importData();

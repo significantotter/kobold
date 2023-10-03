@@ -1,6 +1,10 @@
 import { z } from 'zod';
-import { zAbilityEntrySchema, zCopySchema, zEntrySchema, zModSchema } from './lib/entries.zod.js';
-import { zTypedNumberSchema } from './lib/helpers.zod.js';
+import {
+	zAbilityEntrySchema,
+	zAfflictionEntrySchema,
+	zCopySchema,
+	zEntrySchema,
+} from './lib/entries.zod.js';
 
 export type CreatureTemplate = z.infer<typeof zCreatureTemplateSchema>;
 export const zCreatureTemplateSchema = z.strictObject({
@@ -13,13 +17,13 @@ export const zCreatureTemplateSchema = z.strictObject({
 	abilities: z
 		.object({
 			entries: zEntrySchema.array().optional(),
-			abilities: zEntrySchema.array().optional(),
+			abilities: z.union([zAbilityEntrySchema, zAfflictionEntrySchema]).array().optional(),
 		})
 		.optional(),
 	optAbilities: z
 		.object({
 			entries: zEntrySchema.array().optional(),
-			abilities: zEntrySchema.array().optional(),
+			abilities: z.union([zAbilityEntrySchema, zAfflictionEntrySchema]).array().optional(),
 		})
 		.optional(),
 });
@@ -33,13 +37,13 @@ export const zCreatureTemplateFluffSchema = z.strictObject({
 	abilities: z
 		.object({
 			entries: z.array(zEntrySchema).optional(),
-			abilities: z.array(zEntrySchema).optional(),
+			abilities: z.array(z.union([zAbilityEntrySchema, zAfflictionEntrySchema])).optional(),
 		})
 		.optional(),
 	optAbilities: z
 		.object({
 			entries: z.array(zEntrySchema).optional(),
-			abilities: z.array(zEntrySchema).optional(),
+			abilities: z.array(z.union([zAbilityEntrySchema, zAfflictionEntrySchema])).optional(),
 		})
 		.optional(),
 	_copy: zCopySchema.optional(),

@@ -7,12 +7,6 @@ import { z } from 'zod';
 
 export class QuickRules extends Model<typeof zQuickRuleSchema, typeof schema.QuickRules> {
 	public table = schema.QuickRules;
-	public generateSearchText(resource: QuickRule): string {
-		return `QuickRule: ${resource.name}`;
-	}
-	public generateTags(resource: QuickRule): string[] {
-		return [];
-	}
 	constructor(public db: BetterSQLite3Database<typeof schema>) {
 		super();
 	}
@@ -25,6 +19,12 @@ export class QuickRules extends Model<typeof zQuickRuleSchema, typeof schema.Qui
 			name,
 			rule,
 		}));
+	}
+	public generateSearchText(quickRule: QuickRule): string {
+		return `Rule: ${quickRule.name}`;
+	}
+	public generateTags(quickRule: QuickRule): string[] {
+		return [];
 	}
 	public async import() {
 		await this._importData();

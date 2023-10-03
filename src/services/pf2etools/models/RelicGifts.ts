@@ -6,12 +6,6 @@ import { zRelicGiftSchema, RelicGift } from './RelicGifts.zod.js';
 
 export class RelicGifts extends Model<typeof zRelicGiftSchema, typeof schema.RelicGifts> {
 	public table = schema.RelicGifts;
-	public generateSearchText(resource: RelicGift): string {
-		return `RelicGift: ${resource.name}`;
-	}
-	public generateTags(resource: RelicGift): string[] {
-		return [];
-	}
 	constructor(public db: BetterSQLite3Database<typeof schema>) {
 		super();
 	}
@@ -21,6 +15,12 @@ export class RelicGifts extends Model<typeof zRelicGiftSchema, typeof schema.Rel
 	}
 	public resourceListFromFile(file: any): any[] {
 		return file.relicGift;
+	}
+	public generateSearchText(relicGift: RelicGift): string {
+		return `Relic Gift: ${relicGift.name} (${relicGift.tier})`;
+	}
+	public generateTags(relicGift: RelicGift): string[] {
+		return [relicGift.source].concat(relicGift.traits ?? []);
 	}
 	public async import() {
 		await this._importData();

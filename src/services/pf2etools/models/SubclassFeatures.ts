@@ -9,12 +9,6 @@ export class SubclassFeatures extends Model<
 	typeof schema.SubclassFeatures
 > {
 	public table = schema.SubclassFeatures;
-	public generateSearchText(resource: SubclassFeature): string {
-		return `SubclassFeature: ${resource.name}`;
-	}
-	public generateTags(resource: SubclassFeature): string[] {
-		return [];
-	}
 	constructor(public db: BetterSQLite3Database<typeof schema>) {
 		super();
 	}
@@ -24,6 +18,12 @@ export class SubclassFeatures extends Model<
 	}
 	public resourceListFromFile(file: any): any[] {
 		return file.subclassFeature;
+	}
+	public generateSearchText(subclassFeature: SubclassFeature): string {
+		return `${subclassFeature.subclassShortName} Feature: ${subclassFeature.name}`;
+	}
+	public generateTags(subclassFeature: SubclassFeature): string[] {
+		return [subclassFeature.source];
 	}
 	public async import() {
 		await this._importData();

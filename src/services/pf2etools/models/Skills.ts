@@ -6,12 +6,6 @@ import { zSkillSchema, Skill } from './Skills.zod.js';
 
 export class Skills extends Model<typeof zSkillSchema, typeof schema.Skills> {
 	public table = schema.Skills;
-	public generateSearchText(resource: Skill): string {
-		return `Skill: ${resource.name}`;
-	}
-	public generateTags(resource: Skill): string[] {
-		return [];
-	}
 	constructor(public db: BetterSQLite3Database<typeof schema>) {
 		super();
 	}
@@ -21,6 +15,12 @@ export class Skills extends Model<typeof zSkillSchema, typeof schema.Skills> {
 	}
 	public resourceListFromFile(file: any): any[] {
 		return file.skill;
+	}
+	public generateSearchText(skill: Skill): string {
+		return `Skill: ${skill.name}`;
+	}
+	public generateTags(skill: Skill): string[] {
+		return [skill.source];
 	}
 	public async import() {
 		await this._importData();

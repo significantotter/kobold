@@ -6,12 +6,6 @@ import * as schema from '../pf2eTools.schema.js';
 
 export class Companions extends Model<typeof zCompanionSchema, typeof schema.Companions> {
 	public table = schema.Companions;
-	public generateSearchText(resource: Companion): string {
-		return `Companion: ${resource.name}`;
-	}
-	public generateTags(resource: Companion): string[] {
-		return [];
-	}
 	constructor(public db: BetterSQLite3Database<typeof schema>) {
 		super();
 	}
@@ -21,6 +15,12 @@ export class Companions extends Model<typeof zCompanionSchema, typeof schema.Com
 	}
 	public resourceListFromFile(file: any): any[] {
 		return file.companion;
+	}
+	public generateSearchText(companion: Companion): string {
+		return `Companion: ${companion.name}`;
+	}
+	public generateTags(companion: Companion): string[] {
+		return companion.traits ?? [];
 	}
 	public async import() {
 		await this._importData();

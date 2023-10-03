@@ -1,6 +1,7 @@
 import { KoboldEmbed } from '../../../../utils/kobold-embed-utils.js';
 import { Action } from '../../models/index.js';
 import { CompendiumEmbedParser } from '../compendium-parser.js';
+import { EntryParser } from '../compendium-entry-parser.js';
 
 export async function parseAction(
 	this: CompendiumEmbedParser,
@@ -9,6 +10,7 @@ export async function parseAction(
 	const title = `${ability.name} ${
 		ability.activity ? this.helpers.parseActivity(ability.activity) : ''
 	}`;
+	const entryParser = new EntryParser(this.helpers, { delimiter: '\n\n' });
 	let description: string[] = [];
 	if (ability.traits?.length) {
 		description.push(`(${ability.traits.join(', ')})`);
@@ -32,7 +34,7 @@ export async function parseAction(
 		description.push(`**Overcome** $(ability.overcome)}`);
 	}
 	if (ability.entries?.length) {
-		description.push(...ability.entries.map(this.entries.parseEntry));
+		description.push(entryParser.parseEntries(ability.entries));
 	}
 	if (ability.special?.length) {
 		description.push(`**Special** ${ability.special.join(', ')}`);

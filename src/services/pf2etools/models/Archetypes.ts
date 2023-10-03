@@ -6,12 +6,6 @@ import * as schema from '../pf2eTools.schema.js';
 
 export class Archetypes extends Model<typeof zArchetypeSchema, typeof schema.Archetypes> {
 	public table = schema.Archetypes;
-	public generateSearchText(resource: Archetype): string {
-		return `Archetype: ${resource.name}`;
-	}
-	public generateTags(resource: Archetype): string[] {
-		return [];
-	}
 	constructor(public db: BetterSQLite3Database<typeof schema>) {
 		super();
 	}
@@ -21,6 +15,12 @@ export class Archetypes extends Model<typeof zArchetypeSchema, typeof schema.Arc
 	}
 	public resourceListFromFile(file: any): any[] {
 		return file.archetype ?? [];
+	}
+	public generateSearchText(archetype: Archetype): string {
+		return `Archetype: ${archetype.name}`;
+	}
+	public generateTags(archetype: Archetype): string[] {
+		return [archetype.rarity ?? 'common'].concat(archetype.miscTags ?? []);
 	}
 	public async import() {
 		await this._importData();

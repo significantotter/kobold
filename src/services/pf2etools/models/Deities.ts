@@ -6,12 +6,6 @@ import { zDeitySchema, Deity, zDeityFluffSchema, DeityFluff } from './Deities.zo
 
 export class Deities extends Model<typeof zDeitySchema, typeof schema.Deities> {
 	public table = schema.Deities;
-	public generateSearchText(resource: Deity): string {
-		return `Deity: ${resource.name}`;
-	}
-	public generateTags(resource: Deity): string[] {
-		return [];
-	}
 	constructor(public db: BetterSQLite3Database<typeof schema>) {
 		super();
 	}
@@ -21,6 +15,16 @@ export class Deities extends Model<typeof zDeitySchema, typeof schema.Deities> {
 	}
 	public resourceListFromFile(file: any): any[] {
 		return file.deity ?? [];
+	}
+	public generateSearchText(deity: Deity): string {
+		return `Deity: ${deity.name}`;
+	}
+	public generateTags(deity: Deity): string[] {
+		return [
+			...(deity.alignment?.alignment ?? []),
+			...(deity.domains?.map(domain => `domain-${domain}`) ?? []),
+			deity.source,
+		];
 	}
 	public async import() {
 		await this._importData();

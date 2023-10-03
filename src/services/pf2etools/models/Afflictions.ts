@@ -16,11 +16,11 @@ export class Afflictions extends Model<typeof zAfflictionSchema, typeof schema.A
 		return file.disease.concat(file.curse);
 	}
 	public table = schema.Afflictions;
-	public generateSearchText(resource: Affliction): string {
-		return `${resource.type}: ${resource.name}`;
+	public generateSearchText(affliction: Affliction): string {
+		return `${affliction.type}: ${affliction.name}`;
 	}
-	public generateTags(resource: Affliction): string[] {
-		return [];
+	public generateTags(affliction: Affliction): string[] {
+		return affliction.traits ?? [];
 	}
 	public async import() {
 		await this._importData();

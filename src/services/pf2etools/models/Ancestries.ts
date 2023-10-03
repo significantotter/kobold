@@ -1,8 +1,15 @@
 import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
-import { fetchManyJsonFiles } from './lib/helpers.js';
+import { fetchManyJsonFiles, fetchOneJsonFile } from './lib/helpers.js';
 import { Model } from './lib/Model.js';
 import * as schema from '../pf2eTools.schema.js';
-import { zAncestrySchema, Ancestry } from './Ancestries.zod.js';
+import {
+	zAncestrySchema,
+	Ancestry,
+	Heritage,
+	zHeritageSchema,
+	VersatileHeritage,
+	zVersatileHeritageSchema,
+} from './Ancestries.zod.js';
 
 export class Ancestries extends Model<typeof zAncestrySchema, typeof schema.Ancestries> {
 	public table = schema.Ancestries;
@@ -20,7 +27,33 @@ export class Ancestries extends Model<typeof zAncestrySchema, typeof schema.Ance
 		return fetchManyJsonFiles('ancestries');
 	}
 	public resourceListFromFile(file: any): any[] {
-		return file.ancestry;
+		return file.ancestry ?? [];
+	}
+	public async import() {
+		await this._importData();
+	}
+}
+
+export class VersatileHeritages extends Model<
+	typeof zVersatileHeritageSchema,
+	typeof schema.VersatileHeritages
+> {
+	public table = schema.VersatileHeritages;
+	constructor(public db: BetterSQLite3Database<typeof schema>) {
+		super();
+	}
+	public z = zVersatileHeritageSchema;
+	public getFiles(): any[] {
+		return [fetchOneJsonFile('ancestries/versatile-heritages')];
+	}
+	public resourceListFromFile(file: any): any[] {
+		return file.versatileHeritage ?? [];
+	}
+	public generateSearchText(versatileHeritage: VersatileHeritage): string {
+		return `Versatile Heritage: ${versatileHeritage.name}`;
+	}
+	public generateTags(versatileHeritage: VersatileHeritage): string[] {
+		return [versatileHeritage.rarity ?? 'common'].concat(versatileHeritage.traits ?? []);
 	}
 	public async import() {
 		await this._importData();

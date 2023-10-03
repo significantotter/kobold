@@ -6,12 +6,6 @@ import { zTraitSchema, Trait } from './Traits.zod.js';
 
 export class Traits extends Model<typeof zTraitSchema, typeof schema.Traits> {
 	public table = schema.Traits;
-	public generateSearchText(resource: Trait): string {
-		return `Trait: ${resource.name}`;
-	}
-	public generateTags(resource: Trait): string[] {
-		return [];
-	}
 	constructor(public db: BetterSQLite3Database<typeof schema>) {
 		super();
 	}
@@ -21,6 +15,12 @@ export class Traits extends Model<typeof zTraitSchema, typeof schema.Traits> {
 	}
 	public resourceListFromFile(file: any): any[] {
 		return file.trait;
+	}
+	public generateSearchText(trait: Trait): string {
+		return `Trait: ${trait.name}`;
+	}
+	public generateTags(trait: Trait): string[] {
+		return [trait.source];
 	}
 	public async import() {
 		await this._importData();

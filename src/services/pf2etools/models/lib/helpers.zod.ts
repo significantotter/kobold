@@ -28,15 +28,17 @@ export const zTypedNumberSchema = z.strictObject({
 	entry: z.string().optional(),
 });
 
+export type AbilityScore = z.infer<typeof zAbilityScoreSchema>;
 export const zAbilityScoreSchema = z.strictObject({
-	str: z.number(),
-	dex: z.number(),
-	con: z.number(),
-	int: z.number(),
-	wis: z.number(),
-	cha: z.number(),
+	str: z.number().optional(),
+	dex: z.number().optional(),
+	con: z.number().optional(),
+	int: z.number().optional(),
+	wis: z.number().optional(),
+	cha: z.number().optional(),
 });
 
+export type Price = z.infer<typeof zPriceSchema>;
 export const zPriceSchema = z
 	.object({
 		coin: z.union([z.string(), z.null()]).optional(),

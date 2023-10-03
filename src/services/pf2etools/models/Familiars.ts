@@ -3,15 +3,10 @@ import { fetchOneJsonFile } from './lib/helpers.js';
 import { Model } from './lib/Model.js';
 import * as schema from '../pf2eTools.schema.js';
 import { Familiar, zFamiliarSchema } from './Familiars.zod.js';
+import _ from 'lodash';
 
 export class Familiars extends Model<typeof zFamiliarSchema, typeof schema.Familiars> {
 	public table = schema.Familiars;
-	public generateSearchText(resource: Familiar): string {
-		return `Familiar: ${resource.name}`;
-	}
-	public generateTags(resource: Familiar): string[] {
-		return [];
-	}
 	constructor(public db: BetterSQLite3Database<typeof schema>) {
 		super();
 	}
@@ -21,6 +16,13 @@ export class Familiars extends Model<typeof zFamiliarSchema, typeof schema.Famil
 	}
 	public resourceListFromFile(file: any): any[] {
 		return file.familiar;
+	}
+	public generateSearchText(familiar: Familiar): string {
+		return `Familiar: ${familiar.name}`;
+	}
+	public generateTags(familiar: Familiar): string[] {
+		const tags = [familiar.source, familiar.alignment].concat(familiar.traits ?? []);
+		return tags.filter(_.identity) as string[];
 	}
 	public async import() {
 		await this._importData();

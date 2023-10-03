@@ -18,8 +18,45 @@ import { getEmoji } from '../../../constants/emoji.js';
 import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { CompendiumUtils } from '../../../services/pf2etools/utils/compendium-utils.js';
-import { Ability, Action, Affliction, Creature } from '../../../services/pf2etools/models/index.js';
-import { DrizzleUtils } from '../../../services/pf2etools/utils/drizzle-utils.js';
+import {
+	Ability,
+	Action,
+	Affliction,
+	Ancestry,
+	Archetype,
+	Background,
+	Class,
+	ClassFeature,
+	Companion,
+	CompanionAbility,
+	Condition,
+	Creature,
+	CreatureTemplate,
+	Deity,
+	Domain,
+	Eidolon,
+	Event as EventType,
+	Familiar,
+	FamiliarAbility,
+	Feat,
+	Group,
+	Hazard,
+	Item,
+	Language,
+	OptionalFeature,
+	Organization,
+	Place,
+	QuickRule,
+	RelicGift,
+	Ritual,
+	Skill,
+	Spell,
+	Table,
+	Trait,
+	VariantRule,
+	Vehicle,
+	VersatileHeritage,
+} from '../../../services/pf2etools/models/index.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
 import { StringUtils } from '../../../utils/string-utils.js';
 import _ from 'lodash';
@@ -94,81 +131,142 @@ export class CompendiumSearchSubCommand implements Command {
 				);
 				break;
 			case 'ancestries':
+				result = await embedParser.parseAncestry(
+					searchResults.ancestries[0].data as Ancestry
+				);
+				break;
+			case 'versatileHeritages':
+				result = await embedParser.parseVersatileHeritage(
+					searchResults.versatileHeritages[0].data as VersatileHeritage
+				);
 				break;
 			case 'archetypes':
+				result = await embedParser.parseArchetype(
+					searchResults.archetypes[0].data as Archetype
+				);
 				break;
 			case 'backgrounds':
-				break;
-			case 'books':
+				result = await embedParser.parseBackground(
+					searchResults.backgrounds[0].data as Background
+				);
 				break;
 			case 'classes':
+				result = await embedParser.parseClass(searchResults.classes[0].data as Class);
 				break;
 			case 'classFeatures':
+				result = await embedParser.parseClassFeature(
+					searchResults.classFeatures[0].data as ClassFeature
+				);
 				break;
 			case 'companionAbilities':
+				result = await embedParser.parseCompanionAbility(
+					searchResults.companionAbilities[0].data as CompanionAbility
+				);
 				break;
 			case 'companions':
+				result = await embedParser.parseCompanion(
+					searchResults.companions[0].data as Companion
+				);
 				break;
 			case 'conditions':
+				result = await embedParser.parseCondition(
+					searchResults.conditions[0].data as Condition
+				);
 				break;
 			case 'creatures':
 				result = await embedParser.parseCreature(
 					searchResults.creatures[0].data as Creature
 				);
 				break;
-			case 'creaturesFluff':
-				break;
 			case 'creatureTemplates':
-				break;
-			case 'creatureTemplatesFluff':
+				result = await embedParser.parseCreatureTemplate(
+					searchResults.creatureTemplates[0].data as CreatureTemplate
+				);
 				break;
 			case 'deities':
-				break;
-			case 'deitiesFluff':
+				result = await embedParser.parseDeity(searchResults.deities[0].data as Deity);
 				break;
 			case 'domains':
+				result = await embedParser.parseDomain(searchResults.domains[0].data as Domain);
 				break;
 			case 'eidolons':
+				result = await embedParser.parseEidolon(searchResults.eidolons[0].data as Eidolon);
 				break;
 			case 'events':
+				result = await embedParser.parseEvent(searchResults.events[0].data as EventType);
 				break;
 			case 'familiarAbilities':
+				result = await embedParser.parseFamiliarAbility(
+					searchResults.familiarAbilities[0].data as FamiliarAbility
+				);
 				break;
 			case 'familiars':
+				result = await embedParser.parseFamiliar(
+					searchResults.familiars[0].data as Familiar
+				);
 				break;
 			case 'feats':
+				result = await embedParser.parseFeat(searchResults.feats[0].data as Feat);
 				break;
 			case 'groups':
+				result = await embedParser.parseGroup(searchResults.groups[0].data as Group);
 				break;
 			case 'hazards':
+				result = await embedParser.parseHazard(searchResults.hazards[0].data as Hazard);
 				break;
 			case 'items':
+				result = await embedParser.parseItem(searchResults.items[0].data as Item);
 				break;
 			case 'languages':
+				result = await embedParser.parseLanguage(
+					searchResults.languages[0].data as Language
+				);
 				break;
 			case 'optionalFeatures':
+				result = await embedParser.parseOptionalFeature(
+					searchResults.optionalFeatures[0].data as OptionalFeature
+				);
 				break;
 			case 'organizations':
-				break;
-			case 'organizationsFluff':
+				result = await embedParser.parseOrganization(
+					searchResults.organizations[0].data as Organization
+				);
 				break;
 			case 'places':
+				result = await embedParser.parsePlace(searchResults.places[0].data as Place);
 				break;
 			case 'quickRules':
+				result = await embedParser.parseQuickRule(
+					searchResults.quickRules[0].data as QuickRule
+				);
 				break;
 			case 'rituals':
+				result = await embedParser.parseRitual(searchResults.rituals[0].data as Ritual);
+				break;
+			case 'relicGifts':
+				result = await embedParser.parseRelicGift(
+					searchResults.relicGifts[0].data as RelicGift
+				);
 				break;
 			case 'skills':
+				result = await embedParser.parseSkill(searchResults.skills[0].data as Skill);
 				break;
 			case 'spells':
+				result = await embedParser.parseSpell(searchResults.spells[0].data as Spell);
 				break;
 			case 'tables':
+				result = await embedParser.parseTable(searchResults.tables[0].data as Table);
 				break;
 			case 'traits':
+				result = await embedParser.parseTrait(searchResults.traits[0].data as Trait);
 				break;
 			case 'variantRules':
+				result = await embedParser.parseVariantRule(
+					searchResults.variantRules[0].data as VariantRule
+				);
 				break;
 			case 'vehicles':
+				result = await embedParser.parseVehicle(searchResults.vehicles[0].data as Vehicle);
 				break;
 		}
 

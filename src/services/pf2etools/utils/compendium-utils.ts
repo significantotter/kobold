@@ -1,135 +1,10 @@
-import { getTableColumns, inArray } from 'drizzle-orm';
+import { inArray } from 'drizzle-orm';
 import { CompendiumModel } from '../compendium.model.js';
 import * as schema from '../pf2eTools.schema.js';
 import { DrizzleUtils } from './drizzle-utils.js';
-import {
-	SQLiteTableWithColumns,
-	TableConfig,
-	integer,
-	sqliteTable,
-	text,
-	getTableConfig,
-	SQLiteColumn,
-} from 'drizzle-orm/sqlite-core';
-import { db } from '../pf2eTools.db.js';
 import { Model } from '../models/lib/Model.js';
 
 type schemaKeys = Omit<typeof schema, 'Search'>;
-// const SearchableTable = sqliteTable('Searchable', {
-// 	id: integer('id').primaryKey().notNull(),
-// 	name: text('name').notNull(),
-// 	search: text('search').notNull(),
-// 	tags: text('tags', { mode: 'json' }).notNull().$type<string[]>(),
-// 	data: text('data', { mode: 'json' }).notNull().$type<any>(),
-// });
-// const columns = getTableColumns(SearchableTable);
-// const columns = {
-// 	id: integer('id').primaryKey().notNull()._,
-// 	name: text('name').notNull()._,
-// 	search: text('search').notNull()._,
-// 	tags: text('tags', { mode: 'json' }).notNull().$type<string[]>()._,
-// };
-// interface columns {
-// 	[k: string]: SQLiteColumn<any, any>;
-// 	id: SQLiteColumn<
-// 		{
-// 			name: 'id';
-// 			tableName: keyof schemaKeys;
-// 			dataType: 'number';
-// 			columnType: 'SQLiteInteger';
-// 			data: number;
-// 			driverParam: number;
-// 			notNull: true;
-// 			hasDefault: boolean;
-// 			enumValues: undefined;
-// 			baseColumn: never;
-// 		},
-// 		object
-// 	>;
-// 	name: SQLiteColumn<
-// 		{
-// 			name: 'name';
-// 			tableName: keyof schemaKeys;
-// 			dataType: 'string';
-// 			columnType: 'SQLiteText';
-// 			data: string;
-// 			driverParam: string;
-// 			notNull: true;
-// 			hasDefault: false;
-// 			enumValues: [string, ...string[]];
-// 			baseColumn: never;
-// 		},
-// 		object
-// 	>;
-// 	search: SQLiteColumn<
-// 		{
-// 			name: 'search';
-// 			tableName: keyof schemaKeys;
-// 			dataType: 'string';
-// 			columnType: 'SQLiteText';
-// 			data: string;
-// 			driverParam: string;
-// 			notNull: true;
-// 			hasDefault: false;
-// 			enumValues: [string, ...string[]];
-// 			baseColumn: never;
-// 		},
-// 		object
-// 	>;
-// 	tags: SQLiteColumn<
-// 		{
-// 			name: 'tags';
-// 			tableName: keyof schemaKeys;
-// 			dataType: 'json';
-// 			columnType: 'SQLiteTextJson';
-// 			data: string[];
-// 			driverParam: string;
-// 			notNull: true;
-// 			hasDefault: false;
-// 			enumValues: undefined;
-// 			baseColumn: never;
-// 		},
-// 		object
-// 	>;
-// 	data: SQLiteColumn<
-// 		{
-// 			name: 'data';
-// 			tableName: keyof schemaKeys;
-// 			dataType: 'json';
-// 			columnType: 'SQLiteTextJson';
-// 			data: any;
-// 			driverParam: string;
-// 			notNull: true;
-// 			hasDefault: false;
-// 			enumValues: undefined;
-// 			baseColumn: never;
-// 		},
-// 		object
-// 	>;
-// }
-// schema.Abilities.data;
-
-// const inferSelect = SearchableTable._.inferSelect;
-// const inferInsert = SearchableTable._.inferInsert;
-
-// interface SearchableTableConfig extends TableConfig {
-// 	brand: 'Table';
-// 	config: TableConfig;
-// 	name: string;
-// 	schema: string | undefined;
-// 	columns: columns;
-// 	inferSelect: typeof inferSelect;
-// 	inferInsert: typeof inferInsert;
-// }
-
-// interface Searchable extends SQLiteTableWithColumns<SearchableTableConfig> {
-// 	_: SearchableTableConfig;
-// 	id: columns['id'];
-// 	name: columns['name'];
-// 	search: columns['search'];
-// 	tags: columns['tags'];
-// }
-
 export class CompendiumUtils {
 	public static tableNameToTable = {};
 
@@ -165,6 +40,19 @@ export class CompendiumUtils {
 		const afflictions = resultsByTable.Afflictions?.length
 			? compendium.db.query.Afflictions.findMany({
 					where: inArray(compendium.afflictions.table.id, resultsByTable.Afflictions),
+			  })
+			: [];
+		const ancestries = resultsByTable.Ancestries?.length
+			? compendium.db.query.Ancestries.findMany({
+					where: inArray(compendium.ancestries.table.id, resultsByTable.Ancestries),
+			  })
+			: [];
+		const versatileHeritages = resultsByTable.VersatileHeritages?.length
+			? compendium.db.query.VersatileHeritages.findMany({
+					where: inArray(
+						compendium.versatileHeritages.table.id,
+						resultsByTable.VersatileHeritages
+					),
 			  })
 			: [];
 		const archetypes = resultsByTable.Archetypes?.length
@@ -337,11 +225,11 @@ export class CompendiumUtils {
 					),
 			  })
 			: [];
-		// const tables = resultsByTable.Tables?.length
-		// 	? compendium.db.query.Tables.findMany({
-		// 			where: inArray(compendium.tables.table.id, resultsByTable.Tables),
-		// 	  })
-		// 	: [];
+		const tables = resultsByTable.Tables?.length
+			? compendium.db.query.Tables.findMany({
+					where: inArray(compendium.tables.table.id, resultsByTable.Tables),
+			  })
+			: [];
 		const traits = resultsByTable.Traits?.length
 			? compendium.db.query.Traits.findMany({
 					where: inArray(compendium.traits.table.id, resultsByTable.Traits),
@@ -362,6 +250,8 @@ export class CompendiumUtils {
 			actions,
 			afflictions,
 			archetypes,
+			ancestries,
+			versatileHeritages,
 			backgrounds,
 			books,
 			classFeatures,
@@ -392,7 +282,7 @@ export class CompendiumUtils {
 			sources,
 			spells,
 			subclassFeatures,
-			// tables,
+			tables,
 			traits,
 			variantRules,
 			vehicles,
@@ -402,6 +292,8 @@ export class CompendiumUtils {
 			actions: await actions,
 			afflictions: await afflictions,
 			archetypes: await archetypes,
+			ancestries: await ancestries,
+			versatileHeritages: await versatileHeritages,
 			backgrounds: await backgrounds,
 			books: await books,
 			classFeatures: await classFeatures,
@@ -432,7 +324,7 @@ export class CompendiumUtils {
 			sources: await sources,
 			spells: await spells,
 			subclassFeatures: await subclassFeatures,
-			// tables: await tables,
+			tables: await tables,
 			traits: await traits,
 			variantRules: await variantRules,
 			vehicles: await vehicles,
@@ -444,11 +336,19 @@ export class CompendiumUtils {
 			.map(([modelName, results]) => {
 				const model = compendium[modelName as keyof CompendiumModel] as Model<any, any>;
 				return results.map(result => {
-					const searchableResult = model.generateSearchText(result.data);
-					return {
-						name: searchableResult,
-						value: searchableResult,
-					};
+					try {
+						const searchableResult = model.generateSearchText(result.data);
+						return {
+							name: searchableResult,
+							value: searchableResult,
+						};
+					} catch (err) {
+						console.warn(modelName, result, err);
+						return {
+							name: result.name,
+							value: result.name,
+						};
+					}
 				});
 			})
 			.flat();

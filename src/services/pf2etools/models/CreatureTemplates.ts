@@ -15,12 +15,6 @@ export class CreatureTemplates extends Model<
 	typeof schema.CreatureTemplates
 > {
 	public table = schema.CreatureTemplates;
-	public generateSearchText(resource: CreatureTemplate): string {
-		return `CreatureTemplate: ${resource.name}`;
-	}
-	public generateTags(resource: CreatureTemplate): string[] {
-		return [];
-	}
 	constructor(public db: BetterSQLite3Database<typeof schema>) {
 		super();
 	}
@@ -30,6 +24,12 @@ export class CreatureTemplates extends Model<
 	}
 	public resourceListFromFile(file: any): any[] {
 		return file.creatureTemplate ?? [];
+	}
+	public generateSearchText(creatureTemplate: CreatureTemplate): string {
+		return `Creature Template: ${creatureTemplate.name}`;
+	}
+	public generateTags(creatureTemplate: CreatureTemplate): string[] {
+		return [];
 	}
 	public async import() {
 		await this._importData();

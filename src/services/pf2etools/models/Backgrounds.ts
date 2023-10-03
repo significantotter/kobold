@@ -6,12 +6,6 @@ import * as schema from '../pf2eTools.schema.js';
 
 export class Backgrounds extends Model<typeof zBackgroundSchema, typeof schema.Backgrounds> {
 	public table = schema.Backgrounds;
-	public generateSearchText(resource: Background): string {
-		return `Background: ${resource.name}`;
-	}
-	public generateTags(resource: Background): string[] {
-		return [];
-	}
 	constructor(public db: BetterSQLite3Database<typeof schema>) {
 		super();
 	}
@@ -21,6 +15,12 @@ export class Backgrounds extends Model<typeof zBackgroundSchema, typeof schema.B
 	}
 	public resourceListFromFile(file: any): any[] {
 		return file.background ?? [];
+	}
+	public generateSearchText(background: Background): string {
+		return `Background: ${background.name}`;
+	}
+	public generateTags(background: Background): string[] {
+		return ([] as string[]).concat(background.traits ?? []).concat(background.miscTags ?? []);
 	}
 	public async import() {
 		await this._importData();

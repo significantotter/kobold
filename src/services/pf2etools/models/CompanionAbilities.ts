@@ -9,12 +9,6 @@ export class CompanionAbilities extends Model<
 	typeof schema.CompanionAbilities
 > {
 	public table = schema.CompanionAbilities;
-	public generateSearchText(resource: CompanionAbility): string {
-		return `CompanionAbility: ${resource.name}`;
-	}
-	public generateTags(resource: CompanionAbility): string[] {
-		return [];
-	}
 	constructor(public db: BetterSQLite3Database<typeof schema>) {
 		super();
 	}
@@ -24,6 +18,12 @@ export class CompanionAbilities extends Model<
 	}
 	public resourceListFromFile(file: any): any[] {
 		return file.companionAbility;
+	}
+	public generateSearchText(companionAbility: CompanionAbility): string {
+		return `Companion Ability: ${companionAbility.name}`;
+	}
+	public generateTags(companionAbility: CompanionAbility): string[] {
+		return companionAbility.traits ?? [];
 	}
 	public async import() {
 		await this._importData();

@@ -18,6 +18,7 @@ import {
 	DeityFluff,
 	Domain,
 	Eidolon,
+	EventType,
 	Familiar,
 	FamiliarAbility,
 	Feat,
@@ -40,6 +41,7 @@ import {
 	VariantRule,
 	Vehicle,
 	Ancestry,
+	VersatileHeritage,
 	RenderDemo,
 	OrganizationFluff,
 	CreatureTemplateFluff,
@@ -155,7 +157,7 @@ export const Eidolons = sqliteTable('Eidolons', {
 
 export const Events = sqliteTable('Events', {
 	...standardFields,
-	data: text('data', { mode: 'json' }).notNull().$type<Event>(),
+	data: text('data', { mode: 'json' }).notNull().$type<EventType>(),
 });
 
 export const FamiliarAbilities = sqliteTable('FamiliarAbilities', {
@@ -181,6 +183,11 @@ export const Groups = sqliteTable('Groups', {
 export const Hazards = sqliteTable('Hazards', {
 	...standardFields,
 	data: text('data', { mode: 'json' }).notNull().$type<Hazard>(),
+});
+
+export const VersatileHeritages = sqliteTable('VersatileHeritages', {
+	...standardFields,
+	data: text('data', { mode: 'json' }).notNull().$type<VersatileHeritage>(),
 });
 
 export const Items = sqliteTable('Items', {

@@ -2,6 +2,7 @@ import {
 	Abilities,
 	Actions,
 	Afflictions,
+	Ancestries,
 	Archetypes,
 	Backgrounds,
 	Books,
@@ -41,6 +42,7 @@ import {
 	Traits,
 	VariantRules,
 	Vehicles,
+	VersatileHeritages,
 } from './models/index.js';
 import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import * as schema from './pf2eTools.schema.js';
@@ -50,6 +52,7 @@ export class CompendiumModel {
 	public readonly actions: Actions;
 	public readonly afflictions: Afflictions;
 	public readonly archetypes: Archetypes;
+	public readonly ancestries: Ancestries;
 	public readonly backgrounds: Backgrounds;
 	public readonly creatures: Creatures;
 	public readonly creaturesFluff: CreaturesFluff;
@@ -88,6 +91,7 @@ export class CompendiumModel {
 	public readonly traits: Traits;
 	public readonly variantRules: VariantRules;
 	public readonly vehicles: Vehicles;
+	public readonly versatileHeritages: VersatileHeritages;
 	public readonly search: typeof schema.Search;
 	public readonly db: BetterSQLite3Database<typeof schema>;
 
@@ -97,6 +101,7 @@ export class CompendiumModel {
 		this.actions = new Actions(db);
 		this.afflictions = new Afflictions(db);
 		this.archetypes = new Archetypes(db);
+		this.ancestries = new Ancestries(db);
 		this.backgrounds = new Backgrounds(db);
 		this.creatures = new Creatures(db);
 		this.creaturesFluff = new CreaturesFluff(db);
@@ -135,6 +140,7 @@ export class CompendiumModel {
 		this.traits = new Traits(db);
 		this.variantRules = new VariantRules(db);
 		this.vehicles = new Vehicles(db);
+		this.versatileHeritages = new VersatileHeritages(db);
 		this.search = schema.Search;
 	}
 }

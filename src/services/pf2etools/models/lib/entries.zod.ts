@@ -112,8 +112,10 @@ export const baseZAbilityEntrySchema = z.strictObject({
 	prerequisites: z.string().optional(),
 	actionType: z
 		.object({
-			class: z.string().array(),
-			archetype: z.string().array(),
+			class: z.string().array().optional(),
+			archetype: z.string().array().optional(),
+			ancestry: z.string().array().optional(),
+			heritage: z.string().array().optional(),
 		})
 		.optional(),
 	range: zTypedNumberSchema.optional(),

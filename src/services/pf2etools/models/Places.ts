@@ -6,12 +6,6 @@ import { zPlaceSchema, Place } from './Places.zod.js';
 
 export class Places extends Model<typeof zPlaceSchema, typeof schema.Places> {
 	public table = schema.Places;
-	public generateSearchText(resource: Place): string {
-		return `Place: ${resource.name}`;
-	}
-	public generateTags(resource: Place): string[] {
-		return [];
-	}
 	constructor(public db: BetterSQLite3Database<typeof schema>) {
 		super();
 	}
@@ -21,6 +15,12 @@ export class Places extends Model<typeof zPlaceSchema, typeof schema.Places> {
 	}
 	public resourceListFromFile(file: any): any[] {
 		return file.place;
+	}
+	public generateSearchText(place: Place): string {
+		return `Place: ${place.name}`;
+	}
+	public generateTags(place: Place): string[] {
+		return [place.source].concat(place.traits ?? []);
 	}
 	public async import() {
 		await this._importData();

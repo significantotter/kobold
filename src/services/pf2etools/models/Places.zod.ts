@@ -25,10 +25,6 @@ export const zPlaceSchema = z.strictObject({
 	nationData: z
 		.object({
 			government: z.string(),
-			capital: z.strictObject({
-				name: z.string(),
-				total: z.number(),
-			}),
 			population: z.string().array(),
 			languages: z.string().array(),
 			religions: z
@@ -36,14 +32,19 @@ export const zPlaceSchema = z.strictObject({
 				.or(z.strictObject({ type: z.string(), religions: z.string().array() }))
 				.array()
 				.optional(),
-			exports: z.string().array(),
-			imports: z.string().array().optional(),
-			enemies: z.string().array(),
-			factions: z.string().array(),
 			threats: z.string().array().optional(),
 			features: z
 				.array(z.strictObject({ name: z.string(), entries: z.array(z.string()) }))
 				.optional(),
+
+			capital: z.strictObject({
+				name: z.string(),
+				total: z.number(),
+			}),
+			exports: z.string().array(),
+			imports: z.string().array().optional(),
+			enemies: z.string().array(),
+			factions: z.string().array(),
 		})
 		.optional(),
 	residents: z

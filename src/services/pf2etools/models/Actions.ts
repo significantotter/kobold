@@ -22,7 +22,7 @@ export class Actions extends Model<typeof zActionSchema, typeof schema.Actions> 
 		return `Action: ${action.name}${activityShorthand ? ` (${activityShorthand})` : ''}`;
 	}
 	public generateTags(action: Action): string[] {
-		return [];
+		return action.traits ?? [];
 	}
 	public async import() {
 		await this._importData();

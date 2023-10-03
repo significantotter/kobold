@@ -6,12 +6,6 @@ import { zConditionSchema, Condition } from './Conditions.zod.js';
 
 export class Conditions extends Model<typeof zConditionSchema, typeof schema.Conditions> {
 	public table = schema.Conditions;
-	public generateSearchText(resource: Condition): string {
-		return `Condition: ${resource.name}`;
-	}
-	public generateTags(resource: Condition): string[] {
-		return [];
-	}
 	constructor(public db: BetterSQLite3Database<typeof schema>) {
 		super();
 	}
@@ -21,6 +15,12 @@ export class Conditions extends Model<typeof zConditionSchema, typeof schema.Con
 	}
 	public resourceListFromFile(file: any): any[] {
 		return file.condition ?? [];
+	}
+	public generateSearchText(condition: Condition): string {
+		return `Condition: ${condition.name}`;
+	}
+	public generateTags(condition: Condition): string[] {
+		return [];
 	}
 	public async import() {
 		await this._importData();

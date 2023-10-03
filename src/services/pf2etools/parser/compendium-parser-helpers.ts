@@ -1,10 +1,15 @@
 import _ from 'lodash';
 import {
+	AbilityScore,
+	Activate,
 	Activity,
 	Creature,
 	CreatureSense,
 	Defenses,
+	Duration,
 	Frequency,
+	Price,
+	ShieldData,
 	Speed,
 	SpellLevel,
 	Spellcasting,
@@ -16,7 +21,7 @@ import {
 import { CompendiumModel } from '../compendium.model.js';
 import { AttachmentBuilder } from 'discord.js';
 
-function nth(n: number) {
+export function nth(n: number) {
 	if (isNaN(Number(n))) return n.toString();
 	return n + (['st', 'nd', 'rd'][((((n + 90) % 100) - 10) % 10) - 1] || 'th');
 }
@@ -59,8 +64,7 @@ export function parseActivityRaw(activity?: Activity) {
 export class SharedParsers {
 	constructor(
 		private model: CompendiumModel,
-		private emojiConverter: { (emoji: string): string },
-		private files: AttachmentBuilder[] = []
+		private emojiConverter: { (emoji: string): string }
 	) {}
 
 	public parseSpellcastingLevel(spellcastingLevel: SpellLevel | undefined): string {
@@ -243,12 +247,12 @@ export class SharedParsers {
 		}
 		return languageString;
 	}
-	public parseStat(stat: Stat | number): string {
+	public parseStat(stat: Stat | number, sign: boolean = true): string {
 		if (_.isNumber(stat)) return applyOperatorIfNumber(stat);
 		let statString = '';
 		if (stat.std != null || stat.default != null) {
 			const untypedStat = stat.std ?? stat.default;
-			if (_.isFinite(Number(untypedStat))) {
+			if (sign && _.isFinite(Number(untypedStat))) {
 				if (Number(untypedStat) < 0) {
 					statString += untypedStat;
 				} else statString += `+${untypedStat}`;
@@ -296,7 +300,7 @@ export class SharedParsers {
 		}
 		if (stat == null && statNotes == null) return undefined;
 		else {
-			return [stat, statNotes].filter(_.isUndefined).join(' ');
+			return [stat, statNotes].filter(_.identity).join(' ');
 		}
 	}
 	public splitRecordsIntoGroups(label: string, record: TargetValueRecord) {
@@ -305,7 +309,7 @@ export class SharedParsers {
 		};
 
 		const stdValue = this.parseGroupedRecordStat('std', record);
-		const defaultValue = this.parseGroupedRecordStat('std', record);
+		const defaultValue = this.parseGroupedRecordStat('default', record);
 		if (stdValue || defaultValue) {
 			groupedResults.std.push(`**${label}** ${stdValue ?? defaultValue}`);
 		}
@@ -319,7 +323,41 @@ export class SharedParsers {
 		}
 		return groupedResults;
 	}
-	public parseAttributes(attributes: Creature['abilityMods']): string {
+	public parseDuration(duration: Duration): string {
+		if (!duration) return '';
+		let durationString = '**Duration** ';
+		if ('type' in duration) {
+			return this.parseDuration(duration.duration) + ' ' + duration.entry;
+		} else {
+			durationString += this.parseTypedNumber(duration);
+			let parentheticals: string[] = [];
+			if (duration.sustained) parentheticals.push('sustained');
+			if (duration.dismiss) parentheticals.push(`dismissable`);
+			if (parentheticals.length) {
+				durationString += ` (${parentheticals.join(', ')})`;
+			}
+			return durationString;
+		}
+	}
+	public parseActivate(activate: Activate) {
+		const activateLine: string[] = ['**Activate**'];
+		if (activate?.activity) activateLine.push(this.parseActivity(activate.activity));
+		if (activate?.traits?.length) activateLine.push(`(${activate.traits.join(', ')})`);
+		if (activate?.note) activateLine.push(activate.note);
+		if (activate?.components?.length)
+			activateLine.push(`**Components ${activate.components.join(', ')}`);
+		if (activate?.trigger) activateLine.push(`**Trigger** ${activate.trigger}`);
+		if (activate?.requirements) activateLine.push(`**Requirements** ${activate.requirements}`);
+		return activateLine.join(' ');
+	}
+	public parsePrice(price: Price) {
+		if (!price) return '';
+		return `**Price** ${[price?.amount, price?.coin, price?.note]
+			.filter(_.identity)
+			.join(' ')}`;
+	}
+	public parseShieldData(shieldData: ShieldData) {}
+	public parseAttributes(attributes: AbilityScore): string {
 		const attributeContent: string[] = [];
 		if (attributes?.str) attributeContent.push(`**Str** ${this.parseStat(attributes.str)}`);
 		if (attributes?.dex) attributeContent.push(`**Dex** ${this.parseStat(attributes.dex)}`);
@@ -333,7 +371,7 @@ export class SharedParsers {
 		// AC and saves
 		const acLine: string[] = [];
 		if (defenses.ac) {
-			acLine.push(`**AC** ${this.parseStat(defenses.ac)}`);
+			acLine.push(`**AC** ${this.parseStat(defenses.ac, false)}`);
 		}
 		if (defenses.savingThrows) {
 			let savesString: string[] = [];
@@ -452,7 +490,7 @@ export class SharedParsers {
 		const groupStrings = _.keys(hpGroups).map(group => {
 			return `**${group}**: ${hpGroups[group].join('; ')}`;
 		});
-		return [acString, defaultString, ...groupStrings].filter(_.isEmpty).join('\n');
+		return [acString, defaultString, ...groupStrings].filter(_.identity).join('\n');
 	}
 	public parseSpeed(speed: Speed) {
 		const speeds: string[] = [];

@@ -6,12 +6,6 @@ import { zRitualSchema, Ritual } from './Rituals.zod.js';
 
 export class Rituals extends Model<typeof zRitualSchema, typeof schema.Rituals> {
 	public table = schema.Rituals;
-	public generateSearchText(resource: Ritual): string {
-		return `Ritual: ${resource.name}`;
-	}
-	public generateTags(resource: Ritual): string[] {
-		return [];
-	}
 	constructor(public db: BetterSQLite3Database<typeof schema>) {
 		super();
 	}
@@ -21,6 +15,12 @@ export class Rituals extends Model<typeof zRitualSchema, typeof schema.Rituals> 
 	}
 	public resourceListFromFile(file: any): any[] {
 		return file.ritual;
+	}
+	public generateSearchText(ritual: Ritual): string {
+		return `Ritual ${ritual.level}: ${ritual.name}`;
+	}
+	public generateTags(ritual: Ritual): string[] {
+		return [ritual.source].concat(ritual.traits ?? []);
 	}
 	public async import() {
 		await this._importData();

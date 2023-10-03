@@ -11,12 +11,6 @@ import {
 
 export class Organizations extends Model<typeof zOrganizationSchema, typeof schema.Organizations> {
 	public table = schema.Organizations;
-	public generateSearchText(resource: Organization): string {
-		return `Organization: ${resource.name}`;
-	}
-	public generateTags(resource: Organization): string[] {
-		return [];
-	}
 	constructor(public db: BetterSQLite3Database<typeof schema>) {
 		super();
 	}
@@ -26,6 +20,12 @@ export class Organizations extends Model<typeof zOrganizationSchema, typeof sche
 	}
 	public resourceListFromFile(file: any): any[] {
 		return file.organization;
+	}
+	public generateSearchText(organization: Organization): string {
+		return `Organization: ${organization.name}`;
+	}
+	public generateTags(organization: Organization): string[] {
+		return [organization.source].concat(organization.traits ?? []);
 	}
 	public async import() {
 		await this._importData();

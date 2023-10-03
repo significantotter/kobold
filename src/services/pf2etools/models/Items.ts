@@ -6,12 +6,6 @@ import * as schema from '../pf2eTools.schema.js';
 
 export class Items extends Model<typeof zItemSchema, typeof schema.Items> {
 	public table = schema.Items;
-	public generateSearchText(resource: Item): string {
-		return `Item: ${resource.name}`;
-	}
-	public generateTags(resource: Item): string[] {
-		return [];
-	}
 	constructor(public db: BetterSQLite3Database<typeof schema>) {
 		super();
 	}
@@ -21,6 +15,12 @@ export class Items extends Model<typeof zItemSchema, typeof schema.Items> {
 	}
 	public resourceListFromFile(file: any): any[] {
 		return file.item ?? file.baseitem ?? [];
+	}
+	public generateSearchText(item: Item): string {
+		return `Item: ${item.name}`;
+	}
+	public generateTags(item: Item): string[] {
+		return [item.source].concat(item.traits ?? []).concat(item.type ? [item.type] : []);
 	}
 	public async import() {
 		await this._importData();

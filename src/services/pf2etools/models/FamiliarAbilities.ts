@@ -9,12 +9,6 @@ export class FamiliarAbilities extends Model<
 	typeof schema.FamiliarAbilities
 > {
 	public table = schema.FamiliarAbilities;
-	public generateSearchText(resource: FamiliarAbility): string {
-		return `FamiliarAbility: ${resource.name}`;
-	}
-	public generateTags(resource: FamiliarAbility): string[] {
-		return [];
-	}
 	constructor(public db: BetterSQLite3Database<typeof schema>) {
 		super();
 	}
@@ -24,6 +18,12 @@ export class FamiliarAbilities extends Model<
 	}
 	public resourceListFromFile(file: any): any[] {
 		return file.familiarAbility;
+	}
+	public generateSearchText(familiarAbility: FamiliarAbility): string {
+		return `Familiar Ability: ${familiarAbility.name}`;
+	}
+	public generateTags(familiarAbility: FamiliarAbility): string[] {
+		return [familiarAbility.source, familiarAbility.type];
 	}
 	public async import() {
 		await this._importData();

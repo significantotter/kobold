@@ -6,12 +6,6 @@ import * as schema from '../pf2eTools.schema.js';
 
 export class Events extends Model<typeof zEventSchema, typeof schema.Events> {
 	public table = schema.Events;
-	public generateSearchText(resource: Event): string {
-		return `Event: ${resource.name}`;
-	}
-	public generateTags(resource: Event): string[] {
-		return [];
-	}
 	constructor(public db: BetterSQLite3Database<typeof schema>) {
 		super();
 	}
@@ -21,6 +15,12 @@ export class Events extends Model<typeof zEventSchema, typeof schema.Events> {
 	}
 	public resourceListFromFile(file: any): any[] {
 		return file.event ?? [];
+	}
+	public generateSearchText(resource: Event): string {
+		return `Event ${resource.level}: ${resource.name}`;
+	}
+	public generateTags(resource: Event): string[] {
+		return [resource.source];
 	}
 	public async import() {
 		await this._importData();
