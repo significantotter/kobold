@@ -1,5 +1,5 @@
 import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
-import { zArchetypeSchema, Archetype } from './Archetypes.zod.js';
+import { zArchetypeSchema, Archetype } from './../schemas/index.js';
 import { fetchOneJsonFile } from './lib/helpers.js';
 import { Model } from './lib/Model.js';
 import * as schema from '../pf2eTools.schema.js';

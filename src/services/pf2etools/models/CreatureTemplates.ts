@@ -8,7 +8,7 @@ import {
 	zCreatureTemplateFluffSchema,
 	CreatureTemplateFluff as CreatureTemplateFluffType,
 	CreatureTemplateFluff,
-} from './CreatureTemplates.zod.js';
+} from './../schemas/index.js';
 
 export class CreatureTemplates extends Model<
 	typeof zCreatureTemplateSchema,

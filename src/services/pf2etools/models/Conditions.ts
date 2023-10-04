@@ -2,7 +2,7 @@ import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import { fetchOneJsonFile } from './lib/helpers.js';
 import { Model } from './lib/Model.js';
 import * as schema from '../pf2eTools.schema.js';
-import { zConditionSchema, Condition } from './Conditions.zod.js';
+import { zConditionSchema, Condition } from './../schemas/index.js';
 
 export class Conditions extends Model<typeof zConditionSchema, typeof schema.Conditions> {
 	public table = schema.Conditions;

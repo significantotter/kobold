@@ -18,7 +18,7 @@ import {
 	DeityFluff,
 	Domain,
 	Eidolon,
-	EventType,
+	Event as EventType,
 	Familiar,
 	FamiliarAbility,
 	Feat,
@@ -45,8 +45,8 @@ import {
 	RenderDemo,
 	OrganizationFluff,
 	CreatureTemplateFluff,
-} from './models/index-types.js';
-import { ItemFluff } from './models/Items.zod.js';
+} from './schemas/index-types.js';
+import { ItemFluff } from './schemas/index.js';
 
 const standardFields = {
 	id: integer('id').primaryKey().notNull(),

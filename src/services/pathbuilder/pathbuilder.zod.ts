@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { zAbilityScoreSchema } from '../pf2etools/models/lib/helpers.zod.js';
+import { zAbilityScoreSchema } from '../pf2etools/schemas/index.js';
 
 export const zAbilitySchema = z.union([
 	z.literal('str'),

@@ -1,5 +1,5 @@
 import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
-import { zItemSchema, Item, ItemFluff, zItemFluffSchema } from './Items.zod.js';
+import { zItemSchema, Item, ItemFluff, zItemFluffSchema } from './../schemas/index.js';
 import { fetchManyJsonFiles, fetchOneJsonFile } from './lib/helpers.js';
 import { Model } from './lib/Model.js';
 import * as schema from '../pf2eTools.schema.js';

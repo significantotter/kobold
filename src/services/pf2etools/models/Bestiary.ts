@@ -1,5 +1,10 @@
 import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
-import { zCreatureSchema, Creature, zCreatureFluffSchema, CreatureFluff } from './Bestiary.zod.js';
+import {
+	zCreatureSchema,
+	Creature,
+	zCreatureFluffSchema,
+	CreatureFluff,
+} from './../schemas/index.js';
 import { fetchManyJsonFiles } from './lib/helpers.js';
 import { Model } from './lib/Model.js';
 import * as schema from '../pf2eTools.schema.js';

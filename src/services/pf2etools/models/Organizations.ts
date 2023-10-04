@@ -7,7 +7,7 @@ import {
 	OrganizationFluff,
 	zOrganizationFluffSchema,
 	zOrganizationSchema,
-} from './Organizations.zod.js';
+} from './../schemas/index.js';
 
 export class Organizations extends Model<typeof zOrganizationSchema, typeof schema.Organizations> {
 	public table = schema.Organizations;

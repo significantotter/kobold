@@ -2,7 +2,7 @@ import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import { fetchOneJsonFile } from './lib/helpers.js';
 import { Model } from './lib/Model.js';
 import * as schema from '../pf2eTools.schema.js';
-import { zQuickRuleSchema, QuickRule } from './QuickRules.zod.js';
+import { zQuickRuleSchema, QuickRule } from './../schemas/index.js';
 import { z } from 'zod';
 
 export class QuickRules extends Model<typeof zQuickRuleSchema, typeof schema.QuickRules> {

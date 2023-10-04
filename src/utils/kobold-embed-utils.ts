@@ -6,7 +6,7 @@ import {
 	EmbedBuilder,
 	EmbedData,
 } from 'discord.js';
-import _ from 'lodash';
+import _, { split } from 'lodash';
 import { TranslationFunctions } from '../i18n/i18n-types.js';
 import { Action, Character, Sheet } from '../services/kobold/models/index.js';
 import { InitiativeBuilder, TurnData } from './initiative-utils.js';
@@ -311,7 +311,50 @@ export class KoboldEmbed extends EmbedBuilder {
 		}
 		return finalEmbeds;
 	}
+	public async splitDescriptionToFields() {
+		//if a description is longer than 4096 characters, split excess into a field
+		if (!this.data.description || this.data.description.length <= 4096) return;
+		const splitDescription = this.data.description.split('\n');
+		// group description into chunks of 1024 characters
+		const descriptionChunks: string[][] = [];
+		let currentChunk: string[] = [];
+		let currentChunkLength = 0;
+		let currentChunkContinuesCodeBlock = false;
+		for (const line of splitDescription) {
+			if (currentChunkLength + line.length > 1000) {
+				if (currentChunkContinuesCodeBlock) currentChunk.push('```');
+				descriptionChunks.push(currentChunk);
+				currentChunk = [];
+				if (currentChunkContinuesCodeBlock) currentChunk.push('```');
+				currentChunkLength = 0;
+			}
+			if (line.length > 1000) {
+				// ignore newline characters when splitting an oversized block
+				const numberOfSegments = Math.ceil(line.length / 1000);
+				const splitLine = _.chunk(line, numberOfSegments).map(segment => segment.join(''));
+				for (let splitLineSegment of splitLine) {
+					if (currentChunkContinuesCodeBlock) splitLineSegment = '```' + splitLineSegment;
+					// check for an odd number of ``` formatters
+					if ((splitLineSegment?.match(/```/g) ?? []).length % 2 === 1)
+						currentChunkContinuesCodeBlock = !currentChunkContinuesCodeBlock;
+					if (currentChunkContinuesCodeBlock) splitLineSegment += '```';
+					descriptionChunks.push([splitLineSegment]);
+				}
+			} else {
+				if ((line?.match(/```/g) ?? []).length % 2 === 1)
+					currentChunkContinuesCodeBlock = !currentChunkContinuesCodeBlock;
+				currentChunk.push(line);
+				currentChunkLength += line.length + 2; //lines are each joined with \n, adding 2
+			}
+		}
+		// add the first four chunks to the description
+		this.setDescription(descriptionChunks.slice(0, 4).flat(2).join('\n'));
+		this.addFields(
+			descriptionChunks.slice(4).map(chunk => ({ name: '\u200b', value: chunk.join('\n') }))
+		);
+	}
 	public async sendBatches(intr: CommandInteraction, isEphemeral = false) {
+		this.splitDescriptionToFields();
 		this.splitFieldsThatAreTooLong();
 		const splitEmbeds = this.splitEmbedIfTooLong();
 		for (const embed of splitEmbeds) {

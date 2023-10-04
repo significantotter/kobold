@@ -9,7 +9,7 @@ import {
 	zHeritageSchema,
 	VersatileHeritage,
 	zVersatileHeritageSchema,
-} from './Ancestries.zod.js';
+} from './../schemas/index.js';
 
 export class Ancestries extends Model<typeof zAncestrySchema, typeof schema.Ancestries> {
 	public table = schema.Ancestries;

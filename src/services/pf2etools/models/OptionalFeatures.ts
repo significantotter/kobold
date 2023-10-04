@@ -2,7 +2,7 @@ import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import { fetchOneJsonFile } from './lib/helpers.js';
 import { Model } from './lib/Model.js';
 import * as schema from '../pf2eTools.schema.js';
-import { zOptionalFeatureSchema, OptionalFeature } from './OptionalFeatures.zod.js';
+import { zOptionalFeatureSchema, OptionalFeature } from './../schemas/index.js';
 
 export class OptionalFeatures extends Model<
 	typeof zOptionalFeatureSchema,

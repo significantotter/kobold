@@ -2,7 +2,7 @@ import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import { fetchManyJsonFiles, fetchOneJsonFile } from './lib/helpers.js';
 import { Model } from './lib/Model.js';
 import * as schema from '../pf2eTools.schema.js';
-import { zSubclassFeatureSchema, SubclassFeature } from './SubclassFeatures.zod.js';
+import { zSubclassFeatureSchema, SubclassFeature } from './../schemas/index.js';
 
 export class SubclassFeatures extends Model<
 	typeof zSubclassFeatureSchema,

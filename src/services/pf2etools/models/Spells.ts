@@ -1,5 +1,5 @@
 import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
-import { zSpellSchema, Spell } from './Spells.zod.js';
+import { zSpellSchema, Spell } from './../schemas/index.js';
 import { fetchManyJsonFiles } from './lib/helpers.js';
 import { Model } from './lib/Model.js';
 import * as schema from '../pf2eTools.schema.js';
@@ -17,7 +17,7 @@ export class Spells extends Model<typeof zSpellSchema, typeof schema.Spells> {
 		return file.spell ?? [];
 	}
 	public generateSearchText(spell: Spell): string {
-		return `Spell: ${spell.name}`;
+		return `${spell.focus ? 'Focus ' : ''}Spell ${spell.level}: ${spell.name}`;
 	}
 	public generateTags(spell: Spell): string[] {
 		return [spell.source]

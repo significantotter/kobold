@@ -2,7 +2,7 @@ import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import { fetchOneJsonFile } from './lib/helpers.js';
 import { Model } from './lib/Model.js';
 import * as schema from '../pf2eTools.schema.js';
-import { Language, zLanguageSchema } from './Languages.zod.js';
+import { Language, zLanguageSchema } from './../schemas/index.js';
 
 export class Languages extends Model<typeof zLanguageSchema, typeof schema.Languages> {
 	public table = schema.Languages;

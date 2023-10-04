@@ -1,0 +1,17 @@
+import { EmbedData } from 'discord.js';
+import { Trait } from '../../models/index.js';
+import { CompendiumEmbedParser } from '../compendium-parser.js';
+import { EntryParser } from '../compendium-entry-parser.js';
+
+export async function parseTrait(this: CompendiumEmbedParser, trait: Trait): Promise<EmbedData> {
+	const title = `${trait.name}`;
+	const entryParser = new EntryParser({ delimiter: '\n\n', emojiConverter: this.emojiConverter });
+	const descriptionLines: string[] = [];
+	if (trait.categories) descriptionLines.push(`**Categories** ${trait.categories.join(', ')}`);
+
+	descriptionLines.push(entryParser.parseEntries(trait.entries));
+	return {
+		title: title,
+		description: descriptionLines.join('\n'),
+	};
+}

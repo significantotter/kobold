@@ -2,7 +2,7 @@ import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import { fetchOneJsonFile } from './lib/helpers.js';
 import { Model } from './lib/Model.js';
 import * as schema from '../pf2eTools.schema.js';
-import { zRenderDemoSchema, RenderDemo } from './RenderDemos.zod.js';
+import { zRenderDemoSchema, RenderDemo } from './../schemas/index.js';
 
 export class RenderDemos extends Model<typeof zRenderDemoSchema, typeof schema.RenderDemos> {
 	public table = schema.RenderDemos;

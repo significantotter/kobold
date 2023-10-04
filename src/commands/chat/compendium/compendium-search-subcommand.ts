@@ -7,13 +7,15 @@ import {
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
+	APIEmbed,
+	EmbedData,
 } from 'discord.js';
 import { Command, CommandDeferType } from '../../index.js';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { CompendiumModel } from '../../../services/pf2etools/compendium.model.js';
 import { CompendiumOptions } from './compendium-command-options.js';
-import { CompendiumEmbedParser } from '../../../services/pf2etools/parser/compendium-parser.js';
+import { CompendiumEmbedParser } from '../../../services/pf2etools/parsers/compendium-parser.js';
 import { getEmoji } from '../../../constants/emoji.js';
 import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
@@ -99,7 +101,7 @@ export class CompendiumSearchSubCommand implements Command {
 			getEmoji(intr, emoji)
 		);
 
-		let result: KoboldEmbed | undefined = undefined;
+		let result: APIEmbed | EmbedData | undefined = undefined;
 
 		const searchResults = await CompendiumUtils.search(search, compendium, 1);
 		const closestMatchSorter = StringUtils.generateSorterByWordDistance(
@@ -276,6 +278,6 @@ export class CompendiumSearchSubCommand implements Command {
 			);
 		}
 
-		await result.sendBatches(intr);
+		await new KoboldEmbed(result).sendBatches(intr);
 	}
 }

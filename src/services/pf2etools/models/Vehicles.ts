@@ -2,7 +2,7 @@ import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import { fetchOneJsonFile } from './lib/helpers.js';
 import { Model } from './lib/Model.js';
 import * as schema from '../pf2eTools.schema.js';
-import { zVehicleSchema, Vehicle } from './Vehicles.zod.js';
+import { zVehicleSchema, Vehicle } from '../schemas/Vehicles.zod.js';
 
 export class Vehicles extends Model<typeof zVehicleSchema, typeof schema.Vehicles> {
 	public table = schema.Vehicles;

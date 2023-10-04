@@ -1,9 +1,9 @@
 import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
-import { zActionSchema, Action } from './Actions.zod.js';
+import { zActionSchema, Action } from './../schemas/index.js';
 import { fetchOneJsonFile } from './lib/helpers.js';
 import { Model } from './lib/Model.js';
 import * as schema from '../pf2eTools.schema.js';
-import { parseActivityRaw } from '../parser/compendium-parser-helpers.js';
+import { parseActivityRaw } from '../parsers/compendium-entry-parser.js';
 
 export class Actions extends Model<typeof zActionSchema, typeof schema.Actions> {
 	constructor(public db: BetterSQLite3Database<typeof schema>) {

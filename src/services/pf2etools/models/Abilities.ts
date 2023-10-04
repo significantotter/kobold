@@ -1,8 +1,7 @@
-import { Ability, zAbilitySchema } from './Abilities.zod.js';
-import { Abilities as abilities } from '../pf2eTools.schema.js';
+import { Ability, zAbilitySchema } from './../schemas/index.js';
 import { fetchOneJsonFile } from './lib/helpers.js';
 import { Model } from './lib/Model.js';
-import { parseActivityRaw } from '../parser/compendium-parser-helpers.js';
+import { parseActivityRaw } from '../parsers/compendium-entry-parser.js';
 import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import * as schema from '../pf2eTools.schema.js';
 

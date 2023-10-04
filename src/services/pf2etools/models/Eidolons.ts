@@ -2,7 +2,7 @@ import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import { fetchOneJsonFile } from './lib/helpers.js';
 import { Model } from './lib/Model.js';
 import * as schema from '../pf2eTools.schema.js';
-import { zEidolonSchema, Eidolon } from './Eidolons.zod.js';
+import { zEidolonSchema, Eidolon } from './../schemas/index.js';
 
 export class Eidolons extends Model<typeof zEidolonSchema, typeof schema.Eidolons> {
 	public table = schema.Eidolons;
