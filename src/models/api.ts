@@ -1,14 +1,10 @@
 import express, { Express } from 'express';
-import { createRequire } from 'node:module';
 import util from 'node:util';
 
 import { Controller } from '../controllers/index.js';
 import { checkAuth, handleError } from '../middleware/index.js';
 import { Logger } from '../services/index.js';
-
-const require = createRequire(import.meta.url);
-let Config = require('../../config/config.json');
-let Logs = require('../../lang/logs.json');
+import { Config } from '../config/config.js';
 
 type UnpackedPromise<T> = T extends Promise<infer U> ? U : T;
 type GenericFunction<TS extends any[], R> = (...args: TS) => R;
@@ -38,7 +34,7 @@ export class Api {
 			});
 		});
 		await appListenPromise;
-		Logger.info(Logs.info.apiStarted.replaceAll('{PORT}', Config.api.port));
+		Logger.info(`API started on port ${Config.api.port}.`);
 	}
 
 	private setupControllers(): void {

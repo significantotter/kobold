@@ -6,11 +6,9 @@ import { CustomClient } from '../extensions/index.js';
 import { BotSite } from '../models/config-models.js';
 import { HttpService, Logger } from '../services/index.js';
 import { ShardUtils } from '../utils/index.js';
+import { Config } from '../config/config.js';
 
 const require = createRequire(import.meta.url);
-let BotSites: BotSite[] = require('../../config/bot-sites.json');
-let Config = require('../../config/config.json');
-let Logs = require('../../lang/logs.json');
 
 export class UpdateServerCountJob implements Job {
 	public name = 'Update Server Count';
@@ -25,7 +23,7 @@ export class UpdateServerCountJob implements Job {
 		private shardManager: ShardingManager,
 		private httpService: HttpService
 	) {
-		this.botSites = BotSites.filter(botSite => botSite.enabled);
+		this.botSites = Config.botSites.filter(botSite => botSite.enabled);
 	}
 
 	public async run(): Promise<void> {
@@ -44,9 +42,7 @@ export class UpdateServerCountJob implements Job {
 			{ context: { type, name, url } }
 		);
 
-		Logger.info(
-			Logs.info.updatedServerCount.replaceAll('{SERVER_COUNT}', serverCount.toLocaleString())
-		);
+		Logger.info(`Updated server count. Connected to ${serverCount} total servers.`);
 
 		for (let botSite of this.botSites) {
 			try {
@@ -59,14 +55,21 @@ export class UpdateServerCountJob implements Job {
 					throw res;
 				}
 			} catch (error) {
-				Logger.error(
-					Logs.error.updatedServerCountSite.replaceAll('{BOT_SITE}', botSite.name),
-					error
-				);
+				if (error instanceof Error) {
+					Logger.error(
+						`An error occurred while updating the server count on '${botSite.name}'`,
+						error
+					);
+				} else {
+					Logger.error(
+						`An error occurred while updating the server count on '${botSite.name}'`
+					);
+					console.error(error);
+				}
 				continue;
 			}
 
-			Logger.info(Logs.info.updatedServerCountSite.replaceAll('{BOT_SITE}', botSite.name));
+			Logger.info(`Updated server count on '${botSite.name}'`);
 		}
 	}
 }

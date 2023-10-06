@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+import _ from 'lodash';
 dotenv.config();
 
 const env = process.env;
@@ -47,6 +48,8 @@ interface config {
 		updateServerCount: {
 			schedule: string;
 			log: boolean;
+			runOnce: boolean;
+			initialDelaySecs: number;
 		};
 	};
 	rateLimiting: {
@@ -83,11 +86,45 @@ interface config {
 			value: string;
 		};
 	};
+	botSites: {
+		name: string;
+		enabled: boolean;
+		url: string;
+		authorization: string;
+		body: string;
+	}[];
 }
 
 function parseEnvArray(envVariable: string) {
 	if (envVariable == '') return [];
 	return (envVariable || '').split(',');
+}
+function parseEnvObjectArray(envVariable: string, params: { [k: string]: string }) {
+	if (envVariable == '') return [];
+	try {
+		const initialResult = JSON.parse(envVariable) as any[];
+		if (!_.isArray(initialResult)) throw new Error('Not an array');
+		const parsedResult: { [k: string]: any } = [];
+		for (const envObject of initialResult) {
+			const currentParsedObject: { [k: string]: any } = {};
+			for (const [key, value] of Object.entries(params)) {
+				if (!envObject[key])
+					throw new Error(`Missing key ${key} on object ${JSON.stringify(envObject)}`);
+				else if (typeof envObject[key] !== value) {
+					throw new Error(
+						`Key ${key} on object ${JSON.stringify(envObject)} is not of type ${value}`
+					);
+				} else {
+					currentParsedObject[key] = envObject[key];
+				}
+			}
+			parsedResult.push(currentParsedObject);
+		}
+		return parsedResult;
+	} catch (err) {
+		console.warn('Error parsing bot sites env from: ' + envVariable);
+		console.warn(err);
+	}
 }
 
 function parseEnvObject(envVariable: string) {
@@ -167,6 +204,9 @@ export const Config: config = Object.freeze({
 		updateServerCount: {
 			schedule: env.JOBS_UPDATE_SERVER_COUNT_SCHEDULE ?? '0 */10 * * * *',
 			log: parseEnvBoolean(env.JOBS_UPDATE_SERVER_COUNT_LOG ?? '') ?? false,
+			runOnce: parseEnvBoolean(env.JOBS_UPDATE_SERVER_COUNT_RUN_ONCE ?? '') ?? false,
+			initialDelaySecs:
+				parseEnvNumber(env.JOBS_UPDATE_SERVER_COUNT_RUN_INITIAL_DELAY_SECS ?? '') ?? 0,
 		},
 	},
 	rateLimiting: {
@@ -203,4 +243,12 @@ export const Config: config = Object.freeze({
 			value: env.DEBUG_SHARD_MODE_VALUE ?? 'worker',
 		},
 	},
+	botSites:
+		(parseEnvObjectArray(env.BOT_SITES_0 ?? '', {
+			name: 'string',
+			enabled: 'boolean',
+			url: 'string',
+			authorization: 'string',
+			body: 'string',
+		}) as config['botSites']) ?? [],
 });

@@ -11,8 +11,6 @@ import { MathUtils, ShardUtils } from './utils/index.js';
 import { Config } from './config/config.js';
 import Logs from './config/lang/logs.json' assert { type: 'json' };
 import { filterNotNullOrUndefined } from './utils/type-guards.js';
-import { db } from './services/pf2etools/pf2eTools.db.js';
-import { CompendiumModel } from './services/pf2etools/compendium.model.js';
 
 async function start(): Promise<void> {
 	Logger.info(Logs.info.appStarted);
@@ -52,7 +50,7 @@ async function start(): Promise<void> {
 		return;
 	}
 
-	let shardManager = new ShardingManager('dist/start-bot.js', {
+	let shardManager = new ShardingManager('dist/src/start-bot.js', {
 		token: Config.client.token,
 		mode: (Config.debug.shardMode.enabled ? Config.debug.shardMode.value : 'process') as any,
 		respawn: true,
