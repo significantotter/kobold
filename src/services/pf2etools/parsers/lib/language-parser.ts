@@ -3,10 +3,12 @@ import { Language } from '../../models/index.js';
 import { CompendiumEmbedParser } from '../compendium-parser.js';
 import { EntryParser } from '../compendium-entry-parser.js';
 
-export async function parseLanguage(
-	this: CompendiumEmbedParser,
-	language: Language
-): Promise<EmbedData> {
+export async function _parseLanguage(this: CompendiumEmbedParser, language: Language) {
+	const preprocessedData = (await this.preprocessData(language)) as Language;
+	return parseLanguage.call(this, preprocessedData);
+}
+
+export function parseLanguage(this: CompendiumEmbedParser, language: Language): EmbedData {
 	const title = `${language.name}`;
 	const entryParser = new EntryParser({ delimiter: '\n\n', emojiConverter: this.emojiConverter });
 	const descriptionLines: string[] = [];

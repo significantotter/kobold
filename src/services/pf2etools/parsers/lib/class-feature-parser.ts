@@ -3,10 +3,15 @@ import { ClassFeature } from '../../models/index.js';
 import { CompendiumEmbedParser } from '../compendium-parser.js';
 import { EntryParser } from '../compendium-entry-parser.js';
 
-export async function parseClassFeature(
+export async function _parseClassFeature(this: CompendiumEmbedParser, classFeature: ClassFeature) {
+	const preprocessedData = (await this.preprocessData(classFeature)) as ClassFeature;
+	return parseClassFeature.call(this, preprocessedData);
+}
+
+export function parseClassFeature(
 	this: CompendiumEmbedParser,
 	classFeature: ClassFeature
-): Promise<EmbedData> {
+): EmbedData {
 	const entryParser = new EntryParser({ delimiter: '\n\n', emojiConverter: this.emojiConverter });
 	const title = `${classFeature.name} (${classFeature.className} ${classFeature.level})`;
 	let descriptionLines: string[] = [];

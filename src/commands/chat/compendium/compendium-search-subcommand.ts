@@ -50,6 +50,7 @@ import {
 	Place,
 	QuickRule,
 	RelicGift,
+	RenderDemo,
 	Ritual,
 	Skill,
 	Spell,
@@ -93,6 +94,15 @@ export class CompendiumSearchSubCommand implements Command {
 		data: any,
 		{ compendium }: { compendium: CompendiumModel }
 	): Promise<void> {
+		// const renderDemo = await compendium.db.query.RenderDemos.findFirst();
+		// const renderDemoData = renderDemo?.data as RenderDemo;
+		// const embedParserDemo = new CompendiumEmbedParser(compendium, (emoji: string) =>
+		// 	getEmoji(intr, emoji)
+		// );
+		// const renderDemoEmbed = await embedParserDemo.parseRenderDemo(renderDemoData);
+		// await new KoboldEmbed(renderDemoEmbed).sendBatches(intr);
+		// return;
+
 		const search = intr.options
 			.getString(CompendiumOptions.COMPENDIUM_SEARCH_OPTION.name, true)
 			.trim();

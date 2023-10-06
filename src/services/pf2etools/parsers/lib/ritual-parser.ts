@@ -3,6 +3,11 @@ import { Ritual } from '../../models/index.js';
 import { CompendiumEmbedParser } from '../compendium-parser.js';
 import { EntryParser } from '../compendium-entry-parser.js';
 
+export async function _parseRitual(this: CompendiumEmbedParser, ritual: Ritual) {
+	const preprocessedData = (await this.preprocessData(ritual)) as Ritual;
+	return parseRitual.call(this, preprocessedData);
+}
+
 export function parseRitual(this: CompendiumEmbedParser, ritual: Ritual): EmbedData {
 	const title = `${ritual.name} (Ritual ${ritual.level})`;
 	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });

@@ -4,7 +4,12 @@ import { CompendiumEmbedParser } from '../compendium-parser.js';
 import { EntryParser } from '../compendium-entry-parser.js';
 import _ from 'lodash';
 
-export async function parseItem(this: CompendiumEmbedParser, item: Item): Promise<EmbedData> {
+export async function _parseItem(this: CompendiumEmbedParser, item: Item) {
+	const preprocessedData = (await this.preprocessData(item)) as Item;
+	return parseItem.call(this, preprocessedData);
+}
+
+export function parseItem(this: CompendiumEmbedParser, item: Item): EmbedData {
 	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
 	const title = `${item.name}`;
 	const descriptionLines: string[] = [];

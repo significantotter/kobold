@@ -3,7 +3,12 @@ import { Spell } from '../../models/index.js';
 import { CompendiumEmbedParser } from '../compendium-parser.js';
 import { EntryParser } from '../compendium-entry-parser.js';
 
-export async function parseSpell(this: CompendiumEmbedParser, spell: Spell): Promise<EmbedData> {
+export async function _parseSpell(this: CompendiumEmbedParser, spell: Spell) {
+	const preprocessedData = (await this.preprocessData(spell)) as Spell;
+	return parseSpell.call(this, preprocessedData);
+}
+
+export function parseSpell(this: CompendiumEmbedParser, spell: Spell): EmbedData {
 	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
 	let emoji = entryParser.parseActivityEmoji(spell?.cast);
 	emoji = emoji.replaceAll(' to ', '...');

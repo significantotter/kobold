@@ -6,10 +6,18 @@ import { EntryParser } from '../compendium-entry-parser.js';
 const abilityIsAffliction = (ability: Ability | Affliction): ability is Affliction =>
 	ability.type === 'affliction' || ability.type === 'Disease' || ability.type === 'Curse';
 
-export async function parseCreatureTemplate(
+export async function _parseCreatureTemplate(
 	this: CompendiumEmbedParser,
 	creatureTemplate: CreatureTemplate
-): Promise<EmbedData> {
+) {
+	const preprocessedData = (await this.preprocessData(creatureTemplate)) as CreatureTemplate;
+	return parseCreatureTemplate.call(this, preprocessedData);
+}
+
+export function parseCreatureTemplate(
+	this: CompendiumEmbedParser,
+	creatureTemplate: CreatureTemplate
+): EmbedData {
 	const entryParser = new EntryParser({ delimiter: '\n\n', emojiConverter: this.emojiConverter });
 	const title = `${creatureTemplate.name}`;
 	const descriptionLines = [];

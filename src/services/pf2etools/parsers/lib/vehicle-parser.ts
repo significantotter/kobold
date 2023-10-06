@@ -3,10 +3,12 @@ import { Speed, Vehicle } from '../../models/index.js';
 import { CompendiumEmbedParser } from '../compendium-parser.js';
 import { EntryParser } from '../compendium-entry-parser.js';
 
-export async function parseVehicle(
-	this: CompendiumEmbedParser,
-	vehicle: Vehicle
-): Promise<EmbedData> {
+export async function _parseVehicle(this: CompendiumEmbedParser, vehicle: Vehicle) {
+	const preprocessedData = (await this.preprocessData(vehicle)) as Vehicle;
+	return parseVehicle.call(this, preprocessedData);
+}
+
+export function parseVehicle(this: CompendiumEmbedParser, vehicle: Vehicle): EmbedData {
 	const title = `${vehicle.name} (Vehicle ${vehicle.level})`;
 	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
 	const descriptionLines: string[] = [];

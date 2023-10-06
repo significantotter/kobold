@@ -6,6 +6,7 @@ const zBaseActivitySchema = z.strictObject({
 	number: z.number().optional(),
 	unit: z.string().optional(),
 });
+
 export type Activity = z.infer<typeof zBaseActivitySchema> & { entry?: Entry };
 export const zActivitySchema: z.ZodType<Activity> = zBaseActivitySchema.extend({
 	entry: z.lazy(() => zEntrySchema).optional(),
@@ -221,6 +222,18 @@ const basePf2eOptions = z.strictObject({
 export type Pf2eOptions = z.infer<typeof basePf2eOptions> & { items: Entry[] };
 export const zPf2eOptionsSchema: z.ZodType<Pf2eOptions> = basePf2eOptions.extend({
 	items: z.lazy(() => zEntrySchema.array()),
+});
+
+export type DataGenericContent = z.infer<typeof dataGenericContentSchema>;
+export const dataGenericContentSchema = z.object({
+	name: z.string().optional(),
+	traits: z.array(z.string()).optional(),
+	level: z.string().or(z.number()).optional(),
+	type: z.string().optional(),
+	category: z.string().optional(),
+	activity: zActivitySchema.optional(),
+	frequency: zFrequencySchema.optional(),
+	sections: z.array(z.array(z.array(z.string()))),
 });
 
 const baseZDataContentEntrySchema = z.strictObject({

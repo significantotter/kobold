@@ -3,7 +3,12 @@ import { Trait } from '../../models/index.js';
 import { CompendiumEmbedParser } from '../compendium-parser.js';
 import { EntryParser } from '../compendium-entry-parser.js';
 
-export async function parseTrait(this: CompendiumEmbedParser, trait: Trait): Promise<EmbedData> {
+export async function _parseTrait(this: CompendiumEmbedParser, trait: Trait) {
+	const preprocessedData = (await this.preprocessData(trait)) as Trait;
+	return parseTrait.call(this, preprocessedData);
+}
+
+export function parseTrait(this: CompendiumEmbedParser, trait: Trait): EmbedData {
 	const title = `${trait.name}`;
 	const entryParser = new EntryParser({ delimiter: '\n\n', emojiConverter: this.emojiConverter });
 	const descriptionLines: string[] = [];

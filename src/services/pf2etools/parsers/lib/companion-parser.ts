@@ -3,10 +3,12 @@ import { Companion } from '../../models/index.js';
 import { CompendiumEmbedParser } from '../compendium-parser.js';
 import { EntryParser } from '../compendium-entry-parser.js';
 
-export async function parseCompanion(
-	this: CompendiumEmbedParser,
-	companion: Companion
-): Promise<EmbedData> {
+export async function _parseCompanion(this: CompendiumEmbedParser, companion: Companion) {
+	const preprocessedData = (await this.preprocessData(companion)) as Companion;
+	return parseCompanion.call(this, preprocessedData);
+}
+
+export function parseCompanion(this: CompendiumEmbedParser, companion: Companion): EmbedData {
 	const title = `${companion.name}`;
 	const descriptionLines: string[] = [];
 	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });

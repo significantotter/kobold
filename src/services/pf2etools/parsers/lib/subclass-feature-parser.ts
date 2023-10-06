@@ -3,10 +3,18 @@ import { SubclassFeature } from '../../models/index.js';
 import { CompendiumEmbedParser } from '../compendium-parser.js';
 import { EntryParser } from '../compendium-entry-parser.js';
 
-export async function parseSubclassFeature(
+export async function _parseSubclassFeature(
 	this: CompendiumEmbedParser,
 	subclassFeature: SubclassFeature
-): Promise<EmbedData> {
+) {
+	const preprocessedData = (await this.preprocessData(subclassFeature)) as SubclassFeature;
+	return parseSubclassFeature.call(this, preprocessedData);
+}
+
+export function parseSubclassFeature(
+	this: CompendiumEmbedParser,
+	subclassFeature: SubclassFeature
+): EmbedData {
 	const title = `${subclassFeature.name} (${subclassFeature.subclassShortName} ${subclassFeature.className} ${subclassFeature.level})`;
 	let description = '';
 	const entryParser = new EntryParser({ delimiter: '\n\n', emojiConverter: this.emojiConverter });

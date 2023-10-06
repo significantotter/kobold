@@ -3,10 +3,12 @@ import { Eidolon } from '../../models/index.js';
 import { CompendiumEmbedParser } from '../compendium-parser.js';
 import { EntryParser } from '../compendium-entry-parser.js';
 
-export async function parseEidolon(
-	this: CompendiumEmbedParser,
-	eidolon: Eidolon
-): Promise<EmbedData> {
+export async function _parseEidolon(this: CompendiumEmbedParser, eidolon: Eidolon) {
+	const preprocessedData = (await this.preprocessData(eidolon)) as Eidolon;
+	return parseEidolon.call(this, preprocessedData);
+}
+
+export function parseEidolon(this: CompendiumEmbedParser, eidolon: Eidolon): EmbedData {
 	const title = `${eidolon.name}`;
 	const descriptionLines: string[] = [];
 	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });

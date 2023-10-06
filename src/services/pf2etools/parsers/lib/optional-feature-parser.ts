@@ -4,10 +4,18 @@ import { CompendiumEmbedParser } from '../compendium-parser.js';
 import { EntryParser } from '../compendium-entry-parser.js';
 import { nth } from '../compendium-parser-helpers.js';
 
-export async function parseOptionalFeature(
+export async function _parseOptionalFeature(
 	this: CompendiumEmbedParser,
 	optionalFeature: OptionalFeature
-): Promise<EmbedData> {
+) {
+	const preprocessedData = (await this.preprocessData(optionalFeature)) as OptionalFeature;
+	return parseOptionalFeature.call(this, preprocessedData);
+}
+
+export function parseOptionalFeature(
+	this: CompendiumEmbedParser,
+	optionalFeature: OptionalFeature
+): EmbedData {
 	const title = `${optionalFeature.name}`;
 	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
 	const descriptionLines: string[] = [];

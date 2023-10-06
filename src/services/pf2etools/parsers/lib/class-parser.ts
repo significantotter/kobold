@@ -5,10 +5,12 @@ import { EntryParser } from '../compendium-entry-parser.js';
 import _ from 'lodash';
 import { table } from 'table';
 
-export async function parseClass(
-	this: CompendiumEmbedParser,
-	classValue: Class
-): Promise<EmbedData> {
+export async function _parseClass(this: CompendiumEmbedParser, classValue: Class) {
+	const preprocessedData = (await this.preprocessData(classValue)) as Class;
+	return parseClass.call(this, preprocessedData);
+}
+
+export function parseClass(this: CompendiumEmbedParser, classValue: Class): EmbedData {
 	const entryParser = new EntryParser({ delimiter: '\n\n', emojiConverter: this.emojiConverter });
 	const title = `${classValue.name}`;
 	const descriptionLines = [];

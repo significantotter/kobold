@@ -8,10 +8,23 @@ import { DrizzleUtils } from '../../utils/drizzle-utils.js';
 const abilityIsAffliction = (ability: Ability | Affliction): ability is Affliction =>
 	ability.type === 'affliction' || ability.type === 'Disease' || ability.type === 'Curse';
 
-export async function parseCreature(
+export async function _parseCreature(this: CompendiumEmbedParser, creature: Creature) {
+	const preprocessedData = (await this.preprocessData(creature)) as Creature;
+
+	// Creature Async Work
+	const fluffResultRaw = await this.model.db.query.CreaturesFluff.findFirst({
+		where: DrizzleUtils.ilike(this.model.creaturesFluff.table.name, creature.name),
+	});
+	const fluffResult = fluffResultRaw?.data as CreatureFluff | undefined;
+
+	return parseCreature.call(this, preprocessedData, fluffResult);
+}
+
+export function parseCreature(
 	this: CompendiumEmbedParser,
-	creature: Creature
-): Promise<EmbedData> {
+	creature: Creature,
+	fluffData?: CreatureFluff
+): EmbedData {
 	const delimiter = '\n';
 	const entryParser = new EntryParser({
 		delimiter,
@@ -21,10 +34,6 @@ export async function parseCreature(
 		delimiter: '; ',
 		emojiConverter: this.emojiConverter,
 	});
-	const fluffResultRaw = await this.model.db.query.CreaturesFluff.findFirst({
-		where: DrizzleUtils.ilike(this.model.creaturesFluff.table.name, creature.name),
-	});
-	const fluffResult = fluffResultRaw?.data as CreatureFluff | undefined;
 
 	let title = creature.name;
 	if (creature.level) {
@@ -155,7 +164,7 @@ export async function parseCreature(
 		url: `https://pf2etools.com/bestiary.html#${encodeURIComponent(creature.name)}${
 			creature.source ? `_${encodeURIComponent(creature.source)}` : ''
 		}`,
-		thumbnail: fluffResult?.images?.[0] ? { url: fluffResult.images[0] } : undefined,
+		thumbnail: fluffData?.images?.[0] ? { url: fluffData.images[0] } : undefined,
 		description: topBlock.join(delimiter),
 		fields: [
 			{

@@ -4,10 +4,12 @@ import { CompendiumEmbedParser } from '../compendium-parser.js';
 import { EntryParser } from '../compendium-entry-parser.js';
 import _ from 'lodash';
 
-export async function parseRelicGift(
-	this: CompendiumEmbedParser,
-	relicGift: RelicGift
-): Promise<EmbedData> {
+export async function _parseRelicGift(this: CompendiumEmbedParser, relicGift: RelicGift) {
+	const preprocessedData = (await this.preprocessData(relicGift)) as RelicGift;
+	return parseRelicGift.call(this, preprocessedData);
+}
+
+export function parseRelicGift(this: CompendiumEmbedParser, relicGift: RelicGift): EmbedData {
 	const title = `${relicGift.name} (${relicGift.tier} Gift)`;
 	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
 	const descriptionLines: string[] = [];

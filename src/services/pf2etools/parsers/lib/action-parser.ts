@@ -3,10 +3,12 @@ import { Action } from '../../models/index.js';
 import { CompendiumEmbedParser } from '../compendium-parser.js';
 import { EntryParser } from '../compendium-entry-parser.js';
 
-export async function parseAction(
-	this: CompendiumEmbedParser,
-	ability: Action
-): Promise<EmbedData> {
+export async function _parseAction(this: CompendiumEmbedParser, ability: Action) {
+	const preprocessedData = (await this.preprocessData(ability)) as Action;
+	return parseAction.call(this, preprocessedData);
+}
+
+export function parseAction(this: CompendiumEmbedParser, ability: Action): EmbedData {
 	const entryParser = new EntryParser({ delimiter: '\n\n', emojiConverter: this.emojiConverter });
 	const title = `${ability.name} ${
 		ability.activity ? entryParser.parseActivity(ability.activity) : ''

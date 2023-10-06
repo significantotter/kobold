@@ -3,10 +3,18 @@ import { CompanionAbility } from '../../models/index.js';
 import { CompendiumEmbedParser } from '../compendium-parser.js';
 import { EntryParser } from '../compendium-entry-parser.js';
 
-export async function parseCompanionAbility(
+export async function _parseCompanionAbility(
 	this: CompendiumEmbedParser,
 	companionAbility: CompanionAbility
-): Promise<EmbedData> {
+) {
+	const preprocessedData = (await this.preprocessData(companionAbility)) as CompanionAbility;
+	return parseCompanionAbility.call(this, preprocessedData);
+}
+
+export function parseCompanionAbility(
+	this: CompendiumEmbedParser,
+	companionAbility: CompanionAbility
+): EmbedData {
 	const title = `${companionAbility.name}`;
 	const entryParser = new EntryParser({ delimiter: '\n\n', emojiConverter: this.emojiConverter });
 	const description = entryParser.parseEntries(companionAbility.entries);

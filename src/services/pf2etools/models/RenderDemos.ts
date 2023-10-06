@@ -17,10 +17,10 @@ export class RenderDemos extends Model<typeof zRenderDemoSchema, typeof schema.R
 	}
 	public z = zRenderDemoSchema;
 	public getFiles(): any[] {
-		return [fetchOneJsonFile('renderDemos')];
+		return [fetchOneJsonFile('renderdemo')];
 	}
 	public resourceListFromFile(file: any): any[] {
-		return file.renderDemo;
+		return file.renderdemo;
 	}
 	public async import() {
 		await this._importData();

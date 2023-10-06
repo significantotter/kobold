@@ -3,10 +3,12 @@ import { Ancestry, AncestryFeature } from '../../models/index.js';
 import { CompendiumEmbedParser } from '../compendium-parser.js';
 import { EntryParser } from '../compendium-entry-parser.js';
 
-export async function parseAncestry(
-	this: CompendiumEmbedParser,
-	ancestry: Ancestry
-): Promise<EmbedData> {
+export async function _parseAncestry(this: CompendiumEmbedParser, ancestry: Ancestry) {
+	const preprocessedData = (await this.preprocessData(ancestry)) as Ancestry;
+	return parseAncestry.call(this, preprocessedData);
+}
+
+export function parseAncestry(this: CompendiumEmbedParser, ancestry: Ancestry): EmbedData {
 	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
 	const title = `${ancestry.name}`;
 	const descriptionLines: string[] = [];

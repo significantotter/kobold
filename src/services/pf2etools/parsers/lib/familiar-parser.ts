@@ -3,10 +3,12 @@ import { Familiar } from '../../models/index.js';
 import { CompendiumEmbedParser } from '../compendium-parser.js';
 import { EntryParser } from '../compendium-entry-parser.js';
 
-export async function parseFamiliar(
-	this: CompendiumEmbedParser,
-	familiar: Familiar
-): Promise<EmbedData> {
+export async function _parseFamiliar(this: CompendiumEmbedParser, familiar: Familiar) {
+	const preprocessedData = (await this.preprocessData(familiar)) as Familiar;
+	return parseFamiliar.call(this, preprocessedData);
+}
+
+export function parseFamiliar(this: CompendiumEmbedParser, familiar: Familiar): EmbedData {
 	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
 	const title = `${familiar.name}`;
 	const descriptionLines: string[] = [];

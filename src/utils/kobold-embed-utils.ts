@@ -320,12 +320,15 @@ export class KoboldEmbed extends EmbedBuilder {
 		let currentChunk: string[] = [];
 		let currentChunkLength = 0;
 		let currentChunkContinuesCodeBlock = false;
+		let currentChunkContinuesQuote = false;
 		for (const line of splitDescription) {
 			if (currentChunkLength + line.length > 1000) {
 				if (currentChunkContinuesCodeBlock) currentChunk.push('```');
+				if (currentChunkContinuesQuote) currentChunk.push('`');
 				descriptionChunks.push(currentChunk);
 				currentChunk = [];
 				if (currentChunkContinuesCodeBlock) currentChunk.push('```');
+				if (currentChunkContinuesQuote) currentChunk.push('`');
 				currentChunkLength = 0;
 			}
 			if (line.length > 1000) {
@@ -334,15 +337,24 @@ export class KoboldEmbed extends EmbedBuilder {
 				const splitLine = _.chunk(line, numberOfSegments).map(segment => segment.join(''));
 				for (let splitLineSegment of splitLine) {
 					if (currentChunkContinuesCodeBlock) splitLineSegment = '```' + splitLineSegment;
+					if (currentChunkContinuesQuote) splitLineSegment = '`' + splitLineSegment;
 					// check for an odd number of ``` formatters
 					if ((splitLineSegment?.match(/```/g) ?? []).length % 2 === 1)
 						currentChunkContinuesCodeBlock = !currentChunkContinuesCodeBlock;
+					// check for an odd number of ` formatters
+					if ((splitLineSegment?.match(/(?<!`)`{1}(?!`)/g) ?? []).length % 2 === 1)
+						currentChunkContinuesQuote = !currentChunkContinuesQuote;
 					if (currentChunkContinuesCodeBlock) splitLineSegment += '```';
+					if (currentChunkContinuesQuote) splitLineSegment = '`';
 					descriptionChunks.push([splitLineSegment]);
 				}
 			} else {
+				// check for an odd number of ``` formatters
 				if ((line?.match(/```/g) ?? []).length % 2 === 1)
 					currentChunkContinuesCodeBlock = !currentChunkContinuesCodeBlock;
+				// check for an odd number of ` formatters
+				if ((line?.match(/(?<!`)`{1}(?!`)/g) ?? []).length % 2 === 1)
+					currentChunkContinuesQuote = !currentChunkContinuesQuote;
 				currentChunk.push(line);
 				currentChunkLength += line.length + 2; //lines are each joined with \n, adding 2
 			}
@@ -353,7 +365,40 @@ export class KoboldEmbed extends EmbedBuilder {
 			descriptionChunks.slice(4).map(chunk => ({ name: '\u200b', value: chunk.join('\n') }))
 		);
 	}
+	public fixDiscordFormattingInQuotes() {
+		//fix discord emoji in codeblocks
+		const emojiRegex = /\<\w*\:\w*\:\w*\>/g;
+		if (this.data.description) {
+			const splitByCodeblock = this.data.description.split(/(?<!`)`{1}(?!`)/g);
+			if (splitByCodeblock.length > 1) {
+				for (let i = 1; i < splitByCodeblock.length; i += 2) {
+					splitByCodeblock[i] = splitByCodeblock[i].replaceAll(
+						emojiRegex,
+						emoji => '`' + emoji + '`'
+					);
+				}
+			}
+			this.data.description = splitByCodeblock.join('`');
+		}
+		if (this.data.fields?.length) {
+			const fields = this.data.fields;
+			for (const field of fields ?? []) {
+				const splitByCodeblock = field.value.split(/(?<!`)`{1}(?!`)/g);
+				if (splitByCodeblock.length > 1) {
+					for (let i = 1; i < splitByCodeblock.length; i += 2) {
+						splitByCodeblock[i] = splitByCodeblock[i].replace(
+							emojiRegex,
+							emoji => '`' + emoji + '`'
+						);
+					}
+				}
+				field.value = splitByCodeblock.join('`');
+			}
+			this.data.fields = fields;
+		}
+	}
 	public async sendBatches(intr: CommandInteraction, isEphemeral = false) {
+		this.fixDiscordFormattingInQuotes();
 		this.splitDescriptionToFields();
 		this.splitFieldsThatAreTooLong();
 		const splitEmbeds = this.splitEmbedIfTooLong();

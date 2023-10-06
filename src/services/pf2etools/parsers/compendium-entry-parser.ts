@@ -1,12 +1,14 @@
 import _ from 'lodash';
 import {
 	AbilityEntry,
+	Action,
 	Activate,
 	Activity,
 	AfflictionEntry,
 	AttackEntry,
 	Background,
 	DataEntry,
+	DataGenericContent,
 	Entry,
 	Feat,
 	Hazard,
@@ -27,6 +29,62 @@ import { SharedParsers, applyOperatorIfNumber, nth } from './compendium-parser-h
 import { table } from 'table';
 import { CompendiumEmbedParser } from './compendium-parser.js';
 import { EmbedData } from 'discord.js';
+import { parseHazard } from './lib/hazard-parser.js';
+import { parseRitual } from './lib/ritual-parser.js';
+import { parseBackground } from './lib/background-parser.js';
+import { parseAction } from './lib/action-parser.js';
+
+const discordLinkRegex =
+	/\[[\w _\-\)\(]+\]\(((([A-Za-z]{3,9}:(?:\/\/)?)(?:[\-;:&=\+\$,\w]+@)?[A-Za-z0-9\.\-]+|(?:www\.|[\-;:&=\+\$,\w]+@)[A-Za-z0-9\.\-]+)((?:\/[\+~%\/\.\w\-_]*)?\??(?:[\-\+=&;%@\.\w_]*)#?(?:[ \.\!\/\\\w]*))?)\)/g;
+
+const emojiSpecialCharacterOptions = [
+	'☈',
+	'☊',
+	'☧',
+	'☡',
+	'☠',
+	'☙',
+	'☃',
+	'♇',
+	'♄',
+	'♅',
+	'♆',
+	'☬',
+	'☫',
+	'⚕',
+	'⚗',
+	'⚝',
+	'⚞',
+	'⚟',
+	'⚳',
+	'⚴',
+	'⚵',
+	'⚶',
+	'⚷',
+	'⚸',
+	'⚹',
+	'⚺',
+	'⚻',
+	'⚼',
+	'⚊',
+	'⚋',
+	'⚌',
+	'⚍',
+	'⚎',
+	'⚏',
+	'☰',
+	'☱',
+	'☲',
+	'☳',
+	'☴',
+	'☵',
+	'☶',
+	'☷',
+	'☟',
+	'☞',
+	'☝',
+	'☜',
+];
 
 export function parseActivityRaw(activity?: Activity) {
 	if (!activity) return '';
@@ -160,6 +218,7 @@ export class EntryParser {
 	}
 
 	public parseEntry(entry: Entry, showTitle: boolean = true): string {
+		if (!entry) return '';
 		if (_.isString(entry)) return entry;
 		else if (entry.type === 'successDegree')
 			return this.parseSuccessDegree(entry as SuccessDegreeEntry, showTitle);
@@ -248,23 +307,59 @@ export class EntryParser {
 		const allowedColWidths = [52, 23, 18, 15];
 		const maxColWidth = allowedColWidths[parsedTable[0].length - 1];
 		const colOptions = [];
-		for (const col in parsedTable[0]) {
+		const discordEmojiRegex = /\<\w*\:\w*\:\w*\>/g;
+		const tokenToTrueValueMap: { [k: string]: string } = {};
+		const stripDiscordLinks = (str: string): string => {
+			// Discord links won't display properly in the table, so we'll strip them out
+			// We could remove the formatting for them like emoji, but they're
+			// Much more difficult because of the need to line wrap link text
+			const linkText = /^\[([\w _\-\)\(]+)\]/g.exec(str.trim())?.[1];
+			return linkText ?? str;
+		};
+		const tokenizeDiscordEmoji = (emoji: string): string => {
+			const lowerEmoji = emoji.toLowerCase();
+			if (tokenToTrueValueMap[lowerEmoji]) return tokenToTrueValueMap[lowerEmoji];
+			else {
+				tokenToTrueValueMap[lowerEmoji] =
+					' ' +
+					emojiSpecialCharacterOptions[Object.keys(tokenToTrueValueMap).length] +
+					' ';
+			}
+			return tokenToTrueValueMap[lowerEmoji];
+		};
+		const restoreDiscordEmoji = (str: string): string => {
+			let result = str;
+			for (const [key, value] of Object.entries(tokenToTrueValueMap)) {
+				result = result.replaceAll(value, key);
+			}
+			return result;
+		};
+		const parsedWithoutDiscordEmoji = parsedTable.map(row =>
+			row.map(cell =>
+				cell
+					.replaceAll(discordEmojiRegex, tokenizeDiscordEmoji)
+					.replaceAll(discordLinkRegex, stripDiscordLinks)
+			)
+		);
+		for (const col in parsedWithoutDiscordEmoji[0]) {
 			const colLengths = [
-				...parsedTable.map((row, rowIndex) => (rowIndex === 0 ? 0 : row[col].length)),
+				...parsedWithoutDiscordEmoji.map((row, rowIndex) =>
+					rowIndex === 0 ? 0 : row[col].length
+				),
 			];
 			const averageCellLength = Math.ceil(
-				colLengths.reduce((a, b) => a + b, 0) / parsedTable.length
+				colLengths.reduce((a, b) => a + b, 0) / parsedWithoutDiscordEmoji.length
 			);
 			const maxCellLength = Math.max(...colLengths);
 			const suggestedCellSize = Math.ceil(
 				(averageCellLength + averageCellLength + maxCellLength) / 3
 			);
-			const headerLimit = Math.ceil(parsedTable[0][col].length / 3);
+			const headerLimit = Math.ceil(parsedWithoutDiscordEmoji[0][col].length / 3);
 			colOptions.push({
 				width: Math.min(Math.max(suggestedCellSize, headerLimit), maxColWidth),
 			});
 		}
-		const result = table(parsedTable, {
+		const result = table(parsedWithoutDiscordEmoji, {
 			border: {
 				topLeft: ``,
 				topRight: ``,
@@ -277,7 +372,7 @@ export class EntryParser {
 			},
 			columns: colOptions,
 		});
-		return '```' + result + '```';
+		return '`' + restoreDiscordEmoji(result) + '`';
 	}
 
 	public parseTableEntry(tableEntry: TableEntry, showTitle: boolean = true): string {
@@ -285,7 +380,9 @@ export class EntryParser {
 		const parsedTable: string[][] = [];
 		for (const row of tableEntry.rows) {
 			if ('rows' in row) {
-				parsedTable.push(row.rows.map(subRow => subRow.map(_.toString)).flat(2));
+				for (const subRow of row.rows) {
+					parsedTable.push(subRow.map(_.toString));
+				}
 			} else {
 				parsedTable.push(row.map(_.toString));
 			}
@@ -343,11 +440,6 @@ export class EntryParser {
 		return this.parseEntries(entry.items);
 	}
 
-	public parseGenericData(entry: any) {
-		// TODO: implement this
-		return '';
-	}
-
 	public embedDataToString(embedData: EmbedData) {
 		if (!embedData) return '';
 		const embedLines: string[] = [];
@@ -360,16 +452,61 @@ export class EntryParser {
 		}
 		return embedLines.join(this.delimiter);
 	}
+
+	public parseGenericDataEntry(entry: DataGenericContent): string {
+		if (!entry) return '';
+		const genericLines: string[] = [];
+		let title = entry?.name ?? '';
+		if (entry.activity) {
+			title += ` ${this.parseActivity(entry.activity)}`;
+		}
+		if (entry.level) {
+			title += ` (Level ${entry.level})`;
+		}
+		genericLines.push(`**${title}**`);
+		if (entry.traits?.length) {
+			genericLines.push(` (${entry.traits.join(', ')})`);
+		}
+		if (entry.type) {
+			genericLines.push(`**${entry.type}**`);
+		}
+		if (entry.category) {
+			genericLines.push(`**Category** ${entry.category}`);
+		}
+		if (entry.frequency) {
+			genericLines.push(this.helpers.parseFrequency(entry.frequency));
+		}
+		if (entry.sections) {
+			genericLines.push(
+				entry.sections
+					.map(sectionGroup =>
+						sectionGroup.map(section => this.parseEntries(section)).join(this.delimiter)
+					)
+					.join(this.delimiter)
+			);
+		}
+		return genericLines.join(this.delimiter);
+	}
+
 	public parseDataEntry(entry: DataEntry, showTitle: boolean = true): string {
+		if (!entry) return '';
 		if (this.embedParser) {
 			if (entry.tag === 'background')
 				return this.embedDataToString(
-					this.embedParser.parseBackground(entry.data as Background)
+					parseBackground.call(this.embedParser, entry.data as Background)
 				);
 			if (entry.tag === 'hazard')
-				return this.embedDataToString(this.embedParser.parseHazard(entry.data as Hazard)); // TODO
+				return this.embedDataToString(
+					parseHazard.call(this.embedParser, entry.data as Hazard)
+				);
 			if (entry.tag === 'ritual')
-				return this.embedDataToString(this.embedParser.parseRitual(entry.data as Ritual)); // TODO
+				return this.embedDataToString(
+					parseRitual.call(this.embedParser, entry.data as Ritual)
+				);
+			if (entry.tag === 'action')
+				return this.embedDataToString(
+					parseAction.call(this.embedParser, entry.data as Action)
+				);
 			if (entry.tag === 'curse') return ``;
 			if (entry.tag === 'item') return ``;
 			if (entry.tag === 'spell') return ``;
@@ -378,14 +515,15 @@ export class EntryParser {
 			if (entry.tag === 'eidolon') return `(See Eidolon "${entry.name}")`;
 			if (entry.tag === 'creature') return `(See Creature "${entry.name}")`;
 		}
-		if (entry.tag === 'generic') return this.parseGenericData(entry);
+		if (entry.tag === 'generic')
+			return this.parseGenericDataEntry(entry.data as DataGenericContent);
 		if (entry.tag === 'table') return `See ${entry.name}`;
 		if (entry.tag === 'feat') this.parseFeat(entry.data as Feat, true).value;
-		if (entry.tag === 'action' || entry.tag === 'ability')
+		if (entry.tag === 'ability')
 			return this.parseAbilityEntry(entry.data as AbilityEntry, showTitle);
 		if (entry.tag === 'affliction')
 			return this.parseAfflictionEntry(entry.data as AfflictionEntry, showTitle);
-		return '';
+		return this.parseGenericDataEntry(entry.data as DataGenericContent);
 	}
 
 	public parseLevelEffectEntry(entry: LevelEffectEntry, showTitle: boolean = true): string {
@@ -498,6 +636,8 @@ export class EntryParser {
 		// ignore generic, it tells you where to find the text of a common ability
 		// ignore actionType, it's only used in archetypes/ancestries to reference the action source
 		if (ability.entries?.length) abilityLines.push(this.parseEntries(ability.entries));
+		if (!ability.entries?.length && ability.generic?.tag)
+			abilityLines.push(`See ${ability.generic.tag} "${ability.name}"`);
 
 		if (ability.special) abilityLines.push(`;**Special** ${ability.special}`);
 		return abilityLines.join(this.delimiter);

@@ -4,6 +4,11 @@ import { CompendiumEmbedParser } from '../compendium-parser.js';
 import { EntryParser } from '../compendium-entry-parser.js';
 import _ from 'lodash';
 
+export async function _parseHazard(this: CompendiumEmbedParser, hazard: Hazard) {
+	const preprocessedData = (await this.preprocessData(hazard)) as Hazard;
+	return parseHazard.call(this, preprocessedData);
+}
+
 export function parseHazard(this: CompendiumEmbedParser, hazard: Hazard): EmbedData {
 	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
 	const title = `${hazard.name} (Hazard ${hazard.level})`;

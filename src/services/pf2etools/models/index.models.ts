@@ -22,6 +22,7 @@ export * from './Places.js';
 export * from './QuickRules.js';
 export * from './RelicGifts.js';
 export * from './Rituals.js';
+export * from './RenderDemos.js';
 export * from './Skills.js';
 export * from './Sources.js';
 export * from './Spells.js';

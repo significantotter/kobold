@@ -1,26 +1,41 @@
 import { EmbedData } from 'discord.js';
-import { Deity } from '../../models/index.js';
+import { Deity, DeityFluff } from '../../models/index.js';
 import { CompendiumEmbedParser } from '../compendium-parser.js';
 import { EntryParser } from '../compendium-entry-parser.js';
 import { DrizzleUtils } from '../../utils/drizzle-utils.js';
 import { nth } from '../compendium-parser-helpers.js';
 import _ from 'lodash';
 
-export async function parseDeity(this: CompendiumEmbedParser, deity: Deity): Promise<EmbedData> {
+export async function _parseDeity(this: CompendiumEmbedParser, deity: Deity) {
+	const preprocessedData = (await this.preprocessData(deity)) as Deity;
+
+	// Deity async work
+	const deityFluff = (
+		await this.model.db.query.DeitiesFluff.findFirst({
+			where: DrizzleUtils.ilike(this.model.deitiesFluff.table.name, deity.name),
+		})
+	)?.data as DeityFluff | undefined;
+
+	return parseDeity.call(this, preprocessedData, deityFluff);
+}
+
+export function parseDeity(
+	this: CompendiumEmbedParser,
+	deity: Deity,
+	deityFluff?: DeityFluff
+): EmbedData {
 	let title = `${deity.name}`;
 	if (deity.alias?.length) title += ` (${deity.alias.join(', ')})`;
 	if (deity.alignment?.alignment?.length)
 		title += ` ${deity.alignment.alignment.map(n => n.toUpperCase()).join(', ')}`;
 	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
-	const fluffEntry = await this.model.db.query.DeitiesFluff.findFirst({
-		where: DrizzleUtils.ilike(this.model.deitiesFluff.table.name, deity.name),
-	});
+
 	const descriptionLines: string[] = [];
 	let thumbnail: string | undefined = undefined;
-	if (fluffEntry?.data) {
-		thumbnail = fluffEntry.data.images?.[0];
+	if (deityFluff) {
+		thumbnail = deityFluff.images?.[0];
 		descriptionLines.push(
-			entryParser.parseEntries(fluffEntry.data.entries ?? fluffEntry.data.lore ?? [])
+			entryParser.parseEntries(deityFluff.entries ?? deityFluff.lore ?? [])
 		);
 		descriptionLines.push(''); //extra spacing
 	}
@@ -122,5 +137,6 @@ export async function parseDeity(this: CompendiumEmbedParser, deity: Deity): Pro
 		title: title,
 		description: descriptionLines.join('\n'),
 		fields,
+		image: thumbnail ? { url: thumbnail } : undefined,
 	};
 }

@@ -3,10 +3,12 @@ import { VariantRule } from '../../models/index.js';
 import { CompendiumEmbedParser } from '../compendium-parser.js';
 import { EntryParser } from '../compendium-entry-parser.js';
 
-export async function parseVariantRule(
-	this: CompendiumEmbedParser,
-	variantRule: VariantRule
-): Promise<EmbedData> {
+export async function _parseVariantRule(this: CompendiumEmbedParser, variantRule: VariantRule) {
+	const preprocessedData = (await this.preprocessData(variantRule)) as VariantRule;
+	return parseVariantRule.call(this, preprocessedData);
+}
+
+export function parseVariantRule(this: CompendiumEmbedParser, variantRule: VariantRule): EmbedData {
 	const title = `${variantRule.name}`;
 	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
 	const descriptionLines: string[] = [];

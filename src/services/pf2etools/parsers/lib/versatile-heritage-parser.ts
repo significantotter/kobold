@@ -7,14 +7,14 @@ export async function _parseVersatileHeritage(
 	this: CompendiumEmbedParser,
 	versatileHeritage: VersatileHeritage
 ) {
-	const preprocess = this.preprocessData(versatileHeritage) as VersatileHeritage;
-	return parseVersatileHeritage.call(this, versatileHeritage);
+	const preprocessedData = (await this.preprocessData(versatileHeritage)) as VersatileHeritage;
+	return parseVersatileHeritage.call(this, preprocessedData);
 }
 
-export async function parseVersatileHeritage(
+export function parseVersatileHeritage(
 	this: CompendiumEmbedParser,
 	versatileHeritage: VersatileHeritage
-): Promise<EmbedData> {
+): EmbedData {
 	const title = `${versatileHeritage.name}`;
 	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
 	const descriptionLines: string[] = [];
