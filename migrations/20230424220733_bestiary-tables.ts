@@ -1,7 +1,7 @@
 import { Knex } from 'knex';
-import { Creature } from '../dist/utils/creature.js';
+import { Creature } from '../src/utils/creature.js';
 import _ from 'lodash';
-import { Character } from '../dist/services/kobold/models/index.js';
+import { Character } from '../src/services/kobold/models/index.js';
 
 export async function up(knex: Knex): Promise<void> {
 	await knex.schema.createTable('bestiary_files_loaded', function (table) {

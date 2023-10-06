@@ -1,6 +1,6 @@
 import { Knex } from 'knex';
 
-const attributeAbilityMap = {
+const attributeAbilityMap: { [k: string]: string } = {
 	acrobatics: 'dexterity',
 	arcana: 'intelligence',
 	athletics: 'strength',
