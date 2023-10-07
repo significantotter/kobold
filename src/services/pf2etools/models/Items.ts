@@ -3,6 +3,7 @@ import { zItemSchema, Item, ItemFluff, zItemFluffSchema } from './../schemas/ind
 import { fetchManyJsonFiles, fetchOneJsonFile } from './lib/helpers.js';
 import { Model } from './lib/Model.js';
 import * as schema from '../pf2eTools.schema.js';
+import _ from 'lodash';
 
 export class Items extends Model<typeof zItemSchema, typeof schema.Items> {
 	public table = schema.Items;
@@ -17,7 +18,8 @@ export class Items extends Model<typeof zItemSchema, typeof schema.Items> {
 		return file.item ?? file.baseitem ?? [];
 	}
 	public generateSearchText(item: Item): string {
-		return `Item${item.level ? ` ${item.level}` : ''}: ${item.name}`;
+		let categoryGroup = [item.category, item.level].filter(_.identity);
+		return `Item: ${item.name}${categoryGroup.length ? ` (${categoryGroup.join(' ')})` : ''}`;
 	}
 	public generateTags(item: Item): string[] {
 		return [item.source].concat(item.traits ?? []).concat(item.type ? [item.type] : []);

@@ -211,7 +211,7 @@ export class EntryParser {
 		if (activate?.traits?.length) activateLine.push(`(${activate.traits.join(', ')})`);
 		if (activate?.note) activateLine.push(activate.note);
 		if (activate?.components?.length)
-			activateLine.push(`**Components ${activate.components.join(', ')}`);
+			activateLine.push(`**Components** ${activate.components.join(', ')}`);
 		if (activate?.trigger) activateLine.push(`**Trigger** ${activate.trigger}`);
 		if (activate?.requirements) activateLine.push(`**Requirements** ${activate.requirements}`);
 		return activateLine.join(' ');

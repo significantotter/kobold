@@ -1,4 +1,4 @@
-import { inArray } from 'drizzle-orm';
+import { inArray, sql } from 'drizzle-orm';
 import { CompendiumModel } from '../compendium.model.js';
 import * as schema from '../pf2eTools.schema.js';
 import { DrizzleUtils } from './drizzle-utils.js';
@@ -13,10 +13,20 @@ export class CompendiumUtils {
 		compendium: CompendiumModel,
 		limit: number = 50
 	) {
-		const searchResult = await compendium.db.query.Search.findMany({
-			where: DrizzleUtils.ilike(compendium.search.search, `%${searchText}%`),
-			limit,
-		});
+		let searchResult: CompendiumModel['search']['$inferSelect'][];
+		if (searchText?.length > 3) {
+			searchResult = await compendium.db.query.Search.findMany({
+				where: DrizzleUtils.ilike(compendium.search.search, `%${searchText}%`),
+				limit,
+			});
+		} else {
+			// allow for discovery of entries
+			searchResult = await compendium.db.query.Search.findMany({
+				where: DrizzleUtils.ilike(compendium.search.search, `%${searchText}%`),
+				limit,
+				orderBy: sql`RANDOM()`,
+			});
+		}
 
 		const resultsByTable = searchResult.reduce(
 			(byTable, result) => {

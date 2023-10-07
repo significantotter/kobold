@@ -11,7 +11,7 @@ export async function _parseItem(this: CompendiumEmbedParser, item: Item) {
 
 export function parseItem(this: CompendiumEmbedParser, item: Item): EmbedData {
 	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
-	const title = `${item.name}`;
+	const title = `${item.name}${item.level ? ` (Item ${item.level})` : ''}`;
 	const descriptionLines: string[] = [];
 	if (item.traits) descriptionLines.push(`**Traits** ${item.traits.join(', ')}`);
 	if (item.contract) {
