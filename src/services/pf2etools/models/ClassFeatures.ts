@@ -17,7 +17,7 @@ export class ClassFeatures extends Model<typeof zClassFeatureSchema, typeof sche
 		return file.classFeature;
 	}
 	public generateSearchText(classFeature: ClassFeature): string {
-		return `${classFeature.className} Feature: ${classFeature.name}`;
+		return `${classFeature.className} Feature ${classFeature.level}: ${classFeature.name}`;
 	}
 	public generateTags(classFeature: ClassFeature): string[] {
 		return [classFeature.source];

@@ -18,7 +18,8 @@ export class Feats extends Model<typeof zFeatSchema, typeof schema.Feats> {
 		return file.feat ?? [];
 	}
 	public generateSearchText(feat: Feat): string {
-		return `Feat: ${feat.name}`;
+		const featTypeClause = `${feat.featType ? `${feat.featType} ` : ''}`;
+		return `Feat: ${feat.name} (${featTypeClause}${feat.level})`;
 	}
 	public generateTags(feat: Feat): string[] {
 		return _.uniq(

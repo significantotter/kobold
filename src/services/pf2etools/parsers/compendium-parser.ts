@@ -42,8 +42,6 @@ import { _parseFamiliarAbility } from './lib/familiar-ability-parser.js';
 import { _parseOrganization } from './lib/organization-parser.js';
 import { _parseTable } from './lib/table-parser.js';
 import { _parseRelicGift } from './lib/relic-gift-parser.js';
-import { EntryParser } from './compendium-entry-parser.js';
-import { DrizzleUtils } from '../utils/drizzle-utils.js';
 import { _parseRenderDemo } from './lib/render-demo-parser.js';
 
 export class CompendiumEmbedParser {
@@ -154,7 +152,7 @@ export class CompendiumEmbedParser {
 				return `[${
 					displaytext ?? name
 				}](https://pf2etools.com/${resourceName}.html#${name.replaceAll(' ', '%20')}_${
-					src ?? defaultSrc
+					src || defaultSrc
 				})`;
 			}
 

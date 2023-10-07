@@ -20,7 +20,7 @@ export class SubclassFeatures extends Model<
 		return file.subclassFeature;
 	}
 	public generateSearchText(subclassFeature: SubclassFeature): string {
-		return `${subclassFeature.subclassShortName} Feature: ${subclassFeature.name}`;
+		return `${subclassFeature.subclassShortName} Feature ${subclassFeature.level}: ${subclassFeature.name}`;
 	}
 	public generateTags(subclassFeature: SubclassFeature): string[] {
 		return [subclassFeature.source];

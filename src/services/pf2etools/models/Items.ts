@@ -17,7 +17,7 @@ export class Items extends Model<typeof zItemSchema, typeof schema.Items> {
 		return file.item ?? file.baseitem ?? [];
 	}
 	public generateSearchText(item: Item): string {
-		return `Item: ${item.name}`;
+		return `Item${item.level ? ` ${item.level}` : ''}: ${item.name}`;
 	}
 	public generateTags(item: Item): string[] {
 		return [item.source].concat(item.traits ?? []).concat(item.type ? [item.type] : []);

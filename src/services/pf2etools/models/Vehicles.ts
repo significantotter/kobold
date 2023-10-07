@@ -17,7 +17,7 @@ export class Vehicles extends Model<typeof zVehicleSchema, typeof schema.Vehicle
 		return file.vehicle;
 	}
 	public generateSearchText(vehicle: Vehicle): string {
-		return `Vehicle: ${vehicle.name}`;
+		return `Vehicle ${vehicle.level}: ${vehicle.name}`;
 	}
 	public generateTags(vehicle: Vehicle): string[] {
 		return [vehicle.source].concat(vehicle.traits ?? []);

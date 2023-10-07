@@ -17,7 +17,9 @@ export class Afflictions extends Model<typeof zAfflictionSchema, typeof schema.A
 	}
 	public table = schema.Afflictions;
 	public generateSearchText(affliction: Affliction): string {
-		return `${affliction.type}: ${affliction.name}`;
+		return `${affliction.type}${affliction.level ? ` ${affliction.level}` : ''}: ${
+			affliction.name
+		}`;
 	}
 	public generateTags(affliction: Affliction): string[] {
 		return affliction.traits ?? [];
