@@ -10,7 +10,7 @@ export async function _parseTrait(this: CompendiumEmbedParser, trait: Trait) {
 
 export function parseTrait(this: CompendiumEmbedParser, trait: Trait): EmbedData {
 	const title = `${trait.name}`;
-	const entryParser = new EntryParser({ delimiter: '\n\n', emojiConverter: this.emojiConverter });
+	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
 	const descriptionLines: string[] = [];
 	if (trait.categories) descriptionLines.push(`**Categories** ${trait.categories.join(', ')}`);
 

@@ -10,7 +10,7 @@ export async function _parseLanguage(this: CompendiumEmbedParser, language: Lang
 
 export function parseLanguage(this: CompendiumEmbedParser, language: Language): EmbedData {
 	const title = `${language.name}`;
-	const entryParser = new EntryParser({ delimiter: '\n\n', emojiConverter: this.emojiConverter });
+	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
 	const descriptionLines: string[] = [];
 	if (language.typicalSpeakers)
 		descriptionLines.push(`**Typical Speakers** ${language.typicalSpeakers.join(', ')}`);

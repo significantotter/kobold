@@ -10,7 +10,7 @@ export async function _parseRenderDemo(this: CompendiumEmbedParser, renderDemo: 
 
 export function parseRenderDemo(this: CompendiumEmbedParser, renderDemo: RenderDemo): EmbedData {
 	const title = `${renderDemo.name}`;
-	const entryParser = new EntryParser({ delimiter: '\n\n', emojiConverter: this.emojiConverter });
+	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
 	const descriptionLines: string[] = [];
 
 	descriptionLines.push(entryParser.parseEntries(renderDemo.entries));

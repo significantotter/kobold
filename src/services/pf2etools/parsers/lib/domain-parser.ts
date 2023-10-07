@@ -29,7 +29,7 @@ export function parseDomain(
 	relatedDeities?: Deity[],
 	relatedSpells?: Spell[]
 ): EmbedData {
-	const entryParser = new EntryParser({ delimiter: '\n\n', emojiConverter: this.emojiConverter });
+	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
 	const title = `${domain.name} Domain`;
 	const descriptionLines: string[] = [];
 

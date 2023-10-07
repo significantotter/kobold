@@ -9,7 +9,7 @@ export async function _parseFeat(this: CompendiumEmbedParser, feat: Feat) {
 }
 
 export function parseFeat(this: CompendiumEmbedParser, feat: Feat): EmbedData {
-	const entryParser = new EntryParser({ delimiter: '\n\n', emojiConverter: this.emojiConverter });
+	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
 	const parsedFeat = entryParser.parseFeat(feat, false);
 	return {
 		title: parsedFeat.name,

@@ -9,7 +9,7 @@ export async function _parseCondition(this: CompendiumEmbedParser, condition: Co
 }
 
 export function parseCondition(this: CompendiumEmbedParser, condition: Condition): EmbedData {
-	const entryParser = new EntryParser({ delimiter: '\n\n', emojiConverter: this.emojiConverter });
+	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
 	const title = `${condition.name}`;
 	const description = entryParser.parseEntries(condition.entries);
 	return {

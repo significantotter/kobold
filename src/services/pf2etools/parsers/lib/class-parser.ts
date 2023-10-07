@@ -11,7 +11,7 @@ export async function _parseClass(this: CompendiumEmbedParser, classValue: Class
 }
 
 export function parseClass(this: CompendiumEmbedParser, classValue: Class): EmbedData {
-	const entryParser = new EntryParser({ delimiter: '\n\n', emojiConverter: this.emojiConverter });
+	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
 	const title = `${classValue.name}`;
 	const descriptionLines = [];
 	if (classValue.summary.text) descriptionLines.push(classValue.summary.text);

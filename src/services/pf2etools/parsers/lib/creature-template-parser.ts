@@ -18,7 +18,7 @@ export function parseCreatureTemplate(
 	this: CompendiumEmbedParser,
 	creatureTemplate: CreatureTemplate
 ): EmbedData {
-	const entryParser = new EntryParser({ delimiter: '\n\n', emojiConverter: this.emojiConverter });
+	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
 	const title = `${creatureTemplate.name}`;
 	const descriptionLines = [];
 	descriptionLines.push(entryParser.parseEntries(creatureTemplate.entries));

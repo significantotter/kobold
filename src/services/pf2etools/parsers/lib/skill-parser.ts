@@ -10,7 +10,7 @@ export async function _parseSkill(this: CompendiumEmbedParser, skill: Skill) {
 
 export function parseSkill(this: CompendiumEmbedParser, skill: Skill): EmbedData {
 	const title = `${skill.name}`;
-	const entryParser = new EntryParser({ delimiter: '\n\n', emojiConverter: this.emojiConverter });
+	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
 	const description = entryParser.parseEntries(skill.entries);
 	return {
 		title: title,

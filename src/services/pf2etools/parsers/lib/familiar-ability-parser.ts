@@ -15,7 +15,7 @@ export function parseFamiliarAbility(
 	this: CompendiumEmbedParser,
 	familiarAbility: FamiliarAbility
 ): EmbedData {
-	const entryParser = new EntryParser({ delimiter: '\n\n', emojiConverter: this.emojiConverter });
+	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
 	const title = `${familiarAbility.name}`;
 	const descriptionLines: string[] = [];
 	descriptionLines.push(`**Ability Type** ${familiarAbility.type}`);

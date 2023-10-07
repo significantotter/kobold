@@ -9,7 +9,7 @@ export async function _parseEvent(this: CompendiumEmbedParser, event: Event) {
 }
 
 export function parseEvent(this: CompendiumEmbedParser, event: Event): EmbedData {
-	const entryParser = new EntryParser({ delimiter: '\n\n', emojiConverter: this.emojiConverter });
+	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
 	const title = `${event.name} (Event ${event.level})`;
 	const descriptionLines: string[] = [];
 	if (event.traits) descriptionLines.push(`**Traits:** ${event.traits.join(', ')}`);

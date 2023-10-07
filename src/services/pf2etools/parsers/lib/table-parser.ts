@@ -12,7 +12,7 @@ export async function _parseTable(this: CompendiumEmbedParser, tableValue: Table
 
 export function parseTable(this: CompendiumEmbedParser, tableValue: Table): EmbedData {
 	const title = `${tableValue.name}`;
-	const entryParser = new EntryParser({ delimiter: '\n\n', emojiConverter: this.emojiConverter });
+	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
 	return {
 		title: title,
 		description: entryParser.parseTableEntry({ ...tableValue, type: 'table' }),

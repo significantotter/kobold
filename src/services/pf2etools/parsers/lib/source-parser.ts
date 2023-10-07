@@ -10,7 +10,7 @@ export async function _parseSource(this: CompendiumEmbedParser, source: Source) 
 
 export function parseSource(this: CompendiumEmbedParser, source: Source): EmbedData {
 	const title = `${source.name}`;
-	const entryParser = new EntryParser({ delimiter: '\n\n', emojiConverter: this.emojiConverter });
+	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
 	const descriptionLines: string[] = [];
 	if (source.entries) descriptionLines.push(entryParser.parseEntries(source.entries));
 	return {

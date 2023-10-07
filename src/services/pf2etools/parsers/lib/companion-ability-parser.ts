@@ -16,7 +16,7 @@ export function parseCompanionAbility(
 	companionAbility: CompanionAbility
 ): EmbedData {
 	const title = `${companionAbility.name}`;
-	const entryParser = new EntryParser({ delimiter: '\n\n', emojiConverter: this.emojiConverter });
+	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
 	const description = entryParser.parseEntries(companionAbility.entries);
 	return {
 		title: title,

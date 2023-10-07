@@ -12,7 +12,7 @@ export function parseClassFeature(
 	this: CompendiumEmbedParser,
 	classFeature: ClassFeature
 ): EmbedData {
-	const entryParser = new EntryParser({ delimiter: '\n\n', emojiConverter: this.emojiConverter });
+	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
 	const title = `${classFeature.name} (${classFeature.className} ${classFeature.level})`;
 	let descriptionLines: string[] = [];
 	if (classFeature.subclasses) descriptionLines.push(`**Subclass:** ${classFeature.subclasses}`);

@@ -10,7 +10,7 @@ export async function _parseQuickRule(this: CompendiumEmbedParser, quickRule: Qu
 
 export function parseQuickRule(this: CompendiumEmbedParser, quickRule: QuickRule): EmbedData {
 	const title = `${quickRule.name}`;
-	const entryParser = new EntryParser({ delimiter: '\n\n', emojiConverter: this.emojiConverter });
+	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
 	const description = entryParser.parseEntry(quickRule.rule);
 	return {
 		title: title,

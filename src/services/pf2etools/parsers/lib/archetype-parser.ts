@@ -36,7 +36,7 @@ export function parseArchetype(
 	archetype: Archetype,
 	feats?: Feat[]
 ): EmbedData {
-	const entryParser = new EntryParser({ delimiter: '\n\n', emojiConverter: this.emojiConverter });
+	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
 	const title = `${archetype.name}`;
 	const descriptionLines: string[] = [];
 	if (archetype.rarity) descriptionLines.push(`**Rarity:** ${archetype.rarity}`);

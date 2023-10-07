@@ -11,7 +11,7 @@ export async function _parsePlace(this: CompendiumEmbedParser, place: Place) {
 
 export function parsePlace(this: CompendiumEmbedParser, place: Place): EmbedData {
 	const title = `${place.name} (${place.category} ${place.level ?? ''})`;
-	const entryParser = new EntryParser({ delimiter: '\n\n', emojiConverter: this.emojiConverter });
+	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
 	const descriptionLines: string[] = [];
 	descriptionLines.push(`**Traits** ${place.traits.join(', ')}`);
 	if (place.description) descriptionLines.push(`${place.description}`);
