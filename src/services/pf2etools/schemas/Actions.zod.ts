@@ -9,7 +9,8 @@ export const zActionFooterSchema: z.ZodType<ActionFooter> = baseZActionFooterSch
 	entries: z.lazy(() => zEntrySchema.array()),
 });
 
-const baseZActionSchema = z.strictObject({
+export type Action = z.infer<typeof zActionSchema>;
+export const zActionSchema = z.strictObject({
 	name: z.string(),
 	alias: z.string().array().optional(),
 	source: z.string(),
@@ -42,13 +43,6 @@ const baseZActionSchema = z.strictObject({
 	cost: z.string().optional(),
 	requirements: z.string().optional(),
 	special: z.array(z.string()).optional(),
-});
-export type Action = z.infer<typeof baseZActionSchema> & {
-	entries: Entry[];
-	info?: Entry[];
-	footer?: ActionFooter[];
-};
-export const zActionSchema: z.ZodType<Action> = baseZActionSchema.extend({
 	entries: z.lazy(() => zEntrySchema.array()),
 	info: z.lazy(() => zEntrySchema.array()).optional(),
 	footer: z.lazy(() => zActionFooterSchema.array()).optional(),

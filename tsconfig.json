@@ -26,6 +26,7 @@
 		"src/migrations",
 		"node_modules",
 		"tests",
-		"knexfile.ts"
+		"knexfile.ts",
+		"src/services/pf2etools/Pf2eTools/**/*"
 	]
 }

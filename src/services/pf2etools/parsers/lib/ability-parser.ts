@@ -9,7 +9,7 @@ export async function _parseAbility(this: CompendiumEmbedParser, ability: Abilit
 }
 
 export function parseAbility(this: CompendiumEmbedParser, ability: Ability): EmbedData {
-	const entryParser = new EntryParser({ delimiter: '\n\n', emojiConverter: this.emojiConverter });
+	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
 	const title = `${ability.name} ${
 		ability.activity ? entryParser.parseActivity(ability.activity) : ''
 	}`;
