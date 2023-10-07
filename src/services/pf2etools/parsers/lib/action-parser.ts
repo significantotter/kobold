@@ -2,7 +2,6 @@ import { EmbedData } from 'discord.js';
 import { Action } from '../../models/index.js';
 import { CompendiumEmbedParser } from '../compendium-parser.js';
 import { EntryParser } from '../compendium-entry-parser.js';
-import { CompendiumPropBuilder } from '../compendium-prop-builder.js';
 
 export async function _parseAction(this: CompendiumEmbedParser, ability: Action) {
 	const preprocessedData = (await this.preprocessData(ability)) as Action;
@@ -10,10 +9,6 @@ export async function _parseAction(this: CompendiumEmbedParser, ability: Action)
 }
 
 export function parseAction(this: CompendiumEmbedParser, ability: Action): EmbedData {
-	const propBuilder = new CompendiumPropBuilder(this.model.actions.z, this);
-
-	const parsers = propBuilder.parse;
-	parsers.traits(ability);
 	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
 	const title = `${ability.name} ${
 		ability.activity ? entryParser.parseActivity(ability.activity) : ''
