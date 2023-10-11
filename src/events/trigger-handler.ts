@@ -5,12 +5,12 @@ import { Trigger } from '../triggers/index.js';
 import { Config } from './../config/config.js';
 
 export class TriggerHandler {
-	private rateLimiter = new RateLimiter(
+	protected rateLimiter = new RateLimiter(
 		Config.rateLimiting.triggers.amount,
 		Config.rateLimiting.triggers.interval * 1000
 	);
 
-	constructor(private triggers: Trigger[]) {}
+	constructor(protected triggers: Trigger[]) {}
 
 	public async process(msg: Message): Promise<void> {
 		// Check if user is rate limited

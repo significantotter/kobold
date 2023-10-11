@@ -18,16 +18,9 @@ export { BestiaryFilesLoaded } from './bestiary-files-loaded/bestiary-files-load
 export { Npc } from './npc/npc.model.js';
 export { UserSettings } from './user-settings/user-settings.model.js';
 
-export type { Sheet as BaseSheet } from './../lib/shared-schemas/sheet.schema.js';
 export type { Attribute } from './../lib/shared-schemas/attribute.schema.js';
 export type { ModelWithSheet } from './../lib/thing-with-sheet.js';
 
-export type {
-	Action,
-	Modifier,
-	RollMacro,
-	SheetAdjustment,
-	Lore,
-	Sheet,
-	InitWithActorsAndGroups,
-} from './../lib/type-helpers.js';
+export type { InitWithActorsAndGroups } from './../lib/type-helpers.js';
+
+export type * from './character/character.zod.js';

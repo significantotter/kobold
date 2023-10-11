@@ -6,12 +6,12 @@ import { EventHandler } from './index.js';
 import { Config } from './../config/config.js';
 
 export class ReactionHandler implements EventHandler {
-	private rateLimiter = new RateLimiter(
+	protected rateLimiter = new RateLimiter(
 		Config.rateLimiting.reactions.amount,
 		Config.rateLimiting.reactions.interval * 1000
 	);
 
-	constructor(private reactions: Reaction[]) {}
+	constructor(protected reactions: Reaction[]) {}
 
 	public async process(msgReaction: MessageReaction, msg: Message, reactor: User): Promise<void> {
 		// Don't respond to self, or other bots
@@ -50,7 +50,7 @@ export class ReactionHandler implements EventHandler {
 		await reaction.execute(msgReaction, msg, reactor);
 	}
 
-	private findReaction(emoji: string): Reaction | undefined {
+	protected findReaction(emoji: string): Reaction | undefined {
 		return this.reactions.find(reaction => reaction.emoji === emoji);
 	}
 }

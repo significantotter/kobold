@@ -55,6 +55,7 @@
 		"better-sqlite3": "^8.6.0",
 		"class-transformer": "0.5.1",
 		"class-validator": "0.14.0",
+		"csv": "^6.3.4",
 		"date-fns": "^2.30.0",
 		"dice-roller-parser": "^0.1.8",
 		"dice-typescript": "^1.6.1",

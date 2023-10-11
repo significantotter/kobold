@@ -6,8 +6,8 @@ import Logs from './../config/lang/logs.json' assert { type: 'json' };
 
 export class Manager {
 	constructor(
-		private shardManager: ShardingManager,
-		private jobService: JobService
+		protected shardManager: ShardingManager,
+		protected jobService: JobService
 	) {}
 
 	public async start(): Promise<void> {
@@ -39,11 +39,11 @@ export class Manager {
 		this.jobService.start();
 	}
 
-	private registerListeners(): void {
+	protected registerListeners(): void {
 		this.shardManager.on('shardCreate', shard => this.onShardCreate(shard));
 	}
 
-	private onShardCreate(shard: Shard): void {
+	protected onShardCreate(shard: Shard): void {
 		Logger.info(Logs.info.managerLaunchedShard.replaceAll('{SHARD_ID}', shard.id.toString()));
 	}
 }

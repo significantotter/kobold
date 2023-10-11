@@ -20,7 +20,7 @@ export class ShardsController implements Controller {
 	public router: Router = router();
 	public authToken: string = Config.api.secret;
 
-	constructor(private shardManager: ShardingManager) {}
+	constructor(protected shardManager: ShardingManager) {}
 
 	public register(): void {
 		this.router.get('/', (req, res) => this.getShards(req, res));
@@ -29,7 +29,7 @@ export class ShardsController implements Controller {
 		);
 	}
 
-	private async getShards(req: Request, res: Response): Promise<void> {
+	protected async getShards(req: Request, res: Response): Promise<void> {
 		let shardDatas = await Promise.all(
 			this.shardManager.shards.map(async shard => {
 				let shardInfo: ShardInfo = {
@@ -62,7 +62,7 @@ export class ShardsController implements Controller {
 		res.status(200).json(resBody);
 	}
 
-	private async setShardPresences(req: Request, res: Response): Promise<void> {
+	protected async setShardPresences(req: Request, res: Response): Promise<void> {
 		let reqBody: SetShardPresencesRequest = res.locals.input;
 
 		await this.shardManager.broadcastEval(

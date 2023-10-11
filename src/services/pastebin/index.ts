@@ -7,7 +7,7 @@ export class PasteBin {
 		this.apiKey = apiKey;
 	}
 
-	public async post({ code, name, format = 'json', expires = '1M' }: { [k: string]: string }) {
+	public async post({ code, name, format = 'json', expires = '1Y' }: { [k: string]: string }) {
 		const formData = new FormData();
 		formData.append('api_dev_key', this.apiKey);
 		formData.append('api_paste_code', code);

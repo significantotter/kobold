@@ -13,7 +13,7 @@ import { Config } from './../config/config.js';
 import Logs from './../config/lang/logs.json' assert { type: 'json' };
 
 export class CommandRegistrationService {
-	constructor(private rest: REST) {}
+	constructor(protected rest: REST) {}
 
 	public async process(commands: Command[], args: string[]): Promise<void> {
 		let localCmds = commands.map(command => command.metadata);
@@ -178,7 +178,7 @@ export class CommandRegistrationService {
 		}
 	}
 
-	private formatCommandList(
+	protected formatCommandList(
 		cmds: RESTPostAPIApplicationCommandsJSONBody[] | APIApplicationCommand[]
 	): string {
 		return cmds.length > 0

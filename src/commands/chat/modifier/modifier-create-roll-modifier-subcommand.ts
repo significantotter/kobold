@@ -46,8 +46,10 @@ export class ModifierCreateRollModifierSubCommand implements Command {
 			.getString(ModifierOptions.MODIFIER_NAME_OPTION.name, true)
 			.trim()
 			.toLowerCase();
-		let modifierType = intr.options
-			.getString(ModifierOptions.MODIFIER_TYPE_OPTION.name, true)
+		let modifierType = (
+			intr.options.getString(ModifierOptions.MODIFIER_TYPE_OPTION.name) ??
+			L.en.commandOptions.modifierType.choices.untyped.value()
+		)
 			.trim()
 			.toLowerCase();
 		const description = intr.options.getString(

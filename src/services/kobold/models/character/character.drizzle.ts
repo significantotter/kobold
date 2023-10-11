@@ -6,7 +6,7 @@
 
 // export class dCharacter {
 // 	public z = zCharacter;
-// 	constructor(private kobold: Kobold) {}
+// 	constructor(protected kobold: Kobold) {}
 // 	public get query(): typeof this.kobold.db.query.character {
 // 		return this.kobold.db.query.character;
 // 	}

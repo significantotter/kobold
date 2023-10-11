@@ -15,7 +15,7 @@ type Promisify<T> = {
 };
 
 export class Api {
-	private app: Express;
+	protected app: Express;
 
 	constructor(public controllers: Controller[]) {
 		this.app = express();
@@ -37,7 +37,7 @@ export class Api {
 		Logger.info(`API started on port ${Config.api.port}.`);
 	}
 
-	private setupControllers(): void {
+	protected setupControllers(): void {
 		for (let controller of this.controllers) {
 			if (controller.authToken) {
 				controller.router.use(checkAuth(controller.authToken));

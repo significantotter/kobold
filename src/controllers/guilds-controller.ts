@@ -11,13 +11,13 @@ export class GuildsController implements Controller {
 	public router: Router = router();
 	public authToken: string = Config.api.secret;
 
-	constructor(private shardManager: ShardingManager) {}
+	constructor(protected shardManager: ShardingManager) {}
 
 	public register(): void {
 		this.router.get('/', (req, res) => this.getGuilds(req, res));
 	}
 
-	private async getGuilds(req: Request, res: Response): Promise<void> {
+	protected async getGuilds(req: Request, res: Response): Promise<void> {
 		let guilds: string[] = [
 			...new Set(
 				(

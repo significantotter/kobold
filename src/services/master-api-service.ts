@@ -9,9 +9,9 @@ import { HttpService } from './index.js';
 import { Config } from './../config/config.js';
 
 export class MasterApiService {
-	private clusterId: string;
+	protected clusterId: string;
 
-	constructor(private httpService: HttpService) {
+	constructor(protected httpService: HttpService) {
 		this.clusterId = '';
 	}
 

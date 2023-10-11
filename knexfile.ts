@@ -1,10 +1,11 @@
+import 'ts-node/register';
 import type { Knex } from 'knex';
 import dotenv from 'dotenv';
 dotenv.config();
 
 // Update with your config settings.
 
-const config: { [key: string]: Knex.Config } = {
+const config = {
 	development: {
 		client: 'postgresql',
 		connection: process.env.DATABASE_URL,
@@ -15,7 +16,8 @@ const config: { [key: string]: Knex.Config } = {
 		migrations: {
 			tableName: 'knex_migrations',
 			directory: './migrations',
-			loadExtensions: ['.js', '.ts'],
+			extension: 'ts',
+			loadExtensions: ['.ts'],
 		},
 	},
 
@@ -29,8 +31,9 @@ const config: { [key: string]: Knex.Config } = {
 		migrations: {
 			tableName: 'knex_migrations',
 			directory: './migrations',
-			loadExtensions: ['.js', '.ts'],
+			extension: 'ts',
+			loadExtensions: ['.ts'],
 		},
 	},
-};
+} satisfies Record<string, Knex.Config>;
 export default config;

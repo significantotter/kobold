@@ -23,7 +23,7 @@ import { filterNotNullOrUndefined } from '../utils/type-guards.js';
 import { InjectedServices, InjectData } from '../commands/command.js';
 
 export class CommandHandler implements EventHandler {
-	private rateLimiter = new RateLimiter(
+	protected rateLimiter = new RateLimiter(
 		Config.rateLimiting.commands.amount,
 		Config.rateLimiting.commands.interval * 1000
 	);
@@ -178,7 +178,7 @@ export class CommandHandler implements EventHandler {
 		}
 	}
 
-	private async sendError(intr: CommandInteraction): Promise<void> {
+	protected async sendError(intr: CommandInteraction): Promise<void> {
 		try {
 			const embed = new KoboldEmbed();
 			embed.setTitle('Something went Wrong!');

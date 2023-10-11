@@ -7,6 +7,7 @@ import { DiceUtils } from './dice-utils.js';
 import { KoboldError } from './KoboldError.js';
 import { SheetUtils } from './sheet-utils.js';
 import { PartialDeep } from 'type-fest';
+import { AdditionalSkill, BaseSkills } from '../services/kobold/models/character/character.zod.js';
 
 // I also add the key, and compare values in lower case to the options
 const statOptions: {
@@ -252,8 +253,21 @@ export function convertBestiaryCreatureToSheet(
 			}
 		}
 	}
-	let skills: Sheet['skills'] = _.defaultsDeep({ lores: [] }, SheetUtils.defaultSheet.skills);
+	let baseSkills: BaseSkills = _.defaultsDeep({}, SheetUtils.defaultSheet.baseSkills);
+	let additionalSkills: AdditionalSkill[] = _.defaultsDeep(
+		[],
+		SheetUtils.defaultSheet.additionalSkills
+	);
 	for (const skill in bestiaryEntry.skills) {
+		if (skill in baseSkills) {
+			const skillKey = skill as keyof BaseSkills;
+			baseSkills[skillKey] = {
+				proficiency: null,
+				total: bestiaryEntry.skills[skill].std + rollAdjustment,
+				ability: attributeAbilityMap,
+			};
+		} else {
+		}
 		const splitSkill = skill.split(' ');
 		if (splitSkill.length > 1) {
 			//lore skill
@@ -264,13 +278,17 @@ export function convertBestiaryCreatureToSheet(
 			});
 		} else {
 			for (const key in bestiaryEntry.skills[skill]) {
-				if (key.includes('note')) {
-					continue;
-				} else if (key === 'std') {
-					skills[skill] = bestiaryEntry.skills[skill][key] + rollAdjustment;
-				} else
-					skills[skill + ' ' + key.toLowerCase()] =
-						bestiaryEntry.skills[skill][key] + rollAdjustment;
+				if (skill in skills) {
+					if (key.includes('note')) {
+						continue;
+					} else if (key === 'std') {
+						const skillKey = skill as keyof Sheet['skills'];
+						skills[skillKey] = bestiaryEntry.skills[skill].std + rollAdjustment;
+					} else {
+						skills[skill + ' ' + key.toLowerCase()] =
+							bestiaryEntry.skills[skill][key] + rollAdjustment;
+					}
+				}
 			}
 		}
 	}

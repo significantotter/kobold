@@ -29,18 +29,18 @@ import { Config } from './../config/config.js';
 import Logs from './../config/lang/logs.json' assert { type: 'json' };
 
 export class Bot {
-	private ready = false;
+	protected ready = false;
 
 	constructor(
-		private token: string,
-		private client: Client,
-		private guildJoinHandler: GuildJoinHandler,
-		private guildLeaveHandler: GuildLeaveHandler,
-		private messageHandler: MessageHandler,
-		private commandHandler: CommandHandler,
-		private buttonHandler: ButtonHandler,
-		private reactionHandler: ReactionHandler,
-		private jobService: JobService
+		protected token: string,
+		protected client: Client,
+		protected guildJoinHandler: GuildJoinHandler,
+		protected guildLeaveHandler: GuildLeaveHandler,
+		protected messageHandler: MessageHandler,
+		protected commandHandler: CommandHandler,
+		protected buttonHandler: ButtonHandler,
+		protected reactionHandler: ReactionHandler,
+		protected jobService: JobService
 	) {}
 
 	public async start(): Promise<void> {
@@ -48,7 +48,7 @@ export class Bot {
 		await this.login(this.token);
 	}
 
-	private registerListeners(): void {
+	protected registerListeners(): void {
 		this.client.on(Events.ClientReady, () => this.onReady());
 		this.client.on(
 			Events.ShardReady,
@@ -69,7 +69,7 @@ export class Bot {
 		);
 	}
 
-	private async login(token: string): Promise<void> {
+	protected async login(token: string): Promise<void> {
 		try {
 			await this.client.login(token);
 		} catch (error) {
@@ -78,7 +78,7 @@ export class Bot {
 		}
 	}
 
-	private async onReady(): Promise<void> {
+	protected async onReady(): Promise<void> {
 		let userTag = this.client.user?.tag ?? '';
 		Logger.info(Logs.info.clientLogin.replaceAll('{USER_TAG}', userTag));
 
@@ -90,11 +90,11 @@ export class Bot {
 		Logger.info(Logs.info.clientReady);
 	}
 
-	private onShardReady(shardId: number, _unavailableGuilds: Set<string>): void {
+	protected onShardReady(shardId: number, _unavailableGuilds: Set<string>): void {
 		Logger.setShardId(shardId);
 	}
 
-	private async onGuildJoin(guild: Guild): Promise<void> {
+	protected async onGuildJoin(guild: Guild): Promise<void> {
 		if (!this.ready || Config.debug.dummyMode.enabled) {
 			return;
 		}
@@ -106,7 +106,7 @@ export class Bot {
 		}
 	}
 
-	private async onGuildLeave(guild: Guild): Promise<void> {
+	protected async onGuildLeave(guild: Guild): Promise<void> {
 		if (!this.ready || Config.debug.dummyMode.enabled) {
 			return;
 		}
@@ -118,7 +118,7 @@ export class Bot {
 		}
 	}
 
-	private async onMessage(msg: Message): Promise<void> {
+	protected async onMessage(msg: Message): Promise<void> {
 		if (
 			!this.ready ||
 			(Config.debug.dummyMode.enabled &&
@@ -139,7 +139,7 @@ export class Bot {
 		}
 	}
 
-	private async onInteraction(intr: Interaction): Promise<void> {
+	protected async onInteraction(intr: Interaction): Promise<void> {
 		if (
 			!this.ready ||
 			(Config.debug.dummyMode.enabled &&
@@ -163,7 +163,7 @@ export class Bot {
 		}
 	}
 
-	private async onReaction(
+	protected async onReaction(
 		msgReaction: MessageReaction | PartialMessageReaction,
 		reactor: User | PartialUser
 	): Promise<void> {
@@ -196,7 +196,7 @@ export class Bot {
 		}
 	}
 
-	private async onRateLimit(rateLimitData: RateLimitData): Promise<void> {
+	protected async onRateLimit(rateLimitData: RateLimitData): Promise<void> {
 		if (rateLimitData.timeToReset >= Config.logging.rateLimit.minTimeout * 1000) {
 			Logger.error(Logs.error.apiRateLimit, rateLimitData);
 		}

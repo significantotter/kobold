@@ -20,7 +20,12 @@
 		"disableSizeLimit": true,
 		"types": ["vitest/globals"]
 	},
-	"include": ["src/**/*.ts", "src/**/*.json", "migrations/**/*.ts", "types.d.ts"],
+	"ts-node": {
+		"transpileOnly": true,
+		"files": true,
+		"module": "NodeNext",
+	},
+	"include": ["src/**/*.ts", "src/**/*.json", "types.d.ts"],
 	"exclude": [
 		"dist",
 		"src/migrations",

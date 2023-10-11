@@ -17,15 +17,15 @@ import { APIEmbedField } from 'discord.js';
 import L from '../i18n/i18n-node.js';
 
 export class RollBuilder {
-	private userSettings: UserSettings | null;
-	private creature: Creature | null;
-	private targetCreature: Creature | null;
-	private rollDescription: string | null;
-	private rollNote: string | null;
+	protected userSettings: UserSettings | null;
+	protected creature: Creature | null;
+	protected targetCreature: Creature | null;
+	protected rollDescription: string | null;
+	protected rollNote: string | null;
 	public rollResults: ResultField[];
-	private footer: string;
-	private title: string;
-	private LL: TranslationFunctions;
+	protected footer: string;
+	protected title: string;
+	protected LL: TranslationFunctions;
 
 	constructor({
 		actorName,

@@ -12,6 +12,7 @@ import { StringUtils } from '../../../../utils/string-utils.js';
 import { zCharacter } from './character.zod.js';
 import { z } from 'zod';
 import { ZodValidator } from '../../lib/zod-validator.js';
+import './character-parse-test.js';
 export type ZCharacter = z.infer<typeof zCharacter>;
 
 interface ErrorWithCode<T extends number = number> extends Error {

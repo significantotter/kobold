@@ -1,10 +1,4 @@
-import {
-	Attribute,
-	Character,
-	ModelWithSheet,
-	Modifier,
-	Sheet,
-} from '../services/kobold/models/index.js';
+import { ModelWithSheet } from '../services/kobold/models/index.js';
 import { PathBuilder } from '../services/pathbuilder/pathbuilder.js';
 import { CreatureFluff, CreatureStatBlock } from '../services/pf2etools/pf2etools-types.js';
 import { WG } from '../services/wanderers-guide/wanderers-guide.js';
@@ -19,7 +13,13 @@ import { parseBonusesForTagsFromModifiers } from '../services/kobold/lib/helpers
 import { KoboldError } from './KoboldError.js';
 import { BaseMessageOptions } from 'discord.js';
 import { SheetUtils } from './sheet-utils.js';
-import { ZCharacter } from '../services/kobold/models/character/character.model.js';
+import {
+	Character,
+	Sheet,
+	Modifier,
+	Attribute,
+} from '../services/kobold/models/character/character.zod.js';
+import { literalKeys } from './type-guards.js';
 
 const damageTypeShorthands: { [shorthand: string]: string } = {
 	piercing: 'p',
@@ -56,10 +56,10 @@ export interface attackRoll {
 }
 
 export class Creature {
-	private _adjustedSheet: Sheet;
+	protected _adjustedSheet: Sheet;
 	constructor(
 		public _sheet: Sheet,
-		private _name?: string
+		protected _name?: string
 	) {
 		const sheetDefaults: Sheet = {
 			info: {
@@ -199,7 +199,7 @@ export class Creature {
 		);
 	}
 
-	public get sheet() {
+	public get sheet(): Sheet {
 		return this._adjustedSheet;
 	}
 
@@ -277,13 +277,16 @@ export class Creature {
 			if (DCs.length) basicStats += `${DCs.join(', ')}\n`;
 
 			let saveTexts = [];
-			for (const save in this.sheet.saves) {
-				if (save.includes('ProfMod') || this.sheet.saves[save] == null) continue;
-				saveTexts.push(
-					`${save} \`${this.sheet.saves[save] >= 0 ? '+' : ''}${
-						this.sheet.saves[save]
-					}\` (DC ${10 + this.sheet.saves[save]})`
-				);
+			for (const save of literalKeys(this.sheet.saves)) {
+				const targetSave = this.sheet.saves[save];
+				if (save.includes('ProfMod') || targetSave == null) continue;
+				else {
+					saveTexts.push(
+						`${save} \`${targetSave >= 0 ? '+' : ''}${targetSave}\` (DC ${
+							10 + targetSave
+						})`
+					);
+				}
 			}
 			if (saveTexts.length) basicStats += `Saves: ${saveTexts.join(', ')}\n`;
 
@@ -344,7 +347,7 @@ export class Creature {
 
 		// sheet metadata
 		sheetEmbed.setTitle(this.name);
-		if (this.sheet.url) sheetEmbed.setURL(this.sheet.url);
+		if (this.sheet.info.url) sheetEmbed.setURL(this.sheet.info.url);
 		if (this.sheet.info.imageURL) sheetEmbed.setThumbnail(this.sheet.info.imageURL);
 
 		// general section
@@ -421,7 +424,7 @@ export class Creature {
 
 		// Abilities
 		let abilityTexts = [];
-		for (const ability in this.sheet.abilities) {
+		for (const ability of literalKeys(this.sheet.abilities)) {
 			if (this.sheet.abilities[ability] != null)
 				abilityTexts.push(
 					`${_.capitalize(ability.slice(0, 3))} \`${this.sheet.abilities[ability]}\``
@@ -432,12 +435,11 @@ export class Creature {
 
 		// Saves
 		let saveTexts = [];
-		for (const save in this.sheet.saves) {
-			if (save.includes('ProfMod') || this.sheet.saves[save] == null) continue;
+		for (const save of literalKeys(this.sheet.saves)) {
+			const targetSave = this.sheet.saves[save];
+			if (save.includes('ProfMod') || targetSave == null) continue;
 			saveTexts.push(
-				`${save} \`${this.sheet.saves[save] >= 0 ? '+' : ''}${
-					this.sheet.saves[save]
-				}\` (DC ${10 + this.sheet.saves[save]})`
+				`${save} \`${targetSave >= 0 ? '+' : ''}${targetSave}\` (DC ${10 + targetSave})`
 			);
 		}
 		if (saveTexts.length)
@@ -530,12 +532,12 @@ export class Creature {
 		// Skills
 		let skillTexts = [];
 		let skillTotals = this.skillTotals;
-		for (const skill of _.keys(skillTotals).sort((a, b) => a.localeCompare(b))) {
-			if (skillTotals[skill] == null) continue;
+		for (const skill of literalKeys(skillTotals).sort((a, b) =>
+			a.toString().localeCompare(b.toString())
+		)) {
+			const skillTotal = skillTotals[skill];
 			//avoid null values
-			skillTexts.push(
-				`${skill} \`${skillTotals[skill] >= 0 ? '+' : ''}${skillTotals[skill]}\``
-			);
+			skillTexts.push(`${skill} \`${skillTotal >= 0 ? '+' : ''}${skillTotal}\``);
 		}
 		const skillBatches = _.chunk(skillTexts, 7);
 		for (const skillGroup of skillBatches) {
@@ -810,7 +812,7 @@ export class Creature {
 			return (this.sheet.general.perception ?? 0) + 10;
 		if (['classdc', 'class'].includes(trimmedLowerDCName))
 			return this.sheet.general.classDC ?? 10;
-		for (const skill of _.keys(this.sheet.skills)) {
+		for (const skill of literalKeys(this.sheet.skills)) {
 			if (skill === 'lores') continue;
 			if (
 				skill.toLowerCase() === trimmedLowerDCName ||
@@ -923,7 +925,7 @@ export class Creature {
 			[rollName: string]: roll;
 		} = {};
 
-		for (const ability in this.sheet.abilities) {
+		for (const ability of Object.keys(this.sheet.abilities)) {
 			rolls[ability] = {
 				name: ability.toLowerCase(),
 				type: 'ability',
@@ -947,12 +949,15 @@ export class Creature {
 			tags: ['check', 'perception', 'wisdom'],
 		};
 
-		for (const skill in this.sheet.skills) {
+		for (const skill of literalKeys(this.sheet.skills)) {
 			if (skill.includes('ProfMod')) continue;
+			if (skill === 'lores') continue;
+			const skillValue = this.sheet.skills[skill];
+			if (!skillValue) continue;
 			rolls[skill] = {
 				name: skill.toLowerCase(),
 				type: 'skill',
-				bonus: this.sheet.skills[skill],
+				bonus: skillValue,
 				tags: ['skill', skill, Creature.attributeAbilityMap[skill]].filter(t => t != null),
 			};
 		}
@@ -1025,14 +1030,20 @@ export class Creature {
 		};
 	}
 
-	public get skillTotals() {
+	public get skillTotals(): { [k: string]: number } {
 		const keyedLores = _.keyBy(this.sheet.skills.lores, lore => lore.name + ' lore');
-		const lores = _.mapValues(keyedLores, lore => lore.bonus);
-		const filteredSkills = _.pickBy(this.sheet.skills, (skillValue, skill) => {
-			return (
-				!skill.includes('lore') && !skill.includes('ProfMod') && skillValue !== undefined
-			);
-		});
+		const rawLores = _.mapValues(keyedLores, lore => lore.bonus);
+		const lores = _.pickBy(rawLores, _.isNumber);
+		const filteredSkills = _.pickBy(
+			this.sheet.skills,
+			(skillValue, skill): skillValue is number => {
+				return (
+					!skill.includes('lore') &&
+					!skill.includes('ProfMod') &&
+					skillValue !== undefined
+				);
+			}
+		);
 
 		return { ...filteredSkills, ...lores };
 	}
@@ -1086,13 +1097,13 @@ export class Creature {
 	}
 
 	public get attributes(): Attribute[] {
-		const baseAttributes = [
-			{ name: 'level', type: 'base', value: this.sheet.info.level, tags: ['level'] },
-			{ name: 'maxHp', type: 'base', value: this.sheet.defenses.maxHp, tags: ['maxHp'] },
+		const baseAttributes: Attribute[] = [
+			{ name: 'level', type: 'base', value: this.sheet.info.level ?? 0, tags: ['level'] },
+			{ name: 'maxHp', type: 'base', value: this.sheet.defenses.maxHp ?? 0, tags: ['maxHp'] },
 			{
 				name: 'hp',
 				type: 'base',
-				value: this.sheet.defenses.currentHp,
+				value: this.sheet.defenses.currentHp ?? 0,
 				tags: ['hp'],
 			},
 			{
@@ -1101,31 +1112,31 @@ export class Creature {
 				value: this.sheet.defenses.tempHp || 0,
 				tags: ['tempHp'],
 			},
-			{ name: 'ac', type: 'base', value: this.sheet.defenses.ac, tags: ['ac'] },
+			{ name: 'ac', type: 'base', value: this.sheet.defenses.ac ?? 0, tags: ['ac'] },
 			{
 				name: 'heroPoints',
 				type: 'base',
-				value: this.sheet.general.currentHeroPoints || 0,
+				value: this.sheet.general.currentHeroPoints ?? 0,
 				tags: ['heroPoints'],
 			},
 
-			{ name: 'speed', type: 'base', value: this.sheet.general.speed || 0, tags: ['speed'] },
+			{ name: 'speed', type: 'base', value: this.sheet.general.speed ?? 0, tags: ['speed'] },
 			{
 				name: 'classDc',
 				type: 'base',
-				value: this.sheet.general.classDC || 10,
+				value: this.sheet.general.classDC ?? 10,
 				tags: ['classDc'],
 			},
 			{
 				name: 'classAttack',
 				type: 'base',
-				value: this.sheet.general.classAttack || 0,
+				value: this.sheet.general.classAttack ?? 0,
 				tags: ['classAttack'],
 			},
 			{
 				name: 'perception',
 				type: 'skill',
-				value: this.sheet.general.perception || 0,
+				value: this.sheet.general.perception ?? 0,
 				tags: ['skill', 'perception', 'wisdom'],
 			},
 		];
@@ -1134,25 +1145,25 @@ export class Creature {
 				{
 					name: 'maxStamina',
 					type: 'base',
-					value: this.sheet.defenses.maxStamina || 0,
+					value: this.sheet.defenses.maxStamina ?? 0,
 					tags: ['maxStamina'],
 				},
 				{
 					name: 'maxResolve',
 					type: 'base',
-					value: this.sheet.defenses.maxResolve || 0,
+					value: this.sheet.defenses.maxResolve ?? 0,
 					tags: ['maxResolve'],
 				},
 				{
 					name: 'stamina',
 					type: 'base',
-					value: this.sheet.defenses.currentStamina || 0,
+					value: this.sheet.defenses.currentStamina ?? 0,
 					tags: ['stamina'],
 				},
 				{
 					name: 'resolve',
 					type: 'base',
-					value: this.sheet.defenses.currentResolve || 0,
+					value: this.sheet.defenses.currentResolve ?? 0,
 					tags: ['resolve'],
 				}
 			);
@@ -1162,19 +1173,19 @@ export class Creature {
 				{
 					name: 'arcane',
 					type: 'base',
-					value: this.profToLevel(this.sheet.castingStats.arcaneAttack || 0),
+					value: this.profToLevel(this.sheet.castingStats.arcaneAttack ?? 0),
 					tags: ['arcane'],
 				},
 				{
 					name: 'arcaneAttack',
 					type: 'base',
-					value: this.profToLevel(this.sheet.castingStats.arcaneAttack || 0),
+					value: this.profToLevel(this.sheet.castingStats.arcaneAttack ?? 0),
 					tags: ['arcaneAttack'],
 				},
 				{
 					name: 'arcaneSpellAttack',
 					type: 'base',
-					value: this.profToLevel(this.sheet.castingStats.arcaneAttack || 0),
+					value: this.profToLevel(this.sheet.castingStats.arcaneAttack ?? 0),
 					tags: ['arcaneSpellAttack'],
 				}
 			);
@@ -1184,19 +1195,19 @@ export class Creature {
 				{
 					name: 'divine',
 					type: 'base',
-					value: this.profToLevel(this.sheet.castingStats.divineAttack || 0),
+					value: this.profToLevel(this.sheet.castingStats.divineAttack ?? 0),
 					tags: ['divine'],
 				},
 				{
 					name: 'divineAttack',
 					type: 'base',
-					value: this.profToLevel(this.sheet.castingStats.divineAttack || 0),
+					value: this.profToLevel(this.sheet.castingStats.divineAttack ?? 0),
 					tags: ['divineAttack'],
 				},
 				{
 					name: 'divineSpellAttack',
 					type: 'base',
-					value: this.profToLevel(this.sheet.castingStats.divineAttack || 0),
+					value: this.profToLevel(this.sheet.castingStats.divineAttack ?? 0),
 					tags: ['divineSpellAttack'],
 				}
 			);
@@ -1206,19 +1217,19 @@ export class Creature {
 				{
 					name: 'primal',
 					type: 'base',
-					value: this.profToLevel(this.sheet.castingStats.primalAttack || 0),
+					value: this.profToLevel(this.sheet.castingStats.primalAttack ?? 0),
 					tags: ['primal'],
 				},
 				{
 					name: 'primalAttack',
 					type: 'base',
-					value: this.profToLevel(this.sheet.castingStats.primalAttack || 0),
+					value: this.profToLevel(this.sheet.castingStats.primalAttack ?? 0),
 					tags: ['primalAttack'],
 				},
 				{
 					name: 'primalSpellAttack',
 					type: 'base',
-					value: this.profToLevel(this.sheet.castingStats.primalAttack || 0),
+					value: this.profToLevel(this.sheet.castingStats.primalAttack ?? 0),
 					tags: ['primalSpellAttack'],
 				}
 			);
@@ -1228,19 +1239,19 @@ export class Creature {
 				{
 					name: 'occult',
 					type: 'base',
-					value: this.profToLevel(this.sheet.castingStats.occultAttack || 0),
+					value: this.profToLevel(this.sheet.castingStats.occultAttack ?? 0),
 					tags: ['occult'],
 				},
 				{
 					name: 'occultAttack',
 					type: 'base',
-					value: this.profToLevel(this.sheet.castingStats.occultAttack || 0),
+					value: this.profToLevel(this.sheet.castingStats.occultAttack ?? 0),
 					tags: ['occultAttack'],
 				},
 				{
 					name: 'occultSpellAttack',
 					type: 'base',
-					value: this.profToLevel(this.sheet.castingStats.occultAttack || 0),
+					value: this.profToLevel(this.sheet.castingStats.occultAttack ?? 0),
 					tags: ['occultSpellAttack'],
 				}
 			);
@@ -1250,13 +1261,13 @@ export class Creature {
 				{
 					name: 'arcaneDC',
 					type: 'base',
-					value: this.profToLevel(this.sheet.castingStats.arcaneDC || 0),
+					value: this.profToLevel(this.sheet.castingStats.arcaneDC ?? 0),
 					tags: ['arcaneDC'],
 				},
 				{
 					name: 'arcaneSpellDC',
 					type: 'base',
-					value: this.profToLevel(this.sheet.castingStats.arcaneDC || 0),
+					value: this.profToLevel(this.sheet.castingStats.arcaneDC ?? 0),
 					tags: ['arcaneSpellDC'],
 				}
 			);
@@ -1266,13 +1277,13 @@ export class Creature {
 				{
 					name: 'divineDC',
 					type: 'base',
-					value: this.profToLevel(this.sheet.castingStats.divineDC || 0),
+					value: this.profToLevel(this.sheet.castingStats.divineDC ?? 0),
 					tags: ['divineDC'],
 				},
 				{
 					name: 'divineSpellDC',
 					type: 'base',
-					value: this.profToLevel(this.sheet.castingStats.divineDC || 0),
+					value: this.profToLevel(this.sheet.castingStats.divineDC ?? 0),
 					tags: ['divineSpellDC'],
 				}
 			);
@@ -1282,13 +1293,13 @@ export class Creature {
 				{
 					name: 'primalDC',
 					type: 'base',
-					value: this.profToLevel(this.sheet.castingStats.primalDC || 0),
+					value: this.profToLevel(this.sheet.castingStats.primalDC ?? 0),
 					tags: ['primalDC'],
 				},
 				{
 					name: 'primalSpellDC',
 					type: 'base',
-					value: this.profToLevel(this.sheet.castingStats.primalDC || 0),
+					value: this.profToLevel(this.sheet.castingStats.primalDC ?? 0),
 					tags: ['primalSpellDC'],
 				}
 			);
@@ -1298,13 +1309,13 @@ export class Creature {
 				{
 					name: 'occultDC',
 					type: 'base',
-					value: this.profToLevel(this.sheet.castingStats.occultDC || 0),
+					value: this.profToLevel(this.sheet.castingStats.occultDC ?? 0),
 					tags: ['occultDC'],
 				},
 				{
 					name: 'occultSpellDC',
 					type: 'base',
-					value: this.profToLevel(this.sheet.castingStats.occultDC || 0),
+					value: this.profToLevel(this.sheet.castingStats.occultDC ?? 0),
 					tags: ['occultSpellDC'],
 				}
 			);
@@ -1314,25 +1325,25 @@ export class Creature {
 				{
 					name: 'simpleProfMod',
 					type: 'base',
-					value: this.profToLevel(this.sheet.offense.simpleProfMod || 0),
+					value: this.profToLevel(this.sheet.offense.simpleProfMod ?? 0),
 					tags: ['simpleProfMod'],
 				},
 				{
 					name: 'simple',
 					type: 'base',
-					value: this.profToLevel(this.sheet.offense.simpleProfMod || 0),
+					value: this.profToLevel(this.sheet.offense.simpleProfMod ?? 0),
 					tags: ['simple'],
 				},
 				{
 					name: 'simpleWeapon',
 					type: 'base',
-					value: this.profToLevel(this.sheet.offense.simpleProfMod || 0),
+					value: this.profToLevel(this.sheet.offense.simpleProfMod ?? 0),
 					tags: ['simpleWeapon'],
 				},
 				{
 					name: 'simpleAttack',
 					type: 'base',
-					value: this.profToLevel(this.sheet.offense.simpleProfMod || 0),
+					value: this.profToLevel(this.sheet.offense.simpleProfMod ?? 0),
 					tags: ['simpleAttack'],
 				}
 			);
@@ -1342,25 +1353,25 @@ export class Creature {
 				{
 					name: 'martialProfMod',
 					type: 'base',
-					value: this.profToLevel(this.sheet.offense.martialProfMod || 0),
+					value: this.profToLevel(this.sheet.offense.martialProfMod ?? 0),
 					tags: ['martialProfMod'],
 				},
 				{
 					name: 'martial',
 					type: 'base',
-					value: this.profToLevel(this.sheet.offense.martialProfMod || 0),
+					value: this.profToLevel(this.sheet.offense.martialProfMod ?? 0),
 					tags: ['martial'],
 				},
 				{
 					name: 'martialWeapon',
 					type: 'base',
-					value: this.profToLevel(this.sheet.offense.martialProfMod || 0),
+					value: this.profToLevel(this.sheet.offense.martialProfMod ?? 0),
 					tags: ['martialWeapon'],
 				},
 				{
 					name: 'martialAttack',
 					type: 'base',
-					value: this.profToLevel(this.sheet.offense.martialProfMod || 0),
+					value: this.profToLevel(this.sheet.offense.martialProfMod ?? 0),
 					tags: ['martialAttack'],
 				}
 			);
@@ -1370,25 +1381,25 @@ export class Creature {
 				{
 					name: 'unarmedProfMod',
 					type: 'base',
-					value: this.profToLevel(this.sheet.offense.unarmedProfMod || 0),
+					value: this.profToLevel(this.sheet.offense.unarmedProfMod ?? 0),
 					tags: ['unarmedProfMod'],
 				},
 				{
 					name: 'unarmed',
 					type: 'base',
-					value: this.profToLevel(this.sheet.offense.unarmedProfMod || 0),
+					value: this.profToLevel(this.sheet.offense.unarmedProfMod ?? 0),
 					tags: ['unarmed'],
 				},
 				{
 					name: 'unarmedWeapon',
 					type: 'base',
-					value: this.profToLevel(this.sheet.offense.unarmedProfMod || 0),
+					value: this.profToLevel(this.sheet.offense.unarmedProfMod ?? 0),
 					tags: ['unarmedWeapon'],
 				},
 				{
 					name: 'unarmedAttack',
 					type: 'base',
-					value: this.profToLevel(this.sheet.offense.unarmedProfMod || 0),
+					value: this.profToLevel(this.sheet.offense.unarmedProfMod ?? 0),
 					tags: ['unarmedAttack'],
 				}
 			);
@@ -1398,25 +1409,25 @@ export class Creature {
 				{
 					name: 'advancedProfMod',
 					type: 'base',
-					value: this.profToLevel(this.sheet.offense.advancedProfMod || 0),
+					value: this.profToLevel(this.sheet.offense.advancedProfMod ?? 0),
 					tags: ['advancedProfMod'],
 				},
 				{
 					name: 'advanced',
 					type: 'base',
-					value: this.profToLevel(this.sheet.offense.advancedProfMod || 0),
+					value: this.profToLevel(this.sheet.offense.advancedProfMod ?? 0),
 					tags: ['advanced'],
 				},
 				{
 					name: 'advancedWeapon',
 					type: 'base',
-					value: this.profToLevel(this.sheet.offense.advancedProfMod || 0),
+					value: this.profToLevel(this.sheet.offense.advancedProfMod ?? 0),
 					tags: ['advancedWeapon'],
 				},
 				{
 					name: 'advancedAttack',
 					type: 'base',
-					value: this.profToLevel(this.sheet.offense.advancedProfMod || 0),
+					value: this.profToLevel(this.sheet.offense.advancedProfMod ?? 0),
 					tags: ['advancedAttack'],
 				}
 			);
@@ -1424,20 +1435,23 @@ export class Creature {
 
 		const lores = this.sheet.skills.lores.map(lore => ({
 			name: lore.name + ' lore',
-			value: lore.bonus,
+			type: 'skill',
+			value: lore.bonus ?? 0,
 			tags: ['skill', lore.name, 'intelligence'],
 		}));
 		const nonLoreSkills: Character['attributes'] = [];
-		for (const skillName in this.sheet.skills) {
+		for (const skillName of literalKeys(this.sheet.skills)) {
+			if (skillName === 'lores') continue;
+			const skillValue = this.sheet.skills[skillName];
 			nonLoreSkills.push({
 				name: skillName,
 				type: 'skill',
-				value: this.sheet.skills[skillName],
+				value: skillValue ?? 0,
 				tags: ['skill', skillName, Creature.attributeAbilityMap[skillName]],
 			});
 		}
 		const abilities: Character['attributes'] = [];
-		for (const abilityName in this.sheet.abilities) {
+		for (const abilityName in Object.keys(this.sheet.abilities)) {
 			abilities.push({
 				name: abilityName,
 				type: 'ability',
@@ -1452,11 +1466,11 @@ export class Creature {
 			});
 		}
 		const saves: Character['attributes'] = [];
-		for (const saveName in this.sheet.saves) {
+		for (const saveName of literalKeys(this.sheet.saves)) {
 			saves.push({
 				name: saveName,
 				type: 'save',
-				value: this.sheet.saves[saveName],
+				value: this.sheet.saves[saveName] ?? 0,
 				tags: ['save', saveName],
 			});
 		}
@@ -1464,13 +1478,13 @@ export class Creature {
 			{
 				name: 'fort',
 				type: 'save',
-				value: this.sheet.saves.fortitude,
+				value: this.sheet.saves.fortitude ?? 0,
 				tags: ['save', 'fortitude', 'constitution'],
 			},
 			{
 				name: 'ref',
 				type: 'save',
-				value: this.sheet.saves.reflex,
+				value: this.sheet.saves.reflex ?? 0,
 				tags: ['save', 'reflex', 'dexterity'],
 			}
 		);
@@ -1533,10 +1547,10 @@ export class Creature {
 	}
 
 	public static fromModelWithSheet(initActor: ModelWithSheet): Creature {
-		return new Creature(initActor.sheet, initActor.name);
+		return new Creature(initActor.sheet as Sheet, initActor.name);
 	}
 
-	public static fromZCharacter(character: ZCharacter): Creature {
+	public static fromZCharacter(character: Character): Creature {
 		let sheet = { ...character.sheet };
 		sheet.actions = [...(sheet.actions ?? []), ...character.actions];
 		sheet.modifiers = [...(sheet.modifiers ?? []), ...character.modifiers];

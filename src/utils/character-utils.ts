@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { Character } from './../services/kobold/models/character/character.model.js';
+import { Character } from './../services/kobold/models/character/character.zod.js';
 import { Creature, roll, rollable } from './creature.js';
 import { StringUtils } from './string-utils.js';
 import {

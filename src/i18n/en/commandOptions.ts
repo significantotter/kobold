@@ -532,6 +532,24 @@ export default {
 	modifierType: {
 		name: 'type',
 		description: 'The optional type (status, item, or circumstance) of the modifier.',
+		choices: {
+			status: {
+				name: 'status',
+				value: 'status',
+			},
+			item: {
+				name: 'item',
+				value: 'item',
+			},
+			circumstance: {
+				name: 'circumstance',
+				value: 'circumstance',
+			},
+			untyped: {
+				name: 'untyped',
+				value: 'untyped',
+			},
+		},
 	},
 	modifierDescription: {
 		name: 'description',

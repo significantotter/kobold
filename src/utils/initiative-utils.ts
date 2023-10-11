@@ -34,7 +34,7 @@ export class InitiativeBuilder {
 	public actorsByGroup: { [key: number]: InitiativeActor[] };
 	public groups: InitiativeActorGroup[];
 	public userSettings: UserSettings;
-	private LL: TranslationFunctions;
+	protected LL: TranslationFunctions;
 
 	constructor({
 		initiative,

@@ -31,8 +31,26 @@ export class ModifierOptions {
 	public static readonly MODIFIER_TYPE_OPTION: APIApplicationCommandBasicOption = {
 		name: L.en.commandOptions.modifierType.name(),
 		description: L.en.commandOptions.modifierType.description(),
-		required: true,
+		required: false,
 		type: ApplicationCommandOptionType.String,
+		choices: [
+			{
+				name: L.en.commandOptions.modifierType.choices.untyped.name(),
+				value: L.en.commandOptions.modifierType.choices.untyped.value(),
+			},
+			{
+				name: L.en.commandOptions.modifierType.choices.status.name(),
+				value: L.en.commandOptions.modifierType.choices.status.value(),
+			},
+			{
+				name: L.en.commandOptions.modifierType.choices.circumstance.name(),
+				value: L.en.commandOptions.modifierType.choices.circumstance.value(),
+			},
+			{
+				name: L.en.commandOptions.modifierType.choices.item.name(),
+				value: L.en.commandOptions.modifierType.choices.item.value(),
+			},
+		],
 	};
 	public static readonly MODIFIER_DESCRIPTION_OPTION: APIApplicationCommandBasicOption = {
 		name: L.en.commandOptions.modifierDescription.name(),

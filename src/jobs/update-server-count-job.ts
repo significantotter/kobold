@@ -17,11 +17,11 @@ export class UpdateServerCountJob implements Job {
 	public runOnce: boolean = Config.jobs.updateServerCount.runOnce;
 	public initialDelaySecs: number = Config.jobs.updateServerCount.initialDelaySecs;
 
-	private botSites: BotSite[];
+	protected botSites: BotSite[];
 
 	constructor(
-		private shardManager: ShardingManager,
-		private httpService: HttpService
+		protected shardManager: ShardingManager,
+		protected httpService: HttpService
 	) {
 		this.botSites = Config.botSites.filter(botSite => botSite.enabled);
 	}

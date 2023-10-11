@@ -7,12 +7,12 @@ import { EventHandler } from './index.js';
 import { Config } from './../config/config.js';
 
 export class ButtonHandler implements EventHandler {
-	private rateLimiter = new RateLimiter(
+	protected rateLimiter = new RateLimiter(
 		Config.rateLimiting.buttons.amount,
 		Config.rateLimiting.buttons.interval * 1000
 	);
 
-	constructor(private buttons: Button[]) {}
+	constructor(protected buttons: Button[]) {}
 
 	public async process(intr: ButtonInteraction): Promise<void> {
 		// Don't respond to self, or other bots
@@ -66,7 +66,7 @@ export class ButtonHandler implements EventHandler {
 		await button.execute(intr);
 	}
 
-	private findButton(id: string): Button | undefined {
+	protected findButton(id: string): Button | undefined {
 		return this.buttons.find(button => button.ids.includes(id));
 	}
 }

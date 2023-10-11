@@ -2,7 +2,7 @@
 
 export class Kobold {
 	// public character: dCharacter;
-	constructor(private dbService: any) {
+	constructor(protected dbService: any) {
 		// this.character = new dCharacter(this);
 	}
 	public get schema() {
