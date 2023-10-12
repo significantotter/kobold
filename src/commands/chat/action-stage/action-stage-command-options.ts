@@ -133,7 +133,7 @@ export class ActionStageOptions {
 	public static readonly ACTION_ROLL_TARGET_DC_OPTION: APIApplicationCommandBasicOption = {
 		name: Language.LL.commandOptions.actionStageRollSave.name(),
 		description: Language.LL.commandOptions.actionStageRollSave.description(),
-		required: false,
+		required: true,
 		type: ApplicationCommandOptionType.String,
 	};
 	public static readonly ACTION_ROLL_ABILITY_DC_OPTION: APIApplicationCommandBasicOption = {

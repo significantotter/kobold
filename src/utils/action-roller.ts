@@ -147,7 +147,7 @@ export class ActionRoller {
 		let currentExtraAttributes = _.values(extraAttributes);
 		let tags = [...this.tags];
 
-		if (roll.targetDC.toLowerCase() === 'ac') tags = _.uniq([...tags, 'attack']);
+		if ((roll.targetDC ?? '').toLowerCase() === 'ac') tags = _.uniq([...tags, 'attack']);
 
 		if (allowRollModifiers && options.attackModifierExpression) {
 			// add the attack modifier expression
