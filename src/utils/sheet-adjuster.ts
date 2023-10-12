@@ -18,6 +18,7 @@ import {
 	sheetPropertyGroups,
 	TypedSheetAdjustment,
 } from './sheet-utils.js';
+import { literalKeys } from './type-guards.js';
 
 export class SheetAdjuster {
 	infoAdjuster: SheetInfoAdjuster;
@@ -133,46 +134,6 @@ export abstract class SheetPropertyGroupAdjuster<T> {
 	public abstract adjust(k: keyof T, adjustment: TypedSheetAdjustment): void;
 }
 
-export abstract class SheetPropertyGroupBucket<T> {
-	buckets: { [k: string]: TypedSheetAdjustment } = {};
-	constructor() {}
-	public abstract combine(
-		currentAdjustment: TypedSheetAdjustment,
-		newAdjustment: TypedSheetAdjustment
-	): TypedSheetAdjustment;
-	public abstract discardAdjustment(adjustment: TypedSheetAdjustment): boolean;
-	public abstract sortToBucket(adjustment: TypedSheetAdjustment): void;
-	public reduceBuckets(): TypedSheetAdjustment | undefined {
-		const reducedBucket = Object.values(this.buckets).reduce(
-			(a: TypedSheetAdjustment, b: TypedSheetAdjustment): TypedSheetAdjustment => {
-				if (a == null) return b;
-				if (b == null) return a;
-				return this.combine(a, b);
-			}
-		);
-		if (this.discardAdjustment(reducedBucket)) return;
-		return reducedBucket;
-	}
-}
-
-export class SheetAdjustmentBucketer {
-	protected sheetInfoBucket: SheetInfoBucket = new SheetInfoBucket();
-	constructor() {}
-
-	addToBucket(adjustment: TypedSheetAdjustment) {
-		if (adjustment.propertyType === 'info') {
-			this.sheetInfoBucket.sortToBucket(adjustment);
-		}
-	}
-
-	reduceBuckets(): TypedSheetAdjustment[] {
-		const buckets = [this.sheetInfoBucket];
-		return buckets
-			.map(bucket => bucket.reduceBuckets())
-			.filter(adjustment => adjustment != null) as TypedSheetAdjustment[];
-	}
-}
-
 // Sheet Info Properties
 
 export class SheetInfoAdjuster implements SheetPropertyGroupAdjuster<SheetInfo> {
@@ -195,34 +156,6 @@ export class SheetInfoAdjuster implements SheetPropertyGroupAdjuster<SheetInfo> 
 		return _.isString(stringAdjustment);
 	}
 	public static validOperations = ['+', '='] as const;
-}
-export class SheetInfoBucket extends SheetPropertyGroupBucket<SheetInfo> {
-	public combine(
-		currentAdjustment: TypedSheetAdjustment,
-		newAdjustment: TypedSheetAdjustment
-	): TypedSheetAdjustment {
-		if (newAdjustment.operation === '=') return newAdjustment;
-		else {
-			return {
-				...newAdjustment,
-				value: currentAdjustment.value + newAdjustment.value,
-			};
-		}
-	}
-	public sortToBucket(adjustment: TypedSheetAdjustment): void {
-		const currentValue = this.buckets[adjustment.property];
-		if (currentValue == null) {
-			this.buckets[adjustment.property] = adjustment;
-		} else {
-			this.buckets[adjustment.property] = this.combine(currentValue, adjustment);
-		}
-	}
-	public discardAdjustment(adjustment: TypedSheetAdjustment): boolean {
-		return (
-			adjustment.value === '' &&
-			(adjustment.operation === '+' || adjustment.operation === '-')
-		);
-	}
 }
 
 // Sheet InfoList Properties
@@ -250,34 +183,6 @@ export class SheetInfoListAdjuster implements SheetPropertyGroupAdjuster<SheetIn
 		return stringAdjustment.split(',').every(value => _.isString(value.trim()));
 	}
 	public static validOperations = ['+', '='] as const;
-}
-export class SheetInfoListsBucket extends SheetPropertyGroupBucket<SheetInfoLists> {
-	public combine(
-		currentAdjustment: TypedSheetAdjustment,
-		newAdjustment: TypedSheetAdjustment
-	): TypedSheetAdjustment {
-		if (newAdjustment.operation === '=') return newAdjustment;
-		else {
-			return {
-				...newAdjustment,
-				value: currentAdjustment.value + newAdjustment.value,
-			};
-		}
-	}
-	public sortToBucket(adjustment: TypedSheetAdjustment): void {
-		const currentValue = this.buckets[adjustment.property];
-		if (currentValue == null) {
-			this.buckets[adjustment.property] = adjustment;
-		} else {
-			this.buckets[adjustment.property] = this.combine(currentValue, adjustment);
-		}
-	}
-	public discardAdjustment(adjustment: TypedSheetAdjustment): boolean {
-		return (
-			adjustment.value === '' &&
-			(adjustment.operation === '+' || adjustment.operation === '-')
-		);
-	}
 }
 
 // protected adjustByNumber<K>(

@@ -1,5 +1,7 @@
 import { z } from 'zod';
 import { SheetUtils } from '../../../../utils/sheet-utils.js';
+import { zStatSchema } from '../../../pf2etools/schemas/index.js';
+import { SheetProperties } from '../../../../utils/sheet-properties.js';
 
 const zNullableInteger = z.number().int().nullable().default(null);
 
@@ -282,10 +284,8 @@ export const zModifier = z
 	.describe('A modifier is a bonus or penalty that can be applied to a roll or sheet property.');
 
 export type AdditionalSkill = z.infer<typeof zAdditionalSkill>;
-export const zAdditionalSkill = z.strictObject({
+export const zAdditionalSkill = zStatSchema.extend({
 	name: z.string().describe("The skill's name."),
-	total: zNullableInteger.describe("The skill's total roll bonus."),
-	profMod: zNullableInteger.describe("The skill's proficiency modifier."),
 });
 
 export type Damage = z.infer<typeof zDamage>;
@@ -556,6 +556,6 @@ export const zCharacter = z
 		actions: z.array(zAction).default([]),
 		modifiers: z.array(zModifier).default([]),
 		rollMacros: z.array(zRollMacro).default([]),
-		sheet: zSheet.default(zSheet.parse(SheetUtils.defaultSheet)),
+		sheet: zSheet.default(zSheet.parse(SheetProperties.defaultSheet)),
 	})
 	.describe('An imported character');
