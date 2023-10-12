@@ -18,26 +18,6 @@
 // 			expect(SheetUtils.standardizeSheetProperty('a_c')).toBe('ac');
 // 		});
 // 	});
-// 	describe('validateSheetProperty', () => {
-// 		it('should return true if the property is valid', () => {
-// 			expect(SheetUtils.validateSheetProperty('ac')).toBe(true);
-// 			expect(SheetUtils.validateSheetProperty('classDC')).toBe(true);
-// 			expect(SheetUtils.validateSheetProperty('arcaneAttack')).toBe(true);
-// 			expect(SheetUtils.validateSheetProperty('fire weakness')).toBe(true);
-// 			expect(SheetUtils.validateSheetProperty('cold weakness')).toBe(true);
-// 			expect(SheetUtils.validateSheetProperty('darkvision sense')).toBe(true);
-// 			expect(SheetUtils.validateSheetProperty('sonic immunity')).toBe(true);
-// 			expect(SheetUtils.validateSheetProperty('common language')).toBe(true);
-// 			expect(SheetUtils.validateSheetProperty('a c')).toBe(true);
-// 			expect(SheetUtils.validateSheetProperty('str skills')).toBe(true);
-// 			expect(SheetUtils.validateSheetProperty('checks')).toBe(true);
-// 		});
-// 		it('should return false if the property is invalid', () => {
-// 			expect(SheetUtils.validateSheetProperty('foo checks')).toBe(false);
-// 			expect(SheetUtils.validateSheetProperty('str foo')).toBe(false);
-// 			expect(SheetUtils.validateSheetProperty('bar')).toBe(false);
-// 		});
-// 	});
 // 	describe('sheetPropertyIsNumeric', () => {
 // 		it('should return true if the property is numeric', () => {
 // 			expect(SheetUtils.sheetPropertyIsNumeric('ac')).toBe(true);
