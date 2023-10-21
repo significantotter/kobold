@@ -1,12 +1,21 @@
+import _ from 'lodash';
+import {
+	SheetAttackAdjustment,
+	SheetInfoAdjustment,
+	SheetInfoListAdjustment,
+	SheetIntegerAdjustment,
+	SheetStatAdjustment,
+	TypedSheetAdjustment,
+} from './sheet-adjuster.js';
 import {
 	SheetPropertyGroupBucket,
 	SheetInfoBucket,
 	SheetInfoListsBucket,
-	IntPropertyBucket,
 	StatBucket,
-	SheetPropertyGroupAdjustment,
+	SheetIntegerPropertyBucket,
+	WeaknessResistanceBucket,
+	AttackBucket,
 } from './sheet-adjustment-bucketer.js';
-import { TypedSheetAdjustment } from './sheet-utils.js';
 
 class TestSheetPropertyGroupBucket extends SheetPropertyGroupBucket<TypedSheetAdjustment> {
 	public serialize(adjustment: TypedSheetAdjustment): TypedSheetAdjustment {
@@ -28,6 +37,7 @@ class TestSheetPropertyGroupBucket extends SheetPropertyGroupBucket<TypedSheetAd
 			value: currentAdjustment.value + newAdjustment.value,
 		};
 	}
+	public combineSameType = this.combine.bind(this);
 }
 
 describe('SheetPropertyGroupBucket', () => {
@@ -197,19 +207,19 @@ describe('SheetInfoBucket', () => {
 	describe('combine', () => {
 		it('should return the new adjustment', () => {
 			const bucket = new SheetInfoBucket();
-			const currentAdjustment: TypedSheetAdjustment = {
+			const currentAdjustment: SheetInfoAdjustment = {
 				propertyType: 'info',
 				type: 'untyped',
 				property: 'name',
 				operation: '=',
-				value: 'Alice',
+				parsed: 'Alice',
 			};
-			const newAdjustment: TypedSheetAdjustment = {
+			const newAdjustment: SheetInfoAdjustment = {
 				propertyType: 'info',
 				type: 'untyped',
 				property: 'name',
 				operation: '+',
-				value: 'Bob',
+				parsed: 'Bob',
 			};
 			const result = bucket.combine(currentAdjustment, newAdjustment);
 			expect(result).toEqual(newAdjustment);
@@ -262,47 +272,72 @@ describe('SheetInfoListsBucket', () => {
 	describe('combine', () => {
 		it('should return new adjustment if operation is "="', () => {
 			const bucket = new SheetInfoListsBucket();
-			const currentAdjustment: TypedSheetAdjustment = {
+			const currentAdjustment: SheetInfoListAdjustment = {
 				propertyType: 'infoList',
 				type: 'untyped',
 				property: 'name',
 				operation: '=',
-				value: 'Alice',
+				parsed: ['Alice'],
 			};
-			const newAdjustment: TypedSheetAdjustment = {
+			const newAdjustment: SheetInfoListAdjustment = {
 				propertyType: 'infoList',
 				type: 'untyped',
 				property: 'name',
 				operation: '=',
-				value: 'Bob',
+				parsed: ['Bob'],
 			};
 			const result = bucket.combine(currentAdjustment, newAdjustment);
 			expect(result).toEqual(newAdjustment);
 		});
+		it('should remove values from the new adjustment if operation is "-"', () => {
+			const bucket = new SheetInfoListsBucket();
+			const currentAdjustment: SheetInfoListAdjustment = {
+				propertyType: 'infoList',
+				type: 'untyped',
+				property: 'name',
+				operation: '=',
+				parsed: ['Alice', 'Bob', 'Charlie'],
+			};
+			const newAdjustment: SheetInfoListAdjustment = {
+				propertyType: 'infoList',
+				type: 'untyped',
+				property: 'name',
+				operation: '-',
+				parsed: ['Alice', 'Charlie'],
+			};
+			const result = bucket.combine(currentAdjustment, newAdjustment);
+			expect(result).toEqual({
+				propertyType: 'infoList',
+				type: 'untyped',
+				property: 'name',
+				operation: '=',
+				parsed: ['Bob'],
+			});
+		});
 
 		it('should combine values if operation is "+"', () => {
 			const bucket = new SheetInfoListsBucket();
-			const currentAdjustment: TypedSheetAdjustment = {
+			const currentAdjustment: SheetInfoListAdjustment = {
 				propertyType: 'info',
 				type: 'untyped',
 				property: 'name',
 				operation: '=',
-				value: 'Alice',
+				parsed: ['Alice'],
 			};
-			const newAdjustment: TypedSheetAdjustment = {
+			const newAdjustment: SheetInfoListAdjustment = {
 				propertyType: 'info',
 				type: 'untyped',
 				property: 'name',
 				operation: '+',
-				value: 'Bob',
+				parsed: ['Bob'],
 			};
 			const result = bucket.combine(currentAdjustment, newAdjustment);
 			expect(result).toEqual({
 				propertyType: 'info',
 				type: 'untyped',
 				property: 'name',
-				operation: '+',
-				value: 'Alice,Bob',
+				operation: '=',
+				parsed: ['Alice', 'Bob'],
 			});
 		});
 	});
@@ -361,23 +396,24 @@ describe('SheetInfoListsBucket', () => {
 		});
 	});
 });
-describe('IntPropertyBucket', () => {
+
+describe('SheetIntegerPropertyBucket', () => {
 	describe('combineAdjustments', () => {
 		it('should combine numeric values using addition', () => {
-			const bucket = new IntPropertyBucket();
-			const currentAdjustment: TypedSheetAdjustment = {
+			const bucket = new SheetIntegerPropertyBucket();
+			const currentAdjustment: SheetIntegerAdjustment = {
 				type: 'untyped',
 				propertyType: 'intProperty',
 				property: 'age',
 				operation: '=',
-				value: '30',
+				parsed: 30,
 			};
-			const newAdjustment: TypedSheetAdjustment = {
+			const newAdjustment: SheetIntegerAdjustment = {
 				type: 'untyped',
 				propertyType: 'intProperty',
 				property: 'age',
 				operation: '+',
-				value: '10',
+				parsed: 10,
 			};
 			const result = bucket.combine(currentAdjustment, newAdjustment);
 			expect(result).toEqual({
@@ -385,40 +421,78 @@ describe('IntPropertyBucket', () => {
 				propertyType: 'intProperty',
 				property: 'age',
 				operation: '=',
-				value: '40',
+				parsed: 40,
+			});
+		});
+	});
+
+	describe('combineSameType', () => {
+		let sheetIntegerPropertyBucket: SheetIntegerPropertyBucket;
+
+		beforeEach(() => {
+			sheetIntegerPropertyBucket = new SheetIntegerPropertyBucket();
+		});
+
+		it('should combine two "add" adjustments', () => {
+			const currentAdjustment: SheetIntegerAdjustment = {
+				type: 'status',
+				propertyType: 'intProperty',
+				operation: '+',
+				property: 'strength',
+				parsed: 10,
+			};
+			const newAdjustment: SheetIntegerAdjustment = {
+				type: 'status',
+				propertyType: 'intProperty',
+				operation: '+',
+				property: 'strength',
+				parsed: 5,
+			};
+			const result = sheetIntegerPropertyBucket.combineSameType(
+				currentAdjustment,
+				newAdjustment
+			);
+			expect(result).toEqual({
+				type: 'status',
+				propertyType: 'intProperty',
+				operation: '+',
+				property: 'strength',
+				parsed: 10,
 			});
 		});
 
-		it('should handle empty string values as 0', () => {
-			const bucket = new IntPropertyBucket();
-			const currentAdjustment: TypedSheetAdjustment = {
-				type: 'untyped',
+		it('should combine two "subtract" adjustments', () => {
+			const currentAdjustment: SheetIntegerAdjustment = {
+				type: 'status',
 				propertyType: 'intProperty',
-				property: 'age',
-				operation: '=',
-				value: '30',
+				operation: '-',
+				property: 'strength',
+				parsed: 10,
 			};
-			const newAdjustment: TypedSheetAdjustment = {
-				type: 'untyped',
+			const newAdjustment: SheetIntegerAdjustment = {
+				type: 'status',
 				propertyType: 'intProperty',
-				property: 'age',
-				operation: '+',
-				value: '',
+				operation: '-',
+				property: 'strength',
+				parsed: 5,
 			};
-			const result = bucket.combine(currentAdjustment, newAdjustment);
+			const result = sheetIntegerPropertyBucket.combineSameType(
+				currentAdjustment,
+				newAdjustment
+			);
 			expect(result).toEqual({
-				type: 'untyped',
+				type: 'status',
 				propertyType: 'intProperty',
-				property: 'age',
-				operation: '=',
-				value: '30',
+				operation: '-',
+				property: 'strength',
+				parsed: 5,
 			});
 		});
 	});
 
 	describe('discardAdjustment', () => {
 		it('should return true if value is empty and operation is "+" or "-"', () => {
-			const bucket = new IntPropertyBucket();
+			const bucket = new SheetIntegerPropertyBucket();
 			const adjustment: TypedSheetAdjustment = {
 				type: 'untyped',
 				propertyType: 'intProperty',
@@ -431,7 +505,7 @@ describe('IntPropertyBucket', () => {
 		});
 
 		it('should return false if value is not a valid integer', () => {
-			const bucket = new IntPropertyBucket();
+			const bucket = new SheetIntegerPropertyBucket();
 			const adjustment: TypedSheetAdjustment = {
 				type: 'untyped',
 				propertyType: 'intProperty',
@@ -444,7 +518,7 @@ describe('IntPropertyBucket', () => {
 		});
 
 		it('should return false if operation is not "+" or "-"', () => {
-			const bucket = new IntPropertyBucket();
+			const bucket = new SheetIntegerPropertyBucket();
 			const adjustment: TypedSheetAdjustment = {
 				type: 'untyped',
 				propertyType: 'intProperty',
@@ -467,11 +541,12 @@ describe('StatBucket', () => {
 
 	describe('serialize', () => {
 		it('should serialize a stat adjustment with total', () => {
-			const adjustment: SheetPropertyGroupAdjustment = {
+			const adjustment: SheetStatAdjustment = {
 				type: 'untyped',
 				operation: '=',
 				property: 'test',
-				stat: {
+				propertyType: 'stat',
+				parsed: {
 					total: 10,
 				},
 			};
@@ -486,11 +561,12 @@ describe('StatBucket', () => {
 		});
 
 		it('should serialize a stat adjustment with proficiency and a totalDC', () => {
-			const adjustment: SheetPropertyGroupAdjustment = {
+			const adjustment: SheetStatAdjustment = {
 				type: 'untyped',
 				operation: '=',
 				property: 'test',
-				stat: {
+				propertyType: 'stat',
+				parsed: {
 					proficiency: 2,
 					totalDC: 15,
 				},
@@ -506,11 +582,12 @@ describe('StatBucket', () => {
 		});
 
 		it('should serialize a stat adjustment with ability', () => {
-			const adjustment: SheetPropertyGroupAdjustment = {
+			const adjustment: SheetStatAdjustment = {
 				type: 'untyped',
 				property: 'test',
 				operation: '=',
-				stat: {
+				propertyType: 'stat',
+				parsed: {
 					ability: 'strength',
 				},
 			};
@@ -540,7 +617,7 @@ describe('StatBucket', () => {
 				property: 'test',
 				operation: '=',
 				propertyType: 'stat',
-				stat: {
+				parsed: {
 					total: 10,
 				},
 			});
@@ -560,7 +637,7 @@ describe('StatBucket', () => {
 				propertyType: 'stat',
 				property: 'test',
 				operation: '=',
-				stat: {
+				parsed: {
 					proficiency: 2,
 				},
 			});
@@ -580,7 +657,7 @@ describe('StatBucket', () => {
 				property: 'test',
 				propertyType: 'stat',
 				operation: '=',
-				stat: {
+				parsed: {
 					totalDC: 15,
 				},
 			});
@@ -600,7 +677,7 @@ describe('StatBucket', () => {
 				property: 'test',
 				propertyType: 'stat',
 				operation: '=',
-				stat: {
+				parsed: {
 					ability: 'strength',
 				},
 			});
@@ -609,20 +686,22 @@ describe('StatBucket', () => {
 
 	describe('combine', () => {
 		it('should combine two stat adjustments with = operation', () => {
-			const currentAdjustment: SheetPropertyGroupAdjustment = {
+			const currentAdjustment: SheetStatAdjustment = {
 				type: 'untyped',
 				operation: '=',
 				property: 'test',
-				stat: {
+				propertyType: 'stat',
+				parsed: {
 					total: 10,
 					proficiency: 2,
 				},
 			};
-			const newAdjustment: SheetPropertyGroupAdjustment = {
+			const newAdjustment: SheetStatAdjustment = {
 				type: 'untyped',
 				operation: '=',
 				property: 'test',
-				stat: {
+				propertyType: 'stat',
+				parsed: {
 					totalDC: 15,
 					ability: 'strength',
 				},
@@ -632,7 +711,8 @@ describe('StatBucket', () => {
 				type: 'untyped',
 				operation: '=',
 				property: 'test',
-				stat: {
+				propertyType: 'stat',
+				parsed: {
 					total: 10,
 					proficiency: 2,
 					totalDC: 15,
@@ -642,20 +722,22 @@ describe('StatBucket', () => {
 		});
 
 		it('should combine two stat adjustments with + operation', () => {
-			const currentAdjustment: SheetPropertyGroupAdjustment = {
+			const currentAdjustment: SheetStatAdjustment = {
 				type: 'untyped',
 				operation: '=',
 				property: 'test',
-				stat: {
+				propertyType: 'stat',
+				parsed: {
 					total: 10,
 					proficiency: 2,
 				},
 			};
-			const newAdjustment: SheetPropertyGroupAdjustment = {
+			const newAdjustment: SheetStatAdjustment = {
 				type: 'untyped',
 				operation: '+',
 				property: 'test',
-				stat: {
+				propertyType: 'stat',
+				parsed: {
 					total: 5,
 					totalDC: 15,
 					ability: 'strength',
@@ -666,7 +748,8 @@ describe('StatBucket', () => {
 				type: 'untyped',
 				operation: '=',
 				property: 'test',
-				stat: {
+				propertyType: 'stat',
+				parsed: {
 					total: 15,
 					proficiency: 2,
 					totalDC: 15,
@@ -676,22 +759,24 @@ describe('StatBucket', () => {
 		});
 
 		it('should combine two stat adjustments with - operation', () => {
-			const currentAdjustment: SheetPropertyGroupAdjustment = {
+			const currentAdjustment: SheetStatAdjustment = {
 				type: 'untyped',
 				operation: '=',
 				property: 'test',
-				stat: {
+				propertyType: 'stat',
+				parsed: {
 					total: 10,
 					proficiency: 2,
 					totalDC: 15,
 					ability: 'strength',
 				},
 			};
-			const newAdjustment: SheetPropertyGroupAdjustment = {
+			const newAdjustment: SheetStatAdjustment = {
 				type: 'untyped',
 				operation: '-',
 				property: 'test',
-				stat: {
+				propertyType: 'stat',
+				parsed: {
 					total: 5,
 					totalDC: 10,
 					ability: 'strength',
@@ -702,7 +787,8 @@ describe('StatBucket', () => {
 				type: 'untyped',
 				operation: '=',
 				property: 'test',
-				stat: {
+				propertyType: 'stat',
+				parsed: {
 					total: 5,
 					proficiency: 2,
 					totalDC: 5,
@@ -759,6 +845,229 @@ describe('StatBucket', () => {
 			};
 			const result = bucket.discardAdjustment(adjustment);
 			expect(result).toBe(false);
+		});
+	});
+});
+
+describe('WeaknessResistanceBucket', () => {
+	let weaknessResistanceBucket: WeaknessResistanceBucket;
+
+	beforeEach(() => {
+		weaknessResistanceBucket = new WeaknessResistanceBucket();
+	});
+
+	describe('sortToBucket', () => {
+		it('should add an adjustment to the correct bucket', () => {
+			const adjustment: TypedSheetAdjustment = {
+				type: 'status',
+				propertyType: 'weaknessResistance',
+				operation: '+',
+				property: 'fire weakness',
+				value: '10',
+			};
+			weaknessResistanceBucket.sortToBucket(adjustment);
+			expect(weaknessResistanceBucket.buckets['fire weakness']).toEqual({
+				status: { ..._.omit(adjustment, 'value'), parsed: 10 },
+			});
+		});
+
+		it('should discard an adjustment with an empty value and "+" operation', () => {
+			const adjustment: TypedSheetAdjustment = {
+				type: 'status',
+				propertyType: 'weaknessResistance',
+				operation: '+',
+				property: 'fire weakness',
+				value: '',
+			};
+			weaknessResistanceBucket.sortToBucket(adjustment);
+			expect(weaknessResistanceBucket.buckets['fire weakness']).toBeUndefined();
+		});
+
+		it('should discard an adjustment with an empty value and "-" operation', () => {
+			const adjustment: TypedSheetAdjustment = {
+				type: 'status',
+				propertyType: 'weaknessResistance',
+				operation: '-',
+				property: 'fire resistance',
+				value: '',
+			};
+			weaknessResistanceBucket.sortToBucket(adjustment);
+			expect(weaknessResistanceBucket.buckets['fire resistance']).toBeUndefined();
+		});
+
+		it('should discard an adjustment with a non-numeric value', () => {
+			const adjustment: TypedSheetAdjustment = {
+				type: 'status',
+				propertyType: 'weaknessResistance',
+				operation: '+',
+				property: 'fire resistance',
+				value: 'not a number',
+			};
+			weaknessResistanceBucket.sortToBucket(adjustment);
+			expect(weaknessResistanceBucket.buckets['fire resistance']).toBeUndefined();
+		});
+	});
+
+	describe('reduceBuckets', () => {
+		it('should reduce the bucket and return the adjustments', () => {
+			const adjustment1: TypedSheetAdjustment = {
+				type: 'status',
+				propertyType: 'weaknessResistance',
+				operation: '+',
+				property: 'cold weakness',
+				value: '10',
+			};
+			const adjustment2: TypedSheetAdjustment = {
+				type: 'status',
+				propertyType: 'weaknessResistance',
+				operation: '-',
+				property: 'cold weakness',
+				value: '5',
+			};
+			const resultAdjustment: TypedSheetAdjustment = {
+				type: 'status',
+				propertyType: 'weaknessResistance',
+				operation: '+',
+				property: 'cold weakness',
+				value: '5',
+			};
+			weaknessResistanceBucket.sortToBucket(adjustment1);
+			weaknessResistanceBucket.sortToBucket(adjustment2);
+			const result = weaknessResistanceBucket.reduceBuckets();
+			expect(result).toContainEqual(resultAdjustment);
+			expect(result).not.toContainEqual(adjustment1);
+			expect(result).not.toContainEqual(adjustment2);
+		});
+	});
+});
+
+describe('AttackBucket', () => {
+	let attackBucket: AttackBucket;
+
+	beforeEach(() => {
+		attackBucket = new AttackBucket();
+	});
+
+	describe('discardAdjustment', () => {
+		it('should discard an adjustment with "+" operation', () => {
+			const adjustment: TypedSheetAdjustment = {
+				type: 'untyped',
+				propertyType: 'attack',
+				operation: '+',
+				property: 'fire',
+				value: 'attack: 10; damage: 1d4+2',
+			};
+			const result = attackBucket.discardAdjustment(adjustment);
+			expect(result).toBe(true);
+		});
+
+		it('should discard an adjustment with "-" operation', () => {
+			const adjustment: TypedSheetAdjustment = {
+				type: 'untyped',
+				propertyType: 'attack',
+				operation: '-',
+				property: 'claw',
+				value: 'attack: 10; damage: 1d4+2',
+			};
+			const result = attackBucket.discardAdjustment(adjustment);
+			expect(result).toBe(true);
+		});
+
+		it('should not discard an adjustment with "=" operation', () => {
+			const adjustment: TypedSheetAdjustment = {
+				type: 'untyped',
+				propertyType: 'attack',
+				operation: '=',
+				property: 'claw',
+				value: 'attack: 10; damage: 1d4+2',
+			};
+			const result = attackBucket.discardAdjustment(adjustment);
+			expect(result).toBe(false);
+		});
+	});
+
+	describe('serialize', () => {
+		it('should serialize an adjustment to a string', () => {
+			const adjustment: SheetAttackAdjustment = {
+				type: 'untyped',
+				propertyType: 'attack',
+				operation: '=',
+				property: 'claw attack',
+				parsed: {
+					name: 'claw',
+					toHit: 5,
+					damage: [{ dice: '1d4+2', type: 'slashing' }],
+					range: '10 ft',
+					traits: ['agile', 'finesse'],
+					notes: 'This is a note',
+				},
+			};
+			const result = attackBucket.serialize(adjustment);
+			expect(result.value).toBe(
+				'to hit: 5; damage: 1d4+2 slashing; range: 10 ft; traits: agile,finesse; notes: This is a note'
+			);
+		});
+	});
+
+	describe('deserialize', () => {
+		it('should deserialize a string to an adjustment', () => {
+			const adjustment: TypedSheetAdjustment = {
+				type: 'untyped',
+				propertyType: 'attack',
+				operation: '=',
+				property: 'claw attack',
+				value: 'to hit: 5; damage: 1d4+2 slashing; range: 10 ft; traits: agile, finesse; notes: This is a note',
+			};
+			const result = attackBucket.deserialize(adjustment);
+			expect(result).toEqual({
+				type: 'untyped',
+				propertyType: 'attack',
+				operation: '=',
+				property: 'claw attack',
+				parsed: {
+					name: 'claw',
+					toHit: 5,
+					damage: [{ dice: '1d4+2', type: 'slashing' }],
+					range: '10 ft',
+					traits: ['agile', 'finesse'],
+					notes: 'This is a note',
+				},
+			});
+		});
+	});
+
+	describe('combine', () => {
+		it('should return the new adjustment', () => {
+			const currentAdjustment: SheetAttackAdjustment = {
+				type: 'untyped',
+				propertyType: 'attack',
+				operation: '=',
+				property: 'claw attack',
+				parsed: {
+					name: 'claw',
+					toHit: 5,
+					damage: [{ dice: '1d4+2', type: 'slashing' }],
+					range: '10 ft',
+					traits: ['agile', 'finesse'],
+					notes: 'This is a note',
+				},
+			};
+			const newAdjustment: SheetAttackAdjustment = {
+				type: 'untyped',
+				propertyType: 'attack',
+				operation: '=',
+				property: 'claw attack',
+				parsed: {
+					name: 'claw',
+					toHit: 10,
+					damage: [{ dice: '1d6+3', type: 'slashing' }],
+					range: '5 ft',
+					traits: ['agile'],
+					notes: 'a note',
+				},
+			};
+			const result = attackBucket.combine(currentAdjustment, newAdjustment);
+			expect(result).toEqual(newAdjustment);
 		});
 	});
 });

@@ -1,35 +1,44 @@
 import _ from 'lodash';
 import { ProficiencyStat, Sheet } from '../services/kobold/models/index.js';
-import { TypedSheetAdjustment } from './sheet-utils.js';
+import {
+	AdjustablePropertyEnum,
+	SheetAttackAdjuster,
+	SheetInfoAdjuster,
+	SheetInfoAdjustment,
+	SheetInfoListAdjuster,
+	SheetInfoListAdjustment,
+	SheetIntegerAdjuster,
+	SheetIntegerAdjustment,
+	SheetStatAdjuster,
+	SheetStatAdjustment,
+	TypedSheetAdjustment,
+} from './sheet-adjuster.js';
 
 export class SheetAdjustmentBucketer {
-	protected sheetInfoBucket: SheetInfoBucket;
-	protected sheetInfoListsBucket: SheetInfoListsBucket;
-	protected intPropertyBucket: IntPropertyBucket;
+	protected buckets: Record<
+		NonNullable<TypedSheetAdjustment['propertyType']>,
+		SheetPropertyGroupBucket<any>
+	>;
 	constructor(protected sheet: Sheet) {
-		this.sheetInfoBucket = new SheetInfoBucket();
-		this.sheetInfoListsBucket = new SheetInfoListsBucket();
-		this.intPropertyBucket = new IntPropertyBucket();
+		this.buckets = {
+			info: new SheetInfoBucket(),
+			infoList: new SheetInfoListsBucket(),
+			intProperty: new SheetIntegerPropertyBucket(),
+			weaknessResistance: new WeaknessResistanceBucket(),
+			baseCounter: new BaseCounterBucket(),
+			stat: new StatBucket(),
+			extraSkill: new ExtraSkillBucket(),
+			attack: new AttackBucket(),
+		};
 	}
 
 	addToBucket(adjustment: TypedSheetAdjustment) {
-		if (adjustment.propertyType === 'info') {
-			this.sheetInfoBucket.sortToBucket(adjustment);
-		}
-		if (adjustment.propertyType === 'infoList') {
-			this.sheetInfoListsBucket.sortToBucket(adjustment);
-		}
-		if (
-			adjustment.propertyType === 'intProperty' ||
-			adjustment.propertyType === 'baseCounter'
-		) {
-			this.intPropertyBucket.sortToBucket(adjustment);
-		}
+		if (adjustment.propertyType == null) return;
+		return this.buckets[adjustment.propertyType].sortToBucket(adjustment);
 	}
 
 	reduceBuckets(): TypedSheetAdjustment[] {
-		const buckets = [this.sheetInfoBucket];
-		return buckets.map(bucket => bucket.reduceBuckets()).flat(1);
+		return _.flatMap(this.buckets, bucket => bucket.reduceBuckets());
 	}
 }
 
@@ -39,6 +48,7 @@ export abstract class SheetPropertyGroupBucket<T> {
 	public abstract serialize(adjustment: T): TypedSheetAdjustment;
 	public abstract deserialize(adjustment: TypedSheetAdjustment): T;
 	public abstract combine(currentAdjustment: T, newAdjustment: T): T;
+	public abstract combineSameType(currentAdjustment: T, newAdjustment: T): T;
 	public abstract discardAdjustment(adjustment: TypedSheetAdjustment): boolean;
 	public sortToBucket(adjustment: TypedSheetAdjustment): void {
 		if (this.discardAdjustment(adjustment)) return;
@@ -74,54 +84,44 @@ export abstract class SheetPropertyGroupBucket<T> {
 	}
 }
 
-export class SheetInfoBucket extends SheetPropertyGroupBucket<TypedSheetAdjustment> {
-	public serialize(adjustment: TypedSheetAdjustment): TypedSheetAdjustment {
-		return adjustment;
-	}
-	public deserialize(adjustment: TypedSheetAdjustment): TypedSheetAdjustment {
-		return adjustment;
-	}
+export class SheetInfoBucket extends SheetPropertyGroupBucket<SheetInfoAdjustment> {
+	public serialize = SheetInfoAdjuster.serializeAdjustment;
+	public deserialize = SheetInfoAdjuster.deserializeAdjustment;
 	public combine(
-		currentAdjustment: TypedSheetAdjustment,
-		newAdjustment: TypedSheetAdjustment
-	): TypedSheetAdjustment {
+		currentAdjustment: SheetInfoAdjustment,
+		newAdjustment: SheetInfoAdjustment
+	): SheetInfoAdjustment {
 		return newAdjustment;
 	}
+	public combineSameType = this.combine.bind(this);
 	public discardAdjustment(adjustment: TypedSheetAdjustment): boolean {
 		return adjustment.operation === '+' || adjustment.operation === '-';
 	}
 }
 
-export class SheetInfoListsBucket extends SheetPropertyGroupBucket<TypedSheetAdjustment> {
-	public serialize(adjustment: TypedSheetAdjustment): TypedSheetAdjustment {
-		return adjustment;
-	}
-	public deserialize(adjustment: TypedSheetAdjustment): TypedSheetAdjustment {
-		return adjustment;
-	}
+export class SheetInfoListsBucket extends SheetPropertyGroupBucket<SheetInfoListAdjustment> {
+	public serialize = SheetInfoListAdjuster.serializeAdjustment;
+	public deserialize = SheetInfoListAdjuster.deserializeAdjustment;
 	public combine(
-		currentAdjustment: TypedSheetAdjustment,
-		newAdjustment: TypedSheetAdjustment
-	): TypedSheetAdjustment {
+		currentAdjustment: SheetInfoListAdjustment,
+		newAdjustment: SheetInfoListAdjustment
+	): SheetInfoListAdjustment {
 		if (newAdjustment.operation === '=') return newAdjustment;
 		else if (newAdjustment.operation === '+') {
 			return {
-				...newAdjustment,
-				value: currentAdjustment.value
-					.split(',')
-					.concat(newAdjustment.value.split(','))
-					.join(','),
+				...currentAdjustment,
+				parsed: currentAdjustment.parsed.concat(newAdjustment.parsed),
 			};
 		} else {
 			return {
-				...newAdjustment,
-				value: currentAdjustment.value
-					.split(',')
-					.filter(value => !newAdjustment.value.split(',').includes(value))
-					.join(','),
+				...currentAdjustment,
+				parsed: currentAdjustment.parsed.filter(
+					value => !newAdjustment.parsed.includes(value)
+				),
 			};
 		}
 	}
+	public combineSameType = this.combine.bind(this);
 	public discardAdjustment(adjustment: TypedSheetAdjustment): boolean {
 		return (
 			adjustment.value === '' &&
@@ -130,42 +130,54 @@ export class SheetInfoListsBucket extends SheetPropertyGroupBucket<TypedSheetAdj
 	}
 }
 
-export class IntPropertyBucket extends SheetPropertyGroupBucket<TypedSheetAdjustment> {
-	public serialize(adjustment: TypedSheetAdjustment): TypedSheetAdjustment {
-		return adjustment;
-	}
-	public deserialize(adjustment: TypedSheetAdjustment): TypedSheetAdjustment {
-		return adjustment;
-	}
+export class SheetIntegerPropertyBucket extends SheetPropertyGroupBucket<SheetIntegerAdjustment> {
+	public serialize = SheetIntegerAdjuster.serializeAdjustment;
+	public deserialize = SheetIntegerAdjuster.deserializeAdjustment;
 	protected getBucketKey(adjustment: TypedSheetAdjustment): string {
 		return adjustment.property;
 	}
 
 	public combine(
-		currentAdjustment: TypedSheetAdjustment,
-		newAdjustment: TypedSheetAdjustment
-	): TypedSheetAdjustment {
+		currentAdjustment: SheetIntegerAdjustment,
+		newAdjustment: SheetIntegerAdjustment
+	): SheetIntegerAdjustment {
 		if (newAdjustment.operation === '=') return newAdjustment;
 		else if (newAdjustment.operation === '+') {
-			const currentValue =
-				currentAdjustment.value === '' ? 0 : parseInt(currentAdjustment.value, 10);
-			const newValue = newAdjustment.value === '' ? 0 : parseInt(newAdjustment.value, 10);
-			const combinedValue = currentValue + newValue;
+			const combinedValue = currentAdjustment.parsed + newAdjustment.parsed;
 			return {
 				...currentAdjustment,
-				value: combinedValue.toString(),
+				parsed: combinedValue,
 			};
 		} else {
 			// operation is -
-			const currentValue =
-				currentAdjustment.value === '' ? 0 : parseInt(currentAdjustment.value, 10);
-			const newValue = newAdjustment.value === '' ? 0 : parseInt(newAdjustment.value, 10);
-			const combinedValue = currentValue - newValue;
+			const combinedValue = currentAdjustment.parsed - newAdjustment.parsed;
 			return {
 				...currentAdjustment,
-				value: combinedValue.toString(),
+				parsed: combinedValue,
 			};
 		}
+	}
+	public combineSameType(
+		currentAdjustment: SheetIntegerAdjustment,
+		newAdjustment: SheetIntegerAdjustment
+	): SheetIntegerAdjustment {
+		if (newAdjustment.operation === '+') {
+			const max = _.maxBy(
+				[currentAdjustment, newAdjustment],
+				(adjustment: SheetIntegerAdjustment) => adjustment.parsed
+			);
+			if (max) return max;
+		} else if (newAdjustment.operation === '-') {
+			// operation is -
+			const min = _.minBy(
+				[currentAdjustment, newAdjustment],
+				(adjustment: SheetIntegerAdjustment) => adjustment.parsed
+			);
+			if (min) return min;
+		} // otherwise (newAdjustment.operation === '=')
+		// or maxBy/minBy returned null, which is impossible because the array is non-empty
+		// and the adjustments are non-nullable
+		return newAdjustment;
 	}
 
 	public discardAdjustment(adjustment: TypedSheetAdjustment): boolean {
@@ -176,124 +188,153 @@ export class IntPropertyBucket extends SheetPropertyGroupBucket<TypedSheetAdjust
 	}
 }
 
-export type SheetPropertyGroupAdjustment = {
-	type: TypedSheetAdjustment['type'];
-	operation: TypedSheetAdjustment['operation'];
-	property: string;
-	stat: Partial<ProficiencyStat>;
-};
-const statPropTotalValueRegex = /(?:total|bonus)\W*:\W*([0-9]+)/gi;
-const statPropProficiencyValueRegex = /(?:proficiency|prof)\W*:\W*([0-9]+)/gi;
-const statPropTotalDCRegex = /(?:totalDC|DC)\W*:\W*([0-9]+)/gi;
-const abilityPropRegex =
-	/ability\W*:\W*(strength|str|dexterity|dex|constitution|con|intelligence|int|wisdom|wis|charisma|cha){1}/gi;
-
-export class StatBucket extends SheetPropertyGroupBucket<SheetPropertyGroupAdjustment> {
-	public serialize(adjustment: SheetPropertyGroupAdjustment): TypedSheetAdjustment {
-		const total = adjustment.stat.total ? `total:${adjustment.stat.total}` : '';
-		const proficiency = adjustment.stat.proficiency
-			? `proficiency:${adjustment.stat.proficiency}`
-			: '';
-		const totalDC = adjustment.stat.totalDC ? `totalDC:${adjustment.stat.totalDC}` : '';
-		const ability = adjustment.stat.ability ? `ability:${adjustment.stat.ability}` : '';
-		const value = [total, proficiency, totalDC, ability].filter(_.identity).join(',');
-
-		return {
-			..._.omit(adjustment, 'stat'),
-			propertyType: 'stat',
-			value,
-		};
+// You can only adjust the max of a counter, so treat it as a number
+export class BaseCounterBucket extends SheetIntegerPropertyBucket {}
+// you can only adjust the amount of a weakness/resistance, so treat it as a number
+export class WeaknessResistanceBucket extends SheetIntegerPropertyBucket {
+	// however, you always discard values of 0. They're not meaningful like
+	// for other numeric values
+	public discardAdjustment(adjustment: TypedSheetAdjustment): boolean {
+		return (
+			((adjustment.value === '' || isNaN(parseInt(adjustment.value))) &&
+				(adjustment.operation === '+' || adjustment.operation === '-')) ||
+			parseInt(adjustment.value) === 0
+		);
 	}
+}
+export class StatBucket extends SheetPropertyGroupBucket<SheetStatAdjustment> {
+	public serialize = SheetStatAdjuster.serializeAdjustment;
+	public deserialize = SheetStatAdjuster.deserializeAdjustment;
 
-	public deserialize(adjustment: TypedSheetAdjustment): SheetPropertyGroupAdjustment {
-		const totalMatch = statPropTotalValueRegex.exec(adjustment.value);
-		const proficiencyMatch = statPropProficiencyValueRegex.exec(adjustment.value);
-		const totalDCMatch = statPropTotalDCRegex.exec(adjustment.value);
-		const abilityMatch = abilityPropRegex.exec(adjustment.value);
-
-		if (!totalMatch && !proficiencyMatch && !totalDCMatch && !abilityMatch) {
-			// parse as a number, and the total value
-			const numericResult = parseInt(adjustment.value);
-			return {
-				..._.omit(adjustment, 'value'),
-				stat: {
-					total: numericResult,
-				},
-			};
-		} else {
-			const stat: SheetPropertyGroupAdjustment['stat'] = {};
-			if (totalMatch) stat.total = parseInt(totalMatch[1]);
-			if (proficiencyMatch) stat.proficiency = parseInt(proficiencyMatch[1]);
-			if (totalDCMatch) stat.totalDC = parseInt(totalDCMatch[1]);
-			if (abilityMatch)
-				stat.ability = abilityMatch
-					? (abilityMatch[1] as ProficiencyStat['ability'])
-					: undefined;
-			return {
-				..._.omit(adjustment, 'value'),
-				stat,
-			};
-		}
-	}
 	protected getBucketKey(adjustment: TypedSheetAdjustment): string {
 		return adjustment.property;
 	}
 
 	public combine(
-		currentAdjustment: SheetPropertyGroupAdjustment,
-		newAdjustment: SheetPropertyGroupAdjustment
-	): SheetPropertyGroupAdjustment {
+		currentAdjustment: SheetStatAdjustment,
+		newAdjustment: SheetStatAdjustment
+	): SheetStatAdjustment {
 		let newStat: Partial<ProficiencyStat> = {};
 		if (newAdjustment.operation === '=') {
-			return { ...newAdjustment, stat: _.merge(currentAdjustment.stat, newAdjustment.stat) };
+			return {
+				...newAdjustment,
+				parsed: _.merge(currentAdjustment.parsed, newAdjustment.parsed),
+			};
 		} else if (newAdjustment.operation === '+') {
-			if (newAdjustment.stat.total != undefined) {
-				newStat.total = currentAdjustment.stat.total
-					? currentAdjustment.stat.total + newAdjustment.stat.total
-					: newAdjustment.stat.total;
+			if (newAdjustment.parsed.total != undefined) {
+				newStat.total = currentAdjustment.parsed.total
+					? currentAdjustment.parsed.total + newAdjustment.parsed.total
+					: newAdjustment.parsed.total;
 			}
-			if (newAdjustment.stat.totalDC != undefined) {
-				newStat.totalDC = currentAdjustment.stat.totalDC
-					? currentAdjustment.stat.totalDC + newAdjustment.stat.totalDC
-					: newAdjustment.stat.totalDC;
+			if (newAdjustment.parsed.totalDC != undefined) {
+				newStat.totalDC = currentAdjustment.parsed.totalDC
+					? currentAdjustment.parsed.totalDC + newAdjustment.parsed.totalDC
+					: newAdjustment.parsed.totalDC;
 			}
-			if (newAdjustment.stat.proficiency != undefined) {
-				newStat.proficiency = currentAdjustment.stat.proficiency
-					? currentAdjustment.stat.proficiency + newAdjustment.stat.proficiency
-					: newAdjustment.stat.proficiency;
+			if (newAdjustment.parsed.proficiency != undefined) {
+				newStat.proficiency = currentAdjustment.parsed.proficiency
+					? currentAdjustment.parsed.proficiency + newAdjustment.parsed.proficiency
+					: newAdjustment.parsed.proficiency;
 			}
 			if (
-				newAdjustment.stat.ability != undefined &&
-				currentAdjustment.stat.ability == undefined
+				newAdjustment.parsed.ability != undefined &&
+				currentAdjustment.parsed.ability == undefined
 			) {
-				newStat.ability = newAdjustment.stat.ability;
+				newStat.ability = newAdjustment.parsed.ability;
 			}
 			return {
 				...currentAdjustment,
-				stat: _.merge(currentAdjustment.stat, newStat),
+				parsed: _.merge(currentAdjustment.parsed, newStat),
 			};
 		} else {
-			if (newAdjustment.stat.total != undefined) {
-				newStat.total = currentAdjustment.stat.total
-					? currentAdjustment.stat.total - newAdjustment.stat.total
-					: newAdjustment.stat.total;
+			if (newAdjustment.parsed.total != undefined) {
+				newStat.total = currentAdjustment.parsed.total
+					? currentAdjustment.parsed.total - newAdjustment.parsed.total
+					: newAdjustment.parsed.total;
 			}
-			if (newAdjustment.stat.totalDC != undefined) {
-				newStat.totalDC = currentAdjustment.stat.totalDC
-					? currentAdjustment.stat.totalDC - newAdjustment.stat.totalDC
-					: newAdjustment.stat.totalDC;
+			if (newAdjustment.parsed.totalDC != undefined) {
+				newStat.totalDC = currentAdjustment.parsed.totalDC
+					? currentAdjustment.parsed.totalDC - newAdjustment.parsed.totalDC
+					: newAdjustment.parsed.totalDC;
 			}
-			if (newAdjustment.stat.proficiency != undefined) {
-				newStat.proficiency = currentAdjustment.stat.proficiency
-					? currentAdjustment.stat.proficiency - newAdjustment.stat.proficiency
-					: newAdjustment.stat.proficiency;
+			if (newAdjustment.parsed.proficiency != undefined) {
+				newStat.proficiency = currentAdjustment.parsed.proficiency
+					? currentAdjustment.parsed.proficiency - newAdjustment.parsed.proficiency
+					: newAdjustment.parsed.proficiency;
 			}
-			if (newAdjustment.stat.ability === currentAdjustment.stat.ability) {
+			if (newAdjustment.parsed.ability === currentAdjustment.parsed.ability) {
 				newStat.ability = null;
 			}
 			return {
 				...currentAdjustment,
-				stat: _.merge(currentAdjustment.stat, newStat),
+				parsed: _.merge(currentAdjustment.parsed, newStat),
+			};
+		}
+	}
+	public combineSameType(
+		currentAdjustment: SheetStatAdjustment,
+		newAdjustment: SheetStatAdjustment
+	): SheetStatAdjustment {
+		let newStat: Partial<ProficiencyStat> = {};
+		if (newAdjustment.operation === '=') {
+			return {
+				...newAdjustment,
+				parsed: _.merge(currentAdjustment.parsed, newAdjustment.parsed),
+			};
+		} else if (newAdjustment.operation === '+') {
+			if (newAdjustment.parsed.total != undefined) {
+				newStat.total = Math.max(
+					currentAdjustment.parsed.total ?? 0,
+					newAdjustment.parsed.total
+				);
+			}
+			if (newAdjustment.parsed.totalDC != undefined) {
+				newStat.totalDC = Math.max(
+					currentAdjustment.parsed.totalDC ?? 0,
+					newAdjustment.parsed.totalDC
+				);
+			}
+			if (newAdjustment.parsed.proficiency != undefined) {
+				newStat.proficiency = Math.max(
+					currentAdjustment.parsed.proficiency ?? 0,
+					newAdjustment.parsed.proficiency
+				);
+			}
+			if (
+				newAdjustment.parsed.ability != undefined &&
+				currentAdjustment.parsed.ability == undefined
+			) {
+				newStat.ability = newAdjustment.parsed.ability;
+			}
+			return {
+				...currentAdjustment,
+				parsed: _.merge(currentAdjustment.parsed, newStat),
+			};
+		} else {
+			if (newAdjustment.parsed.total != undefined) {
+				newStat.total = Math.min(
+					currentAdjustment.parsed.total ?? 0,
+					newAdjustment.parsed.total
+				);
+			}
+			if (newAdjustment.parsed.totalDC != undefined) {
+				newStat.totalDC = Math.min(
+					currentAdjustment.parsed.totalDC ?? 0,
+					newAdjustment.parsed.totalDC
+				);
+			}
+			if (newAdjustment.parsed.proficiency != undefined) {
+				newStat.proficiency = Math.min(
+					currentAdjustment.parsed.proficiency ?? 0,
+					newAdjustment.parsed.proficiency
+				);
+			}
+			if (newAdjustment.parsed.ability === currentAdjustment.parsed.ability) {
+				newStat.ability = null;
+			}
+			return {
+				...currentAdjustment,
+				parsed: _.merge(currentAdjustment.parsed, newStat),
 			};
 		}
 	}
@@ -306,4 +347,37 @@ export class StatBucket extends SheetPropertyGroupBucket<SheetPropertyGroupAdjus
 	}
 }
 
-class ExtraSkillBucket extends StatBucket {}
+// Extra skills are just stats, but in a list instead of with a string literal index
+// We handle that on parse, so we don't need to do anything extra here
+export class ExtraSkillBucket extends StatBucket {}
+
+// Attacks all overwrite each other, so we don't need to combine them
+// We don't care about the contents until we parse
+export class AttackBucket extends SheetPropertyGroupBucket<SheetAttackAdjuster> {
+	public discardAdjustment(adjustment: TypedSheetAdjustment): boolean {
+		return adjustment.operation === '+' || adjustment.operation === '-';
+	}
+	public serialize = SheetAttackAdjuster.serializeAdjustment;
+	public deserialize = SheetAttackAdjuster.deserializeAdjustment;
+	public combine(
+		currentAdjustment: SheetAttackAdjuster,
+		newAdjustment: SheetAttackAdjuster
+	): SheetAttackAdjuster {
+		return newAdjustment;
+	}
+	public combineSameType = this.combine.bind(this);
+}
+
+// Type check object to make sure that all buckets are accounted for
+const allBuckets: {
+	[k in NonNullable<AdjustablePropertyEnum>]: typeof SheetPropertyGroupBucket<any>;
+} = {
+	info: SheetInfoBucket,
+	infoList: SheetInfoListsBucket,
+	intProperty: SheetIntegerPropertyBucket,
+	baseCounter: BaseCounterBucket,
+	weaknessResistance: WeaknessResistanceBucket,
+	stat: StatBucket,
+	extraSkill: ExtraSkillBucket,
+	attack: AttackBucket,
+};

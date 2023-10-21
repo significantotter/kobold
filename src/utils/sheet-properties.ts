@@ -1,5 +1,13 @@
 import _ from 'lodash';
-import { Sheet, SheetInfo } from '../services/kobold/models/index.js';
+import {
+	Sheet,
+	SheetBaseCounters,
+	SheetInfo,
+	SheetInfoLists,
+	SheetIntegers,
+	SheetStats,
+	SheetWeaknessesResistances,
+} from '../services/kobold/models/index.js';
 
 export class SheetInfoProperties {
 	constructor(protected sheetInfo: SheetInfo) {}
@@ -32,8 +40,177 @@ export class SheetInfoProperties {
 	public static aliases = SheetInfoProperties._aliases;
 }
 
+export class SheetInfoListProperties {
+	constructor(protected sheetInfo: SheetInfoLists) {}
+	public static properties: Record<keyof SheetInfoLists, { aliases: string[] }> = {
+		traits: { aliases: [] },
+		languages: { aliases: [] },
+		senses: { aliases: [] },
+		immunities: { aliases: ['immune'] },
+	};
+
+	public static get _aliases(): { [k: string]: undefined | keyof SheetInfoLists } {
+		const aliases: { [k: string]: undefined | keyof SheetInfoLists } = {};
+		for (const [key, value] of Object.entries(SheetInfoListProperties.properties)) {
+			for (const alias of value.aliases) {
+				aliases[alias] = key as keyof SheetInfoLists;
+			}
+			aliases[key.toLowerCase()] = key as keyof SheetInfoLists;
+		}
+		return aliases;
+	}
+	public static aliases = SheetInfoListProperties._aliases;
+}
+
+export class SheetIntegerProperties {
+	constructor(protected sheetIntegers: SheetIntegers) {}
+	public static properties: Record<keyof SheetIntegers, { aliases: string[] }> = {
+		ac: { aliases: ['armor', 'armorclass'] },
+		// Ability Scores
+		strength: { aliases: ['str'] },
+		dexterity: { aliases: ['dex'] },
+		constitution: { aliases: ['con'] },
+		intelligence: { aliases: ['int'] },
+		wisdom: { aliases: ['wis'] },
+		charisma: { aliases: ['cha'] },
+		// Speeds
+		walkSpeed: { aliases: ['walk', 'speed'] },
+		flySpeed: { aliases: ['fly'] },
+		swimSpeed: { aliases: ['swim'] },
+		climbSpeed: { aliases: ['climb'] },
+		burrowSpeed: { aliases: ['burrow'] },
+		dimensionalSpeed: { aliases: ['dimensional'] },
+		// Extra Proficiencies
+		heavyProficiency: { aliases: ['heavy'] },
+		mediumProficiency: { aliases: ['medium'] },
+		lightProficiency: { aliases: ['light'] },
+		unarmoredProficiency: { aliases: ['unarmored'] },
+		martialProficiency: { aliases: ['martial'] },
+		simpleProficiency: { aliases: ['simple'] },
+		unarmedProficiency: { aliases: ['unarmed'] },
+		advancedProficiency: { aliases: ['advanced'] },
+	};
+
+	public static get _aliases(): { [k: string]: undefined | keyof SheetIntegers } {
+		const aliases: { [k: string]: undefined | keyof SheetIntegers } = {};
+		for (const [key, value] of Object.entries(SheetIntegerProperties.properties)) {
+			for (const alias of value.aliases) {
+				aliases[alias] = key as keyof SheetIntegers;
+			}
+			aliases[key.toLowerCase()] = key as keyof SheetIntegers;
+		}
+		return aliases;
+	}
+	public static aliases = SheetIntegerProperties._aliases;
+}
+
+export class SheetBaseCounterProperties {
+	constructor(protected sheetBaseCounters: SheetBaseCounters) {}
+	public static properties: Record<keyof SheetBaseCounters, { aliases: string[] }> = {
+		heroPoints: { aliases: [] },
+		focusPoints: { aliases: [] },
+		hp: { aliases: [] },
+		tempHp: { aliases: [] },
+		stamina: { aliases: [] },
+		resolve: { aliases: [] },
+	};
+
+	public static get _aliases(): { [k: string]: undefined | keyof SheetBaseCounters } {
+		const aliases: { [k: string]: undefined | keyof SheetBaseCounters } = {};
+		for (const [key, value] of Object.entries(SheetBaseCounterProperties.properties)) {
+			for (const alias of value.aliases) {
+				aliases[alias] = key as keyof SheetBaseCounters;
+			}
+			aliases[key.toLowerCase()] = key as keyof SheetBaseCounters;
+		}
+		return aliases;
+	}
+	public static aliases = SheetBaseCounterProperties._aliases;
+}
+
+export class SheetStatProperties {
+	constructor(protected sheetStats: SheetStats) {}
+	public static properties: Record<keyof SheetStats, { aliases: string[] }> = {
+		// casting
+		arcane: { aliases: [] },
+		divine: { aliases: [] },
+		occult: { aliases: [] },
+		primal: { aliases: [] },
+		// Class attack/DC
+		class: { aliases: [] },
+		// perception
+		perception: { aliases: [] },
+		// saves
+		fortitude: { aliases: [] },
+		reflex: { aliases: [] },
+		will: { aliases: [] },
+		// skills
+		acrobatics: { aliases: [] },
+		arcana: { aliases: [] },
+		athletics: { aliases: [] },
+		crafting: { aliases: [] },
+		deception: { aliases: [] },
+		diplomacy: { aliases: [] },
+		intimidation: { aliases: [] },
+		medicine: { aliases: [] },
+		nature: { aliases: [] },
+		occultism: { aliases: [] },
+		performance: { aliases: [] },
+		religion: { aliases: [] },
+		society: { aliases: [] },
+		stealth: { aliases: [] },
+		survival: { aliases: [] },
+		thievery: { aliases: [] },
+	};
+
+	public static get _aliases(): { [k: string]: undefined | keyof SheetStats } {
+		const aliases: { [k: string]: undefined | keyof SheetStats } = {};
+		for (const [key, value] of Object.entries(SheetStatProperties.properties)) {
+			for (const alias of value.aliases) {
+				aliases[alias] = key as keyof SheetStats;
+			}
+			aliases[key.toLowerCase()] = key as keyof SheetStats;
+		}
+		return aliases;
+	}
+	public static aliases = SheetStatProperties._aliases;
+}
+
+export class SheetAttackProperties {
+	constructor(protected sheetAttacks: Sheet['attacks']) {}
+	public static propertyNameRegex = /(.*) attack$/i;
+}
+
+export class SheetAdditionalSkillProperties {
+	constructor(protected sheetInfo: Sheet['additionalSkills']) {}
+	public static propertyNameRegex = /(.*) lore$/i;
+}
+
+export class SheetResistanceProperties {
+	constructor(protected sheetInfo: SheetWeaknessesResistances['resistances']) {}
+	public static propertyNameRegex = /resistance(s)?/i;
+}
+
+export class SheetWeaknessProperties {
+	constructor(protected sheetInfo: SheetWeaknessesResistances['weaknesses']) {}
+	public static propertyNameRegex = /weakness(es)?/i;
+}
+
 export class SheetProperties {
-	public static aliases = SheetInfoProperties.aliases;
+	public static aliases = {
+		...SheetInfoProperties.aliases,
+		...SheetInfoListProperties.aliases,
+		...SheetIntegerProperties.aliases,
+		...SheetBaseCounterProperties.aliases,
+		...SheetStatProperties.aliases,
+	};
+	public static regexes = [
+		SheetAttackProperties.propertyNameRegex,
+		SheetAdditionalSkillProperties.propertyNameRegex,
+		SheetResistanceProperties.propertyNameRegex,
+		SheetWeaknessProperties.propertyNameRegex,
+	];
+
 	public static properties = SheetInfoProperties.properties;
 	public static adjustableAliases = _.omit(SheetInfoProperties.aliases, [
 		'name',

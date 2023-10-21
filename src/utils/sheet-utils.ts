@@ -5,7 +5,8 @@ import {
 	Sheet,
 	SheetModifier,
 } from '../services/kobold/models/index.js';
-import { SheetAdjuster } from './sheet-adjuster.js';
+import { AdjustablePropertyEnum, SheetAdjuster, TypedSheetAdjustment } from './sheet-adjuster.js';
+import { SheetAdjustmentBucketer } from './sheet-adjustment-bucketer.js';
 
 export const loreRegex = /(.*) lore$/i;
 export const immunityRegex = /immunit((ies)|(y))/i;
@@ -43,19 +44,6 @@ export const sheetPropertyGroups = _.flatMap(
 	})
 );
 
-export type TypedSheetAdjustment = SheetAdjustment & {
-	type: 'untyped' | 'status' | 'circumstance' | 'item';
-	propertyType:
-		| 'info'
-		| 'infoList'
-		| 'intProperty'
-		| 'baseCounter'
-		| 'stat'
-		| 'attack'
-		| 'extraSkill'
-		| 'weaknessResistance'
-		| null;
-};
 export type reducedSheetAdjustment = {
 	[type: string]: {
 		[property: string]: string | number;
@@ -174,12 +162,15 @@ export class SheetUtils {
 		const activeSheetAdjustments: TypedSheetAdjustment[] = activeSheetModifiers.reduce(
 			(a, b) => {
 				return a.concat(
-					(b.sheetAdjustments ?? []).map(adjustment => ({
-						...adjustment,
-						property: SheetAdjuster.standardizeProperty(adjustment.property),
-						type: b.type,
-						propertyType: SheetAdjuster.getPropertyType(adjustment.property),
-					}))
+					(b.sheetAdjustments ?? []).map(
+						adjustment =>
+							({
+								...adjustment,
+								property: SheetAdjuster.standardizeProperty(adjustment.property),
+								type: b.type,
+								propertyType: SheetAdjuster.getPropertyType(adjustment.property),
+							}) as TypedSheetAdjustment
+					)
 				);
 			},
 			[] as TypedSheetAdjustment[]
@@ -193,7 +184,7 @@ export class SheetUtils {
 		 * Groups sheet adjustments by property and type, then combines anything that can be combined
 		 * Spits out adjustments that can be applied directly to the sheet
 		 */
-		const sheetBucketer = new SheetAdjustmentBucketer();
+		const sheetBucketer = new SheetAdjustmentBucketer(sheet);
 		for (const adjustment of spreadSheetAdjustments) {
 			sheetBucketer.addToBucket(adjustment);
 		}

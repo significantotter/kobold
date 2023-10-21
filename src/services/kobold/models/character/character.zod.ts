@@ -306,7 +306,7 @@ export const zSheetAttack = z.strictObject({
 	notes: z.string().nullable().default(null).describe('The attack notes.'),
 });
 
-export enum SheetIntPropertyKeys {
+export enum SheetIntegerKeys {
 	// AC
 	ac = 'ac',
 	// Ability Scores
@@ -334,8 +334,8 @@ export enum SheetIntPropertyKeys {
 	advancedProficiency = 'advancedProficiency',
 }
 
-export type SheetIntProperties = z.infer<typeof zSheetIntProperties>;
-export const zSheetIntProperties = zRecordOf(SheetIntPropertyKeys, zNullableInteger).describe(
+export type SheetIntegers = z.infer<typeof zSheetIntegers>;
+export const zSheetIntegers = zRecordOf(SheetIntegerKeys, zNullableInteger).describe(
 	"The creature's nullable integer properties."
 );
 
@@ -482,7 +482,7 @@ export const zSheet = z
 		info: zSheetInfo.describe('Textual sheet information'),
 		infoLists: zSheetInfoLists,
 		weaknessesResistances: zSheetWeaknessesResistances,
-		intProperties: zSheetIntProperties.describe('All nullable integer properties of a sheet.'),
+		intProperties: zSheetIntegers.describe('All nullable integer properties of a sheet.'),
 		stats: zSheetStats,
 		baseCounters: zSheetBaseCounters.describe('All incrementable counters on a sheet'),
 		additionalSkills: z
