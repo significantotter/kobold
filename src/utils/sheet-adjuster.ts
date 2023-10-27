@@ -1,14 +1,21 @@
 import _ from 'lodash';
 import {
+	AbilityEnum,
+	AdjustablePropertyEnum,
 	Damage,
-	ProficiencyStat,
 	Sheet,
 	SheetAdjustment,
+	SheetAdjustmentOperationEnum,
 	SheetAttack,
+	SheetBaseCounterKeys,
+	SheetBaseCounters,
 	SheetInfo,
-	SheetInfoKeys,
 	SheetInfoListKeys,
 	SheetInfoLists,
+	SheetIntegers,
+	SheetStatKeys,
+	SheetStats,
+	StatSubGroupEnum,
 } from '../services/kobold/models/index.js';
 import {
 	SheetProperties,
@@ -17,68 +24,55 @@ import {
 	SheetIntegerProperties,
 	SheetBaseCounterProperties,
 	SheetStatProperties,
-	SheetWeaknessProperties,
-	SheetResistanceProperties,
+	SheetWeaknessResistanceProperties,
 	SheetAdditionalSkillProperties,
 	SheetAttackProperties,
 } from './sheet-properties.js';
-import {
-	loreRegex,
-	immunityRegex,
-	resistanceRegex,
-	weaknessRegex,
-	languageRegex,
-	senseRegex,
-	attackRegex,
-	sheetPropertyGroups,
-} from './sheet-utils.js';
+import { KoboldError } from './KoboldError.js';
 
-export type AdjustablePropertyEnum =
-	| 'info'
-	| 'infoList'
-	| 'intProperty'
-	| 'baseCounter'
-	| 'weaknessResistance'
-	| 'stat'
-	| 'attack'
-	| 'extraSkill'
-	| null;
-
-export type TypedSheetAdjustment = SheetAdjustment & {
-	type: 'untyped' | 'status' | 'circumstance' | 'item';
-	propertyType: AdjustablePropertyEnum;
-	parsed?: never;
-};
-
-export type ParsedSheetAdjustment<T> = Omit<TypedSheetAdjustment, 'value' | 'parsed'> & {
+export type ParsedSheetAdjustment<T> = Omit<SheetAdjustment, 'value' | 'parsed'> & {
 	parsed: T;
 	value?: never;
 };
 
 export class SheetAdjuster {
 	infoAdjuster: SheetInfoAdjuster;
+	infoListAdjuster: SheetInfoListAdjuster;
+	intPropertyAdjuster: SheetIntegerAdjuster;
+	baseCounterAdjuster: SheetBaseCounterAdjuster;
+	statAdjuster: SheetStatAdjuster;
+	weaknessResistanceAdjuster: SheetWeaknessResistanceAdjuster;
+	extraSkillAdjuster: SheetAdditionalSkillAdjuster;
+	attackAdjuster: SheetAttackAdjuster;
+
 	constructor(protected sheet: Sheet) {
 		this.infoAdjuster = new SheetInfoAdjuster(sheet.info);
+		this.infoListAdjuster = new SheetInfoListAdjuster(sheet.infoLists);
+		this.intPropertyAdjuster = new SheetIntegerAdjuster(sheet.intProperties);
+		this.baseCounterAdjuster = new SheetBaseCounterAdjuster(sheet.baseCounters);
+		this.statAdjuster = new SheetStatAdjuster(sheet.stats);
+		this.weaknessResistanceAdjuster = new SheetWeaknessResistanceAdjuster(
+			sheet.weaknessesResistances
+		);
+		this.extraSkillAdjuster = new SheetAdditionalSkillAdjuster(sheet.additionalSkills);
+		this.attackAdjuster = new SheetAttackAdjuster(sheet.attacks);
 	}
 	public static isAdjustableProperty(propName: string) {
-		return propName in SheetProperties.aliases;
+		return propName in SheetProperties.adjustableAliases;
 	}
 
 	public static standardizeProperty(propertyName: string) {
-		const lowerTrimmedProperty = propertyName
-			.toLowerCase()
-			.trim()
-			.replaceAll('_', '')
-			.replaceAll('-', '');
+		const lowerTrimmedProperty = propertyName.toLowerCase().trim().replaceAll(/_|-/g, '');
 
 		// if any property regex matches, then its valid
+		if (_.some(SheetProperties.regexes, regex => regex.test(propertyName))) return propertyName;
 		if (_.some(SheetProperties.regexes, regex => regex.test(lowerTrimmedProperty)))
 			return lowerTrimmedProperty;
 
 		const withoutSpaces = lowerTrimmedProperty.replaceAll(' ', '');
 
 		// if any alias matches without spaces, then its valid
-		const sheetProperty = SheetProperties.aliases[withoutSpaces];
+		const sheetProperty = SheetProperties.adjustableAliases[withoutSpaces];
 		if (sheetProperty) {
 			return sheetProperty;
 		}
@@ -88,50 +82,71 @@ export class SheetAdjuster {
 	static validateSheetProperty(property: string): boolean {
 		// basic sheet property
 		const standardizedProperty = SheetAdjuster.standardizeProperty(property);
-		if (standardizedProperty in SheetProperties.properties) return true;
+		if (standardizedProperty in SheetProperties.adjustableProperties) return true;
 		// property groups
-		if (sheetPropertyGroups.includes(_.camelCase(property))) return true;
+		if (SheetProperties.isPropertyGroup(standardizedProperty)) return true;
 		// regexes
-		if (
-			property.match(loreRegex) ||
-			property.match(immunityRegex) ||
-			property.match(resistanceRegex) ||
-			property.match(weaknessRegex) ||
-			property.match(languageRegex) ||
-			property.match(senseRegex) ||
-			property.match(attackRegex)
-		) {
+		if (_.some(SheetProperties.regexes, regex => regex.test(property))) {
 			return true;
 		}
 
 		return false;
 	}
 
-	public adjust(adjustment: TypedSheetAdjustment) {
-		const propertyInInfo = SheetInfoProperties.aliases[adjustment.property];
-		if (propertyInInfo) {
-			this.infoAdjuster.adjust(propertyInInfo, adjustment);
-			return;
+	public adjust(adjustment: SheetAdjustment) {
+		switch (adjustment.propertyType) {
+			case AdjustablePropertyEnum.info:
+				this.infoAdjuster.adjust(adjustment);
+				break;
+			case AdjustablePropertyEnum.infoList:
+				this.infoListAdjuster.adjust(adjustment);
+				break;
+			case AdjustablePropertyEnum.intProperty:
+				this.intPropertyAdjuster.adjust(adjustment);
+				break;
+			case AdjustablePropertyEnum.baseCounter:
+				this.baseCounterAdjuster.adjust(adjustment);
+				break;
+			case AdjustablePropertyEnum.stat:
+				this.statAdjuster.adjust(adjustment);
+				break;
+			case AdjustablePropertyEnum.weaknessResistance:
+				this.weaknessResistanceAdjuster.adjust(adjustment);
+				break;
+			case AdjustablePropertyEnum.extraSkill:
+				this.extraSkillAdjuster.adjust(adjustment);
+				break;
+			case AdjustablePropertyEnum.attack:
+				this.attackAdjuster.adjust(adjustment);
+				break;
+			default:
+				throw new KoboldError(
+					`Property ${adjustment.property} is not a valid sheet property`
+				);
 		}
 	}
 
 	public static getPropertyType(property: string): AdjustablePropertyEnum {
 		// basic sheet property
 		const standardizedProperty = SheetAdjuster.standardizeProperty(property);
-		if (SheetInfoProperties.aliases[standardizedProperty]) return 'info';
-		else if (SheetInfoListProperties.aliases[standardizedProperty]) return 'infoList';
-		else if (SheetIntegerProperties.aliases[standardizedProperty]) return 'intProperty';
-		else if (SheetBaseCounterProperties.aliases[standardizedProperty]) return 'baseCounter';
-		else if (SheetStatProperties.aliases[standardizedProperty]) return 'stat';
+		if (SheetInfoProperties.aliases[standardizedProperty]) return AdjustablePropertyEnum.info;
+		else if (SheetInfoListProperties.aliases[standardizedProperty])
+			return AdjustablePropertyEnum.infoList;
+		else if (SheetIntegerProperties.aliases[standardizedProperty])
+			return AdjustablePropertyEnum.intProperty;
+		else if (SheetBaseCounterProperties.aliases[standardizedProperty])
+			return AdjustablePropertyEnum.baseCounter;
+		else if (SheetStatProperties.aliases[standardizedProperty])
+			return AdjustablePropertyEnum.stat;
 
 		// regexes
-		if (property.match(SheetWeaknessProperties.propertyNameRegex)) return 'weaknessResistance';
-		else if (property.match(SheetResistanceProperties.propertyNameRegex))
-			return 'weaknessResistance';
+		if (property.match(SheetWeaknessResistanceProperties.propertyNameRegex))
+			return AdjustablePropertyEnum.weaknessResistance;
 		else if (property.match(SheetAdditionalSkillProperties.propertyNameRegex))
-			return 'extraSkill';
-		else if (property.match(SheetAttackProperties.propertyNameRegex)) return 'attack';
-		return null;
+			return AdjustablePropertyEnum.extraSkill;
+		else if (property.match(SheetAttackProperties.propertyNameRegex))
+			return AdjustablePropertyEnum.attack;
+		return AdjustablePropertyEnum.none;
 	}
 
 	/**
@@ -139,7 +154,7 @@ export class SheetAdjuster {
 	 * @param adjustmentString The adjustment string to validate
 	 * @returns
 	 */
-	static validateSheetPropertyValue(
+	public static validateSheetPropertyValue(
 		standardizedProperty: string,
 		adjustmentString: string
 	): boolean {
@@ -153,7 +168,7 @@ export class SheetAdjuster {
 
 export abstract class SheetPropertyGroupAdjuster<T> {
 	constructor() {}
-	public abstract adjust(k: keyof T, adjustment: TypedSheetAdjustment): void;
+	public abstract adjust(adjustment: SheetAdjustment): void;
 }
 
 // Sheet Info Properties
@@ -162,29 +177,31 @@ export type SheetInfoAdjustment = ParsedSheetAdjustment<string>;
 
 export class SheetInfoAdjuster implements SheetPropertyGroupAdjuster<SheetInfo> {
 	constructor(protected sheetInfo: SheetInfo) {}
-	public isSheetInfoProperty(propName: string): propName is SheetInfoKeys {
-		return propName in this.sheetInfo;
-	}
-	public adjust(k: keyof SheetInfo, adjustment: TypedSheetAdjustment): void {
-		const currentValue = this.sheetInfo[k] ?? '';
+	public adjust(adjustment: SheetAdjustment): void {
+		const prop = adjustment.property as keyof SheetInfo;
+		const sheetInfoAdjustment = SheetInfoAdjuster.deserializeAdjustment(adjustment);
+		if (!sheetInfoAdjustment) {
+			console.warn('something went wrong parsing adjustment', adjustment);
+			return;
+		}
+		const currentValue = this.sheetInfo[prop] ?? '';
 		switch (adjustment.operation) {
-			case '+':
-				this.sheetInfo[k] = currentValue + adjustment.value;
+			case SheetAdjustmentOperationEnum['+']:
+				this.sheetInfo[prop] = currentValue + sheetInfoAdjustment.parsed;
 				break;
-			case '=':
-				this.sheetInfo[k] = adjustment.value;
+			case SheetAdjustmentOperationEnum['=']:
+				this.sheetInfo[prop] = sheetInfoAdjustment.parsed;
 				break;
 		}
 	}
 	public static validateAdjustment(stringAdjustment: string): boolean {
 		return _.isString(stringAdjustment);
 	}
-	public static validOperations = ['+', '='] as const;
 
-	public static serializeAdjustment(adjustment: SheetInfoAdjustment): TypedSheetAdjustment {
+	public static serializeAdjustment(adjustment: SheetInfoAdjustment): SheetAdjustment {
 		return { ..._.omit(adjustment, 'parsed'), value: adjustment.parsed };
 	}
-	public static deserializeAdjustment(adjustment: TypedSheetAdjustment): SheetInfoAdjustment {
+	public static deserializeAdjustment(adjustment: SheetAdjustment): SheetInfoAdjustment | null {
 		return { ..._.omit(adjustment, 'value'), parsed: adjustment.value };
 	}
 }
@@ -197,29 +214,36 @@ export class SheetInfoListAdjuster implements SheetPropertyGroupAdjuster<SheetIn
 	public isSheetInfoListsProperty(propName: string): propName is SheetInfoListKeys {
 		return propName in this.sheetInfoLists;
 	}
-	public adjust(k: keyof SheetInfoLists, adjustment: TypedSheetAdjustment): void {
-		const splitValues = adjustment.value.split(',').map(value => value.trim());
-		switch (adjustment.operation) {
-			case '+':
-				this.sheetInfoLists[k].push(...splitValues);
+	public adjust(adjustment: SheetAdjustment): void {
+		const prop = adjustment.property as keyof SheetInfoLists;
+		const sheetInfoListAdjustment = SheetInfoListAdjuster.deserializeAdjustment(adjustment);
+		if (!sheetInfoListAdjustment) {
+			console.warn('something went wrong parsing adjustment', adjustment);
+			return;
+		}
+		const splitValues = sheetInfoListAdjustment.parsed;
+		switch (sheetInfoListAdjustment.operation) {
+			case SheetAdjustmentOperationEnum['+']:
+				this.sheetInfoLists[prop].push(...splitValues);
 				break;
-			case '-':
-				this.sheetInfoLists[k].filter(value => !splitValues.includes(value));
+			case SheetAdjustmentOperationEnum['-']:
+				_.remove(this.sheetInfoLists[prop], value => splitValues.includes(value));
 				break;
-			case '=':
-				this.sheetInfoLists[k] = splitValues;
+			case SheetAdjustmentOperationEnum['=']:
+				this.sheetInfoLists[prop] = splitValues;
 				break;
 		}
 	}
 	public static validateAdjustment(stringAdjustment: string): boolean {
 		return stringAdjustment.split(',').every(value => _.isString(value.trim()));
 	}
-	public static validOperations = ['+', '='] as const;
 
-	public static serializeAdjustment(adjustment: SheetInfoListAdjustment): TypedSheetAdjustment {
+	public static serializeAdjustment(adjustment: SheetInfoListAdjustment): SheetAdjustment {
 		return { ..._.omit(adjustment, 'parsed'), value: adjustment.parsed.join(', ') };
 	}
-	public static deserializeAdjustment(adjustment: TypedSheetAdjustment): SheetInfoListAdjustment {
+	public static deserializeAdjustment(
+		adjustment: SheetAdjustment
+	): SheetInfoListAdjustment | null {
 		return {
 			..._.omit(adjustment, 'value'),
 			parsed: adjustment.value.split(',').map(value => value.trim()),
@@ -228,97 +252,186 @@ export class SheetInfoListAdjuster implements SheetPropertyGroupAdjuster<SheetIn
 }
 
 export type SheetIntegerAdjustment = ParsedSheetAdjustment<number>;
-export class SheetIntegerAdjuster {
+export class SheetIntegerAdjuster implements SheetPropertyGroupAdjuster<SheetIntegers> {
+	constructor(protected sheetIntegerProperties: SheetIntegers) {}
+
 	public static serializeAdjustment = function (
 		adjustment: SheetIntegerAdjustment
-	): TypedSheetAdjustment {
+	): SheetAdjustment {
 		return { ..._.omit(adjustment, 'parsed'), value: adjustment.parsed.toString() };
 	};
 	public static deserializeAdjustment = function (
-		adjustment: TypedSheetAdjustment
-	): SheetIntegerAdjustment {
+		adjustment: SheetAdjustment
+	): SheetIntegerAdjustment | null {
 		return {
 			..._.omit(adjustment, 'value'),
 			parsed: adjustment.value === '' ? 0 : parseInt(adjustment.value),
 		};
 	};
+	public adjust(adjustment: SheetAdjustment): void {
+		const prop = adjustment.property as keyof SheetIntegers;
+		const sheetIntegerAdjustment = SheetIntegerAdjuster.deserializeAdjustment(adjustment);
+		if (!sheetIntegerAdjustment || isNaN(sheetIntegerAdjustment.parsed)) {
+			console.warn('something went wrong parsing adjustment', adjustment);
+			return;
+		}
+		const currentValue = this.sheetIntegerProperties[prop] ?? 0;
+		switch (adjustment.operation) {
+			case SheetAdjustmentOperationEnum['+']:
+				this.sheetIntegerProperties[prop] = currentValue + sheetIntegerAdjustment.parsed;
+				break;
+			case SheetAdjustmentOperationEnum['-']:
+				this.sheetIntegerProperties[prop] = currentValue - sheetIntegerAdjustment.parsed;
+				break;
+			case SheetAdjustmentOperationEnum['=']:
+				this.sheetIntegerProperties[prop] = sheetIntegerAdjustment.parsed;
+				break;
+		}
+	}
 }
 
 export type SheetBaseCounterAdjustment = ParsedSheetAdjustment<number>;
-export class SheetBaseCounterAdjuster {
+export class SheetBaseCounterAdjuster implements SheetPropertyGroupAdjuster<SheetBaseCounters> {
+	constructor(protected sheetBaseCounterProperties: SheetBaseCounters) {}
 	public static serializeAdjustment = SheetIntegerAdjuster.serializeAdjustment;
 	public static deserializeAdjustment = SheetIntegerAdjuster.deserializeAdjustment;
+	public adjust(adjustment: SheetAdjustment): void {
+		const prop = adjustment.property as SheetBaseCounterKeys;
+		const sheetIntegerAdjustment = SheetIntegerAdjuster.deserializeAdjustment(adjustment);
+		if (
+			!sheetIntegerAdjustment ||
+			isNaN(sheetIntegerAdjustment.parsed) ||
+			!(prop in this.sheetBaseCounterProperties)
+		) {
+			console.warn('something went wrong parsing the adjustment', adjustment);
+			return;
+		}
+		const currentValue = this.sheetBaseCounterProperties[prop].max ?? 0;
+		switch (adjustment.operation) {
+			case SheetAdjustmentOperationEnum['+']:
+				this.sheetBaseCounterProperties[prop].max =
+					currentValue + sheetIntegerAdjustment.parsed;
+				break;
+			case SheetAdjustmentOperationEnum['-']:
+				this.sheetBaseCounterProperties[prop].max =
+					currentValue - sheetIntegerAdjustment.parsed;
+				break;
+			case SheetAdjustmentOperationEnum['=']:
+				this.sheetBaseCounterProperties[prop].max = sheetIntegerAdjustment.parsed;
+				break;
+		}
+	}
 }
 
-export type SheetStatAdjustment = ParsedSheetAdjustment<Partial<ProficiencyStat>>;
-const statPropTotalValueRegex = /(?:total|bonus)\W*:\W*([0-9]+)/gi;
-const statPropProficiencyValueRegex = /(?:proficiency|prof)\W*:\W*([0-9]+)/gi;
-const statPropTotalDCRegex = /(?:totalDC|DC)\W*:\W*([0-9]+)/gi;
-const abilityPropRegex =
-	/ability\W*:\W*(strength|str|dexterity|dex|constitution|con|intelligence|int|wisdom|wis|charisma|cha){1}/gi;
+export type SheetStatAdjustment = ParsedSheetAdjustment<
+	| { subKey: StatSubGroupEnum.ability; value: AbilityEnum | '' }
+	| { subKey: Exclude<StatSubGroupEnum, StatSubGroupEnum.ability>; value: number }
+>;
 
-export class SheetStatAdjuster {
-	public static serializeAdjustment(adjustment: SheetStatAdjustment): TypedSheetAdjustment {
-		const total = adjustment.parsed.total ? `total:${adjustment.parsed.total}` : '';
-		const proficiency = adjustment.parsed.proficiency
-			? `proficiency:${adjustment.parsed.proficiency}`
-			: '';
-		const totalDC = adjustment.parsed.totalDC ? `totalDC:${adjustment.parsed.totalDC}` : '';
-		const ability = adjustment.parsed.ability ? `ability:${adjustment.parsed.ability}` : '';
-		const value = [total, proficiency, totalDC, ability].filter(_.identity).join(',');
-
+export class SheetStatAdjuster implements SheetPropertyGroupAdjuster<SheetStats> {
+	constructor(protected sheetStatProperties: SheetStats) {}
+	public static serializeAdjustment(adjustment: SheetStatAdjustment): SheetAdjustment {
 		return {
 			..._.omit(adjustment, 'parsed'),
-			propertyType: 'stat',
-			value,
+			propertyType: AdjustablePropertyEnum.stat,
+			value: adjustment.parsed.value.toString(),
 		};
 	}
 
-	public static deserializeAdjustment(adjustment: TypedSheetAdjustment): SheetStatAdjustment {
-		const totalMatch = statPropTotalValueRegex.exec(adjustment.value);
-		const proficiencyMatch = statPropProficiencyValueRegex.exec(adjustment.value);
-		const totalDCMatch = statPropTotalDCRegex.exec(adjustment.value);
-		const abilityMatch = abilityPropRegex.exec(adjustment.value);
+	public static deserializeAdjustment(adjustment: SheetAdjustment): SheetStatAdjustment | null {
+		const nonAliasedProp =
+			SheetStatProperties.aliases[SheetProperties.standardizePropKey(adjustment.property)];
+		if (!nonAliasedProp)
+			throw new KoboldError(`Property ${adjustment.property} is not a valid stat property`);
+		const property = SheetStatProperties.properties[nonAliasedProp];
 
-		if (!totalMatch && !proficiencyMatch && !totalDCMatch && !abilityMatch) {
-			// parse as a number, and the total value
-			const numericResult = parseInt(adjustment.value);
+		let parsedValue: string | number;
+		if (property.subKey === StatSubGroupEnum.ability) {
+			if (adjustment.value !== '' && !(adjustment.value in AbilityEnum)) {
+				return null;
+			}
+			// string property
 			return {
 				..._.omit(adjustment, 'value'),
 				parsed: {
-					total: numericResult,
+					value: (adjustment.value as AbilityEnum) || '',
+					subKey: property.subKey,
 				},
 			};
 		} else {
-			const stat: SheetStatAdjustment['parsed'] = {};
-			if (totalMatch) stat.total = parseInt(totalMatch[1]);
-			if (proficiencyMatch) stat.proficiency = parseInt(proficiencyMatch[1]);
-			if (totalDCMatch) stat.totalDC = parseInt(totalDCMatch[1]);
-			if (abilityMatch)
-				stat.ability = abilityMatch
-					? (abilityMatch[1] as ProficiencyStat['ability'])
-					: undefined;
+			parsedValue = adjustment.value === '' ? 0 : parseInt(adjustment.value);
+			if (isNaN(parsedValue)) {
+				throw new KoboldError(
+					`Property ${adjustment.property}'s value ${adjustment.value} is not a valid number`
+				);
+			}
 			return {
 				..._.omit(adjustment, 'value'),
-				parsed: stat,
+				parsed: {
+					value: parsedValue,
+					subKey: property.subKey,
+				},
 			};
+		}
+	}
+	public adjust(adjustment: SheetAdjustment): void {
+		const prop = adjustment.property as SheetStatKeys;
+		const sheetStatAdjustment = SheetStatAdjuster.deserializeAdjustment(adjustment);
+		if (!sheetStatAdjustment) {
+			console.warn('something went wrong parsing stat adjustment', adjustment);
+			return;
+		}
+		// typescript doesn't know how to discriminate between the two types of subKey
+		// so we restore the base type and then if/else to delineate
+		const parsedAdjustment = sheetStatAdjustment.parsed;
+		if (parsedAdjustment.subKey === StatSubGroupEnum.ability) {
+			const interpretedSubKey = parsedAdjustment.subKey;
+			const currentValue = this.sheetStatProperties[prop][interpretedSubKey] ?? 0;
+			switch (adjustment.operation) {
+				case SheetAdjustmentOperationEnum['-']:
+					if (currentValue === this.sheetStatProperties[prop][parsedAdjustment.subKey]) {
+						this.sheetStatProperties[prop][parsedAdjustment.subKey] = null;
+					}
+					break;
+				case SheetAdjustmentOperationEnum['=']:
+					this.sheetStatProperties[prop][parsedAdjustment.subKey] =
+						parsedAdjustment.value === '' ? null : parsedAdjustment.value;
+					break;
+			}
+		} else {
+			const currentValue = this.sheetStatProperties[prop][parsedAdjustment.subKey] ?? 0;
+			switch (adjustment.operation) {
+				case SheetAdjustmentOperationEnum['+']:
+					this.sheetStatProperties[prop][parsedAdjustment.subKey] =
+						currentValue + parsedAdjustment.value;
+					break;
+				case SheetAdjustmentOperationEnum['-']:
+					this.sheetStatProperties[prop][parsedAdjustment.subKey] =
+						currentValue - parsedAdjustment.value;
+					break;
+				case SheetAdjustmentOperationEnum['=']:
+					this.sheetStatProperties[prop][parsedAdjustment.subKey] =
+						parsedAdjustment.value;
+					break;
+			}
 		}
 	}
 }
 
 export type SheetAttackAdjustment = ParsedSheetAdjustment<SheetAttack>;
 
-const separatorRegex = /[\|;]/gi;
+const separatorRegex = /[\|&]/gi;
 const innerSeparator = ',';
-const toHitRegex = /(?:to hit|tohit|hit|attack|atk)[\W:]([^\|;]+)/gi;
-const damageRegex = /(?:damage|dmg)[\W:]([^\|;]+)/gi;
+const toHitRegex = /(?:to hit|tohit|hit|attack|atk)[\W:]([^\|&]+)/gi;
+const damageRegex = /(?:damage|dmg)[\W:]([^\|&]+)/gi;
 const damageTypeRegex = / ((?:[ A-Za-z_-])+)\W*$/gi;
-const rangeRegex = /(?:range)[\W:]([^\|;]+)/gi;
-const traitsRegex = /(?:traits?)[\W:]([^\|;]+)/gi;
-const notesRegex = /(?:notes?)[\W:]([^\|;]+)/gi;
+const rangeRegex = /(?:range)[\W:]([^\|&]+)/gi;
+const traitsRegex = /(?:traits?)[\W:]([^\|&]+)/gi;
+const notesRegex = /(?:notes?)[\W:]([^\|&]+)/gi;
 
-export class SheetAttackAdjuster {
-	public static serializeAdjustment(adjustment: SheetAttackAdjustment): TypedSheetAdjustment {
+export class SheetAttackAdjuster implements SheetPropertyGroupAdjuster<Sheet['attacks']> {
+	constructor(protected sheetAttacks: Sheet['attacks']) {}
+	public static serializeAdjustment(adjustment: SheetAttackAdjustment): SheetAdjustment {
 		const toHit = adjustment.parsed.toHit ? `to hit: ${adjustment.parsed.toHit}` : '';
 		const damage = adjustment.parsed.damage
 			? `damage: ${adjustment.parsed.damage
@@ -331,13 +444,13 @@ export class SheetAttackAdjuster {
 			: '';
 		const notes = adjustment.parsed.notes ? `notes: ${adjustment.parsed.notes}` : '';
 		const newValue = [toHit, damage, range, traits, notes].filter(_.identity).join('; ');
-		let newAdjustment: TypedSheetAdjustment = {
+		let newAdjustment: SheetAdjustment = {
 			..._.omit(adjustment, 'parsed'),
 			value: newValue,
 		};
 		return newAdjustment;
 	}
-	public static deserializeAdjustment(adjustment: TypedSheetAdjustment): SheetAttackAdjustment {
+	public static deserializeAdjustment(adjustment: SheetAdjustment): SheetAttackAdjustment | null {
 		const splitValue = adjustment.value.split(/[|;]/gi);
 		let toHitClause: number = 0;
 		let damageValues: Damage[] = [];
@@ -387,28 +500,136 @@ export class SheetAttackAdjuster {
 			},
 		};
 	}
+	public adjust(adjustment: SheetAdjustment): void {
+		const sheetAttackAdjustment = SheetAttackAdjuster.deserializeAdjustment(adjustment);
+		if (!sheetAttackAdjustment) {
+			console.warn('something went wrong parsing adjustment', adjustment);
+			return;
+		}
+		const currentValue = this.sheetAttacks;
+
+		// filter out existing attacks with this name no matter what
+		// on +/=, overwrite the new attack which requires removal anyway
+		_.remove(this.sheetAttacks, attack => attack.name === sheetAttackAdjustment.parsed.name);
+		switch (adjustment.operation) {
+			case SheetAdjustmentOperationEnum['+']:
+			case SheetAdjustmentOperationEnum['=']:
+				this.sheetAttacks.push(sheetAttackAdjustment.parsed);
+				break;
+		}
+	}
 }
 
-export class SheetAdditionalSkillAdjuster {
+export class SheetAdditionalSkillAdjuster
+	implements SheetPropertyGroupAdjuster<Sheet['additionalSkills']>
+{
+	constructor(protected sheetAdditionalSkills: Sheet['additionalSkills']) {}
 	public static serializeAdjustment = SheetStatAdjuster.serializeAdjustment;
 	public static deserializeAdjustment = SheetStatAdjuster.deserializeAdjustment;
+	public adjust(adjustment: SheetAdjustment): void {
+		const sheetStatAdjustment = SheetStatAdjuster.deserializeAdjustment(adjustment);
+		if (!sheetStatAdjustment) {
+			console.warn('something went wrong parsing adjustment', adjustment);
+			return;
+		}
+		// filter out existing additional skills with this name no matter what
+		// on +/=, overwrite the new additional skill which requires removal anyway
+		const targetStat: Sheet['additionalSkills'][number] = this.sheetAdditionalSkills.find(
+			skill => skill.name === sheetStatAdjustment.property
+		) ?? {
+			name: sheetStatAdjustment.property,
+			dc: 10,
+			proficiency: 0,
+			bonus: 0,
+			ability: null,
+		};
+
+		if (sheetStatAdjustment.parsed.subKey === StatSubGroupEnum.ability) {
+			switch (adjustment.operation) {
+				case SheetAdjustmentOperationEnum['-']:
+					if (targetStat.ability === sheetStatAdjustment.parsed.value) {
+						targetStat.ability === null;
+					}
+					break;
+				case SheetAdjustmentOperationEnum['=']:
+					targetStat.ability = sheetStatAdjustment.parsed.value || null;
+					break;
+			}
+			return;
+		} else {
+			const currentValue = targetStat[sheetStatAdjustment.parsed.subKey] ?? 0;
+			switch (adjustment.operation) {
+				case SheetAdjustmentOperationEnum['+']:
+					targetStat[sheetStatAdjustment.parsed.subKey] =
+						currentValue + sheetStatAdjustment.parsed.value;
+					break;
+				case SheetAdjustmentOperationEnum['-']:
+					targetStat[sheetStatAdjustment.parsed.subKey] =
+						currentValue - sheetStatAdjustment.parsed.value;
+					break;
+				case SheetAdjustmentOperationEnum['=']:
+					targetStat[sheetStatAdjustment.parsed.subKey] =
+						sheetStatAdjustment.parsed.value;
+					break;
+			}
+		}
+
+		_.remove(this.sheetAdditionalSkills, skill => skill.name === targetStat.name);
+		this.sheetAdditionalSkills.push(targetStat);
+	}
 }
 
-export class SheetWeaknessResistanceAdjuster {
+export class SheetWeaknessResistanceAdjuster
+	implements SheetPropertyGroupAdjuster<Sheet['weaknessesResistances']>
+{
+	constructor(protected sheetWeaknessResistance: Sheet['weaknessesResistances']) {}
 	public static serializeAdjustment = SheetIntegerAdjuster.serializeAdjustment;
 	public static deserializeAdjustment = SheetIntegerAdjuster.deserializeAdjustment;
+	public adjust(adjustment: SheetAdjustment): void {
+		const sheetIntegerAdjustment = SheetIntegerAdjuster.deserializeAdjustment(adjustment);
+		const weaknessResistanceName = SheetWeaknessResistanceProperties.propertyNameRegex
+			.exec(adjustment.property)?.[1]
+			?.trim()
+			?.toLowerCase();
+		if (!sheetIntegerAdjustment || !weaknessResistanceName) {
+			console.warn('something went wrong parsing adjustment', adjustment);
+			return;
+		}
+		const isWeakness = SheetWeaknessResistanceProperties.isWeakness(adjustment.property);
+		const targetList = isWeakness
+			? this.sheetWeaknessResistance.weaknesses
+			: this.sheetWeaknessResistance.resistances;
+
+		const currentValue = targetList.find(entry => entry.type === weaknessResistanceName) ?? {
+			type: weaknessResistanceName,
+			amount: 0,
+		};
+		_.remove(targetList, entry => entry.type === weaknessResistanceName);
+		switch (adjustment.operation) {
+			case SheetAdjustmentOperationEnum['+']:
+				currentValue.amount += sheetIntegerAdjustment.parsed;
+				break;
+			case SheetAdjustmentOperationEnum['-']:
+				currentValue.amount -= sheetIntegerAdjustment.parsed;
+				break;
+			case SheetAdjustmentOperationEnum['=']:
+				currentValue.amount = sheetIntegerAdjustment.parsed;
+				break;
+		}
+		targetList.push(currentValue);
+	}
 }
 
 // Type check object to make sure that all adjusters are accounted for
 const allBuckets: {
-	[k in NonNullable<AdjustablePropertyEnum>]: Object;
+	[k in Exclude<AdjustablePropertyEnum, ''>]: Object;
 } = {
 	info: SheetInfoAdjuster,
 	infoList: SheetInfoListAdjuster,
 	intProperty: SheetIntegerAdjuster,
 	baseCounter: SheetBaseCounterAdjuster,
-	weaknessResistance: SheetWeaknessResistanceAdjuster,
 	stat: SheetStatAdjuster,
 	extraSkill: SheetAdditionalSkillAdjuster,
+	weaknessResistance: SheetWeaknessResistanceAdjuster,
 	attack: SheetAttackAdjuster,
 };

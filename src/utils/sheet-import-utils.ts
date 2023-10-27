@@ -7,7 +7,7 @@ import { DiceUtils } from './dice-utils.js';
 import { KoboldError } from './KoboldError.js';
 import { SheetUtils } from './sheet-utils.js';
 import { PartialDeep } from 'type-fest';
-import { AdditionalSkill, BaseSkills } from '../services/kobold/models/character/character.zod.js';
+import { AdditionalSkill } from '../services/kobold/models/character/character.zod.js';
 
 // I also add the key, and compare values in lower case to the options
 const statOptions: {

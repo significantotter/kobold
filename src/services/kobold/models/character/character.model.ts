@@ -1,18 +1,16 @@
 import { GuildDefaultCharacter, ChannelDefaultCharacter, InitiativeActor } from './../index.js';
 import type { Character as CharacterType } from './character.schema.js';
 import { BaseModel } from '../../lib/base-model.js';
-import { Sheet as SheetType } from '../../lib/type-helpers.js';
 import { Action as ActionType } from '../../lib/shared-schemas/action.schema.d.js';
 import { Modifier as ModifierType } from '../../lib/shared-schemas/modifier.schema.d.js';
 import { RollMacro as RollMacroType } from '../../lib/shared-schemas/roll-macro.schema.d.js';
 import _ from 'lodash';
 import { Creature } from '../../../../utils/creature.js';
 import { ChatInputCommandInteraction } from 'discord.js';
-import { StringUtils } from '../../../../utils/string-utils.js';
-import { zCharacter } from './character.zod.js';
+import { zCharacter, Sheet as SheetType } from './character.zod.js';
 import { z } from 'zod';
 import { ZodValidator } from '../../lib/zod-validator.js';
-import './character-parse-test.js';
+
 export type ZCharacter = z.infer<typeof zCharacter>;
 
 interface ErrorWithCode<T extends number = number> extends Error {
@@ -52,18 +50,10 @@ export class Character extends BaseModel {
 		characterName: string,
 		userId: string
 	): Promise<Character[]> {
-		const results = await this.query().whereRaw(
-			`user_id=:userId AND name::TEXT ILIKE :characterName`,
-			{
-				userId,
-				characterName: `%${characterName}%`,
-			}
-		);
-		const closestByName = StringUtils.generateSorterByWordDistance<Character>(
-			characterName,
-			character => character.name
-		);
-		return results.sort(closestByName);
+		return await this.query().whereRaw(`user_id=:userId AND name::TEXT ILIKE :characterName`, {
+			userId,
+			characterName: `%${characterName}%`,
+		});
 	}
 
 	async updateTracker(intr: ChatInputCommandInteraction, sheet: SheetType) {

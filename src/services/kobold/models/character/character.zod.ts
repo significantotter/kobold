@@ -1,7 +1,4 @@
 import { z } from 'zod';
-import { SheetUtils } from '../../../../utils/sheet-utils.js';
-import { zStatSchema } from '../../../pf2etools/schemas/index.js';
-import { SheetProperties } from '../../../../utils/sheet-properties.js';
 
 const zNullableInteger = z.number().int().nullable().default(null);
 
@@ -25,23 +22,29 @@ export const zRecordOf = <T extends Record<string, string>, ZodValueType extends
 	);
 };
 
-export type AbilityEnum = z.infer<typeof zAbilityEnum>;
-const zAbilityEnum = z.enum([
-	'strength',
-	'dexterity',
-	'constitution',
-	'intelligence',
-	'wisdom',
-	'charisma',
-]);
+export enum AbilityEnum {
+	strength = 'strength',
+	dexterity = 'dexterity',
+	constitution = 'constitution',
+	intelligence = 'intelligence',
+	wisdom = 'wisdom',
+	charisma = 'charisma',
+}
+export const zAbilityEnum = z.nativeEnum(AbilityEnum);
 
 export type ProficiencyStat = z.infer<typeof zProficiencyStat>;
 export const zProficiencyStat = z.strictObject({
 	proficiency: zNullableInteger,
-	totalDC: zNullableInteger,
-	total: zNullableInteger,
+	dc: zNullableInteger,
+	bonus: zNullableInteger,
 	ability: zAbilityEnum.nullable().default(null),
 });
+export enum StatSubGroupEnum {
+	proficiency = 'proficiency',
+	dc = 'dc',
+	bonus = 'bonus',
+	ability = 'ability',
+}
 
 const zTimestamp = z.string().datetime().default(new Date().toISOString());
 
@@ -243,11 +246,41 @@ export const zRollMacro = z.strictObject({
 	macro: z.string(),
 });
 
-export type SheetAdjustment = z.infer<typeof zSheetAdjustment>;
+export type SheetAdjustment = z.infer<typeof zSheetAdjustment> & {
+	// This is for the parser, keeping type safety as we extend this type
+	parsed?: never;
+};
+export enum AdjustablePropertyEnum {
+	info = 'info',
+	infoList = 'infoList',
+	intProperty = 'intProperty',
+	baseCounter = 'baseCounter',
+	weaknessResistance = 'weaknessResistance',
+	stat = 'stat',
+	attack = 'attack',
+	extraSkill = 'extraSkill',
+	none = '',
+}
+
+export enum SheetAdjustmentTypeEnum {
+	untyped = 'untyped',
+	status = 'status',
+	circumstance = 'circumstance',
+	item = 'item',
+}
+
+export enum SheetAdjustmentOperationEnum {
+	'+' = '+',
+	'-' = '-',
+	'=' = '=',
+}
+
 export const zSheetAdjustment = z.object({
 	property: z.string(),
-	operation: z.enum(['+', '-', '=']),
+	propertyType: z.nativeEnum(AdjustablePropertyEnum),
+	operation: z.nativeEnum(SheetAdjustmentOperationEnum),
 	value: z.string(),
+	type: z.nativeEnum(SheetAdjustmentTypeEnum).default(SheetAdjustmentTypeEnum.untyped),
 });
 
 export type SheetModifier = z.infer<typeof zSheetModifier>;
@@ -257,7 +290,6 @@ export const zSheetModifier = z
 		name: z.string(),
 		isActive: z.boolean().default(false),
 		description: z.string().default(''),
-		type: z.string().default('untyped'),
 		sheetAdjustments: z.array(zSheetAdjustment).default([]),
 	})
 	.describe('A sheet modifier. The sheetAdjustments are applied to the sheet.');
@@ -284,7 +316,7 @@ export const zModifier = z
 	.describe('A modifier is a bonus or penalty that can be applied to a roll or sheet property.');
 
 export type AdditionalSkill = z.infer<typeof zAdditionalSkill>;
-export const zAdditionalSkill = zStatSchema.extend({
+export const zAdditionalSkill = zProficiencyStat.extend({
 	name: z.string().describe("The skill's name."),
 });
 
@@ -556,6 +588,271 @@ export const zCharacter = z
 		actions: z.array(zAction).default([]),
 		modifiers: z.array(zModifier).default([]),
 		rollMacros: z.array(zRollMacro).default([]),
-		sheet: zSheet.default(zSheet.parse(SheetProperties.defaultSheet)),
+		sheet: zSheet.default(zSheet.parse(getDefaultSheet())),
 	})
 	.describe('An imported character');
+
+export function getDefaultSheet(): Sheet {
+	{
+		return {
+			staticInfo: {
+				name: '',
+				level: null,
+				usesStamina: false,
+			},
+			info: {
+				url: null,
+				description: null,
+				gender: null,
+				age: null,
+				alignment: null,
+				deity: null,
+				imageURL: null,
+				size: null,
+				class: null,
+				keyability: null,
+				ancestry: null,
+				heritage: null,
+				background: null,
+			},
+			infoLists: {
+				traits: [],
+				senses: [],
+				languages: [],
+				immunities: [],
+			},
+			weaknessesResistances: {
+				resistances: [],
+				weaknesses: [],
+			},
+			intProperties: {
+				ac: null,
+
+				strength: null,
+				dexterity: null,
+				constitution: null,
+				intelligence: null,
+				wisdom: null,
+				charisma: null,
+
+				walkSpeed: null,
+				flySpeed: null,
+				swimSpeed: null,
+				climbSpeed: null,
+				burrowSpeed: null,
+				dimensionalSpeed: null,
+
+				heavyProficiency: null,
+				mediumProficiency: null,
+				lightProficiency: null,
+				unarmoredProficiency: null,
+
+				martialProficiency: null,
+				simpleProficiency: null,
+				unarmedProficiency: null,
+				advancedProficiency: null,
+			},
+			baseCounters: {
+				heroPoints: {
+					name: 'Hero Points',
+					style: 'default',
+					current: 0,
+					max: 0,
+					recoverable: false,
+				},
+				focusPoints: {
+					name: 'Focus Points',
+					style: 'default',
+					current: 0,
+					max: 0,
+					recoverable: false,
+				},
+				hp: { name: 'HP', style: 'default', current: 0, max: 0, recoverable: true },
+				tempHp: {
+					name: 'Temp HP',
+					style: 'default',
+					current: 0,
+					max: null,
+					recoverable: true,
+				},
+				resolve: {
+					name: 'Resolve',
+					style: 'default',
+					current: 0,
+					max: 0,
+					recoverable: true,
+				},
+				stamina: {
+					name: 'Stamina',
+					style: 'default',
+					current: 0,
+					max: 0,
+					recoverable: true,
+				},
+			},
+			stats: {
+				// Perception
+				perception: {
+					bonus: null,
+					dc: null,
+					proficiency: null,
+					ability: AbilityEnum.wisdom,
+				},
+				// Class DC/Attack
+				class: {
+					bonus: null,
+					dc: null,
+					proficiency: null,
+					ability: null,
+				},
+				// Casting
+				arcane: {
+					bonus: null,
+					dc: null,
+					proficiency: null,
+					ability: null,
+				},
+				divine: {
+					bonus: null,
+					dc: null,
+					proficiency: null,
+					ability: null,
+				},
+				occult: {
+					bonus: null,
+					dc: null,
+					proficiency: null,
+					ability: null,
+				},
+				primal: {
+					bonus: null,
+					dc: null,
+					proficiency: null,
+					ability: null,
+				},
+				// Saves
+				fortitude: {
+					bonus: null,
+					dc: null,
+					proficiency: null,
+					ability: AbilityEnum.constitution,
+				},
+				reflex: {
+					bonus: null,
+					dc: null,
+					proficiency: null,
+					ability: AbilityEnum.dexterity,
+				},
+				will: {
+					bonus: null,
+					dc: null,
+					proficiency: null,
+					ability: AbilityEnum.wisdom,
+				},
+				// Skills
+				acrobatics: {
+					bonus: null,
+					dc: null,
+					proficiency: null,
+					ability: AbilityEnum.dexterity,
+				},
+				arcana: {
+					bonus: null,
+					dc: null,
+					proficiency: null,
+					ability: AbilityEnum.intelligence,
+				},
+				athletics: {
+					bonus: null,
+					dc: null,
+					proficiency: null,
+					ability: AbilityEnum.strength,
+				},
+				crafting: {
+					bonus: null,
+					dc: null,
+					proficiency: null,
+					ability: AbilityEnum.intelligence,
+				},
+				deception: {
+					bonus: null,
+					dc: null,
+					proficiency: null,
+					ability: AbilityEnum.charisma,
+				},
+				diplomacy: {
+					bonus: null,
+					dc: null,
+					proficiency: null,
+					ability: AbilityEnum.charisma,
+				},
+				intimidation: {
+					bonus: null,
+					dc: null,
+					proficiency: null,
+					ability: AbilityEnum.charisma,
+				},
+				medicine: {
+					bonus: null,
+					dc: null,
+					proficiency: null,
+					ability: AbilityEnum.wisdom,
+				},
+				nature: {
+					bonus: null,
+					dc: null,
+					proficiency: null,
+					ability: AbilityEnum.wisdom,
+				},
+				occultism: {
+					bonus: null,
+					dc: null,
+					proficiency: null,
+					ability: AbilityEnum.intelligence,
+				},
+				performance: {
+					bonus: null,
+					dc: null,
+					proficiency: null,
+					ability: AbilityEnum.charisma,
+				},
+				religion: {
+					bonus: null,
+					dc: null,
+					proficiency: null,
+					ability: AbilityEnum.wisdom,
+				},
+				society: {
+					bonus: null,
+					dc: null,
+					proficiency: null,
+					ability: AbilityEnum.intelligence,
+				},
+				stealth: {
+					bonus: null,
+					dc: null,
+					proficiency: null,
+					ability: AbilityEnum.dexterity,
+				},
+				survival: {
+					bonus: null,
+					dc: null,
+					proficiency: null,
+					ability: AbilityEnum.wisdom,
+				},
+				thievery: {
+					bonus: null,
+					dc: null,
+					proficiency: null,
+					ability: AbilityEnum.dexterity,
+				},
+			},
+			additionalSkills: [],
+			attacks: [],
+			rollMacros: [],
+			actions: [],
+			modifiers: [],
+			sourceData: { aliases: [] },
+		};
+	}
+}

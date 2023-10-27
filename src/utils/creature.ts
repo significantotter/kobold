@@ -191,7 +191,10 @@ export class Creature {
 			sourceData: {},
 		};
 		this._sheet = _.defaultsDeep(this._sheet, sheetDefaults);
-		const sheetAdjustments = SheetUtils.parseSheetModifiers(this._sheet, this._sheet.modifiers);
+		const sheetAdjustments = SheetUtils.sheetModifiersFromString(
+			this._sheet,
+			this._sheet.modifiers
+		);
 		this._adjustedSheet = SheetUtils.applySheetAdjustments(
 			this._sheet,
 			sheetAdjustments.overwriteSheetAdjustments,

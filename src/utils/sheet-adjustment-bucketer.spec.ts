@@ -5,7 +5,6 @@ import {
 	SheetInfoListAdjustment,
 	SheetIntegerAdjustment,
 	SheetStatAdjustment,
-	TypedSheetAdjustment,
 } from './sheet-adjuster.js';
 import {
 	SheetPropertyGroupBucket,
@@ -16,22 +15,30 @@ import {
 	WeaknessResistanceBucket,
 	AttackBucket,
 } from './sheet-adjustment-bucketer.js';
+import {
+	AbilityEnum,
+	AdjustablePropertyEnum,
+	SheetAdjustment,
+	SheetAdjustmentOperationEnum,
+	SheetAdjustmentTypeEnum,
+	StatSubGroupEnum,
+} from '../services/kobold/models/index.js';
 
-class TestSheetPropertyGroupBucket extends SheetPropertyGroupBucket<TypedSheetAdjustment> {
-	public serialize(adjustment: TypedSheetAdjustment): TypedSheetAdjustment {
+class TestSheetPropertyGroupBucket extends SheetPropertyGroupBucket<SheetAdjustment> {
+	public serialize(adjustment: SheetAdjustment): SheetAdjustment {
 		return adjustment;
 	}
-	public deserialize(adjustment: TypedSheetAdjustment): TypedSheetAdjustment {
+	public deserialize(adjustment: SheetAdjustment): SheetAdjustment {
 		return adjustment;
 	}
-	public discardAdjustment(adjustment: TypedSheetAdjustment): boolean {
+	public discardAdjustment(adjustment: SheetAdjustment): boolean {
 		return adjustment.value === 'discard';
 	}
 
 	public combine(
-		currentAdjustment: TypedSheetAdjustment,
-		newAdjustment: TypedSheetAdjustment
-	): TypedSheetAdjustment {
+		currentAdjustment: SheetAdjustment,
+		newAdjustment: SheetAdjustment
+	): SheetAdjustment {
 		return {
 			...currentAdjustment,
 			value: currentAdjustment.value + newAdjustment.value,
@@ -41,160 +48,223 @@ class TestSheetPropertyGroupBucket extends SheetPropertyGroupBucket<TypedSheetAd
 }
 
 describe('SheetPropertyGroupBucket', () => {
+	let sheetPropertyGroupBucket: TestSheetPropertyGroupBucket;
+
+	beforeEach(() => {
+		sheetPropertyGroupBucket = new TestSheetPropertyGroupBucket();
+	});
+
 	describe('sortToBucket', () => {
+		it('should add an adjustment to the correct bucket', () => {
+			const adjustment: SheetAdjustment = {
+				type: SheetAdjustmentTypeEnum.status,
+				propertyType: AdjustablePropertyEnum.intProperty,
+				operation: SheetAdjustmentOperationEnum['+'],
+				property: AbilityEnum.strength,
+				value: '10',
+			};
+			sheetPropertyGroupBucket.sortToBucket(adjustment);
+			expect(sheetPropertyGroupBucket.buckets).toEqual({
+				strength: {
+					status: {
+						[SheetAdjustmentOperationEnum['+']]: {
+							type: SheetAdjustmentTypeEnum.status,
+							propertyType: AdjustablePropertyEnum.intProperty,
+							operation: SheetAdjustmentOperationEnum['+'],
+							property: AbilityEnum.strength,
+							value: '10',
+						},
+					},
+				},
+			});
+		});
 		it('should add new adjustment to bucket if bucket is empty', () => {
-			const bucket = new TestSheetPropertyGroupBucket();
-			const adjustment: TypedSheetAdjustment = {
-				propertyType: 'info',
-				type: 'untyped',
+			const adjustment: SheetAdjustment = {
+				propertyType: AdjustablePropertyEnum.info,
+				type: SheetAdjustmentTypeEnum.untyped,
 				property: 'name',
-				operation: '=',
+				operation: SheetAdjustmentOperationEnum['='],
 				value: 'Alice',
 			};
-			bucket.sortToBucket(adjustment);
-			expect(bucket.buckets).toEqual({ name: { untyped: adjustment } });
+			sheetPropertyGroupBucket.sortToBucket(adjustment);
+			expect(sheetPropertyGroupBucket.buckets).toEqual({
+				name: { untyped: { [SheetAdjustmentOperationEnum['=']]: adjustment } },
+			});
 		});
 
 		it('should combine adjustments if bucket already has an adjustment for the property', () => {
-			const bucket = new TestSheetPropertyGroupBucket();
-			const currentAdjustment: TypedSheetAdjustment = {
-				propertyType: null,
-				type: 'untyped',
+			const currentAdjustment: SheetAdjustment = {
+				propertyType: AdjustablePropertyEnum.none,
+				type: SheetAdjustmentTypeEnum.untyped,
 				property: 'name',
-				operation: '=',
+				operation: SheetAdjustmentOperationEnum['+'],
 				value: 'Alice',
 			};
-			const newAdjustment: TypedSheetAdjustment = {
-				propertyType: null,
-				type: 'untyped',
+			const newAdjustment: SheetAdjustment = {
+				propertyType: AdjustablePropertyEnum.none,
+				type: SheetAdjustmentTypeEnum.untyped,
 				property: 'name',
-				operation: '+',
+				operation: SheetAdjustmentOperationEnum['+'],
 				value: 'Bob',
 			};
-			bucket.sortToBucket(currentAdjustment);
-			bucket.sortToBucket(newAdjustment);
-			expect(bucket.buckets).toEqual({
+			sheetPropertyGroupBucket.sortToBucket(currentAdjustment);
+			sheetPropertyGroupBucket.sortToBucket(newAdjustment);
+			expect(sheetPropertyGroupBucket.buckets).toEqual({
 				name: {
 					untyped: {
-						propertyType: null,
-						type: 'untyped',
-						property: 'name',
-						operation: '=',
-						value: 'AliceBob',
+						[SheetAdjustmentOperationEnum['+']]: {
+							propertyType: AdjustablePropertyEnum.none,
+							type: SheetAdjustmentTypeEnum.untyped,
+							property: 'name',
+							operation: SheetAdjustmentOperationEnum['+'],
+							value: 'AliceBob',
+						},
 					},
 				},
 			});
 		});
 		it('should discard adjustments instead of adding if discardAdjustment returns true', () => {
-			const bucket = new TestSheetPropertyGroupBucket();
-			const currentAdjustment: TypedSheetAdjustment = {
-				propertyType: null,
-				type: 'untyped',
+			const currentAdjustment: SheetAdjustment = {
+				propertyType: AdjustablePropertyEnum.none,
+				type: SheetAdjustmentTypeEnum.untyped,
 				property: 'name',
-				operation: '=',
+				operation: SheetAdjustmentOperationEnum['+'],
 				value: 'Alice',
 			};
-			const newAdjustment: TypedSheetAdjustment = {
-				propertyType: null,
-				type: 'untyped',
+			const newAdjustment: SheetAdjustment = {
+				propertyType: AdjustablePropertyEnum.none,
+				type: SheetAdjustmentTypeEnum.untyped,
 				property: 'name',
-				operation: '+',
+				operation: SheetAdjustmentOperationEnum['+'],
 				value: 'discard',
 			};
-			bucket.sortToBucket(currentAdjustment);
-			bucket.sortToBucket(newAdjustment);
-			expect(bucket.buckets).toEqual({
+			sheetPropertyGroupBucket.sortToBucket(currentAdjustment);
+			sheetPropertyGroupBucket.sortToBucket(newAdjustment);
+			expect(sheetPropertyGroupBucket.buckets).toEqual({
 				name: {
 					untyped: {
-						propertyType: null,
-						type: 'untyped',
-						property: 'name',
-						operation: '=',
-						value: 'Alice',
+						[SheetAdjustmentOperationEnum['+']]: {
+							propertyType: AdjustablePropertyEnum.none,
+							type: SheetAdjustmentTypeEnum.untyped,
+							property: 'name',
+							operation: SheetAdjustmentOperationEnum['+'],
+							value: 'Alice',
+						},
 					},
 				},
 			});
 		});
 
 		describe('reduceBuckets', () => {
+			it('should reduce the buckets to an array of adjustments', () => {
+				sheetPropertyGroupBucket.buckets = {
+					strength: {
+						status: {
+							[SheetAdjustmentOperationEnum['+']]: {
+								type: SheetAdjustmentTypeEnum.status,
+								propertyType: AdjustablePropertyEnum.intProperty,
+								operation: SheetAdjustmentOperationEnum['+'],
+								property: AbilityEnum.strength,
+								value: '10',
+							},
+						},
+						circumstance: {
+							[SheetAdjustmentOperationEnum['-']]: {
+								type: SheetAdjustmentTypeEnum.circumstance,
+								propertyType: AdjustablePropertyEnum.intProperty,
+								operation: SheetAdjustmentOperationEnum['-'],
+								property: AbilityEnum.strength,
+								value: '5',
+							},
+						},
+					},
+				};
+				const result = sheetPropertyGroupBucket.reduceBuckets();
+				expect(result).toEqual([
+					{
+						type: SheetAdjustmentTypeEnum.status,
+						propertyType: AdjustablePropertyEnum.intProperty,
+						operation: SheetAdjustmentOperationEnum['+'],
+						property: AbilityEnum.strength,
+						value: '105',
+					},
+				]);
+			});
 			it('should return an empty array if buckets is empty', () => {
-				const bucket = new TestSheetPropertyGroupBucket();
-				const result = bucket.reduceBuckets();
+				const result = sheetPropertyGroupBucket.reduceBuckets();
 				expect(result).toEqual([]);
 			});
 
 			it('should return an array of adjustments if buckets is not empty', () => {
-				const bucket = new TestSheetPropertyGroupBucket();
-				bucket.sortToBucket({
-					propertyType: null,
-					type: 'untyped',
+				sheetPropertyGroupBucket.sortToBucket({
+					propertyType: AdjustablePropertyEnum.none,
+					type: SheetAdjustmentTypeEnum.untyped,
 					property: 'name',
-					operation: '=',
+					operation: SheetAdjustmentOperationEnum['='],
 					value: 'Alice',
 				});
-				bucket.sortToBucket({
-					propertyType: null,
-					type: 'untyped',
+				sheetPropertyGroupBucket.sortToBucket({
+					propertyType: AdjustablePropertyEnum.none,
+					type: SheetAdjustmentTypeEnum.untyped,
 					property: 'name',
-					operation: '+',
+					operation: SheetAdjustmentOperationEnum['+'],
 					value: 'Bob',
 				});
-				bucket.sortToBucket({
-					propertyType: null,
-					type: 'untyped',
+				sheetPropertyGroupBucket.sortToBucket({
+					propertyType: AdjustablePropertyEnum.none,
+					type: SheetAdjustmentTypeEnum.untyped,
 					property: 'age',
-					operation: '=',
+					operation: SheetAdjustmentOperationEnum['='],
 					value: '30',
 				});
-				const result = bucket.reduceBuckets();
+				const result = sheetPropertyGroupBucket.reduceBuckets();
 				expect(result).toEqual([
 					{
-						propertyType: null,
-						type: 'untyped',
+						propertyType: AdjustablePropertyEnum.none,
+						type: SheetAdjustmentTypeEnum.untyped,
 						property: 'name',
-						operation: '=',
+						operation: SheetAdjustmentOperationEnum['='],
 						value: 'AliceBob',
 					},
 					{
-						propertyType: null,
-						type: 'untyped',
+						propertyType: AdjustablePropertyEnum.none,
+						type: SheetAdjustmentTypeEnum.untyped,
 						property: 'age',
-						operation: '=',
+						operation: SheetAdjustmentOperationEnum['='],
 						value: '30',
 					},
 				]);
 			});
 
 			it('Should discard bucket results that return true from discardAdjustment', () => {
-				const bucket = new TestSheetPropertyGroupBucket();
-				bucket.sortToBucket({
-					propertyType: null,
-					type: 'untyped',
+				sheetPropertyGroupBucket.sortToBucket({
+					propertyType: AdjustablePropertyEnum.none,
+					type: SheetAdjustmentTypeEnum.untyped,
 					property: 'name',
-					operation: '=',
+					operation: SheetAdjustmentOperationEnum['='],
 					value: 'dis',
 				});
-				bucket.sortToBucket({
-					propertyType: null,
-					type: 'untyped',
+				sheetPropertyGroupBucket.sortToBucket({
+					propertyType: AdjustablePropertyEnum.none,
+					type: SheetAdjustmentTypeEnum.untyped,
 					property: 'name',
-					operation: '+',
+					operation: SheetAdjustmentOperationEnum['+'],
 					value: 'card',
 				});
-				bucket.sortToBucket({
-					propertyType: null,
-					type: 'untyped',
+				sheetPropertyGroupBucket.sortToBucket({
+					propertyType: AdjustablePropertyEnum.none,
+					type: SheetAdjustmentTypeEnum.untyped,
 					property: 'age',
-					operation: '=',
+					operation: SheetAdjustmentOperationEnum['='],
 					value: '30',
 				});
-				const result = bucket.reduceBuckets();
+				const result = sheetPropertyGroupBucket.reduceBuckets();
 				expect(result).toEqual([
 					{
-						propertyType: null,
-						type: 'untyped',
+						propertyType: AdjustablePropertyEnum.none,
+						type: SheetAdjustmentTypeEnum.untyped,
 						property: 'age',
-						operation: '=',
+						operation: SheetAdjustmentOperationEnum['='],
 						value: '30',
 					},
 				]);
@@ -208,17 +278,17 @@ describe('SheetInfoBucket', () => {
 		it('should return the new adjustment', () => {
 			const bucket = new SheetInfoBucket();
 			const currentAdjustment: SheetInfoAdjustment = {
-				propertyType: 'info',
-				type: 'untyped',
+				propertyType: AdjustablePropertyEnum.info,
+				type: SheetAdjustmentTypeEnum.untyped,
 				property: 'name',
-				operation: '=',
+				operation: SheetAdjustmentOperationEnum['='],
 				parsed: 'Alice',
 			};
 			const newAdjustment: SheetInfoAdjustment = {
-				propertyType: 'info',
-				type: 'untyped',
+				propertyType: AdjustablePropertyEnum.info,
+				type: SheetAdjustmentTypeEnum.untyped,
 				property: 'name',
-				operation: '+',
+				operation: SheetAdjustmentOperationEnum['+'],
 				parsed: 'Bob',
 			};
 			const result = bucket.combine(currentAdjustment, newAdjustment);
@@ -229,11 +299,11 @@ describe('SheetInfoBucket', () => {
 	describe('discardAdjustment', () => {
 		it('should return true if the operation is "+"', () => {
 			const bucket = new SheetInfoBucket();
-			const adjustment: TypedSheetAdjustment = {
-				propertyType: 'info',
-				type: 'untyped',
+			const adjustment: SheetAdjustment = {
+				propertyType: AdjustablePropertyEnum.info,
+				type: SheetAdjustmentTypeEnum.untyped,
 				property: 'name',
-				operation: '+',
+				operation: SheetAdjustmentOperationEnum['+'],
 				value: 'Alice',
 			};
 			const result = bucket.discardAdjustment(adjustment);
@@ -242,11 +312,11 @@ describe('SheetInfoBucket', () => {
 
 		it('should return true if the operation is "-"', () => {
 			const bucket = new SheetInfoBucket();
-			const adjustment: TypedSheetAdjustment = {
-				propertyType: 'info',
-				type: 'untyped',
+			const adjustment: SheetAdjustment = {
+				propertyType: AdjustablePropertyEnum.info,
+				type: SheetAdjustmentTypeEnum.untyped,
 				property: 'name',
-				operation: '-',
+				operation: SheetAdjustmentOperationEnum['-'],
 				value: 'Bob',
 			};
 			const result = bucket.discardAdjustment(adjustment);
@@ -255,11 +325,11 @@ describe('SheetInfoBucket', () => {
 
 		it('should return false if the operation is =', () => {
 			const bucket = new SheetInfoBucket();
-			const adjustment: TypedSheetAdjustment = {
-				propertyType: 'info',
-				type: 'untyped',
+			const adjustment: SheetAdjustment = {
+				propertyType: AdjustablePropertyEnum.info,
+				type: SheetAdjustmentTypeEnum.untyped,
 				property: 'name',
-				operation: '=',
+				operation: SheetAdjustmentOperationEnum['='],
 				value: 'Alice',
 			};
 			const result = bucket.discardAdjustment(adjustment);
@@ -273,17 +343,17 @@ describe('SheetInfoListsBucket', () => {
 		it('should return new adjustment if operation is "="', () => {
 			const bucket = new SheetInfoListsBucket();
 			const currentAdjustment: SheetInfoListAdjustment = {
-				propertyType: 'infoList',
-				type: 'untyped',
+				propertyType: AdjustablePropertyEnum.infoList,
+				type: SheetAdjustmentTypeEnum.untyped,
 				property: 'name',
-				operation: '=',
+				operation: SheetAdjustmentOperationEnum['='],
 				parsed: ['Alice'],
 			};
 			const newAdjustment: SheetInfoListAdjustment = {
-				propertyType: 'infoList',
-				type: 'untyped',
+				propertyType: AdjustablePropertyEnum.infoList,
+				type: SheetAdjustmentTypeEnum.untyped,
 				property: 'name',
-				operation: '=',
+				operation: SheetAdjustmentOperationEnum['='],
 				parsed: ['Bob'],
 			};
 			const result = bucket.combine(currentAdjustment, newAdjustment);
@@ -292,25 +362,25 @@ describe('SheetInfoListsBucket', () => {
 		it('should remove values from the new adjustment if operation is "-"', () => {
 			const bucket = new SheetInfoListsBucket();
 			const currentAdjustment: SheetInfoListAdjustment = {
-				propertyType: 'infoList',
-				type: 'untyped',
+				propertyType: AdjustablePropertyEnum.infoList,
+				type: SheetAdjustmentTypeEnum.untyped,
 				property: 'name',
-				operation: '=',
+				operation: SheetAdjustmentOperationEnum['='],
 				parsed: ['Alice', 'Bob', 'Charlie'],
 			};
 			const newAdjustment: SheetInfoListAdjustment = {
-				propertyType: 'infoList',
-				type: 'untyped',
+				propertyType: AdjustablePropertyEnum.infoList,
+				type: SheetAdjustmentTypeEnum.untyped,
 				property: 'name',
-				operation: '-',
+				operation: SheetAdjustmentOperationEnum['-'],
 				parsed: ['Alice', 'Charlie'],
 			};
 			const result = bucket.combine(currentAdjustment, newAdjustment);
 			expect(result).toEqual({
-				propertyType: 'infoList',
-				type: 'untyped',
+				propertyType: AdjustablePropertyEnum.infoList,
+				type: SheetAdjustmentTypeEnum.untyped,
 				property: 'name',
-				operation: '=',
+				operation: SheetAdjustmentOperationEnum['='],
 				parsed: ['Bob'],
 			});
 		});
@@ -318,25 +388,25 @@ describe('SheetInfoListsBucket', () => {
 		it('should combine values if operation is "+"', () => {
 			const bucket = new SheetInfoListsBucket();
 			const currentAdjustment: SheetInfoListAdjustment = {
-				propertyType: 'info',
-				type: 'untyped',
+				propertyType: AdjustablePropertyEnum.info,
+				type: SheetAdjustmentTypeEnum.untyped,
 				property: 'name',
-				operation: '=',
+				operation: SheetAdjustmentOperationEnum['='],
 				parsed: ['Alice'],
 			};
 			const newAdjustment: SheetInfoListAdjustment = {
-				propertyType: 'info',
-				type: 'untyped',
+				propertyType: AdjustablePropertyEnum.info,
+				type: SheetAdjustmentTypeEnum.untyped,
 				property: 'name',
-				operation: '+',
+				operation: SheetAdjustmentOperationEnum['+'],
 				parsed: ['Bob'],
 			};
 			const result = bucket.combine(currentAdjustment, newAdjustment);
 			expect(result).toEqual({
-				propertyType: 'info',
-				type: 'untyped',
+				propertyType: AdjustablePropertyEnum.info,
+				type: SheetAdjustmentTypeEnum.untyped,
 				property: 'name',
-				operation: '=',
+				operation: SheetAdjustmentOperationEnum['='],
 				parsed: ['Alice', 'Bob'],
 			});
 		});
@@ -345,11 +415,11 @@ describe('SheetInfoListsBucket', () => {
 	describe('discardAdjustment', () => {
 		it('should return true if value is empty and operation is "+"', () => {
 			const bucket = new SheetInfoListsBucket();
-			const adjustment: TypedSheetAdjustment = {
-				type: 'untyped',
-				propertyType: 'info',
+			const adjustment: SheetAdjustment = {
+				type: SheetAdjustmentTypeEnum.untyped,
+				propertyType: AdjustablePropertyEnum.info,
 				property: 'name',
-				operation: '+',
+				operation: SheetAdjustmentOperationEnum['+'],
 				value: '',
 			};
 			const result = bucket.discardAdjustment(adjustment);
@@ -358,11 +428,11 @@ describe('SheetInfoListsBucket', () => {
 
 		it('should return true if value is empty and operation is "-"', () => {
 			const bucket = new SheetInfoListsBucket();
-			const adjustment: TypedSheetAdjustment = {
-				type: 'untyped',
-				propertyType: 'info',
+			const adjustment: SheetAdjustment = {
+				type: SheetAdjustmentTypeEnum.untyped,
+				propertyType: AdjustablePropertyEnum.info,
 				property: 'name',
-				operation: '-',
+				operation: SheetAdjustmentOperationEnum['-'],
 				value: '',
 			};
 			const result = bucket.discardAdjustment(adjustment);
@@ -371,11 +441,11 @@ describe('SheetInfoListsBucket', () => {
 
 		it('should return false if value is not empty', () => {
 			const bucket = new SheetInfoListsBucket();
-			const adjustment: TypedSheetAdjustment = {
-				type: 'untyped',
-				propertyType: 'info',
+			const adjustment: SheetAdjustment = {
+				type: SheetAdjustmentTypeEnum.untyped,
+				propertyType: AdjustablePropertyEnum.info,
 				property: 'name',
-				operation: '+',
+				operation: SheetAdjustmentOperationEnum['+'],
 				value: 'Alice',
 			};
 			const result = bucket.discardAdjustment(adjustment);
@@ -384,11 +454,11 @@ describe('SheetInfoListsBucket', () => {
 
 		it('should return false if operation is not "+" or "-"', () => {
 			const bucket = new SheetInfoListsBucket();
-			const adjustment: TypedSheetAdjustment = {
-				type: 'untyped',
-				propertyType: 'info',
+			const adjustment: SheetAdjustment = {
+				type: SheetAdjustmentTypeEnum.untyped,
+				propertyType: AdjustablePropertyEnum.info,
 				property: 'name',
-				operation: '=',
+				operation: SheetAdjustmentOperationEnum['='],
 				value: 'Alice',
 			};
 			const result = bucket.discardAdjustment(adjustment);
@@ -402,25 +472,25 @@ describe('SheetIntegerPropertyBucket', () => {
 		it('should combine numeric values using addition', () => {
 			const bucket = new SheetIntegerPropertyBucket();
 			const currentAdjustment: SheetIntegerAdjustment = {
-				type: 'untyped',
-				propertyType: 'intProperty',
+				type: SheetAdjustmentTypeEnum.untyped,
+				propertyType: AdjustablePropertyEnum.intProperty,
 				property: 'age',
-				operation: '=',
+				operation: SheetAdjustmentOperationEnum['='],
 				parsed: 30,
 			};
 			const newAdjustment: SheetIntegerAdjustment = {
-				type: 'untyped',
-				propertyType: 'intProperty',
+				type: SheetAdjustmentTypeEnum.untyped,
+				propertyType: AdjustablePropertyEnum.intProperty,
 				property: 'age',
-				operation: '+',
+				operation: SheetAdjustmentOperationEnum['+'],
 				parsed: 10,
 			};
 			const result = bucket.combine(currentAdjustment, newAdjustment);
 			expect(result).toEqual({
-				type: 'untyped',
-				propertyType: 'intProperty',
+				type: SheetAdjustmentTypeEnum.untyped,
+				propertyType: AdjustablePropertyEnum.intProperty,
 				property: 'age',
-				operation: '=',
+				operation: SheetAdjustmentOperationEnum['='],
 				parsed: 40,
 			});
 		});
@@ -435,17 +505,17 @@ describe('SheetIntegerPropertyBucket', () => {
 
 		it('should combine two "add" adjustments', () => {
 			const currentAdjustment: SheetIntegerAdjustment = {
-				type: 'status',
-				propertyType: 'intProperty',
-				operation: '+',
-				property: 'strength',
+				type: SheetAdjustmentTypeEnum.status,
+				propertyType: AdjustablePropertyEnum.intProperty,
+				operation: SheetAdjustmentOperationEnum['+'],
+				property: AbilityEnum.strength,
 				parsed: 10,
 			};
 			const newAdjustment: SheetIntegerAdjustment = {
-				type: 'status',
-				propertyType: 'intProperty',
-				operation: '+',
-				property: 'strength',
+				type: SheetAdjustmentTypeEnum.status,
+				propertyType: AdjustablePropertyEnum.intProperty,
+				operation: SheetAdjustmentOperationEnum['+'],
+				property: AbilityEnum.strength,
 				parsed: 5,
 			};
 			const result = sheetIntegerPropertyBucket.combineSameType(
@@ -453,27 +523,27 @@ describe('SheetIntegerPropertyBucket', () => {
 				newAdjustment
 			);
 			expect(result).toEqual({
-				type: 'status',
-				propertyType: 'intProperty',
-				operation: '+',
-				property: 'strength',
+				type: SheetAdjustmentTypeEnum.status,
+				propertyType: AdjustablePropertyEnum.intProperty,
+				operation: SheetAdjustmentOperationEnum['+'],
+				property: AbilityEnum.strength,
 				parsed: 10,
 			});
 		});
 
 		it('should combine two "subtract" adjustments', () => {
 			const currentAdjustment: SheetIntegerAdjustment = {
-				type: 'status',
-				propertyType: 'intProperty',
-				operation: '-',
-				property: 'strength',
+				type: SheetAdjustmentTypeEnum.status,
+				propertyType: AdjustablePropertyEnum.intProperty,
+				operation: SheetAdjustmentOperationEnum['-'],
+				property: AbilityEnum.strength,
 				parsed: 10,
 			};
 			const newAdjustment: SheetIntegerAdjustment = {
-				type: 'status',
-				propertyType: 'intProperty',
-				operation: '-',
-				property: 'strength',
+				type: SheetAdjustmentTypeEnum.status,
+				propertyType: AdjustablePropertyEnum.intProperty,
+				operation: SheetAdjustmentOperationEnum['-'],
+				property: AbilityEnum.strength,
 				parsed: 5,
 			};
 			const result = sheetIntegerPropertyBucket.combineSameType(
@@ -481,10 +551,10 @@ describe('SheetIntegerPropertyBucket', () => {
 				newAdjustment
 			);
 			expect(result).toEqual({
-				type: 'status',
-				propertyType: 'intProperty',
-				operation: '-',
-				property: 'strength',
+				type: SheetAdjustmentTypeEnum.status,
+				propertyType: AdjustablePropertyEnum.intProperty,
+				operation: SheetAdjustmentOperationEnum['-'],
+				property: AbilityEnum.strength,
 				parsed: 5,
 			});
 		});
@@ -493,11 +563,11 @@ describe('SheetIntegerPropertyBucket', () => {
 	describe('discardAdjustment', () => {
 		it('should return true if value is empty and operation is "+" or "-"', () => {
 			const bucket = new SheetIntegerPropertyBucket();
-			const adjustment: TypedSheetAdjustment = {
-				type: 'untyped',
-				propertyType: 'intProperty',
+			const adjustment: SheetAdjustment = {
+				type: SheetAdjustmentTypeEnum.untyped,
+				propertyType: AdjustablePropertyEnum.intProperty,
 				property: 'age',
-				operation: '+',
+				operation: SheetAdjustmentOperationEnum['+'],
 				value: '',
 			};
 			const result = bucket.discardAdjustment(adjustment);
@@ -506,11 +576,11 @@ describe('SheetIntegerPropertyBucket', () => {
 
 		it('should return false if value is not a valid integer', () => {
 			const bucket = new SheetIntegerPropertyBucket();
-			const adjustment: TypedSheetAdjustment = {
-				type: 'untyped',
-				propertyType: 'intProperty',
+			const adjustment: SheetAdjustment = {
+				type: SheetAdjustmentTypeEnum.untyped,
+				propertyType: AdjustablePropertyEnum.intProperty,
 				property: 'age',
-				operation: '=',
+				operation: SheetAdjustmentOperationEnum['='],
 				value: 'not a number',
 			};
 			const result = bucket.discardAdjustment(adjustment);
@@ -519,11 +589,11 @@ describe('SheetIntegerPropertyBucket', () => {
 
 		it('should return false if operation is not "+" or "-"', () => {
 			const bucket = new SheetIntegerPropertyBucket();
-			const adjustment: TypedSheetAdjustment = {
-				type: 'untyped',
-				propertyType: 'intProperty',
+			const adjustment: SheetAdjustment = {
+				type: SheetAdjustmentTypeEnum.untyped,
+				propertyType: AdjustablePropertyEnum.intProperty,
 				property: 'age',
-				operation: '=',
+				operation: SheetAdjustmentOperationEnum['='],
 				value: '30',
 			};
 			const result = bucket.discardAdjustment(adjustment);
@@ -540,259 +610,356 @@ describe('StatBucket', () => {
 	});
 
 	describe('serialize', () => {
-		it('should serialize a stat adjustment with total', () => {
+		it('should serialize a stat bonus adjustment', () => {
 			const adjustment: SheetStatAdjustment = {
-				type: 'untyped',
-				operation: '=',
-				property: 'test',
-				propertyType: 'stat',
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['='],
+				property: 'arcanaAbility',
+				propertyType: AdjustablePropertyEnum.stat,
 				parsed: {
-					total: 10,
+					value: 10,
+					subKey: StatSubGroupEnum.bonus,
 				},
 			};
 			const result = bucket.serialize(adjustment);
 			expect(result).toEqual({
-				type: 'untyped',
-				propertyType: 'stat',
-				operation: '=',
-				property: 'test',
-				value: 'total:10',
+				type: SheetAdjustmentTypeEnum.untyped,
+				propertyType: AdjustablePropertyEnum.stat,
+				operation: SheetAdjustmentOperationEnum['='],
+				property: 'arcanaAbility',
+				value: '10',
 			});
 		});
 
-		it('should serialize a stat adjustment with proficiency and a totalDC', () => {
+		it('should serialize a stat adjustment with proficiency and a dc', () => {
 			const adjustment: SheetStatAdjustment = {
-				type: 'untyped',
-				operation: '=',
-				property: 'test',
-				propertyType: 'stat',
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['='],
+				property: 'arcanaDc',
+				propertyType: AdjustablePropertyEnum.stat,
 				parsed: {
-					proficiency: 2,
-					totalDC: 15,
+					subKey: StatSubGroupEnum.dc,
+					value: 15,
 				},
 			};
 			const result = bucket.serialize(adjustment);
 			expect(result).toEqual({
-				type: 'untyped',
-				propertyType: 'stat',
-				operation: '=',
-				property: 'test',
-				value: 'proficiency:2,totalDC:15',
+				type: SheetAdjustmentTypeEnum.untyped,
+				propertyType: AdjustablePropertyEnum.stat,
+				operation: SheetAdjustmentOperationEnum['='],
+				property: 'arcanaDc',
+				value: '15',
 			});
 		});
 
 		it('should serialize a stat adjustment with ability', () => {
 			const adjustment: SheetStatAdjustment = {
-				type: 'untyped',
-				property: 'test',
-				operation: '=',
-				propertyType: 'stat',
+				type: SheetAdjustmentTypeEnum.untyped,
+				property: 'arcanaAbility',
+				operation: SheetAdjustmentOperationEnum['='],
+				propertyType: AdjustablePropertyEnum.stat,
 				parsed: {
-					ability: 'strength',
+					value: AbilityEnum.intelligence,
+					subKey: StatSubGroupEnum.ability,
 				},
 			};
 			const result = bucket.serialize(adjustment);
 			expect(result).toEqual({
-				type: 'untyped',
-				propertyType: 'stat',
-				operation: '=',
-				property: 'test',
-				value: 'ability:strength',
+				type: SheetAdjustmentTypeEnum.untyped,
+				propertyType: AdjustablePropertyEnum.stat,
+				operation: SheetAdjustmentOperationEnum['='],
+				property: 'arcanaAbility',
+				value: AbilityEnum.intelligence,
 			});
 		});
 	});
 
 	describe('deserialize', () => {
-		it('should deserialize a stat adjustment with total', () => {
-			const adjustment: TypedSheetAdjustment = {
-				type: 'untyped',
-				operation: '=',
-				propertyType: 'stat',
-				property: 'test',
-				value: 'total:10',
+		it('should deserialize a stat adjustment with bonus', () => {
+			const adjustment: SheetAdjustment = {
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['='],
+				propertyType: AdjustablePropertyEnum.stat,
+				property: 'arcanaAbility',
+				value: AbilityEnum.intelligence,
 			};
 			const result = bucket.deserialize(adjustment);
 			expect(result).toEqual({
-				type: 'untyped',
-				property: 'test',
-				operation: '=',
-				propertyType: 'stat',
+				type: SheetAdjustmentTypeEnum.untyped,
+				property: 'arcanaAbility',
+				operation: SheetAdjustmentOperationEnum['='],
+				propertyType: AdjustablePropertyEnum.stat,
 				parsed: {
-					total: 10,
+					value: AbilityEnum.intelligence,
+					subKey: StatSubGroupEnum.ability,
 				},
 			});
 		});
 
 		it('should deserialize a stat adjustment with proficiency', () => {
-			const adjustment: TypedSheetAdjustment = {
-				type: 'untyped',
-				operation: '=',
-				propertyType: 'stat',
-				property: 'test',
-				value: 'proficiency:2',
+			const adjustment: SheetAdjustment = {
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['='],
+				propertyType: AdjustablePropertyEnum.stat,
+				property: 'arcanaProficiency',
+				value: '2',
 			};
 			const result = bucket.deserialize(adjustment);
 			expect(result).toEqual({
-				type: 'untyped',
-				propertyType: 'stat',
-				property: 'test',
-				operation: '=',
+				type: SheetAdjustmentTypeEnum.untyped,
+				propertyType: AdjustablePropertyEnum.stat,
+				property: 'arcanaProficiency',
+				operation: SheetAdjustmentOperationEnum['='],
 				parsed: {
-					proficiency: 2,
+					value: 2,
+					subKey: StatSubGroupEnum.proficiency,
 				},
 			});
 		});
 
-		it('should deserialize a stat adjustment with totalDC', () => {
-			const adjustment: TypedSheetAdjustment = {
-				type: 'untyped',
-				operation: '=',
-				propertyType: 'stat',
-				property: 'test',
-				value: 'totalDC:15',
+		it('should deserialize a stat adjustment with dc', () => {
+			const adjustment: SheetAdjustment = {
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['='],
+				propertyType: AdjustablePropertyEnum.stat,
+				property: 'arcanaDc',
+				value: '15',
 			};
 			const result = bucket.deserialize(adjustment);
 			expect(result).toEqual({
-				type: 'untyped',
-				property: 'test',
-				propertyType: 'stat',
-				operation: '=',
+				type: SheetAdjustmentTypeEnum.untyped,
+				property: 'arcanaDc',
+				propertyType: AdjustablePropertyEnum.stat,
+				operation: SheetAdjustmentOperationEnum['='],
 				parsed: {
-					totalDC: 15,
+					value: 15,
+					subKey: StatSubGroupEnum.dc,
 				},
 			});
 		});
 
 		it('should deserialize a stat adjustment with ability', () => {
-			const adjustment: TypedSheetAdjustment = {
-				type: 'untyped',
-				operation: '=',
-				propertyType: 'stat',
-				property: 'test',
-				value: 'ability:strength',
+			const adjustment: SheetAdjustment = {
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['='],
+				propertyType: AdjustablePropertyEnum.stat,
+				property: 'arcanaAbility',
+				value: AbilityEnum.strength,
 			};
 			const result = bucket.deserialize(adjustment);
 			expect(result).toEqual({
-				type: 'untyped',
-				property: 'test',
-				propertyType: 'stat',
-				operation: '=',
+				type: SheetAdjustmentTypeEnum.untyped,
+				property: 'arcanaAbility',
+				propertyType: AdjustablePropertyEnum.stat,
+				operation: SheetAdjustmentOperationEnum['='],
 				parsed: {
-					ability: 'strength',
+					value: AbilityEnum.strength,
+					subKey: StatSubGroupEnum.ability,
 				},
 			});
 		});
 	});
 
 	describe('combine', () => {
-		it('should combine two stat adjustments with = operation', () => {
+		it('should combine two numeric stat adjustments with = operation by overwriting', () => {
 			const currentAdjustment: SheetStatAdjustment = {
-				type: 'untyped',
-				operation: '=',
-				property: 'test',
-				propertyType: 'stat',
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['+'],
+				property: 'arcanaBonus',
+				propertyType: AdjustablePropertyEnum.stat,
 				parsed: {
-					total: 10,
-					proficiency: 2,
+					value: 10,
+					subKey: StatSubGroupEnum.bonus,
 				},
 			};
 			const newAdjustment: SheetStatAdjustment = {
-				type: 'untyped',
-				operation: '=',
-				property: 'test',
-				propertyType: 'stat',
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['='],
+				property: 'arcanaBonus',
+				propertyType: AdjustablePropertyEnum.stat,
 				parsed: {
-					totalDC: 15,
-					ability: 'strength',
+					value: 15,
+					subKey: StatSubGroupEnum.bonus,
 				},
 			};
 			const result = bucket.combine(currentAdjustment, newAdjustment);
 			expect(result).toEqual({
-				type: 'untyped',
-				operation: '=',
-				property: 'test',
-				propertyType: 'stat',
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['='],
+				property: 'arcanaBonus',
+				propertyType: AdjustablePropertyEnum.stat,
 				parsed: {
-					total: 10,
-					proficiency: 2,
-					totalDC: 15,
-					ability: 'strength',
+					value: 15,
+					subKey: StatSubGroupEnum.bonus,
 				},
 			});
 		});
 
-		it('should combine two stat adjustments with + operation', () => {
+		it('should combine two numeric stat adjustments with =, then + operation', () => {
 			const currentAdjustment: SheetStatAdjustment = {
-				type: 'untyped',
-				operation: '=',
-				property: 'test',
-				propertyType: 'stat',
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['='],
+				property: 'arcanaProficiency',
+				propertyType: AdjustablePropertyEnum.stat,
 				parsed: {
-					total: 10,
-					proficiency: 2,
+					value: 4,
+					subKey: StatSubGroupEnum.proficiency,
 				},
 			};
 			const newAdjustment: SheetStatAdjustment = {
-				type: 'untyped',
-				operation: '+',
-				property: 'test',
-				propertyType: 'stat',
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['+'],
+				property: 'arcanaProficiency',
+				propertyType: AdjustablePropertyEnum.stat,
 				parsed: {
-					total: 5,
-					totalDC: 15,
-					ability: 'strength',
+					value: 2,
+					subKey: StatSubGroupEnum.proficiency,
 				},
 			};
 			const result = bucket.combine(currentAdjustment, newAdjustment);
 			expect(result).toEqual({
-				type: 'untyped',
-				operation: '=',
-				property: 'test',
-				propertyType: 'stat',
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['='],
+				property: 'arcanaProficiency',
+				propertyType: AdjustablePropertyEnum.stat,
 				parsed: {
-					total: 15,
-					proficiency: 2,
-					totalDC: 15,
-					ability: 'strength',
+					value: 6,
+					subKey: StatSubGroupEnum.proficiency,
 				},
 			});
 		});
 
-		it('should combine two stat adjustments with - operation', () => {
+		it('should combine two numeric stat adjustments with - operation', () => {
 			const currentAdjustment: SheetStatAdjustment = {
-				type: 'untyped',
-				operation: '=',
-				property: 'test',
-				propertyType: 'stat',
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['='],
+				property: 'ArcanaBonus',
+				propertyType: AdjustablePropertyEnum.stat,
 				parsed: {
-					total: 10,
-					proficiency: 2,
-					totalDC: 15,
-					ability: 'strength',
+					value: 10,
+					subKey: StatSubGroupEnum.bonus,
 				},
 			};
 			const newAdjustment: SheetStatAdjustment = {
-				type: 'untyped',
-				operation: '-',
-				property: 'test',
-				propertyType: 'stat',
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['-'],
+				property: 'ArcanaBonus',
+				propertyType: AdjustablePropertyEnum.stat,
 				parsed: {
-					total: 5,
-					totalDC: 10,
-					ability: 'strength',
+					value: 2,
+					subKey: StatSubGroupEnum.bonus,
 				},
 			};
 			const result = bucket.combine(currentAdjustment, newAdjustment);
 			expect(result).toEqual({
-				type: 'untyped',
-				operation: '=',
-				property: 'test',
-				propertyType: 'stat',
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['='],
+				property: 'ArcanaBonus',
+				propertyType: AdjustablePropertyEnum.stat,
 				parsed: {
-					total: 5,
-					proficiency: 2,
-					totalDC: 5,
-					ability: null,
+					value: 8,
+					subKey: StatSubGroupEnum.bonus,
+				},
+			});
+		});
+		it('should combine two text stat adjustments with = operation by overwriting', () => {
+			const currentAdjustment: SheetStatAdjustment = {
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['+'],
+				property: 'arcanaAbility',
+				propertyType: AdjustablePropertyEnum.stat,
+				parsed: {
+					value: AbilityEnum.intelligence,
+					subKey: StatSubGroupEnum.ability,
+				},
+			};
+			const newAdjustment: SheetStatAdjustment = {
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['='],
+				property: 'arcanaAbility',
+				propertyType: AdjustablePropertyEnum.stat,
+				parsed: {
+					value: AbilityEnum.charisma,
+					subKey: StatSubGroupEnum.ability,
+				},
+			};
+			const result = bucket.combine(currentAdjustment, newAdjustment);
+			expect(result).toEqual({
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['='],
+				property: 'arcanaAbility',
+				propertyType: AdjustablePropertyEnum.stat,
+				parsed: {
+					value: AbilityEnum.charisma,
+					subKey: StatSubGroupEnum.ability,
+				},
+			});
+		});
+
+		it('should combine two text stat adjustments with =, then + operation', () => {
+			const currentAdjustment: SheetStatAdjustment = {
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['='],
+				property: 'arcanaAbility',
+				propertyType: AdjustablePropertyEnum.stat,
+				parsed: {
+					value: AbilityEnum.intelligence,
+					subKey: StatSubGroupEnum.ability,
+				},
+			};
+			const newAdjustment: SheetStatAdjustment = {
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['+'],
+				property: 'arcanaAbility',
+				propertyType: AdjustablePropertyEnum.stat,
+				parsed: {
+					value: AbilityEnum.strength,
+					subKey: StatSubGroupEnum.ability,
+				},
+			};
+			const result = bucket.combine(currentAdjustment, newAdjustment);
+			expect(result).toEqual({
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['+'],
+				property: 'arcanaAbility',
+				propertyType: AdjustablePropertyEnum.stat,
+				parsed: {
+					value: AbilityEnum.strength,
+					subKey: StatSubGroupEnum.ability,
+				},
+			});
+		});
+
+		it('should combine two text stat adjustments with - operation', () => {
+			const currentAdjustment: SheetStatAdjustment = {
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['='],
+				property: 'ArcanaAbility',
+				propertyType: AdjustablePropertyEnum.stat,
+				parsed: {
+					value: AbilityEnum.intelligence,
+					subKey: StatSubGroupEnum.ability,
+				},
+			};
+			const newAdjustment: SheetStatAdjustment = {
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['-'],
+				property: 'ArcanaAbility',
+				propertyType: AdjustablePropertyEnum.stat,
+				parsed: {
+					value: AbilityEnum.intelligence,
+					subKey: StatSubGroupEnum.ability,
+				},
+			};
+			const result = bucket.combine(currentAdjustment, newAdjustment);
+			expect(result).toEqual({
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['='],
+				property: 'ArcanaAbility',
+				propertyType: AdjustablePropertyEnum.stat,
+				parsed: {
+					value: '',
+					subKey: StatSubGroupEnum.ability,
 				},
 			});
 		});
@@ -800,10 +967,10 @@ describe('StatBucket', () => {
 
 	describe('discardAdjustment', () => {
 		it('should discard a stat adjustment with empty value and + operation', () => {
-			const adjustment: TypedSheetAdjustment = {
-				type: 'untyped',
-				operation: '+',
-				propertyType: 'stat',
+			const adjustment: SheetAdjustment = {
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['+'],
+				propertyType: AdjustablePropertyEnum.stat,
 				property: 'test',
 				value: '',
 			};
@@ -812,10 +979,10 @@ describe('StatBucket', () => {
 		});
 
 		it('should discard a stat adjustment with empty value and - operation', () => {
-			const adjustment: TypedSheetAdjustment = {
-				type: 'untyped',
-				operation: '-',
-				propertyType: 'stat',
+			const adjustment: SheetAdjustment = {
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['-'],
+				propertyType: AdjustablePropertyEnum.stat,
 				property: 'test',
 				value: '',
 			};
@@ -824,24 +991,24 @@ describe('StatBucket', () => {
 		});
 
 		it('should not discard a stat adjustment with non-empty value and + operation', () => {
-			const adjustment: TypedSheetAdjustment = {
-				type: 'untyped',
-				operation: '+',
-				propertyType: 'stat',
+			const adjustment: SheetAdjustment = {
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['+'],
+				propertyType: AdjustablePropertyEnum.stat,
 				property: 'test',
-				value: 'total:10',
+				value: 'bonus:10',
 			};
 			const result = bucket.discardAdjustment(adjustment);
 			expect(result).toBe(false);
 		});
 
 		it('should not discard a stat adjustment with non-empty value and - operation', () => {
-			const adjustment: TypedSheetAdjustment = {
-				type: 'untyped',
-				operation: '-',
-				propertyType: 'stat',
+			const adjustment: SheetAdjustment = {
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['-'],
+				propertyType: AdjustablePropertyEnum.stat,
 				property: 'test',
-				value: 'total:10',
+				value: 'bonus:10',
 			};
 			const result = bucket.discardAdjustment(adjustment);
 			expect(result).toBe(false);
@@ -858,24 +1025,29 @@ describe('WeaknessResistanceBucket', () => {
 
 	describe('sortToBucket', () => {
 		it('should add an adjustment to the correct bucket', () => {
-			const adjustment: TypedSheetAdjustment = {
-				type: 'status',
-				propertyType: 'weaknessResistance',
-				operation: '+',
+			const adjustment: SheetAdjustment = {
+				type: SheetAdjustmentTypeEnum.status,
+				propertyType: AdjustablePropertyEnum.weaknessResistance,
+				operation: SheetAdjustmentOperationEnum['+'],
 				property: 'fire weakness',
 				value: '10',
 			};
 			weaknessResistanceBucket.sortToBucket(adjustment);
 			expect(weaknessResistanceBucket.buckets['fire weakness']).toEqual({
-				status: { ..._.omit(adjustment, 'value'), parsed: 10 },
+				status: {
+					[SheetAdjustmentOperationEnum['+']]: {
+						..._.omit(adjustment, 'value'),
+						parsed: 10,
+					},
+				},
 			});
 		});
 
 		it('should discard an adjustment with an empty value and "+" operation', () => {
-			const adjustment: TypedSheetAdjustment = {
-				type: 'status',
-				propertyType: 'weaknessResistance',
-				operation: '+',
+			const adjustment: SheetAdjustment = {
+				type: SheetAdjustmentTypeEnum.status,
+				propertyType: AdjustablePropertyEnum.weaknessResistance,
+				operation: SheetAdjustmentOperationEnum['+'],
 				property: 'fire weakness',
 				value: '',
 			};
@@ -884,10 +1056,10 @@ describe('WeaknessResistanceBucket', () => {
 		});
 
 		it('should discard an adjustment with an empty value and "-" operation', () => {
-			const adjustment: TypedSheetAdjustment = {
-				type: 'status',
-				propertyType: 'weaknessResistance',
-				operation: '-',
+			const adjustment: SheetAdjustment = {
+				type: SheetAdjustmentTypeEnum.status,
+				propertyType: AdjustablePropertyEnum.weaknessResistance,
+				operation: SheetAdjustmentOperationEnum['-'],
 				property: 'fire resistance',
 				value: '',
 			};
@@ -896,10 +1068,10 @@ describe('WeaknessResistanceBucket', () => {
 		});
 
 		it('should discard an adjustment with a non-numeric value', () => {
-			const adjustment: TypedSheetAdjustment = {
-				type: 'status',
-				propertyType: 'weaknessResistance',
-				operation: '+',
+			const adjustment: SheetAdjustment = {
+				type: SheetAdjustmentTypeEnum.status,
+				propertyType: AdjustablePropertyEnum.weaknessResistance,
+				operation: SheetAdjustmentOperationEnum['+'],
 				property: 'fire resistance',
 				value: 'not a number',
 			};
@@ -910,24 +1082,24 @@ describe('WeaknessResistanceBucket', () => {
 
 	describe('reduceBuckets', () => {
 		it('should reduce the bucket and return the adjustments', () => {
-			const adjustment1: TypedSheetAdjustment = {
-				type: 'status',
-				propertyType: 'weaknessResistance',
-				operation: '+',
+			const adjustment1: SheetAdjustment = {
+				type: SheetAdjustmentTypeEnum.status,
+				propertyType: AdjustablePropertyEnum.weaknessResistance,
+				operation: SheetAdjustmentOperationEnum['+'],
 				property: 'cold weakness',
 				value: '10',
 			};
-			const adjustment2: TypedSheetAdjustment = {
-				type: 'status',
-				propertyType: 'weaknessResistance',
-				operation: '-',
+			const adjustment2: SheetAdjustment = {
+				type: SheetAdjustmentTypeEnum.status,
+				propertyType: AdjustablePropertyEnum.weaknessResistance,
+				operation: SheetAdjustmentOperationEnum['-'],
 				property: 'cold weakness',
 				value: '5',
 			};
-			const resultAdjustment: TypedSheetAdjustment = {
-				type: 'status',
-				propertyType: 'weaknessResistance',
-				operation: '+',
+			const resultAdjustment: SheetAdjustment = {
+				type: SheetAdjustmentTypeEnum.status,
+				propertyType: AdjustablePropertyEnum.weaknessResistance,
+				operation: SheetAdjustmentOperationEnum['+'],
 				property: 'cold weakness',
 				value: '5',
 			};
@@ -950,10 +1122,10 @@ describe('AttackBucket', () => {
 
 	describe('discardAdjustment', () => {
 		it('should discard an adjustment with "+" operation', () => {
-			const adjustment: TypedSheetAdjustment = {
-				type: 'untyped',
-				propertyType: 'attack',
-				operation: '+',
+			const adjustment: SheetAdjustment = {
+				type: SheetAdjustmentTypeEnum.untyped,
+				propertyType: AdjustablePropertyEnum.attack,
+				operation: SheetAdjustmentOperationEnum['+'],
 				property: 'fire',
 				value: 'attack: 10; damage: 1d4+2',
 			};
@@ -962,10 +1134,10 @@ describe('AttackBucket', () => {
 		});
 
 		it('should discard an adjustment with "-" operation', () => {
-			const adjustment: TypedSheetAdjustment = {
-				type: 'untyped',
-				propertyType: 'attack',
-				operation: '-',
+			const adjustment: SheetAdjustment = {
+				type: SheetAdjustmentTypeEnum.untyped,
+				propertyType: AdjustablePropertyEnum.attack,
+				operation: SheetAdjustmentOperationEnum['-'],
 				property: 'claw',
 				value: 'attack: 10; damage: 1d4+2',
 			};
@@ -974,10 +1146,10 @@ describe('AttackBucket', () => {
 		});
 
 		it('should not discard an adjustment with "=" operation', () => {
-			const adjustment: TypedSheetAdjustment = {
-				type: 'untyped',
-				propertyType: 'attack',
-				operation: '=',
+			const adjustment: SheetAdjustment = {
+				type: SheetAdjustmentTypeEnum.untyped,
+				propertyType: AdjustablePropertyEnum.attack,
+				operation: SheetAdjustmentOperationEnum['='],
 				property: 'claw',
 				value: 'attack: 10; damage: 1d4+2',
 			};
@@ -989,9 +1161,9 @@ describe('AttackBucket', () => {
 	describe('serialize', () => {
 		it('should serialize an adjustment to a string', () => {
 			const adjustment: SheetAttackAdjustment = {
-				type: 'untyped',
-				propertyType: 'attack',
-				operation: '=',
+				type: SheetAdjustmentTypeEnum.untyped,
+				propertyType: AdjustablePropertyEnum.attack,
+				operation: SheetAdjustmentOperationEnum['='],
 				property: 'claw attack',
 				parsed: {
 					name: 'claw',
@@ -1011,18 +1183,18 @@ describe('AttackBucket', () => {
 
 	describe('deserialize', () => {
 		it('should deserialize a string to an adjustment', () => {
-			const adjustment: TypedSheetAdjustment = {
-				type: 'untyped',
-				propertyType: 'attack',
-				operation: '=',
+			const adjustment: SheetAdjustment = {
+				type: SheetAdjustmentTypeEnum.untyped,
+				propertyType: AdjustablePropertyEnum.attack,
+				operation: SheetAdjustmentOperationEnum['='],
 				property: 'claw attack',
-				value: 'to hit: 5; damage: 1d4+2 slashing; range: 10 ft; traits: agile, finesse; notes: This is a note',
+				value: 'to hit: 5 | damage: 1d4+2 slashing | range: 10 ft & traits: agile, finesse & notes: This is a note',
 			};
 			const result = attackBucket.deserialize(adjustment);
 			expect(result).toEqual({
-				type: 'untyped',
-				propertyType: 'attack',
-				operation: '=',
+				type: SheetAdjustmentTypeEnum.untyped,
+				propertyType: AdjustablePropertyEnum.attack,
+				operation: SheetAdjustmentOperationEnum['='],
 				property: 'claw attack',
 				parsed: {
 					name: 'claw',
@@ -1039,9 +1211,9 @@ describe('AttackBucket', () => {
 	describe('combine', () => {
 		it('should return the new adjustment', () => {
 			const currentAdjustment: SheetAttackAdjustment = {
-				type: 'untyped',
-				propertyType: 'attack',
-				operation: '=',
+				type: SheetAdjustmentTypeEnum.untyped,
+				propertyType: AdjustablePropertyEnum.attack,
+				operation: SheetAdjustmentOperationEnum['='],
 				property: 'claw attack',
 				parsed: {
 					name: 'claw',
@@ -1053,9 +1225,9 @@ describe('AttackBucket', () => {
 				},
 			};
 			const newAdjustment: SheetAttackAdjustment = {
-				type: 'untyped',
-				propertyType: 'attack',
-				operation: '=',
+				type: SheetAdjustmentTypeEnum.untyped,
+				propertyType: AdjustablePropertyEnum.attack,
+				operation: SheetAdjustmentOperationEnum['='],
 				property: 'claw attack',
 				parsed: {
 					name: 'claw',

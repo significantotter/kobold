@@ -47,7 +47,7 @@ describe('Character', () => {
 	// 			characterData: CharacterDataFactory.build({ name: 'aSdFqWeRtYuI' }),
 	// 		});
 	// 		const createdCharacter = await Character.query().insert(builtCharacter);
-	// 		const looseFetch = await Character.queryControlledCharacterByName('sDfQwE', '1');
+	// 		const looseFetch = await CharacterUtils.findCharacterByName('sDfQwE', '1');
 	// 		expect(looseFetch).toHaveProperty('length', 1);
 	// 		expect(looseFetch[0].characterData).toHaveProperty('name', 'aSdFqWeRtYuI');
 	// 	});

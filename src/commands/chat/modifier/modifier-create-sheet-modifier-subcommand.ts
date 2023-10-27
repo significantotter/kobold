@@ -14,6 +14,7 @@ import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import L from '../../../i18n/i18n-node.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
 import { Creature } from '../../../utils/creature.js';
+import { SheetUtils } from '../../../utils/sheet-utils.js';
 
 export class ModifierCreateSheetModifierSubCommand implements Command {
 	public names = [L.en.commands.modifier.createSheetModifier.name()];
@@ -60,7 +61,7 @@ export class ModifierCreateSheetModifierSubCommand implements Command {
 
 		const creature = new Creature(activeCharacter.sheet);
 
-		const parsedSheetValues: SheetAdjustment[] = StringUtils.parseSheetModifiers(
+		const parsedSheetValues: SheetAdjustment[] = SheetUtils.sheetModifiersFromString(
 			modifierSheetValues,
 			creature
 		);

@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import { Character } from './../services/kobold/models/character/character.zod.js';
 import { Creature, roll, rollable } from './creature.js';
 import { StringUtils } from './string-utils.js';
 import {
@@ -8,6 +7,7 @@ import {
 	ChatInputCommandInteraction,
 	CommandInteraction,
 } from 'discord.js';
+import { Character } from '../services/kobold/models/index.js';
 
 interface NamedThing {
 	Name: string;
@@ -44,6 +44,24 @@ export class CharacterUtils {
 			}
 		}
 		return lowestMatchTarget;
+	}
+
+	/**
+	 * Given a string, finds all skills containing that string on a given character
+	 * @param targetCharacter the character to check for matching skills
+	 * @param skillText the text to match to skills
+	 * @returns all skills that contain the given skillText
+	 */
+	public static async findCharacterByName(
+		nameText: string,
+		userId: string
+	): Promise<Character[]> {
+		const results = await CharacterUtils.findCharacterByName(nameText, userId);
+		const closestByName = StringUtils.generateSorterByWordDistance<Character>(
+			nameText,
+			character => character.name
+		);
+		return results.sort(closestByName);
 	}
 
 	/**

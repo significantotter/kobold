@@ -1,3 +1,22 @@
+export type * from './character/character.zod.js';
+// also export the enums and some other needed values
+export {
+	AbilityEnum,
+	AdjustablePropertyEnum,
+	SheetAdjustmentOperationEnum,
+	SheetAdjustmentTypeEnum,
+	SheetStatKeys,
+	SheetInfoKeys,
+	SheetIntegerKeys,
+	SheetInfoListKeys,
+	SheetBaseCounterKeys,
+	SheetWeaknessesResistancesKeys,
+	StatSubGroupEnum,
+	getDefaultSheet,
+} from './character/character.zod.js';
+
+// TODO: purge all non-kobold-service imports within this directory
+
 export { WgToken } from './wg-token/wg-token.model.js';
 export { WgTokenFactory } from './wg-token/wg-token.factory.js';
 export { Character } from './character/character.model.js';
@@ -22,5 +41,3 @@ export type { Attribute } from './../lib/shared-schemas/attribute.schema.js';
 export type { ModelWithSheet } from './../lib/thing-with-sheet.js';
 
 export type { InitWithActorsAndGroups } from './../lib/type-helpers.js';
-
-export type * from './character/character.zod.js';

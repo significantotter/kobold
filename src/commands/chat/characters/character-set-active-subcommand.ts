@@ -16,6 +16,7 @@ import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
+import { CharacterUtils } from '../../../utils/character-utils.js';
 
 export class CharacterSetActiveSubCommand implements Command {
 	public names = [L.en.commands.character.setActive.name()];
@@ -39,7 +40,7 @@ export class CharacterSetActiveSubCommand implements Command {
 			const match = intr.options.getString(ChatArgs.SET_ACTIVE_NAME_OPTION.name) ?? '';
 
 			//get the character matches
-			const options = await Character.queryControlledCharacterByName(match, intr.user.id);
+			const options = await CharacterUtils.findCharacterByName(match, intr.user.id);
 
 			//return the matched characters
 			return options.map(character => ({
@@ -57,7 +58,7 @@ export class CharacterSetActiveSubCommand implements Command {
 
 		// try and find that charcter
 		const targetCharacter = (
-			await Character.queryControlledCharacterByName(charName, intr.user.id)
+			await CharacterUtils.findCharacterByName(charName, intr.user.id)
 		)[0];
 
 		if (targetCharacter) {

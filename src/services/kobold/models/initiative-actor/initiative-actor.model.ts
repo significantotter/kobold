@@ -3,7 +3,7 @@ import { BaseModel } from '../../lib/base-model.js';
 import InitiativeActorSchema from './initiative-actor.schema.json' assert { type: 'json' };
 import Objection, { Model, RelationMappings } from 'objection';
 import { Initiative } from '../initiative/initiative.model.js';
-import { Sheet as SheetType } from '../../lib/type-helpers.js';
+import { Sheet as SheetType } from './../character/character.zod.js';
 import { InitiativeActorGroup } from '../initiative-actor-group/initiative-actor-group.model.js';
 import { Character } from '../character/character.model.js';
 import { ChatInputCommandInteraction } from 'discord.js';
@@ -19,6 +19,7 @@ export interface InitiativeActor extends InitiativeActorType {
 }
 export class InitiativeActor extends BaseModel {
 	static idColumn: string | string[] = 'id';
+
 	public async saveSheet(intr: ChatInputCommandInteraction, sheet: SheetType) {
 		// apply any damage effects from the action to the creature
 		let promises: any[] = [

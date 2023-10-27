@@ -23,6 +23,7 @@ import { compileExpression } from 'filtrex';
 import { DiceUtils } from '../../../utils/dice-utils.js';
 import { Creature } from '../../../utils/creature.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
+import { SheetUtils } from '../../../utils/sheet-utils.js';
 
 export class ModifierUpdateSubCommand implements Command {
 	public names = [L.en.commands.modifier.update.name()];
@@ -166,7 +167,7 @@ export class ModifierUpdateSubCommand implements Command {
 				);
 			}
 			const creature = new Creature(activeCharacter.sheet);
-			updateValue = StringUtils.parseSheetModifiers(newFieldValue, creature);
+			updateValue = SheetUtils.sheetModifiersFromString(newFieldValue, creature);
 		} else {
 			// if a field wasn't provided, or the field isn't present in our options, send an error
 			await InteractionUtils.send(
