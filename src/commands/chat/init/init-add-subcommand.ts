@@ -25,7 +25,7 @@ import { Npc, Sheet } from '../../../services/kobold/models/index.js';
 import { Creature } from '../../../utils/creature.js';
 import _ from 'lodash';
 import { InitOptions } from './init-command-options.js';
-import { generateStatOverrides } from '../../../utils/sheet-import-utils.js';
+import { generateStatOverrides } from '../../../utils/sheet/sheet-import-utils.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
 import { SettingsUtils } from '../../../utils/settings-utils.js';
 import L from '../../../i18n/i18n-node.js';

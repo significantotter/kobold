@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import {
 	SheetAttackAdjustment,
+	SheetExtraSkillAdjustment,
 	SheetInfoAdjustment,
 	SheetInfoListAdjustment,
 	SheetIntegerAdjustment,
@@ -14,6 +15,7 @@ import {
 	SheetIntegerPropertyBucket,
 	WeaknessResistanceBucket,
 	AttackBucket,
+	ExtraSkillBucket,
 } from './sheet-adjustment-bucketer.js';
 import {
 	AbilityEnum,
@@ -21,8 +23,10 @@ import {
 	SheetAdjustment,
 	SheetAdjustmentOperationEnum,
 	SheetAdjustmentTypeEnum,
+	SheetStatKeys,
 	StatSubGroupEnum,
-} from '../services/kobold/models/index.js';
+} from '../../services/kobold/models/index.js';
+import { KoboldError } from '../KoboldError.js';
 
 class TestSheetPropertyGroupBucket extends SheetPropertyGroupBucket<SheetAdjustment> {
 	public serialize(adjustment: SheetAdjustment): SheetAdjustment {
@@ -614,10 +618,11 @@ describe('StatBucket', () => {
 			const adjustment: SheetStatAdjustment = {
 				type: SheetAdjustmentTypeEnum.untyped,
 				operation: SheetAdjustmentOperationEnum['='],
-				property: 'arcanaAbility',
+				property: 'arcanaBonus',
 				propertyType: AdjustablePropertyEnum.stat,
 				parsed: {
 					value: 10,
+					baseKey: SheetStatKeys.arcana,
 					subKey: StatSubGroupEnum.bonus,
 				},
 			};
@@ -626,18 +631,19 @@ describe('StatBucket', () => {
 				type: SheetAdjustmentTypeEnum.untyped,
 				propertyType: AdjustablePropertyEnum.stat,
 				operation: SheetAdjustmentOperationEnum['='],
-				property: 'arcanaAbility',
+				property: 'arcanaBonus',
 				value: '10',
 			});
 		});
 
-		it('should serialize a stat adjustment with proficiency and a dc', () => {
+		it('should serialize a stat adjustment wit a dc', () => {
 			const adjustment: SheetStatAdjustment = {
 				type: SheetAdjustmentTypeEnum.untyped,
 				operation: SheetAdjustmentOperationEnum['='],
 				property: 'arcanaDc',
 				propertyType: AdjustablePropertyEnum.stat,
 				parsed: {
+					baseKey: SheetStatKeys.arcana,
 					subKey: StatSubGroupEnum.dc,
 					value: 15,
 				},
@@ -660,6 +666,7 @@ describe('StatBucket', () => {
 				propertyType: AdjustablePropertyEnum.stat,
 				parsed: {
 					value: AbilityEnum.intelligence,
+					baseKey: SheetStatKeys.arcana,
 					subKey: StatSubGroupEnum.ability,
 				},
 			};
@@ -691,6 +698,7 @@ describe('StatBucket', () => {
 				propertyType: AdjustablePropertyEnum.stat,
 				parsed: {
 					value: AbilityEnum.intelligence,
+					baseKey: SheetStatKeys.arcana,
 					subKey: StatSubGroupEnum.ability,
 				},
 			});
@@ -712,6 +720,7 @@ describe('StatBucket', () => {
 				operation: SheetAdjustmentOperationEnum['='],
 				parsed: {
 					value: 2,
+					baseKey: SheetStatKeys.arcana,
 					subKey: StatSubGroupEnum.proficiency,
 				},
 			});
@@ -733,6 +742,7 @@ describe('StatBucket', () => {
 				operation: SheetAdjustmentOperationEnum['='],
 				parsed: {
 					value: 15,
+					baseKey: SheetStatKeys.arcana,
 					subKey: StatSubGroupEnum.dc,
 				},
 			});
@@ -754,6 +764,7 @@ describe('StatBucket', () => {
 				operation: SheetAdjustmentOperationEnum['='],
 				parsed: {
 					value: AbilityEnum.strength,
+					baseKey: SheetStatKeys.arcana,
 					subKey: StatSubGroupEnum.ability,
 				},
 			});
@@ -769,6 +780,7 @@ describe('StatBucket', () => {
 				propertyType: AdjustablePropertyEnum.stat,
 				parsed: {
 					value: 10,
+					baseKey: SheetStatKeys.arcana,
 					subKey: StatSubGroupEnum.bonus,
 				},
 			};
@@ -779,6 +791,7 @@ describe('StatBucket', () => {
 				propertyType: AdjustablePropertyEnum.stat,
 				parsed: {
 					value: 15,
+					baseKey: SheetStatKeys.arcana,
 					subKey: StatSubGroupEnum.bonus,
 				},
 			};
@@ -790,6 +803,7 @@ describe('StatBucket', () => {
 				propertyType: AdjustablePropertyEnum.stat,
 				parsed: {
 					value: 15,
+					baseKey: SheetStatKeys.arcana,
 					subKey: StatSubGroupEnum.bonus,
 				},
 			});
@@ -803,6 +817,7 @@ describe('StatBucket', () => {
 				propertyType: AdjustablePropertyEnum.stat,
 				parsed: {
 					value: 4,
+					baseKey: SheetStatKeys.arcana,
 					subKey: StatSubGroupEnum.proficiency,
 				},
 			};
@@ -813,6 +828,7 @@ describe('StatBucket', () => {
 				propertyType: AdjustablePropertyEnum.stat,
 				parsed: {
 					value: 2,
+					baseKey: SheetStatKeys.arcana,
 					subKey: StatSubGroupEnum.proficiency,
 				},
 			};
@@ -824,6 +840,7 @@ describe('StatBucket', () => {
 				propertyType: AdjustablePropertyEnum.stat,
 				parsed: {
 					value: 6,
+					baseKey: SheetStatKeys.arcana,
 					subKey: StatSubGroupEnum.proficiency,
 				},
 			});
@@ -837,6 +854,7 @@ describe('StatBucket', () => {
 				propertyType: AdjustablePropertyEnum.stat,
 				parsed: {
 					value: 10,
+					baseKey: SheetStatKeys.arcana,
 					subKey: StatSubGroupEnum.bonus,
 				},
 			};
@@ -847,6 +865,7 @@ describe('StatBucket', () => {
 				propertyType: AdjustablePropertyEnum.stat,
 				parsed: {
 					value: 2,
+					baseKey: SheetStatKeys.arcana,
 					subKey: StatSubGroupEnum.bonus,
 				},
 			};
@@ -858,6 +877,7 @@ describe('StatBucket', () => {
 				propertyType: AdjustablePropertyEnum.stat,
 				parsed: {
 					value: 8,
+					baseKey: SheetStatKeys.arcana,
 					subKey: StatSubGroupEnum.bonus,
 				},
 			});
@@ -870,6 +890,7 @@ describe('StatBucket', () => {
 				propertyType: AdjustablePropertyEnum.stat,
 				parsed: {
 					value: AbilityEnum.intelligence,
+					baseKey: SheetStatKeys.arcana,
 					subKey: StatSubGroupEnum.ability,
 				},
 			};
@@ -880,6 +901,7 @@ describe('StatBucket', () => {
 				propertyType: AdjustablePropertyEnum.stat,
 				parsed: {
 					value: AbilityEnum.charisma,
+					baseKey: SheetStatKeys.arcana,
 					subKey: StatSubGroupEnum.ability,
 				},
 			};
@@ -891,6 +913,7 @@ describe('StatBucket', () => {
 				propertyType: AdjustablePropertyEnum.stat,
 				parsed: {
 					value: AbilityEnum.charisma,
+					baseKey: SheetStatKeys.arcana,
 					subKey: StatSubGroupEnum.ability,
 				},
 			});
@@ -904,6 +927,7 @@ describe('StatBucket', () => {
 				propertyType: AdjustablePropertyEnum.stat,
 				parsed: {
 					value: AbilityEnum.intelligence,
+					baseKey: SheetStatKeys.arcana,
 					subKey: StatSubGroupEnum.ability,
 				},
 			};
@@ -914,6 +938,7 @@ describe('StatBucket', () => {
 				propertyType: AdjustablePropertyEnum.stat,
 				parsed: {
 					value: AbilityEnum.strength,
+					baseKey: SheetStatKeys.arcana,
 					subKey: StatSubGroupEnum.ability,
 				},
 			};
@@ -925,6 +950,7 @@ describe('StatBucket', () => {
 				propertyType: AdjustablePropertyEnum.stat,
 				parsed: {
 					value: AbilityEnum.strength,
+					baseKey: SheetStatKeys.arcana,
 					subKey: StatSubGroupEnum.ability,
 				},
 			});
@@ -938,6 +964,7 @@ describe('StatBucket', () => {
 				propertyType: AdjustablePropertyEnum.stat,
 				parsed: {
 					value: AbilityEnum.intelligence,
+					baseKey: SheetStatKeys.arcana,
 					subKey: StatSubGroupEnum.ability,
 				},
 			};
@@ -948,6 +975,7 @@ describe('StatBucket', () => {
 				propertyType: AdjustablePropertyEnum.stat,
 				parsed: {
 					value: AbilityEnum.intelligence,
+					baseKey: SheetStatKeys.arcana,
 					subKey: StatSubGroupEnum.ability,
 				},
 			};
@@ -959,6 +987,7 @@ describe('StatBucket', () => {
 				propertyType: AdjustablePropertyEnum.stat,
 				parsed: {
 					value: '',
+					baseKey: SheetStatKeys.arcana,
 					subKey: StatSubGroupEnum.ability,
 				},
 			});
@@ -1007,6 +1036,467 @@ describe('StatBucket', () => {
 				type: SheetAdjustmentTypeEnum.untyped,
 				operation: SheetAdjustmentOperationEnum['-'],
 				propertyType: AdjustablePropertyEnum.stat,
+				property: 'test',
+				value: 'bonus:10',
+			};
+			const result = bucket.discardAdjustment(adjustment);
+			expect(result).toBe(false);
+		});
+	});
+});
+
+describe('ExtraSkillBucket', () => {
+	let bucket: ExtraSkillBucket;
+
+	beforeEach(() => {
+		bucket = new ExtraSkillBucket();
+	});
+
+	describe('serialize', () => {
+		it('should serialize an extra skill bonus adjustment', () => {
+			const adjustment: SheetExtraSkillAdjustment = {
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['='],
+				property: 'kobold lore bonus',
+				propertyType: AdjustablePropertyEnum.extraSkill,
+				parsed: {
+					value: 10,
+					baseKey: 'Kobold Lore',
+					subKey: StatSubGroupEnum.bonus,
+				},
+			};
+			const result = bucket.serialize(adjustment);
+			expect(result).toEqual({
+				type: SheetAdjustmentTypeEnum.untyped,
+				propertyType: AdjustablePropertyEnum.extraSkill,
+				operation: SheetAdjustmentOperationEnum['='],
+				property: 'kobold lore bonus',
+				value: '10',
+			});
+		});
+
+		it('should serialize an extra skill adjustment a dc', () => {
+			const adjustment: SheetExtraSkillAdjustment = {
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['='],
+				property: 'kobold lore dc',
+				propertyType: AdjustablePropertyEnum.extraSkill,
+				parsed: {
+					baseKey: 'kobold lore',
+					subKey: StatSubGroupEnum.dc,
+					value: 15,
+				},
+			};
+			const result = bucket.serialize(adjustment);
+			expect(result).toEqual({
+				type: SheetAdjustmentTypeEnum.untyped,
+				propertyType: AdjustablePropertyEnum.extraSkill,
+				operation: SheetAdjustmentOperationEnum['='],
+				property: 'kobold lore dc',
+				value: '15',
+			});
+		});
+
+		it('should serialize an extra skill adjustment a proficiency', () => {
+			const adjustment: SheetExtraSkillAdjustment = {
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['='],
+				property: 'kobold lore proficiency',
+				propertyType: AdjustablePropertyEnum.extraSkill,
+				parsed: {
+					baseKey: 'kobold lore',
+					subKey: StatSubGroupEnum.proficiency,
+					value: 15,
+				},
+			};
+			const result = bucket.serialize(adjustment);
+			expect(result).toEqual({
+				type: SheetAdjustmentTypeEnum.untyped,
+				propertyType: AdjustablePropertyEnum.extraSkill,
+				operation: SheetAdjustmentOperationEnum['='],
+				property: 'kobold lore proficiency',
+				value: '15',
+			});
+		});
+
+		it('should serialize an extra skill adjustment with an ability', () => {
+			const adjustment: SheetExtraSkillAdjustment = {
+				type: SheetAdjustmentTypeEnum.untyped,
+				property: 'kobold lore ability',
+				operation: SheetAdjustmentOperationEnum['='],
+				propertyType: AdjustablePropertyEnum.extraSkill,
+				parsed: {
+					value: AbilityEnum.intelligence,
+					baseKey: SheetStatKeys.arcana,
+					subKey: StatSubGroupEnum.ability,
+				},
+			};
+			const result = bucket.serialize(adjustment);
+			expect(result).toEqual({
+				type: SheetAdjustmentTypeEnum.untyped,
+				propertyType: AdjustablePropertyEnum.extraSkill,
+				operation: SheetAdjustmentOperationEnum['='],
+				property: 'kobold lore ability',
+				value: AbilityEnum.intelligence,
+			});
+		});
+	});
+
+	describe('deserialize', () => {
+		it('should deserialize adjustment with a bonus by default', () => {
+			const adjustment: SheetAdjustment = {
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['='],
+				propertyType: AdjustablePropertyEnum.extraSkill,
+				property: 'kobold lore',
+				value: '8',
+			};
+			const result = bucket.deserialize(adjustment);
+			expect(result).toEqual({
+				type: SheetAdjustmentTypeEnum.untyped,
+				property: 'kobold lore',
+				operation: SheetAdjustmentOperationEnum['='],
+				propertyType: AdjustablePropertyEnum.extraSkill,
+				parsed: {
+					value: 8,
+					baseKey: 'kobold lore',
+					subKey: StatSubGroupEnum.bonus,
+				},
+			});
+		});
+
+		it('should deserialize adjustment with proficiency', () => {
+			const adjustment: SheetAdjustment = {
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['='],
+				propertyType: AdjustablePropertyEnum.extraSkill,
+				property: 'koboldLoreProf',
+				value: '2',
+			};
+			const result = bucket.deserialize(adjustment);
+			expect(result).toEqual({
+				type: SheetAdjustmentTypeEnum.untyped,
+				propertyType: AdjustablePropertyEnum.extraSkill,
+				property: 'koboldLoreProf',
+				operation: SheetAdjustmentOperationEnum['='],
+				parsed: {
+					value: 2,
+					baseKey: 'kobold lore',
+					subKey: StatSubGroupEnum.proficiency,
+				},
+			});
+		});
+
+		it('should deserialize adjustment with dc', () => {
+			const adjustment: SheetAdjustment = {
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['='],
+				propertyType: AdjustablePropertyEnum.extraSkill,
+				property: 'kobold-lore-dc',
+				value: '15',
+			};
+			const result = bucket.deserialize(adjustment);
+			expect(result).toEqual({
+				type: SheetAdjustmentTypeEnum.untyped,
+				property: 'kobold-lore-dc',
+				propertyType: AdjustablePropertyEnum.extraSkill,
+				operation: SheetAdjustmentOperationEnum['='],
+				parsed: {
+					value: 15,
+					baseKey: 'kobold lore',
+					subKey: StatSubGroupEnum.dc,
+				},
+			});
+		});
+
+		it('should deserialize adjustment with ability', () => {
+			const adjustment: SheetAdjustment = {
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['='],
+				propertyType: AdjustablePropertyEnum.extraSkill,
+				property: 'esoteric lore ability',
+				value: AbilityEnum.charisma,
+			};
+			const result = bucket.deserialize(adjustment);
+			expect(result).toEqual({
+				type: SheetAdjustmentTypeEnum.untyped,
+				property: 'esoteric lore ability',
+				propertyType: AdjustablePropertyEnum.extraSkill,
+				operation: SheetAdjustmentOperationEnum['='],
+				parsed: {
+					value: AbilityEnum.charisma,
+					baseKey: 'esoteric lore',
+					subKey: StatSubGroupEnum.ability,
+				},
+			});
+		});
+	});
+
+	describe('combine', () => {
+		it('should combine two numeric extraSkill adjustments with = operation by overwriting', () => {
+			const currentAdjustment: SheetExtraSkillAdjustment = {
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['+'],
+				property: 'arcanaBonus',
+				propertyType: AdjustablePropertyEnum.extraSkill,
+				parsed: {
+					value: 10,
+					baseKey: SheetStatKeys.arcana,
+					subKey: StatSubGroupEnum.bonus,
+				},
+			};
+			const newAdjustment: SheetExtraSkillAdjustment = {
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['='],
+				property: 'arcanaBonus',
+				propertyType: AdjustablePropertyEnum.extraSkill,
+				parsed: {
+					value: 15,
+					baseKey: SheetStatKeys.arcana,
+					subKey: StatSubGroupEnum.bonus,
+				},
+			};
+			const result = bucket.combine(currentAdjustment, newAdjustment);
+			expect(result).toEqual({
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['='],
+				property: 'arcanaBonus',
+				propertyType: AdjustablePropertyEnum.extraSkill,
+				parsed: {
+					value: 15,
+					baseKey: SheetStatKeys.arcana,
+					subKey: StatSubGroupEnum.bonus,
+				},
+			});
+		});
+
+		it('should combine two numeric extraSkill adjustments with =, then + operation', () => {
+			const currentAdjustment: SheetExtraSkillAdjustment = {
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['='],
+				property: 'arcanaProficiency',
+				propertyType: AdjustablePropertyEnum.extraSkill,
+				parsed: {
+					value: 4,
+					baseKey: SheetStatKeys.arcana,
+					subKey: StatSubGroupEnum.proficiency,
+				},
+			};
+			const newAdjustment: SheetExtraSkillAdjustment = {
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['+'],
+				property: 'arcanaProficiency',
+				propertyType: AdjustablePropertyEnum.extraSkill,
+				parsed: {
+					value: 2,
+					baseKey: SheetStatKeys.arcana,
+					subKey: StatSubGroupEnum.proficiency,
+				},
+			};
+			const result = bucket.combine(currentAdjustment, newAdjustment);
+			expect(result).toEqual({
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['='],
+				property: 'arcanaProficiency',
+				propertyType: AdjustablePropertyEnum.extraSkill,
+				parsed: {
+					value: 6,
+					baseKey: SheetStatKeys.arcana,
+					subKey: StatSubGroupEnum.proficiency,
+				},
+			});
+		});
+
+		it('should combine two numeric extraSkill adjustments with - operation', () => {
+			const currentAdjustment: SheetExtraSkillAdjustment = {
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['='],
+				property: 'ArcanaBonus',
+				propertyType: AdjustablePropertyEnum.extraSkill,
+				parsed: {
+					value: 10,
+					baseKey: SheetStatKeys.arcana,
+					subKey: StatSubGroupEnum.bonus,
+				},
+			};
+			const newAdjustment: SheetExtraSkillAdjustment = {
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['-'],
+				property: 'ArcanaBonus',
+				propertyType: AdjustablePropertyEnum.extraSkill,
+				parsed: {
+					value: 2,
+					baseKey: SheetStatKeys.arcana,
+					subKey: StatSubGroupEnum.bonus,
+				},
+			};
+			const result = bucket.combine(currentAdjustment, newAdjustment);
+			expect(result).toEqual({
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['='],
+				property: 'ArcanaBonus',
+				propertyType: AdjustablePropertyEnum.extraSkill,
+				parsed: {
+					value: 8,
+					baseKey: SheetStatKeys.arcana,
+					subKey: StatSubGroupEnum.bonus,
+				},
+			});
+		});
+		it('should combine two text extraSkill adjustments with = operation by overwriting', () => {
+			const currentAdjustment: SheetExtraSkillAdjustment = {
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['+'],
+				property: 'arcanaAbility',
+				propertyType: AdjustablePropertyEnum.extraSkill,
+				parsed: {
+					value: AbilityEnum.intelligence,
+					baseKey: SheetStatKeys.arcana,
+					subKey: StatSubGroupEnum.ability,
+				},
+			};
+			const newAdjustment: SheetExtraSkillAdjustment = {
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['='],
+				property: 'arcanaAbility',
+				propertyType: AdjustablePropertyEnum.extraSkill,
+				parsed: {
+					value: AbilityEnum.charisma,
+					baseKey: SheetStatKeys.arcana,
+					subKey: StatSubGroupEnum.ability,
+				},
+			};
+			const result = bucket.combine(currentAdjustment, newAdjustment);
+			expect(result).toEqual({
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['='],
+				property: 'arcanaAbility',
+				propertyType: AdjustablePropertyEnum.extraSkill,
+				parsed: {
+					value: AbilityEnum.charisma,
+					baseKey: SheetStatKeys.arcana,
+					subKey: StatSubGroupEnum.ability,
+				},
+			});
+		});
+
+		it('should combine two text extraSkill adjustments with =, then + operation', () => {
+			const currentAdjustment: SheetExtraSkillAdjustment = {
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['='],
+				property: 'arcanaAbility',
+				propertyType: AdjustablePropertyEnum.extraSkill,
+				parsed: {
+					value: AbilityEnum.intelligence,
+					baseKey: SheetStatKeys.arcana,
+					subKey: StatSubGroupEnum.ability,
+				},
+			};
+			const newAdjustment: SheetExtraSkillAdjustment = {
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['+'],
+				property: 'arcanaAbility',
+				propertyType: AdjustablePropertyEnum.extraSkill,
+				parsed: {
+					value: AbilityEnum.strength,
+					baseKey: SheetStatKeys.arcana,
+					subKey: StatSubGroupEnum.ability,
+				},
+			};
+			const result = bucket.combine(currentAdjustment, newAdjustment);
+			expect(result).toEqual({
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['+'],
+				property: 'arcanaAbility',
+				propertyType: AdjustablePropertyEnum.extraSkill,
+				parsed: {
+					value: AbilityEnum.strength,
+					baseKey: SheetStatKeys.arcana,
+					subKey: StatSubGroupEnum.ability,
+				},
+			});
+		});
+
+		it('should combine two text extraSkill adjustments with - operation', () => {
+			const currentAdjustment: SheetExtraSkillAdjustment = {
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['='],
+				property: 'ArcanaAbility',
+				propertyType: AdjustablePropertyEnum.extraSkill,
+				parsed: {
+					value: AbilityEnum.intelligence,
+					baseKey: SheetStatKeys.arcana,
+					subKey: StatSubGroupEnum.ability,
+				},
+			};
+			const newAdjustment: SheetExtraSkillAdjustment = {
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['-'],
+				property: 'ArcanaAbility',
+				propertyType: AdjustablePropertyEnum.extraSkill,
+				parsed: {
+					value: AbilityEnum.intelligence,
+					baseKey: SheetStatKeys.arcana,
+					subKey: StatSubGroupEnum.ability,
+				},
+			};
+			const result = bucket.combine(currentAdjustment, newAdjustment);
+			expect(result).toEqual({
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['='],
+				property: 'ArcanaAbility',
+				propertyType: AdjustablePropertyEnum.extraSkill,
+				parsed: {
+					value: '',
+					baseKey: SheetStatKeys.arcana,
+					subKey: StatSubGroupEnum.ability,
+				},
+			});
+		});
+	});
+
+	describe('discardAdjustment', () => {
+		it('should discard an extra skill adjustment with empty value and + operation', () => {
+			const adjustment: SheetAdjustment = {
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['+'],
+				propertyType: AdjustablePropertyEnum.extraSkill,
+				property: 'test',
+				value: '',
+			};
+			const result = bucket.discardAdjustment(adjustment);
+			expect(result).toBe(true);
+		});
+
+		it('should discard an extra skill adjustment with empty value and - operation', () => {
+			const adjustment: SheetAdjustment = {
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['-'],
+				propertyType: AdjustablePropertyEnum.extraSkill,
+				property: 'test',
+				value: '',
+			};
+			const result = bucket.discardAdjustment(adjustment);
+			expect(result).toBe(true);
+		});
+
+		it('should not discard an extra skill adjustment with non-empty value and + operation', () => {
+			const adjustment: SheetAdjustment = {
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['+'],
+				propertyType: AdjustablePropertyEnum.extraSkill,
+				property: 'test',
+				value: 'bonus:10',
+			};
+			const result = bucket.discardAdjustment(adjustment);
+			expect(result).toBe(false);
+		});
+
+		it('should not discard an extra skill adjustment with non-empty value and - operation', () => {
+			const adjustment: SheetAdjustment = {
+				type: SheetAdjustmentTypeEnum.untyped,
+				operation: SheetAdjustmentOperationEnum['-'],
+				propertyType: AdjustablePropertyEnum.extraSkill,
 				property: 'test',
 				value: 'bonus:10',
 			};
@@ -1067,7 +1557,7 @@ describe('WeaknessResistanceBucket', () => {
 			expect(weaknessResistanceBucket.buckets['fire resistance']).toBeUndefined();
 		});
 
-		it('should discard an adjustment with a non-numeric value', () => {
+		it('should throw an error for an adjustment with a non-numeric value', () => {
 			const adjustment: SheetAdjustment = {
 				type: SheetAdjustmentTypeEnum.status,
 				propertyType: AdjustablePropertyEnum.weaknessResistance,
@@ -1075,8 +1565,7 @@ describe('WeaknessResistanceBucket', () => {
 				property: 'fire resistance',
 				value: 'not a number',
 			};
-			weaknessResistanceBucket.sortToBucket(adjustment);
-			expect(weaknessResistanceBucket.buckets['fire resistance']).toBeUndefined();
+			expect(() => weaknessResistanceBucket.sortToBucket(adjustment)).toThrow(KoboldError);
 		});
 	});
 

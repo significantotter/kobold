@@ -1,6 +1,5 @@
 import _ from 'lodash';
 import type {
-	ProficiencyStat,
 	Sheet,
 	SheetBaseCounters,
 	SheetInfo,
@@ -8,17 +7,20 @@ import type {
 	SheetIntegers,
 	SheetStats,
 	SheetWeaknessesResistances,
-} from '../services/kobold/models/index.js';
+} from '../../services/kobold/models/index.js';
 import {
 	AbilityEnum,
 	SheetStatKeys,
 	StatSubGroupEnum,
 	getDefaultSheet,
-} from '../services/kobold/models/index.js';
-import { literalKeys } from './type-guards.js';
+} from '../../services/kobold/models/index.js';
+import { literalKeys } from '../type-guards.js';
 
 function standardizePropKey(name: string): string {
 	return name.toLowerCase().trim().replaceAll(/_|-/g, '');
+}
+function standardizeCustomPropName(name: string): string {
+	return _.kebabCase(name.trim()).replaceAll('-', ' ');
 }
 
 export class SheetInfoProperties {
@@ -183,8 +185,8 @@ export class SheetStatProperties {
 	};
 
 	public static properties: Record<
-		`${keyof SheetStats}${Capitalize<StatSubGroupEnum>}`,
-		{ aliases: string[]; baseKey: keyof SheetStats; subKey: StatSubGroupEnum }
+		`${SheetStatKeys}${Capitalize<StatSubGroupEnum>}`,
+		{ aliases: string[]; baseKey: SheetStatKeys; subKey: StatSubGroupEnum }
 	> = {
 		// casting
 		arcaneBonus: {
@@ -712,7 +714,8 @@ export class SheetAttackProperties {
 
 export class SheetAdditionalSkillProperties {
 	constructor(protected sheetInfo: Sheet['additionalSkills']) {}
-	public static propertyNameRegex = /(.+) lore$/i;
+	public static propertyNameRegex =
+		/(.+\W*lore)\W*(dc|bonus|total|attack|proficiency|prof|ability)?$/i;
 }
 
 export class SheetWeaknessResistanceProperties {
@@ -723,6 +726,7 @@ export class SheetWeaknessResistanceProperties {
 
 export class SheetProperties {
 	public static standardizePropKey = standardizePropKey;
+	public static standardizeCustomPropName = standardizeCustomPropName;
 
 	public static aliases = {
 		...SheetInfoProperties.aliases,

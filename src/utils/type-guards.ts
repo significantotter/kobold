@@ -7,6 +7,3 @@ export function filterNotNullOrUndefined<T>(
 export function literalKeys<T extends Object>(obj: T) {
 	return Object.keys(obj) as Array<keyof T>;
 }
-
-const foo = { foo: 'asdf', bar: 2, 3: 4 };
-const baz = literalKeys(foo);

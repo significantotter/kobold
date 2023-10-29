@@ -7,19 +7,15 @@ import {
 	convertBestiaryCreatureToSheet,
 	convertPathBuilderToSheet,
 	convertWanderersGuideCharToSheet,
-} from './sheet-import-utils.js';
+} from './sheet/sheet-import-utils.js';
 import { KoboldEmbed } from './kobold-embed-utils.js';
 import { parseBonusesForTagsFromModifiers } from '../services/kobold/lib/helpers.js';
 import { KoboldError } from './KoboldError.js';
 import { BaseMessageOptions } from 'discord.js';
-import { SheetUtils } from './sheet-utils.js';
-import {
-	Character,
-	Sheet,
-	Modifier,
-	Attribute,
-} from '../services/kobold/models/character/character.zod.js';
+import { SheetUtils } from './sheet/sheet-utils.js';
+import { Character, Sheet, Modifier, Attribute } from '../services/kobold/models/index.js';
 import { literalKeys } from './type-guards.js';
+import { SheetProperties } from './sheet/sheet-properties.js';
 
 const damageTypeShorthands: { [shorthand: string]: string } = {
 	piercing: 'p',
@@ -61,135 +57,7 @@ export class Creature {
 		public _sheet: Sheet,
 		protected _name?: string
 	) {
-		const sheetDefaults: Sheet = {
-			info: {
-				traits: [],
-				name: '',
-				url: null,
-				description: null,
-				gender: null,
-				age: null,
-				alignment: null,
-				deity: null,
-				imageURL: null,
-				level: null,
-				size: null,
-				class: null,
-				keyability: null,
-				ancestry: null,
-				heritage: null,
-				background: null,
-				usesStamina: false,
-			},
-			general: {
-				senses: [],
-				languages: [],
-				currentHeroPoints: null,
-				speed: null,
-				flySpeed: null,
-				swimSpeed: null,
-				climbSpeed: null,
-				currentFocusPoints: null,
-				focusPoints: null,
-				classDC: null,
-				classAttack: null,
-				perception: null,
-				perceptionProfMod: null,
-			},
-			abilities: {
-				strength: null,
-				dexterity: null,
-				constitution: null,
-				intelligence: null,
-				wisdom: null,
-				charisma: null,
-			},
-			defenses: {
-				resistances: [],
-				immunities: [],
-				weaknesses: [],
-				currentHp: null,
-				maxHp: null,
-				tempHp: null,
-				currentResolve: null,
-				maxResolve: null,
-				currentStamina: null,
-				maxStamina: null,
-				ac: null,
-				heavyProfMod: null,
-				mediumProfMod: null,
-				lightProfMod: null,
-				unarmoredProfMod: null,
-			},
-			offense: {
-				martialProfMod: null,
-				simpleProfMod: null,
-				unarmedProfMod: null,
-				advancedProfMod: null,
-			},
-			castingStats: {
-				arcaneAttack: null,
-				arcaneDC: null,
-				arcaneProfMod: null,
-				divineAttack: null,
-				divineDC: null,
-				divineProfMod: null,
-				occultAttack: null,
-				occultDC: null,
-				occultProfMod: null,
-				primalAttack: null,
-				primalDC: null,
-				primalProfMod: null,
-			},
-			saves: {
-				fortitude: null,
-				fortitudeProfMod: null,
-				reflex: null,
-				reflexProfMod: null,
-				will: null,
-				willProfMod: null,
-			},
-			skills: {
-				lores: [],
-				acrobatics: null,
-				acrobaticsProfMod: null,
-				arcana: null,
-				arcanaProfMod: null,
-				athletics: null,
-				athleticsProfMod: null,
-				crafting: null,
-				craftingProfMod: null,
-				deception: null,
-				deceptionProfMod: null,
-				diplomacy: null,
-				diplomacyProfMod: null,
-				intimidation: null,
-				intimidationProfMod: null,
-				medicine: null,
-				medicineProfMod: null,
-				nature: null,
-				natureProfMod: null,
-				occultism: null,
-				occultismProfMod: null,
-				performance: null,
-				performanceProfMod: null,
-				religion: null,
-				religionProfMod: null,
-				society: null,
-				societyProfMod: null,
-				stealth: null,
-				stealthProfMod: null,
-				survival: null,
-				survivalProfMod: null,
-				thievery: null,
-				thieveryProfMod: null,
-			},
-			attacks: [],
-			rollMacros: [],
-			actions: [],
-			modifiers: [],
-			sourceData: {},
-		};
+		const sheetDefaults: Sheet = SheetProperties.defaultSheet;
 		this._sheet = _.defaultsDeep(this._sheet, sheetDefaults);
 		const sheetAdjustments = SheetUtils.sheetModifiersFromString(
 			this._sheet,

@@ -16,7 +16,7 @@ import {
 	SheetStatKeys,
 	SheetStats,
 	StatSubGroupEnum,
-} from '../services/kobold/models/index.js';
+} from '../../services/kobold/models/index.js';
 import {
 	SheetProperties,
 	SheetInfoProperties,
@@ -28,7 +28,7 @@ import {
 	SheetAdditionalSkillProperties,
 	SheetAttackProperties,
 } from './sheet-properties.js';
-import { KoboldError } from './KoboldError.js';
+import { KoboldError } from '../KoboldError.js';
 
 export type ParsedSheetAdjustment<T> = Omit<SheetAdjustment, 'value' | 'parsed'> & {
 	parsed: T;
@@ -63,12 +63,6 @@ export class SheetAdjuster {
 
 	public static standardizeProperty(propertyName: string) {
 		const lowerTrimmedProperty = propertyName.toLowerCase().trim().replaceAll(/_|-/g, '');
-
-		// if any property regex matches, then its valid
-		if (_.some(SheetProperties.regexes, regex => regex.test(propertyName))) return propertyName;
-		if (_.some(SheetProperties.regexes, regex => regex.test(lowerTrimmedProperty)))
-			return lowerTrimmedProperty;
-
 		const withoutSpaces = lowerTrimmedProperty.replaceAll(' ', '');
 
 		// if any alias matches without spaces, then its valid
@@ -76,6 +70,12 @@ export class SheetAdjuster {
 		if (sheetProperty) {
 			return sheetProperty;
 		}
+
+		// if any property regex matches, then its valid
+		if (_.some(SheetProperties.regexes, regex => regex.test(propertyName))) return propertyName;
+		if (_.some(SheetProperties.regexes, regex => regex.test(lowerTrimmedProperty)))
+			return lowerTrimmedProperty;
+
 		// we're not validating yet, so still return the string
 		return propertyName.trim();
 	}
@@ -128,15 +128,16 @@ export class SheetAdjuster {
 
 	public static getPropertyType(property: string): AdjustablePropertyEnum {
 		// basic sheet property
-		const standardizedProperty = SheetAdjuster.standardizeProperty(property);
-		if (SheetInfoProperties.aliases[standardizedProperty]) return AdjustablePropertyEnum.info;
-		else if (SheetInfoListProperties.aliases[standardizedProperty])
+		const lowerStandardizedProperty = SheetAdjuster.standardizeProperty(property).toLowerCase();
+		if (SheetInfoProperties.aliases[lowerStandardizedProperty])
+			return AdjustablePropertyEnum.info;
+		else if (SheetInfoListProperties.aliases[lowerStandardizedProperty])
 			return AdjustablePropertyEnum.infoList;
-		else if (SheetIntegerProperties.aliases[standardizedProperty])
+		else if (SheetIntegerProperties.aliases[lowerStandardizedProperty])
 			return AdjustablePropertyEnum.intProperty;
-		else if (SheetBaseCounterProperties.aliases[standardizedProperty])
+		else if (SheetBaseCounterProperties.aliases[lowerStandardizedProperty])
 			return AdjustablePropertyEnum.baseCounter;
-		else if (SheetStatProperties.aliases[standardizedProperty])
+		else if (SheetStatProperties.aliases[lowerStandardizedProperty])
 			return AdjustablePropertyEnum.stat;
 
 		// regexes
@@ -154,15 +155,77 @@ export class SheetAdjuster {
 	 * @param adjustmentString The adjustment string to validate
 	 * @returns
 	 */
-	public static validateSheetPropertyValue(
-		standardizedProperty: string,
-		adjustmentString: string
-	): boolean {
-		// TODO
-		if (standardizedProperty in SheetProperties.aliases) {
-			return SheetInfoAdjuster.validateAdjustment(adjustmentString);
+	public static validateSheetAdjustment(sheetAdjustment: SheetAdjustment): boolean {
+		if (sheetAdjustment.propertyType === AdjustablePropertyEnum.none) {
+			return false;
 		}
-		return false;
+		switch (sheetAdjustment.propertyType) {
+			case AdjustablePropertyEnum.info:
+				const parsedInfo = SheetInfoAdjuster.deserializeAdjustment(sheetAdjustment);
+				if (!parsedInfo || SheetInfoAdjuster.discardAdjustment(sheetAdjustment)) {
+					return false;
+				}
+				break;
+			case AdjustablePropertyEnum.infoList:
+				const parsedInfoList = SheetInfoListAdjuster.deserializeAdjustment(sheetAdjustment);
+				if (!parsedInfoList || SheetInfoListAdjuster.discardAdjustment(sheetAdjustment)) {
+					return false;
+				}
+				break;
+			case AdjustablePropertyEnum.intProperty:
+				const parsedInt = SheetIntegerAdjuster.deserializeAdjustment(sheetAdjustment);
+				if (!parsedInt || SheetIntegerAdjuster.discardAdjustment(sheetAdjustment)) {
+					return false;
+				}
+				break;
+			case AdjustablePropertyEnum.baseCounter:
+				const parsedBaseCounter =
+					SheetBaseCounterAdjuster.deserializeAdjustment(sheetAdjustment);
+				if (
+					!parsedBaseCounter ||
+					SheetBaseCounterAdjuster.discardAdjustment(sheetAdjustment)
+				) {
+					return false;
+				}
+				break;
+			case AdjustablePropertyEnum.stat:
+				const parsedStat = SheetStatAdjuster.deserializeAdjustment(sheetAdjustment);
+				if (!parsedStat || SheetStatAdjuster.discardAdjustment(sheetAdjustment)) {
+					return false;
+				}
+				break;
+			case AdjustablePropertyEnum.weaknessResistance:
+				const parsedWeakRes =
+					SheetWeaknessResistanceAdjuster.deserializeAdjustment(sheetAdjustment);
+				if (
+					!parsedWeakRes ||
+					SheetWeaknessResistanceAdjuster.discardAdjustment(sheetAdjustment)
+				) {
+					return false;
+				}
+				break;
+			case AdjustablePropertyEnum.extraSkill:
+				const parsedSkill =
+					SheetAdditionalSkillAdjuster.deserializeAdjustment(sheetAdjustment);
+				if (
+					!parsedSkill ||
+					SheetAdditionalSkillAdjuster.discardAdjustment(sheetAdjustment)
+				) {
+					return false;
+				}
+				break;
+			case AdjustablePropertyEnum.attack:
+				const parsedAtk = SheetAttackAdjuster.deserializeAdjustment(sheetAdjustment);
+				if (!parsedAtk || SheetAttackAdjuster.discardAdjustment(sheetAdjustment)) {
+					return false;
+				}
+				break;
+			default:
+				throw new KoboldError(
+					`Property ${sheetAdjustment.property} is not a valid sheet property`
+				);
+		}
+		return true;
 	}
 }
 
@@ -180,9 +243,11 @@ export class SheetInfoAdjuster implements SheetPropertyGroupAdjuster<SheetInfo> 
 	public adjust(adjustment: SheetAdjustment): void {
 		const prop = adjustment.property as keyof SheetInfo;
 		const sheetInfoAdjustment = SheetInfoAdjuster.deserializeAdjustment(adjustment);
-		if (!sheetInfoAdjustment) {
-			console.warn('something went wrong parsing adjustment', adjustment);
-			return;
+		if (!sheetInfoAdjustment || !(prop in this.sheetInfo)) {
+			throw new KoboldError(
+				'something went wrong parsing adjustment',
+				JSON.stringify(adjustment)
+			);
 		}
 		const currentValue = this.sheetInfo[prop] ?? '';
 		switch (adjustment.operation) {
@@ -204,6 +269,9 @@ export class SheetInfoAdjuster implements SheetPropertyGroupAdjuster<SheetInfo> 
 	public static deserializeAdjustment(adjustment: SheetAdjustment): SheetInfoAdjustment | null {
 		return { ..._.omit(adjustment, 'value'), parsed: adjustment.value };
 	}
+	public static discardAdjustment(adjustment: SheetAdjustment): boolean {
+		return adjustment.operation === '+' || adjustment.operation === '-';
+	}
 }
 
 // Sheet InfoList Properties
@@ -215,11 +283,13 @@ export class SheetInfoListAdjuster implements SheetPropertyGroupAdjuster<SheetIn
 		return propName in this.sheetInfoLists;
 	}
 	public adjust(adjustment: SheetAdjustment): void {
-		const prop = adjustment.property as keyof SheetInfoLists;
+		const prop = adjustment.property as SheetInfoListKeys;
 		const sheetInfoListAdjustment = SheetInfoListAdjuster.deserializeAdjustment(adjustment);
-		if (!sheetInfoListAdjustment) {
-			console.warn('something went wrong parsing adjustment', adjustment);
-			return;
+		if (!sheetInfoListAdjustment || !(prop in this.sheetInfoLists)) {
+			throw new KoboldError(
+				'something went wrong parsing adjustment',
+				JSON.stringify(adjustment)
+			);
 		}
 		const splitValues = sheetInfoListAdjustment.parsed;
 		switch (sheetInfoListAdjustment.operation) {
@@ -227,7 +297,7 @@ export class SheetInfoListAdjuster implements SheetPropertyGroupAdjuster<SheetIn
 				this.sheetInfoLists[prop].push(...splitValues);
 				break;
 			case SheetAdjustmentOperationEnum['-']:
-				_.remove(this.sheetInfoLists[prop], value => splitValues.includes(value));
+				_.remove(this.sheetInfoLists[prop], (value: string) => splitValues.includes(value));
 				break;
 			case SheetAdjustmentOperationEnum['=']:
 				this.sheetInfoLists[prop] = splitValues;
@@ -246,8 +316,14 @@ export class SheetInfoListAdjuster implements SheetPropertyGroupAdjuster<SheetIn
 	): SheetInfoListAdjustment | null {
 		return {
 			..._.omit(adjustment, 'value'),
-			parsed: adjustment.value.split(',').map(value => value.trim()),
+			parsed: adjustment.value.split(',').map((value: string) => value.trim()),
 		};
+	}
+	public static discardAdjustment(adjustment: SheetAdjustment): boolean {
+		return (
+			adjustment.value === '' &&
+			(adjustment.operation === '+' || adjustment.operation === '-')
+		);
 	}
 }
 
@@ -263,17 +339,26 @@ export class SheetIntegerAdjuster implements SheetPropertyGroupAdjuster<SheetInt
 	public static deserializeAdjustment = function (
 		adjustment: SheetAdjustment
 	): SheetIntegerAdjustment | null {
+		const value = adjustment.value === '' ? 0 : parseInt(adjustment.value);
+		if (isNaN(value)) {
+			throw new KoboldError(
+				'something went wrong parsing adjustment',
+				JSON.stringify(adjustment)
+			);
+		}
 		return {
 			..._.omit(adjustment, 'value'),
-			parsed: adjustment.value === '' ? 0 : parseInt(adjustment.value),
+			parsed: value,
 		};
 	};
 	public adjust(adjustment: SheetAdjustment): void {
 		const prop = adjustment.property as keyof SheetIntegers;
 		const sheetIntegerAdjustment = SheetIntegerAdjuster.deserializeAdjustment(adjustment);
 		if (!sheetIntegerAdjustment || isNaN(sheetIntegerAdjustment.parsed)) {
-			console.warn('something went wrong parsing adjustment', adjustment);
-			return;
+			throw new KoboldError(
+				'something went wrong parsing adjustment',
+				JSON.stringify(adjustment)
+			);
 		}
 		const currentValue = this.sheetIntegerProperties[prop] ?? 0;
 		switch (adjustment.operation) {
@@ -288,6 +373,12 @@ export class SheetIntegerAdjuster implements SheetPropertyGroupAdjuster<SheetInt
 				break;
 		}
 	}
+	public static discardAdjustment(adjustment: SheetAdjustment): boolean {
+		return (
+			(adjustment.value === '' || parseInt(adjustment.value) === 0) &&
+			(adjustment.operation === '+' || adjustment.operation === '-')
+		);
+	}
 }
 
 export type SheetBaseCounterAdjustment = ParsedSheetAdjustment<number>;
@@ -298,13 +389,11 @@ export class SheetBaseCounterAdjuster implements SheetPropertyGroupAdjuster<Shee
 	public adjust(adjustment: SheetAdjustment): void {
 		const prop = adjustment.property as SheetBaseCounterKeys;
 		const sheetIntegerAdjustment = SheetIntegerAdjuster.deserializeAdjustment(adjustment);
-		if (
-			!sheetIntegerAdjustment ||
-			isNaN(sheetIntegerAdjustment.parsed) ||
-			!(prop in this.sheetBaseCounterProperties)
-		) {
-			console.warn('something went wrong parsing the adjustment', adjustment);
-			return;
+		if (!sheetIntegerAdjustment || !(prop in this.sheetBaseCounterProperties)) {
+			throw new KoboldError(
+				'something went wrong parsing the adjustment',
+				JSON.stringify(adjustment)
+			);
 		}
 		const currentValue = this.sheetBaseCounterProperties[prop].max ?? 0;
 		switch (adjustment.operation) {
@@ -321,19 +410,25 @@ export class SheetBaseCounterAdjuster implements SheetPropertyGroupAdjuster<Shee
 				break;
 		}
 	}
+	public static discardAdjustment = SheetIntegerAdjuster.discardAdjustment;
 }
 
 export type SheetStatAdjustment = ParsedSheetAdjustment<
-	| { subKey: StatSubGroupEnum.ability; value: AbilityEnum | '' }
-	| { subKey: Exclude<StatSubGroupEnum, StatSubGroupEnum.ability>; value: number }
+	| { baseKey: SheetStatKeys; subKey: StatSubGroupEnum.ability; value: AbilityEnum | '' }
+	| {
+			baseKey: SheetStatKeys;
+			subKey: Exclude<StatSubGroupEnum, StatSubGroupEnum.ability>;
+			value: number;
+	  }
 >;
 
 export class SheetStatAdjuster implements SheetPropertyGroupAdjuster<SheetStats> {
 	constructor(protected sheetStatProperties: SheetStats) {}
-	public static serializeAdjustment(adjustment: SheetStatAdjustment): SheetAdjustment {
+	public static serializeAdjustment(
+		adjustment: SheetStatAdjustment | SheetExtraSkillAdjustment
+	): SheetAdjustment {
 		return {
 			..._.omit(adjustment, 'parsed'),
-			propertyType: AdjustablePropertyEnum.stat,
 			value: adjustment.parsed.value.toString(),
 		};
 	}
@@ -341,8 +436,9 @@ export class SheetStatAdjuster implements SheetPropertyGroupAdjuster<SheetStats>
 	public static deserializeAdjustment(adjustment: SheetAdjustment): SheetStatAdjustment | null {
 		const nonAliasedProp =
 			SheetStatProperties.aliases[SheetProperties.standardizePropKey(adjustment.property)];
-		if (!nonAliasedProp)
+		if (!nonAliasedProp) {
 			throw new KoboldError(`Property ${adjustment.property} is not a valid stat property`);
+		}
 		const property = SheetStatProperties.properties[nonAliasedProp];
 
 		let parsedValue: string | number;
@@ -350,11 +446,17 @@ export class SheetStatAdjuster implements SheetPropertyGroupAdjuster<SheetStats>
 			if (adjustment.value !== '' && !(adjustment.value in AbilityEnum)) {
 				return null;
 			}
-			// string property
+			// Ability property
+			if (!(adjustment.value in AbilityEnum) && adjustment.value !== '') {
+				throw new KoboldError(
+					`Property ${adjustment.property}'s value ${adjustment.value} is not a valid number`
+				);
+			}
 			return {
 				..._.omit(adjustment, 'value'),
 				parsed: {
-					value: (adjustment.value as AbilityEnum) || '',
+					value: adjustment.value as AbilityEnum | '',
+					baseKey: property.baseKey,
 					subKey: property.subKey,
 				},
 			};
@@ -369,52 +471,68 @@ export class SheetStatAdjuster implements SheetPropertyGroupAdjuster<SheetStats>
 				..._.omit(adjustment, 'value'),
 				parsed: {
 					value: parsedValue,
+					baseKey: property.baseKey,
 					subKey: property.subKey,
 				},
 			};
 		}
 	}
 	public adjust(adjustment: SheetAdjustment): void {
-		const prop = adjustment.property as SheetStatKeys;
 		const sheetStatAdjustment = SheetStatAdjuster.deserializeAdjustment(adjustment);
 		if (!sheetStatAdjustment) {
-			console.warn('something went wrong parsing stat adjustment', adjustment);
-			return;
+			throw new KoboldError(
+				'something went wrong parsing stat adjustment',
+				JSON.stringify(adjustment)
+			);
 		}
+		const parsedAdjustment = sheetStatAdjustment.parsed;
+		const baseKey = parsedAdjustment.baseKey;
 		// typescript doesn't know how to discriminate between the two types of subKey
 		// so we restore the base type and then if/else to delineate
-		const parsedAdjustment = sheetStatAdjustment.parsed;
 		if (parsedAdjustment.subKey === StatSubGroupEnum.ability) {
 			const interpretedSubKey = parsedAdjustment.subKey;
-			const currentValue = this.sheetStatProperties[prop][interpretedSubKey] ?? 0;
+			const currentValue = this.sheetStatProperties[baseKey][interpretedSubKey] ?? 0;
 			switch (adjustment.operation) {
 				case SheetAdjustmentOperationEnum['-']:
-					if (currentValue === this.sheetStatProperties[prop][parsedAdjustment.subKey]) {
-						this.sheetStatProperties[prop][parsedAdjustment.subKey] = null;
+					if (
+						currentValue === this.sheetStatProperties[baseKey][parsedAdjustment.subKey]
+					) {
+						this.sheetStatProperties[baseKey][parsedAdjustment.subKey] = null;
 					}
 					break;
 				case SheetAdjustmentOperationEnum['=']:
-					this.sheetStatProperties[prop][parsedAdjustment.subKey] =
+					this.sheetStatProperties[baseKey][parsedAdjustment.subKey] =
 						parsedAdjustment.value === '' ? null : parsedAdjustment.value;
 					break;
 			}
 		} else {
-			const currentValue = this.sheetStatProperties[prop][parsedAdjustment.subKey] ?? 0;
+			let currentValue = this.sheetStatProperties[baseKey][parsedAdjustment.subKey];
+			if (currentValue === null) {
+				if (parsedAdjustment.subKey === StatSubGroupEnum.dc) currentValue = 10;
+				else currentValue = 0;
+			}
+
 			switch (adjustment.operation) {
 				case SheetAdjustmentOperationEnum['+']:
-					this.sheetStatProperties[prop][parsedAdjustment.subKey] =
+					this.sheetStatProperties[baseKey][parsedAdjustment.subKey] =
 						currentValue + parsedAdjustment.value;
 					break;
 				case SheetAdjustmentOperationEnum['-']:
-					this.sheetStatProperties[prop][parsedAdjustment.subKey] =
+					this.sheetStatProperties[baseKey][parsedAdjustment.subKey] =
 						currentValue - parsedAdjustment.value;
 					break;
 				case SheetAdjustmentOperationEnum['=']:
-					this.sheetStatProperties[prop][parsedAdjustment.subKey] =
+					this.sheetStatProperties[baseKey][parsedAdjustment.subKey] =
 						parsedAdjustment.value;
 					break;
 			}
 		}
+	}
+	public static discardAdjustment(adjustment: SheetAdjustment): boolean {
+		return (
+			adjustment.value === '' &&
+			(adjustment.operation === '+' || adjustment.operation === '-')
+		);
 	}
 }
 
@@ -458,33 +576,48 @@ export class SheetAttackAdjuster implements SheetPropertyGroupAdjuster<Sheet['at
 		let traits: string[] = [];
 		let notes = '';
 
-		let toHitMatch = toHitRegex.exec(adjustment.value);
-		if (toHitMatch) {
-			toHitClause = parseInt(toHitMatch[1]);
+		for (const value of splitValue) {
+			let toHitMatch = toHitRegex.exec(value);
+			if (toHitMatch) {
+				toHitClause = parseInt(toHitMatch[1]);
+			}
+			let damageMatch = damageRegex.exec(value);
+			if (damageMatch) {
+				damageValues = damageMatch[1]
+					.split(innerSeparator)
+					.map(damage => damage.trim())
+					.map(damage => {
+						const typeMatch = damageTypeRegex.exec(damage);
+						const type = typeMatch ? typeMatch[1].trim() : '';
+						const dice = damage.replaceAll(damageTypeRegex, '').trim();
+						return { dice, type };
+					});
+			}
+			let rangeMatch = rangeRegex.exec(value);
+			if (rangeMatch) {
+				range = rangeMatch[1].trim();
+			}
+			let traitsMatch = traitsRegex.exec(value);
+			if (traitsMatch) {
+				traits = traitsMatch[1].split(innerSeparator).map(trait => trait.trim());
+			}
+			let notesMatch = notesRegex.exec(value);
+			if (notesMatch) {
+				notes = notesMatch[1].trim();
+			}
 		}
-		let damageMatch = damageRegex.exec(adjustment.value);
-		if (damageMatch) {
-			damageValues = damageMatch[1]
-				.split(innerSeparator)
-				.map(damage => damage.trim())
-				.map(damage => {
-					const typeMatch = damageTypeRegex.exec(damage);
-					const type = typeMatch ? typeMatch[1].trim() : '';
-					const dice = damage.replaceAll(damageTypeRegex, '').trim();
-					return { dice, type };
-				});
-		}
-		let rangeMatch = rangeRegex.exec(adjustment.value);
-		if (rangeMatch) {
-			range = rangeMatch[1].trim();
-		}
-		let traitsMatch = traitsRegex.exec(adjustment.value);
-		if (traitsMatch) {
-			traits = traitsMatch[1].split(innerSeparator).map(trait => trait.trim());
-		}
-		let notesMatch = notesRegex.exec(adjustment.value);
-		if (notesMatch) {
-			notes = notesMatch[1].trim();
+
+		if (
+			!toHitClause &&
+			!damageValues.length &&
+			!range &&
+			!traits.length &&
+			!notes &&
+			adjustment.operation !== SheetAdjustmentOperationEnum['-']
+		) {
+			throw new KoboldError(
+				"Yip! I couldn't understand the attack adjustment " + JSON.stringify(adjustment)
+			);
 		}
 
 		for (let i = 0; i < splitValue.length; i++) {}
@@ -503,14 +636,20 @@ export class SheetAttackAdjuster implements SheetPropertyGroupAdjuster<Sheet['at
 	public adjust(adjustment: SheetAdjustment): void {
 		const sheetAttackAdjustment = SheetAttackAdjuster.deserializeAdjustment(adjustment);
 		if (!sheetAttackAdjustment) {
-			console.warn('something went wrong parsing adjustment', adjustment);
-			return;
+			throw new KoboldError(
+				'something went wrong parsing adjustment',
+				JSON.stringify(adjustment)
+			);
 		}
-		const currentValue = this.sheetAttacks;
 
 		// filter out existing attacks with this name no matter what
 		// on +/=, overwrite the new attack which requires removal anyway
-		_.remove(this.sheetAttacks, attack => attack.name === sheetAttackAdjustment.parsed.name);
+		_.remove(
+			this.sheetAttacks,
+			attack =>
+				attack.name.trim().toLowerCase() ===
+				sheetAttackAdjustment.parsed.name.trim().toLowerCase()
+		);
 		switch (adjustment.operation) {
 			case SheetAdjustmentOperationEnum['+']:
 			case SheetAdjustmentOperationEnum['=']:
@@ -518,26 +657,101 @@ export class SheetAttackAdjuster implements SheetPropertyGroupAdjuster<Sheet['at
 				break;
 		}
 	}
+	public static discardAdjustment(adjustment: SheetAdjustment): boolean {
+		return adjustment.operation === '+' || adjustment.operation === '-';
+	}
 }
+
+export type SheetExtraSkillAdjustment = ParsedSheetAdjustment<
+	| { baseKey: string; subKey: StatSubGroupEnum.ability; value: AbilityEnum | '' }
+	| {
+			baseKey: string;
+			subKey: Exclude<StatSubGroupEnum, StatSubGroupEnum.ability>;
+			value: number;
+	  }
+>;
 
 export class SheetAdditionalSkillAdjuster
 	implements SheetPropertyGroupAdjuster<Sheet['additionalSkills']>
 {
 	constructor(protected sheetAdditionalSkills: Sheet['additionalSkills']) {}
 	public static serializeAdjustment = SheetStatAdjuster.serializeAdjustment;
-	public static deserializeAdjustment = SheetStatAdjuster.deserializeAdjustment;
+	public static deserializeAdjustment(
+		adjustment: SheetAdjustment
+	): SheetExtraSkillAdjustment | null {
+		const propertyMatch = SheetAdditionalSkillProperties.propertyNameRegex.exec(
+			adjustment.property
+		);
+		if (!propertyMatch) {
+			throw new KoboldError(
+				`Property ${adjustment.property} is not a valid additional skill property`
+			);
+		}
+		const propertyName = SheetProperties.standardizeCustomPropName(propertyMatch[1]);
+		let subKey = StatSubGroupEnum.bonus;
+		if (propertyMatch[2]) {
+			const subProperty = propertyMatch[2].trim().toLowerCase();
+			if (subProperty.startsWith('prof')) {
+				subKey = StatSubGroupEnum.proficiency;
+			} else if (subProperty.startsWith('dc')) {
+				subKey = StatSubGroupEnum.dc;
+			} else if (subProperty.startsWith('ability')) {
+				subKey = StatSubGroupEnum.ability;
+			}
+		}
+
+		let parsedValue: string | number;
+		if (subKey === StatSubGroupEnum.ability) {
+			if (adjustment.value !== '' && !(adjustment.value in AbilityEnum)) {
+				return null;
+			}
+			// Ability property
+			if (!(adjustment.value in AbilityEnum) && adjustment.value !== '') {
+				throw new KoboldError(
+					`Property ${adjustment.property}'s value ${adjustment.value} is not a valid number`
+				);
+			}
+			return {
+				..._.omit(adjustment, 'value'),
+				parsed: {
+					value: adjustment.value as AbilityEnum | '',
+					baseKey: propertyName,
+					subKey: subKey,
+				},
+			};
+		} else {
+			parsedValue = adjustment.value === '' ? 0 : parseInt(adjustment.value);
+			if (isNaN(parsedValue)) {
+				throw new KoboldError(
+					`Property ${adjustment.property}'s value ${adjustment.value} is not a valid number`
+				);
+			}
+			return {
+				..._.omit(adjustment, 'value'),
+				parsed: {
+					value: parsedValue,
+					baseKey: propertyName,
+					subKey: subKey,
+				},
+			};
+		}
+	}
 	public adjust(adjustment: SheetAdjustment): void {
-		const sheetStatAdjustment = SheetStatAdjuster.deserializeAdjustment(adjustment);
+		const sheetStatAdjustment = SheetAdditionalSkillAdjuster.deserializeAdjustment(adjustment);
 		if (!sheetStatAdjustment) {
-			console.warn('something went wrong parsing adjustment', adjustment);
-			return;
+			throw new KoboldError(
+				'something went wrong parsing adjustment',
+				JSON.stringify(adjustment)
+			);
 		}
 		// filter out existing additional skills with this name no matter what
 		// on +/=, overwrite the new additional skill which requires removal anyway
 		const targetStat: Sheet['additionalSkills'][number] = this.sheetAdditionalSkills.find(
-			skill => skill.name === sheetStatAdjustment.property
+			skill =>
+				SheetProperties.standardizeCustomPropName(skill.name) ===
+				sheetStatAdjustment.parsed.baseKey
 		) ?? {
-			name: sheetStatAdjustment.property,
+			name: sheetStatAdjustment.parsed.baseKey,
 			dc: 10,
 			proficiency: 0,
 			bonus: 0,
@@ -574,8 +788,17 @@ export class SheetAdditionalSkillAdjuster
 			}
 		}
 
-		_.remove(this.sheetAdditionalSkills, skill => skill.name === targetStat.name);
+		_.remove(
+			this.sheetAdditionalSkills,
+			skill => SheetProperties.standardizeCustomPropName(skill.name) === targetStat.name
+		);
 		this.sheetAdditionalSkills.push(targetStat);
+	}
+	public static discardAdjustment(adjustment: SheetAdjustment): boolean {
+		return (
+			adjustment.value === '' &&
+			(adjustment.operation === '+' || adjustment.operation === '-')
+		);
 	}
 }
 
@@ -587,24 +810,35 @@ export class SheetWeaknessResistanceAdjuster
 	public static deserializeAdjustment = SheetIntegerAdjuster.deserializeAdjustment;
 	public adjust(adjustment: SheetAdjustment): void {
 		const sheetIntegerAdjustment = SheetIntegerAdjuster.deserializeAdjustment(adjustment);
-		const weaknessResistanceName = SheetWeaknessResistanceProperties.propertyNameRegex
+		let weaknessResistanceName = SheetWeaknessResistanceProperties.propertyNameRegex
 			.exec(adjustment.property)?.[1]
 			?.trim()
 			?.toLowerCase();
 		if (!sheetIntegerAdjustment || !weaknessResistanceName) {
-			console.warn('something went wrong parsing adjustment', adjustment);
-			return;
+			throw new KoboldError(
+				'something went wrong parsing adjustment',
+				JSON.stringify(adjustment)
+			);
 		}
+		weaknessResistanceName = SheetProperties.standardizeCustomPropName(weaknessResistanceName);
+
 		const isWeakness = SheetWeaknessResistanceProperties.isWeakness(adjustment.property);
 		const targetList = isWeakness
 			? this.sheetWeaknessResistance.weaknesses
 			: this.sheetWeaknessResistance.resistances;
 
-		const currentValue = targetList.find(entry => entry.type === weaknessResistanceName) ?? {
+		const currentValue = targetList.find(
+			entry =>
+				SheetProperties.standardizeCustomPropName(entry.type) === weaknessResistanceName
+		) ?? {
 			type: weaknessResistanceName,
 			amount: 0,
 		};
-		_.remove(targetList, entry => entry.type === weaknessResistanceName);
+		_.remove(
+			targetList,
+			entry =>
+				SheetProperties.standardizeCustomPropName(entry.type) === weaknessResistanceName
+		);
 		switch (adjustment.operation) {
 			case SheetAdjustmentOperationEnum['+']:
 				currentValue.amount += sheetIntegerAdjustment.parsed;
@@ -617,6 +851,13 @@ export class SheetWeaknessResistanceAdjuster
 				break;
 		}
 		targetList.push(currentValue);
+	}
+
+	public static discardAdjustment(adjustment: SheetAdjustment): boolean {
+		return (
+			(adjustment.value === '' || parseInt(adjustment.value) === 0) &&
+			(adjustment.operation === '+' || adjustment.operation === '-')
+		);
 	}
 }
 
