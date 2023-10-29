@@ -1,4 +1,5 @@
 import {
+	AbilityEnum,
 	AdjustablePropertyEnum,
 	Sheet,
 	SheetAdjustment,
@@ -457,9 +458,9 @@ describe('SheetAttackAdjuster', () => {
 				toHit: 5,
 				damage: [{ dice: '1d6', type: 'cold or fire' }],
 				name: 'Foo',
-				range: '',
+				range: null,
 				traits: [],
-				notes: '',
+				notes: null,
 			});
 			expect(sheet.attacks.length).toBe(2);
 		});
@@ -477,9 +478,9 @@ describe('SheetAttackAdjuster', () => {
 				toHit: 5,
 				damage: [{ dice: '1d6', type: 'cold or fire' }],
 				name: 'Foo',
-				range: '',
+				range: null,
 				traits: [],
-				notes: '',
+				notes: null,
 			});
 			expect(sheet.attacks.length).toBe(2);
 		});
@@ -505,9 +506,9 @@ describe('SheetAttackAdjuster', () => {
 				toHit: 5,
 				damage: [{ dice: '1d6', type: 'cold or fire' }],
 				name: 'Foo',
-				range: '',
+				range: null,
 				traits: [],
-				notes: '',
+				notes: null,
 			});
 			expect(sheet.attacks.length).toBe(2);
 		});
@@ -573,7 +574,7 @@ describe('SheetAdditionalSkillAdjuster', () => {
 	});
 
 	describe('adjust', () => {
-		it('should add to an additional skill property', () => {
+		it('should add to an existing additional skill property', () => {
 			const adjustment: SheetAdjustment = {
 				type: SheetAdjustmentTypeEnum.untyped,
 				value: '2',
@@ -583,6 +584,7 @@ describe('SheetAdditionalSkillAdjuster', () => {
 			};
 			adjuster.adjust(adjustment);
 			expect(sheet.additionalSkills[0].bonus).toBe(8);
+			expect(sheet.additionalSkills[0].dc).toBe(16);
 		});
 
 		it('should subtract from an additional skill property', () => {
@@ -594,6 +596,7 @@ describe('SheetAdditionalSkillAdjuster', () => {
 				operation: SheetAdjustmentOperationEnum['-'],
 			};
 			adjuster.adjust(adjustment);
+			expect(sheet.additionalSkills[0].bonus).toBe(6);
 			expect(sheet.additionalSkills[0].dc).toBe(15);
 		});
 
@@ -607,6 +610,40 @@ describe('SheetAdditionalSkillAdjuster', () => {
 			};
 			adjuster.adjust(adjustment);
 			expect(sheet.additionalSkills[0].bonus).toBe(5);
+			expect(sheet.additionalSkills[0].dc).toBe(16);
+		});
+
+		it('create a new additional skill property, adding both dc and bonus if either is specified', () => {
+			const adjustment: SheetAdjustment = {
+				type: SheetAdjustmentTypeEnum.untyped,
+				value: '7',
+				property: 'Esoteric Lore',
+				propertyType: AdjustablePropertyEnum.extraSkill,
+				operation: SheetAdjustmentOperationEnum['='],
+			};
+			const adjustment2: SheetAdjustment = {
+				type: SheetAdjustmentTypeEnum.untyped,
+				value: AbilityEnum.charisma,
+				property: 'Esoteric Lore Ability',
+				propertyType: AdjustablePropertyEnum.extraSkill,
+				operation: SheetAdjustmentOperationEnum['='],
+			};
+			const adjustment3: SheetAdjustment = {
+				type: SheetAdjustmentTypeEnum.untyped,
+				value: '14',
+				property: 'Dragon Lore Dc',
+				propertyType: AdjustablePropertyEnum.extraSkill,
+				operation: SheetAdjustmentOperationEnum['='],
+			};
+			adjuster.adjust(adjustment);
+			adjuster.adjust(adjustment2);
+			adjuster.adjust(adjustment3);
+			expect(sheet.additionalSkills[1].bonus).toBe(7);
+			expect(sheet.additionalSkills[1].dc).toBe(17);
+			expect(sheet.additionalSkills[1].ability).toBe(AbilityEnum.charisma);
+			expect(sheet.additionalSkills[2].bonus).toBe(4);
+			expect(sheet.additionalSkills[2].dc).toBe(14);
+			expect(sheet.additionalSkills[2].ability).toBe(AbilityEnum.intelligence);
 		});
 
 		it('should do nothing for an invalid adjustment', () => {

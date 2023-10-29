@@ -443,11 +443,8 @@ export class SheetStatAdjuster implements SheetPropertyGroupAdjuster<SheetStats>
 
 		let parsedValue: string | number;
 		if (property.subKey === StatSubGroupEnum.ability) {
-			if (adjustment.value !== '' && !(adjustment.value in AbilityEnum)) {
-				return null;
-			}
 			// Ability property
-			if (!(adjustment.value in AbilityEnum) && adjustment.value !== '') {
+			if (!SheetProperties.abilityFromAlias[adjustment.value] && adjustment.value !== '') {
 				throw new KoboldError(
 					`Property ${adjustment.property}'s value ${adjustment.value} is not a valid number`
 				);
@@ -455,7 +452,7 @@ export class SheetStatAdjuster implements SheetPropertyGroupAdjuster<SheetStats>
 			return {
 				..._.omit(adjustment, 'value'),
 				parsed: {
-					value: adjustment.value as AbilityEnum | '',
+					value: SheetProperties.abilityFromAlias[adjustment.value] ?? '',
 					baseKey: property.baseKey,
 					subKey: property.subKey,
 				},
@@ -625,11 +622,11 @@ export class SheetAttackAdjuster implements SheetPropertyGroupAdjuster<Sheet['at
 			..._.omit(adjustment, 'value'),
 			parsed: {
 				name: adjustment.property.split(' ').slice(0, -1).join(' '), // remove the attack keyword
-				toHit: toHitClause,
+				toHit: toHitClause || null,
 				damage: damageValues,
-				range,
+				range: range || null,
 				traits,
-				notes,
+				notes: notes || null,
 			},
 		};
 	}
@@ -702,11 +699,8 @@ export class SheetAdditionalSkillAdjuster
 
 		let parsedValue: string | number;
 		if (subKey === StatSubGroupEnum.ability) {
-			if (adjustment.value !== '' && !(adjustment.value in AbilityEnum)) {
-				return null;
-			}
 			// Ability property
-			if (!(adjustment.value in AbilityEnum) && adjustment.value !== '') {
+			if (!SheetProperties.abilityFromAlias[adjustment.value] && adjustment.value !== '') {
 				throw new KoboldError(
 					`Property ${adjustment.property}'s value ${adjustment.value} is not a valid number`
 				);
@@ -714,7 +708,7 @@ export class SheetAdditionalSkillAdjuster
 			return {
 				..._.omit(adjustment, 'value'),
 				parsed: {
-					value: adjustment.value as AbilityEnum | '',
+					value: SheetProperties.abilityFromAlias[adjustment.value] ?? '',
 					baseKey: propertyName,
 					subKey: subKey,
 				},
@@ -752,10 +746,16 @@ export class SheetAdditionalSkillAdjuster
 				sheetStatAdjustment.parsed.baseKey
 		) ?? {
 			name: sheetStatAdjustment.parsed.baseKey,
-			dc: 10,
-			proficiency: 0,
-			bonus: 0,
-			ability: null,
+			dc:
+				sheetStatAdjustment.parsed.subKey === StatSubGroupEnum.bonus
+					? 10 + sheetStatAdjustment.parsed.value
+					: 10,
+			proficiency: null,
+			bonus:
+				sheetStatAdjustment.parsed.subKey === StatSubGroupEnum.dc
+					? sheetStatAdjustment.parsed.value - 10
+					: 0,
+			ability: AbilityEnum.intelligence,
 		};
 
 		if (sheetStatAdjustment.parsed.subKey === StatSubGroupEnum.ability) {
@@ -771,7 +771,11 @@ export class SheetAdditionalSkillAdjuster
 			}
 			return;
 		} else {
-			const currentValue = targetStat[sheetStatAdjustment.parsed.subKey] ?? 0;
+			let currentValue = targetStat[sheetStatAdjustment.parsed.subKey];
+			if (currentValue === null) {
+				if (sheetStatAdjustment.parsed.subKey === StatSubGroupEnum.dc) currentValue = 10;
+				else currentValue = 0;
+			}
 			switch (adjustment.operation) {
 				case SheetAdjustmentOperationEnum['+']:
 					targetStat[sheetStatAdjustment.parsed.subKey] =
