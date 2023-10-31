@@ -1,17 +1,13 @@
-import { GuildDefaultCharacter, ChannelDefaultCharacter, InitiativeActor } from './../index.js';
-import type { Character as CharacterType } from './character.schema.js';
+import { Sheet } from './../index.js';
 import { BaseModel } from '../../lib/base-model.js';
-import { Action as ActionType } from '../../lib/shared-schemas/action.schema.d.js';
-import { Modifier as ModifierType } from '../../lib/shared-schemas/modifier.schema.d.js';
-import { RollMacro as RollMacroType } from '../../lib/shared-schemas/roll-macro.schema.d.js';
 import _ from 'lodash';
 import { Creature } from '../../../../utils/creature.js';
 import { ChatInputCommandInteraction } from 'discord.js';
-import { zCharacter, Sheet as SheetType } from './character.zod.js';
-import { z } from 'zod';
+import { Character, zCharacter } from '../../schemas/character.zod.js';
 import { ZodValidator } from '../../lib/zod-validator.js';
-
-export type ZCharacter = z.infer<typeof zCharacter>;
+import { GuildDefaultCharacterModel } from '../guild-default-character/guild-default-character.model.js';
+import { ChannelDefaultCharacterModel } from '../channel-default-character/channel-default-character.model.js';
+import { InitiativeActorModel } from '../initiative-actor/initiative-actor.model.js';
 
 interface ErrorWithCode<T extends number = number> extends Error {
 	code: T;
@@ -22,21 +18,15 @@ function isErrorWithCode<T extends number>(
 	return err instanceof Error && 'code' in err;
 }
 
-export interface Character extends CharacterType {
-	sheet: SheetType;
-	actions: ActionType[];
-	modifiers: ModifierType[];
-	rollMacros: RollMacroType[];
-	guildDefaultCharacter?: GuildDefaultCharacter[];
-	channelDefaultCharacter?: ChannelDefaultCharacter[];
+export interface CharacterModel extends Character {
+	guildDefaultCharacter?: GuildDefaultCharacterModel[];
+	channelDefaultCharacter?: ChannelDefaultCharacterModel[];
 }
-export class Character extends BaseModel {
+export class CharacterModel extends BaseModel {
 	static get tableName(): string {
 		return 'character';
 	}
-	// enable ajv formats to  validate the date field when inserting in database
 	static createValidator() {
-		console.warn('creating validator');
 		return new ZodValidator();
 	}
 
@@ -56,7 +46,7 @@ export class Character extends BaseModel {
 		});
 	}
 
-	async updateTracker(intr: ChatInputCommandInteraction, sheet: SheetType) {
+	async updateTracker(intr: ChatInputCommandInteraction, sheet: Sheet) {
 		const creature = new Creature(sheet);
 		const tracker = await creature.compileTracker(this.trackerMode ?? 'counters_only');
 		try {
@@ -83,10 +73,10 @@ export class Character extends BaseModel {
 		}
 	}
 
-	async saveSheet(intr: ChatInputCommandInteraction, sheet: SheetType) {
+	async saveSheet(intr: ChatInputCommandInteraction, sheet: Sheet) {
 		let promises: Promise<any>[] = [
 			this.$query().patch({ sheet }).execute(),
-			InitiativeActor.query().patch({ sheet }).where('characterId', this.id).execute(),
+			InitiativeActorModel.query().patch({ sheet }).where('characterId', this.id).execute(),
 		];
 		if (this.trackerMessageId) {
 			promises.push(this.updateTracker(intr, sheet));
@@ -134,7 +124,7 @@ export class Character extends BaseModel {
 		return {
 			guildDefaultCharacter: {
 				relation: BaseModel.HasManyRelation,
-				modelClass: GuildDefaultCharacter,
+				modelClass: GuildDefaultCharacterModel,
 				join: {
 					from: 'character.id',
 					to: 'guildDefaultCharacter.characterId',
@@ -142,7 +132,7 @@ export class Character extends BaseModel {
 			},
 			channelDefaultCharacter: {
 				relation: BaseModel.HasManyRelation,
-				modelClass: ChannelDefaultCharacter,
+				modelClass: ChannelDefaultCharacterModel,
 				join: {
 					from: 'character.id',
 					to: 'channelDefaultCharacter.characterId',

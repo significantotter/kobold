@@ -77,7 +77,7 @@ export class InitJoinSubCommand implements Command {
 			await InteractionUtils.send(
 				intr,
 				L.en.commands.init.join.interactions.characterAlreadyInInit({
-					characterName: activeCharacter.sheet.info.name,
+					characterName: activeCharacter.sheet.staticInfo.name,
 				})
 			);
 			return;

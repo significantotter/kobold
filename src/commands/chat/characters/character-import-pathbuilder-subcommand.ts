@@ -1,4 +1,4 @@
-import { Character } from '../../../services/kobold/models/index.js';
+import { Character, CharacterModel } from '../../../services/kobold/index.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -59,7 +59,7 @@ export class CharacterImportPathbuilderSubCommand implements Command {
 			);
 		}
 
-		const existingCharacter = await Character.query()
+		const existingCharacter = await CharacterModel.query()
 			.where({
 				userId: intr.user.id,
 			})
@@ -84,12 +84,12 @@ export class CharacterImportPathbuilderSubCommand implements Command {
 			});
 
 			// set current characters owned by user to inactive state
-			await Character.query()
+			await CharacterModel.query()
 				.patch({ isActiveCharacter: false })
 				.where({ userId: intr.user.id });
 
 			// store sheet in db
-			const newCharacter = await Character.query().insertAndFetch({
+			const newCharacter = await CharacterModel.query().insertAndFetch({
 				name: creature.name,
 				charId: jsonId,
 				userId: intr.user.id,

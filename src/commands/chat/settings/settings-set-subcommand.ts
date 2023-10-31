@@ -16,8 +16,8 @@ import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { InteractionUtils } from '../../../utils/interaction-utils.js';
 import _ from 'lodash';
-import { UserSettings } from '../../../services/kobold/models/index.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
+import { UserSettingsModel } from '../../../services/kobold/index.js';
 
 export class SettingsSetSubCommand implements Command {
 	public names = [L.en.commands.settings.set.name()];
@@ -91,14 +91,14 @@ export class SettingsSetSubCommand implements Command {
 		}
 
 		// fetch the value to determine whether to insert or update
-		const existingSetting = await UserSettings.query().findOne({ userId: intr.user.id });
+		const existingSetting = await UserSettingsModel.query().findOne({ userId: intr.user.id });
 
 		let result;
 		if (existingSetting) {
 			existingSetting[settingDbName] = parsedValue;
 			result = await existingSetting.$query().patch();
 		} else {
-			result = await UserSettings.query().insert({
+			result = await UserSettingsModel.query().insert({
 				userId: intr.user.id,
 				[settingDbName]: parsedValue,
 			});

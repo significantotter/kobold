@@ -1,12 +1,10 @@
-import type { UserSettings as UserSettingsType } from './user-settings.schema.js';
-import { JSONSchema7 } from 'json-schema';
+import type { UserSettings } from '../../schemas/user-settings.zod.js';
 import { BaseModel } from '../../lib/base-model.js';
-import UserSettingsSchema from './user-settings.schema.json' assert { type: 'json' };
-import Objection from 'objection';
-import { removeRequired } from '../../lib/helpers.js';
+import { zUserSettings } from '../../schemas/user-settings.zod.js';
+import { ZodValidator } from '../../lib/zod-validator.js';
 
-export interface UserSettings extends UserSettingsType {}
-export class UserSettings extends BaseModel {
+export interface UserSettingsModel extends UserSettings {}
+export class UserSettingsModel extends BaseModel {
 	static get idColumn() {
 		return ['userId'];
 	}
@@ -15,7 +13,9 @@ export class UserSettings extends BaseModel {
 		return 'userSettings';
 	}
 
-	static get jsonSchema(): Objection.JSONSchema {
-		return removeRequired(UserSettingsSchema as unknown as Objection.JSONSchema);
+	static createValidator() {
+		return new ZodValidator();
 	}
+
+	public $z = zUserSettings;
 }

@@ -1,21 +1,19 @@
 import Ajv from 'ajv';
 import { InitiativeFactory } from './initiative.factory.js';
-import { Initiative } from './initiative.model.js';
-import InitiativeSchema from './initiative.schema.json' assert { type: 'json' };
+import { InitiativeModel } from './initiative.model.js';
 import addFormats from 'ajv-formats';
-const ajv = new Ajv.default({ allowUnionTypes: true });
-addFormats.default(ajv);
+import { zInitiative } from '../../schemas/initiative.zod.js';
 
 describe('Initiative', () => {
 	test('validates a built factory', () => {
 		const builtInitiative = InitiativeFactory.build();
-		const valid = ajv.validate(InitiativeSchema, builtInitiative);
-		expect(valid).toBe(true);
+		const valid = zInitiative.safeParse(builtInitiative.toJSON());
+		expect(valid.success).toBe(true);
 	});
 	test('validates a created factory object', async () => {
 		const createdInitiative = await InitiativeFactory.create();
-		const valid = ajv.validate(InitiativeSchema, createdInitiative);
-		expect(valid).toBe(true);
+		const valid = zInitiative.safeParse(createdInitiative.toJSON());
+		expect(valid.success).toBe(true);
 	});
 	test('builds a factory with a fake id', async () => {
 		const builtInitiative = InitiativeFactory.withFakeId().build();
@@ -23,8 +21,8 @@ describe('Initiative', () => {
 	});
 	test('Model successfully inserts and retrieves a created factory', async () => {
 		const builtInitiative = InitiativeFactory.build();
-		await Initiative.query().insert(builtInitiative);
-		const fetchedInitiatives = await Initiative.query();
+		await InitiativeModel.query().insert(builtInitiative);
+		const fetchedInitiatives = await InitiativeModel.query();
 		const insertedInitiative = fetchedInitiatives.find(
 			factory => factory.charId === builtInitiative.charId
 		);

@@ -49,7 +49,7 @@ export class RollMacroListSubCommand implements Command {
 
 		const embed = await new KoboldEmbed();
 		embed.setCharacter(activeCharacter);
-		embed.setTitle(`${activeCharacter.sheet.info.name}'s Roll Macros`);
+		embed.setTitle(`${activeCharacter.sheet.staticInfo.name}'s Roll Macros`);
 		embed.addFields(fields);
 		await embed.sendBatches(intr);
 	}

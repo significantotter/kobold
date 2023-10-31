@@ -7,14 +7,13 @@ import {
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 
-import { Character, SheetAdjustment } from '../../../services/kobold/models/index.js';
-import { InteractionUtils, StringUtils } from '../../../utils/index.js';
+import { CharacterModel, SheetAdjustment } from '../../../services/kobold/index.js';
+import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import L from '../../../i18n/i18n-node.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
-import { Creature } from '../../../utils/creature.js';
-import { SheetUtils } from '../../../utils/sheet-utils.js';
+import { SheetUtils } from '../../../utils/sheet/sheet-utils.js';
 
 export class ModifierCreateSheetModifierSubCommand implements Command {
 	public names = [L.en.commands.modifier.createSheetModifier.name()];
@@ -59,12 +58,11 @@ export class ModifierCreateSheetModifierSubCommand implements Command {
 			true
 		);
 
-		const creature = new Creature(activeCharacter.sheet);
+		const parsedSheetAdjustments: SheetAdjustment[] =
+			SheetUtils.stringToSheetAdjustments(modifierSheetValues);
 
-		const parsedSheetValues: SheetAdjustment[] = SheetUtils.sheetModifiersFromString(
-			modifierSheetValues,
-			creature
-		);
+		// make sure that the adjustments are valid and can be applied to a sheet
+		SheetUtils.adjustSheetWithSheetAdjustments(activeCharacter.sheet, parsedSheetAdjustments);
 
 		// make sure the name does't already exist in the character's modifiers
 		if (activeCharacter.getModifierByName(name)) {
@@ -72,13 +70,13 @@ export class ModifierCreateSheetModifierSubCommand implements Command {
 				intr,
 				LL.commands.modifier.createRollModifier.interactions.alreadyExists({
 					modifierName: name,
-					characterName: activeCharacter.sheet.info.name,
+					characterName: activeCharacter.sheet.staticInfo.name,
 				})
 			);
 			return;
 		}
 
-		await Character.query().updateAndFetchById(activeCharacter.id, {
+		await CharacterModel.query().updateAndFetchById(activeCharacter.id, {
 			modifiers: [
 				...activeCharacter.modifiers,
 				{
@@ -86,7 +84,7 @@ export class ModifierCreateSheetModifierSubCommand implements Command {
 					isActive: true,
 					description,
 					type: modifierType,
-					sheetAdjustments: parsedSheetValues,
+					sheetAdjustments: parsedSheetAdjustments,
 					modifierType: 'sheet',
 				},
 			],
@@ -97,7 +95,7 @@ export class ModifierCreateSheetModifierSubCommand implements Command {
 			intr,
 			LL.commands.modifier.createRollModifier.interactions.created({
 				modifierName: name,
-				characterName: activeCharacter.sheet.info.name,
+				characterName: activeCharacter.sheet.staticInfo.name,
 			})
 		);
 		return;

@@ -1,4 +1,4 @@
-import { Character } from '../../../services/kobold/models/index.js';
+import { Character, CharacterModel } from '../../../services/kobold/index.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -106,12 +106,12 @@ export class CharacterRemoveSubCommand implements Command {
 				components: [],
 			});
 			//delete the character
-			await Character.query().deleteById(activeCharacter.id);
+			await CharacterModel.query().deleteById(activeCharacter.id);
 
 			//set another character as active
-			const newActive = await Character.query().first().where({ userId: intr.user.id });
+			const newActive = await CharacterModel.query().first().where({ userId: intr.user.id });
 			if (newActive) {
-				await Character.query().patchAndFetchById(newActive.id, {
+				await CharacterModel.query().patchAndFetchById(newActive.id, {
 					isActiveCharacter: true,
 				});
 			}

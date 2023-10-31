@@ -16,7 +16,7 @@ import {
 	SheetStatKeys,
 	SheetStats,
 	StatSubGroupEnum,
-} from '../../services/kobold/models/index.js';
+} from '../../services/kobold/index.js';
 import {
 	SheetProperties,
 	SheetInfoProperties,
@@ -756,6 +756,7 @@ export class SheetAdditionalSkillAdjuster
 					? sheetStatAdjustment.parsed.value - 10
 					: 0,
 			ability: AbilityEnum.intelligence,
+			note: null,
 		};
 
 		if (sheetStatAdjustment.parsed.subKey === StatSubGroupEnum.ability) {

@@ -1,22 +1,22 @@
-import type { Npc as NpcType } from './npc.schema.js';
-import { JSONSchema7 } from 'json-schema';
+import type { Npc } from '../../schemas/npc.zod.js';
 import { BaseModel } from '../../lib/base-model.js';
-import npc from './npc.schema.json' assert { type: 'json' };
-import Sheet from '../../lib/shared-schemas/sheet.schema.json' assert { type: 'json' };
-import { Sheet as SheetType } from '../../lib/type-helpers.js';
 import _ from 'lodash';
-import { CreatureStatBlock } from '../../../pf2etools/pf2etools-types.js';
+import { Creature as CreatureStatBlock } from '../../../pf2etools/schemas/index-types.js';
 import { StringUtils } from '../../../../utils/string-utils.js';
-import Objection from 'objection';
-import { removeRequired } from '../../lib/helpers.js';
+import { ZodValidator } from '../../lib/zod-validator.js';
+import { zNpc } from '../../schemas/npc.zod.js';
 
-export interface Npc extends NpcType {
-	sheet?: SheetType;
-}
-export class Npc extends BaseModel {
+export interface NpcModel extends Npc {}
+export class NpcModel extends BaseModel {
 	static get tableName(): string {
 		return 'npc';
 	}
+
+	static createValidator() {
+		return new ZodValidator();
+	}
+
+	public $z = zNpc;
 
 	public async fetchVariantDataIfExists(): Promise<CreatureStatBlock> {
 		if (this.data.description && this.data.description.includes('{@creature ')) {
@@ -26,9 +26,10 @@ export class Npc extends BaseModel {
 				.split('|');
 
 			if (originalCreatureName) {
-				let originalCreatureMatchesQuery = Npc.query().whereRaw('LOWER(name) ilike ?', [
-					`%${(originalCreatureName ?? '').toLowerCase()}%`,
-				]);
+				let originalCreatureMatchesQuery = NpcModel.query().whereRaw(
+					'LOWER(name) ilike ?',
+					[`%${(originalCreatureName ?? '').toLowerCase()}%`]
+				);
 				if (sourceFileName)
 					originalCreatureMatchesQuery = originalCreatureMatchesQuery.andWhereRaw(
 						'LOWER(source_file_name) ilike ?',
@@ -51,12 +52,5 @@ export class Npc extends BaseModel {
 			}
 		}
 		return this.data as CreatureStatBlock;
-	}
-
-	static get jsonSchema(): Objection.JSONSchema {
-		return removeRequired({
-			...npc,
-			properties: { ...npc.properties, sheet: Sheet },
-		} as unknown as Objection.JSONSchema);
 	}
 }

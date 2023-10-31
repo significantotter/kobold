@@ -116,7 +116,6 @@ import { Trigger } from './triggers/index.js';
 import { Config } from './config/config.js';
 import Logs from './config/lang/logs.json' assert { type: 'json' };
 import { checkAndLoadBestiaryFiles } from './services/pf2etools/bestiaryLoader.js';
-import { Kobold } from './services/kobold/models/koboldORM.js';
 import { CompendiumModel } from './services/pf2etools/compendium.model.js';
 import { db } from './services/pf2etools/pf2eTools.db.js';
 

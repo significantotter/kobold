@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { TranslationFunctions } from '../i18n/i18n-types.js';
-import { Attribute, Character, UserSettings } from '../services/kobold/models/index.js';
+import { Attribute, Character, UserSettings } from '../services/kobold/index.js';
 import { Creature } from './creature.js';
 import {
 	DiceUtils,
@@ -67,7 +67,7 @@ export class RollBuilder {
 				initStatsNotification: 'every_round',
 			});
 
-		const actorText = actorName || this.creature?.sheet?.info?.name || '';
+		const actorText = actorName || this.creature?.sheet?.staticInfo?.name || '';
 		this.title = title || `${actorText} ${this.rollDescription}`.trim();
 	}
 
@@ -83,26 +83,25 @@ export class RollBuilder {
 	public addMultiRoll({
 		rollTitle,
 		rollExpressions,
-		showTags = true,
 		rollFromTarget = false,
 	}: {
 		rollTitle?: string;
 		rollExpressions: {
 			name: string;
-			damageType: string;
+			damageType?: string | null;
 			rollExpression: string;
 			tags?: string[];
 			modifierMultiplier?: number;
 			extraAttributes?: Attribute[];
 		}[];
 		rollFromTarget?: boolean;
-		showTags?: boolean;
 	}) {
 		const title = rollTitle || '\u200B';
 		let values = '';
 		const rollFields = rollExpressions.map(rollExpression => ({
 			...DiceUtils.parseAndEvaluateDiceExpression({
 				rollExpression: rollExpression.rollExpression,
+				damageType: rollExpression.damageType ?? undefined,
 				tags: rollExpression.tags,
 				extraAttributes: rollExpression.extraAttributes,
 				modifierMultiplier: rollExpression.modifierMultiplier,

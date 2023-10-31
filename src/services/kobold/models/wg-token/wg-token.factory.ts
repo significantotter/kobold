@@ -1,11 +1,11 @@
 import { Factory } from 'fishery';
 import type { DeepPartial } from 'fishery';
-import { WgToken } from './wg-token.model.js';
+import { WgTokenModel } from './wg-token.model.js';
 import { faker } from '@faker-js/faker';
 
 type WgTokenTransientParams = {};
 
-class WgTokenFactoryClass extends Factory<WgToken, WgTokenTransientParams, WgToken> {
+class WgTokenFactoryClass extends Factory<WgTokenModel, WgTokenTransientParams, WgTokenModel> {
 	withFakeId() {
 		return this.params({
 			id: faker.number.int(2147483647),
@@ -14,9 +14,9 @@ class WgTokenFactoryClass extends Factory<WgToken, WgTokenTransientParams, WgTok
 }
 
 export const WgTokenFactory = WgTokenFactoryClass.define(({ onCreate }) => {
-	onCreate(async builtWgToken => WgToken.query().insert(builtWgToken));
+	onCreate(async builtWgToken => WgTokenModel.query().insert(builtWgToken));
 
-	const wgTokenData: DeepPartial<WgToken> = {
+	const wgTokenData: DeepPartial<WgTokenModel> = {
 		charId: faker.number.int(2147483647),
 		accessToken: faker.string.uuid(),
 		expiresAt: faker.date.soon({ days: 30 }).toISOString(),
@@ -24,5 +24,5 @@ export const WgTokenFactory = WgTokenFactoryClass.define(({ onCreate }) => {
 		tokenType: 'Bearer',
 	};
 
-	return WgToken.fromDatabaseJson(wgTokenData);
+	return WgTokenModel.fromDatabaseJson(wgTokenData);
 });

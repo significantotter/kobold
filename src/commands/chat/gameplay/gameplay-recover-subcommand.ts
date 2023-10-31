@@ -16,7 +16,7 @@ import { GameplayOptions } from './gameplay-command-options.js';
 import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
 import { GameplayUtils } from '../../../utils/gameplay-utils.js';
 import { InteractionUtils } from '../../../utils/interaction-utils.js';
-import { InitiativeActor } from '../../../services/kobold/models/index.js';
+import { InitiativeActor, InitiativeActorModel } from '../../../services/kobold/index.js';
 import { GameUtils } from '../../../utils/game-utils.js';
 
 export class GameplayRecoverSubCommand implements Command {
@@ -82,7 +82,7 @@ export class GameplayRecoverSubCommand implements Command {
 			let recoveredStats;
 			if (
 				characterOrInitActorTargets.some(
-					character => character instanceof InitiativeActor && character.hideStats
+					character => character instanceof InitiativeActorModel && character.hideStats
 				)
 			) {
 				recoveredStats = recoverValues.map(

@@ -8,9 +8,9 @@ import { RateLimiter } from 'discord.js-rate-limiter';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import L from '../../../i18n/i18n-node.js';
 
-import { InitWithActorsAndGroups, Initiative } from '../../../services/kobold/models/index.js';
+import { Initiative, InitiativeModel } from '../../../services/kobold/index.js';
 import { InteractionUtils } from '../../../utils/index.js';
-import { InitiativeBuilder, InitiativeUtils } from '../../../utils/initiative-utils.js';
+import { InitiativeBuilder } from '../../../utils/initiative-utils.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
@@ -42,7 +42,7 @@ export class InitStartSubCommand implements Command {
 		}
 
 		try {
-			const init = await Initiative.query()
+			const init = await InitiativeModel.query()
 				.insertAndFetch({
 					gmUserId: startingUser,
 					channelId: intr.channelId,

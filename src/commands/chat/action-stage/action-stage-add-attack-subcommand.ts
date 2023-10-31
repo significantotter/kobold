@@ -1,4 +1,3 @@
-import { Character } from '../../../services/kobold/models/index.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -18,6 +17,7 @@ import { CharacterUtils } from '../../../utils/character-utils.js';
 import _ from 'lodash';
 import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
 import { ActionStageOptions } from './action-stage-command-options.js';
+import { CharacterModel } from '../../../services/kobold/index.js';
 
 export class ActionStageAddAttackSubCommand implements Command {
 	public names = [L.en.commands.actionStage.addAttack.name()];
@@ -125,7 +125,7 @@ export class ActionStageAddAttackSubCommand implements Command {
 
 		// save the character
 
-		await Character.query().updateAndFetchById(activeCharacter.id, {
+		await CharacterModel.query().updateAndFetchById(activeCharacter.id, {
 			actions: activeCharacter.actions,
 		});
 

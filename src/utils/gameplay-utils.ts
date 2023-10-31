@@ -1,5 +1,12 @@
 import { ChatInputCommandInteraction, Client } from 'discord.js';
-import { Character, InitiativeActor, ModelWithSheet } from '../services/kobold/models/index.js';
+import {
+	Character,
+	CharacterModel,
+	InitiativeActor,
+	InitiativeActorModel,
+	ModelWithSheet,
+	SheetBaseCounterKeys,
+} from '../services/kobold/index.js';
 import { KoboldError } from './KoboldError.js';
 import { Creature, SettableSheetOption } from './creature.js';
 import { CharacterUtils } from './character-utils.js';
@@ -18,7 +25,7 @@ export class GameplayUtils {
 		} else {
 			const [type, id] = compositeId.split('-');
 			if (type === 'init') {
-				const initResult = await InitiativeActor.query()
+				const initResult = await InitiativeActorModel.query()
 					.withGraphFetched('character')
 					.findOne({ id });
 				if (initResult) {
@@ -28,7 +35,7 @@ export class GameplayUtils {
 					}
 				}
 			} else if (type === 'char') {
-				const charResult = await Character.query().findOne({ id });
+				const charResult = await CharacterModel.query().findOne({ id });
 				if (charResult) targetCharacters.push(charResult);
 			}
 		}
@@ -50,7 +57,7 @@ export class GameplayUtils {
 	public static async setGameplayStats(
 		intr: ChatInputCommandInteraction,
 		targets: ModelWithSheet[],
-		option: SettableSheetOption,
+		option: SheetBaseCounterKeys,
 		value: string
 	) {
 		const promises = [];

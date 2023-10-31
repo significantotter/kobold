@@ -1,10 +1,10 @@
 import { AutocompleteInteraction, CacheType, CommandInteraction } from 'discord.js';
-import { UserSettings } from '../services/kobold/models/index.js';
-import { UserSettings as UserSettingsType } from '../services/kobold/models/user-settings/user-settings.schema.js';
+import { UserSettings } from '../services/kobold/index.js';
 import _ from 'lodash';
+import { UserSettingsModel } from '../services/kobold/models/user-settings/user-settings.model.js';
 
 export class SettingsUtils {
-	public static get defaultSettings(): UserSettingsType {
+	public static get defaultSettings(): UserSettings {
 		return {
 			userId: '',
 			rollCompactMode: 'normal',
@@ -17,7 +17,7 @@ export class SettingsUtils {
 	): Promise<UserSettings> {
 		let settings: UserSettings | undefined;
 		try {
-			settings = await UserSettings.query().findOne('userId', intr.user.id);
+			settings = await UserSettingsModel.query().findOne('userId', intr.user.id);
 		} catch {}
 		return _.defaults(settings, this.defaultSettings);
 	}

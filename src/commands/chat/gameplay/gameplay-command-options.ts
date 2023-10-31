@@ -4,6 +4,7 @@ import {
 	ChannelType,
 } from 'discord.js';
 import L from '../../../i18n/i18n-node.js';
+import { SheetBaseCounterKeys } from '../../../services/kobold/index.js';
 
 export class GameplayOptions {
 	public static readonly GAMEPLAY_SET_OPTION: APIApplicationCommandBasicOption = {
@@ -11,32 +12,10 @@ export class GameplayOptions {
 		description: L.en.commandOptions.gameplaySetOption.description(),
 		required: true,
 		type: ApplicationCommandOptionType.String,
-		choices: [
-			{
-				name: L.en.commandOptions.gameplaySetOption.choices.hp.name(),
-				value: L.en.commandOptions.gameplaySetOption.choices.hp.value(),
-			},
-			{
-				name: L.en.commandOptions.gameplaySetOption.choices.tempHp.name(),
-				value: L.en.commandOptions.gameplaySetOption.choices.tempHp.value(),
-			},
-			{
-				name: L.en.commandOptions.gameplaySetOption.choices.stamina.name(),
-				value: L.en.commandOptions.gameplaySetOption.choices.stamina.value(),
-			},
-			{
-				name: L.en.commandOptions.gameplaySetOption.choices.resolve.name(),
-				value: L.en.commandOptions.gameplaySetOption.choices.resolve.value(),
-			},
-			{
-				name: L.en.commandOptions.gameplaySetOption.choices.heroPoints.name(),
-				value: L.en.commandOptions.gameplaySetOption.choices.heroPoints.value(),
-			},
-			{
-				name: L.en.commandOptions.gameplaySetOption.choices.focusPoints.name(),
-				value: L.en.commandOptions.gameplaySetOption.choices.focusPoints.value(),
-			},
-		],
+		choices: Object.values(SheetBaseCounterKeys).map(key => ({
+			name: L.en.commandOptions.gameplaySetOption.choices[key].name(),
+			value: L.en.commandOptions.gameplaySetOption.choices[key].value(),
+		})),
 	};
 	public static readonly GAMEPLAY_DAMAGE_AMOUNT: APIApplicationCommandBasicOption = {
 		name: L.en.commandOptions.gameplayDamageAmount.name(),

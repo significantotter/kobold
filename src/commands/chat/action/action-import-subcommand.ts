@@ -1,4 +1,4 @@
-import { Action, Character } from '../../../services/kobold/models/index.js';
+import { Action, Character, CharacterModel, zAction } from '../../../services/kobold/index.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -20,7 +20,6 @@ import {
 } from '../../../utils/import-utils.js';
 import { ActionOptions } from '../action/action-command-options.js';
 import L from '../../../i18n/i18n-node.js';
-import { zAction } from '../../../services/kobold/models/character/character.zod.js';
 import { z } from 'zod';
 
 export class ActionImportSubCommand implements Command {
@@ -109,7 +108,7 @@ export class ActionImportSubCommand implements Command {
 			return;
 		}
 
-		await Character.query().patchAndFetchById(activeCharacter.id, {
+		await CharacterModel.query().patchAndFetchById(activeCharacter.id, {
 			actions: finalActions,
 		});
 

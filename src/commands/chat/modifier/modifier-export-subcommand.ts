@@ -44,13 +44,13 @@ export class ModifierExportSubCommand implements Command {
 
 		const pastebinPost = await new PasteBin({ apiKey: Config.pastebin.apiKey }).post({
 			code: JSON.stringify(modifiers),
-			name: `${activeCharacter.sheet.info.name}'s Modifiers`,
+			name: `${activeCharacter.sheet.staticInfo.name}'s Modifiers`,
 		});
 
 		await InteractionUtils.send(
 			intr,
 			LL.commands.modifier.export.interactions.success({
-				characterName: activeCharacter.sheet.info.name,
+				characterName: activeCharacter.sheet.staticInfo.name,
 				pasteBinLink: pastebinPost,
 			})
 		);

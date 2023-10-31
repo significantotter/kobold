@@ -96,7 +96,7 @@ export class RollSaveSubCommand implements Command {
 		);
 
 		const rollResult = await DiceUtils.rollSimpleCreatureRoll({
-			actorName: creature.sheet.info.name,
+			actorName: creature.sheet.staticInfo.name,
 			creature,
 			attributeName: targetRoll.name,
 			rollNote,

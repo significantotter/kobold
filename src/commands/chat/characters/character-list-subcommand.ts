@@ -1,4 +1,9 @@
-import { Character, GuildDefaultCharacter } from '../../../services/kobold/models/index.js';
+import {
+	Character,
+	CharacterModel,
+	GuildDefaultCharacter,
+	GuildDefaultCharacterModel,
+} from '../../../services/kobold/index.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -29,11 +34,11 @@ export class CharacterListSubCommand implements Command {
 		LL: TranslationFunctions
 	): Promise<void> {
 		// try and find that character
-		const targetCharacter = await Character.query().where({
+		const targetCharacter = await CharacterModel.query().where({
 			userId: intr.user.id,
 		});
 		const serverDefault = (
-			await GuildDefaultCharacter.query().where({
+			await GuildDefaultCharacterModel.query().where({
 				userId: intr.user.id,
 				guildId: intr.guildId,
 			})
@@ -49,11 +54,11 @@ export class CharacterListSubCommand implements Command {
 			const characterFields = [];
 
 			for (const character of targetCharacter) {
-				const level = character.sheet?.info?.level;
-				const heritage = character.sheet?.info?.heritage;
-				const ancestry = character.sheet?.info?.ancestry;
-				const classes = character.sheet?.info?.class;
-				const isServerDefault = serverDefault?.characterId == character.id;
+				const level = character.sheet.staticInfo.level;
+				const heritage = character.sheet.info.heritage;
+				const ancestry = character.sheet.info.ancestry;
+				const classes = character.sheet.info.class;
+				const isServerDefault = serverDefault.characterId == character.id;
 				characterFields.push({
 					name: LL.commands.character.list.interactions.characterListEmbed.characterFieldName(
 						{

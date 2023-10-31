@@ -1,7 +1,7 @@
 import { InitiativeFactory } from './../initiative/initiative.factory.js';
 import { Factory } from 'fishery';
 import type { DeepPartial } from 'fishery';
-import { InitiativeActor } from './initiative-actor.model.js';
+import { InitiativeActorModel } from './initiative-actor.model.js';
 import { faker } from '@faker-js/faker';
 import { InitiativeActorGroupFactory } from '../initiative-actor-group/initiative-actor-group.factory.js';
 
@@ -10,9 +10,9 @@ type InitiativeActorTransientParams = {
 };
 
 class InitiativeActorFactoryClass extends Factory<
-	InitiativeActor,
+	InitiativeActorModel,
 	InitiativeActorTransientParams,
-	InitiativeActor
+	InitiativeActorModel
 > {
 	withFakeId() {
 		return this.params({
@@ -26,40 +26,32 @@ class InitiativeActorFactoryClass extends Factory<
 	}
 }
 
-export const InitiativeActorFactory = InitiativeActorFactoryClass.define(
-	({ onCreate, transientParams }) => {
-		onCreate(async builtInitiativeActor => {
-			return InitiativeActor.query().insertGraph(
-				{
-					...builtInitiativeActor,
-					actorGroup: {
-						...InitiativeActorGroupFactory.build({
-							userId: builtInitiativeActor.userId,
-							name: builtInitiativeActor.name,
-						}),
-						initiative: { '#ref': 'initiative' },
-					},
-					initiative: { '#id': 'initiative', ...InitiativeFactory.build() },
+export const InitiativeActorFactory = InitiativeActorFactoryClass.define(({ onCreate }) => {
+	onCreate(async builtInitiativeActor => {
+		return InitiativeActorModel.query().insertGraph(
+			{
+				...builtInitiativeActor,
+				actorGroup: {
+					...InitiativeActorGroupFactory.build({
+						userId: builtInitiativeActor.userId,
+						name: builtInitiativeActor.name,
+					}),
+					initiative: { '#ref': 'initiative' },
 				},
-				{ allowRefs: true }
-			);
-		});
-		const name = faker.person.firstName();
-		let actorGroup;
-		if (transientParams.includeGroup) {
-			actorGroup = InitiativeActorGroupFactory.withFakeId().build({ name });
-		}
+				initiative: { '#id': 'initiative', ...InitiativeFactory.build() },
+			},
+			{ allowRefs: true }
+		);
+	});
+	const name = faker.person.firstName();
 
-		const actorData: DeepPartial<InitiativeActor> = {
-			userId: faker.string.uuid(),
-			name,
-			actorGroup,
-			hideStats: faker.datatype.boolean(),
-			initiativeActorGroupId: actorGroup?.id,
-			createdAt: faker.date.recent({ days: 30 }).toISOString(),
-			lastUpdatedAt: faker.date.recent({ days: 30 }).toISOString(),
-		};
+	const actorData: DeepPartial<InitiativeActorModel> = {
+		userId: faker.string.uuid(),
+		name,
+		hideStats: faker.datatype.boolean(),
+		createdAt: faker.date.recent({ days: 30 }).toISOString(),
+		lastUpdatedAt: faker.date.recent({ days: 30 }).toISOString(),
+	};
 
-		return InitiativeActor.fromDatabaseJson(actorData);
-	}
-);
+	return InitiativeActorModel.fromDatabaseJson(actorData);
+});

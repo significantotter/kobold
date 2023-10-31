@@ -16,9 +16,9 @@ import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import L from '../../../i18n/i18n-node.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
 import { ModifierOptions } from './modifier-command-options.js';
-import { Character } from '../../../services/kobold/models/index.js';
 import _ from 'lodash';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
+import { CharacterModel } from '../../../services/kobold/index.js';
 
 export class ModifierToggleSubCommand implements Command {
 	public names = [L.en.commands.modifier.toggle.name()];
@@ -90,7 +90,7 @@ export class ModifierToggleSubCommand implements Command {
 
 		activeCharacter.modifiers[targetIndex].isActive = !modifier.isActive;
 
-		await Character.query().patchAndFetchById(activeCharacter.id, {
+		await CharacterModel.query().patchAndFetchById(activeCharacter.id, {
 			modifiers: activeCharacter.modifiers,
 		});
 
@@ -101,7 +101,7 @@ export class ModifierToggleSubCommand implements Command {
 		const updateEmbed = new KoboldEmbed();
 		updateEmbed.setTitle(
 			LL.commands.modifier.toggle.interactions.success({
-				characterName: activeCharacter.sheet.info.name,
+				characterName: activeCharacter.sheet.staticInfo.name,
 				modifierName: modifier.name,
 				activeSetting: activeText,
 			})

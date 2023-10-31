@@ -5,7 +5,8 @@ import {
 	Character,
 	GuildDefaultCharacterFactory,
 	Modifier,
-} from '../services/kobold/models/index.js';
+	SheetAdjustmentTypeEnum,
+} from '../services/kobold/index.js';
 import { afterEach } from 'vitest';
 
 describe('Character Utils', function () {
@@ -48,9 +49,8 @@ describe('Character Utils', function () {
 				modifierType: 'roll',
 				name: 'FakeModifier',
 				description: 'description',
-				tags: ['foo', 'bar'],
-				type: 'custom',
-				value: 10,
+				type: SheetAdjustmentTypeEnum.untyped,
+				value: '10',
 			};
 			const otherTargetModifier: Modifier = {
 				isActive: true,
@@ -58,9 +58,8 @@ describe('Character Utils', function () {
 				modifierType: 'roll',
 				name: 'qwer FakeModifier asdf',
 				description: 'description',
-				tags: ['foo', 'bar'],
-				type: 'custom',
-				value: 10,
+				type: SheetAdjustmentTypeEnum.untyped,
+				value: '10',
 			};
 			const unmatchedModifier: Modifier = {
 				isActive: true,
@@ -68,9 +67,8 @@ describe('Character Utils', function () {
 				modifierType: 'roll',
 				name: 'akeAbilit',
 				description: 'description',
-				tags: ['foo', 'bar'],
-				type: 'custom',
-				value: 10,
+				type: SheetAdjustmentTypeEnum.untyped,
+				value: '10',
 			};
 			fakeCharacter.modifiers = [targetModifier, otherTargetModifier, unmatchedModifier];
 			const foundModifiers = CharacterUtils.findPossibleModifierFromString(
@@ -89,9 +87,8 @@ describe('Character Utils', function () {
 				modifierType: 'roll',
 				name: 'FakeModifier',
 				description: 'description',
-				tags: ['foo', 'bar'],
-				type: 'custom',
-				value: 10,
+				type: SheetAdjustmentTypeEnum.untyped,
+				value: '10',
 			};
 			const secondModifier: Modifier = {
 				isActive: true,
@@ -99,9 +96,8 @@ describe('Character Utils', function () {
 				modifierType: 'roll',
 				name: 'qwer FakeModifier asdf',
 				description: 'description',
-				tags: ['foo', 'bar'],
-				type: 'custom',
-				value: 10,
+				type: SheetAdjustmentTypeEnum.untyped,
+				value: '10',
 			};
 			const thirdModifier: Modifier = {
 				isActive: true,
@@ -109,9 +105,8 @@ describe('Character Utils', function () {
 				modifierType: 'roll',
 				name: 'akeAbilit',
 				description: 'description',
-				tags: ['foo', 'bar'],
-				type: 'custom',
-				value: 10,
+				type: SheetAdjustmentTypeEnum.untyped,
+				value: '10',
 			};
 			fakeCharacter.modifiers = [firstModifier, secondModifier, thirdModifier];
 			const foundModifiers = CharacterUtils.findPossibleModifierFromString(

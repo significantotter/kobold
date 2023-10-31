@@ -8,17 +8,13 @@ import {
 	ApplicationCommandOptionChoiceData,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
-import { Kobold } from '../services/kobold/models/koboldORM.js';
-import { Character } from '../services/kobold/models/index.js';
+import { Character, CharacterModel } from '../services/kobold/index.js';
 import { ConditionalPick } from 'type-fest';
 import { CharacterUtils } from '../utils/character-utils.js';
 import _ from 'lodash';
-import { ZCharacter } from '../services/kobold/models/character/character.model.js';
 import { CompendiumModel } from '../services/pf2etools/compendium.model.js';
 
-export interface InjectedCommandData {
-	kobold: Kobold;
-}
+export interface InjectedCommandData {}
 
 export interface Command {
 	names: String[];
@@ -48,8 +44,8 @@ export interface InjectedServices {
 }
 
 export interface InjectData {
-	activeCharacter: ZCharacter | null;
-	ownedCharacters: ZCharacter[];
+	activeCharacter: Character | null;
+	ownedCharacters: Character[];
 }
 
 export interface InjectableCommandData {
@@ -63,22 +59,17 @@ export function UsingData<T extends InjectableCommandData>(usesData: T) {
 		public usesData: T = usesData;
 
 		public async fetchInjectedDataForCommand(intr: CommandInteraction): Promise<targetData> {
-			let activeCharacterPromise: Promise<Character | null> | undefined = undefined;
-			if (this.usesData.activeCharacter) {
-				activeCharacterPromise = CharacterUtils.getActiveCharacter(intr);
-			}
-			let ownedCharactersPromise: Promise<Character[]> | undefined = undefined;
-			if (this.usesData.ownedCharacters) {
-				ownedCharactersPromise = Character.query().where({
-					userId: intr.user.id,
-				}) as any as Promise<Character[]>;
-			}
+			let activeCharacterPromise = CharacterUtils.getActiveCharacter(intr);
+
+			let ownedCharactersPromise = CharacterModel.query().where({
+				userId: intr.user.id,
+			});
 			let [activeCharacter, ownedCharacters] = await Promise.all([
 				activeCharacterPromise,
 				ownedCharactersPromise,
 			]);
 			const parsedOwnedCharacters = ownedCharacters?.map?.(character => character.parse());
-			const parsedActiveCharacter = activeCharacter?.parse?.() ?? null;
+			const parsedActiveCharacter = activeCharacter ? activeCharacter.parse() : null;
 
 			return _.pickBy(
 				{

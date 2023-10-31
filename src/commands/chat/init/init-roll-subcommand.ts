@@ -25,7 +25,12 @@ import { RollBuilder } from '../../../utils/roll-builder.js';
 import { ActionRoller } from '../../../utils/action-roller.js';
 import { getEmoji } from '../../../constants/emoji.js';
 import { InitOptions } from './init-command-options.js';
-import { Character, InitiativeActor } from '../../../services/kobold/models/index.js';
+import {
+	Character,
+	CharacterModel,
+	InitiativeActor,
+	InitiativeActorModel,
+} from '../../../services/kobold/index.js';
 import { GameUtils } from '../../../utils/game-utils.js';
 import { SettingsUtils } from '../../../utils/settings-utils.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
@@ -111,7 +116,7 @@ export class InitRollSubCommand implements Command {
 		);
 
 		let targetCreature: Creature | undefined;
-		let targetActor: InitiativeActor | Character | undefined;
+		let targetActor: InitiativeActorModel | CharacterModel | undefined;
 
 		if (targetInitActorName && targetInitActorName !== '__NONE__') {
 			const { targetCharacter, targetInitActor } =
@@ -164,11 +169,11 @@ export class InitRollSubCommand implements Command {
 				targetCreature
 			);
 
-			const builtRoll = actionRoller.buildRoll(rollNote, targetAction.description, {
+			const builtRoll = actionRoller.buildRoll(rollNote, targetAction.description ?? '', {
 				attackModifierExpression: modifierExpression,
 				damageModifierExpression,
 				title: `${getEmoji(intr, targetAction.actionCost)} ${
-					creature.sheet.info.name
+					creature.sheet.staticInfo.name
 				} used ${targetAction.name}!`,
 			});
 

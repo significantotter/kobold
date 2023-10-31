@@ -11,7 +11,7 @@ import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Creature } from '../../../utils/creature.js';
 import { UsingData } from '../../command.js';
-import { ZCharacter } from '../../../services/kobold/models/character/character.model.js';
+import { Character } from '../../../services/kobold/index.js';
 
 export class CharacterSheetSubCommand
 	extends UsingData({ activeCharacter: true })
@@ -31,7 +31,7 @@ export class CharacterSheetSubCommand
 	public async execute(
 		intr: ChatInputCommandInteraction,
 		LL: TranslationFunctions,
-		{ activeCharacter }: { activeCharacter: ZCharacter }
+		{ activeCharacter }: { activeCharacter: Character }
 	): Promise<void> {
 		// const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
 		if (!activeCharacter) {
@@ -42,7 +42,7 @@ export class CharacterSheetSubCommand
 			return;
 		}
 
-		const creature = Creature.fromZCharacter(activeCharacter);
+		const creature = Creature.fromCharacter(activeCharacter);
 		const embed = creature.compileSheetEmbed();
 
 		await InteractionUtils.send(intr, embed);

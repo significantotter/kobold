@@ -1,4 +1,4 @@
-import { AbilityEnum } from '../../services/kobold/models/index.js';
+import { AbilityEnum } from '../../services/kobold/index.js';
 import { SheetProperties } from './sheet-properties.js';
 
 describe('SheetProperties', () => {
@@ -54,6 +54,7 @@ describe('SheetProperties', () => {
 					dc: null,
 					bonus: null,
 					ability: AbilityEnum.charisma,
+					note: null,
 				},
 				{
 					name: 'koboldsGonnaKobLore',
@@ -61,6 +62,7 @@ describe('SheetProperties', () => {
 					dc: null,
 					bonus: null,
 					ability: AbilityEnum.intelligence,
+					note: null,
 				},
 				{
 					name: 'someSkill',
@@ -68,6 +70,7 @@ describe('SheetProperties', () => {
 					dc: null,
 					bonus: null,
 					ability: AbilityEnum.strength,
+					note: null,
 				},
 			];
 

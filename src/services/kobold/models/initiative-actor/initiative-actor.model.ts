@@ -1,30 +1,35 @@
-import type { InitiativeActor as InitiativeActorType } from './initiative-actor.schema.js';
+import type { InitiativeActor } from '../../schemas/initiative-actor.zod.js';
 import { BaseModel } from '../../lib/base-model.js';
-import InitiativeActorSchema from './initiative-actor.schema.json' assert { type: 'json' };
-import Objection, { Model, RelationMappings } from 'objection';
-import { Initiative } from '../initiative/initiative.model.js';
-import { Sheet as SheetType } from './../character/character.zod.js';
-import { InitiativeActorGroup } from '../initiative-actor-group/initiative-actor-group.model.js';
-import { Character } from '../character/character.model.js';
+import { Model, RelationMappings } from 'objection';
+import { InitiativeModel } from '../initiative/initiative.model.js';
+import { InitiativeActorGroupModel } from '../initiative-actor-group/initiative-actor-group.model.js';
+import { CharacterModel } from '../character/character.model.js';
 import { ChatInputCommandInteraction } from 'discord.js';
 import { StringUtils } from '../../../../utils/index.js';
 import _ from 'lodash';
-import { removeRequired } from '../../lib/helpers.js';
+import { zInitiativeActor } from '../../schemas/initiative-actor.zod.js';
+import { ZodValidator } from '../../lib/zod-validator.js';
+import { Sheet } from '../../lib/schemas/sheet.zod.js';
 
-export interface InitiativeActor extends InitiativeActorType {
-	initiative?: Initiative;
-	actorGroup?: InitiativeActorGroup;
-	character?: Character;
-	sheet: SheetType;
+export interface InitiativeActorModel extends InitiativeActor {
+	initiative?: InitiativeModel;
+	actorGroup?: InitiativeActorGroupModel;
+	character?: CharacterModel;
 }
-export class InitiativeActor extends BaseModel {
+export class InitiativeActorModel extends BaseModel {
 	static idColumn: string | string[] = 'id';
 
-	public async saveSheet(intr: ChatInputCommandInteraction, sheet: SheetType) {
+	static createValidator() {
+		return new ZodValidator();
+	}
+
+	public $z = zInitiativeActor;
+
+	public async saveSheet(intr: ChatInputCommandInteraction, sheet: Sheet) {
 		// apply any damage effects from the action to the creature
 		let promises: any[] = [
 			this.$query().patch({ sheet }).execute(),
-			Character.query()
+			CharacterModel.query()
 				.patch({ sheet })
 				.where('id', this.characterId ?? null)
 				.execute(),
@@ -33,7 +38,7 @@ export class InitiativeActor extends BaseModel {
 			promises.push(this.character.updateTracker(intr, sheet));
 		}
 		if (this.characterId && !this.character) {
-			const character = await Character.query().findOne({ id: this.characterId });
+			const character = await CharacterModel.query().findOne({ id: this.characterId });
 			if (character) promises.push(character.updateTracker(intr, sheet));
 		}
 
@@ -45,15 +50,11 @@ export class InitiativeActor extends BaseModel {
 		return 'initiativeActor';
 	}
 
-	static get jsonSchema(): Objection.JSONSchema {
-		return removeRequired(InitiativeActorSchema as unknown as Objection.JSONSchema);
-	}
-
 	static get relationMappings(): RelationMappings {
 		return {
 			initiative: {
 				relation: Model.BelongsToOneRelation,
-				modelClass: Initiative,
+				modelClass: InitiativeModel,
 				join: {
 					from: 'initiativeActor.initiativeId',
 					to: 'initiative.id',
@@ -61,7 +62,7 @@ export class InitiativeActor extends BaseModel {
 			},
 			actorGroup: {
 				relation: Model.BelongsToOneRelation,
-				modelClass: InitiativeActorGroup,
+				modelClass: InitiativeActorGroupModel,
 				join: {
 					from: 'initiativeActor.initiativeActorGroupId',
 					to: 'initiativeActorGroup.id',
@@ -69,7 +70,7 @@ export class InitiativeActor extends BaseModel {
 			},
 			character: {
 				relation: Model.BelongsToOneRelation,
-				modelClass: Character,
+				modelClass: CharacterModel,
 				join: {
 					from: 'initiativeActor.characterId',
 					to: 'character.id',

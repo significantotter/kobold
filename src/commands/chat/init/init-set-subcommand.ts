@@ -1,6 +1,4 @@
-import { InitiativeActorGroup } from './../../../services/kobold/models/initiative-actor-group/initiative-actor-group.model.js';
 import { InitiativeUtils, InitiativeBuilder } from './../../../utils/initiative-utils.js';
-import { InitiativeActor } from '../../../services/kobold/models/initiative-actor/initiative-actor.model.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -19,9 +17,13 @@ import _ from 'lodash';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import L from '../../../i18n/i18n-node.js';
-import { Initiative } from '../../../services/kobold/models/index.js';
 import { InitOptions } from './init-command-options.js';
 import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
+import {
+	InitiativeModel,
+	InitiativeActorGroupModel,
+	InitiativeActorModel,
+} from '../../../services/kobold/index.js';
 
 export class InitSetSubCommand implements Command {
 	public names = [L.en.commands.init.set.name()];
@@ -134,22 +136,30 @@ export class InitSetSubCommand implements Command {
 
 		// perform the updates
 		if (fieldToChange === 'player-is-gm') {
-			await Initiative.query().patchAndFetchById(currentInit.id, {
+			await InitiativeModel.query().patchAndFetchById(currentInit.id, {
 				gmUserId: finalValue,
 			});
 		} else if (fieldToChange === 'initiative') {
-			await InitiativeActorGroup.query().patchAndFetchById(actor.initiativeActorGroupId, {
-				initiativeResult: finalValue,
-			});
+			await InitiativeActorGroupModel.query().patchAndFetchById(
+				actor.initiativeActorGroupId,
+				{
+					initiativeResult: finalValue,
+				}
+			);
 		} else if (fieldToChange === 'name') {
-			await InitiativeActor.query().patchAndFetchById(actor.id, { name: finalValue });
+			await InitiativeActorModel.query().patchAndFetchById(actor.id, { name: finalValue });
 			if (actorsInGroup.length === 1) {
-				await InitiativeActorGroup.query().patchAndFetchById(actor.initiativeActorGroupId, {
-					name: finalValue,
-				});
+				await InitiativeActorGroupModel.query().patchAndFetchById(
+					actor.initiativeActorGroupId,
+					{
+						name: finalValue,
+					}
+				);
 			}
 		} else if (fieldToChange === 'hide-stats') {
-			await InitiativeActor.query().patchAndFetchById(actor.id, { hideStats: finalValue });
+			await InitiativeActorModel.query().patchAndFetchById(actor.id, {
+				hideStats: finalValue,
+			});
 		}
 		currentInit = await InitiativeUtils.getInitiativeForChannel(intr.channel);
 

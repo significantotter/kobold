@@ -1,5 +1,17 @@
 import _ from 'lodash';
-import { Attribute, Character, Sheet, UserSettings } from '../services/kobold/models/index.js';
+import {
+	AdvancedDamageRoll,
+	AttackOrSkillRoll,
+	Attribute,
+	Character,
+	DamageRoll,
+	Roll,
+	SaveRoll,
+	SheetInfoLists,
+	SheetWeaknessesResistances,
+	TextRoll,
+	UserSettings,
+} from '../services/kobold/index.js';
 import { DiceRollError, DiceUtils, MultiRollResult } from './dice-utils.js';
 import { RollBuilder } from './roll-builder.js';
 import { Creature } from './creature.js';
@@ -7,7 +19,6 @@ import { EmbedUtils } from './kobold-embed-utils.js';
 import { UserSettingsFactory } from '../services/kobold/models/user-settings/user-settings.factory.js';
 
 type Action = Character['actions'][0];
-type Roll = Character['actions'][0]['rolls'][0];
 type ContestedRollTypes = 'attack' | 'skill-challenge' | 'save' | 'none';
 type ResultRollTypes = 'damage' | 'advanced-damage' | 'text';
 
@@ -34,9 +45,9 @@ export class ActionRoller {
 	public tags: string[];
 	public totalDamageDealt = 0;
 	public totalHealingDone = 0;
-	public triggeredWeaknesses: Sheet['defenses']['weaknesses'] = [];
-	public triggeredResistances: Sheet['defenses']['resistances'] = [];
-	public triggeredImmunities: Sheet['defenses']['immunities'] = [];
+	public triggeredWeaknesses: SheetWeaknessesResistances['weaknesses'] = [];
+	public triggeredResistances: SheetWeaknessesResistances['resistances'] = [];
+	public triggeredImmunities: SheetInfoLists['immunities'] = [];
 	public creature: Creature;
 	constructor(
 		public userSettings: UserSettings | null,
@@ -87,7 +98,7 @@ export class ActionRoller {
 	}
 	public rollSkillChallenge(
 		rollBuilder: RollBuilder,
-		roll: Roll,
+		roll: AttackOrSkillRoll,
 		options: BuildRollOptions,
 		extraAttributes: { [k: string]: Attribute },
 		rollCounter: number
@@ -119,6 +130,7 @@ export class ActionRoller {
 				name =>
 					(extraAttributes[name] = {
 						name,
+						aliases: [name.toLowerCase()],
 						value: result.results.total,
 						type: 'rollResult',
 						tags: [],
@@ -126,12 +138,14 @@ export class ActionRoller {
 			);
 			extraAttributes[`roll${rollCounter}`] = {
 				name: `roll${rollCounter}`,
+				aliases: [`roll${rollCounter}`.toLowerCase()],
 				value: result.results.total,
 				type: 'rollResult',
 				tags: [],
 			};
 			extraAttributes[`roll${rollCounter}Attack`] = {
 				name: `roll${rollCounter}Attack`,
+				aliases: [`roll${rollCounter}Attack`.toLowerCase()],
 				value: result.results.total,
 				type: 'rollResult',
 				tags: [],
@@ -143,7 +157,7 @@ export class ActionRoller {
 
 	public rollAttack(
 		rollBuilder: RollBuilder,
-		roll: Roll,
+		roll: Roll & { type: 'attack' | 'skill-challenge' },
 		options: BuildRollOptions,
 		extraAttributes: { [k: string]: Attribute },
 		rollCounter: number
@@ -177,6 +191,7 @@ export class ActionRoller {
 				name =>
 					(extraAttributes[name] = {
 						name,
+						aliases: [name.toLowerCase()],
 						value: result.results.total,
 						type: 'rollResult',
 						tags: [],
@@ -184,6 +199,7 @@ export class ActionRoller {
 			);
 			extraAttributes[`roll${rollCounter}`] = {
 				name: `roll${rollCounter}`,
+				aliases: [`roll${rollCounter}`.toLowerCase()],
 				value: result.results.total,
 
 				type: 'rollResult',
@@ -191,8 +207,8 @@ export class ActionRoller {
 			};
 			extraAttributes[`roll${rollCounter}Attack`] = {
 				name: `roll${rollCounter}Attack`,
+				aliases: [`roll${rollCounter}Attack`.toLowerCase()],
 				value: result.results.total,
-
 				type: 'rollResult',
 				tags: [],
 			};
@@ -202,7 +218,7 @@ export class ActionRoller {
 	}
 	rollSave(
 		rollBuilder: RollBuilder,
-		roll: Roll,
+		roll: SaveRoll,
 		options: BuildRollOptions,
 		extraAttributes: { [k: string]: Attribute },
 		rollCounter: number
@@ -232,6 +248,7 @@ export class ActionRoller {
 					name =>
 						(extraAttributes[name] = {
 							name,
+							aliases: [name.toLowerCase()],
 							value: result.results?.total,
 							type: 'rollResult',
 							tags: [],
@@ -239,12 +256,14 @@ export class ActionRoller {
 				);
 				extraAttributes[`roll${rollCounter}`] = {
 					name: `roll${rollCounter}`,
+					aliases: [`roll${rollCounter}`.toLowerCase()],
 					value: result.results?.total,
 					type: 'rollResult',
 					tags: [],
 				};
 				extraAttributes[`roll${rollCounter}Save`] = {
 					name: `roll${rollCounter}Save`,
+					aliases: [`roll${rollCounter}Save`.toLowerCase()],
 					value: result.results?.total,
 					type: 'rollResult',
 					tags: [],
@@ -258,12 +277,14 @@ export class ActionRoller {
 
 			extraAttributes[`roll${rollCounter}`] = {
 				name: `roll${rollCounter}`,
+				aliases: [`roll${rollCounter}`.toLowerCase()],
 				value: 0,
 				type: 'rollResult',
 				tags: [],
 			};
 			extraAttributes[`roll${rollCounter}Save`] = {
 				name: `roll${rollCounter}Save`,
+				aliases: [`roll${rollCounter}Save`.toLowerCase()],
 				value: 0,
 				type: 'rollResult',
 				tags: [],
@@ -275,7 +296,7 @@ export class ActionRoller {
 
 	public rollText(
 		rollBuilder: RollBuilder,
-		roll: Roll,
+		roll: TextRoll,
 		options: BuildRollOptions,
 		extraAttributes: { [k: string]: Attribute },
 		rollCounter: number,
@@ -332,7 +353,7 @@ export class ActionRoller {
 
 	public rollBasicDamage(
 		rollBuilder: RollBuilder,
-		roll: Roll,
+		roll: DamageRoll,
 		options: BuildRollOptions,
 		extraAttributes: { [k: string]: Attribute },
 		rollCounter: number,
@@ -376,7 +397,7 @@ export class ActionRoller {
 
 		const result = rollBuilder.addRoll({
 			rollTitle: roll.name || _.capitalize(effectTerm),
-			damageType: roll?.damageType,
+			damageType: roll.damageType ?? undefined,
 			rollExpression,
 			tags,
 			extraAttributes: currentExtraAttributes,
@@ -387,18 +408,21 @@ export class ActionRoller {
 		if (result.type !== 'error') {
 			extraAttributes[`roll${rollCounter}`] = {
 				name: `roll${rollCounter}`,
+				aliases: [`roll${rollCounter}`.toLowerCase()],
 				value: result.results.total,
 				type: 'rollResult',
 				tags: [],
 			};
 			extraAttributes[`roll${rollCounter}${_.capitalize(effectTerm)}`] = {
 				name: `roll${rollCounter}${_.capitalize(effectTerm)}`,
+				aliases: [`roll${rollCounter}${effectTerm}`.toLowerCase()],
 				value: result.results.total,
 				type: 'rollResult',
 				tags: [],
 			};
 			extraAttributes[`roll${rollCounter}Applied${_.capitalize(effectTerm)}`] = {
 				name: `roll${rollCounter}Applied${_.capitalize(effectTerm)}`,
+				aliases: [`roll${rollCounter}Applied${effectTerm}`.toLowerCase()],
 				value: result.results.total,
 				type: 'rollResult',
 				tags: [],
@@ -410,7 +434,7 @@ export class ActionRoller {
 
 	public rollAdvancedDamage(
 		rollBuilder: RollBuilder,
-		roll: Roll,
+		roll: AdvancedDamageRoll,
 		options: BuildRollOptions,
 		extraAttributes: { [k: string]: Attribute },
 		rollCounter: number,
@@ -455,7 +479,7 @@ export class ActionRoller {
 			if (rollCritSuccessExpression) {
 				rollExpressions.push({
 					name: `critical success ${effectTerm}`,
-					damageType: roll?.damageType,
+					damageType: roll.damageType,
 					rollExpression: rollCritSuccessExpression,
 					tags,
 					extraAttributes: currentExtraAttributes,
@@ -489,7 +513,7 @@ export class ActionRoller {
 
 			rollExpressions.push({
 				name: `success ${effectTerm}`,
-				damageType: roll?.damageType,
+				damageType: roll.damageType,
 				rollExpression: rollSuccessExpression,
 				tags,
 				extraAttributes: currentExtraAttributes,
@@ -522,7 +546,7 @@ export class ActionRoller {
 
 			rollExpressions.push({
 				name: `failure ${effectTerm}`,
-				damageType: roll?.damageType,
+				damageType: roll.damageType,
 				rollExpression: rollFailureExpression,
 				tags,
 				extraAttributes: currentExtraAttributes,
@@ -553,7 +577,7 @@ export class ActionRoller {
 
 			rollExpressions.push({
 				name: `critical failure ${effectTerm}`,
-				damageType: roll?.damageType,
+				damageType: roll.damageType,
 				rollExpression: rollCritFailureExpression,
 				tags,
 				extraAttributes: currentExtraAttributes,
@@ -570,7 +594,14 @@ export class ActionRoller {
 				`roll${rollCounter}Critical${_.capitalize(effectTerm)}`,
 				`roll${rollCounter}Applied${_.capitalize(effectTerm)}`,
 			].forEach(
-				name => (extraAttributes[name] = { name, value: 0, type: 'rollResult', tags: [] })
+				name =>
+					(extraAttributes[name] = {
+						name,
+						aliases: [name.toLowerCase()],
+						value: 0,
+						type: 'rollResult',
+						tags: [],
+					})
 			);
 			return null;
 		}
@@ -634,42 +665,49 @@ export class ActionRoller {
 		// update the extra attributes for the next roll
 		extraAttributes[`roll${rollCounter}`] = {
 			name: `roll${rollCounter}`,
+			aliases: [`roll${rollCounter}`.toLowerCase()],
 			value: appliedDamage,
 			type: 'rollResult',
 			tags: [],
 		};
 		extraAttributes[`roll${rollCounter}${_.capitalize(effectTerm)}`] = {
 			name: `roll${rollCounter}${_.capitalize(effectTerm)}`,
+			aliases: [`roll${rollCounter}${effectTerm}`.toLowerCase()],
 			value: appliedDamage,
 			type: 'rollResult',
 			tags: [],
 		};
 		extraAttributes[`roll${rollCounter}Applied${_.capitalize(effectTerm)}`] = {
 			name: `roll${rollCounter}Applied${_.capitalize(effectTerm)}`,
+			aliases: [`roll${rollCounter}Applied${effectTerm}`.toLowerCase()],
 			value: appliedDamage,
 			type: 'rollResult',
 			tags: [],
 		};
 		extraAttributes[`roll${rollCounter}CriticalSuccess${_.capitalize(effectTerm)}`] = {
 			name: `roll${rollCounter}CriticalSuccess${_.capitalize(effectTerm)}`,
+			aliases: [`roll${rollCounter}CriticalSuccess${effectTerm}`.toLowerCase()],
 			value: critSuccessDamageResult?.results?.total || 0,
 			type: 'rollResult',
 			tags: [],
 		};
 		extraAttributes[`roll${rollCounter}Success${_.capitalize(effectTerm)}`] = {
 			name: `roll${rollCounter}Success${_.capitalize(effectTerm)}`,
+			aliases: [`roll${rollCounter}Success${effectTerm}`.toLowerCase()],
 			value: damageResult?.results?.total || 0,
 			type: 'rollResult',
 			tags: [],
 		};
 		extraAttributes[`roll${rollCounter}Failure${_.capitalize(effectTerm)}`] = {
 			name: `roll${rollCounter}Failure${_.capitalize(effectTerm)}`,
+			aliases: [`roll${rollCounter}Failure${effectTerm}`.toLowerCase()],
 			value: failureDamageResult?.results?.total || 0,
 			type: 'rollResult',
 			tags: [],
 		};
 		extraAttributes[`roll${rollCounter}CriticalFailure${_.capitalize(effectTerm)}`] = {
 			name: `roll${rollCounter}CriticalFailure${_.capitalize(effectTerm)}`,
+			aliases: [`roll${rollCounter}CriticalFailure${effectTerm}`.toLowerCase()],
 			value: critFailureDamageResult?.results?.total || 0,
 			type: 'rollResult',
 			tags: [],
@@ -679,7 +717,7 @@ export class ActionRoller {
 		return results;
 	}
 
-	public applyDamage(roll: Roll, damage: number) {
+	public applyDamage(roll: DamageRoll | AdvancedDamageRoll, damage: number) {
 		if (this.targetCreature) {
 			const {
 				appliedDamage,
@@ -687,7 +725,7 @@ export class ActionRoller {
 				appliedResistance,
 				appliedWeakness,
 				appliedImmunity,
-			} = this.targetCreature.applyDamage(damage, roll.damageType);
+			} = this.targetCreature.applyDamage(damage, roll.damageType ?? undefined);
 			this.totalDamageDealt += appliedDamage;
 			if (appliedImmunity)
 				this.triggeredImmunities = _.uniq([...this.triggeredImmunities, appliedImmunity]);
@@ -754,6 +792,7 @@ export class ActionRoller {
 			name =>
 				(extraAttributes[name] = {
 					name,
+					aliases: [name.toLowerCase()],
 					value: abilityLevel,
 					type: 'rollResult',
 					tags: [],
@@ -765,6 +804,7 @@ export class ActionRoller {
 				name =>
 					(extraAttributes[name] = {
 						name,
+						aliases: [name.toLowerCase()],
 						value: overwriteTargetDc,
 						type: 'rollResult',
 						tags: [],

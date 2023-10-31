@@ -25,7 +25,12 @@ import { Creature } from '../../../utils/creature.js';
 import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
 import { InitOptions } from '../init/init-command-options.js';
 import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
-import { Character, InitiativeActor } from '../../../services/kobold/models/index.js';
+import {
+	Character,
+	CharacterModel,
+	InitiativeActor,
+	InitiativeActorModel,
+} from '../../../services/kobold/index.js';
 import { GameUtils } from '../../../utils/game-utils.js';
 import { SettingsUtils } from '../../../utils/settings-utils.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
@@ -119,7 +124,7 @@ export class RollActionSubCommand implements Command {
 
 		const creature = Creature.fromCharacter(activeCharacter);
 		let targetCreature: Creature | undefined;
-		let targetActor: InitiativeActor | Character | undefined;
+		let targetActor: InitiativeActorModel | CharacterModel | undefined;
 
 		if (
 			targetInitActorName &&
@@ -146,15 +151,15 @@ export class RollActionSubCommand implements Command {
 			}
 		);
 
-		const builtRoll = actionRoller.buildRoll(rollNote, targetAction.description, {
+		const builtRoll = actionRoller.buildRoll(rollNote, targetAction.description ?? '', {
 			heightenLevel,
 			targetDC,
 			saveDiceRoll: saveRollType,
 			attackModifierExpression,
 			damageModifierExpression,
-			title: `${getEmoji(intr, targetAction.actionCost)} ${creature.sheet.info.name} used ${
-				targetAction.name
-			}!`,
+			title: `${getEmoji(intr, targetAction.actionCost)} ${
+				creature.sheet.staticInfo.name
+			} used ${targetAction.name}!`,
 		});
 		const embed = builtRoll.compileEmbed({ forceFields: true, showTags: false });
 

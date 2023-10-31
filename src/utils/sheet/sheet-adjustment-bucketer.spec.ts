@@ -25,7 +25,7 @@ import {
 	SheetAdjustmentTypeEnum,
 	SheetStatKeys,
 	StatSubGroupEnum,
-} from '../../services/kobold/models/index.js';
+} from '../../services/kobold/index.js';
 import { KoboldError } from '../KoboldError.js';
 
 class TestSheetPropertyGroupBucket extends SheetPropertyGroupBucket<SheetAdjustment> {

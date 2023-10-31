@@ -1,4 +1,8 @@
-import { Character, InitiativeActor } from '../../../services/kobold/models/index.js';
+import {
+	CharacterModel,
+	InitiativeActorModel,
+	WgTokenModel,
+} from '../../../services/kobold/index.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -11,7 +15,6 @@ import { default as axios } from 'axios';
 
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
-import { WgToken } from '../../../services/kobold/models/index.js';
 import { CharacterHelpers } from './helpers.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
 import L from '../../../i18n/i18n-node.js';
@@ -60,6 +63,11 @@ export class CharacterUpdateSubCommand implements Command {
 					' Note: You must re-export your pathbuilder character and use the new json ' +
 					'id to update your character sheet with new changes. Otherwise, I will just ' +
 					'reload the data from the last exported pathbuilder json id.';
+			}
+			if (!jsonId) {
+				throw new KoboldError(
+					'Yip! You must provide a pathbuilder json id to update your character sheet with new changes.'
+				);
 			}
 
 			const pathBuilderChar = await new PathBuilder().get({ characterJsonId: jsonId });
@@ -166,20 +174,23 @@ export class CharacterUpdateSubCommand implements Command {
 				}
 			}
 			// set current characters owned by user to inactive state
-			await Character.query()
+			await CharacterModel.query()
 				.patch({ isActiveCharacter: false })
 				.where({ userId: intr.user.id });
 
 			// store sheet in db
-			const updatedCharacter = await Character.query().patchAndFetchById(activeCharacter.id, {
-				name: creature.sheet.info.name,
-				charId: jsonId,
-				userId: intr.user.id,
-				sheet: creature.sheet,
-				isActiveCharacter: true,
-				importSource: 'pathbuilder',
-			});
-			await InitiativeActor.query()
+			const updatedCharacter = await CharacterModel.query().patchAndFetchById(
+				activeCharacter.id,
+				{
+					name: creature.sheet.staticInfo.name,
+					charId: jsonId,
+					userId: intr.user.id,
+					sheet: creature.sheet,
+					isActiveCharacter: true,
+					importSource: 'pathbuilder',
+				}
+			);
+			await InitiativeActorModel.query()
 				.patch({ sheet: creature.sheet })
 				.where({ characterId: updatedCharacter.id });
 
@@ -190,7 +201,7 @@ export class CharacterUpdateSubCommand implements Command {
 			await InteractionUtils.send(
 				intr,
 				LL.commands.character.update.interactions.success({
-					characterName: updatedCharacter.sheet.info.name,
+					characterName: updatedCharacter.sheet.staticInfo.name,
 				}) + newSheetUpdateWarning
 			);
 			return;
@@ -198,7 +209,7 @@ export class CharacterUpdateSubCommand implements Command {
 		//otherwise wanderer's guide
 		else {
 			//check for token access
-			const token = await WgToken.query().where({ charId: activeCharacter.charId });
+			const token = await WgTokenModel.query().where({ charId: activeCharacter.charId });
 
 			if (!token.length) {
 				// The user needs to authenticate!
@@ -219,6 +230,11 @@ export class CharacterUpdateSubCommand implements Command {
 				return;
 			}
 			let fetchedCharacter;
+			if (!activeCharacter.charId) {
+				throw new KoboldError(
+					"Yip! I couldn't find a wanderer's guide id to update your character with!"
+				);
+			}
 			try {
 				fetchedCharacter = await CharacterHelpers.fetchWgCharacterFromToken(
 					activeCharacter.charId,
@@ -229,7 +245,7 @@ export class CharacterUpdateSubCommand implements Command {
 				console.log(err);
 				if ((axios.default ?? axios).isAxiosError(err) && err?.response?.status === 401) {
 					//token expired!
-					await WgToken.query().delete().where({ charId: activeCharacter.charId });
+					await WgTokenModel.query().delete().where({ charId: activeCharacter.charId });
 					await InteractionUtils.send(
 						intr,
 						LL.commands.character.interactions.expiredToken()
@@ -263,14 +279,14 @@ export class CharacterUpdateSubCommand implements Command {
 			}
 
 			// store sheet in db
-			const updatedCharacter = await Character.query().updateAndFetchById(
+			const updatedCharacter = await CharacterModel.query().updateAndFetchById(
 				activeCharacter.id,
 				{
 					userId: intr.user.id,
 					...fetchedCharacter,
 				}
 			);
-			await InitiativeActor.query()
+			await InitiativeActorModel.query()
 				.patch({ sheet: fetchedCharacter.sheet })
 				.where({ characterId: updatedCharacter.id });
 

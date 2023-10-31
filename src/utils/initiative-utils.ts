@@ -5,8 +5,11 @@ import {
 	Initiative,
 	Character,
 	UserSettings,
-	InitWithActorsAndGroups,
-} from './../services/kobold/models/index.js';
+	InitiativeWithRelations,
+	InitiativeActorModel,
+	InitiativeModel,
+	InitiativeActorWithRelations,
+} from './../services/kobold/index.js';
 import {
 	ChatInputCommandInteraction,
 	CommandInteraction,
@@ -30,8 +33,8 @@ export type TurnData = {
 };
 
 export class InitiativeBuilder {
-	public init: Initiative;
-	public actorsByGroup: { [key: number]: InitiativeActor[] };
+	public init: InitiativeWithRelations;
+	public actorsByGroup: { [key: number]: InitiativeActorWithRelations[] };
 	public groups: InitiativeActorGroup[];
 	public userSettings: UserSettings;
 	protected LL: TranslationFunctions;
@@ -43,7 +46,7 @@ export class InitiativeBuilder {
 		userSettings,
 		LL,
 	}: {
-		initiative: Initiative;
+		initiative: InitiativeWithRelations;
 		actors?: InitiativeActor[];
 		groups?: InitiativeActorGroup[];
 		userSettings?: UserSettings;
@@ -115,7 +118,7 @@ export class InitiativeBuilder {
 
 		return {
 			currentRound: this.init.currentRound || 1,
-			currentTurnGroupId: result.value.id,
+			currentTurnGroupId: result.id,
 		};
 	}
 
@@ -284,48 +287,48 @@ export class InitiativeBuilder {
 	): string {
 		let turnText = '';
 		// if the character doesn't have a full sheet, don't show stats
-		if (!actor.sheet?.info) return turnText;
+		if (!actor.sheet) return turnText;
 		// use a second line for an actor with a too-long name
 		if (actor.name.length > 40) {
 			turnText += '\n';
 		}
-		if (actor.sheet?.defenses?.currentHp === undefined) {
+		if (actor.sheet.baseCounters.hp.current === undefined) {
 			return turnText;
 		}
 		// if we should hide the creature's stats, do so
 		if (!options.showHiddenCreatureStats && actor.hideStats) {
-			const hp = actor.sheet?.defenses?.currentHp;
+			const hp = actor.sheet.baseCounters.hp.current;
 			turnText += ` <${this.hpTextFromValue(
-				actor.sheet.defenses.currentHp ?? 0,
-				actor.sheet.defenses.maxHp ?? 0
+				actor.sheet.baseCounters.hp.current,
+				actor.sheet.baseCounters.hp.max ?? 0
 			)}>`;
-			if (actor.sheet.info?.usesStamina) {
+			if (actor.sheet.staticInfo.usesStamina) {
 				turnText += ` <${this.staminaTextFromValue(
-					actor.sheet.defenses.currentStamina ?? 0,
-					actor.sheet.defenses.maxStamina ?? 0
+					actor.sheet.baseCounters.stamina.current,
+					actor.sheet.baseCounters.stamina.max ?? 0
 				)}>`;
 			}
-			if (actor.sheet.defenses.tempHp) {
+			if (actor.sheet.baseCounters.tempHp.current) {
 				turnText += `<THP ?/?>`;
 			}
 		}
 
 		// otherwise, display the creature's stats if we can
 		else {
-			turnText += ` <HP ${actor.sheet.defenses.currentHp}`;
-			turnText += `/${actor.sheet.defenses.maxHp}`;
+			turnText += ` <HP ${actor.sheet.baseCounters.hp.current}`;
+			turnText += `/${actor.sheet.baseCounters.hp.max}`;
 			turnText += `>`;
-			if (actor.sheet.info?.usesStamina) {
-				turnText += `<SP ${actor.sheet.defenses.currentStamina}`;
-				turnText += `/${actor.sheet.defenses.maxStamina}`;
+			if (actor.sheet.staticInfo.usesStamina) {
+				turnText += `<SP ${actor.sheet.baseCounters.stamina.current}`;
+				turnText += `/${actor.sheet.baseCounters.stamina.max}`;
 				turnText += `>`;
 
-				turnText += `<RP ${actor.sheet.defenses.currentResolve}`;
-				turnText += `/${actor.sheet.defenses.maxResolve}`;
+				turnText += `<RP ${actor.sheet.baseCounters.resolve.current}`;
+				turnText += `/${actor.sheet.baseCounters.resolve.max}`;
 				turnText += `>`;
 			}
-			if (actor.sheet.defenses.tempHp) {
-				turnText += `<THP ${actor.sheet.defenses.tempHp}>`;
+			if (actor.sheet.baseCounters.tempHp.current) {
+				turnText += `<THP ${actor.sheet.baseCounters.tempHp.current}>`;
 			}
 		}
 
@@ -340,7 +343,10 @@ export class InitiativeBuilder {
 			this.init?.actors ??
 			_.flatten(_.values(this.actorsByGroup)) ??
 			([] as InitiativeActor[])
-		).filter(actor => actor.initiativeActorGroupId === this.init.currentTurnGroupId);
+		).filter(
+			(actor: InitiativeActor) =>
+				actor.initiativeActorGroupId === this.init.currentTurnGroupId
+		);
 	}
 }
 
@@ -366,7 +372,7 @@ export class InitiativeUtils {
 		LL,
 	}: {
 		character: Character;
-		currentInit: Initiative;
+		currentInit: InitiativeWithRelations;
 		skillChoice?: string | null;
 		diceExpression?: string | null;
 		initiativeValue?: number | null;
@@ -384,7 +390,7 @@ export class InitiativeUtils {
 			rollResultMessage = new KoboldEmbed()
 				.setTitle(
 					LL.commands.init.join.interactions.joinedEmbed.title({
-						characterName: character.sheet.info.name,
+						characterName: character.sheet.staticInfo.name,
 					})
 				)
 				.setDescription(
@@ -445,20 +451,22 @@ export class InitiativeUtils {
 
 		let nameCount = 1;
 		let existingName = (currentInit.actors ?? []).find(
-			actor => actor.name.toLowerCase() === character.sheet.info.name.toLowerCase()
+			(actor: InitiativeActor) =>
+				actor.name.toLowerCase() === character.sheet.staticInfo.name.toLowerCase()
 		);
-		let uniqueName = character.sheet.info.name;
+		let uniqueName = character.sheet.staticInfo.name;
 		if (existingName) {
 			while (
 				(currentInit.actors ?? []).find(
-					actor => actor.name.toLowerCase() === uniqueName.toLowerCase()
+					(actor: InitiativeActor) =>
+						actor.name.toLowerCase() === uniqueName.toLowerCase()
 				)
 			) {
-				uniqueName = character.sheet.info.name + `-${nameCount++}`;
+				uniqueName = character.sheet.staticInfo.name + `-${nameCount++}`;
 			}
 		}
 
-		const newActor = await InitiativeActor.query().insertGraphAndFetch({
+		const newActor = await InitiativeActorModel.query().insertGraphAndFetch({
 			initiativeId: currentInit.id,
 			name: uniqueName,
 			characterId: character.id,
@@ -474,7 +482,7 @@ export class InitiativeUtils {
 			},
 		});
 
-		currentInit.actors = (currentInit.actors ?? []).concat(newActor);
+		currentInit.actors = (currentInit.actors ?? []).concat({ ...newActor, character });
 		currentInit.actorGroups = (currentInit.actorGroups ?? []).concat(
 			newActor.actorGroup as InitiativeActorGroup
 		);
@@ -489,7 +497,7 @@ export class InitiativeUtils {
 		}
 		const channelId = channel.id;
 
-		const currentInit = await Initiative.queryGraphFromChannel(channelId).first();
+		const currentInit = await InitiativeModel.queryGraphFromChannel(channelId).first();
 		if (!currentInit || currentInit.length === 0) {
 			throw new KoboldError(L.en.utils.initiative.noActiveInitError());
 		}
@@ -520,23 +528,30 @@ export class InitiativeUtils {
 		return await InteractionUtils.send(intr, embed);
 	}
 
-	public static getControllableInitiativeActors(initiative: Initiative, userId: string) {
+	public static getControllableInitiativeActors(
+		initiative: InitiativeWithRelations,
+		userId: string
+	) {
 		const actorOptions = initiative?.actors ?? [];
 		const controllableActors = actorOptions.filter(
-			actor => initiative.gmUserId === userId || actor.userId === userId
+			(actor: InitiativeActor) => initiative.gmUserId === userId || actor.userId === userId
 		);
 		return controllableActors;
 	}
-	public static getControllableInitiativeGroups(initiative: Initiative, userId: string) {
+	public static getControllableInitiativeGroups(
+		initiative: InitiativeWithRelations,
+		userId: string
+	) {
 		const actorGroupOptions = initiative.actorGroups ?? [];
 		const controllableGroups = actorGroupOptions.filter(
-			group => initiative.gmUserId === userId || group.userId === userId
+			(group: InitiativeActorGroup) =>
+				initiative.gmUserId === userId || group.userId === userId
 		);
 		return controllableGroups;
 	}
 
 	public static getActiveCharacterActor(
-		initiative: Initiative,
+		initiative: InitiativeWithRelations,
 		userId: string,
 		LL: TranslationFunctions
 	) {
@@ -582,11 +597,11 @@ export class InitiativeUtils {
 
 	public static getNameMatchActorFromInitiative(
 		userId: string,
-		initiative: Initiative,
+		initiative: InitiativeWithRelations,
 		characterName: string,
 		LL?: TranslationFunctions,
 		requireControlled: boolean = false
-	): InitiativeActor {
+	): InitiativeActorWithRelations {
 		LL = LL ?? L.en;
 		// get actor options that match the given name, were created by you, or you're the gm of
 		let actorOptions: InitiativeActor[] = [];
@@ -595,7 +610,7 @@ export class InitiativeUtils {
 		} else {
 			actorOptions = initiative.actors ?? [];
 		}
-		const result = InitiativeUtils.nameMatchGeneric<InitiativeActor>(
+		const result = InitiativeUtils.nameMatchGeneric<InitiativeActorWithRelations>(
 			actorOptions,
 			characterName
 		);
@@ -604,7 +619,7 @@ export class InitiativeUtils {
 	}
 
 	public static getNameMatchGroupFromInitiative(
-		initiative: Initiative,
+		initiative: InitiativeWithRelations,
 		userId: string,
 		groupName: string,
 		LL: TranslationFunctions

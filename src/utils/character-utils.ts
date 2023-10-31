@@ -7,7 +7,7 @@ import {
 	ChatInputCommandInteraction,
 	CommandInteraction,
 } from 'discord.js';
-import { Character } from '../services/kobold/models/index.js';
+import { Character, CharacterModel } from '../services/kobold/index.js';
 
 interface NamedThing {
 	Name: string;
@@ -55,9 +55,9 @@ export class CharacterUtils {
 	public static async findCharacterByName(
 		nameText: string,
 		userId: string
-	): Promise<Character[]> {
+	): Promise<CharacterModel[]> {
 		const results = await CharacterUtils.findCharacterByName(nameText, userId);
-		const closestByName = StringUtils.generateSorterByWordDistance<Character>(
+		const closestByName = StringUtils.generateSorterByWordDistance<CharacterModel>(
 			nameText,
 			character => character.name
 		);
@@ -220,22 +220,22 @@ export class CharacterUtils {
 	 */
 	public static async getActiveCharacter(
 		intr: CommandInteraction | AutocompleteInteraction<CacheType>
-	): Promise<Character | null> {
+	): Promise<CharacterModel | null> {
 		const { user, guildId, channelId } = intr;
 		const userId = user.id;
 		const [activeCharacter, GuildDefaultCharacter, ChannelDefaultCharacter] = await Promise.all(
 			[
-				Character.query().where({
+				CharacterModel.query().where({
 					userId: userId,
 					isActiveCharacter: true,
 				}),
-				Character.query()
+				CharacterModel.query()
 					.joinRelated('guildDefaultCharacter')
 					.where({
 						'guildDefaultCharacter.userId': userId,
 						'guildDefaultCharacter.guildId': guildId ?? 0,
 					}),
-				Character.query()
+				CharacterModel.query()
 					.joinRelated('channelDefaultCharacter')
 					.where({
 						'channelDefaultCharacter.userId': userId,

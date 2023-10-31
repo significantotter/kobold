@@ -1,4 +1,4 @@
-import { Character } from '../../../services/kobold/models/index.js';
+import { Character, CharacterModel } from '../../../services/kobold/index.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -220,11 +220,9 @@ export class ActionStageEditSubCommand implements Command {
 		} else if (moveTo === 'bottom') {
 			const roll = matchedAction.rolls.splice(rollIndex, 1)[0];
 			matchedAction.rolls = [...matchedAction.rolls, roll];
-		} else {
-			matchedAction.rolls[rollIndex][fieldToEdit] = finalValue;
 		}
 
-		await Character.query().updateAndFetchById(activeCharacter.id, {
+		await CharacterModel.query().updateAndFetchById(activeCharacter.id, {
 			actions: activeCharacter.actions,
 		});
 

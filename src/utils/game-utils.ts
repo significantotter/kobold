@@ -1,17 +1,24 @@
 import { AutocompleteInteraction, CacheType, ChatInputCommandInteraction } from 'discord.js';
 import {
 	Character,
+	CharacterModel,
 	Game,
+	GameModel,
+	GameWithRelations,
 	Initiative,
 	InitiativeActor,
+	InitiativeActorModel,
+	InitiativeActorWithRelations,
+	InitiativeModel,
+	InitiativeWithRelations,
 	ModelWithSheet,
-} from '../services/kobold/models/index.js';
+} from '../services/kobold/index.js';
 import { CharacterUtils } from './character-utils.js';
 import { InitiativeUtils } from './initiative-utils.js';
 
 export class GameUtils {
 	public static async getActiveGame(userId: string, guildId: string, channelId?: string) {
-		const games = await Game.query()
+		const games = await GameModel.query()
 			.withGraphFetched('characters.[guildDefaultCharacter, channelDefaultCharacter]')
 			.where({
 				guildId,
@@ -55,7 +62,7 @@ export class GameUtils {
 
 	public static async autocompleteGameCharacter(
 		targetCharacterName: String,
-		activeGame?: Game | null
+		activeGame?: GameWithRelations | null
 	) {
 		if (!activeGame?.characters) return [];
 
@@ -78,15 +85,15 @@ export class GameUtils {
 		intr: ChatInputCommandInteraction<CacheType> | AutocompleteInteraction<CacheType>,
 		targetName?: string | null
 	): Promise<{
-		joinedGames: Game[];
-		init: Initiative | null;
+		joinedGames: GameModel[];
+		init: InitiativeModel | null;
 		characterOrInitActorTargets: ModelWithSheet[];
-		activeCharacter: Character | null;
-		targetCharacter: Character | null;
-		targetInitActor: InitiativeActor | null;
+		activeCharacter: CharacterModel | null;
+		targetCharacter: CharacterModel | null;
+		targetInitActor: InitiativeActorModel | null;
 	}> {
 		const [joinedGames, initResult, activeCharacter] = await Promise.all([
-			Game.queryWhereUserHasCharacter(intr.user.id, intr.guildId ?? null),
+			GameModel.queryWhereUserHasCharacter(intr.user.id, intr.guildId ?? null),
 			InitiativeUtils.getInitiativeForChannelOrNull(intr.channel),
 			CharacterUtils.getActiveCharacter(intr),
 		]);
@@ -111,7 +118,7 @@ export class GameUtils {
 		);
 
 		// find a match in the init actors
-		let matchedInitActor: InitiativeActor | null;
+		let matchedInitActor: InitiativeActorModel | null;
 
 		matchedInitActor =
 			(initResult?.actors ?? []).find(

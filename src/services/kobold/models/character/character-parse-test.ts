@@ -2,7 +2,7 @@ import { parse } from 'csv-parse/sync';
 import { readFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { zCharacter } from './character.zod.js';
+import { zCharacter } from '../../schemas/character.zod.js';
 import { z } from 'zod';
 
 const __filename = fileURLToPath(import.meta.url);

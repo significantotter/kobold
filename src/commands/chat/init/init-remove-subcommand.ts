@@ -1,5 +1,4 @@
-import { InitiativeActorGroup } from './../../../services/kobold/models/initiative-actor-group/initiative-actor-group.model.js';
-import { InitiativeActor } from '../../../services/kobold/models/initiative-actor/initiative-actor.model.js';
+import { InitiativeActor, InitiativeActorModel } from '../../../services/kobold/index.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -16,13 +15,13 @@ import { InteractionUtils } from '../../../utils/index.js';
 import { InitiativeUtils, InitiativeBuilder } from '../../../utils/initiative-utils.js';
 import { Command, CommandDeferType } from '../../index.js';
 import _ from 'lodash';
-import { Initiative } from '../../../services/kobold/models/index.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import L from '../../../i18n/i18n-node.js';
 import { InitOptions } from './init-command-options.js';
 import { SettingsUtils } from '../../../utils/settings-utils.js';
 import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
+import { InitiativeActorGroupModel, InitiativeModel } from '../../../services/kobold/index.js';
 
 export class InitRemoveSubCommand implements Command {
 	public names = [L.en.commands.init.remove.name()];
@@ -83,9 +82,9 @@ export class InitRemoveSubCommand implements Command {
 			currentInit.actors,
 			possibleActor => possibleActor.initiativeActorGroupId === actor.initiativeActorGroupId
 		);
-		await InitiativeActor.query().deleteById(actor.id);
+		await InitiativeActorModel.query().deleteById(actor.id);
 		if (actorsInGroup.length === 1) {
-			await InitiativeActorGroup.query().deleteById(actor.initiativeActorGroupId);
+			await InitiativeActorGroupModel.query().deleteById(actor.initiativeActorGroupId);
 		}
 
 		const deletedEmbed = new KoboldEmbed();
@@ -115,7 +114,7 @@ export class InitRemoveSubCommand implements Command {
 			let currentTurn = initBuilder.getCurrentTurnInfo();
 			let previousTurn = initBuilder.getPreviousTurnChanges();
 
-			const updatedInitiative = await Initiative.query()
+			const updatedInitiative = await InitiativeModel.query()
 				.patchAndFetchById(currentInit.id, previousTurn)
 				.withGraphFetched('[actors.[character], actorGroups]');
 

@@ -15,6 +15,12 @@ export class StringUtils {
 		return output;
 	}
 
+	public static stringsToCommaPhrase(strings: string[]): string {
+		return strings
+			.map((value, index, arr) => `${index === arr.length - 1 ? 'or ' : ''}"${value}"`)
+			.join(', ');
+	}
+
 	public static stripMarkdown(input: string): string {
 		return removeMarkdown(input);
 	}

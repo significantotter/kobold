@@ -1,4 +1,4 @@
-import { Action, Character } from '../../../services/kobold/models/index.js';
+import { Action, CharacterModel } from '../../../services/kobold/index.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -53,12 +53,12 @@ export class ActionCreateSubCommand implements Command {
 				intr,
 				LL.commands.action.create.interactions.alreadyExists({
 					actionName: name,
-					characterName: activeCharacter.sheet.info.name,
+					characterName: activeCharacter.sheet.staticInfo.name,
 				})
 			);
 			return;
 		}
-		await Character.query().updateAndFetchById(activeCharacter.id, {
+		await CharacterModel.query().updateAndFetchById(activeCharacter.id, {
 			actions: [
 				...activeCharacter.actions,
 				{
@@ -79,7 +79,7 @@ export class ActionCreateSubCommand implements Command {
 			intr,
 			LL.commands.action.create.interactions.created({
 				actionName: name,
-				characterName: activeCharacter.sheet.info.name,
+				characterName: activeCharacter.sheet.staticInfo.name,
 			})
 		);
 		return;

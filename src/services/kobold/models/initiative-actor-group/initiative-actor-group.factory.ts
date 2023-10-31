@@ -1,16 +1,15 @@
-import { InitiativeActorFactory } from './../initiative-actor/initiative-actor.factory.js';
 import { InitiativeFactory } from './../initiative/initiative.factory.js';
 import { Factory } from 'fishery';
 import type { DeepPartial } from 'fishery';
-import { InitiativeActorGroup } from './initiative-actor-group.model.js';
+import { InitiativeActorGroupModel } from './initiative-actor-group.model.js';
 import { faker } from '@faker-js/faker';
 
 type InitiativeActorGroupTransientParams = {};
 
 class InitiativeActorGroupFactoryClass extends Factory<
-	InitiativeActorGroup,
+	InitiativeActorGroupModel,
 	InitiativeActorGroupTransientParams,
-	InitiativeActorGroup
+	InitiativeActorGroupModel
 > {
 	withFakeId() {
 		return this.params({
@@ -27,13 +26,13 @@ class InitiativeActorGroupFactoryClass extends Factory<
 export const InitiativeActorGroupFactory = InitiativeActorGroupFactoryClass.define(
 	({ onCreate }) => {
 		onCreate(async builtInitiativeActorGroup => {
-			return InitiativeActorGroup.query().insertGraph({
+			return InitiativeActorGroupModel.query().insertGraph({
 				...builtInitiativeActorGroup,
 				initiative: InitiativeFactory.build(),
 			});
 		});
 
-		const actorGroupData: DeepPartial<InitiativeActorGroup> = {
+		const actorGroupData: DeepPartial<InitiativeActorGroupModel> = {
 			userId: faker.string.uuid(),
 			name: faker.person.firstName(),
 			initiativeResult: faker.number.int(40),
@@ -41,6 +40,6 @@ export const InitiativeActorGroupFactory = InitiativeActorGroupFactoryClass.defi
 			lastUpdatedAt: faker.date.recent({ days: 30 }).toISOString(),
 		};
 
-		return InitiativeActorGroup.fromDatabaseJson(actorGroupData);
+		return InitiativeActorGroupModel.fromDatabaseJson(actorGroupData);
 	}
 );

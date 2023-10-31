@@ -4,7 +4,9 @@ import {
 	InitiativeActorGroupFactory,
 	Initiative,
 	InitiativeActorGroup,
-} from '../services/kobold/models/index.js';
+	InitiativeWithRelations,
+	InitiativeModel,
+} from '../services/kobold/index.js';
 import { InitiativeUtils, InitiativeBuilder } from './initiative-utils.js';
 import { CommandInteraction } from 'discord.js';
 import { KoboldEmbed } from './kobold-embed-utils.js';
@@ -12,7 +14,7 @@ import { InteractionUtils } from './interaction-utils.js';
 import L from '../i18n/i18n-node.js';
 import { KoboldError } from './KoboldError.js';
 
-function setupInitiativeActorsAndGroupsForTests(initiative: Initiative) {
+function setupInitiativeActorsAndGroupsForTests(initiative: InitiativeWithRelations) {
 	const actors = InitiativeActorFactory.withFakeId().buildList(
 		3,
 		{},
@@ -367,7 +369,7 @@ describe('initiative-utils', function () {
 	});
 	describe('InitiativeUtils.getInitiativeForChannel', function () {
 		beforeAll(async function () {
-			await Initiative.query().delete().where({ channelId: 'testChannelId' });
+			await InitiativeModel.query().delete().where({ channelId: 'testChannelId' });
 			await InitiativeFactory.create({ channelId: 'testChannelId' });
 		});
 		test('returns the initiative for the channel', async function () {
@@ -395,7 +397,7 @@ describe('initiative-utils', function () {
 			}
 		});
 		afterAll(async function () {
-			await Initiative.query().delete().where({ channelId: 'testChannelId' });
+			await InitiativeModel.query().delete().where({ channelId: 'testChannelId' });
 		});
 	});
 	describe('InitiativeUtils.sendNewRoundMessage', function () {
@@ -411,7 +413,7 @@ describe('initiative-utils', function () {
 				},
 			};
 			vi.spyOn(InteractionUtils, 'send').mockResolvedValueOnce('success!' as any);
-			vi.spyOn(Initiative, 'query').mockImplementationOnce((): any => {
+			vi.spyOn(InitiativeModel, 'query').mockImplementationOnce((): any => {
 				return {
 					updateAndFetchById(id: any, obj: any) {
 						return initiative;
@@ -574,7 +576,7 @@ describe('initiative-utils', function () {
 				'another',
 				L.en
 			);
-			expect(result.actor).toBe(actors[1]);
+			expect(result).toBe(actors[1]);
 		});
 		test('returns an error message if no match is found', function () {
 			const initiative = InitiativeFactory.build();
@@ -582,13 +584,14 @@ describe('initiative-utils', function () {
 				setupInitiativeActorsAndGroupsForTests(initiative);
 			initiative.actors = [];
 
-			const result = InitiativeUtils.getNameMatchActorFromInitiative(
-				'testUserId',
-				initiative,
-				'notFound',
-				L.en
-			);
-			expect(result.errorMessage).toBeTruthy();
+			expect(() =>
+				InitiativeUtils.getNameMatchActorFromInitiative(
+					'testUserId',
+					initiative,
+					'notFound',
+					L.en
+				)
+			).toThrow(KoboldError);
 		});
 	});
 	describe('InitiativeUtils.getNameMatchGroupFromInitiative', function () {
@@ -609,7 +612,7 @@ describe('initiative-utils', function () {
 				'another',
 				L.en
 			);
-			expect(result.group).toBe(secondGroup);
+			expect(result).toBe(secondGroup);
 		});
 		test('returns an error message if no match is found', function () {
 			const initiative = InitiativeFactory.build();
@@ -622,13 +625,14 @@ describe('initiative-utils', function () {
 			thirdGroup.name = 'yetAnotherName';
 			thirdGroup.userId = 'zxcv';
 
-			const result = InitiativeUtils.getNameMatchGroupFromInitiative(
-				initiative,
-				'testUserId',
-				'notFound',
-				L.en
-			);
-			expect(result.errorMessage).toBeTruthy();
+			expect(() =>
+				InitiativeUtils.getNameMatchGroupFromInitiative(
+					initiative,
+					'testUserId',
+					'notFound',
+					L.en
+				)
+			).toBeTruthy();
 		});
 	});
 });

@@ -6,7 +6,7 @@ import {
 	SheetModifier,
 	SheetAdjustmentOperationEnum,
 	SheetAdjustmentTypeEnum,
-} from '../../services/kobold/models/index.js';
+} from '../../services/kobold/index.js';
 import { SheetAdjuster } from './sheet-adjuster.js';
 import { SheetAdjustmentBucketer } from './sheet-adjustment-bucketer.js';
 import { KoboldError } from '../KoboldError.js';
@@ -24,7 +24,7 @@ export class SheetUtils {
 		);
 	}
 
-	public static stringToSheetAdjustments(input: string, sheet: Sheet): SheetAdjustment[] {
+	public static stringToSheetAdjustments(input: string): SheetAdjustment[] {
 		const adjustmentSegments = input.split(';').filter(result => result.trim() !== '');
 		const adjustments = adjustmentSegments.map(segment => {
 			const adjustmentParts = /([^=+-]+)([=+-])(.+)/.exec(segment);

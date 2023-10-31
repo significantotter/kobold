@@ -1,4 +1,4 @@
-import { Character, Game, GuildDefaultCharacter } from '../../../services/kobold/models/index.js';
+import { Character, Game, GuildDefaultCharacter } from '../../../services/kobold/index.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -43,7 +43,7 @@ export class ActionListSubCommand implements Command {
 		const fields = [];
 		for (const action of actions.sort((a, b) => (a.name || '').localeCompare(b.name))) {
 			let description = action.description || '\u200B';
-			if (action.description?.length >= 1000)
+			if ((action.description ?? '').length >= 1000)
 				description = description.substring(0, 1000) + '...';
 			fields.push({
 				name: action.name || 'unnamed action',

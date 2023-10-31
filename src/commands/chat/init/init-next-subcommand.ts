@@ -10,7 +10,7 @@ import { RateLimiter } from 'discord.js-rate-limiter';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import _ from 'lodash';
-import { Initiative } from '../../../services/kobold/models/index.js';
+import { Initiative, InitiativeModel } from '../../../services/kobold/index.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import L from '../../../i18n/i18n-node.js';
@@ -45,7 +45,7 @@ export class InitNextSubCommand implements Command {
 		const currentTurn = initBuilder.getCurrentTurnInfo();
 		const nextTurn = initBuilder.getNextTurnChanges();
 
-		const updatedInitiative = await Initiative.query()
+		const updatedInitiative = await InitiativeModel.query()
 			.patchAndFetchById(currentInit.id, nextTurn)
 			.withGraphFetched('[actors.[character], actorGroups]');
 

@@ -14,7 +14,7 @@ import { RateLimiter } from 'discord.js-rate-limiter';
 
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
-import { Character } from '../../../services/kobold/models/index.js';
+import { Character, CharacterModel } from '../../../services/kobold/index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import L from '../../../i18n/i18n-node.js';
 import { CollectorUtils } from '../../../utils/collector-utils.js';
@@ -142,7 +142,7 @@ export class RollMacroRemoveSubCommand implements Command {
 					rollMacro =>
 						rollMacro.name.toLocaleLowerCase() !== rollMacroChoice.toLocaleLowerCase()
 				);
-				await Character.query()
+				await CharacterModel.query()
 					.patch({ rollMacros: rollMacrosWithoutRemoved })
 					.where({ userId: intr.user.id });
 

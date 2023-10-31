@@ -8,6 +8,7 @@
 !/**/config/lang/**/*.json
 .DS_Store
 /**/i18n-types.ts
+**/*.csv
 
 /trace
 

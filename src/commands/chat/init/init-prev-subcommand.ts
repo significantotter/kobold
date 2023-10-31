@@ -10,11 +10,11 @@ import { RateLimiter } from 'discord.js-rate-limiter';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import _ from 'lodash';
-import { Initiative } from '../../../services/kobold/models/index.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import L from '../../../i18n/i18n-node.js';
 import { SettingsUtils } from '../../../utils/settings-utils.js';
+import { InitiativeModel } from '../../../services/kobold/index.js';
 
 export class InitPrevSubCommand implements Command {
 	public names = [L.en.commands.init.prev.name()];
@@ -46,7 +46,7 @@ export class InitPrevSubCommand implements Command {
 		const previousTurn = initBuilder.getPreviousTurnChanges();
 		const currentTurn = initBuilder.getCurrentTurnInfo();
 
-		const updatedInitiative = await Initiative.query()
+		const updatedInitiative = await InitiativeModel.query()
 			.patchAndFetchById(currentInit.id, previousTurn)
 			.withGraphFetched('[actors.[character], actorGroups]');
 

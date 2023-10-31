@@ -1,4 +1,4 @@
-import { Character } from '../../../services/kobold/models/index.js';
+import { Character, CharacterModel } from '../../../services/kobold/index.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -120,7 +120,7 @@ export class ActionStageAddSkillChallengeSubCommand implements Command {
 
 		// save the character
 
-		await Character.query().updateAndFetchById(activeCharacter.id, {
+		await CharacterModel.query().updateAndFetchById(activeCharacter.id, {
 			actions: activeCharacter.actions,
 		});
 

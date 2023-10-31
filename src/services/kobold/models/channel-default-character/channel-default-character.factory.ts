@@ -1,28 +1,28 @@
 import { Factory } from 'fishery';
 import type { DeepPartial } from 'fishery';
-import { ChannelDefaultCharacter } from './channel-default-character.model.js';
+import { ChannelDefaultCharacterModel } from './channel-default-character.model.js';
 import { faker } from '@faker-js/faker';
 
 type ChannelDefaultCharacterTransientParams = {};
 
 class ChannelDefaultCharacterFactoryClass extends Factory<
-	ChannelDefaultCharacter,
+	ChannelDefaultCharacterModel,
 	ChannelDefaultCharacterTransientParams,
-	ChannelDefaultCharacter
+	ChannelDefaultCharacterModel
 > {}
 
 export const ChannelDefaultCharacterFactory = ChannelDefaultCharacterFactoryClass.define(
 	({ onCreate, transientParams }) => {
 		onCreate(async builtChannelDefaultCharacter =>
-			ChannelDefaultCharacter.query().insert(builtChannelDefaultCharacter)
+			ChannelDefaultCharacterModel.query().insert(builtChannelDefaultCharacter)
 		);
 
-		const characterData: DeepPartial<ChannelDefaultCharacter> = {
+		const characterData: DeepPartial<ChannelDefaultCharacterModel> = {
 			characterId: faker.number.int(2147483647),
 			userId: faker.string.uuid(),
 			channelId: faker.string.uuid(),
 		};
 
-		return ChannelDefaultCharacter.fromDatabaseJson(characterData);
+		return ChannelDefaultCharacterModel.fromDatabaseJson(characterData);
 	}
 );

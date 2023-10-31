@@ -1,4 +1,3 @@
-import { Character, Game, GuildDefaultCharacter } from '../../../services/kobold/models/index.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -12,12 +11,11 @@ import {
 
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
-import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { CollectorUtils } from '../../../utils/collector-utils.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
 import { ActionStageOptions } from './action-stage-command-options.js';
+import { CharacterModel } from '../../../services/kobold/index.js';
 
 export class ActionStageRemoveSubCommand implements Command {
 	public names = [L.en.commands.actionStage.remove.name()];
@@ -106,7 +104,7 @@ export class ActionStageRemoveSubCommand implements Command {
 		matchedAction.rolls.splice(rollIndex, 1);
 
 		//save the character
-		await Character.query().patchAndFetchById(activeCharacter.id, {
+		await CharacterModel.query().patchAndFetchById(activeCharacter.id, {
 			actions: activeCharacter.actions,
 		});
 

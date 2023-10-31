@@ -7,7 +7,7 @@ import {
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 
-import { Character, Modifier } from '../../../services/kobold/models/index.js';
+import { Character, Modifier, zModifier } from '../../../services/kobold/index.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
@@ -15,9 +15,6 @@ import L from '../../../i18n/i18n-node.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
 import { compileExpression } from 'filtrex';
 import { PasteBin } from '../../../services/pastebin/index.js';
-import modifierSchema from './../../../services/kobold/lib/shared-schemas/modifier.schema.json' assert { type: 'json' };
-import Ajv from 'ajv';
-import addFormats from 'ajv-formats';
 import _ from 'lodash';
 import {
 	ignoreOnConflict,
@@ -25,8 +22,7 @@ import {
 	renameOnConflict,
 	replaceAll,
 } from '../../../utils/import-utils.js';
-const ajv = new Ajv.default({ allowUnionTypes: true });
-addFormats.default(ajv);
+import { CharacterModel } from '../../../services/kobold/models/character/character.model.js';
 
 export class ModifierImportSubCommand implements Command {
 	public names = [L.en.commands.modifier.import.name()];
@@ -78,8 +74,8 @@ export class ModifierImportSubCommand implements Command {
 			} else {
 				newModifiers = JSON.parse(modifiersText);
 			}
-			const valid = ajv.validate(modifierSchema, newModifiers);
-			if (!valid) {
+			const valid = zModifier.safeParse(newModifiers);
+			if (!valid.success) {
 				invalidJson = true;
 			} else {
 				for (const modifier of newModifiers) {
@@ -127,14 +123,14 @@ export class ModifierImportSubCommand implements Command {
 			return;
 		}
 
-		await Character.query().patchAndFetchById(activeCharacter.id, {
+		await CharacterModel.query().patchAndFetchById(activeCharacter.id, {
 			modifiers: finalModifiers,
 		});
 
 		await InteractionUtils.send(
 			intr,
 			LL.commands.modifier.import.interactions.imported({
-				characterName: activeCharacter.sheet.info.name,
+				characterName: activeCharacter.sheet.staticInfo.name,
 			})
 		);
 		return;

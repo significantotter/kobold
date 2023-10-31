@@ -7,7 +7,7 @@ import {
 	AdjustablePropertyEnum,
 	Modifier,
 	SheetStatKeys,
-} from '../../services/kobold/models/index.js';
+} from '../../services/kobold/index.js';
 import { KoboldError } from '../KoboldError.js';
 import { SheetProperties } from './sheet-properties.js';
 import { SheetUtils } from './sheet-utils.js';
@@ -17,16 +17,20 @@ function sheetWithTestProperties(): Sheet {
 	sheet.staticInfo.name = 'Test Sheet';
 	sheet.intProperties.strength = 2;
 	sheet.stats.fortitude = {
+		name: 'Fortitude',
 		proficiency: 2,
 		bonus: 4,
 		dc: 14,
 		ability: AbilityEnum.constitution,
+		note: null,
 	};
 	sheet.stats.reflex = {
+		name: 'Reflex',
 		proficiency: 2,
 		bonus: 6,
 		dc: 16,
 		ability: AbilityEnum.constitution,
+		note: null,
 	};
 	return sheet;
 }
@@ -41,6 +45,7 @@ describe('SheetUtils', () => {
 					description: '',
 					modifierType: 'sheet',
 					isActive: true,
+					type: SheetAdjustmentTypeEnum.untyped,
 					sheetAdjustments: [
 						{
 							type: SheetAdjustmentTypeEnum.untyped,
@@ -63,6 +68,7 @@ describe('SheetUtils', () => {
 					description: '',
 					modifierType: 'sheet',
 					isActive: false,
+					type: SheetAdjustmentTypeEnum.untyped,
 					sheetAdjustments: [
 						{
 							type: SheetAdjustmentTypeEnum.untyped,
@@ -78,7 +84,7 @@ describe('SheetUtils', () => {
 					description: '',
 					modifierType: 'roll',
 					isActive: true,
-					type: 'status',
+					type: SheetAdjustmentTypeEnum.status,
 					value: '1d4',
 					targetTags: 'attack',
 				},
@@ -97,6 +103,7 @@ describe('SheetUtils', () => {
 					description: '',
 					modifierType: 'sheet',
 					isActive: false,
+					type: SheetAdjustmentTypeEnum.untyped,
 					sheetAdjustments: [
 						{
 							type: SheetAdjustmentTypeEnum.untyped,
@@ -112,7 +119,7 @@ describe('SheetUtils', () => {
 					description: '',
 					modifierType: 'roll',
 					isActive: true,
-					type: 'status',
+					type: SheetAdjustmentTypeEnum.status,
 					value: '1d4',
 					targetTags: 'attack',
 				},
@@ -142,13 +149,13 @@ describe('SheetUtils', () => {
 					value: '1',
 				},
 			];
-			expect(SheetUtils.stringToSheetAdjustments(input, sheet)).toEqual(adjustments);
+			expect(SheetUtils.stringToSheetAdjustments(input)).toEqual(adjustments);
 		});
 
 		it('should throw an error for an invalid adjustment', () => {
 			const input = 'Strength + foo';
 			const sheet: Sheet = sheetWithTestProperties();
-			expect(() => SheetUtils.stringToSheetAdjustments(input, sheet)).toThrow(KoboldError);
+			expect(() => SheetUtils.stringToSheetAdjustments(input)).toThrow(KoboldError);
 		});
 	});
 
@@ -208,8 +215,7 @@ describe('SheetUtils', () => {
 		it('allows a user to add an attack to a sheet', () => {
 			const sheet: Sheet = sheetWithTestProperties();
 			const newAttackAdjustment = SheetUtils.stringToSheetAdjustments(
-				'Claw attack = to hit +2 | damage 1d4 + 1 acid or piercing | traits: agile, finesse, unarmed | notes: "foo"',
-				sheet
+				'Claw attack = to hit +2 | damage 1d4 + 1 acid or piercing | traits: agile, finesse, unarmed | notes: "foo"'
 			);
 			const adjustedSheet = SheetUtils.adjustSheetWithSheetAdjustments(
 				sheet,
@@ -228,8 +234,7 @@ describe('SheetUtils', () => {
 		it('allows a user to add a lore to a sheet', () => {
 			const sheet: Sheet = sheetWithTestProperties();
 			const newLoreAdjustment = SheetUtils.stringToSheetAdjustments(
-				'kobold lore = -2; kobold lore ability=str',
-				sheet
+				'kobold lore = -2; kobold lore ability=str'
 			);
 			const adjustedSheet = SheetUtils.adjustSheetWithSheetAdjustments(
 				sheet,
@@ -246,8 +251,7 @@ describe('SheetUtils', () => {
 		it('allows a user to set weaknesses and resistances', () => {
 			const sheet: Sheet = sheetWithTestProperties();
 			const resistAndWeaknessAdjustments = SheetUtils.stringToSheetAdjustments(
-				'fire resistance = 3; fire resist+1; multi word cold weakness +2',
-				sheet
+				'fire resistance = 3; fire resist+1; multi word cold weakness +2'
 			);
 			const adjustedSheet = SheetUtils.adjustSheetWithSheetAdjustments(
 				sheet,
@@ -266,8 +270,7 @@ describe('SheetUtils', () => {
 		it('allows a user to update stats', () => {
 			const sheet: Sheet = sheetWithTestProperties();
 			const statAdjustments = SheetUtils.stringToSheetAdjustments(
-				'arcana = 4; will dc+1; class ability=con',
-				sheet
+				'arcana = 4; will dc+1; class ability=con'
 			);
 			const adjustedSheet = SheetUtils.adjustSheetWithSheetAdjustments(
 				sheet,
@@ -286,10 +289,8 @@ describe('SheetUtils', () => {
 			const sheet: Sheet = sheetWithTestProperties();
 			sheet.baseCounters.hp.max = 10;
 			sheet.baseCounters.hp.current = 10;
-			const baseCounterAdjustments = SheetUtils.stringToSheetAdjustments(
-				'max hp + 4; hp - 1',
-				sheet
-			);
+			const baseCounterAdjustments =
+				SheetUtils.stringToSheetAdjustments('max hp + 4; hp - 1');
 			const adjustedSheet = SheetUtils.adjustSheetWithSheetAdjustments(
 				sheet,
 				baseCounterAdjustments
@@ -304,10 +305,7 @@ describe('SheetUtils', () => {
 		it('allows a user to update an int property', () => {
 			const sheet: Sheet = sheetWithTestProperties();
 			sheet.intProperties.ac = 17;
-			const intPropertyAdjustments = SheetUtils.stringToSheetAdjustments(
-				'ac=15; ac+1',
-				sheet
-			);
+			const intPropertyAdjustments = SheetUtils.stringToSheetAdjustments('ac=15; ac+1');
 			const adjustedSheet = SheetUtils.adjustSheetWithSheetAdjustments(
 				sheet,
 				intPropertyAdjustments
@@ -318,8 +316,7 @@ describe('SheetUtils', () => {
 		it('allows a user to update an info list property', () => {
 			const sheet: Sheet = sheetWithTestProperties();
 			const infoListPropertyAdjustments = SheetUtils.stringToSheetAdjustments(
-				'languages = common; languages+draconic,elven',
-				sheet
+				'languages = common; languages+draconic,elven'
 			);
 			const adjustedSheet = SheetUtils.adjustSheetWithSheetAdjustments(
 				sheet,
@@ -331,8 +328,7 @@ describe('SheetUtils', () => {
 		it('allows a user to update an info property', () => {
 			const sheet: Sheet = sheetWithTestProperties();
 			const infoPropertyAdjustment = SheetUtils.stringToSheetAdjustments(
-				'url=https://github.com/significantotter/kobold?foo=%27bar%27',
-				sheet
+				'url=https://github.com/significantotter/kobold?foo=%27bar%27'
 			);
 			const adjustedSheet = SheetUtils.adjustSheetWithSheetAdjustments(
 				sheet,
@@ -345,9 +341,7 @@ describe('SheetUtils', () => {
 
 		it('does not allow a user to update a non-adjustable properties', () => {
 			const sheet: Sheet = sheetWithTestProperties();
-			expect(() => SheetUtils.stringToSheetAdjustments('name=fred', sheet)).toThrow(
-				KoboldError
-			);
+			expect(() => SheetUtils.stringToSheetAdjustments('name=fred')).toThrow(KoboldError);
 		});
 
 		it('should throw an error for an invalid adjustment', () => {

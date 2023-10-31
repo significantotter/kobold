@@ -1,4 +1,9 @@
-import { Character, Game, GuildDefaultCharacter } from '../../../services/kobold/models/index.js';
+import {
+	Character,
+	CharacterModel,
+	Game,
+	GuildDefaultCharacter,
+} from '../../../services/kobold/index.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -60,9 +65,9 @@ export class ActionStageAddAdvancedDamageSubCommand implements Command {
 			true
 		);
 		const damageType = intr.options.getString(ActionStageOptions.ACTION_STAGE_DAMAGE_TYPE.name);
-		const healInsteadOfDamage = intr.options.getBoolean(
-			ActionStageOptions.ACTION_ROLL_HEAL_INSTEAD_OF_DAMAGE.name
-		);
+		const healInsteadOfDamage =
+			intr.options.getBoolean(ActionStageOptions.ACTION_ROLL_HEAL_INSTEAD_OF_DAMAGE.name) ??
+			false;
 		const successDiceRoll = intr.options.getString(
 			ActionStageOptions.ACTION_SUCCESS_DICE_ROLL_OPTION.name
 		);
@@ -140,7 +145,7 @@ export class ActionStageAddAdvancedDamageSubCommand implements Command {
 
 		// save the character
 
-		await Character.query().updateAndFetchById(activeCharacter.id, {
+		await CharacterModel.query().updateAndFetchById(activeCharacter.id, {
 			actions: activeCharacter.actions,
 		});
 

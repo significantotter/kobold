@@ -1,6 +1,17 @@
-import { ModelWithSheet } from '../services/kobold/models/index.js';
+import {
+	AbilityEnum,
+	Counter,
+	ModelWithSheet,
+	ProficiencyStat,
+	SheetAttack,
+	SheetBaseCounterKeys,
+	SheetStatKeys,
+} from '../services/kobold/index.js';
 import { PathBuilder } from '../services/pathbuilder/pathbuilder.js';
-import { CreatureFluff, CreatureStatBlock } from '../services/pf2etools/pf2etools-types.js';
+import {
+	CreatureFluff as BestiaryCreatureFluff,
+	Creature as BestiaryCreature,
+} from '../services/pf2etools/schemas/index-types.js';
 import { WG } from '../services/wanderers-guide/wanderers-guide.js';
 import _ from 'lodash';
 import {
@@ -13,9 +24,15 @@ import { parseBonusesForTagsFromModifiers } from '../services/kobold/lib/helpers
 import { KoboldError } from './KoboldError.js';
 import { BaseMessageOptions } from 'discord.js';
 import { SheetUtils } from './sheet/sheet-utils.js';
-import { Character, Sheet, Modifier, Attribute } from '../services/kobold/models/index.js';
-import { literalKeys } from './type-guards.js';
-import { SheetProperties } from './sheet/sheet-properties.js';
+import { Character, Sheet, Modifier, Attribute } from '../services/kobold/index.js';
+import {
+	SheetIntegerGroupEnum,
+	SheetIntegerProperties,
+	SheetProperties,
+	SheetStatProperties,
+	StatGroupEnum,
+} from './sheet/sheet-properties.js';
+import { AttributeUtils } from './attribute-utils.js';
 
 const damageTypeShorthands: { [shorthand: string]: string } = {
 	piercing: 'p',
@@ -44,10 +61,10 @@ export interface attackRoll {
 	name: string;
 	type: 'attack';
 	toHit: string | number | null;
-	damage: { dice: string; type?: string | null }[];
-	range?: string | null;
+	damage: { dice: string; type: string | null }[];
+	range: string | null;
 	traits: string[];
-	notes?: string | null;
+	notes: string | null;
 	tags: string[];
 }
 
@@ -59,14 +76,9 @@ export class Creature {
 	) {
 		const sheetDefaults: Sheet = SheetProperties.defaultSheet;
 		this._sheet = _.defaultsDeep(this._sheet, sheetDefaults);
-		const sheetAdjustments = SheetUtils.sheetModifiersFromString(
+		this._adjustedSheet = SheetUtils.adjustSheetWithModifiers(
 			this._sheet,
 			this._sheet.modifiers
-		);
-		this._adjustedSheet = SheetUtils.applySheetAdjustments(
-			this._sheet,
-			sheetAdjustments.overwriteSheetAdjustments,
-			sheetAdjustments.modifySheetAdjustments
 		);
 	}
 
@@ -76,141 +88,240 @@ export class Creature {
 
 	// convenience helpers
 	public get name(): string {
-		return this._name ?? this.sheet.info.name;
+		return this._name ?? this.sheet.staticInfo.name;
 	}
 	public get level(): number {
-		return this.sheet.info.level ?? 0;
+		return this.sheet.staticInfo.level ?? 0;
+	}
+
+	public interpretDc(stat: ProficiencyStat): number {
+		if (stat == null) return 0;
+		if (stat.dc != null) return stat.dc;
+		else if (stat.bonus != null) return 10 + stat.bonus;
+		else if (stat.ability != null && stat.proficiency != null) {
+			return 10 + stat.proficiency + this.abilities[stat.ability];
+		} else return 10;
+	}
+	public interpretBonus(stat: ProficiencyStat): number {
+		if (stat == null) return 0;
+		if (stat.bonus != null) return stat.bonus;
+		else if (stat.dc != null) return stat.dc - 10;
+		else if (stat.ability != null && stat.proficiency != null) {
+			return 10 + stat.proficiency + this.abilities[stat.ability];
+		} else return 0;
 	}
 
 	public profToLevel(prof: number): number {
-		if (prof > 0) return prof + (this.sheet.info.level ?? 0);
+		if (prof > 0) return prof + (this.sheet.staticInfo.level ?? 0);
 		else return 0;
 	}
 
-	public compileTracker(mode: string): BaseMessageOptions {
-		let title = `${this.name} Tracker \``;
-		if (this.sheet.info.level) title += `Level ${this.sheet.info.level ?? 'unknown'}`;
+	public statIsUnset(stat: ProficiencyStat): boolean {
+		return (
+			stat.bonus === null ||
+			stat.dc === null ||
+			(stat.proficiency === null && stat.ability === null)
+		);
+	}
+
+	public generateStatBonusDcText(stat: ProficiencyStat): string {
+		if (this.statIsUnset(stat)) return '';
+
+		const bonus = this.interpretBonus(stat);
+
+		return `${stat.name}: \`${bonus > 0 ? '+' : ''}${bonus}\`, (DC \`${this.interpretDc(
+			stat
+		)}\`)`;
+	}
+
+	public generateStatBonusText(stat: ProficiencyStat): string {
+		if (this.statIsUnset(stat)) return '';
+
+		const bonus = this.interpretBonus(stat);
+
+		return `${stat.name}: \`${bonus > 0 ? '+' : ''}${bonus}\``;
+	}
+
+	public sheetBasicStatsText(): string {
+		let basicInfo = '';
+		if (this.sheet.baseCounters.hp.max) {
+			basicInfo += `HP: \`${this.sheet.baseCounters.hp.current ?? 0}\`/\`${
+				this.sheet.baseCounters.hp.max
+			}\``;
+
+			if (this.sheet.baseCounters.tempHp.current) {
+				basicInfo += `, temp: \`${this.sheet.baseCounters.tempHp.current}\`\n`;
+			} else basicInfo += '\n';
+		}
+		if (this.sheet.staticInfo.usesStamina) {
+			basicInfo += `${this.sheet.baseCounters.stamina.name}: \`${this.sheet.baseCounters.stamina.current}\`/\`${this.sheet.baseCounters.stamina.max}\` `;
+			basicInfo += `${this.sheet.baseCounters.resolve.name}: \`${this.sheet.baseCounters.resolve.current}\`/\`${this.sheet.baseCounters.resolve.max}\`\n`;
+		}
+		if (this.sheet.baseCounters.heroPoints.max) {
+			basicInfo += `${this.sheet.baseCounters.heroPoints.name}: \`${this.sheet.baseCounters.heroPoints.current}\`/\`3\`, `;
+		}
+		if (this.sheet.baseCounters.focusPoints.max) {
+			basicInfo += `${this.sheet.baseCounters.focusPoints.name}: \`${this.sheet.baseCounters.focusPoints.current}\``;
+			basicInfo += `/\`${this.sheet.baseCounters.focusPoints.max}\``;
+		}
+		return basicInfo;
+	}
+
+	public sheetDefensiveStatText(): string {
+		let basicStatsLines = [];
+		if (this.sheet.weaknessesResistances.resistances.length)
+			basicStatsLines.push(
+				`Resistances: ${this.sheet.weaknessesResistances.resistances
+					.map(r => `${r.type} ${r.amount}`)
+					.join(', ')}`
+			);
+		if (this.sheet.weaknessesResistances.weaknesses.length)
+			basicStatsLines.push(
+				`Weaknesses: ${this.sheet.weaknessesResistances.weaknesses
+					.map(w => `${w.type} ${w.amount}`)
+					.join(', ')}`
+			);
+		if (this.sheet.infoLists.immunities?.length)
+			basicStatsLines.push(`Immunities: ${this.sheet.infoLists.immunities.join(', ')}`);
+		const DCs = [];
+		if (this.sheet.intProperties.ac != null) DCs.push(`AC \`${this.sheet.intProperties.ac}\``);
+		if (this.sheet.stats.class.dc != null)
+			DCs.push(this.generateStatBonusDcText(this.sheet.stats.class));
+		if (this.sheet.stats.perception.bonus != null || this.sheet.stats.perception.dc != null)
+			DCs.push(this.generateStatBonusDcText(this.sheet.stats.perception));
+
+		if (DCs.length) basicStatsLines.push(`${DCs.join(', ')}`);
+		return basicStatsLines.join('\n');
+	}
+
+	public sheetGameplayInfoText(): string {
+		const gameplayInfoLines = [];
+		const hasASpeed =
+			this.sheet.intProperties.walkSpeed != null ||
+			this.sheet.intProperties.flySpeed != null ||
+			this.sheet.intProperties.climbSpeed != null ||
+			this.sheet.intProperties.swimSpeed != null;
+		if (hasASpeed) {
+			let speedLine = `Speed:`;
+			if (this.sheet.intProperties.walkSpeed != null)
+				speedLine += ` Walk \`${this.sheet.intProperties.walkSpeed}\`ft`;
+			if (this.sheet.intProperties.flySpeed != null)
+				speedLine += ` Fly \`${this.sheet.intProperties.flySpeed}\`ft`;
+			if (this.sheet.intProperties.climbSpeed != null)
+				speedLine += ` Climb \`${this.sheet.intProperties.climbSpeed}\`ft`;
+			if (this.sheet.intProperties.swimSpeed)
+				speedLine += ` Swim \`${this.sheet.intProperties.swimSpeed}\`ft`;
+			gameplayInfoLines.push(speedLine);
+		}
+		if (this.sheet.infoLists.traits.length)
+			gameplayInfoLines.push(`Traits: ${this.sheet.infoLists.traits.join(', ')}`);
+		if (this.sheet.info.background)
+			gameplayInfoLines.push(`Background: ${this.sheet.info.background}`);
+		return gameplayInfoLines.join('\n');
+	}
+
+	public sheetAbilitiesText(includeTitle: boolean = true): string {
+		const title = includeTitle ? 'Abilities: ' : '';
+		const abilityText = Object.entries(this.abilities)
+			.map(
+				([abilityName, abilityValue]) =>
+					`${
+						SheetProperties.shorthandFromAbility[abilityName as AbilityEnum]
+					} \`${abilityValue}\``
+			)
+			.join(', ');
+		return abilityText.length ? `${title}${abilityText}` : '';
+	}
+	public sheetSaveText(includeTitle: boolean = true): string {
+		const title = includeTitle ? 'Saves: ' : '';
+		let saveTexts = [];
+		for (const save of this.saves) {
+			const saveText = this.generateStatBonusDcText(save);
+			if (saveText) saveTexts.push(saveText);
+		}
+		return saveTexts.length ? `Saves: ${saveTexts.join(', ')}` : '';
+	}
+	public sheetSkillText(includeTitle: boolean = true): string {
+		const title = includeTitle ? 'Skills: ' : '';
+		const skillTextLines = [];
+		for (const skill of this.skills.sort((a, b) =>
+			a.name.toString().localeCompare(b.name.toString())
+		)) {
+			//avoid null values
+			skillTextLines.push(this.generateStatBonusText(skill));
+		}
+		return skillTextLines.length ? `${title}${skillTextLines.join('\n')}` : '';
+	}
+	public sheetCastingStatText(includeTitle: boolean = true): string {
+		let castingStats = [];
+		const title = includeTitle ? 'Spellcasting: ' : '';
+		for (const castingStat of this.castingStats) {
+			const castingStatText = this.generateStatBonusDcText(castingStat);
+			if (castingStatText) castingStats.push(castingStatText);
+		}
+		return castingStats.length ? `${title}${castingStats.join(', ')}` : '';
+	}
+
+	public sheetAttacksText(includeTitle: boolean = false): string {
+		const attackLines = [];
+		for (const attack of this.sheet.attacks) {
+			let builtAttack = `**${_.capitalize(attack.name)}**`;
+			if (attack.toHit) builtAttack += ` \`+${attack.toHit}\``;
+			if (attack.traits?.length) builtAttack += ` (${attack.traits.join(', ')})`;
+			builtAttack += `,`;
+			if (attack.damage?.length) {
+				builtAttack += ` **Damage:** ${attack.damage
+					.map(d => `\`${d.dice}${d.type ? ` ${d.type}` : ''}\``)
+					.join(', ')}`;
+			}
+			attackLines.push(builtAttack);
+		}
+		const attackText = attackLines.join('\n');
+		const title = includeTitle ? 'Attacks: ' : '';
+		return attackText.length ? `${title}${attackText}` : '';
+	}
+
+	public trackerTitleText() {
+		let title = '';
+		if (this.sheet.info.url) {
+			title += `[${this.name}](${this.sheet.info.url}) Tracker \``;
+		} else {
+			title += `${this.name} Tracker`;
+		}
+		if (this.sheet.staticInfo.level)
+			title += `Level ${this.sheet.staticInfo.level ?? 'unknown'}`;
 		if (this.sheet.info.heritage) title += ` ${this.sheet.info.heritage}`;
 		if (this.sheet.info.ancestry) title += ` ${this.sheet.info.ancestry}`;
 		if (this.sheet.info.class) title += ` ${this.sheet.info.class}`;
-		title += '`\n';
+		return title;
+	}
 
-		let counters = '';
-		if (this.sheet.defenses?.maxHp) {
-			counters += `HP: \`${this.sheet.defenses.currentHp}\`/\`${this.sheet.defenses.maxHp}\``;
+	public sheetTitleText() {
+		let title = '';
+		if (this.sheet.staticInfo.level)
+			title = `Level ${this.sheet.staticInfo.level ?? 'unknown'}`;
+		if (this.sheet.info.heritage) title += ` ${this.sheet.info.heritage}`;
+		if (this.sheet.info.ancestry) title += ` ${this.sheet.info.ancestry}`;
+		if (this.sheet.info.class) title += ` ${this.sheet.info.class}`;
+		return title;
+	}
 
-			if (this.sheet.defenses?.tempHp) {
-				counters += `, temp: \`${this.sheet.defenses.tempHp}\`\n`;
-			} else counters += '\n';
-		}
-		if (this.sheet.info.usesStamina) {
-			counters += `Stamina: \`${this.sheet.defenses.currentStamina}\`/\`${this.sheet.defenses.maxStamina}\` `;
-			counters += `Resolve: \`${this.sheet.defenses.currentResolve}\`/\`${this.sheet.defenses.maxResolve}\`\n`;
-		}
-		if (this.sheet.general.currentHeroPoints != null) {
-			counters += `Hero Points: \`${this.sheet.general.currentHeroPoints}\`/\`3\`, `;
-		}
-		if (this.sheet.general.focusPoints != null) {
-			counters += `Focus Points: \`${this.sheet.general.currentFocusPoints ?? 0}\``;
-			counters += `/\`${this.sheet.general.focusPoints}\``;
-		}
-		counters += '\n';
+	public compileTracker(mode: string): BaseMessageOptions {
+		const contentGroups = [];
 
-		let basicStats = '';
-		if (mode === 'basic_stats') {
-			basicStats += '\n';
-			if (this.sheet.defenses.resistances?.length)
-				basicStats += `Resistances: ${this.sheet.defenses.resistances
-					.map(r => `${r.type} ${r.amount}`)
-					.join(', ')}\n`;
-			if (this.sheet.defenses.weaknesses?.length)
-				basicStats += `Weaknesses: ${this.sheet.defenses.weaknesses
-					.map(w => `${w.type} ${w.amount}`)
-					.join(', ')}\n`;
-			if (this.sheet.defenses.immunities?.length)
-				basicStats += `Immunities: ${this.sheet.defenses.immunities.join(', ')}\n`;
-			const DCs = [];
-			if (this.sheet.defenses.ac != null) DCs.push(`AC \`${this.sheet.defenses.ac}\``);
-			if (this.sheet.general.classDC != null)
-				DCs.push(`Class DC \`${this.sheet.general.classDC}\``);
-			if (this.sheet.general.perception != null)
-				DCs.push(
-					`Perception \`${this.sheet.general.perception}\` (DC ${
-						10 + this.sheet.general.perception
-					})`
-				);
-			if (this.sheet.skills.athletics != null)
-				DCs.push(
-					`Athletics \`${this.sheet.skills.athletics}\` (DC ${
-						10 + this.sheet.skills.athletics
-					})`
-				);
-			if (DCs.length) basicStats += `${DCs.join(', ')}\n`;
-
-			let saveTexts = [];
-			for (const save of literalKeys(this.sheet.saves)) {
-				const targetSave = this.sheet.saves[save];
-				if (save.includes('ProfMod') || targetSave == null) continue;
-				else {
-					saveTexts.push(
-						`${save} \`${targetSave >= 0 ? '+' : ''}${targetSave}\` (DC ${
-							10 + targetSave
-						})`
-					);
-				}
-			}
-			if (saveTexts.length) basicStats += `Saves: ${saveTexts.join(', ')}\n`;
-
-			if (
-				this.sheet.castingStats.arcaneAttack != null ||
-				this.sheet.castingStats.divineAttack != null ||
-				this.sheet.castingStats.primalAttack != null ||
-				this.sheet.castingStats.occultAttack != null ||
-				this.sheet.castingStats.arcaneDC != null ||
-				this.sheet.castingStats.divineDC != null ||
-				this.sheet.castingStats.primalDC != null ||
-				this.sheet.castingStats.occultDC != null
-			) {
-				let castingStats = [];
-				if (this.sheet.castingStats.arcaneAttack || this.sheet.castingStats.arcaneDC) {
-					let arcane = `Arcane `;
-					if (this.sheet.castingStats.arcaneAttack)
-						arcane += ` \`+${this.sheet.castingStats.arcaneAttack}\``;
-					if (this.sheet.castingStats.arcaneDC)
-						arcane += ` (DC ${this.sheet.castingStats.arcaneDC})`;
-					castingStats.push(arcane);
-				}
-				if (this.sheet.castingStats.divineAttack || this.sheet.castingStats.divineDC) {
-					let divine = `Divine `;
-					if (this.sheet.castingStats.divineAttack)
-						divine += ` \`+${this.sheet.castingStats.divineAttack}\``;
-					if (this.sheet.castingStats.divineDC)
-						divine += ` (DC ${this.sheet.castingStats.divineDC})`;
-					castingStats.push(divine);
-				}
-				if (this.sheet.castingStats.occultAttack || this.sheet.castingStats.occultDC) {
-					let occult = `Occult `;
-					if (this.sheet.castingStats.occultAttack)
-						occult += ` \`+${this.sheet.castingStats.occultAttack}\``;
-					if (this.sheet.castingStats.occultDC)
-						occult += ` (DC ${this.sheet.castingStats.occultDC})`;
-					castingStats.push(occult);
-				}
-				if (this.sheet.castingStats.primalAttack || this.sheet.castingStats.primalDC) {
-					let primal = `Primal `;
-					if (this.sheet.castingStats.primalAttack)
-						primal += ` \`+${this.sheet.castingStats.primalAttack}\``;
-					if (this.sheet.castingStats.primalDC)
-						primal += ` (DC ${this.sheet.castingStats.primalDC})`;
-					castingStats.push(primal);
-				}
-				basicStats += `Spellcasting: ${castingStats.join(', ')}\n`;
-			}
-		} else if (mode === 'full_sheet') {
+		if (mode === 'full_sheet') {
 			//full sheet
 			return { embeds: [this.compileSheetEmbed()] };
+		} else {
+			contentGroups.push(this.trackerTitleText());
+			contentGroups.push(this.sheetBasicStatsText());
+			if (mode === 'basic_stats') {
+				contentGroups.push(this.sheetDefensiveStatText());
+				contentGroups.push(this.sheetSaveText());
+				contentGroups.push(this.sheetCastingStatText());
+			}
 		}
-		return { content: title + counters + basicStats, embeds: [] };
+		return { content: contentGroups.join('\n'), embeds: [] };
 	}
 
 	public compileSheetEmbed(): KoboldEmbed {
@@ -221,200 +332,50 @@ export class Creature {
 		if (this.sheet.info.url) sheetEmbed.setURL(this.sheet.info.url);
 		if (this.sheet.info.imageURL) sheetEmbed.setThumbnail(this.sheet.info.imageURL);
 
+		const descriptionGroups = [];
+
 		// general section
-		let generalText = '';
-		if (this.sheet.defenses?.maxHp) {
-			generalText += `HP: \`${this.sheet.defenses.currentHp}\`/\`${this.sheet.defenses.maxHp}\``;
+		descriptionGroups.push(this.sheetBasicStatsText());
+		descriptionGroups.push(this.sheetDefensiveStatText());
+		descriptionGroups.push(this.sheetGameplayInfoText());
 
-			if (this.sheet.defenses?.tempHp) {
-				generalText += `, temp: \`${this.sheet.defenses.tempHp}\`\n`;
-			} else generalText += '\n';
-		}
-		if (this.sheet.info.usesStamina) {
-			generalText += `Stamina: \`${this.sheet.defenses.currentStamina}/${this.sheet.defenses.maxStamina}\`\n`;
-			generalText += `Resolve: \`${this.sheet.defenses.currentResolve}/${this.sheet.defenses.maxResolve}\`\n`;
-		}
-		if (this.sheet.defenses.ac != null) generalText += `AC \`${this.sheet.defenses.ac}\`\n`;
-		generalText += `Hero Points: \`${this.sheet.general.currentHeroPoints}\`/\`3\`\n`;
-		generalText += `Focus Points: \`${this.sheet.general.currentFocusPoints ?? 0}\``;
-		if (this.sheet.general.focusPoints) generalText += `/\`${this.sheet.general.focusPoints}\``;
-		generalText += '\n';
-		if (this.sheet.defenses.resistances?.length)
-			generalText += `Resistances: ${this.sheet.defenses.resistances
-				.map(r => `${r.type} ${r.amount}`)
-				.join(', ')}\n`;
-		if (this.sheet.defenses.weaknesses?.length)
-			generalText += `Weaknesses: ${this.sheet.defenses.weaknesses
-				.map(w => `${w.type} ${w.amount}`)
-				.join(', ')}\n`;
-		if (this.sheet.defenses.immunities?.length)
-			generalText += `Immunities: ${this.sheet.defenses.immunities.join(', ')}\n`;
-		if (this.sheet.general.perception != null)
-			generalText += `Perception \`${this.sheet.general.perception}\` (DC ${
-				10 + this.sheet.general.perception
-			})\n`;
-		if (this.sheet.general.classDC != null) {
-			generalText += `Class DC \`${this.sheet.general.classDC}\`, `;
-			generalText += `Class Attack \`${
-				this.sheet.general.classAttack ?? this.sheet.general.classDC - 10
-			}\`\n`;
-		}
-		const hasASpeed =
-			this.sheet.general.speed != null ||
-			this.sheet.general.flySpeed != null ||
-			this.sheet.general.climbSpeed != null ||
-			this.sheet.general.swimSpeed != null;
-		if (hasASpeed) generalText += `Speed:`;
-		if (this.sheet.general.speed != null)
-			generalText += ` Walk \`${this.sheet.general.speed}\`ft`;
-		if (this.sheet.general.flySpeed != null)
-			generalText += ` Fly \`${this.sheet.general.flySpeed}\`ft`;
-		if (this.sheet.general.climbSpeed != null)
-			generalText += ` Climb \`${this.sheet.general.climbSpeed}\`ft`;
-		if (this.sheet.general.swimSpeed)
-			generalText += ` Swim \`${this.sheet.general.swimSpeed}\`ft`;
-		if (this.sheet.info.traits?.length)
-			generalText += `\nTraits: ${this.sheet.info.traits.join(', ')}`;
-		if (hasASpeed) generalText += '\n';
-		if (this.sheet.info.background)
-			generalText += `\nBackground: ${this.sheet.info.background}`;
+		const sheetInfoText = descriptionGroups.filter(_.identity).join('\n');
 
-		let generalTitleText = '';
-		if (this.sheet.info.level) generalTitleText = `Level ${this.sheet.info.level ?? 'unknown'}`;
-		if (this.sheet.info.heritage) generalTitleText += ` ${this.sheet.info.heritage}`;
-		if (this.sheet.info.ancestry) generalTitleText += ` ${this.sheet.info.ancestry}`;
-		if (this.sheet.info.class) generalTitleText += ` ${this.sheet.info.class}`;
-		if (generalText.length) {
+		if (sheetInfoText.length) {
+			const title = this.sheetTitleText();
 			sheetEmbed.addFields([
 				{
-					name: generalTitleText ?? 'Sheet Info',
-					value: generalText,
+					name: title ?? 'Sheet Info',
+					value: sheetInfoText,
 				},
 			]);
 		}
 
 		// Abilities
-		let abilityTexts = [];
-		for (const ability of literalKeys(this.sheet.abilities)) {
-			if (this.sheet.abilities[ability] != null)
-				abilityTexts.push(
-					`${_.capitalize(ability.slice(0, 3))} \`${this.sheet.abilities[ability]}\``
-				);
-		}
-		if (abilityTexts.length)
-			sheetEmbed.addFields([{ name: 'Abilities', value: abilityTexts.join(', ') }]);
+		sheetEmbed.addFields([{ name: 'Abilities', value: this.sheetAbilitiesText(false) }]);
 
 		// Saves
-		let saveTexts = [];
-		for (const save of literalKeys(this.sheet.saves)) {
-			const targetSave = this.sheet.saves[save];
-			if (save.includes('ProfMod') || targetSave == null) continue;
-			saveTexts.push(
-				`${save} \`${targetSave >= 0 ? '+' : ''}${targetSave}\` (DC ${10 + targetSave})`
-			);
-		}
-		if (saveTexts.length)
-			sheetEmbed.addFields([{ name: 'Saves', value: saveTexts.join(', ') }]);
+		let saveText = this.sheetSaveText(false);
+		if (saveText) sheetEmbed.addFields([{ name: 'Saves', value: saveText }]);
 
-		if (
-			this.sheet.castingStats.arcaneAttack != null ||
-			this.sheet.castingStats.divineAttack != null ||
-			this.sheet.castingStats.primalAttack != null ||
-			this.sheet.castingStats.occultAttack != null ||
-			this.sheet.castingStats.arcaneDC != null ||
-			this.sheet.castingStats.divineDC != null ||
-			this.sheet.castingStats.primalDC != null ||
-			this.sheet.castingStats.occultDC != null
-		) {
-			let castingStats = [];
-			if (this.sheet.castingStats.arcaneAttack || this.sheet.castingStats.arcaneDC) {
-				let arcane = `Arcane `;
-				if (this.sheet.castingStats.arcaneAttack)
-					arcane += ` \`+${this.sheet.castingStats.arcaneAttack}\``;
-				if (this.sheet.castingStats.arcaneDC)
-					arcane += ` (DC ${this.sheet.castingStats.arcaneDC})`;
-				castingStats.push(arcane);
-			}
-			if (this.sheet.castingStats.divineAttack || this.sheet.castingStats.divineDC) {
-				let divine = `Divine `;
-				if (this.sheet.castingStats.divineAttack)
-					divine += ` \`+${this.sheet.castingStats.divineAttack}\``;
-				if (this.sheet.castingStats.divineDC)
-					divine += ` (DC ${this.sheet.castingStats.divineDC})`;
-				castingStats.push(divine);
-			}
-			if (this.sheet.castingStats.occultAttack || this.sheet.castingStats.occultDC) {
-				let occult = `Occult `;
-				if (this.sheet.castingStats.occultAttack)
-					occult += ` \`+${this.sheet.castingStats.occultAttack}\``;
-				if (this.sheet.castingStats.occultDC)
-					occult += ` (DC ${this.sheet.castingStats.occultDC})`;
-				castingStats.push(occult);
-			}
-			if (this.sheet.castingStats.primalAttack || this.sheet.castingStats.primalDC) {
-				let primal = `Primal `;
-				if (this.sheet.castingStats.primalAttack)
-					primal += ` \`+${this.sheet.castingStats.primalAttack}\``;
-				if (this.sheet.castingStats.primalDC)
-					primal += ` (DC ${this.sheet.castingStats.primalDC})`;
-				castingStats.push(primal);
-			}
-			sheetEmbed.addFields([{ name: 'Spellcasting', value: castingStats.join(', ') }]);
-		}
-		if (
-			this.sheet.offense.simpleProfMod ||
-			this.sheet.offense.martialProfMod ||
-			this.sheet.offense.unarmedProfMod ||
-			this.sheet.offense.advancedProfMod ||
-			this.sheet.attacks?.length
-		) {
-			const maxWeaponMod = Math.max(
-				this.sheet.offense.simpleProfMod ?? -99,
-				this.sheet.offense.martialProfMod ?? -99,
-				this.sheet.offense.unarmedProfMod ?? -99,
-				this.sheet.offense.advancedProfMod ?? -99
-			);
-			let attacks = '';
-			if (maxWeaponMod !== -99) {
-				const level = this.sheet.info.level ?? 0;
-				attacks = `**Melee** (strength, best proficiency): \`+${
-					maxWeaponMod + level + this.mods.str
-				}\`\n`;
-				attacks += `**Ranged/Finesse** (dexterity, best proficiency): \`+${
-					maxWeaponMod + level + this.mods.dex
-				}\``;
-			}
-			for (const attack of _.values(this.attackRolls)) {
-				let builtAttack = `**${_.capitalize(attack.name)}**`;
-				if (attack.toHit) builtAttack += ` \`+${attack.toHit}\``;
-				if (attack.traits?.length) builtAttack += ` (${attack.traits.join(', ')})`;
-				builtAttack += `,`;
-				if (attack.damage?.length) {
-					builtAttack += ` **Damage:** ${attack.damage
-						.map(d => `\`${d.dice}${d.type ? ` ${d.type}` : ''}\``)
-						.join(', ')}`;
-				}
-				if (attacks.length) attacks += '\n';
-				attacks += builtAttack;
-			}
-			sheetEmbed.addFields([{ name: 'Attacks', value: attacks }]);
-		}
+		// Casting Stats
+		let castingStatText = this.sheetCastingStatText(false);
+		if (castingStatText)
+			sheetEmbed.addFields([{ name: 'Spellcasting', value: castingStatText }]);
+
+		let attackText = this.sheetAttacksText(false);
+		if (attackText) sheetEmbed.addFields([{ name: 'Attacks', value: attackText }]);
 
 		// Skills
-		let skillTexts = [];
-		let skillTotals = this.skillTotals;
-		for (const skill of literalKeys(skillTotals).sort((a, b) =>
-			a.toString().localeCompare(b.toString())
-		)) {
-			const skillTotal = skillTotals[skill];
-			//avoid null values
-			skillTexts.push(`${skill} \`${skillTotal >= 0 ? '+' : ''}${skillTotal}\``);
+		let skillText = this.sheetSkillText(false);
+		if (skillText) {
+			const skillBatches = _.chunk(skillText.split('\n'), 7);
+			for (const skillGroup of skillBatches) {
+				sheetEmbed.addFields([
+					{ name: 'Skills', value: skillGroup.join('\n'), inline: true },
+				]);
+			}
 		}
-		const skillBatches = _.chunk(skillTexts, 7);
-		for (const skillGroup of skillBatches) {
-			sheetEmbed.addFields([{ name: 'Skills', value: skillGroup.join('\n'), inline: true }]);
-		}
-
 		return sheetEmbed;
 	}
 
@@ -422,55 +383,57 @@ export class Creature {
 
 	public recover() {
 		const updates: { name: string; initialValue: number; updatedValue: number }[] = [];
-		if (Number(this.sheet.defenses.tempHp) > 0) {
+		if (Number(this.sheet.baseCounters.tempHp.current) > 0) {
 			updates.push({
 				name: 'Temp HP',
-				initialValue: Number(this.sheet.defenses.tempHp),
+				initialValue: Number(this.sheet.baseCounters.tempHp.current),
 				updatedValue: 0,
 			});
-			this.sheet.defenses.tempHp = 0;
+			this.sheet.baseCounters.tempHp.current = 0;
 		}
-		if (Number(this.sheet.defenses.currentHp) < Number(this.sheet.defenses.maxHp)) {
+		if (Number(this.sheet.baseCounters.hp.current) < Number(this.sheet.baseCounters.hp.max)) {
 			updates.push({
 				name: 'HP',
-				initialValue: Number(this.sheet.defenses.currentHp),
-				updatedValue: Number(this.sheet.defenses.maxHp),
+				initialValue: Number(this.sheet.baseCounters.hp.current),
+				updatedValue: Number(this.sheet.baseCounters.hp.max),
 			});
-			this.sheet.defenses.currentHp = Number(this.sheet.defenses.maxHp);
+			this.sheet.baseCounters.hp.current = Number(this.sheet.baseCounters.hp.max);
 		}
 		if (
-			this.sheet.info.usesStamina &&
-			Number(this.sheet.defenses.currentStamina) < Number(this.sheet.defenses.maxStamina)
+			this.sheet.staticInfo.usesStamina &&
+			Number(this.sheet.baseCounters.stamina.current) <
+				Number(this.sheet.baseCounters.stamina.max)
 		) {
 			updates.push({
 				name: 'Stamina',
-				initialValue: Number(this.sheet.defenses.currentStamina),
-				updatedValue: Number(this.sheet.defenses.maxStamina),
+				initialValue: Number(this.sheet.baseCounters.stamina.current),
+				updatedValue: Number(this.sheet.baseCounters.stamina.max),
 			});
-			this.sheet.defenses.currentStamina = Number(this.sheet.defenses.maxStamina);
+			this.sheet.baseCounters.stamina.current = Number(this.sheet.baseCounters.stamina.max);
 		}
 		if (
-			this.sheet.info.usesStamina &&
-			Number(this.sheet.defenses.currentResolve) < Number(this.sheet.defenses.maxResolve)
+			this.sheet.staticInfo.usesStamina &&
+			Number(this.sheet.baseCounters.resolve.current) <
+				Number(this.sheet.baseCounters.resolve.max)
 		) {
 			updates.push({
 				name: 'Resolve',
-				initialValue: Number(this.sheet.defenses.currentResolve),
-				updatedValue: Number(this.sheet.defenses.maxResolve),
+				initialValue: Number(this.sheet.baseCounters.resolve.current),
+				updatedValue: Number(this.sheet.baseCounters.resolve.max),
 			});
-			this.sheet.defenses.currentResolve = Number(this.sheet.defenses.maxResolve);
+			this.sheet.baseCounters.resolve.current = Number(this.sheet.baseCounters.resolve.max);
 		}
 		return updates;
 	}
 
 	/**
 	 *
-	 * @param option One of the settable sheet values
+	 * @param option One of the sheet's base counter keys, such as "hp", "stamina", "resolve", "heroPoints", "focusPoints"
 	 * @param value A string representing the value to update the sheet with
 	 *  			A numeric string that can start with "+" or "-" to indicate a relative change
 	 * @returns An object with the initial and updated values
 	 */
-	public updateValue(option: SettableSheetOption, value: string) {
+	public updateValue(option: SheetBaseCounterKeys, value: string) {
 		const computeNewValue = (
 			currentValue: number,
 			update: string,
@@ -485,7 +448,10 @@ export class Creature {
 			} else {
 				finalValue = parseInt(update);
 			}
-			if (isNaN(finalValue)) throw new KoboldError(`Yip! I didn\'t understand "${value}"!`);
+			if (isNaN(finalValue))
+				throw new KoboldError(
+					`Yip! I don\'t understand how to read "${value}" as a number!`
+				);
 			if (min != null && finalValue < min) finalValue = min;
 			if (max != null && finalValue > max) finalValue = max;
 			return finalValue;
@@ -493,57 +459,13 @@ export class Creature {
 		let initialValue;
 		let updatedValue;
 
-		if (option === 'hp') {
-			if (this.sheet?.defenses?.currentHp == undefined)
-				return { initialValue: 0, updatedValue: 0 };
-			initialValue = this.sheet.defenses.currentHp;
-			updatedValue = computeNewValue(initialValue, value, 0, this.sheet.defenses.maxHp ?? 0);
-			this.sheet.defenses.currentHp = updatedValue;
-		} else if (option === 'tempHp') {
-			if (this.sheet?.defenses?.tempHp == undefined)
-				return { initialValue: 0, updatedValue: 0 };
-			initialValue = this.sheet.defenses.tempHp;
-			updatedValue = computeNewValue(initialValue, value, 0);
-			this.sheet.defenses.tempHp = updatedValue;
-		} else if (option === 'stamina') {
-			if (this.sheet?.defenses?.currentStamina == undefined)
-				return { initialValue: 0, updatedValue: 0 };
-			initialValue = this.sheet.defenses.currentStamina;
-			updatedValue = computeNewValue(
-				initialValue,
-				value,
-				0,
-				this.sheet.defenses.maxStamina ?? 0
-			);
-			this.sheet.defenses.currentStamina = updatedValue;
-		} else if (option === 'resolve') {
-			if (this.sheet?.defenses?.currentResolve == undefined)
-				return { initialValue: 0, updatedValue: 0 };
-			initialValue = this.sheet.defenses.currentResolve;
-			updatedValue = computeNewValue(
-				initialValue,
-				value,
-				0,
-				this.sheet.defenses.maxResolve ?? 0
-			);
-			this.sheet.defenses.currentResolve = updatedValue;
-		} else if (option === 'heroPoints') {
-			if (this.sheet?.general?.currentHeroPoints == undefined)
-				return { initialValue: 0, updatedValue: 0 };
-			initialValue = this.sheet.general.currentHeroPoints;
-			updatedValue = computeNewValue(initialValue, value, 0, 3);
-			this.sheet.general.currentHeroPoints = updatedValue;
-		} else if (option === 'focusPoints') {
-			if (this.sheet?.general?.currentFocusPoints == undefined)
-				return { initialValue: 0, updatedValue: 0 };
-			initialValue = this.sheet.general.currentFocusPoints;
-			updatedValue = computeNewValue(
-				initialValue,
-				value,
-				0,
-				this.sheet.general?.focusPoints ?? 3
-			);
-			this.sheet.general.currentFocusPoints = updatedValue;
+		if (option in this.sheet.baseCounters) {
+			const property = option as SheetBaseCounterKeys;
+			const counter = this.sheet.baseCounters[property];
+			initialValue = counter.current;
+			updatedValue = computeNewValue(initialValue, value, 0, counter.max ?? Infinity);
+			counter.current = updatedValue;
+			return { initialValue, updatedValue };
 		}
 		return { initialValue, updatedValue };
 	}
@@ -551,7 +473,7 @@ export class Creature {
 	public matchingWeakness(damageType: string) {
 		const shorthandDamageType = damageTypeShorthands[damageType];
 		if (!damageType) return null;
-		for (const weakness of this.sheet.defenses.weaknesses) {
+		for (const weakness of this.sheet.weaknessesResistances.weaknesses) {
 			const shorthandWeaknessType = damageTypeShorthands[weakness.type];
 			if (
 				weakness.type.toLowerCase() === damageType.toLowerCase() ||
@@ -565,7 +487,7 @@ export class Creature {
 	public matchingResistance(damageType: string) {
 		const shorthandDamageType = damageTypeShorthands[damageType];
 		if (!damageType) return null;
-		for (const resistance of this.sheet.defenses.resistances) {
+		for (const resistance of this.sheet.weaknessesResistances.resistances) {
 			const shorthandResistanceType = damageTypeShorthands[resistance.type];
 			if (
 				resistance.type.toLowerCase() === damageType.toLowerCase() ||
@@ -579,7 +501,7 @@ export class Creature {
 	public matchingImmunities(damageType: string) {
 		const shorthandDamageType = damageTypeShorthands[damageType];
 		if (!damageType) return [];
-		for (const immunity of this.sheet.defenses.immunities) {
+		for (const immunity of this.sheet.infoLists.immunities) {
 			const shorthandImmunityType = damageTypeShorthands[immunity];
 			if (
 				immunity.toLowerCase() === damageType.toLowerCase() ||
@@ -591,12 +513,12 @@ export class Creature {
 	}
 
 	public heal(amount: number) {
-		const currentHp = this.sheet.defenses.currentHp ?? 0;
-		this.sheet.defenses.currentHp = Math.min(
-			this.sheet.defenses.maxHp ?? 0,
+		const currentHp = this.sheet.baseCounters.hp.current ?? 0;
+		this.sheet.baseCounters.hp.current = Math.min(
+			this.sheet.baseCounters.hp.max ?? 0,
 			currentHp + amount
 		);
-		return { totalHealed: this.sheet.defenses.currentHp - currentHp };
+		return { totalHealed: this.sheet.baseCounters.hp.current - currentHp };
 	}
 
 	/**
@@ -641,22 +563,22 @@ export class Creature {
 				appliedImmunity = immunities[0];
 			}
 		}
-		let initialTempHp = this.sheet.defenses.tempHp ?? 0;
-		let initialStamina = this.sheet.defenses.currentStamina ?? 0;
-		let initialHp = this.sheet.defenses.currentHp ?? 0;
+		let initialTempHp = this.sheet.baseCounters.tempHp.current ?? 0;
+		let initialStamina = this.sheet.baseCounters.stamina.current ?? 0;
+		let initialHp = this.sheet.baseCounters.hp.current ?? 0;
 		let unappliedDamage = finalDamage;
 
 		// apply damage to temp hp first, then stamina, then hp
 		if (initialTempHp > 0) {
-			this.sheet.defenses.tempHp = Math.max(0, initialTempHp - unappliedDamage);
+			this.sheet.baseCounters.tempHp.current = Math.max(0, initialTempHp - unappliedDamage);
 			unappliedDamage -= Math.min(initialTempHp, unappliedDamage);
 		}
-		if (unappliedDamage > 0 && this.sheet.info.usesStamina && initialStamina > 0) {
-			this.sheet.defenses.currentStamina = Math.max(0, initialStamina - unappliedDamage);
+		if (unappliedDamage > 0 && this.sheet.staticInfo.usesStamina && initialStamina > 0) {
+			this.sheet.baseCounters.stamina.current = Math.max(0, initialStamina - unappliedDamage);
 			unappliedDamage -= Math.min(initialStamina, unappliedDamage);
 		}
 		if (unappliedDamage > 0 && initialHp > 0) {
-			this.sheet.defenses.currentHp = Math.max(0, initialHp - unappliedDamage);
+			this.sheet.baseCounters.hp.current = Math.max(0, initialHp - unappliedDamage);
 			unappliedDamage -= Math.min(initialHp, unappliedDamage);
 		}
 
@@ -670,109 +592,123 @@ export class Creature {
 	}
 
 	getDC(dcName: string): number | null {
-		const trimmedLowerDCName = dcName.toLowerCase().replace(/[^_\[\]a-zA-Z-0-9]+/g, '');
+		const dcPropKey = SheetProperties.standardizePropKey(dcName);
 
-		if (['ac', 'armorclass', 'armor'].includes(trimmedLowerDCName))
-			return this.sheet.defenses.ac ?? 10;
-		if (['fort', 'fortitude'].includes(trimmedLowerDCName))
-			return (this.sheet.saves.fortitude ?? 0) + 10;
-		if (['ref', 'reflex'].includes(trimmedLowerDCName))
-			return (this.sheet.saves.reflex ?? 0) + 10;
-		if (['will'].includes(trimmedLowerDCName)) return (this.sheet.saves.will ?? 0) + 10;
-		if (['perception', 'perceptiondc'].includes(trimmedLowerDCName))
-			return (this.sheet.general.perception ?? 0) + 10;
-		if (['classdc', 'class'].includes(trimmedLowerDCName))
-			return this.sheet.general.classDC ?? 10;
-		for (const skill of literalKeys(this.sheet.skills)) {
-			if (skill === 'lores') continue;
-			if (
-				skill.toLowerCase() === trimmedLowerDCName ||
-				skill.toLowerCase() + 'dc' === trimmedLowerDCName
-			)
-				return 10 + (this.sheet.skills[skill] ?? 0);
+		if (['ac', 'armorclass', 'armor'].includes(dcPropKey))
+			return this.sheet.intProperties.ac ?? 10;
+		const stat = SheetStatProperties.aliases[dcPropKey];
+		if (stat) {
+			const sheetProp = SheetProperties.properties[stat];
+			return this.statDcs[sheetProp.baseKey];
 		}
-		for (const skill of this.sheet.skills.lores) {
-			if (
-				skill.name.toLowerCase() === trimmedLowerDCName ||
-				skill.name.toLowerCase() + 'dc' === trimmedLowerDCName
-			)
-				return 10 + (skill.bonus ?? 0);
-		}
-		if (['arcane', 'arcanedc', 'arcanespelldc'].includes(trimmedLowerDCName))
-			return this.sheet.castingStats.arcaneDC ?? 10;
-		if (['divine', 'divinedc', 'divinespelldc'].includes(trimmedLowerDCName))
-			return this.sheet.castingStats.divineDC ?? 10;
-		if (['occult', 'occultdc', 'occultspelldc'].includes(trimmedLowerDCName))
-			return this.sheet.castingStats.occultDC ?? 10;
-		if (['primal', 'primaldc', 'primalspelldc'].includes(trimmedLowerDCName))
-			return this.sheet.castingStats.primalDC ?? 10;
-		if (['spell', 'spelldc'].includes(trimmedLowerDCName)) {
-			return Math.max(
-				this.sheet.castingStats.arcaneDC ?? 10,
-				this.sheet.castingStats.divineDC ?? 10,
-				this.sheet.castingStats.occultDC ?? 10,
-				this.sheet.castingStats.primalDC ?? 10
-			);
+		const additionalSkill = this.sheet.additionalSkills.find(
+			s => SheetProperties.standardizePropKey(s.name) === dcPropKey
+		);
+		if (additionalSkill) {
+			return this.interpretDc(additionalSkill);
 		}
 		return null;
 	}
 
 	// Roll Options
 
-	public get attackRolls(): {
-		[rollName: string]: attackRoll;
-	} {
-		const rolls: {
-			[rollName: string]: attackRoll;
-		} = {};
+	public get bonusAttacks(): SheetAttack[] {
+		const bonusAttacks: SheetAttack[] = [];
 
-		if (this.sheet.castingStats.arcaneAttack != null) {
-			rolls['arcane spell attack'] = {
+		if (this.statIsUnset(this.sheet.stats.arcane)) {
+			bonusAttacks.push({
 				name: 'Arcane Spell Attack',
-				type: 'attack',
-				toHit: this.sheet.castingStats.arcaneAttack,
+				toHit: this.statBonuses.arcane,
 				damage: [],
-				traits: [],
-				tags: ['attack', 'spell', 'arcane'],
-			};
+				range: null,
+				notes: null,
+				traits: ['attack', 'spell', 'arcane'],
+			});
 		}
 
-		if (this.sheet.castingStats.divineAttack != null) {
-			rolls['divine spell attack'] = {
+		if (!this.statIsUnset(this.sheet.stats.divine)) {
+			bonusAttacks.push({
 				name: 'Divine Spell Attack',
-				type: 'attack',
-				toHit: this.sheet.castingStats.divineAttack,
+				toHit: this.statBonuses.divine,
 				damage: [],
-				traits: [],
-				tags: ['attack', 'spell', 'divine'],
-			};
+				range: null,
+				notes: null,
+				traits: ['attack', 'spell', 'divine'],
+			});
 		}
 
-		if (this.sheet.castingStats.occultAttack != null) {
-			rolls['occult spell attack'] = {
+		if (!this.statIsUnset(this.sheet.stats.occult)) {
+			bonusAttacks.push({
 				name: 'Occult Spell Attack',
-				type: 'attack',
-				toHit: this.sheet.castingStats.occultAttack,
+				toHit: this.statBonuses.occult,
 				damage: [],
-				traits: [],
-				tags: ['attack', 'spell', 'occult'],
-			};
+				range: null,
+				notes: null,
+				traits: ['attack', 'spell', 'occult'],
+			});
 		}
 
-		if (this.sheet.castingStats.primalAttack != null) {
-			rolls['primal spell attack'] = {
+		if (!this.statIsUnset(this.sheet.stats.primal)) {
+			bonusAttacks.push({
 				name: 'Primal Spell Attack',
-				type: 'attack',
-				toHit: this.sheet.castingStats.primalAttack,
+				toHit: this.statBonuses.primal,
 				damage: [],
-				traits: [],
-				tags: ['attack', 'spell', 'primal'],
-			};
+				range: null,
+				notes: null,
+				traits: ['attack', 'spell', 'primal'],
+			});
 		}
 
-		for (const attack of this.sheet.attacks) {
-			rolls[attack.name.toLowerCase()] = {
-				name: attack.name,
+		if (!this.statIsUnset(this.sheet.stats.class)) {
+			bonusAttacks.push({
+				name: 'Class Attack',
+				toHit: this.statBonuses.class,
+				damage: [],
+				range: null,
+				notes: null,
+				traits: ['attack', 'class'],
+			});
+		}
+
+		const maxWeaponMod = Math.max(
+			this.sheet.intProperties.simpleProficiency ?? -99,
+			this.sheet.intProperties.martialProficiency ?? -99,
+			this.sheet.intProperties.unarmedProficiency ?? -99,
+			this.sheet.intProperties.advancedProficiency ?? -99
+		);
+		if (maxWeaponMod !== -99) {
+			const level = this.sheet.staticInfo.level ?? 0;
+			bonusAttacks.push({
+				name: '**Melee** (strength, best proficiency)',
+				toHit: maxWeaponMod + level + this.abilities.strength,
+				damage: [],
+				range: 'melee',
+				notes: null,
+				traits: ['attack', 'strength', 'melee'],
+			});
+			bonusAttacks.push({
+				name: '**Ranged/Finesse** (dexterity, best proficiency)',
+				toHit: maxWeaponMod + level + this.abilities.dexterity,
+				damage: [],
+				range: 'melee',
+				notes: null,
+				traits: ['attack', 'dexterity', 'ranged'],
+			});
+		}
+
+		return bonusAttacks;
+	}
+
+	public get attacks() {
+		return _.uniqBy(this.sheet.attacks.concat(this.bonusAttacks), attack =>
+			attack.name.trim().toLowerCase()
+		);
+	}
+
+	public get attackRolls(): { [k: string]: attackRoll } {
+		return _.keyBy(
+			this.attacks.map(attack => ({
+				name: attack.name.toLowerCase(),
 				type: 'attack',
 				toHit: attack.toHit,
 				damage: attack.damage ?? [],
@@ -780,13 +716,135 @@ export class Creature {
 				traits: attack.traits ?? [],
 				notes: attack.notes,
 				tags: _.uniq(['attack', ...(attack.traits ?? [])]),
-			};
-		}
-		return rolls;
+			})),
+			({ name }) => name.toLowerCase()
+		);
+	}
+
+	public get abilities(): { [k in AbilityEnum]: number } {
+		return {
+			strength: this.sheet.intProperties.strength ?? 0,
+			dexterity: this.sheet.intProperties.dexterity ?? 0,
+			constitution: this.sheet.intProperties.constitution ?? 0,
+			intelligence: this.sheet.intProperties.intelligence ?? 0,
+			wisdom: this.sheet.intProperties.wisdom ?? 0,
+			charisma: this.sheet.intProperties.charisma ?? 0,
+		};
+	}
+
+	public get saves(): ProficiencyStat[] {
+		const allSaveNames = SheetStatProperties.statGroups[StatGroupEnum.saves];
+		return Object.values(_.pick(this.sheet.stats, allSaveNames));
+	}
+	public get skills(): ProficiencyStat[] {
+		const allSkillNames = SheetStatProperties.statGroups[StatGroupEnum.skills];
+		return Object.values(_.pick(this.sheet.stats, allSkillNames)).concat(
+			this.sheet.additionalSkills
+		);
+	}
+	public get castingStats(): ProficiencyStat[] {
+		const allCastingStatNames = SheetStatProperties.statGroups[StatGroupEnum.casting];
+		return Object.values(_.pick(this.sheet.stats, allCastingStatNames));
+	}
+	public get checks(): ProficiencyStat[] {
+		const allCheckNames = SheetStatProperties.statGroups[StatGroupEnum.checks].concat(
+			SheetStatProperties.statGroups[StatGroupEnum.class]
+		);
+		return Object.values(_.pick(this.sheet.stats, allCheckNames));
+	}
+
+	public get ac(): number {
+		return this.sheet.intProperties.ac ?? 10;
+	}
+	public get abilityList(): { name: string; value: number | null }[] {
+		const allAbilityNames = SheetIntegerProperties.statGroups[SheetIntegerGroupEnum.abilities];
+		return Object.entries(_.pick(this.sheet.intProperties, allAbilityNames)).map(
+			([intPropName, intPropValue]) => ({
+				name: intPropName,
+				value: intPropValue,
+			})
+		);
+	}
+	public get speeds(): { name: string; value: number | null }[] {
+		const allSpeedNames = SheetIntegerProperties.statGroups[SheetIntegerGroupEnum.speeds];
+		return Object.entries(_.pick(this.sheet.intProperties, allSpeedNames)).map(
+			([intPropName, intPropValue]) => ({
+				name: intPropName.replace('Speed', ''),
+				value: intPropValue,
+			})
+		);
+	}
+	public get armorProficiencies(): { name: string; value: number | null }[] {
+		const allArmorProfNames =
+			SheetIntegerProperties.statGroups[SheetIntegerGroupEnum.armorProficiencies];
+		return Object.entries(_.pick(this.sheet.intProperties, allArmorProfNames)).map(
+			([intPropName, intPropValue]) => ({
+				name: intPropName.replace('Proficiency', ''),
+				value: intPropValue,
+			})
+		);
+	}
+	public get weaponProficiencies(): { name: string; value: number | null }[] {
+		const allWeaponProfNames =
+			SheetIntegerProperties.statGroups[SheetIntegerGroupEnum.weaponProficiencies];
+		return Object.entries(_.pick(this.sheet.intProperties, allWeaponProfNames)).map(
+			([intPropName, intPropValue]) => ({
+				name: intPropName.replace('Proficiency', ''),
+				value: intPropValue,
+			})
+		);
+	}
+
+	public get counters(): Counter[] {
+		return Object.values(this.sheet.baseCounters);
 	}
 
 	public get keyedActions() {
 		return _.keyBy(this.sheet.actions, action => action.name);
+	}
+
+	public get statBonuses(): { [k in SheetStatKeys]: number } {
+		return _.mapValues(this.sheet.stats, stat => this.interpretBonus(stat));
+	}
+
+	public get statDcs(): { [k in SheetStatKeys]: number } {
+		return _.mapValues(this.sheet.stats, stat => this.interpretDc(stat));
+	}
+
+	public statToRoll(stat: ProficiencyStat, statType: string): roll {
+		const name = SheetProperties.standardizeCustomPropName(stat.name);
+		return {
+			name: name,
+			type: statType,
+			bonus: this.interpretBonus(stat),
+			tags: [statType, name, stat.ability ?? ''].filter(_.identity),
+		};
+	}
+	public statsToRolls(
+		stats: ProficiencyStat[],
+		statType: string
+	): {
+		[rollName: string]: roll;
+	} {
+		return _.keyBy(
+			stats.map(stat => this.statToRoll(stat, statType)),
+			stat => SheetProperties.standardizeCustomPropName(stat.name)
+		);
+	}
+
+	public get savingThrowRolls(): {
+		[rollName: string]: roll;
+	} {
+		return this.statsToRolls(this.saves, 'save');
+	}
+	public get skillRolls(): {
+		[rollName: string]: roll;
+	} {
+		const rolls: {
+			[rollName: string]: roll;
+		} = {};
+
+		return this.statsToRolls(this.skills, 'skill');
 	}
 
 	public get abilityRolls(): {
@@ -796,77 +854,15 @@ export class Creature {
 			[rollName: string]: roll;
 		} = {};
 
-		for (const ability of Object.keys(this.sheet.abilities)) {
-			rolls[ability] = {
-				name: ability.toLowerCase(),
+		for (const [abilityName, abilityValue] of Object.entries(this.abilities)) {
+			rolls[abilityName] = {
+				name: abilityName.toLowerCase(),
 				type: 'ability',
-				bonus: this.mods[ability],
-				tags: ['ability', ability],
+				bonus: abilityValue,
+				tags: ['ability', abilityName],
 			};
 		}
 		return rolls;
-	}
-	public get skillRolls(): {
-		[rollName: string]: roll;
-	} {
-		const rolls: {
-			[rollName: string]: roll;
-		} = {};
-
-		rolls.perception = {
-			name: 'perception',
-			type: 'check',
-			bonus: this.sheet.general.perception ?? 0,
-			tags: ['check', 'perception', 'wisdom'],
-		};
-
-		for (const skill of literalKeys(this.sheet.skills)) {
-			if (skill.includes('ProfMod')) continue;
-			if (skill === 'lores') continue;
-			const skillValue = this.sheet.skills[skill];
-			if (!skillValue) continue;
-			rolls[skill] = {
-				name: skill.toLowerCase(),
-				type: 'skill',
-				bonus: skillValue,
-				tags: ['skill', skill, Creature.attributeAbilityMap[skill]].filter(t => t != null),
-			};
-		}
-		delete rolls.lores;
-		for (const lore of this.sheet.skills.lores || []) {
-			rolls[lore.name.toLocaleLowerCase() + ' lore'] = {
-				name: lore.name + ' lore',
-				type: 'skill',
-				bonus: lore.bonus ?? 0,
-				tags: ['skill', lore.name, 'intelligence'],
-			};
-		}
-		return rolls;
-	}
-
-	public get savingThrowRolls(): {
-		[rollName: string]: roll;
-	} {
-		return {
-			fortitude: {
-				name: 'fortitude',
-				type: 'save',
-				bonus: this.sheet.saves.fortitude ?? 0,
-				tags: ['save', 'fortitude', 'constitution'],
-			},
-			reflex: {
-				name: 'reflex',
-				type: 'save',
-				bonus: this.sheet.saves.reflex ?? 0,
-				tags: ['save', 'reflex', 'dexterity'],
-			},
-			will: {
-				name: 'will',
-				type: 'save',
-				bonus: this.sheet.saves.will ?? 0,
-				tags: ['save', 'will', 'wisdom'],
-			},
-		};
 	}
 
 	public get rolls(): {
@@ -883,42 +879,6 @@ export class Creature {
 		return _.keys(this.rolls);
 	}
 
-	public get mods(): { [k: string]: number } {
-		const parseMod = (score: number) => Math.floor((score - 10) / 2);
-		return {
-			str: parseMod(this.sheet.abilities.strength ?? 10),
-			strength: parseMod(this.sheet.abilities.strength ?? 10),
-			dex: parseMod(this.sheet.abilities.dexterity ?? 10),
-			dexterity: parseMod(this.sheet.abilities.dexterity ?? 10),
-			con: parseMod(this.sheet.abilities.constitution ?? 10),
-			constitution: parseMod(this.sheet.abilities.constitution ?? 10),
-			int: parseMod(this.sheet.abilities.intelligence ?? 10),
-			intelligence: parseMod(this.sheet.abilities.intelligence ?? 10),
-			wis: parseMod(this.sheet.abilities.wisdom ?? 10),
-			wisdom: parseMod(this.sheet.abilities.wisdom ?? 10),
-			cha: parseMod(this.sheet.abilities.charisma ?? 10),
-			charisma: parseMod(this.sheet.abilities.charisma ?? 10),
-		};
-	}
-
-	public get skillTotals(): { [k: string]: number } {
-		const keyedLores = _.keyBy(this.sheet.skills.lores, lore => lore.name + ' lore');
-		const rawLores = _.mapValues(keyedLores, lore => lore.bonus);
-		const lores = _.pickBy(rawLores, _.isNumber);
-		const filteredSkills = _.pickBy(
-			this.sheet.skills,
-			(skillValue, skill): skillValue is number => {
-				return (
-					!skill.includes('lore') &&
-					!skill.includes('ProfMod') &&
-					skillValue !== undefined
-				);
-			}
-		);
-
-		return { ...filteredSkills, ...lores };
-	}
-
 	public get actions() {
 		return this.sheet.actions ?? [];
 	}
@@ -929,504 +889,29 @@ export class Creature {
 		return this.sheet.rollMacros ?? [];
 	}
 
-	public get sheetPropertyGroups() {
-		return SheetUtils.sheetPropertyGroups;
-	}
-
-	public get sheetProperties() {
-		return [
-			...Object.keys(this.sheet.info),
-			...Object.keys(this.sheet.general),
-			...Object.keys(this.sheet.defenses),
-			...Object.keys(this.sheet.skills),
-			...Object.keys(this.sheet.saves),
-			...Object.keys(this.sheet.abilities),
-			...Object.keys(this.sheet.castingStats),
-			...Object.keys(this.sheet.offense),
-		]
-			.filter(key => !['name', 'level', 'languages', 'senses'].includes(key))
-			.map(property => _.camelCase(property));
-	}
-	public get numericSheetProperties() {
-		return [
-			'age',
-			..._.without(Object.keys(this.sheet.general), 'languages', 'senses'),
-			..._.without(
-				Object.keys(this.sheet.defenses),
-				'immunities',
-				'resistances',
-				'weaknesses'
-			),
-			..._.without(Object.keys(this.sheet.skills), 'lores'),
-			...Object.keys(this.sheet.saves),
-			...Object.keys(this.sheet.abilities),
-			...Object.keys(this.sheet.castingStats),
-			...Object.keys(this.sheet.offense),
-		]
-			.filter(key => !['level'].includes(key))
-			.map(property => _.camelCase(property));
-	}
-
-	public get attributes(): Attribute[] {
-		const baseAttributes: Attribute[] = [
-			{ name: 'level', type: 'base', value: this.sheet.info.level ?? 0, tags: ['level'] },
-			{ name: 'maxHp', type: 'base', value: this.sheet.defenses.maxHp ?? 0, tags: ['maxHp'] },
-			{
-				name: 'hp',
-				type: 'base',
-				value: this.sheet.defenses.currentHp ?? 0,
-				tags: ['hp'],
-			},
-			{
-				name: 'tempHp',
-				type: 'base',
-				value: this.sheet.defenses.tempHp || 0,
-				tags: ['tempHp'],
-			},
-			{ name: 'ac', type: 'base', value: this.sheet.defenses.ac ?? 0, tags: ['ac'] },
-			{
-				name: 'heroPoints',
-				type: 'base',
-				value: this.sheet.general.currentHeroPoints ?? 0,
-				tags: ['heroPoints'],
-			},
-
-			{ name: 'speed', type: 'base', value: this.sheet.general.speed ?? 0, tags: ['speed'] },
-			{
-				name: 'classDc',
-				type: 'base',
-				value: this.sheet.general.classDC ?? 10,
-				tags: ['classDc'],
-			},
-			{
-				name: 'classAttack',
-				type: 'base',
-				value: this.sheet.general.classAttack ?? 0,
-				tags: ['classAttack'],
-			},
-			{
-				name: 'perception',
-				type: 'skill',
-				value: this.sheet.general.perception ?? 0,
-				tags: ['skill', 'perception', 'wisdom'],
-			},
-		];
-		if (this.sheet.info.usesStamina) {
-			baseAttributes.push(
-				{
-					name: 'maxStamina',
-					type: 'base',
-					value: this.sheet.defenses.maxStamina ?? 0,
-					tags: ['maxStamina'],
-				},
-				{
-					name: 'maxResolve',
-					type: 'base',
-					value: this.sheet.defenses.maxResolve ?? 0,
-					tags: ['maxResolve'],
-				},
-				{
-					name: 'stamina',
-					type: 'base',
-					value: this.sheet.defenses.currentStamina ?? 0,
-					tags: ['stamina'],
-				},
-				{
-					name: 'resolve',
-					type: 'base',
-					value: this.sheet.defenses.currentResolve ?? 0,
-					tags: ['resolve'],
-				}
-			);
-		}
-		if (this.sheet.castingStats.arcaneAttack != null) {
-			baseAttributes.push(
-				{
-					name: 'arcane',
-					type: 'base',
-					value: this.profToLevel(this.sheet.castingStats.arcaneAttack ?? 0),
-					tags: ['arcane'],
-				},
-				{
-					name: 'arcaneAttack',
-					type: 'base',
-					value: this.profToLevel(this.sheet.castingStats.arcaneAttack ?? 0),
-					tags: ['arcaneAttack'],
-				},
-				{
-					name: 'arcaneSpellAttack',
-					type: 'base',
-					value: this.profToLevel(this.sheet.castingStats.arcaneAttack ?? 0),
-					tags: ['arcaneSpellAttack'],
-				}
-			);
-		}
-		if (this.sheet.castingStats.divineAttack != null) {
-			baseAttributes.push(
-				{
-					name: 'divine',
-					type: 'base',
-					value: this.profToLevel(this.sheet.castingStats.divineAttack ?? 0),
-					tags: ['divine'],
-				},
-				{
-					name: 'divineAttack',
-					type: 'base',
-					value: this.profToLevel(this.sheet.castingStats.divineAttack ?? 0),
-					tags: ['divineAttack'],
-				},
-				{
-					name: 'divineSpellAttack',
-					type: 'base',
-					value: this.profToLevel(this.sheet.castingStats.divineAttack ?? 0),
-					tags: ['divineSpellAttack'],
-				}
-			);
-		}
-		if (this.sheet.castingStats.primalAttack != null) {
-			baseAttributes.push(
-				{
-					name: 'primal',
-					type: 'base',
-					value: this.profToLevel(this.sheet.castingStats.primalAttack ?? 0),
-					tags: ['primal'],
-				},
-				{
-					name: 'primalAttack',
-					type: 'base',
-					value: this.profToLevel(this.sheet.castingStats.primalAttack ?? 0),
-					tags: ['primalAttack'],
-				},
-				{
-					name: 'primalSpellAttack',
-					type: 'base',
-					value: this.profToLevel(this.sheet.castingStats.primalAttack ?? 0),
-					tags: ['primalSpellAttack'],
-				}
-			);
-		}
-		if (this.sheet.castingStats.occultAttack != null) {
-			baseAttributes.push(
-				{
-					name: 'occult',
-					type: 'base',
-					value: this.profToLevel(this.sheet.castingStats.occultAttack ?? 0),
-					tags: ['occult'],
-				},
-				{
-					name: 'occultAttack',
-					type: 'base',
-					value: this.profToLevel(this.sheet.castingStats.occultAttack ?? 0),
-					tags: ['occultAttack'],
-				},
-				{
-					name: 'occultSpellAttack',
-					type: 'base',
-					value: this.profToLevel(this.sheet.castingStats.occultAttack ?? 0),
-					tags: ['occultSpellAttack'],
-				}
-			);
-		}
-		if (this.sheet.castingStats.arcaneDC != null) {
-			baseAttributes.push(
-				{
-					name: 'arcaneDC',
-					type: 'base',
-					value: this.profToLevel(this.sheet.castingStats.arcaneDC ?? 0),
-					tags: ['arcaneDC'],
-				},
-				{
-					name: 'arcaneSpellDC',
-					type: 'base',
-					value: this.profToLevel(this.sheet.castingStats.arcaneDC ?? 0),
-					tags: ['arcaneSpellDC'],
-				}
-			);
-		}
-		if (this.sheet.castingStats.divineDC != null) {
-			baseAttributes.push(
-				{
-					name: 'divineDC',
-					type: 'base',
-					value: this.profToLevel(this.sheet.castingStats.divineDC ?? 0),
-					tags: ['divineDC'],
-				},
-				{
-					name: 'divineSpellDC',
-					type: 'base',
-					value: this.profToLevel(this.sheet.castingStats.divineDC ?? 0),
-					tags: ['divineSpellDC'],
-				}
-			);
-		}
-		if (this.sheet.castingStats.primalDC != null) {
-			baseAttributes.push(
-				{
-					name: 'primalDC',
-					type: 'base',
-					value: this.profToLevel(this.sheet.castingStats.primalDC ?? 0),
-					tags: ['primalDC'],
-				},
-				{
-					name: 'primalSpellDC',
-					type: 'base',
-					value: this.profToLevel(this.sheet.castingStats.primalDC ?? 0),
-					tags: ['primalSpellDC'],
-				}
-			);
-		}
-		if (this.sheet.castingStats.occultDC != null) {
-			baseAttributes.push(
-				{
-					name: 'occultDC',
-					type: 'base',
-					value: this.profToLevel(this.sheet.castingStats.occultDC ?? 0),
-					tags: ['occultDC'],
-				},
-				{
-					name: 'occultSpellDC',
-					type: 'base',
-					value: this.profToLevel(this.sheet.castingStats.occultDC ?? 0),
-					tags: ['occultSpellDC'],
-				}
-			);
-		}
-		if (this.sheet.offense.simpleProfMod) {
-			baseAttributes.push(
-				{
-					name: 'simpleProfMod',
-					type: 'base',
-					value: this.profToLevel(this.sheet.offense.simpleProfMod ?? 0),
-					tags: ['simpleProfMod'],
-				},
-				{
-					name: 'simple',
-					type: 'base',
-					value: this.profToLevel(this.sheet.offense.simpleProfMod ?? 0),
-					tags: ['simple'],
-				},
-				{
-					name: 'simpleWeapon',
-					type: 'base',
-					value: this.profToLevel(this.sheet.offense.simpleProfMod ?? 0),
-					tags: ['simpleWeapon'],
-				},
-				{
-					name: 'simpleAttack',
-					type: 'base',
-					value: this.profToLevel(this.sheet.offense.simpleProfMod ?? 0),
-					tags: ['simpleAttack'],
-				}
-			);
-		}
-		if (this.sheet.offense.martialProfMod) {
-			baseAttributes.push(
-				{
-					name: 'martialProfMod',
-					type: 'base',
-					value: this.profToLevel(this.sheet.offense.martialProfMod ?? 0),
-					tags: ['martialProfMod'],
-				},
-				{
-					name: 'martial',
-					type: 'base',
-					value: this.profToLevel(this.sheet.offense.martialProfMod ?? 0),
-					tags: ['martial'],
-				},
-				{
-					name: 'martialWeapon',
-					type: 'base',
-					value: this.profToLevel(this.sheet.offense.martialProfMod ?? 0),
-					tags: ['martialWeapon'],
-				},
-				{
-					name: 'martialAttack',
-					type: 'base',
-					value: this.profToLevel(this.sheet.offense.martialProfMod ?? 0),
-					tags: ['martialAttack'],
-				}
-			);
-		}
-		if (this.sheet.offense.unarmedProfMod) {
-			baseAttributes.push(
-				{
-					name: 'unarmedProfMod',
-					type: 'base',
-					value: this.profToLevel(this.sheet.offense.unarmedProfMod ?? 0),
-					tags: ['unarmedProfMod'],
-				},
-				{
-					name: 'unarmed',
-					type: 'base',
-					value: this.profToLevel(this.sheet.offense.unarmedProfMod ?? 0),
-					tags: ['unarmed'],
-				},
-				{
-					name: 'unarmedWeapon',
-					type: 'base',
-					value: this.profToLevel(this.sheet.offense.unarmedProfMod ?? 0),
-					tags: ['unarmedWeapon'],
-				},
-				{
-					name: 'unarmedAttack',
-					type: 'base',
-					value: this.profToLevel(this.sheet.offense.unarmedProfMod ?? 0),
-					tags: ['unarmedAttack'],
-				}
-			);
-		}
-		if (this.sheet.offense.advancedProfMod) {
-			baseAttributes.push(
-				{
-					name: 'advancedProfMod',
-					type: 'base',
-					value: this.profToLevel(this.sheet.offense.advancedProfMod ?? 0),
-					tags: ['advancedProfMod'],
-				},
-				{
-					name: 'advanced',
-					type: 'base',
-					value: this.profToLevel(this.sheet.offense.advancedProfMod ?? 0),
-					tags: ['advanced'],
-				},
-				{
-					name: 'advancedWeapon',
-					type: 'base',
-					value: this.profToLevel(this.sheet.offense.advancedProfMod ?? 0),
-					tags: ['advancedWeapon'],
-				},
-				{
-					name: 'advancedAttack',
-					type: 'base',
-					value: this.profToLevel(this.sheet.offense.advancedProfMod ?? 0),
-					tags: ['advancedAttack'],
-				}
-			);
-		}
-
-		const lores = this.sheet.skills.lores.map(lore => ({
-			name: lore.name + ' lore',
-			type: 'skill',
-			value: lore.bonus ?? 0,
-			tags: ['skill', lore.name, 'intelligence'],
-		}));
-		const nonLoreSkills: Character['attributes'] = [];
-		for (const skillName of literalKeys(this.sheet.skills)) {
-			if (skillName === 'lores') continue;
-			const skillValue = this.sheet.skills[skillName];
-			nonLoreSkills.push({
-				name: skillName,
-				type: 'skill',
-				value: skillValue ?? 0,
-				tags: ['skill', skillName, Creature.attributeAbilityMap[skillName]],
-			});
-		}
-		const abilities: Character['attributes'] = [];
-		for (const abilityName in Object.keys(this.sheet.abilities)) {
-			abilities.push({
-				name: abilityName,
-				type: 'ability',
-				value: this.mods[abilityName],
-				tags: ['ability', abilityName],
-			});
-			abilities.push({
-				name: abilityName.slice(0, 3),
-				type: 'ability',
-				value: this.mods[abilityName],
-				tags: ['ability', abilityName],
-			});
-		}
-		const saves: Character['attributes'] = [];
-		for (const saveName of literalKeys(this.sheet.saves)) {
-			saves.push({
-				name: saveName,
-				type: 'save',
-				value: this.sheet.saves[saveName] ?? 0,
-				tags: ['save', saveName],
-			});
-		}
-		saves.push(
-			{
-				name: 'fort',
-				type: 'save',
-				value: this.sheet.saves.fortitude ?? 0,
-				tags: ['save', 'fortitude', 'constitution'],
-			},
-			{
-				name: 'ref',
-				type: 'save',
-				value: this.sheet.saves.reflex ?? 0,
-				tags: ['save', 'reflex', 'dexterity'],
-			}
-		);
-		return [...baseAttributes, ...lores, ...saves, ...nonLoreSkills, ...abilities];
+	public get attributes() {
+		return AttributeUtils.getAttributes(this);
 	}
 
 	public static preserveSheetTrackerValues(sheet: Sheet, updateFrom?: Sheet): Sheet {
 		if (updateFrom) {
-			sheet.general.currentHeroPoints =
-				updateFrom?.general?.currentHeroPoints ?? sheet.general.currentHeroPoints;
-			sheet.general.currentFocusPoints =
-				updateFrom?.general?.currentFocusPoints ?? sheet.general.currentFocusPoints;
-
-			sheet.defenses.currentHp = updateFrom?.defenses?.currentHp ?? sheet.defenses.currentHp;
-			sheet.defenses.currentResolve =
-				updateFrom?.defenses?.currentResolve ?? sheet.defenses.currentResolve;
-			sheet.defenses.currentStamina =
-				updateFrom?.defenses?.currentStamina ?? sheet.defenses.currentStamina;
-			sheet.defenses.tempHp = updateFrom?.defenses?.tempHp ?? sheet.defenses.tempHp;
+			let baseCounterKey: SheetBaseCounterKeys;
+			for (baseCounterKey in sheet.baseCounters) {
+				sheet.baseCounters[baseCounterKey].current =
+					updateFrom.baseCounters[baseCounterKey].current ??
+					sheet.baseCounters[baseCounterKey].current;
+			}
 		}
 		return sheet;
 	}
 
-	public static get attributeAbilityMap(): { [skillName: string]: string } {
-		return {
-			acrobatics: 'dexterity',
-			arcana: 'intelligence',
-			athletics: 'strength',
-			crafting: 'intelligence',
-			deception: 'charisma',
-			diplomacy: 'charisma',
-			intimidation: 'charisma',
-			medicine: 'wisdom',
-			nature: 'wisdom',
-			occultism: 'intelligence',
-			performance: 'charisma',
-			religion: 'wisdom',
-			society: 'intelligence',
-			stealth: 'dexterity',
-			survival: 'wisdom',
-			thievery: 'dexterity',
-			perception: 'wisdom',
-
-			fortitude: 'constitution',
-			reflex: 'dexterity',
-			will: 'wisdom',
-
-			strength: 'strength',
-			dexterity: 'dexterity',
-			constitution: 'constitution',
-			intelligence: 'intelligence',
-			wisdom: 'wisdom',
-			charisma: 'charisma',
-		};
-	}
-
 	public static fromDefault(sheetOverrides: Partial<Sheet> = {}): Creature {
-		const sheet = _.defaults(SheetUtils.defaultSheet, sheetOverrides);
+		const sheet = _.defaults(SheetProperties.defaultSheet, sheetOverrides);
 		return new Creature(sheet);
 	}
 
 	public static fromModelWithSheet(initActor: ModelWithSheet): Creature {
 		return new Creature(initActor.sheet as Sheet, initActor.name);
-	}
-
-	public static fromZCharacter(character: Character): Creature {
-		let sheet = { ...character.sheet };
-		sheet.actions = [...(sheet.actions ?? []), ...character.actions];
-		sheet.modifiers = [...(sheet.modifiers ?? []), ...character.modifiers];
-		sheet.rollMacros = [...(sheet.rollMacros ?? []), ...character.rollMacros];
-		return new Creature(sheet);
 	}
 
 	public static fromCharacter(character: Character): Creature {
@@ -1438,8 +923,8 @@ export class Creature {
 	}
 
 	public static fromBestiaryEntry(
-		bestiaryEntry: CreatureStatBlock,
-		fluffEntry: CreatureFluff,
+		bestiaryEntry: BestiaryCreature,
+		fluffEntry: BestiaryCreatureFluff,
 		options: { useStamina?: boolean; template?: string; customName?: string } = {
 			useStamina: false,
 			template: '',

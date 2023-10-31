@@ -15,7 +15,7 @@ import { RateLimiter } from 'discord.js-rate-limiter';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import _ from 'lodash';
-import { Initiative } from '../../../services/kobold/models/index.js';
+import { Initiative, InitiativeModel } from '../../../services/kobold/index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import L from '../../../i18n/i18n-node.js';
 import { InitOptions } from './init-command-options.js';
@@ -69,7 +69,7 @@ export class InitJumpToSubCommand implements Command {
 		const currentTurn = initBuilder.getCurrentTurnInfo();
 		const targetTurn = initBuilder.getJumpToTurnChanges(targetCharacterName);
 
-		const updatedInitiative = await Initiative.query()
+		const updatedInitiative = await InitiativeModel.query()
 			.patchAndFetchById(initBuilder.init.id, {
 				currentTurnGroupId: targetTurn.currentTurnGroupId,
 			})

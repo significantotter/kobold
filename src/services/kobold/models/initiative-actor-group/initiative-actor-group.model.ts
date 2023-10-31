@@ -1,30 +1,32 @@
-import type { InitiativeActorGroup as InitiativeActorGroupType } from './initiative-actor-group.schema.js';
+import type { InitiativeActorGroup } from '../../schemas/initiative-actor-group.zod.js';
 import { BaseModel } from '../../lib/base-model.js';
-import InitiativeActorGroupSchema from './initiative-actor-group.schema.json' assert { type: 'json' };
-import Objection, { Model, RelationMappings } from 'objection';
-import { Initiative } from '../initiative/initiative.model.js';
-import { InitiativeActor } from '../initiative-actor/initiative-actor.model.js';
-import { removeRequired } from '../../lib/helpers.js';
+import { Model, RelationMappings } from 'objection';
+import { InitiativeModel } from '../initiative/initiative.model.js';
+import { InitiativeActorModel } from '../initiative-actor/initiative-actor.model.js';
+import { zInitiativeActorGroup } from '../../schemas/initiative-actor-group.zod.js';
+import { ZodValidator } from '../../lib/zod-validator.js';
 
-export interface InitiativeActorGroup extends InitiativeActorGroupType {
-	initiative?: Initiative;
-	actors?: InitiativeActor[];
+export interface InitiativeActorGroupModel extends InitiativeActorGroup {
+	initiative?: InitiativeModel;
+	actors?: InitiativeActorModel[];
 }
-export class InitiativeActorGroup extends BaseModel {
+export class InitiativeActorGroupModel extends BaseModel {
 	static idColumn: string | string[] = 'id';
 	static get tableName(): string {
 		return 'initiativeActorGroup';
 	}
 
-	static get jsonSchema(): Objection.JSONSchema {
-		return removeRequired(InitiativeActorGroupSchema as unknown as Objection.JSONSchema);
+	static createValidator() {
+		return new ZodValidator();
 	}
+
+	public $z = zInitiativeActorGroup;
 
 	static get relationMappings(): RelationMappings {
 		return {
 			initiative: {
 				relation: Model.BelongsToOneRelation,
-				modelClass: Initiative,
+				modelClass: InitiativeModel,
 				join: {
 					from: 'initiativeActorGroup.initiativeId',
 					to: 'initiative.id',
@@ -32,7 +34,7 @@ export class InitiativeActorGroup extends BaseModel {
 			},
 			actors: {
 				relation: Model.HasManyRelation,
-				modelClass: InitiativeActor,
+				modelClass: InitiativeActorModel,
 				join: {
 					from: 'initiativeActorGroup.id',
 					to: 'initiativeActor.initiativeActorGroupId',

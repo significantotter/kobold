@@ -1,13 +1,11 @@
-import { Character } from './../index.js';
-import type { GuildDefaultCharacter as GuildDefaultCharacterType } from './guild-default-character.schema.js';
-import { JSONSchema7 } from 'json-schema';
+import type { GuildDefaultCharacter } from '../../schemas/guild-default-character.zod.js';
 import { BaseModel } from '../../lib/base-model.js';
-import GuildDefaultCharacterSchema from './guild-default-character.schema.json' assert { type: 'json' };
-import Objection from 'objection';
-import { removeRequired } from '../../lib/helpers.js';
+import { zGuildDefaultCharacter } from '../../schemas/guild-default-character.zod.js';
+import { ZodValidator } from '../../lib/zod-validator.js';
+import { CharacterModel } from '../character/character.model.js';
 
-export interface GuildDefaultCharacter extends GuildDefaultCharacterType {}
-export class GuildDefaultCharacter extends BaseModel {
+export interface GuildDefaultCharacterModel extends GuildDefaultCharacter {}
+export class GuildDefaultCharacterModel extends BaseModel {
 	static get idColumn() {
 		return ['guildId', 'userId'];
 	}
@@ -16,16 +14,18 @@ export class GuildDefaultCharacter extends BaseModel {
 		return 'guildDefaultCharacter';
 	}
 
-	static get jsonSchema(): Objection.JSONSchema {
-		return removeRequired(GuildDefaultCharacterSchema as unknown as Objection.JSONSchema);
+	static createValidator() {
+		return new ZodValidator();
 	}
+
+	public $z = zGuildDefaultCharacter;
 
 	static get RelationMappings() {
 		return {
 			...super.relationMappings,
 			GuildDefaultCharacter: {
 				relation: BaseModel.HasOneRelation,
-				modelClass: Character,
+				modelClass: CharacterModel,
 				join: {
 					from: 'guildDefaultCharacter.characterId',
 					to: 'character.id',

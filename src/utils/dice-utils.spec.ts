@@ -1,8 +1,10 @@
 import L from '../i18n/i18n-node.js';
+import { Attribute } from '../services/kobold/index.js';
 import { CharacterFactory } from './../services/kobold/models/character/character.factory.js';
 import { Creature } from './creature.js';
 import { DiceUtils } from './dice-utils.js';
 import { RollBuilder } from './roll-builder.js';
+import { SheetProperties } from './sheet/sheet-properties.js';
 describe('Dice Utils', function () {
 	describe('buildDiceExpression', function () {
 		test('builds a dice expression using a base expression, a bonus, and a modifier', function () {
@@ -143,7 +145,7 @@ describe('RollBuilder', function () {
 	test('parses an attribute', function () {
 		const character = CharacterFactory.build({
 			sheet: {
-				abilities: {
+				intProperties: {
 					strength: 22,
 				},
 			},
@@ -158,11 +160,10 @@ describe('RollBuilder', function () {
 	test('parses an attribute using a shorthand value', function () {
 		const character = CharacterFactory.build({
 			sheet: {
-				abilities: {
+				intProperties: {
 					strength: 15,
 				},
 			},
-			customAttributes: [],
 		});
 		expect(DiceUtils.parseAttribute('[str]', Creature.fromCharacter(character))).toStrictEqual([
 			2,
@@ -172,7 +173,7 @@ describe('RollBuilder', function () {
 	test('parses all attributes in a dice expression', function () {
 		const character = CharacterFactory.build({
 			sheet: {
-				abilities: {
+				intProperties: {
 					strength: 15,
 				},
 			},
@@ -183,25 +184,27 @@ describe('RollBuilder', function () {
 	});
 	test('rolls dice using parsed character attributes', function () {
 		const character = CharacterFactory.build({
-			attributes: [
-				{
-					name: 'base',
-					type: 'base',
-					value: 8,
-					tags: [],
-				},
-			],
-			customAttributes: [
-				{
-					name: 'custom',
-					type: 'base',
-					value: 4,
-					tags: [],
-				},
-			],
+			sheet: SheetProperties.defaultSheet,
 		});
+		const extraAttributes: Attribute[] = [
+			{
+				name: 'base',
+				type: 'base',
+				value: 8,
+				tags: [],
+				aliases: ['base'],
+			},
+			{
+				name: 'custom',
+				type: 'base',
+				value: 4,
+				tags: [],
+				aliases: ['custom'],
+			},
+		];
 		const rollBuilder = new RollBuilder({ character });
 		rollBuilder.addRoll({
+			extraAttributes,
 			rollExpression: '[custom]d20 + [base] - [custom]',
 			rollTitle: 'attribute roll',
 		});

@@ -5,7 +5,7 @@ import {
 	SheetAdjustment,
 	SheetAdjustmentOperationEnum,
 	SheetAdjustmentTypeEnum,
-} from '../../services/kobold/models/index.js';
+} from '../../services/kobold/index.js';
 import { KoboldError } from '../KoboldError.js';
 import {
 	SheetAdditionalSkillAdjuster,
@@ -568,6 +568,7 @@ describe('SheetAdditionalSkillAdjuster', () => {
 				proficiency: 6,
 				bonus: 6,
 				ability: null,
+				note: null,
 			},
 		];
 		adjuster = new SheetAdditionalSkillAdjuster(sheet.additionalSkills);

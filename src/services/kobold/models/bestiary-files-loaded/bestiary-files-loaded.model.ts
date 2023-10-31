@@ -1,17 +1,16 @@
-import type { BestiaryFilesLoaded as BestiaryFilesLoadedType } from './bestiary-files-loaded.schema.js';
-import { JSONSchema7 } from 'json-schema';
+import type { BestiaryFilesLoaded } from '../../schemas/bestiary-files-loaded.zod.js';
 import { BaseModel } from '../../lib/base-model.js';
-import BestiaryFilesLoadedSchema from './bestiary-files-loaded.schema.json' assert { type: 'json' };
-import Objection from 'objection';
-import { removeRequired } from '../../lib/helpers.js';
+import { zBestiaryFilesLoaded } from '../../schemas/bestiary-files-loaded.zod.js';
+import { ZodValidator } from '../../lib/zod-validator.js';
 
-export interface BestiaryFilesLoaded extends BestiaryFilesLoadedType {}
-export class BestiaryFilesLoaded extends BaseModel {
+export interface BestiaryFilesLoadedModel extends BestiaryFilesLoaded {}
+export class BestiaryFilesLoadedModel extends BaseModel {
 	static get tableName(): string {
 		return 'bestiaryFilesLoaded';
 	}
-
-	static get jsonSchema(): Objection.JSONSchema {
-		return removeRequired(BestiaryFilesLoadedSchema as unknown as Objection.JSONSchema);
+	static createValidator() {
+		return new ZodValidator();
 	}
+
+	public $z = zBestiaryFilesLoaded;
 }

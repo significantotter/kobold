@@ -11,7 +11,7 @@ import { RateLimiter } from 'discord.js-rate-limiter';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { InitiativeUtils } from '../../../utils/initiative-utils.js';
-import { Initiative } from '../../../services/kobold/models/index.js';
+import { Initiative, InitiativeModel } from '../../../services/kobold/index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import L from '../../../i18n/i18n-node.js';
 import { CollectorUtils } from '../../../utils/collector-utils.js';
@@ -104,7 +104,7 @@ export class InitEndSubCommand implements Command {
 				components: [],
 			});
 			try {
-				await Initiative.query().deleteById(currentInit.id);
+				await InitiativeModel.query().deleteById(currentInit.id);
 				await InteractionUtils.send(intr, L.en.commands.init.end.interactions.success());
 				return;
 			} catch (err) {

@@ -69,7 +69,7 @@ export class RollPerceptionSubCommand implements Command {
 		rollBuilder.addRoll({
 			rollExpression: DiceUtils.buildDiceExpression(
 				'd20',
-				String(creature.sheet.general.perception),
+				String(creature.statBonuses.perception),
 				modifierExpression
 			),
 			rollTitle: '',

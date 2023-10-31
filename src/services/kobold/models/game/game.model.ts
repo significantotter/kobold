@@ -1,22 +1,22 @@
-import type { Game as GameType } from './game.schema.js';
-import { JSONSchema7 } from 'json-schema';
 import { BaseModel } from '../../lib/base-model.js';
-import GameSchema from './game.schema.json' assert { type: 'json' };
-import Objection, { Model, RelationMappings } from 'objection';
-import { Character } from '../character/character.model.js';
-import { removeRequired } from '../../lib/helpers.js';
+import { Model, RelationMappings } from 'objection';
+import { CharacterModel } from '../character/character.model.js';
+import { Game, zGame } from '../../schemas/game.zod.js';
+import { ZodValidator } from '../../lib/zod-validator.js';
 
-export interface Game extends GameType {
-	characters: Character[];
+export interface GameModel extends Game {
+	characters: CharacterModel[];
 }
-export class Game extends BaseModel {
+export class GameModel extends BaseModel {
 	static get tableName(): string {
 		return 'game';
 	}
 
-	static get jsonSchema(): Objection.JSONSchema {
-		return removeRequired(GameSchema as unknown as Objection.JSONSchema);
+	static createValidator() {
+		return new ZodValidator();
 	}
+
+	public $z = zGame;
 
 	static async queryWhereUserHasCharacter(userId: string, guildId: string | null) {
 		const options = await this.query()
@@ -43,7 +43,7 @@ export class Game extends BaseModel {
 		return {
 			characters: {
 				relation: Model.ManyToManyRelation,
-				modelClass: Character,
+				modelClass: CharacterModel,
 				join: {
 					from: 'game.id',
 					through: {

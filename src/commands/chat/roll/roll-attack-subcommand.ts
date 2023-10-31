@@ -21,7 +21,12 @@ import L from '../../../i18n/i18n-node.js';
 import { Creature } from '../../../utils/creature.js';
 import { InitOptions } from '../init/init-command-options.js';
 import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
-import { Character, InitiativeActor } from '../../../services/kobold/models/index.js';
+import {
+	Character,
+	CharacterModel,
+	InitiativeActor,
+	InitiativeActorModel,
+} from '../../../services/kobold/index.js';
 import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
 import { GameUtils } from '../../../utils/game-utils.js';
 import { SettingsUtils } from '../../../utils/settings-utils.js';
@@ -106,7 +111,7 @@ export class RollAttackSubCommand implements Command {
 		const creature = Creature.fromCharacter(activeCharacter);
 
 		let targetCreature: Creature | undefined;
-		let targetActor: InitiativeActor | Character | null;
+		let targetActor: InitiativeActorModel | CharacterModel | null;
 
 		if (
 			targetInitActorName &&

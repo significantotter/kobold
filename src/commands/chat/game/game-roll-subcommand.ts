@@ -21,7 +21,7 @@ import L from '../../../i18n/i18n-node.js';
 import { GameUtils } from '../../../utils/game-utils.js';
 import _ from 'lodash';
 import { GameOptions } from './game-command-options.js';
-import { ModelWithSheet } from '../../../services/kobold/models/index.js';
+import { ModelWithSheet } from '../../../services/kobold/index.js';
 import { EmbedUtils, KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { Creature } from '../../../utils/creature.js';
 import { InitOptions } from '../init/init-command-options.js';
@@ -143,7 +143,7 @@ export class GameRollSubCommand implements Command {
 				targetCharacterName &&
 				targetCharacterName.toLocaleLowerCase().trim().length > 0 &&
 				targetCharacterName.toLocaleLowerCase().trim() !==
-					character.sheet.info.name.toLocaleLowerCase().trim()
+					character.sheet.staticInfo.name.toLocaleLowerCase().trim()
 			) {
 				continue;
 			}
@@ -166,11 +166,11 @@ export class GameRollSubCommand implements Command {
 					targetCreature
 				);
 
-				const builtRoll = actionRoller.buildRoll('', targetAction.description, {
+				const builtRoll = actionRoller.buildRoll('', targetAction.description ?? '', {
 					attackModifierExpression: diceExpression,
 					damageModifierExpression: '',
 					title: `${getEmoji(intr, targetAction.actionCost)} ${
-						creature.sheet.info.name
+						creature.sheet.staticInfo.name
 					} used ${targetAction.name}!`,
 				});
 

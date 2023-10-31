@@ -7,7 +7,7 @@ import {
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 
-import { Character } from '../../../services/kobold/models/index.js';
+import { Character, CharacterModel } from '../../../services/kobold/index.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
@@ -49,7 +49,7 @@ export class RollMacroCreateSubCommand implements Command {
 				intr,
 				LL.commands.rollMacro.create.interactions.alreadyExists({
 					macroName: name,
-					characterName: activeCharacter.sheet.info.name,
+					characterName: activeCharacter.sheet.staticInfo.name,
 				})
 			);
 			return;
@@ -67,7 +67,7 @@ export class RollMacroCreateSubCommand implements Command {
 			return;
 		}
 
-		await Character.query().updateAndFetchById(activeCharacter.id, {
+		await CharacterModel.query().updateAndFetchById(activeCharacter.id, {
 			rollMacros: [
 				...activeCharacter.rollMacros,
 				{
@@ -82,7 +82,7 @@ export class RollMacroCreateSubCommand implements Command {
 			intr,
 			LL.commands.rollMacro.create.interactions.created({
 				macroName: name,
-				characterName: activeCharacter.sheet.info.name,
+				characterName: activeCharacter.sheet.staticInfo.name,
 			})
 		);
 		return;

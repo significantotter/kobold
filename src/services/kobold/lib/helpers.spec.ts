@@ -1,4 +1,4 @@
-import { Modifier } from '../models/index.js';
+import { Attribute, Modifier, SheetAdjustmentTypeEnum } from '../models/index.js';
 import { isModifierValidForTags, parseBonusesForTagsFromModifiers } from './helpers.js';
 
 describe('isModifierValidForTags', () => {
@@ -6,7 +6,7 @@ describe('isModifierValidForTags', () => {
 		const result = isModifierValidForTags(
 			{
 				name: 'test',
-				type: 'status',
+				type: SheetAdjustmentTypeEnum.status,
 				value: '2',
 				targetTags: 'attack and (fire or bludgeoning)',
 				isActive: false,
@@ -22,7 +22,7 @@ describe('isModifierValidForTags', () => {
 		const result = isModifierValidForTags(
 			{
 				name: 'test',
-				type: 'status',
+				type: SheetAdjustmentTypeEnum.status,
 				value: '2',
 				targetTags: 'attack and (fire or bludgeoning)',
 				isActive: false,
@@ -38,7 +38,7 @@ describe('isModifierValidForTags', () => {
 		const result = isModifierValidForTags(
 			{
 				name: 'test',
-				type: 'status',
+				type: SheetAdjustmentTypeEnum.status,
 				value: '2',
 				targetTags:
 					'attack and (fire or bludgeoning) or __foo not in (3, 6) or abs(max(__foo, 6)) == ceil(min(7, 4.6)) or floor(log(10)) < 5 or round(random()) == sqrt(4)',
@@ -49,7 +49,8 @@ describe('isModifierValidForTags', () => {
 			[
 				{
 					name: 'foo',
-					type: 'foo',
+					aliases: ['foo'],
+					type: SheetAdjustmentTypeEnum.circumstance,
 					value: 5,
 					tags: ['foo'],
 				},
@@ -63,7 +64,7 @@ describe('isModifierValidForTags', () => {
 			isModifierValidForTags(
 				{
 					name: 'test',
-					type: 'status',
+					type: SheetAdjustmentTypeEnum.status,
 					value: '2',
 					targetTags: '__foo = 5',
 					isActive: false,
@@ -73,7 +74,8 @@ describe('isModifierValidForTags', () => {
 				[
 					{
 						name: 'foo',
-						type: 'foo',
+						aliases: ['foo'],
+						type: SheetAdjustmentTypeEnum.circumstance,
 						value: 5,
 						tags: ['foo'],
 					},
@@ -90,7 +92,7 @@ describe('parseBonusesForTagsFromModifiers', () => {
 			{
 				name: 'statusBonus',
 				isActive: true,
-				type: 'status',
+				type: SheetAdjustmentTypeEnum.status,
 				value: '2',
 				targetTags: 'attack and (fire or bludgeoning)',
 
@@ -100,7 +102,7 @@ describe('parseBonusesForTagsFromModifiers', () => {
 			{
 				name: 'statusBonus2',
 				isActive: true,
-				type: 'status',
+				type: SheetAdjustmentTypeEnum.status,
 				value: '1',
 				targetTags: 'attack and (fire or bludgeoning)',
 
@@ -110,7 +112,7 @@ describe('parseBonusesForTagsFromModifiers', () => {
 			{
 				name: 'statusBonus3',
 				isActive: true,
-				type: 'status',
+				type: SheetAdjustmentTypeEnum.status,
 				value: '-1',
 				targetTags: 'attack and (fire or bludgeoning)',
 
@@ -120,7 +122,7 @@ describe('parseBonusesForTagsFromModifiers', () => {
 			{
 				name: 'statusBonus4',
 				isActive: true,
-				type: 'status',
+				type: SheetAdjustmentTypeEnum.status,
 				value: '-2',
 				targetTags: 'attack and (fire or bludgeoning)',
 
@@ -130,7 +132,7 @@ describe('parseBonusesForTagsFromModifiers', () => {
 			{
 				name: 'untypedBonus',
 				isActive: true,
-				type: 'untyped',
+				type: SheetAdjustmentTypeEnum.untyped,
 				value: '2',
 				targetTags: 'attack and (fire or bludgeoning)',
 
@@ -140,7 +142,7 @@ describe('parseBonusesForTagsFromModifiers', () => {
 			{
 				name: 'untypedBonus2',
 				isActive: true,
-				type: 'untyped',
+				type: SheetAdjustmentTypeEnum.untyped,
 				value: '1',
 				targetTags: 'attack and (fire or bludgeoning)',
 
@@ -150,7 +152,7 @@ describe('parseBonusesForTagsFromModifiers', () => {
 			{
 				name: 'untypedBonus3',
 				isActive: true,
-				type: 'untyped',
+				type: SheetAdjustmentTypeEnum.untyped,
 				value: '-1',
 				targetTags: 'attack and (fire or bludgeoning)',
 
@@ -160,7 +162,7 @@ describe('parseBonusesForTagsFromModifiers', () => {
 			{
 				name: 'untypedBonus4',
 				isActive: true,
-				type: 'untyped',
+				type: SheetAdjustmentTypeEnum.untyped,
 				value: '-2',
 				targetTags: 'attack and (fire or bludgeoning)',
 
@@ -170,7 +172,7 @@ describe('parseBonusesForTagsFromModifiers', () => {
 			{
 				name: 'fooBonus',
 				isActive: true,
-				type: 'foo',
+				type: SheetAdjustmentTypeEnum.circumstance,
 				value: '2',
 				targetTags: 'attack and (fire or bludgeoning)',
 
@@ -180,7 +182,7 @@ describe('parseBonusesForTagsFromModifiers', () => {
 			{
 				name: 'fooBonus2',
 				isActive: true,
-				type: 'foo',
+				type: SheetAdjustmentTypeEnum.circumstance,
 				value: '1',
 				targetTags: 'attack and (fire or bludgeoning)',
 
@@ -190,7 +192,7 @@ describe('parseBonusesForTagsFromModifiers', () => {
 			{
 				name: 'fooBonus3',
 				isActive: true,
-				type: 'foo',
+				type: SheetAdjustmentTypeEnum.circumstance,
 				value: '-1',
 				targetTags: 'attack and (fire or bludgeoning)',
 
@@ -200,7 +202,7 @@ describe('parseBonusesForTagsFromModifiers', () => {
 			{
 				name: 'foo bonus 4',
 				isActive: true,
-				type: 'foo',
+				type: SheetAdjustmentTypeEnum.circumstance,
 				value: '-2',
 				targetTags: 'attack and (fire or bludgeoning)',
 
@@ -210,7 +212,7 @@ describe('parseBonusesForTagsFromModifiers', () => {
 			{
 				name: 'unmatchingBonus',
 				isActive: true,
-				type: 'foo',
+				type: SheetAdjustmentTypeEnum.circumstance,
 				value: '3',
 				targetTags: 'attack and (fire and bludgeoning)',
 
@@ -220,7 +222,7 @@ describe('parseBonusesForTagsFromModifiers', () => {
 			{
 				name: 'unmatchingPenalty',
 				isActive: true,
-				type: 'foo',
+				type: SheetAdjustmentTypeEnum.circumstance,
 				value: '-3',
 				targetTags: 'attack and (fire and bludgeoning)',
 
@@ -230,7 +232,7 @@ describe('parseBonusesForTagsFromModifiers', () => {
 			{
 				name: 'unmatchingUntyped',
 				isActive: true,
-				type: 'foo',
+				type: SheetAdjustmentTypeEnum.circumstance,
 				value: '3',
 				targetTags: 'attack and (fire and bludgeoning)',
 
@@ -240,7 +242,7 @@ describe('parseBonusesForTagsFromModifiers', () => {
 			{
 				name: 'not active',
 				isActive: false,
-				type: 'foo',
+				type: SheetAdjustmentTypeEnum.circumstance,
 				value: '3',
 				targetTags: 'attack and (fire and bludgeoning)',
 
@@ -248,10 +250,11 @@ describe('parseBonusesForTagsFromModifiers', () => {
 				modifierType: 'roll',
 			},
 		];
-		let attributes = [
+		let attributes: Attribute[] = [
 			{
 				name: 'foo',
-				type: 'foo',
+				aliases: ['foo'],
+				type: SheetAdjustmentTypeEnum.circumstance,
 				value: 5,
 				tags: ['foo'],
 			},
@@ -268,7 +271,7 @@ describe('parseBonusesForTagsFromModifiers', () => {
 			foo: {
 				name: 'fooBonus',
 				isActive: true,
-				type: 'foo',
+				type: SheetAdjustmentTypeEnum.circumstance,
 				value: '2',
 				targetTags: 'attack and (fire or bludgeoning)',
 
@@ -279,7 +282,7 @@ describe('parseBonusesForTagsFromModifiers', () => {
 			status: {
 				name: 'statusBonus',
 				isActive: true,
-				type: 'status',
+				type: SheetAdjustmentTypeEnum.status,
 				value: '2',
 				targetTags: 'attack and (fire or bludgeoning)',
 
@@ -291,7 +294,7 @@ describe('parseBonusesForTagsFromModifiers', () => {
 			foo: {
 				name: 'foo bonus 4',
 				isActive: true,
-				type: 'foo',
+				type: SheetAdjustmentTypeEnum.circumstance,
 				value: '-2',
 				targetTags: 'attack and (fire or bludgeoning)',
 
@@ -302,7 +305,7 @@ describe('parseBonusesForTagsFromModifiers', () => {
 			status: {
 				name: 'statusBonus4',
 				isActive: true,
-				type: 'status',
+				type: SheetAdjustmentTypeEnum.status,
 				value: '-2',
 				targetTags: 'attack and (fire or bludgeoning)',
 
@@ -314,7 +317,7 @@ describe('parseBonusesForTagsFromModifiers', () => {
 			{
 				name: 'untypedBonus',
 				isActive: true,
-				type: 'untyped',
+				type: SheetAdjustmentTypeEnum.untyped,
 				value: '2',
 				targetTags: 'attack and (fire or bludgeoning)',
 
@@ -324,7 +327,7 @@ describe('parseBonusesForTagsFromModifiers', () => {
 			{
 				name: 'untypedBonus2',
 				isActive: true,
-				type: 'untyped',
+				type: SheetAdjustmentTypeEnum.untyped,
 				value: '1',
 				targetTags: 'attack and (fire or bludgeoning)',
 
@@ -334,7 +337,7 @@ describe('parseBonusesForTagsFromModifiers', () => {
 			{
 				name: 'untypedBonus3',
 				isActive: true,
-				type: 'untyped',
+				type: SheetAdjustmentTypeEnum.untyped,
 				value: '-1',
 				targetTags: 'attack and (fire or bludgeoning)',
 
@@ -344,7 +347,7 @@ describe('parseBonusesForTagsFromModifiers', () => {
 			{
 				name: 'untypedBonus4',
 				isActive: true,
-				type: 'untyped',
+				type: SheetAdjustmentTypeEnum.untyped,
 				value: '-2',
 				targetTags: 'attack and (fire or bludgeoning)',
 

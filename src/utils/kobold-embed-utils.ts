@@ -6,9 +6,15 @@ import {
 	EmbedBuilder,
 	EmbedData,
 } from 'discord.js';
-import _, { split } from 'lodash';
+import _ from 'lodash';
 import { TranslationFunctions } from '../i18n/i18n-types.js';
-import { Action, Character, Sheet } from '../services/kobold/models/index.js';
+import {
+	Action,
+	Character,
+	Sheet,
+	SheetInfoLists,
+	SheetWeaknessesResistances,
+} from '../services/kobold/index.js';
 import { InitiativeBuilder, TurnData } from './initiative-utils.js';
 import { InteractionUtils } from './interaction-utils.js';
 import { ActionRoller } from './action-roller.js';
@@ -476,7 +482,9 @@ export class EmbedUtils {
 			let saveType = ' DC';
 			for (const roll of action.rolls) {
 				if (roll.type === 'save' || roll.type === 'attack') {
-					saveType = ` ${roll.saveTargetDC ?? roll.targetDC ?? 'ac'}`;
+					saveType = ` ${
+						roll.type === 'save' ? roll.saveTargetDC ?? 'ac' : roll.targetDC ?? 'ac'
+					}`;
 					// add the word DC if we aren't checking vs the AC
 					if (
 						saveType.toLocaleLowerCase() !== ' ac' &&
@@ -532,7 +540,7 @@ export class EmbedUtils {
 			} damage from ${sourceNameOverwrite ?? actionRoller.creature?.name ?? ''}`;
 			if (
 				//turn this back on if we want to hide damage messages when stats are hidden
-				actionRoller.targetCreature?.sheet?.defenses?.currentHp === 0
+				actionRoller.targetCreature?.sheet?.baseCounters?.hp?.current === 0
 			) {
 				message += "\nYip! They're down!";
 			}
@@ -561,9 +569,9 @@ export class EmbedUtils {
 		totalDamageDealt: number;
 		targetCreatureSheet: Sheet;
 		actionName?: string;
-		triggeredWeaknesses?: Sheet['defenses']['weaknesses'];
-		triggeredResistances?: Sheet['defenses']['resistances'];
-		triggeredImmunities?: Sheet['defenses']['immunities'];
+		triggeredWeaknesses?: SheetWeaknessesResistances['weaknesses'];
+		triggeredResistances?: SheetWeaknessesResistances['resistances'];
+		triggeredImmunities?: SheetInfoLists['immunities'];
 	}) {
 		let message = `${targetCreatureName} ${totalDamageDealt < 0 ? 'healed' : 'took'} ${Math.abs(
 			totalDamageDealt
@@ -573,10 +581,10 @@ export class EmbedUtils {
 		if (actionName) message += ` ${actionName ?? 'action'}`;
 		message += '!';
 
-		const currentHp = targetCreatureSheet.defenses.currentHp;
+		const currentHp = targetCreatureSheet.baseCounters.hp.current;
 
 		if (totalDamageDealt < 0) {
-			if (currentHp === targetCreatureSheet.defenses.maxHp) {
+			if (currentHp === targetCreatureSheet.baseCounters.hp.max) {
 				message += " They're now at full health!";
 			}
 		} else if ((initialDamageAmount ?? 0) < 0 && totalDamageDealt === 0) {

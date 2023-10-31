@@ -1,43 +1,28 @@
-export type * from './character/character.zod.js';
 // also export the enums and some other needed values
-export {
-	AbilityEnum,
-	AdjustablePropertyEnum,
-	SheetAdjustmentOperationEnum,
-	SheetAdjustmentTypeEnum,
-	SheetStatKeys,
-	SheetInfoKeys,
-	SheetIntegerKeys,
-	SheetInfoListKeys,
-	SheetBaseCounterKeys,
-	SheetWeaknessesResistancesKeys,
-	StatSubGroupEnum,
-	getDefaultSheet,
-} from './character/character.zod.js';
+export * from './../lib/index.js';
 
 // TODO: purge all non-kobold-service imports within this directory
 
-export { WgToken } from './wg-token/wg-token.model.js';
-export { WgTokenFactory } from './wg-token/wg-token.factory.js';
-export { Character } from './character/character.model.js';
-export { CharacterFactory } from './character/character.factory.js';
-export { GuildDefaultCharacter } from './guild-default-character/guild-default-character.model.js';
-export { GuildDefaultCharacterFactory } from './guild-default-character/guild-default-character.factory.js';
-export { ChannelDefaultCharacter } from './channel-default-character/channel-default-character.model.js';
-export { ChannelDefaultCharacterFactory } from './channel-default-character/channel-default-character.factory.js';
-export { Initiative } from './initiative/initiative.model.js';
-export { InitiativeActor } from './initiative-actor/initiative-actor.model.js';
-export { InitiativeActorGroup } from './initiative-actor-group/initiative-actor-group.model.js';
-export { InitiativeFactory } from './initiative/initiative.factory.js';
-export { InitiativeActorFactory } from './initiative-actor/initiative-actor.factory.js';
-export { InitiativeActorGroupFactory } from './initiative-actor-group/initiative-actor-group.factory.js';
-export { Game } from './game/game.model.js';
-export { GameFactory } from './game/game.factory.js';
-export { BestiaryFilesLoaded } from './bestiary-files-loaded/bestiary-files-loaded.model.js';
-export { Npc } from './npc/npc.model.js';
-export { UserSettings } from './user-settings/user-settings.model.js';
+export * from './wg-token/wg-token.model.js';
+export * from './wg-token/wg-token.factory.js';
+export * from './character/character.model.js';
+export * from './character/character.factory.js';
+export * from './guild-default-character/guild-default-character.model.js';
+export * from './guild-default-character/guild-default-character.factory.js';
+export * from './channel-default-character/channel-default-character.model.js';
+export * from './channel-default-character/channel-default-character.factory.js';
+export * from './initiative/initiative.model.js';
+export * from './initiative-actor/initiative-actor.model.js';
+export * from './initiative-actor-group/initiative-actor-group.model.js';
+export * from './initiative/initiative.factory.js';
+export * from './initiative-actor/initiative-actor.factory.js';
+export * from './initiative-actor-group/initiative-actor-group.factory.js';
+export * from './game/game.model.js';
+export * from './game/game.factory.js';
+export * from './bestiary-files-loaded/bestiary-files-loaded.model.js';
+export * from './npc/npc.model.js';
+export * from './user-settings/user-settings.model.js';
 
-export type { Attribute } from './../lib/shared-schemas/attribute.schema.js';
-export type { ModelWithSheet } from './../lib/thing-with-sheet.js';
+export type * from './../lib/thing-with-sheet.js';
 
-export type { InitWithActorsAndGroups } from './../lib/type-helpers.js';
+export type * from './../lib/type-helpers.js';

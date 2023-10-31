@@ -1,6 +1,6 @@
 import { DiceUtils } from './../../../utils/dice-utils.js';
 import { RollBuilder } from '../../../utils/roll-builder.js';
-import { InitiativeActor } from './../../../services/kobold/models/initiative-actor/initiative-actor.model.js';
+import { InitiativeActorModel } from './../../../services/kobold/models/initiative-actor/initiative-actor.model.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -21,16 +21,17 @@ import { ChatArgs } from '../../../constants/chat-args.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
-import { Npc, Sheet } from '../../../services/kobold/models/index.js';
+import { Npc, NpcModel, Sheet } from '../../../services/kobold/index.js';
 import { Creature } from '../../../utils/creature.js';
 import _ from 'lodash';
 import { InitOptions } from './init-command-options.js';
-import { generateStatOverrides } from '../../../utils/sheet/sheet-import-utils.js';
+import { applyStatOverrides } from '../../../utils/sheet/sheet-import-utils.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
 import { SettingsUtils } from '../../../utils/settings-utils.js';
 import L from '../../../i18n/i18n-node.js';
 import { DeepPartial } from 'fishery';
-import { CreatureFluff } from '../../../services/pf2etools/pf2etools-types.js';
+import { CreatureFluff } from '../../../services/pf2etools/schemas/index-types.js';
+import { SheetProperties } from '../../../utils/sheet/sheet-properties.js';
 
 export class InitAddSubCommand implements Command {
 	public names = [L.en.commands.init.add.name()];
@@ -87,7 +88,7 @@ export class InitAddSubCommand implements Command {
 			.trim()
 			.toLocaleLowerCase();
 
-		let sheet: DeepPartial<Sheet> = {};
+		let sheet = SheetProperties.defaultSheet;
 		let referenceNpcName = null;
 
 		if (targetCreature.toLowerCase().trim() != 'custom npc') {
@@ -101,7 +102,7 @@ export class InitAddSubCommand implements Command {
 				source = matchedSource;
 			}
 			// search for the npc's name case insensitively
-			let npcPromise = Npc.query().whereRaw('name ilike ?', [`%${name ?? ''}%`]);
+			let npcPromise = NpcModel.query().whereRaw('name ilike ?', [`%${name ?? ''}%`]);
 			// if we're targeting a specific source book, add that to the search
 			if (source)
 				npcPromise = npcPromise.andWhereRaw("(data->'source')::TEXT ilike ?", [
@@ -111,7 +112,8 @@ export class InitAddSubCommand implements Command {
 			if (!npcs.length)
 				throw new KoboldError(`Yip! I couldn't find ${fullMatch} in the bestiary!`);
 			// we know there's at least 1, so there will be a match
-			const npc = StringUtils.findClosestInObjectArray(name, npcs, 'name') as Npc;
+			const npc = StringUtils.findClosestInObjectArray(name, npcs, 'name');
+			if (!npc) throw new KoboldError(`Yip! I couldn\'t find  ${fullMatch} in the bestiary!`);
 			const variantData = await npc.fetchVariantDataIfExists();
 			if (!actorName) actorName = (template ? `${_.capitalize(template)} ` : '') + npc.name;
 			const creature = Creature.fromBestiaryEntry(
@@ -128,13 +130,12 @@ export class InitAddSubCommand implements Command {
 		}
 
 		if (!actorName) actorName = 'unnamed enemy';
-		sheet = _.merge(sheet, { info: { name: actorName } });
+		sheet = _.merge(sheet, { staticInfo: { name: actorName } });
 
 		let finalName: string = actorName;
 
 		if (customStatsString) {
-			const statOverrides = generateStatOverrides(customStatsString);
-			sheet = _.merge(sheet, statOverrides);
+			applyStatOverrides(sheet, customStatsString);
 		}
 
 		let nameCount = 1;
@@ -168,6 +169,7 @@ export class InitAddSubCommand implements Command {
 					})
 				);
 		} else {
+			const creature = new Creature(sheet);
 			const rollBuilder = new RollBuilder({
 				title: L.en.commands.init.add.interactions.joinedEmbed.rolledTitle({
 					actorName: finalName,
@@ -178,7 +180,7 @@ export class InitAddSubCommand implements Command {
 			rollBuilder.addRoll({
 				rollExpression: DiceUtils.buildDiceExpression(
 					'd20',
-					String(sheet?.general?.perception || 0),
+					String(creature.statBonuses.perception || 0),
 					diceExpression
 				),
 				tags: ['skill', 'perception', 'initiative'],
@@ -187,7 +189,7 @@ export class InitAddSubCommand implements Command {
 			rollResultMessage = rollBuilder.compileEmbed();
 		}
 
-		const newActor = await InitiativeActor.query().insertGraphAndFetch({
+		const newActor = await InitiativeActorModel.query().insertGraphAndFetch({
 			initiativeId: currentInit.id,
 			name: actorName,
 			userId: intr.user.id,

@@ -1,6 +1,6 @@
-import { AutocompleteInteraction, CacheType } from 'discord.js';
+import { AutocompleteInteraction, CacheType, GuildMember } from 'discord.js';
 import _ from 'lodash';
-import { Character, Game, InitiativeActor, Npc } from '../services/kobold/models/index.js';
+import { Character, GameModel, InitiativeActor, NpcModel } from '../services/kobold/index.js';
 import { CharacterUtils } from './character-utils.js';
 import { InitiativeUtils } from './initiative-utils.js';
 import { Creature } from './creature.js';
@@ -8,11 +8,6 @@ import { filterNotNullOrUndefined } from './type-guards.js';
 import L from '../i18n/i18n-node.js';
 import { CompendiumModel } from '../services/pf2etools/compendium.model.js';
 import { StringUtils } from './string-utils.js';
-import { TableConfig } from 'drizzle-orm';
-import { DrizzleUtils } from '../services/pf2etools/utils/drizzle-utils.js';
-import { Model } from '../services/pf2etools/models/lib/Model.js';
-import { z } from 'zod';
-import { SQLiteTable } from 'drizzle-orm/sqlite-core';
 import { CompendiumUtils } from '../services/pf2etools/utils/compendium-utils.js';
 
 export class AutocompleteUtils {
@@ -34,7 +29,7 @@ export class AutocompleteUtils {
 		intr: AutocompleteInteraction<CacheType>,
 		matchText: string
 	) {
-		const targetNpcs = await Npc.query()
+		const targetNpcs = await NpcModel.query()
 			.whereRaw('name ilike ?', [`%${matchText ?? ''}%`])
 			.orderByRaw('random()')
 			.limit(49);
@@ -168,12 +163,12 @@ export class AutocompleteUtils {
 			currentInit,
 			intr.user.id
 		);
-		actorOptions = actorOptions.filter(actor =>
+		actorOptions = actorOptions.filter((actor: InitiativeActor) =>
 			actor.name.toLowerCase().includes((matchText ?? '').toLowerCase())
 		);
 
 		//return the matched skills
-		return actorOptions.map(actor => ({
+		return actorOptions.map((actor: InitiativeActor) => ({
 			name: actor.name,
 			value: actor.name,
 		}));
@@ -185,7 +180,7 @@ export class AutocompleteUtils {
 	) {
 		const [currentInit, targetGames, activeCharacter] = await Promise.all([
 			InitiativeUtils.getInitiativeForChannelOrNull(intr.channel),
-			Game.queryWhereUserHasCharacter(intr.user.id, intr.guildId),
+			GameModel.queryWhereUserHasCharacter(intr.user.id, intr.guildId),
 			CharacterUtils.getActiveCharacter(intr),
 		]);
 
@@ -290,16 +285,18 @@ export class AutocompleteUtils {
 			intr.user.id
 		);
 
-		const guildMemberOptions = actorOptions.map(actor => {
+		const guildMemberOptions = actorOptions.map((actor: InitiativeActor) => {
 			return intr.guild?.members?.cache?.find?.(
 				guildMember => guildMember.id === actor.userId
 			);
 		});
 
-		return guildMemberOptions.filter(filterNotNullOrUndefined).map(guildMember => ({
-			name: guildMember.displayName,
-			value: guildMember.id.toString(),
-		}));
+		return guildMemberOptions
+			.filter(filterNotNullOrUndefined)
+			.map((guildMember: GuildMember) => ({
+				name: guildMember.displayName,
+				value: guildMember.id.toString(),
+			}));
 	}
 
 	public static async getGameplayTargetCharacters(

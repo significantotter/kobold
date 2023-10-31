@@ -1,4 +1,4 @@
-import { Character } from '../../../services/kobold/models/index.js';
+import { Character, CharacterModel } from '../../../services/kobold/index.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -145,7 +145,7 @@ export class ActionRemoveSubCommand implements Command {
 					activeCharacter.actions,
 					action => action.name.toLocaleLowerCase() !== actionChoice.toLocaleLowerCase()
 				);
-				await Character.query()
+				await CharacterModel.query()
 					.patch({ actions: actionsWithoutRemoved })
 					.where({ userId: intr.user.id });
 

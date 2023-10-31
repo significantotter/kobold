@@ -1,8 +1,10 @@
 import {
 	ChannelDefaultCharacter,
+	ChannelDefaultCharacterModel,
 	Character,
 	GuildDefaultCharacter,
-} from '../../../services/kobold/models/index.js';
+	GuildDefaultCharacterModel,
+} from '../../../services/kobold/index.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -83,12 +85,12 @@ export class CharacterSetDefaultSubCommand implements Command {
 		if (targetCharacter) {
 			if (defaultScope === L.en.commandOptions.setDefaultScope.choices.channel.value()) {
 				//set all other characters as not the default for this user in this channel
-				await ChannelDefaultCharacter.query()
+				await ChannelDefaultCharacterModel.query()
 					.delete()
 					.where({ userId: intr.user.id, channelId: currentChannelId });
 
 				//set the character as the default for this channel
-				await ChannelDefaultCharacter.query().insert({
+				await ChannelDefaultCharacterModel.query().insert({
 					userId: intr.user.id,
 					channelId: currentChannelId,
 					characterId: targetCharacter.id,
@@ -97,12 +99,12 @@ export class CharacterSetDefaultSubCommand implements Command {
 				defaultScope === L.en.commandOptions.setDefaultScope.choices.server.value()
 			) {
 				//set all other characters as not the default for this user in this guild
-				await GuildDefaultCharacter.query()
+				await GuildDefaultCharacterModel.query()
 					.delete()
 					.where({ userId: intr.user.id, guildId: currentGuildId });
 
 				//set the character as the default for this guild
-				await GuildDefaultCharacter.query().insert({
+				await GuildDefaultCharacterModel.query().insert({
 					userId: intr.user.id,
 					guildId: currentGuildId,
 					characterId: targetCharacter.id,
@@ -120,13 +122,13 @@ export class CharacterSetDefaultSubCommand implements Command {
 			if ('__NONE__'.includes(charName)) {
 				//unset the server default character.
 				if (defaultScope === L.en.commandOptions.setDefaultScope.choices.channel.value()) {
-					await ChannelDefaultCharacter.query()
+					await ChannelDefaultCharacterModel.query()
 						.delete()
 						.where({ userId: intr.user.id, channelId: currentChannelId });
 				} else if (
 					defaultScope === L.en.commandOptions.setDefaultScope.choices.server.value()
 				) {
-					await GuildDefaultCharacter.query()
+					await GuildDefaultCharacterModel.query()
 						.delete()
 						.where({ userId: intr.user.id, guildId: currentGuildId });
 				}

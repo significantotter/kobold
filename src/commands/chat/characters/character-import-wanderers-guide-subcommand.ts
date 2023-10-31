@@ -1,4 +1,4 @@
-import { Character } from '../../../services/kobold/models/index.js';
+import { Character, CharacterModel, WgTokenModel } from '../../../services/kobold/index.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -9,7 +9,7 @@ import { default as axios } from 'axios';
 
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
-import { WgToken } from '../../../services/kobold/models/index.js';
+import { WgToken } from '../../../services/kobold/index.js';
 import { CharacterHelpers } from './helpers.js';
 import { Config } from '../../../config/config.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
@@ -47,8 +47,8 @@ export class CharacterImportWanderersGuideSubCommand implements Command {
 
 		//check if we have a token
 		const [tokenResults, existingCharacter] = await Promise.all([
-			WgToken.query().where({ charId }),
-			Character.query().where({ charId, importSource: 'wg', userId: intr.user.id }),
+			WgTokenModel.query().where({ charId }),
+			CharacterModel.query().where({ charId, importSource: 'wg', userId: intr.user.id }),
 		]);
 
 		if (existingCharacter.length) {
@@ -56,7 +56,7 @@ export class CharacterImportWanderersGuideSubCommand implements Command {
 			await InteractionUtils.send(
 				intr,
 				LL.commands.character.importWanderersGuide.interactions.characterAlreadyExists({
-					characterName: character.sheet.info.name,
+					characterName: character.sheet.staticInfo.name,
 				})
 			);
 			return;
@@ -88,7 +88,7 @@ export class CharacterImportWanderersGuideSubCommand implements Command {
 			} catch (err) {
 				if ((axios.default ?? axios).isAxiosError(err) && err.response?.status === 401) {
 					//token expired!
-					await WgToken.query().delete().where({ charId });
+					await WgTokenModel.query().delete().where({ charId });
 					await InteractionUtils.send(
 						intr,
 						LL.commands.character.interactions.expiredToken()
@@ -116,27 +116,27 @@ export class CharacterImportWanderersGuideSubCommand implements Command {
 					throw err;
 				}
 			}
-			const duplicateNameChar = await Character.query()
+			const duplicateNameChar = await CharacterModel.query()
 				.first()
 				.where({ userId: intr.user.id })
-				.andWhereRaw('name ILIKE ?', character.sheet.info.name.trim());
+				.andWhereRaw('name ILIKE ?', character.sheet.staticInfo.name.trim());
 			if (duplicateNameChar) {
 				await InteractionUtils.send(
 					intr,
 					LL.commands.character.importWanderersGuide.interactions.characterAlreadyExists({
-						characterName: character.sheet.info.name,
+						characterName: character.sheet.staticInfo.name,
 					})
 				);
 				return;
 			}
 
 			// set current characters owned by user to inactive state
-			await Character.query()
+			await CharacterModel.query()
 				.patch({ isActiveCharacter: false })
 				.where({ userId: intr.user.id });
 
 			// store sheet in db
-			const newCharacter = await Character.query().insertAndFetch({
+			const newCharacter = await CharacterModel.query().insertAndFetch({
 				userId: intr.user.id,
 				...character,
 				isActiveCharacter: true,
@@ -148,7 +148,7 @@ export class CharacterImportWanderersGuideSubCommand implements Command {
 			await InteractionUtils.send(
 				intr,
 				LL.commands.character.importWanderersGuide.interactions.success({
-					characterName: newCharacter.sheet.info.name,
+					characterName: newCharacter.sheet.staticInfo.name,
 				})
 			);
 		}

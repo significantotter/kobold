@@ -1,28 +1,28 @@
 import { Factory } from 'fishery';
 import type { DeepPartial } from 'fishery';
-import { GuildDefaultCharacter } from './guild-default-character.model.js';
+import { GuildDefaultCharacterModel } from './guild-default-character.model.js';
 import { faker } from '@faker-js/faker';
 
 type GuildDefaultCharacterTransientParams = {};
 
 class GuildDefaultCharacterFactoryClass extends Factory<
-	GuildDefaultCharacter,
+	GuildDefaultCharacterModel,
 	GuildDefaultCharacterTransientParams,
-	GuildDefaultCharacter
+	GuildDefaultCharacterModel
 > {}
 
 export const GuildDefaultCharacterFactory = GuildDefaultCharacterFactoryClass.define(
 	({ onCreate, transientParams }) => {
 		onCreate(async builtGuildDefaultCharacter =>
-			GuildDefaultCharacter.query().insert(builtGuildDefaultCharacter)
+			GuildDefaultCharacterModel.query().insert(builtGuildDefaultCharacter)
 		);
 
-		const characterData: DeepPartial<GuildDefaultCharacter> = {
+		const characterData: DeepPartial<GuildDefaultCharacterModel> = {
 			characterId: faker.number.int(2147483647),
 			userId: faker.string.uuid(),
 			guildId: faker.string.uuid(),
 		};
 
-		return GuildDefaultCharacter.fromDatabaseJson(characterData);
+		return GuildDefaultCharacterModel.fromDatabaseJson(characterData);
 	}
 );

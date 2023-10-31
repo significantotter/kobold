@@ -8,7 +8,14 @@ import { Creature } from './creature.js';
 import { ActionRoller } from './action-roller.js';
 import { getEmoji } from '../constants/emoji.js';
 import { EmbedUtils, KoboldEmbed } from './kobold-embed-utils.js';
-import { Action, Attribute, Modifier, UserSettings } from '../services/kobold/models/index.js';
+import {
+	Action,
+	ActionCostEnum,
+	ActionTypeEnum,
+	Attribute,
+	Modifier,
+	UserSettings,
+} from '../services/kobold/index.js';
 import { KoboldError } from './KoboldError.js';
 import L from '../i18n/i18n-node.js';
 
@@ -206,6 +213,7 @@ export class DiceUtils {
 			modifiers = creature.getModifiersFromTags(finalTags, extraAttributes ?? []);
 		}
 		for (const modifier of modifiers) {
+			if (modifier.modifierType === 'sheet') continue;
 			// add to both the parsed expression and the initial roll expression
 			// the roll expression shows the user the meaning behind the roll values, while
 			// the parsed expression just has the math for the dice roller to use
@@ -363,7 +371,7 @@ export class DiceUtils {
 			);
 
 		const rollBuilder = new RollBuilder({
-			actorName: actorName ?? creature.sheet.info.name ?? userName,
+			actorName: actorName ?? creature.name ?? userName,
 			creature: creature,
 			rollNote,
 			rollDescription:
@@ -406,6 +414,10 @@ export class DiceUtils {
 		LL: TranslationFunctions;
 	}): { actionRoller: ActionRoller; builtRoll: RollBuilder } {
 		const targetAttack = creature.attackRolls[attackName.toLowerCase()];
+		if (!targetAttack)
+			throw new KoboldError(
+				`Yip! I couldn\'t find an attack called "${attackName.toLowerCase()}"`
+			);
 
 		// build a little action from the attack!
 		const action: Action = {
@@ -413,8 +425,8 @@ export class DiceUtils {
 			description: '',
 			baseLevel: 0,
 			autoHeighten: false,
-			type: 'attack',
-			actionCost: 'oneAction',
+			type: ActionTypeEnum.attack,
+			actionCost: ActionCostEnum.oneAction,
 			tags: [],
 			rolls: [],
 		};
@@ -443,6 +455,7 @@ export class DiceUtils {
 					null,
 					damageModifierExpression
 				),
+				healInsteadOfDamage: false,
 				damageType: targetAttack.damage[0].type,
 				allowRollModifiers: true,
 			});
@@ -454,6 +467,7 @@ export class DiceUtils {
 				roll: DiceUtils.buildDiceExpression(
 					String(DiceUtils.parseDiceFromWgDamageField(targetAttack.damage[i].dice))
 				),
+				healInsteadOfDamage: false,
 				damageType: targetAttack.damage[i].type,
 				allowRollModifiers: false,
 			});
@@ -552,11 +566,11 @@ export class DiceUtils {
 
 			const builtRoll = actionRoller.buildRoll(
 				options.rollNote ?? '',
-				targetAction.description,
+				targetAction.description ?? '',
 				{
 					attackModifierExpression: options.modifierExpression,
 					damageModifierExpression: options.damageModifierExpression,
-					title: `${emojiText}${creature.sheet.info.name} used ${targetAction.name}!`,
+					title: `${emojiText}${creature.sheet.staticInfo.name} used ${targetAction.name}!`,
 				}
 			);
 

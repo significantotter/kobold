@@ -5,7 +5,7 @@ import {
 	SheetAdjustment,
 	AdjustablePropertyEnum,
 	StatSubGroupEnum,
-} from '../../services/kobold/models/index.js';
+} from '../../services/kobold/index.js';
 import {
 	SheetAdditionalSkillAdjuster,
 	SheetAttackAdjuster,

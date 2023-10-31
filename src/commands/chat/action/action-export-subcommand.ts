@@ -41,13 +41,13 @@ export class ActionExportSubCommand implements Command {
 
 		const pastebinPost = await new PasteBin({ apiKey: Config.pastebin.apiKey }).post({
 			code: JSON.stringify(actions),
-			name: `${activeCharacter.sheet.info.name}'s Actions`,
+			name: `${activeCharacter.sheet.staticInfo.name}'s Actions`,
 		});
 
 		await InteractionUtils.send(
 			intr,
 			LL.commands.action.export.interactions.success({
-				characterName: activeCharacter.sheet.info.name,
+				characterName: activeCharacter.sheet.staticInfo.name,
 				pasteBinLink: pastebinPost,
 			})
 		);

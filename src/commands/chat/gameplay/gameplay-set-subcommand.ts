@@ -18,9 +18,7 @@ import { InteractionUtils } from '../../../utils/interaction-utils.js';
 import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
 import { GameplayUtils } from '../../../utils/gameplay-utils.js';
 import _ from 'lodash';
-import { SettableSheetOption } from '../../../utils/creature.js';
-import { CharacterUtils } from '../../../utils/character-utils.js';
-import { Character, InitiativeActor } from '../../../services/kobold/models/index.js';
+import { InitiativeActorModel, SheetBaseCounterKeys } from '../../../services/kobold/index.js';
 import { GameUtils } from '../../../utils/game-utils.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
 
@@ -56,7 +54,8 @@ export class GameplaySetSubCommand implements Command {
 		);
 		const option = _.camelCase(
 			intr.options.getString(GameplayOptions.GAMEPLAY_SET_OPTION.name, true)
-		) as SettableSheetOption;
+		) as SheetBaseCounterKeys;
+
 		const value = intr.options.getString(GameplayOptions.GAMEPLAY_SET_VALUE.name, true);
 
 		const { characterOrInitActorTargets } = await GameUtils.getCharacterOrInitActorTarget(
@@ -79,7 +78,7 @@ export class GameplaySetSubCommand implements Command {
 
 		if (
 			characterOrInitActorTargets.some(
-				character => character instanceof InitiativeActor && character.hideStats
+				character => character instanceof InitiativeActorModel && character.hideStats
 			)
 		) {
 			let verbed = 'increased';

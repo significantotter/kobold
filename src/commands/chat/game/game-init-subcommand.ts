@@ -26,7 +26,8 @@ import {
 	Initiative,
 	InitiativeActor,
 	InitiativeActorGroup,
-} from '../../../services/kobold/models/index.js';
+	InitiativeModel,
+} from '../../../services/kobold/index.js';
 import { GameOptions } from './game-command-options.js';
 import { InitOptions } from '../init/init-command-options.js';
 import { SettingsUtils } from '../../../utils/settings-utils.js';
@@ -124,7 +125,7 @@ export class GameInitSubCommand implements Command {
 				);
 				return;
 			}
-			currentInit = (await Initiative.query()
+			currentInit = (await InitiativeModel.query()
 				.insertAndFetch({
 					gmUserId: intr.user.id,
 					channelId: intr.channel.id,
@@ -149,7 +150,7 @@ export class GameInitSubCommand implements Command {
 				(targetCharacter &&
 					targetCharacter.toLocaleLowerCase().trim().length > 0 &&
 					targetCharacter.toLocaleLowerCase().trim() !==
-						character.sheet.info.name.toLocaleLowerCase().trim())
+						character.sheet.staticInfo.name.toLocaleLowerCase().trim())
 			) {
 				continue;
 			}
@@ -159,7 +160,7 @@ export class GameInitSubCommand implements Command {
 				diceExpression,
 				initiativeValue,
 				currentInit,
-				userName: character.sheet.info.name,
+				userName: character.sheet.staticInfo.name,
 				userId: character.userId,
 				hideStats: false,
 				userSettings,

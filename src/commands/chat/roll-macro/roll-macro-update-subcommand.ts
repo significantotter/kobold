@@ -18,10 +18,10 @@ import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import L from '../../../i18n/i18n-node.js';
 import { RollMacroOptions } from './roll-macro-command-options.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
-import { Character } from '../../../services/kobold/models/index.js';
 import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
 import { DiceRollResult } from '../../../utils/dice-utils.js';
 import { RollBuilder } from '../../../utils/roll-builder.js';
+import { CharacterModel } from '../../../services/kobold/index.js';
 
 export class RollMacroUpdateSubCommand implements Command {
 	public names = [L.en.commands.rollMacro.update.name()];
@@ -96,14 +96,14 @@ export class RollMacroUpdateSubCommand implements Command {
 
 		activeCharacter.rollMacros[targetIndex].macro = macro;
 
-		await Character.query().patchAndFetchById(activeCharacter.id, {
+		await CharacterModel.query().patchAndFetchById(activeCharacter.id, {
 			rollMacros: activeCharacter.rollMacros,
 		});
 
 		const updateEmbed = new KoboldEmbed();
 		updateEmbed.setTitle(
 			LL.commands.rollMacro.update.interactions.successEmbed.title({
-				characterName: activeCharacter.sheet.info.name,
+				characterName: activeCharacter.sheet.staticInfo.name,
 				macroName: targetRollMacro.name,
 				newMacroValue: macro,
 			})

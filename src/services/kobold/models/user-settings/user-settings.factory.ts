@@ -1,21 +1,21 @@
 import { Factory } from 'fishery';
 import type { DeepPartial } from 'fishery';
-import { UserSettings } from './user-settings.model.js';
+import { UserSettingsModel } from './user-settings.model.js';
 import { faker } from '@faker-js/faker';
 
 type UserSettingsTransientParams = {};
 
 class UserSettingsFactoryClass extends Factory<
-	UserSettings,
+	UserSettingsModel,
 	UserSettingsTransientParams,
-	UserSettings
+	UserSettingsModel
 > {}
 
 export const UserSettingsFactory = UserSettingsFactoryClass.define(
 	({ onCreate, transientParams }) => {
-		onCreate(async builtUserSettings => UserSettings.query().insert(builtUserSettings));
+		onCreate(async builtUserSettings => UserSettingsModel.query().insert(builtUserSettings));
 
-		const characterData: DeepPartial<UserSettings> = {
+		const characterData: DeepPartial<UserSettingsModel> = {
 			userId: faker.string.uuid(),
 			initStatsNotification: faker.helpers.arrayElement([
 				'never',
@@ -27,6 +27,6 @@ export const UserSettingsFactory = UserSettingsFactoryClass.define(
 			rollCompactMode: faker.helpers.arrayElement(['compact', 'normal']),
 		};
 
-		return UserSettings.fromDatabaseJson(characterData);
+		return UserSettingsModel.fromDatabaseJson(characterData);
 	}
 );

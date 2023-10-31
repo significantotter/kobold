@@ -14,7 +14,7 @@ import { GameOptions } from './game-command-options.js';
 import { Command, CommandDeferType } from '../../index.js';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { Game } from '../../../services/kobold/models/index.js';
+import { Game, GameModel } from '../../../services/kobold/index.js';
 import { InteractionUtils } from '../../../utils/interaction-utils.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
 
@@ -41,9 +41,9 @@ export class GameManageSubCommand implements Command {
 				.trim()
 				.toLocaleLowerCase();
 
-			let targetGames: Game[] = [];
+			let targetGames: GameModel[] = [];
 			if (option === L.en.commandOptions.gameManageOption.choices.kick.name()) {
-				targetGames = await Game.query()
+				targetGames = await GameModel.query()
 					.withGraphFetched('characters')
 					.where('guildId', intr.guildId)
 					.andWhere('gmUserId', intr.user.id);
@@ -66,19 +66,22 @@ export class GameManageSubCommand implements Command {
 
 				return options;
 			} else if (option === L.en.commandOptions.gameManageOption.choices.join.name()) {
-				targetGames = await Game.queryWhereUserLacksCharacter(
+				targetGames = await GameModel.queryWhereUserLacksCharacter(
 					intr.user.id,
 					intr.guildId ?? ''
 				);
 			} else if (option === L.en.commandOptions.gameManageOption.choices.setActive.name()) {
-				targetGames = await Game.query().where({
+				targetGames = await GameModel.query().where({
 					gmUserId: intr.user.id,
 					guildId: intr.guildId,
 				});
 			} else if (option === L.en.commandOptions.gameManageOption.choices.leave.name()) {
-				targetGames = await Game.queryWhereUserHasCharacter(intr.user.id, intr.guildId);
+				targetGames = await GameModel.queryWhereUserHasCharacter(
+					intr.user.id,
+					intr.guildId
+				);
 			} else if (option === L.en.commandOptions.gameManageOption.choices.delete.name()) {
-				targetGames = await Game.query().where({
+				targetGames = await GameModel.query().where({
 					gmUserId: intr.user.id,
 					guildId: intr.guildId,
 				});
@@ -107,7 +110,7 @@ export class GameManageSubCommand implements Command {
 
 		if (option === L.en.commandOptions.gameManageOption.choices.create.name()) {
 			// ensure it's not a duplicate name
-			const existingGame = await Game.query()
+			const existingGame = await GameModel.query()
 				.where('guildId', 'ilike', intr.guildId)
 				.andWhere('name', value);
 
@@ -135,12 +138,12 @@ export class GameManageSubCommand implements Command {
 			}
 
 			// set existing games here to not active
-			await Game.query()
+			await GameModel.query()
 				.patch({ isActive: false })
 				.where({ gmUserId: intr.user.id, guildId: intr.guildId });
 
 			// create the game!
-			await Game.query().insert({
+			await GameModel.query().insert({
 				name: value,
 				gmUserId: intr.user.id,
 				guildId: intr.guildId,
@@ -156,14 +159,14 @@ export class GameManageSubCommand implements Command {
 			return;
 		} else if (option === L.en.commandOptions.gameManageOption.choices.setActive.name()) {
 			// set target game to active
-			const updated = await Game.query()
+			const updated = await GameModel.query()
 				.patch({ isActive: true })
 				.where({ gmUserId: intr.user.id, guildId: intr.guildId })
 				.andWhere('name', 'ilike', value);
 
 			if (updated > 0) {
 				// set existing games here to not active
-				await Game.query()
+				await GameModel.query()
 					.patch({ isActive: false })
 					.where({ gmUserId: intr.user.id, guildId: intr.guildId })
 					.andWhereNot('name', 'ilike', value);
@@ -184,7 +187,7 @@ export class GameManageSubCommand implements Command {
 			}
 			return;
 		} else if (option === L.en.commandOptions.gameManageOption.choices.delete.name()) {
-			const deletedRows = await Game.query().delete().where({
+			const deletedRows = await GameModel.query().delete().where({
 				gmUserId: intr.user.id,
 				guildId: intr.guildId,
 				name: value,
@@ -210,7 +213,7 @@ export class GameManageSubCommand implements Command {
 			//just in case a character name has ' - ' in it
 			const characterName = characterNameSections.join(' - ');
 			if (gameName && characterName) {
-				const targetGames = await Game.query().withGraphFetched('characters').where({
+				const targetGames = await GameModel.query().withGraphFetched('characters').where({
 					gmUserId: intr.user.id,
 					guildId: intr.guildId,
 					name: gameName,
@@ -263,7 +266,7 @@ export class GameManageSubCommand implements Command {
 				);
 			}
 		} else if (option === L.en.commandOptions.gameManageOption.choices.join.name()) {
-			const targetGames = await Game.query().where({
+			const targetGames = await GameModel.query().where({
 				guildId: intr.guildId,
 				name: value,
 			});
@@ -308,7 +311,7 @@ export class GameManageSubCommand implements Command {
 			}
 			return;
 		} else if (option === L.en.commandOptions.gameManageOption.choices.leave.name()) {
-			const targetGames = await Game.query()
+			const targetGames = await GameModel.query()
 				.where({
 					guildId: intr.guildId,
 					name: value,

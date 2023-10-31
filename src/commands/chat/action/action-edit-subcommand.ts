@@ -1,4 +1,11 @@
-import { Character } from '../../../services/kobold/models/index.js';
+import {
+	Action,
+	ActionCostEnum,
+	ActionTypeEnum,
+	Character,
+	CharacterModel,
+	isActionTypeEnum,
+} from '../../../services/kobold/index.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -17,6 +24,7 @@ import { CharacterUtils } from '../../../utils/character-utils.js';
 import { ActionOptions } from './action-command-options.js';
 import _ from 'lodash';
 import L from '../../../i18n/i18n-node.js';
+import { KoboldError } from '../../../utils/KoboldError.js';
 
 export class ActionEditSubCommand implements Command {
 	public names = [L.en.commands.action.edit.name()];
@@ -87,78 +95,69 @@ export class ActionEditSubCommand implements Command {
 		const currentActionName = matchedAction.name;
 
 		// validate the strings into different types based on which field is being edited
-		let finalValue;
 
 		// string values
 		if (['name', 'description'].includes(fieldToEdit)) {
-			finalValue = newValue.trim();
+			matchedAction[fieldToEdit as 'name' | 'description'] = newValue.trim();
 		}
 		// enum values
-		else if (['type', 'actionCost'].includes(fieldToEdit)) {
-			if (fieldToEdit === 'type') {
-				if (['attack', 'spell', 'other'].includes(newValue.toLocaleLowerCase().trim())) {
-					finalValue = newValue.toLocaleLowerCase().trim();
-				} else {
-					await InteractionUtils.send(
-						intr,
-						LL.commands.action.edit.interactions.invalidActionType()
-					);
-					return;
-				}
-			} else if (fieldToEdit === 'actionCost') {
-				const actionInputMap: { [k: string]: string | undefined } = {
-					one: 'oneAction',
-					two: 'twoActions',
-					three: 'threeActions',
-					free: 'freeAction',
-					variable: 'variableActions',
-					oneaction: 'oneAction',
-					twoactions: 'twoActions',
-					threeactions: 'threeActions',
-					freeaction: 'freeAction',
-					variableactions: 'variableActions',
-					reaction: 'reaction',
-				};
-				let condensedActionCost = newValue.replaceAll(/[ \_-]/g, '').toLocaleLowerCase();
-				if (_.keys(actionInputMap).includes(condensedActionCost)) {
-					finalValue = actionInputMap[condensedActionCost];
-				} else {
-					await InteractionUtils.send(
-						intr,
-						LL.commands.action.edit.interactions.invalidActionCost()
-					);
-					return;
-				}
+		else if (fieldToEdit === 'type') {
+			const enumValue = newValue.toLocaleLowerCase().trim();
+			if (isActionTypeEnum(enumValue)) {
+				matchedAction.type = enumValue;
+			} else {
+				throw new KoboldError(LL.commands.action.edit.interactions.invalidActionType());
+			}
+		} else if (fieldToEdit === 'actionCost') {
+			const actionInputMap: Record<string, ActionCostEnum | undefined> = {
+				one: ActionCostEnum.oneAction,
+				two: ActionCostEnum.twoActions,
+				three: ActionCostEnum.threeActions,
+				free: ActionCostEnum.freeAction,
+				variable: ActionCostEnum.variableActions,
+				oneaction: ActionCostEnum.oneAction,
+				twoactions: ActionCostEnum.twoActions,
+				threeactions: ActionCostEnum.threeActions,
+				freeaction: ActionCostEnum.freeAction,
+				variableactions: ActionCostEnum.variableActions,
+				reaction: ActionCostEnum.reaction,
+			};
+			let condensedActionCost = newValue.replaceAll(/[ \_-]/g, '').toLocaleLowerCase();
+
+			let finalValue: ActionCostEnum | undefined = actionInputMap[condensedActionCost];
+
+			if (finalValue) {
+				matchedAction.actionCost = finalValue;
+			} else {
+				throw new KoboldError(LL.commands.action.edit.interactions.invalidActionCost());
 			}
 		}
 		// integer values
 		else if (['baseLevel'].includes(fieldToEdit)) {
-			finalValue = parseInt(newValue.trim());
-			if (isNaN(finalValue) || finalValue < 1) {
-				await InteractionUtils.send(
-					intr,
-					LL.commands.action.edit.interactions.invalidInteger()
-				);
+			const parsedValue = parseInt(newValue.trim());
+			if (isNaN(parsedValue) || parsedValue < 1) {
+				throw new KoboldError(LL.commands.action.edit.interactions.invalidInteger());
+			} else {
+				matchedAction.baseLevel = parsedValue;
 			}
 		}
 		// string array values
 		else if (['tags'].includes(fieldToEdit)) {
-			finalValue = newValue.split(',').map(tag => tag.trim());
+			matchedAction.tags = newValue.split(',').map(tag => tag.trim());
 		}
 
 		// boolean values
 		else if (['autoHeighten'].includes(fieldToEdit)) {
-			finalValue = ['true', 'yes', '1', 'ok', 'okay'].includes(
+			const autoHeighten = ['true', 'yes', '1', 'ok', 'okay'].includes(
 				newValue.toLocaleLowerCase().trim()
 			);
+			matchedAction.autoHeighten = autoHeighten;
 		} else {
 			// invalid field
-			await InteractionUtils.send(intr, LL.commands.action.edit.interactions.unknownField());
+			throw new KoboldError(LL.commands.action.edit.interactions.unknownField());
 		}
 
-		matchedAction[fieldToEdit] = finalValue;
-
-		await Character.query().updateAndFetchById(activeCharacter.id, {
+		await CharacterModel.query().updateAndFetchById(activeCharacter.id, {
 			actions: activeCharacter.actions,
 		});
 

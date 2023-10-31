@@ -1,4 +1,9 @@
-import { Character, Game, GuildDefaultCharacter } from '../../../services/kobold/models/index.js';
+import {
+	Character,
+	Game,
+	GameModel,
+	GuildDefaultCharacter,
+} from '../../../services/kobold/index.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -29,7 +34,7 @@ export class GameListSubCommand implements Command {
 		intr: ChatInputCommandInteraction,
 		LL: TranslationFunctions
 	): Promise<void> {
-		const allGames = await Game.query()
+		const allGames = await GameModel.query()
 			.withGraphFetched('characters')
 			.where({
 				gmUserId: intr.user.id,

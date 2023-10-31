@@ -1,41 +1,41 @@
-import type { Initiative as InitiativeType } from './initiative.schema.js';
-import { JSONSchema7 } from 'json-schema';
+import type { Initiative } from '../../schemas/initiative.zod.js';
 import { BaseModel } from '../../lib/base-model.js';
-import InitiativeSchema from './initiative.schema.json' assert { type: 'json' };
-import Objection, { Model, QueryBuilder, RelationMappings } from 'objection';
-import { InitiativeActorGroup } from '../initiative-actor-group/initiative-actor-group.model.js';
-import { InitiativeActor } from '../initiative-actor/initiative-actor.model.js';
+import { Model, QueryBuilder, RelationMappings } from 'objection';
+import { InitiativeActorGroupModel } from '../initiative-actor-group/initiative-actor-group.model.js';
+import { InitiativeActorModel } from '../initiative-actor/initiative-actor.model.js';
 import { InitWithActorsAndGroups } from '../index.js';
-import { removeRequired } from '../../lib/helpers.js';
+import { zInitiative } from '../../schemas/initiative.zod.js';
+import { ZodValidator } from '../../lib/zod-validator.js';
 
-export interface Initiative extends InitiativeType {
-	currentTurnGroupId: number | null;
-	currentTurnGroup?: InitiativeActorGroup;
-	actorGroups?: InitiativeActorGroup[];
-	actors?: InitiativeActor[];
+export interface InitiativeModel extends Initiative {
+	currentTurnGroup?: InitiativeActorGroupModel;
+	actorGroups?: InitiativeActorGroupModel[];
+	actors?: InitiativeActorModel[];
 }
-export class Initiative extends BaseModel {
+export class InitiativeModel extends BaseModel {
 	static get tableName(): string {
 		return 'initiative';
 	}
 
+	static createValidator() {
+		return new ZodValidator();
+	}
+
+	public $z = zInitiative;
+
 	public static queryGraphFromChannel(
 		channelId: string
 	): QueryBuilder<InitWithActorsAndGroups, InitWithActorsAndGroups[]> {
-		return Initiative.query().withGraphFetched('[actors.[character], actorGroups]').where({
+		return InitiativeModel.query().withGraphFetched('[actors.[character], actorGroups]').where({
 			channelId,
 		}) as QueryBuilder<InitWithActorsAndGroups, InitWithActorsAndGroups[]>;
-	}
-
-	static get jsonSchema(): Objection.JSONSchema {
-		return removeRequired(InitiativeSchema as unknown as Objection.JSONSchema);
 	}
 
 	static get relationMappings(): RelationMappings {
 		return {
 			currentTurnGroup: {
 				relation: Model.BelongsToOneRelation,
-				modelClass: InitiativeActorGroup,
+				modelClass: InitiativeActorGroupModel,
 				join: {
 					from: 'initiative.currentTurnGroupId',
 					to: 'initiativeActorGroup.id',
@@ -43,7 +43,7 @@ export class Initiative extends BaseModel {
 			},
 			actorGroups: {
 				relation: Model.HasManyRelation,
-				modelClass: InitiativeActorGroup,
+				modelClass: InitiativeActorGroupModel,
 				join: {
 					from: 'initiative.id',
 					to: 'initiativeActorGroup.initiativeId',
@@ -51,7 +51,7 @@ export class Initiative extends BaseModel {
 			},
 			actors: {
 				relation: Model.HasManyRelation,
-				modelClass: InitiativeActor,
+				modelClass: InitiativeActorModel,
 				join: {
 					from: 'initiative.id',
 					to: 'initiativeActor.initiativeId',

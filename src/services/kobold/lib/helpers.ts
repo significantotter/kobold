@@ -1,6 +1,6 @@
 import { compileExpression } from 'filtrex';
 import { DiceUtils } from '../../../utils/dice-utils.js';
-import { Attribute, Modifier } from '../models/index.js';
+import { Attribute, Modifier, RollModifier } from '../models/index.js';
 import { Creature } from '../../../utils/creature.js';
 import L from '../../../i18n/i18n-node.js';
 import Objection from 'objection';
@@ -84,8 +84,8 @@ export function parseBonusesForTagsFromModifiers(
 	creature?: Creature
 ) {
 	const sanitizedTags = tags.map(tag => (tag ?? '').toLocaleLowerCase().trim());
-	let bonuses: { [k: string]: Modifier } = {};
-	let penalties: { [k: string]: Modifier } = {};
+	let bonuses: { [k: string]: RollModifier } = {};
+	let penalties: { [k: string]: RollModifier } = {};
 	const untyped: Modifier[] = [];
 	// for each modifier, check if it targets any tags for this roll
 	for (const modifier of modifiers) {

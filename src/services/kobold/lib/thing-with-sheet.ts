@@ -1,5 +1,5 @@
 import { ChatInputCommandInteraction } from 'discord.js';
-import { Sheet } from './type-helpers.js';
+import { Sheet } from './index.js';
 
 export type ModelWithSheet = {
 	name: string;

@@ -1,6 +1,6 @@
 import fs from 'fs';
 import xxhash from 'xxhashjs';
-import { BestiaryFilesLoaded, Npc } from '../kobold/models/index.js';
+import { BestiaryFilesLoadedModel, NpcModel } from '../kobold/index.js';
 import { transaction } from 'objection';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -45,7 +45,7 @@ export async function hashBestiaryFiles() {
 }
 
 export async function loadBestiaryFileIfNoMatchingHash(file: string, hash: string): Promise<void> {
-	await transaction(BestiaryFilesLoaded, Npc, async (BestiaryFilesLoaded, Npc) => {
+	await transaction(BestiaryFilesLoadedModel, NpcModel, async (BestiaryFilesLoaded, Npc) => {
 		const loadedFile = (await BestiaryFilesLoaded.query().where('fileName', file))[0];
 		let load = false;
 

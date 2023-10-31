@@ -19,7 +19,7 @@ import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { InteractionUtils } from '../../../utils/interaction-utils.js';
 import _ from 'lodash';
 import { Creature } from '../../../utils/creature.js';
-import { Character } from '../../../services/kobold/models/index.js';
+import { Character, CharacterModel } from '../../../services/kobold/index.js';
 import { ChatArgs } from '../../../constants/chat-args.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
@@ -69,7 +69,7 @@ export class GameplayTrackerSubCommand implements Command {
 		);
 
 		// try and find that charcter
-		let targetCharacter: Character | null;
+		let targetCharacter: CharacterModel | null;
 		if (targetCharacterName) {
 			targetCharacter = (
 				await CharacterUtils.findCharacterByName(targetCharacterName, intr.user.id)

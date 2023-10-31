@@ -14,7 +14,6 @@ import { RateLimiter } from 'discord.js-rate-limiter';
 
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
-import { Character } from '../../../services/kobold/models/index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import L from '../../../i18n/i18n-node.js';
 import { CollectorUtils } from '../../../utils/collector-utils.js';
@@ -22,7 +21,7 @@ import { CharacterUtils } from '../../../utils/character-utils.js';
 import { ModifierOptions } from './modifier-command-options.js';
 import _ from 'lodash';
 import { KoboldError } from '../../../utils/KoboldError.js';
-import { refs } from '../../../constants/common-text.js';
+import { CharacterModel } from '../../../services/kobold/index.js';
 
 export class ModifierRemoveSubCommand implements Command {
 	public names = [L.en.commands.modifier.remove.name()];
@@ -152,7 +151,7 @@ export class ModifierRemoveSubCommand implements Command {
 					modifier =>
 						modifier.name.toLocaleLowerCase() !== modifierChoice.toLocaleLowerCase()
 				);
-				await Character.query()
+				await CharacterModel.query()
 					.patch({ modifiers: modifiersWithoutRemoved })
 					.where({ userId: intr.user.id });
 

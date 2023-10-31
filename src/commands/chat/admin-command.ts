@@ -19,8 +19,6 @@ import { ShardUtils } from '../../utils/shard-utils.js';
 import _ from 'lodash';
 import L from '../../i18n/i18n-node.js';
 
-const tsConfig = JSON.parse(fs.readFileSync('./tsconfig.json').toString());
-
 export class AdminCommand implements Command {
 	public names = [L.en.commands.admin.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
@@ -77,7 +75,7 @@ export class AdminCommand implements Command {
 					value: [
 						`**Node.js**: ${process.version}`,
 						`**TypeScript**: v${typescript.version}`,
-						`**ECMAScript**: ${tsConfig.compilerOptions.target}`,
+						`**ECMAScript**:"ESNext"`,
 						`**discord.js**: v${djs.version}`,
 					].join('\n'),
 				},

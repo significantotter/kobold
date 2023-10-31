@@ -1,33 +1,29 @@
 import { CharacterFactory } from './../character/character.factory.js';
-import Ajv from 'ajv';
 import { GuildDefaultCharacterFactory } from './guild-default-character.factory.js';
-import { GuildDefaultCharacter } from './guild-default-character.model.js';
-import GuildDefaultCharacterSchema from './guild-default-character.schema.json' assert { type: 'json' };
-import addFormats from 'ajv-formats';
-const ajv = new Ajv.default({ allowUnionTypes: true });
-addFormats.default(ajv);
+import { GuildDefaultCharacterModel } from './guild-default-character.model.js';
+import { zGuildDefaultCharacter } from '../../schemas/guild-default-character.zod.js';
 
 describe('GuildDefaultCharacter', () => {
 	test('validates a built factory', () => {
 		const builtGuildDefaultCharacter = GuildDefaultCharacterFactory.build();
-		const valid = ajv.validate(GuildDefaultCharacterSchema, builtGuildDefaultCharacter);
-		expect(valid).toBe(true);
+		const valid = zGuildDefaultCharacter.safeParse(builtGuildDefaultCharacter);
+		expect(valid.success).toBe(true);
 	});
 	test('validates a created factory object', async () => {
 		const character = await CharacterFactory.create();
 		const createdGuildDefaultCharacter = await GuildDefaultCharacterFactory.create({
 			characterId: character.id,
 		});
-		const valid = ajv.validate(GuildDefaultCharacterSchema, createdGuildDefaultCharacter);
-		expect(valid).toBe(true);
+		const valid = zGuildDefaultCharacter.safeParse(createdGuildDefaultCharacter);
+		expect(valid.success).toBe(true);
 	});
 	test('Model successfully inserts and retrieves a created character', async () => {
 		const character = await CharacterFactory.create();
 		const builtGuildDefaultCharacter = GuildDefaultCharacterFactory.build({
 			characterId: character.id,
 		});
-		await GuildDefaultCharacter.query().insert(builtGuildDefaultCharacter);
-		const fetchedGuildDefaultCharacters = await GuildDefaultCharacter.query();
+		await GuildDefaultCharacterModel.query().insert(builtGuildDefaultCharacter);
+		const fetchedGuildDefaultCharacters = await GuildDefaultCharacterModel.query();
 		const insertedGuildDefaultCharacter = fetchedGuildDefaultCharacters.find(
 			guildDefaultChars =>
 				guildDefaultChars.characterId === builtGuildDefaultCharacter.characterId

@@ -1,21 +1,17 @@
-import Ajv from 'ajv';
 import { GameFactory } from './game.factory.js';
-import { Game } from './game.model.js';
-import GameSchema from './game.schema.json' assert { type: 'json' };
-import addFormats from 'ajv-formats';
-const ajv = new Ajv.default({ allowUnionTypes: true });
-addFormats.default(ajv);
+import { GameModel } from './game.model.js';
+import { zGame } from '../../schemas/game.zod.js';
 
 describe('Game', () => {
 	test('validates a built factory', () => {
 		const builtGame = GameFactory.build();
-		const valid = ajv.validate(GameSchema, builtGame);
-		expect(valid).toBe(true);
+		const valid = zGame.safeParse(builtGame);
+		expect(valid.success).toBe(true);
 	});
 	test('validates a created factory object', async () => {
 		const createdGame = await GameFactory.create();
-		const valid = ajv.validate(GameSchema, createdGame);
-		expect(valid).toBe(true);
+		const valid = zGame.safeParse(createdGame);
+		expect(valid.success).toBe(true);
 	});
 	test('builds a factory with a fake id', async () => {
 		const builtGame = GameFactory.withFakeId().build();
@@ -23,9 +19,9 @@ describe('Game', () => {
 	});
 	test('Model successfully inserts and retrieves a created factory', async () => {
 		const builtGame = GameFactory.build();
-		await Game.query().insert(builtGame);
-		const fetchedGames = await Game.query();
-		const insertedGame = fetchedGames.find(factory => factory.charId === builtGame.charId);
-		expect(insertedGame?.charId).toBe(builtGame.charId);
+		await GameModel.query().insert(builtGame);
+		const fetchedGames = await GameModel.query();
+		const insertedGame = fetchedGames.find(game => game.id === builtGame.id);
+		expect(insertedGame?.id).toBe(builtGame.id);
 	});
 });

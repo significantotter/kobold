@@ -1,4 +1,4 @@
-import { Character } from '../../../services/kobold/models/index.js';
+import { Character, CharacterModel } from '../../../services/kobold/index.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -63,12 +63,12 @@ export class CharacterSetActiveSubCommand implements Command {
 
 		if (targetCharacter) {
 			//set all other characters as not active
-			await Character.query()
+			await CharacterModel.query()
 				.patch({ isActiveCharacter: false })
 				.where({ userId: intr.user.id });
 
 			//set the character as active
-			await Character.query().patchAndFetchById(targetCharacter.id, {
+			await CharacterModel.query().patchAndFetchById(targetCharacter.id, {
 				isActiveCharacter: true,
 			});
 

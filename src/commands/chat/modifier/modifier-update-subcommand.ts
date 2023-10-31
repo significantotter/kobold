@@ -18,12 +18,12 @@ import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import L from '../../../i18n/i18n-node.js';
 import { ModifierOptions } from './modifier-command-options.js';
 import { CharacterUtils } from '../../../utils/character-utils.js';
-import { Character } from '../../../services/kobold/models/index.js';
+import { CharacterModel, SheetAdjustmentTypeEnum } from '../../../services/kobold/index.js';
 import { compileExpression } from 'filtrex';
 import { DiceUtils } from '../../../utils/dice-utils.js';
 import { Creature } from '../../../utils/creature.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
-import { SheetUtils } from '../../../utils/sheet-utils.js';
+import { SheetUtils } from '../../../utils/sheet/sheet-utils.js';
 
 export class ModifierUpdateSubCommand implements Command {
 	public names = [L.en.commands.modifier.update.name()];
@@ -81,8 +81,6 @@ export class ModifierUpdateSubCommand implements Command {
 			.getString(ModifierOptions.MODIFIER_SET_VALUE_OPTION.name, true)
 			.trim();
 
-		let updateValue: string | string[] | number | Character['modifiers'][0]['sheetAdjustments'];
-
 		//check if we have an active character
 		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
 		if (!activeCharacter) {
@@ -117,7 +115,7 @@ export class ModifierUpdateSubCommand implements Command {
 				);
 				return;
 			} else {
-				updateValue = newFieldValue;
+				targetModifier.name = newFieldValue;
 			}
 		} else if (fieldToChange === 'value') {
 			if (targetModifier.modifierType === 'sheet') {
@@ -132,7 +130,7 @@ export class ModifierUpdateSubCommand implements Command {
 					creature: Creature.fromCharacter(activeCharacter),
 					LL: L.en,
 				});
-				updateValue = newFieldValue;
+				targetModifier.value = newFieldValue;
 			} catch (err) {
 				await InteractionUtils.send(
 					intr,
@@ -156,18 +154,34 @@ export class ModifierUpdateSubCommand implements Command {
 				);
 				return;
 			}
-			updateValue = newFieldValue;
-		} else if (['type', 'description'].includes(fieldToChange)) {
-			if (!newFieldValue) updateValue = null;
-			else updateValue = newFieldValue;
+			targetModifier.targetTags = newFieldValue;
+		} else if (fieldToChange === 'type') {
+			const newType = newFieldValue.trim().toLowerCase();
+			if (!newType) targetModifier.type = SheetAdjustmentTypeEnum.untyped;
+			else if (newType in SheetAdjustmentTypeEnum) {
+				targetModifier.type = newType as SheetAdjustmentTypeEnum;
+			} else {
+				throw new KoboldError(
+					`Yip! The type must be one of ${StringUtils.stringsToCommaPhrase(
+						Object.values(SheetAdjustmentTypeEnum)
+					)}.`
+				);
+			}
+		} else if (fieldToChange === 'description') {
+			if (!newFieldValue) targetModifier.description = null;
+			else targetModifier.description = newFieldValue;
 		} else if (fieldToChange === 'sheet-values') {
 			if (targetModifier.modifierType === 'roll') {
 				throw new KoboldError(
 					'Yip! Roll modifiers don\'t have "sheet values". Maybe you meant to update "value"?'
 				);
 			}
-			const creature = new Creature(activeCharacter.sheet);
-			updateValue = SheetUtils.sheetModifiersFromString(newFieldValue, creature);
+			targetModifier.sheetAdjustments = SheetUtils.stringToSheetAdjustments(newFieldValue);
+			// attempt to use the adjustments to make sure they're valid
+			SheetUtils.adjustSheetWithSheetAdjustments(
+				activeCharacter.sheet,
+				targetModifier.sheetAdjustments
+			);
 		} else {
 			// if a field wasn't provided, or the field isn't present in our options, send an error
 			await InteractionUtils.send(
@@ -179,19 +193,14 @@ export class ModifierUpdateSubCommand implements Command {
 		// just in case the update is for the name
 		const nameBeforeUpdate = targetModifier.name;
 
-		// still references the deep values in characterModifiers
-		let targetIndex = _.indexOf(activeCharacter.modifiers, targetModifier);
-
-		activeCharacter.modifiers[targetIndex][fieldToChange] = updateValue;
-
-		await Character.query().patchAndFetchById(activeCharacter.id, {
+		await CharacterModel.query().patchAndFetchById(activeCharacter.id, {
 			modifiers: activeCharacter.modifiers,
 		});
 
 		const updateEmbed = new KoboldEmbed();
 		updateEmbed.setTitle(
 			LL.commands.modifier.update.interactions.successEmbed.title({
-				characterName: activeCharacter.sheet.info.name,
+				characterName: activeCharacter.sheet.staticInfo.name,
 				modifierName: nameBeforeUpdate,
 				fieldToChange,
 				newFieldValue,

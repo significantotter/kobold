@@ -7,7 +7,6 @@ import {
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 
-import { Character } from '../../../services/kobold/models/index.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
@@ -16,6 +15,7 @@ import { CharacterUtils } from '../../../utils/character-utils.js';
 import { compileExpression } from 'filtrex';
 import { DiceUtils } from '../../../utils/dice-utils.js';
 import { Creature } from '../../../utils/creature.js';
+import { CharacterModel } from '../../../services/kobold/index.js';
 
 export class ModifierCreateRollModifierSubCommand implements Command {
 	public names = [L.en.commands.modifier.createRollModifier.name()];
@@ -66,7 +66,7 @@ export class ModifierCreateRollModifierSubCommand implements Command {
 				intr,
 				LL.commands.modifier.createRollModifier.interactions.alreadyExists({
 					modifierName: name,
-					characterName: activeCharacter.sheet.info.name,
+					characterName: activeCharacter.sheet.staticInfo.name,
 				})
 			);
 			return;
@@ -99,7 +99,7 @@ export class ModifierCreateRollModifierSubCommand implements Command {
 			return;
 		}
 
-		await Character.query().updateAndFetchById(activeCharacter.id, {
+		await CharacterModel.query().updateAndFetchById(activeCharacter.id, {
 			modifiers: [
 				...activeCharacter.modifiers,
 				{
@@ -119,7 +119,7 @@ export class ModifierCreateRollModifierSubCommand implements Command {
 			intr,
 			LL.commands.modifier.createRollModifier.interactions.created({
 				modifierName: name,
-				characterName: activeCharacter.sheet.info.name,
+				characterName: activeCharacter.sheet.staticInfo.name,
 			})
 		);
 		return;

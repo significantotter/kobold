@@ -1,19 +1,21 @@
 import _ from 'lodash';
-import type {
+import {
 	Sheet,
+	SheetBaseCounterKeys,
 	SheetBaseCounters,
 	SheetInfo,
 	SheetInfoLists,
+	SheetIntegerKeys,
 	SheetIntegers,
 	SheetStats,
 	SheetWeaknessesResistances,
-} from '../../services/kobold/models/index.js';
+} from '../../services/kobold/index.js';
 import {
 	AbilityEnum,
 	SheetStatKeys,
 	StatSubGroupEnum,
 	getDefaultSheet,
-} from '../../services/kobold/models/index.js';
+} from '../../services/kobold/index.js';
 import { literalKeys } from '../type-guards.js';
 
 function standardizePropKey(name: string): string {
@@ -35,7 +37,7 @@ export class SheetInfoProperties {
 		deity: { aliases: [] },
 		size: { aliases: [] },
 		class: { aliases: [] },
-		keyability: { aliases: [] },
+		keyAbility: { aliases: [] },
 		ancestry: { aliases: [] },
 		heritage: { aliases: [] },
 		background: { aliases: [] },
@@ -76,9 +78,50 @@ export class SheetInfoListProperties {
 	public static aliases = SheetInfoListProperties._aliases;
 }
 
+export enum SheetIntegerGroupEnum {
+	'ac' = 'ac',
+	'abilities' = 'abilities',
+	'speeds' = 'speeds',
+	'armorProficiencies' = 'armorProficiencies',
+	'weaponProficiencies' = 'weaponProficiencies',
+}
+
 export class SheetIntegerProperties {
 	constructor(protected sheetIntegers: SheetIntegers) {}
-	public static properties: Record<keyof SheetIntegers, { aliases: string[] }> = {
+
+	public static statGroups: Record<SheetIntegerGroupEnum, SheetIntegerKeys[]> = {
+		[SheetIntegerGroupEnum.ac]: [SheetIntegerKeys.ac],
+		[SheetIntegerGroupEnum.abilities]: [
+			SheetIntegerKeys.strength,
+			SheetIntegerKeys.dexterity,
+			SheetIntegerKeys.constitution,
+			SheetIntegerKeys.intelligence,
+			SheetIntegerKeys.wisdom,
+			SheetIntegerKeys.charisma,
+		],
+		[SheetIntegerGroupEnum.speeds]: [
+			SheetIntegerKeys.walkSpeed,
+			SheetIntegerKeys.flySpeed,
+			SheetIntegerKeys.swimSpeed,
+			SheetIntegerKeys.climbSpeed,
+			SheetIntegerKeys.burrowSpeed,
+			SheetIntegerKeys.dimensionalSpeed,
+		],
+		[SheetIntegerGroupEnum.armorProficiencies]: [
+			SheetIntegerKeys.unarmoredProficiency,
+			SheetIntegerKeys.lightProficiency,
+			SheetIntegerKeys.mediumProficiency,
+			SheetIntegerKeys.heavyProficiency,
+		],
+		[SheetIntegerGroupEnum.weaponProficiencies]: [
+			SheetIntegerKeys.unarmedProficiency,
+			SheetIntegerKeys.simpleProficiency,
+			SheetIntegerKeys.martialProficiency,
+			SheetIntegerKeys.advancedProficiency,
+		],
+	};
+
+	public static properties: Record<SheetIntegerKeys, { aliases: string[] }> = {
 		ac: { aliases: ['armor', 'armorclass'] },
 		// Ability Scores
 		strength: { aliases: ['str'] },
@@ -105,13 +148,13 @@ export class SheetIntegerProperties {
 		advancedProficiency: { aliases: ['advanced'] },
 	};
 
-	public static get _aliases(): { [k: string]: undefined | keyof SheetIntegers } {
-		const aliases: { [k: string]: undefined | keyof SheetIntegers } = {};
+	public static get _aliases(): { [k: string]: undefined | SheetIntegerKeys } {
+		const aliases: { [k: string]: undefined | SheetIntegerKeys } = {};
 		for (const [key, value] of Object.entries(SheetIntegerProperties.properties)) {
 			for (const alias of value.aliases) {
-				aliases[alias] = key as keyof SheetIntegers;
+				aliases[alias] = key as SheetIntegerKeys;
 			}
-			aliases[standardizePropKey(key)] = key as keyof SheetIntegers;
+			aliases[standardizePropKey(key)] = key as SheetIntegerKeys;
 		}
 		return aliases;
 	}
@@ -120,7 +163,7 @@ export class SheetIntegerProperties {
 
 export class SheetBaseCounterProperties {
 	constructor(protected sheetBaseCounters: SheetBaseCounters) {}
-	public static properties: Record<keyof SheetBaseCounters, { aliases: string[] }> = {
+	public static properties: Record<SheetBaseCounterKeys, { aliases: string[] }> = {
 		heroPoints: { aliases: ['maxheropoints'] },
 		focusPoints: { aliases: ['fp', 'maxfp', 'maxfocuspoints'] },
 		hp: { aliases: ['health', 'hitpoints', 'maxhp', 'maxhealth', 'maxhitpoints'] },
@@ -129,13 +172,13 @@ export class SheetBaseCounterProperties {
 		resolve: { aliases: ['maxresolve'] },
 	};
 
-	public static get _aliases(): { [k: string]: undefined | keyof SheetBaseCounters } {
-		const aliases: { [k: string]: undefined | keyof SheetBaseCounters } = {};
+	public static get _aliases(): { [k: string]: undefined | SheetBaseCounterKeys } {
+		const aliases: { [k: string]: undefined | SheetBaseCounterKeys } = {};
 		for (const [key, value] of Object.entries(SheetBaseCounterProperties.properties)) {
 			for (const alias of value.aliases) {
-				aliases[alias] = key as keyof SheetBaseCounters;
+				aliases[alias] = key as SheetBaseCounterKeys;
 			}
-			aliases[standardizePropKey(key)] = key as keyof SheetBaseCounters;
+			aliases[standardizePropKey(key)] = key as SheetBaseCounterKeys;
 		}
 		return aliases;
 	}
@@ -153,13 +196,12 @@ export enum StatGroupEnum {
 export class SheetStatProperties {
 	constructor(protected sheetStats: SheetStats) {}
 
-	public static statGroups: Record<StatGroupEnum, (keyof SheetStats)[]> = {
+	public static statGroups: Record<StatGroupEnum, SheetStatKeys[]> = {
 		[StatGroupEnum.casting]: [
 			SheetStatKeys.arcane,
 			SheetStatKeys.divine,
 			SheetStatKeys.occult,
 			SheetStatKeys.primal,
-			SheetStatKeys.class,
 		],
 		[StatGroupEnum.class]: [SheetStatKeys.class],
 		[StatGroupEnum.checks]: [SheetStatKeys.perception],
@@ -760,6 +802,15 @@ export class SheetProperties {
 	public static get defaultSheet(): Sheet {
 		return getDefaultSheet();
 	}
+
+	public static shorthandFromAbility: { [k in AbilityEnum]: string } = {
+		[AbilityEnum.strength]: 'str',
+		[AbilityEnum.dexterity]: 'dex',
+		[AbilityEnum.constitution]: 'con',
+		[AbilityEnum.intelligence]: 'int',
+		[AbilityEnum.wisdom]: 'wis',
+		[AbilityEnum.charisma]: 'cha',
+	};
 
 	public static abilityFromAlias: { [k: string]: AbilityEnum } = {
 		str: AbilityEnum.strength,

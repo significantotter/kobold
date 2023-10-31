@@ -88,7 +88,7 @@ export class RollSkillSubCommand implements Command {
 		const targetRoll = StringUtils.findBestValueByKeyMatch(skillChoice, creature.skillRolls);
 
 		const rollResult = await DiceUtils.rollSimpleCreatureRoll({
-			actorName: creature.sheet.info.name,
+			actorName: creature.sheet.staticInfo.name,
 			creature,
 			attributeName: targetRoll.name,
 			rollNote: rollNote ?? '',
