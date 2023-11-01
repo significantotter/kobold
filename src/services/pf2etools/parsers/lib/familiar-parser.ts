@@ -1,7 +1,6 @@
-import { EmbedData } from 'discord.js';
-import { Familiar } from '../../models/index.js';
-import { CompendiumEmbedParser } from '../compendium-parser.js';
-import { EntryParser } from '../compendium-entry-parser.js';
+import type { EmbedData } from 'discord.js';
+import type { Familiar } from '../../schemas/index.js';
+import type { CompendiumEmbedParser } from '../compendium-parser.js';
 
 export async function _parseFamiliar(this: CompendiumEmbedParser, familiar: Familiar) {
 	const preprocessedData = (await this.preprocessData(familiar)) as Familiar;
@@ -9,7 +8,6 @@ export async function _parseFamiliar(this: CompendiumEmbedParser, familiar: Fami
 }
 
 export function parseFamiliar(this: CompendiumEmbedParser, familiar: Familiar): EmbedData {
-	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
 	const title = `${familiar.name}`;
 	const descriptionLines: string[] = [];
 	if (familiar.requires)
@@ -17,12 +15,12 @@ export function parseFamiliar(this: CompendiumEmbedParser, familiar: Familiar): 
 	if (familiar.granted) {
 		descriptionLines.push(`**Granted Abilities** ${familiar.granted.join(', ')}`);
 	}
-	descriptionLines.push(entryParser.parseEntries(familiar.fluff));
+	descriptionLines.push(this.entryParser.parseEntries(familiar.fluff));
 	const fields: { name: string; value: string }[] = [];
 	for (const ability of familiar.abilities) {
 		fields.push({
-			name: entryParser.parseAbilityEntryTitle(ability),
-			value: entryParser.parseAbilityEntry(ability, false),
+			name: this.entryParser.parseAbilityEntryTitle(ability),
+			value: this.entryParser.parseAbilityEntry(ability, false),
 		});
 	}
 	return {

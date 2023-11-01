@@ -1,7 +1,7 @@
-import { EmbedData } from 'discord.js';
-import { Organization, OrganizationFluff } from '../../models/index.js';
-import { CompendiumEmbedParser } from '../compendium-parser.js';
-import { EntryParser } from '../compendium-entry-parser.js';
+import type { EmbedData } from 'discord.js';
+import type { Organization, OrganizationFluff } from '../../schemas/index.js';
+import type { CompendiumEmbedParser } from '../compendium-parser.js';
+
 import { DrizzleUtils } from '../../utils/drizzle-utils.js';
 
 export async function _parseOrganization(this: CompendiumEmbedParser, organization: Organization) {
@@ -21,9 +21,8 @@ export async function _parseOrganization(this: CompendiumEmbedParser, organizati
 export function parseOrganization(
 	this: CompendiumEmbedParser,
 	organization: Organization,
-	organizationFluff?: OrganizationFluff
+	organizationFluff: OrganizationFluff | undefined
 ): EmbedData {
-	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
 	const descriptionLines: string[] = [];
 	descriptionLines.push(`**Traits** ${organization.traits.join(', ')}`);
 	descriptionLines.push(`**Title** ${organization.title.join(', ')}`);
@@ -52,7 +51,7 @@ export function parseOrganization(
 	descriptionLines.push(`**Anathema** ${organization.anathema.join(', ')}`);
 	if (organizationFluff?.entries?.length) {
 		descriptionLines.push('');
-		descriptionLines.push(entryParser.parseEntries(organizationFluff.entries));
+		descriptionLines.push(this.entryParser.parseEntries(organizationFluff.entries));
 	}
 	descriptionLines.push('');
 

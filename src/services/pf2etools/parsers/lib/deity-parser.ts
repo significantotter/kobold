@@ -1,10 +1,10 @@
-import { EmbedData } from 'discord.js';
-import { Deity, DeityFluff } from '../../models/index.js';
-import { CompendiumEmbedParser } from '../compendium-parser.js';
-import { EntryParser } from '../compendium-entry-parser.js';
+import type { EmbedData } from 'discord.js';
+import type { CompendiumEmbedParser } from '../compendium-parser.js';
+
 import { DrizzleUtils } from '../../utils/drizzle-utils.js';
 import { nth } from '../compendium-parser-helpers.js';
 import _ from 'lodash';
+import { Deity, DeityFluff } from '../../schemas/index.js';
 
 export async function _parseDeity(this: CompendiumEmbedParser, deity: Deity) {
 	const preprocessedData = (await this.preprocessData(deity)) as Deity;
@@ -22,20 +22,19 @@ export async function _parseDeity(this: CompendiumEmbedParser, deity: Deity) {
 export function parseDeity(
 	this: CompendiumEmbedParser,
 	deity: Deity,
-	deityFluff?: DeityFluff
+	deityFluff: DeityFluff | undefined
 ): EmbedData {
 	let title = `${deity.name}`;
 	if (deity.alias?.length) title += ` (${deity.alias.join(', ')})`;
 	if (deity.alignment?.alignment?.length)
 		title += ` ${deity.alignment.alignment.map(n => n.toUpperCase()).join(', ')}`;
-	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
 
 	const descriptionLines: string[] = [];
 	let thumbnail: string | undefined = undefined;
 	if (deityFluff) {
 		thumbnail = deityFluff.images?.[0];
 		descriptionLines.push(
-			entryParser.parseEntries(deityFluff.entries ?? deityFluff.lore ?? [])
+			this.entryParser.parseEntries(deityFluff.entries ?? deityFluff.lore ?? [])
 		);
 		descriptionLines.push(''); //extra spacing
 	}

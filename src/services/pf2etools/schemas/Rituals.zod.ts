@@ -1,6 +1,7 @@
 import { z } from 'zod';
-import { zEntrySchema, zHeighteningSchema } from './index.js';
-import { zDurationSchema, zTypedNumberSchema } from './index.js';
+import { zDurationSchema, zTypedNumberSchema } from './lib/helpers.zod.js';
+import { zEntrySchema } from './lib/entries.zod.js';
+import { zHeighteningSchema } from './lib/entry-helpers.zod.js';
 
 export type Ritual = z.infer<typeof zRitualSchema>;
 export const zRitualSchema = z.strictObject({

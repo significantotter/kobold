@@ -1,27 +1,17 @@
-import { Model, RelationMappings, AjvValidator } from 'objection';
+import { Model, RelationMappings } from 'objection';
 import { z } from 'zod';
 import _ from 'lodash';
-import addFormats from 'ajv-formats';
+import { ZodValidator } from './zod-validator.js';
 
 export class BaseModel extends Model {
-	static idColumn: string | string[] = 'id';
+	declare $idColumn: string | string[];
 
 	/** Allow arbitrary properties */
 	[k: string]: any;
 
 	// enable ajv formats to  validate the date field when inserting in database
 	static createValidator() {
-		return new AjvValidator({
-			onCreateAjv: ajv => {
-				addFormats.default(ajv);
-			},
-			options: {
-				allErrors: true,
-				validateSchema: true,
-				ownProperties: true,
-				allowUnionTypes: true,
-			},
-		});
+		return new ZodValidator();
 	}
 
 	public parse() {
@@ -30,9 +20,6 @@ export class BaseModel extends Model {
 
 	declare $z: z.ZodObject<any>;
 
-	static get relationMappings(): RelationMappings {
-		return {
-			...super.relationMappings,
-		};
-	}
+	static relationMappings: RelationMappings = {};
+	static setupRelationMappings(allModels: any) {}
 }

@@ -5,6 +5,7 @@ import {
 	Character,
 	GuildDefaultCharacterFactory,
 	Modifier,
+	ModifierTypeEnum,
 	SheetAdjustmentTypeEnum,
 } from '../services/kobold/index.js';
 import { afterEach } from 'vitest';
@@ -46,7 +47,7 @@ describe('Character Utils', function () {
 			const targetModifier: Modifier = {
 				isActive: true,
 				targetTags: '',
-				modifierType: 'roll',
+				modifierType: ModifierTypeEnum.roll,
 				name: 'FakeModifier',
 				description: 'description',
 				type: SheetAdjustmentTypeEnum.untyped,
@@ -55,7 +56,7 @@ describe('Character Utils', function () {
 			const otherTargetModifier: Modifier = {
 				isActive: true,
 				targetTags: '',
-				modifierType: 'roll',
+				modifierType: ModifierTypeEnum.roll,
 				name: 'qwer FakeModifier asdf',
 				description: 'description',
 				type: SheetAdjustmentTypeEnum.untyped,
@@ -64,7 +65,7 @@ describe('Character Utils', function () {
 			const unmatchedModifier: Modifier = {
 				isActive: true,
 				targetTags: '',
-				modifierType: 'roll',
+				modifierType: ModifierTypeEnum.roll,
 				name: 'akeAbilit',
 				description: 'description',
 				type: SheetAdjustmentTypeEnum.untyped,
@@ -84,7 +85,7 @@ describe('Character Utils', function () {
 			const firstModifier: Modifier = {
 				isActive: true,
 				targetTags: '',
-				modifierType: 'roll',
+				modifierType: ModifierTypeEnum.roll,
 				name: 'FakeModifier',
 				description: 'description',
 				type: SheetAdjustmentTypeEnum.untyped,
@@ -93,7 +94,7 @@ describe('Character Utils', function () {
 			const secondModifier: Modifier = {
 				isActive: true,
 				targetTags: '',
-				modifierType: 'roll',
+				modifierType: ModifierTypeEnum.roll,
 				name: 'qwer FakeModifier asdf',
 				description: 'description',
 				type: SheetAdjustmentTypeEnum.untyped,
@@ -102,7 +103,7 @@ describe('Character Utils', function () {
 			const thirdModifier: Modifier = {
 				isActive: true,
 				targetTags: '',
-				modifierType: 'roll',
+				modifierType: ModifierTypeEnum.roll,
 				name: 'akeAbilit',
 				description: 'description',
 				type: SheetAdjustmentTypeEnum.untyped,

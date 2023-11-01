@@ -1,9 +1,9 @@
 import { Ability, zAbilitySchema } from './../schemas/index.js';
 import { fetchOneJsonFile } from './lib/helpers.js';
 import { Model } from './lib/Model.js';
-import { parseActivityRaw } from '../parsers/compendium-entry-parser.js';
 import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import * as schema from '../pf2eTools.schema.js';
+import { parseActivityRaw } from '../utils/helpers.js';
 
 export class Abilities extends Model<typeof zAbilitySchema, typeof schema.Abilities> {
 	constructor(public db: BetterSQLite3Database<typeof schema>) {

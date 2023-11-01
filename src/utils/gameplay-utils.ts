@@ -1,14 +1,12 @@
-import { ChatInputCommandInteraction, Client } from 'discord.js';
+import { ChatInputCommandInteraction } from 'discord.js';
 import {
-	Character,
 	CharacterModel,
-	InitiativeActor,
 	InitiativeActorModel,
 	ModelWithSheet,
 	SheetBaseCounterKeys,
 } from '../services/kobold/index.js';
 import { KoboldError } from './KoboldError.js';
-import { Creature, SettableSheetOption } from './creature.js';
+import { Creature } from './creature.js';
 import { CharacterUtils } from './character-utils.js';
 
 export class GameplayUtils {

@@ -11,9 +11,8 @@ import {
 	ShardStats,
 } from '../models/cluster-api/index.js';
 import { Logger } from '../services/index.js';
-import { Controller } from './index.js';
+import { Controller } from './controller.js';
 import { Config } from './../config/config.js';
-import Logs from './../config/lang/logs.json' assert { type: 'json' };
 
 export class ShardsController implements Controller {
 	public path = '/shards';
@@ -42,7 +41,7 @@ export class ShardsController implements Controller {
 					let uptime = (await shard.fetchClientValue('uptime')) as number;
 					shardInfo.uptimeSecs = Math.floor(uptime / 1000);
 				} catch (error) {
-					Logger.error(Logs.error.managerShardInfo, error);
+					Logger.error('An error occurred while retrieving shard info.', error);
 					shardInfo.error = true;
 				}
 

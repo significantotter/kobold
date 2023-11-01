@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import {
+import type {
 	AbilityEntry,
 	Action,
 	Activate,
@@ -27,8 +27,8 @@ import {
 } from '../schemas/index-types.js';
 import { SharedParsers, applyOperatorIfNumber, nth } from './compendium-parser-helpers.js';
 import { table } from 'table';
-import { CompendiumEmbedParser } from './compendium-parser.js';
-import { EmbedData } from 'discord.js';
+import type { CompendiumEmbedParser } from './compendium-parser.js';
+import type { EmbedData } from 'discord.js';
 import { parseHazard } from './lib/hazard-parser.js';
 import { parseRitual } from './lib/ritual-parser.js';
 import { parseBackground } from './lib/background-parser.js';
@@ -85,29 +85,6 @@ const emojiSpecialCharacterOptions = [
 	'☝',
 	'☜',
 ];
-
-export function parseActivityRaw(activity?: Activity) {
-	if (!activity) return '';
-	if ('entry' in activity) {
-		return '';
-	}
-	if (activity.customUnit) return ``;
-	const unit = activity.unit ?? 'action';
-	if (unit === 'reaction') {
-		return 'react';
-	} else if (unit === 'free') {
-		return 'free';
-	} else if (['action', 'actions'].includes(unit)) {
-		if (activity.number === 1) {
-			return '1a';
-		} else if (activity.number === 2) {
-			return '2a';
-		} else if (activity.number === 3) {
-			return '3a';
-		}
-	}
-	return ``;
-}
 
 const fakeEmojiConverter = (emoji: string) =>
 	({
@@ -783,7 +760,7 @@ export class EntryParser {
 		return attackLine.join(' ');
 	}
 
-	parseFeat(feat: Feat, showTitle: boolean = true): { name: string; value: string } {
+	public parseFeat(feat: Feat, showTitle: boolean = true): { name: string; value: string } {
 		const activity = feat.activity ? ' ' + this.parseActivity(feat.activity) : '';
 		const name = `**${feat.name}**${activity} (Feat ${feat.level})`;
 
@@ -815,7 +792,7 @@ export class EntryParser {
 		return { name, value: descriptionLines.join(this.delimiter) };
 	}
 
-	parseHeightening(heightening: Heightening) {
+	public parseHeightening(heightening: Heightening) {
 		const lines = [];
 		if (heightening.X) {
 			lines.push(
@@ -838,5 +815,13 @@ export class EntryParser {
 			);
 		}
 		return lines.join(this.delimiter);
+	}
+
+	public withDelimiter(delimiter: string): EntryParser {
+		return new EntryParser({
+			emojiConverter: this.emojiConverter,
+			embedParser: this.embedParser,
+			delimiter,
+		});
 	}
 }

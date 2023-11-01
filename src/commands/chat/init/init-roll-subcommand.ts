@@ -198,7 +198,7 @@ export class InitRollSubCommand implements Command {
 				embed.addFields(damageField);
 			}
 		} else if (['skill', 'ability', 'save', 'spell'].includes(targetRoll.type)) {
-			const response = await DiceUtils.rollSimpleCreatureRoll({
+			const response = await RollBuilder.fromSimpleCreatureRoll({
 				userName: intr.user.username,
 				actorName: actor.name,
 				creature,
@@ -211,7 +211,7 @@ export class InitRollSubCommand implements Command {
 
 			embed = response.compileEmbed();
 		} else if (targetRoll.type === 'attack') {
-			const { builtRoll, actionRoller } = DiceUtils.rollCreatureAttack({
+			const { builtRoll, actionRoller } = ActionRoller.fromCreatureAttack({
 				creature,
 				targetCreature,
 				attackName: targetRoll.name,

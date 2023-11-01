@@ -1,15 +1,16 @@
 import { z } from 'zod';
-import { zAbilityListEntrySchema, zAttackEntrySchema, zCopySchema, zEntrySchema } from './index.js';
 import {
-	zStatSchema,
-	zRitualMiniSchema,
-	zOtherSourceSchema,
-	zTypedNumberSchema,
-	zSpeedSchema,
 	zAbilityScoreSchema,
 	zDefensesSchema,
+	zOtherSourceSchema,
+	zRitualMiniSchema,
+	zSpeedSchema,
 	zSpellcastingSchema,
-} from './index.js';
+	zStatSchema,
+	zTypedNumberSchema,
+} from './lib/helpers.zod.js';
+import { zAbilityListEntrySchema, zAttackEntrySchema, zEntrySchema } from './lib/entries.zod.js';
+import { zCopySchema } from './lib/entry-helpers.zod.js';
 
 export type CreatureSense = z.infer<typeof zCreatureSenseSchema>;
 const zCreatureSenseSchema = z.strictObject({

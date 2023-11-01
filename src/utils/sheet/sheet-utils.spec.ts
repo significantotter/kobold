@@ -7,6 +7,7 @@ import {
 	AdjustablePropertyEnum,
 	Modifier,
 	SheetStatKeys,
+	ModifierTypeEnum,
 } from '../../services/kobold/index.js';
 import { KoboldError } from '../KoboldError.js';
 import { SheetProperties } from './sheet-properties.js';
@@ -43,7 +44,7 @@ describe('SheetUtils', () => {
 				{
 					name: 'foo',
 					description: '',
-					modifierType: 'sheet',
+					modifierType: ModifierTypeEnum.sheet,
 					isActive: true,
 					type: SheetAdjustmentTypeEnum.untyped,
 					sheetAdjustments: [
@@ -66,7 +67,7 @@ describe('SheetUtils', () => {
 				{
 					name: 'foo',
 					description: '',
-					modifierType: 'sheet',
+					modifierType: ModifierTypeEnum.sheet,
 					isActive: false,
 					type: SheetAdjustmentTypeEnum.untyped,
 					sheetAdjustments: [
@@ -82,7 +83,7 @@ describe('SheetUtils', () => {
 				{
 					name: 'bar',
 					description: '',
-					modifierType: 'roll',
+					modifierType: ModifierTypeEnum.roll,
 					isActive: true,
 					type: SheetAdjustmentTypeEnum.status,
 					value: '1d4',
@@ -101,7 +102,7 @@ describe('SheetUtils', () => {
 				{
 					name: 'foo',
 					description: '',
-					modifierType: 'sheet',
+					modifierType: ModifierTypeEnum.sheet,
 					isActive: false,
 					type: SheetAdjustmentTypeEnum.untyped,
 					sheetAdjustments: [
@@ -117,7 +118,7 @@ describe('SheetUtils', () => {
 				{
 					name: 'bar',
 					description: '',
-					modifierType: 'roll',
+					modifierType: ModifierTypeEnum.roll,
 					isActive: true,
 					type: SheetAdjustmentTypeEnum.status,
 					value: '1d4',

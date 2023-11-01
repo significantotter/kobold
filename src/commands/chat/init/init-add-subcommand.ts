@@ -32,6 +32,7 @@ import L from '../../../i18n/i18n-node.js';
 import { DeepPartial } from 'fishery';
 import { CreatureFluff } from '../../../services/pf2etools/schemas/index-types.js';
 import { SheetProperties } from '../../../utils/sheet/sheet-properties.js';
+import { NpcUtils } from '../../../utils/npc-utils.js';
 
 export class InitAddSubCommand implements Command {
 	public names = [L.en.commands.init.add.name()];
@@ -114,7 +115,7 @@ export class InitAddSubCommand implements Command {
 			// we know there's at least 1, so there will be a match
 			const npc = StringUtils.findClosestInObjectArray(name, npcs, 'name');
 			if (!npc) throw new KoboldError(`Yip! I couldn\'t find  ${fullMatch} in the bestiary!`);
-			const variantData = await npc.fetchVariantDataIfExists();
+			const variantData = await NpcUtils.fetchVariantDataIfExists(npc);
 			if (!actorName) actorName = (template ? `${_.capitalize(template)} ` : '') + npc.name;
 			const creature = Creature.fromBestiaryEntry(
 				variantData,

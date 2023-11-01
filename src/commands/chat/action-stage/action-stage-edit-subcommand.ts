@@ -114,11 +114,11 @@ export class ActionStageEditSubCommand implements Command {
 		let invalid = false;
 		// validate the strings into different types based on which field is being edited
 		if (roll.type === 'attack') {
-			if (!['name', 'targetDC', 'roll', 'allowRollModifier'].includes(fieldToEdit)) {
+			if (!['name', 'targetDC', 'roll', 'allowRollModifiers'].includes(fieldToEdit)) {
 				invalid = true;
 			}
 		} else if (roll.type === 'damage') {
-			if (!['name', 'roll', 'allowRollModifier', 'damageType'].includes(fieldToEdit)) {
+			if (!['name', 'roll', 'allowRollModifiers', 'damageType'].includes(fieldToEdit)) {
 				invalid = true;
 			}
 		} else if (roll.type === 'advanced-damage') {
@@ -129,14 +129,16 @@ export class ActionStageEditSubCommand implements Command {
 					'failureRoll',
 					'criticalSuccessRoll',
 					'criticalFailureRoll',
-					'allowRollModifier',
+					'allowRollModifiers',
 				].includes(fieldToEdit)
 			) {
 				invalid = true;
 			}
 		} else if (roll.type === 'save') {
 			if (
-				!['name', 'saveRollType', 'saveTargetDC', 'allowRollModifier'].includes(fieldToEdit)
+				!['name', 'saveRollType', 'saveTargetDC', 'allowRollModifiers'].includes(
+					fieldToEdit
+				)
 			) {
 				invalid = true;
 			}
@@ -149,7 +151,7 @@ export class ActionStageEditSubCommand implements Command {
 					'failureText',
 					'criticalSuccessText',
 					'criticalFailureText',
-					'allowRollModifier',
+					'allowRollModifiers',
 					'extraTags',
 				].includes(fieldToEdit)
 			) {
@@ -199,7 +201,7 @@ export class ActionStageEditSubCommand implements Command {
 		}
 
 		// boolean values
-		else if (['allowRollModifier'].includes(fieldToEdit)) {
+		else if (['allowRollModifiers'].includes(fieldToEdit)) {
 			finalValue = ['true', 'yes', '1', 'ok', 'okay'].includes(
 				newValue.toLocaleLowerCase().trim()
 			);

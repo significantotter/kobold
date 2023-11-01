@@ -1,8 +1,8 @@
 import { z } from 'zod';
 import { zCharacter } from '../character.zod.js';
 import { zGame } from '../game.zod.js';
-import { zInitiativeActorGroup } from '../initiative-actor-group.zod.js';
 import { zInitiativeActor } from '../initiative-actor.zod.js';
+import { zInitiativeActorGroup } from '../initiative-actor-group.zod.js';
 import { zInitiative } from '../initiative.zod.js';
 
 export type InitiativeActorWithRelations = z.infer<typeof zInitiativeActorWithRelations>;

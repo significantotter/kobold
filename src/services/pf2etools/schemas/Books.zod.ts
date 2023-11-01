@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { zEntrySchema } from './index.js';
 
 export type Book = z.infer<typeof zBookSchema>;
 

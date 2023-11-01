@@ -1,6 +1,5 @@
 import { z } from 'zod';
-import { zTypedNumberSchema } from './index.js';
-import { zAbilityEntrySchema } from './index.js';
+import { zAbilityEntrySchema } from './lib/entries.zod.js';
 
 export type Familiar = z.infer<typeof zFamiliarSchema>;
 export const zFamiliarSchema = z.strictObject({

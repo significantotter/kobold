@@ -1,5 +1,6 @@
 import { z } from 'zod';
-import { zAbilityEntrySchema, zAfflictionEntrySchema, zCopySchema, zEntrySchema } from './index.js';
+import { zAbilityEntrySchema, zAfflictionEntrySchema, zEntrySchema } from './lib/entries.zod.js';
+import { zCopySchema } from './lib/entry-helpers.zod.js';
 
 export type CreatureTemplate = z.infer<typeof zCreatureTemplateSchema>;
 export const zCreatureTemplateSchema = z.strictObject({

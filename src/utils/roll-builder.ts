@@ -15,6 +15,7 @@ import { KoboldEmbed } from './kobold-embed-utils.js';
 import { UserSettingsFactory } from '../services/kobold/models/user-settings/user-settings.factory.js';
 import { APIEmbedField } from 'discord.js';
 import L from '../i18n/i18n-node.js';
+import { KoboldError } from './KoboldError.js';
 
 export class RollBuilder {
 	protected userSettings: UserSettings | null;
@@ -441,5 +442,59 @@ export class RollBuilder {
 		}
 
 		return response;
+	}
+
+	public static fromSimpleCreatureRoll({
+		userName,
+		actorName,
+		creature,
+		attributeName,
+		rollNote,
+		modifierExpression,
+		description,
+		tags,
+		userSettings,
+		LL,
+	}: {
+		userName?: string;
+		actorName?: string;
+		creature: Creature;
+		attributeName: string;
+		rollNote?: string;
+		modifierExpression?: string | null;
+		description?: string;
+		tags?: string[];
+		userSettings?: UserSettings;
+		LL?: TranslationFunctions;
+	}): RollBuilder {
+		LL = LL || L.en;
+
+		const roll = creature.rolls[attributeName.toLowerCase()];
+		if (!roll)
+			throw new KoboldError(
+				`Yip! I couldn\'t find a roll called "${attributeName.toLowerCase()}"`
+			);
+
+		const rollBuilder = new RollBuilder({
+			actorName: actorName ?? creature.name ?? userName,
+			creature: creature,
+			rollNote,
+			rollDescription:
+				description ||
+				LL.utils.dice.rolledAction({
+					actionName: _.startCase(roll.name),
+				}),
+			userSettings,
+		});
+		rollBuilder.addRoll({
+			rollTitle: _.startCase(roll.name),
+			rollExpression: DiceUtils.buildDiceExpression(
+				'd20',
+				String(roll.bonus),
+				modifierExpression
+			),
+			tags: (tags || []).concat(roll.tags),
+		});
+		return rollBuilder;
 	}
 }

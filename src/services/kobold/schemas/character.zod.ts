@@ -1,9 +1,9 @@
 import { z } from 'zod';
 import { zTimestamp } from './lib/helpers.zod.js';
-import { zAction } from '../lib/schemas/action.zod.js';
-import { zModifier } from '../lib/schemas/modifier.zod.js';
-import { zRollMacro } from '../lib/schemas/roll-macro.zod.js';
-import { zSheet } from '../lib/schemas/sheet.zod.js';
+import { zAction } from './shared/action.zod.js';
+import { zModifier } from './shared/modifier.zod.js';
+import { zRollMacro } from './shared/roll-macro.zod.js';
+import { zSheet } from './shared/sheet.zod.js';
 import { getDefaultSheet } from '../lib/sheet-default.js';
 
 export type Character = z.infer<typeof zCharacter>;

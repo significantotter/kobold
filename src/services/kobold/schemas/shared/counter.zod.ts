@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { zNullableInteger } from '../../schemas/lib/helpers.zod.js';
+import { zNullableInteger } from '../lib/helpers.zod.js';
 
 export type PreparedCounter = z.infer<typeof zPreparedCounter>;
 export const zPreparedCounter = z.strictObject({

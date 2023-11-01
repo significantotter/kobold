@@ -14,7 +14,8 @@ import {
 	VoiceChannel,
 } from 'discord.js';
 
-import { PermissionUtils, RegexUtils } from './index.js';
+import { PermissionUtils } from './permission-utils.js';
+import { RegexUtils } from './regex-utils.js';
 
 const FETCH_MEMBER_LIMIT = 20;
 const channelRegex = /bot|command|cmd/i;

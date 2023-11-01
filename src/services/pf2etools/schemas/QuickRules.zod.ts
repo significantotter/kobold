@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { zEntrySchema } from './index.js';
+import { zEntrySchema } from './lib/entries.zod.js';
 
 // Special case
 // This was originally a record of name: rule

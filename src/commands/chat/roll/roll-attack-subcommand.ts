@@ -30,6 +30,7 @@ import {
 import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
 import { GameUtils } from '../../../utils/game-utils.js';
 import { SettingsUtils } from '../../../utils/settings-utils.js';
+import { ActionRoller } from '../../../utils/action-roller.js';
 
 export class RollAttackSubCommand implements Command {
 	public names = [L.en.commands.roll.attack.name()];
@@ -135,7 +136,7 @@ export class RollAttackSubCommand implements Command {
 			targetActor = null;
 		}
 
-		const { builtRoll, actionRoller } = DiceUtils.rollCreatureAttack({
+		const { builtRoll, actionRoller } = ActionRoller.fromCreatureAttack({
 			creature,
 			targetCreature,
 			attackName: attackChoice,

@@ -1,14 +1,34 @@
 import { z } from 'zod';
-import {
-	AdjustablePropertyEnum,
-	SheetAdjustmentOperationEnum,
-	SheetAdjustmentTypeEnum,
-} from '../../schemas/lib/enums.js';
 
 export type SheetAdjustment = z.infer<typeof zSheetAdjustment> & {
 	// This is for the parser, keeping type safety as we extend this type
 	parsed?: never;
 };
+
+export enum SheetAdjustmentTypeEnum {
+	untyped = 'untyped',
+	status = 'status',
+	circumstance = 'circumstance',
+	item = 'item',
+}
+
+export enum AdjustablePropertyEnum {
+	info = 'info',
+	infoList = 'infoList',
+	intProperty = 'intProperty',
+	baseCounter = 'baseCounter',
+	weaknessResistance = 'weaknessResistance',
+	stat = 'stat',
+	attack = 'attack',
+	extraSkill = 'extraSkill',
+	none = '',
+}
+
+export enum SheetAdjustmentOperationEnum {
+	'+' = '+',
+	'-' = '-',
+	'=' = '=',
+}
 
 export const zSheetAdjustment = z.strictObject({
 	property: z.string(),
@@ -18,10 +38,15 @@ export const zSheetAdjustment = z.strictObject({
 	type: z.nativeEnum(SheetAdjustmentTypeEnum).default(SheetAdjustmentTypeEnum.untyped),
 });
 
+export enum ModifierTypeEnum {
+	sheet = 'sheet',
+	roll = 'roll',
+}
+
 export type SheetModifier = z.infer<typeof zSheetModifier>;
 export const zSheetModifier = z
 	.strictObject({
-		modifierType: z.literal('sheet'),
+		modifierType: z.literal(ModifierTypeEnum.sheet),
 		name: z.string(),
 		isActive: z.boolean().default(false),
 		description: z.string().nullable().default(null),
@@ -33,7 +58,7 @@ export const zSheetModifier = z
 export type RollModifier = z.infer<typeof zRollModifier>;
 export const zRollModifier = z
 	.strictObject({
-		modifierType: z.literal('roll'),
+		modifierType: z.literal(ModifierTypeEnum.roll),
 		name: z.string(),
 		isActive: z.boolean().default(false),
 		description: z.string().nullable().default(null),

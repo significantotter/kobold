@@ -1,7 +1,22 @@
 import { z } from 'zod';
-import { zNullableInteger } from '../../schemas/lib/helpers.zod.js';
+import { zNullableInteger } from '../lib/helpers.zod.js';
 import { zRoll } from './roll.zod.js';
-import { ActionCostEnum, ActionTypeEnum } from '../../schemas/lib/enums.js';
+
+export enum ActionCostEnum {
+	oneAction = 'oneAction',
+	twoActions = 'twoActions',
+	threeActions = 'threeActions',
+	freeAction = 'freeAction',
+	variableActions = 'variableActions',
+	reaction = 'reaction',
+	none = 'none',
+}
+
+export enum ActionTypeEnum {
+	attack = 'attack',
+	spell = 'spell',
+	other = 'other',
+}
 
 export type Action = z.infer<typeof zAction>;
 export const zAction = z

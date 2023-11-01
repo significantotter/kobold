@@ -1,7 +1,6 @@
-import { EmbedData } from 'discord.js';
-import { CompanionAbility } from '../../models/index.js';
-import { CompendiumEmbedParser } from '../compendium-parser.js';
-import { EntryParser } from '../compendium-entry-parser.js';
+import type { EmbedData } from 'discord.js';
+import type { CompanionAbility } from '../../schemas/index.js';
+import type { CompendiumEmbedParser } from '../compendium-parser.js';
 
 export async function _parseCompanionAbility(
 	this: CompendiumEmbedParser,
@@ -16,8 +15,8 @@ export function parseCompanionAbility(
 	companionAbility: CompanionAbility
 ): EmbedData {
 	const title = `${companionAbility.name}`;
-	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
-	const description = entryParser.parseEntries(companionAbility.entries);
+
+	const description = this.entryParser.parseEntries(companionAbility.entries);
 	return {
 		title: title,
 		description,

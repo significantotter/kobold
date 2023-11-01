@@ -1,7 +1,7 @@
-import { EmbedData } from 'discord.js';
-import { Condition } from '../../models/index.js';
-import { CompendiumEmbedParser } from '../compendium-parser.js';
-import { EntryParser } from '../compendium-entry-parser.js';
+import type { EmbedData } from 'discord.js';
+import type { CompendiumEmbedParser } from '../compendium-parser.js';
+
+import { Condition } from '../../schemas/index.js';
 
 export async function _parseCondition(this: CompendiumEmbedParser, condition: Condition) {
 	const preprocessedData = (await this.preprocessData(condition)) as Condition;
@@ -9,9 +9,8 @@ export async function _parseCondition(this: CompendiumEmbedParser, condition: Co
 }
 
 export function parseCondition(this: CompendiumEmbedParser, condition: Condition): EmbedData {
-	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
 	const title = `${condition.name}`;
-	const description = entryParser.parseEntries(condition.entries);
+	const description = this.entryParser.parseEntries(condition.entries);
 	return {
 		title: title,
 		description: description,

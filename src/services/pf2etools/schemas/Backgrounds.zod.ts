@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { zEntrySchema } from './index.js';
+import { zEntrySchema } from './lib/entries.zod.js';
 
 export type Background = z.infer<typeof zBackgroundSchema>;
 export const zBackgroundSchema = z.strictObject({

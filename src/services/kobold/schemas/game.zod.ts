@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { zCharacter } from './character.zod.js';
 
 export type Game = z.infer<typeof zGame>;
 export const zGame = z

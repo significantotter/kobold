@@ -1,7 +1,6 @@
-import { EmbedData } from 'discord.js';
-import { Ability } from '../../models/index.js';
-import { CompendiumEmbedParser } from '../compendium-parser.js';
-import { EntryParser } from '../compendium-entry-parser.js';
+import type { EmbedData } from 'discord.js';
+import type { Ability } from '../../schemas/index.js';
+import type { CompendiumEmbedParser } from '../compendium-parser.js';
 
 export async function _parseAbility(this: CompendiumEmbedParser, ability: Ability) {
 	const preprocessedData = (await this.preprocessData(ability)) as Ability;
@@ -9,11 +8,10 @@ export async function _parseAbility(this: CompendiumEmbedParser, ability: Abilit
 }
 
 export function parseAbility(this: CompendiumEmbedParser, ability: Ability): EmbedData {
-	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
 	const title = `${ability.name} ${
-		ability.activity ? entryParser.parseActivity(ability.activity) : ''
+		ability.activity ? this.entryParser.parseActivity(ability.activity) : ''
 	}`;
-	const description = entryParser.parseAbilityEntry(ability, false);
+	const description = this.entryParser.parseAbilityEntry(ability, false);
 	return {
 		title: title,
 		description: description,

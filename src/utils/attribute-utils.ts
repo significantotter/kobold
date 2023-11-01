@@ -1,6 +1,6 @@
 import _ from 'lodash';
-import { Attribute, Counter, ProficiencyStat } from '../services/kobold/index.js';
-import { Creature } from './creature.js';
+import type { Attribute, Counter, ProficiencyStat } from '../services/kobold/index.js';
+import type { Creature } from './creature.js';
 import { SheetProperties } from './sheet/sheet-properties.js';
 
 export class AttributeUtils {

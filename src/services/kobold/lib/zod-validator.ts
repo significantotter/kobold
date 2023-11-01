@@ -1,5 +1,6 @@
 import { Pojo, Validator, ValidatorArgs } from 'objection';
 import { BaseModel } from './base-model.js';
+import _ from 'lodash';
 
 export class ZodValidator extends Validator {
 	validate(args: ValidatorArgs): Pojo {
@@ -23,7 +24,7 @@ export class ZodValidator extends Validator {
 
 		// Do your validation here and throw any exception if the
 		// validation fails.
-		const idColumns = [model.prototype?.constructor?.idColumn as string | string[]].flat();
+		const idColumns = [model.$idColumn as string | string[]].flat();
 		const $zInsert = model.$z.omit(
 			idColumns.reduce((acc, key) => ({ ...acc, [key]: true }), {})
 		);
@@ -37,8 +38,13 @@ export class ZodValidator extends Validator {
 			json = $zInsert.safeParse(json);
 		}
 
+		if (json.success === false) {
+			console.dir(json.error, { depth: null });
+			throw new Error('failed to validate JSON');
+		}
+
 		// You need to return the (possibly modified) json.
-		return json;
+		return json.data;
 	}
 
 	beforeValidate(args: ValidatorArgs) {

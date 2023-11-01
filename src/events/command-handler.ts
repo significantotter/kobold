@@ -12,7 +12,7 @@ import { Command, CommandDeferType } from '../commands/index.js';
 import { DiscordLimits } from '../constants/index.js';
 import { Logger } from '../services/index.js';
 import { CommandUtils, InteractionUtils } from '../utils/index.js';
-import { EventHandler } from './index.js';
+import { EventHandler } from './event-handler.js';
 import { Config } from './../config/config.js';
 import Logs from './../config/lang/logs.json' assert { type: 'json' };
 import { KoboldEmbed } from '../utils/kobold-embed-utils.js';

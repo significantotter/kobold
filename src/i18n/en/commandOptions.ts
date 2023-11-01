@@ -237,7 +237,7 @@ export default {
 		choices: {
 			name: { name: 'name', value: 'name' },
 			damageType: { name: 'damage-type', value: 'damageType' },
-			allowRollModifier: { name: 'allow-roll-modifier', value: 'allowRollModifier' },
+			allowRollModifiers: { name: 'allow-roll-modifier', value: 'allowRollModifiers' },
 			attackTargetDC: { name: 'attack-target-dc', value: 'targetDC' },
 			attackRoll: { name: 'attack-roll', value: 'roll' },
 			basicDamageRoll: { name: 'basic-damage-roll', value: 'roll' },

@@ -1,4 +1,4 @@
-import { Character, CharacterModel } from '../../../services/kobold/index.js';
+import { Character, CharacterModel, RollTypeEnum } from '../../../services/kobold/index.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -59,7 +59,7 @@ export class ActionStageAddSkillChallengeSubCommand implements Command {
 			ActionStageOptions.ACTION_TARGET_OPTION.name,
 			true
 		);
-		const rollType = 'skill-challenge';
+		const rollType = RollTypeEnum.skillChallenge;
 		const rollName = intr.options.getString(
 			ActionStageOptions.ACTION_ROLL_NAME_OPTION.name,
 			true
@@ -130,7 +130,7 @@ export class ActionStageAddSkillChallengeSubCommand implements Command {
 			LL.commands.actionStage.interactions.rollAddSuccess({
 				actionName: action.name,
 				rollName: rollName,
-				rollType: 'skill-challenge',
+				rollType: rollType,
 			})
 		);
 	}

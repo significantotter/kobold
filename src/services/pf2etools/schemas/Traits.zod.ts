@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { zEntrySchema } from './index.js';
-import { zOtherSourceSchema } from './index.js';
+import { zOtherSourceSchema } from './lib/helpers.zod.js';
+import { zEntrySchema } from './lib/entries.zod.js';
 
 export type Trait = z.infer<typeof zTraitSchema>;
 export const zTraitSchema = z.strictObject({

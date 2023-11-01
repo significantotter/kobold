@@ -3,8 +3,8 @@ import type { DeepPartial } from 'fishery';
 import { CharacterModel } from './character.model.js';
 import { faker } from '@faker-js/faker';
 import { WG } from '../../../wanderers-guide/wanderers-guide.js';
-import { Modifier, SheetAdjustmentTypeEnum } from '../index.js';
-import { SheetProperties } from '../../../../utils/sheet/sheet-properties.js';
+import { Modifier, ModifierTypeEnum, SheetAdjustmentTypeEnum } from '../../schemas/index.js';
+import { getDefaultSheet } from '../../lib/sheet-default.js';
 
 export function createRandomModifiers(times: number): Modifier[] {
 	const modifiers: Modifier[] = [];
@@ -16,7 +16,7 @@ export function createRandomModifiers(times: number): Modifier[] {
 			type: faker.helpers.arrayElement(Object.values(SheetAdjustmentTypeEnum)),
 			targetTags: 'attack or skill',
 			value: faker.number.int(2147483647) + '',
-			modifierType: 'roll',
+			modifierType: ModifierTypeEnum.roll,
 		};
 		modifiers.push(modifier);
 	}
@@ -61,7 +61,7 @@ export const CharacterFactory = CharacterFactoryClass.define(({ onCreate }) => {
 		isActiveCharacter: faker.datatype.boolean(),
 		createdAt: faker.date.recent({ days: 30 }).toISOString(),
 		lastUpdatedAt: faker.date.recent({ days: 30 }).toISOString(),
-		sheet: SheetProperties.defaultSheet,
+		sheet: getDefaultSheet(),
 	};
 
 	return CharacterModel.fromDatabaseJson(characterData);

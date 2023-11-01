@@ -1,8 +1,4 @@
-// also export the enums and some other needed values
-export * from './../lib/index.js';
-
 // TODO: purge all non-kobold-service imports within this directory
-
 export * from './wg-token/wg-token.model.js';
 export * from './wg-token/wg-token.factory.js';
 export * from './character/character.model.js';
@@ -23,6 +19,4 @@ export * from './bestiary-files-loaded/bestiary-files-loaded.model.js';
 export * from './npc/npc.model.js';
 export * from './user-settings/user-settings.model.js';
 
-export type * from './../lib/thing-with-sheet.js';
-
-export type * from './../lib/type-helpers.js';
+import './setup-models.js';

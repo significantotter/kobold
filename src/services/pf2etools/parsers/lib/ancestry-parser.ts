@@ -1,7 +1,6 @@
-import { EmbedData } from 'discord.js';
-import { Ancestry, AncestryFeature } from '../../models/index.js';
-import { CompendiumEmbedParser } from '../compendium-parser.js';
-import { EntryParser } from '../compendium-entry-parser.js';
+import type { EmbedData } from 'discord.js';
+import type { Ancestry, AncestryFeature } from '../../schemas/index.js';
+import type { CompendiumEmbedParser } from '../compendium-parser.js';
 
 export async function _parseAncestry(this: CompendiumEmbedParser, ancestry: Ancestry) {
 	const preprocessedData = (await this.preprocessData(ancestry)) as Ancestry;
@@ -9,7 +8,6 @@ export async function _parseAncestry(this: CompendiumEmbedParser, ancestry: Ance
 }
 
 export function parseAncestry(this: CompendiumEmbedParser, ancestry: Ancestry): EmbedData {
-	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
 	const title = `${ancestry.name}`;
 	const descriptionLines: string[] = [];
 	if (ancestry.summary.text) descriptionLines.push(ancestry.summary.text);
@@ -25,7 +23,7 @@ export function parseAncestry(this: CompendiumEmbedParser, ancestry: Ancestry): 
 		(ancestry.features ?? [])
 			.map(
 				(feature: AncestryFeature) =>
-					`**${feature.name}**\n${entryParser.parseEntries(feature.entries)}`
+					`**${feature.name}**\n${this.entryParser.parseEntries(feature.entries)}`
 			)
 			.join('\n')
 	);
@@ -41,7 +39,7 @@ export function parseAncestry(this: CompendiumEmbedParser, ancestry: Ancestry): 
 				name: `${heritage.name}`,
 				value: `${(heritage.info ?? [])
 					.concat(heritage.entries ?? [])
-					.map(entry => entryParser.parseEntry(entry))
+					.map(entry => this.entryParser.parseEntry(entry))
 					.join('\n\n')}`,
 			};
 		});

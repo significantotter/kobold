@@ -1,5 +1,4 @@
-import { AbilityEnum } from '../schemas/lib/enums.js';
-import { Sheet } from './schemas/sheet.zod.js';
+import { AbilityEnum, Sheet } from '../schemas/shared/sheet.zod.js';
 
 export function getDefaultSheet(): Sheet {
 	{
@@ -8,6 +7,7 @@ export function getDefaultSheet(): Sheet {
 				name: '',
 				level: null,
 				usesStamina: false,
+				keyAbility: null,
 			},
 			info: {
 				url: null,
@@ -19,7 +19,6 @@ export function getDefaultSheet(): Sheet {
 				imageURL: null,
 				size: null,
 				class: null,
-				keyAbility: null,
 				ancestry: null,
 				heritage: null,
 				background: null,
@@ -311,7 +310,7 @@ export function getDefaultSheet(): Sheet {
 			rollMacros: [],
 			actions: [],
 			modifiers: [],
-			sourceData: { aliases: [] },
+			sourceData: {},
 		};
 	}
 }

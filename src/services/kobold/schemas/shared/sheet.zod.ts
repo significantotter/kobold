@@ -1,18 +1,122 @@
 import { z } from 'zod';
-import {
-	AbilityEnum,
-	SheetIntegerKeys,
-	SheetStatKeys,
-	SheetInfoKeys,
-	SheetBaseCounterKeys,
-	SheetInfoListKeys,
-	SheetWeaknessesResistancesKeys,
-} from '../../schemas/lib/enums.js';
-import { zNullableInteger, zRecordOf } from '../../schemas/lib/helpers.zod.js';
+import { zNullableInteger, zRecordOf } from '../lib/helpers.zod.js';
 import { zAction } from './action.zod.js';
 import { zNumericCounter } from './counter.zod.js';
 import { zModifier } from './modifier.zod.js';
 import { zRollMacro } from './roll-macro.zod.js';
+
+export enum AbilityEnum {
+	strength = 'strength',
+	dexterity = 'dexterity',
+	constitution = 'constitution',
+	intelligence = 'intelligence',
+	wisdom = 'wisdom',
+	charisma = 'charisma',
+}
+
+export enum StatSubGroupEnum {
+	proficiency = 'proficiency',
+	dc = 'dc',
+	bonus = 'bonus',
+	ability = 'ability',
+}
+
+export enum SheetIntegerKeys {
+	// AC
+	ac = 'ac',
+	// Ability Scores
+	strength = 'strength',
+	dexterity = 'dexterity',
+	constitution = 'constitution',
+	intelligence = 'intelligence',
+	wisdom = 'wisdom',
+	charisma = 'charisma',
+	// Speeds
+	walkSpeed = 'walkSpeed',
+	flySpeed = 'flySpeed',
+	swimSpeed = 'swimSpeed',
+	climbSpeed = 'climbSpeed',
+	burrowSpeed = 'burrowSpeed',
+	dimensionalSpeed = 'dimensionalSpeed',
+	// Extra Proficiencies
+	heavyProficiency = 'heavyProficiency',
+	mediumProficiency = 'mediumProficiency',
+	lightProficiency = 'lightProficiency',
+	unarmoredProficiency = 'unarmoredProficiency',
+	martialProficiency = 'martialProficiency',
+	simpleProficiency = 'simpleProficiency',
+	unarmedProficiency = 'unarmedProficiency',
+	advancedProficiency = 'advancedProficiency',
+}
+
+export enum SheetStatKeys {
+	// casting
+	arcane = 'arcane',
+	divine = 'divine',
+	occult = 'occult',
+	primal = 'primal',
+	// Class attack/DC
+	class = 'class',
+	// perception
+	perception = 'perception',
+	// saves
+	fortitude = 'fortitude',
+	reflex = 'reflex',
+	will = 'will',
+	// skills
+	acrobatics = 'acrobatics',
+	arcana = 'arcana',
+	athletics = 'athletics',
+	crafting = 'crafting',
+	deception = 'deception',
+	diplomacy = 'diplomacy',
+	intimidation = 'intimidation',
+	medicine = 'medicine',
+	nature = 'nature',
+	occultism = 'occultism',
+	performance = 'performance',
+	religion = 'religion',
+	society = 'society',
+	stealth = 'stealth',
+	survival = 'survival',
+	thievery = 'thievery',
+}
+
+export enum SheetInfoKeys {
+	url = 'url',
+	description = 'description',
+	gender = 'gender',
+	age = 'age',
+	alignment = 'alignment',
+	deity = 'deity',
+	imageURL = 'imageURL',
+	size = 'size',
+	class = 'class',
+	ancestry = 'ancestry',
+	heritage = 'heritage',
+	background = 'background',
+}
+
+export enum SheetBaseCounterKeys {
+	heroPoints = 'heroPoints',
+	focusPoints = 'focusPoints',
+	hp = 'hp',
+	tempHp = 'tempHp',
+	stamina = 'stamina',
+	resolve = 'resolve',
+}
+
+export enum SheetInfoListKeys {
+	traits = 'traits',
+	languages = 'languages',
+	senses = 'senses',
+	immunities = 'immunities',
+}
+
+export enum SheetWeaknessesResistancesKeys {
+	resistances = 'resistances',
+	weaknesses = 'weaknesses',
+}
 
 export const zAbilityEnum = z.nativeEnum(AbilityEnum);
 
@@ -65,6 +169,7 @@ export const zSheetStaticInfo = z
 	.strictObject({
 		name: z.string().describe("The creature's name."),
 		level: zNullableInteger.describe("The creature's level."),
+		keyAbility: zAbilityEnum.nullable().describe("The creature's key ability."),
 		usesStamina: z
 			.boolean()
 			.default(false)

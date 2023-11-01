@@ -1,6 +1,6 @@
-import { EmbedData } from 'discord.js';
-import { Book } from '../../models/index.js';
-import { CompendiumEmbedParser } from '../compendium-parser.js';
+import type { EmbedData } from 'discord.js';
+import type { Book } from '../../schemas/index.js';
+import type { CompendiumEmbedParser } from '../compendium-parser.js';
 
 export async function _parseBook(this: CompendiumEmbedParser, book: Book) {
 	const preprocessedData = (await this.preprocessData(book)) as Book;

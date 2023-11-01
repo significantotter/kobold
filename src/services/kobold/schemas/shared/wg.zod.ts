@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { zNullableInteger, zTimestamp } from '../../schemas/lib/helpers.zod.js';
+import { zNullableInteger, zTimestamp } from '../lib/helpers.zod.js';
 
 export type CharacterData = z.infer<typeof zCharacterData>;
 // Character data is not strict because it's API generated

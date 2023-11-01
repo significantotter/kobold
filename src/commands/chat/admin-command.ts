@@ -12,7 +12,6 @@ import { TranslationFunctions } from '../../i18n/i18n-types.js';
 import { InteractionUtils } from '../../utils/interaction-utils.js';
 import { Command, CommandDeferType, InjectedServices } from '../command.js';
 import { Config } from './../../config/config.js';
-import fs from 'fs';
 import typescript from 'typescript';
 import { filesize } from 'filesize';
 import { ShardUtils } from '../../utils/shard-utils.js';

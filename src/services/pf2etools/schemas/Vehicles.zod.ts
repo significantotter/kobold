@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { zAbilityListEntrySchema } from './index.js';
-import { zDefensesSchema, zSpeedSchema, zTypedNumberSchema } from './index.js';
+import { zDefensesSchema, zSpeedSchema, zTypedNumberSchema } from './lib/helpers.zod.js';
+import { zAbilityListEntrySchema } from './lib/entries.zod.js';
 
 export type Vehicle = z.infer<typeof zVehicleSchema>;
 export const zVehicleSchema = z.strictObject({

@@ -198,7 +198,7 @@ export class GameRollSubCommand implements Command {
 				}
 				embeds.push(embed);
 			} else if (rollOptions[rollType.trim().toLocaleLowerCase()]) {
-				const rollResult = await DiceUtils.rollCreatureDice(creature, rollType, intr, {
+				const rollResult = await ActionRoller.fromCreatureRoll(creature, rollType, intr, {
 					modifierExpression: diceExpression,
 					targetCreature,
 					hideStats: targetActor?.hideStats ?? false,

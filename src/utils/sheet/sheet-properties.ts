@@ -9,8 +9,6 @@ import {
 	SheetIntegers,
 	SheetStats,
 	SheetWeaknessesResistances,
-} from '../../services/kobold/index.js';
-import {
 	AbilityEnum,
 	SheetStatKeys,
 	StatSubGroupEnum,
@@ -37,7 +35,6 @@ export class SheetInfoProperties {
 		deity: { aliases: [] },
 		size: { aliases: [] },
 		class: { aliases: [] },
-		keyAbility: { aliases: [] },
 		ancestry: { aliases: [] },
 		heritage: { aliases: [] },
 		background: { aliases: [] },

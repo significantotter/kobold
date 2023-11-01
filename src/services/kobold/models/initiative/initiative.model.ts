@@ -1,9 +1,8 @@
 import type { Initiative } from '../../schemas/initiative.zod.js';
 import { BaseModel } from '../../lib/base-model.js';
-import { Model, QueryBuilder, RelationMappings } from 'objection';
-import { InitiativeActorGroupModel } from '../initiative-actor-group/initiative-actor-group.model.js';
-import { InitiativeActorModel } from '../initiative-actor/initiative-actor.model.js';
-import { InitWithActorsAndGroups } from '../index.js';
+import { Model, QueryBuilder } from 'objection';
+import type { InitiativeActorGroupModel } from '../initiative-actor-group/initiative-actor-group.model.js';
+import type { InitiativeActorModel } from '../initiative-actor/initiative-actor.model.js';
 import { zInitiative } from '../../schemas/initiative.zod.js';
 import { ZodValidator } from '../../lib/zod-validator.js';
 
@@ -13,6 +12,7 @@ export interface InitiativeModel extends Initiative {
 	actors?: InitiativeActorModel[];
 }
 export class InitiativeModel extends BaseModel {
+	public $idColumn = ['id'];
 	static get tableName(): string {
 		return 'initiative';
 	}
@@ -23,16 +23,20 @@ export class InitiativeModel extends BaseModel {
 
 	public $z = zInitiative;
 
-	public static queryGraphFromChannel(
-		channelId: string
-	): QueryBuilder<InitWithActorsAndGroups, InitWithActorsAndGroups[]> {
+	public static queryGraphFromChannel(channelId: string) {
 		return InitiativeModel.query().withGraphFetched('[actors.[character], actorGroups]').where({
 			channelId,
-		}) as QueryBuilder<InitWithActorsAndGroups, InitWithActorsAndGroups[]>;
+		}) as QueryBuilder<InitiativeGraphModel, InitiativeGraphModel[]>;
 	}
 
-	static get relationMappings(): RelationMappings {
-		return {
+	static setupRelationMappings({
+		InitiativeActorGroupModel,
+		InitiativeActorModel,
+	}: {
+		InitiativeActorGroupModel: any;
+		InitiativeActorModel: any;
+	}) {
+		this.relationMappings = {
 			currentTurnGroup: {
 				relation: Model.BelongsToOneRelation,
 				modelClass: InitiativeActorGroupModel,
@@ -59,4 +63,10 @@ export class InitiativeModel extends BaseModel {
 			},
 		};
 	}
+}
+
+export interface InitiativeGraphModel extends InitiativeModel {
+	currentTurnGroup: InitiativeActorGroupModel;
+	actorGroups: InitiativeActorGroupModel[];
+	actors: InitiativeActorModel[];
 }

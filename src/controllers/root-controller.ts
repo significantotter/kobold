@@ -1,7 +1,7 @@
 import { Request, Response, Router } from 'express';
 import router from 'express-promise-router';
 
-import { Controller } from './index.js';
+import { Controller } from './controller.js';
 
 export class RootController implements Controller {
 	public path = '/';

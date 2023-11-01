@@ -1,16 +1,16 @@
 import { z } from 'zod';
-import { zEntrySchema, zFluffSchema, zModSchema } from './index.js';
 import {
-	zActivateSchema,
-	zOtherSourceSchema,
-	zPriceSchema,
+	zArmorDataSchema,
 	zDurationSchema,
 	zFrequencySchema,
-	zWeaponDataSchema,
-	zTypedNumberSchema,
-	zArmorDataSchema,
+	zOtherSourceSchema,
+	zPriceSchema,
 	zSheildDataSchema,
-} from './index.js';
+	zTypedNumberSchema,
+	zWeaponDataSchema,
+} from './lib/helpers.zod.js';
+import { zActivateSchema, zFluffSchema, zModSchema } from './lib/entry-helpers.zod.js';
+import { zEntrySchema } from './lib/entries.zod.js';
 
 const zSiegeWeaponDataSchema = z.strictObject({
 	crew: z.strictObject({ min: z.number(), max: z.number().optional() }).optional(),

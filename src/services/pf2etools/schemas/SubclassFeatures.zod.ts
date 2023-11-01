@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { zEntrySchema } from './index.js';
+import { zEntrySchema } from './lib/entries.zod.js';
 
 export type SubclassFeature = z.infer<typeof zSubclassFeatureSchema>;
 export const zSubclassFeatureSchema = z.strictObject({

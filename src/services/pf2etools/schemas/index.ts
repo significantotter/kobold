@@ -83,8 +83,6 @@ export * from './Tables.zod.js';
 export * from './Traits.zod.js';
 export * from './VariantRules.zod.js';
 export * from './Vehicles.zod.js';
-export * from './index.js';
-export * from './index.js';
 
 export const schemas = [
 	zAbilitySchema,

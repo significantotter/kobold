@@ -1,12 +1,12 @@
 import { URL } from 'node:url';
 
+import { HttpService } from '../http-service.js';
+import { Config } from '../../config/config.js';
 import {
 	LoginClusterResponse,
 	RegisterClusterRequest,
 	RegisterClusterResponse,
-} from '../models/master-api/index.js';
-import { HttpService } from './index.js';
-import { Config } from './../config/config.js';
+} from './clusters.js';
 
 export class MasterApiService {
 	protected clusterId: string;

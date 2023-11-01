@@ -1,12 +1,6 @@
 import { z } from 'zod';
-import {
-	zAbilityScoreSchema,
-	zActivitySchema,
-	zFrequencySchema,
-	zSpeedSchema,
-	zTypedNumberSchema,
-} from './index.js';
-import { zAttackEntrySchema, zEntrySchema } from './index.js';
+import { zActivitySchema, zAttackEntrySchema, zEntrySchema } from './lib/entries.zod.js';
+import { zAbilityScoreSchema, zFrequencySchema, zSpeedSchema } from './lib/helpers.zod.js';
 
 export const zCompanionSenseSchema = z.strictObject({
 	imprecise: z.string().array().optional(),

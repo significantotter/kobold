@@ -3,7 +3,7 @@ import { Request, Response, Router } from 'express';
 import router from 'express-promise-router';
 
 import { GetGuildsResponse } from '../models/cluster-api/index.js';
-import { Controller } from './index.js';
+import { Controller } from './controller.js';
 import { Config } from './../config/config.js';
 
 export class GuildsController implements Controller {

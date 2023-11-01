@@ -17,7 +17,7 @@ import { CharacterUtils } from '../../../utils/character-utils.js';
 import _ from 'lodash';
 import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
 import { ActionStageOptions } from './action-stage-command-options.js';
-import { CharacterModel } from '../../../services/kobold/index.js';
+import { CharacterModel, RollTypeEnum } from '../../../services/kobold/index.js';
 
 export class ActionStageAddAttackSubCommand implements Command {
 	public names = [L.en.commands.actionStage.addAttack.name()];
@@ -64,7 +64,7 @@ export class ActionStageAddAttackSubCommand implements Command {
 			ActionStageOptions.ACTION_TARGET_OPTION.name,
 			true
 		);
-		const rollType = 'attack';
+		const rollType = RollTypeEnum.attack;
 		const rollName = intr.options.getString(
 			ActionStageOptions.ACTION_ROLL_NAME_OPTION.name,
 			true
@@ -135,7 +135,7 @@ export class ActionStageAddAttackSubCommand implements Command {
 			LL.commands.actionStage.interactions.rollAddSuccess({
 				actionName: action.name,
 				rollName: rollName,
-				rollType: 'attack',
+				rollType: rollType,
 			})
 		);
 	}

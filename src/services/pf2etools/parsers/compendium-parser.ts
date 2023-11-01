@@ -1,4 +1,4 @@
-import { CompendiumModel } from '../compendium.model.js';
+import type { CompendiumModel } from '../compendium.model.js';
 import _ from 'lodash';
 import { SharedParsers } from './compendium-parser-helpers.js';
 import { AttachmentBuilder } from 'discord.js';
@@ -43,16 +43,19 @@ import { _parseOrganization } from './lib/organization-parser.js';
 import { _parseTable } from './lib/table-parser.js';
 import { _parseRelicGift } from './lib/relic-gift-parser.js';
 import { _parseRenderDemo } from './lib/render-demo-parser.js';
+import { EntryParser } from './compendium-entry-parser.js';
 
 export class CompendiumEmbedParser {
 	public helpers: SharedParsers;
 	public files: AttachmentBuilder[];
+	public entryParser: EntryParser;
 	constructor(
 		public model: CompendiumModel,
 		public emojiConverter: { (emoji: string): string }
 	) {
 		this.files = [];
 		this.helpers = new SharedParsers();
+		this.entryParser = new EntryParser({ delimiter: '\n', emojiConverter, embedParser: this });
 	}
 	public parseAbility = _parseAbility;
 	public parseAction = _parseAction;

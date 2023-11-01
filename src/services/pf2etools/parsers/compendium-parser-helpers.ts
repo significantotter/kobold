@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import {
+import type {
 	AbilityScore,
 	Creature,
 	CreatureSense,
@@ -15,7 +15,7 @@ import {
 	Stat,
 	TargetValueRecord,
 	TypedNumber,
-} from '../models/index.js';
+} from '../schemas/index.js';
 
 export function nth(n: number) {
 	if (isNaN(Number(n))) return n.toString();

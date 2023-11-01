@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { zEntrySchema } from './index.js';
-import { zOtherSourceSchema } from './index.js';
+import { zEntrySchema } from './lib/entries.zod.js';
+import { zOtherSourceSchema } from './lib/helpers.zod.js';
 
 export type Language = z.infer<typeof zLanguageSchema>;
 export const zLanguageSchema = z.strictObject({

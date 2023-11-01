@@ -1,5 +1,6 @@
 import { z } from 'zod';
-import { getDefaultSheet, zSheet } from '../models/index.js';
+import { getDefaultSheet } from '../lib/sheet-default.js';
+import { zSheet } from './shared/sheet.zod.js';
 
 export type InitiativeActor = z.infer<typeof zInitiativeActor>;
 export const zInitiativeActor = z
@@ -11,19 +12,15 @@ export const zInitiativeActor = z
 			.describe('The id of the initiative actor group the actor belongs to.'),
 		userId: z.string().describe('The discord id of the user who controls the actor'),
 		characterId: z
-			.union([
-				z.number().describe('The id of the character that this actor represents'),
-				z.null().describe('The id of the character that this actor represents'),
-			])
+			.number()
+			.nullable()
 			.describe('The id of the character that this actor represents')
-			.optional(),
+			.default(null),
 		referenceNpcName: z
-			.union([
-				z.string().describe('The name of the npc that this actor represents'),
-				z.null().describe('The name of the npc that this actor represents'),
-			])
+			.string()
+			.nullable()
 			.describe('The name of the npc that this actor represents')
-			.optional(),
+			.default(null),
 		name: z.string().describe('the name of the actor'),
 		hideStats: z
 			.boolean()

@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { zEntrySchema } from './index.js';
-import { zOtherSourceSchema } from './index.js';
+import { zOtherSourceSchema } from './lib/helpers.zod.js';
+import { zEntrySchema } from './lib/entries.zod.js';
 
 export type Archetype = z.infer<typeof zArchetypeSchema>;
 export const zArchetypeSchema = z.strictObject({

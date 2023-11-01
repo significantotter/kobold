@@ -1,7 +1,6 @@
-import { EmbedData } from 'discord.js';
-import { SubclassFeature } from '../../models/index.js';
-import { CompendiumEmbedParser } from '../compendium-parser.js';
-import { EntryParser } from '../compendium-entry-parser.js';
+import type { EmbedData } from 'discord.js';
+import type { SubclassFeature } from '../../schemas/index.js';
+import type { CompendiumEmbedParser } from '../compendium-parser.js';
 
 export async function _parseSubclassFeature(
 	this: CompendiumEmbedParser,
@@ -17,8 +16,8 @@ export function parseSubclassFeature(
 ): EmbedData {
 	const title = `${subclassFeature.name} (${subclassFeature.subclassShortName} ${subclassFeature.className} ${subclassFeature.level})`;
 	let description = '';
-	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
-	description += entryParser.parseEntries(subclassFeature.entries);
+
+	description += this.entryParser.parseEntries(subclassFeature.entries);
 	return {
 		title: title,
 		description: description,

@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { Entry, zEntrySchema } from './index.js';
-import { zOtherSourceSchema, zFrequencySchema, zActivitySchema } from './index.js';
+import { Entry, zActivitySchema, zEntrySchema } from './lib/entries.zod.js';
+import { zOtherSourceSchema, zFrequencySchema } from './lib/helpers.zod.js';
 
 const baseFeatSchema = z.strictObject({
 	name: z.string(),

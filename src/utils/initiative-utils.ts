@@ -402,7 +402,7 @@ export class InitiativeUtils {
 				rollResultMessage.setThumbnail(character.sheet.info.imageURL);
 			}
 		} else if (skillChoice) {
-			rollBuilderResponse = await DiceUtils.rollSimpleCreatureRoll({
+			rollBuilderResponse = await RollBuilder.fromSimpleCreatureRoll({
 				userName,
 				creature: Creature.fromCharacter(character),
 				attributeName: skillChoice,
@@ -427,7 +427,7 @@ export class InitiativeUtils {
 			finalInitiative = rollBuilderResponse.getRollTotalArray()[0] ?? 0;
 			rollResultMessage = rollBuilderResponse.compileEmbed();
 		} else {
-			rollBuilderResponse = await DiceUtils.rollSimpleCreatureRoll({
+			rollBuilderResponse = await RollBuilder.fromSimpleCreatureRoll({
 				userName,
 				creature: Creature.fromCharacter(character),
 				attributeName: 'perception',

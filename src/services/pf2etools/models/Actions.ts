@@ -3,7 +3,7 @@ import { zActionSchema, Action } from './../schemas/index.js';
 import { fetchOneJsonFile } from './lib/helpers.js';
 import { Model } from './lib/Model.js';
 import * as schema from '../pf2eTools.schema.js';
-import { parseActivityRaw } from '../parsers/compendium-entry-parser.js';
+import { parseActivityRaw } from '../utils/helpers.js';
 
 export class Actions extends Model<typeof zActionSchema, typeof schema.Actions> {
 	constructor(public db: BetterSQLite3Database<typeof schema>) {

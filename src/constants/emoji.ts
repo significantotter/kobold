@@ -1,7 +1,7 @@
 import { BaseInteraction, CacheType, ChatInputCommandInteraction } from 'discord.js';
 import { ActionCostEnum, isActionCostEnum } from '../services/kobold/index.js';
 
-type EmojiOptions = Exclude<ActionCostEnum, ActionCostEnum.variableActions>;
+type EmojiOptions = Exclude<ActionCostEnum, ActionCostEnum.variableActions | ActionCostEnum.none>;
 
 const emojiMap: Record<EmojiOptions, string> = {
 	oneAction: '1095183665404837989',
@@ -17,7 +17,7 @@ export function getEmoji(intr?: BaseInteraction<CacheType>, emoji?: EmojiOptions
 	const emojiCache = intr?.client?.guilds?.cache?.get?.('1095180951522377808')?.emojis?.cache;
 	if (!emojiCache) return '';
 
-	if (isActionCostEnum(emoji)) {
+	if (isActionCostEnum(emoji) && emoji !== ActionCostEnum.none) {
 		if (emoji === ActionCostEnum.variableActions) {
 			return (
 				(emojiCache.get(emojiMap[ActionCostEnum.oneAction]) ?? '').toString() +

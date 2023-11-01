@@ -1,4 +1,4 @@
-import { WanderersGuide } from './../index.js';
+import type { WanderersGuide } from './../index.js';
 import type { WG } from './../wanderers-guide.js';
 import axios from 'axios';
 

@@ -1,12 +1,7 @@
 import { z } from 'zod';
-import { zActivitySchema, zOtherSourceSchema, zSpeedSchema } from './index.js';
-import {
-	zAbilityEntrySchema,
-	zAttackEntrySchema,
-	zCopySchema,
-	zEntrySchema,
-	zFluffSchema,
-} from './index.js';
+import { zOtherSourceSchema, zSpeedSchema } from './lib/helpers.zod.js';
+import { zAbilityEntrySchema, zAttackEntrySchema } from './lib/entries.zod.js';
+import { zFluffSchema } from './lib/entry-helpers.zod.js';
 
 export type Deity = z.infer<typeof zDeitySchema>;
 export const zDeitySchema = z.strictObject({

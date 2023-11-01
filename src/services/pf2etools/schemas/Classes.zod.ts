@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { zEntrySchema } from './index.js';
+import { zEntrySchema } from './lib/entries.zod.js';
 
 const zProficiencyCategorySchema = z.strictObject({
 	t: z.array(z.string()).optional(),

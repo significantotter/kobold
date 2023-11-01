@@ -1,7 +1,7 @@
-import { EmbedData } from 'discord.js';
-import { Deity, Domain, Spell } from '../../models/index.js';
-import { CompendiumEmbedParser } from '../compendium-parser.js';
-import { EntryParser } from '../compendium-entry-parser.js';
+import type { EmbedData } from 'discord.js';
+import type { Deity, Domain, Spell } from '../../schemas/index.js';
+import type { CompendiumEmbedParser } from '../compendium-parser.js';
+
 import { DrizzleUtils } from '../../utils/drizzle-utils.js';
 
 export async function _parseDomain(this: CompendiumEmbedParser, domain: Domain) {
@@ -26,10 +26,9 @@ export async function _parseDomain(this: CompendiumEmbedParser, domain: Domain) 
 export function parseDomain(
 	this: CompendiumEmbedParser,
 	domain: Domain,
-	relatedDeities?: Deity[],
-	relatedSpells?: Spell[]
+	relatedDeities: Deity[],
+	relatedSpells: Spell[]
 ): EmbedData {
-	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
 	const title = `${domain.name} Domain`;
 	const descriptionLines: string[] = [];
 
@@ -43,7 +42,7 @@ export function parseDomain(
 		}
 	}
 
-	descriptionLines.push(entryParser.parseEntries(domain.entries));
+	descriptionLines.push(this.entryParser.parseEntries(domain.entries));
 
 	return {
 		title: title,

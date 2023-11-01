@@ -7,6 +7,7 @@ import {
 	SheetBaseCounterKeys,
 	SheetStatKeys,
 } from '../services/kobold/index.js';
+import type { Character, Sheet, Modifier, Attribute } from '../services/kobold/index.js';
 import { PathBuilder } from '../services/pathbuilder/pathbuilder.js';
 import {
 	CreatureFluff as BestiaryCreatureFluff,
@@ -20,11 +21,9 @@ import {
 	convertWanderersGuideCharToSheet,
 } from './sheet/sheet-import-utils.js';
 import { KoboldEmbed } from './kobold-embed-utils.js';
-import { parseBonusesForTagsFromModifiers } from '../services/kobold/lib/helpers.js';
 import { KoboldError } from './KoboldError.js';
 import { BaseMessageOptions } from 'discord.js';
 import { SheetUtils } from './sheet/sheet-utils.js';
-import { Character, Sheet, Modifier, Attribute } from '../services/kobold/index.js';
 import {
 	SheetIntegerGroupEnum,
 	SheetIntegerProperties,
@@ -33,6 +32,7 @@ import {
 	StatGroupEnum,
 } from './sheet/sheet-properties.js';
 import { AttributeUtils } from './attribute-utils.js';
+import { ModifierUtils } from './modifier-utils.js';
 
 const damageTypeShorthands: { [shorthand: string]: string } = {
 	piercing: 'p',
@@ -968,7 +968,7 @@ export class Creature {
 	 * @returns modifier[]
 	 */
 	public getModifiersFromTags(tags: string[], extraAttributes?: Attribute[]): Modifier[] {
-		const { untyped, bonuses, penalties } = parseBonusesForTagsFromModifiers(
+		const { untyped, bonuses, penalties } = ModifierUtils.parseBonusesForTagsFromModifiers(
 			this.modifiers.filter(modifier => modifier.modifierType === 'roll'),
 			[...(this.attributes as Attribute[]), ...(extraAttributes || [])],
 			tags,

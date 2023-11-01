@@ -10,4 +10,5 @@ export * from './npc.zod.js';
 export * from './user-settings.zod.js';
 export * from './wg-token.zod.js';
 
-export * from './lib/relations-schemas.js';
+export * from './lib/index.js';
+export * from './shared/index.js';

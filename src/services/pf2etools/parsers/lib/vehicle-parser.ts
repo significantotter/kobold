@@ -1,7 +1,6 @@
-import { EmbedData } from 'discord.js';
-import { Speed, Vehicle } from '../../models/index.js';
-import { CompendiumEmbedParser } from '../compendium-parser.js';
-import { EntryParser } from '../compendium-entry-parser.js';
+import type { EmbedData } from 'discord.js';
+import type { Speed, Vehicle } from '../../schemas/index.js';
+import type { CompendiumEmbedParser } from '../compendium-parser.js';
 
 export async function _parseVehicle(this: CompendiumEmbedParser, vehicle: Vehicle) {
 	const preprocessedData = (await this.preprocessData(vehicle)) as Vehicle;
@@ -10,14 +9,14 @@ export async function _parseVehicle(this: CompendiumEmbedParser, vehicle: Vehicl
 
 export function parseVehicle(this: CompendiumEmbedParser, vehicle: Vehicle): EmbedData {
 	const title = `${vehicle.name} (Vehicle ${vehicle.level})`;
-	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
+
 	const descriptionLines: string[] = [];
 	if (vehicle.traits) descriptionLines.push(`**Traits** ${vehicle.traits.join(', ')}`);
 	if (vehicle.price)
 		descriptionLines.push(`**Price** ${vehicle.price.coin} ${vehicle.price.amount}`);
 	descriptionLines.push('');
 	if (vehicle.entries) {
-		descriptionLines.push(entryParser.parseEntries(vehicle.entries));
+		descriptionLines.push(this.entryParser.parseEntries(vehicle.entries));
 		descriptionLines.push('');
 	}
 	descriptionLines.push(
@@ -47,7 +46,7 @@ export function parseVehicle(this: CompendiumEmbedParser, vehicle: Vehicle): Emb
 	if (vehicle.abilities?.top) {
 		descriptionLines.push('');
 		descriptionLines.push(
-			vehicle.abilities.top.map(ability => entryParser.parseEntry(ability)).join('\n\n')
+			vehicle.abilities.top.map(ability => this.entryParser.parseEntry(ability)).join('\n\n')
 		);
 	}
 	if (vehicle.defenses) {
@@ -57,7 +56,7 @@ export function parseVehicle(this: CompendiumEmbedParser, vehicle: Vehicle): Emb
 	if (vehicle.abilities?.mid) {
 		descriptionLines.push('');
 		descriptionLines.push(
-			vehicle.abilities.mid.map(ability => entryParser.parseEntry(ability)).join('\n\n')
+			vehicle.abilities.mid.map(ability => this.entryParser.parseEntry(ability)).join('\n\n')
 		);
 	}
 	descriptionLines.push('');
@@ -89,7 +88,7 @@ export function parseVehicle(this: CompendiumEmbedParser, vehicle: Vehicle): Emb
 	if (vehicle.abilities?.bot) {
 		descriptionLines.push('');
 		descriptionLines.push(
-			vehicle.abilities.bot.map(ability => entryParser.parseEntry(ability)).join('\n\n')
+			vehicle.abilities.bot.map(ability => this.entryParser.parseEntry(ability)).join('\n\n')
 		);
 	}
 	if (vehicle.destruction) {

@@ -26,6 +26,7 @@ import {
 	Initiative,
 	InitiativeActor,
 	InitiativeActorGroup,
+	InitiativeGraphModel,
 	InitiativeModel,
 } from '../../../services/kobold/index.js';
 import { GameOptions } from './game-command-options.js';
@@ -131,8 +132,9 @@ export class GameInitSubCommand implements Command {
 					channelId: intr.channel.id,
 					currentTurnGroupId: null,
 					currentRound: 0,
-				} as Initiative)
-				.first()) as InitWithActorsAndGroups;
+				})
+				.withGraphFetched('[actors.[character], actorGroups]')
+				.first()) as InitiativeGraphModel;
 		}
 
 		const initBuilder = new InitiativeBuilder({

@@ -1,7 +1,6 @@
-import { EmbedData } from 'discord.js';
-import { FamiliarAbility } from '../../models/index.js';
-import { CompendiumEmbedParser } from '../compendium-parser.js';
-import { EntryParser } from '../compendium-entry-parser.js';
+import type { EmbedData } from 'discord.js';
+import type { FamiliarAbility } from '../../schemas/index.js';
+import type { CompendiumEmbedParser } from '../compendium-parser.js';
 
 export async function _parseFamiliarAbility(
 	this: CompendiumEmbedParser,
@@ -15,11 +14,10 @@ export function parseFamiliarAbility(
 	this: CompendiumEmbedParser,
 	familiarAbility: FamiliarAbility
 ): EmbedData {
-	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
 	const title = `${familiarAbility.name}`;
 	const descriptionLines: string[] = [];
 	descriptionLines.push(`**Ability Type** ${familiarAbility.type}`);
-	descriptionLines.push(entryParser.parseEntries(familiarAbility.entries));
+	descriptionLines.push(this.entryParser.parseEntries(familiarAbility.entries));
 	return {
 		title: title,
 		description: descriptionLines.join('\n'),

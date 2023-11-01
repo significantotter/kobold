@@ -1,11 +1,7 @@
 import { z } from 'zod';
-import { zEntrySchema, zHeighteningSchema } from './index.js';
-import {
-	zOtherSourceSchema,
-	zDurationSchema,
-	zTypedNumberSchema,
-	zActivitySchema,
-} from './index.js';
+import { zDurationSchema, zOtherSourceSchema, zTypedNumberSchema } from './lib/helpers.zod.js';
+import { zActivitySchema, zEntrySchema } from './lib/entries.zod.js';
+import { zHeighteningSchema } from './lib/entry-helpers.zod.js';
 
 export type Spell = z.infer<typeof zSpellSchema>;
 export const zSpellSchema = z.strictObject({

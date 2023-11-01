@@ -1,7 +1,7 @@
-import { EmbedData } from 'discord.js';
-import { Item } from '../../models/index.js';
-import { CompendiumEmbedParser } from '../compendium-parser.js';
-import { EntryParser } from '../compendium-entry-parser.js';
+import type { EmbedData } from 'discord.js';
+import type { Item } from '../../schemas/index.js';
+import type { CompendiumEmbedParser } from '../compendium-parser.js';
+
 import _ from 'lodash';
 
 export async function _parseItem(this: CompendiumEmbedParser, item: Item) {
@@ -10,7 +10,6 @@ export async function _parseItem(this: CompendiumEmbedParser, item: Item) {
 }
 
 export function parseItem(this: CompendiumEmbedParser, item: Item): EmbedData {
-	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
 	const title = `${item.name}${item.level ? ` (Item ${item.level})` : ''}`;
 	const descriptionLines: string[] = [];
 	if (item.traits) descriptionLines.push(`**Traits** ${item.traits.join(', ')}`);
@@ -138,7 +137,7 @@ export function parseItem(this: CompendiumEmbedParser, item: Item): EmbedData {
 		);
 	}
 
-	if (item.activate) descriptionLines.push(entryParser.parseActivate(item.activate));
+	if (item.activate) descriptionLines.push(this.entryParser.parseActivate(item.activate));
 	if (item.onset) descriptionLines.push(`**Onset** ${item.onset}`);
 	if (item.duration) descriptionLines.push(this.helpers.parseDuration(item.duration));
 
@@ -202,7 +201,7 @@ export function parseItem(this: CompendiumEmbedParser, item: Item): EmbedData {
 
 	if (item.entries?.length) {
 		descriptionLines.push('');
-		descriptionLines.push(entryParser.parseEntries(item.entries, true));
+		descriptionLines.push(this.entryParser.parseEntries(item.entries, true));
 	}
 
 	for (const variant of item.variants ?? []) {
@@ -216,7 +215,7 @@ export function parseItem(this: CompendiumEmbedParser, item: Item): EmbedData {
 		if (variant.usage) variantLine.push(`**Usage** ${variant.usage}`);
 		if (variant.appliesTo) variantLine.push(`**Applies to** ${variant.appliesTo.join(' or ')}`);
 		if (variant.onset) variantLine.push(`**Onset** ${variant.onset}`);
-		if (variant.entries) variantLine.push(entryParser.parseEntries(variant.entries));
+		if (variant.entries) variantLine.push(this.entryParser.parseEntries(variant.entries));
 		if (variant.craftReq)
 			variantLine.push(`**Crafting Requirements** ${variant.craftReq.join(', ')}`);
 		fields.push({

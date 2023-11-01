@@ -1,8 +1,8 @@
 import { or } from 'drizzle-orm';
-import { EmbedData } from 'discord.js';
-import { Archetype, Feat } from '../../models/index.js';
-import { CompendiumEmbedParser } from '../compendium-parser.js';
-import { EntryParser } from '../compendium-entry-parser.js';
+import type { EmbedData } from 'discord.js';
+import type { Archetype, Feat } from '../../schemas/index.js';
+import type { CompendiumEmbedParser } from '../compendium-parser.js';
+
 import { DrizzleUtils } from '../../utils/drizzle-utils.js';
 
 export async function _parseArchetype(this: CompendiumEmbedParser, archetype: Archetype) {
@@ -34,18 +34,17 @@ export async function _parseArchetype(this: CompendiumEmbedParser, archetype: Ar
 export function parseArchetype(
 	this: CompendiumEmbedParser,
 	archetype: Archetype,
-	feats?: Feat[]
+	feats: Feat[]
 ): EmbedData {
-	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
 	const title = `${archetype.name}`;
 	const descriptionLines: string[] = [];
 	if (archetype.rarity) descriptionLines.push(`**Rarity:** ${archetype.rarity}`);
-	if (archetype.entries) descriptionLines.push(entryParser.parseEntries(archetype.entries));
+	if (archetype.entries) descriptionLines.push(this.entryParser.parseEntries(archetype.entries));
 	// Archetypes are very sparse and almost irrelevant without their feats. So we'll fetch their feats for our embed fields.
 
 	return {
 		title: title,
 		description: descriptionLines.join('\n'),
-		fields: feats ? feats.map(feat => entryParser.parseFeat(feat, false)) : undefined,
+		fields: feats ? feats.map(feat => this.entryParser.parseFeat(feat, false)) : undefined,
 	};
 }

@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import './config/config.js';
 import { REST } from 'discord.js';
 import { Options, GatewayIntentBits, Partials, disableValidators } from 'discord.js';
@@ -108,7 +109,6 @@ import {
 	TriggerHandler,
 } from './events/index.js';
 import { CustomClient } from './extensions/index.js';
-import { Job } from './jobs/index.js';
 import { Bot } from './models/bot.js';
 import { Reaction } from './reactions/index.js';
 import { CommandRegistrationService, DBModel, JobService, Logger } from './services/index.js';
@@ -118,6 +118,7 @@ import Logs from './config/lang/logs.json' assert { type: 'json' };
 import { checkAndLoadBestiaryFiles } from './services/pf2etools/bestiaryLoader.js';
 import { CompendiumModel } from './services/pf2etools/compendium.model.js';
 import { db } from './services/pf2etools/pf2eTools.db.js';
+import { Job } from './services/job-service.js';
 
 // this is to prevent embeds breaking on "addFields" when adding more than an embed can hold
 // because we batch our embeds afterwards instead of before assigning fields

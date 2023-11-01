@@ -1,7 +1,6 @@
-import { EmbedData } from 'discord.js';
-import { Affliction } from '../../models/index.js';
-import { CompendiumEmbedParser } from '../compendium-parser.js';
-import { EntryParser } from '../compendium-entry-parser.js';
+import type { EmbedData } from 'discord.js';
+import type { Affliction } from '../../schemas/index.js';
+import type { CompendiumEmbedParser } from '../compendium-parser.js';
 
 export async function _parseAffliction(this: CompendiumEmbedParser, affliction: Affliction) {
 	const preprocessedData = (await this.preprocessData(affliction)) as Affliction;
@@ -9,9 +8,8 @@ export async function _parseAffliction(this: CompendiumEmbedParser, affliction: 
 }
 
 export function parseAffliction(this: CompendiumEmbedParser, affliction: Affliction): EmbedData {
-	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
 	const title = `${affliction.name}`;
-	const description = entryParser.parseAfflictionEntry(affliction, false);
+	const description = this.entryParser.parseAfflictionEntry(affliction, false);
 	return {
 		title: title,
 		description: description,

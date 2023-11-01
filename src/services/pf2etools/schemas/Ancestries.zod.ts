@@ -1,5 +1,6 @@
 import { z } from 'zod';
-import { zEntrySchema, zOtherSourceSchema, zSpeedSchema } from './index.js';
+import { zEntrySchema } from './lib/entries.zod.js';
+import { zOtherSourceSchema, zSpeedSchema } from './lib/helpers.zod.js';
 
 export type AncestryFeature = z.infer<typeof zAncestryFeatureSchema>;
 export const zAncestryFeatureSchema = z.strictObject({

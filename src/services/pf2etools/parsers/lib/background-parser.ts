@@ -1,7 +1,6 @@
-import { EmbedData } from 'discord.js';
-import { Background } from '../../models/index.js';
-import { CompendiumEmbedParser } from '../compendium-parser.js';
-import { EntryParser } from '../compendium-entry-parser.js';
+import type { EmbedData } from 'discord.js';
+import type { Background } from '../../schemas/index.js';
+import type { CompendiumEmbedParser } from '../compendium-parser.js';
 
 export async function _parseBackground(this: CompendiumEmbedParser, background: Background) {
 	const preprocessedData = (await this.preprocessData(background)) as Background;
@@ -9,11 +8,10 @@ export async function _parseBackground(this: CompendiumEmbedParser, background: 
 }
 
 export function parseBackground(this: CompendiumEmbedParser, background: Background): EmbedData {
-	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
 	const title = `${background.name}`;
 	const descriptionLines = [];
 	if (background.traits) descriptionLines.push(`**Traits:** ${background.traits.join(', ')}`);
-	descriptionLines.push(entryParser.parseEntries(background.entries));
+	descriptionLines.push(this.entryParser.parseEntries(background.entries));
 	return {
 		title: title,
 		description: descriptionLines.join('\n'),

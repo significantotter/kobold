@@ -16,6 +16,7 @@
 	"scripts": {
 		"lint": "eslint . --cache --ext .js,.jsx,.ts,.tsx",
 		"lint:fix": "eslint . --fix --cache --ext .js,.jsx,.ts,.tsx",
+		"check-circular": "madge --debug --circular --extensions ts ./src",
 		"format": "prettier --check .",
 		"format:fix": "prettier --write .",
 		"clean": "git clean -xdf --exclude=\"/src/config/**/*\"",
@@ -109,6 +110,7 @@
 		"glob": "^10.3.4",
 		"json-schema-to-typescript": "^13.1.1",
 		"json-schema-to-zod": "^1.1.1",
+		"madge": "^6.1.0",
 		"minimatch": "^9.0.3",
 		"prettier": "^3.0.3",
 		"sqlite3": "^5.1.6",
@@ -116,5 +118,13 @@
 		"ts-to-zod": "^3.1.3",
 		"typescript": "^5.2",
 		"vitest": "^0.34.4"
+	},
+	"madge": {
+		"tsConfig": "./tsconfig.json",
+		"detectiveOptions": {
+			"ts": {
+				"skipTypeImports": true
+			}
+		}
 	}
 }

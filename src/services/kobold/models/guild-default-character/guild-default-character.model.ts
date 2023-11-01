@@ -2,13 +2,10 @@ import type { GuildDefaultCharacter } from '../../schemas/guild-default-characte
 import { BaseModel } from '../../lib/base-model.js';
 import { zGuildDefaultCharacter } from '../../schemas/guild-default-character.zod.js';
 import { ZodValidator } from '../../lib/zod-validator.js';
-import { CharacterModel } from '../character/character.model.js';
 
 export interface GuildDefaultCharacterModel extends GuildDefaultCharacter {}
 export class GuildDefaultCharacterModel extends BaseModel {
-	static get idColumn() {
-		return ['guildId', 'userId'];
-	}
+	public $idColumn = ['guildId', 'userId'];
 
 	static get tableName(): string {
 		return 'guildDefaultCharacter';
@@ -20,8 +17,8 @@ export class GuildDefaultCharacterModel extends BaseModel {
 
 	public $z = zGuildDefaultCharacter;
 
-	static get RelationMappings() {
-		return {
+	static setupRelationMappings({ CharacterModel }: { CharacterModel: any }) {
+		this.relationMappings = {
 			...super.relationMappings,
 			GuildDefaultCharacter: {
 				relation: BaseModel.HasOneRelation,

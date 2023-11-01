@@ -1,7 +1,6 @@
-import { EmbedData } from 'discord.js';
-import { Companion } from '../../models/index.js';
-import { CompendiumEmbedParser } from '../compendium-parser.js';
-import { EntryParser } from '../compendium-entry-parser.js';
+import type { EmbedData } from 'discord.js';
+import type { Companion } from '../../schemas/index.js';
+import type { CompendiumEmbedParser } from '../compendium-parser.js';
 
 export async function _parseCompanion(this: CompendiumEmbedParser, companion: Companion) {
 	const preprocessedData = (await this.preprocessData(companion)) as Companion;
@@ -11,12 +10,10 @@ export async function _parseCompanion(this: CompendiumEmbedParser, companion: Co
 export function parseCompanion(this: CompendiumEmbedParser, companion: Companion): EmbedData {
 	const title = `${companion.name}`;
 	const descriptionLines: string[] = [];
-	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
-	const inlineEntryParser = new EntryParser({
-		delimiter: ' ',
-		emojiConverter: this.emojiConverter,
-	});
-	if (companion.fluff?.length) descriptionLines.push(entryParser.parseEntries(companion.fluff));
+
+	const inlineEntryParser = this.entryParser.withDelimiter(' ');
+	if (companion.fluff?.length)
+		descriptionLines.push(this.entryParser.parseEntries(companion.fluff));
 	if (companion.access) descriptionLines.push(`**Access** ${companion.access}`);
 	descriptionLines.push(`**Size** ${companion.size.join(' or ')}`);
 	for (const attack of companion.attacks) {

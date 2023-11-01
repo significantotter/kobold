@@ -15,9 +15,9 @@ import {
 	SheetInfoLists,
 	SheetWeaknessesResistances,
 } from '../services/kobold/index.js';
-import { InitiativeBuilder, TurnData } from './initiative-utils.js';
+import type { InitiativeBuilder, TurnData } from './initiative-utils.js';
 import { InteractionUtils } from './interaction-utils.js';
-import { ActionRoller } from './action-roller.js';
+import type { ActionRoller } from './action-roller.js';
 import { KoboldError } from './KoboldError.js';
 import L from '../i18n/i18n-node.js';
 

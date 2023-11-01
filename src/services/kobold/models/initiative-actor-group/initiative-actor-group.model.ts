@@ -1,8 +1,8 @@
 import type { InitiativeActorGroup } from '../../schemas/initiative-actor-group.zod.js';
 import { BaseModel } from '../../lib/base-model.js';
-import { Model, RelationMappings } from 'objection';
-import { InitiativeModel } from '../initiative/initiative.model.js';
-import { InitiativeActorModel } from '../initiative-actor/initiative-actor.model.js';
+import { Model } from 'objection';
+import type { InitiativeModel } from '../initiative/initiative.model.js';
+import type { InitiativeActorModel } from '../initiative-actor/initiative-actor.model.js';
 import { zInitiativeActorGroup } from '../../schemas/initiative-actor-group.zod.js';
 import { ZodValidator } from '../../lib/zod-validator.js';
 
@@ -11,7 +11,7 @@ export interface InitiativeActorGroupModel extends InitiativeActorGroup {
 	actors?: InitiativeActorModel[];
 }
 export class InitiativeActorGroupModel extends BaseModel {
-	static idColumn: string | string[] = 'id';
+	public $idColumn = 'id';
 	static get tableName(): string {
 		return 'initiativeActorGroup';
 	}
@@ -22,8 +22,14 @@ export class InitiativeActorGroupModel extends BaseModel {
 
 	public $z = zInitiativeActorGroup;
 
-	static get relationMappings(): RelationMappings {
-		return {
+	static setupRelationMappings({
+		InitiativeModel,
+		InitiativeActorModel,
+	}: {
+		InitiativeModel: any;
+		InitiativeActorModel: any;
+	}) {
+		this.relationMappings = {
 			initiative: {
 				relation: Model.BelongsToOneRelation,
 				modelClass: InitiativeModel,

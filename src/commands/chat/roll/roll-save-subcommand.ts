@@ -23,6 +23,7 @@ import _ from 'lodash';
 import { SettingsUtils } from '../../../utils/settings-utils.js';
 import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
 import { GameUtils } from '../../../utils/game-utils.js';
+import { RollBuilder } from '../../../utils/roll-builder.js';
 
 export class RollSaveSubCommand implements Command {
 	public names = [L.en.commands.roll.save.name()];
@@ -95,7 +96,7 @@ export class RollSaveSubCommand implements Command {
 			creature.savingThrowRolls
 		);
 
-		const rollResult = await DiceUtils.rollSimpleCreatureRoll({
+		const rollResult = await RollBuilder.fromSimpleCreatureRoll({
 			actorName: creature.sheet.staticInfo.name,
 			creature,
 			attributeName: targetRoll.name,

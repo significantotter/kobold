@@ -1,8 +1,13 @@
 import _ from 'lodash';
 import { EmbedData } from 'discord.js';
-import { Ability, Affliction, Creature, CreatureFluff, CreatureSense } from '../../models/index.js';
-import { CompendiumEmbedParser } from '../compendium-parser.js';
-import { EntryParser } from '../compendium-entry-parser.js';
+import {
+	Ability,
+	Affliction,
+	Creature,
+	CreatureFluff,
+	CreatureSense,
+} from '../../schemas/index.js';
+import type { CompendiumEmbedParser } from '../compendium-parser.js';
 import { DrizzleUtils } from '../../utils/drizzle-utils.js';
 
 const abilityIsAffliction = (ability: Ability | Affliction): ability is Affliction =>
@@ -23,17 +28,10 @@ export async function _parseCreature(this: CompendiumEmbedParser, creature: Crea
 export function parseCreature(
 	this: CompendiumEmbedParser,
 	creature: Creature,
-	fluffData?: CreatureFluff
+	fluffData: CreatureFluff | undefined
 ): EmbedData {
 	const delimiter = '\n';
-	const entryParser = new EntryParser({
-		delimiter,
-		emojiConverter: this.emojiConverter,
-	});
-	const inlineEntryParser = new EntryParser({
-		delimiter: '; ',
-		emojiConverter: this.emojiConverter,
-	});
+	const inlineEntryParser = this.entryParser.withDelimiter('; ');
 
 	let title = creature.name;
 	if (creature.level) {
@@ -117,7 +115,7 @@ export function parseCreature(
 					if (abilityIsAffliction(ability)) {
 						return `**${ability.name}** ${(ability.entries ?? []).join(', ')}`;
 					} else {
-						return `${entryParser.parseAbilityEntry(ability)}`;
+						return `${this.entryParser.parseAbilityEntry(ability)}`;
 					}
 				})
 				.filter(_.identity)
@@ -149,9 +147,9 @@ export function parseCreature(
 			creature.abilities.bot
 				.map(ability => {
 					if (abilityIsAffliction(ability)) {
-						return entryParser.parseAfflictionEntry(ability);
+						return this.entryParser.parseAfflictionEntry(ability);
 					} else {
-						return entryParser.parseAbilityEntry(ability);
+						return this.entryParser.parseAbilityEntry(ability);
 					}
 				})
 				.filter(_.identity)

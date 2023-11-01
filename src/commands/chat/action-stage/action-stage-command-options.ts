@@ -43,8 +43,8 @@ export class ActionStageOptions {
 				value: L.en.commandOptions.actionStageStageEditOption.choices.damageType.value(),
 			},
 			{
-				name: L.en.commandOptions.actionStageStageEditOption.choices.allowRollModifier.name(),
-				value: L.en.commandOptions.actionStageStageEditOption.choices.allowRollModifier.value(),
+				name: L.en.commandOptions.actionStageStageEditOption.choices.allowRollModifiers.name(),
+				value: L.en.commandOptions.actionStageStageEditOption.choices.allowRollModifiers.value(),
 			},
 			{
 				name: L.en.commandOptions.actionStageStageEditOption.choices.attackTargetDC.name(),

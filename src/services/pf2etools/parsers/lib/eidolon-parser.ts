@@ -1,7 +1,6 @@
-import { EmbedData } from 'discord.js';
-import { Eidolon } from '../../models/index.js';
-import { CompendiumEmbedParser } from '../compendium-parser.js';
-import { EntryParser } from '../compendium-entry-parser.js';
+import type { EmbedData } from 'discord.js';
+import type { Eidolon } from '../../schemas/index.js';
+import type { CompendiumEmbedParser } from '../compendium-parser.js';
 
 export async function _parseEidolon(this: CompendiumEmbedParser, eidolon: Eidolon) {
 	const preprocessedData = (await this.preprocessData(eidolon)) as Eidolon;
@@ -11,12 +10,9 @@ export async function _parseEidolon(this: CompendiumEmbedParser, eidolon: Eidolo
 export function parseEidolon(this: CompendiumEmbedParser, eidolon: Eidolon): EmbedData {
 	const title = `${eidolon.name}`;
 	const descriptionLines: string[] = [];
-	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
-	const inlineEntryParser = new EntryParser({
-		delimiter: ' ',
-		emojiConverter: this.emojiConverter,
-	});
-	if (eidolon.fluff?.length) descriptionLines.push(entryParser.parseEntries(eidolon.fluff));
+
+	const inlineEntryParser = this.entryParser.withDelimiter(' ');
+	if (eidolon.fluff?.length) descriptionLines.push(this.entryParser.parseEntries(eidolon.fluff));
 	descriptionLines.push(
 		`**Tradition** ${eidolon.tradition + ' ' + (eidolon.traditionNote ?? '')}`
 	);

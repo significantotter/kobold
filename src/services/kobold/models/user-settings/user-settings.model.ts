@@ -18,4 +18,8 @@ export class UserSettingsModel extends BaseModel {
 	}
 
 	public $z = zUserSettings;
+
+	static setupRelationMappings({}: {}) {
+		this.relationMappings = {};
+	}
 }

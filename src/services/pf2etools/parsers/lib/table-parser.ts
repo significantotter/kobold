@@ -1,8 +1,7 @@
-import { EmbedData } from 'discord.js';
-import { Table } from '../../models/index.js';
-import { CompendiumEmbedParser } from '../compendium-parser.js';
-import { EntryParser } from '../compendium-entry-parser.js';
-import { table } from 'table';
+import type { EmbedData } from 'discord.js';
+import type { Table } from '../../schemas/index.js';
+import type { CompendiumEmbedParser } from '../compendium-parser.js';
+
 import _ from 'lodash';
 
 export async function _parseTable(this: CompendiumEmbedParser, tableValue: Table) {
@@ -12,9 +11,9 @@ export async function _parseTable(this: CompendiumEmbedParser, tableValue: Table
 
 export function parseTable(this: CompendiumEmbedParser, tableValue: Table): EmbedData {
 	const title = `${tableValue.name}`;
-	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
+
 	return {
 		title: title,
-		description: entryParser.parseTableEntry({ ...tableValue, type: 'table' }),
+		description: this.entryParser.parseTableEntry({ ...tableValue, type: 'table' }),
 	};
 }

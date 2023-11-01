@@ -1,7 +1,7 @@
-import { EmbedData } from 'discord.js';
-import { Place } from '../../models/index.js';
-import { CompendiumEmbedParser } from '../compendium-parser.js';
-import { EntryParser } from '../compendium-entry-parser.js';
+import type { EmbedData } from 'discord.js';
+import type { Place } from '../../schemas/index.js';
+import type { CompendiumEmbedParser } from '../compendium-parser.js';
+
 import _ from 'lodash';
 
 export async function _parsePlace(this: CompendiumEmbedParser, place: Place) {
@@ -11,7 +11,7 @@ export async function _parsePlace(this: CompendiumEmbedParser, place: Place) {
 
 export function parsePlace(this: CompendiumEmbedParser, place: Place): EmbedData {
 	const title = `${place.name} (${place.category} ${place.level ?? ''})`;
-	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
+
 	const descriptionLines: string[] = [];
 	descriptionLines.push(`**Traits** ${place.traits.join(', ')}`);
 	if (place.description) descriptionLines.push(`${place.description}`);
@@ -33,7 +33,7 @@ export function parsePlace(this: CompendiumEmbedParser, place: Place): EmbedData
 			descriptionLines.push(`**Threats** ${place.settlementData.threats.join(', ')}`);
 		for (const feature of place.settlementData?.features ?? []) {
 			descriptionLines.push(
-				`**${feature.name}** ${entryParser.parseEntries(feature.entries)}`
+				`**${feature.name}** ${this.entryParser.parseEntries(feature.entries)}`
 			);
 		}
 	}
@@ -56,7 +56,7 @@ export function parsePlace(this: CompendiumEmbedParser, place: Place): EmbedData
 			);
 		for (const feature of place.nationData?.features ?? []) {
 			descriptionLines.push(
-				`**${feature.name}** ${entryParser.parseEntries(feature.entries)}`
+				`**${feature.name}** ${this.entryParser.parseEntries(feature.entries)}`
 			);
 		}
 
@@ -89,7 +89,7 @@ export function parsePlace(this: CompendiumEmbedParser, place: Place): EmbedData
 		descriptionLines.push(`**${resident.name}** (${traits.join(' ')}) ${resident.bond}`);
 	}
 	descriptionLines.push(``);
-	if (place.entries) descriptionLines.push(entryParser.parseEntries(place.entries));
+	if (place.entries) descriptionLines.push(this.entryParser.parseEntries(place.entries));
 
 	return {
 		title: title,

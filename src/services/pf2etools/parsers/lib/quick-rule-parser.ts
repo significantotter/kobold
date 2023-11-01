@@ -1,7 +1,6 @@
-import { EmbedData } from 'discord.js';
-import { QuickRule } from '../../models/index.js';
-import { CompendiumEmbedParser } from '../compendium-parser.js';
-import { EntryParser } from '../compendium-entry-parser.js';
+import type { EmbedData } from 'discord.js';
+import type { QuickRule } from '../../schemas/index.js';
+import type { CompendiumEmbedParser } from '../compendium-parser.js';
 
 export async function _parseQuickRule(this: CompendiumEmbedParser, quickRule: QuickRule) {
 	const preprocessedData = (await this.preprocessData(quickRule)) as QuickRule;
@@ -10,8 +9,8 @@ export async function _parseQuickRule(this: CompendiumEmbedParser, quickRule: Qu
 
 export function parseQuickRule(this: CompendiumEmbedParser, quickRule: QuickRule): EmbedData {
 	const title = `${quickRule.name}`;
-	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
-	const description = entryParser.parseEntry(quickRule.rule);
+
+	const description = this.entryParser.parseEntry(quickRule.rule);
 	return {
 		title: title,
 		description: description,

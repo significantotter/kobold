@@ -22,6 +22,7 @@ import { Creature } from '../../../utils/creature.js';
 import _ from 'lodash';
 import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
 import { GameUtils } from '../../../utils/game-utils.js';
+import { RollBuilder } from '../../../utils/roll-builder.js';
 
 export class RollSkillSubCommand implements Command {
 	public names = [L.en.commands.roll.skill.name()];
@@ -87,7 +88,7 @@ export class RollSkillSubCommand implements Command {
 
 		const targetRoll = StringUtils.findBestValueByKeyMatch(skillChoice, creature.skillRolls);
 
-		const rollResult = await DiceUtils.rollSimpleCreatureRoll({
+		const rollResult = await RollBuilder.fromSimpleCreatureRoll({
 			actorName: creature.sheet.staticInfo.name,
 			creature,
 			attributeName: targetRoll.name,

@@ -1,7 +1,7 @@
-import { EmbedData } from 'discord.js';
-import { OptionalFeature } from '../../models/index.js';
-import { CompendiumEmbedParser } from '../compendium-parser.js';
-import { EntryParser } from '../compendium-entry-parser.js';
+import type { EmbedData } from 'discord.js';
+import type { OptionalFeature } from '../../schemas/index.js';
+import type { CompendiumEmbedParser } from '../compendium-parser.js';
+
 import { nth } from '../compendium-parser-helpers.js';
 
 export async function _parseOptionalFeature(
@@ -17,7 +17,7 @@ export function parseOptionalFeature(
 	optionalFeature: OptionalFeature
 ): EmbedData {
 	const title = `${optionalFeature.name}`;
-	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
+
 	const descriptionLines: string[] = [];
 	if (optionalFeature.traits)
 		descriptionLines.push(`**Traits** ${optionalFeature.traits.join(', ')}`);
@@ -39,7 +39,7 @@ export function parseOptionalFeature(
 		}
 		descriptionLines.push(`**Prerequisite** ${prerequisiteLine.join(', ')}`);
 	}
-	descriptionLines.push(entryParser.parseEntries(optionalFeature.entries));
+	descriptionLines.push(this.entryParser.parseEntries(optionalFeature.entries));
 	return {
 		title: title,
 		description: descriptionLines.join('\n'),

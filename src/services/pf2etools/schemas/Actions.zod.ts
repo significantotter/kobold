@@ -1,5 +1,6 @@
 import { z } from 'zod';
-import { Entry, zActivitySchema, zEntrySchema, zFrequencySchema } from './index.js';
+import { Entry, zActivitySchema, zEntrySchema } from './lib/entries.zod.js';
+import { zFrequencySchema } from './lib/helpers.zod.js';
 
 const baseZActionFooterSchema = z.strictObject({
 	name: z.string(),

@@ -3,6 +3,7 @@ import {
 	CharacterModel,
 	Game,
 	GuildDefaultCharacter,
+	RollTypeEnum,
 } from '../../../services/kobold/index.js';
 import {
 	ApplicationCommandType,
@@ -59,7 +60,7 @@ export class ActionStageAddAdvancedDamageSubCommand implements Command {
 			ActionStageOptions.ACTION_TARGET_OPTION.name,
 			true
 		);
-		const rollType = 'advanced-damage';
+		const rollType = RollTypeEnum.advancedDamage;
 		const rollName = intr.options.getString(
 			ActionStageOptions.ACTION_ROLL_NAME_OPTION.name,
 			true
@@ -155,7 +156,7 @@ export class ActionStageAddAdvancedDamageSubCommand implements Command {
 			LL.commands.actionStage.interactions.rollAddSuccess({
 				actionName: action.name,
 				rollName: rollName,
-				rollType: 'advanced damage',
+				rollType: rollType,
 			})
 		);
 	}

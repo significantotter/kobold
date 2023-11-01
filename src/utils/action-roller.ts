@@ -1,11 +1,14 @@
 import _ from 'lodash';
 import {
+	ActionCostEnum,
+	ActionTypeEnum,
 	AdvancedDamageRoll,
 	AttackOrSkillRoll,
 	Attribute,
 	Character,
 	DamageRoll,
 	Roll,
+	RollTypeEnum,
 	SaveRoll,
 	SheetInfoLists,
 	SheetWeaknessesResistances,
@@ -15,8 +18,13 @@ import {
 import { DiceRollError, DiceUtils, MultiRollResult } from './dice-utils.js';
 import { RollBuilder } from './roll-builder.js';
 import { Creature } from './creature.js';
-import { EmbedUtils } from './kobold-embed-utils.js';
+import { EmbedUtils, KoboldEmbed } from './kobold-embed-utils.js';
 import { UserSettingsFactory } from '../services/kobold/models/user-settings/user-settings.factory.js';
+import { ChatInputCommandInteraction } from 'discord.js';
+import { getEmoji } from '../constants/emoji.js';
+import L from '../i18n/i18n-node.js';
+import { TranslationFunctions } from '../i18n/i18n-types.js';
+import { KoboldError } from './KoboldError.js';
 
 type Action = Character['actions'][0];
 type ContestedRollTypes = 'attack' | 'skill-challenge' | 'save' | 'none';
@@ -157,7 +165,7 @@ export class ActionRoller {
 
 	public rollAttack(
 		rollBuilder: RollBuilder,
-		roll: Roll & { type: 'attack' | 'skill-challenge' },
+		roll: AttackOrSkillRoll,
 		options: BuildRollOptions,
 		extraAttributes: { [k: string]: Attribute },
 		rollCounter: number
@@ -974,5 +982,212 @@ export class ActionRoller {
 		}
 
 		return rollBuilder;
+	}
+
+	public static fromCreatureAttack({
+		creature,
+		targetCreature,
+		attackName,
+		rollNote,
+		attackModifierExpression,
+		damageModifierExpression,
+		targetAC,
+		userSettings,
+		LL = L.en,
+	}: {
+		creature: Creature;
+		targetCreature?: Creature;
+		attackName: string;
+		rollNote?: string;
+		attackModifierExpression?: string;
+		damageModifierExpression?: string;
+		targetAC?: number;
+		userSettings?: UserSettings;
+		LL: TranslationFunctions;
+	}): { actionRoller: ActionRoller; builtRoll: RollBuilder } {
+		const targetAttack = creature.attackRolls[attackName.toLowerCase()];
+		if (!targetAttack)
+			throw new KoboldError(
+				`Yip! I couldn\'t find an attack called "${attackName.toLowerCase()}"`
+			);
+
+		// build a little action from the attack!
+		const action: Action = {
+			name: targetAttack.name,
+			description: '',
+			baseLevel: 0,
+			autoHeighten: false,
+			type: ActionTypeEnum.attack,
+			actionCost: ActionCostEnum.oneAction,
+			tags: [],
+			rolls: [],
+		};
+		// add the attack roll
+		if (targetAttack.toHit) {
+			action.rolls.push({
+				type: RollTypeEnum.attack,
+				name: 'To Hit',
+				roll: DiceUtils.buildDiceExpression(
+					'd20',
+					String(targetAttack.toHit),
+					attackModifierExpression
+				),
+				targetDC: 'AC',
+				allowRollModifiers: true,
+			});
+		}
+
+		// add the first damage roll with damage modifiers
+		if (targetAttack.damage[0]) {
+			action.rolls.push({
+				type: RollTypeEnum.damage,
+				name: 'Damage',
+				roll: DiceUtils.buildDiceExpression(
+					String(DiceUtils.parseDiceFromWgDamageField(targetAttack.damage[0].dice)),
+					null,
+					damageModifierExpression
+				),
+				healInsteadOfDamage: false,
+				damageType: targetAttack.damage[0].type,
+				allowRollModifiers: true,
+			});
+		}
+		for (let i = 1; i < targetAttack.damage.length; i++) {
+			action.rolls.push({
+				type: RollTypeEnum.damage,
+				name: 'Damage',
+				roll: DiceUtils.buildDiceExpression(
+					String(DiceUtils.parseDiceFromWgDamageField(targetAttack.damage[i].dice))
+				),
+				healInsteadOfDamage: false,
+				damageType: targetAttack.damage[i].type,
+				allowRollModifiers: false,
+			});
+		}
+
+		const actionRoller = new ActionRoller(
+			userSettings ?? null,
+			action,
+			creature,
+			targetCreature
+		);
+		const builtRoll = actionRoller.buildRoll(
+			rollNote ?? '',
+			L.en.commands.roll.attack.interactions.rollEmbed.rollDescription({
+				attackName: targetAttack.name,
+			}),
+			{
+				targetDC: targetAC,
+			}
+		);
+		return {
+			actionRoller,
+			builtRoll,
+		};
+	}
+	public static async fromCreatureRoll(
+		creature: Creature,
+		rollChoice: string,
+		intr: ChatInputCommandInteraction,
+		options: {
+			overwriteCreatureName?: string;
+			rollNote?: string;
+			modifierExpression?: string;
+			damageModifierExpression?: string;
+			targetAC?: number;
+			targetCreature?: Creature;
+			hideStats: boolean;
+			targetNameOverwrite?: string;
+			sourceNameOverwrite?: string;
+			userSettings?: UserSettings;
+			LL?: TranslationFunctions;
+		}
+	): Promise<{ error: boolean; message: string | KoboldEmbed; actionRoller?: ActionRoller }> {
+		const LL = options.LL ?? L.en;
+		const targetRoll = creature.rolls[rollChoice] ?? creature.attackRolls[rollChoice];
+
+		const targetAction = creature.keyedActions[rollChoice];
+		let actionRoller: ActionRoller;
+
+		if (!targetRoll) {
+			return {
+				error: true,
+				message: LL.commands.init.roll.interactions.invalidRoll(),
+			};
+		}
+
+		let embed: KoboldEmbed;
+
+		if (['skill', 'ability', 'save', 'spell', 'check'].includes(targetRoll.type)) {
+			const response = await RollBuilder.fromSimpleCreatureRoll({
+				actorName: options.overwriteCreatureName,
+				creature,
+				attributeName: targetRoll.name,
+				rollNote: options.rollNote ?? '',
+				modifierExpression: options.modifierExpression,
+				LL,
+			});
+
+			return { error: false, message: response.compileEmbed() };
+		} else if (targetRoll.type === 'attack') {
+			let attackResult = ActionRoller.fromCreatureAttack({
+				creature,
+				targetCreature: options.targetCreature,
+				attackName: targetRoll.name,
+				rollNote: options.rollNote,
+				attackModifierExpression: options.modifierExpression,
+				damageModifierExpression: options.damageModifierExpression,
+				targetAC: options.targetAC,
+				LL,
+			});
+
+			actionRoller = attackResult.actionRoller;
+
+			embed = attackResult.builtRoll.compileEmbed({ forceFields: true });
+		} else if (targetAction) {
+			actionRoller = new ActionRoller(
+				options.userSettings ?? null,
+				targetAction,
+				creature,
+				options.targetCreature
+			);
+
+			const emojiText = targetAction.actionCost
+				? getEmoji(intr, targetAction.actionCost) + ' '
+				: '';
+
+			const builtRoll = actionRoller.buildRoll(
+				options.rollNote ?? '',
+				targetAction.description ?? '',
+				{
+					attackModifierExpression: options.modifierExpression,
+					damageModifierExpression: options.damageModifierExpression,
+					title: `${emojiText}${creature.sheet.staticInfo.name} used ${targetAction.name}!`,
+				}
+			);
+
+			embed = builtRoll.compileEmbed({ forceFields: true, showTags: false });
+
+			embed = EmbedUtils.describeActionResult({
+				embed,
+				action: targetAction,
+			});
+
+			embed.addFields(
+				await EmbedUtils.getOrSendActionDamageField({
+					intr,
+					hideStats: options.hideStats,
+					actionRoller,
+					sourceNameOverwrite: options.sourceNameOverwrite,
+					targetNameOverwrite: options.targetNameOverwrite,
+					LL,
+				})
+			);
+		} else {
+			throw new KoboldError(
+				`Yip! I couldn't figure out how to roll the ${targetRoll.type} roll "${targetRoll.name}"`
+			);
+		}
+		return { error: false, message: embed, actionRoller };
 	}
 }

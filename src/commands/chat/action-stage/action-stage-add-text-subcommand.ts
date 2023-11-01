@@ -1,4 +1,4 @@
-import { Character, CharacterModel } from '../../../services/kobold/index.js';
+import { Character, CharacterModel, RollTypeEnum } from '../../../services/kobold/index.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -50,7 +50,7 @@ export class ActionStageAddTextSubCommand implements Command {
 		intr: ChatInputCommandInteraction,
 		LL: TranslationFunctions
 	): Promise<void> {
-		const rollType = 'text';
+		const rollType = RollTypeEnum.text;
 		const rollName = intr.options.getString(
 			ActionStageOptions.ACTION_ROLL_NAME_OPTION.name,
 			true
@@ -165,7 +165,7 @@ export class ActionStageAddTextSubCommand implements Command {
 			LL.commands.actionStage.interactions.rollAddSuccess({
 				actionName: action.name,
 				rollName: rollName,
-				rollType: 'text',
+				rollType: rollType,
 			})
 		);
 	}

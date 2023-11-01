@@ -2,11 +2,11 @@ import { Guild, Locale } from 'discord.js';
 
 import { Logger } from '../services/index.js';
 import { ClientUtils, MessageUtils } from '../utils/index.js';
-import { EventHandler } from './index.js';
 import Logs from './../config/lang/logs.json' assert { type: 'json' };
 import { KoboldEmbed } from '../utils/kobold-embed-utils.js';
 import { refs } from '../constants/common-text.js';
 import _ from 'lodash';
+import { EventHandler } from './event-handler.js';
 
 const welcomeEmbed = new KoboldEmbed({
 	title: 'Yip! Thank you for using Kobold.',

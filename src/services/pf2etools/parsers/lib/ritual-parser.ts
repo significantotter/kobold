@@ -1,7 +1,6 @@
-import { EmbedData } from 'discord.js';
-import { Ritual } from '../../models/index.js';
-import { CompendiumEmbedParser } from '../compendium-parser.js';
-import { EntryParser } from '../compendium-entry-parser.js';
+import type { EmbedData } from 'discord.js';
+import type { Ritual } from '../../schemas/index.js';
+import type { CompendiumEmbedParser } from '../compendium-parser.js';
 
 export async function _parseRitual(this: CompendiumEmbedParser, ritual: Ritual) {
 	const preprocessedData = (await this.preprocessData(ritual)) as Ritual;
@@ -10,7 +9,6 @@ export async function _parseRitual(this: CompendiumEmbedParser, ritual: Ritual) 
 
 export function parseRitual(this: CompendiumEmbedParser, ritual: Ritual): EmbedData {
 	const title = `${ritual.name} (Ritual ${ritual.level})`;
-	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
 	const descriptionLines: string[] = [];
 	if (ritual.traits) descriptionLines.push(`**Traits** ${ritual.traits.join(', ')}`);
 	if (ritual.cast) {
@@ -52,10 +50,10 @@ export function parseRitual(this: CompendiumEmbedParser, ritual: Ritual): EmbedD
 		descriptionLines.push(`**Duration** ${this.helpers.parseDuration(ritual.duration)}`);
 	if (ritual.targets) descriptionLines.push(`**Targets** ${ritual.targets}`);
 	descriptionLines.push('');
-	descriptionLines.push(entryParser.parseEntries(ritual.entries));
+	descriptionLines.push(this.entryParser.parseEntries(ritual.entries));
 	if (ritual.heightened) {
 		descriptionLines.push('');
-		descriptionLines.push(entryParser.parseHeightening(ritual.heightened));
+		descriptionLines.push(this.entryParser.parseHeightening(ritual.heightened));
 	}
 	return {
 		title: title,

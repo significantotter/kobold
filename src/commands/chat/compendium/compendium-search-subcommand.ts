@@ -20,7 +20,11 @@ import { getEmoji } from '../../../constants/emoji.js';
 import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { CompendiumUtils } from '../../../services/pf2etools/utils/compendium-utils.js';
-import {
+
+import { KoboldError } from '../../../utils/KoboldError.js';
+import { StringUtils } from '../../../utils/string-utils.js';
+import _ from 'lodash';
+import type {
 	Ability,
 	Action,
 	Affliction,
@@ -50,7 +54,6 @@ import {
 	Place,
 	QuickRule,
 	RelicGift,
-	RenderDemo,
 	Ritual,
 	Skill,
 	Spell,
@@ -59,10 +62,7 @@ import {
 	VariantRule,
 	Vehicle,
 	VersatileHeritage,
-} from '../../../services/pf2etools/models/index.js';
-import { KoboldError } from '../../../utils/KoboldError.js';
-import { StringUtils } from '../../../utils/string-utils.js';
-import _ from 'lodash';
+} from '../../../services/pf2etools/schemas/index-types.js';
 
 export class CompendiumSearchSubCommand implements Command {
 	public names = [L.en.commands.compendium.search.name()];

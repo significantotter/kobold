@@ -1,7 +1,6 @@
-import { EmbedData } from 'discord.js';
-import { Group } from '../../models/index.js';
-import { CompendiumEmbedParser } from '../compendium-parser.js';
-import { EntryParser } from '../compendium-entry-parser.js';
+import type { EmbedData } from 'discord.js';
+import type { Group } from '../../schemas/index.js';
+import type { CompendiumEmbedParser } from '../compendium-parser.js';
 
 export async function _parseGroup(this: CompendiumEmbedParser, group: Group) {
 	const preprocessedData = (await this.preprocessData(group)) as Group;

@@ -1,7 +1,6 @@
-import { EmbedData } from 'discord.js';
-import { Source } from '../../models/index.js';
-import { CompendiumEmbedParser } from '../compendium-parser.js';
-import { EntryParser } from '../compendium-entry-parser.js';
+import type { EmbedData } from 'discord.js';
+import type { Source } from '../../schemas/index.js';
+import type { CompendiumEmbedParser } from '../compendium-parser.js';
 
 export async function _parseSource(this: CompendiumEmbedParser, source: Source) {
 	const preprocessedData = (await this.preprocessData(source)) as Source;
@@ -10,9 +9,9 @@ export async function _parseSource(this: CompendiumEmbedParser, source: Source) 
 
 export function parseSource(this: CompendiumEmbedParser, source: Source): EmbedData {
 	const title = `${source.name}`;
-	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
+
 	const descriptionLines: string[] = [];
-	if (source.entries) descriptionLines.push(entryParser.parseEntries(source.entries));
+	if (source.entries) descriptionLines.push(this.entryParser.parseEntries(source.entries));
 	return {
 		title: title,
 		url: source.store,

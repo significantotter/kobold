@@ -1,7 +1,6 @@
-import { EmbedData } from 'discord.js';
-import { Spell } from '../../models/index.js';
-import { CompendiumEmbedParser } from '../compendium-parser.js';
-import { EntryParser } from '../compendium-entry-parser.js';
+import type { EmbedData } from 'discord.js';
+import type { Spell } from '../../schemas/index.js';
+import type { CompendiumEmbedParser } from '../compendium-parser.js';
 
 export async function _parseSpell(this: CompendiumEmbedParser, spell: Spell) {
 	const preprocessedData = (await this.preprocessData(spell)) as Spell;
@@ -9,8 +8,7 @@ export async function _parseSpell(this: CompendiumEmbedParser, spell: Spell) {
 }
 
 export function parseSpell(this: CompendiumEmbedParser, spell: Spell): EmbedData {
-	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
-	let emoji = entryParser.parseActivityEmoji(spell?.cast);
+	let emoji = this.entryParser.parseActivityEmoji(spell?.cast);
 	emoji = emoji.replaceAll(' to ', '...');
 	if (emoji) emoji = ` ${emoji}`;
 	let title = `${spell.name}${emoji} (${
@@ -33,7 +31,7 @@ export function parseSpell(this: CompendiumEmbedParser, spell: Spell): EmbedData
 	if (spell.traditions) descriptionLines.push(`**Traditions:** ${spell.traditions.join(', ')}`);
 	if (spell.requirements) descriptionLines.push(`**Requirements:** ${spell.requirements}`);
 	let castLine: string[] = [];
-	if (spell.cast) castLine.push(`**Cast:** ${entryParser.parseActivity(spell.cast)}`);
+	if (spell.cast) castLine.push(`**Cast:** ${this.entryParser.parseActivity(spell.cast)}`);
 	if (spell.trigger) castLine.push(`**Trigger:** ${spell.trigger}`);
 	if (castLine.length) descriptionLines.push(castLine.join('; '));
 
@@ -56,18 +54,18 @@ export function parseSpell(this: CompendiumEmbedParser, spell: Spell): EmbedData
 	}
 
 	descriptionLines.push('');
-	descriptionLines.push(entryParser.parseEntries(spell.entries));
+	descriptionLines.push(this.entryParser.parseEntries(spell.entries));
 
 	if (spell.heightened) {
 		descriptionLines.push('');
-		descriptionLines.push(entryParser.parseHeightening(spell.heightened));
+		descriptionLines.push(this.entryParser.parseHeightening(spell.heightened));
 	}
 	if (spell.amp?.entries) {
-		descriptionLines.push(`**Amp** ${entryParser.parseEntries(spell.amp.entries)}`);
+		descriptionLines.push(`**Amp** ${this.entryParser.parseEntries(spell.amp.entries)}`);
 	}
 	if (spell.amp?.heightened) {
 		descriptionLines.push(
-			entryParser
+			this.entryParser
 				.parseHeightening(spell.amp.heightened)
 				.replaceAll('Heightened', 'Amp Heightened')
 		);

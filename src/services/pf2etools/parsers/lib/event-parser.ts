@@ -1,7 +1,6 @@
-import { EmbedData } from 'discord.js';
-import { Event } from '../../models/index.js';
-import { CompendiumEmbedParser } from '../compendium-parser.js';
-import { EntryParser } from '../compendium-entry-parser.js';
+import type { EmbedData } from 'discord.js';
+import type { Event } from '../../schemas/index.js';
+import type { CompendiumEmbedParser } from '../compendium-parser.js';
 
 export async function _parseEvent(this: CompendiumEmbedParser, event: Event) {
 	const preprocessedData = (await this.preprocessData(event)) as Event;
@@ -9,12 +8,11 @@ export async function _parseEvent(this: CompendiumEmbedParser, event: Event) {
 }
 
 export function parseEvent(this: CompendiumEmbedParser, event: Event): EmbedData {
-	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
 	const title = `${event.name} (Event ${event.level})`;
 	const descriptionLines: string[] = [];
 	if (event.traits) descriptionLines.push(`**Traits:** ${event.traits.join(', ')}`);
 	descriptionLines.push(`**Applicable Skills:** ${event.applicableSkills.join(', ')}`);
-	descriptionLines.push(entryParser.parseEntries(event.entries));
+	descriptionLines.push(this.entryParser.parseEntries(event.entries));
 
 	return {
 		title: title,

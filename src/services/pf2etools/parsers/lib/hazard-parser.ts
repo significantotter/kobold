@@ -1,7 +1,7 @@
-import { EmbedData } from 'discord.js';
-import { Hazard } from '../../models/index.js';
-import { CompendiumEmbedParser } from '../compendium-parser.js';
-import { EntryParser } from '../compendium-entry-parser.js';
+import type { EmbedData } from 'discord.js';
+import type { Hazard } from '../../schemas/index.js';
+import type { CompendiumEmbedParser } from '../compendium-parser.js';
+
 import _ from 'lodash';
 
 export async function _parseHazard(this: CompendiumEmbedParser, hazard: Hazard) {
@@ -10,7 +10,6 @@ export async function _parseHazard(this: CompendiumEmbedParser, hazard: Hazard) 
 }
 
 export function parseHazard(this: CompendiumEmbedParser, hazard: Hazard): EmbedData {
-	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
 	const title = `${hazard.name} (Hazard ${hazard.level})`;
 	const descriptionLines: string[] = [];
 	descriptionLines.push(`**Traits** ${hazard.traits.join(', ')}`);
@@ -34,7 +33,9 @@ export function parseHazard(this: CompendiumEmbedParser, hazard: Hazard): EmbedD
 		descriptionLines.push(stealthLine.join(' '));
 	}
 	if (hazard.description)
-		descriptionLines.push(`**Description** ${entryParser.parseEntries(hazard.description)}`);
+		descriptionLines.push(
+			`**Description** ${this.entryParser.parseEntries(hazard.description)}`
+		);
 
 	descriptionLines.push('');
 	if (hazard.disable.entries)
@@ -52,17 +53,19 @@ export function parseHazard(this: CompendiumEmbedParser, hazard: Hazard): EmbedD
 		descriptionLines.push(defenses);
 	}
 	for (const action of hazard.actions ?? []) {
-		descriptionLines.push(entryParser.parseEntry(_.merge(action, { type: 'ability' }), true));
+		descriptionLines.push(
+			this.entryParser.parseEntry(_.merge(action, { type: 'ability' }), true)
+		);
 	}
 	descriptionLines.push('');
 	if (hazard.routine) {
-		descriptionLines.push(`**Routine** ${entryParser.parseEntries(hazard.routine)}`);
+		descriptionLines.push(`**Routine** ${this.entryParser.parseEntries(hazard.routine)}`);
 	}
 	if (hazard.speed) descriptionLines.push(this.helpers.parseSpeed(hazard.speed));
 
 	if (hazard.attacks) {
 		for (const attack of hazard.attacks) {
-			descriptionLines.push(entryParser.parseAttackEntry(attack));
+			descriptionLines.push(this.entryParser.parseAttackEntry(attack));
 		}
 	}
 	if (hazard.reset) {

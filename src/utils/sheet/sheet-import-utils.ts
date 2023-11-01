@@ -1,5 +1,11 @@
 import _ from 'lodash';
-import { AbilityEnum, ProficiencyStat, Sheet, SheetStatKeys } from '../../services/kobold/index.js';
+import {
+	AbilityEnum,
+	ProficiencyStat,
+	Sheet,
+	SheetStatKeys,
+	isAbilityEnum,
+} from '../../services/kobold/index.js';
 import { PathBuilder, ability } from '../../services/pathbuilder/pathbuilder.js';
 import { CreatureFluff, Creature, Stat } from '../../services/pf2etools/schemas/index-types.js';
 import { WG } from '../../services/wanderers-guide/wanderers-guide.js';
@@ -293,6 +299,7 @@ export function convertBestiaryCreatureToSheet(
 					bestiaryEntry.name,
 			usesStamina: options.useStamina ?? false,
 			level: (bestiaryEntry.level ?? 0) + challengeAdjustment,
+			keyAbility: null,
 		},
 		info: {
 			description: bestiaryEntry.description ?? null,
@@ -307,7 +314,6 @@ export function convertBestiaryCreatureToSheet(
 			imageURL: fluffEntry?.images?.[0] ?? null,
 			size: size?.[0] ?? 'medium',
 			class: null,
-			keyAbility: null,
 			ancestry: null,
 			heritage: null,
 			background: null,
@@ -588,6 +594,7 @@ export function convertWanderersGuideCharToSheet(
 			name: characterData.name,
 			level: level,
 			usesStamina: characterData.variantStamina === 1,
+			keyAbility: null,
 		},
 		info: {
 			url: `https://wanderersguide.app/profile/characters/${characterData.id}`,
@@ -599,7 +606,6 @@ export function convertWanderersGuideCharToSheet(
 			imageURL: characterData?.infoJSON?.imageURL ?? null,
 			size: calculatedStats.generalInfo?.size ?? null,
 			class: calculatedStats.generalInfo?.className ?? null,
-			keyAbility: null,
 			ancestry,
 			heritage,
 			background: calculatedStats.generalInfo?.backgroundName ?? null,
@@ -716,6 +722,9 @@ export function convertPathBuilderToSheet(
 		return prof + pathBuilderSheet.level;
 	};
 
+	const trimmedKeyAbility = pathBuilderSheet.keyability.trim().toLowerCase();
+	const keyAbility = isAbilityEnum(trimmedKeyAbility) ? trimmedKeyAbility : null;
+
 	// these are modifying values from different sources for certain stats
 	// for example, item bonuses to skills
 	const modKeys = _.mapKeys(pathBuilderSheet.mods, (value, key) => key.toLocaleLowerCase());
@@ -763,10 +772,7 @@ export function convertPathBuilderToSheet(
 				pathBuilderSheet.level;
 	}
 
-	const keyAbility =
-		SheetProperties.abilityFromAlias[pathBuilderSheet.keyability.trim().toLowerCase()] ??
-		AbilityEnum.strength;
-	let keyAbilityBonus = baseSheet.intProperties[keyAbility] ?? 0;
+	let keyAbilityBonus = keyAbility ? baseSheet.intProperties[keyAbility] ?? 0 : 0;
 
 	// spellcasting stats
 	for (const spellcasting of pathBuilderSheet.spellCasters) {
@@ -868,6 +874,7 @@ export function convertPathBuilderToSheet(
 			name: pathBuilderSheet.name,
 			level: pathBuilderSheet.level,
 			usesStamina: options.useStamina ?? false,
+			keyAbility: keyAbility,
 		},
 		info: {
 			...baseSheet.info,
@@ -877,7 +884,6 @@ export function convertPathBuilderToSheet(
 			deity: pathBuilderSheet.deity ?? null,
 			size: sizeToString(pathBuilderSheet.size),
 			class: pathBuilderSheet.class,
-			keyAbility: pathBuilderSheet.keyability,
 			ancestry: pathBuilderSheet.ancestry,
 			heritage: pathBuilderSheet.heritage.replace(' ' + pathBuilderSheet.ancestry, ''),
 			background: pathBuilderSheet.background,

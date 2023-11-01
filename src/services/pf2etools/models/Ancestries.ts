@@ -5,8 +5,6 @@ import * as schema from '../pf2eTools.schema.js';
 import {
 	zAncestrySchema,
 	Ancestry,
-	Heritage,
-	zHeritageSchema,
 	VersatileHeritage,
 	zVersatileHeritageSchema,
 } from './../schemas/index.js';

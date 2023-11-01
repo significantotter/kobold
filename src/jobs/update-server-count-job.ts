@@ -1,12 +1,12 @@
 import { ActivityType, Client, ShardingManager } from 'discord.js';
 import { createRequire } from 'node:module';
 
-import { Job } from './index.js';
 import { CustomClient } from '../extensions/index.js';
 import { BotSite } from '../models/config-models.js';
 import { HttpService, Logger } from '../services/index.js';
 import { ShardUtils } from '../utils/index.js';
 import { Config } from '../config/config.js';
+import { Job } from '../services/job-service.js';
 
 const require = createRequire(import.meta.url);
 

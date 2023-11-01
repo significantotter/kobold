@@ -1,7 +1,6 @@
-import { EmbedData } from 'discord.js';
-import { Ability, Affliction, CreatureTemplate } from '../../models/index.js';
-import { CompendiumEmbedParser } from '../compendium-parser.js';
-import { EntryParser } from '../compendium-entry-parser.js';
+import type { EmbedData } from 'discord.js';
+import type { Ability, Affliction, CreatureTemplate } from '../../schemas/index.js';
+import type { CompendiumEmbedParser } from '../compendium-parser.js';
 
 const abilityIsAffliction = (ability: Ability | Affliction): ability is Affliction =>
 	ability.type === 'affliction' || ability.type === 'Disease' || ability.type === 'Curse';
@@ -18,20 +17,19 @@ export function parseCreatureTemplate(
 	this: CompendiumEmbedParser,
 	creatureTemplate: CreatureTemplate
 ): EmbedData {
-	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
 	const title = `${creatureTemplate.name}`;
 	const descriptionLines = [];
-	descriptionLines.push(entryParser.parseEntries(creatureTemplate.entries));
+	descriptionLines.push(this.entryParser.parseEntries(creatureTemplate.entries));
 	const genericAbilities: string[] = [];
 	const fields: { name: string; value: string; inline: boolean }[] = [];
 	if (creatureTemplate.abilities?.entries) {
-		descriptionLines.push(entryParser.parseEntries(creatureTemplate.abilities.entries));
+		descriptionLines.push(this.entryParser.parseEntries(creatureTemplate.abilities.entries));
 	}
 	for (const ability of creatureTemplate.abilities?.abilities ?? []) {
 		if (abilityIsAffliction(ability)) {
 			fields.push({
 				name: `**${ability.name ?? 'Affliction'}**`,
-				value: entryParser.parseAfflictionEntry(ability, false),
+				value: this.entryParser.parseAfflictionEntry(ability, false),
 				inline: true,
 			});
 		} else {
@@ -39,8 +37,8 @@ export function parseCreatureTemplate(
 				genericAbilities.push(ability.name ?? 'Ability');
 			} else {
 				fields.push({
-					name: entryParser.parseAbilityEntryTitle(ability),
-					value: entryParser.parseAbilityEntry(ability, false),
+					name: this.entryParser.parseAbilityEntryTitle(ability),
+					value: this.entryParser.parseAbilityEntry(ability, false),
 					inline: true,
 				});
 			}
@@ -49,7 +47,7 @@ export function parseCreatureTemplate(
 	if (creatureTemplate.optAbilities?.entries) {
 		fields.push({
 			name: '**Optional Abilities**',
-			value: entryParser.parseEntries(creatureTemplate.optAbilities.entries),
+			value: this.entryParser.parseEntries(creatureTemplate.optAbilities.entries),
 			inline: false,
 		});
 	}
@@ -57,14 +55,14 @@ export function parseCreatureTemplate(
 		if (abilityIsAffliction(ability)) {
 			fields.push({
 				name: `**${ability.name ?? 'Ability'}**`,
-				value: entryParser.parseAfflictionEntry(ability),
+				value: this.entryParser.parseAfflictionEntry(ability),
 				inline: true,
 			});
 		} else {
 			if (!ability.generic) {
 				fields.push({
-					name: entryParser.parseAbilityEntryTitle(ability),
-					value: entryParser.parseAbilityEntry(ability, false),
+					name: this.entryParser.parseAbilityEntryTitle(ability),
+					value: this.entryParser.parseAbilityEntry(ability, false),
 					inline: true,
 				});
 			}

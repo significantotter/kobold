@@ -1,7 +1,6 @@
-import { EmbedData } from 'discord.js';
-import { Skill } from '../../models/index.js';
-import { CompendiumEmbedParser } from '../compendium-parser.js';
-import { EntryParser } from '../compendium-entry-parser.js';
+import type { EmbedData } from 'discord.js';
+import type { Skill } from '../../schemas/index.js';
+import type { CompendiumEmbedParser } from '../compendium-parser.js';
 
 export async function _parseSkill(this: CompendiumEmbedParser, skill: Skill) {
 	const preprocessedData = (await this.preprocessData(skill)) as Skill;
@@ -10,8 +9,8 @@ export async function _parseSkill(this: CompendiumEmbedParser, skill: Skill) {
 
 export function parseSkill(this: CompendiumEmbedParser, skill: Skill): EmbedData {
 	const title = `${skill.name}`;
-	const entryParser = new EntryParser({ delimiter: '\n', emojiConverter: this.emojiConverter });
-	const description = entryParser.parseEntries(skill.entries);
+
+	const description = this.entryParser.parseEntries(skill.entries);
 	return {
 		title: title,
 		description: description,

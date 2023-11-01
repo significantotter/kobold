@@ -3,7 +3,7 @@ import { RateLimiter } from 'discord.js-rate-limiter';
 
 import { Button, ButtonDeferType } from '../buttons/index.js';
 import { InteractionUtils } from '../utils/index.js';
-import { EventHandler } from './index.js';
+import { EventHandler } from './event-handler.js';
 import { Config } from './../config/config.js';
 
 export class ButtonHandler implements EventHandler {
