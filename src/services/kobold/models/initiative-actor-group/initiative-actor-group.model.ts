@@ -11,7 +11,8 @@ export interface InitiativeActorGroupModel extends InitiativeActorGroup {
 	actors?: InitiativeActorModel[];
 }
 export class InitiativeActorGroupModel extends BaseModel {
-	public $idColumn = 'id';
+	static idColumn = ['id'];
+	public $insertIgnore = 'id';
 	static get tableName(): string {
 		return 'initiativeActorGroup';
 	}

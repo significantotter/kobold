@@ -8,7 +8,8 @@ export interface GameModel extends Game {
 	characters: CharacterModel[];
 }
 export class GameModel extends BaseModel {
-	public $idColumn = ['id'];
+	static idColumn = ['id'];
+	public $insertIgnore = ['id'];
 	static get tableName(): string {
 		return 'game';
 	}

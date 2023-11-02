@@ -274,7 +274,7 @@ describe('ModifierUtils', () => {
 			);
 
 			expect(bonuses).toStrictEqual({
-				foo: {
+				circumstance: {
 					name: 'fooBonus',
 					isActive: true,
 					type: SheetAdjustmentTypeEnum.circumstance,
@@ -297,7 +297,7 @@ describe('ModifierUtils', () => {
 				},
 			});
 			expect(penalties).toStrictEqual({
-				foo: {
+				circumstance: {
 					name: 'foo bonus 4',
 					isActive: true,
 					type: SheetAdjustmentTypeEnum.circumstance,

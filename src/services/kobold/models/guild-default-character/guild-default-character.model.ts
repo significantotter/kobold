@@ -5,7 +5,8 @@ import { ZodValidator } from '../../lib/zod-validator.js';
 
 export interface GuildDefaultCharacterModel extends GuildDefaultCharacter {}
 export class GuildDefaultCharacterModel extends BaseModel {
-	public $idColumn = ['guildId', 'userId'];
+	static idColumn = ['guildId', 'userId'];
+	public $insertIgnore = [];
 
 	static get tableName(): string {
 		return 'guildDefaultCharacter';

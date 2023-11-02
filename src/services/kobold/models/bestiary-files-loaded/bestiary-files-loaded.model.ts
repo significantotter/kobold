@@ -5,7 +5,8 @@ import { ZodValidator } from '../../lib/zod-validator.js';
 
 export interface BestiaryFilesLoadedModel extends BestiaryFilesLoaded {}
 export class BestiaryFilesLoadedModel extends BaseModel {
-	public $idColumn = 'id';
+	static idColumn = ['id'];
+	public $insertIgnore = ['id'];
 
 	static get tableName(): string {
 		return 'bestiaryFilesLoaded';

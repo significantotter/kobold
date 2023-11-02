@@ -24,18 +24,18 @@ export class ZodValidator extends Validator {
 
 		// Do your validation here and throw any exception if the
 		// validation fails.
-		const idColumns = [model.$idColumn as string | string[]].flat();
+		const insertIgnore = [(model.$insertIgnore ?? []) as string | string[]].flat();
 		const $zInsert = model.$z.omit(
-			idColumns.reduce((acc, key) => ({ ...acc, [key]: true }), {})
+			insertIgnore.reduce((acc, key) => ({ ...acc, [key]: true }), {})
 		);
 		const $zUpdate = $zInsert.partial();
 
 		// there's no way to check if it's an insert vs a select in here,
 		// so we'll settle for id fields always validating as optional, unfortunately
 		if (opt.patch) {
-			json = $zUpdate.safeParse(json);
+			json = $zUpdate.parse(json);
 		} else {
-			json = $zInsert.safeParse(json);
+			json = $zInsert.parse(json);
 		}
 
 		if (json.success === false) {
@@ -44,7 +44,7 @@ export class ZodValidator extends Validator {
 		}
 
 		// You need to return the (possibly modified) json.
-		return json.data;
+		return json;
 	}
 
 	beforeValidate(args: ValidatorArgs) {

@@ -11,22 +11,23 @@ class UserSettingsFactoryClass extends Factory<
 	UserSettingsModel
 > {}
 
-export const UserSettingsFactory = UserSettingsFactoryClass.define(
-	({ onCreate, transientParams }) => {
-		onCreate(async builtUserSettings => UserSettingsModel.query().insert(builtUserSettings));
+export const UserSettingsFactory = UserSettingsFactoryClass.define(({ onCreate }) => {
+	onCreate(async builtUserSettings => {
+		console.log(builtUserSettings);
+		return UserSettingsModel.query().insert(builtUserSettings.toJSON());
+	});
 
-		const characterData: DeepPartial<UserSettingsModel> = {
-			userId: faker.string.uuid(),
-			initStatsNotification: faker.helpers.arrayElement([
-				'never',
-				'every_turn',
-				'every_round',
-				'whenever_hidden',
-			]),
-			inlineRollsDisplay: faker.helpers.arrayElement(['detailed', 'compact']),
-			rollCompactMode: faker.helpers.arrayElement(['compact', 'normal']),
-		};
+	const characterData: DeepPartial<UserSettingsModel> = {
+		userId: faker.string.uuid(),
+		initStatsNotification: faker.helpers.arrayElement([
+			'never',
+			'every_turn',
+			'every_round',
+			'whenever_hidden',
+		]),
+		inlineRollsDisplay: faker.helpers.arrayElement(['detailed', 'compact']),
+		rollCompactMode: faker.helpers.arrayElement(['compact', 'normal']),
+	};
 
-		return UserSettingsModel.fromDatabaseJson(characterData);
-	}
-);
+	return UserSettingsModel.fromDatabaseJson(characterData);
+});

@@ -34,6 +34,10 @@ import {
 	RollV1,
 	SheetAdjustmentV1,
 	SheetV1,
+	zActionV1,
+	zModifierV1,
+	zRollV1,
+	zSheetAdjustmentV1,
 	zSheetV1,
 } from './character.v1.zod.js';
 import { SheetAdjuster } from './sheet-adjuster.js';
@@ -41,61 +45,65 @@ import { SheetAdjuster } from './sheet-adjuster.js';
 const scoreToModifier = (score: number) => Math.floor((score - 10) / 2);
 
 export function upgradeRoll(roll: RollV1): Roll {
-	if (!isRollTypeEnum(roll.type)) {
+	const defaultedRoll = zRollV1.parse(roll);
+	if (!isRollTypeEnum(defaultedRoll.type)) {
 		throw new KoboldError('Failed to parse roll! ' + JSON.stringify(roll));
 	}
-	if (roll.type === RollTypeEnum.attack || roll.type === RollTypeEnum.skillChallenge) {
+	if (
+		defaultedRoll.type === RollTypeEnum.attack ||
+		defaultedRoll.type === RollTypeEnum.skillChallenge
+	) {
 		const result: AttackOrSkillRoll = {
-			name: roll.name,
-			type: roll.type,
-			allowRollModifiers: roll.allowRollModifiers,
-			targetDC: roll.targetDC ?? roll.saveTargetDC ?? null,
-			roll: roll.roll ?? '',
+			name: defaultedRoll.name,
+			type: defaultedRoll.type,
+			allowRollModifiers: defaultedRoll.allowRollModifiers,
+			targetDC: defaultedRoll.targetDC ?? defaultedRoll.saveTargetDC ?? null,
+			roll: defaultedRoll.roll ?? '',
 		};
 		return result;
-	} else if (roll.type === RollTypeEnum.save) {
+	} else if (defaultedRoll.type === RollTypeEnum.save) {
 		const result: SaveRoll = {
-			name: roll.name,
-			type: roll.type,
-			allowRollModifiers: roll.allowRollModifiers,
-			saveRollType: roll.saveRollType ?? null,
-			saveTargetDC: roll.saveTargetDC ?? null,
+			name: defaultedRoll.name,
+			type: defaultedRoll.type,
+			allowRollModifiers: defaultedRoll.allowRollModifiers,
+			saveRollType: defaultedRoll.saveRollType ?? null,
+			saveTargetDC: defaultedRoll.saveTargetDC ?? null,
 		};
 		return result;
-	} else if (roll.type === RollTypeEnum.text) {
+	} else if (defaultedRoll.type === RollTypeEnum.text) {
 		const result: TextRoll = {
-			name: roll.name,
-			type: roll.type,
-			allowRollModifiers: roll.allowRollModifiers,
-			defaultText: roll.defaultText ?? null,
-			criticalSuccessText: roll.criticalSuccessText ?? null,
-			criticalFailureText: roll.criticalFailureText ?? null,
-			successText: roll.successText ?? null,
-			failureText: roll.failureText ?? null,
-			extraTags: roll.extraTags ?? [],
+			name: defaultedRoll.name,
+			type: defaultedRoll.type,
+			allowRollModifiers: defaultedRoll.allowRollModifiers,
+			defaultText: defaultedRoll.defaultText ?? null,
+			criticalSuccessText: defaultedRoll.criticalSuccessText ?? null,
+			criticalFailureText: defaultedRoll.criticalFailureText ?? null,
+			successText: defaultedRoll.successText ?? null,
+			failureText: defaultedRoll.failureText ?? null,
+			extraTags: defaultedRoll.extraTags ?? [],
 		};
 		return result;
-	} else if (roll.type === RollTypeEnum.advancedDamage) {
+	} else if (defaultedRoll.type === RollTypeEnum.advancedDamage) {
 		const result: AdvancedDamageRoll = {
-			name: roll.name,
-			type: roll.type,
-			allowRollModifiers: roll.allowRollModifiers,
-			damageType: roll.damageType ?? null,
-			healInsteadOfDamage: roll.healInsteadOfDamage ?? false,
-			criticalSuccessRoll: roll.criticalSuccessRoll ?? null,
-			criticalFailureRoll: roll.criticalFailureRoll ?? null,
-			successRoll: roll.successRoll ?? null,
-			failureRoll: roll.failureRoll ?? null,
+			name: defaultedRoll.name,
+			type: defaultedRoll.type,
+			allowRollModifiers: defaultedRoll.allowRollModifiers,
+			damageType: defaultedRoll.damageType ?? null,
+			healInsteadOfDamage: defaultedRoll.healInsteadOfDamage ?? false,
+			criticalSuccessRoll: defaultedRoll.criticalSuccessRoll ?? null,
+			criticalFailureRoll: defaultedRoll.criticalFailureRoll ?? null,
+			successRoll: defaultedRoll.successRoll ?? null,
+			failureRoll: defaultedRoll.failureRoll ?? null,
 		};
 		return result;
-	} else if (roll.type === RollTypeEnum.damage) {
+	} else if (defaultedRoll.type === RollTypeEnum.damage) {
 		const result: DamageRoll = {
-			name: roll.name,
-			type: roll.type,
-			allowRollModifiers: roll.allowRollModifiers,
-			damageType: roll.damageType ?? null,
-			healInsteadOfDamage: roll.healInsteadOfDamage ?? false,
-			roll: roll.roll ?? '',
+			name: defaultedRoll.name,
+			type: defaultedRoll.type,
+			allowRollModifiers: defaultedRoll.allowRollModifiers,
+			damageType: defaultedRoll.damageType ?? null,
+			healInsteadOfDamage: defaultedRoll.healInsteadOfDamage ?? false,
+			roll: defaultedRoll.roll ?? '',
 		};
 		return result;
 	} else {
@@ -105,19 +113,20 @@ export function upgradeRoll(roll: RollV1): Roll {
 }
 
 export function upgradeAction(action: ActionV1): Action {
-	const trimmedLowerActionType = action.type.trim().toLowerCase();
+	const defaultedAction = zActionV1.parse(action);
+	const trimmedLowerActionType = defaultedAction.type.trim().toLowerCase();
 	let actionType = ActionTypeEnum.other;
 	if (isActionTypeEnum(trimmedLowerActionType)) {
 		actionType = trimmedLowerActionType;
 	}
-	const trimmedLowerActionCost = (action.actionCost ?? '').trim().toLowerCase();
+	const trimmedActionCost = (defaultedAction.actionCost ?? '').trim();
 	let actionCost: ActionCostEnum = ActionCostEnum.none;
-	if (isActionCostEnum(trimmedLowerActionCost)) {
-		actionCost = trimmedLowerActionCost;
+	if (isActionCostEnum(trimmedActionCost)) {
+		actionCost = trimmedActionCost;
 	}
-	const rolls: Roll[] = action.rolls.map(upgradeRoll);
+	const rolls: Roll[] = defaultedAction.rolls.map(upgradeRoll);
 	return {
-		...action,
+		...defaultedAction,
 		type: actionType,
 		actionCost,
 		rolls,
@@ -127,15 +136,16 @@ export function upgradeSheetAdjustment(
 	sheetAdjustment: SheetAdjustmentV1,
 	adjustmentType?: SheetAdjustmentTypeEnum
 ): SheetAdjustment {
-	const property = SheetAdjuster.standardizeProperty(sheetAdjustment.property);
+	const defaultedSheetAdjustment = zSheetAdjustmentV1.parse(sheetAdjustment);
+	const property = SheetAdjuster.standardizeProperty(defaultedSheetAdjustment.property);
 	const propertyType = SheetAdjuster.getPropertyType(property);
-	const operation = isSheetAdjustmentOperationEnum(sheetAdjustment.operation)
-		? sheetAdjustment.operation
+	const operation = isSheetAdjustmentOperationEnum(defaultedSheetAdjustment.operation)
+		? defaultedSheetAdjustment.operation
 		: SheetAdjustmentOperationEnum['='];
 	const type = adjustmentType ?? SheetAdjustmentTypeEnum.untyped;
 	return {
 		property,
-		value: sheetAdjustment.value,
+		value: defaultedSheetAdjustment.value,
 		operation,
 		propertyType,
 		type,
@@ -143,23 +153,24 @@ export function upgradeSheetAdjustment(
 }
 
 export function upgradeModifier(modifier: ModifierV1): Modifier {
-	const trimmedLowerType = modifier.type.trim().toLowerCase();
+	const defaultedModifier = zModifierV1.parse(modifier);
+	const trimmedLowerType = defaultedModifier.type.trim().toLowerCase();
 	const adjustmentType = isSheetAdjustmentTypeEnum(trimmedLowerType)
 		? trimmedLowerType
 		: SheetAdjustmentTypeEnum.untyped;
-	if (modifier.modifierType === ModifierTypeEnum.roll) {
+	if (defaultedModifier.modifierType === ModifierTypeEnum.roll) {
 		return {
-			...modifier,
+			...defaultedModifier,
 			modifierType: ModifierTypeEnum.roll,
 			type: adjustmentType,
-			value: modifier.value == null ? '' : modifier.value.toString(),
+			value: defaultedModifier.value == null ? '' : defaultedModifier.value.toString(),
 		} satisfies RollModifier;
 	} else if (modifier.modifierType === ModifierTypeEnum.sheet) {
 		return {
-			...modifier,
+			...defaultedModifier,
 			modifierType: ModifierTypeEnum.sheet,
 			type: adjustmentType,
-			sheetAdjustments: modifier.sheetAdjustments.map(adjustment =>
+			sheetAdjustments: defaultedModifier.sheetAdjustments.map(adjustment =>
 				upgradeSheetAdjustment(adjustment, adjustmentType)
 			),
 		} satisfies SheetModifier;

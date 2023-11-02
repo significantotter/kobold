@@ -1,10 +1,11 @@
-import { Model, RelationMappings } from 'objection';
+import { Model, RelationMappings, StaticHookArguments } from 'objection';
 import { z } from 'zod';
 import _ from 'lodash';
 import { ZodValidator } from './zod-validator.js';
 
 export class BaseModel extends Model {
-	declare $idColumn: string | string[];
+	static idColumn = ['id'];
+	declare $insertIgnore: string | string[];
 
 	/** Allow arbitrary properties */
 	[k: string]: any;

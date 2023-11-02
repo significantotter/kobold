@@ -116,15 +116,6 @@ const zBaseRoll = z.strictObject({
 	allowRollModifiers: z.boolean().default(false),
 });
 
-enum RollTypeEnum {
-	attack = 'attack',
-	skillChallenge = 'skill-challenge',
-	damage = 'damage',
-	advancedDamage = 'advanced-damage',
-	save = 'save',
-	text = 'text',
-}
-
 const zAttackOrSkillRoll = zBaseRoll.extend({
 	type: z.enum(['attack', 'skill-challenge']),
 	targetDC: z.string().nullable().optional(),
@@ -171,7 +162,7 @@ export const zRollV1 = z.discriminatedUnion('type', [
 ]);
 
 export type ActionV1 = z.infer<typeof zActionV1>;
-const zActionV1 = z
+export const zActionV1 = z
 	.object({
 		name: z.string(),
 		description: z.string(),
@@ -192,14 +183,14 @@ const zAttribute = z.strictObject({
 });
 
 export type SheetAdjustmentV1 = z.infer<typeof zSheetAdjustmentV1>;
-const zSheetAdjustmentV1 = z.strictObject({
+export const zSheetAdjustmentV1 = z.strictObject({
 	property: z.string(),
 	operation: z.enum(['+', '-', '=']),
 	value: z.string(),
 });
 
 export type ModifierV1 = z.infer<typeof zModifierV1>;
-const zModifierV1 = z
+export const zModifierV1 = z
 	.union([
 		z.strictObject({
 			name: z.string(),

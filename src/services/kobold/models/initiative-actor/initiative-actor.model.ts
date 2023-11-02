@@ -14,7 +14,8 @@ export interface InitiativeActorModel extends InitiativeActor {
 	character?: CharacterModel;
 }
 export class InitiativeActorModel extends BaseModel {
-	public $idColumn = 'id';
+	static idColumn = ['id'];
+	public $insertIgnore = 'id';
 
 	static createValidator() {
 		return new ZodValidator();

@@ -10,7 +10,8 @@ export interface CharacterModel extends Character {
 	channelDefaultCharacter?: ChannelDefaultCharacterModel[];
 }
 export class CharacterModel extends BaseModel {
-	public $idColumn = ['id'];
+	static idColumn = ['id'];
+	public $insertIgnore = ['id'];
 	static get tableName(): string {
 		return 'character';
 	}

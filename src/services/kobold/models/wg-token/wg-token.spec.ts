@@ -1,13 +1,11 @@
-import Ajv from 'ajv';
 import { WgTokenFactory } from './wg-token.factory.js';
 import { WgTokenModel } from './wg-token.model.js';
-import addFormats from 'ajv-formats';
 import { zWgToken } from '../../schemas/wg-token.zod.js';
 
 describe('WG Token', () => {
 	test('validates a built factory', () => {
 		const builtToken = WgTokenFactory.build();
-		const valid = zWgToken.safeParse(builtToken.toJSON());
+		const valid = zWgToken.omit({ id: true }).safeParse(builtToken.toJSON());
 		expect(valid.success).toBe(true);
 	});
 	test('validates a created factory object', async () => {

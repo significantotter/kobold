@@ -5,9 +5,8 @@ import { ZodValidator } from '../../lib/zod-validator.js';
 
 export interface UserSettingsModel extends UserSettings {}
 export class UserSettingsModel extends BaseModel {
-	static get idColumn() {
-		return ['userId'];
-	}
+	static idColumn = ['userId'];
+	public $insertIgnore = [];
 
 	static get tableName(): string {
 		return 'userSettings';

@@ -4,7 +4,8 @@ import { ZodValidator } from '../../lib/zod-validator.js';
 
 export interface WgTokenModel extends WgToken {}
 export class WgTokenModel extends BaseModel {
-	public $idColumn = ['id'];
+	static idColumn = ['id'];
+	public $insertIgnore = ['id'];
 	static get tableName(): string {
 		return 'WgAuthToken';
 	}

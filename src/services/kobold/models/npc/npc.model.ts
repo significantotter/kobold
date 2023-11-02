@@ -6,7 +6,8 @@ import { zNpc } from '../../schemas/npc.zod.js';
 
 export interface NpcModel extends Npc {}
 export class NpcModel extends BaseModel {
-	public $idColumn = ['id'];
+	static idColumn = ['id'];
+	public $insertIgnore = ['id'];
 	static get tableName(): string {
 		return 'npc';
 	}

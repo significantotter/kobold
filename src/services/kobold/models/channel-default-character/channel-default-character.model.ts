@@ -7,7 +7,8 @@ import { ZodValidator } from '../../lib/zod-validator.js';
 
 export interface ChannelDefaultCharacterModel extends ChannelDefaultCharacter {}
 export class ChannelDefaultCharacterModel extends BaseModel {
-	public $idColumn = ['channelId', 'userId'];
+	static idColumn = ['id'];
+	public $insertIgnore = ['channelId', 'userId'];
 
 	static get tableName(): string {
 		return 'channelDefaultCharacter';
