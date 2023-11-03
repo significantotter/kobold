@@ -13,6 +13,7 @@ import { ConditionalPick } from 'type-fest';
 import { CharacterUtils } from '../utils/character-utils.js';
 import _ from 'lodash';
 import { CompendiumModel } from '../services/pf2etools/compendium.model.js';
+import { Kobold } from '../services/kobold/kobold.model.js';
 
 export interface InjectedCommandData {}
 
@@ -41,6 +42,7 @@ export interface Command {
 
 export interface InjectedServices {
 	compendium: CompendiumModel;
+	kobold: Kobold;
 }
 
 export interface InjectData {

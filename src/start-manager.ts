@@ -10,13 +10,11 @@ import { Manager } from './models/manager.js';
 import { DBModel, HttpService, JobService, Logger, MasterApiService } from './services/index.js';
 import { MathUtils, ShardUtils } from './utils/index.js';
 import { Config } from './config/config.js';
-import Logs from './config/lang/logs.json' assert { type: 'json' };
 import { filterNotNullOrUndefined } from './utils/type-guards.js';
 import { Job } from './services/job-service.js';
 
 async function start(): Promise<void> {
-	Logger.info(Logs.info.appStarted);
-	DBModel.init(Config.database.url);
+	Logger.info(`Application started.`);
 
 	// Dependencies
 	let httpService = new HttpService();
@@ -43,12 +41,12 @@ async function start(): Promise<void> {
 			totalShards = recommendedShards;
 		}
 	} catch (error) {
-		Logger.error(Logs.error.retrieveShards, error);
+		Logger.error(`An error occurred while retrieving which shards to spawn.`, error);
 		return;
 	}
 
 	if (shardList.length === 0) {
-		Logger.warn(Logs.warn.managerNoShards);
+		Logger.warn(`No shards to spawn.`);
 		return;
 	}
 
@@ -83,9 +81,9 @@ async function start(): Promise<void> {
 }
 
 process.on('unhandledRejection', (reason, _promise) => {
-	Logger.error(Logs.error.unhandledRejection, reason);
+	Logger.error(`An unhandled promise rejection occurred.`, reason);
 });
 
 start().catch(error => {
-	Logger.error(Logs.error.unspecified, error);
+	Logger.error(`An unspecified error occurred.`, error);
 });

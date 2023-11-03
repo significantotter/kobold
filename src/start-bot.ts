@@ -114,21 +114,23 @@ import { Reaction } from './reactions/index.js';
 import { CommandRegistrationService, DBModel, JobService, Logger } from './services/index.js';
 import { Trigger } from './triggers/index.js';
 import { Config } from './config/config.js';
-import Logs from './config/lang/logs.json' assert { type: 'json' };
 import { checkAndLoadBestiaryFiles } from './services/pf2etools/bestiaryLoader.js';
 import { CompendiumModel } from './services/pf2etools/compendium.model.js';
 import { db } from './services/pf2etools/pf2eTools.db.js';
 import { Job } from './services/job-service.js';
+import { Kobold as Kobold } from './services/kobold/kobold.model.js';
+import { getDialect } from './services/db.dialect.js';
 
 // this is to prevent embeds breaking on "addFields" when adding more than an embed can hold
 // because we batch our embeds afterwards instead of before assigning fields
 disableValidators();
 
 async function start(): Promise<void> {
+	const PostgresDialect = getDialect();
+	const kobold = new Kobold(PostgresDialect);
 	DBModel.init(Config.database.url);
 
 	const compendium = new CompendiumModel(db);
-	// const kobold = new Kobold();
 
 	// asynchronously load the bestiary files
 	checkAndLoadBestiaryFiles();
@@ -278,7 +280,7 @@ async function start(): Promise<void> {
 	// Event handlers
 	let guildJoinHandler = new GuildJoinHandler();
 	let guildLeaveHandler = new GuildLeaveHandler();
-	let commandHandler = new CommandHandler(commands, { compendium });
+	let commandHandler = new CommandHandler(commands, { compendium, kobold });
 	let buttonHandler = new ButtonHandler(buttons);
 	let triggerHandler = new TriggerHandler(triggers);
 	let messageHandler = new MessageHandler(triggerHandler);
@@ -309,7 +311,7 @@ async function start(): Promise<void> {
 			let commandRegistrationService = new CommandRegistrationService(rest);
 			await commandRegistrationService.process(commands, process.argv);
 		} catch (error) {
-			Logger.error(Logs.error.commandAction, error);
+			Logger.error('An error occurred while running a command action.', error);
 		}
 		process.exit();
 	}
@@ -318,9 +320,9 @@ async function start(): Promise<void> {
 }
 
 process.on('unhandledRejection', (reason, _promise) => {
-	Logger.error(Logs.error.unhandledRejection, reason);
+	Logger.error('An unhandled promise rejection occurred.', reason);
 });
 
 start().catch(error => {
-	Logger.error(Logs.error.unspecified, error);
+	Logger.error('An unspecified error occurred', error);
 });

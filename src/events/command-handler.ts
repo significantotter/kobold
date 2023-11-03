@@ -14,7 +14,6 @@ import { Logger } from '../services/index.js';
 import { CommandUtils, InteractionUtils } from '../utils/index.js';
 import { EventHandler } from './event-handler.js';
 import { Config } from './../config/config.js';
-import Logs from './../config/lang/logs.json' assert { type: 'json' };
 import { KoboldEmbed } from '../utils/kobold-embed-utils.js';
 import { refs } from '../constants/common-text.js';
 import { KoboldError } from '../utils/KoboldError.js';
@@ -53,9 +52,7 @@ export class CommandHandler implements EventHandler {
 		let command = CommandUtils.findCommand(this.commands, commandParts);
 		if (!command) {
 			Logger.error(
-				Logs.error.commandNotFound
-					.replaceAll('{INTERACTION_ID}', intr.id)
-					.replaceAll('{COMMAND_NAME}', commandName)
+				`[${intr.id}] A command with the name '${commandName}' could not be found.`
 			);
 			return;
 		}
@@ -63,9 +60,7 @@ export class CommandHandler implements EventHandler {
 		if (intr instanceof AutocompleteInteraction) {
 			if (!command.autocomplete) {
 				Logger.error(
-					Logs.error.autocompleteNotFound
-						.replaceAll('{INTERACTION_ID}', intr.id)
-						.replaceAll('{COMMAND_NAME}', commandName)
+					`[{INTERACTION_ID}] An autocomplete method for the '${intr.id}' option on the '${commandName}' command could not be found.`
 				);
 				return;
 			}
@@ -82,22 +77,13 @@ export class CommandHandler implements EventHandler {
 					intr.channel instanceof TextChannel ||
 						intr.channel instanceof NewsChannel ||
 						intr.channel instanceof ThreadChannel
-						? Logs.error.autocompleteGuild
-								.replaceAll('{INTERACTION_ID}', intr.id)
-								.replaceAll('{OPTION_NAME}', commandName)
-								.replaceAll('{COMMAND_NAME}', commandName)
-								.replaceAll('{USER_TAG}', intr.user.tag)
-								.replaceAll('{USER_ID}', intr.user.id)
-								.replaceAll('{CHANNEL_NAME}', intr.channel.name)
-								.replaceAll('{CHANNEL_ID}', intr.channel.id)
-								.replaceAll('{GUILD_NAME}', intr.guild?.name ?? '')
-								.replaceAll('{GUILD_ID}', intr.guild?.id ?? '')
-						: Logs.error.autocompleteOther
-								.replaceAll('{INTERACTION_ID}', intr.id)
-								.replaceAll('{OPTION_NAME}', commandName)
-								.replaceAll('{COMMAND_NAME}', commandName)
-								.replaceAll('{USER_TAG}', intr.user.tag)
-								.replaceAll('{USER_ID}', intr.user.id),
+						? `[${intr.id}] An error occurred while executing the '${commandName}' autocomplete` +
+								` on the '${commandName}' command for user '${intr.user.tag}' (${intr.user.id}) ` +
+								`in channel '${intr.channel.name}' (${intr.channel.id}) in guild` +
+								` '${intr.guild?.name ?? ''}' (${intr.guild?.id ?? ''}).`
+						: `[${intr.id}] An error occurred while executing the ` +
+								`'${commandName}' autocomplete on the '${commandName}' command ` +
+								`for user '${intr.user.tag}' (${intr.user.id}).`,
 					error
 				);
 			}
@@ -159,20 +145,13 @@ export class CommandHandler implements EventHandler {
 				intr.channel instanceof TextChannel ||
 					intr.channel instanceof NewsChannel ||
 					intr.channel instanceof ThreadChannel
-					? Logs.error.commandGuild
-							.replaceAll('{INTERACTION_ID}', intr.id)
-							.replaceAll('{COMMAND_NAME}', commandName)
-							.replaceAll('{USER_TAG}', intr.user.tag)
-							.replaceAll('{USER_ID}', intr.user.id)
-							.replaceAll('{CHANNEL_NAME}', intr.channel.name)
-							.replaceAll('{CHANNEL_ID}', intr.channel.id)
-							.replaceAll('{GUILD_NAME}', intr.guild?.name ?? '')
-							.replaceAll('{GUILD_ID}', intr.guild?.id ?? '')
-					: Logs.error.commandOther
-							.replaceAll('{INTERACTION_ID}', intr.id)
-							.replaceAll('{COMMAND_NAME}', commandName)
-							.replaceAll('{USER_TAG}', intr.user.tag)
-							.replaceAll('{USER_ID}', intr.user.id),
+					? `[${intr.id}] An error occurred while executing the '${commandName}' autocomplete` +
+							` on the '${commandName}' command for user '${intr.user.tag}' (${intr.user.id}) ` +
+							`in channel '${intr.channel.name}' (${intr.channel.id}) in guild` +
+							` '${intr.guild?.name ?? ''}' (${intr.guild?.id ?? ''}).`
+					: `[${intr.id}] An error occurred while executing the ` +
+							`'${commandName}' autocomplete on the '${commandName}' command ` +
+							`for user '${intr.user.tag}' (${intr.user.id}).`,
 				error
 			);
 		}
