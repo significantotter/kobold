@@ -1,8 +1,8 @@
 {
 	"compilerOptions": {
 		"target": "ESNext",
-		"module": "NodeNext",
-		"moduleResolution": "NodeNext",
+		"module": "Node16",
+		"moduleResolution": "Node16",
 		"composite": true,
 		"lib": ["es2021"],
 		"declaration": true,
@@ -23,7 +23,7 @@
 	"ts-node": {
 		"transpileOnly": true,
 		"files": true,
-		"module": "NodeNext",
+		"module": "ESNext",
 	},
 	"include": ["src/**/*.ts", "src/**/*.json", "types.d.ts"],
 	"exclude": [
