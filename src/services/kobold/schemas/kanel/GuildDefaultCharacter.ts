@@ -6,7 +6,7 @@ export type GuildDefaultCharacterUserId = string;
 export type GuildDefaultCharacterGuildId = string;
 
 /** Represents the table public.guild_default_character */
-export default interface guilddefaultcharacterTable {
+export default interface GuildDefaultCharacterTable {
   /** Database type: pg_catalog.varchar */
   userId: ColumnType<GuildDefaultCharacterUserId, GuildDefaultCharacterUserId, GuildDefaultCharacterUserId | null>;
 
@@ -17,8 +17,8 @@ export default interface guilddefaultcharacterTable {
   characterId: ColumnType<CharacterId, CharacterId, CharacterId | null>;
 }
 
-export type guilddefaultcharacter = Selectable<guilddefaultcharacterTable>;
+export type GuildDefaultCharacter = Selectable<GuildDefaultCharacterTable>;
 
-export type Newguilddefaultcharacter = Insertable<guilddefaultcharacterTable>;
+export type NewGuildDefaultCharacter = Insertable<GuildDefaultCharacterTable>;
 
-export type guilddefaultcharacterUpdate = Updateable<guilddefaultcharacterTable>;
+export type GuildDefaultCharacterUpdate = Updateable<GuildDefaultCharacterTable>;

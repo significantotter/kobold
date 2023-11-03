@@ -3,7 +3,7 @@ import type { ColumnType, Selectable, Insertable, Updateable } from 'kysely';
 export type NpcId = number;
 
 /** Represents the table public.npc */
-export default interface npcTable {
+export default interface NpcTable {
   /** Database type: pg_catalog.int4 */
   id: ColumnType<NpcId, NpcId | null, NpcId | null>;
 
@@ -26,8 +26,8 @@ export default interface npcTable {
   lastUpdatedAt: ColumnType<Date | null, Date | string | null, Date | string | null>;
 }
 
-export type npc = Selectable<npcTable>;
+export type Npc = Selectable<NpcTable>;
 
-export type Newnpc = Insertable<npcTable>;
+export type NewNpc = Insertable<NpcTable>;
 
-export type npcUpdate = Updateable<npcTable>;
+export type NpcUpdate = Updateable<NpcTable>;

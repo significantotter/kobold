@@ -3,7 +3,7 @@ import type { ColumnType, Selectable, Insertable, Updateable } from 'kysely';
 export type GameId = number;
 
 /** Represents the table public.game */
-export default interface gameTable {
+export default interface GameTable {
   /** Database type: pg_catalog.int4 */
   id: ColumnType<GameId, GameId | null, GameId | null>;
 
@@ -26,8 +26,8 @@ export default interface gameTable {
   lastUpdatedAt: ColumnType<Date | null, Date | string | null, Date | string | null>;
 }
 
-export type game = Selectable<gameTable>;
+export type Game = Selectable<GameTable>;
 
-export type Newgame = Insertable<gameTable>;
+export type NewGame = Insertable<GameTable>;
 
-export type gameUpdate = Updateable<gameTable>;
+export type GameUpdate = Updateable<GameTable>;

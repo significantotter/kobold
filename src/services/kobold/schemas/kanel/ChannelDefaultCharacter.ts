@@ -6,7 +6,7 @@ export type ChannelDefaultCharacterUserId = string;
 export type ChannelDefaultCharacterChannelId = string;
 
 /** Represents the table public.channel_default_character */
-export default interface channeldefaultcharacterTable {
+export default interface ChannelDefaultCharacterTable {
   /** Database type: pg_catalog.varchar */
   userId: ColumnType<ChannelDefaultCharacterUserId, ChannelDefaultCharacterUserId, ChannelDefaultCharacterUserId | null>;
 
@@ -17,8 +17,8 @@ export default interface channeldefaultcharacterTable {
   characterId: ColumnType<CharacterId, CharacterId, CharacterId | null>;
 }
 
-export type channeldefaultcharacter = Selectable<channeldefaultcharacterTable>;
+export type ChannelDefaultCharacter = Selectable<ChannelDefaultCharacterTable>;
 
-export type Newchanneldefaultcharacter = Insertable<channeldefaultcharacterTable>;
+export type NewChannelDefaultCharacter = Insertable<ChannelDefaultCharacterTable>;
 
-export type channeldefaultcharacterUpdate = Updateable<channeldefaultcharacterTable>;
+export type ChannelDefaultCharacterUpdate = Updateable<ChannelDefaultCharacterTable>;

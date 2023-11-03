@@ -3,7 +3,7 @@ import type { ColumnType, Selectable, Insertable, Updateable } from 'kysely';
 export type WgAuthTokenId = number;
 
 /** Represents the table public.wg_auth_token */
-export default interface wgauthtokenTable {
+export default interface WgAuthTokenTable {
   /** Database type: pg_catalog.int4 */
   id: ColumnType<WgAuthTokenId, WgAuthTokenId | null, WgAuthTokenId | null>;
 
@@ -23,8 +23,8 @@ export default interface wgauthtokenTable {
   tokenType: ColumnType<string, string, string | null>;
 }
 
-export type wgauthtoken = Selectable<wgauthtokenTable>;
+export type WgAuthToken = Selectable<WgAuthTokenTable>;
 
-export type Newwgauthtoken = Insertable<wgauthtokenTable>;
+export type NewWgAuthToken = Insertable<WgAuthTokenTable>;
 
-export type wgauthtokenUpdate = Updateable<wgauthtokenTable>;
+export type WgAuthTokenUpdate = Updateable<WgAuthTokenTable>;

@@ -3,7 +3,7 @@ import type { ColumnType, Selectable, Insertable, Updateable } from 'kysely';
 export type KnexMigrationsId = number;
 
 /** Represents the table public.knex_migrations */
-export default interface knexmigrationsTable {
+export default interface KnexMigrationsTable {
   /** Database type: pg_catalog.int4 */
   id: ColumnType<KnexMigrationsId, KnexMigrationsId | null, KnexMigrationsId | null>;
 
@@ -17,8 +17,8 @@ export default interface knexmigrationsTable {
   migrationTime: ColumnType<Date | null, Date | string | null, Date | string | null>;
 }
 
-export type knexmigrations = Selectable<knexmigrationsTable>;
+export type KnexMigrations = Selectable<KnexMigrationsTable>;
 
-export type Newknexmigrations = Insertable<knexmigrationsTable>;
+export type NewKnexMigrations = Insertable<KnexMigrationsTable>;
 
-export type knexmigrationsUpdate = Updateable<knexmigrationsTable>;
+export type KnexMigrationsUpdate = Updateable<KnexMigrationsTable>;

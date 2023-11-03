@@ -3,7 +3,7 @@ import type { ColumnType, Selectable, Insertable, Updateable } from 'kysely';
 export type UserSettingsUserId = string;
 
 /** Represents the table public.user_settings */
-export default interface usersettingsTable {
+export default interface UserSettingsTable {
   /** Database type: pg_catalog.varchar */
   userId: ColumnType<UserSettingsUserId, UserSettingsUserId, UserSettingsUserId | null>;
 
@@ -17,8 +17,8 @@ export default interface usersettingsTable {
   inlineRollsDisplay: ColumnType<string | null, string | null, string | null>;
 }
 
-export type usersettings = Selectable<usersettingsTable>;
+export type UserSettings = Selectable<UserSettingsTable>;
 
-export type Newusersettings = Insertable<usersettingsTable>;
+export type NewUserSettings = Insertable<UserSettingsTable>;
 
-export type usersettingsUpdate = Updateable<usersettingsTable>;
+export type UserSettingsUpdate = Updateable<UserSettingsTable>;

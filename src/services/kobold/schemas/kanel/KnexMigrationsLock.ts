@@ -3,7 +3,7 @@ import type { ColumnType, Selectable, Insertable, Updateable } from 'kysely';
 export type KnexMigrationsLockIndex = number;
 
 /** Represents the table public.knex_migrations_lock */
-export default interface knexmigrationslockTable {
+export default interface KnexMigrationsLockTable {
   /** Database type: pg_catalog.int4 */
   index: ColumnType<KnexMigrationsLockIndex, KnexMigrationsLockIndex | null, KnexMigrationsLockIndex | null>;
 
@@ -11,8 +11,8 @@ export default interface knexmigrationslockTable {
   isLocked: ColumnType<number | null, number | null, number | null>;
 }
 
-export type knexmigrationslock = Selectable<knexmigrationslockTable>;
+export type KnexMigrationsLock = Selectable<KnexMigrationsLockTable>;
 
-export type Newknexmigrationslock = Insertable<knexmigrationslockTable>;
+export type NewKnexMigrationsLock = Insertable<KnexMigrationsLockTable>;
 
-export type knexmigrationslockUpdate = Updateable<knexmigrationslockTable>;
+export type KnexMigrationsLockUpdate = Updateable<KnexMigrationsLockTable>;

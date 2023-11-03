@@ -6,7 +6,7 @@ import type { ColumnType, Selectable, Insertable, Updateable } from 'kysely';
 export type InitiativeActorId = number;
 
 /** Represents the table public.initiative_actor */
-export default interface initiativeactorTable {
+export default interface InitiativeActorTable {
   /** Database type: pg_catalog.int4 */
   id: ColumnType<InitiativeActorId, InitiativeActorId | null, InitiativeActorId | null>;
 
@@ -41,8 +41,8 @@ export default interface initiativeactorTable {
   hideStats: ColumnType<boolean, boolean | null, boolean | null>;
 }
 
-export type initiativeactor = Selectable<initiativeactorTable>;
+export type InitiativeActor = Selectable<InitiativeActorTable>;
 
-export type Newinitiativeactor = Insertable<initiativeactorTable>;
+export type NewInitiativeActor = Insertable<InitiativeActorTable>;
 
-export type initiativeactorUpdate = Updateable<initiativeactorTable>;
+export type InitiativeActorUpdate = Updateable<InitiativeActorTable>;

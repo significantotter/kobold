@@ -3,7 +3,7 @@ import type { ColumnType, Selectable, Insertable, Updateable } from 'kysely';
 export type InitiativeId = number;
 
 /** Represents the table public.initiative */
-export default interface initiativeTable {
+export default interface InitiativeTable {
   /** Database type: pg_catalog.int4 */
   id: ColumnType<InitiativeId, InitiativeId | null, InitiativeId | null>;
 
@@ -29,8 +29,8 @@ export default interface initiativeTable {
   lastUpdatedAt: ColumnType<Date | null, Date | string | null, Date | string | null>;
 }
 
-export type initiative = Selectable<initiativeTable>;
+export type Initiative = Selectable<InitiativeTable>;
 
-export type Newinitiative = Insertable<initiativeTable>;
+export type NewInitiative = Insertable<InitiativeTable>;
 
-export type initiativeUpdate = Updateable<initiativeTable>;
+export type InitiativeUpdate = Updateable<InitiativeTable>;

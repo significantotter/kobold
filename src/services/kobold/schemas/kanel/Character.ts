@@ -3,7 +3,7 @@ import type { ColumnType, Selectable, Insertable, Updateable } from 'kysely';
 export type CharacterId = number;
 
 /** Represents the table public.character */
-export default interface characterTable {
+export default interface CharacterTable {
   /** Database type: pg_catalog.int4 */
   id: ColumnType<CharacterId, CharacterId | null, CharacterId | null>;
 
@@ -68,8 +68,8 @@ export default interface characterTable {
   trackerMode: ColumnType<string | null, string | null, string | null>;
 }
 
-export type character = Selectable<characterTable>;
+export type Character = Selectable<CharacterTable>;
 
-export type Newcharacter = Insertable<characterTable>;
+export type NewCharacter = Insertable<CharacterTable>;
 
-export type characterUpdate = Updateable<characterTable>;
+export type CharacterUpdate = Updateable<CharacterTable>;

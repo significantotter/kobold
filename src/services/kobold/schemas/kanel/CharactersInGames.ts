@@ -3,7 +3,7 @@ import type { CharacterId } from './Character.js';
 import type { ColumnType, Selectable, Insertable, Updateable } from 'kysely';
 
 /** Represents the table public.characters_in_games */
-export default interface charactersingamesTable {
+export default interface CharactersInGamesTable {
   /** Database type: pg_catalog.int4 */
   gameId: ColumnType<GameId, GameId, GameId | null>;
 
@@ -17,8 +17,8 @@ export default interface charactersingamesTable {
   lastUpdatedAt: ColumnType<Date | null, Date | string | null, Date | string | null>;
 }
 
-export type charactersingames = Selectable<charactersingamesTable>;
+export type CharactersInGames = Selectable<CharactersInGamesTable>;
 
-export type Newcharactersingames = Insertable<charactersingamesTable>;
+export type NewCharactersInGames = Insertable<CharactersInGamesTable>;
 
-export type charactersingamesUpdate = Updateable<charactersingamesTable>;
+export type CharactersInGamesUpdate = Updateable<CharactersInGamesTable>;

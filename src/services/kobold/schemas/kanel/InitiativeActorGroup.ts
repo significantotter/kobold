@@ -4,7 +4,7 @@ import type { ColumnType, Selectable, Insertable, Updateable } from 'kysely';
 export type InitiativeActorGroupId = number;
 
 /** Represents the table public.initiative_actor_group */
-export default interface initiativeactorgroupTable {
+export default interface InitiativeActorGroupTable {
   /** Database type: pg_catalog.int4 */
   id: ColumnType<InitiativeActorGroupId, InitiativeActorGroupId | null, InitiativeActorGroupId | null>;
 
@@ -27,8 +27,8 @@ export default interface initiativeactorgroupTable {
   lastUpdatedAt: ColumnType<Date | null, Date | string | null, Date | string | null>;
 }
 
-export type initiativeactorgroup = Selectable<initiativeactorgroupTable>;
+export type InitiativeActorGroup = Selectable<InitiativeActorGroupTable>;
 
-export type Newinitiativeactorgroup = Insertable<initiativeactorgroupTable>;
+export type NewInitiativeActorGroup = Insertable<InitiativeActorGroupTable>;
 
-export type initiativeactorgroupUpdate = Updateable<initiativeactorgroupTable>;
+export type InitiativeActorGroupUpdate = Updateable<InitiativeActorGroupTable>;
