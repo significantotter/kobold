@@ -32,7 +32,7 @@ import {
 	StatGroupEnum,
 } from './sheet/sheet-properties.js';
 import { AttributeUtils } from './attribute-utils.js';
-import { ModifierUtils } from './modifier-utils.js';
+import { ModifierUtils } from './kobold-service-utils/modifier-utils.js';
 
 const damageTypeShorthands: { [shorthand: string]: string } = {
 	piercing: 'p',

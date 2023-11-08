@@ -12,7 +12,7 @@ import {
 	ErrorResult,
 } from './dice-utils.js';
 import { KoboldEmbed } from './kobold-embed-utils.js';
-import { UserSettingsFactory } from '../services/kobold/models/user-settings/user-settings.factory.js';
+import { UserSettingsFactory } from '../services/kobold/models-old/user-settings/user-settings.factory.js';
 import { APIEmbedField } from 'discord.js';
 import L from '../i18n/i18n-node.js';
 import { KoboldError } from './KoboldError.js';

@@ -12,17 +12,16 @@ import { RateLimiter } from 'discord.js-rate-limiter';
 
 import { ChatArgs } from '../../../constants/index.js';
 
-import { InteractionUtils, StringUtils } from '../../../utils/index.js';
+import { StringUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
-import { CharacterUtils } from '../../../utils/character-utils.js';
-import { DiceUtils } from '../../../utils/dice-utils.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import L from '../../../i18n/i18n-node.js';
 import { Creature } from '../../../utils/creature.js';
 import _ from 'lodash';
 import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
-import { GameUtils } from '../../../utils/game-utils.js';
 import { RollBuilder } from '../../../utils/roll-builder.js';
+import { Kobold } from '../../../services/kobold/kobold.model.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 
 export class RollSkillSubCommand implements Command {
 	public names = [L.en.commands.roll.skill.name()];
@@ -39,24 +38,28 @@ export class RollSkillSubCommand implements Command {
 
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
-		option: AutocompleteFocusedOption
+		option: AutocompleteFocusedOption,
+		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === ChatArgs.SKILL_CHOICE_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
 			const match = intr.options.getString(ChatArgs.SKILL_CHOICE_OPTION.name) ?? '';
 
+			const koboldUtils: KoboldUtils = new KoboldUtils(kobold);
+			const { activeCharacter } = await koboldUtils.fetchDataForCommand(intr, {
+				activeCharacter: true,
+			});
+
 			//get the active character
-			const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
 			if (!activeCharacter) {
 				//no choices if we don't have a character to match against
 				return [];
 			}
 			//find a skill on the character matching the autocomplete string
-			const matchedSkills = CharacterUtils.findPossibleSkillFromString(
-				activeCharacter,
-				match
-			).map(skill => ({ name: skill.name, value: skill.name }));
+			const matchedSkills = koboldUtils.characterUtils
+				.findPossibleSkillFromString(activeCharacter, match)
+				.map(skill => ({ name: skill.name, value: skill.name }));
 			//return the matched skills
 			return matchedSkills;
 		}
@@ -64,7 +67,8 @@ export class RollSkillSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		if (!intr.isChatInputCommand()) return;
 		const skillChoice = intr.options.getString(ChatArgs.SKILL_CHOICE_OPTION.name, true);
@@ -75,14 +79,12 @@ export class RollSkillSubCommand implements Command {
 			intr.options.getString(ChatArgs.ROLL_SECRET_OPTION.name) ??
 			L.en.commandOptions.rollSecret.choices.public.value();
 
-		const [activeCharacter, activeGame] = await Promise.all([
-			CharacterUtils.getActiveCharacter(intr),
-			GameUtils.getActiveGame(intr.user.id, intr.guildId ?? ''),
-		]);
-		if (!activeCharacter) {
-			await InteractionUtils.send(intr, L.en.commands.roll.interactions.noActiveCharacter());
-			return;
-		}
+		const koboldUtils: KoboldUtils = new KoboldUtils(kobold);
+		const { activeGame, activeCharacter } = await koboldUtils.fetchDataForCommand(intr, {
+			activeGame: true,
+			activeCharacter: true,
+		});
+		koboldUtils.assertActiveCharacterNotNull(activeCharacter);
 
 		const creature = Creature.fromCharacter(activeCharacter);
 

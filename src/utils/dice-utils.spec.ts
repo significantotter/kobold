@@ -1,6 +1,6 @@
 import L from '../i18n/i18n-node.js';
 import { Attribute } from '../services/kobold/index.js';
-import { CharacterFactory } from './../services/kobold/models/character/character.factory.js';
+import { CharacterFactory } from '../services/kobold/models-old/character/character.factory.js';
 import { Creature } from './creature.js';
 import { DiceUtils } from './dice-utils.js';
 import { RollBuilder } from './roll-builder.js';

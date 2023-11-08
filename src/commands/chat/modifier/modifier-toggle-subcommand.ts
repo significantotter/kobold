@@ -14,7 +14,7 @@ import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import L from '../../../i18n/i18n-node.js';
-import { CharacterUtils } from '../../../utils/character-utils.js';
+import { CharacterUtils } from '../../../utils/kobold-service-utils/character-utils.js';
 import { ModifierOptions } from './modifier-command-options.js';
 import _ from 'lodash';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
@@ -35,7 +35,8 @@ export class ModifierToggleSubCommand implements Command {
 
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
-		option: AutocompleteFocusedOption
+		option: AutocompleteFocusedOption,
+		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === ModifierOptions.MODIFIER_NAME_OPTION.name) {
@@ -63,7 +64,8 @@ export class ModifierToggleSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		let name = intr.options
 			.getString(ModifierOptions.MODIFIER_NAME_OPTION.name, true)

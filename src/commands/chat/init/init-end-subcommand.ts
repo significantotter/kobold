@@ -10,7 +10,7 @@ import { RateLimiter } from 'discord.js-rate-limiter';
 
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
-import { InitiativeUtils } from '../../../utils/initiative-utils.js';
+import { InitiativeUtils } from '../../../utils/initiative-builder.js';
 import { Initiative, InitiativeModel } from '../../../services/kobold/index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import L from '../../../i18n/i18n-node.js';
@@ -31,7 +31,8 @@ export class InitEndSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const currentInit = await InitiativeUtils.getInitiativeForChannel(intr.channel);
 

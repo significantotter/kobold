@@ -17,11 +17,10 @@ import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import L from '../../../i18n/i18n-node.js';
 import { RollMacroOptions } from './roll-macro-command-options.js';
-import { CharacterUtils } from '../../../utils/character-utils.js';
-import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
 import { DiceRollResult } from '../../../utils/dice-utils.js';
 import { RollBuilder } from '../../../utils/roll-builder.js';
-import { CharacterModel } from '../../../services/kobold/index.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { Kobold } from '../../../services/kobold/kobold.model.js';
 
 export class RollMacroUpdateSubCommand implements Command {
 	public names = [L.en.commands.rollMacro.update.name()];
@@ -38,19 +37,22 @@ export class RollMacroUpdateSubCommand implements Command {
 
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
-		option: AutocompleteFocusedOption
+		option: AutocompleteFocusedOption,
+		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === RollMacroOptions.MACRO_NAME_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
+			const { autocompleteUtils } = new KoboldUtils(kobold);
 			const match = intr.options.getString(RollMacroOptions.MACRO_NAME_OPTION.name) ?? '';
-			return await AutocompleteUtils.getAllMatchingRollsMacrosForCharacter(intr, match);
+			return await autocompleteUtils.getAllMatchingRollsMacrosForCharacter(intr, match);
 		}
 	}
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const rollMacroName = intr.options
 			.getString(RollMacroOptions.MACRO_NAME_OPTION.name, true)
@@ -60,19 +62,18 @@ export class RollMacroUpdateSubCommand implements Command {
 			.toLocaleLowerCase()
 			.trim();
 
+		const koboldUtils = new KoboldUtils(kobold);
+		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+			activeCharacter: true,
+		});
+
 		let updateValue: string | string[] | number;
 
-		//check if we have an active character
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
-		if (!activeCharacter) {
-			await InteractionUtils.send(
-				intr,
-				LL.commands.character.interactions.noActiveCharacter()
-			);
-			return;
-		}
+		const targetRollMacro = koboldUtils.characterUtils.getRollMacroByName(
+			activeCharacter,
+			rollMacroName
+		);
 
-		const targetRollMacro = activeCharacter.getRollMacroByName(rollMacroName);
 		if (!targetRollMacro) {
 			// no matching roll macro found
 			await InteractionUtils.send(intr, LL.commands.rollMacro.interactions.notFound());
@@ -96,9 +97,10 @@ export class RollMacroUpdateSubCommand implements Command {
 
 		activeCharacter.rollMacros[targetIndex].macro = macro;
 
-		await CharacterModel.query().patchAndFetchById(activeCharacter.id, {
-			rollMacros: activeCharacter.rollMacros,
-		});
+		kobold.character.update(
+			{ id: activeCharacter.id },
+			{ rollMacros: activeCharacter.rollMacros }
+		);
 
 		const updateEmbed = new KoboldEmbed();
 		updateEmbed.setTitle(

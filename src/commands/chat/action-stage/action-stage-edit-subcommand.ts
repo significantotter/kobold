@@ -14,7 +14,7 @@ import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { CharacterUtils } from '../../../utils/character-utils.js';
+import { CharacterUtils } from '../../../utils/kobold-service-utils/character-utils.js';
 import { ActionStageOptions } from './action-stage-command-options.js';
 
 export class ActionStageEditSubCommand implements Command {
@@ -31,7 +31,8 @@ export class ActionStageEditSubCommand implements Command {
 
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
-		option: AutocompleteFocusedOption
+		option: AutocompleteFocusedOption,
+		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === ActionStageOptions.ACTION_ROLL_TARGET_OPTION.name) {
@@ -67,7 +68,8 @@ export class ActionStageEditSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const actionRollTarget = intr.options.getString(
 			ActionStageOptions.ACTION_ROLL_TARGET_OPTION.name,

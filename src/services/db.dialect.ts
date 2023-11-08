@@ -1,14 +1,8 @@
-import { Pool } from 'pg';
+import pg from 'pg';
 import { PostgresDialect } from 'kysely';
 
-export function getDialect() {
+export function getDialect(databaseUrl: string) {
 	return new PostgresDialect({
-		pool: new Pool({
-			database: 'test',
-			host: 'localhost',
-			user: 'admin',
-			port: 5434,
-			max: 10,
-		}),
+		pool: new pg.Pool({ connectionString: databaseUrl }),
 	});
 }

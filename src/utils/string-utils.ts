@@ -14,6 +14,57 @@ export class StringUtils {
 
 		return output;
 	}
+	/**
+	 * Finds the array item whose Name property is closest to 'name'. Useful for loose string matching skills, etc.
+	 * @param name the name to match
+	 * @param matchTargets the targets of the match with property .Name
+	 * @returns the closest matchTarget to name
+	 */
+	public static getBestNameMatch<
+		T extends {
+			Name: string;
+		},
+	>(name: string, matchTargets: T[]): T | null {
+		if (matchTargets.length === 0) return null;
+
+		let lowestMatchTarget = matchTargets[0];
+		let lowestMatchTargetDistance = StringUtils.levenshteinDistance(
+			(matchTargets[0].Name || '').toLowerCase(),
+			name.toLowerCase()
+		);
+		for (let i = 1; i < matchTargets.length; i++) {
+			const currentMatchTargetDistance = StringUtils.levenshteinDistance(
+				(matchTargets[i].Name || '').toLowerCase(),
+				name.toLowerCase()
+			);
+			if (currentMatchTargetDistance < lowestMatchTargetDistance) {
+				lowestMatchTarget = matchTargets[i];
+				lowestMatchTargetDistance = currentMatchTargetDistance;
+			}
+		}
+		return lowestMatchTarget;
+	}
+
+	public static nameMatchGeneric<
+		T extends {
+			name?: string;
+		},
+	>(options: T[], name: string): T | null {
+		let thing: T | null;
+		if (options.length === 0) {
+			return null;
+		} else {
+			const nameMatch = StringUtils.getBestNameMatch<{ Name: string; thing: T }>(
+				name,
+				options.map(thing => ({
+					Name: String(thing.name),
+					thing: thing,
+				}))
+			);
+			thing = nameMatch?.thing ?? null;
+		}
+		return thing;
+	}
 
 	public static stringsToCommaPhrase(strings: string[]): string {
 		return strings

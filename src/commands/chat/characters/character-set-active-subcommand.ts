@@ -16,7 +16,7 @@ import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { CharacterUtils } from '../../../utils/character-utils.js';
+import { CharacterUtils } from '../../../utils/kobold-service-utils/character-utils.js';
 
 export class CharacterSetActiveSubCommand implements Command {
 	public names = [L.en.commands.character.setActive.name()];
@@ -32,7 +32,8 @@ export class CharacterSetActiveSubCommand implements Command {
 
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
-		option: AutocompleteFocusedOption
+		option: AutocompleteFocusedOption,
+		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === ChatArgs.SET_ACTIVE_NAME_OPTION.name) {
@@ -52,7 +53,8 @@ export class CharacterSetActiveSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const charName = intr.options.getString(ChatArgs.SET_ACTIVE_NAME_OPTION.name, true);
 

@@ -1,5 +1,5 @@
 import { KoboldEmbed } from './../../../utils/kobold-embed-utils.js';
-import { InitiativeUtils, InitiativeBuilder } from '../../../utils/initiative-utils.js';
+import { InitiativeUtils, InitiativeBuilder } from '../../../utils/initiative-builder.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -19,9 +19,9 @@ import { Initiative, InitiativeModel } from '../../../services/kobold/index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import L from '../../../i18n/i18n-node.js';
 import { InitOptions } from './init-command-options.js';
-import { SettingsUtils } from '../../../utils/settings-utils.js';
+import { SettingsUtils } from '../../../utils/kobold-service-utils/user-settings-utils.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
-import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
+import { AutocompleteUtils } from '../../../utils/kobold-service-utils/autocomplete-utils.js';
 
 export class InitJumpToSubCommand implements Command {
 	public names = [L.en.commands.init.jumpTo.name()];
@@ -38,7 +38,8 @@ export class InitJumpToSubCommand implements Command {
 
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
-		option: AutocompleteFocusedOption
+		option: AutocompleteFocusedOption,
+		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === InitOptions.INIT_CHARACTER_OPTION.name) {
@@ -50,7 +51,8 @@ export class InitJumpToSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const targetCharacterName = intr.options.getString(
 			InitOptions.INIT_CHARACTER_OPTION.name,

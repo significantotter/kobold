@@ -8,9 +8,6 @@ import {
 	ApplicationCommandOptionChoiceData,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
-import { Character, CharacterModel } from '../services/kobold/index.js';
-import { ConditionalPick } from 'type-fest';
-import { CharacterUtils } from '../utils/character-utils.js';
 import _ from 'lodash';
 import { CompendiumModel } from '../services/pf2etools/compendium.model.js';
 import { Kobold } from '../services/kobold/kobold.model.js';
@@ -25,8 +22,6 @@ export interface Command {
 	requireClientPerms: PermissionsString[];
 	restrictedGuilds?: string[];
 	commands?: Command[];
-	usesData?: object;
-	fetchInjectedDataForCommand?(intr: CommandInteraction): any;
 	autocomplete?(
 		intr: AutocompleteInteraction,
 		option: AutocompleteFocusedOption,
@@ -35,7 +30,6 @@ export interface Command {
 	execute(
 		intr: CommandInteraction,
 		LL: TranslationFunctions,
-		data?: Partial<InjectData>,
 		services?: Partial<InjectedServices>
 	): Promise<void>;
 }
@@ -43,54 +37,6 @@ export interface Command {
 export interface InjectedServices {
 	compendium: CompendiumModel;
 	kobold: Kobold;
-}
-
-export interface InjectData {
-	activeCharacter: Character | null;
-	ownedCharacters: Character[];
-}
-
-export interface InjectableCommandData {
-	activeCharacter?: boolean;
-	ownedCharacters?: boolean;
-}
-
-export function UsingData<T extends InjectableCommandData>(usesData: T) {
-	type targetData = ConditionalPick<InjectData, keyof T>;
-	return class {
-		public usesData: T = usesData;
-
-		public async fetchInjectedDataForCommand(intr: CommandInteraction): Promise<targetData> {
-			let activeCharacterPromise = CharacterUtils.getActiveCharacter(intr);
-
-			let ownedCharactersPromise = CharacterModel.query().where({
-				userId: intr.user.id,
-			});
-			let [activeCharacter, ownedCharacters] = await Promise.all([
-				activeCharacterPromise,
-				ownedCharactersPromise,
-			]);
-			const parsedOwnedCharacters = ownedCharacters?.map?.(character => character.parse());
-			const parsedActiveCharacter = activeCharacter ? activeCharacter.parse() : null;
-
-			return _.pickBy(
-				{
-					activeCharacter: parsedActiveCharacter,
-					ownedCharacters: parsedOwnedCharacters,
-				},
-				_.identity
-			) as targetData;
-		}
-
-		public async execute(
-			intr: CommandInteraction,
-			LL: TranslationFunctions,
-			data?: targetData,
-			services?: Partial<InjectedServices>
-		): Promise<void> {
-			return;
-		}
-	};
 }
 
 export enum CommandDeferType {

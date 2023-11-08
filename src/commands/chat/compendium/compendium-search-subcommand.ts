@@ -17,7 +17,7 @@ import { CompendiumModel } from '../../../services/pf2etools/compendium.model.js
 import { CompendiumOptions } from './compendium-command-options.js';
 import { CompendiumEmbedParser } from '../../../services/pf2etools/parsers/compendium-parser.js';
 import { getEmoji } from '../../../constants/emoji.js';
-import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
+import { AutocompleteUtils } from '../../../utils/kobold-service-utils/autocomplete-utils.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { CompendiumUtils } from '../../../services/pf2etools/utils/compendium-utils.js';
 
@@ -91,7 +91,6 @@ export class CompendiumSearchSubCommand implements Command {
 	public async execute(
 		intr: ChatInputCommandInteraction,
 		LL: TranslationFunctions,
-		data: any,
 		{ compendium }: { compendium: CompendiumModel }
 	): Promise<void> {
 		// const renderDemo = await compendium.db.query.RenderDemos.findFirst();

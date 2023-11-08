@@ -14,23 +14,15 @@ import { ChatArgs } from '../../../constants/index.js';
 
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
-import { CharacterUtils } from '../../../utils/character-utils.js';
-import { DiceUtils } from '../../../utils/dice-utils.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import L from '../../../i18n/i18n-node.js';
 import { Creature } from '../../../utils/creature.js';
 import { InitOptions } from '../init/init-command-options.js';
-import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
-import {
-	Character,
-	CharacterModel,
-	InitiativeActor,
-	InitiativeActorModel,
-} from '../../../services/kobold/index.js';
+import { Character, InitiativeActor } from '../../../services/kobold/index.js';
 import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
-import { GameUtils } from '../../../utils/game-utils.js';
-import { SettingsUtils } from '../../../utils/settings-utils.js';
 import { ActionRoller } from '../../../utils/action-roller.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { Kobold } from '../../../services/kobold/kobold.model.js';
 
 export class RollAttackSubCommand implements Command {
 	public names = [L.en.commands.roll.attack.name()];
@@ -47,7 +39,8 @@ export class RollAttackSubCommand implements Command {
 
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
-		option: AutocompleteFocusedOption
+		option: AutocompleteFocusedOption,
+		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === ChatArgs.ATTACK_CHOICE_OPTION.name) {
@@ -55,33 +48,37 @@ export class RollAttackSubCommand implements Command {
 			const match = intr.options.getString(ChatArgs.ATTACK_CHOICE_OPTION.name) ?? '';
 
 			//get the active character
-			const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
+			const koboldUtils: KoboldUtils = new KoboldUtils(kobold);
+			const { activeCharacter } = await koboldUtils.fetchDataForCommand(intr, {
+				activeCharacter: true,
+			});
 			if (!activeCharacter) {
 				//no choices if we don't have a character to match against
 				return [];
 			}
 			//find a attack on the character matching the autocomplete string
-			const matchedAttack = CharacterUtils.findPossibleAttackFromString(
-				activeCharacter,
-				match
-			).map(attack => ({
-				name: attack.name,
-				value: attack.name,
-			}));
+			const matchedAttack = koboldUtils.characterUtils
+				.findPossibleAttackFromString(activeCharacter, match)
+				.map(attack => ({
+					name: attack.name,
+					value: attack.name,
+				}));
 			//return the matched attacks
 			return matchedAttack;
 		}
 		if (option.name === InitOptions.INIT_CHARACTER_TARGET.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
 			const match = intr.options.getString(InitOptions.INIT_CHARACTER_TARGET.name) ?? '';
+			const koboldUtils: KoboldUtils = new KoboldUtils(kobold);
 
-			return await AutocompleteUtils.getAllTargetOptions(intr, match);
+			return await koboldUtils.autocompleteUtils.getAllTargetOptions(intr, match);
 		}
 	}
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const attackChoice = intr.options.getString(ChatArgs.ATTACK_CHOICE_OPTION.name, true);
 		const targetInitActorName = intr.options.getString(
@@ -99,20 +96,22 @@ export class RollAttackSubCommand implements Command {
 			intr.options.getString(ChatArgs.ROLL_SECRET_OPTION.name) ??
 			L.en.commandOptions.rollSecret.choices.public.value();
 
-		const [activeCharacter, userSettings, activeGame] = await Promise.all([
-			CharacterUtils.getActiveCharacter(intr),
-			SettingsUtils.getSettingsForUser(intr),
-			GameUtils.getActiveGame(intr.user.id, intr.guildId ?? ''),
-		]);
-		if (!activeCharacter) {
-			await InteractionUtils.send(intr, L.en.commands.roll.interactions.noActiveCharacter());
-			return;
-		}
+		const koboldUtils: KoboldUtils = new KoboldUtils(kobold);
+		const { gameUtils, creatureUtils } = koboldUtils;
+		const { activeCharacter, userSettings, activeGame } = await koboldUtils.fetchDataForCommand(
+			intr,
+			{
+				activeGame: true,
+				activeCharacter: true,
+				userSettings: true,
+			}
+		);
+		koboldUtils.assertActiveCharacterNotNull(activeCharacter);
 
 		const creature = Creature.fromCharacter(activeCharacter);
 
 		let targetCreature: Creature | undefined;
-		let targetActor: InitiativeActorModel | CharacterModel | null;
+		let targetActor: InitiativeActor | Character | null;
 
 		if (
 			targetInitActorName &&
@@ -120,7 +119,7 @@ export class RollAttackSubCommand implements Command {
 			targetInitActorName.trim().toLocaleLowerCase() != '(none)'
 		) {
 			const { targetCharacter, targetInitActor } =
-				await GameUtils.getCharacterOrInitActorTarget(intr, targetInitActorName);
+				await gameUtils.getCharacterOrInitActorTarget(intr, targetInitActorName);
 			targetActor = targetInitActor ?? targetCharacter;
 			if (!targetActor) {
 				await InteractionUtils.send(
@@ -150,14 +149,17 @@ export class RollAttackSubCommand implements Command {
 
 		if (targetCreature && targetActor) {
 			// apply any effects from the action to the creature
-			await targetActor.$query().patch({ sheet: targetCreature.sheet });
+			await kobold.initiativeActor.update(
+				{ id: targetActor.id },
+				{ sheet: targetCreature.sheet }
+			);
 		}
 
 		const embed = builtRoll.compileEmbed({ forceFields: true });
 
 		if (targetActor && targetCreature && actionRoller.shouldDisplayDamageText()) {
 			//overwrite this as Creature, because it can't be null if targetCreature is defined
-			await targetActor.saveSheet(intr, (actionRoller.targetCreature as Creature).sheet);
+			await creatureUtils.saveCharacterSheet(intr, actionRoller.targetCreature!.sheet);
 
 			const damageField = await EmbedUtils.getOrSendActionDamageField({
 				intr,

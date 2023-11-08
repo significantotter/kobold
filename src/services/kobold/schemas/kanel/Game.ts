@@ -11,7 +11,7 @@ export default interface GameTable {
   gmUserId: ColumnType<string, string, string | null>;
 
   /** Database type: pg_catalog.text */
-  name: ColumnType<string | null, string | null, string | null>;
+  name: ColumnType<string, string, string | null>;
 
   /** Database type: pg_catalog.text */
   guildId: ColumnType<string, string, string | null>;
@@ -20,10 +20,10 @@ export default interface GameTable {
   isActive: ColumnType<boolean, boolean | null, boolean | null>;
 
   /** Database type: pg_catalog.timestamptz */
-  createdAt: ColumnType<Date | null, Date | string | null, Date | string | null>;
+  createdAt: ColumnType<Date, Date | string | null, Date | string | null>;
 
   /** Database type: pg_catalog.timestamptz */
-  lastUpdatedAt: ColumnType<Date | null, Date | string | null, Date | string | null>;
+  lastUpdatedAt: ColumnType<Date, Date | string | null, Date | string | null>;
 }
 
 export type Game = Selectable<GameTable>;

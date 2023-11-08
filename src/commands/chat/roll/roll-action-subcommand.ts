@@ -14,7 +14,7 @@ import { ChatArgs } from '../../../constants/index.js';
 
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
-import { CharacterUtils } from '../../../utils/character-utils.js';
+import { CharacterUtils } from '../../../utils/kobold-service-utils/character-utils.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import L from '../../../i18n/i18n-node.js';
 import { ActionOptions } from '../action/action-command-options.js';
@@ -24,15 +24,15 @@ import { getEmoji } from '../../../constants/emoji.js';
 import { Creature } from '../../../utils/creature.js';
 import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
 import { InitOptions } from '../init/init-command-options.js';
-import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
+import { AutocompleteUtils } from '../../../utils/kobold-service-utils/autocomplete-utils.js';
 import {
 	Character,
 	CharacterModel,
 	InitiativeActor,
 	InitiativeActorModel,
 } from '../../../services/kobold/index.js';
-import { GameUtils } from '../../../utils/game-utils.js';
-import { SettingsUtils } from '../../../utils/settings-utils.js';
+import { GameUtils } from '../../../utils/kobold-service-utils/game-utils.js';
+import { SettingsUtils } from '../../../utils/kobold-service-utils/user-settings-utils.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
 
 export class RollActionSubCommand implements Command {
@@ -50,7 +50,8 @@ export class RollActionSubCommand implements Command {
 
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
-		option: AutocompleteFocusedOption
+		option: AutocompleteFocusedOption,
+		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === ActionOptions.ACTION_TARGET_OPTION.name) {
@@ -84,7 +85,8 @@ export class RollActionSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: any }
 	): Promise<void> {
 		const targetActionName = intr.options.getString(
 			ActionOptions.ACTION_TARGET_OPTION.name,
@@ -108,10 +110,12 @@ export class RollActionSubCommand implements Command {
 			intr.options.getString(ChatArgs.ROLL_SECRET_OPTION.name) ??
 			L.en.commandOptions.rollSecret.choices.public.value();
 
+		const { gameUtils } = koboldUtils(kobold);
+
 		const [activeCharacter, userSettings, activeGame] = await Promise.all([
 			CharacterUtils.getActiveCharacter(intr),
 			SettingsUtils.getSettingsForUser(intr),
-			GameUtils.getActiveGame(intr.user.id, intr.guildId ?? ''),
+			gameUtils.getActiveGame(intr.user.id, intr.guildId ?? ''),
 		]);
 		if (!activeCharacter) {
 			await InteractionUtils.send(intr, L.en.commands.roll.interactions.noActiveCharacter());
@@ -132,7 +136,7 @@ export class RollActionSubCommand implements Command {
 			targetInitActorName.trim().toLocaleLowerCase() != '(none)'
 		) {
 			const { targetCharacter, targetInitActor } =
-				await GameUtils.getCharacterOrInitActorTarget(intr, targetInitActorName);
+				await gameUtils.getCharacterOrInitActorTarget(intr, targetInitActorName);
 			targetActor = targetInitActor ?? targetCharacter ?? undefined;
 			targetCreature = targetActor ? Creature.fromModelWithSheet(targetActor) : undefined;
 		}

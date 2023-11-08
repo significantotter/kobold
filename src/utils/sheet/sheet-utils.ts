@@ -6,11 +6,15 @@ import {
 	SheetModifier,
 	SheetAdjustmentOperationEnum,
 	SheetAdjustmentTypeEnum,
+	ModelWithSheet,
+	SheetBaseCounterKeys,
 } from '../../services/kobold/index.js';
 import { SheetAdjuster } from './sheet-adjuster.js';
 import { SheetAdjustmentBucketer } from './sheet-adjustment-bucketer.js';
 import { KoboldError } from '../KoboldError.js';
 import { SheetProperties } from './sheet-properties.js';
+import { ChatInputCommandInteraction } from 'discord.js';
+import { Creature } from '../creature.js';
 
 export class SheetUtils {
 	public static adjustSheetWithModifiers(sheet: Sheet, modifiers: Modifier[]) {
@@ -95,5 +99,33 @@ export class SheetUtils {
 			adjuster.adjust(adjustment);
 		}
 		return adjustedSheet;
+	}
+
+	public static async recoverGameplayStats(
+		intr: ChatInputCommandInteraction,
+		targets: ModelWithSheet[]
+	) {
+		const creature = targets[0]?.sheet ? new Creature(targets[0]?.sheet) : undefined;
+		let recoverValues: ReturnType<Creature['recover']>;
+		if (creature) {
+			recoverValues = creature.recover();
+		} else throw new KoboldError("Yip! I couldn't find a sheet to target.");
+		await targets[0].saveSheet(intr, creature.sheet);
+		return recoverValues;
+	}
+	public static async setGameplayStats(
+		intr: ChatInputCommandInteraction,
+		targets: ModelWithSheet[],
+		option: SheetBaseCounterKeys,
+		value: string
+	) {
+		// sheets should be exact duplicates, so we only do our updates on one sheet, but write it onto both locations
+		const creature = targets[0]?.sheet ? new Creature(targets[0]?.sheet) : undefined;
+		let updateValues: ReturnType<Creature['updateValue']>;
+		if (creature) {
+			updateValues = creature.updateValue(option, value);
+		} else throw new KoboldError("Yip! I couldn't find a sheet to target.");
+		await targets[0].saveSheet(intr, creature.sheet);
+		return updateValues;
 	}
 }

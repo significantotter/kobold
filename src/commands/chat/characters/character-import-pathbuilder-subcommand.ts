@@ -30,7 +30,8 @@ export class CharacterImportPathbuilderSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const jsonId = intr.options.getNumber(
 			CharacterOptions.IMPORT_PATHBUILDER_OPTION.name,

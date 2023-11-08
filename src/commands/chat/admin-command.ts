@@ -35,7 +35,6 @@ export class AdminCommand implements Command {
 	public async execute(
 		intr: ChatInputCommandInteraction,
 		LL: TranslationFunctions,
-		{},
 		services: InjectedServices
 	): Promise<void> {
 		if (!intr.isChatInputCommand()) return;

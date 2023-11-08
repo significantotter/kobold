@@ -12,7 +12,7 @@ import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import L from '../../../i18n/i18n-node.js';
-import { CharacterUtils } from '../../../utils/character-utils.js';
+import { CharacterUtils } from '../../../utils/kobold-service-utils/character-utils.js';
 import { SheetUtils } from '../../../utils/sheet/sheet-utils.js';
 
 export class ModifierCreateSheetModifierSubCommand implements Command {
@@ -30,7 +30,8 @@ export class ModifierCreateSheetModifierSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
 		if (!activeCharacter) {

@@ -131,7 +131,8 @@ export class ModifierCommand implements Command {
 
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
-		option: AutocompleteFocusedOption
+		option: AutocompleteFocusedOption,
+		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 
@@ -149,7 +150,6 @@ export class ModifierCommand implements Command {
 	public async execute(
 		intr: ChatInputCommandInteraction,
 		LL: TranslationFunctions,
-		{},
 		services: InjectedServices
 	): Promise<void> {
 		if (!intr.isChatInputCommand()) return;
@@ -163,8 +163,7 @@ export class ModifierCommand implements Command {
 
 		let passesChecks = await CommandUtils.runChecks(command, intr);
 		if (passesChecks) {
-			const data = await command.fetchInjectedDataForCommand?.(intr);
-			await command.execute(intr, LL, data, services);
+			await command.execute(intr, LL, services);
 		}
 	}
 }

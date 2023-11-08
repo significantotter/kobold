@@ -19,6 +19,7 @@ import { ActionOptions } from '../action/action-command-options.js';
 import { InitOptions } from '../init/init-command-options.js';
 import L from '../../../i18n/i18n-node.js';
 import { InjectedServices } from '../../command.js';
+import { Kobold } from '../../../services/kobold/kobold.model.js';
 
 export class RollCommand implements Command {
 	public names = [L.en.commands.roll.name()];
@@ -207,7 +208,8 @@ export class RollCommand implements Command {
 
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
-		option: AutocompleteFocusedOption
+		option: AutocompleteFocusedOption,
+		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 
@@ -225,7 +227,6 @@ export class RollCommand implements Command {
 	public async execute(
 		intr: ChatInputCommandInteraction,
 		LL: TranslationFunctions,
-		{},
 		services: InjectedServices
 	): Promise<void> {
 		if (!intr.isChatInputCommand()) return;
@@ -239,8 +240,7 @@ export class RollCommand implements Command {
 
 		let passesChecks = await CommandUtils.runChecks(command, intr);
 		if (passesChecks) {
-			const data = await command.fetchInjectedDataForCommand?.(intr);
-			await command.execute(intr, LL, data, services);
+			await command.execute(intr, LL, services);
 		}
 	}
 }

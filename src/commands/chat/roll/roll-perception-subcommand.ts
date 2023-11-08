@@ -8,17 +8,15 @@ import { RateLimiter } from 'discord.js-rate-limiter';
 
 import { ChatArgs } from '../../../constants/index.js';
 
-import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
-import { CharacterUtils } from '../../../utils/character-utils.js';
 import { DiceUtils } from '../../../utils/dice-utils.js';
 import { RollBuilder } from '../../../utils/roll-builder.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import L from '../../../i18n/i18n-node.js';
 import { Creature } from '../../../utils/creature.js';
-import { SettingsUtils } from '../../../utils/settings-utils.js';
 import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
-import { GameUtils } from '../../../utils/game-utils.js';
+import { Kobold } from '../../../services/kobold/kobold.model.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 
 export class RollPerceptionSubCommand implements Command {
 	public names = [L.en.commands.roll.perception.name()];
@@ -35,7 +33,8 @@ export class RollPerceptionSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		if (!intr.isChatInputCommand()) return;
 		const modifierExpression = intr.options.getString(ChatArgs.ROLL_MODIFIER_OPTION.name) ?? '';
@@ -45,15 +44,16 @@ export class RollPerceptionSubCommand implements Command {
 			intr.options.getString(ChatArgs.ROLL_SECRET_OPTION.name) ??
 			L.en.commandOptions.rollSecret.choices.public.value();
 
-		const [activeCharacter, userSettings, activeGame] = await Promise.all([
-			CharacterUtils.getActiveCharacter(intr),
-			SettingsUtils.getSettingsForUser(intr),
-			GameUtils.getActiveGame(intr.user.id, intr.guildId ?? ''),
-		]);
-		if (!activeCharacter) {
-			await InteractionUtils.send(intr, LL.commands.roll.interactions.noActiveCharacter());
-			return;
-		}
+		const koboldUtils: KoboldUtils = new KoboldUtils(kobold);
+		const { activeCharacter, userSettings, activeGame } = await koboldUtils.fetchDataForCommand(
+			intr,
+			{
+				activeGame: true,
+				activeCharacter: true,
+				userSettings: true,
+			}
+		);
+		koboldUtils.assertActiveCharacterNotNull(activeCharacter);
 
 		const creature = Creature.fromCharacter(activeCharacter);
 

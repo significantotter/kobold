@@ -1,0 +1,166 @@
+import { AutocompleteInteraction, CacheType, ChatInputCommandInteraction } from 'discord.js';
+import {
+	Character,
+	GameModel,
+	GameWithRelations,
+	Initiative,
+	InitiativeActor,
+	InitiativeActorWithRelations,
+	ModelWithSheet,
+} from '../../services/kobold/index.js';
+import type { KoboldUtils } from './kobold-utils.js';
+import { Kobold } from '../../services/kobold/kobold.model.js';
+
+export class GameUtils {
+	kobold: Kobold;
+	constructor(private koboldUtils: KoboldUtils) {
+		this.kobold = koboldUtils.kobold;
+	}
+	public async getActiveGame(userId: string, guildId: string, channelId?: string) {
+		const games = await this.kobold.game.readMany({ guildId: guildId });
+		const activeGmGame = games.find(game => game.gmUserId === userId && game.isActive);
+		if (activeGmGame) return activeGmGame;
+		const defaultChannelPlayerGame = games.find(
+			game =>
+				game.isActive &&
+				game.characters.find(
+					character =>
+						character.userId === userId &&
+						(character.channelDefaultCharacters ?? []).find(
+							defaultChar => defaultChar.channelId === channelId
+						)
+				)
+		);
+		if (defaultChannelPlayerGame) return defaultChannelPlayerGame;
+		const defaultGuildPlayerGame = games.find(
+			game =>
+				game.isActive &&
+				game.characters.find(
+					character =>
+						character.userId === userId &&
+						(character.guildDefaultCharacters ?? []).find(
+							defaultChar => defaultChar.guildId === guildId
+						)
+				)
+		);
+		if (defaultGuildPlayerGame) return defaultGuildPlayerGame;
+		const activeCharacterGame = games.find(
+			game =>
+				game.isActive &&
+				game.characters.find(
+					character => character.userId === userId && character.isActiveCharacter
+				)
+		);
+		if (activeCharacterGame) return activeCharacterGame;
+		return null;
+	}
+
+	public async autocompleteGameCharacter(
+		targetCharacterName: String,
+		activeGame?: GameWithRelations | null
+	) {
+		if (!activeGame?.characters) return [];
+
+		const matches: Character[] = [];
+		for (const character of activeGame.characters) {
+			if (
+				targetCharacterName === '' ||
+				character.name.toLowerCase().includes(targetCharacterName.toLowerCase())
+			) {
+				matches.push(character);
+			}
+		}
+		return matches.map(character => ({
+			name: character.name,
+			value: character.name,
+		}));
+	}
+
+	public async getCharacterOrInitActorTarget(
+		intr: ChatInputCommandInteraction<CacheType> | AutocompleteInteraction<CacheType>,
+		targetName?: string | null
+	): Promise<{
+		joinedGames: GameWithRelations[];
+		init: Initiative | null;
+		characterOrInitActorTargets: ModelWithSheet[];
+		activeCharacter: Character | null;
+		targetCharacter: Character | null;
+		targetInitActor: InitiativeActor | null;
+	}> {
+		const [joinedGames, initResult, activeCharacter] = await Promise.all([
+			this.kobold.game.readMany({
+				userId: intr.user.id,
+				guildId: intr.guildId ?? undefined,
+			}),
+			this.koboldUtils.initiativeUtils.getInitiativeForChannelOrNull(intr.channel),
+			this.koboldUtils.characterUtils.getActiveCharacter(intr),
+		]);
+
+		if (!targetName)
+			return {
+				joinedGames,
+				init: initResult,
+				characterOrInitActorTargets: activeCharacter ? [activeCharacter] : [],
+				activeCharacter,
+				targetCharacter: activeCharacter,
+				targetInitActor: null,
+			};
+
+		let characterOptions: Character[] = joinedGames.flatMap(game => game.characters);
+
+		if (activeCharacter) characterOptions = characterOptions.concat(activeCharacter);
+
+		// find a match from the game characters or active character
+		let matchedCharacter = characterOptions.find(
+			character => character.name.trim().toLowerCase() === targetName.trim().toLowerCase()
+		);
+
+		// find a match in the init actors
+		let matchedInitActor: InitiativeActorWithRelations | null;
+
+		matchedInitActor =
+			(initResult?.actors ?? []).find(
+				actor => actor.name.trim().toLowerCase() === targetName.trim().toLowerCase()
+			) ?? null;
+
+		// if we found an init actor but not a character, and the init actor has a character associated with it
+		// add in that character
+		if (matchedInitActor && !matchedCharacter && matchedInitActor.character) {
+			matchedCharacter = matchedInitActor.character;
+		}
+
+		const targets: ModelWithSheet[] = [];
+		if (matchedCharacter) targets.push(matchedCharacter);
+		if (matchedInitActor) targets.push(matchedInitActor);
+
+		return {
+			joinedGames,
+			init: initResult,
+			characterOrInitActorTargets: targets,
+			activeCharacter,
+			targetCharacter: matchedCharacter ?? null,
+			targetInitActor: matchedInitActor,
+		};
+	}
+
+	public async getWhereUserHasCharacter(userId: string, guildId: string | null) {
+		if (guildId == null) return [];
+		const options = await this.kobold.game.readMany({ guildId });
+
+		return options.filter(
+			option =>
+				option.characters.filter(char => char.userId === userId && char.isActiveCharacter)
+					.length > 0 || option.gmUserId === userId
+		);
+	}
+	public async getWhereUserLacksCharacter(userId: string, guildId: string | null) {
+		if (guildId == null) return [];
+		const options = await this.kobold.game.readMany({ guildId });
+		// Filter out the games that the user is already in
+		return options.filter(
+			option =>
+				option.characters.filter(char => char.userId === userId && char.isActiveCharacter)
+					.length === 0
+		);
+	}
+}

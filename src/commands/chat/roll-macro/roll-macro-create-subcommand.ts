@@ -7,13 +7,13 @@ import {
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 
-import { Character, CharacterModel } from '../../../services/kobold/index.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import L from '../../../i18n/i18n-node.js';
-import { CharacterUtils } from '../../../utils/character-utils.js';
 import { RollBuilder } from '../../../utils/roll-builder.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { Kobold } from '../../../services/kobold/kobold.model.js';
 
 export class RollMacroCreateSubCommand implements Command {
 	public names = [L.en.commands.rollMacro.create.name()];
@@ -30,21 +30,20 @@ export class RollMacroCreateSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
-		if (!activeCharacter) {
-			await InteractionUtils.send(
-				intr,
-				LL.commands.character.interactions.noActiveCharacter()
-			);
-			return;
-		}
+		const koboldUtils = new KoboldUtils(kobold);
+		const { characterUtils } = koboldUtils;
+		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+			activeCharacter: true,
+		});
+
 		let name = intr.options.getString(RollMacroOptions.MACRO_NAME_OPTION.name, true).trim();
 		const macro = intr.options.getString(RollMacroOptions.MACRO_VALUE_OPTION.name, true);
 
 		// make sure the name does't already exist in the character's rollMacros
-		if (activeCharacter.getRollMacroByName(name)) {
+		if (characterUtils.getRollMacroByName(activeCharacter, name)) {
 			await InteractionUtils.send(
 				intr,
 				LL.commands.rollMacro.create.interactions.alreadyExists({
@@ -67,15 +66,18 @@ export class RollMacroCreateSubCommand implements Command {
 			return;
 		}
 
-		await CharacterModel.query().updateAndFetchById(activeCharacter.id, {
-			rollMacros: [
-				...activeCharacter.rollMacros,
-				{
-					name,
-					macro,
-				},
-			],
-		});
+		await kobold.character.update(
+			{ id: activeCharacter.id },
+			{
+				rollMacros: [
+					...activeCharacter.rollMacros,
+					{
+						name,
+						macro,
+					},
+				],
+			}
+		);
 
 		//send a response
 		await InteractionUtils.send(

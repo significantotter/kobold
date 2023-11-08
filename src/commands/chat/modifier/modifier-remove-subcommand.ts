@@ -17,7 +17,7 @@ import { Command, CommandDeferType } from '../../index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import L from '../../../i18n/i18n-node.js';
 import { CollectorUtils } from '../../../utils/collector-utils.js';
-import { CharacterUtils } from '../../../utils/character-utils.js';
+import { CharacterUtils } from '../../../utils/kobold-service-utils/character-utils.js';
 import { ModifierOptions } from './modifier-command-options.js';
 import _ from 'lodash';
 import { KoboldError } from '../../../utils/KoboldError.js';
@@ -38,7 +38,8 @@ export class ModifierRemoveSubCommand implements Command {
 
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
-		option: AutocompleteFocusedOption
+		option: AutocompleteFocusedOption,
+		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === ModifierOptions.MODIFIER_NAME_OPTION.name) {
@@ -66,7 +67,8 @@ export class ModifierRemoveSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const modifierChoice = intr.options.getString(
 			ModifierOptions.MODIFIER_NAME_OPTION.name,

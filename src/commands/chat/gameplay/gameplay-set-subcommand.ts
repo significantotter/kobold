@@ -15,12 +15,13 @@ import { Command, CommandDeferType } from '../../index.js';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { InteractionUtils } from '../../../utils/interaction-utils.js';
-import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
-import { GameplayUtils } from '../../../utils/gameplay-utils.js';
+import { AutocompleteUtils } from '../../../utils/kobold-service-utils/autocomplete-utils.js';
+import { GameplayUtils } from '../../../utils/kobold-service-utils/gameplay-utils.js';
 import _ from 'lodash';
 import { InitiativeActorModel, SheetBaseCounterKeys } from '../../../services/kobold/index.js';
-import { GameUtils } from '../../../utils/game-utils.js';
+import { GameUtils } from '../../../utils/kobold-service-utils/game-utils.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
+import { koboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 
 export class GameplaySetSubCommand implements Command {
 	public names = [L.en.commands.gameplay.set.name()];
@@ -36,7 +37,8 @@ export class GameplaySetSubCommand implements Command {
 
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
-		option: AutocompleteFocusedOption
+		option: AutocompleteFocusedOption,
+		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name) {
@@ -46,7 +48,8 @@ export class GameplaySetSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: any }
 	): Promise<void> {
 		const targetCharacter = intr.options.getString(
 			GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name,
@@ -58,7 +61,8 @@ export class GameplaySetSubCommand implements Command {
 
 		const value = intr.options.getString(GameplayOptions.GAMEPLAY_SET_VALUE.name, true);
 
-		const { characterOrInitActorTargets } = await GameUtils.getCharacterOrInitActorTarget(
+		const { gameUtils } = koboldUtils(kobold);
+		const { characterOrInitActorTargets } = await gameUtils.getCharacterOrInitActorTarget(
 			intr,
 			targetCharacter
 		);

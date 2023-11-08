@@ -15,6 +15,8 @@
 	"type": "module",
 	"scripts": {
 		"kanel": "tsx ./src/scripts/kanel.ts",
+		"migrate": "tsx ./src/scripts/migrate.ts",
+		"migrate:test": "NODE_ENV=TEST NODE_OPTIONS='--loader ts-node/esm' knex migrate:latest",
 		"lint": "eslint . --cache --ext .js,.jsx,.ts,.tsx",
 		"lint:fix": "eslint . --fix --cache --ext .js,.jsx,.ts,.tsx",
 		"check-circular": "madge --debug --circular --extensions ts ./src",
@@ -40,8 +42,6 @@
 		"typesafe-i18n": "NODE_OPTIONS='--max-old-space-size=4096' typesafe-i18n --no-watch",
 		"typesafe-i18n:watch": "typesafe-i18n",
 		"knex": "NODE_OPTIONS='--max-old-space-size=4096' NODE_OPTIONS='--loader ts-node/esm' knex",
-		"migrate": "NODE_OPTIONS='--max-old-space-size=4096' NODE_OPTIONS='--loader ts-node/esm' knex migrate:latest",
-		"migrate:test": "NODE_ENV=TEST NODE_OPTIONS='--loader ts-node/esm' knex migrate:latest",
 		"test": "vitest",
 		"replace-i18n-types": "cp ./src/i18n/i18n-types.prod.ts ./src/i18n/i18n-types.ts",
 		"build-prod": "NODE_OPTIONS='--max-old-space-size=4096' npm run replace-i18n-types && npm run build-types && tsc --project tsconfig.json",

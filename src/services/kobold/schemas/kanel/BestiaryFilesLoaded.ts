@@ -8,16 +8,16 @@ export default interface BestiaryFilesLoadedTable {
   id: ColumnType<BestiaryFilesLoadedId, BestiaryFilesLoadedId | null, BestiaryFilesLoadedId | null>;
 
   /** Database type: pg_catalog.text */
-  fileName: ColumnType<string | null, string | null, string | null>;
+  fileName: ColumnType<string, string, string | null>;
 
   /** Database type: pg_catalog.text */
-  fileHash: ColumnType<string | null, string | null, string | null>;
+  fileHash: ColumnType<string, string, string | null>;
 
   /** Database type: pg_catalog.timestamptz */
-  createdAt: ColumnType<Date | null, Date | string | null, Date | string | null>;
+  createdAt: ColumnType<Date, Date | string | null, Date | string | null>;
 
   /** Database type: pg_catalog.timestamptz */
-  lastUpdatedAt: ColumnType<Date | null, Date | string | null, Date | string | null>;
+  lastUpdatedAt: ColumnType<Date, Date | string | null, Date | string | null>;
 }
 
 export type BestiaryFilesLoaded = Selectable<BestiaryFilesLoadedTable>;

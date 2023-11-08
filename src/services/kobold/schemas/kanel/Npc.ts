@@ -1,3 +1,4 @@
+import type { NpcData, NpcFluff } from './../kanel-types.js';
 import type { ColumnType, Selectable, Insertable, Updateable } from 'kysely';
 
 export type NpcId = number;
@@ -8,22 +9,22 @@ export default interface NpcTable {
   id: ColumnType<NpcId, NpcId | null, NpcId | null>;
 
   /** Database type: pg_catalog.jsonb */
-  data: ColumnType<unknown | null, unknown | null, unknown | null>;
+  data: ColumnType<NpcData, NpcData | null, NpcData | null>;
 
   /** Database type: pg_catalog.jsonb */
-  fluff: ColumnType<unknown | null, unknown | null, unknown | null>;
+  fluff: ColumnType<NpcFluff, NpcFluff | null, NpcFluff | null>;
 
   /** Database type: pg_catalog.text */
-  name: ColumnType<string | null, string | null, string | null>;
+  name: ColumnType<string, string, string | null>;
 
   /** Database type: pg_catalog.text */
-  sourceFileName: ColumnType<string | null, string | null, string | null>;
+  sourceFileName: ColumnType<string, string, string | null>;
 
   /** Database type: pg_catalog.timestamptz */
-  createdAt: ColumnType<Date | null, Date | string | null, Date | string | null>;
+  createdAt: ColumnType<Date, Date | string | null, Date | string | null>;
 
   /** Database type: pg_catalog.timestamptz */
-  lastUpdatedAt: ColumnType<Date | null, Date | string | null, Date | string | null>;
+  lastUpdatedAt: ColumnType<Date, Date | string | null, Date | string | null>;
 }
 
 export type Npc = Selectable<NpcTable>;

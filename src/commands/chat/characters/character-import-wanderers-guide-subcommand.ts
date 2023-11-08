@@ -12,7 +12,7 @@ import { Command, CommandDeferType } from '../../index.js';
 import { WgToken } from '../../../services/kobold/index.js';
 import { CharacterHelpers } from './helpers.js';
 import { Config } from '../../../config/config.js';
-import { CharacterUtils } from '../../../utils/character-utils.js';
+import { CharacterUtils } from '../../../utils/kobold-service-utils/character-utils.js';
 import { CharacterOptions } from './command-options.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import L from '../../../i18n/i18n-node.js';
@@ -31,7 +31,8 @@ export class CharacterImportWanderersGuideSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const url = intr.options.getString(CharacterOptions.IMPORT_OPTION.name, true).trim();
 		let charId = CharacterUtils.parseCharacterIdFromText(url);

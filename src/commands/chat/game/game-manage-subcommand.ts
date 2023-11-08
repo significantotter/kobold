@@ -14,9 +14,11 @@ import { GameOptions } from './game-command-options.js';
 import { Command, CommandDeferType } from '../../index.js';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { Game, GameModel } from '../../../services/kobold/index.js';
+import { GameWithRelations } from '../../../services/kobold/index.js';
 import { InteractionUtils } from '../../../utils/interaction-utils.js';
-import { CharacterUtils } from '../../../utils/character-utils.js';
+import { Kobold } from '../../../services/kobold/kobold.model.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { KoboldError } from '../../../utils/KoboldError.js';
 
 export class GameManageSubCommand implements Command {
 	public names = [L.en.commands.game.manage.name()];
@@ -32,7 +34,8 @@ export class GameManageSubCommand implements Command {
 
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
-		option: AutocompleteFocusedOption
+		option: AutocompleteFocusedOption,
+		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === GameOptions.GAME_MANAGE_VALUE.name) {
@@ -41,12 +44,15 @@ export class GameManageSubCommand implements Command {
 				.trim()
 				.toLocaleLowerCase();
 
-			let targetGames: GameModel[] = [];
+			const { gameUtils } = new KoboldUtils(kobold);
+
+			let targetGames: GameWithRelations[] = [];
 			if (option === L.en.commandOptions.gameManageOption.choices.kick.name()) {
-				targetGames = await GameModel.query()
-					.withGraphFetched('characters')
-					.where('guildId', intr.guildId)
-					.andWhere('gmUserId', intr.user.id);
+				if (!intr.guildId) return [];
+				targetGames = await kobold.game.readMany({
+					guildId: intr.guildId,
+					gmUserId: intr.user.id,
+				});
 
 				// this option sort of needs 2 values, a game and a character
 				// we're going to cheat that and use hyphenated values
@@ -66,22 +72,21 @@ export class GameManageSubCommand implements Command {
 
 				return options;
 			} else if (option === L.en.commandOptions.gameManageOption.choices.join.name()) {
-				targetGames = await GameModel.queryWhereUserLacksCharacter(
+				targetGames = await gameUtils.getWhereUserLacksCharacter(
 					intr.user.id,
 					intr.guildId ?? ''
 				);
 			} else if (option === L.en.commandOptions.gameManageOption.choices.setActive.name()) {
-				targetGames = await GameModel.query().where({
+				if (!intr.guildId) return [];
+				targetGames = await kobold.game.readMany({
 					gmUserId: intr.user.id,
 					guildId: intr.guildId,
 				});
 			} else if (option === L.en.commandOptions.gameManageOption.choices.leave.name()) {
-				targetGames = await GameModel.queryWhereUserHasCharacter(
-					intr.user.id,
-					intr.guildId
-				);
+				targetGames = await gameUtils.getWhereUserHasCharacter(intr.user.id, intr.guildId);
 			} else if (option === L.en.commandOptions.gameManageOption.choices.delete.name()) {
-				targetGames = await GameModel.query().where({
+				if (!intr.guildId) return [];
+				targetGames = await kobold.game.readMany({
 					gmUserId: intr.user.id,
 					guildId: intr.guildId,
 				});
@@ -103,133 +108,45 @@ export class GameManageSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const option = intr.options.getString(GameOptions.GAME_MANAGE_OPTION.name, true);
 		const value = intr.options.getString(GameOptions.GAME_MANAGE_VALUE.name, true);
 
-		if (option === L.en.commandOptions.gameManageOption.choices.create.name()) {
-			// ensure it's not a duplicate name
-			const existingGame = await GameModel.query()
-				.where('guildId', 'ilike', intr.guildId)
-				.andWhere('name', value);
+		if (!intr.guildId) {
+			throw new KoboldError('You can only manage games in a server!');
+		}
 
-			if (value.length < 1) {
-				InteractionUtils.send(
-					intr,
-					LL.commands.game.manage.interactions.gameNameTooShort()
-				);
-				return;
-			}
-			if (value.indexOf(' - ') !== -1) {
-				InteractionUtils.send(
-					intr,
-					LL.commands.game.manage.interactions.gameNameDisallowedCharacters()
-				);
-				return;
-			}
+		const { characterUtils } = new KoboldUtils(kobold);
 
-			if (existingGame.length > 0) {
-				InteractionUtils.send(
-					intr,
-					LL.commands.game.manage.interactions.gameAlreadyExists()
-				);
-				return;
-			}
-
-			// set existing games here to not active
-			await GameModel.query()
-				.patch({ isActive: false })
-				.where({ gmUserId: intr.user.id, guildId: intr.guildId });
-
-			// create the game!
-			await GameModel.query().insert({
-				name: value,
-				gmUserId: intr.user.id,
-				guildId: intr.guildId,
-				isActive: true,
-			});
-
-			await InteractionUtils.send(
-				intr,
-				LL.commands.game.manage.interactions.createSuccess({
-					gameName: value,
-				})
-			);
-			return;
-		} else if (option === L.en.commandOptions.gameManageOption.choices.setActive.name()) {
-			// set target game to active
-			const updated = await GameModel.query()
-				.patch({ isActive: true })
-				.where({ gmUserId: intr.user.id, guildId: intr.guildId })
-				.andWhere('name', 'ilike', value);
-
-			if (updated > 0) {
-				// set existing games here to not active
-				await GameModel.query()
-					.patch({ isActive: false })
-					.where({ gmUserId: intr.user.id, guildId: intr.guildId })
-					.andWhereNot('name', 'ilike', value);
-
-				await InteractionUtils.send(
-					intr,
-					LL.commands.game.manage.interactions.setActiveSuccess({
-						gameName: value,
-					})
-				);
-			} else {
-				await InteractionUtils.send(
-					intr,
-					LL.commands.game.interactions.notFound({
-						gameName: value,
-					})
-				);
-			}
-			return;
-		} else if (option === L.en.commandOptions.gameManageOption.choices.delete.name()) {
-			const deletedRows = await GameModel.query().delete().where({
-				gmUserId: intr.user.id,
-				guildId: intr.guildId,
-				name: value,
-			});
-			if (deletedRows) {
-				await InteractionUtils.send(
-					intr,
-					LL.commands.game.manage.interactions.deleteSuccess({
-						gameName: value,
-					})
-				);
-			} else {
-				await InteractionUtils.send(
-					intr,
-					LL.commands.game.interactions.notFound({
-						gameName: value,
-					})
-				);
-			}
-			return;
-		} else if (option === L.en.commandOptions.gameManageOption.choices.kick.name()) {
+		// This option uses value differently, so we do this separately from the rest
+		if (option === L.en.commandOptions.gameManageOption.choices.kick.name()) {
 			const [gameName, ...characterNameSections] = value.split(' - ');
 			//just in case a character name has ' - ' in it
 			const characterName = characterNameSections.join(' - ');
+
+			const targetGames = await kobold.game.readMany({
+				guildId: intr.guildId,
+				gmUserId: intr.user.id,
+				name: gameName,
+			});
+			const targetGame = targetGames.length ? targetGames[0] : null;
+
 			if (gameName && characterName) {
-				const targetGames = await GameModel.query().withGraphFetched('characters').where({
-					gmUserId: intr.user.id,
-					guildId: intr.guildId,
-					name: gameName,
-				});
 				if (targetGames.length) {
 					const targetGame = targetGames[0];
-					const targetCharacters = (targetGame.characters || []).filter(
+					const targetCharacter = (targetGame.characters || []).find(
 						character =>
 							character.name.trim().toLocaleLowerCase() ===
 							characterName.trim().toLocaleLowerCase()
 					);
-					if (targetCharacters.length) {
-						await targetGame
-							.$relatedQuery('characters')
-							.unrelate()
-							.where({ id: targetCharacters[0].id });
+
+					if (targetCharacter) {
+						await kobold.charactersInGames.delete({
+							characterId: targetCharacter.id,
+							gameId: targetGame.id,
+						});
 
 						await InteractionUtils.send(
 							intr,
@@ -265,13 +182,106 @@ export class GameManageSubCommand implements Command {
 					LL.commands.game.manage.interactions.kickParseFailed()
 				);
 			}
-		} else if (option === L.en.commandOptions.gameManageOption.choices.join.name()) {
-			const targetGames = await GameModel.query().where({
-				guildId: intr.guildId,
+			return;
+		}
+
+		const targetGames = await kobold.game.readMany({
+			guildId: intr.guildId,
+			name: value,
+		});
+		const targetGame = targetGames.length ? targetGames[0] : null;
+
+		if (option === L.en.commandOptions.gameManageOption.choices.create.name()) {
+			// ensure it's not a duplicate name
+
+			if (value.length < 1) {
+				InteractionUtils.send(
+					intr,
+					LL.commands.game.manage.interactions.gameNameTooShort()
+				);
+				return;
+			}
+			if (value.indexOf(' - ') !== -1) {
+				InteractionUtils.send(
+					intr,
+					LL.commands.game.manage.interactions.gameNameDisallowedCharacters()
+				);
+				return;
+			}
+
+			if (targetGame) {
+				InteractionUtils.send(
+					intr,
+					LL.commands.game.manage.interactions.gameAlreadyExists()
+				);
+				return;
+			}
+
+			// set existing games here to not active
+			await kobold.game.updateMany(
+				{ gmUserId: intr.user.id, guildId: intr.guildId },
+				{ isActive: false }
+			);
+
+			// create the game!
+			await kobold.game.create({
 				name: value,
+				gmUserId: intr.user.id,
+				guildId: intr.guildId,
+				isActive: true,
 			});
-			if (targetGames.length > 0) {
-				const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
+
+			await InteractionUtils.send(
+				intr,
+				LL.commands.game.manage.interactions.createSuccess({
+					gameName: value,
+				})
+			);
+			return;
+		} else if (option === L.en.commandOptions.gameManageOption.choices.setActive.name()) {
+			if (targetGame == null) {
+				throw new KoboldError(
+					LL.commands.game.interactions.notFound({
+						gameName: value,
+					})
+				);
+			}
+			// set existing games here to not active
+			await kobold.game.updateMany(
+				{ guildId: intr.guildId, gmUserId: intr.user.id },
+				{ isActive: false }
+			);
+
+			// set target game to active
+			await kobold.game.update({ id: targetGame.id }, { isActive: true });
+
+			await InteractionUtils.send(
+				intr,
+				LL.commands.game.manage.interactions.setActiveSuccess({
+					gameName: value,
+				})
+			);
+			return;
+		} else if (option === L.en.commandOptions.gameManageOption.choices.delete.name()) {
+			if (targetGame == null) {
+				throw new KoboldError(
+					LL.commands.game.interactions.notFound({
+						gameName: value,
+					})
+				);
+			}
+			await kobold.game.delete({ id: targetGame.id });
+
+			await InteractionUtils.send(
+				intr,
+				LL.commands.game.manage.interactions.deleteSuccess({
+					gameName: value,
+				})
+			);
+			return;
+		} else if (option === L.en.commandOptions.gameManageOption.choices.join.name()) {
+			if (targetGame != null) {
+				const activeCharacter = await characterUtils.getActiveCharacter(intr);
 				if (!activeCharacter) {
 					//didn't find the game
 					await InteractionUtils.send(
@@ -279,24 +289,25 @@ export class GameManageSubCommand implements Command {
 						LL.commands.character.interactions.noActiveCharacter()
 					);
 				} else if (
-					(targetGames[0].characters || []).filter(
+					(targetGame.characters || []).filter(
 						character => character.id === activeCharacter.id
 					).length > 0
 				) {
 					await InteractionUtils.send(
 						intr,
-						`${activeCharacter.name} is already in ${targetGames[0].name}!`
+						`${activeCharacter.name} is already in ${targetGame.name}!`
 					);
 				} else {
 					//relate the two!
-					const result = await targetGames[0]
-						.$relatedQuery('characters')
-						.relate(activeCharacter);
+					await kobold.charactersInGames.create({
+						characterId: activeCharacter.id,
+						gameId: targetGame.id,
+					});
 					await InteractionUtils.send(
 						intr,
 						LL.commands.game.manage.interactions.joinSuccess({
 							characterName: activeCharacter.name,
-							gameName: targetGames[0].name,
+							gameName: targetGame.name,
 						})
 					);
 				}
@@ -311,22 +322,15 @@ export class GameManageSubCommand implements Command {
 			}
 			return;
 		} else if (option === L.en.commandOptions.gameManageOption.choices.leave.name()) {
-			const targetGames = await GameModel.query()
-				.where({
-					guildId: intr.guildId,
-					name: value,
-				})
-				.andWhereNot({ gmUserId: intr.user.id });
-			if (targetGames.length > 0) {
-				const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
+			if (targetGame) {
+				const activeCharacter = await characterUtils.getActiveCharacter(intr);
 				if (!activeCharacter) {
-					//didn't find the game
 					await InteractionUtils.send(
 						intr,
 						LL.commands.character.interactions.noActiveCharacter()
 					);
 				} else if (
-					(targetGames[0].characters || []).filter(
+					(targetGame.characters || []).filter(
 						character => character.id === activeCharacter.id
 					).length > 0
 				) {
@@ -334,15 +338,15 @@ export class GameManageSubCommand implements Command {
 						intr,
 						LL.commands.game.manage.interactions.characterNotInGame({
 							characterName: activeCharacter.name,
-							gameName: targetGames[0].name,
+							gameName: targetGame.name,
 						})
 					);
 				} else {
 					//unrelate the two!
-					await targetGames[0]
-						.$relatedQuery('characters')
-						.unrelate()
-						.where('id', activeCharacter.id);
+					await kobold.charactersInGames.delete({
+						characterId: activeCharacter.id,
+						gameId: targetGame.id,
+					});
 					await InteractionUtils.send(
 						intr,
 						LL.commands.game.manage.interactions.leaveSuccess({

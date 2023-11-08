@@ -15,11 +15,11 @@ import { Command, CommandDeferType } from '../../index.js';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { InteractionUtils } from '../../../utils/interaction-utils.js';
-import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
+import { AutocompleteUtils } from '../../../utils/kobold-service-utils/autocomplete-utils.js';
 import _ from 'lodash';
 import { Creature } from '../../../utils/creature.js';
 import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
-import { GameUtils } from '../../../utils/game-utils.js';
+import { GameUtils } from '../../../utils/kobold-service-utils/game-utils.js';
 
 export class GameplayDamageSubCommand implements Command {
 	public names = [L.en.commands.gameplay.damage.name()];
@@ -35,7 +35,8 @@ export class GameplayDamageSubCommand implements Command {
 
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
-		option: AutocompleteFocusedOption
+		option: AutocompleteFocusedOption,
+		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name) {
@@ -47,7 +48,8 @@ export class GameplayDamageSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: any }
 	): Promise<void> {
 		const targetCharacter = intr.options.getString(
 			GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name,
@@ -56,10 +58,9 @@ export class GameplayDamageSubCommand implements Command {
 		const amount = intr.options.getNumber(GameplayOptions.GAMEPLAY_DAMAGE_AMOUNT.name, true);
 		const type = intr.options.getString(GameplayOptions.GAMEPLAY_DAMAGE_TYPE.name, true);
 
-		const { characterOrInitActorTargets } = await GameUtils.getCharacterOrInitActorTarget(
-			intr,
-			targetCharacter
-		);
+		const { characterOrInitActorTargets } = await new GameUtils(
+			kobold
+		).getCharacterOrInitActorTarget(intr, targetCharacter);
 
 		const sheet = characterOrInitActorTargets[0].sheet;
 		const creature = new Creature(sheet);

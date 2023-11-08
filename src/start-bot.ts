@@ -126,7 +126,7 @@ import { getDialect } from './services/db.dialect.js';
 disableValidators();
 
 async function start(): Promise<void> {
-	const PostgresDialect = getDialect();
+	const PostgresDialect = getDialect(Config.database.url);
 	const kobold = new Kobold(PostgresDialect);
 	DBModel.init(Config.database.url);
 

@@ -12,13 +12,13 @@ import {
 import { RateLimiter } from 'discord.js-rate-limiter';
 
 import { InteractionUtils } from '../../../utils/index.js';
-import { InitiativeUtils } from '../../../utils/initiative-utils.js';
+import { InitiativeUtils } from '../../../utils/initiative-builder.js';
 import { Command, CommandDeferType } from '../../index.js';
 import _ from 'lodash';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import L from '../../../i18n/i18n-node.js';
-import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
+import { AutocompleteUtils } from '../../../utils/kobold-service-utils/autocomplete-utils.js';
 import { Creature } from '../../../utils/creature.js';
 import { InitOptions } from './init-command-options.js';
 
@@ -37,7 +37,8 @@ export class InitStatBlockSubCommand implements Command {
 
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
-		option: AutocompleteFocusedOption
+		option: AutocompleteFocusedOption,
+		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === InitOptions.INIT_CHARACTER_OPTION.name) {
@@ -50,7 +51,8 @@ export class InitStatBlockSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const targetCharacterName = intr.options.getString(
 			InitOptions.INIT_CHARACTER_OPTION.name,

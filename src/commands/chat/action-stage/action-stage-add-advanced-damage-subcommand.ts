@@ -22,8 +22,8 @@ import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { CollectorUtils } from '../../../utils/collector-utils.js';
-import { CharacterUtils } from '../../../utils/character-utils.js';
-import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
+import { CharacterUtils } from '../../../utils/kobold-service-utils/character-utils.js';
+import { AutocompleteUtils } from '../../../utils/kobold-service-utils/autocomplete-utils.js';
 import { ActionStageOptions } from './action-stage-command-options.js';
 
 export class ActionStageAddAdvancedDamageSubCommand implements Command {
@@ -40,7 +40,8 @@ export class ActionStageAddAdvancedDamageSubCommand implements Command {
 
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
-		option: AutocompleteFocusedOption
+		option: AutocompleteFocusedOption,
+		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === ActionStageOptions.ACTION_TARGET_OPTION.name) {
@@ -54,7 +55,8 @@ export class ActionStageAddAdvancedDamageSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const targetAction = intr.options.getString(
 			ActionStageOptions.ACTION_TARGET_OPTION.name,

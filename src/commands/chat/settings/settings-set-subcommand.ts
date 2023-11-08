@@ -33,7 +33,8 @@ export class SettingsSetSubCommand implements Command {
 
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
-		option: AutocompleteFocusedOption
+		option: AutocompleteFocusedOption,
+		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (
@@ -59,7 +60,8 @@ export class SettingsSetSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const option = intr.options.getString(SettingsOptions.SETTINGS_SET_OPTION.name, true);
 		const value = intr.options.getString(SettingsOptions.SETTINGS_SET_VALUE.name, true);

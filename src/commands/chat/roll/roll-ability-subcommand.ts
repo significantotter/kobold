@@ -15,15 +15,16 @@ import { ChatArgs } from '../../../constants/index.js';
 
 import { InteractionUtils, StringUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
-import { CharacterUtils } from '../../../utils/character-utils.js';
+import { CharacterUtils } from '../../../utils/kobold-service-utils/character-utils.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import L from '../../../i18n/i18n-node.js';
 import { Creature } from '../../../utils/creature.js';
 import _ from 'lodash';
-import { SettingsUtils } from '../../../utils/settings-utils.js';
+import { SettingsUtils } from '../../../utils/kobold-service-utils/user-settings-utils.js';
 import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
-import { GameUtils } from '../../../utils/game-utils.js';
+import { GameUtils } from '../../../utils/kobold-service-utils/game-utils.js';
 import { RollBuilder } from '../../../utils/roll-builder.js';
+import { koboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 
 export class RollAbilitySubCommand implements Command {
 	public names = [L.en.commands.roll.ability.name()];
@@ -40,7 +41,8 @@ export class RollAbilitySubCommand implements Command {
 
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
-		option: AutocompleteFocusedOption
+		option: AutocompleteFocusedOption,
+		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === ChatArgs.ABILITY_CHOICE_OPTION.name) {
@@ -68,7 +70,8 @@ export class RollAbilitySubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: any }
 	): Promise<void> {
 		const abilityChoice = intr.options.getString(ChatArgs.ABILITY_CHOICE_OPTION.name, true);
 		const modifierExpression = intr.options.getString(ChatArgs.ROLL_MODIFIER_OPTION.name) ?? '';
@@ -77,10 +80,12 @@ export class RollAbilitySubCommand implements Command {
 			intr.options.getString(ChatArgs.ROLL_SECRET_OPTION.name) ??
 			L.en.commandOptions.rollSecret.choices.public.value();
 
+		const { gameUtils } = new koboldUtils(kobold);
+
 		const [activeCharacter, userSettings, activeGame] = await Promise.all([
 			CharacterUtils.getActiveCharacter(intr),
 			SettingsUtils.getSettingsForUser(intr),
-			GameUtils.getActiveGame(intr.user.id, intr.guildId ?? ''),
+			gameUtils.getActiveGame(intr.user.id, intr.guildId ?? ''),
 		]);
 		if (!activeCharacter) {
 			await InteractionUtils.send(intr, L.en.commands.roll.interactions.noActiveCharacter());

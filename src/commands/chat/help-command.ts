@@ -165,7 +165,6 @@ export class HelpCommand implements Command {
 	public async execute(
 		intr: ChatInputCommandInteraction,
 		LL: TranslationFunctions,
-		{},
 		services: InjectedServices
 	): Promise<void> {
 		// look through our options that are subcommands

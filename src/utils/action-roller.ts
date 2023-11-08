@@ -19,7 +19,7 @@ import { DiceRollError, DiceUtils, MultiRollResult } from './dice-utils.js';
 import { RollBuilder } from './roll-builder.js';
 import { Creature } from './creature.js';
 import { EmbedUtils, KoboldEmbed } from './kobold-embed-utils.js';
-import { UserSettingsFactory } from '../services/kobold/models/user-settings/user-settings.factory.js';
+import { UserSettingsFactory } from '../services/kobold/models-old/user-settings/user-settings.factory.js';
 import { ChatInputCommandInteraction } from 'discord.js';
 import { getEmoji } from '../constants/emoji.js';
 import L from '../i18n/i18n-node.js';

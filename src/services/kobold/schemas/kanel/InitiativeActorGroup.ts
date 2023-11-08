@@ -18,13 +18,13 @@ export default interface InitiativeActorGroupTable {
   name: ColumnType<string, string, string | null>;
 
   /** Database type: pg_catalog.numeric */
-  initiativeResult: ColumnType<string, string, string | null>;
+  initiativeResult: ColumnType<number, number, number | null>;
 
   /** Database type: pg_catalog.timestamptz */
-  createdAt: ColumnType<Date | null, Date | string | null, Date | string | null>;
+  createdAt: ColumnType<Date, Date | string | null, Date | string | null>;
 
   /** Database type: pg_catalog.timestamptz */
-  lastUpdatedAt: ColumnType<Date | null, Date | string | null, Date | string | null>;
+  lastUpdatedAt: ColumnType<Date, Date | string | null, Date | string | null>;
 }
 
 export type InitiativeActorGroup = Selectable<InitiativeActorGroupTable>;

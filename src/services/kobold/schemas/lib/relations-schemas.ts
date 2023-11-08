@@ -1,24 +1,36 @@
 import { z } from 'zod';
-import { zCharacter } from '../character.zod.js';
-import { zGame } from '../game.zod.js';
-import { zInitiativeActor } from '../initiative-actor.zod.js';
-import { zInitiativeActorGroup } from '../initiative-actor-group.zod.js';
-import { zInitiative } from '../initiative.zod.js';
+import {
+	ChannelDefaultCharacter,
+	Character,
+	Game,
+	GuildDefaultCharacter,
+	Initiative,
+	InitiativeActor,
+	InitiativeActorGroup,
+} from '../db-types.js';
 
-export type InitiativeActorWithRelations = z.infer<typeof zInitiativeActorWithRelations>;
-export const zInitiativeActorWithRelations = zInitiativeActor.extend({
-	initiative: zInitiative.optional(),
-	actorGroup: zInitiativeActorGroup.optional(),
-	character: zCharacter.optional(),
-});
-export type InitiativeWithRelations = z.infer<typeof zInitiativeWithRelations>;
-export const zInitiativeWithRelations = zInitiative.extend({
-	currentTurnGroup: zInitiativeActorGroup.optional(),
-	actorGroups: z.array(zInitiativeActorGroup).optional(),
-	actors: z.array(zInitiativeActorWithRelations).optional(),
-});
+export type CharacterWithRelations = Character & {
+	channelDefaultCharacters: ChannelDefaultCharacter[];
+	guildDefaultCharacters: GuildDefaultCharacter[];
+};
 
-export type GameWithRelations = z.infer<typeof zGameWithRelations>;
-export const zGameWithRelations = zGame.extend({
-	characters: z.array(zCharacter).optional(),
-});
+export type InitiativeActorWithRelations = InitiativeActor & {
+	initiative?: Initiative | null;
+	actorGroup: InitiativeActorGroup;
+	character?: CharacterWithRelations | null;
+};
+
+export type InitiativeActorGroupWithRelations = InitiativeActorGroup & {
+	initiative?: Initiative | null;
+	actors: InitiativeActorWithRelations[];
+};
+
+export type InitiativeWithRelations = Initiative & {
+	currentTurnGroup: InitiativeActorGroup | null;
+	actorGroups: InitiativeActorGroupWithRelations[];
+	actors: InitiativeActorWithRelations[];
+};
+
+export type GameWithRelations = Game & {
+	characters: CharacterWithRelations[];
+};

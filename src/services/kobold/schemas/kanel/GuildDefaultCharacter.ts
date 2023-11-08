@@ -7,10 +7,10 @@ export type GuildDefaultCharacterGuildId = string;
 
 /** Represents the table public.guild_default_character */
 export default interface GuildDefaultCharacterTable {
-  /** Database type: pg_catalog.varchar */
+  /** Database type: pg_catalog.text */
   userId: ColumnType<GuildDefaultCharacterUserId, GuildDefaultCharacterUserId, GuildDefaultCharacterUserId | null>;
 
-  /** Database type: pg_catalog.varchar */
+  /** Database type: pg_catalog.text */
   guildId: ColumnType<GuildDefaultCharacterGuildId, GuildDefaultCharacterGuildId, GuildDefaultCharacterGuildId | null>;
 
   /** Database type: pg_catalog.int4 */

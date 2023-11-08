@@ -128,7 +128,8 @@ export class CommandHandler implements EventHandler {
 				// Execute the command
 				const LL = L.en;
 				let data: Partial<InjectData> =
-					(await command?.fetchInjectedDataForCommand?.(intr)) ?? {};
+					(await command?.fetchInjectedDataForCommand?.(intr, this.injectedServices)) ??
+					{};
 				await command.execute(intr, LL, data, this.injectedServices);
 			}
 		} catch (error) {

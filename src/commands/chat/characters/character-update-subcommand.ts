@@ -16,7 +16,7 @@ import { default as axios } from 'axios';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { CharacterHelpers } from './helpers.js';
-import { CharacterUtils } from '../../../utils/character-utils.js';
+import { CharacterUtils } from '../../../utils/kobold-service-utils/character-utils.js';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Config } from '../../../config/config.js';
@@ -41,7 +41,8 @@ export class CharacterUpdateSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		//check if we have an active character
 		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);

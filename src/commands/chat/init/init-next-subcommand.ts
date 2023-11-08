@@ -1,4 +1,4 @@
-import { InitiativeUtils, InitiativeBuilder } from '../../../utils/initiative-utils.js';
+import { InitiativeUtils, InitiativeBuilder } from '../../../utils/initiative-builder.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -14,7 +14,7 @@ import { Initiative, InitiativeModel } from '../../../services/kobold/index.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import L from '../../../i18n/i18n-node.js';
-import { SettingsUtils } from '../../../utils/settings-utils.js';
+import { SettingsUtils } from '../../../utils/kobold-service-utils/user-settings-utils.js';
 
 export class InitNextSubCommand implements Command {
 	public names = [L.en.commands.init.next.name()];
@@ -31,7 +31,8 @@ export class InitNextSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const [currentInit, userSettings] = await Promise.all([
 			InitiativeUtils.getInitiativeForChannel(intr.channel),

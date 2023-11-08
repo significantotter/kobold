@@ -32,7 +32,8 @@ export class GameListSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const allGames = await GameModel.query()
 			.withGraphFetched('characters')

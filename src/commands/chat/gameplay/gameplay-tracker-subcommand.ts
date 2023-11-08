@@ -21,7 +21,7 @@ import _ from 'lodash';
 import { Creature } from '../../../utils/creature.js';
 import { Character, CharacterModel } from '../../../services/kobold/index.js';
 import { ChatArgs } from '../../../constants/chat-args.js';
-import { CharacterUtils } from '../../../utils/character-utils.js';
+import { CharacterUtils } from '../../../utils/kobold-service-utils/character-utils.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
 
 export class GameplayTrackerSubCommand implements Command {
@@ -38,7 +38,8 @@ export class GameplayTrackerSubCommand implements Command {
 
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
-		option: AutocompleteFocusedOption
+		option: AutocompleteFocusedOption,
+		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === ChatArgs.SET_ACTIVE_NAME_OPTION.name) {
@@ -57,7 +58,8 @@ export class GameplayTrackerSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const targetCharacterName = intr.options.getString(ChatArgs.SET_ACTIVE_NAME_OPTION.name);
 		const trackerMode =

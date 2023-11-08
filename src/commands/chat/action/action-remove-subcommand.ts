@@ -18,7 +18,7 @@ import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { CollectorUtils } from '../../../utils/collector-utils.js';
 import { ActionOptions } from './action-command-options.js';
-import { CharacterUtils } from '../../../utils/character-utils.js';
+import { CharacterUtils } from '../../../utils/kobold-service-utils/character-utils.js';
 import _ from 'lodash';
 import { KoboldError } from '../../../utils/KoboldError.js';
 
@@ -36,7 +36,8 @@ export class ActionRemoveSubCommand implements Command {
 
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
-		option: AutocompleteFocusedOption
+		option: AutocompleteFocusedOption,
+		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === ActionOptions.ACTION_TARGET_OPTION.name) {
@@ -64,7 +65,8 @@ export class ActionRemoveSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const actionChoice = intr.options.getString(ActionOptions.ACTION_TARGET_OPTION.name, true);
 		//get the active character

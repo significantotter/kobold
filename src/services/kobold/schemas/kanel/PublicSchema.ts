@@ -1,3 +1,5 @@
+import type KyselyMigrationTable from './KyselyMigration.js';
+import type KyselyMigrationLockTable from './KyselyMigrationLock.js';
 import type BestiaryFilesLoadedTable from './BestiaryFilesLoaded.js';
 import type ChannelDefaultCharacterTable from './ChannelDefaultCharacter.js';
 import type CharacterTable from './Character.js';
@@ -14,6 +16,10 @@ import type UserSettingsTable from './UserSettings.js';
 import type WgAuthTokenTable from './WgAuthToken.js';
 
 export default interface PublicSchema {
+  kyselyMigration: KyselyMigrationTable;
+
+  kyselyMigrationLock: KyselyMigrationLockTable;
+
   bestiaryFilesLoaded: BestiaryFilesLoadedTable;
 
   channelDefaultCharacter: ChannelDefaultCharacterTable;

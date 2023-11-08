@@ -12,7 +12,7 @@ import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { CollectorUtils } from '../../../utils/collector-utils.js';
-import { CharacterUtils } from '../../../utils/character-utils.js';
+import { CharacterUtils } from '../../../utils/kobold-service-utils/character-utils.js';
 import _ from 'lodash';
 
 export class ActionListSubCommand implements Command {
@@ -29,7 +29,8 @@ export class ActionListSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
 		if (!activeCharacter) {

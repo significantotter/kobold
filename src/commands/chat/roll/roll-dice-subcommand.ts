@@ -8,15 +8,13 @@ import { RateLimiter } from 'discord.js-rate-limiter';
 
 import { ChatArgs } from '../../../constants/index.js';
 
-import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { RollBuilder } from '../../../utils/roll-builder.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import L from '../../../i18n/i18n-node.js';
-import { CharacterUtils } from '../../../utils/character-utils.js';
-import { SettingsUtils } from '../../../utils/settings-utils.js';
 import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
-import { GameUtils } from '../../../utils/game-utils.js';
+import { Kobold } from '../../../services/kobold/kobold.model.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 
 export class RollDiceSubCommand implements Command {
 	public names = [L.en.commands.roll.dice.name()];
@@ -33,7 +31,8 @@ export class RollDiceSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		if (!intr.isChatInputCommand()) return;
 		const diceExpression = intr.options.getString(ChatArgs.ROLL_EXPRESSION_OPTION.name, true);
@@ -44,11 +43,15 @@ export class RollDiceSubCommand implements Command {
 
 		const rollNote = intr.options.getString(ChatArgs.ROLL_NOTE_OPTION.name) ?? '';
 
-		let [activeCharacter, userSettings, activeGame] = await Promise.all([
-			CharacterUtils.getActiveCharacter(intr),
-			SettingsUtils.getSettingsForUser(intr),
-			GameUtils.getActiveGame(intr.user.id, intr.guildId ?? ''),
-		]);
+		const koboldUtils: KoboldUtils = new KoboldUtils(kobold);
+		let { activeCharacter, userSettings, activeGame } = await koboldUtils.fetchDataForCommand(
+			intr,
+			{
+				activeGame: true,
+				activeCharacter: true,
+				userSettings: true,
+			}
+		);
 
 		//only use the active character if the roll uses character attributes
 		if (!/(\[[\w \-_\.]{2,}\])/g.test(diceExpression)) {

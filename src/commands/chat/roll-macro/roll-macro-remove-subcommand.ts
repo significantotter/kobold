@@ -14,16 +14,13 @@ import { RateLimiter } from 'discord.js-rate-limiter';
 
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
-import { Character, CharacterModel } from '../../../services/kobold/index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import L from '../../../i18n/i18n-node.js';
 import { CollectorUtils } from '../../../utils/collector-utils.js';
-import { CharacterUtils } from '../../../utils/character-utils.js';
 import { RollMacroOptions } from './roll-macro-command-options.js';
 import _ from 'lodash';
-import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
-import { KoboldError } from '../../../utils/KoboldError.js';
-import { refs } from '../../../constants/common-text.js';
+import { Kobold } from '../../../services/kobold/kobold.model.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 
 export class RollMacroRemoveSubCommand implements Command {
 	public names = [L.en.commands.rollMacro.remove.name()];
@@ -40,35 +37,37 @@ export class RollMacroRemoveSubCommand implements Command {
 
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
-		option: AutocompleteFocusedOption
+		option: AutocompleteFocusedOption,
+		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === RollMacroOptions.MACRO_NAME_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
 			const match = intr.options.getString(RollMacroOptions.MACRO_NAME_OPTION.name) ?? '';
 
-			return await AutocompleteUtils.getAllMatchingRollsMacrosForCharacter(intr, match);
+			return await new KoboldUtils(
+				kobold
+			).autocompleteUtils.getAllMatchingRollsMacrosForCharacter(intr, match);
 		}
 	}
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
+		const koboldUtils = new KoboldUtils(kobold);
+		const { characterUtils } = koboldUtils;
+		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+			activeCharacter: true,
+		});
+
 		const rollMacroChoice = intr.options.getString(
 			RollMacroOptions.MACRO_NAME_OPTION.name,
 			true
 		);
-		//get the active character
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
-		if (!activeCharacter) {
-			await InteractionUtils.send(
-				intr,
-				LL.commands.rollMacro.interactions.requiresActiveCharacter()
-			);
-			return;
-		}
-		const targetRollMacro = activeCharacter.getRollMacroByName(rollMacroChoice);
+
+		const targetRollMacro = characterUtils.getRollMacroByName(activeCharacter, rollMacroChoice);
 		if (targetRollMacro) {
 			// ask for confirmation
 
@@ -142,9 +141,10 @@ export class RollMacroRemoveSubCommand implements Command {
 					rollMacro =>
 						rollMacro.name.toLocaleLowerCase() !== rollMacroChoice.toLocaleLowerCase()
 				);
-				await CharacterModel.query()
-					.patch({ rollMacros: rollMacrosWithoutRemoved })
-					.where({ userId: intr.user.id });
+				await kobold.character.update(
+					{ id: activeCharacter.id },
+					{ rollMacros: rollMacrosWithoutRemoved }
+				);
 
 				await InteractionUtils.send(
 					intr,

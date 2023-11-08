@@ -31,7 +31,8 @@ export class CharacterListSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		// try and find that character
 		const targetCharacter = await CharacterModel.query().where({

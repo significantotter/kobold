@@ -10,7 +10,7 @@ import L from '../../../i18n/i18n-node.js';
 
 import { Initiative, InitiativeModel } from '../../../services/kobold/index.js';
 import { InteractionUtils } from '../../../utils/index.js';
-import { InitiativeBuilder } from '../../../utils/initiative-utils.js';
+import { InitiativeBuilder } from '../../../utils/initiative-builder.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
@@ -30,7 +30,8 @@ export class InitStartSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const startingUser = intr.user.id;
 		if (!intr.channel || !intr.channel.id) {

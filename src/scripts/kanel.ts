@@ -100,8 +100,7 @@ await kanel.processDatabase({
 	customTypeMap: {
 		'pg_catalog.tsvector': 'Set<string>',
 		'pg_catalog.int4': 'number',
-		// 'pg_catalog.json': 'string',
-		// 'pg_catalog.jsonb': 'string',
+		'pg_catalog.numeric': 'number',
 		'pg_catalog.bpchar': 'string',
 		'public.citext': 'string',
 	},

@@ -1,6 +1,6 @@
 import { DiceUtils } from './../../../utils/dice-utils.js';
 import { RollBuilder } from '../../../utils/roll-builder.js';
-import { InitiativeActorModel } from './../../../services/kobold/models/initiative-actor/initiative-actor.model.js';
+import { InitiativeActorModel } from '../../../services/kobold/models-old/initiative-actor/initiative-actor.model.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -16,23 +16,23 @@ import { RateLimiter } from 'discord.js-rate-limiter';
 
 import { InteractionUtils, StringUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
-import { InitiativeUtils, InitiativeBuilder } from '../../../utils/initiative-utils.js';
+import { InitiativeUtils, InitiativeBuilder } from '../../../utils/initiative-builder.js';
 import { ChatArgs } from '../../../constants/chat-args.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
+import { AutocompleteUtils } from '../../../utils/kobold-service-utils/autocomplete-utils.js';
 import { Npc, NpcModel, Sheet } from '../../../services/kobold/index.js';
 import { Creature } from '../../../utils/creature.js';
 import _ from 'lodash';
 import { InitOptions } from './init-command-options.js';
 import { applyStatOverrides } from '../../../utils/sheet/sheet-import-utils.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
-import { SettingsUtils } from '../../../utils/settings-utils.js';
+import { SettingsUtils } from '../../../utils/kobold-service-utils/user-settings-utils.js';
 import L from '../../../i18n/i18n-node.js';
 import { DeepPartial } from 'fishery';
 import { CreatureFluff } from '../../../services/pf2etools/schemas/index-types.js';
 import { SheetProperties } from '../../../utils/sheet/sheet-properties.js';
-import { NpcUtils } from '../../../utils/npc-utils.js';
+import { NpcUtils } from '../../../utils/kobold-service-utils/npc-utils.js';
 
 export class InitAddSubCommand implements Command {
 	public names = [L.en.commands.init.add.name()];
@@ -49,7 +49,8 @@ export class InitAddSubCommand implements Command {
 
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
-		option: AutocompleteFocusedOption
+		option: AutocompleteFocusedOption,
+		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return [];
 		if (option.name === InitOptions.INIT_CREATURE_OPTION.name) {
@@ -72,7 +73,8 @@ export class InitAddSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const [currentInit, userSettings] = await Promise.all([
 			InitiativeUtils.getInitiativeForChannel(intr.channel),

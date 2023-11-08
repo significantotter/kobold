@@ -12,18 +12,16 @@ import { RateLimiter } from 'discord.js-rate-limiter';
 
 import { ChatArgs } from '../../../constants/index.js';
 
-import { InteractionUtils, StringUtils } from '../../../utils/index.js';
+import { StringUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
-import { CharacterUtils } from '../../../utils/character-utils.js';
-import { DiceUtils } from '../../../utils/dice-utils.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import L from '../../../i18n/i18n-node.js';
 import { Creature } from '../../../utils/creature.js';
 import _ from 'lodash';
-import { SettingsUtils } from '../../../utils/settings-utils.js';
 import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
-import { GameUtils } from '../../../utils/game-utils.js';
 import { RollBuilder } from '../../../utils/roll-builder.js';
+import { Kobold } from '../../../services/kobold/kobold.model.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 
 export class RollSaveSubCommand implements Command {
 	public names = [L.en.commands.roll.save.name()];
@@ -40,7 +38,8 @@ export class RollSaveSubCommand implements Command {
 
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
-		option: AutocompleteFocusedOption
+		option: AutocompleteFocusedOption,
+		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === ChatArgs.SAVE_CHOICE_OPTION.name) {
@@ -48,19 +47,21 @@ export class RollSaveSubCommand implements Command {
 			const match = intr.options.getString(ChatArgs.SAVE_CHOICE_OPTION.name) ?? '';
 
 			//get the active character
-			const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
+			const koboldUtils: KoboldUtils = new KoboldUtils(kobold);
+			const { activeCharacter } = await koboldUtils.fetchDataForCommand(intr, {
+				activeCharacter: true,
+			});
 			if (!activeCharacter) {
 				//no choices if we don't have a character to match against
 				return [];
 			}
 			//find a save on the character matching the autocomplete string
-			const matchedSaves = CharacterUtils.findPossibleSaveFromString(
-				activeCharacter,
-				match
-			).map(save => ({
-				name: save.name,
-				value: save.name,
-			}));
+			const matchedSaves = koboldUtils.characterUtils
+				.findPossibleSaveFromString(activeCharacter, match)
+				.map(save => ({
+					name: save.name,
+					value: save.name,
+				}));
 			//return the matched saves
 			return matchedSaves;
 		}
@@ -68,7 +69,8 @@ export class RollSaveSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		if (!intr.isChatInputCommand()) return;
 		const saveChoice = intr.options.getString(ChatArgs.SAVE_CHOICE_OPTION.name, true);
@@ -79,15 +81,16 @@ export class RollSaveSubCommand implements Command {
 			intr.options.getString(ChatArgs.ROLL_SECRET_OPTION.name) ??
 			L.en.commandOptions.rollSecret.choices.public.value();
 
-		const [activeCharacter, userSettings, activeGame] = await Promise.all([
-			CharacterUtils.getActiveCharacter(intr),
-			SettingsUtils.getSettingsForUser(intr),
-			GameUtils.getActiveGame(intr.user.id, intr.guildId ?? ''),
-		]);
-		if (!activeCharacter) {
-			await InteractionUtils.send(intr, LL.commands.roll.interactions.noActiveCharacter());
-			return;
-		}
+		const koboldUtils: KoboldUtils = new KoboldUtils(kobold);
+		const { activeCharacter, userSettings, activeGame } = await koboldUtils.fetchDataForCommand(
+			intr,
+			{
+				activeGame: true,
+				activeCharacter: true,
+				userSettings: true,
+			}
+		);
+		koboldUtils.assertActiveCharacterNotNull(activeCharacter);
 
 		const creature = Creature.fromCharacter(activeCharacter);
 
