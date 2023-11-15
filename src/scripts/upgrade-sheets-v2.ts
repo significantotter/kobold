@@ -28,13 +28,14 @@ await kobold.db.transaction().execute(async trx => {
 			const sheet = zSheetV1.safeParse(record.sheet);
 			if (!sheet.success) {
 				if (!zSheet.safeParse(record.sheet).success) {
-					console.warn(sheet.error);
+					console.dir(sheet.error, { depth: null });
 					throw new Error(`Failed to parse sheet ${record.id}`);
 				} else continue;
 			}
 			const upgradedSheet = upgradeSheet(sheet.data);
-			if (!zSheet.safeParse(upgradedSheet).success) {
-				console.warn(upgradedSheet);
+			const upgradedSheetParsed = zSheet.safeParse(upgradedSheet);
+			if (!upgradedSheetParsed.success) {
+				console.dir(upgradedSheetParsed.error, { depth: null });
 				throw new Error(`Failed to parse upgraded sheet ${record.id}`);
 			}
 			record.sheet = upgradedSheet;
