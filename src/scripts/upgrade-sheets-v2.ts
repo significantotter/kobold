@@ -28,7 +28,7 @@ await kobold.db.transaction().execute(async trx => {
 			const sheet = zSheetV1.safeParse(record.sheet);
 			if (!sheet.success) {
 				if (!zSheet.safeParse(record.sheet).success) {
-					console.warn(sheet);
+					console.warn(sheet.error);
 					throw new Error(`Failed to parse sheet ${record.id}`);
 				} else continue;
 			}
@@ -44,7 +44,7 @@ await kobold.db.transaction().execute(async trx => {
 			const modifiers = z.array(zModifierV1).safeParse(record.modifiers);
 			if (!modifiers.success) {
 				if (!z.array(zModifier).safeParse(record.modifiers).success) {
-					console.warn(modifiers);
+					console.warn(modifiers.error);
 					throw new Error(`Failed to parse modifiers ${record.id}`);
 				} else continue;
 			}
