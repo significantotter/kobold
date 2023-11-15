@@ -44,14 +44,14 @@ await kobold.db.transaction().execute(async trx => {
 			const modifiers = z.array(zModifierV1).safeParse(record.modifiers);
 			if (!modifiers.success) {
 				if (!z.array(zModifier).safeParse(record.modifiers).success) {
-					console.warn(modifiers.error);
+					console.dir(modifiers.error, { depth: null });
 					throw new Error(`Failed to parse modifiers ${record.id}`);
 				} else continue;
 			}
 			const upgradedModifiers = modifiers.data.map(modifier => upgradeModifier(modifier));
 			const upgradedModifiersParsed = z.array(zModifier).safeParse(upgradedModifiers);
 			if (!upgradedModifiersParsed.success) {
-				console.warn(upgradedModifiersParsed.error);
+				console.dir(upgradedModifiersParsed.error, { depth: null });
 				throw new Error(`Failed to parse upgraded modifiers ${record.id}`);
 			}
 			record.modifiers = upgradedModifiers;
@@ -60,14 +60,14 @@ await kobold.db.transaction().execute(async trx => {
 			const actions = z.array(zActionV1).safeParse(record.actions);
 			if (!actions.success) {
 				if (!z.array(zAction).safeParse(record.actions).success) {
-					console.warn(actions.error);
+					console.dir(actions.error, { depth: null });
 					throw new Error(`Failed to parse action for ${record.id}`);
 				} else continue;
 			}
 			const upgradedActions = actions.data.map(action => upgradeAction(action));
 			const upgradedActionsParsed = z.array(zAction).safeParse(upgradedActions);
 			if (!upgradedActionsParsed.success) {
-				console.warn(upgradedActionsParsed.error);
+				console.dir(upgradedActionsParsed.error, { depth: null });
 				throw new Error(`Failed to parse upgraded action for ${record.id}`);
 			}
 			record.actions = upgradedActions;
