@@ -17,18 +17,18 @@ import {
 	SheetStats,
 	StatSubGroupEnum,
 } from '../../services/kobold/index.js';
+import { KoboldError } from '../KoboldError.js';
 import {
-	SheetProperties,
-	SheetInfoProperties,
-	SheetInfoListProperties,
-	SheetIntegerProperties,
-	SheetBaseCounterProperties,
-	SheetStatProperties,
-	SheetWeaknessResistanceProperties,
 	SheetAdditionalSkillProperties,
 	SheetAttackProperties,
+	SheetBaseCounterProperties,
+	SheetInfoListProperties,
+	SheetInfoProperties,
+	SheetIntegerProperties,
+	SheetProperties,
+	SheetStatProperties,
+	SheetWeaknessResistanceProperties,
 } from './sheet-properties.js';
-import { KoboldError } from '../KoboldError.js';
 
 export type ParsedSheetAdjustment<T> = Omit<SheetAdjustment, 'value' | 'parsed'> & {
 	parsed: T;

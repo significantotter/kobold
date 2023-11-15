@@ -1,23 +1,23 @@
-import { Kobold } from '../../services/kobold/index.js';
-import { InitiativeUtils } from './initiative-utils.js';
-import { CharacterUtils } from './character-utils.js';
-import { GameUtils } from './game-utils.js';
-import { ModifierUtils } from './modifier-utils.js';
-import { NpcUtils } from './npc-utils.js';
 import { Interaction } from 'discord.js';
 import _ from 'lodash';
+import { SetNonNullable } from 'type-fest';
 import {
-	UserSettings,
+	CharacterWithRelations,
 	GameWithRelations,
 	InitiativeWithRelations,
-	CharacterWithRelations,
+	Kobold,
+	UserSettings,
 } from '../../services/kobold/index.js';
-import { UserSettingsUtils } from './user-settings-utils.js';
 import { KoboldError } from '../KoboldError.js';
-import { SetNonNullable } from 'type-fest';
 import { AutocompleteUtils } from './autocomplete-utils.js';
-import { GameplayUtils } from './gameplay-utils.js';
+import { CharacterUtils } from './character-utils.js';
 import { CreatureUtils } from './creature-utils.js';
+import { GameUtils } from './game-utils.js';
+import { GameplayUtils } from './gameplay-utils.js';
+import { InitiativeUtils } from './initiative-utils.js';
+import { ModifierUtils } from './modifier-utils.js';
+import { NpcUtils } from './npc-utils.js';
+import { UserSettingsUtils } from './user-settings-utils.js';
 
 export interface InjectedData {
 	activeCharacter: CharacterWithRelations | null;

@@ -1,9 +1,7 @@
 import { ChatInputCommandInteraction } from 'discord.js';
-import { ModelWithSheet, SheetBaseCounterKeys, SheetRecord } from '../../services/kobold/index.js';
-import { Kobold } from '../../services/kobold/index.js';
-import { KoboldUtils } from './kobold-utils.js';
+import { Kobold, SheetBaseCounterKeys, SheetRecord } from '../../services/kobold/index.js';
 import { Creature } from '../creature.js';
-import { KoboldError } from '../KoboldError.js';
+import { KoboldUtils } from './kobold-utils.js';
 
 export class GameplayUtils {
 	private kobold: Kobold;

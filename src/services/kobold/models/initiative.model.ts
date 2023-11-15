@@ -1,18 +1,18 @@
 import { ExpressionBuilder, Kysely } from 'kysely';
-import { Model } from './model.js';
+import { jsonArrayFrom, jsonObjectFrom } from 'kysely/helpers/postgres';
+import { sheetRecordForActor } from '../lib/shared-relation-builders.js';
 import {
 	Database,
 	Initiative,
-	InitiativeUpdate,
-	InitiativeId,
-	NewInitiative,
-	InitiativeWithRelations,
 	InitiativeActor,
 	InitiativeActorGroup,
+	InitiativeId,
+	InitiativeUpdate,
+	InitiativeWithRelations,
+	NewInitiative,
 	SheetRecord,
 } from '../schemas/index.js';
-import { jsonArrayFrom, jsonObjectFrom } from 'kysely/helpers/postgres';
-import { sheetRecordForActor } from '../lib/shared-relation-builders.js';
+import { Model } from './model.js';
 
 type InitiativeGraphQueryOutput = Initiative & {
 	currentTurnGroup: InitiativeActorGroup | null;

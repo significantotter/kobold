@@ -27,7 +27,7 @@ import {
 	isSheetAdjustmentOperationEnum,
 	isSheetAdjustmentTypeEnum,
 } from '../../services/kobold/index.js';
-import { KoboldError } from '../KoboldError.js';
+import { KoboldError } from '../../utils/KoboldError.js';
 import {
 	ActionV1,
 	ModifierV1,
@@ -40,7 +40,7 @@ import {
 	zSheetAdjustmentV1,
 	zSheetV1,
 } from './character.v1.zod.js';
-import { SheetAdjuster } from './sheet-adjuster.js';
+import { SheetAdjuster } from '../../utils/sheet/sheet-adjuster.js';
 
 const scoreToModifier = (score: number) => Math.floor((score - 10) / 2);
 
@@ -160,14 +160,21 @@ export function upgradeModifier(modifier: ModifierV1): Modifier {
 		: SheetAdjustmentTypeEnum.untyped;
 	if (defaultedModifier.modifierType === ModifierTypeEnum.roll) {
 		return {
-			...defaultedModifier,
+			name: defaultedModifier.name,
+			description: defaultedModifier.description,
+			isActive: defaultedModifier.isActive,
+			targetTags: defaultedModifier.targetTags,
+
 			modifierType: ModifierTypeEnum.roll,
 			type: adjustmentType,
 			value: defaultedModifier.value == null ? '' : defaultedModifier.value.toString(),
 		} satisfies RollModifier;
 	} else if (modifier.modifierType === ModifierTypeEnum.sheet) {
 		return {
-			...defaultedModifier,
+			name: defaultedModifier.name,
+			description: defaultedModifier.description,
+			isActive: defaultedModifier.isActive,
+
 			modifierType: ModifierTypeEnum.sheet,
 			type: adjustmentType,
 			sheetAdjustments: defaultedModifier.sheetAdjustments.map(adjustment =>

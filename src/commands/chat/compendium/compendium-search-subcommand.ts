@@ -1,28 +1,27 @@
 import {
-	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
-	ChatInputCommandInteraction,
-	PermissionsString,
+	APIEmbed,
 	ApplicationCommandOptionChoiceData,
+	ApplicationCommandType,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
-	APIEmbed,
+	ChatInputCommandInteraction,
 	EmbedData,
+	PermissionsString,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
-import { Command, CommandDeferType } from '../../index.js';
+import { getEmoji } from '../../../constants/emoji.js';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { CompendiumModel } from '../../../services/pf2etools/compendium.model.js';
-import { CompendiumOptions } from './compendium-command-options.js';
 import { CompendiumEmbedParser } from '../../../services/pf2etools/parsers/compendium-parser.js';
-import { getEmoji } from '../../../constants/emoji.js';
-import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { CompendiumUtils } from '../../../services/pf2etools/utils/compendium-utils.js';
+import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
+import { Command, CommandDeferType } from '../../index.js';
+import { CompendiumOptions } from './compendium-command-options.js';
 
-import { KoboldError } from '../../../utils/KoboldError.js';
-import { StringUtils } from '../../../utils/string-utils.js';
 import _ from 'lodash';
+import { Kobold } from '../../../services/kobold/kobold.model.js';
 import type {
 	Ability,
 	Action,
@@ -62,8 +61,9 @@ import type {
 	Vehicle,
 	VersatileHeritage,
 } from '../../../services/pf2etools/schemas/index-types.js';
+import { KoboldError } from '../../../utils/KoboldError.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { Kobold } from '../../../services/kobold/kobold.model.js';
+import { StringUtils } from '../../../utils/string-utils.js';
 
 export class CompendiumSearchSubCommand implements Command {
 	public names = [L.en.commands.compendium.search.name()];

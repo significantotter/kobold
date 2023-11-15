@@ -1,9 +1,7 @@
-import _ from 'lodash';
-import { StringUtils } from '../string-utils.js';
 import { AutocompleteInteraction, CacheType, CommandInteraction } from 'discord.js';
-import { Character, CharacterWithRelations } from '../../services/kobold/index.js';
+import { Character, CharacterWithRelations, Kobold } from '../../services/kobold/index.js';
+import { StringUtils } from '../string-utils.js';
 import type { KoboldUtils } from './kobold-utils.js';
-import { Kobold } from '../../services/kobold/index.js';
 
 export class CharacterUtils {
 	private kobold: Kobold;

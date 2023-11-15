@@ -1,20 +1,15 @@
 import { AutocompleteInteraction, CacheType, ChatInputCommandInteraction } from 'discord.js';
+import L from '../../i18n/i18n-node.js';
 import {
 	Character,
 	CharacterWithRelations,
-	GameModel,
 	GameWithRelations,
-	Initiative,
-	InitiativeActor,
 	InitiativeActorWithRelations,
-	InitiativeWithRelations,
-	ModelWithSheet,
+	Kobold,
 	SheetRecord,
 } from '../../services/kobold/index.js';
-import type { KoboldUtils } from './kobold-utils.js';
-import { Kobold } from '../../services/kobold/index.js';
-import L from '../../i18n/i18n-node.js';
 import { KoboldError } from '../KoboldError.js';
+import type { KoboldUtils } from './kobold-utils.js';
 
 export class GameUtils {
 	kobold: Kobold;

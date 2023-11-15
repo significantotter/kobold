@@ -1,12 +1,12 @@
 import { Kysely } from 'kysely';
-import { Model } from './model.js';
 import {
-	Database,
 	ChannelDefaultCharacter,
 	ChannelDefaultCharacterUpdate,
 	ChannelDefaultCharacterUserId,
+	Database,
 	NewChannelDefaultCharacter,
 } from '../schemas/index.js';
+import { Model } from './model.js';
 
 export class ChannelDefaultCharacterModel extends Model<Database['channelDefaultCharacter']> {
 	constructor(db: Kysely<Database>) {

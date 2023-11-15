@@ -1,22 +1,22 @@
 import {
+	ApplicationCommandOptionChoiceData,
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
 	ChatInputCommandInteraction,
 	PermissionsString,
-	ApplicationCommandOptionChoiceData,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 
+import L from '../../../i18n/i18n-node.js';
 import { CommandUtils } from '../../../utils/index.js';
+import { InjectedServices } from '../../command.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { CompendiumOptions } from './compendium-command-options.js';
-import L from '../../../i18n/i18n-node.js';
-import { InjectedServices } from '../../command.js';
 
 export class CompendiumCommand implements Command {
 	public names = [L.en.commands.compendium.name()];

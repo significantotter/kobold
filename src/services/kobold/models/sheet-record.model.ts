@@ -1,12 +1,13 @@
 import { Kysely } from 'kysely';
-import { Model } from './model.js';
+import { sqlJSON } from '../lib/kysely-json.js';
 import {
 	Database,
-	SheetRecord,
-	SheetRecordUpdate,
-	SheetRecordId,
 	NewSheetRecord,
+	SheetRecord,
+	SheetRecordId,
+	SheetRecordUpdate,
 } from '../schemas/index.js';
+import { Model } from './model.js';
 
 export class SheetRecordModel extends Model<Database['sheetRecord']> {
 	constructor(db: Kysely<Database>) {
@@ -16,7 +17,12 @@ export class SheetRecordModel extends Model<Database['sheetRecord']> {
 	public async create(args: NewSheetRecord): Promise<SheetRecord> {
 		const result = await this.db
 			.insertInto('sheetRecord')
-			.values(args)
+			.values({
+				...args,
+				modifiers: args.modifiers !== undefined ? sqlJSON(args.modifiers) : undefined,
+				actions: args.modifiers !== undefined ? sqlJSON(args.actions) : undefined,
+				rollMacros: args.modifiers !== undefined ? sqlJSON(args.rollMacros) : undefined,
+			})
 			.returningAll()
 			.execute();
 		return result[0];
@@ -37,11 +43,16 @@ export class SheetRecordModel extends Model<Database['sheetRecord']> {
 	): Promise<SheetRecord> {
 		const result = await this.db
 			.updateTable('sheetRecord')
-			.set(args)
+			.set({
+				...args,
+				modifiers: args.modifiers !== undefined ? sqlJSON(args.modifiers) : undefined,
+				actions: args.modifiers !== undefined ? sqlJSON(args.actions) : undefined,
+				rollMacros: args.modifiers !== undefined ? sqlJSON(args.rollMacros) : undefined,
+			})
 			.where('sheetRecord.id', '=', id)
 			.returningAll()
-			.execute();
-		return result[0];
+			.executeTakeFirstOrThrow();
+		return result;
 	}
 
 	public async delete({ id }: { id: SheetRecordId }): Promise<void> {

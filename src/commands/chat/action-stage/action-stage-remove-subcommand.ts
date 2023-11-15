@@ -1,22 +1,21 @@
 import {
-	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
-	ChatInputCommandInteraction,
-	PermissionsString,
 	ApplicationCommandOptionChoiceData,
+	ApplicationCommandType,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
+	ChatInputCommandInteraction,
+	PermissionsString,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 
-import { InteractionUtils } from '../../../utils/index.js';
-import { Command, CommandDeferType } from '../../index.js';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { CharacterUtils } from '../../../utils/kobold-service-utils/character-utils.js';
-import { ActionStageOptions } from './action-stage-command-options.js';
-import { CharacterModel, Kobold } from '../../../services/kobold/index.js';
+import { Kobold } from '../../../services/kobold/index.js';
+import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { Command, CommandDeferType } from '../../index.js';
+import { ActionStageOptions } from './action-stage-command-options.js';
 
 export class ActionStageRemoveSubCommand implements Command {
 	public names = [L.en.commands.actionStage.remove.name()];

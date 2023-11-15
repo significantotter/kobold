@@ -1,36 +1,27 @@
-import {
-	CharacterModel,
-	CharacterWithRelations,
-	InitiativeActorModel,
-	Kobold,
-	Sheet,
-	WgAuthTokenModel,
-} from '../../../services/kobold/index.js';
+import { default as axios } from 'axios';
 import {
 	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
-	ChatInputCommandInteraction,
-	PermissionsString,
-	ComponentType,
 	ButtonStyle,
+	ChatInputCommandInteraction,
+	ComponentType,
+	PermissionsString,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
-import { default as axios } from 'axios';
+import { Kobold } from '../../../services/kobold/index.js';
 
-import { InteractionUtils } from '../../../utils/index.js';
-import { Command, CommandDeferType } from '../../index.js';
-import { CharacterHelpers } from './helpers.js';
-import { CharacterUtils } from '../../../utils/kobold-service-utils/character-utils.js';
+import { Config } from '../../../config/config.js';
+import { refs } from '../../../constants/common-text.js';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { Config } from '../../../config/config.js';
-import { CharacterOptions } from './command-options.js';
-import { refs } from '../../../constants/common-text.js';
 import { PathBuilder } from '../../../services/pathbuilder/index.js';
-import { Creature } from '../../../utils/creature.js';
-import { CollectorUtils } from '../../../utils/collector-utils.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
+import { CollectorUtils } from '../../../utils/collector-utils.js';
+import { Creature } from '../../../utils/creature.js';
+import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { WG } from '../../../services/wanderers-guide/wanderers-guide.js';
+import { Command, CommandDeferType } from '../../index.js';
+import { CharacterOptions } from './command-options.js';
+import { CharacterHelpers } from './helpers.js';
 
 export class CharacterUpdateSubCommand implements Command {
 	public names = [L.en.commands.character.update.name()];

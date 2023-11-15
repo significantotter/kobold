@@ -1,32 +1,24 @@
 import {
-	ChannelDefaultCharacter,
-	ChannelDefaultCharacterModel,
-	Character,
-	GuildDefaultCharacter,
-	GuildDefaultCharacterModel,
-	Kobold,
-} from '../../../services/kobold/index.js';
-import {
+	ApplicationCommandOptionChoiceData,
 	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
 	ChatInputCommandInteraction,
 	PermissionsString,
-	ApplicationCommandOptionChoiceData,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
+import { Kobold } from '../../../services/kobold/index.js';
 
 import { ChatArgs } from '../../../constants/index.js';
 
-import { InteractionUtils } from '../../../utils/index.js';
-import { Command, CommandDeferType } from '../../index.js';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { CharacterOptions } from './command-options.js';
-import { CharacterUtils } from '../../../utils/kobold-service-utils/character-utils.js';
-import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
+import { InteractionUtils } from '../../../utils/index.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { Command, CommandDeferType } from '../../index.js';
+import { CharacterOptions } from './command-options.js';
 
 export class CharacterSetDefaultSubCommand implements Command {
 	public names = [L.en.commands.character.setDefault.name()];

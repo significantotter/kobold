@@ -1,27 +1,27 @@
 import {
-	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
-	ChatInputCommandInteraction,
 	ApplicationCommandOptionChoiceData,
+	ApplicationCommandType,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
-	CacheType,
-	PermissionsString,
-	ComponentType,
 	ButtonStyle,
+	CacheType,
+	ChatInputCommandInteraction,
+	ComponentType,
+	PermissionsString,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 
-import { InteractionUtils } from '../../../utils/index.js';
-import { Command, CommandDeferType } from '../../index.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import L from '../../../i18n/i18n-node.js';
-import { CollectorUtils } from '../../../utils/collector-utils.js';
-import { RollMacroOptions } from './roll-macro-command-options.js';
 import _ from 'lodash';
+import L from '../../../i18n/i18n-node.js';
+import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold } from '../../../services/kobold/index.js';
-import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { CollectorUtils } from '../../../utils/collector-utils.js';
+import { InteractionUtils } from '../../../utils/index.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { Command, CommandDeferType } from '../../index.js';
+import { RollMacroOptions } from './roll-macro-command-options.js';
 
 export class RollMacroRemoveSubCommand implements Command {
 	public names = [L.en.commands.rollMacro.remove.name()];

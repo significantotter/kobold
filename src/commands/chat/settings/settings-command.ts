@@ -1,23 +1,22 @@
 import {
+	ApplicationCommandOptionChoiceData,
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
 	ChatInputCommandInteraction,
 	PermissionsString,
-	ApplicationCommandOptionChoiceData,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 
+import L from '../../../i18n/i18n-node.js';
 import { CommandUtils } from '../../../utils/index.js';
+import { InjectedServices } from '../../command.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { SettingsOptions } from './settings-command-options.js';
-import L from '../../../i18n/i18n-node.js';
-import { InjectedServices } from '../../command.js';
-import { Kobold } from '../../../services/kobold/index.js';
 
 export class SettingsCommand implements Command {
 	public names = [L.en.commands.settings.name()];
@@ -46,7 +45,7 @@ export class SettingsCommand implements Command {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption,
-		{ kobold }: { kobold: Kobold }
+		services: InjectedServices
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 
@@ -58,7 +57,7 @@ export class SettingsCommand implements Command {
 			return;
 		}
 
-		return await command.autocomplete(intr, option);
+		return await command.autocomplete(intr, option, services);
 	}
 
 	public async execute(

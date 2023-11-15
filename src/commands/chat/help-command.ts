@@ -1,17 +1,17 @@
-import { KoboldEmbed } from './../../utils/kobold-embed-utils.js';
 import {
+	ApplicationCommandOptionType,
 	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 	ChatInputCommandInteraction,
 	PermissionsString,
-	ApplicationCommandOptionType,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
+import { KoboldEmbed } from '../../utils/kobold-embed-utils.js';
 
-import { TranslationFunctions } from '../../i18n/i18n-types.js';
-import { Command, CommandDeferType } from '../index.js';
 import _ from 'lodash';
 import L from '../../i18n/i18n-node.js';
+import { TranslationFunctions } from '../../i18n/i18n-types.js';
 import { InjectedServices } from '../command.js';
+import { Command, CommandDeferType } from '../index.js';
 
 function createCommandOperationHelpField(
 	command: string,

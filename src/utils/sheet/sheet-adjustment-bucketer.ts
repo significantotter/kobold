@@ -1,11 +1,11 @@
 import _ from 'lodash';
 import {
-	ProficiencyStat,
+	AdjustablePropertyEnum,
 	Sheet,
 	SheetAdjustment,
-	AdjustablePropertyEnum,
 	StatSubGroupEnum,
 } from '../../services/kobold/index.js';
+import { KoboldError } from '../KoboldError.js';
 import {
 	SheetAdditionalSkillAdjuster,
 	SheetAttackAdjuster,
@@ -21,7 +21,6 @@ import {
 	SheetStatAdjustment,
 	SheetWeaknessResistanceAdjuster,
 } from './sheet-adjuster.js';
-import { KoboldError } from '../KoboldError.js';
 
 export class SheetAdjustmentBucketer {
 	protected buckets: Record<

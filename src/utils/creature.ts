@@ -1,3 +1,13 @@
+import { BaseMessageOptions } from 'discord.js';
+import _ from 'lodash';
+import type {
+	Action,
+	Attribute,
+	Modifier,
+	RollMacro,
+	Sheet,
+	SheetRecord,
+} from '../services/kobold/index.js';
 import {
 	AbilityEnum,
 	Counter,
@@ -6,25 +16,16 @@ import {
 	SheetBaseCounterKeys,
 	SheetStatKeys,
 } from '../services/kobold/index.js';
-import type {
-	Sheet,
-	Modifier,
-	Attribute,
-	SheetRecord,
-	Action,
-	RollMacro,
-} from '../services/kobold/index.js';
 import { PathBuilder } from '../services/pathbuilder/pathbuilder.js';
 import { WG } from '../services/wanderers-guide/wanderers-guide.js';
-import _ from 'lodash';
+import { KoboldError } from './KoboldError.js';
+import { AttributeUtils } from './attribute-utils.js';
+import { KoboldEmbed } from './kobold-embed-utils.js';
+import { ModifierUtils } from './kobold-service-utils/modifier-utils.js';
 import {
 	convertPathBuilderToSheet,
 	convertWanderersGuideCharToSheet,
 } from './sheet/sheet-import-utils.js';
-import { KoboldEmbed } from './kobold-embed-utils.js';
-import { KoboldError } from './KoboldError.js';
-import { BaseMessageOptions } from 'discord.js';
-import { SheetUtils } from './sheet/sheet-utils.js';
 import {
 	SheetIntegerGroupEnum,
 	SheetIntegerProperties,
@@ -32,8 +33,7 @@ import {
 	SheetStatProperties,
 	StatGroupEnum,
 } from './sheet/sheet-properties.js';
-import { AttributeUtils } from './attribute-utils.js';
-import { ModifierUtils } from './kobold-service-utils/modifier-utils.js';
+import { SheetUtils } from './sheet/sheet-utils.js';
 
 const damageTypeShorthands: { [shorthand: string]: string } = {
 	piercing: 'p',

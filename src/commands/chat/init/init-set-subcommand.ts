@@ -1,31 +1,25 @@
-import { InitiativeBuilder, InitiativeBuilderUtils } from '../../../utils/initiative-builder.js';
 import {
+	ApplicationCommandOptionChoiceData,
 	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
-	ChatInputCommandInteraction,
-	PermissionsString,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
-	ApplicationCommandOptionChoiceData,
+	ChatInputCommandInteraction,
+	PermissionsString,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
+import { InitiativeBuilder, InitiativeBuilderUtils } from '../../../utils/initiative-builder.js';
 
-import { InteractionUtils } from '../../../utils/index.js';
-import { Command, CommandDeferType } from '../../index.js';
 import _ from 'lodash';
-import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import L from '../../../i18n/i18n-node.js';
-import { InitOptions } from './init-command-options.js';
-import { AutocompleteUtils } from '../../../utils/kobold-service-utils/autocomplete-utils.js';
-import {
-	InitiativeModel,
-	InitiativeActorGroupModel,
-	InitiativeActorModel,
-	Kobold,
-} from '../../../services/kobold/index.js';
+import { TranslationFunctions } from '../../../i18n/i18n-types.js';
+import { Kobold } from '../../../services/kobold/index.js';
+import { InteractionUtils } from '../../../utils/index.js';
+import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { Command, CommandDeferType } from '../../index.js';
+import { InitOptions } from './init-command-options.js';
 
 export class InitSetSubCommand implements Command {
 	public names = [L.en.commands.init.set.name()];

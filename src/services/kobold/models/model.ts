@@ -1,6 +1,6 @@
 import { Insertable, Kysely, Selectable, Updateable } from 'kysely';
-import { Database } from '../schemas/index.js';
 import { ValueOf } from 'type-fest';
+import { Database } from '../schemas/index.js';
 
 export abstract class Model<T extends ValueOf<Database>> {
 	constructor(protected db: Kysely<Database>) {}

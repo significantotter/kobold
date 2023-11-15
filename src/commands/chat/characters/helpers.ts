@@ -1,7 +1,7 @@
-import { WanderersGuide } from '../../../services/wanderers-guide/index.js';
 import { Config } from '../../../config/config.js';
+import { SheetRecord } from '../../../services/kobold/index.js';
+import { WanderersGuide } from '../../../services/wanderers-guide/index.js';
 import { Creature } from '../../../utils/creature.js';
-import { Sheet, SheetRecord } from '../../../services/kobold/index.js';
 
 export class CharacterHelpers {
 	public static async fetchWgCharacterFromToken(

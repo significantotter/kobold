@@ -1,20 +1,20 @@
 import { ExpressionBuilder, Kysely } from 'kysely';
-import { Model } from './model.js';
-import {
-	Database,
-	InitiativeActorUpdate,
-	InitiativeActorId,
-	NewInitiativeActor,
-	InitiativeActorWithRelations,
-	InitiativeActorGroup,
-	Initiative,
-	SheetRecord,
-} from '../schemas/index.js';
 import { jsonObjectFrom } from 'kysely/helpers/postgres';
 import {
 	channelDefaultCharacterForCharacter,
 	guildDefaultCharacterForCharacter,
 } from '../lib/shared-relation-builders.js';
+import {
+	Database,
+	Initiative,
+	InitiativeActorGroup,
+	InitiativeActorId,
+	InitiativeActorUpdate,
+	InitiativeActorWithRelations,
+	NewInitiativeActor,
+	SheetRecord,
+} from '../schemas/index.js';
+import { Model } from './model.js';
 
 export function actorGroupForActor(eb: ExpressionBuilder<Database, 'initiativeActor'>) {
 	return jsonObjectFrom(

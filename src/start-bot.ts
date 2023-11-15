@@ -1,103 +1,102 @@
+import { GatewayIntentBits, Options, Partials, REST, disableValidators } from 'discord.js';
 import 'reflect-metadata';
 import './config/config.js';
-import { REST } from 'discord.js';
-import { Options, GatewayIntentBits, Partials, disableValidators } from 'discord.js';
 
 import { Button } from './buttons/index.js';
 import {
+	// action
+	ActionCommand,
+	ActionCreateSubCommand,
+	ActionDetailSubCommand,
+	ActionEditSubCommand,
+	ActionExportSubCommand,
+	ActionImportSubCommand,
+	ActionListSubCommand,
+	ActionRemoveSubCommand,
+	ActionStageAddAdvancedDamageSubCommand,
+	ActionStageAddAttackSubCommand,
+	ActionStageAddBasicDamageSubCommand,
+	ActionStageAddSaveSubCommand,
+	ActionStageAddSkillChallengeSubCommand,
+	ActionStageAddTextSubCommand,
+	//action stage
+	ActionStageCommand,
+	ActionStageEditSubCommand,
+	ActionStageRemoveSubCommand,
+	// admin
+	AdminCommand,
 	// character
 	CharacterCommand,
+	CharacterImportPathbuilderSubCommand,
+	CharacterImportWanderersGuideSubCommand,
+	CharacterListSubCommand,
+	CharacterRemoveSubCommand,
 	CharacterSetActiveSubCommand,
 	CharacterSetDefaultSubCommand,
-	CharacterListSubCommand,
-	CharacterUpdateSubCommand,
-	CharacterRemoveSubCommand,
-	CharacterImportWanderersGuideSubCommand,
-	CharacterImportPathbuilderSubCommand,
 	CharacterSheetSubCommand,
+	CharacterUpdateSubCommand,
 	// compendium
 	CompendiumCommand,
 	CompendiumSearchSubCommand,
-	// roll
-	RollCommand,
-	RollDiceSubCommand,
-	RollSkillSubCommand,
-	RollSaveSubCommand,
-	RollPerceptionSubCommand,
-	RollAttackSubCommand,
-	RollActionSubCommand,
+	// game
+	GameCommand,
+	GameInitSubCommand,
+	GameListSubCommand,
+	GameManageSubCommand,
+	GameRollSubCommand,
+	// gameplay
+	GameplayCommand,
+	GameplayDamageSubCommand,
+	GameplayRecoverSubCommand,
+	GameplaySetSubCommand,
+	GameplayTrackerSubCommand,
+	// help
+	HelpCommand,
+	InitAddSubCommand,
 	// init
 	InitCommand,
-	InitAddSubCommand,
-	InitSetSubCommand,
-	InitShowSubCommand,
-	InitStatBlockSubCommand,
-	InitRollSubCommand,
+	InitEndSubCommand,
+	InitJoinSubCommand,
+	InitJumpToSubCommand,
 	InitNextSubCommand,
 	InitPrevSubCommand,
-	InitJumpToSubCommand,
-	InitStartSubCommand,
-	InitJoinSubCommand,
 	InitRemoveSubCommand,
-	InitEndSubCommand,
+	InitRollSubCommand,
+	InitSetSubCommand,
+	InitShowSubCommand,
+	InitStartSubCommand,
+	InitStatBlockSubCommand,
 	// modifier
 	ModifierCommand,
 	ModifierCreateRollModifierSubCommand,
 	ModifierCreateSheetModifierSubCommand,
-	ModifierRemoveSubCommand,
-	ModifierListSubCommand,
 	ModifierDetailSubCommand,
 	ModifierExportSubCommand,
 	ModifierImportSubCommand,
-	ModifierUpdateSubCommand,
+	ModifierListSubCommand,
+	ModifierRemoveSubCommand,
 	ModifierToggleSubCommand,
-	// game
-	GameCommand,
-	GameManageSubCommand,
-	GameRollSubCommand,
-	GameInitSubCommand,
-	GameListSubCommand,
-	// gameplay
-	GameplayCommand,
-	GameplayDamageSubCommand,
-	GameplaySetSubCommand,
-	GameplayRecoverSubCommand,
-	GameplayTrackerSubCommand,
-	// action
-	ActionCommand,
-	ActionListSubCommand,
-	ActionDetailSubCommand,
-	ActionCreateSubCommand,
-	ActionRemoveSubCommand,
-	ActionEditSubCommand,
-	ActionImportSubCommand,
-	ActionExportSubCommand,
-	//action stage
-	ActionStageCommand,
-	ActionStageAddAttackSubCommand,
-	ActionStageAddSkillChallengeSubCommand,
-	ActionStageAddSaveSubCommand,
-	ActionStageAddTextSubCommand,
-	ActionStageAddBasicDamageSubCommand,
-	ActionStageAddAdvancedDamageSubCommand,
-	ActionStageEditSubCommand,
-	ActionStageRemoveSubCommand,
+	ModifierUpdateSubCommand,
+	RollActionSubCommand,
+	RollAttackSubCommand,
+	// roll
+	RollCommand,
+	RollDiceSubCommand,
 	// roll macro
 	RollMacroCommand,
-	RollMacroListSubCommand,
 	RollMacroCreateSubCommand,
-	RollMacroUpdateSubCommand,
+	RollMacroListSubCommand,
 	RollMacroRemoveSubCommand,
+	RollMacroUpdateSubCommand,
+	RollPerceptionSubCommand,
+	RollSaveSubCommand,
+	RollSkillSubCommand,
 	// settings
 	SettingsCommand,
 	SettingsSetSubCommand,
-
-	// help
-	HelpCommand,
-	// admin
-	AdminCommand,
 } from './commands/chat/index.js';
 import { Command } from './commands/index.js';
+import { Config } from './config/config.js';
 import {
 	ButtonHandler,
 	CommandHandler,
@@ -110,14 +109,13 @@ import {
 import { CustomClient } from './extensions/index.js';
 import { Bot } from './models/bot.js';
 import { Reaction } from './reactions/index.js';
-import { CommandRegistrationService, DBModel, JobService, Logger } from './services/index.js';
-import { Trigger } from './triggers/index.js';
-import { Config } from './config/config.js';
+import { getDialect } from './services/db.dialect.js';
+import { CommandRegistrationService, JobService, Logger } from './services/index.js';
+import { Job } from './services/job-service.js';
+import { Kobold } from './services/kobold/index.js';
 import { CompendiumModel } from './services/pf2etools/compendium.model.js';
 import { db } from './services/pf2etools/pf2eTools.db.js';
-import { Job } from './services/job-service.js';
-import { Kobold as Kobold } from './services/kobold/index.js';
-import { getDialect } from './services/db.dialect.js';
+import { Trigger } from './triggers/index.js';
 
 // this is to prevent embeds breaking on "addFields" when adding more than an embed can hold
 // because we batch our embeds afterwards instead of before assigning fields
@@ -126,7 +124,6 @@ disableValidators();
 async function start(): Promise<void> {
 	const PostgresDialect = getDialect(Config.database.url);
 	const kobold = new Kobold(PostgresDialect);
-	DBModel.init(Config.database.url);
 
 	const compendium = new CompendiumModel(db);
 

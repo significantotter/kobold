@@ -1,6 +1,6 @@
 import _ from 'lodash';
-import { RollMacro, Action, Modifier, Sheet, SheetRecord } from '../../services/kobold/index.js';
-import { roll, Creature, rollable } from '../creature.js';
+import { Action, Modifier, RollMacro, SheetRecord } from '../../services/kobold/index.js';
+import { Creature, roll, rollable } from '../creature.js';
 
 export class FinderHelpers {
 	/**

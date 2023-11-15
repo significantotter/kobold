@@ -1,24 +1,23 @@
 import {
+	ApplicationCommandOptionChoiceData,
 	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
 	ChatInputCommandInteraction,
 	PermissionsString,
-	ApplicationCommandOptionChoiceData,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 
 import { GameOptions } from './game-command-options.js';
 
-import { Command, CommandDeferType } from '../../index.js';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { GameWithRelations } from '../../../services/kobold/index.js';
-import { InteractionUtils } from '../../../utils/interaction-utils.js';
-import { Kobold } from '../../../services/kobold/index.js';
-import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { GameWithRelations, Kobold } from '../../../services/kobold/index.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
+import { InteractionUtils } from '../../../utils/interaction-utils.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { Command, CommandDeferType } from '../../index.js';
 
 export class GameManageSubCommand implements Command {
 	public names = [L.en.commands.game.manage.name()];

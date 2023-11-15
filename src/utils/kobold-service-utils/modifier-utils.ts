@@ -1,9 +1,8 @@
 import { compileExpression } from 'filtrex';
 import L from '../../i18n/i18n-node.js';
-import { Attribute, Modifier, RollModifier } from '../../services/kobold/index.js';
+import { Attribute, Kobold, Modifier, RollModifier } from '../../services/kobold/index.js';
 import type { Creature } from '../creature.js';
 import { DiceUtils } from '../dice-utils.js';
-import { Kobold } from '../../services/kobold/index.js';
 import type { KoboldUtils } from './kobold-utils.js';
 
 export class ModifierUtils {

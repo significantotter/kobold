@@ -1,28 +1,26 @@
-import { CharacterModel, Kobold } from '../../../services/kobold/index.js';
 import {
-	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
-	ChatInputCommandInteraction,
-	PermissionsString,
-	AutocompleteInteraction,
-	AutocompleteFocusedOption,
 	ApplicationCommandOptionChoiceData,
-	CacheType,
-	ComponentType,
+	ApplicationCommandType,
+	AutocompleteFocusedOption,
+	AutocompleteInteraction,
 	ButtonStyle,
+	CacheType,
+	ChatInputCommandInteraction,
+	ComponentType,
+	PermissionsString,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
+import { Kobold } from '../../../services/kobold/index.js';
 
-import { InteractionUtils } from '../../../utils/index.js';
-import { Command, CommandDeferType } from '../../index.js';
+import _ from 'lodash';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { CollectorUtils } from '../../../utils/collector-utils.js';
-import { ActionOptions } from './action-command-options.js';
-import { CharacterUtils } from '../../../utils/kobold-service-utils/character-utils.js';
-import _ from 'lodash';
-import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { InteractionUtils } from '../../../utils/index.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
-import { Creature } from '../../../utils/creature.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { Command, CommandDeferType } from '../../index.js';
+import { ActionOptions } from './action-command-options.js';
 
 export class ActionRemoveSubCommand implements Command {
 	public names = [L.en.commands.action.remove.name()];

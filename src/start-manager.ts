@@ -1,17 +1,16 @@
-import 'reflect-metadata';
-import './config/config.js';
 import { ShardingManager } from 'discord.js';
 import 'reflect-metadata';
+import './config/config.js';
 
+import { Config } from './config/config.js';
 import { GuildsController, RootController, ShardsController } from './controllers/index.js';
 import { UpdateServerCountJob } from './jobs/index.js';
 import { Api } from './models/api.js';
 import { Manager } from './models/manager.js';
-import { DBModel, HttpService, JobService, Logger, MasterApiService } from './services/index.js';
-import { MathUtils, ShardUtils } from './utils/index.js';
-import { Config } from './config/config.js';
-import { filterNotNullOrUndefined } from './utils/type-guards.js';
+import { HttpService, JobService, Logger, MasterApiService } from './services/index.js';
 import { Job } from './services/job-service.js';
+import { MathUtils, ShardUtils } from './utils/index.js';
+import { filterNotNullOrUndefined } from './utils/type-guards.js';
 
 async function start(): Promise<void> {
 	Logger.info(`Application started.`);

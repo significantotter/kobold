@@ -1,35 +1,37 @@
-import { DiceUtils } from './../../../utils/dice-utils.js';
-import { RollBuilder } from '../../../utils/roll-builder.js';
 import {
+	ApplicationCommandOptionChoiceData,
 	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
+	AutocompleteFocusedOption,
+	AutocompleteInteraction,
+	CacheType,
 	ChatInputCommandInteraction,
 	EmbedBuilder,
 	PermissionsString,
-	AutocompleteInteraction,
-	ApplicationCommandOptionChoiceData,
-	AutocompleteFocusedOption,
-	CacheType,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
+import { DiceUtils } from '../../../utils/dice-utils.js';
+import { RollBuilder } from '../../../utils/roll-builder.js';
 
-import { InteractionUtils, StringUtils } from '../../../utils/index.js';
-import { Command, CommandDeferType } from '../../index.js';
-import { InitiativeBuilder, InitiativeBuilderUtils } from '../../../utils/initiative-builder.js';
+import _ from 'lodash';
 import { ChatArgs } from '../../../constants/chat-args.js';
-import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
+import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold } from '../../../services/kobold/index.js';
-import { Creature } from '../../../utils/creature.js';
-import { convertBestiaryCreatureToSheet } from '../../../utils/sheet/sheet-import-utils.js';
-import _ from 'lodash';
-import { InitOptions } from './init-command-options.js';
-import { applyStatOverrides } from '../../../utils/sheet/sheet-import-utils.js';
-import L from '../../../i18n/i18n-node.js';
-import { SheetProperties } from '../../../utils/sheet/sheet-properties.js';
-import { NpcUtils } from '../../../utils/kobold-service-utils/npc-utils.js';
-import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { CompendiumModel } from '../../../services/pf2etools/compendium.model.js';
+import { Creature } from '../../../utils/creature.js';
+import { InteractionUtils, StringUtils } from '../../../utils/index.js';
+import { InitiativeBuilder, InitiativeBuilderUtils } from '../../../utils/initiative-builder.js';
+import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { NpcUtils } from '../../../utils/kobold-service-utils/npc-utils.js';
+import {
+	applyStatOverrides,
+	convertBestiaryCreatureToSheet,
+} from '../../../utils/sheet/sheet-import-utils.js';
+import { SheetProperties } from '../../../utils/sheet/sheet-properties.js';
+import { Command, CommandDeferType } from '../../index.js';
+import { InitOptions } from './init-command-options.js';
 
 export class InitAddSubCommand implements Command {
 	public names = [L.en.commands.init.add.name()];

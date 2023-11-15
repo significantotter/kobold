@@ -1,24 +1,24 @@
 import {
+	ApplicationCommandOptionChoiceData,
 	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
 	ChatInputCommandInteraction,
 	PermissionsString,
-	ApplicationCommandOptionChoiceData,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 
 import { SettingsOptions } from './settings-command-options.js';
 
-import { Command, CommandDeferType } from '../../index.js';
+import _ from 'lodash';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { InteractionUtils } from '../../../utils/interaction-utils.js';
-import _ from 'lodash';
+import { Kobold, UserSettings } from '../../../services/kobold/index.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
-import { Kobold, UserSettings, UserSettingsModel } from '../../../services/kobold/index.js';
+import { InteractionUtils } from '../../../utils/interaction-utils.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { Command, CommandDeferType } from '../../index.js';
 
 export class SettingsSetSubCommand implements Command {
 	public names = [L.en.commands.settings.set.name()];

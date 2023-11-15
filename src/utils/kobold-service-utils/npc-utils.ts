@@ -1,15 +1,15 @@
-import _ from 'lodash';
-import { StringUtils } from '../string-utils.js';
-import { Creature } from '../../services/pf2etools/schemas/Bestiary.zod.js';
-import { Kobold } from '../../services/kobold/index.js';
-import type { KoboldUtils } from './kobold-utils.js';
-import { CompendiumModel } from '../../services/pf2etools/compendium.model.js';
+import { CommandInteraction } from 'discord.js';
 import { SQL, and, sql } from 'drizzle-orm';
+import _ from 'lodash';
 import { getEmoji } from '../../constants/emoji.js';
+import { Kobold } from '../../services/kobold/index.js';
+import { CompendiumModel } from '../../services/pf2etools/compendium.model.js';
 import { CompendiumEmbedParser } from '../../services/pf2etools/parsers/compendium-parser.js';
+import { Creature } from '../../services/pf2etools/schemas/Bestiary.zod.js';
 import { DrizzleUtils } from '../../services/pf2etools/utils/drizzle-utils.js';
 import { KoboldError } from '../KoboldError.js';
-import { CommandInteraction } from 'discord.js';
+import { StringUtils } from '../string-utils.js';
+import type { KoboldUtils } from './kobold-utils.js';
 
 export class NpcUtils {
 	private kobold: Kobold;

@@ -1,20 +1,20 @@
+import { APIEmbedField } from 'discord.js';
 import _ from 'lodash';
+import L from '../i18n/i18n-node.js';
 import { TranslationFunctions } from '../i18n/i18n-types.js';
 import { Attribute, CharacterWithRelations, UserSettings } from '../services/kobold/index.js';
+import { KoboldError } from './KoboldError.js';
 import { Creature } from './creature.js';
 import {
-	DiceUtils,
-	DiceRollResult,
-	MultiRollResult,
-	TextResult,
-	ResultField,
 	DiceRollError,
+	DiceRollResult,
+	DiceUtils,
 	ErrorResult,
+	MultiRollResult,
+	ResultField,
+	TextResult,
 } from './dice-utils.js';
 import { KoboldEmbed } from './kobold-embed-utils.js';
-import { APIEmbedField } from 'discord.js';
-import L from '../i18n/i18n-node.js';
-import { KoboldError } from './KoboldError.js';
 
 export class RollBuilder {
 	protected userSettings: UserSettings | null;

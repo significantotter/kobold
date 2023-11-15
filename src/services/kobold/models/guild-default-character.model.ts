@@ -1,13 +1,13 @@
 import { Kysely } from 'kysely';
-import { Model } from './model.js';
 import {
 	Database,
 	GuildDefaultCharacter,
-	GuildDefaultCharacterUpdate,
-	NewGuildDefaultCharacter,
 	GuildDefaultCharacterGuildId,
+	GuildDefaultCharacterUpdate,
 	GuildDefaultCharacterUserId,
+	NewGuildDefaultCharacter,
 } from '../schemas/index.js';
+import { Model } from './model.js';
 
 export class GuildDefaultCharacterModel extends Model<Database['guildDefaultCharacter']> {
 	constructor(db: Kysely<Database>) {

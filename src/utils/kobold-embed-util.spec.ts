@@ -1,5 +1,4 @@
 import { EmbedBuilder } from 'discord.js';
-import { Character } from '../services/kobold/index.js';
 import { KoboldEmbed } from './kobold-embed-utils.js';
 
 function getFakeInitiativeBuilder() {

@@ -1,10 +1,10 @@
 import { CommandInteraction, GuildChannel, ThreadChannel } from 'discord.js';
 
 import { Command } from '../commands/command.js';
-import { FormatUtils } from './format-utils.js';
-import { KoboldEmbed } from './kobold-embed-utils.js';
 import { refs } from '../constants/common-text.js';
+import { FormatUtils } from './format-utils.js';
 import { InteractionUtils } from './interaction-utils.js';
+import { KoboldEmbed } from './kobold-embed-utils.js';
 
 export class CommandUtils {
 	public static getSubCommandByName(commands: Command[], input: string): Command | undefined {

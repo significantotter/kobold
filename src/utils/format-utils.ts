@@ -1,4 +1,4 @@
-import { Locale, Guild } from 'discord.js';
+import { Guild, Locale } from 'discord.js';
 import { Duration } from 'luxon'; // TODO: Missing types
 
 export class FormatUtils {

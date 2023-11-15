@@ -7,21 +7,20 @@ import {
 	EmbedData,
 } from 'discord.js';
 import _ from 'lodash';
+import L from '../i18n/i18n-node.js';
 import { TranslationFunctions } from '../i18n/i18n-types.js';
 import {
 	Action,
-	Character,
 	CharacterWithRelations,
 	Sheet,
 	SheetInfoLists,
 	SheetRecord,
 	SheetWeaknessesResistances,
 } from '../services/kobold/index.js';
+import { KoboldError } from './KoboldError.js';
+import type { ActionRoller } from './action-roller.js';
 import type { InitiativeBuilder, TurnData } from './initiative-builder.js';
 import { InteractionUtils } from './interaction-utils.js';
-import type { ActionRoller } from './action-roller.js';
-import { KoboldError } from './KoboldError.js';
-import L from '../i18n/i18n-node.js';
 
 export class KoboldEmbed extends EmbedBuilder {
 	public constructor(data?: APIEmbed | EmbedData) {

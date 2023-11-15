@@ -1,25 +1,22 @@
-import { Character, CharacterModel, Kobold, RollTypeEnum } from '../../../services/kobold/index.js';
 import {
-	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
-	ChatInputCommandInteraction,
-	PermissionsString,
 	ApplicationCommandOptionChoiceData,
+	ApplicationCommandType,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
+	ChatInputCommandInteraction,
+	PermissionsString,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
+import { Kobold, RollTypeEnum } from '../../../services/kobold/index.js';
 
-import { InteractionUtils } from '../../../utils/index.js';
-import { Command, CommandDeferType } from '../../index.js';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { CharacterUtils } from '../../../utils/kobold-service-utils/character-utils.js';
-import { AutocompleteUtils } from '../../../utils/kobold-service-utils/autocomplete-utils.js';
-import { ActionStageOptions } from './action-stage-command-options.js';
-import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { InteractionUtils } from '../../../utils/index.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
-import { Creature } from '../../../utils/creature.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { Command, CommandDeferType } from '../../index.js';
+import { ActionStageOptions } from './action-stage-command-options.js';
 
 export class ActionStageAddTextSubCommand implements Command {
 	public names = [L.en.commands.actionStage.addText.name()];

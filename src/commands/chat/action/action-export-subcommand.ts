@@ -1,19 +1,18 @@
 import {
 	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 	ChatInputCommandInteraction,
 	PermissionsString,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 
-import { InteractionUtils } from '../../../utils/index.js';
-import { Command, CommandDeferType } from '../../index.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { PasteBin } from '../../../services/pastebin/index.js';
-import { CharacterUtils } from '../../../utils/kobold-service-utils/character-utils.js';
 import { Config } from '../../../config/config.js';
 import L from '../../../i18n/i18n-node.js';
-import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold } from '../../../services/kobold/kobold.model.js';
+import { PasteBin } from '../../../services/pastebin/index.js';
+import { InteractionUtils } from '../../../utils/index.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { Command, CommandDeferType } from '../../index.js';
 
 export class ActionExportSubCommand implements Command {
 	public names = [L.en.commands.action.export.name()];

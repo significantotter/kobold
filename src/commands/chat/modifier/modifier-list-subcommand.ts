@@ -1,18 +1,17 @@
-import { KoboldEmbed } from './../../../utils/kobold-embed-utils.js';
 import {
 	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 	ChatInputCommandInteraction,
 	PermissionsString,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
+import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 
-import { Command, CommandDeferType } from '../../index.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import L from '../../../i18n/i18n-node.js';
-import _ from 'lodash';
-import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold } from '../../../services/kobold/index.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { Command, CommandDeferType } from '../../index.js';
 
 export class ModifierListSubCommand implements Command {
 	public names = [L.en.commands.modifier.list.name()];

@@ -1,9 +1,6 @@
 import { z } from 'zod';
 import { zNullableInteger, zRecordOf } from '../lib/helpers.zod.js';
-import { zAction } from './action.zod.js';
 import { zNumericCounter } from './counter.zod.js';
-import { zModifier } from './modifier.zod.js';
-import { zRollMacro } from './roll-macro.zod.js';
 
 export enum AbilityEnum {
 	strength = 'strength',

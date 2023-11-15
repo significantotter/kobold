@@ -1,7 +1,6 @@
 import { CalculatedStatsFactory } from '../../../services/wanderers-guide/character-api/factories/calculatedStats.factory.js';
 import { CharacterDataFactory } from '../../../services/wanderers-guide/character-api/factories/characterData.factory.js';
 import { WG } from '../../../services/wanderers-guide/wanderers-guide.js';
-import { CharacterHelpers } from './helpers.js';
 
 describe('CharacterHelpers', () => {
 	describe('parseAttributesForCharacter', () => {

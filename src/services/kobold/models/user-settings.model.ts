@@ -1,12 +1,12 @@
 import { Kysely } from 'kysely';
-import { Model } from './model.js';
 import {
 	Database,
+	NewUserSettings,
 	UserSettings,
 	UserSettingsUpdate,
 	UserSettingsUserId,
-	NewUserSettings,
 } from '../schemas/index.js';
+import { Model } from './model.js';
 
 export class UserSettingsModel extends Model<Database['userSettings']> {
 	constructor(db: Kysely<Database>) {

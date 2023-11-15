@@ -1,23 +1,22 @@
 import {
-	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
-	ChatInputCommandInteraction,
-	PermissionsString,
 	ApplicationCommandOptionChoiceData,
+	ApplicationCommandType,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
+	ChatInputCommandInteraction,
+	PermissionsString,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 
-import { Command, CommandDeferType } from '../../index.js';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { GameplayOptions } from './gameplay-command-options.js';
-import { InteractionUtils } from '../../../utils/interaction-utils.js';
-import { InitiativeActorModel, Kobold } from '../../../services/kobold/index.js';
-import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { SheetUtils } from '../../../utils/sheet/sheet-utils.js';
+import { Kobold } from '../../../services/kobold/index.js';
 import { Creature } from '../../../utils/creature.js';
+import { InteractionUtils } from '../../../utils/interaction-utils.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { Command, CommandDeferType } from '../../index.js';
+import { GameplayOptions } from './gameplay-command-options.js';
 
 export class GameplayRecoverSubCommand implements Command {
 	public names = [L.en.commands.gameplay.recover.name()];

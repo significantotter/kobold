@@ -1,27 +1,24 @@
 import {
+	ApplicationCommandOptionChoiceData,
 	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
 	ChatInputCommandInteraction,
 	PermissionsString,
-	ApplicationCommandOptionChoiceData,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 
 import { GameplayOptions } from './gameplay-command-options.js';
 
-import { Command, CommandDeferType } from '../../index.js';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { InteractionUtils } from '../../../utils/interaction-utils.js';
-import { AutocompleteUtils } from '../../../utils/kobold-service-utils/autocomplete-utils.js';
-import _ from 'lodash';
-import { Creature } from '../../../utils/creature.js';
-import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
-import { GameUtils } from '../../../utils/kobold-service-utils/game-utils.js';
-import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Kobold } from '../../../services/kobold/kobold.model.js';
+import { Creature } from '../../../utils/creature.js';
+import { InteractionUtils } from '../../../utils/interaction-utils.js';
+import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { Command, CommandDeferType } from '../../index.js';
 
 export class GameplayDamageSubCommand implements Command {
 	public names = [L.en.commands.gameplay.damage.name()];

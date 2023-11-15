@@ -1,23 +1,5 @@
 import _ from 'lodash';
 import {
-	SheetAttackAdjustment,
-	SheetExtraSkillAdjustment,
-	SheetInfoAdjustment,
-	SheetInfoListAdjustment,
-	SheetIntegerAdjustment,
-	SheetStatAdjustment,
-} from './sheet-adjuster.js';
-import {
-	SheetPropertyGroupBucket,
-	SheetInfoBucket,
-	SheetInfoListsBucket,
-	StatBucket,
-	SheetIntegerPropertyBucket,
-	WeaknessResistanceBucket,
-	AttackBucket,
-	ExtraSkillBucket,
-} from './sheet-adjustment-bucketer.js';
-import {
 	AbilityEnum,
 	AdjustablePropertyEnum,
 	SheetAdjustment,
@@ -27,6 +9,24 @@ import {
 	StatSubGroupEnum,
 } from '../../services/kobold/index.js';
 import { KoboldError } from '../KoboldError.js';
+import {
+	SheetAttackAdjustment,
+	SheetExtraSkillAdjustment,
+	SheetInfoAdjustment,
+	SheetInfoListAdjustment,
+	SheetIntegerAdjustment,
+	SheetStatAdjustment,
+} from './sheet-adjuster.js';
+import {
+	AttackBucket,
+	ExtraSkillBucket,
+	SheetInfoBucket,
+	SheetInfoListsBucket,
+	SheetIntegerPropertyBucket,
+	SheetPropertyGroupBucket,
+	StatBucket,
+	WeaknessResistanceBucket,
+} from './sheet-adjustment-bucketer.js';
 
 class TestSheetPropertyGroupBucket extends SheetPropertyGroupBucket<SheetAdjustment> {
 	public serialize(adjustment: SheetAdjustment): SheetAdjustment {

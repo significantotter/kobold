@@ -1,17 +1,16 @@
-import { Kobold } from '../../../services/kobold/index.js';
 import {
 	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 	ChatInputCommandInteraction,
 	PermissionsString,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
+import { Kobold } from '../../../services/kobold/index.js';
 
-import { Command, CommandDeferType } from '../../index.js';
-import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import _ from 'lodash';
+import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { Command, CommandDeferType } from '../../index.js';
 
 export class ActionListSubCommand implements Command {
 	public names = [L.en.commands.action.list.name()];

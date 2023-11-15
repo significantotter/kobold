@@ -1,23 +1,22 @@
-import { Character, CharacterModel, Kobold } from '../../../services/kobold/index.js';
 import {
+	ApplicationCommandOptionChoiceData,
 	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
 	ChatInputCommandInteraction,
 	PermissionsString,
-	ApplicationCommandOptionChoiceData,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
+import { Kobold } from '../../../services/kobold/index.js';
 
 import { ChatArgs } from '../../../constants/index.js';
 
-import { InteractionUtils } from '../../../utils/index.js';
-import { Command, CommandDeferType } from '../../index.js';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { CharacterUtils } from '../../../utils/kobold-service-utils/character-utils.js';
+import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { Command, CommandDeferType } from '../../index.js';
 
 export class CharacterSetActiveSubCommand implements Command {
 	public names = [L.en.commands.character.setActive.name()];

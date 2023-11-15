@@ -1,22 +1,19 @@
-import { Character, CharacterModel, Kobold } from '../../../services/kobold/index.js';
 import {
 	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
-	ChatInputCommandInteraction,
-	PermissionsString,
 	ButtonStyle,
+	ChatInputCommandInteraction,
 	ComponentType,
+	PermissionsString,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
+import { Kobold } from '../../../services/kobold/index.js';
 
-import { InteractionUtils } from '../../../utils/index.js';
-import { Command, CommandDeferType } from '../../index.js';
-import { CharacterUtils } from '../../../utils/kobold-service-utils/character-utils.js';
-import { CollectorUtils } from './../../../utils/collector-utils.js';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { refs } from '../../../constants/common-text.js';
-import { KoboldError } from '../../../utils/KoboldError.js';
+import { CollectorUtils } from '../../../utils/collector-utils.js';
+import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { Command, CommandDeferType } from '../../index.js';
 
 export class CharacterRemoveSubCommand implements Command {
 	public names = [L.en.commands.character.remove.name()];

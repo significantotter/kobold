@@ -1,31 +1,29 @@
 import {
+	ApplicationCommandOptionChoiceData,
 	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
-	ChatInputCommandInteraction,
-	PermissionsString,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
-	ApplicationCommandOptionChoiceData,
+	ChatInputCommandInteraction,
+	PermissionsString,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 
-import { InteractionUtils, StringUtils } from '../../../utils/index.js';
-import { Command, CommandDeferType } from '../../index.js';
-import _ from 'lodash';
-import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import L from '../../../i18n/i18n-node.js';
-import { ModifierOptions } from './modifier-command-options.js';
-import { CharacterUtils } from '../../../utils/kobold-service-utils/character-utils.js';
-import { CharacterModel, Kobold, SheetAdjustmentTypeEnum } from '../../../services/kobold/index.js';
 import { compileExpression } from 'filtrex';
-import { DiceUtils } from '../../../utils/dice-utils.js';
-import { Creature } from '../../../utils/creature.js';
+import L from '../../../i18n/i18n-node.js';
+import { TranslationFunctions } from '../../../i18n/i18n-types.js';
+import { Kobold, SheetAdjustmentTypeEnum } from '../../../services/kobold/index.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
-import { SheetUtils } from '../../../utils/sheet/sheet-utils.js';
-import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { Creature } from '../../../utils/creature.js';
+import { DiceUtils } from '../../../utils/dice-utils.js';
+import { InteractionUtils, StringUtils } from '../../../utils/index.js';
+import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { SheetUtils } from '../../../utils/sheet/sheet-utils.js';
+import { Command, CommandDeferType } from '../../index.js';
+import { ModifierOptions } from './modifier-command-options.js';
 
 export class ModifierUpdateSubCommand implements Command {
 	public names = [L.en.commands.modifier.update.name()];

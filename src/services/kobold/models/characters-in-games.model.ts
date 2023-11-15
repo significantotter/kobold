@@ -1,11 +1,11 @@
 import { Kysely } from 'kysely';
-import { Model } from './model.js';
 import {
-	Database,
 	CharactersInGames,
 	CharactersInGamesUpdate,
+	Database,
 	NewCharactersInGames,
 } from '../schemas/index.js';
+import { Model } from './model.js';
 
 export class CharactersInGamesModel extends Model<Database['charactersInGames']> {
 	constructor(db: Kysely<Database>) {

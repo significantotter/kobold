@@ -1,20 +1,20 @@
 import {
 	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 	ChatInputCommandInteraction,
 	PermissionsString,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 
 import { ChatArgs } from '../../../constants/index.js';
 
-import { Command, CommandDeferType } from '../../index.js';
-import { RollBuilder } from '../../../utils/roll-builder.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import L from '../../../i18n/i18n-node.js';
-import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
+import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold } from '../../../services/kobold/index.js';
+import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { RollBuilder } from '../../../utils/roll-builder.js';
+import { Command, CommandDeferType } from '../../index.js';
 
 export class RollDiceSubCommand implements Command {
 	public names = [L.en.commands.roll.dice.name()];

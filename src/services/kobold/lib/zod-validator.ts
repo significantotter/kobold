@@ -1,6 +1,5 @@
 import { Pojo, Validator, ValidatorArgs } from 'objection';
 import { BaseModel } from './base-model.js';
-import _ from 'lodash';
 
 export class ZodValidator extends Validator {
 	validate(args: ValidatorArgs): Pojo {

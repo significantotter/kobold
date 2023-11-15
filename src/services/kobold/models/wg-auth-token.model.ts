@@ -1,12 +1,12 @@
 import { Kysely } from 'kysely';
-import { Model } from './model.js';
 import {
 	Database,
-	WgAuthToken,
-	WgAuthTokenUpdate,
-	WgAuthTokenId,
 	NewWgAuthToken,
+	WgAuthToken,
+	WgAuthTokenId,
+	WgAuthTokenUpdate,
 } from '../schemas/index.js';
+import { Model } from './model.js';
 
 export class WgAuthTokenModel extends Model<Database['wgAuthToken']> {
 	constructor(db: Kysely<Database>) {

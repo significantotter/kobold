@@ -1,29 +1,27 @@
-import { ModifierOptions } from './modifier-command-options.js';
 import {
 	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 	ChatInputCommandInteraction,
 	PermissionsString,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
+import { ModifierOptions } from './modifier-command-options.js';
 
-import { InteractionUtils } from '../../../utils/index.js';
-import { Command, CommandDeferType } from '../../index.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import L from '../../../i18n/i18n-node.js';
-import { CharacterUtils } from '../../../utils/kobold-service-utils/character-utils.js';
 import { compileExpression } from 'filtrex';
-import { DiceUtils } from '../../../utils/dice-utils.js';
-import { Creature } from '../../../utils/creature.js';
+import L from '../../../i18n/i18n-node.js';
+import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import {
-	CharacterModel,
 	Kobold,
 	ModifierTypeEnum,
 	isSheetAdjustmentTypeEnum,
 } from '../../../services/kobold/index.js';
+import { KoboldError } from '../../../utils/KoboldError.js';
+import { Creature } from '../../../utils/creature.js';
+import { DiceUtils } from '../../../utils/dice-utils.js';
+import { InteractionUtils } from '../../../utils/index.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { KoboldError } from '../../../utils/KoboldError.js';
+import { Command, CommandDeferType } from '../../index.js';
 
 export class ModifierCreateRollModifierSubCommand implements Command {
 	public names = [L.en.commands.modifier.createRollModifier.name()];

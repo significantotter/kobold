@@ -1,19 +1,17 @@
-import { ExpressionBuilder, Kysely } from 'kysely';
-import { Model } from './model.js';
-import {
-	Database,
-	CharacterUpdate,
-	CharacterId,
-	NewCharacter,
-	CharacterWithRelations,
-	SheetRecord,
-} from '../schemas/index.js';
+import { Kysely } from 'kysely';
 import {
 	channelDefaultCharacterForCharacter,
 	guildDefaultCharacterForCharacter,
 	sheetRecordForCharacter,
 } from '../lib/shared-relation-builders.js';
-import { jsonObjectFrom } from 'kysely/helpers/postgres';
+import {
+	CharacterId,
+	CharacterUpdate,
+	CharacterWithRelations,
+	Database,
+	NewCharacter,
+} from '../schemas/index.js';
+import { Model } from './model.js';
 
 export class CharacterModel extends Model<Database['character']> {
 	constructor(db: Kysely<Database>) {

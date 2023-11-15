@@ -1,12 +1,12 @@
 import { ExpressionBuilder, Kysely } from 'kysely';
 import { jsonArrayFrom } from 'kysely/helpers/postgres';
-import { Model } from './model.js';
-import { Database, GameUpdate, GameId, NewGame, GameWithRelations } from '../schemas/index.js';
 import {
 	channelDefaultCharacterForCharacter,
 	guildDefaultCharacterForCharacter,
 	sheetRecordForCharacter,
 } from '../lib/shared-relation-builders.js';
+import { Database, GameId, GameUpdate, GameWithRelations, NewGame } from '../schemas/index.js';
+import { Model } from './model.js';
 
 export function charactersForGame(
 	eb: ExpressionBuilder<Database, 'game'>,

@@ -1,7 +1,7 @@
 import { URL } from 'node:url';
 
-import { HttpService } from '../http-service.js';
 import { Config } from '../../config/config.js';
+import { HttpService } from '../http-service.js';
 import {
 	LoginClusterResponse,
 	RegisterClusterRequest,

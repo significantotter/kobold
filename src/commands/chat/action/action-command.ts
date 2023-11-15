@@ -103,7 +103,7 @@ export class ActionCommand implements Command {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption,
-		{ kobold }: { kobold: Kobold }
+		services: InjectedServices
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 
@@ -112,7 +112,7 @@ export class ActionCommand implements Command {
 			return;
 		}
 
-		return await command.autocomplete(intr, option);
+		return await command.autocomplete(intr, option, services);
 	}
 
 	public async execute(

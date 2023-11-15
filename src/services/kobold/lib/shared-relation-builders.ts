@@ -1,6 +1,6 @@
-import { Database, SheetRecord } from '../schemas/index.js';
 import { ExpressionBuilder } from 'kysely';
 import { jsonArrayFrom, jsonObjectFrom } from 'kysely/helpers/postgres';
+import { Database, SheetRecord } from '../schemas/index.js';
 
 export function channelDefaultCharacterForCharacter(
 	eb: ExpressionBuilder<Database, 'character'>,

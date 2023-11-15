@@ -1,29 +1,28 @@
-import { ModifierOptions } from './modifier-command-options.js';
 import {
 	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 	ChatInputCommandInteraction,
 	PermissionsString,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
+import { ModifierOptions } from './modifier-command-options.js';
 
-import { Modifier, zModifier } from '../../../services/kobold/index.js';
-import { InteractionUtils } from '../../../utils/index.js';
-import { Command, CommandDeferType } from '../../index.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import L from '../../../i18n/i18n-node.js';
 import { compileExpression } from 'filtrex';
-import { PasteBin } from '../../../services/pastebin/index.js';
 import _ from 'lodash';
+import L from '../../../i18n/i18n-node.js';
+import { TranslationFunctions } from '../../../i18n/i18n-types.js';
+import { Kobold, Modifier, zModifier } from '../../../services/kobold/index.js';
+import { PasteBin } from '../../../services/pastebin/index.js';
 import {
 	ignoreOnConflict,
 	overwriteOnConflict,
 	renameOnConflict,
 	replaceAll,
 } from '../../../utils/import-utils.js';
+import { InteractionUtils } from '../../../utils/index.js';
 import { TextParseHelpers } from '../../../utils/kobold-helpers/text-parse-helpers.js';
-import { Kobold } from '../../../services/kobold/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { Command, CommandDeferType } from '../../index.js';
 
 export class ModifierImportSubCommand implements Command {
 	public names = [L.en.commands.modifier.import.name()];

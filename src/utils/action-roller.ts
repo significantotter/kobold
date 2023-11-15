@@ -1,11 +1,15 @@
+import { ChatInputCommandInteraction } from 'discord.js';
 import _ from 'lodash';
+import { getEmoji } from '../constants/emoji.js';
+import L from '../i18n/i18n-node.js';
+import { TranslationFunctions } from '../i18n/i18n-types.js';
 import {
+	Action,
 	ActionCostEnum,
 	ActionTypeEnum,
 	AdvancedDamageRoll,
 	AttackOrSkillRoll,
 	Attribute,
-	Action,
 	DamageRoll,
 	Roll,
 	RollTypeEnum,
@@ -15,15 +19,11 @@ import {
 	TextRoll,
 	UserSettings,
 } from '../services/kobold/index.js';
-import { DiceRollError, DiceUtils, MultiRollResult } from './dice-utils.js';
-import { RollBuilder } from './roll-builder.js';
-import { Creature } from './creature.js';
-import { EmbedUtils, KoboldEmbed } from './kobold-embed-utils.js';
-import { ChatInputCommandInteraction } from 'discord.js';
-import { getEmoji } from '../constants/emoji.js';
-import L from '../i18n/i18n-node.js';
-import { TranslationFunctions } from '../i18n/i18n-types.js';
 import { KoboldError } from './KoboldError.js';
+import { Creature } from './creature.js';
+import { DiceRollError, DiceUtils, MultiRollResult } from './dice-utils.js';
+import { EmbedUtils, KoboldEmbed } from './kobold-embed-utils.js';
+import { RollBuilder } from './roll-builder.js';
 
 type ContestedRollTypes = 'attack' | 'skill-challenge' | 'save' | 'none';
 type ResultRollTypes = 'damage' | 'advanced-damage' | 'text';

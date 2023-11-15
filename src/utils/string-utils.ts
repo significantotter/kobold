@@ -1,5 +1,5 @@
-import removeMarkdown from 'remove-markdown';
 import _ from 'lodash';
+import removeMarkdown from 'remove-markdown';
 
 export class StringUtils {
 	public static truncate(input: string, length: number, addEllipsis: boolean = false): string {

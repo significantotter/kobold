@@ -1,28 +1,16 @@
 import objection from 'objection';
 import { Knex } from 'knex';
 import dotenv from 'dotenv';
-import { DBModel } from './src/services/db-model.js';
 import { beforeEach, afterAll, afterEach } from 'vitest';
 dotenv.config();
 
 const { transaction, Model } = objection;
 
-DBModel.init(process.env.DATABASE_TEST_URL as string);
-
-const knex = DBModel.knex;
 let globalTransaction: objection.Transaction | null;
 let globalKnex: Knex | null;
 
-beforeEach(async () => {
-	globalTransaction = await transaction.start(knex);
-	Model.knex(globalTransaction);
-});
+beforeEach(async () => {});
 
-afterEach(async () => {
-	if (globalTransaction) await globalTransaction.rollback();
-	Model.knex(knex);
-});
+afterEach(async () => {});
 
-afterAll(async () => {
-	knex.destroy();
-});
+afterAll(async () => {});

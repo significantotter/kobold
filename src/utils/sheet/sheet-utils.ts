@@ -1,21 +1,16 @@
 import _ from 'lodash';
 import {
 	Modifier,
-	SheetAdjustment,
 	Sheet,
-	SheetModifier,
+	SheetAdjustment,
 	SheetAdjustmentOperationEnum,
 	SheetAdjustmentTypeEnum,
-	ModelWithSheet,
-	SheetBaseCounterKeys,
-	SheetRecord,
+	SheetModifier,
 } from '../../services/kobold/index.js';
+import { KoboldError } from '../KoboldError.js';
 import { SheetAdjuster } from './sheet-adjuster.js';
 import { SheetAdjustmentBucketer } from './sheet-adjustment-bucketer.js';
-import { KoboldError } from '../KoboldError.js';
 import { SheetProperties } from './sheet-properties.js';
-import { ChatInputCommandInteraction } from 'discord.js';
-import { Creature } from '../creature.js';
 
 export class SheetUtils {
 	public static adjustSheetWithModifiers(sheet: Sheet, modifiers: Modifier[]) {

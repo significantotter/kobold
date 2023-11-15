@@ -1,33 +1,31 @@
 import {
-	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
-	ChatInputCommandInteraction,
-	PermissionsString,
 	ApplicationCommandOptionChoiceData,
+	ApplicationCommandType,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
+	ChatInputCommandInteraction,
+	PermissionsString,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 
 import { ChatArgs } from '../../../constants/index.js';
 
-import { InteractionUtils } from '../../../utils/index.js';
-import { Command, CommandDeferType } from '../../index.js';
-import { RollBuilder } from '../../../utils/roll-builder.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import L from '../../../i18n/i18n-node.js';
-import { GameUtils } from '../../../utils/kobold-service-utils/game-utils.js';
 import _ from 'lodash';
-import { GameOptions } from './game-command-options.js';
-import { SheetRecord } from '../../../services/kobold/index.js';
-import { EmbedUtils, KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
-import { Creature } from '../../../utils/creature.js';
-import { InitOptions } from '../init/init-command-options.js';
-import { ActionRoller } from '../../../utils/action-roller.js';
 import { getEmoji } from '../../../constants/emoji.js';
-import { Kobold } from '../../../services/kobold/index.js';
+import L from '../../../i18n/i18n-node.js';
+import { TranslationFunctions } from '../../../i18n/i18n-types.js';
+import { Kobold, SheetRecord } from '../../../services/kobold/index.js';
+import { ActionRoller } from '../../../utils/action-roller.js';
+import { Creature } from '../../../utils/creature.js';
+import { InteractionUtils } from '../../../utils/index.js';
+import { EmbedUtils, KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { RollBuilder } from '../../../utils/roll-builder.js';
+import { Command, CommandDeferType } from '../../index.js';
+import { InitOptions } from '../init/init-command-options.js';
+import { GameOptions } from './game-command-options.js';
 
 export class GameRollSubCommand implements Command {
 	public names = [L.en.commands.game.roll.name()];

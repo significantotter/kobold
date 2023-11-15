@@ -1,16 +1,15 @@
-import { TranslationFunctions } from './../i18n/i18n-types.js';
 import {
-	RESTPostAPIApplicationCommandsJSONBody,
+	ApplicationCommandOptionChoiceData,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CommandInteraction,
 	PermissionsString,
-	ApplicationCommandOptionChoiceData,
+	RESTPostAPIApplicationCommandsJSONBody,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
-import _ from 'lodash';
-import { CompendiumModel } from '../services/pf2etools/compendium.model.js';
 import { Kobold } from '../services/kobold/index.js';
+import { CompendiumModel } from '../services/pf2etools/compendium.model.js';
+import { TranslationFunctions } from './../i18n/i18n-types.js';
 
 export interface InjectedCommandData {}
 

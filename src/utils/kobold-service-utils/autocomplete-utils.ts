@@ -1,15 +1,14 @@
 import { AutocompleteInteraction, CacheType } from 'discord.js';
+import { ilike, sql } from 'drizzle-orm';
 import _ from 'lodash';
-import { InitiativeActor } from '../../services/kobold/index.js';
-import { Creature } from '../creature.js';
+import { InitiativeActor, Kobold } from '../../services/kobold/index.js';
 import { CompendiumModel } from '../../services/pf2etools/compendium.model.js';
-import { StringUtils } from '../string-utils.js';
 import { CompendiumUtils } from '../../services/pf2etools/utils/compendium-utils.js';
-import { Kobold } from '../../services/kobold/index.js';
-import type { KoboldUtils } from './kobold-utils.js';
+import { Creature } from '../creature.js';
 import { InitiativeBuilderUtils } from '../initiative-builder.js';
 import { FinderHelpers } from '../kobold-helpers/finder-helpers.js';
-import { ilike, sql } from 'drizzle-orm';
+import { StringUtils } from '../string-utils.js';
+import type { KoboldUtils } from './kobold-utils.js';
 
 export class AutocompleteUtils {
 	public kobold: Kobold;

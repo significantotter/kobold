@@ -1,5 +1,5 @@
 import { CamelCasePlugin, Kysely, ParseJSONResultsPlugin, PostgresDialect } from 'kysely';
-import Database from './schemas/kanel/Database.js';
+import { CharactersInGamesModel } from './models/characters-in-games.model.js';
 import {
 	ChannelDefaultCharacterModel,
 	CharacterModel,
@@ -12,7 +12,7 @@ import {
 	UserSettingsModel,
 	WgAuthTokenModel,
 } from './models/index.js';
-import { CharactersInGamesModel } from './models/characters-in-games.model.js';
+import Database from './schemas/kanel/Database.js';
 
 export class Kobold {
 	public db: Kysely<Database>;

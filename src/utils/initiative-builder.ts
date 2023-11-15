@@ -1,23 +1,22 @@
+import { CommandInteraction, Message } from 'discord.js';
+import _ from 'lodash';
+import L from '../i18n/i18n-node.js';
 import { TranslationFunctions } from '../i18n/i18n-types.js';
 import {
-	InitiativeActorGroup,
-	InitiativeActor,
-	Character,
-	UserSettings,
-	InitiativeWithRelations,
-	InitiativeActorWithRelations,
 	CharacterWithRelations,
+	InitiativeActor,
+	InitiativeActorGroup,
+	InitiativeActorWithRelations,
+	InitiativeWithRelations,
+	UserSettings,
 } from '../services/kobold/index.js';
-import { CommandInteraction, Message } from 'discord.js';
-import { KoboldEmbed } from './kobold-embed-utils.js';
-import _ from 'lodash';
-import { InteractionUtils } from './interaction-utils.js';
-import { RollBuilder } from './roll-builder.js';
-import { Creature } from './creature.js';
 import { KoboldError } from './KoboldError.js';
-import L from '../i18n/i18n-node.js';
-import { StringUtils } from './string-utils.js';
+import { Creature } from './creature.js';
 import { DefaultUtils } from './default-utils.js';
+import { InteractionUtils } from './interaction-utils.js';
+import { KoboldEmbed } from './kobold-embed-utils.js';
+import { RollBuilder } from './roll-builder.js';
+import { StringUtils } from './string-utils.js';
 
 export type TurnData = {
 	currentRound: number;

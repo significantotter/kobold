@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { PartialDeep } from 'type-fest';
 import {
 	AbilityEnum,
 	ProficiencyStat,
@@ -6,14 +7,12 @@ import {
 	SheetStatKeys,
 	isAbilityEnum,
 } from '../../services/kobold/index.js';
-import { PathBuilder, ability } from '../../services/pathbuilder/pathbuilder.js';
-import { CreatureFluff, Creature, Stat } from '../../services/pf2etools/schemas/index-types.js';
+import { PathBuilder } from '../../services/pathbuilder/pathbuilder.js';
+import { Creature, CreatureFluff, Stat } from '../../services/pf2etools/schemas/index-types.js';
 import { WG } from '../../services/wanderers-guide/wanderers-guide.js';
 import { DiceUtils } from '../dice-utils.js';
-import { KoboldError } from '../KoboldError.js';
-import { SheetUtils } from './sheet-utils.js';
-import { PartialDeep } from 'type-fest';
 import { SheetProperties, SheetStatProperties } from './sheet-properties.js';
+import { SheetUtils } from './sheet-utils.js';
 
 function parsePf2eStat(stat: Stat | number | null): { bonus: number | null; note: string } {
 	if (stat == null) return { bonus: null, note: '' };

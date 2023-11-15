@@ -1,25 +1,24 @@
 import {
+	ApplicationCommandOptionChoiceData,
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
 	ChatInputCommandInteraction,
 	PermissionsString,
-	ApplicationCommandOptionChoiceData,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 import { ChatArgs } from '../../../constants/chat-args.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 
+import L from '../../../i18n/i18n-node.js';
 import { CommandUtils } from '../../../utils/index.js';
+import { InjectedServices } from '../../command.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { ActionOptions } from '../action/action-command-options.js';
 import { InitOptions } from '../init/init-command-options.js';
-import L from '../../../i18n/i18n-node.js';
-import { InjectedServices } from '../../command.js';
-import { Kobold } from '../../../services/kobold/index.js';
 
 export class RollCommand implements Command {
 	public names = [L.en.commands.roll.name()];
@@ -186,7 +185,7 @@ export class RollCommand implements Command {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption,
-		{ kobold }: { kobold: Kobold }
+		services: InjectedServices
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 
@@ -198,7 +197,7 @@ export class RollCommand implements Command {
 			return;
 		}
 
-		return await command.autocomplete(intr, option);
+		return await command.autocomplete(intr, option, services);
 	}
 
 	public async execute(

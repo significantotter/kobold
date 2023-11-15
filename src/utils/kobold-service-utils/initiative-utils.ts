@@ -1,14 +1,14 @@
 import { ChatInputCommandInteraction, TextBasedChannel } from 'discord.js';
-import {
-	InitiativeWithRelations,
-	Sheet,
-	CharacterWithRelations,
-} from '../../services/kobold/index.js';
-import { Kobold } from '../../services/kobold/index.js';
-import { KoboldError } from '../KoboldError.js';
-import type { KoboldUtils } from './kobold-utils.js';
 import L from '../../i18n/i18n-node.js';
+import {
+	CharacterWithRelations,
+	InitiativeWithRelations,
+	Kobold,
+	Sheet,
+} from '../../services/kobold/index.js';
+import { KoboldError } from '../KoboldError.js';
 import { InitiativeBuilderUtils } from '../initiative-builder.js';
+import type { KoboldUtils } from './kobold-utils.js';
 
 export class InitiativeUtils {
 	private kobold: Kobold;

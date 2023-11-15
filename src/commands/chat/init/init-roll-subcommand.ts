@@ -1,32 +1,30 @@
-import { ChatArgs } from '../../../constants/chat-args.js';
 import {
+	ApplicationCommandOptionChoiceData,
 	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
-	ChatInputCommandInteraction,
-	PermissionsString,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
-	ApplicationCommandOptionChoiceData,
+	ChatInputCommandInteraction,
+	PermissionsString,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
+import { ChatArgs } from '../../../constants/chat-args.js';
 
-import { InteractionUtils } from '../../../utils/index.js';
-import { Command, CommandDeferType } from '../../index.js';
-import _ from 'lodash';
-import { EmbedUtils, KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import L from '../../../i18n/i18n-node.js';
-import { Creature } from '../../../utils/creature.js';
-import { RollBuilder } from '../../../utils/roll-builder.js';
-import { ActionRoller } from '../../../utils/action-roller.js';
 import { getEmoji } from '../../../constants/emoji.js';
-import { InitOptions } from './init-command-options.js';
-import { SheetRecord } from '../../../services/kobold/index.js';
+import L from '../../../i18n/i18n-node.js';
+import { TranslationFunctions } from '../../../i18n/i18n-types.js';
+import { Kobold, SheetRecord } from '../../../services/kobold/index.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
-import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { Kobold } from '../../../services/kobold/index.js';
+import { ActionRoller } from '../../../utils/action-roller.js';
+import { Creature } from '../../../utils/creature.js';
+import { InteractionUtils } from '../../../utils/index.js';
 import { InitiativeBuilderUtils } from '../../../utils/initiative-builder.js';
+import { EmbedUtils, KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { RollBuilder } from '../../../utils/roll-builder.js';
+import { Command, CommandDeferType } from '../../index.js';
+import { InitOptions } from './init-command-options.js';
 
 export class InitRollSubCommand implements Command {
 	public names = [L.en.commands.init.roll.name()];

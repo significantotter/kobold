@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import {
+	AbilityEnum,
 	Sheet,
 	SheetBaseCounterKeys,
 	SheetBaseCounters,
@@ -7,10 +8,9 @@ import {
 	SheetInfoLists,
 	SheetIntegerKeys,
 	SheetIntegers,
+	SheetStatKeys,
 	SheetStats,
 	SheetWeaknessesResistances,
-	AbilityEnum,
-	SheetStatKeys,
 	StatSubGroupEnum,
 	getDefaultSheet,
 } from '../../services/kobold/index.js';
