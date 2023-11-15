@@ -1,5 +1,5 @@
 import { KoboldEmbed } from './../../../utils/kobold-embed-utils.js';
-import { InitiativeUtils, InitiativeBuilder } from '../../../utils/initiative-builder.js';
+import { InitiativeBuilder } from '../../../utils/initiative-builder.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -15,13 +15,12 @@ import { RateLimiter } from 'discord.js-rate-limiter';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import _ from 'lodash';
-import { Initiative, InitiativeModel } from '../../../services/kobold/index.js';
+import { InitiativeModel, Kobold } from '../../../services/kobold/index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import L from '../../../i18n/i18n-node.js';
 import { InitOptions } from './init-command-options.js';
-import { SettingsUtils } from '../../../utils/kobold-service-utils/user-settings-utils.js';
-import { KoboldError } from '../../../utils/KoboldError.js';
 import { AutocompleteUtils } from '../../../utils/kobold-service-utils/autocomplete-utils.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 
 export class InitJumpToSubCommand implements Command {
 	public names = [L.en.commands.init.jumpTo.name()];
@@ -45,7 +44,8 @@ export class InitJumpToSubCommand implements Command {
 		if (option.name === InitOptions.INIT_CHARACTER_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
 			const match = intr.options.getString(InitOptions.INIT_CHARACTER_OPTION.name);
-			return AutocompleteUtils.getAllInitMembers(intr, match);
+			const { autocompleteUtils } = new KoboldUtils(kobold);
+			return autocompleteUtils.getAllInitMembers(intr, match);
 		}
 	}
 
@@ -58,25 +58,27 @@ export class InitJumpToSubCommand implements Command {
 			InitOptions.INIT_CHARACTER_OPTION.name,
 			true
 		);
-		const [currentInit, userSettings] = await Promise.all([
-			InitiativeUtils.getInitiativeForChannel(intr.channel),
-			SettingsUtils.getSettingsForUser(intr),
-		]);
+		const koboldUtils = new KoboldUtils(kobold);
+		const { currentInitiative, userSettings } =
+			await koboldUtils.fetchNonNullableDataForCommand(intr, {
+				currentInitiative: true,
+				userSettings: true,
+			});
 
 		const initBuilder = new InitiativeBuilder({
-			initiative: currentInit,
+			initiative: currentInitiative,
 			userSettings,
 			LL,
 		});
 		const currentTurn = initBuilder.getCurrentTurnInfo();
 		const targetTurn = initBuilder.getJumpToTurnChanges(targetCharacterName);
 
-		const updatedInitiative = await InitiativeModel.query()
-			.patchAndFetchById(initBuilder.init.id, {
+		const updatedInitiative = await kobold.initiative.update(
+			{ id: currentInitiative.id },
+			{
 				currentTurnGroupId: targetTurn.currentTurnGroupId,
-			})
-			.withGraphFetched('[actors.[character], actorGroups]');
-
+			}
+		);
 		initBuilder.set({
 			initiative: updatedInitiative,
 			actors: updatedInitiative.actors,

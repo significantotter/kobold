@@ -18,6 +18,7 @@ import { GameplayOptions } from './gameplay-command-options.js';
 import { ChatArgs } from '../../../constants/chat-args.js';
 import L from '../../../i18n/i18n-node.js';
 import { InjectedServices } from '../../command.js';
+import { Kobold } from '../../../services/kobold/index.js';
 
 export class GameplayCommand implements Command {
 	public names = [L.en.commands.gameplay.name()];

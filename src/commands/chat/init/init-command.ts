@@ -18,6 +18,7 @@ import { CommandUtils, InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { InitOptions } from './init-command-options.js';
 import { InjectedServices } from '../../command.js';
+import { Kobold } from '../../../services/kobold/index.js';
 
 export class InitCommand implements Command {
 	public names = [L.en.commands.init.name()];

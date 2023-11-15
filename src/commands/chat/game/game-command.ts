@@ -19,6 +19,7 @@ import { GameOptions } from './game-command-options.js';
 import { InitOptions } from '../init/init-command-options.js';
 import L from '../../../i18n/i18n-node.js';
 import { InjectedServices } from '../../command.js';
+import { Kobold } from '../../../services/kobold/kobold.model.js';
 
 export class GameCommand implements Command {
 	public names = [L.en.commands.game.name()];

@@ -16,7 +16,7 @@ import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { GameWithRelations } from '../../../services/kobold/index.js';
 import { InteractionUtils } from '../../../utils/interaction-utils.js';
-import { Kobold } from '../../../services/kobold/kobold.model.js';
+import { Kobold } from '../../../services/kobold/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
 
@@ -118,7 +118,8 @@ export class GameManageSubCommand implements Command {
 			throw new KoboldError('You can only manage games in a server!');
 		}
 
-		const { characterUtils } = new KoboldUtils(kobold);
+		const koboldUtils = new KoboldUtils(kobold);
+		const { characterUtils } = koboldUtils;
 
 		// This option uses value differently, so we do this separately from the rest
 		if (option === L.en.commandOptions.gameManageOption.choices.kick.name()) {

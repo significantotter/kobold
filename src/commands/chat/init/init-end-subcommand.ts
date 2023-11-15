@@ -10,11 +10,11 @@ import { RateLimiter } from 'discord.js-rate-limiter';
 
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
-import { InitiativeUtils } from '../../../utils/initiative-builder.js';
-import { Initiative, InitiativeModel } from '../../../services/kobold/index.js';
+import { InitiativeModel, Kobold } from '../../../services/kobold/index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import L from '../../../i18n/i18n-node.js';
 import { CollectorUtils } from '../../../utils/collector-utils.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 
 export class InitEndSubCommand implements Command {
 	public names = [L.en.commands.init.end.name()];
@@ -34,7 +34,10 @@ export class InitEndSubCommand implements Command {
 		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
-		const currentInit = await InitiativeUtils.getInitiativeForChannel(intr.channel);
+		const koboldUtils = new KoboldUtils(kobold);
+		const { currentInitiative } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+			currentInitiative: true,
+		});
 
 		const prompt = await intr.reply({
 			content: LL.commands.init.end.interactions.confirmation.text(),
@@ -105,7 +108,7 @@ export class InitEndSubCommand implements Command {
 				components: [],
 			});
 			try {
-				await InitiativeModel.query().deleteById(currentInit.id);
+				await kobold.initiative.delete({ id: currentInitiative.id });
 				await InteractionUtils.send(intr, L.en.commands.init.end.interactions.success());
 				return;
 			} catch (err) {

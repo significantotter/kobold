@@ -20,13 +20,15 @@ import L from '../../../i18n/i18n-node.js';
 import _ from 'lodash';
 import { GameOptions } from './game-command-options.js';
 import { InitOptions } from '../init/init-command-options.js';
-import { Kobold } from '../../../services/kobold/kobold.model.js';
+import { Kobold } from '../../../services/kobold/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import {
 	Character,
 	InitiativeWithRelations,
 	UserSettings,
 } from '../../../services/kobold/index.js';
+import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
+import { Creature } from '../../../utils/creature.js';
 
 export class GameInitSubCommand implements Command {
 	public names = [L.en.commands.game.init.name()];
@@ -58,7 +60,7 @@ export class GameInitSubCommand implements Command {
 			//we don't need to autocomplete if we're just dealing with whitespace
 			const match = intr.options.getString(ChatArgs.SKILL_CHOICE_OPTION.name) ?? '';
 
-			const { gameUtils, characterUtils } = new KoboldUtils(kobold);
+			const { gameUtils } = new KoboldUtils(kobold);
 			//get the active game
 			const game = await gameUtils.getActiveGame(intr.user.id, intr.guildId ?? '');
 			if (!game) {
@@ -67,9 +69,10 @@ export class GameInitSubCommand implements Command {
 			}
 			const choices: Set<string> = new Set();
 			for (const character of game.characters || []) {
-				const matchedSkills = characterUtils
-					.findPossibleSkillFromString(character, match)
-					.map(skill => skill.name);
+				const matchedSkills = FinderHelpers.matchAllSkills(
+					Creature.fromSheetRecord(character.sheetRecord),
+					match
+				).map(skill => skill.name);
 				for (const skill of matchedSkills) {
 					choices.add(_.capitalize(skill));
 				}
@@ -150,7 +153,7 @@ export class GameInitSubCommand implements Command {
 				(targetCharacter &&
 					targetCharacter.toLocaleLowerCase().trim().length > 0 &&
 					targetCharacter.toLocaleLowerCase().trim() !==
-						character.sheet.staticInfo.name.toLocaleLowerCase().trim())
+						character.name.toLocaleLowerCase().trim())
 			) {
 				continue;
 			}
@@ -171,13 +174,11 @@ export class GameInitSubCommand implements Command {
 				character.name
 			);
 
-			await koboldUtils.initiativeUtils.addActorToInitiative({
+			await koboldUtils.initiativeUtils.createActorFromCharacter({
 				initiativeId: currentInitiative.id,
-				characterId: character.id,
-				sheet: character.sheet,
+				character,
 				name: actorName,
 				initiativeResult,
-				userId: intr.user.id,
 				hideStats: false,
 			});
 

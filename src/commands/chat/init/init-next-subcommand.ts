@@ -1,4 +1,4 @@
-import { InitiativeUtils, InitiativeBuilder } from '../../../utils/initiative-builder.js';
+import { InitiativeBuilder } from '../../../utils/initiative-builder.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -10,11 +10,11 @@ import { RateLimiter } from 'discord.js-rate-limiter';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import _ from 'lodash';
-import { Initiative, InitiativeModel } from '../../../services/kobold/index.js';
+import { InitiativeModel, Kobold } from '../../../services/kobold/index.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import L from '../../../i18n/i18n-node.js';
-import { SettingsUtils } from '../../../utils/kobold-service-utils/user-settings-utils.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 
 export class InitNextSubCommand implements Command {
 	public names = [L.en.commands.init.next.name()];
@@ -34,21 +34,25 @@ export class InitNextSubCommand implements Command {
 		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
-		const [currentInit, userSettings] = await Promise.all([
-			InitiativeUtils.getInitiativeForChannel(intr.channel),
-			SettingsUtils.getSettingsForUser(intr),
-		]);
+		const koboldUtils = new KoboldUtils(kobold);
+		const { currentInitiative, userSettings } =
+			await koboldUtils.fetchNonNullableDataForCommand(intr, {
+				currentInitiative: true,
+				userSettings: true,
+			});
+
 		const initBuilder = new InitiativeBuilder({
-			initiative: currentInit,
+			initiative: currentInitiative,
 			userSettings,
 			LL,
 		});
 		const currentTurn = initBuilder.getCurrentTurnInfo();
 		const nextTurn = initBuilder.getNextTurnChanges();
 
-		const updatedInitiative = await InitiativeModel.query()
-			.patchAndFetchById(currentInit.id, nextTurn)
-			.withGraphFetched('[actors.[character], actorGroups]');
+		const updatedInitiative = await kobold.initiative.update(
+			{ id: currentInitiative.id },
+			nextTurn
+		);
 
 		initBuilder.set({
 			initiative: updatedInitiative,

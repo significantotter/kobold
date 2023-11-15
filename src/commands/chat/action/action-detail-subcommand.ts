@@ -18,6 +18,9 @@ import _ from 'lodash';
 import { ActionOptions } from './action-command-options.js';
 import { getEmoji } from '../../../constants/emoji.js';
 import L from '../../../i18n/i18n-node.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { Kobold } from '../../../services/kobold/kobold.model.js';
+import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 
 export class ActionDetailSubCommand implements Command {
 	public names = [L.en.commands.action.detail.name()];
@@ -42,14 +45,15 @@ export class ActionDetailSubCommand implements Command {
 			const match = intr.options.getString(ActionOptions.ACTION_TARGET_OPTION.name) ?? '';
 
 			//get the active character
-			const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
+			const { characterUtils } = new KoboldUtils(kobold);
+			const activeCharacter = await characterUtils.getActiveCharacter(intr);
 			if (!activeCharacter) {
 				//no choices if we don't have a character to match against
 				return [];
 			}
 			//find an action on the character matching the autocomplete string
-			const matchedActions = CharacterUtils.findPossibleActionFromString(
-				activeCharacter,
+			const matchedActions = FinderHelpers.matchAllActions(
+				activeCharacter.sheetRecord,
 				match
 			).map(action => ({
 				name: action.name,
@@ -66,16 +70,16 @@ export class ActionDetailSubCommand implements Command {
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const actionChoice = intr.options.getString(ActionOptions.ACTION_TARGET_OPTION.name, true);
-		//get the active character
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
-		if (!activeCharacter) {
-			await InteractionUtils.send(
-				intr,
-				LL.commands.character.interactions.noActiveCharacter()
-			);
-			return;
-		}
-		const targetAction = activeCharacter.getActionByName(actionChoice);
+
+		const koboldUtils = new KoboldUtils(kobold);
+		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+			activeCharacter: true,
+		});
+
+		const targetAction = FinderHelpers.getActionByName(
+			activeCharacter.sheetRecord,
+			actionChoice
+		);
 		if (!targetAction) {
 			await InteractionUtils.send(intr, LL.commands.action.interactions.notFound());
 			return;

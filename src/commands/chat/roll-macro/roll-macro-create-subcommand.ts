@@ -13,7 +13,8 @@ import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import L from '../../../i18n/i18n-node.js';
 import { RollBuilder } from '../../../utils/roll-builder.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { Kobold } from '../../../services/kobold/kobold.model.js';
+import { Kobold } from '../../../services/kobold/index.js';
+import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 
 export class RollMacroCreateSubCommand implements Command {
 	public names = [L.en.commands.rollMacro.create.name()];
@@ -34,7 +35,6 @@ export class RollMacroCreateSubCommand implements Command {
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const koboldUtils = new KoboldUtils(kobold);
-		const { characterUtils } = koboldUtils;
 		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
 			activeCharacter: true,
 		});
@@ -43,12 +43,12 @@ export class RollMacroCreateSubCommand implements Command {
 		const macro = intr.options.getString(RollMacroOptions.MACRO_VALUE_OPTION.name, true);
 
 		// make sure the name does't already exist in the character's rollMacros
-		if (characterUtils.getRollMacroByName(activeCharacter, name)) {
+		if (FinderHelpers.getRollMacroByName(activeCharacter.sheetRecord, name)) {
 			await InteractionUtils.send(
 				intr,
 				LL.commands.rollMacro.create.interactions.alreadyExists({
 					macroName: name,
-					characterName: activeCharacter.sheet.staticInfo.name,
+					characterName: activeCharacter.name,
 				})
 			);
 			return;
@@ -66,11 +66,11 @@ export class RollMacroCreateSubCommand implements Command {
 			return;
 		}
 
-		await kobold.character.update(
-			{ id: activeCharacter.id },
+		await kobold.sheetRecord.update(
+			{ id: activeCharacter.sheetRecord.id },
 			{
 				rollMacros: [
-					...activeCharacter.rollMacros,
+					...activeCharacter.sheetRecord.rollMacros,
 					{
 						name,
 						macro,
@@ -84,7 +84,7 @@ export class RollMacroCreateSubCommand implements Command {
 			intr,
 			LL.commands.rollMacro.create.interactions.created({
 				macroName: name,
-				characterName: activeCharacter.sheet.staticInfo.name,
+				characterName: activeCharacter.name,
 			})
 		);
 		return;

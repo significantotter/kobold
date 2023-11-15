@@ -1,17 +1,19 @@
-import { Kysely } from 'kysely';
+import { ExpressionBuilder, Kysely } from 'kysely';
 import { Model } from './model.js';
 import {
 	Database,
-	Character,
 	CharacterUpdate,
 	CharacterId,
 	NewCharacter,
 	CharacterWithRelations,
+	SheetRecord,
 } from '../schemas/index.js';
 import {
 	channelDefaultCharacterForCharacter,
 	guildDefaultCharacterForCharacter,
+	sheetRecordForCharacter,
 } from '../lib/shared-relation-builders.js';
+import { jsonObjectFrom } from 'kysely/helpers/postgres';
 
 export class CharacterModel extends Model<Database['character']> {
 	constructor(db: Kysely<Database>) {
@@ -26,6 +28,7 @@ export class CharacterModel extends Model<Database['character']> {
 			.returning(eb => [
 				guildDefaultCharacterForCharacter(eb),
 				channelDefaultCharacterForCharacter(eb),
+				sheetRecordForCharacter(eb),
 			])
 			.execute();
 		return result[0];
@@ -46,6 +49,7 @@ export class CharacterModel extends Model<Database['character']> {
 			.select(eb => [
 				guildDefaultCharacterForCharacter(eb, { guildId }),
 				channelDefaultCharacterForCharacter(eb, { channelId }),
+				sheetRecordForCharacter(eb),
 			])
 			.where('character.userId', '=', userId)
 			.execute();
@@ -62,38 +66,92 @@ export class CharacterModel extends Model<Database['character']> {
 		return null;
 	}
 
-	public async readMany({
+	public readMany({
 		userId,
 		guildId,
 		channelId,
+		name,
 	}: {
 		userId?: string;
 		guildId?: string;
 		channelId?: string;
+		name?: string;
 	}): Promise<CharacterWithRelations[]> {
-		let query = await this.db
+		let query = this.db
 			.selectFrom('character')
 			.selectAll()
 			.select(eb => [
 				guildDefaultCharacterForCharacter(eb, { guildId }),
 				channelDefaultCharacterForCharacter(eb, { channelId }),
+				sheetRecordForCharacter(eb),
 			]);
 		if (userId) query = query.where('character.userId', '=', userId);
+		if (name) query = query.where('character.name', 'ilike', `%${name}%`);
 
-		return await query.execute();
+		return query.execute();
 	}
 
-	public async read({ id }: { id: CharacterId }): Promise<CharacterWithRelations | null> {
-		const result = await this.db
+	public async read(
+		params: {
+			name?: string;
+			charId?: number;
+			importSource?: string;
+		} & (
+			| {
+					id: CharacterId;
+			  }
+			| {
+					userId: string;
+			  }
+		)
+	): Promise<CharacterWithRelations | null> {
+		let query = this.db
 			.selectFrom('character')
 			.selectAll()
 			.select(eb => [
 				guildDefaultCharacterForCharacter(eb),
 				channelDefaultCharacterForCharacter(eb),
-			])
-			.where('character.id', '=', id)
+				sheetRecordForCharacter(eb),
+			]);
+		if ('id' in params) query = query.where('character.id', '=', params.id);
+		else {
+			query = query.where('character.userId', '=', params.userId);
+		}
+		if (params.name) query = query.where('character.name', 'ilike', `%${params.name}%`);
+		if (params.charId) {
+			query = query.where('character.charId', '=', params.charId);
+		}
+		if (params.importSource) {
+			query = query.where('character.importSource', '=', params.importSource);
+		}
+		return (await query.executeTakeFirst()) ?? null;
+	}
+
+	public async setIsActive({
+		id,
+		userId,
+	}: {
+		id: CharacterId;
+		userId: string;
+	}): Promise<CharacterWithRelations> {
+		await this.db
+			.updateTable('character')
+			.set({ isActiveCharacter: false })
+			.where('character.userId', '=', userId)
 			.execute();
-		return result[0] ?? null;
+
+		const result = await this.db
+			.updateTable('character')
+			.set({ isActiveCharacter: true })
+			.where('character.id', '=', id)
+			.returningAll()
+			.returning(eb => [
+				guildDefaultCharacterForCharacter(eb),
+				channelDefaultCharacterForCharacter(eb),
+				sheetRecordForCharacter(eb),
+			])
+			.execute();
+		return result[0];
 	}
 
 	public async update(
@@ -108,6 +166,7 @@ export class CharacterModel extends Model<Database['character']> {
 			.returning(eb => [
 				guildDefaultCharacterForCharacter(eb),
 				channelDefaultCharacterForCharacter(eb),
+				sheetRecordForCharacter(eb),
 			])
 			.execute();
 		return result[0];

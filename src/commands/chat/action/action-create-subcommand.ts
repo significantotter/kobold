@@ -1,4 +1,10 @@
-import { Action, CharacterModel } from '../../../services/kobold/index.js';
+import {
+	Action,
+	ActionCostEnum,
+	ActionTypeEnum,
+	CharacterModel,
+	Kobold,
+} from '../../../services/kobold/index.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -12,6 +18,8 @@ import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { CharacterUtils } from '../../../utils/kobold-service-utils/character-utils.js';
 import { ActionOptions } from './action-command-options.js';
 import L from '../../../i18n/i18n-node.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 
 export class ActionCreateSubCommand implements Command {
 	public names = [L.en.commands.action.create.name()];
@@ -30,14 +38,11 @@ export class ActionCreateSubCommand implements Command {
 		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
-		if (!activeCharacter) {
-			await InteractionUtils.send(
-				intr,
-				LL.commands.character.interactions.noActiveCharacter()
-			);
-			return;
-		}
+		const koboldUtils = new KoboldUtils(kobold);
+		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+			activeCharacter: true,
+		});
+
 		let name = intr.options.getString(ActionOptions.ACTION_NAME_OPTION.name, true).trim();
 		const description =
 			intr.options.getString(ActionOptions.ACTION_DESCRIPTION_OPTION.name) ?? '';
@@ -49,38 +54,42 @@ export class ActionCreateSubCommand implements Command {
 		const tags = intr.options.getString(ActionOptions.ACTION_TAGS_OPTION.name);
 
 		// make sure the name does't already exist in the character's actions
-		if (activeCharacter.getActionByName(name)) {
+		if (FinderHelpers.getActionByName(activeCharacter.sheetRecord, name)) {
 			await InteractionUtils.send(
 				intr,
 				LL.commands.action.create.interactions.alreadyExists({
 					actionName: name,
-					characterName: activeCharacter.sheet.staticInfo.name,
+					characterName: activeCharacter.name,
 				})
 			);
 			return;
 		}
-		await CharacterModel.query().updateAndFetchById(activeCharacter.id, {
-			actions: [
-				...activeCharacter.actions,
-				{
-					name,
-					description,
-					type: type,
-					actionCost,
-					baseLevel,
-					autoHeighten,
-					rolls: [],
-					tags: tags ? tags.split(',').map(tag => tag.trim()) : [],
-				},
-			] as Action[],
-		});
+
+		await kobold.sheetRecord.update(
+			{ id: activeCharacter.sheetRecordId },
+			{
+				actions: [
+					...activeCharacter.sheetRecord.actions,
+					{
+						name,
+						description,
+						type: type as ActionTypeEnum,
+						actionCost: actionCost as ActionCostEnum,
+						baseLevel,
+						autoHeighten,
+						rolls: [],
+						tags: tags ? tags.split(',').map(tag => tag.trim()) : [],
+					},
+				],
+			}
+		);
 
 		//send a response
 		await InteractionUtils.send(
 			intr,
 			LL.commands.action.create.interactions.created({
 				actionName: name,
-				characterName: activeCharacter.sheet.staticInfo.name,
+				characterName: activeCharacter.name,
 			})
 		);
 		return;

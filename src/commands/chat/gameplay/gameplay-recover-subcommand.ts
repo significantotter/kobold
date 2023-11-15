@@ -13,13 +13,11 @@ import { Command, CommandDeferType } from '../../index.js';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { GameplayOptions } from './gameplay-command-options.js';
-import { AutocompleteUtils } from '../../../utils/kobold-service-utils/autocomplete-utils.js';
-import { GameplayUtils } from '../../../utils/kobold-service-utils/gameplay-utils.js';
 import { InteractionUtils } from '../../../utils/interaction-utils.js';
-import { InitiativeActor, InitiativeActorModel } from '../../../services/kobold/index.js';
-import { GameUtils } from '../../../utils/kobold-service-utils/game-utils.js';
-import { koboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { InitiativeActorModel, Kobold } from '../../../services/kobold/index.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { SheetUtils } from '../../../utils/sheet/sheet-utils.js';
+import { Creature } from '../../../utils/creature.js';
 
 export class GameplayRecoverSubCommand implements Command {
 	public names = [L.en.commands.gameplay.recover.name()];
@@ -40,7 +38,8 @@ export class GameplayRecoverSubCommand implements Command {
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name) {
-			return await AutocompleteUtils.getAllTargetOptions(intr, option.value);
+			const { autocompleteUtils } = new KoboldUtils(kobold);
+			return await autocompleteUtils.getAllTargetOptions(intr, option.value);
 		}
 	}
 
@@ -50,47 +49,30 @@ export class GameplayRecoverSubCommand implements Command {
 		{ kobold }: { kobold: any }
 	): Promise<void> {
 		const targetCharacter = intr.options.getString(
-			GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name
+			GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name,
+			true
 		);
 
-		const { gameUtils } = koboldUtils(kobold);
+		const { gameUtils, gameplayUtils } = new KoboldUtils(kobold);
 
-		const { characterOrInitActorTargets } = await gameUtils.getCharacterOrInitActorTarget(
-			intr,
-			targetCharacter
-		);
-		if (!characterOrInitActorTargets?.length) {
-			if (!targetCharacter) {
-				await InteractionUtils.send(
-					intr,
-					`Yip! I couldn't find an active character to target! Specify a "target-character" to target something else.`
-				);
-			} else {
-				await InteractionUtils.send(
-					intr,
-					`Yip! I couldn't find any characters or initiative actors named ${targetCharacter}!`
-				);
-			}
-			return;
-		}
+		const { targetSheetRecord, hideStats, targetName } =
+			await gameUtils.getCharacterOrInitActorTarget(intr, targetCharacter);
+		const targetCreature = Creature.fromSheetRecord(targetSheetRecord);
 
-		const recoverValues = await SheetUtils.recoverGameplayStats(
+		const recoverValues = await gameplayUtils.recoverGameplayStats(
 			intr,
-			characterOrInitActorTargets
+			targetSheetRecord,
+			targetCreature
 		);
 		if (!recoverValues.length) {
 			await InteractionUtils.send(
 				intr,
-				`Yip! I tried to recover ${characterOrInitActorTargets[0].name}'s stats, but their stats are already full!`
+				`Yip! I tried to recover ${targetName}'s stats, but their stats are already full!`
 			);
 			return;
 		} else {
 			let recoveredStats;
-			if (
-				characterOrInitActorTargets.some(
-					character => character instanceof InitiativeActorModel && character.hideStats
-				)
-			) {
+			if (hideStats) {
 				recoveredStats = recoverValues.map(
 					recoveredStat =>
 						`${recoveredStat.name} increased by ${
@@ -105,9 +87,7 @@ export class GameplayRecoverSubCommand implements Command {
 			}
 			await InteractionUtils.send(
 				intr,
-				`Yip! ${characterOrInitActorTargets[0].name} recovered! ${recoveredStats.join(
-					', '
-				)}`
+				`Yip! ${targetName} recovered! ${recoveredStats.join(', ')}`
 			);
 		}
 	}

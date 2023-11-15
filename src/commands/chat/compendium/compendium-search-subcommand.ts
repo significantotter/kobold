@@ -17,7 +17,6 @@ import { CompendiumModel } from '../../../services/pf2etools/compendium.model.js
 import { CompendiumOptions } from './compendium-command-options.js';
 import { CompendiumEmbedParser } from '../../../services/pf2etools/parsers/compendium-parser.js';
 import { getEmoji } from '../../../constants/emoji.js';
-import { AutocompleteUtils } from '../../../utils/kobold-service-utils/autocomplete-utils.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { CompendiumUtils } from '../../../services/pf2etools/utils/compendium-utils.js';
 
@@ -63,6 +62,8 @@ import type {
 	Vehicle,
 	VersatileHeritage,
 } from '../../../services/pf2etools/schemas/index-types.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { Kobold } from '../../../services/kobold/kobold.model.js';
 
 export class CompendiumSearchSubCommand implements Command {
 	public names = [L.en.commands.compendium.search.name()];
@@ -79,13 +80,14 @@ export class CompendiumSearchSubCommand implements Command {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption,
-		{ compendium }: { compendium: CompendiumModel }
+		{ compendium, kobold }: { compendium: CompendiumModel; kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === CompendiumOptions.COMPENDIUM_SEARCH_OPTION.name) {
 			const search =
 				intr.options.getString(CompendiumOptions.COMPENDIUM_SEARCH_OPTION.name, true) ?? '';
-			return AutocompleteUtils.searchCompendium(intr, search, compendium);
+			const { autocompleteUtils } = new KoboldUtils(kobold);
+			return autocompleteUtils.searchCompendium(intr, search, compendium);
 		}
 	}
 	public async execute(

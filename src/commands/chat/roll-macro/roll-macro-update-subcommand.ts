@@ -20,7 +20,9 @@ import { RollMacroOptions } from './roll-macro-command-options.js';
 import { DiceRollResult } from '../../../utils/dice-utils.js';
 import { RollBuilder } from '../../../utils/roll-builder.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { Kobold } from '../../../services/kobold/kobold.model.js';
+import { Kobold } from '../../../services/kobold/index.js';
+import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
+import { Creature } from '../../../utils/creature.js';
 
 export class RollMacroUpdateSubCommand implements Command {
 	public names = [L.en.commands.rollMacro.update.name()];
@@ -69,8 +71,8 @@ export class RollMacroUpdateSubCommand implements Command {
 
 		let updateValue: string | string[] | number;
 
-		const targetRollMacro = koboldUtils.characterUtils.getRollMacroByName(
-			activeCharacter,
+		const targetRollMacro = FinderHelpers.getRollMacroByName(
+			activeCharacter.sheetRecord,
 			rollMacroName
 		);
 
@@ -93,19 +95,19 @@ export class RollMacroUpdateSubCommand implements Command {
 		}
 
 		// still references the deep values in characterRollMacros
-		let targetIndex = _.indexOf(activeCharacter.rollMacros, targetRollMacro);
+		let targetIndex = _.indexOf(activeCharacter.sheetRecord.rollMacros, targetRollMacro);
 
-		activeCharacter.rollMacros[targetIndex].macro = macro;
+		activeCharacter.sheetRecord.rollMacros[targetIndex].macro = macro;
 
-		kobold.character.update(
-			{ id: activeCharacter.id },
-			{ rollMacros: activeCharacter.rollMacros }
+		kobold.sheetRecord.update(
+			{ id: activeCharacter.sheetRecord.id },
+			{ rollMacros: activeCharacter.sheetRecord.rollMacros }
 		);
 
 		const updateEmbed = new KoboldEmbed();
 		updateEmbed.setTitle(
 			LL.commands.rollMacro.update.interactions.successEmbed.title({
-				characterName: activeCharacter.sheet.staticInfo.name,
+				characterName: activeCharacter.name,
 				macroName: targetRollMacro.name,
 				newMacroValue: macro,
 			})

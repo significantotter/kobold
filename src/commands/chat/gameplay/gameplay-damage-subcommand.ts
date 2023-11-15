@@ -20,6 +20,8 @@ import _ from 'lodash';
 import { Creature } from '../../../utils/creature.js';
 import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
 import { GameUtils } from '../../../utils/kobold-service-utils/game-utils.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { Kobold } from '../../../services/kobold/kobold.model.js';
 
 export class GameplayDamageSubCommand implements Command {
 	public names = [L.en.commands.gameplay.damage.name()];
@@ -42,14 +44,15 @@ export class GameplayDamageSubCommand implements Command {
 		if (option.name === GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name) {
 			const match =
 				intr.options.getString(GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name) ?? '';
-			return await AutocompleteUtils.getAllTargetOptions(intr, match);
+			const { autocompleteUtils } = new KoboldUtils(kobold);
+			return await autocompleteUtils.getAllTargetOptions(intr, match);
 		}
 	}
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
 		LL: TranslationFunctions,
-		{ kobold }: { kobold: any }
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const targetCharacter = intr.options.getString(
 			GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name,
@@ -58,12 +61,13 @@ export class GameplayDamageSubCommand implements Command {
 		const amount = intr.options.getNumber(GameplayOptions.GAMEPLAY_DAMAGE_AMOUNT.name, true);
 		const type = intr.options.getString(GameplayOptions.GAMEPLAY_DAMAGE_TYPE.name, true);
 
-		const { characterOrInitActorTargets } = await new GameUtils(
-			kobold
-		).getCharacterOrInitActorTarget(intr, targetCharacter);
+		const { gameUtils, creatureUtils } = new KoboldUtils(kobold);
 
-		const sheet = characterOrInitActorTargets[0].sheet;
-		const creature = new Creature(sheet);
+		const { targetSheetRecord, hideStats, targetName } =
+			await gameUtils.getCharacterOrInitActorTarget(intr, targetCharacter);
+
+		const creature = Creature.fromSheetRecord(targetSheetRecord);
+
 		let message = '';
 		if (amount >= 0) {
 			const damageResult = creature.applyDamage(amount, type);
@@ -93,7 +97,7 @@ export class GameplayDamageSubCommand implements Command {
 				targetCreatureSheet: creature.sheet,
 			});
 		}
-		await characterOrInitActorTargets[0].saveSheet(intr, creature.sheet);
+		await creatureUtils.saveSheet(intr, targetSheetRecord);
 
 		await InteractionUtils.send(intr, message);
 	}

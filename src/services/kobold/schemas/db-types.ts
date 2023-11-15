@@ -1,4 +1,3 @@
-export * from './kanel/BestiaryFilesLoaded.js';
 export * from './kanel/ChannelDefaultCharacter.js';
 export * from './kanel/Character.js';
 export * from './kanel/CharactersInGames.js';
@@ -7,13 +6,12 @@ export * from './kanel/GuildDefaultCharacter.js';
 export * from './kanel/Initiative.js';
 export * from './kanel/InitiativeActor.js';
 export * from './kanel/InitiativeActorGroup.js';
-export * from './kanel/Npc.js';
+export * from './kanel/SheetRecord.js';
 export * from './kanel/UserSettings.js';
 export * from './kanel/WgAuthToken.js';
 export * from './kanel/PublicSchema.js';
 export * from './kanel/Database.js';
 
-export { default as BestiaryFilesLoadedTable } from './kanel/BestiaryFilesLoaded.js';
 export { default as ChannelDefaultCharacterTable } from './kanel/ChannelDefaultCharacter.js';
 export { default as CharacterTable } from './kanel/Character.js';
 export { default as CharactersInGamesTable } from './kanel/CharactersInGames.js';
@@ -22,7 +20,7 @@ export { default as GuildDefaultCharacterTable } from './kanel/GuildDefaultChara
 export { default as InitiativeTable } from './kanel/Initiative.js';
 export { default as InitiativeActorTable } from './kanel/InitiativeActor.js';
 export { default as InitiativeActorGroupTable } from './kanel/InitiativeActorGroup.js';
-export { default as NpcTable } from './kanel/Npc.js';
+export { default as SheetRecordTable } from './kanel/SheetRecord.js';
 export { default as UserSettingsTable } from './kanel/UserSettings.js';
 export { default as WgAuthTokenTable } from './kanel/WgAuthToken.js';
 export { default as PublicSchema } from './kanel/PublicSchema.js';

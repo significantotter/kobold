@@ -19,10 +19,10 @@ import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { InteractionUtils } from '../../../utils/interaction-utils.js';
 import _ from 'lodash';
 import { Creature } from '../../../utils/creature.js';
-import { Character, CharacterModel } from '../../../services/kobold/index.js';
+import { CharacterWithRelations, Kobold } from '../../../services/kobold/index.js';
 import { ChatArgs } from '../../../constants/chat-args.js';
-import { CharacterUtils } from '../../../utils/kobold-service-utils/character-utils.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 
 export class GameplayTrackerSubCommand implements Command {
 	public names = [L.en.commands.gameplay.tracker.name()];
@@ -46,7 +46,8 @@ export class GameplayTrackerSubCommand implements Command {
 			const match = intr.options.getString(ChatArgs.SET_ACTIVE_NAME_OPTION.name) ?? '';
 
 			//get the character matches
-			const options = await CharacterUtils.findCharacterByName(match, intr.user.id);
+			const { characterUtils } = new KoboldUtils(kobold);
+			const options = await characterUtils.findOwnedCharacterByName(match, intr.user.id);
 
 			//return the matched characters
 			return options.map(character => ({
@@ -69,12 +70,14 @@ export class GameplayTrackerSubCommand implements Command {
 			false,
 			[ChannelType.GuildText]
 		);
+		const koboldUtils = new KoboldUtils(kobold);
+		const { characterUtils } = new KoboldUtils(kobold);
 
 		// try and find that charcter
-		let targetCharacter: CharacterModel | null;
+		let targetCharacter: CharacterWithRelations | null;
 		if (targetCharacterName) {
 			targetCharacter = (
-				await CharacterUtils.findCharacterByName(targetCharacterName, intr.user.id)
+				await characterUtils.findOwnedCharacterByName(targetCharacterName, intr.user.id)
 			)[0];
 			if (!targetCharacter) {
 				throw new KoboldError(
@@ -82,29 +85,29 @@ export class GameplayTrackerSubCommand implements Command {
 				);
 			}
 		} else {
-			targetCharacter = await CharacterUtils.getActiveCharacter(intr);
+			targetCharacter = await characterUtils.getActiveCharacter(intr);
 			if (!targetCharacter) {
 				throw new KoboldError(LL.commands.character.interactions.noActiveCharacter());
 			}
 		}
-		const chosenCharacter = targetCharacter;
+		const targetSheetRecord = targetCharacter.sheetRecord;
 
-		if (chosenCharacter.trackerMessageId) {
+		if (targetSheetRecord.trackerMessageId) {
 			// if we already have a tracker, confirm that we want to make a new one
 			// then edit the old one to mark it as outdated
 			if (
-				chosenCharacter.trackerMessageId &&
-				chosenCharacter.trackerChannelId &&
-				chosenCharacter.trackerGuildId
+				targetSheetRecord.trackerMessageId &&
+				targetSheetRecord.trackerChannelId &&
+				targetSheetRecord.trackerGuildId
 			) {
 				// allow this to be async. We don't need to rush
-				intr.client.guilds.fetch(chosenCharacter.trackerGuildId).then(guild => {
+				intr.client.guilds.fetch(targetSheetRecord.trackerGuildId).then(guild => {
 					return guild.channels
-						.fetch(chosenCharacter.trackerChannelId ?? '')
+						.fetch(targetSheetRecord.trackerChannelId ?? '')
 						.then(channel => {
 							if (channel?.isTextBased()) {
 								return channel.messages
-									.fetch(chosenCharacter.trackerMessageId ?? '')
+									.fetch(targetSheetRecord.trackerMessageId ?? '')
 									.then(message => {
 										return message.edit({
 											content:
@@ -119,8 +122,7 @@ export class GameplayTrackerSubCommand implements Command {
 			}
 		}
 
-		const sheet = chosenCharacter.sheet;
-		const creature = new Creature(sheet);
+		const creature = Creature.fromSheetRecord(targetSheetRecord);
 
 		const trackerDisplay = creature.compileTracker(trackerMode);
 
@@ -137,11 +139,14 @@ export class GameplayTrackerSubCommand implements Command {
 			);
 		}
 
-		await chosenCharacter.$query().patch({
-			trackerMessageId: trackerResponse.id,
-			trackerGuildId: trackerResponse.guildId,
-			trackerChannelId: trackerResponse.channelId,
-			trackerMode: trackerMode,
-		});
+		await kobold.sheetRecord.update(
+			{ id: targetSheetRecord.id },
+			{
+				trackerMessageId: trackerResponse.id,
+				trackerGuildId: trackerResponse.guildId,
+				trackerChannelId: trackerResponse.channelId,
+				trackerMode: trackerMode,
+			}
+		);
 	}
 }

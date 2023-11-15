@@ -1,17 +1,11 @@
-import { Expression, ExpressionBuilder, Kysely, SqlBool } from 'kysely';
-import { jsonArrayFrom, jsonObjectFrom } from 'kysely/helpers/postgres';
+import { ExpressionBuilder, Kysely } from 'kysely';
+import { jsonArrayFrom } from 'kysely/helpers/postgres';
 import { Model } from './model.js';
-import {
-	Database,
-	Game,
-	GameUpdate,
-	GameId,
-	NewGame,
-	GameWithRelations,
-} from '../schemas/index.js';
+import { Database, GameUpdate, GameId, NewGame, GameWithRelations } from '../schemas/index.js';
 import {
 	channelDefaultCharacterForCharacter,
 	guildDefaultCharacterForCharacter,
+	sheetRecordForCharacter,
 } from '../lib/shared-relation-builders.js';
 
 export function charactersForGame(
@@ -25,6 +19,7 @@ export function charactersForGame(
 			.select(ebCharacter => [
 				channelDefaultCharacterForCharacter(ebCharacter, { userId }),
 				guildDefaultCharacterForCharacter(ebCharacter, { guildId, userId }),
+				sheetRecordForCharacter(ebCharacter),
 			])
 			.innerJoin('charactersInGames', 'character.id', 'charactersInGames.characterId')
 			.whereRef('charactersInGames.gameId', '=', 'game.id')

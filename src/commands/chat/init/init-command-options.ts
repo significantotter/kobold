@@ -43,7 +43,7 @@ export class InitOptions {
 	public static readonly INIT_CHARACTER_OPTION: APIApplicationCommandBasicOption = {
 		name: L.en.commandOptions.initCharacter.name(),
 		description: L.en.commandOptions.initCharacter.description(),
-		required: false,
+		required: true,
 		autocomplete: true,
 		type: ApplicationCommandOptionType.String,
 	};

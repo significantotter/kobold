@@ -7,11 +7,12 @@ import {
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 
-import { InteractionUtils } from '../../../utils/index.js';
-import { InitiativeUtils, InitiativeBuilder } from '../../../utils/initiative-builder.js';
+import { InitiativeBuilder } from '../../../utils/initiative-builder.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import L from '../../../i18n/i18n-node.js';
+import { Kobold } from '../../../services/kobold/index.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 
 export class InitShowSubCommand implements Command {
 	public names = [L.en.commands.init.show.name()];
@@ -31,9 +32,12 @@ export class InitShowSubCommand implements Command {
 		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
-		const currentInit = await InitiativeUtils.getInitiativeForChannel(intr.channel);
+		const koboldUtils = new KoboldUtils(kobold);
+		const { currentInitiative } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+			currentInitiative: true,
+		});
 
-		const initBuilder = new InitiativeBuilder({ initiative: currentInit, LL });
+		const initBuilder = new InitiativeBuilder({ initiative: currentInitiative, LL });
 		await KoboldEmbed.sendInitiative(intr, initBuilder, LL, {
 			dmIfHiddenCreatures: initBuilder.init.gmUserId === intr.user.id,
 		});

@@ -20,8 +20,9 @@ import { Creature } from '../../../utils/creature.js';
 import _ from 'lodash';
 import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
 import { RollBuilder } from '../../../utils/roll-builder.js';
-import { Kobold } from '../../../services/kobold/kobold.model.js';
+import { Kobold } from '../../../services/kobold/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 
 export class RollSaveSubCommand implements Command {
 	public names = [L.en.commands.roll.save.name()];
@@ -56,12 +57,13 @@ export class RollSaveSubCommand implements Command {
 				return [];
 			}
 			//find a save on the character matching the autocomplete string
-			const matchedSaves = koboldUtils.characterUtils
-				.findPossibleSaveFromString(activeCharacter, match)
-				.map(save => ({
-					name: save.name,
-					value: save.name,
-				}));
+			const matchedSaves = FinderHelpers.matchAllSaves(
+				Creature.fromSheetRecord(activeCharacter.sheetRecord),
+				match
+			).map(save => ({
+				name: save.name,
+				value: save.name,
+			}));
 			//return the matched saves
 			return matchedSaves;
 		}
@@ -92,7 +94,7 @@ export class RollSaveSubCommand implements Command {
 		);
 		koboldUtils.assertActiveCharacterNotNull(activeCharacter);
 
-		const creature = Creature.fromCharacter(activeCharacter);
+		const creature = Creature.fromSheetRecord(activeCharacter.sheetRecord);
 
 		const targetRoll = StringUtils.findBestValueByKeyMatch(
 			saveChoice,

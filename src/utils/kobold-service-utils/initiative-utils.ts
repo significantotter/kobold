@@ -1,16 +1,14 @@
 import { ChatInputCommandInteraction, TextBasedChannel } from 'discord.js';
 import {
 	InitiativeWithRelations,
-	InitiativeModel,
-	Character,
-	UserSettings,
 	Sheet,
+	CharacterWithRelations,
 } from '../../services/kobold/index.js';
-import { Kobold } from '../../services/kobold/kobold.model.js';
+import { Kobold } from '../../services/kobold/index.js';
 import { KoboldError } from '../KoboldError.js';
 import type { KoboldUtils } from './kobold-utils.js';
 import L from '../../i18n/i18n-node.js';
-import { InitiativeBuilder, InitiativeBuilderUtils } from '../initiative-builder.js';
+import { InitiativeBuilderUtils } from '../initiative-builder.js';
 
 export class InitiativeUtils {
 	private kobold: Kobold;
@@ -57,21 +55,50 @@ export class InitiativeUtils {
 		return actor;
 	}
 
-	public async addActorToInitiative({
+	public async createActorFromCharacter({
 		initiativeId,
-		characterId,
-		userId,
-		name,
+		character,
 		initiativeResult,
+		hideStats,
+		name,
+	}: {
+		initiativeId: number;
+		character: CharacterWithRelations;
+		initiativeResult: number;
+		hideStats?: boolean;
+		name?: string;
+	}) {
+		const actorGroup = await this.kobold.initiativeActorGroup.create({
+			initiativeId,
+			userId: character.userId,
+			name: character.name,
+			initiativeResult,
+		});
+		const actor = await this.kobold.initiativeActor.create({
+			initiativeId,
+			name: name ?? character.name,
+			characterId: character.id,
+			sheetRecordId: character.sheetRecordId,
+			userId: character.userId,
+			hideStats: hideStats ?? false,
+			initiativeActorGroupId: actorGroup.id,
+		});
+		return actor;
+	}
+
+	public async createActorFromSheet({
+		initiativeId,
 		sheet,
+		name,
+		userId,
+		initiativeResult,
 		hideStats,
 	}: {
 		initiativeId: number;
-		characterId: number;
+		sheet: Sheet;
 		userId: string;
 		name: string;
 		initiativeResult: number;
-		sheet: Sheet;
 		hideStats?: boolean;
 	}) {
 		const actorGroup = await this.kobold.initiativeActorGroup.create({
@@ -80,13 +107,15 @@ export class InitiativeUtils {
 			name,
 			initiativeResult,
 		});
+		const sheetRecord = await this.kobold.sheetRecord.create({
+			sheet,
+		});
 		const actor = await this.kobold.initiativeActor.create({
 			initiativeId,
 			name,
-			characterId,
-			sheet,
+			sheetRecordId: sheetRecord.id,
 			userId,
-			hideStats,
+			hideStats: hideStats ?? false,
 			initiativeActorGroupId: actorGroup.id,
 		});
 		return actor;

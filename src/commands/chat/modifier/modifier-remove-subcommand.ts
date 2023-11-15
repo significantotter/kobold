@@ -21,7 +21,9 @@ import { CharacterUtils } from '../../../utils/kobold-service-utils/character-ut
 import { ModifierOptions } from './modifier-command-options.js';
 import _ from 'lodash';
 import { KoboldError } from '../../../utils/KoboldError.js';
-import { CharacterModel } from '../../../services/kobold/index.js';
+import { CharacterModel, Kobold } from '../../../services/kobold/index.js';
+import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 
 export class ModifierRemoveSubCommand implements Command {
 	public names = [L.en.commands.modifier.remove.name()];
@@ -47,14 +49,15 @@ export class ModifierRemoveSubCommand implements Command {
 			const match = intr.options.getString(ModifierOptions.MODIFIER_NAME_OPTION.name) ?? '';
 
 			//get the active character
-			const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
+			const { characterUtils } = new KoboldUtils(kobold);
+			const activeCharacter = await characterUtils.getActiveCharacter(intr);
 			if (!activeCharacter) {
 				//no choices if we don't have a character to match against
 				return [];
 			}
 			//find a save on the character matching the autocomplete string
-			const matchedModifiers = CharacterUtils.findPossibleModifierFromString(
-				activeCharacter,
+			const matchedModifiers = FinderHelpers.matchAllModifiers(
+				activeCharacter.sheetRecord,
 				match
 			).map(modifier => ({
 				name: modifier.name,
@@ -75,11 +78,14 @@ export class ModifierRemoveSubCommand implements Command {
 			true
 		);
 		//get the active character
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
-		if (!activeCharacter) {
-			throw new KoboldError(LL.commands.character.interactions.noActiveCharacter());
-		}
-		const targetModifier = activeCharacter.getModifierByName(modifierChoice);
+		const koboldUtils = new KoboldUtils(kobold);
+		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+			activeCharacter: true,
+		});
+		const targetModifier = FinderHelpers.getModifierByName(
+			activeCharacter.sheetRecord,
+			modifierChoice
+		);
 		if (targetModifier) {
 			// ask for confirmation
 
@@ -149,13 +155,16 @@ export class ModifierRemoveSubCommand implements Command {
 			// remove the modifier
 			if (result && result.value === 'remove') {
 				const modifiersWithoutRemoved = _.filter(
-					activeCharacter.modifiers,
+					activeCharacter.sheetRecord.modifiers,
 					modifier =>
 						modifier.name.toLocaleLowerCase() !== modifierChoice.toLocaleLowerCase()
 				);
-				await CharacterModel.query()
-					.patch({ modifiers: modifiersWithoutRemoved })
-					.where({ userId: intr.user.id });
+				await kobold.sheetRecord.update(
+					{ id: activeCharacter.sheetRecordId },
+					{
+						modifiers: modifiersWithoutRemoved,
+					}
+				);
 
 				await InteractionUtils.send(
 					intr,

@@ -4,6 +4,7 @@ import {
 	Character,
 	GuildDefaultCharacter,
 	GuildDefaultCharacterModel,
+	Kobold,
 } from '../../../services/kobold/index.js';
 import {
 	ApplicationCommandType,
@@ -24,6 +25,8 @@ import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { CharacterOptions } from './command-options.js';
 import { CharacterUtils } from '../../../utils/kobold-service-utils/character-utils.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { KoboldError } from '../../../utils/KoboldError.js';
 
 export class CharacterSetDefaultSubCommand implements Command {
 	public names = [L.en.commands.character.setDefault.name()];
@@ -47,7 +50,11 @@ export class CharacterSetDefaultSubCommand implements Command {
 			//we don't need to autocomplete if we're just dealing with whitespace
 			const match = intr.options.getString(ChatArgs.SET_ACTIVE_NAME_OPTION.name) ?? '';
 
-			const matchedCharacters = await CharacterUtils.findCharacterByName(match, intr.user.id);
+			const { characterUtils } = new KoboldUtils(kobold);
+			const matchedCharacters = await characterUtils.findOwnedCharacterByName(
+				match,
+				intr.user.id
+			);
 			//get the character matches
 			const options = matchedCharacters.map(character => ({
 				name: character.name,
@@ -79,20 +86,28 @@ export class CharacterSetDefaultSubCommand implements Command {
 		const currentGuildId = intr.guildId;
 		const currentChannelId = intr.channelId;
 
-		// try and find that charcter
+		const { characterUtils } = new KoboldUtils(kobold);
+
+		// try and find that character
 		const targetCharacter = (
-			await CharacterUtils.findCharacterByName(charName, intr.user.id)
+			await characterUtils.findOwnedCharacterByName(charName, intr.user.id)
 		)[0];
 
 		if (targetCharacter) {
 			if (defaultScope === L.en.commandOptions.setDefaultScope.choices.channel.value()) {
+				if (!currentChannelId)
+					throw new KoboldError(
+						'Yip! You must be in a server to set a channel default character.'
+					);
+
 				//set all other characters as not the default for this user in this channel
-				await ChannelDefaultCharacterModel.query()
-					.delete()
-					.where({ userId: intr.user.id, channelId: currentChannelId });
+				await kobold.channelDefaultCharacter.delete({
+					userId: intr.user.id,
+					channelId: currentChannelId,
+				});
 
 				//set the character as the default for this channel
-				await ChannelDefaultCharacterModel.query().insert({
+				await kobold.channelDefaultCharacter.create({
 					userId: intr.user.id,
 					channelId: currentChannelId,
 					characterId: targetCharacter.id,
@@ -100,13 +115,18 @@ export class CharacterSetDefaultSubCommand implements Command {
 			} else if (
 				defaultScope === L.en.commandOptions.setDefaultScope.choices.server.value()
 			) {
-				//set all other characters as not the default for this user in this guild
-				await GuildDefaultCharacterModel.query()
-					.delete()
-					.where({ userId: intr.user.id, guildId: currentGuildId });
+				if (!currentGuildId)
+					throw new KoboldError(
+						'Yip! You must be in a server to set a server default character.'
+					);
 
+				//set all other characters as not the default for this user in this guild
+				await kobold.guildDefaultCharacter.delete({
+					userId: intr.user.id,
+					guildId: currentGuildId,
+				});
 				//set the character as the default for this guild
-				await GuildDefaultCharacterModel.query().insert({
+				await kobold.guildDefaultCharacter.create({
 					userId: intr.user.id,
 					guildId: currentGuildId,
 					characterId: targetCharacter.id,
@@ -124,15 +144,26 @@ export class CharacterSetDefaultSubCommand implements Command {
 			if ('__NONE__'.includes(charName)) {
 				//unset the server default character.
 				if (defaultScope === L.en.commandOptions.setDefaultScope.choices.channel.value()) {
-					await ChannelDefaultCharacterModel.query()
-						.delete()
-						.where({ userId: intr.user.id, channelId: currentChannelId });
+					if (!currentChannelId)
+						throw new KoboldError(
+							'Yip! You must be in a server to set a channel default character.'
+						);
+					await kobold.channelDefaultCharacter.delete({
+						userId: intr.user.id,
+						channelId: currentChannelId,
+					});
 				} else if (
 					defaultScope === L.en.commandOptions.setDefaultScope.choices.server.value()
 				) {
-					await GuildDefaultCharacterModel.query()
-						.delete()
-						.where({ userId: intr.user.id, guildId: currentGuildId });
+					if (!currentGuildId)
+						throw new KoboldError(
+							'Yip! You must be in a server to set a server default character.'
+						);
+
+					await await kobold.guildDefaultCharacter.delete({
+						userId: intr.user.id,
+						guildId: currentGuildId,
+					});
 				}
 				await InteractionUtils.send(
 					intr,

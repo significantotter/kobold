@@ -7,12 +7,11 @@ import {
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 
-import { Character, Modifier, zModifier } from '../../../services/kobold/index.js';
+import { Modifier, zModifier } from '../../../services/kobold/index.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import L from '../../../i18n/i18n-node.js';
-import { CharacterUtils } from '../../../utils/kobold-service-utils/character-utils.js';
 import { compileExpression } from 'filtrex';
 import { PasteBin } from '../../../services/pastebin/index.js';
 import _ from 'lodash';
@@ -22,7 +21,9 @@ import {
 	renameOnConflict,
 	replaceAll,
 } from '../../../utils/import-utils.js';
-import { CharacterModel } from '../../../services/kobold/models-old/character/character.model.js';
+import { TextParseHelpers } from '../../../utils/kobold-helpers/text-parse-helpers.js';
+import { Kobold } from '../../../services/kobold/index.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 
 export class ModifierImportSubCommand implements Command {
 	public names = [L.en.commands.modifier.import.name()];
@@ -42,14 +43,10 @@ export class ModifierImportSubCommand implements Command {
 		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
-		if (!activeCharacter) {
-			await InteractionUtils.send(
-				intr,
-				LL.commands.character.interactions.noActiveCharacter()
-			);
-			return;
-		}
+		const koboldUtils = new KoboldUtils(kobold);
+		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+			activeCharacter: true,
+		});
 		let importMode = intr.options
 			.getString(ModifierOptions.MODIFIER_IMPORT_MODE.name, true)
 			.trim()
@@ -58,7 +55,7 @@ export class ModifierImportSubCommand implements Command {
 			.getString(ModifierOptions.MODIFIER_IMPORT_URL.name, true)
 			.trim();
 
-		const importId = CharacterUtils.parsePastebinIdFromText(importUrl);
+		const importId = TextParseHelpers.parsePastebinIdFromText(importUrl);
 
 		if (!importId) {
 			await InteractionUtils.send(intr, LL.commands.modifier.import.interactions.badUrl());
@@ -97,9 +94,9 @@ export class ModifierImportSubCommand implements Command {
 			);
 			return;
 		}
-		const currentModifiers = activeCharacter.modifiers;
+		const currentModifiers = activeCharacter.sheetRecord.modifiers;
 
-		let finalModifiers: Character['modifiers'] = [];
+		let finalModifiers: Modifier[] = [];
 
 		if (importMode === L.en.commandOptions.modifierImportMode.choices.fullyReplace.value()) {
 			finalModifiers = replaceAll(currentModifiers, newModifiers);
@@ -124,14 +121,19 @@ export class ModifierImportSubCommand implements Command {
 			return;
 		}
 
-		await CharacterModel.query().patchAndFetchById(activeCharacter.id, {
-			modifiers: finalModifiers,
-		});
+		await kobold.sheetRecord.update(
+			{
+				id: activeCharacter.sheetRecordId,
+			},
+			{
+				modifiers: finalModifiers,
+			}
+		);
 
 		await InteractionUtils.send(
 			intr,
 			LL.commands.modifier.import.interactions.imported({
-				characterName: activeCharacter.sheet.staticInfo.name,
+				characterName: activeCharacter.name,
 			})
 		);
 		return;

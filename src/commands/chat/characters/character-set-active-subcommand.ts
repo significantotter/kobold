@@ -1,4 +1,4 @@
-import { Character, CharacterModel } from '../../../services/kobold/index.js';
+import { Character, CharacterModel, Kobold } from '../../../services/kobold/index.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -17,6 +17,7 @@ import { Command, CommandDeferType } from '../../index.js';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { CharacterUtils } from '../../../utils/kobold-service-utils/character-utils.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 
 export class CharacterSetActiveSubCommand implements Command {
 	public names = [L.en.commands.character.setActive.name()];
@@ -40,8 +41,9 @@ export class CharacterSetActiveSubCommand implements Command {
 			//we don't need to autocomplete if we're just dealing with whitespace
 			const match = intr.options.getString(ChatArgs.SET_ACTIVE_NAME_OPTION.name) ?? '';
 
+			const { characterUtils } = new KoboldUtils(kobold);
 			//get the character matches
-			const options = await CharacterUtils.findCharacterByName(match, intr.user.id);
+			const options = await characterUtils.findOwnedCharacterByName(match, intr.user.id);
 
 			//return the matched characters
 			return options.map(character => ({
@@ -58,21 +60,15 @@ export class CharacterSetActiveSubCommand implements Command {
 	): Promise<void> {
 		const charName = intr.options.getString(ChatArgs.SET_ACTIVE_NAME_OPTION.name, true);
 
+		const { characterUtils } = new KoboldUtils(kobold);
+
 		// try and find that charcter
 		const targetCharacter = (
-			await CharacterUtils.findCharacterByName(charName, intr.user.id)
+			await characterUtils.findOwnedCharacterByName(charName, intr.user.id)
 		)[0];
 
 		if (targetCharacter) {
-			//set all other characters as not active
-			await CharacterModel.query()
-				.patch({ isActiveCharacter: false })
-				.where({ userId: intr.user.id });
-
-			//set the character as active
-			await CharacterModel.query().patchAndFetchById(targetCharacter.id, {
-				isActiveCharacter: true,
-			});
+			await kobold.character.setIsActive({ id: targetCharacter.id, userId: intr.user.id });
 
 			//send success message
 			await InteractionUtils.send(

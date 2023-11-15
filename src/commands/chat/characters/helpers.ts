@@ -1,11 +1,14 @@
 import { WanderersGuide } from '../../../services/wanderers-guide/index.js';
 import { Config } from '../../../config/config.js';
-import { WG } from '../../../services/wanderers-guide/wanderers-guide.js';
 import { Creature } from '../../../utils/creature.js';
-import { Attribute, Sheet } from '../../../services/kobold/index.js';
+import { Sheet, SheetRecord } from '../../../services/kobold/index.js';
 
 export class CharacterHelpers {
-	public static async fetchWgCharacterFromToken(charId: number, token: string, oldSheet?: Sheet) {
+	public static async fetchWgCharacterFromToken(
+		charId: number,
+		token: string,
+		oldSheetRecord?: SheetRecord
+	) {
 		const WGTokenApi = new WanderersGuide({ token });
 
 		const WGApiKeyApi = new WanderersGuide({ apiKey: Config.wanderersGuide.apiKey });
@@ -145,15 +148,12 @@ export class CharacterHelpers {
 			},
 		};
 
-		const sheet = Creature.fromWandererersGuide(calculatedStats, characterData, oldSheet).sheet;
-
-		return {
-			name: characterData.name,
-			charId,
-			isActiveCharacter: true,
-			characterData,
+		const creature = Creature.fromWandererersGuide(
 			calculatedStats,
-			sheet,
-		};
+			characterData,
+			oldSheetRecord
+		);
+
+		return creature;
 	}
 }

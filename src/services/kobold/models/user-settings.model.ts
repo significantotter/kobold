@@ -44,6 +44,16 @@ export class UserSettingsModel extends Model<Database['userSettings']> {
 		return result[0];
 	}
 
+	public async upsert(args: UserSettings): Promise<UserSettings> {
+		const result = await this.db
+			.insertInto('userSettings')
+			.values(args)
+			.onConflict(oc => oc.column('userId').doUpdateSet(args))
+			.returningAll()
+			.execute();
+		return result[0];
+	}
+
 	public async delete({ userId }: { userId: UserSettingsUserId }): Promise<void> {
 		await this.db
 			.deleteFrom('userSettings')

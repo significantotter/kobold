@@ -17,6 +17,7 @@ import { Command, CommandDeferType } from '../../index.js';
 import { SettingsOptions } from './settings-command-options.js';
 import L from '../../../i18n/i18n-node.js';
 import { InjectedServices } from '../../command.js';
+import { Kobold } from '../../../services/kobold/index.js';
 
 export class SettingsCommand implements Command {
 	public names = [L.en.commands.settings.name()];

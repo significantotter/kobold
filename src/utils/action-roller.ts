@@ -5,7 +5,7 @@ import {
 	AdvancedDamageRoll,
 	AttackOrSkillRoll,
 	Attribute,
-	Character,
+	Action,
 	DamageRoll,
 	Roll,
 	RollTypeEnum,
@@ -19,14 +19,12 @@ import { DiceRollError, DiceUtils, MultiRollResult } from './dice-utils.js';
 import { RollBuilder } from './roll-builder.js';
 import { Creature } from './creature.js';
 import { EmbedUtils, KoboldEmbed } from './kobold-embed-utils.js';
-import { UserSettingsFactory } from '../services/kobold/models-old/user-settings/user-settings.factory.js';
 import { ChatInputCommandInteraction } from 'discord.js';
 import { getEmoji } from '../constants/emoji.js';
 import L from '../i18n/i18n-node.js';
 import { TranslationFunctions } from '../i18n/i18n-types.js';
 import { KoboldError } from './KoboldError.js';
 
-type Action = Character['actions'][0];
 type ContestedRollTypes = 'attack' | 'skill-challenge' | 'save' | 'none';
 type ResultRollTypes = 'damage' | 'advanced-damage' | 'text';
 
@@ -56,12 +54,11 @@ export class ActionRoller {
 	public triggeredWeaknesses: SheetWeaknessesResistances['weaknesses'] = [];
 	public triggeredResistances: SheetWeaknessesResistances['resistances'] = [];
 	public triggeredImmunities: SheetInfoLists['immunities'] = [];
-	public creature: Creature;
 	constructor(
 		public userSettings: UserSettings | null,
 		public action: Action,
-		creature?: Creature,
-		public targetCreature?: Creature,
+		public creature: Creature,
+		public targetCreature?: Creature | null,
 		public options?: {
 			heightenLevel?: number;
 		}
@@ -69,16 +66,15 @@ export class ActionRoller {
 		this.action = action;
 		this.tags = _.uniq([...(action?.tags ?? [])]);
 		if (this.action?.type) this.tags.push(this.action.type);
-		this.creature = creature ?? Creature.fromDefault();
 		this.options = options;
 
 		if (!userSettings) {
-			this.userSettings = UserSettingsFactory.build({
+			this.userSettings = {
 				userId: '',
 				inlineRollsDisplay: 'detailed',
 				rollCompactMode: 'normal',
 				initStatsNotification: 'every_round',
-			});
+			};
 		}
 	}
 
@@ -996,7 +992,7 @@ export class ActionRoller {
 		LL = L.en,
 	}: {
 		creature: Creature;
-		targetCreature?: Creature;
+		targetCreature?: Creature | null;
 		attackName: string;
 		rollNote?: string;
 		attackModifierExpression?: string;
@@ -1095,7 +1091,7 @@ export class ActionRoller {
 			modifierExpression?: string;
 			damageModifierExpression?: string;
 			targetAC?: number;
-			targetCreature?: Creature;
+			targetCreature?: Creature | null;
 			hideStats: boolean;
 			targetNameOverwrite?: string;
 			sourceNameOverwrite?: string;

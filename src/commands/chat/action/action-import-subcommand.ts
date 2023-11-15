@@ -11,7 +11,6 @@ import { Command, CommandDeferType } from '../../index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import _ from 'lodash';
 import { PasteBin } from '../../../services/pastebin/index.js';
-import { CharacterUtils } from '../../../utils/kobold-service-utils/character-utils.js';
 import {
 	replaceAll,
 	overwriteOnConflict,
@@ -21,6 +20,9 @@ import {
 import { ActionOptions } from '../action/action-command-options.js';
 import L from '../../../i18n/i18n-node.js';
 import { z } from 'zod';
+import { TextParseHelpers } from '../../../utils/kobold-helpers/text-parse-helpers.js';
+import { Kobold } from '../../../services/kobold/index.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 
 export class ActionImportSubCommand implements Command {
 	public names = [L.en.commands.action.import.name()];
@@ -39,14 +41,11 @@ export class ActionImportSubCommand implements Command {
 		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
-		if (!activeCharacter) {
-			await InteractionUtils.send(
-				intr,
-				LL.commands.character.interactions.noActiveCharacter()
-			);
-			return;
-		}
+		const koboldUtils = new KoboldUtils(kobold);
+		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+			activeCharacter: true,
+		});
+
 		let importMode = intr.options
 			.getString(ActionOptions.ACTION_IMPORT_MODE_OPTION.name, true)
 			.trim()
@@ -55,7 +54,7 @@ export class ActionImportSubCommand implements Command {
 			.getString(ActionOptions.ACTION_IMPORT_URL_OPTION.name, true)
 			.trim();
 
-		const importId = CharacterUtils.parsePastebinIdFromText(importUrl);
+		const importId = TextParseHelpers.parsePastebinIdFromText(importUrl);
 
 		if (!importId) {
 			await InteractionUtils.send(intr, LL.commands.action.import.interactions.badUrl());
@@ -84,9 +83,9 @@ export class ActionImportSubCommand implements Command {
 			);
 			return;
 		}
-		const currentActions = activeCharacter.actions;
+		const currentActions = activeCharacter.sheetRecord.actions;
 
-		let finalActions: Character['actions'] = [];
+		let finalActions: Action[] = [];
 
 		if (importMode === L.en.commandOptions.actionImportMode.choices.fullyReplace.value()) {
 			finalActions = replaceAll(currentActions, newActions);
@@ -109,9 +108,10 @@ export class ActionImportSubCommand implements Command {
 			return;
 		}
 
-		await CharacterModel.query().patchAndFetchById(activeCharacter.id, {
-			actions: finalActions,
-		});
+		await kobold.sheetRecord.update(
+			{ id: activeCharacter.sheetRecordId },
+			{ actions: finalActions }
+		);
 
 		await InteractionUtils.send(
 			intr,

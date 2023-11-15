@@ -13,13 +13,13 @@ import { RateLimiter } from 'discord.js-rate-limiter';
 import { ChatArgs } from '../../../constants/chat-args.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 
-import { CommandUtils, InteractionUtils } from '../../../utils/index.js';
+import { CommandUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { ActionOptions } from '../action/action-command-options.js';
 import { InitOptions } from '../init/init-command-options.js';
 import L from '../../../i18n/i18n-node.js';
 import { InjectedServices } from '../../command.js';
-import { Kobold } from '../../../services/kobold/kobold.model.js';
+import { Kobold } from '../../../services/kobold/index.js';
 
 export class RollCommand implements Command {
 	public names = [L.en.commands.roll.name()];
@@ -31,29 +31,6 @@ export class RollCommand implements Command {
 		default_member_permissions: undefined,
 
 		options: [
-			{
-				name: L.en.commands.roll.ability.name(),
-				description: L.en.commands.roll.ability.description(),
-				type: ApplicationCommandOptionType.Subcommand,
-				options: [
-					{
-						...ChatArgs.ABILITY_CHOICE_OPTION,
-						required: true,
-					},
-					{
-						...ChatArgs.ROLL_MODIFIER_OPTION,
-						required: false,
-					},
-					{
-						...ChatArgs.ROLL_NOTE_OPTION,
-						required: false,
-					},
-					{
-						...ChatArgs.ROLL_SECRET_OPTION,
-						required: false,
-					},
-				],
-			},
 			{
 				name: L.en.commands.roll.action.name(),
 				description: L.en.commands.roll.action.description(),

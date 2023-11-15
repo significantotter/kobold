@@ -17,6 +17,7 @@ import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { ActionOptions } from './action-command-options.js';
 import L from '../../../i18n/i18n-node.js';
 import { InjectedServices } from '../../command.js';
+import { Kobold } from '../../../services/kobold/index.js';
 
 export class ActionCommand implements Command {
 	public names = [L.en.commands.action.name()];

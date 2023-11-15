@@ -11,9 +11,10 @@ import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import L from '../../../i18n/i18n-node.js';
-import { CharacterUtils } from '../../../utils/kobold-service-utils/character-utils.js';
 import { PasteBin } from '../../../services/pastebin/index.js';
 import { Config } from '../../../config/config.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { Kobold } from '../../../services/kobold/kobold.model.js';
 
 export class ModifierExportSubCommand implements Command {
 	public names = [L.en.commands.modifier.export.name()];
@@ -33,25 +34,21 @@ export class ModifierExportSubCommand implements Command {
 		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
-		if (!activeCharacter) {
-			await InteractionUtils.send(
-				intr,
-				LL.commands.character.interactions.noActiveCharacter()
-			);
-			return;
-		}
-		const modifiers = activeCharacter.modifiers;
+		const koboldUtils = new KoboldUtils(kobold);
+		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+			activeCharacter: true,
+		});
+		const modifiers = activeCharacter.sheetRecord.modifiers;
 
 		const pastebinPost = await new PasteBin({ apiKey: Config.pastebin.apiKey }).post({
 			code: JSON.stringify(modifiers),
-			name: `${activeCharacter.sheet.staticInfo.name}'s Modifiers`,
+			name: `${activeCharacter.name}'s Modifiers`,
 		});
 
 		await InteractionUtils.send(
 			intr,
 			LL.commands.modifier.export.interactions.success({
-				characterName: activeCharacter.sheet.staticInfo.name,
+				characterName: activeCharacter.name,
 				pasteBinLink: pastebinPost,
 			})
 		);

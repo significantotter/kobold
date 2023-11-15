@@ -15,7 +15,15 @@ import { CharacterUtils } from '../../../utils/kobold-service-utils/character-ut
 import { compileExpression } from 'filtrex';
 import { DiceUtils } from '../../../utils/dice-utils.js';
 import { Creature } from '../../../utils/creature.js';
-import { CharacterModel } from '../../../services/kobold/index.js';
+import {
+	CharacterModel,
+	Kobold,
+	ModifierTypeEnum,
+	isSheetAdjustmentTypeEnum,
+} from '../../../services/kobold/index.js';
+import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { KoboldError } from '../../../utils/KoboldError.js';
 
 export class ModifierCreateRollModifierSubCommand implements Command {
 	public names = [L.en.commands.modifier.createRollModifier.name()];
@@ -35,14 +43,10 @@ export class ModifierCreateRollModifierSubCommand implements Command {
 		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
-		if (!activeCharacter) {
-			await InteractionUtils.send(
-				intr,
-				LL.commands.character.interactions.noActiveCharacter()
-			);
-			return;
-		}
+		const koboldUtils = new KoboldUtils(kobold);
+		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+			activeCharacter: true,
+		});
 		let name = intr.options
 			.getString(ModifierOptions.MODIFIER_NAME_OPTION.name, true)
 			.trim()
@@ -61,13 +65,20 @@ export class ModifierCreateRollModifierSubCommand implements Command {
 			.getString(ModifierOptions.MODIFIER_TARGET_TAGS_OPTION.name, true)
 			.trim();
 
+		if (!isSheetAdjustmentTypeEnum(modifierType)) {
+			throw new KoboldError(
+				`Yip! ${modifierType} is not a valid modifier type! Please use one ` +
+					`of the suggested options when entering the modifier type or leave it blank.`
+			);
+		}
+
 		// make sure the name does't already exist in the character's modifiers
-		if (activeCharacter.getModifierByName(name)) {
+		if (FinderHelpers.getModifierByName(activeCharacter.sheetRecord, name)) {
 			await InteractionUtils.send(
 				intr,
 				LL.commands.modifier.createRollModifier.interactions.alreadyExists({
 					modifierName: name,
-					characterName: activeCharacter.sheet.staticInfo.name,
+					characterName: activeCharacter.name,
 				})
 			);
 			return;
@@ -89,7 +100,7 @@ export class ModifierCreateRollModifierSubCommand implements Command {
 		try {
 			DiceUtils.parseAndEvaluateDiceExpression({
 				rollExpression: String(value),
-				creature: Creature.fromCharacter(activeCharacter),
+				creature: Creature.fromSheetRecord(activeCharacter.sheetRecord),
 				LL: L.en,
 			});
 		} catch (err) {
@@ -99,28 +110,32 @@ export class ModifierCreateRollModifierSubCommand implements Command {
 			);
 			return;
 		}
+		if (!value) throw new KoboldError(`Yip! I couldn't parse that modifier value!`);
 
-		await CharacterModel.query().updateAndFetchById(activeCharacter.id, {
-			modifiers: [
-				...activeCharacter.modifiers,
-				{
-					name,
-					isActive: true,
-					description,
-					value,
-					type: modifierType,
-					modifierType: 'roll',
-					targetTags,
-				},
-			],
-		});
+		await kobold.sheetRecord.update(
+			{ id: activeCharacter.sheetRecordId },
+			{
+				modifiers: [
+					...activeCharacter.sheetRecord.modifiers,
+					{
+						name,
+						isActive: true,
+						description,
+						value,
+						type: modifierType,
+						modifierType: ModifierTypeEnum.roll,
+						targetTags,
+					},
+				],
+			}
+		);
 
 		//send a response
 		await InteractionUtils.send(
 			intr,
 			LL.commands.modifier.createRollModifier.interactions.created({
 				modifierName: name,
-				characterName: activeCharacter.sheet.staticInfo.name,
+				characterName: activeCharacter.name,
 			})
 		);
 		return;

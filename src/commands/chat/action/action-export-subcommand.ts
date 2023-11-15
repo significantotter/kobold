@@ -12,6 +12,8 @@ import { PasteBin } from '../../../services/pastebin/index.js';
 import { CharacterUtils } from '../../../utils/kobold-service-utils/character-utils.js';
 import { Config } from '../../../config/config.js';
 import L from '../../../i18n/i18n-node.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { Kobold } from '../../../services/kobold/kobold.model.js';
 
 export class ActionExportSubCommand implements Command {
 	public names = [L.en.commands.action.export.name()];
@@ -30,25 +32,22 @@ export class ActionExportSubCommand implements Command {
 		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
-		if (!activeCharacter) {
-			await InteractionUtils.send(
-				intr,
-				LL.commands.character.interactions.noActiveCharacter()
-			);
-			return;
-		}
-		const actions = activeCharacter.actions;
+		const koboldUtils = new KoboldUtils(kobold);
+		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+			activeCharacter: true,
+		});
+
+		const actions = activeCharacter.sheetRecord.actions;
 
 		const pastebinPost = await new PasteBin({ apiKey: Config.pastebin.apiKey }).post({
 			code: JSON.stringify(actions),
-			name: `${activeCharacter.sheet.staticInfo.name}'s Actions`,
+			name: `${activeCharacter.name}'s Actions`,
 		});
 
 		await InteractionUtils.send(
 			intr,
 			LL.commands.action.export.interactions.success({
-				characterName: activeCharacter.sheet.staticInfo.name,
+				characterName: activeCharacter.name,
 				pasteBinLink: pastebinPost,
 			})
 		);

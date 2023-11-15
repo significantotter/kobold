@@ -1,7 +1,10 @@
 import {
 	CharacterModel,
+	CharacterWithRelations,
 	InitiativeActorModel,
-	WgTokenModel,
+	Kobold,
+	Sheet,
+	WgAuthTokenModel,
 } from '../../../services/kobold/index.js';
 import {
 	ApplicationCommandType,
@@ -26,6 +29,8 @@ import { PathBuilder } from '../../../services/pathbuilder/index.js';
 import { Creature } from '../../../utils/creature.js';
 import { CollectorUtils } from '../../../utils/collector-utils.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { WG } from '../../../services/wanderers-guide/wanderers-guide.js';
 
 export class CharacterUpdateSubCommand implements Command {
 	public names = [L.en.commands.character.update.name()];
@@ -45,14 +50,11 @@ export class CharacterUpdateSubCommand implements Command {
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		//check if we have an active character
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
-		if (!activeCharacter) {
-			await InteractionUtils.send(
-				intr,
-				LL.commands.character.interactions.noActiveCharacter()
-			);
-			return;
-		}
+		const koboldUtils = new KoboldUtils(kobold);
+		const { creatureUtils } = koboldUtils;
+		let { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+			activeCharacter: true,
+		});
 
 		if (activeCharacter.importSource === 'pathbuilder') {
 			let jsonId = intr.options.getNumber(CharacterOptions.IMPORT_PATHBUILDER_OPTION.name);
@@ -84,7 +86,10 @@ export class CharacterUpdateSubCommand implements Command {
 
 			let creature: Creature;
 			try {
-				creature = Creature.fromPathBuilder(pathBuilderChar.build, activeCharacter.sheet);
+				creature = Creature.fromPathBuilder(
+					pathBuilderChar.build,
+					activeCharacter.sheetRecord
+				);
 			} catch (err) {
 				// try to load the sheet without the previous character sheet
 				// if this fails, we accept the 500 error
@@ -173,36 +178,27 @@ export class CharacterUpdateSubCommand implements Command {
 						components: [],
 					});
 				}
+				activeCharacter = await kobold.character.update(
+					{ id: activeCharacter.id },
+					{ name: creature.name }
+				);
 			}
-			// set current characters owned by user to inactive state
-			await CharacterModel.query()
-				.patch({ isActiveCharacter: false })
-				.where({ userId: intr.user.id });
-
 			// store sheet in db
-			const updatedCharacter = await CharacterModel.query().patchAndFetchById(
-				activeCharacter.id,
+			const updatedSheetRecord = await kobold.sheetRecord.update(
+				{ id: activeCharacter.sheetRecord.id },
 				{
-					name: creature.sheet.staticInfo.name,
-					charId: jsonId,
-					userId: intr.user.id,
-					sheet: creature.sheet,
-					isActiveCharacter: true,
-					importSource: 'pathbuilder',
+					sheet: creature._sheet,
 				}
 			);
-			await InitiativeActorModel.query()
-				.patch({ sheet: creature.sheet })
-				.where({ characterId: updatedCharacter.id });
 
-			await updatedCharacter.updateTracker(intr, creature.sheet);
+			await creatureUtils.updateSheetTracker(intr, updatedSheetRecord);
 
 			//send success message
 
 			await InteractionUtils.send(
 				intr,
 				LL.commands.character.update.interactions.success({
-					characterName: updatedCharacter.sheet.staticInfo.name,
+					characterName: activeCharacter.name,
 				}) + newSheetUpdateWarning
 			);
 			return;
@@ -210,9 +206,9 @@ export class CharacterUpdateSubCommand implements Command {
 		//otherwise wanderer's guide
 		else {
 			//check for token access
-			const token = await WgTokenModel.query().where({ charId: activeCharacter.charId });
+			const token = await kobold.wgAuthToken.read({ charId: activeCharacter.charId });
 
-			if (!token.length) {
+			if (!token) {
 				// The user needs to authenticate!
 				await InteractionUtils.send(
 					intr,
@@ -230,23 +226,26 @@ export class CharacterUpdateSubCommand implements Command {
 				);
 				return;
 			}
-			let fetchedCharacter;
+			let fetchedCreature: Creature;
 			if (!activeCharacter.charId) {
 				throw new KoboldError(
 					"Yip! I couldn't find a wanderer's guide id to update your character with!"
 				);
 			}
 			try {
-				fetchedCharacter = await CharacterHelpers.fetchWgCharacterFromToken(
+				fetchedCreature = await CharacterHelpers.fetchWgCharacterFromToken(
 					activeCharacter.charId,
-					token[0].accessToken,
-					activeCharacter.sheet
+					token.accessToken,
+					activeCharacter.sheetRecord
 				);
 			} catch (err) {
 				console.log(err);
 				if ((axios.default ?? axios).isAxiosError(err) && err?.response?.status === 401) {
 					//token expired!
-					await WgTokenModel.query().delete().where({ charId: activeCharacter.charId });
+					await kobold.wgAuthToken.delete({
+						charId: activeCharacter.charId,
+					});
+
 					await InteractionUtils.send(
 						intr,
 						LL.commands.character.interactions.expiredToken()
@@ -279,26 +278,29 @@ export class CharacterUpdateSubCommand implements Command {
 				}
 			}
 
+			if (fetchedCreature.name !== activeCharacter.name) {
+				activeCharacter = await kobold.character.update(
+					{ id: activeCharacter.id },
+					{ name: fetchedCreature.name }
+				);
+			}
+
 			// store sheet in db
-			const updatedCharacter = await CharacterModel.query().updateAndFetchById(
-				activeCharacter.id,
+			const updatedSheetRecord = await kobold.sheetRecord.update(
+				{ id: activeCharacter.sheetRecordId },
 				{
-					userId: intr.user.id,
-					...fetchedCharacter,
+					sheet: fetchedCreature._sheet,
 				}
 			);
-			await InitiativeActorModel.query()
-				.patch({ sheet: fetchedCharacter.sheet })
-				.where({ characterId: updatedCharacter.id });
 
-			await updatedCharacter.updateTracker(intr, fetchedCharacter.sheet);
+			await creatureUtils.updateSheetTracker(intr, updatedSheetRecord);
 
 			//send success message
 
 			await InteractionUtils.send(
 				intr,
 				LL.commands.character.update.interactions.success({
-					characterName: updatedCharacter.name,
+					characterName: activeCharacter.name,
 				})
 			);
 		}

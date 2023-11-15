@@ -17,7 +17,7 @@ import { CommandUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { L } from '../../../i18n/i18n-node.js';
 import { InjectedServices } from '../../command.js';
-import { Kobold } from '../../../services/kobold/kobold.model.js';
+import { Kobold } from '../../../services/kobold/index.js';
 
 export class RollMacroCommand implements Command {
 	public names = [L.en.commands.rollMacro.name()];

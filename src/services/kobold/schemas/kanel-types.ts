@@ -3,6 +3,7 @@ export type { Sheet } from './shared/sheet.zod.js';
 import type { Action } from './shared/action.zod.js';
 import type { Modifier } from './shared/modifier.zod.js';
 import type { RollMacro } from './shared/roll-macro.zod.js';
+export type { NpcData, NpcFluff } from './shared/npc-data.js';
 
 export type Actions = Action[];
 export type Modifiers = Modifier[];

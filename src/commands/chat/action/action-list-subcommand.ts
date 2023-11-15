@@ -1,4 +1,4 @@
-import { Character, Game, GuildDefaultCharacter } from '../../../services/kobold/index.js';
+import { Kobold } from '../../../services/kobold/index.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -6,14 +6,12 @@ import {
 	PermissionsString,
 } from 'discord.js';
 
-import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { CollectorUtils } from '../../../utils/collector-utils.js';
-import { CharacterUtils } from '../../../utils/kobold-service-utils/character-utils.js';
 import _ from 'lodash';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 
 export class ActionListSubCommand implements Command {
 	public names = [L.en.commands.action.list.name()];
@@ -32,15 +30,12 @@ export class ActionListSubCommand implements Command {
 		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
-		if (!activeCharacter) {
-			await InteractionUtils.send(
-				intr,
-				LL.commands.character.interactions.noActiveCharacter()
-			);
-			return;
-		}
-		const actions = activeCharacter.actions;
+		const koboldUtils = new KoboldUtils(kobold);
+		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+			activeCharacter: true,
+		});
+
+		const actions = activeCharacter.sheetRecord.actions;
 		const fields = [];
 		for (const action of actions.sort((a, b) => (a.name || '').localeCompare(b.name))) {
 			let description = action.description || '\u200B';

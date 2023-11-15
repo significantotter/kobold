@@ -8,6 +8,7 @@ import {
 	InitiativeActorWithRelations,
 	InitiativeActorGroup,
 	Initiative,
+	SheetRecord,
 } from '../schemas/index.js';
 import { jsonObjectFrom } from 'kysely/helpers/postgres';
 import {
@@ -50,6 +51,17 @@ export function characterForActor(eb: ExpressionBuilder<Database, 'initiativeAct
 	).as('character');
 }
 
+function sheetRecordForActor(eb: ExpressionBuilder<Database, 'initiativeActor'>) {
+	return jsonObjectFrom(
+		eb
+			.selectFrom('sheetRecord')
+			.selectAll('sheetRecord')
+			.whereRef('sheetRecord.id', '=', 'initiativeActor.sheetRecordId')
+	)
+		.$castTo<SheetRecord>()
+		.as('sheetRecord');
+}
+
 export class InitiativeActorModel extends Model<Database['initiativeActor']> {
 	constructor(db: Kysely<Database>) {
 		super(db);
@@ -64,6 +76,7 @@ export class InitiativeActorModel extends Model<Database['initiativeActor']> {
 				actorGroupForActor(eb),
 				initiativeForActor(eb),
 				characterForActor(eb),
+				sheetRecordForActor(eb),
 			])
 			.execute();
 		return result[0];
@@ -77,7 +90,12 @@ export class InitiativeActorModel extends Model<Database['initiativeActor']> {
 		const result = await this.db
 			.selectFrom('initiativeActor')
 			.selectAll()
-			.select(eb => [actorGroupForActor(eb), initiativeForActor(eb), characterForActor(eb)])
+			.select(eb => [
+				actorGroupForActor(eb),
+				initiativeForActor(eb),
+				characterForActor(eb),
+				sheetRecordForActor(eb),
+			])
 			.where('initiativeActor.id', '=', id)
 			.execute();
 		return result[0] ?? null;
@@ -96,6 +114,7 @@ export class InitiativeActorModel extends Model<Database['initiativeActor']> {
 				actorGroupForActor(eb),
 				initiativeForActor(eb),
 				characterForActor(eb),
+				sheetRecordForActor(eb),
 			]);
 		if (id) query = query.where('initiativeActor.id', '=', id);
 		if (characterId) query = query.where('initiativeActor.characterId', '=', characterId);

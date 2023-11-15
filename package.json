@@ -1,5 +1,5 @@
 {
-	"name": "Kobold",
+	"name": "kobold",
 	"version": "1.0.0",
 	"author": "Significantotter",
 	"description": "A discord.js bot for Pathfinder 2e play by post games.",
@@ -16,6 +16,7 @@
 	"scripts": {
 		"kanel": "tsx ./src/scripts/kanel.ts",
 		"migrate": "tsx ./src/scripts/migrate.ts",
+		"migrate:down": "tsx ./src/scripts/migrate-down.ts",
 		"migrate:test": "NODE_ENV=TEST NODE_OPTIONS='--loader ts-node/esm' knex migrate:latest",
 		"lint": "eslint . --cache --ext .js,.jsx,.ts,.tsx",
 		"lint:fix": "eslint . --fix --cache --ext .js,.jsx,.ts,.tsx",

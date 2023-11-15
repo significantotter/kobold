@@ -17,7 +17,8 @@ import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { InteractionUtils } from '../../../utils/interaction-utils.js';
 import _ from 'lodash';
 import { KoboldError } from '../../../utils/KoboldError.js';
-import { UserSettingsModel } from '../../../services/kobold/index.js';
+import { Kobold, UserSettings, UserSettingsModel } from '../../../services/kobold/index.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 
 export class SettingsSetSubCommand implements Command {
 	public names = [L.en.commands.settings.set.name()];
@@ -66,9 +67,14 @@ export class SettingsSetSubCommand implements Command {
 		const option = intr.options.getString(SettingsOptions.SETTINGS_SET_OPTION.name, true);
 		const value = intr.options.getString(SettingsOptions.SETTINGS_SET_VALUE.name, true);
 
+		const koboldUtils = new KoboldUtils(kobold);
+		const { userSettings } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+			userSettings: true,
+		});
+
 		// validate
 		let trimmedOptionName = _.camelCase(option.trim());
-		let settingDbName: string;
+		let settingDbName: keyof UserSettings;
 		let parsedValue: string;
 
 		if (trimmedOptionName === 'initiativeTrackerNotifications') {
@@ -93,18 +99,9 @@ export class SettingsSetSubCommand implements Command {
 		}
 
 		// fetch the value to determine whether to insert or update
-		const existingSetting = await UserSettingsModel.query().findOne({ userId: intr.user.id });
 
-		let result;
-		if (existingSetting) {
-			existingSetting[settingDbName] = parsedValue;
-			result = await existingSetting.$query().patch();
-		} else {
-			result = await UserSettingsModel.query().insert({
-				userId: intr.user.id,
-				[settingDbName]: parsedValue,
-			});
-		}
+		userSettings[settingDbName] = parsedValue;
+		await kobold.userSettings.upsert(userSettings);
 
 		await InteractionUtils.send(intr, `Yip! "${option}" has been set to "${value}".`);
 	}

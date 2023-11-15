@@ -12,9 +12,7 @@ import { RateLimiter } from 'discord.js-rate-limiter';
 
 import { ChatArgs } from '../../../constants/index.js';
 
-import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
-import { CharacterUtils } from '../../../utils/kobold-service-utils/character-utils.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import L from '../../../i18n/i18n-node.js';
 import { ActionOptions } from '../action/action-command-options.js';
@@ -24,16 +22,15 @@ import { getEmoji } from '../../../constants/emoji.js';
 import { Creature } from '../../../utils/creature.js';
 import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
 import { InitOptions } from '../init/init-command-options.js';
-import { AutocompleteUtils } from '../../../utils/kobold-service-utils/autocomplete-utils.js';
 import {
 	Character,
-	CharacterModel,
-	InitiativeActor,
-	InitiativeActorModel,
+	InitiativeActorWithRelations,
+	SheetRecord,
 } from '../../../services/kobold/index.js';
-import { GameUtils } from '../../../utils/kobold-service-utils/game-utils.js';
-import { SettingsUtils } from '../../../utils/kobold-service-utils/user-settings-utils.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
+import { Kobold } from '../../../services/kobold/index.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 
 export class RollActionSubCommand implements Command {
 	public names = [L.en.commands.roll.action.name()];
@@ -58,15 +55,18 @@ export class RollActionSubCommand implements Command {
 			//we don't need to autocomplete if we're just dealing with whitespace
 			const match = intr.options.getString(ActionOptions.ACTION_TARGET_OPTION.name) ?? '';
 
+			const { characterUtils } = new KoboldUtils(kobold);
+
 			//get the active character
-			const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
+			const activeCharacter = await characterUtils.getActiveCharacter(intr);
 			if (!activeCharacter) {
 				//no choices if we don't have a character to match against
 				return [];
 			}
 			//find an action on the character matching the autocomplete string
-			const matchedActions = CharacterUtils.findPossibleActionFromString(
-				activeCharacter,
+			const creature = Creature.fromSheetRecord(activeCharacter.sheetRecord);
+			const matchedActions = FinderHelpers.matchAllActions(
+				activeCharacter.sheetRecord,
 				match
 			).map(action => ({
 				name: action.name,
@@ -79,7 +79,9 @@ export class RollActionSubCommand implements Command {
 			//we don't need to autocomplete if we're just dealing with whitespace
 			const match = intr.options.getString(InitOptions.INIT_CHARACTER_TARGET.name) ?? '';
 
-			return await AutocompleteUtils.getAllTargetOptions(intr, match);
+			const { autocompleteUtils } = new KoboldUtils(kobold);
+
+			return await autocompleteUtils.getAllTargetOptions(intr, match);
 		}
 	}
 
@@ -92,7 +94,7 @@ export class RollActionSubCommand implements Command {
 			ActionOptions.ACTION_TARGET_OPTION.name,
 			true
 		);
-		const targetInitActorName = intr.options.getString(
+		const targetSheetName = intr.options.getString(
 			InitOptions.INIT_CHARACTER_TARGET.name,
 			true
 		);
@@ -110,35 +112,38 @@ export class RollActionSubCommand implements Command {
 			intr.options.getString(ChatArgs.ROLL_SECRET_OPTION.name) ??
 			L.en.commandOptions.rollSecret.choices.public.value();
 
-		const { gameUtils } = koboldUtils(kobold);
+		const koboldUtils: KoboldUtils = new KoboldUtils(kobold);
+		const { creatureUtils, gameUtils } = koboldUtils;
 
-		const [activeCharacter, userSettings, activeGame] = await Promise.all([
-			CharacterUtils.getActiveCharacter(intr),
-			SettingsUtils.getSettingsForUser(intr),
-			gameUtils.getActiveGame(intr.user.id, intr.guildId ?? ''),
-		]);
-		if (!activeCharacter) {
-			await InteractionUtils.send(intr, L.en.commands.roll.interactions.noActiveCharacter());
-			return;
-		}
+		const { activeCharacter, userSettings, activeGame } = await koboldUtils.fetchDataForCommand(
+			intr,
+			{
+				activeCharacter: true,
+				userSettings: true,
+				activeGame: true,
+			}
+		);
+		koboldUtils.assertActiveCharacterNotNull(activeCharacter);
 
-		const targetAction = activeCharacter.actions.find(
+		const creature = Creature.fromSheetRecord(activeCharacter.sheetRecord);
+
+		const targetAction = creature.actions.find(
 			action => action.name.toLocaleLowerCase() === targetActionName.toLocaleLowerCase()
 		);
 
-		const creature = Creature.fromCharacter(activeCharacter);
-		let targetCreature: Creature | undefined;
-		let targetActor: InitiativeActorModel | CharacterModel | undefined;
+		let targetSheetRecord: SheetRecord | null = null;
+		let targetCreature: Creature | null = null;
+		let hideStats = false;
 
 		if (
-			targetInitActorName &&
-			targetInitActorName.trim().toLocaleLowerCase() != '__none__' &&
-			targetInitActorName.trim().toLocaleLowerCase() != '(none)'
+			targetSheetName &&
+			targetSheetName.trim().toLocaleLowerCase() != '__none__' &&
+			targetSheetName.trim().toLocaleLowerCase() != '(none)'
 		) {
-			const { targetCharacter, targetInitActor } =
-				await gameUtils.getCharacterOrInitActorTarget(intr, targetInitActorName);
-			targetActor = targetInitActor ?? targetCharacter ?? undefined;
-			targetCreature = targetActor ? Creature.fromModelWithSheet(targetActor) : undefined;
+			const results = await gameUtils.getCharacterOrInitActorTarget(intr, targetSheetName);
+			targetSheetRecord = results.targetSheetRecord;
+			hideStats = results.hideStats;
+			targetCreature = Creature.fromSheetRecord(targetSheetRecord);
 		}
 
 		if (!targetAction) {
@@ -175,18 +180,22 @@ export class RollActionSubCommand implements Command {
 			targetDC,
 		});
 
-		if (targetCreature && targetActor && actionRoller.shouldDisplayDamageText()) {
-			await targetActor.saveSheet(intr, (actionRoller.targetCreature as Creature).sheet);
+		if (targetCreature && targetSheetRecord) {
+			// apply any effects from the action to the creature
+			await creatureUtils.saveSheet(intr, {
+				...targetSheetRecord,
+				sheet: targetCreature._sheet,
+			});
 
 			const damageField = await EmbedUtils.getOrSendActionDamageField({
 				intr,
 				actionRoller,
-				hideStats: targetActor.hideStats,
-				targetNameOverwrite: targetActor.name,
+				hideStats,
+				targetNameOverwrite: targetSheetName,
 				LL,
 			});
 
-			response.addFields(damageField);
+			embed.addFields(damageField);
 		}
 		await EmbedUtils.dispatchEmbeds(intr, [response], secretRoll, activeGame?.gmUserId);
 	}

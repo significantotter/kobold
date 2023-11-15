@@ -1,9 +1,9 @@
 import { compileExpression } from 'filtrex';
 import L from '../../i18n/i18n-node.js';
-import { Attribute, Character, Modifier, RollModifier } from '../../services/kobold/index.js';
+import { Attribute, Modifier, RollModifier } from '../../services/kobold/index.js';
 import type { Creature } from '../creature.js';
 import { DiceUtils } from '../dice-utils.js';
-import { Kobold } from '../../services/kobold/kobold.model.js';
+import { Kobold } from '../../services/kobold/index.js';
 import type { KoboldUtils } from './kobold-utils.js';
 
 export class ModifierUtils {
@@ -167,16 +167,5 @@ export class ModifierUtils {
 			}
 		}
 		return { bonuses, penalties, untyped };
-	}
-
-	/**
-	 * Fetches a character's modifier by the modifier name
-	 * @param name the name of the modifier
-	 * @returns the modifier
-	 */
-	public getByNameFromCharacter(character: Character, name: string): Modifier | undefined {
-		return character.modifiers.find(
-			modifier => modifier.name.toLocaleLowerCase().trim() === name.toLocaleLowerCase().trim()
-		);
 	}
 }

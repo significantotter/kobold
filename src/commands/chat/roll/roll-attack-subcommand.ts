@@ -18,11 +18,17 @@ import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import L from '../../../i18n/i18n-node.js';
 import { Creature } from '../../../utils/creature.js';
 import { InitOptions } from '../init/init-command-options.js';
-import { Character, InitiativeActor } from '../../../services/kobold/index.js';
+import {
+	Character,
+	InitiativeActor,
+	InitiativeActorWithRelations,
+	SheetRecord,
+} from '../../../services/kobold/index.js';
 import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
 import { ActionRoller } from '../../../utils/action-roller.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { Kobold } from '../../../services/kobold/kobold.model.js';
+import { Kobold } from '../../../services/kobold/index.js';
+import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 
 export class RollAttackSubCommand implements Command {
 	public names = [L.en.commands.roll.attack.name()];
@@ -57,12 +63,13 @@ export class RollAttackSubCommand implements Command {
 				return [];
 			}
 			//find a attack on the character matching the autocomplete string
-			const matchedAttack = koboldUtils.characterUtils
-				.findPossibleAttackFromString(activeCharacter, match)
-				.map(attack => ({
-					name: attack.name,
-					value: attack.name,
-				}));
+			const matchedAttack = FinderHelpers.matchAllAttacks(
+				Creature.fromSheetRecord(activeCharacter.sheetRecord),
+				match
+			).map(attack => ({
+				name: attack.name,
+				value: attack.name,
+			}));
 			//return the matched attacks
 			return matchedAttack;
 		}
@@ -81,7 +88,7 @@ export class RollAttackSubCommand implements Command {
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const attackChoice = intr.options.getString(ChatArgs.ATTACK_CHOICE_OPTION.name, true);
-		const targetInitActorName = intr.options.getString(
+		const targetSheetName = intr.options.getString(
 			InitOptions.INIT_CHARACTER_TARGET.name,
 			true
 		);
@@ -108,31 +115,21 @@ export class RollAttackSubCommand implements Command {
 		);
 		koboldUtils.assertActiveCharacterNotNull(activeCharacter);
 
-		const creature = Creature.fromCharacter(activeCharacter);
+		const creature = Creature.fromSheetRecord(activeCharacter.sheetRecord);
 
-		let targetCreature: Creature | undefined;
-		let targetActor: InitiativeActor | Character | null;
+		let targetSheetRecord: SheetRecord | null = null;
+		let targetCreature: Creature | null = null;
+		let hideStats = false;
 
 		if (
-			targetInitActorName &&
-			targetInitActorName.trim().toLocaleLowerCase() != '__none__' &&
-			targetInitActorName.trim().toLocaleLowerCase() != '(none)'
+			targetSheetName &&
+			targetSheetName.trim().toLocaleLowerCase() != '__none__' &&
+			targetSheetName.trim().toLocaleLowerCase() != '(none)'
 		) {
-			const { targetCharacter, targetInitActor } =
-				await gameUtils.getCharacterOrInitActorTarget(intr, targetInitActorName);
-			targetActor = targetInitActor ?? targetCharacter;
-			if (!targetActor) {
-				await InteractionUtils.send(
-					intr,
-					L.en.commands.roll.interactions.targetNotFound({
-						targetName: targetInitActorName,
-					})
-				);
-				return;
-			}
-			targetCreature = Creature.fromModelWithSheet(targetActor);
-		} else {
-			targetActor = null;
+			const results = await gameUtils.getCharacterOrInitActorTarget(intr, targetSheetName);
+			targetSheetRecord = results.targetSheetRecord;
+			hideStats = results.hideStats;
+			targetCreature = Creature.fromSheetRecord(targetSheetRecord);
 		}
 
 		const { builtRoll, actionRoller } = ActionRoller.fromCreatureAttack({
@@ -147,25 +144,20 @@ export class RollAttackSubCommand implements Command {
 			LL,
 		});
 
-		if (targetCreature && targetActor) {
-			// apply any effects from the action to the creature
-			await kobold.initiativeActor.update(
-				{ id: targetActor.id },
-				{ sheet: targetCreature.sheet }
-			);
-		}
-
 		const embed = builtRoll.compileEmbed({ forceFields: true });
 
-		if (targetActor && targetCreature && actionRoller.shouldDisplayDamageText()) {
-			//overwrite this as Creature, because it can't be null if targetCreature is defined
-			await creatureUtils.saveCharacterSheet(intr, actionRoller.targetCreature!.sheet);
+		if (targetCreature && targetSheetRecord) {
+			// apply any effects from the action to the creature
+			await creatureUtils.saveSheet(intr, {
+				...targetSheetRecord,
+				sheet: targetCreature._sheet,
+			});
 
 			const damageField = await EmbedUtils.getOrSendActionDamageField({
 				intr,
 				actionRoller,
-				hideStats: targetActor.hideStats,
-				targetNameOverwrite: targetActor.name,
+				hideStats,
+				targetNameOverwrite: targetSheetName,
 				LL,
 			});
 

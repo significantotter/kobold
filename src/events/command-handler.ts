@@ -19,7 +19,7 @@ import { refs } from '../constants/common-text.js';
 import { KoboldError } from '../utils/KoboldError.js';
 import L from '../i18n/i18n-node.js';
 import { filterNotNullOrUndefined } from '../utils/type-guards.js';
-import { InjectedServices, InjectData } from '../commands/command.js';
+import { InjectedServices } from '../commands/command.js';
 
 export class CommandHandler implements EventHandler {
 	protected rateLimiter = new RateLimiter(
@@ -127,10 +127,7 @@ export class CommandHandler implements EventHandler {
 			if (passesChecks) {
 				// Execute the command
 				const LL = L.en;
-				let data: Partial<InjectData> =
-					(await command?.fetchInjectedDataForCommand?.(intr, this.injectedServices)) ??
-					{};
-				await command.execute(intr, LL, data, this.injectedServices);
+				await command.execute(intr, LL, this.injectedServices);
 			}
 		} catch (error) {
 			// Kobold Errors are expected error messages encountered through regular use of the bot

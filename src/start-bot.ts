@@ -24,7 +24,6 @@ import {
 	RollSkillSubCommand,
 	RollSaveSubCommand,
 	RollPerceptionSubCommand,
-	RollAbilitySubCommand,
 	RollAttackSubCommand,
 	RollActionSubCommand,
 	// init
@@ -114,11 +113,10 @@ import { Reaction } from './reactions/index.js';
 import { CommandRegistrationService, DBModel, JobService, Logger } from './services/index.js';
 import { Trigger } from './triggers/index.js';
 import { Config } from './config/config.js';
-import { checkAndLoadBestiaryFiles } from './services/pf2etools/bestiaryLoader.js';
 import { CompendiumModel } from './services/pf2etools/compendium.model.js';
 import { db } from './services/pf2etools/pf2eTools.db.js';
 import { Job } from './services/job-service.js';
-import { Kobold as Kobold } from './services/kobold/kobold.model.js';
+import { Kobold as Kobold } from './services/kobold/index.js';
 import { getDialect } from './services/db.dialect.js';
 
 // this is to prevent embeds breaking on "addFields" when adding more than an embed can hold
@@ -131,9 +129,6 @@ async function start(): Promise<void> {
 	DBModel.init(Config.database.url);
 
 	const compendium = new CompendiumModel(db);
-
-	// asynchronously load the bestiary files
-	checkAndLoadBestiaryFiles();
 
 	// Client
 	let client = new CustomClient({
@@ -182,7 +177,6 @@ async function start(): Promise<void> {
 			new RollSkillSubCommand(),
 			new RollSaveSubCommand(),
 			new RollPerceptionSubCommand(),
-			new RollAbilitySubCommand(),
 		]),
 
 		// Init commands

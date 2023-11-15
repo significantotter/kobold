@@ -17,6 +17,7 @@ import { CommandUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { InjectedServices } from '../../command.js';
+import { Kobold } from '../../../services/kobold/kobold.model.js';
 
 export class CharacterCommand implements Command {
 	public names = [L.en.commands.character.name()];

@@ -15,7 +15,8 @@ import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { CharacterUtils } from '../../../utils/kobold-service-utils/character-utils.js';
 import { ActionStageOptions } from './action-stage-command-options.js';
-import { CharacterModel } from '../../../services/kobold/index.js';
+import { CharacterModel, Kobold } from '../../../services/kobold/index.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 
 export class ActionStageRemoveSubCommand implements Command {
 	public names = [L.en.commands.actionStage.remove.name()];
@@ -41,7 +42,8 @@ export class ActionStageRemoveSubCommand implements Command {
 				intr.options.getString(ActionStageOptions.ACTION_ROLL_TARGET_OPTION.name) ?? '';
 
 			//get the active character
-			const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
+			const { characterUtils } = new KoboldUtils(kobold);
+			const activeCharacter = await characterUtils.getActiveCharacter(intr);
 			if (!activeCharacter) {
 				//no choices if we don't have a character to match against
 				return [];
@@ -49,7 +51,7 @@ export class ActionStageRemoveSubCommand implements Command {
 			//find a roll on the character matching the autocomplete string
 
 			const matchedActionRolls: ApplicationCommandOptionChoiceData[] = [];
-			for (const action of activeCharacter.actions || []) {
+			for (const action of activeCharacter.sheetRecord.actions || []) {
 				for (const roll of action.rolls) {
 					const rollMatchText = `${action.name.toLocaleLowerCase()} -- ${roll.name.toLocaleLowerCase()}`;
 					if (rollMatchText.includes(match.toLocaleLowerCase())) {
@@ -77,18 +79,13 @@ export class ActionStageRemoveSubCommand implements Command {
 		);
 		const [actionName, action] = actionRollTarget.split(' -- ').map(term => term.trim());
 
-		//get the active character
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
-		if (!activeCharacter) {
-			await InteractionUtils.send(
-				intr,
-				LL.commands.character.interactions.noActiveCharacter()
-			);
-			return;
-		}
+		const koboldUtils = new KoboldUtils(kobold);
+		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+			activeCharacter: true,
+		});
 
 		//find a roll on the character matching the autocomplete string
-		const matchedAction = activeCharacter.actions?.find(
+		const matchedAction = activeCharacter.sheetRecord.actions?.find(
 			action => action.name.toLocaleLowerCase() === actionName.toLocaleLowerCase()
 		);
 		if (!matchedAction) {
@@ -105,10 +102,11 @@ export class ActionStageRemoveSubCommand implements Command {
 		const rollName = matchedAction.rolls[rollIndex].name;
 		matchedAction.rolls.splice(rollIndex, 1);
 
-		//save the character
-		await CharacterModel.query().patchAndFetchById(activeCharacter.id, {
-			actions: activeCharacter.actions,
-		});
+		//save the actions
+		await kobold.sheetRecord.update(
+			{ id: activeCharacter.sheetRecordId },
+			{ actions: activeCharacter.sheetRecord.actions }
+		);
 
 		//send a confirmation message
 		await InteractionUtils.send(

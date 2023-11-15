@@ -1,7 +1,7 @@
-import { AutocompleteInteraction, CacheType, CommandInteraction, Interaction } from 'discord.js';
+import { Interaction } from 'discord.js';
 import { UserSettings } from '../../services/kobold/index.js';
 import _ from 'lodash';
-import { Kobold } from '../../services/kobold/kobold.model.js';
+import { Kobold } from '../../services/kobold/index.js';
 import { KoboldUtils } from './kobold-utils.js';
 import { DefaultUtils } from '../default-utils.js';
 

@@ -307,9 +307,6 @@ export function getDefaultSheet(): Sheet {
 			},
 			additionalSkills: [],
 			attacks: [],
-			rollMacros: [],
-			actions: [],
-			modifiers: [],
 			sourceData: {},
 		};
 	}

@@ -661,10 +661,6 @@ export default {
 			initJoinDescription: 'The skill to use for initiative instead of perception.',
 		},
 	},
-	abilityChoice: {
-		name: 'ability',
-		description: 'The ability to roll.',
-	},
 	attackChoice: {
 		name: 'attack',
 		description: 'The attack to roll.',

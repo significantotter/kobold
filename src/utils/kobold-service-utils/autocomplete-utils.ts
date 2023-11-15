@@ -1,14 +1,15 @@
-import { AutocompleteInteraction, CacheType, GuildMember } from 'discord.js';
+import { AutocompleteInteraction, CacheType } from 'discord.js';
 import _ from 'lodash';
-import { Character, InitiativeActor } from '../../services/kobold/index.js';
+import { InitiativeActor } from '../../services/kobold/index.js';
 import { Creature } from '../creature.js';
-import { filterNotNullOrUndefined } from '../type-guards.js';
 import { CompendiumModel } from '../../services/pf2etools/compendium.model.js';
 import { StringUtils } from '../string-utils.js';
 import { CompendiumUtils } from '../../services/pf2etools/utils/compendium-utils.js';
-import { Kobold } from '../../services/kobold/kobold.model.js';
+import { Kobold } from '../../services/kobold/index.js';
 import type { KoboldUtils } from './kobold-utils.js';
 import { InitiativeBuilderUtils } from '../initiative-builder.js';
+import { FinderHelpers } from '../kobold-helpers/finder-helpers.js';
+import { ilike, sql } from 'drizzle-orm';
 
 export class AutocompleteUtils {
 	public kobold: Kobold;
@@ -29,20 +30,18 @@ export class AutocompleteUtils {
 		return choices.sort(sorter).slice(0, 50);
 	}
 
-	public async getBestiaryNpcs(intr: AutocompleteInteraction<CacheType>, matchText: string) {
-		const targetNpcs = await this.kobold.npc.readMany({
-			name: matchText,
-			orderBy: 'random',
+	public async getBestiaryCreatures(
+		intr: AutocompleteInteraction<CacheType>,
+		compendium: CompendiumModel,
+		matchText: string
+	) {
+		const targetBestiaryCreatures = await compendium.db.query.Creatures.findMany({
+			where: ilike(compendium.creatures.table.search, matchText),
+			orderBy: sql`random`,
 			limit: 49,
 		});
-		return targetNpcs.map(npc => {
-			let name = npc.name;
-			const duplicates = targetNpcs.filter(c => c.name === npc.name);
-			if (duplicates.length > 1) {
-				name = `${npc.name} (${npc.data?.source})`;
-			}
-
-			return { name: name, value: name };
+		return targetBestiaryCreatures.map(npc => {
+			return { name: npc.search, value: npc.search };
 		});
 	}
 
@@ -56,18 +55,21 @@ export class AutocompleteUtils {
 			//no choices if we don't have a character to match against
 			return [];
 		}
+		const creature = Creature.fromSheetRecord(activeCharacter.sheetRecord);
+
 		//find a save on the character matching the autocomplete string
-		const matchedActions = this.koboldUtils.characterUtils
-			.findPossibleActionFromString(activeCharacter, matchText)
-			.map(action => ({
-				name: action.name,
-				value: action.name,
-			}));
+		const matchedActions = FinderHelpers.matchAllActions(
+			activeCharacter.sheetRecord,
+			matchText
+		).map(action => ({
+			name: action.name,
+			value: action.name,
+		}));
 		//return the matched saves
 		return matchedActions;
 	}
 
-	public async getAllMatchingRollsForActiveCharacter(
+	public async getAllMatchingStatRollsForActiveCharacter(
 		intr: AutocompleteInteraction<CacheType>,
 		matchText: string,
 		extraChoices: string[] = []
@@ -80,39 +82,49 @@ export class AutocompleteUtils {
 			return [];
 		}
 
+		const creature = Creature.fromSheetRecord(character.sheetRecord);
+
 		// add skills
-		const matchedSkills = this.koboldUtils.characterUtils
-			.findPossibleSkillFromString(character, matchText)
-			.map(skill => skill.name);
+		const matchedSkills = FinderHelpers.matchAllSkills(creature, matchText).map(
+			skill => skill.name
+		);
 		for (const skill of matchedSkills) {
 			choices.add(_.capitalize(skill));
 		}
 
 		// add saves
-		const matchedSaves = this.koboldUtils.characterUtils
-			.findPossibleSaveFromString(character, matchText)
-			.map(save => save.name);
+		const matchedSaves = FinderHelpers.matchAllSaves(creature, matchText).map(
+			save => save.name
+		);
 		for (const save of matchedSaves) {
 			choices.add(_.capitalize(save));
 		}
-		// add abilities
-		const matchedAbilities = this.koboldUtils.characterUtils
-			.findPossibleAbilityFromString(character, matchText)
-			.map(ability => ability.name);
-		for (const ability of matchedAbilities) {
-			choices.add(_.capitalize(ability));
+
+		// add attacks
+		const matchedAttacks = FinderHelpers.matchAllAttacks(creature, matchText).map(
+			attack => attack.name
+		);
+		for (const attack of matchedAttacks) {
+			choices.add(_.capitalize(attack));
+		}
+
+		const matchedActions = FinderHelpers.matchAllActions(character.sheetRecord, matchText).map(
+			action => action.name
+		);
+		for (const action of matchedActions) {
+			choices.add(_.capitalize(action));
 		}
 
 		choices.delete('');
 
-		const results = [];
+		const matchedRolls: { name: string; value: string }[] = [];
 		let counter = 0;
 		for (const value of choices.values()) {
-			if (counter > 90) continue;
-			results.push({ name: value, value: value });
+			matchedRolls.push({ name: value, value: value });
 			counter++;
 		}
-		return results;
+
+		return _.take(matchedRolls, 90);
 	}
 
 	public async getAllMatchingRollsMacrosForCharacter(
@@ -125,13 +137,15 @@ export class AutocompleteUtils {
 			//no choices if we don't have a character to match against
 			return [];
 		}
+
 		//find a save on the character matching the autocomplete string
-		const matchedRollMacros = this.koboldUtils.characterUtils
-			.findPossibleRollMacroFromString(activeCharacter, matchText)
-			.map(modifier => ({
-				name: modifier.name,
-				value: modifier.name,
-			}));
+		const matchedRollMacros = FinderHelpers.matchAllRollMacros(
+			activeCharacter.sheetRecord,
+			matchText
+		).map(modifier => ({
+			name: modifier.name,
+			value: modifier.name,
+		}));
 		//return the matched saves
 		return matchedRollMacros;
 	}
@@ -177,42 +191,6 @@ export class AutocompleteUtils {
 		}));
 	}
 
-	public async getAllTargetOptions(intr: AutocompleteInteraction<CacheType>, matchText: string) {
-		const [currentInit, targetGames, activeCharacter] = await Promise.all([
-			this.koboldUtils.initiativeUtils.getInitiativeForChannelOrNull(intr.channel),
-			this.koboldUtils.gameUtils.getWhereUserHasCharacter(intr.user.id, intr.guildId),
-			this.koboldUtils.characterUtils.getActiveCharacter(intr),
-		]);
-
-		// the character options can be any game character or the user's active character
-		let characterOptions = targetGames
-			.flatMap(game => game.characters)
-			// flat map can give us undefined values, so filter them out
-			.filter(result => !!result)
-			.map(character => ({ name: character.name, value: character.name }));
-		if (activeCharacter) {
-			characterOptions = characterOptions.concat({
-				name: activeCharacter.name,
-				value: activeCharacter.name,
-			});
-		}
-		const actorOptions = (currentInit?.actors ?? [])
-			.filter(actor => actor.name.toLocaleLowerCase().includes(matchText.toLocaleLowerCase()))
-			.map(actor => ({
-				name: actor.name,
-				value: actor.name,
-			}));
-
-		const allOptions = [
-			{ name: '(None)', value: '__NONE__' },
-			...characterOptions,
-			...actorOptions,
-		];
-
-		//return the matched actors, removing any duplicates
-		return _.uniqBy(allOptions, 'name');
-	}
-
 	public async getInitTargetOptions(intr: AutocompleteInteraction<CacheType>, matchText: string) {
 		const currentInit = await this.koboldUtils.initiativeUtils.getInitiativeForChannelOrNull(
 			intr.channel
@@ -248,17 +226,13 @@ export class AutocompleteUtils {
 			currentInit,
 			targetCharacterName,
 			false
-		) as InitiativeActor & { character: Character };
+		);
 
-		if (!actor?.sheet) {
-			return [];
-		}
-		const creature = new Creature(actor.sheet);
+		const creature = Creature.fromSheetRecord(actor.sheetRecord);
 
 		const allRolls = _.uniq([
 			..._.keys(creature.attackRolls),
 			...creature.actions.map(action => action.name),
-			...(actor.character?.actions ?? []).map(action => action.name),
 			..._.keys(creature.rolls),
 		]);
 
@@ -271,70 +245,46 @@ export class AutocompleteUtils {
 		}));
 	}
 
-	public async getAllUsersInInitiative(
-		intr: AutocompleteInteraction<CacheType>,
-		matchText: string
-	) {
-		const currentInit = await this.koboldUtils.initiativeUtils.getInitiativeForChannelOrNull(
-			intr.channel
-		);
-		if (!currentInit) {
-			return [];
-		}
-		//get the character matches
-		let actorOptions = InitiativeBuilderUtils.getControllableInitiativeActors(
-			currentInit,
-			intr.user.id
+	public async getAllTargetOptions(intr: AutocompleteInteraction<CacheType>, matchText: string) {
+		let [currentInit, targetGames, activeCharacter] = await Promise.all([
+			this.koboldUtils.initiativeUtils.getInitiativeForChannelOrNull(intr.channel),
+			this.koboldUtils.gameUtils.getWhereUserHasCharacter(intr.user.id, intr.guildId),
+			this.koboldUtils.characterUtils.getActiveCharacter(intr),
+		]);
+
+		// only take the games that we're GM'ing in, or that our active character is in
+		targetGames = targetGames.filter(
+			game =>
+				game.gmUserId === intr.user.id ||
+				game.characters.find(c => c.id === activeCharacter?.id)
 		);
 
-		const guildMemberOptions = actorOptions.map((actor: InitiativeActor) => {
-			return intr.guild?.members?.cache?.find?.(
-				guildMember => guildMember.id === actor.userId
-			);
-		});
-
-		return guildMemberOptions
-			.filter(filterNotNullOrUndefined)
-			.map((guildMember: GuildMember) => ({
-				name: guildMember.displayName,
-				value: guildMember.id.toString(),
-			}));
-	}
-
-	public async getGameplayTargetCharacters(
-		intr: AutocompleteInteraction<CacheType>,
-		matchText: string
-	) {
-		const activeCharacter = await this.koboldUtils.characterUtils.getActiveCharacter(intr);
-		const currentInit = await this.koboldUtils.initiativeUtils.getInitiativeForChannelOrNull(
-			intr.channel
-		);
-
-		let results = [];
-
-		//get the character matches
-		let actorOptions = currentInit?.actors ?? [];
-
-		//return the matched skills
-		results.push(
-			...actorOptions.map(actor => ({
-				name: actor.name,
-				value: 'init-' + actor.id.toString(),
-			}))
-		);
-
-		if (
-			activeCharacter &&
-			!actorOptions.find(actor => actor.characterId === activeCharacter.id)
-		) {
-			results.unshift({
+		// the character options can be any game character or the user's active character
+		let characterOptions = targetGames
+			.flatMap(game => game.characters)
+			// flat map can give us undefined values, so filter them out
+			.filter(result => !!result)
+			.map(character => ({ name: character.name, value: character.name }));
+		if (activeCharacter) {
+			characterOptions = characterOptions.concat({
 				name: activeCharacter.name,
-				value: 'char-' + activeCharacter.id.toString(),
+				value: activeCharacter.name,
 			});
 		}
+		const actorOptions = (currentInit?.actors ?? [])
+			.filter(actor => actor.name.toLocaleLowerCase().includes(matchText.toLocaleLowerCase()))
+			.map(actor => ({
+				name: actor.name,
+				value: actor.name,
+			}));
 
-		return results.filter(result =>
-			result.name.toLowerCase().includes(matchText.toLowerCase())
-		);
+		const allOptions = [
+			{ name: '(None)', value: '__NONE__' },
+			...characterOptions,
+			...actorOptions,
+		];
+
+		//return the matched actors, removing any duplicates
+		return _.uniqBy(allOptions, 'name');
 	}
 }

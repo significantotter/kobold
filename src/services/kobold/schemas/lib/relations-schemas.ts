@@ -7,17 +7,19 @@ import {
 	Initiative,
 	InitiativeActor,
 	InitiativeActorGroup,
+	SheetRecord,
 } from '../db-types.js';
 
 export type CharacterWithRelations = Character & {
 	channelDefaultCharacters: ChannelDefaultCharacter[];
 	guildDefaultCharacters: GuildDefaultCharacter[];
+	sheetRecord: SheetRecord;
 };
 
 export type InitiativeActorWithRelations = InitiativeActor & {
 	initiative?: Initiative | null;
 	actorGroup: InitiativeActorGroup;
-	character?: CharacterWithRelations | null;
+	sheetRecord: SheetRecord;
 };
 
 export type InitiativeActorGroupWithRelations = InitiativeActorGroup & {

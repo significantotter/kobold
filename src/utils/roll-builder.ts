@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { TranslationFunctions } from '../i18n/i18n-types.js';
-import { Attribute, Character, UserSettings } from '../services/kobold/index.js';
+import { Attribute, CharacterWithRelations, UserSettings } from '../services/kobold/index.js';
 import { Creature } from './creature.js';
 import {
 	DiceUtils,
@@ -12,7 +12,6 @@ import {
 	ErrorResult,
 } from './dice-utils.js';
 import { KoboldEmbed } from './kobold-embed-utils.js';
-import { UserSettingsFactory } from '../services/kobold/models-old/user-settings/user-settings.factory.js';
 import { APIEmbedField } from 'discord.js';
 import L from '../i18n/i18n-node.js';
 import { KoboldError } from './KoboldError.js';
@@ -40,9 +39,9 @@ export class RollBuilder {
 		LL,
 	}: {
 		actorName?: string;
-		character?: Character | null;
-		creature?: Creature;
-		targetCreature?: Creature;
+		character?: CharacterWithRelations | null;
+		creature?: Creature | null;
+		targetCreature?: Creature | null;
 		rollDescription?: string;
 		rollNote?: string;
 		title?: string;
@@ -56,17 +55,15 @@ export class RollBuilder {
 		this.footer = '';
 		this.creature = creature || null;
 		if (character && !this.creature) {
-			this.creature = Creature.fromCharacter(character);
+			this.creature = Creature.fromSheetRecord(character.sheetRecord);
 		}
 		this.targetCreature = targetCreature || null;
-		this.userSettings =
-			userSettings ??
-			UserSettingsFactory.build({
-				userId: '',
-				inlineRollsDisplay: 'detailed',
-				rollCompactMode: 'normal',
-				initStatsNotification: 'every_round',
-			});
+		this.userSettings = userSettings ?? {
+			userId: '',
+			inlineRollsDisplay: 'detailed',
+			rollCompactMode: 'normal',
+			initStatsNotification: 'every_round',
+		};
 
 		const actorText = actorName || this.creature?.sheet?.staticInfo?.name || '';
 		this.title = title || `${actorText} ${this.rollDescription}`.trim();

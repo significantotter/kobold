@@ -1,4 +1,4 @@
-import { Character, CharacterModel, RollTypeEnum } from '../../../services/kobold/index.js';
+import { Character, CharacterModel, Kobold, RollTypeEnum } from '../../../services/kobold/index.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -17,6 +17,9 @@ import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { CharacterUtils } from '../../../utils/kobold-service-utils/character-utils.js';
 import { ActionStageOptions } from './action-stage-command-options.js';
 import { AutocompleteUtils } from '../../../utils/kobold-service-utils/autocomplete-utils.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
+import { Creature } from '../../../utils/creature.js';
 
 export class ActionStageAddSaveSubCommand implements Command {
 	public names = [L.en.commands.actionStage.addSave.name()];
@@ -41,15 +44,18 @@ export class ActionStageAddSaveSubCommand implements Command {
 			const match =
 				intr.options.getString(ActionStageOptions.ACTION_TARGET_OPTION.name) ?? '';
 
-			return await AutocompleteUtils.getTargetActionForActiveCharacter(intr, match);
+			const { autocompleteUtils } = new KoboldUtils(kobold);
+			return await autocompleteUtils.getTargetActionForActiveCharacter(intr, match);
 		} else if (option.name === ActionStageOptions.ACTION_SAVE_ROLL_TYPE_OPTION.name) {
 			const match =
 				intr.options.getString(ActionStageOptions.ACTION_SAVE_ROLL_TYPE_OPTION.name) ?? '';
-			return await AutocompleteUtils.getAllMatchingRollsForActiveCharacter(intr, match);
+			const { autocompleteUtils } = new KoboldUtils(kobold);
+			return await autocompleteUtils.getAllMatchingStatRollsForActiveCharacter(intr, match);
 		} else if (option.name === ActionStageOptions.ACTION_ROLL_ABILITY_DC_OPTION.name) {
 			const match =
 				intr.options.getString(ActionStageOptions.ACTION_ROLL_ABILITY_DC_OPTION.name) ?? '';
-			return await AutocompleteUtils.getAllMatchingRollsForActiveCharacter(intr, match, [
+			const { autocompleteUtils } = new KoboldUtils(kobold);
+			return await autocompleteUtils.getAllMatchingStatRollsForActiveCharacter(intr, match, [
 				'AC',
 				'Class DC',
 				'Arcane DC',
@@ -83,19 +89,14 @@ export class ActionStageAddSaveSubCommand implements Command {
 			ActionStageOptions.ACTION_ROLL_ABILITY_DC_OPTION.name
 		);
 
-		//get the active character
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
-		if (!activeCharacter) {
-			await InteractionUtils.send(
-				intr,
-				LL.commands.character.interactions.noActiveCharacter()
-			);
-			return;
-		}
+		const koboldUtils = new KoboldUtils(kobold);
+		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+			activeCharacter: true,
+		});
 
 		// find the action
-		const matchedActions = CharacterUtils.findPossibleActionFromString(
-			activeCharacter,
+		const matchedActions = FinderHelpers.matchAllActions(
+			activeCharacter.sheetRecord,
 			targetAction
 		);
 		if (!matchedActions || !matchedActions.length) {
@@ -125,10 +126,10 @@ export class ActionStageAddSaveSubCommand implements Command {
 		});
 
 		// save the character
-
-		await CharacterModel.query().updateAndFetchById(activeCharacter.id, {
-			actions: activeCharacter.actions,
-		});
+		await kobold.sheetRecord.update(
+			{ id: activeCharacter.sheetRecordId },
+			{ actions: activeCharacter.sheetRecord.actions }
+		);
 
 		// send the response message
 		await InteractionUtils.send(

@@ -9,12 +9,14 @@ import {
 	InitiativeWithRelations,
 	InitiativeActor,
 	InitiativeActorGroup,
+	SheetRecord,
 } from '../schemas/index.js';
 import { jsonArrayFrom, jsonObjectFrom } from 'kysely/helpers/postgres';
+import { sheetRecordForActor } from '../lib/shared-relation-builders.js';
 
 type InitiativeGraphQueryOutput = Initiative & {
 	currentTurnGroup: InitiativeActorGroup | null;
-	actors: InitiativeActor[];
+	actors: (InitiativeActor & { sheetRecord: SheetRecord })[];
 	actorGroups: InitiativeActorGroup[];
 };
 
@@ -23,6 +25,7 @@ export function actorsForInitiative(eb: ExpressionBuilder<Database, 'initiative'
 		eb
 			.selectFrom('initiativeActor')
 			.selectAll('initiativeActor')
+			.select(eb => [sheetRecordForActor(eb)])
 			.whereRef('initiative.id', '=', 'initiativeActor.initiativeId')
 	).as('actors');
 }
@@ -55,6 +58,7 @@ function buildRelationFromQuery(
 		...initiative,
 		actors: initiative.actors.map(actor => ({
 			...actor,
+			sheetRecord: actor.sheetRecord!,
 			actorGroup: initiative.actorGroups.find(
 				group => group.id === actor.initiativeActorGroupId
 			)!,

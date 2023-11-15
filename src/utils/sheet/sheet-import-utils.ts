@@ -66,7 +66,7 @@ function applyValuesToStatInPlace(
 
 export function convertBestiaryCreatureToSheet(
 	bestiaryEntry: Creature,
-	fluffEntry: CreatureFluff,
+	fluffEntry: CreatureFluff | undefined,
 	options: { useStamina?: boolean; template?: string; customName?: string }
 ): Sheet {
 	const baseSheet = SheetProperties.defaultSheet;
@@ -411,9 +411,6 @@ export function convertBestiaryCreatureToSheet(
 		stats: baseSheet.stats,
 		additionalSkills: baseSheet.additionalSkills,
 		attacks,
-		rollMacros: [],
-		actions: [],
-		modifiers: [],
 		sourceData: { data: bestiaryEntry, fluff: fluffEntry },
 	};
 
@@ -669,9 +666,6 @@ export function convertWanderersGuideCharToSheet(
 				notes: null,
 			};
 		}),
-		rollMacros: [],
-		actions: [],
-		modifiers: [],
 
 		sourceData: { calculatedStats, characterData },
 	};
@@ -968,9 +962,6 @@ export function convertPathBuilderToSheet(
 				notes: null,
 			} satisfies Sheet['attacks'][number];
 		}),
-		rollMacros: [],
-		actions: [],
-		modifiers: [],
 		sourceData: pathBuilderSheet,
 	};
 

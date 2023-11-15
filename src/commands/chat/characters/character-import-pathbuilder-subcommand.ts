@@ -1,4 +1,4 @@
-import { Character, CharacterModel } from '../../../services/kobold/index.js';
+import { Character, CharacterModel, Kobold } from '../../../services/kobold/index.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -15,6 +15,7 @@ import { PathBuilder } from '../../../services/pathbuilder/index.js';
 import { Creature } from '../../../utils/creature.js';
 import { refs } from '../../../constants/common-text.js';
 import L from '../../../i18n/i18n-node.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 
 export class CharacterImportPathbuilderSubCommand implements Command {
 	public names = [L.en.commands.character.importPathbuilder.name()];
@@ -48,6 +49,7 @@ export class CharacterImportPathbuilderSubCommand implements Command {
 			);
 			return;
 		}
+		const koboldUtils = new KoboldUtils(kobold);
 
 		//check if we have an existing character
 		const pathBuilderChar = await new PathBuilder().get({ characterJsonId: jsonId });
@@ -59,22 +61,16 @@ export class CharacterImportPathbuilderSubCommand implements Command {
 				})
 			);
 		}
+		const existingCharacter = await kobold.character.read({
+			name: pathBuilderChar?.build?.name ?? 'unnamed character',
+			userId: intr.user.id,
+		});
 
-		const existingCharacter = await CharacterModel.query()
-			.where({
-				userId: intr.user.id,
-			})
-			.andWhereRaw(
-				'name ILIKE ?',
-				(pathBuilderChar?.build?.name ?? 'unnamed character').trim()
-			);
-
-		if (existingCharacter.length) {
-			const character = existingCharacter[0];
+		if (existingCharacter) {
 			await InteractionUtils.send(
 				intr,
 				LL.commands.character.importPathbuilder.interactions.characterAlreadyExists({
-					characterName: character.name,
+					characterName: existingCharacter.name,
 				})
 			);
 			return;
@@ -84,19 +80,23 @@ export class CharacterImportPathbuilderSubCommand implements Command {
 				useStamina,
 			});
 
-			// set current characters owned by user to inactive state
-			await CharacterModel.query()
-				.patch({ isActiveCharacter: false })
-				.where({ userId: intr.user.id });
+			const sheetRecord = await kobold.sheetRecord.create({
+				sheet: creature._sheet,
+			});
 
 			// store sheet in db
-			const newCharacter = await CharacterModel.query().insertAndFetch({
+			const newCharacter = await kobold.character.create({
 				name: creature.name,
 				charId: jsonId,
 				userId: intr.user.id,
-				sheet: creature.sheet,
+				sheetRecordId: sheetRecord.id,
 				isActiveCharacter: true,
 				importSource: 'pathbuilder',
+			});
+
+			await kobold.character.setIsActive({
+				id: newCharacter.id,
+				userId: intr.user.id,
 			});
 
 			//send success message

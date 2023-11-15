@@ -1,4 +1,4 @@
-import { Character, CharacterModel } from '../../../services/kobold/index.js';
+import { CharacterModel, Kobold } from '../../../services/kobold/index.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -20,7 +20,9 @@ import { CollectorUtils } from '../../../utils/collector-utils.js';
 import { ActionOptions } from './action-command-options.js';
 import { CharacterUtils } from '../../../utils/kobold-service-utils/character-utils.js';
 import _ from 'lodash';
-import { KoboldError } from '../../../utils/KoboldError.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
+import { Creature } from '../../../utils/creature.js';
 
 export class ActionRemoveSubCommand implements Command {
 	public names = [L.en.commands.action.remove.name()];
@@ -45,14 +47,15 @@ export class ActionRemoveSubCommand implements Command {
 			const match = intr.options.getString(ActionOptions.ACTION_TARGET_OPTION.name) ?? '';
 
 			//get the active character
-			const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
+			const { characterUtils } = new KoboldUtils(kobold);
+			const activeCharacter = await characterUtils.getActiveCharacter(intr);
 			if (!activeCharacter) {
 				//no choices if we don't have a character to match against
 				return [];
 			}
 			//find an action on the character matching the autocomplete string
-			const matchedActions = CharacterUtils.findPossibleActionFromString(
-				activeCharacter,
+			const matchedActions = FinderHelpers.matchAllActions(
+				activeCharacter.sheetRecord,
 				match
 			).map(action => ({
 				name: action.name,
@@ -69,12 +72,16 @@ export class ActionRemoveSubCommand implements Command {
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const actionChoice = intr.options.getString(ActionOptions.ACTION_TARGET_OPTION.name, true);
-		//get the active character
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
-		if (!activeCharacter) {
-			throw new KoboldError(LL.commands.character.interactions.noActiveCharacter());
-		}
-		const targetAction = activeCharacter.getActionByName(actionChoice);
+
+		const koboldUtils = new KoboldUtils(kobold);
+		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+			activeCharacter: true,
+		});
+
+		const targetAction = FinderHelpers.getActionByName(
+			activeCharacter.sheetRecord,
+			actionChoice
+		);
 		if (targetAction) {
 			// ask for confirmation
 
@@ -144,12 +151,14 @@ export class ActionRemoveSubCommand implements Command {
 			// remove the action
 			if (result && result.value === 'remove') {
 				const actionsWithoutRemoved = _.filter(
-					activeCharacter.actions,
+					activeCharacter.sheetRecord.actions,
 					action => action.name.toLocaleLowerCase() !== actionChoice.toLocaleLowerCase()
 				);
-				await CharacterModel.query()
-					.patch({ actions: actionsWithoutRemoved })
-					.where({ userId: intr.user.id });
+
+				await kobold.sheetRecord.update(
+					{ id: activeCharacter.sheetRecordId },
+					{ actions: actionsWithoutRemoved }
+				);
 
 				await InteractionUtils.send(
 					intr,

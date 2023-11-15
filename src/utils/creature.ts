@@ -1,22 +1,23 @@
 import {
 	AbilityEnum,
 	Counter,
-	ModelWithSheet,
 	ProficiencyStat,
 	SheetAttack,
 	SheetBaseCounterKeys,
 	SheetStatKeys,
 } from '../services/kobold/index.js';
-import type { Character, Sheet, Modifier, Attribute } from '../services/kobold/index.js';
+import type {
+	Sheet,
+	Modifier,
+	Attribute,
+	SheetRecord,
+	Action,
+	RollMacro,
+} from '../services/kobold/index.js';
 import { PathBuilder } from '../services/pathbuilder/pathbuilder.js';
-import {
-	CreatureFluff as BestiaryCreatureFluff,
-	Creature as BestiaryCreature,
-} from '../services/pf2etools/schemas/index-types.js';
 import { WG } from '../services/wanderers-guide/wanderers-guide.js';
 import _ from 'lodash';
 import {
-	convertBestiaryCreatureToSheet,
 	convertPathBuilderToSheet,
 	convertWanderersGuideCharToSheet,
 } from './sheet/sheet-import-utils.js';
@@ -70,16 +71,28 @@ export interface attackRoll {
 
 export class Creature {
 	protected _adjustedSheet: Sheet;
+	public actions: Action[];
+	public rollMacros: RollMacro[];
+	public modifiers: Modifier[];
 	constructor(
 		public _sheet: Sheet,
+		{
+			actions,
+			rollMacros,
+			modifiers,
+		}: {
+			actions: Action[];
+			rollMacros: RollMacro[];
+			modifiers: Modifier[];
+		},
 		protected _name?: string
 	) {
 		const sheetDefaults: Sheet = SheetProperties.defaultSheet;
+		this.actions = actions;
+		this.rollMacros = rollMacros;
+		this.modifiers = modifiers;
 		this._sheet = _.defaultsDeep(this._sheet, sheetDefaults);
-		this._adjustedSheet = SheetUtils.adjustSheetWithModifiers(
-			this._sheet,
-			this._sheet.modifiers
-		);
+		this._adjustedSheet = SheetUtils.adjustSheetWithModifiers(this._sheet, this.modifiers);
 	}
 
 	public get sheet(): Sheet {
@@ -389,6 +402,7 @@ export class Creature {
 				initialValue: Number(this.sheet.baseCounters.tempHp.current),
 				updatedValue: 0,
 			});
+			this._sheet.baseCounters.tempHp.current = 0;
 			this.sheet.baseCounters.tempHp.current = 0;
 		}
 		if (Number(this.sheet.baseCounters.hp.current) < Number(this.sheet.baseCounters.hp.max)) {
@@ -397,6 +411,7 @@ export class Creature {
 				initialValue: Number(this.sheet.baseCounters.hp.current),
 				updatedValue: Number(this.sheet.baseCounters.hp.max),
 			});
+			this._sheet.baseCounters.hp.current = Number(this.sheet.baseCounters.hp.max);
 			this.sheet.baseCounters.hp.current = Number(this.sheet.baseCounters.hp.max);
 		}
 		if (
@@ -409,6 +424,7 @@ export class Creature {
 				initialValue: Number(this.sheet.baseCounters.stamina.current),
 				updatedValue: Number(this.sheet.baseCounters.stamina.max),
 			});
+			this._sheet.baseCounters.stamina.current = Number(this.sheet.baseCounters.stamina.max);
 			this.sheet.baseCounters.stamina.current = Number(this.sheet.baseCounters.stamina.max);
 		}
 		if (
@@ -421,6 +437,7 @@ export class Creature {
 				initialValue: Number(this.sheet.baseCounters.resolve.current),
 				updatedValue: Number(this.sheet.baseCounters.resolve.max),
 			});
+			this._sheet.baseCounters.resolve.current = Number(this.sheet.baseCounters.resolve.max);
 			this.sheet.baseCounters.resolve.current = Number(this.sheet.baseCounters.resolve.max);
 		}
 		return updates;
@@ -462,9 +479,11 @@ export class Creature {
 		if (option in this.sheet.baseCounters) {
 			const property = option as SheetBaseCounterKeys;
 			const counter = this.sheet.baseCounters[property];
+			const _counter = this._sheet.baseCounters[property];
 			initialValue = counter.current;
 			updatedValue = computeNewValue(initialValue, value, 0, counter.max ?? Infinity);
 			counter.current = updatedValue;
+			_counter.current = updatedValue;
 			return { initialValue, updatedValue };
 		}
 		return { initialValue, updatedValue };
@@ -515,6 +534,10 @@ export class Creature {
 	public heal(amount: number) {
 		const currentHp = this.sheet.baseCounters.hp.current ?? 0;
 		this.sheet.baseCounters.hp.current = Math.min(
+			this.sheet.baseCounters.hp.max ?? 0,
+			currentHp + amount
+		);
+		this._sheet.baseCounters.hp.current = Math.min(
 			this.sheet.baseCounters.hp.max ?? 0,
 			currentHp + amount
 		);
@@ -571,14 +594,20 @@ export class Creature {
 		// apply damage to temp hp first, then stamina, then hp
 		if (initialTempHp > 0) {
 			this.sheet.baseCounters.tempHp.current = Math.max(0, initialTempHp - unappliedDamage);
+			this._sheet.baseCounters.tempHp.current = Math.max(0, initialTempHp - unappliedDamage);
 			unappliedDamage -= Math.min(initialTempHp, unappliedDamage);
 		}
 		if (unappliedDamage > 0 && this.sheet.staticInfo.usesStamina && initialStamina > 0) {
 			this.sheet.baseCounters.stamina.current = Math.max(0, initialStamina - unappliedDamage);
+			this._sheet.baseCounters.stamina.current = Math.max(
+				0,
+				initialStamina - unappliedDamage
+			);
 			unappliedDamage -= Math.min(initialStamina, unappliedDamage);
 		}
 		if (unappliedDamage > 0 && initialHp > 0) {
 			this.sheet.baseCounters.hp.current = Math.max(0, initialHp - unappliedDamage);
+			this._sheet.baseCounters.hp.current = Math.max(0, initialHp - unappliedDamage);
 			unappliedDamage -= Math.min(initialHp, unappliedDamage);
 		}
 
@@ -800,7 +829,7 @@ export class Creature {
 	}
 
 	public get keyedActions() {
-		return _.keyBy(this.sheet.actions, action => action.name);
+		return _.keyBy(this.actions, action => action.name);
 	}
 
 	public get statBonuses(): { [k in SheetStatKeys]: number } {
@@ -879,16 +908,6 @@ export class Creature {
 		return _.keys(this.rolls);
 	}
 
-	public get actions() {
-		return this.sheet.actions ?? [];
-	}
-	public get modifiers() {
-		return this.sheet.modifiers ?? [];
-	}
-	public get rollMacros() {
-		return this.sheet.rollMacros ?? [];
-	}
-
 	public get attributes() {
 		return AttributeUtils.getAttributes(this);
 	}
@@ -905,59 +924,46 @@ export class Creature {
 		return sheet;
 	}
 
-	public static fromDefault(sheetOverrides: Partial<Sheet> = {}): Creature {
-		const sheet = _.defaults(SheetProperties.defaultSheet, sheetOverrides);
-		return new Creature(sheet);
+	public static fromSheetRecord(sheetRecord: SheetRecord): Creature {
+		let sheet = { ...sheetRecord.sheet };
+		return new Creature(sheetRecord.sheet, {
+			actions: sheetRecord.actions ?? [],
+			modifiers: sheetRecord.modifiers ?? [],
+			rollMacros: sheetRecord.rollMacros ?? [],
+		});
 	}
 
-	public static fromModelWithSheet(initActor: ModelWithSheet): Creature {
-		return new Creature(initActor.sheet as Sheet, initActor.name);
-	}
-
-	public static fromCharacter(character: Character): Creature {
-		let sheet = { ...character.sheet };
-		sheet.actions = [...(sheet.actions ?? []), ...character.actions];
-		sheet.modifiers = [...(sheet.modifiers ?? []), ...character.modifiers];
-		sheet.rollMacros = [...(sheet.rollMacros ?? []), ...character.rollMacros];
-		return new Creature(sheet);
-	}
-
-	public static fromBestiaryEntry(
-		bestiaryEntry: BestiaryCreature,
-		fluffEntry: BestiaryCreatureFluff,
-		options: { useStamina?: boolean; template?: string; customName?: string } = {
-			useStamina: false,
-			template: '',
-			customName: '',
-		}
-	): Creature {
-		const sheet = convertBestiaryCreatureToSheet(bestiaryEntry, fluffEntry, options);
-
-		return new Creature(sheet);
-	}
 	public static fromWandererersGuide(
 		calculatedStats: WG.CharacterCalculatedStatsApiResponse,
 		characterData: WG.CharacterApiResponse,
-		updateFrom?: Sheet
+		updateFrom?: SheetRecord
 	): Creature {
 		let sheet = convertWanderersGuideCharToSheet(calculatedStats, characterData);
-		sheet = Creature.preserveSheetTrackerValues(sheet, updateFrom);
-		return new Creature(sheet);
+		sheet = Creature.preserveSheetTrackerValues(sheet, updateFrom?.sheet);
+		return new Creature(sheet, {
+			actions: updateFrom?.actions ?? [],
+			modifiers: updateFrom?.modifiers ?? [],
+			rollMacros: updateFrom?.rollMacros ?? [],
+		});
 	}
 
 	public static fromPathBuilder(
 		pathBuilderSheet: PathBuilder.Character,
-		updateFrom?: Sheet,
+		updateFrom?: SheetRecord,
 		options: {
 			useStamina: boolean;
 		} = { useStamina: false }
 	): Creature {
 		let sheet = convertPathBuilderToSheet(pathBuilderSheet, options);
 		if (updateFrom) {
-			sheet.info.imageURL = updateFrom.info.imageURL ?? sheet.info.imageURL;
+			sheet.info.imageURL = updateFrom.sheet.info.imageURL ?? sheet.info.imageURL;
 		}
-		sheet = Creature.preserveSheetTrackerValues(sheet, updateFrom);
-		return new Creature(sheet);
+		sheet = Creature.preserveSheetTrackerValues(sheet, updateFrom?.sheet);
+		return new Creature(sheet, {
+			actions: updateFrom?.actions ?? [],
+			modifiers: updateFrom?.modifiers ?? [],
+			rollMacros: updateFrom?.rollMacros ?? [],
+		});
 	}
 
 	//roll helpers

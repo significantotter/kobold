@@ -792,9 +792,6 @@ describe('sheet-v2-upgrader', () => {
 						notes: 'Can be used once every 3 rounds',
 					},
 				],
-				rollMacros: [],
-				actions: [],
-				modifiers: [],
 				sourceData: {},
 			};
 

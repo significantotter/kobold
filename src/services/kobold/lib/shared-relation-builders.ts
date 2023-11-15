@@ -1,4 +1,4 @@
-import { Database } from '../schemas/index.js';
+import { Database, SheetRecord } from '../schemas/index.js';
 import { ExpressionBuilder } from 'kysely';
 import { jsonArrayFrom, jsonObjectFrom } from 'kysely/helpers/postgres';
 
@@ -44,4 +44,26 @@ export function guildDefaultCharacterForCharacter(
 				return ebChannel.and(ands);
 			})
 	).as('guildDefaultCharacters');
+}
+
+export function sheetRecordForActor(eb: ExpressionBuilder<Database, 'initiativeActor'>) {
+	return jsonObjectFrom(
+		eb
+			.selectFrom('sheetRecord')
+			.selectAll('sheetRecord')
+			.whereRef('sheetRecord.id', '=', 'initiativeActor.sheetRecordId')
+	)
+		.$castTo<SheetRecord>()
+		.as('sheetRecord');
+}
+
+export function sheetRecordForCharacter(eb: ExpressionBuilder<Database, 'character'>) {
+	return jsonObjectFrom(
+		eb
+			.selectFrom('sheetRecord')
+			.selectAll('sheetRecord')
+			.whereRef('sheetRecord.id', '=', 'character.sheetRecordId')
+	)
+		.$castTo<SheetRecord>()
+		.as('sheetRecord');
 }

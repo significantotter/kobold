@@ -17,6 +17,7 @@ import { Command, CommandDeferType } from '../../index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { ActionStageOptions } from './action-stage-command-options.js';
 import { InjectedServices } from '../../command.js';
+import { Kobold } from '../../../services/kobold/kobold.model.js';
 
 export class ActionStageCommand implements Command {
 	public names = [L.en.commands.actionStage.name()];

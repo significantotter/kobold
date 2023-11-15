@@ -22,29 +22,48 @@ export class WgAuthTokenModel extends Model<Database['wgAuthToken']> {
 		return result[0];
 	}
 
-	public async read({ id }: { id: WgAuthTokenId }): Promise<WgAuthToken | null> {
-		const result = await this.db
-			.selectFrom('wgAuthToken')
-			.selectAll()
-			.where('wgAuthToken.id', '=', id)
-			.execute();
-		return result[0] ?? null;
+	public async read({
+		id,
+		charId,
+	}: {
+		id?: WgAuthTokenId;
+		charId?: number;
+	}): Promise<WgAuthToken | null> {
+		let query = this.db.selectFrom('wgAuthToken').selectAll();
+
+		if (id) query = query.where('wgAuthToken.id', '=', id);
+		if (charId) query = query.where('wgAuthToken.charId', '=', charId);
+
+		const result = await query.orderBy('expiresAt desc').executeTakeFirst();
+
+		return result ?? null;
 	}
 
 	public async update(
-		{ id }: { id: WgAuthTokenId },
+		{
+			id,
+			charId,
+		}: {
+			id?: WgAuthTokenId;
+			charId?: number;
+		},
 		args: WgAuthTokenUpdate
 	): Promise<WgAuthToken> {
-		const result = await this.db
-			.updateTable('wgAuthToken')
-			.set(args)
-			.where('wgAuthToken.id', '=', id)
-			.returningAll()
-			.execute();
+		let query = this.db.updateTable('wgAuthToken').set(args);
+
+		if (id != null) query = query.where('wgAuthToken.id', '=', id);
+		if (charId != null) query = query.where('wgAuthToken.charId', '=', charId);
+
+		const result = await query.returningAll().execute();
 		return result[0];
 	}
 
-	public async delete({ id }: { id: WgAuthTokenId }): Promise<void> {
-		await this.db.deleteFrom('wgAuthToken').where('wgAuthToken.id', '=', id).execute();
+	public async delete({ id, charId }: { id?: WgAuthTokenId; charId?: number }): Promise<void> {
+		let query = this.db.deleteFrom('wgAuthToken');
+
+		if (id != null) query = query.where('wgAuthToken.id', '=', id);
+		if (charId != null) query = query.where('wgAuthToken.charId', '=', charId);
+
+		await query.execute();
 	}
 }

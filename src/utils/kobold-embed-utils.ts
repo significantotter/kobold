@@ -11,8 +11,10 @@ import { TranslationFunctions } from '../i18n/i18n-types.js';
 import {
 	Action,
 	Character,
+	CharacterWithRelations,
 	Sheet,
 	SheetInfoLists,
+	SheetRecord,
 	SheetWeaknessesResistances,
 } from '../services/kobold/index.js';
 import type { InitiativeBuilder, TurnData } from './initiative-builder.js';
@@ -30,11 +32,14 @@ export class KoboldEmbed extends EmbedBuilder {
 	 * Sets character specific attributes for the embed: currently just the thumbnail
 	 * @param character The character to set the attributes for
 	 */
-	public setCharacter(character: Character) {
-		if (character?.sheet?.info?.imageURL) {
-			this.setThumbnail(character.sheet.info.imageURL);
+	public setSheetRecord(sheetRecord: SheetRecord) {
+		if (sheetRecord.sheet.info.imageURL) {
+			this.setThumbnail(sheetRecord.sheet.info.imageURL);
 		}
 		return this;
+	}
+	public setCharacter(character: CharacterWithRelations) {
+		return this.setSheetRecord(character.sheetRecord);
 	}
 
 	public static async sendInitiative(
@@ -138,8 +143,8 @@ export class KoboldEmbed extends EmbedBuilder {
 
 		if (initiativeBuilder.actorsByGroup[groupTurn.id].length === 1) {
 			const actor = initiativeBuilder.actorsByGroup[groupTurn.id][0];
-			if (actor?.character) {
-				result.setCharacter(actor.character);
+			if (actor.characterId) {
+				result.setSheetRecord(actor.sheetRecord);
 			}
 		}
 		return result;

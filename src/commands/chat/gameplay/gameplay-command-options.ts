@@ -41,7 +41,7 @@ export class GameplayOptions {
 	public static readonly GAMEPLAY_TARGET_CHARACTER: APIApplicationCommandBasicOption = {
 		name: L.en.commandOptions.gameplayTargetCharacter.name(),
 		description: L.en.commandOptions.gameplayTargetCharacter.description(),
-		required: false,
+		required: true,
 		autocomplete: true,
 		type: ApplicationCommandOptionType.String,
 	};

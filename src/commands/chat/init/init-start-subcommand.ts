@@ -8,12 +8,13 @@ import { RateLimiter } from 'discord.js-rate-limiter';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import L from '../../../i18n/i18n-node.js';
 
-import { Initiative, InitiativeModel } from '../../../services/kobold/index.js';
+import { Initiative, InitiativeModel, Kobold } from '../../../services/kobold/index.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { InitiativeBuilder } from '../../../utils/initiative-builder.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 
 export class InitStartSubCommand implements Command {
 	public names = [L.en.commands.init.start.name()];
@@ -41,16 +42,21 @@ export class InitStartSubCommand implements Command {
 			);
 			return;
 		}
+		const koboldUtils = new KoboldUtils(kobold);
+		const { currentInitiative } = await koboldUtils.fetchDataForCommand(intr, {
+			currentInitiative: true,
+		});
+		if (currentInitiative) {
+			throw new KoboldError(LL.commands.init.start.interactions.initExistsError());
+		}
 
 		try {
-			const init = await InitiativeModel.query()
-				.insertAndFetch({
-					gmUserId: startingUser,
-					channelId: intr.channelId,
-					currentTurnGroupId: null,
-					currentRound: 0,
-				} as Initiative)
-				.first();
+			const init = await kobold.initiative.create({
+				gmUserId: startingUser,
+				channelId: intr.channelId,
+				currentTurnGroupId: null,
+				currentRound: 0,
+			});
 
 			const initBuilder = new InitiativeBuilder({
 				initiative: init,
@@ -67,9 +73,7 @@ export class InitStartSubCommand implements Command {
 				: InteractionUtils.send(intr, updatedEmbed);
 		} catch (err) {
 			if (err instanceof KoboldError) throw err;
-			if (err instanceof Error && err.name === 'UniqueViolationError') {
-				throw new KoboldError(LL.commands.init.start.interactions.initExistsError());
-			} else {
+			else {
 				console.warn(err);
 				throw new KoboldError(LL.commands.init.start.interactions.otherError());
 			}

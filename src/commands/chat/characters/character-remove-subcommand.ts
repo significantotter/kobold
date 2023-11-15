@@ -1,4 +1,4 @@
-import { Character, CharacterModel } from '../../../services/kobold/index.js';
+import { Character, CharacterModel, Kobold } from '../../../services/kobold/index.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -16,6 +16,7 @@ import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { refs } from '../../../constants/common-text.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 
 export class CharacterRemoveSubCommand implements Command {
 	public names = [L.en.commands.character.remove.name()];
@@ -34,15 +35,10 @@ export class CharacterRemoveSubCommand implements Command {
 		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
-		//check if we have an active character
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
-		if (!activeCharacter) {
-			await InteractionUtils.send(
-				intr,
-				LL.commands.character.interactions.noActiveCharacter()
-			);
-			return;
-		}
+		const koboldUtils = new KoboldUtils(kobold);
+		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+			activeCharacter: true,
+		});
 
 		const prompt = await intr.reply({
 			content: LL.commands.character.remove.interactions.removeConfirmation.text({
@@ -107,13 +103,13 @@ export class CharacterRemoveSubCommand implements Command {
 				components: [],
 			});
 			//delete the character
-			await CharacterModel.query().deleteById(activeCharacter.id);
 
-			//set another character as active
-			const newActive = await CharacterModel.query().first().where({ userId: intr.user.id });
-			if (newActive) {
-				await CharacterModel.query().patchAndFetchById(newActive.id, {
-					isActiveCharacter: true,
+			await kobold.character.delete({ id: activeCharacter.id });
+			const newActiveCharacter = await kobold.character.read({ userId: intr.user.id });
+			if (newActiveCharacter) {
+				await kobold.character.setIsActive({
+					id: newActiveCharacter.id,
+					userId: intr.user.id,
 				});
 			}
 

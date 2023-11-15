@@ -5,7 +5,11 @@ export class DrizzleUtils {
 		return `'${value.replace(/([\_\%])/g, '')}'`;
 	}
 	// Compares two strings, ignoring case and allowing wildcards
-	public static ilike(column: Column, value: string | SQLWrapper, escape?: string): SQL {
+	public static ilike(
+		column: Column | SQL<unknown>,
+		value: string | SQLWrapper,
+		escape?: string
+	): SQL {
 		if (escape) return sql`upper(${column}) like upper(${value}) escape ${escape}`;
 		return sql`upper(${column}) like upper(${value})`;
 	}

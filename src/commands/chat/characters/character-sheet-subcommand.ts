@@ -10,13 +10,10 @@ import { Command, CommandDeferType } from '../../index.js';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Creature } from '../../../utils/creature.js';
-import { UsingData } from '../../command.js';
-import { Character } from '../../../services/kobold/index.js';
+import { Kobold } from '../../../services/kobold/index.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 
-export class CharacterSheetSubCommand
-	extends UsingData({ activeCharacter: true })
-	implements Command
-{
+export class CharacterSheetSubCommand implements Command {
 	public names = [L.en.commands.character.sheet.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
@@ -31,18 +28,14 @@ export class CharacterSheetSubCommand
 	public async execute(
 		intr: ChatInputCommandInteraction,
 		LL: TranslationFunctions,
-		{ activeCharacter }: { activeCharacter: Character }
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
-		// const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
-		if (!activeCharacter) {
-			await InteractionUtils.send(
-				intr,
-				LL.commands.character.interactions.noActiveCharacter()
-			);
-			return;
-		}
+		const koboldUtils = new KoboldUtils(kobold);
+		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+			activeCharacter: true,
+		});
 
-		const creature = Creature.fromCharacter(activeCharacter);
+		const creature = Creature.fromSheetRecord(activeCharacter.sheetRecord);
 		const embed = creature.compileSheetEmbed();
 
 		await InteractionUtils.send(intr, embed);

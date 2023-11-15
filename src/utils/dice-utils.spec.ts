@@ -1,10 +1,39 @@
 import L from '../i18n/i18n-node.js';
-import { Attribute } from '../services/kobold/index.js';
-import { CharacterFactory } from '../services/kobold/models-old/character/character.factory.js';
+import { Attribute, CharacterWithRelations } from '../services/kobold/index.js';
 import { Creature } from './creature.js';
 import { DiceUtils } from './dice-utils.js';
 import { RollBuilder } from './roll-builder.js';
 import { SheetProperties } from './sheet/sheet-properties.js';
+
+const mocks = {
+	get character(): CharacterWithRelations {
+		return {
+			name: 'Character Name',
+			id: 1,
+			createdAt: new Date(),
+			lastUpdatedAt: new Date(),
+			userId: 'user1',
+			sheetRecordId: 1,
+			charId: 100,
+			isActiveCharacter: true,
+			importSource: 'Import Source',
+			channelDefaultCharacters: [],
+			guildDefaultCharacters: [],
+			sheetRecord: {
+				id: 1,
+				sheet: SheetProperties.defaultSheet,
+				modifiers: [],
+				actions: [],
+				rollMacros: [],
+				trackerMode: null,
+				trackerMessageId: null,
+				trackerChannelId: null,
+				trackerGuildId: null,
+			},
+		};
+	},
+};
+
 describe('Dice Utils', function () {
 	describe('buildDiceExpression', function () {
 		test('builds a dice expression using a base expression, a bonus, and a modifier', function () {
@@ -85,7 +114,7 @@ describe('RollBuilder', function () {
 		expect(diceField).toBeUndefined();
 	});
 	test(`when referencing a character, applies the character's name and image to the embed`, function () {
-		const fakeCharacter = CharacterFactory.build();
+		const fakeCharacter: CharacterWithRelations = mocks.character;
 		const rollBuilder = new RollBuilder({
 			character: fakeCharacter,
 		});
@@ -102,7 +131,7 @@ describe('RollBuilder', function () {
 		expect(result.data?.footer?.text).toBe('testing!\n\n');
 	});
 	test(`allows a title that will overwrite any otherwise generated title`, function () {
-		const fakeCharacter = CharacterFactory.build();
+		const fakeCharacter = mocks.character;
 		const rollBuilder = new RollBuilder({
 			character: fakeCharacter,
 			actorName: 'some actor',
@@ -143,49 +172,34 @@ describe('RollBuilder', function () {
 		);
 	});
 	test('parses an attribute', function () {
-		const character = CharacterFactory.build({
-			sheet: {
-				intProperties: {
-					strength: 22,
-				},
-			},
-		});
+		const character = mocks.character;
+		character.sheetRecord.sheet.intProperties.strength = 22;
 		expect(
-			DiceUtils.parseAttribute('[strength]', Creature.fromCharacter(character))
+			DiceUtils.parseAttribute('[strength]', Creature.fromSheetRecord(character.sheetRecord))
 		).toStrictEqual([6, ['ability', 'strength']]);
 	});
 	test('fails to parse an invalid attribute', function () {
 		expect(DiceUtils.parseAttribute('[same]')).toStrictEqual([0, []]);
 	});
 	test('parses an attribute using a shorthand value', function () {
-		const character = CharacterFactory.build({
-			sheet: {
-				intProperties: {
-					strength: 15,
-				},
-			},
-		});
-		expect(DiceUtils.parseAttribute('[str]', Creature.fromCharacter(character))).toStrictEqual([
-			2,
-			['ability', 'strength'],
-		]);
+		const character = mocks.character;
+		character.sheetRecord.sheet.intProperties.strength = 22;
+		expect(
+			DiceUtils.parseAttribute('[str]', Creature.fromSheetRecord(character.sheetRecord))
+		).toStrictEqual([2, ['ability', 'strength']]);
 	});
 	test('parses all attributes in a dice expression', function () {
-		const character = CharacterFactory.build({
-			sheet: {
-				intProperties: {
-					strength: 15,
-				},
-			},
-		});
+		const character = mocks.character;
+		character.sheetRecord.sheet.intProperties.strength = 15;
 		expect(
-			DiceUtils.parseAttributes('[str]d20 + [str]', Creature.fromCharacter(character))
+			DiceUtils.parseAttributes(
+				'[str]d20 + [str]',
+				Creature.fromSheetRecord(character.sheetRecord)
+			)
 		).toStrictEqual(['2d20 + 2', ['ability', 'strength']]);
 	});
 	test('rolls dice using parsed character attributes', function () {
-		const character = CharacterFactory.build({
-			sheet: SheetProperties.defaultSheet,
-		});
+		const character = mocks.character;
 		const extraAttributes: Attribute[] = [
 			{
 				name: 'base',

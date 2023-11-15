@@ -1,9 +1,4 @@
-import {
-	Character,
-	CharacterModel,
-	GuildDefaultCharacter,
-	GuildDefaultCharacterModel,
-} from '../../../services/kobold/index.js';
+import { Kobold } from '../../../services/kobold/index.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -16,6 +11,7 @@ import { Command, CommandDeferType } from '../../index.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 
 export class CharacterListSubCommand implements Command {
 	public names = [L.en.commands.character.list.name()];
@@ -34,18 +30,20 @@ export class CharacterListSubCommand implements Command {
 		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
-		// try and find that character
-		const targetCharacter = await CharacterModel.query().where({
-			userId: intr.user.id,
-		});
-		const serverDefault = (
-			await GuildDefaultCharacterModel.query().where({
-				userId: intr.user.id,
-				guildId: intr.guildId,
-			})
-		)[0];
+		const koboldUtils = new KoboldUtils(kobold);
 
-		if (!targetCharacter.length) {
+		// try and find that character
+		const { ownedCharacters } = await koboldUtils.fetchDataForCommand(intr, {
+			ownedCharacters: true,
+		});
+
+		const serverDefault = ownedCharacters.find(character =>
+			character.guildDefaultCharacters.find(
+				serverDefault => serverDefault.guildId == intr.guildId
+			)
+		);
+
+		if (!ownedCharacters.length) {
 			//send success message
 			await InteractionUtils.send(
 				intr,
@@ -54,12 +52,12 @@ export class CharacterListSubCommand implements Command {
 		} else {
 			const characterFields = [];
 
-			for (const character of targetCharacter) {
-				const level = character.sheet.staticInfo.level;
-				const heritage = character.sheet.info.heritage;
-				const ancestry = character.sheet.info.ancestry;
-				const classes = character.sheet.info.class;
-				const isServerDefault = serverDefault.characterId == character.id;
+			for (const character of ownedCharacters) {
+				const level = character.sheetRecord.sheet.staticInfo.level;
+				const heritage = character.sheetRecord.sheet.info.heritage;
+				const ancestry = character.sheetRecord.sheet.info.ancestry;
+				const classes = character.sheetRecord.sheet.info.class;
+				const isServerDefault = serverDefault?.id == character.id;
 				characterFields.push({
 					name: LL.commands.character.list.interactions.characterListEmbed.characterFieldName(
 						{

@@ -4,6 +4,7 @@ import {
 	ActionTypeEnum,
 	Character,
 	CharacterModel,
+	Kobold,
 	isActionTypeEnum,
 } from '../../../services/kobold/index.js';
 import {
@@ -25,6 +26,8 @@ import { ActionOptions } from './action-command-options.js';
 import _ from 'lodash';
 import L from '../../../i18n/i18n-node.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 
 export class ActionEditSubCommand implements Command {
 	public names = [L.en.commands.action.edit.name()];
@@ -49,14 +52,15 @@ export class ActionEditSubCommand implements Command {
 			const match = intr.options.getString(ActionOptions.ACTION_TARGET_OPTION.name) ?? '';
 
 			//get the active character
-			const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
+			const { characterUtils } = new KoboldUtils(kobold);
+			const activeCharacter = await characterUtils.getActiveCharacter(intr);
 			if (!activeCharacter) {
 				//no choices if we don't have a character to match against
 				return [];
 			}
 			//find an action on the character matching the autocomplete string
-			const matchedActions = CharacterUtils.findPossibleActionFromString(
-				activeCharacter,
+			const matchedActions = FinderHelpers.matchAllActions(
+				activeCharacter.sheetRecord,
 				match
 			).map(action => ({
 				name: action.name,
@@ -75,18 +79,13 @@ export class ActionEditSubCommand implements Command {
 		const fieldToEdit = intr.options.getString(ActionOptions.ACTION_EDIT_OPTION.name, true);
 		const newValue = intr.options.getString(ActionOptions.ACTION_EDIT_VALUE.name, true);
 
-		//get the active character
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
-		if (!activeCharacter) {
-			await InteractionUtils.send(
-				intr,
-				LL.commands.character.interactions.noActiveCharacter()
-			);
-			return;
-		}
+		const koboldUtils = new KoboldUtils(kobold);
+		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+			activeCharacter: true,
+		});
 
 		//find a roll on the character matching the autocomplete string
-		const matchedAction = activeCharacter.actions?.find(
+		const matchedAction = activeCharacter.sheetRecord.actions.find(
 			action => action.name.toLocaleLowerCase() === actionTarget.toLocaleLowerCase()
 		);
 		if (!matchedAction) {
@@ -159,9 +158,10 @@ export class ActionEditSubCommand implements Command {
 			throw new KoboldError(LL.commands.action.edit.interactions.unknownField());
 		}
 
-		await CharacterModel.query().updateAndFetchById(activeCharacter.id, {
-			actions: activeCharacter.actions,
-		});
+		await kobold.sheetRecord.update(
+			{ id: activeCharacter.sheetRecordId },
+			{ actions: activeCharacter.sheetRecord.actions }
+		);
 
 		//send a confirmation message
 		await InteractionUtils.send(

@@ -6,6 +6,7 @@ import {
 	UserSettings,
 	InitiativeWithRelations,
 	InitiativeActorWithRelations,
+	CharacterWithRelations,
 } from '../services/kobold/index.js';
 import { CommandInteraction, Message } from 'discord.js';
 import { KoboldEmbed } from './kobold-embed-utils.js';
@@ -268,55 +269,54 @@ export class InitiativeBuilder {
 	}
 
 	public generateActorStatDisplayString(
-		actor: InitiativeActor,
+		actor: InitiativeActorWithRelations,
 		options: {
 			showHiddenCreatureStats?: boolean;
 		} = { showHiddenCreatureStats: false }
 	): string {
 		let turnText = '';
-		// if the character doesn't have a full sheet, don't show stats
-		if (!actor.sheet) return turnText;
+		const sheet = actor.sheetRecord.sheet;
 		// use a second line for an actor with a too-long name
 		if (actor.name.length > 40) {
 			turnText += '\n';
 		}
-		if (actor.sheet.baseCounters.hp.current === undefined) {
+		if (sheet.baseCounters.hp.current === undefined) {
 			return turnText;
 		}
 		// if we should hide the creature's stats, do so
 		if (!options.showHiddenCreatureStats && actor.hideStats) {
-			const hp = actor.sheet.baseCounters.hp.current;
+			const hp = sheet.baseCounters.hp.current;
 			turnText += ` <${this.hpTextFromValue(
-				actor.sheet.baseCounters.hp.current,
-				actor.sheet.baseCounters.hp.max ?? 0
+				sheet.baseCounters.hp.current,
+				sheet.baseCounters.hp.max ?? 0
 			)}>`;
-			if (actor.sheet.staticInfo.usesStamina) {
+			if (sheet.staticInfo.usesStamina) {
 				turnText += ` <${this.staminaTextFromValue(
-					actor.sheet.baseCounters.stamina.current,
-					actor.sheet.baseCounters.stamina.max ?? 0
+					sheet.baseCounters.stamina.current,
+					sheet.baseCounters.stamina.max ?? 0
 				)}>`;
 			}
-			if (actor.sheet.baseCounters.tempHp.current) {
+			if (sheet.baseCounters.tempHp.current) {
 				turnText += `<THP ?/?>`;
 			}
 		}
 
 		// otherwise, display the creature's stats if we can
 		else {
-			turnText += ` <HP ${actor.sheet.baseCounters.hp.current}`;
-			turnText += `/${actor.sheet.baseCounters.hp.max}`;
+			turnText += ` <HP ${sheet.baseCounters.hp.current}`;
+			turnText += `/${sheet.baseCounters.hp.max}`;
 			turnText += `>`;
-			if (actor.sheet.staticInfo.usesStamina) {
-				turnText += `<SP ${actor.sheet.baseCounters.stamina.current}`;
-				turnText += `/${actor.sheet.baseCounters.stamina.max}`;
+			if (sheet.staticInfo.usesStamina) {
+				turnText += `<SP ${sheet.baseCounters.stamina.current}`;
+				turnText += `/${sheet.baseCounters.stamina.max}`;
 				turnText += `>`;
 
-				turnText += `<RP ${actor.sheet.baseCounters.resolve.current}`;
-				turnText += `/${actor.sheet.baseCounters.resolve.max}`;
+				turnText += `<RP ${sheet.baseCounters.resolve.current}`;
+				turnText += `/${sheet.baseCounters.resolve.max}`;
 				turnText += `>`;
 			}
-			if (actor.sheet.baseCounters.tempHp.current) {
-				turnText += `<THP ${actor.sheet.baseCounters.tempHp.current}>`;
+			if (sheet.baseCounters.tempHp.current) {
+				turnText += `<THP ${sheet.baseCounters.tempHp.current}>`;
 			}
 		}
 
@@ -357,7 +357,7 @@ export class InitiativeBuilderUtils {
 		initiativeValue,
 		userSettings,
 	}: {
-		character: Character;
+		character: CharacterWithRelations;
 		skillChoice?: string | null;
 		diceExpression?: string | null;
 		initiativeValue?: number | null;
@@ -369,7 +369,7 @@ export class InitiativeBuilderUtils {
 			finalInitiative = initiativeValue;
 		} else if (skillChoice) {
 			rollBuilderResponse = await RollBuilder.fromSimpleCreatureRoll({
-				creature: Creature.fromCharacter(character),
+				creature: Creature.fromSheetRecord(character.sheetRecord),
 				attributeName: skillChoice,
 				modifierExpression: diceExpression,
 				tags: ['initiative'],
@@ -391,7 +391,7 @@ export class InitiativeBuilderUtils {
 			finalInitiative = rollBuilderResponse.getRollTotalArray()[0] ?? 0;
 		} else {
 			rollBuilderResponse = await RollBuilder.fromSimpleCreatureRoll({
-				creature: Creature.fromCharacter(character),
+				creature: Creature.fromSheetRecord(character.sheetRecord),
 				attributeName: 'perception',
 				modifierExpression: diceExpression,
 				tags: ['initiative'],
@@ -477,29 +477,6 @@ export class InitiativeBuilderUtils {
 				initiative.gmUserId === userId || group.userId === userId
 		);
 		return controllableGroups;
-	}
-
-	public static getActiveCharacterActor(
-		initiative: InitiativeWithRelations,
-		userId: string,
-		LL: TranslationFunctions
-	) {
-		let actor: InitiativeActor | null = null;
-		for (const possibleActor of initiative?.actors || []) {
-			const actorCharacter = possibleActor.character;
-			if (
-				actorCharacter &&
-				actorCharacter.isActiveCharacter &&
-				actorCharacter.userId === userId
-			) {
-				actor = possibleActor;
-				break;
-			}
-		}
-		if (!actor) {
-			throw new KoboldError(L.en.utils.initiative.activeCharacterNotInInitError());
-		}
-		return actor;
 	}
 
 	public static getNameMatchActorFromInitiative(

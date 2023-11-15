@@ -99,7 +99,7 @@ export class CompendiumEmbedParser {
 	public parseVehicle = _parseVehicle;
 	public parseVersatileHeritage = _parseVersatileHeritage;
 
-	public async preprocessData(data: any): Promise<any> {
+	public async preprocessData<T>(data: T): Promise<T> {
 		let dataAsString = JSON.stringify(data);
 
 		//remove the prompts

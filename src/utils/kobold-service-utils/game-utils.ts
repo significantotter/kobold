@@ -1,15 +1,20 @@
 import { AutocompleteInteraction, CacheType, ChatInputCommandInteraction } from 'discord.js';
 import {
 	Character,
+	CharacterWithRelations,
 	GameModel,
 	GameWithRelations,
 	Initiative,
 	InitiativeActor,
 	InitiativeActorWithRelations,
+	InitiativeWithRelations,
 	ModelWithSheet,
+	SheetRecord,
 } from '../../services/kobold/index.js';
 import type { KoboldUtils } from './kobold-utils.js';
-import { Kobold } from '../../services/kobold/kobold.model.js';
+import { Kobold } from '../../services/kobold/index.js';
+import L from '../../i18n/i18n-node.js';
+import { KoboldError } from '../KoboldError.js';
 
 export class GameUtils {
 	kobold: Kobold;
@@ -78,14 +83,11 @@ export class GameUtils {
 
 	public async getCharacterOrInitActorTarget(
 		intr: ChatInputCommandInteraction<CacheType> | AutocompleteInteraction<CacheType>,
-		targetName?: string | null
+		targetName: string
 	): Promise<{
-		joinedGames: GameWithRelations[];
-		init: Initiative | null;
-		characterOrInitActorTargets: ModelWithSheet[];
-		activeCharacter: Character | null;
-		targetCharacter: Character | null;
-		targetInitActor: InitiativeActor | null;
+		targetSheetRecord: SheetRecord;
+		hideStats: boolean;
+		targetName: string;
 	}> {
 		const [joinedGames, initResult, activeCharacter] = await Promise.all([
 			this.kobold.game.readMany({
@@ -96,17 +98,9 @@ export class GameUtils {
 			this.koboldUtils.characterUtils.getActiveCharacter(intr),
 		]);
 
-		if (!targetName)
-			return {
-				joinedGames,
-				init: initResult,
-				characterOrInitActorTargets: activeCharacter ? [activeCharacter] : [],
-				activeCharacter,
-				targetCharacter: activeCharacter,
-				targetInitActor: null,
-			};
-
-		let characterOptions: Character[] = joinedGames.flatMap(game => game.characters);
+		let characterOptions: CharacterWithRelations[] = joinedGames.flatMap(
+			game => game.characters
+		);
 
 		if (activeCharacter) characterOptions = characterOptions.concat(activeCharacter);
 
@@ -123,24 +117,19 @@ export class GameUtils {
 				actor => actor.name.trim().toLowerCase() === targetName.trim().toLowerCase()
 			) ?? null;
 
-		// if we found an init actor but not a character, and the init actor has a character associated with it
-		// add in that character
-		if (matchedInitActor && !matchedCharacter && matchedInitActor.character) {
-			matchedCharacter = matchedInitActor.character;
+		const targetSheetRecord =
+			matchedInitActor?.sheetRecord ?? matchedCharacter?.sheetRecord ?? null;
+		const hideStats = matchedInitActor?.hideStats ?? false;
+		const actualTargetName = matchedInitActor?.name ?? matchedCharacter?.name ?? null;
+
+		if (!targetSheetRecord) {
+			throw new KoboldError(
+				L.en.commands.roll.interactions.targetNotFound({
+					targetName,
+				})
+			);
 		}
-
-		const targets: ModelWithSheet[] = [];
-		if (matchedCharacter) targets.push(matchedCharacter);
-		if (matchedInitActor) targets.push(matchedInitActor);
-
-		return {
-			joinedGames,
-			init: initResult,
-			characterOrInitActorTargets: targets,
-			activeCharacter,
-			targetCharacter: matchedCharacter ?? null,
-			targetInitActor: matchedInitActor,
-		};
+		return { targetSheetRecord, hideStats, targetName: actualTargetName! };
 	}
 
 	public async getWhereUserHasCharacter(userId: string, guildId: string | null) {
@@ -149,8 +138,8 @@ export class GameUtils {
 
 		return options.filter(
 			option =>
-				option.characters.filter(char => char.userId === userId && char.isActiveCharacter)
-					.length > 0 || option.gmUserId === userId
+				option.characters.filter(char => char.userId === userId).length > 0 ||
+				option.gmUserId === userId
 		);
 	}
 	public async getWhereUserLacksCharacter(userId: string, guildId: string | null) {

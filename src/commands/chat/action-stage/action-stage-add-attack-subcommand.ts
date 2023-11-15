@@ -17,7 +17,10 @@ import { CharacterUtils } from '../../../utils/kobold-service-utils/character-ut
 import _ from 'lodash';
 import { AutocompleteUtils } from '../../../utils/kobold-service-utils/autocomplete-utils.js';
 import { ActionStageOptions } from './action-stage-command-options.js';
-import { CharacterModel, RollTypeEnum } from '../../../services/kobold/index.js';
+import { CharacterModel, Kobold, RollTypeEnum } from '../../../services/kobold/index.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { Creature } from '../../../utils/creature.js';
+import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 
 export class ActionStageAddAttackSubCommand implements Command {
 	public names = [L.en.commands.actionStage.addAttack.name()];
@@ -41,12 +44,14 @@ export class ActionStageAddAttackSubCommand implements Command {
 			//we don't need to autocomplete if we're just dealing with whitespace
 			const match =
 				intr.options.getString(ActionStageOptions.ACTION_TARGET_OPTION.name) ?? '';
-			return await AutocompleteUtils.getTargetActionForActiveCharacter(intr, match);
+			const { autocompleteUtils } = new KoboldUtils(kobold);
+			return await autocompleteUtils.getTargetActionForActiveCharacter(intr, match);
 		} else if (option.name === ActionStageOptions.ACTION_ROLL_TARGET_DC_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
 			const match =
 				intr.options.getString(ActionStageOptions.ACTION_ROLL_TARGET_DC_OPTION.name) ?? '';
-			return await AutocompleteUtils.getAllMatchingRollsForActiveCharacter(intr, match, [
+			const { autocompleteUtils } = new KoboldUtils(kobold);
+			return await autocompleteUtils.getAllMatchingStatRollsForActiveCharacter(intr, match, [
 				'AC',
 				'Class DC',
 				'Arcane DC',
@@ -84,19 +89,14 @@ export class ActionStageAddAttackSubCommand implements Command {
 		);
 		if (allowRollModifiers === null) allowRollModifiers = true;
 
-		//get the active character
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
-		if (!activeCharacter) {
-			await InteractionUtils.send(
-				intr,
-				LL.commands.character.interactions.noActiveCharacter()
-			);
-			return;
-		}
+		const koboldUtils = new KoboldUtils(kobold);
+		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+			activeCharacter: true,
+		});
 
 		// find the action
-		const matchedActions = CharacterUtils.findPossibleActionFromString(
-			activeCharacter,
+		const matchedActions = FinderHelpers.matchAllActions(
+			activeCharacter.sheetRecord,
 			targetAction
 		);
 		if (!matchedActions || !matchedActions.length) {
@@ -125,11 +125,11 @@ export class ActionStageAddAttackSubCommand implements Command {
 			allowRollModifiers,
 		});
 
-		// save the character
-
-		await CharacterModel.query().updateAndFetchById(activeCharacter.id, {
-			actions: activeCharacter.actions,
-		});
+		// save the sheet record
+		await kobold.sheetRecord.update(
+			{ id: activeCharacter.sheetRecordId },
+			{ actions: activeCharacter.sheetRecord.actions }
+		);
 
 		// send the response message
 		await InteractionUtils.send(

@@ -10,7 +10,7 @@ import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import _ from 'lodash';
-import { Kobold } from '../../../services/kobold/kobold.model.js';
+import { Kobold } from '../../../services/kobold/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 
 export class RollMacroListSubCommand implements Command {
@@ -35,7 +35,7 @@ export class RollMacroListSubCommand implements Command {
 			activeCharacter: true,
 		});
 
-		const rollMacros = activeCharacter.rollMacros;
+		const rollMacros = activeCharacter.sheetRecord.rollMacros;
 		const fields = [];
 		for (const rollMacro of rollMacros.sort((a, b) => (a.name || '').localeCompare(b.name))) {
 			fields.push({
@@ -47,7 +47,7 @@ export class RollMacroListSubCommand implements Command {
 
 		const embed = await new KoboldEmbed();
 		embed.setCharacter(activeCharacter);
-		embed.setTitle(`${activeCharacter.sheet.staticInfo.name}'s Roll Macros`);
+		embed.setTitle(`${activeCharacter.name}'s Roll Macros`);
 		embed.addFields(fields);
 		await embed.sendBatches(intr);
 	}

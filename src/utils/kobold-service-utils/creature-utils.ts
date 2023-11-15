@@ -5,9 +5,10 @@ import {
 	InitiativeActor,
 	InitiativeActorModel,
 	InitiativeActorWithRelations,
+	SheetRecord,
 } from '../../services/kobold/index.js';
 import { Creature } from '../creature.js';
-import { Kobold } from '../../services/kobold/kobold.model.js';
+import { Kobold } from '../../services/kobold/index.js';
 import { KoboldUtils } from './kobold-utils.js';
 
 interface ErrorWithCode<T extends number = number> extends Error {
@@ -25,8 +26,8 @@ export class CreatureUtils {
 		this.kobold = koboldUtils.kobold;
 	}
 
-	public async updateSheetTracker(intr: ChatInputCommandInteraction, target: Character) {
-		const creature = new Creature(target.sheet);
+	public async updateSheetTracker(intr: ChatInputCommandInteraction, target: SheetRecord) {
+		const creature = Creature.fromSheetRecord(target);
 		const tracker = await creature.compileTracker(target.trackerMode ?? 'counters_only');
 		try {
 			if (
@@ -45,7 +46,7 @@ export class CreatureUtils {
 		} catch (e) {
 			if (isErrorWithCode(e) && e.code === 10008) {
 				// unknown message. Clear the tracker so we don't keep trying every time
-				await this.kobold.character.update(
+				await this.kobold.sheetRecord.update(
 					{ id: target.id },
 					{ trackerMessageId: null, trackerChannelId: null, trackerGuildId: null }
 				);
@@ -53,31 +54,11 @@ export class CreatureUtils {
 		}
 	}
 
-	public async saveCharacterSheet(intr: ChatInputCommandInteraction, target: Character) {
+	public async saveSheet(intr: ChatInputCommandInteraction, target: SheetRecord) {
 		const sheet = target.sheet;
-		let promises: Promise<any>[] = [
-			this.kobold.character.update({ id: target.id }, { sheet: target.sheet }),
-			this.kobold.initiativeActor.update({ characterId: target.id }, { sheet: target.sheet }),
-		];
+		await this.kobold.sheetRecord.update({ id: target.id }, { sheet });
 		if (target.trackerMessageId) {
-			promises.push(this.updateSheetTracker(intr, target));
-		}
-		await Promise.all(promises);
-	}
-
-	public async saveInitActorSheet(
-		intr: ChatInputCommandInteraction,
-		target: InitiativeActorWithRelations
-	) {
-		const sheet = target.sheet;
-		// apply any damage effects from the action to the creature
-		await this.kobold.initiativeActor.update({ id: target.id }, { sheet });
-		if (target.characterId) {
-			const character = await this.kobold.character.update(
-				{ id: target.characterId },
-				{ sheet }
-			);
-			await this.updateSheetTracker(intr, character);
+			await this.updateSheetTracker(intr, target);
 		}
 	}
 }

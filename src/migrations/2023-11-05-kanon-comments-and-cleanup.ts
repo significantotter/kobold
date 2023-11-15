@@ -119,7 +119,7 @@ export async function up(db: Kysely<any>): Promise<void> {
 		)
 	);
 	await db.executeQuery(
-		sql`COMMENT ON COLUMN "initiative_actor"."sheet" IS '@type(Sheet, ''./../kanel-types.js'', true, false, true)'`.compile(
+		sql`COMMENT ON COLUMN "initiative_actor"."sheet" IS '@type(Sheet, ''./../kanel-types'', true, false, true)'`.compile(
 			db
 		)
 	);

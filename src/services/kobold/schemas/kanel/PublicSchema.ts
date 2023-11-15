@@ -1,6 +1,6 @@
 import type KyselyMigrationTable from './KyselyMigration.js';
 import type KyselyMigrationLockTable from './KyselyMigrationLock.js';
-import type BestiaryFilesLoadedTable from './BestiaryFilesLoaded.js';
+import type SheetRecordTable from './SheetRecord.js';
 import type ChannelDefaultCharacterTable from './ChannelDefaultCharacter.js';
 import type CharacterTable from './Character.js';
 import type CharactersInGamesTable from './CharactersInGames.js';
@@ -11,7 +11,6 @@ import type InitiativeActorTable from './InitiativeActor.js';
 import type InitiativeActorGroupTable from './InitiativeActorGroup.js';
 import type KnexMigrationsTable from './KnexMigrations.js';
 import type KnexMigrationsLockTable from './KnexMigrationsLock.js';
-import type NpcTable from './Npc.js';
 import type UserSettingsTable from './UserSettings.js';
 import type WgAuthTokenTable from './WgAuthToken.js';
 
@@ -20,7 +19,7 @@ export default interface PublicSchema {
 
   kyselyMigrationLock: KyselyMigrationLockTable;
 
-  bestiaryFilesLoaded: BestiaryFilesLoadedTable;
+  sheetRecord: SheetRecordTable;
 
   channelDefaultCharacter: ChannelDefaultCharacterTable;
 
@@ -41,8 +40,6 @@ export default interface PublicSchema {
   knexMigrations: KnexMigrationsTable;
 
   knexMigrationsLock: KnexMigrationsLockTable;
-
-  npc: NpcTable;
 
   userSettings: UserSettingsTable;
 

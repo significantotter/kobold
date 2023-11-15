@@ -260,8 +260,7 @@ export class HelpCommand implements Command {
 							`\`/${LL.commands.roll.name()} ${LL.commands.roll.perception.name()}\` ${LL.commands.roll.perception.description()}\n` +
 							`\`/${LL.commands.roll.name()} ${LL.commands.roll.save.name()}\` ${LL.commands.roll.save.description()}\n` +
 							`\`/${LL.commands.roll.name()} ${LL.commands.roll.action.name()}\` ${LL.commands.roll.action.description()}\n` +
-							`\`/${LL.commands.roll.name()} ${LL.commands.roll.attack.name()}\` ${LL.commands.roll.attack.description()}\n` +
-							`\`/${LL.commands.roll.name()} ${LL.commands.roll.ability.name()}\` ${LL.commands.roll.ability.description()}`,
+							`\`/${LL.commands.roll.name()} ${LL.commands.roll.attack.name()}\` ${LL.commands.roll.attack.description()}\n`,
 					},
 					{
 						name: LL.commands.init.name(),
@@ -401,7 +400,6 @@ export class HelpCommand implements Command {
 						LL.commands.roll.skill.name(),
 						LL.commands.roll.perception.name(),
 						LL.commands.roll.save.name(),
-						LL.commands.roll.ability.name(),
 						LL.commands.roll.attack.name(),
 						LL.commands.roll.action.name(),
 					].map(command =>

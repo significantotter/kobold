@@ -3,6 +3,7 @@ import {
 	Game,
 	GameModel,
 	GuildDefaultCharacter,
+	Kobold,
 } from '../../../services/kobold/index.js';
 import {
 	ApplicationCommandType,
@@ -17,6 +18,7 @@ import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import _ from 'lodash';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 
 export class GameListSubCommand implements Command {
 	public names = [L.en.commands.game.list.name()];
@@ -35,12 +37,12 @@ export class GameListSubCommand implements Command {
 		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
-		const allGames = await GameModel.query()
-			.withGraphFetched('characters')
-			.where({
-				gmUserId: intr.user.id,
-				guildId: intr.guild?.id ?? '',
-			});
+		const koboldUtils = new KoboldUtils(kobold);
+
+		const allGames = await kobold.game.readMany({
+			gmUserId: intr.user.id,
+			guildId: intr.guild?.id,
+		});
 
 		if (allGames.length === 0) {
 			InteractionUtils.send(intr, L.en.commands.game.interactions.noGames());

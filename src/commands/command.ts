@@ -10,7 +10,7 @@ import {
 import { RateLimiter } from 'discord.js-rate-limiter';
 import _ from 'lodash';
 import { CompendiumModel } from '../services/pf2etools/compendium.model.js';
-import { Kobold } from '../services/kobold/kobold.model.js';
+import { Kobold } from '../services/kobold/index.js';
 
 export interface InjectedCommandData {}
 

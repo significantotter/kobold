@@ -1,4 +1,3 @@
-import { InitiativeActor, InitiativeActorModel } from '../../../services/kobold/index.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -12,15 +11,15 @@ import {
 import { RateLimiter } from 'discord.js-rate-limiter';
 
 import { InteractionUtils } from '../../../utils/index.js';
-import { InitiativeBuilder } from '../../../utils/initiative-builder.js';
+import { InitiativeBuilder, InitiativeBuilderUtils } from '../../../utils/initiative-builder.js';
 import { Command, CommandDeferType } from '../../index.js';
 import _ from 'lodash';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import L from '../../../i18n/i18n-node.js';
 import { InitOptions } from './init-command-options.js';
-import { AutocompleteUtils } from '../../../utils/kobold-service-utils/autocomplete-utils.js';
-import { InitiativeActorGroupModel, InitiativeModel } from '../../../services/kobold/index.js';
+import { Kobold } from '../../../services/kobold/index.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 
 export class InitRemoveSubCommand implements Command {
 	public names = [L.en.commands.init.remove.name()];
@@ -45,7 +44,8 @@ export class InitRemoveSubCommand implements Command {
 			//we don't need to autocomplete if we're just dealing with whitespace
 			const match = intr.options.getString(InitOptions.INIT_CHARACTER_OPTION.name) ?? '';
 
-			return AutocompleteUtils.getAllControllableInitiativeActors(intr, match);
+			const { autocompleteUtils } = new KoboldUtils(kobold);
+			return autocompleteUtils.getAllControllableInitiativeActors(intr, match);
 		}
 	}
 
@@ -54,37 +54,32 @@ export class InitRemoveSubCommand implements Command {
 		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
-		const targetCharacterName = intr.options.getString(InitOptions.INIT_CHARACTER_OPTION.name);
+		const targetActorName = intr.options
+			.getString(InitOptions.INIT_CHARACTER_OPTION.name, true)
+			.trim();
 
-		const [currentInit, userSettings] = await Promise.all([
-			InitiativeUtils.getInitiativeForChannel(intr.channel),
-			SettingsUtils.getSettingsForUser(intr),
-		]);
+		const koboldUtils = new KoboldUtils(kobold);
+		const { currentInitiative, userSettings } =
+			await koboldUtils.fetchNonNullableDataForCommand(intr, {
+				userSettings: true,
+				currentInitiative: true,
+			});
 
-		let actorResponse: InitiativeActor;
-		if (!targetCharacterName) {
-			actorResponse = await InitiativeUtils.getActiveCharacterActor(
-				currentInit,
-				intr.user.id,
-				LL
-			);
-		} else {
-			actorResponse = InitiativeUtils.getNameMatchActorFromInitiative(
-				intr.user.id,
-				currentInit,
-				targetCharacterName,
-				true
-			);
-		}
+		let actorResponse = InitiativeBuilderUtils.getNameMatchActorFromInitiative(
+			intr.user.id,
+			currentInitiative,
+			targetActorName,
+			true
+		);
 
 		const actor = actorResponse;
 		const actorsInGroup = _.filter(
-			currentInit.actors,
+			currentInitiative.actors,
 			possibleActor => possibleActor.initiativeActorGroupId === actor.initiativeActorGroupId
 		);
-		await InitiativeActorModel.query().deleteById(actor.id);
+		await kobold.initiativeActor.delete({ id: actor.id });
 		if (actorsInGroup.length === 1) {
-			await InitiativeActorGroupModel.query().deleteById(actor.initiativeActorGroupId);
+			await kobold.initiativeActorGroup.delete({ id: actor.initiativeActorGroupId });
 		}
 
 		const deletedEmbed = new KoboldEmbed();
@@ -98,25 +93,26 @@ export class InitRemoveSubCommand implements Command {
 
 		if (
 			//we removed the currently active group
-			currentInit.currentTurnGroupId === actor.initiativeActorGroupId &&
+			currentInitiative.currentTurnGroupId === actor.initiativeActorGroupId &&
 			//the groups are not already empty somehow
-			currentInit.actorGroups?.length &&
+			currentInitiative.actorGroups?.length &&
 			//we haven't removed the last group
-			!(currentInit.actorGroups.length === 1 && actorsInGroup.length === 1)
+			!(currentInitiative.actorGroups.length === 1 && actorsInGroup.length === 1)
 		) {
 			//we need to fix the initiative!
 
 			const initBuilder = new InitiativeBuilder({
-				initiative: currentInit,
+				initiative: currentInitiative,
 				userSettings,
 				LL,
 			});
 			let currentTurn = initBuilder.getCurrentTurnInfo();
 			let previousTurn = initBuilder.getPreviousTurnChanges();
 
-			const updatedInitiative = await InitiativeModel.query()
-				.patchAndFetchById(currentInit.id, previousTurn)
-				.withGraphFetched('[actors.[character], actorGroups]');
+			const updatedInitiative = await kobold.initiative.read({ id: currentInitiative.id });
+
+			if (!updatedInitiative)
+				throw new Error('Initiative was already deleted while trying to remove an actor');
 
 			initBuilder.set({
 				initiative: updatedInitiative,
@@ -128,7 +124,7 @@ export class InitRemoveSubCommand implements Command {
 			const activeGroup = initBuilder.activeGroup;
 
 			if (updatedInitiative.currentRound === 0) {
-				await InitiativeUtils.sendNewRoundMessage(intr, initBuilder);
+				await InitiativeBuilderUtils.sendNewRoundMessage(intr, initBuilder);
 			}
 
 			await InteractionUtils.send(intr, {
@@ -146,13 +142,13 @@ export class InitRemoveSubCommand implements Command {
 			}
 		} else {
 			const initBuilder = new InitiativeBuilder({
-				initiative: currentInit,
+				initiative: currentInitiative,
 				userSettings,
 				LL,
 			});
 			initBuilder.removeActor(actor);
-			if (currentInit.currentRound === 0) {
-				await InitiativeUtils.sendNewRoundMessage(intr, initBuilder);
+			if (currentInitiative.currentRound === 0) {
+				await InitiativeBuilderUtils.sendNewRoundMessage(intr, initBuilder);
 			}
 		}
 	}

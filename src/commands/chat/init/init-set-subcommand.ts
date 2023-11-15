@@ -1,4 +1,4 @@
-import { InitiativeUtils, InitiativeBuilder } from '../../../utils/initiative-builder.js';
+import { InitiativeBuilder, InitiativeBuilderUtils } from '../../../utils/initiative-builder.js';
 import {
 	ApplicationCommandType,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -23,7 +23,9 @@ import {
 	InitiativeModel,
 	InitiativeActorGroupModel,
 	InitiativeActorModel,
+	Kobold,
 } from '../../../services/kobold/index.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 
 export class InitSetSubCommand implements Command {
 	public names = [L.en.commands.init.set.name()];
@@ -48,7 +50,8 @@ export class InitSetSubCommand implements Command {
 			//we don't need to autocomplete if we're just dealing with whitespace
 			const match = intr.options.getString(InitOptions.INIT_CHARACTER_OPTION.name) ?? '';
 
-			return await AutocompleteUtils.getInitTargetOptions(intr, match);
+			const { autocompleteUtils } = new KoboldUtils(kobold);
+			return await autocompleteUtils.getInitTargetOptions(intr, match);
 		}
 	}
 
@@ -77,17 +80,19 @@ export class InitSetSubCommand implements Command {
 			);
 			return;
 		}
-		let currentInit = await InitiativeUtils.getInitiativeForChannel(intr.channel);
+		const koboldUtils = new KoboldUtils(kobold);
+		let { currentInitiative } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+			currentInitiative: true,
+		});
 
-		const actor = await InitiativeUtils.getNameMatchActorFromInitiative(
+		const actor = await InitiativeBuilderUtils.getNameMatchActorFromInitiative(
 			intr.user.id,
-			currentInit,
+			currentInitiative,
 			targetCharacterName,
-			LL,
 			true
 		);
 		const actorsInGroup = _.filter(
-			currentInit.actors,
+			currentInitiative.actors,
 			possibleActor => possibleActor.initiativeActorGroupId === actor.initiativeActorGroupId
 		);
 
@@ -104,7 +109,7 @@ export class InitSetSubCommand implements Command {
 				return;
 				//a name can't already be in the initiative
 			} else if (
-				currentInit.actors.find(
+				currentInitiative.actors.find(
 					actor => actor.name.toLowerCase() === newFieldValue.toLowerCase()
 				)
 			) {
@@ -138,32 +143,41 @@ export class InitSetSubCommand implements Command {
 
 		// perform the updates
 		if (fieldToChange === 'player-is-gm') {
-			await InitiativeModel.query().patchAndFetchById(currentInit.id, {
-				gmUserId: finalValue,
-			});
+			await kobold.initiative.update(
+				{ id: currentInitiative.id },
+				{
+					gmUserId: finalValue,
+				}
+			);
 		} else if (fieldToChange === 'initiative') {
-			await InitiativeActorGroupModel.query().patchAndFetchById(
-				actor.initiativeActorGroupId,
+			await kobold.initiativeActorGroup.update(
+				{ id: actor.initiativeActorGroupId },
 				{
 					initiativeResult: finalValue,
 				}
 			);
 		} else if (fieldToChange === 'name') {
-			await InitiativeActorModel.query().patchAndFetchById(actor.id, { name: finalValue });
+			await kobold.initiativeActor.update({ id: actor.id }, { name: finalValue });
 			if (actorsInGroup.length === 1) {
-				await InitiativeActorGroupModel.query().patchAndFetchById(
-					actor.initiativeActorGroupId,
+				await kobold.initiativeActorGroup.update(
+					{ id: actor.initiativeActorGroupId },
 					{
 						name: finalValue,
 					}
 				);
 			}
 		} else if (fieldToChange === 'hide-stats') {
-			await InitiativeActorModel.query().patchAndFetchById(actor.id, {
-				hideStats: finalValue,
-			});
+			await kobold.initiativeActor.update(
+				{ id: actor.id },
+				{
+					hideStats: finalValue,
+				}
+			);
 		}
-		currentInit = await InitiativeUtils.getInitiativeForChannel(intr.channel);
+
+		({ currentInitiative } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+			currentInitiative: true,
+		}));
 
 		const updateEmbed = new KoboldEmbed();
 		updateEmbed.setTitle(
@@ -177,11 +191,11 @@ export class InitSetSubCommand implements Command {
 		await InteractionUtils.send(intr, updateEmbed);
 
 		const initBuilder = new InitiativeBuilder({
-			initiative: currentInit,
+			initiative: currentInitiative,
 			LL,
 		});
-		if (currentInit.currentRound === 0) {
-			await InitiativeUtils.sendNewRoundMessage(intr, initBuilder);
+		if (currentInitiative.currentRound === 0) {
+			await InitiativeBuilderUtils.sendNewRoundMessage(intr, initBuilder);
 		}
 	}
 }

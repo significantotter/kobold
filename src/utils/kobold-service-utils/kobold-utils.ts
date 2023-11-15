@@ -1,16 +1,16 @@
-import { Kobold } from '../../services/kobold/kobold.model.js';
+import { Kobold } from '../../services/kobold/index.js';
 import { InitiativeUtils } from './initiative-utils.js';
 import { CharacterUtils } from './character-utils.js';
 import { GameUtils } from './game-utils.js';
 import { ModifierUtils } from './modifier-utils.js';
 import { NpcUtils } from './npc-utils.js';
-import { AutocompleteInteraction, CommandInteraction, Interaction } from 'discord.js';
+import { Interaction } from 'discord.js';
 import _ from 'lodash';
 import {
-	Character,
 	UserSettings,
 	GameWithRelations,
 	InitiativeWithRelations,
+	CharacterWithRelations,
 } from '../../services/kobold/index.js';
 import { UserSettingsUtils } from './user-settings-utils.js';
 import { KoboldError } from '../KoboldError.js';
@@ -20,8 +20,8 @@ import { GameplayUtils } from './gameplay-utils.js';
 import { CreatureUtils } from './creature-utils.js';
 
 export interface InjectedData {
-	activeCharacter: Character | null;
-	ownedCharacters: Character[];
+	activeCharacter: CharacterWithRelations | null;
+	ownedCharacters: CharacterWithRelations[];
 	userSettings: UserSettings;
 	activeGame: GameWithRelations | null;
 	currentInitiative: InitiativeWithRelations | null;

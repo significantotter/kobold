@@ -222,23 +222,5 @@ export const zSheet = z
 			.describe("The creature's lore/additional skills."),
 		attacks: z.array(zSheetAttack).describe("The creature's attacks."),
 		sourceData: z.any().default({}).describe('The source data the sheet was parsed from'),
-		modifiers: z
-			.array(zModifier)
-			.default([])
-			.describe(
-				'An array of toggleable modifier strictObjects that apply dice expression values to rolls with certain tags.'
-			),
-		actions: z
-			.array(zAction)
-			.default([])
-			.describe(
-				'An array of default actions set up for the user. These allow the user to make certain roll operations as a single command.'
-			),
-		rollMacros: z
-			.array(zRollMacro)
-			.default([])
-			.describe(
-				'An array of roll macro strictObjects that allow the substituting of saved roll expressions for simple keywords.'
-			),
 	})
 	.describe("A creature's sheet.");

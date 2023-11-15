@@ -22,7 +22,9 @@ export class Creatures extends Model<typeof zCreatureSchema, typeof schema.Creat
 		return file.creature ?? [];
 	}
 	public generateSearchText(creature: Creature): string {
-		return `Creature${creature.level ? ` ${creature.level}` : ''}: ${creature.name}`;
+		return `Creature${creature.level ? ` ${creature.level}` : ''}: ${creature.name}${
+			creature.source ? ` (${creature.source})` : ''
+		}}`;
 	}
 	public generateTags(creature: Creature): string[] {
 		return creature.traits ?? [];

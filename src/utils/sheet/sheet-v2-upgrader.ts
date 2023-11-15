@@ -466,9 +466,6 @@ export function upgradeSheet(sheet: SheetV1): Sheet {
 			)
 		),
 		attacks: sheet.attacks,
-		rollMacros: sheet.rollMacros,
-		actions: sheet.actions.map(upgradeAction),
-		modifiers: sheet.modifiers.map(upgradeModifier),
 		sourceData: sheet.sourceData,
 	};
 	return newSheet;

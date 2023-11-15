@@ -14,7 +14,7 @@ const abilityIsAffliction = (ability: Ability | Affliction): ability is Afflicti
 	ability.type === 'affliction' || ability.type === 'Disease' || ability.type === 'Curse';
 
 export async function _parseCreature(this: CompendiumEmbedParser, creature: Creature) {
-	const preprocessedData = (await this.preprocessData(creature)) as Creature;
+	const preprocessedData = await this.preprocessData(creature);
 
 	// Creature Async Work
 	const fluffResultRaw = await this.model.db.query.CreaturesFluff.findFirst({

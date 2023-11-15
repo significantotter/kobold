@@ -18,9 +18,11 @@ import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import L from '../../../i18n/i18n-node.js';
 import { InitOptions } from './init-command-options.js';
-import { Kobold } from '../../../services/kobold/kobold.model.js';
+import { Kobold } from '../../../services/kobold/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import _ from 'lodash';
+import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
+import { Creature } from '../../../utils/creature.js';
 
 export class InitJoinSubCommand implements Command {
 	public names = [L.en.commands.init.join.name()];
@@ -53,9 +55,10 @@ export class InitJoinSubCommand implements Command {
 				return [];
 			}
 			//find a skill on the character matching the autocomplete string
-			const matchedSkills = characterUtils
-				.findPossibleSkillFromString(activeCharacter, match)
-				.map(skill => ({ name: skill.name, value: skill.name }));
+			const matchedSkills = FinderHelpers.matchAllSkills(
+				Creature.fromSheetRecord(activeCharacter.sheetRecord),
+				match
+			).map(skill => ({ name: skill.name, value: skill.name }));
 			//return the matched skills
 			return matchedSkills;
 		}
@@ -81,7 +84,7 @@ export class InitJoinSubCommand implements Command {
 			await InteractionUtils.send(
 				intr,
 				L.en.commands.init.join.interactions.characterAlreadyInInit({
-					characterName: activeCharacter.sheet.staticInfo.name,
+					characterName: activeCharacter.name,
 				})
 			);
 			return;
@@ -107,13 +110,11 @@ export class InitJoinSubCommand implements Command {
 			activeCharacter.name
 		);
 
-		await koboldUtils.initiativeUtils.addActorToInitiative({
+		await koboldUtils.initiativeUtils.createActorFromCharacter({
 			initiativeId: currentInitiative.id,
-			characterId: activeCharacter.id,
-			sheet: activeCharacter.sheet,
+			character: activeCharacter,
 			name: actorName,
 			initiativeResult,
-			userId: intr.user.id,
 			hideStats,
 		});
 

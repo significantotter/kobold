@@ -12,15 +12,16 @@ import {
 import { RateLimiter } from 'discord.js-rate-limiter';
 
 import { InteractionUtils } from '../../../utils/index.js';
-import { InitiativeUtils } from '../../../utils/initiative-builder.js';
 import { Command, CommandDeferType } from '../../index.js';
 import _ from 'lodash';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import L from '../../../i18n/i18n-node.js';
-import { AutocompleteUtils } from '../../../utils/kobold-service-utils/autocomplete-utils.js';
 import { Creature } from '../../../utils/creature.js';
 import { InitOptions } from './init-command-options.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { Kobold } from '../../../services/kobold/kobold.model.js';
+import { InitiativeBuilderUtils } from '../../../utils/initiative-builder.js';
 
 export class InitStatBlockSubCommand implements Command {
 	public names = [L.en.commands.init.statBlock.name()];
@@ -45,7 +46,8 @@ export class InitStatBlockSubCommand implements Command {
 			//we don't need to autocomplete if we're just dealing with whitespace
 			const match = intr.options.getString(InitOptions.INIT_CHARACTER_OPTION.name);
 
-			return await AutocompleteUtils.getAllControllableInitiativeActors(intr, match);
+			const { autocompleteUtils } = new KoboldUtils(kobold);
+			return await autocompleteUtils.getAllControllableInitiativeActors(intr, match);
 		}
 	}
 
@@ -62,25 +64,30 @@ export class InitStatBlockSubCommand implements Command {
 		const isSecretMessage =
 			secretMessage === L.en.commandOptions.statBlockSecret.choices.secret.value();
 
-		const currentInit = await InitiativeUtils.getInitiativeForChannel(intr.channel);
+		const koboldUtils = new KoboldUtils(kobold);
+		const { currentInitiative } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+			currentInitiative: true,
+		});
 
-		const actor = await InitiativeUtils.getNameMatchActorFromInitiative(
+		const actor = await InitiativeBuilderUtils.getNameMatchActorFromInitiative(
 			intr.user.id,
-			currentInit,
+			currentInitiative,
 			targetCharacterName,
-			LL,
 			true
 		);
 
 		let sheetEmbed: KoboldEmbed;
-		if (actor.sheet) {
-			const creature = new Creature(actor.sheet, actor.name);
-			sheetEmbed = creature.compileSheetEmbed();
-		} else {
-			sheetEmbed = new KoboldEmbed();
-			sheetEmbed.setTitle(actor.name);
-			sheetEmbed.setDescription('No sheet found!');
-		}
+		const creature = new Creature(
+			actor.sheetRecord.sheet,
+			{
+				actions: actor.sheetRecord.actions,
+				modifiers: actor.sheetRecord.modifiers,
+				rollMacros: actor.sheetRecord.rollMacros,
+			},
+			actor.name
+		);
+		sheetEmbed = creature.compileSheetEmbed();
+
 		await InteractionUtils.send(intr, sheetEmbed, isSecretMessage);
 	}
 }

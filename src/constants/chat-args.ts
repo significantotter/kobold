@@ -64,13 +64,6 @@ export class ChatArgs {
 		autocomplete: true,
 		type: ApplicationCommandOptionType.String,
 	};
-	public static readonly ABILITY_CHOICE_OPTION: APIApplicationCommandBasicOption = {
-		name: L.en.commandOptions.abilityChoice.name(),
-		description: L.en.commandOptions.abilityChoice.description(),
-		required: true,
-		autocomplete: true,
-		type: ApplicationCommandOptionType.String,
-	};
 	public static readonly ATTACK_CHOICE_OPTION: APIApplicationCommandBasicOption = {
 		name: L.en.commandOptions.attackChoice.name(),
 		description: L.en.commandOptions.attackChoice.description(),

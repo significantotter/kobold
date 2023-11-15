@@ -19,7 +19,6 @@ export { RollDiceSubCommand } from './roll/roll-dice-subcommand.js';
 export { RollSkillSubCommand } from './roll/roll-skill-subcommand.js';
 export { RollSaveSubCommand } from './roll/roll-save-subcommand.js';
 export { RollPerceptionSubCommand } from './roll/roll-perception-subcommand.js';
-export { RollAbilitySubCommand } from './roll/roll-ability-subcommand.js';
 export { RollAttackSubCommand } from './roll/roll-attack-subcommand.js';
 export { RollActionSubCommand } from './roll/roll-action-subcommand.js';
 

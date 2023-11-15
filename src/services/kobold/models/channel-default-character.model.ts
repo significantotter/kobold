@@ -41,22 +41,39 @@ export class ChannelDefaultCharacterModel extends Model<Database['channelDefault
 	}
 
 	public async update(
-		{ userId }: { userId: ChannelDefaultCharacterUserId },
+		{
+			userId,
+			channelId,
+		}: {
+			userId: ChannelDefaultCharacterUserId;
+			channelId: string;
+		},
 		args: ChannelDefaultCharacterUpdate
 	): Promise<ChannelDefaultCharacter> {
-		const result = await this.db
+		let query = this.db
 			.updateTable('channelDefaultCharacter')
 			.set(args)
-			.where('channelDefaultCharacter.userId', '=', userId)
-			.returningAll()
-			.execute();
+			.where('channelDefaultCharacter.userId', '=', userId);
+
+		if (userId) query = query.where('channelDefaultCharacter.userId', '=', userId);
+		if (channelId) query = query.where('channelDefaultCharacter.channelId', '=', channelId);
+
+		const result = await query.returningAll().execute();
 		return result[0];
 	}
 
-	public async delete({ userId }: { userId: ChannelDefaultCharacterUserId }): Promise<void> {
-		await this.db
-			.deleteFrom('channelDefaultCharacter')
-			.where('channelDefaultCharacter.userId', '=', userId)
-			.execute();
+	public async delete({
+		userId,
+		channelId,
+	}: {
+		userId: ChannelDefaultCharacterUserId;
+		channelId: string;
+	}): Promise<void> {
+		let query = this.db.deleteFrom('channelDefaultCharacter');
+
+		if (userId) query = query.where('channelDefaultCharacter.userId', '=', userId);
+		if (channelId) query = query.where('channelDefaultCharacter.channelId', '=', channelId);
+
+		await query.execute();
 	}
 }

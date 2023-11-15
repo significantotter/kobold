@@ -19,8 +19,9 @@ import L from '../../../i18n/i18n-node.js';
 import { CollectorUtils } from '../../../utils/collector-utils.js';
 import { RollMacroOptions } from './roll-macro-command-options.js';
 import _ from 'lodash';
-import { Kobold } from '../../../services/kobold/kobold.model.js';
+import { Kobold } from '../../../services/kobold/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 
 export class RollMacroRemoveSubCommand implements Command {
 	public names = [L.en.commands.rollMacro.remove.name()];
@@ -67,7 +68,10 @@ export class RollMacroRemoveSubCommand implements Command {
 			true
 		);
 
-		const targetRollMacro = characterUtils.getRollMacroByName(activeCharacter, rollMacroChoice);
+		const targetRollMacro = FinderHelpers.getRollMacroByName(
+			activeCharacter.sheetRecord,
+			rollMacroChoice
+		);
 		if (targetRollMacro) {
 			// ask for confirmation
 
@@ -137,12 +141,12 @@ export class RollMacroRemoveSubCommand implements Command {
 			// remove the rollMacro
 			if (result && result.value === 'remove') {
 				const rollMacrosWithoutRemoved = _.filter(
-					activeCharacter.rollMacros,
+					activeCharacter.sheetRecord.rollMacros,
 					rollMacro =>
 						rollMacro.name.toLocaleLowerCase() !== rollMacroChoice.toLocaleLowerCase()
 				);
-				await kobold.character.update(
-					{ id: activeCharacter.id },
+				await kobold.sheetRecord.update(
+					{ id: activeCharacter.sheetRecord.id },
 					{ rollMacros: rollMacrosWithoutRemoved }
 				);
 

@@ -15,7 +15,7 @@ import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import L from '../../../i18n/i18n-node.js';
 import { Creature } from '../../../utils/creature.js';
 import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
-import { Kobold } from '../../../services/kobold/kobold.model.js';
+import { Kobold } from '../../../services/kobold/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 
 export class RollPerceptionSubCommand implements Command {
@@ -55,7 +55,7 @@ export class RollPerceptionSubCommand implements Command {
 		);
 		koboldUtils.assertActiveCharacterNotNull(activeCharacter);
 
-		const creature = Creature.fromCharacter(activeCharacter);
+		const creature = Creature.fromSheetRecord(activeCharacter.sheetRecord);
 
 		const rollBuilder = new RollBuilder({
 			character: activeCharacter,

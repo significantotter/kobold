@@ -18,12 +18,14 @@ import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import L from '../../../i18n/i18n-node.js';
 import { ModifierOptions } from './modifier-command-options.js';
 import { CharacterUtils } from '../../../utils/kobold-service-utils/character-utils.js';
-import { CharacterModel, SheetAdjustmentTypeEnum } from '../../../services/kobold/index.js';
+import { CharacterModel, Kobold, SheetAdjustmentTypeEnum } from '../../../services/kobold/index.js';
 import { compileExpression } from 'filtrex';
 import { DiceUtils } from '../../../utils/dice-utils.js';
 import { Creature } from '../../../utils/creature.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
 import { SheetUtils } from '../../../utils/sheet/sheet-utils.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 
 export class ModifierUpdateSubCommand implements Command {
 	public names = [L.en.commands.modifier.update.name()];
@@ -49,14 +51,15 @@ export class ModifierUpdateSubCommand implements Command {
 			const match = intr.options.getString(ModifierOptions.MODIFIER_NAME_OPTION.name) ?? '';
 
 			//get the active character
-			const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
+			const { characterUtils } = new KoboldUtils(kobold);
+			const activeCharacter = await characterUtils.getActiveCharacter(intr);
 			if (!activeCharacter) {
 				//no choices if we don't have a character to match against
 				return [];
 			}
 			//find a save on the character matching the autocomplete string
-			const matchedModifiers = CharacterUtils.findPossibleModifierFromString(
-				activeCharacter,
+			const matchedModifiers = FinderHelpers.matchAllModifiers(
+				activeCharacter.sheetRecord,
 				match
 			).map(modifier => ({
 				name: modifier.name,
@@ -84,16 +87,15 @@ export class ModifierUpdateSubCommand implements Command {
 			.trim();
 
 		//check if we have an active character
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
-		if (!activeCharacter) {
-			await InteractionUtils.send(
-				intr,
-				LL.commands.character.interactions.noActiveCharacter()
-			);
-			return;
-		}
+		const koboldUtils = new KoboldUtils(kobold);
+		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+			activeCharacter: true,
+		});
 
-		const targetModifier = activeCharacter.getModifierByName(modifierName);
+		const targetModifier = FinderHelpers.getModifierByName(
+			activeCharacter.sheetRecord,
+			modifierName
+		);
 		if (!targetModifier) {
 			// no matching modifier found
 			await InteractionUtils.send(intr, LL.commands.modifier.interactions.notFound());
@@ -110,7 +112,9 @@ export class ModifierUpdateSubCommand implements Command {
 				);
 				return;
 				//a name can't already be a modifier
-			} else if (activeCharacter.getModifierByName(newFieldValue)) {
+			} else if (
+				FinderHelpers.getModifierByName(activeCharacter.sheetRecord, newFieldValue)
+			) {
 				await InteractionUtils.send(
 					intr,
 					LL.commands.modifier.update.interactions.nameExistsError()
@@ -129,7 +133,7 @@ export class ModifierUpdateSubCommand implements Command {
 				// we must be able to evaluate the modifier as a roll for this character
 				DiceUtils.parseAndEvaluateDiceExpression({
 					rollExpression: newFieldValue,
-					creature: Creature.fromCharacter(activeCharacter),
+					creature: Creature.fromSheetRecord(activeCharacter.sheetRecord),
 					LL: L.en,
 				});
 				targetModifier.value = newFieldValue;
@@ -181,7 +185,7 @@ export class ModifierUpdateSubCommand implements Command {
 			targetModifier.sheetAdjustments = SheetUtils.stringToSheetAdjustments(newFieldValue);
 			// attempt to use the adjustments to make sure they're valid
 			SheetUtils.adjustSheetWithSheetAdjustments(
-				activeCharacter.sheet,
+				activeCharacter.sheetRecord.sheet,
 				targetModifier.sheetAdjustments
 			);
 		} else {
@@ -195,14 +199,17 @@ export class ModifierUpdateSubCommand implements Command {
 		// just in case the update is for the name
 		const nameBeforeUpdate = targetModifier.name;
 
-		await CharacterModel.query().patchAndFetchById(activeCharacter.id, {
-			modifiers: activeCharacter.modifiers,
-		});
+		await kobold.sheetRecord.update(
+			{ id: activeCharacter.sheetRecordId },
+			{
+				modifiers: activeCharacter.sheetRecord.modifiers,
+			}
+		);
 
 		const updateEmbed = new KoboldEmbed();
 		updateEmbed.setTitle(
 			LL.commands.modifier.update.interactions.successEmbed.title({
-				characterName: activeCharacter.sheet.staticInfo.name,
+				characterName: activeCharacter.name,
 				modifierName: nameBeforeUpdate,
 				fieldToChange,
 				newFieldValue,

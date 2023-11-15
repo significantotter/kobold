@@ -15,13 +15,17 @@ import { Command, CommandDeferType } from '../../index.js';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { InteractionUtils } from '../../../utils/interaction-utils.js';
-import { AutocompleteUtils } from '../../../utils/kobold-service-utils/autocomplete-utils.js';
 import { GameplayUtils } from '../../../utils/kobold-service-utils/gameplay-utils.js';
 import _ from 'lodash';
-import { InitiativeActorModel, SheetBaseCounterKeys } from '../../../services/kobold/index.js';
-import { GameUtils } from '../../../utils/kobold-service-utils/game-utils.js';
+import {
+	InitiativeActorModel,
+	Kobold,
+	SheetBaseCounterKeys,
+} from '../../../services/kobold/index.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
-import { koboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { Creature } from '../../../utils/creature.js';
+import { SheetUtils } from '../../../utils/sheet/sheet-utils.js';
 
 export class GameplaySetSubCommand implements Command {
 	public names = [L.en.commands.gameplay.set.name()];
@@ -42,7 +46,8 @@ export class GameplaySetSubCommand implements Command {
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name) {
-			return await AutocompleteUtils.getAllTargetOptions(intr, option.value);
+			const { autocompleteUtils } = new KoboldUtils(kobold);
+			return await autocompleteUtils.getAllTargetOptions(intr, option.value);
 		}
 	}
 
@@ -61,15 +66,17 @@ export class GameplaySetSubCommand implements Command {
 
 		const value = intr.options.getString(GameplayOptions.GAMEPLAY_SET_VALUE.name, true);
 
-		const { gameUtils } = koboldUtils(kobold);
-		const { characterOrInitActorTargets } = await gameUtils.getCharacterOrInitActorTarget(
-			intr,
-			targetCharacter
-		);
+		const { gameUtils, gameplayUtils } = new KoboldUtils(kobold);
 
-		const { initialValue, updatedValue } = await GameplayUtils.setGameplayStats(
+		const { targetSheetRecord, hideStats, targetName } =
+			await gameUtils.getCharacterOrInitActorTarget(intr, targetCharacter);
+
+		const creature = Creature.fromSheetRecord(targetSheetRecord);
+
+		const { initialValue, updatedValue } = await gameplayUtils.setGameplayStats(
 			intr,
-			characterOrInitActorTargets,
+			targetSheetRecord,
+			creature,
 			option,
 			value
 		);
@@ -80,21 +87,15 @@ export class GameplaySetSubCommand implements Command {
 		}
 		let message;
 
-		if (
-			characterOrInitActorTargets.some(
-				character => character instanceof InitiativeActorModel && character.hideStats
-			)
-		) {
+		if (hideStats) {
 			let verbed = 'increased';
 			let diff = updatedValue - initialValue;
 			if (diff < 0) {
 				verbed = 'decreased';
 			}
-			message = `Yip! I ${verbed} ${
-				characterOrInitActorTargets[0].name
-			}'s ${option} by ${Math.abs(diff)}.`;
+			message = `Yip! I ${verbed} ${targetName}'s ${option} by ${Math.abs(diff)}.`;
 		} else {
-			message = `Yip! I updated ${characterOrInitActorTargets[0].name}'s ${option} from ${initialValue} to ${updatedValue}.`;
+			message = `Yip! I updated ${targetName}'s ${option} from ${initialValue} to ${updatedValue}.`;
 		}
 		if (option === 'hp' && updatedValue == 0) {
 			message += " They're down!";
