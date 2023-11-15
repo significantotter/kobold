@@ -152,8 +152,8 @@ describe('RollBuilder', function () {
 		rollBuilder.addRoll({ rollExpression: 'dd6++1', rollTitle: 'errorRoll' });
 		console.warn = temp;
 		const result = rollBuilder.compileEmbed();
-		const errorRollField = (result.data.fields ?? []).find(field => field.name === 'errorRoll');
-		expect(errorRollField?.value).toContain(
+		const errorRollField = (result.data.fields ?? []).find(field => field.name === 'error');
+		expect(errorRollField?.value ?? '').toContain(
 			L.en.utils.dice.diceRollError({ rollExpression: 'dd6++1' })
 		);
 	});
@@ -162,8 +162,8 @@ describe('RollBuilder', function () {
 		rollBuilder.addRoll({ rollExpression: 'd10', rollTitle: 'testRoll' });
 		rollBuilder.addRoll({ rollExpression: '500d6', rollTitle: 'errorRoll' });
 		const result = rollBuilder.compileEmbed();
-		const errorRollField = (result.data.fields ?? []).find(field => field.name === 'errorRoll');
-		expect(errorRollField?.value).toContain(
+		const errorRollField = (result.data.fields ?? []).find(field => field.name === 'error');
+		expect(errorRollField?.value ?? '').toContain(
 			L.en.utils.dice
 				.diceRollError({
 					rollExpression: '',
@@ -173,30 +173,30 @@ describe('RollBuilder', function () {
 	});
 	test('parses an attribute', function () {
 		const character = mocks.character;
-		character.sheetRecord.sheet.intProperties.strength = 22;
+		character.sheetRecord.sheet.intProperties.strength = 6;
 		expect(
 			DiceUtils.parseAttribute('[strength]', Creature.fromSheetRecord(character.sheetRecord))
-		).toStrictEqual([6, ['ability', 'strength']]);
+		).toStrictEqual([6, ['attr', 'strength']]);
 	});
 	test('fails to parse an invalid attribute', function () {
 		expect(DiceUtils.parseAttribute('[same]')).toStrictEqual([0, []]);
 	});
 	test('parses an attribute using a shorthand value', function () {
 		const character = mocks.character;
-		character.sheetRecord.sheet.intProperties.strength = 22;
+		character.sheetRecord.sheet.intProperties.strength = 6;
 		expect(
 			DiceUtils.parseAttribute('[str]', Creature.fromSheetRecord(character.sheetRecord))
-		).toStrictEqual([2, ['ability', 'strength']]);
+		).toStrictEqual([6, ['attr', 'strength']]);
 	});
 	test('parses all attributes in a dice expression', function () {
 		const character = mocks.character;
-		character.sheetRecord.sheet.intProperties.strength = 15;
+		character.sheetRecord.sheet.intProperties.strength = 2;
 		expect(
 			DiceUtils.parseAttributes(
 				'[str]d20 + [str]',
 				Creature.fromSheetRecord(character.sheetRecord)
 			)
-		).toStrictEqual(['2d20 + 2', ['ability', 'strength']]);
+		).toStrictEqual(['2d20 + 2', ['attr', 'strength']]);
 	});
 	test('rolls dice using parsed character attributes', function () {
 		const character = mocks.character;

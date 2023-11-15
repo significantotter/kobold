@@ -219,10 +219,14 @@ export const zSheetV1 = z
 		info: z
 			.object({
 				name: z.string().describe("The character's name."),
-				url: z.string().nullable().describe('The url to open the character.'),
-				description: z.string().nullable().describe("The character's description."),
+				url: z.string().optional().nullable().describe('The url to open the character.'),
+				description: z
+					.string()
+					.optional()
+					.nullable()
+					.describe("The character's description."),
 				gender: z.string().nullable().optional().describe("The character's gender"),
-				age: z.number().nullable().describe("The character's age"),
+				age: z.number().nullable().optional().describe("The character's age"),
 				alignment: z.string().nullable().optional().describe("The character's alignment"),
 				deity: z.string().nullable().optional().describe("The character's deity"),
 				imageURL: z
@@ -232,13 +236,12 @@ export const zSheetV1 = z
 					.describe("The character's portrait image URL."),
 				level: z.number().int().nullable().describe("The character's level."),
 				size: z.string().nullable().optional().describe("The character's size category."),
-				class: z
+				class: z.string().nullable().optional().describe("The character's class."),
+				keyability: z
 					.string()
 					.nullable()
 					.optional()
-					.optional()
-					.describe("The character's class."),
-				keyability: z.string().nullable().describe("The character's key ability."),
+					.describe("The character's key ability."),
 				ancestry: z.string().nullable().optional().describe("The character's ancestry."),
 				heritage: z.string().nullable().describe("The character's heritage."),
 				background: z
@@ -432,11 +435,13 @@ export const zSheetV1 = z
 					.number()
 					.int()
 					.nullable()
+					.optional()
 					.describe("The character's arcane casting attack bonus."),
 				arcaneDC: z
 					.number()
 					.int()
 					.nullable()
+					.optional()
 					.describe("The character's arcane casting DC."),
 				arcaneProfMod: z
 					.number()
@@ -448,11 +453,13 @@ export const zSheetV1 = z
 					.number()
 					.int()
 					.nullable()
+					.optional()
 					.describe("The character's divine casting stat."),
 				divineDC: z
 					.number()
 					.int()
 					.nullable()
+					.optional()
 					.describe("The character's divine casting stat."),
 				divineProfMod: z
 					.number()
@@ -464,11 +471,13 @@ export const zSheetV1 = z
 					.number()
 					.int()
 					.nullable()
+					.optional()
 					.describe("The character's occult casting stat."),
 				occultDC: z
 					.number()
 					.int()
 					.nullable()
+					.optional()
 					.describe("The character's occult casting stat."),
 				occultProfMod: z
 					.number()
@@ -480,11 +489,13 @@ export const zSheetV1 = z
 					.number()
 					.int()
 					.nullable()
+					.optional()
 					.describe("The character's primal casting stat."),
 				primalDC: z
 					.number()
 					.int()
 					.nullable()
+					.optional()
 					.describe("The character's primal casting stat."),
 				primalProfMod: z
 					.number()

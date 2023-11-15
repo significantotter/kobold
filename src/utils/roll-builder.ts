@@ -65,7 +65,8 @@ export class RollBuilder {
 			initStatsNotification: 'every_round',
 		};
 
-		const actorText = actorName || this.creature?.sheet?.staticInfo?.name || '';
+		const actorText =
+			actorName || character?.name || this.creature?.sheet?.staticInfo?.name || '';
 		this.title = title || `${actorText} ${this.rollDescription}`.trim();
 	}
 
@@ -266,17 +267,18 @@ export class RollBuilder {
 			}
 			return rollResult;
 		} catch (err) {
+			let errorRoll: ErrorResult = {
+				type: 'error',
+				value: `failed to roll ${rollExpression}`,
+			};
 			if (err instanceof DiceRollError) {
-				return {
+				errorRoll = {
 					type: 'error',
 					value: err.message,
 				};
-			} else {
-				return {
-					type: 'error',
-					value: `failed to roll ${rollExpression}`,
-				};
 			}
+			this.rollResults.push(errorRoll);
+			return errorRoll;
 		}
 	}
 
@@ -392,6 +394,11 @@ export class RollBuilder {
 		} else if (result.type === 'text') {
 			convertedResult = {
 				name: result.name,
+				value: result.value,
+			};
+		} else if (result.type === 'error') {
+			convertedResult = {
+				name: result.type,
 				value: result.value,
 			};
 		} else {

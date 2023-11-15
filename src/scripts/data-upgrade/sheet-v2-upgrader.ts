@@ -242,8 +242,8 @@ export function upgradeSheet(sheet: SheetV1): Sheet {
 			keyAbility: keyAbility,
 		},
 		info: {
-			url: sheet.info.url,
-			description: sheet.info.description,
+			url: sheet.info.url ?? '',
+			description: sheet.info.description ?? '',
 			gender: sheet.info.gender ?? null,
 			age: sheet.info.age ? sheet.info.age.toString() : null,
 			alignment: sheet.info.alignment ?? null,

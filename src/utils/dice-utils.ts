@@ -46,7 +46,7 @@ export interface ErrorResult {
 	value: string;
 }
 
-export type ResultField = DiceRollResult | MultiRollResult | TextResult;
+export type ResultField = DiceRollResult | MultiRollResult | TextResult | ErrorResult;
 
 const attributeRegex = /(\[[\w \-_\.]{2,}\])/g;
 
