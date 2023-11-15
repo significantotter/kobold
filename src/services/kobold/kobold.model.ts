@@ -32,10 +32,7 @@ export class Kobold {
 	constructor(dialect: PostgresDialect) {
 		this.db = new Kysely<Database>({
 			dialect,
-			plugins: [
-				new CamelCasePlugin({ maintainNestedObjectKeys: true }),
-				new ParseJSONResultsPlugin(),
-			],
+			plugins: [new ParseJSONResultsPlugin(), new CamelCasePlugin()],
 		});
 		this.channelDefaultCharacter = new ChannelDefaultCharacterModel(this.db);
 		this.character = new CharacterModel(this.db);

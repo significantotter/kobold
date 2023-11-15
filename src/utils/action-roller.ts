@@ -235,6 +235,7 @@ export class ActionRoller {
 		let currentExtraAttributes = _.values(extraAttributes);
 		if (options.saveDiceRoll) {
 			// Roll the save
+			console.log(targetDcClause, options.targetDC, roll.saveTargetDC);
 			const result = rollBuilder.addRoll({
 				rollTitle: `${targetDcClause}${roll.saveRollType} check VS. ${roll.saveTargetDC}`,
 				rollExpression: options.saveDiceRoll,
