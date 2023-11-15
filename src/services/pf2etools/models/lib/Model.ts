@@ -1,6 +1,6 @@
 import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import { z } from 'zod';
-import { SQLiteTable, SQLiteTableWithColumns, TableConfig } from 'drizzle-orm/sqlite-core';
+import { SQLiteTable, TableConfig } from 'drizzle-orm/sqlite-core';
 import * as schema from '../../pf2eTools.schema.js';
 import { getTableName } from 'drizzle-orm';
 

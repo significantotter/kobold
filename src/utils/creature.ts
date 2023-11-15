@@ -621,17 +621,19 @@ export class Creature {
 	}
 
 	getDC(dcName: string): number | null {
-		const dcPropKey = SheetProperties.standardizePropKey(dcName);
+		const dcPropKey = SheetProperties.standardizeProperty(dcName);
 
 		if (['ac', 'armorclass', 'armor'].includes(dcPropKey))
 			return this.sheet.intProperties.ac ?? 10;
-		const stat = SheetStatProperties.aliases[dcPropKey];
+		const stat = SheetStatProperties.aliases[dcPropKey.toLowerCase()];
 		if (stat) {
 			const sheetProp = SheetProperties.properties[stat];
 			return this.statDcs[sheetProp.baseKey];
 		}
 		const additionalSkill = this.sheet.additionalSkills.find(
-			s => SheetProperties.standardizePropKey(s.name) === dcPropKey
+			s =>
+				SheetProperties.standardizeCustomPropName(s.name) ===
+				SheetProperties.standardizeCustomPropName(dcPropKey)
 		);
 		if (additionalSkill) {
 			return this.interpretDc(additionalSkill);

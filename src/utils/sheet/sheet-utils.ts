@@ -40,7 +40,7 @@ export class SheetUtils {
 					`Yip! I couldn't find an adjustable sheet attribute named "${attributeName}".`
 				);
 			}
-			const standardizedProperty = SheetAdjuster.standardizeProperty(attributeName);
+			const standardizedProperty = SheetProperties.standardizeProperty(attributeName);
 			const sheetAdjustment: SheetAdjustment = {
 				type: SheetAdjustmentTypeEnum.untyped,
 				propertyType: SheetAdjuster.getPropertyType(standardizedProperty),
@@ -63,7 +63,7 @@ export class SheetUtils {
 		const bucketer = new SheetAdjustmentBucketer(sheet);
 		for (const adjustment of sheetAdjustments) {
 			// standardize the property
-			const standardizedProperty = SheetAdjuster.standardizeProperty(adjustment.property);
+			const standardizedProperty = SheetProperties.standardizeProperty(adjustment.property);
 			if (SheetProperties.isPropertyGroup(standardizedProperty)) {
 				// split the adjustment into many property adjustments if it's a group
 				const properties = SheetProperties.propertyGroupToSheetProperties(

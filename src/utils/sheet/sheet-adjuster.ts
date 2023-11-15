@@ -61,27 +61,9 @@ export class SheetAdjuster {
 		return propName in SheetProperties.adjustableAliases;
 	}
 
-	public static standardizeProperty(propertyName: string) {
-		const lowerTrimmedProperty = propertyName.toLowerCase().trim().replaceAll(/_|-/g, '');
-		const withoutSpaces = lowerTrimmedProperty.replaceAll(' ', '');
-
-		// if any alias matches without spaces, then its valid
-		const sheetProperty = SheetProperties.adjustableAliases[withoutSpaces];
-		if (sheetProperty) {
-			return sheetProperty;
-		}
-
-		// if any property regex matches, then its valid
-		if (_.some(SheetProperties.regexes, regex => regex.test(propertyName))) return propertyName;
-		if (_.some(SheetProperties.regexes, regex => regex.test(lowerTrimmedProperty)))
-			return lowerTrimmedProperty;
-
-		// we're not validating yet, so still return the string
-		return propertyName.trim();
-	}
 	static validateSheetProperty(property: string): boolean {
 		// basic sheet property
-		const standardizedProperty = SheetAdjuster.standardizeProperty(property);
+		const standardizedProperty = SheetProperties.standardizeProperty(property);
 		if (standardizedProperty in SheetProperties.adjustableProperties) return true;
 		// property groups
 		if (SheetProperties.isPropertyGroup(standardizedProperty)) return true;
@@ -128,7 +110,8 @@ export class SheetAdjuster {
 
 	public static getPropertyType(property: string): AdjustablePropertyEnum {
 		// basic sheet property
-		const lowerStandardizedProperty = SheetAdjuster.standardizeProperty(property).toLowerCase();
+		const lowerStandardizedProperty =
+			SheetProperties.standardizeProperty(property).toLowerCase();
 		if (SheetInfoProperties.aliases[lowerStandardizedProperty])
 			return AdjustablePropertyEnum.info;
 		else if (SheetInfoListProperties.aliases[lowerStandardizedProperty])
@@ -151,7 +134,7 @@ export class SheetAdjuster {
 	}
 
 	/**
-	 * @param standardizedProperty A property that has been returned from SheetAdjuster.standardizeProperty()
+	 * @param standardizedProperty A property that has been returned from SheetProperties.standardizeProperty()
 	 * @param adjustmentString The adjustment string to validate
 	 * @returns
 	 */

@@ -106,17 +106,6 @@ describe('SheetAdjuster static', () => {
 			expect(SheetAdjuster.isAdjustableProperty('usesStamina')).toBe(false);
 		});
 	});
-
-	describe('standardizeProperty', () => {
-		it('should standardize a property name', () => {
-			expect(SheetAdjuster.standardizeProperty('Strength ')).toBe('strength');
-		});
-
-		it('should remove underscores and hyphens', () => {
-			const result = SheetAdjuster.standardizeProperty('max_hp');
-			expect(result).toBe('hp');
-		});
-	});
 });
 
 describe('SheetInfoAdjuster', () => {

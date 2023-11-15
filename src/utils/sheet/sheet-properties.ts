@@ -767,6 +767,25 @@ export class SheetProperties {
 	public static standardizePropKey = standardizePropKey;
 	public static standardizeCustomPropName = standardizeCustomPropName;
 
+	public static standardizeProperty(propertyName: string) {
+		const lowerTrimmedProperty = propertyName.toLowerCase().trim().replaceAll(/_|-/g, '');
+		const withoutSpaces = lowerTrimmedProperty.replaceAll(' ', '');
+
+		// if any alias matches without spaces, then its valid
+		const sheetProperty = SheetProperties.adjustableAliases[withoutSpaces];
+		if (sheetProperty) {
+			return sheetProperty;
+		}
+
+		// if any property regex matches, then its valid
+		if (_.some(SheetProperties.regexes, regex => regex.test(propertyName))) return propertyName;
+		if (_.some(SheetProperties.regexes, regex => regex.test(lowerTrimmedProperty)))
+			return lowerTrimmedProperty;
+
+		// we're not validating yet, so still return the string
+		return propertyName.trim();
+	}
+
 	public static aliases = {
 		...SheetInfoProperties.aliases,
 		...SheetInfoListProperties.aliases,

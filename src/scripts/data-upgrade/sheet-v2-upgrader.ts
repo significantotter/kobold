@@ -41,6 +41,7 @@ import {
 	zSheetV1,
 } from './character.v1.zod.js';
 import { SheetAdjuster } from '../../utils/sheet/sheet-adjuster.js';
+import { SheetProperties } from '../../utils/sheet/sheet-properties.js';
 
 const scoreToModifier = (score: number) => Math.floor((score - 10) / 2);
 
@@ -137,7 +138,7 @@ export function upgradeSheetAdjustment(
 	adjustmentType?: SheetAdjustmentTypeEnum
 ): SheetAdjustment {
 	const defaultedSheetAdjustment = zSheetAdjustmentV1.parse(sheetAdjustment);
-	const property = SheetAdjuster.standardizeProperty(defaultedSheetAdjustment.property);
+	const property = SheetProperties.standardizeProperty(defaultedSheetAdjustment.property);
 	const propertyType = SheetAdjuster.getPropertyType(property);
 	const operation = isSheetAdjustmentOperationEnum(defaultedSheetAdjustment.operation)
 		? defaultedSheetAdjustment.operation

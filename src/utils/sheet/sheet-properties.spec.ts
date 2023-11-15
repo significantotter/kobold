@@ -2,6 +2,17 @@ import { AbilityEnum } from '../../services/kobold/index.js';
 import { SheetProperties } from './sheet-properties.js';
 
 describe('SheetProperties', () => {
+	describe('standardizeProperty', () => {
+		it('should standardize a property name', () => {
+			expect(SheetProperties.standardizeProperty('Strength ')).toBe('strength');
+		});
+
+		it('should remove underscores and hyphens', () => {
+			const result = SheetProperties.standardizeProperty('max_hp');
+			expect(result).toBe('hp');
+		});
+	});
+
 	describe('isPropertyGroup', () => {
 		it('should return true for a valid property group', () => {
 			expect(SheetProperties.isPropertyGroup('constitution-saves')).toBe(true);
