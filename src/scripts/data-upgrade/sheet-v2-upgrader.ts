@@ -250,14 +250,14 @@ export function upgradeSheet(sheet: SheetV1): Sheet {
 
 	const newSheet: Sheet = {
 		staticInfo: {
-			name: sheet.info.name,
+			name: sheet.info.name ?? 'Unnamed Character',
 			level: level,
-			usesStamina: sheet.info.usesStamina,
+			usesStamina: sheet.info.usesStamina ?? false,
 			keyAbility: keyAbility,
 		},
 		info: {
-			url: sheet.info.url ?? '',
-			description: sheet.info.description ?? '',
+			url: sheet.info.url ?? null,
+			description: sheet.info.description ?? null,
 			gender: sheet.info.gender ?? null,
 			age: sheet.info.age ? sheet.info.age.toString() : null,
 			alignment: sheet.info.alignment ?? null,
@@ -266,7 +266,7 @@ export function upgradeSheet(sheet: SheetV1): Sheet {
 			size: sheet.info.size ?? null,
 			class: sheet.info.class ?? null,
 			ancestry: sheet.info.ancestry ?? null,
-			heritage: sheet.info.heritage,
+			heritage: sheet.info.heritage ?? null,
 			background: sheet.info.background ?? null,
 		},
 		infoLists: {
@@ -284,10 +284,10 @@ export function upgradeSheet(sheet: SheetV1): Sheet {
 
 			...abilities,
 
-			walkSpeed: sheet.general.speed,
-			flySpeed: sheet.general.flySpeed,
-			swimSpeed: sheet.general.swimSpeed,
-			climbSpeed: sheet.general.climbSpeed,
+			walkSpeed: sheet.general.speed ?? null,
+			flySpeed: sheet.general.flySpeed ?? null,
+			swimSpeed: sheet.general.swimSpeed ?? null,
+			climbSpeed: sheet.general.climbSpeed ?? null,
 			burrowSpeed: null,
 			dimensionalSpeed: null,
 
@@ -313,7 +313,7 @@ export function upgradeSheet(sheet: SheetV1): Sheet {
 				name: 'Focus Points',
 				style: 'default',
 				current: sheet.general.currentFocusPoints ?? 0,
-				max: sheet.general.focusPoints,
+				max: sheet.general.focusPoints ?? null,
 				recoverable: false,
 			},
 			hp: {

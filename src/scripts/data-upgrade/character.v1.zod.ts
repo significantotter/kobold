@@ -237,12 +237,13 @@ export const zSheetV1 = z
 	.object({
 		info: z
 			.object({
-				name: z.string().describe("The character's name."),
+				name: z.string().optional().describe("The character's name."),
 				url: z.string().optional().nullable().describe('The url to open the character.'),
 				description: z
 					.string()
 					.optional()
 					.nullable()
+					.optional()
 					.describe("The character's description."),
 				gender: z.string().nullable().optional().describe("The character's gender"),
 				age: z
@@ -258,7 +259,7 @@ export const zSheetV1 = z
 					.nullable()
 					.optional()
 					.describe("The character's portrait image URL."),
-				level: z.number().int().nullable().describe("The character's level."),
+				level: z.number().int().nullable().optional().describe("The character's level."),
 				size: z.string().nullable().optional().describe("The character's size category."),
 				class: z.string().nullable().optional().describe("The character's class."),
 				keyability: z
@@ -267,7 +268,7 @@ export const zSheetV1 = z
 					.optional()
 					.describe("The character's key ability."),
 				ancestry: z.string().nullable().optional().describe("The character's ancestry."),
-				heritage: z.string().nullable().describe("The character's heritage."),
+				heritage: z.string().nullable().optional().describe("The character's heritage."),
 				background: z
 					.string()
 					.nullable()
@@ -276,25 +277,48 @@ export const zSheetV1 = z
 				traits: z.array(z.string()).describe("The character's traits."),
 				usesStamina: z
 					.boolean()
+					.optional()
 					.describe('Whether the character follows alternate stamina rules.'),
 			})
 			.describe('The general character sheet formation.'),
 		abilities: z
 			.object({
-				strength: z.number().int().nullable().describe("The character's strength score."),
-				dexterity: z.number().int().nullable().describe("The character's dexterity score."),
+				strength: z
+					.number()
+					.int()
+					.nullable()
+					.optional()
+					.describe("The character's strength score."),
+				dexterity: z
+					.number()
+					.int()
+					.nullable()
+					.optional()
+					.describe("The character's dexterity score."),
 				constitution: z
 					.number()
 					.int()
 					.nullable()
+					.optional()
 					.describe("The character's constitution score."),
 				intelligence: z
 					.number()
 					.int()
 					.nullable()
+					.optional()
 					.describe("The character's intelligence score."),
-				wisdom: z.number().int().nullable().describe("The character's wisdom score."),
-				charisma: z.number().int().nullable().describe("The character's charisma score."),
+				wisdom: z
+					.number()
+					.int()
+					.nullable()
+					.optional()
+					.describe("The character's wisdom score."),
+				charisma: z
+					.number()
+					.int()
+					.nullable()
+					.optional()
+					.describe("The character's charisma score."),
 			})
 			.describe("The character's primary ability scores."),
 		general: z
@@ -303,29 +327,62 @@ export const zSheetV1 = z
 					.number()
 					.int()
 					.nullable()
+					.optional()
 					.describe("The character's current hero points."),
-				speed: z.number().int().nullable().describe("The character's land speed."),
-				flySpeed: z.number().int().nullable().describe("The character's fly speed."),
-				swimSpeed: z.number().int().nullable().describe("The character's swim speed."),
-				climbSpeed: z.number().int().nullable().describe("The character's climb speed."),
+				speed: z
+					.number()
+					.int()
+					.nullable()
+					.optional()
+					.describe("The character's land speed."),
+				flySpeed: z
+					.number()
+					.int()
+					.nullable()
+					.optional()
+					.describe("The character's fly speed."),
+				swimSpeed: z
+					.number()
+					.int()
+					.nullable()
+					.optional()
+					.describe("The character's swim speed."),
+				climbSpeed: z
+					.number()
+					.int()
+					.nullable()
+					.optional()
+					.describe("The character's climb speed."),
 				currentFocusPoints: z
 					.number()
 					.int()
 					.nullable()
+					.optional()
 					.describe("The character's current focus points."),
 				focusPoints: z
 					.number()
 					.int()
 					.nullable()
+					.optional()
 					.describe("The character's maximum focus points."),
-				classDC: z.number().int().nullable().describe("The character's class DC."),
+				classDC: z
+					.number()
+					.int()
+					.nullable()
+					.optional()
+					.describe("The character's class DC."),
 				classAttack: z
 					.number()
 					.int()
 					.nullable()
 					.optional()
 					.describe("The character's class attack roll."),
-				perception: z.number().int().nullable().describe("The character's perception."),
+				perception: z
+					.number()
+					.int()
+					.nullable()
+					.optional()
+					.describe("The character's perception."),
 				perceptionProfMod: z
 					.number()
 					.int()
@@ -342,12 +399,14 @@ export const zSheetV1 = z
 					.number()
 					.int()
 					.nullable()
+					.optional()
 					.describe("The character's current hit points."),
 				maxHp: z.number().int().nullable().describe("The character's maximum hit points."),
 				tempHp: z
 					.number()
 					.int()
 					.nullable()
+					.optional()
 					.describe("The character's temporary hit points."),
 				currentResolve: z
 					.number()
@@ -560,6 +619,7 @@ export const zSheetV1 = z
 					.number()
 					.int()
 					.nullable()
+					.optional()
 					.describe("The character's acrobatics skill."),
 				acrobaticsProfMod: z
 					.number()
@@ -567,35 +627,60 @@ export const zSheetV1 = z
 					.nullable()
 					.optional()
 					.describe("The character's acrobatics proficiency modifier."),
-				arcana: z.number().int().nullable().describe("The character's arcana skill."),
+				arcana: z
+					.number()
+					.int()
+					.nullable()
+					.optional()
+					.describe("The character's arcana skill."),
 				arcanaProfMod: z
 					.number()
 					.int()
 					.nullable()
 					.optional()
 					.describe("The character's arcana proficiency modifier."),
-				athletics: z.number().int().nullable().describe("The character's athletics skill."),
+				athletics: z
+					.number()
+					.int()
+					.nullable()
+					.optional()
+					.describe("The character's athletics skill."),
 				athleticsProfMod: z
 					.number()
 					.int()
 					.nullable()
 					.optional()
 					.describe("The character's athletics proficiency modifier."),
-				crafting: z.number().int().nullable().describe("The character's crafting skill."),
+				crafting: z
+					.number()
+					.int()
+					.nullable()
+					.optional()
+					.describe("The character's crafting skill."),
 				craftingProfMod: z
 					.number()
 					.int()
 					.nullable()
 					.optional()
 					.describe("The character's crafting proficiency modifier."),
-				deception: z.number().int().nullable().describe("The character's deception skill."),
+				deception: z
+					.number()
+					.int()
+					.nullable()
+					.optional()
+					.describe("The character's deception skill."),
 				deceptionProfMod: z
 					.number()
 					.int()
 					.nullable()
 					.optional()
 					.describe("The character's deception proficiency modifier."),
-				diplomacy: z.number().int().nullable().describe("The character's diplomacy skill."),
+				diplomacy: z
+					.number()
+					.int()
+					.nullable()
+					.optional()
+					.describe("The character's diplomacy skill."),
 				diplomacyProfMod: z
 					.number()
 					.int()
@@ -606,6 +691,7 @@ export const zSheetV1 = z
 					.number()
 					.int()
 					.nullable()
+					.optional()
 					.describe("The character's intimidation skill."),
 				intimidationProfMod: z
 					.number()
@@ -613,21 +699,36 @@ export const zSheetV1 = z
 					.nullable()
 					.optional()
 					.describe("The character's intimidation proficiency modifier."),
-				medicine: z.number().int().nullable().describe("The character's medicine skill."),
+				medicine: z
+					.number()
+					.int()
+					.nullable()
+					.optional()
+					.describe("The character's medicine skill."),
 				medicineProfMod: z
 					.number()
 					.int()
 					.nullable()
 					.optional()
 					.describe("The character's medicine proficiency modifier."),
-				nature: z.number().int().nullable().describe("The character's nature skill."),
+				nature: z
+					.number()
+					.int()
+					.nullable()
+					.optional()
+					.describe("The character's nature skill."),
 				natureProfMod: z
 					.number()
 					.int()
 					.nullable()
 					.optional()
 					.describe("The character's nature proficiency modifier."),
-				occultism: z.number().int().nullable().describe("The character's occultism skill."),
+				occultism: z
+					.number()
+					.int()
+					.nullable()
+					.optional()
+					.describe("The character's occultism skill."),
 				occultismProfMod: z
 					.number()
 					.int()
@@ -638,6 +739,7 @@ export const zSheetV1 = z
 					.number()
 					.int()
 					.nullable()
+					.optional()
 					.describe("The character's performance skill."),
 				performanceProfMod: z
 					.number()
@@ -645,35 +747,60 @@ export const zSheetV1 = z
 					.nullable()
 					.optional()
 					.describe("The character's performance proficiency modifier."),
-				religion: z.number().int().nullable().describe("The character's religion skill."),
+				religion: z
+					.number()
+					.int()
+					.nullable()
+					.optional()
+					.describe("The character's religion skill."),
 				religionProfMod: z
 					.number()
 					.int()
 					.nullable()
 					.optional()
 					.describe("The character's religion proficiency modifier."),
-				society: z.number().int().nullable().describe("The character's society skill."),
+				society: z
+					.number()
+					.int()
+					.nullable()
+					.optional()
+					.describe("The character's society skill."),
 				societyProfMod: z
 					.number()
 					.int()
 					.nullable()
 					.optional()
 					.describe("The character's society proficiency modifier."),
-				stealth: z.number().int().nullable().describe("The character's stealth skill."),
+				stealth: z
+					.number()
+					.int()
+					.nullable()
+					.optional()
+					.describe("The character's stealth skill."),
 				stealthProfMod: z
 					.number()
 					.int()
 					.nullable()
 					.optional()
 					.describe("The character's stealth proficiency modifier."),
-				survival: z.number().int().nullable().describe("The character's survival skill."),
+				survival: z
+					.number()
+					.int()
+					.nullable()
+					.optional()
+					.describe("The character's survival skill."),
 				survivalProfMod: z
 					.number()
 					.int()
 					.nullable()
 					.optional()
 					.describe("The character's survival proficiency modifier."),
-				thievery: z.number().int().nullable().describe("The character's thievery skill."),
+				thievery: z
+					.number()
+					.int()
+					.nullable()
+					.optional()
+					.describe("The character's thievery skill."),
 				thieveryProfMod: z
 					.number()
 					.int()

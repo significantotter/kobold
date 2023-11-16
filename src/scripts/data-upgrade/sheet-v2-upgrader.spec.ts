@@ -867,5 +867,34 @@ describe('sheet-v2-upgrader', () => {
 
 			expect(result).toEqual(expectedSheet);
 		});
+
+		it('should handle a legacy empty sheet', () => {
+			const oldSheet = {
+				info: { traits: [] as string[] },
+				saves: { will: 6, reflex: 5, fortitude: 4 },
+				skills: { lores: [], athletics: 7 },
+				actions: [],
+				attacks: [],
+				general: { senses: [] as any[], languages: [] as any[] },
+				offense: {},
+				defenses: {
+					ac: 19,
+					maxHp: 30,
+					currentHp: 0,
+					immunities: [],
+					weaknesses: [
+						{ type: 'fire', amount: 5 },
+						{ type: 'cold', amount: 3 },
+					],
+					resistances: [{ type: 'electric', amount: 5 }],
+				},
+				abilities: {},
+				modifiers: [],
+				rollMacros: [],
+				sourceData: {},
+				castingStats: {},
+			};
+			console.log(upgradeSheet(oldSheet));
+		});
 	});
 });
