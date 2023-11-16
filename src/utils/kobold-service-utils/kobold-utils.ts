@@ -77,7 +77,7 @@ export class KoboldUtils {
 				: Promise.resolve(undefined);
 
 		let currentInitiativePromise = usesData.currentInitiative
-			? this.initiativeUtils.getInitiativeForChannel(intr.channel)
+			? this.initiativeUtils.getInitiativeForChannelOrNull(intr.channel)
 			: Promise.resolve(undefined);
 
 		let [activeCharacter, ownedCharacters, userSettings, activeGame, currentInitiative] =

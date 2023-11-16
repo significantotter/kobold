@@ -200,7 +200,6 @@ export class GameRollSubCommand implements Command {
 						actionRoller,
 						hideStats: hideStats,
 						targetNameOverwrite: targetSheetName!,
-						LL,
 					});
 					embed.addFields(damageField);
 				}
@@ -232,7 +231,6 @@ export class GameRollSubCommand implements Command {
 						actionRoller: rollResult.actionRoller,
 						hideStats: hideStats,
 						targetNameOverwrite: targetSheetName!,
-						LL,
 					});
 
 					embed.addFields(damageField);
@@ -244,7 +242,6 @@ export class GameRollSubCommand implements Command {
 					actorName: intr.user.username,
 					rollDescription: LL.commands.roll.dice.interactions.rolledDice(),
 					userSettings,
-					LL,
 				});
 				rollBuilder.addRoll({ rollExpression: diceExpression });
 				embeds.push(rollBuilder.compileEmbed());

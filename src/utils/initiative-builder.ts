@@ -425,7 +425,6 @@ export class InitiativeBuilderUtils {
 
 	public static initiativeJoinEmbed(
 		finalInitiative: RollBuilder | number,
-		currentRound: number,
 		name: string
 	): KoboldEmbed {
 		let rollResultMessage: KoboldEmbed;
@@ -442,17 +441,13 @@ export class InitiativeBuilderUtils {
 					})
 				);
 		} else {
-			rollResultMessage = finalInitiative.compileEmbed();
+			rollResultMessage = finalInitiative.compileEmbed().setTitle(
+				L.en.commands.init.join.interactions.joinedEmbed.title({
+					characterName: name,
+				})
+			);
 		}
 
-		rollResultMessage.addFields([
-			{
-				name: L.en.commands.init.join.interactions.joinedEmbed.roundField.name(),
-				value: L.en.commands.init.join.interactions.joinedEmbed.roundField.value({
-					currentRound: currentRound,
-				}),
-			},
-		]);
 		return rollResultMessage;
 	}
 

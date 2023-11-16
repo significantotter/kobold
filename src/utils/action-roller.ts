@@ -21,7 +21,14 @@ import {
 } from '../services/kobold/index.js';
 import { KoboldError } from './KoboldError.js';
 import { Creature } from './creature.js';
-import { DiceRollError, DiceUtils, MultiRollResult } from './dice-utils.js';
+import {
+	DiceRollError,
+	DiceRollResult,
+	DiceUtils,
+	ErrorResult,
+	MultiRollResult,
+	TextResult,
+} from './dice-utils.js';
 import { EmbedUtils, KoboldEmbed } from './kobold-embed-utils.js';
 import { RollBuilder } from './roll-builder.js';
 
@@ -370,7 +377,9 @@ export class ActionRoller {
 		let currentExtraAttributes = _.values(extraAttributes);
 		let rollExpression = roll.roll;
 		if (options.damageModifierExpression) {
-			rollExpression = `${rollExpression} + (${options.damageModifierExpression})`;
+			rollExpression = `${rollExpression ?? ''} +(${
+				options.damageModifierExpression
+			})`.trim();
 		}
 
 		// normal damage cases: Last action was an attack and it succeeded, last action was a save that failed, we don't know about the last action
@@ -399,17 +408,34 @@ export class ActionRoller {
 			multiplier = 0.5;
 		}
 
-		const result = rollBuilder.addRoll({
-			rollTitle: roll.name || _.capitalize(effectTerm),
-			damageType: roll.damageType ?? undefined,
-			rollExpression,
-			tags,
-			extraAttributes: currentExtraAttributes,
-			multiplier,
-			showTags: false,
-		});
+		const rollTitle = roll.name || _.capitalize(effectTerm);
 
-		if (result.type !== 'error') {
+		let result: DiceRollResult | ErrorResult | TextResult;
+
+		if (rollExpression) {
+			result = rollBuilder.addRoll({
+				rollTitle,
+				damageType: roll.damageType ?? undefined,
+				rollExpression,
+				tags,
+				extraAttributes: currentExtraAttributes,
+				multiplier,
+				showTags: false,
+			});
+		} else if (roll.damageType) {
+			result = rollBuilder.addText({
+				title: rollTitle,
+				text: roll.damageType,
+				extraAttributes: currentExtraAttributes,
+			});
+		} else {
+			result = {
+				type: 'error',
+				value: 'A damage roll must have either a dice roll or a damage type!',
+			} satisfies ErrorResult;
+		}
+
+		if (result.type === 'dice') {
 			extraAttributes[`roll${rollCounter}`] = {
 				name: `roll${rollCounter}`,
 				aliases: [`roll${rollCounter}`.toLowerCase()],
@@ -760,9 +786,9 @@ export class ActionRoller {
 
 		if (options?.title) {
 			title = options.title;
-		} else if (this.creature && this.action?.name) {
-			title = `${this.creature.name} used ${this.action.name} on ${this.creature.name}!`;
-		} else if (this.creature) {
+		} else if (this.creature && this.action.name && this.targetCreature) {
+			title = `${this.creature.name} used ${this.action.name} on ${this.targetCreature.name}!`;
+		} else if (this.creature && this.action.name) {
 			title = `${this.creature.name} used ${this.action.name}!`;
 		} else {
 			title = `${this.action.name}`;
@@ -952,7 +978,7 @@ export class ActionRoller {
 					lastTargetingResult,
 					lastTargetingActionType
 				);
-				if (result && result.type !== 'error') {
+				if (result && result.type === 'dice') {
 					if (result?.results?.total && !roll.healInsteadOfDamage)
 						this.applyDamage(roll, result.results.total);
 					else if (result?.results?.total && roll.healInsteadOfDamage)
@@ -989,7 +1015,6 @@ export class ActionRoller {
 		damageModifierExpression,
 		targetAC,
 		userSettings,
-		LL = L.en,
 	}: {
 		creature: Creature;
 		targetCreature?: Creature | null;
@@ -999,7 +1024,6 @@ export class ActionRoller {
 		damageModifierExpression?: string;
 		targetAC?: number;
 		userSettings?: UserSettings;
-		LL: TranslationFunctions;
 	}): { actionRoller: ActionRoller; builtRoll: RollBuilder } {
 		const targetAttack = creature.attackRolls[attackName.toLowerCase()];
 		if (!targetAttack)
@@ -1019,7 +1043,7 @@ export class ActionRoller {
 			rolls: [],
 		};
 		// add the attack roll
-		if (targetAttack.toHit) {
+		if (targetAttack.toHit != null) {
 			action.rolls.push({
 				type: RollTypeEnum.attack,
 				name: 'To Hit',
@@ -1038,11 +1062,12 @@ export class ActionRoller {
 			action.rolls.push({
 				type: RollTypeEnum.damage,
 				name: 'Damage',
-				roll: DiceUtils.buildDiceExpression(
-					String(DiceUtils.parseDiceFromWgDamageField(targetAttack.damage[0].dice)),
-					null,
-					damageModifierExpression
-				),
+				roll:
+					DiceUtils.buildDiceExpression(
+						targetAttack.damage[0].dice,
+						null,
+						damageModifierExpression
+					) || null,
 				healInsteadOfDamage: false,
 				damageType: targetAttack.damage[0].type,
 				allowRollModifiers: true,
@@ -1052,9 +1077,7 @@ export class ActionRoller {
 			action.rolls.push({
 				type: RollTypeEnum.damage,
 				name: 'Damage',
-				roll: DiceUtils.buildDiceExpression(
-					String(DiceUtils.parseDiceFromWgDamageField(targetAttack.damage[i].dice))
-				),
+				roll: targetAttack.damage[i].dice,
 				healInsteadOfDamage: false,
 				damageType: targetAttack.damage[i].type,
 				allowRollModifiers: false,
@@ -1134,7 +1157,6 @@ export class ActionRoller {
 				attackModifierExpression: options.modifierExpression,
 				damageModifierExpression: options.damageModifierExpression,
 				targetAC: options.targetAC,
-				LL,
 			});
 
 			actionRoller = attackResult.actionRoller;
@@ -1176,7 +1198,6 @@ export class ActionRoller {
 					actionRoller,
 					sourceNameOverwrite: options.sourceNameOverwrite,
 					targetNameOverwrite: options.targetNameOverwrite,
-					LL,
 				})
 			);
 		} else {

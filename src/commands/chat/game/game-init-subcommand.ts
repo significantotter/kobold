@@ -24,6 +24,7 @@ import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js
 import { Command, CommandDeferType } from '../../index.js';
 import { InitOptions } from '../init/init-command-options.js';
 import { GameOptions } from './game-command-options.js';
+import { KoboldError } from '../../../utils/KoboldError.js';
 
 export class GameInitSubCommand implements Command {
 	public names = [L.en.commands.game.init.name()];
@@ -91,7 +92,7 @@ export class GameInitSubCommand implements Command {
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const koboldUtils: KoboldUtils = new KoboldUtils(kobold);
-		const { gameUtils, initiativeUtils } = koboldUtils;
+		const { initiativeUtils } = koboldUtils;
 		let { currentInitiative, activeGame, userSettings } = await koboldUtils.fetchDataForCommand(
 			intr,
 			{
@@ -133,13 +134,6 @@ export class GameInitSubCommand implements Command {
 			});
 		}
 
-		const initBuilder = new InitiativeBuilder({
-			initiative: currentInitiative,
-			actors: currentInitiative.actors,
-			groups: currentInitiative.actorGroups,
-			LL,
-		});
-
 		for (const character of _.uniqBy(activeGame.characters, 'id')) {
 			if (
 				// the character is already in the init
@@ -177,16 +171,8 @@ export class GameInitSubCommand implements Command {
 				hideStats: false,
 			});
 
-			const embed = InitiativeBuilderUtils.initiativeJoinEmbed(
-				initiativeResult,
-				currentInitiative.currentRound,
-				actorName
-			);
+			const embed = InitiativeBuilderUtils.initiativeJoinEmbed(rollResult, actorName);
 
-			initBuilder.set({
-				actors: currentInitiative.actors,
-				groups: currentInitiative.actorGroups,
-			});
 			embeds.push(embed);
 		}
 		if (embeds.length === 0) {
@@ -194,6 +180,17 @@ export class GameInitSubCommand implements Command {
 		} else {
 			await InteractionUtils.send(intr, { embeds: embeds });
 		}
+
+		const newInitiative = await initiativeUtils.getInitiativeForChannel(intr.channel);
+
+		if (!newInitiative)
+			throw new KoboldError(
+				"Yip! Something went wrong and I couldn't find this channel's initiative"
+			);
+
+		const initBuilder = new InitiativeBuilder({
+			initiative: newInitiative,
+		});
 
 		await InitiativeBuilderUtils.sendNewRoundMessage(intr, initBuilder);
 	}

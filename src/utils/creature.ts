@@ -58,14 +58,8 @@ export interface roll {
 	tags: string[];
 }
 
-export interface attackRoll {
-	name: string;
+export interface attackRoll extends SheetAttack {
 	type: 'attack';
-	toHit: string | number | null;
-	damage: { dice: string; type: string | null }[];
-	range: string | null;
-	traits: string[];
-	notes: string | null;
 	tags: string[];
 }
 
@@ -279,7 +273,7 @@ export class Creature {
 		const attackLines = [];
 		for (const attack of this.sheet.attacks) {
 			let builtAttack = `**${_.capitalize(attack.name)}**`;
-			if (attack.toHit) builtAttack += ` \`+${attack.toHit}\``;
+			if (attack.toHit != null) builtAttack += ` \`+${attack.toHit}\``;
 			if (attack.traits?.length) builtAttack += ` (${attack.traits.join(', ')})`;
 			builtAttack += `,`;
 			if (attack.damage?.length) {
@@ -646,11 +640,12 @@ export class Creature {
 	public get bonusAttacks(): SheetAttack[] {
 		const bonusAttacks: SheetAttack[] = [];
 
-		if (this.statIsUnset(this.sheet.stats.arcane)) {
+		if (!this.statIsUnset(this.sheet.stats.arcane)) {
 			bonusAttacks.push({
 				name: 'Arcane Spell Attack',
 				toHit: this.statBonuses.arcane,
 				damage: [],
+				effects: [],
 				range: null,
 				notes: null,
 				traits: ['attack', 'spell', 'arcane'],
@@ -662,6 +657,7 @@ export class Creature {
 				name: 'Divine Spell Attack',
 				toHit: this.statBonuses.divine,
 				damage: [],
+				effects: [],
 				range: null,
 				notes: null,
 				traits: ['attack', 'spell', 'divine'],
@@ -673,6 +669,7 @@ export class Creature {
 				name: 'Occult Spell Attack',
 				toHit: this.statBonuses.occult,
 				damage: [],
+				effects: [],
 				range: null,
 				notes: null,
 				traits: ['attack', 'spell', 'occult'],
@@ -684,6 +681,7 @@ export class Creature {
 				name: 'Primal Spell Attack',
 				toHit: this.statBonuses.primal,
 				damage: [],
+				effects: [],
 				range: null,
 				notes: null,
 				traits: ['attack', 'spell', 'primal'],
@@ -695,6 +693,7 @@ export class Creature {
 				name: 'Class Attack',
 				toHit: this.statBonuses.class,
 				damage: [],
+				effects: [],
 				range: null,
 				notes: null,
 				traits: ['attack', 'class'],
@@ -713,6 +712,7 @@ export class Creature {
 				name: '**Melee** (strength, best proficiency)',
 				toHit: maxWeaponMod + level + this.abilities.strength,
 				damage: [],
+				effects: [],
 				range: 'melee',
 				notes: null,
 				traits: ['attack', 'strength', 'melee'],
@@ -721,6 +721,7 @@ export class Creature {
 				name: '**Ranged/Finesse** (dexterity, best proficiency)',
 				toHit: maxWeaponMod + level + this.abilities.dexterity,
 				damage: [],
+				effects: [],
 				range: 'melee',
 				notes: null,
 				traits: ['attack', 'dexterity', 'ranged'],
@@ -738,16 +739,19 @@ export class Creature {
 
 	public get attackRolls(): { [k: string]: attackRoll } {
 		return _.keyBy(
-			this.attacks.map(attack => ({
-				name: attack.name.toLowerCase(),
-				type: 'attack',
-				toHit: attack.toHit,
-				damage: attack.damage ?? [],
-				range: attack.range,
-				traits: attack.traits ?? [],
-				notes: attack.notes,
-				tags: _.uniq(['attack', ...(attack.traits ?? [])]),
-			})),
+			this.attacks
+				.map(attack => ({
+					name: attack.name.toLowerCase(),
+					type: 'attack' as 'attack',
+					toHit: attack.toHit,
+					effects: attack.effects,
+					damage: attack.damage ?? [],
+					range: attack.range,
+					traits: attack.traits ?? [],
+					notes: attack.notes,
+					tags: _.uniq(['attack', ...(attack.traits ?? [])]),
+				}))
+				.concat(),
 			({ name }) => name.toLowerCase()
 		);
 	}
@@ -878,30 +882,12 @@ export class Creature {
 		return this.statsToRolls(this.skills, 'skill');
 	}
 
-	public get abilityRolls(): {
-		[rollName: string]: roll;
-	} {
-		const rolls: {
-			[rollName: string]: roll;
-		} = {};
-
-		for (const [abilityName, abilityValue] of Object.entries(this.abilities)) {
-			rolls[abilityName] = {
-				name: abilityName.toLowerCase(),
-				type: 'ability',
-				bonus: abilityValue,
-				tags: ['ability', abilityName],
-			};
-		}
-		return rolls;
-	}
-
 	public get rolls(): {
 		[rollName: string]: roll;
 	} {
 		return {
+			...this.statsToRolls([this.sheet.stats.perception], 'check'),
 			...this.savingThrowRolls,
-			...this.abilityRolls,
 			...this.skillRolls,
 		};
 	}

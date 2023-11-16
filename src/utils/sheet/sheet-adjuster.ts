@@ -525,6 +525,7 @@ const damageRegex = /(?:damage|dmg)[\W:]([^\|&]+)/gi;
 const damageTypeRegex = / ((?:[ A-Za-z_-])+)\W*$/gi;
 const rangeRegex = /(?:range)[\W:]([^\|&]+)/gi;
 const traitsRegex = /(?:traits?)[\W:]([^\|&]+)/gi;
+const effectsRegex = /(?:effects?)[\W:]([^\|&]+)/gi;
 const notesRegex = /(?:notes?)[\W:]([^\|&]+)/gi;
 
 export class SheetAttackAdjuster implements SheetPropertyGroupAdjuster<Sheet['attacks']> {
@@ -540,8 +541,13 @@ export class SheetAttackAdjuster implements SheetPropertyGroupAdjuster<Sheet['at
 		const traits = adjustment.parsed.traits
 			? `traits: ${adjustment.parsed.traits.join(innerSeparator)}`
 			: '';
+		const effects = adjustment.parsed.effects
+			? `effects: ${adjustment.parsed.effects.join(innerSeparator)}`
+			: '';
 		const notes = adjustment.parsed.notes ? `notes: ${adjustment.parsed.notes}` : '';
-		const newValue = [toHit, damage, range, traits, notes].filter(_.identity).join('; ');
+		const newValue = [toHit, damage, range, traits, effects, notes]
+			.filter(_.identity)
+			.join('; ');
 		let newAdjustment: SheetAdjustment = {
 			..._.omit(adjustment, 'parsed'),
 			value: newValue,
@@ -554,6 +560,7 @@ export class SheetAttackAdjuster implements SheetPropertyGroupAdjuster<Sheet['at
 		let damageValues: Damage[] = [];
 		let range = '';
 		let traits: string[] = [];
+		let effects: string[] = [];
 		let notes = '';
 
 		for (const value of splitValue) {
@@ -581,6 +588,10 @@ export class SheetAttackAdjuster implements SheetPropertyGroupAdjuster<Sheet['at
 			if (traitsMatch) {
 				traits = traitsMatch[1].split(innerSeparator).map(trait => trait.trim());
 			}
+			let effectsMatch = effectsRegex.exec(value);
+			if (effectsMatch) {
+				effects = effectsMatch[1].split(innerSeparator).map(trait => trait.trim());
+			}
 			let notesMatch = notesRegex.exec(value);
 			if (notesMatch) {
 				notes = notesMatch[1].trim();
@@ -592,6 +603,7 @@ export class SheetAttackAdjuster implements SheetPropertyGroupAdjuster<Sheet['at
 			!damageValues.length &&
 			!range &&
 			!traits.length &&
+			!effects.length &&
 			!notes &&
 			adjustment.operation !== SheetAdjustmentOperationEnum['-']
 		) {
@@ -607,6 +619,7 @@ export class SheetAttackAdjuster implements SheetPropertyGroupAdjuster<Sheet['at
 				name: adjustment.property.split(' ').slice(0, -1).join(' '), // remove the attack keyword
 				toHit: toHitClause || null,
 				damage: damageValues,
+				effects,
 				range: range || null,
 				traits,
 				notes: notes || null,

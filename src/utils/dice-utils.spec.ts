@@ -65,21 +65,17 @@ describe('Dice Utils', function () {
 			expect(result).toBe('d20+5');
 		});
 	});
-	describe('parseDiceFromWgDamageField', function () {
+	describe('removeNonDice', function () {
 		test('removes valid damage type from the end of a dice expression', function () {
-			const dice = DiceUtils.parseDiceFromWgDamageField('d20 - 5 electric');
+			const dice = DiceUtils.removeNonDice('d20 - 5 electric');
 			expect(dice).toBe('d20 - 5');
-			const otherDice = DiceUtils.parseDiceFromWgDamageField(
-				'{( 2 / 5 )d20kl...10} >= 14 fire or mental'
-			);
+			const otherDice = DiceUtils.removeNonDice('{( 2 / 5 )d20kl...10} >= 14 fire or mental');
 			expect(otherDice).toBe('{( 2 / 5 )d20kl...10} >= 14');
 		});
 		test(`doesn't remove test that might be in the middle of a roll expression`, function () {
-			const dice = DiceUtils.parseDiceFromWgDamageField('d20 - 5 electric + 5');
+			const dice = DiceUtils.removeNonDice('d20 - 5 electric + 5');
 			expect(dice).toBe('d20 - 5 electric + 5');
-			const otherDice = DiceUtils.parseDiceFromWgDamageField(
-				'{( 2 / 5 fire )d20kl...10} >= 14'
-			);
+			const otherDice = DiceUtils.removeNonDice('{( 2 / 5 fire )d20kl...10} >= 14');
 			expect(otherDice).toBe('{( 2 / 5 fire )d20kl...10} >= 14');
 		});
 	});

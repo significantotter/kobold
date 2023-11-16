@@ -25,7 +25,7 @@ export const zDamageRoll = zBaseRoll.extend({
 	type: z.literal(RollTypeEnum.damage),
 	damageType: z.string().nullable().default(null),
 	healInsteadOfDamage: z.boolean().default(false),
-	roll: z.string().default(''),
+	roll: z.string().nullable().default(null),
 });
 export type AdvancedDamageRoll = z.infer<typeof zAdvancedDamageRoll>;
 export const zAdvancedDamageRoll = zBaseRoll.extend({

@@ -1658,6 +1658,7 @@ describe('AttackBucket', () => {
 					name: 'claw',
 					toHit: 5,
 					damage: [{ dice: '1d4+2', type: 'slashing' }],
+					effects: ['grab', 'spiny eurypterid venom'],
 					range: '10 ft',
 					traits: ['agile', 'finesse'],
 					notes: 'This is a note',
@@ -1665,7 +1666,7 @@ describe('AttackBucket', () => {
 			};
 			const result = attackBucket.serialize(adjustment);
 			expect(result.value).toBe(
-				'to hit: 5; damage: 1d4+2 slashing; range: 10 ft; traits: agile,finesse; notes: This is a note'
+				'to hit: 5; damage: 1d4+2 slashing; range: 10 ft; traits: agile,finesse; effects: grab,spiny eurypterid venom; notes: This is a note'
 			);
 		});
 	});
@@ -1677,7 +1678,7 @@ describe('AttackBucket', () => {
 				propertyType: AdjustablePropertyEnum.attack,
 				operation: SheetAdjustmentOperationEnum['='],
 				property: 'claw attack',
-				value: 'to hit: 5 | damage: 1d4+2 slashing | range: 10 ft & traits: agile, finesse & notes: This is a note',
+				value: 'to hit: 5 | damage: 1d4+2 slashing | range: 10 ft & traits: agile, finesse | effects: grab, spiny eurypterid venom & notes: This is a note',
 			};
 			const result = attackBucket.deserialize(adjustment);
 			expect(result).toEqual({
@@ -1689,6 +1690,7 @@ describe('AttackBucket', () => {
 					name: 'claw',
 					toHit: 5,
 					damage: [{ dice: '1d4+2', type: 'slashing' }],
+					effects: ['grab', 'spiny eurypterid venom'],
 					range: '10 ft',
 					traits: ['agile', 'finesse'],
 					notes: 'This is a note',
@@ -1708,6 +1710,7 @@ describe('AttackBucket', () => {
 					name: 'claw',
 					toHit: 5,
 					damage: [{ dice: '1d4+2', type: 'slashing' }],
+					effects: [],
 					range: '10 ft',
 					traits: ['agile', 'finesse'],
 					notes: 'This is a note',
@@ -1722,6 +1725,7 @@ describe('AttackBucket', () => {
 					name: 'claw',
 					toHit: 10,
 					damage: [{ dice: '1d6+3', type: 'slashing' }],
+					effects: [],
 					range: '5 ft',
 					traits: ['agile'],
 					notes: 'a note',

@@ -44,6 +44,7 @@ import {
 } from './character.v1.zod.js';
 import { SheetAdjuster } from '../../utils/sheet/sheet-adjuster.js';
 import { SheetProperties } from '../../utils/sheet/sheet-properties.js';
+import { DiceUtils } from '../../utils/dice-utils.js';
 
 const scoreToModifier = (score: number) => Math.floor((score - 10) / 2);
 
@@ -139,7 +140,11 @@ export function upgradeAttack(attack: AttackV1): SheetAttack {
 	const toHit = isNaN(Number(attack.toHit)) ? null : Number(attack.toHit);
 	return {
 		name: attack.name,
-		damage: attack.damage.map(damage => ({ dice: damage.dice, type: damage.type ?? null })),
+		damage: attack.damage.map(damage => ({
+			dice: DiceUtils.removeNonDice(damage.dice),
+			type: damage.type ? damage.type : DiceUtils.getNonDice(damage.dice),
+		})),
+		effects: 'effects' in attack ? (attack.effects as string[] | undefined) ?? [] : [],
 		traits: attack.traits ?? [],
 		toHit: attack.toHit ? toHit : null,
 		range: attack.range,

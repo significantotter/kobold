@@ -146,6 +146,10 @@ export const zSheetAttack = z.strictObject({
 	name: z.string().describe('The attack name.'),
 	toHit: zNullableInteger.describe('The attack toHit.'),
 	damage: z.array(zDamage).default([]).describe('The attack damage.'),
+	effects: z
+		.array(z.string())
+		.default([])
+		.describe('Any abilities or rider effects to an attack'),
 	range: z.string().nullable().default(null).describe('The attack range.'),
 	traits: z.string().array().default([]).describe('The attack traits.'),
 	notes: z.string().nullable().default(null).describe('The attack notes.'),

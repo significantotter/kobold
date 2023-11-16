@@ -886,6 +886,7 @@ describe('sheet-v2-upgrader', () => {
 						name: "Dragon's Breath",
 						toHit: 5,
 						damage: [{ dice: '2d6', type: 'fire' }],
+						effects: [],
 						range: '30 ft',
 						traits: ['fire', 'breath weapon'],
 						notes: 'Can be used once every 3 rounds',

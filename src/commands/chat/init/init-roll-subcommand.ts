@@ -176,7 +176,6 @@ export class InitRollSubCommand implements Command {
 					actionRoller,
 					hideStats,
 					targetNameOverwrite: targetSheetName,
-					LL,
 				});
 
 				embed.addFields(damageField);
@@ -195,6 +194,7 @@ export class InitRollSubCommand implements Command {
 
 			embed = response.compileEmbed();
 		} else if (targetRoll.type === 'attack') {
+			console.log(targetCreature);
 			const { builtRoll, actionRoller } = ActionRoller.fromCreatureAttack({
 				creature,
 				targetCreature,
@@ -204,7 +204,6 @@ export class InitRollSubCommand implements Command {
 				damageModifierExpression,
 				targetAC,
 				userSettings,
-				LL,
 			});
 
 			embed = builtRoll.compileEmbed({ forceFields: true });
@@ -217,7 +216,6 @@ export class InitRollSubCommand implements Command {
 					actionRoller,
 					hideStats: hideStats,
 					targetNameOverwrite: targetSheetName,
-					LL,
 				});
 
 				embed.addFields(damageField);

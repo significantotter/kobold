@@ -512,14 +512,12 @@ export class EmbedUtils {
 		hideStats,
 		targetNameOverwrite,
 		sourceNameOverwrite,
-		LL,
 	}: {
 		intr: ChatInputCommandInteraction;
 		actionRoller: ActionRoller;
 		hideStats: boolean;
 		targetNameOverwrite?: string;
 		sourceNameOverwrite?: string;
-		LL: TranslationFunctions;
 	}) {
 		let message = '\u200b';
 		if (true || !hideStats) {

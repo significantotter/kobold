@@ -134,7 +134,6 @@ export class RollAttackSubCommand implements Command {
 			damageModifierExpression,
 			targetAC: targetAC ?? undefined,
 			userSettings,
-			LL,
 		});
 
 		const embed = builtRoll.compileEmbed({ forceFields: true });
@@ -151,7 +150,6 @@ export class RollAttackSubCommand implements Command {
 				actionRoller,
 				hideStats,
 				targetNameOverwrite: targetSheetName,
-				LL,
 			});
 
 			embed.addFields(damageField);

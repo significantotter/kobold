@@ -24,13 +24,16 @@ export class NpcUtils {
 	) {
 		// search for the npc's name case insensitively
 		let where: SQL<unknown> | undefined = DrizzleUtils.ilike(
-			compendium.creatures.table.name,
+			compendium.creatures.table.search,
 			`%${name}%`
 		);
 		if (source) {
 			where = and(
 				where,
-				DrizzleUtils.ilike(sql`${compendium.creatures.table}->>'source'`, `%${source}%`)
+				DrizzleUtils.ilike(
+					sql`${compendium.creatures.table.data}->>'source'`,
+					`%${source}%`
+				)
 			);
 		}
 		const npcs = await compendium.creatures.db.query.Creatures.findMany({
@@ -56,7 +59,7 @@ export class NpcUtils {
 				where: DrizzleUtils.ilike(compendium.creaturesFluff.table.name, npc.name),
 			})
 		)?.data;
-		npcFluff = await embedParser.preprocessData(npcFluff);
+		if (npcFluff) npcFluff = await embedParser.preprocessData(npcFluff);
 
 		return { bestiaryCreature: npc, bestiaryCreatureFluff: npcFluff };
 	}

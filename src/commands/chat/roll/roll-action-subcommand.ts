@@ -186,7 +186,6 @@ export class RollActionSubCommand implements Command {
 				actionRoller,
 				hideStats,
 				targetNameOverwrite: targetSheetName,
-				LL,
 			});
 
 			embed.addFields(damageField);

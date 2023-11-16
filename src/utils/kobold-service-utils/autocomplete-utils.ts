@@ -1,5 +1,5 @@
 import { AutocompleteInteraction, CacheType } from 'discord.js';
-import { ilike, sql } from 'drizzle-orm';
+import { sql } from 'drizzle-orm';
 import _ from 'lodash';
 import { InitiativeActor, Kobold } from '../../services/kobold/index.js';
 import { CompendiumModel } from '../../services/pf2etools/compendium.model.js';
@@ -9,6 +9,7 @@ import { InitiativeBuilderUtils } from '../initiative-builder.js';
 import { FinderHelpers } from '../kobold-helpers/finder-helpers.js';
 import { StringUtils } from '../string-utils.js';
 import type { KoboldUtils } from './kobold-utils.js';
+import { DrizzleUtils } from '../../services/pf2etools/utils/drizzle-utils.js';
 
 export class AutocompleteUtils {
 	public kobold: Kobold;
@@ -35,8 +36,8 @@ export class AutocompleteUtils {
 		matchText: string
 	) {
 		const targetBestiaryCreatures = await compendium.db.query.Creatures.findMany({
-			where: ilike(compendium.creatures.table.search, matchText),
-			orderBy: sql`random`,
+			where: DrizzleUtils.ilike(compendium.creatures.table.search, `%${matchText}%`),
+			orderBy: sql`RANDOM()`,
 			limit: 49,
 		});
 		return targetBestiaryCreatures.map(npc => {

@@ -52,8 +52,13 @@ const attributeRegex = /(\[[\w \-_\.]{2,}\])/g;
 
 const damageTypeMatch = / [A-Za-z \-_,\/]+$/;
 export class DiceUtils {
-	public static parseDiceFromWgDamageField(wgDamageField: string): string {
+	public static removeNonDice(wgDamageField: string): string {
 		return wgDamageField.replace(damageTypeMatch, '');
+	}
+	public static getNonDice(wgDamageField: string): string | null {
+		const match = wgDamageField.match(damageTypeMatch);
+		if (!match) return null;
+		else return match[0];
 	}
 
 	public static addNumberToDiceExpression(diceExpression: string, number: number): string {
@@ -80,6 +85,8 @@ export class DiceUtils {
 		bonus?: string | null,
 		modifierExpression?: string | null
 	) {
+		if (!baseDice && !bonus && !modifierExpression) return '';
+
 		//if we have a bonus, and the bonus does not start with + or -
 		if (bonus?.length && !['-', '+'].includes(bonus.charAt(0))) {
 			//add a sign to the bonus
@@ -87,14 +94,14 @@ export class DiceUtils {
 		}
 
 		//if we have a bonus, but no base dice, base the dice on a d20
-		if (bonus && !baseDice) {
+		if (bonus && !bonus.includes('d20') && !baseDice) {
 			baseDice = 'd20';
 		}
 
 		let wrappedModifierExpression = '';
 		if (modifierExpression) wrappedModifierExpression = `+(${modifierExpression})`;
 
-		return `${baseDice}${bonus || ''}${wrappedModifierExpression}`;
+		return `${baseDice ?? ''}${bonus ?? ''}${wrappedModifierExpression ?? ''}`;
 	}
 
 	public static parseAttribute(

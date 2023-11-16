@@ -2,8 +2,10 @@ import _ from 'lodash';
 import { PartialDeep } from 'type-fest';
 import {
 	AbilityEnum,
+	Damage,
 	ProficiencyStat,
 	Sheet,
+	SheetAttack,
 	SheetStatKeys,
 	isAbilityEnum,
 } from '../../services/kobold/index.js';
@@ -31,6 +33,26 @@ function parsePf2eStat(stat: Stat | number | null): { bonus: number | null; note
 const scoreToBonus = function (score: number) {
 	return Math.floor((score - 10) / 2);
 };
+
+function parseDamageRoll(rollString: string): SheetAttack['damage'] {
+	const damageTypes: SheetAttack['damage'] = [];
+	rollString = rollString.replaceAll(/\[|\]|\([^\)]*\)/g, '');
+
+	const damageClauses = rollString.split(/\W*(?:plus|and|,|,\W*and)\W*/g);
+
+	for (const damageClause of damageClauses) {
+		const match = damageClause.match(/(\d+\W*d?\W*\d*\W*\+?\W*\d*)?(?:\s*([a-zA-Z\s\.]+))?/);
+		if (match) {
+			const [, dice, type] = match;
+			damageTypes.push({
+				type: type ? type.trim() : null,
+				dice: dice.trim(),
+			});
+		}
+	}
+
+	return damageTypes;
+}
 
 function applyValuesToStatInPlace(
 	sheet: Sheet,
@@ -226,24 +248,50 @@ export function convertBestiaryCreatureToSheet(
 		dc: willBonus ? willBonus + 10 : null,
 	};
 
-	let attacks: Sheet['attacks'] = [];
+	let attacks: SheetAttack[] = [];
+
 	for (const attack of bestiaryEntry?.attacks || []) {
-		const damageRolls: Sheet['attacks'][0]['damage'] = [];
-		for (const damage of [attack.damage ?? ''].filter(_.identity).flat()) {
-			const splitDamage = damage.split('{@damage').slice(1);
-			for (const damageSplit of splitDamage) {
-				const [dice, type] = damageSplit.split('}').map(d => d.trim());
-				damageRolls.push({
-					dice: DiceUtils.addNumberToDiceExpression(dice, rollAdjustment),
-					type,
+		let damageResult: { type: null | string; dice: null | string }[] = [];
+
+		if (attack.damageType && _.isString(attack.damage)) {
+			damageResult.push({
+				dice: attack.damage,
+				type: attack.damageType,
+			});
+			if (attack.damageType2 && attack.damage2) {
+				damageResult.push({
+					dice: attack.damage2,
+					type: attack.damageType2,
 				});
 			}
+		} else {
+			for (const damage of [attack.damage].flat()) {
+				if (damage) damageResult = parseDamageRoll(damage);
+			}
 		}
+
+		for (const effect of attack.effects || []) {
+			if (effect.toString()) {
+				damageResult.push({ dice: null, type: effect.toString() });
+			}
+		}
+
+		const damageRolls: Damage[] = damageResult.filter(
+			(result): result is Damage => result.dice != null
+		);
+		const effects: string[] = damageResult
+			.filter(
+				(result): result is { dice: null; type: string } =>
+					result.dice == null && result.type != null
+			)
+			.map(result => result.type);
+
 		attacks.push({
 			name: attack.name,
 			range: attack.range ? attack.range.toString() : null,
 			toHit: attack.attack ? attack.attack + rollAdjustment : null,
 			damage: damageRolls,
+			effects,
 			traits: attack.traits ?? [],
 			notes: null,
 		});
@@ -660,6 +708,7 @@ export function convertWanderersGuideCharToSheet(
 				name: weapon.Name,
 				toHit: Number(String(weapon.Bonus)), //sometimes wg sends "+1" instead :/
 				damage: [{ dice: damageComponents.join(' '), type: damageType ?? null }],
+				effects: [],
 				range: null,
 				traits: [],
 				notes: null,
@@ -956,10 +1005,11 @@ export function convertPathBuilderToSheet(
 				name: String(weapon.name),
 				toHit: weapon.attack,
 				damage: [mainDamage, ...extraDamage],
+				effects: [],
 				range: null,
 				traits: [],
 				notes: null,
-			} satisfies Sheet['attacks'][number];
+			} satisfies SheetAttack;
 		}),
 		sourceData: pathBuilderSheet,
 	};

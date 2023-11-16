@@ -23,6 +23,7 @@ import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { InitOptions } from './init-command-options.js';
+import { KoboldError } from '../../../utils/KoboldError.js';
 
 export class InitJoinSubCommand implements Command {
 	public names = [L.en.commands.init.join.name()];
@@ -70,6 +71,7 @@ export class InitJoinSubCommand implements Command {
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const koboldUtils: KoboldUtils = new KoboldUtils(kobold);
+		const { initiativeUtils } = koboldUtils;
 		const { currentInitiative, activeCharacter, userSettings } =
 			await koboldUtils.fetchNonNullableDataForCommand(intr, {
 				currentInitiative: true,
@@ -118,18 +120,19 @@ export class InitJoinSubCommand implements Command {
 			hideStats,
 		});
 
-		const embed = InitiativeBuilderUtils.initiativeJoinEmbed(
-			initiativeResult,
-			currentInitiative.currentRound,
-			actorName
-		);
+		const embed = InitiativeBuilderUtils.initiativeJoinEmbed(rollResult, actorName);
+
+		const newInitiative = await initiativeUtils.getInitiativeForChannel(intr.channel);
+
+		if (!newInitiative)
+			throw new KoboldError(
+				"Yip! Something went wrong and I couldn't find this channel's initiative"
+			);
 
 		const initBuilder = new InitiativeBuilder({
-			initiative: currentInitiative,
-			actors: currentInitiative.actors,
-			groups: currentInitiative.actorGroups,
-			LL,
+			initiative: newInitiative,
 		});
+
 		await InteractionUtils.send(intr, embed);
 		if (currentInitiative.currentRound === 0) {
 			await InitiativeBuilderUtils.sendNewRoundMessage(intr, initBuilder);

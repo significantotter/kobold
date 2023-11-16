@@ -427,6 +427,7 @@ describe('SheetAttackAdjuster', () => {
 				name: 'Bar',
 				range: null,
 				traits: [],
+				effects: [],
 				notes: 'Bar',
 			},
 		];
@@ -481,6 +482,7 @@ describe('SheetAttackAdjuster', () => {
 				name: 'Foo',
 				range: null,
 				traits: [],
+				effects: [],
 				notes: 'Foo',
 			});
 			const adjustment = {
@@ -509,6 +511,7 @@ describe('SheetAttackAdjuster', () => {
 				name: 'Foo',
 				range: null,
 				traits: [],
+				effects: [],
 				notes: 'Foo',
 			});
 			const adjustment = {
