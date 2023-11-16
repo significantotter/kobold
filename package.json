@@ -14,6 +14,7 @@
 	],
 	"type": "module",
 	"scripts": {
+		"rebuild": ".\\node_modules\\.bin\\electron-rebuild.cmd -f -m ./node_modules/better-sqlite3",
 		"kanel": "tsx ./src/scripts/kanel.ts",
 		"data-upgrade": "tsx ./src/scripts/upgrade-sheets-v2.ts",
 		"migrate": "tsx ./src/scripts/migrate.ts",

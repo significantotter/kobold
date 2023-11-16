@@ -32,6 +32,10 @@ export abstract class Model<T extends z.ZodTypeAny, K extends SQLiteTable<TableC
 					throw new Error();
 				}
 				const result = parse.data;
+				const commaName = (result.name as string)?.match(/^(\w+), (\w+)$/);
+				if (commaName) {
+					result.name = `${commaName[2]} ${commaName[1]}`;
+				}
 				const search = this.generateSearchText(result);
 				const tags = this.generateTags(result);
 				const insertedData = await this.db

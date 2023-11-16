@@ -194,7 +194,6 @@ export class InitRollSubCommand implements Command {
 
 			embed = response.compileEmbed();
 		} else if (targetRoll.type === 'attack') {
-			console.log(targetCreature);
 			const { builtRoll, actionRoller } = ActionRoller.fromCreatureAttack({
 				creature,
 				targetCreature,

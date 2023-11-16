@@ -2,6 +2,13 @@ import _ from 'lodash';
 import removeMarkdown from 'remove-markdown';
 
 export class StringUtils {
+	public static oxfordListJoin(arr: string[]) {
+		if (arr.length === 1) return arr[0];
+		const firsts = arr.slice(0, arr.length - 1);
+		const last = arr[arr.length - 1];
+		return firsts.join(', ') + ' and ' + last;
+	}
+
 	public static truncate(input: string, length: number, addEllipsis: boolean = false): string {
 		if (input.length <= length) {
 			return input;

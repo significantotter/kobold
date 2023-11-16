@@ -31,6 +31,7 @@ import {
 } from './dice-utils.js';
 import { EmbedUtils, KoboldEmbed } from './kobold-embed-utils.js';
 import { RollBuilder } from './roll-builder.js';
+import { StringUtils } from './string-utils.js';
 
 type ContestedRollTypes = 'attack' | 'skill-challenge' | 'save' | 'none';
 type ResultRollTypes = 'damage' | 'advanced-damage' | 'text';
@@ -335,7 +336,8 @@ export class ActionRoller {
 			(lastTargetingResult === 'success' ||
 				// or we don't have a previous attack result
 				lastTargetingActionType === 'none' ||
-				!lastTargetingResult)
+				!lastTargetingResult ||
+				(lastTargetingResult === 'critical success' && roll.criticalSuccessText === null))
 		) {
 			text += `\nSuccess: ${roll.successText}`;
 		}
@@ -345,7 +347,8 @@ export class ActionRoller {
 			(lastTargetingResult === 'failure' ||
 				// or we don't have a previous attack result
 				lastTargetingActionType === 'none' ||
-				!lastTargetingResult)
+				!lastTargetingResult ||
+				(lastTargetingResult === 'critical failure' && roll.criticalSuccessText === null))
 		) {
 			text += `\nFailure: ${roll.failureText}`;
 		}
@@ -1081,6 +1084,19 @@ export class ActionRoller {
 				healInsteadOfDamage: false,
 				damageType: targetAttack.damage[i].type,
 				allowRollModifiers: false,
+			});
+		}
+		if (targetAttack.effects.length) {
+			action.rolls.push({
+				type: RollTypeEnum.text,
+				name: 'Effects',
+				criticalSuccessText: null,
+				successText: StringUtils.oxfordListJoin(targetAttack.effects),
+				failureText: null,
+				criticalFailureText: null,
+				allowRollModifiers: false,
+				defaultText: null,
+				extraTags: [],
 			});
 		}
 

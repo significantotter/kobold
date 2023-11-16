@@ -34,6 +34,7 @@ import {
 	StatGroupEnum,
 } from './sheet/sheet-properties.js';
 import { SheetUtils } from './sheet/sheet-utils.js';
+import { StringUtils } from './string-utils.js';
 
 const damageTypeShorthands: { [shorthand: string]: string } = {
 	piercing: 'p',
@@ -280,6 +281,9 @@ export class Creature {
 				builtAttack += ` **Damage:** ${attack.damage
 					.map(d => `\`${d.dice}${d.type ? ` ${d.type}` : ''}\``)
 					.join(', ')}`;
+			}
+			if (attack.effects.length) {
+				builtAttack += ' plus ' + StringUtils.oxfordListJoin(attack.effects);
 			}
 			attackLines.push(builtAttack);
 		}

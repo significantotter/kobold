@@ -12,7 +12,6 @@ import {
 import { PathBuilder } from '../../services/pathbuilder/pathbuilder.js';
 import { Creature, CreatureFluff, Stat } from '../../services/pf2etools/schemas/index-types.js';
 import { WG } from '../../services/wanderers-guide/wanderers-guide.js';
-import { DiceUtils } from '../dice-utils.js';
 import { SheetProperties, SheetStatProperties } from './sheet-properties.js';
 import { SheetUtils } from './sheet-utils.js';
 
@@ -34,8 +33,8 @@ const scoreToBonus = function (score: number) {
 	return Math.floor((score - 10) / 2);
 };
 
-function parseDamageRoll(rollString: string): SheetAttack['damage'] {
-	const damageTypes: SheetAttack['damage'] = [];
+function parseDamageRoll(rollString: string): { type: string | null; dice: string | null }[] {
+	const damageTypes: { type: string | null; dice: string | null }[] = [];
 	rollString = rollString.replaceAll(/\[|\]|\([^\)]*\)/g, '');
 
 	const damageClauses = rollString.split(/\W*(?:plus|and|,|,\W*and)\W*/g);
@@ -46,7 +45,7 @@ function parseDamageRoll(rollString: string): SheetAttack['damage'] {
 			const [, dice, type] = match;
 			damageTypes.push({
 				type: type ? type.trim() : null,
-				dice: dice.trim(),
+				dice: dice ? dice.trim() : null,
 			});
 		}
 	}
@@ -279,12 +278,14 @@ export function convertBestiaryCreatureToSheet(
 		const damageRolls: Damage[] = damageResult.filter(
 			(result): result is Damage => result.dice != null
 		);
-		const effects: string[] = damageResult
-			.filter(
-				(result): result is { dice: null; type: string } =>
-					result.dice == null && result.type != null
-			)
-			.map(result => result.type);
+		const effects: string[] = _.uniq(
+			damageResult
+				.filter(
+					(result): result is { dice: null; type: string } =>
+						result.dice == null && result.type != null
+				)
+				.map(result => result.type)
+		);
 
 		attacks.push({
 			name: attack.name,
@@ -422,8 +423,8 @@ export function convertBestiaryCreatureToSheet(
 			},
 			heroPoints: {
 				...baseSheet.baseCounters.heroPoints,
-				current: hpValue ?? 0,
-				max: hpValue,
+				current: 0,
+				max: 0,
 			},
 			focusPoints: {
 				...baseSheet.baseCounters.focusPoints,
