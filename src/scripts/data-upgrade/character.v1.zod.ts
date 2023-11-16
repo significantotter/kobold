@@ -198,8 +198,8 @@ export const zModifierV1 = z
 			description: z.string().nullable(),
 			type: z.string(),
 			modifierType: z.enum(['roll']).default('roll'),
-			value: z.union([z.number(), z.string()]),
-			targetTags: z.string().nullable(),
+			value: z.union([z.number(), z.string()]).optional(),
+			targetTags: z.string().nullable().optional(),
 			sheetAdjustments: z.null().optional(),
 		}),
 		z.strictObject({

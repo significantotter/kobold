@@ -178,7 +178,7 @@ export function upgradeModifier(modifier: ModifierV1): Modifier {
 			name: defaultedModifier.name,
 			description: defaultedModifier.description,
 			isActive: defaultedModifier.isActive,
-			targetTags: defaultedModifier.targetTags,
+			targetTags: defaultedModifier.targetTags ?? '',
 
 			modifierType: ModifierTypeEnum.roll,
 			type: adjustmentType,

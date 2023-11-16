@@ -322,6 +322,37 @@ describe('sheet-v2-upgrader', () => {
 			expect(upgradedModifier).toEqual(expectedModifier);
 		});
 
+		it('should handle weird old formats', () => {
+			const oldModifiers = [
+				{
+					name: 'shield raised',
+					type: 'circumstance',
+					isActive: false,
+					description: null,
+					modifierType: 'roll' as ModifierTypeEnum.roll,
+					sheetAdjustments: null,
+				},
+				{
+					name: 'image',
+					type: 'untyped',
+					isActive: true,
+					description: null,
+					modifierType: 'roll' as ModifierTypeEnum.roll,
+					sheetAdjustments: null,
+				},
+				{
+					name: 'resistances',
+					type: 'status',
+					isActive: true,
+					description: null,
+					modifierType: 'roll' as ModifierTypeEnum.roll,
+					sheetAdjustments: null,
+				},
+			];
+			const upgradedModifiers = oldModifiers.map(upgradeModifier);
+			console.log(upgradedModifiers);
+		});
+
 		it('should throw an error for an invalid modifier', () => {
 			const invalidModifier: any = {
 				name: 'Test Modifier',
@@ -894,7 +925,6 @@ describe('sheet-v2-upgrader', () => {
 				sourceData: {},
 				castingStats: {},
 			};
-			console.log(upgradeSheet(oldSheet));
 		});
 	});
 });
