@@ -245,7 +245,12 @@ export const zSheetV1 = z
 					.nullable()
 					.describe("The character's description."),
 				gender: z.string().nullable().optional().describe("The character's gender"),
-				age: z.number().nullable().optional().describe("The character's age"),
+				age: z
+					.number()
+					.or(z.string())
+					.nullable()
+					.optional()
+					.describe("The character's age"),
 				alignment: z.string().nullable().optional().describe("The character's alignment"),
 				deity: z.string().nullable().optional().describe("The character's deity"),
 				imageURL: z
