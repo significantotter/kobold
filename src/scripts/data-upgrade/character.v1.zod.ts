@@ -213,6 +213,25 @@ export const zModifierV1 = z
 	])
 	.describe('A modifier is a bonus or penalty that can be applied to a roll or sheet property.');
 
+export type AttackV1 = z.infer<typeof zAttackV1>;
+export const zAttackV1 = z.strictObject({
+	name: z.string().describe('The attack name.'),
+	toHit: z.string().or(z.number()).nullable().describe('The attack toHit.'),
+	damage: z
+		.array(
+			z
+				.object({
+					dice: z.string().describe('The attack damage dice.'),
+					type: z.string().nullable().optional().describe('The attack damage type.'),
+				})
+				.describe('A damage roll')
+		)
+		.describe('The attack damage.'),
+	range: z.string().nullable().default(null).describe('The attack range.'),
+	traits: z.string().array().default([]).nullable().optional().describe('The attack traits.'),
+	notes: z.string().nullable().default(null).describe('The attack notes.'),
+});
+
 export type SheetV1 = z.infer<typeof zSheetV1>;
 export const zSheetV1 = z
 	.object({
@@ -671,31 +690,7 @@ export const zSheetV1 = z
 					.describe("The character's lore skills."),
 			})
 			.describe("The character's skill attributes."),
-		attacks: z
-			.array(
-				z.strictObject({
-					name: z.string().describe('The attack name.'),
-					toHit: z.number().nullable().describe('The attack toHit.'),
-					damage: z
-						.array(
-							z
-								.object({
-									dice: z.string().describe('The attack damage dice.'),
-									type: z
-										.string()
-										.nullable()
-										.default(null)
-										.describe('The attack damage type.'),
-								})
-								.describe('A damage roll')
-						)
-						.describe('The attack damage.'),
-					range: z.string().nullable().default(null).describe('The attack range.'),
-					traits: z.string().array().default([]).describe('The attack traits.'),
-					notes: z.string().nullable().default(null).describe('The attack notes.'),
-				})
-			)
-			.describe("The character's attacks."),
+		attacks: z.array(zAttackV1).describe("The character's attacks."),
 		sourceData: z.object({}).describe('The source data the sheet was parsed from').default({}),
 		modifiers: z
 			.array(zModifierV1)

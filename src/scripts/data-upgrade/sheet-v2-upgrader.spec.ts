@@ -12,6 +12,7 @@ import {
 } from './character.v1.zod.js';
 import {
 	upgradeAction,
+	upgradeAttack,
 	upgradeModifier,
 	upgradeRoll,
 	upgradeSheet,
@@ -330,6 +331,73 @@ describe('sheet-v2-upgrader', () => {
 				modifierType: 'invalid',
 			};
 			expect(() => upgradeModifier(invalidModifier)).toThrow();
+		});
+	});
+
+	describe('upgradeAttack', () => {
+		it('should correctly upgrade an attack', () => {
+			const attackV1 = {
+				name: 'Attack 1',
+				damage: [{ dice: '1d6' }],
+				traits: ['trait1', 'trait2'],
+				toHit: '2',
+				range: '30 ft',
+				notes: 'Some notes',
+			};
+
+			const expectedAttack = {
+				name: 'Attack 1',
+				damage: [{ dice: '1d6', type: null }],
+				traits: ['trait1', 'trait2'],
+				toHit: 2,
+				range: '30 ft',
+				notes: 'Some notes',
+			};
+
+			expect(upgradeAttack(attackV1)).toEqual(expectedAttack);
+		});
+
+		it('should correctly handle null toHit', () => {
+			const attackV1 = {
+				name: 'Attack 1',
+				damage: [{ dice: '1d6' }],
+				traits: ['trait1', 'trait2'],
+				toHit: null,
+				range: '30 ft',
+				notes: 'Some notes',
+			};
+
+			const expectedAttack = {
+				name: 'Attack 1',
+				damage: [{ dice: '1d6', type: null }],
+				traits: ['trait1', 'trait2'],
+				toHit: null,
+				range: '30 ft',
+				notes: 'Some notes',
+			};
+
+			expect(upgradeAttack(attackV1)).toEqual(expectedAttack);
+		});
+
+		it('should correctly handle undefined traits', () => {
+			const attackV1 = {
+				name: 'Attack 1',
+				damage: [{ dice: '1d6' }],
+				toHit: '2',
+				range: '30 ft',
+				notes: 'Some notes',
+			};
+
+			const expectedAttack = {
+				name: 'Attack 1',
+				damage: [{ dice: '1d6', type: null }],
+				traits: [],
+				toHit: 2,
+				range: '30 ft',
+				notes: 'Some notes',
+			};
+
+			expect(upgradeAttack(attackV1)).toEqual(expectedAttack);
 		});
 	});
 

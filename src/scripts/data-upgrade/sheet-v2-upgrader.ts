@@ -17,6 +17,7 @@ import {
 	SheetAdjustment,
 	SheetAdjustmentOperationEnum,
 	SheetAdjustmentTypeEnum,
+	SheetAttack,
 	SheetModifier,
 	TextRoll,
 	getDefaultSheet,
@@ -30,6 +31,7 @@ import {
 import { KoboldError } from '../../utils/KoboldError.js';
 import {
 	ActionV1,
+	AttackV1,
 	ModifierV1,
 	RollV1,
 	SheetAdjustmentV1,
@@ -133,6 +135,18 @@ export function upgradeAction(action: ActionV1): Action {
 		rolls,
 	};
 }
+export function upgradeAttack(attack: AttackV1): SheetAttack {
+	const toHit = isNaN(Number(attack.toHit)) ? null : Number(attack.toHit);
+	return {
+		name: attack.name,
+		damage: attack.damage.map(damage => ({ dice: damage.dice, type: damage.type ?? null })),
+		traits: attack.traits ?? [],
+		toHit: attack.toHit ? toHit : null,
+		range: attack.range,
+		notes: attack.notes,
+	};
+}
+
 export function upgradeSheetAdjustment(
 	sheetAdjustment: SheetAdjustmentV1,
 	adjustmentType?: SheetAdjustmentTypeEnum
@@ -473,7 +487,7 @@ export function upgradeSheet(sheet: SheetV1): Sheet {
 				lore.profMod
 			)
 		),
-		attacks: sheet.attacks,
+		attacks: sheet.attacks.map(upgradeAttack),
 		sourceData: sheet.sourceData,
 	};
 	return newSheet;
