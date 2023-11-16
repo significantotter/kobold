@@ -95,9 +95,14 @@ export class CommandRegistrationService {
 						)
 					);
 					for (let localCmd of localCmdsOnRemoteMetadata) {
-						await this.rest.post(Routes.applicationCommands(Config.client.id), {
-							body: localCmd,
-						});
+						try {
+							await this.rest.post(Routes.applicationCommands(Config.client.id), {
+								body: localCmd,
+							});
+						} catch (err) {
+							Logger.info('Error when trying to register ', localCmd.name);
+							throw err;
+						}
 					}
 					Logger.info(Logs.info.commandActionUpdated);
 				}

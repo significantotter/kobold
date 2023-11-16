@@ -66,8 +66,8 @@ export class ModifierCommand implements Command {
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					ModifierOptions.MODIFIER_NAME_OPTION,
-					ModifierOptions.MODIFIER_TYPE_OPTION,
 					ModifierOptions.MODIFIER_SHEET_VALUES_OPTION,
+					ModifierOptions.MODIFIER_TYPE_OPTION,
 					ModifierOptions.MODIFIER_DESCRIPTION_OPTION,
 				],
 			},
@@ -77,9 +77,9 @@ export class ModifierCommand implements Command {
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					ModifierOptions.MODIFIER_NAME_OPTION,
-					ModifierOptions.MODIFIER_TYPE_OPTION,
 					ModifierOptions.MODIFIER_VALUE_OPTION,
 					ModifierOptions.MODIFIER_TARGET_TAGS_OPTION,
+					ModifierOptions.MODIFIER_TYPE_OPTION,
 					ModifierOptions.MODIFIER_DESCRIPTION_OPTION,
 				],
 			},
