@@ -1,4 +1,5 @@
 import type { ColumnType, Selectable, Insertable, Updateable } from 'kysely';
+import { z } from 'zod';
 
 export type KnexMigrationsId = number;
 
@@ -16,6 +17,29 @@ export default interface KnexMigrationsTable {
   /** Database type: pg_catalog.timestamptz */
   migrationTime: ColumnType<Date | null, Date | string | null, Date | string | null>;
 }
+
+export const knexMigrationsId = z.number();
+
+export const zKnexMigrations = z.strictObject({
+  id: knexMigrationsId,
+  name: z.string().nullable(),
+  batch: z.number().nullable(),
+  migrationTime: z.date().nullable(),
+});
+
+export const zKnexMigrationsInitializer = z.strictObject({
+  id: knexMigrationsId.optional(),
+  name: z.string().optional().nullable(),
+  batch: z.number().optional().nullable(),
+  migrationTime: z.date().optional().nullable(),
+});
+
+export const zKnexMigrationsMutator = z.strictObject({
+  id: knexMigrationsId.optional(),
+  name: z.string().optional().nullable(),
+  batch: z.number().optional().nullable(),
+  migrationTime: z.date().optional().nullable(),
+});
 
 export type KnexMigrations = Selectable<KnexMigrationsTable>;
 

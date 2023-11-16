@@ -1,4 +1,5 @@
 import type { ColumnType, Selectable, Insertable, Updateable } from 'kysely';
+import { z } from 'zod';
 
 export type KnexMigrationsLockIndex = number;
 
@@ -10,6 +11,23 @@ export default interface KnexMigrationsLockTable {
   /** Database type: pg_catalog.int4 */
   isLocked: ColumnType<number | null, number | null, number | null>;
 }
+
+export const knexMigrationsLockIndex = z.number();
+
+export const zKnexMigrationsLock = z.strictObject({
+  index: knexMigrationsLockIndex,
+  isLocked: z.number().nullable(),
+});
+
+export const zKnexMigrationsLockInitializer = z.strictObject({
+  index: knexMigrationsLockIndex.optional(),
+  isLocked: z.number().optional().nullable(),
+});
+
+export const zKnexMigrationsLockMutator = z.strictObject({
+  index: knexMigrationsLockIndex.optional(),
+  isLocked: z.number().optional().nullable(),
+});
 
 export type KnexMigrationsLock = Selectable<KnexMigrationsLockTable>;
 

@@ -1,7 +1,7 @@
-import { ChatInputCommandInteraction } from 'discord.js';
-import { Kobold, SheetRecord } from '../../services/kobold/index.js';
+import type { ChatInputCommandInteraction } from 'discord.js';
+import type { Kobold, SheetRecord } from '../../services/kobold/index.js';
 import { Creature } from '../creature.js';
-import { KoboldUtils } from './kobold-utils.js';
+import type { KoboldUtils } from './kobold-utils.js';
 
 interface ErrorWithCode<T extends number = number> extends Error {
 	code: T;

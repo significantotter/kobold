@@ -1,4 +1,5 @@
 import type { ColumnType, Selectable, Insertable, Updateable } from 'kysely';
+import { z } from 'zod';
 
 export type InitiativeId = number;
 
@@ -25,6 +26,38 @@ export default interface InitiativeTable {
   /** Database type: pg_catalog.timestamptz */
   lastUpdatedAt: ColumnType<Date, Date | string | null, Date | string | null>;
 }
+
+export const initiativeId = z.number();
+
+export const zInitiative = z.strictObject({
+  id: initiativeId,
+  channelId: z.string(),
+  gmUserId: z.string(),
+  currentRound: z.number(),
+  currentTurnGroupId: z.number().nullable(),
+  createdAt: z.date(),
+  lastUpdatedAt: z.date(),
+});
+
+export const zInitiativeInitializer = z.strictObject({
+  id: initiativeId.optional(),
+  channelId: z.string(),
+  gmUserId: z.string(),
+  currentRound: z.number().optional(),
+  currentTurnGroupId: z.number().optional().nullable(),
+  createdAt: z.date().optional(),
+  lastUpdatedAt: z.date().optional(),
+});
+
+export const zInitiativeMutator = z.strictObject({
+  id: initiativeId.optional(),
+  channelId: z.string().optional(),
+  gmUserId: z.string().optional(),
+  currentRound: z.number().optional(),
+  currentTurnGroupId: z.number().optional().nullable(),
+  createdAt: z.date().optional(),
+  lastUpdatedAt: z.date().optional(),
+});
 
 export type Initiative = Selectable<InitiativeTable>;
 

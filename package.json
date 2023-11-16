@@ -15,14 +15,14 @@
 	"type": "module",
 	"scripts": {
 		"rebuild": ".\\node_modules\\.bin\\electron-rebuild.cmd -f -m ./node_modules/better-sqlite3",
-		"kanel": "tsx ./src/scripts/kanel.ts",
+		"kanel": "tsx ./src/scripts/kanel-generate.ts",
 		"data-upgrade": "tsx ./src/scripts/upgrade-sheets-v2.ts",
+		"check-circular": "madge --circular --extensions ts ./src",
 		"migrate": "tsx ./src/scripts/migrate.ts",
 		"migrate:down": "tsx ./src/scripts/migrate-down.ts",
 		"migrate:test": "NODE_ENV=TEST NODE_OPTIONS='--loader ts-node/esm' knex migrate:latest",
 		"lint": "eslint . --cache --ext .js,.jsx,.ts,.tsx",
 		"lint:fix": "eslint . --fix --cache --ext .js,.jsx,.ts,.tsx",
-		"check-circular": "madge --debug --circular --extensions ts ./src",
 		"format": "prettier --check .",
 		"format:fix": "prettier --write .",
 		"clean": "git clean -xdf --exclude=\"/src/config/**/*\"",
@@ -95,7 +95,8 @@
 		"type-fest": "^4.3.1",
 		"typesafe-i18n": "^5.26.2",
 		"xxhashjs": "^0.2.2",
-		"zod": "^3.22.2"
+		"zod": "^3.22.2",
+		"zod-fixture": "^2.5.0"
 	},
 	"devDependencies": {
 		"@types/better-sqlite3": "^7.6.5",
@@ -117,6 +118,7 @@
 		"json-schema-to-zod": "^1.1.1",
 		"kanel": "^3.5.5",
 		"kanel-kysely": "^0.2.1",
+		"kanel-zod": "^1.2.3",
 		"madge": "^6.1.0",
 		"minimatch": "^9.0.3",
 		"prettier": "^3.0.3",

@@ -1,5 +1,7 @@
+import { characterId } from './Character.js';
 import type { CharacterId } from './Character.js';
 import type { ColumnType, Selectable, Insertable, Updateable } from 'kysely';
+import { z } from 'zod';
 
 export type ChannelDefaultCharacterUserId = string;
 
@@ -16,6 +18,28 @@ export default interface ChannelDefaultCharacterTable {
   /** Database type: pg_catalog.int4 */
   characterId: ColumnType<CharacterId, CharacterId, CharacterId | null>;
 }
+
+export const channelDefaultCharacterUserId = z.string();
+
+export const channelDefaultCharacterChannelId = z.string();
+
+export const zChannelDefaultCharacter = z.strictObject({
+  userId: channelDefaultCharacterUserId,
+  channelId: channelDefaultCharacterChannelId,
+  characterId: characterId,
+});
+
+export const zChannelDefaultCharacterInitializer = z.strictObject({
+  userId: channelDefaultCharacterUserId,
+  channelId: channelDefaultCharacterChannelId,
+  characterId: characterId,
+});
+
+export const zChannelDefaultCharacterMutator = z.strictObject({
+  userId: channelDefaultCharacterUserId.optional(),
+  channelId: channelDefaultCharacterChannelId.optional(),
+  characterId: characterId.optional(),
+});
 
 export type ChannelDefaultCharacter = Selectable<ChannelDefaultCharacterTable>;
 

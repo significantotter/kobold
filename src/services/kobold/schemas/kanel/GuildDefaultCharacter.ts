@@ -1,5 +1,7 @@
+import { characterId } from './Character.js';
 import type { CharacterId } from './Character.js';
 import type { ColumnType, Selectable, Insertable, Updateable } from 'kysely';
+import { z } from 'zod';
 
 export type GuildDefaultCharacterUserId = string;
 
@@ -16,6 +18,28 @@ export default interface GuildDefaultCharacterTable {
   /** Database type: pg_catalog.int4 */
   characterId: ColumnType<CharacterId, CharacterId, CharacterId | null>;
 }
+
+export const guildDefaultCharacterUserId = z.string();
+
+export const guildDefaultCharacterGuildId = z.string();
+
+export const zGuildDefaultCharacter = z.strictObject({
+  userId: guildDefaultCharacterUserId,
+  guildId: guildDefaultCharacterGuildId,
+  characterId: characterId,
+});
+
+export const zGuildDefaultCharacterInitializer = z.strictObject({
+  userId: guildDefaultCharacterUserId,
+  guildId: guildDefaultCharacterGuildId,
+  characterId: characterId,
+});
+
+export const zGuildDefaultCharacterMutator = z.strictObject({
+  userId: guildDefaultCharacterUserId.optional(),
+  guildId: guildDefaultCharacterGuildId.optional(),
+  characterId: characterId.optional(),
+});
 
 export type GuildDefaultCharacter = Selectable<GuildDefaultCharacterTable>;
 

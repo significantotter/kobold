@@ -1,12 +1,14 @@
 // @ts-check
-import kanel, { InstantiatedConfig } from 'kanel';
+import kanel, { Details, InstantiatedConfig, Output, Path, PreRenderHook } from 'kanel';
 import { config } from 'dotenv';
 import kk from 'kanel-kysely';
+import kz from 'kanel-zod';
 import { recase } from '@kristiandupont/recase';
 import { tryParse } from 'tagged-comment-parser';
 import { join } from 'path';
 import _ from 'lodash';
 const { makeKyselyHook } = kk;
+const { makeGenerateZodSchemas, defaultGetZodIdentifierMetadata, defaultZodTypeMap } = kz;
 config();
 const toPascalCase = recase('snake', 'pascal');
 
@@ -14,11 +16,35 @@ const outputPath = './src/services/kobold/schemas/kanel';
 
 function convertESMPaths(path: string, lines: string[], instantiatedConfig: InstantiatedConfig) {
 	return lines.map(line =>
-		line.replace(/^import\stype\s.*'(.*)';$/, (match, p1) => {
-			return /\sfrom\s'kysely';$/.test(match) ? match : match.replace(p1, `${p1}.js`);
-		})
+		line
+			.replace(/^import\stype\s.*'(.*)';$/, (match, p1) => {
+				return /\sfrom\s'kysely';$/.test(match) ? match : match.replace(p1, `${p1}.js`);
+			})
+			.replace(/^import\s.*'(\.\/(?:(?!\.js).)*)';$/, (match, p1) => {
+				return /\sfrom';$/.test(match) ? match : match.replace(p1, `${p1}.js`);
+			})
 	);
 }
+const removeSchemaInference: PreRenderHook = (
+	outputAcc: Output,
+	instantiatedConfig: InstantiatedConfig
+) => {
+	for (const fileName in outputAcc) {
+		const file = outputAcc[fileName];
+		for (const declaration of file.declarations) {
+			if (declaration.declarationType === 'generic') {
+				declaration.lines = declaration.lines.map((line: string) =>
+					line
+						.replaceAll(/: z\.Schema<.*>/g, '')
+						.replaceAll(/ as any/g, '')
+						.replaceAll(/z\.object\(/g, 'z.strictObject(')
+				);
+			}
+		}
+	}
+
+	return outputAcc;
+};
 
 await kanel.processDatabase({
 	connection: process.env.DATABASE_URL ?? '',
@@ -29,6 +55,23 @@ await kanel.processDatabase({
 	enumStyle: 'type',
 	// propertyCasing: 'camel',
 	preRenderHooks: [
+		makeGenerateZodSchemas({
+			getZodSchemaMetadata(
+				details: Details,
+				generateFor: 'selector' | 'initializer' | 'mutator' | undefined,
+				instantiatedConfig: InstantiatedConfig
+			): { name: string; comment?: string[]; path: Path } {
+				const { path, name: typescriptName } = instantiatedConfig.getMetadata(
+					details,
+					generateFor,
+					instantiatedConfig
+				);
+				const name = 'z' + toPascalCase(typescriptName);
+				return { path, name };
+			},
+			getZodIdentifierMetadata: defaultGetZodIdentifierMetadata,
+			zodTypeMap: { ...defaultZodTypeMap, 'pg_catalog.numeric': 'z.number()' },
+		}),
 		makeKyselyHook({
 			databaseFilename: 'Database',
 			getKyselyItemMetadata: (d, selectorName, canInitialize, canMutate) => {
@@ -44,6 +87,7 @@ await kanel.processDatabase({
 				};
 			},
 		}),
+		removeSchemaInference,
 	],
 	postRenderHooks: [convertESMPaths],
 

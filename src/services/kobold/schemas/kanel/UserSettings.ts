@@ -1,4 +1,5 @@
 import type { ColumnType, Selectable, Insertable, Updateable } from 'kysely';
+import { z } from 'zod';
 
 export type UserSettingsUserId = string;
 
@@ -16,6 +17,29 @@ export default interface UserSettingsTable {
   /** Database type: pg_catalog.text */
   inlineRollsDisplay: ColumnType<string, string | null, string | null>;
 }
+
+export const userSettingsUserId = z.string();
+
+export const zUserSettings = z.strictObject({
+  userId: userSettingsUserId,
+  initStatsNotification: z.string(),
+  rollCompactMode: z.string(),
+  inlineRollsDisplay: z.string(),
+});
+
+export const zUserSettingsInitializer = z.strictObject({
+  userId: userSettingsUserId,
+  initStatsNotification: z.string().optional(),
+  rollCompactMode: z.string().optional(),
+  inlineRollsDisplay: z.string().optional(),
+});
+
+export const zUserSettingsMutator = z.strictObject({
+  userId: userSettingsUserId.optional(),
+  initStatsNotification: z.string().optional(),
+  rollCompactMode: z.string().optional(),
+  inlineRollsDisplay: z.string().optional(),
+});
 
 export type UserSettings = Selectable<UserSettingsTable>;
 

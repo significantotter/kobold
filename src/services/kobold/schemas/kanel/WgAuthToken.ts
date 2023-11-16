@@ -1,4 +1,5 @@
 import type { ColumnType, Selectable, Insertable, Updateable } from 'kysely';
+import { z } from 'zod';
 
 export type WgAuthTokenId = number;
 
@@ -22,6 +23,35 @@ export default interface WgAuthTokenTable {
   /** Database type: pg_catalog.text */
   tokenType: ColumnType<string, string, string | null>;
 }
+
+export const wgAuthTokenId = z.number();
+
+export const zWgAuthToken = z.strictObject({
+  id: wgAuthTokenId,
+  charId: z.number(),
+  accessToken: z.string(),
+  expiresAt: z.date(),
+  accessRights: z.string(),
+  tokenType: z.string(),
+});
+
+export const zWgAuthTokenInitializer = z.strictObject({
+  id: wgAuthTokenId.optional(),
+  charId: z.number(),
+  accessToken: z.string(),
+  expiresAt: z.date(),
+  accessRights: z.string(),
+  tokenType: z.string(),
+});
+
+export const zWgAuthTokenMutator = z.strictObject({
+  id: wgAuthTokenId.optional(),
+  charId: z.number().optional(),
+  accessToken: z.string().optional(),
+  expiresAt: z.date().optional(),
+  accessRights: z.string().optional(),
+  tokenType: z.string().optional(),
+});
 
 export type WgAuthToken = Selectable<WgAuthTokenTable>;
 

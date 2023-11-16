@@ -1,5 +1,7 @@
+import { sheetRecordId } from './SheetRecord.js';
 import type { SheetRecordId } from './SheetRecord.js';
 import type { ColumnType, Selectable, Insertable, Updateable } from 'kysely';
+import { z } from 'zod';
 
 export type CharacterId = number;
 
@@ -32,6 +34,44 @@ export default interface CharacterTable {
   /** Database type: pg_catalog.int4 */
   sheetRecordId: ColumnType<SheetRecordId, SheetRecordId, SheetRecordId | null>;
 }
+
+export const characterId = z.number();
+
+export const zCharacter = z.strictObject({
+  id: characterId,
+  userId: z.string(),
+  charId: z.number(),
+  isActiveCharacter: z.boolean(),
+  createdAt: z.date(),
+  lastUpdatedAt: z.date(),
+  name: z.string(),
+  importSource: z.string(),
+  sheetRecordId: sheetRecordId,
+});
+
+export const zCharacterInitializer = z.strictObject({
+  id: characterId.optional(),
+  userId: z.string(),
+  charId: z.number(),
+  isActiveCharacter: z.boolean().optional(),
+  createdAt: z.date().optional(),
+  lastUpdatedAt: z.date().optional(),
+  name: z.string(),
+  importSource: z.string(),
+  sheetRecordId: sheetRecordId,
+});
+
+export const zCharacterMutator = z.strictObject({
+  id: characterId.optional(),
+  userId: z.string().optional(),
+  charId: z.number().optional(),
+  isActiveCharacter: z.boolean().optional(),
+  createdAt: z.date().optional(),
+  lastUpdatedAt: z.date().optional(),
+  name: z.string().optional(),
+  importSource: z.string().optional(),
+  sheetRecordId: sheetRecordId.optional(),
+});
 
 export type Character = Selectable<CharacterTable>;
 
