@@ -66,10 +66,11 @@ export class CharactersInGamesModel extends Model<Database['charactersInGames']>
 		characterId: number;
 		gameId: number;
 	}): Promise<void> {
-		await this.db
+		const result = await this.db
 			.deleteFrom('charactersInGames')
 			.where('charactersInGames.characterId', '=', characterId)
 			.where('charactersInGames.gameId', '=', gameId)
 			.execute();
+		if (Number(result[0].numDeletedRows) == 0) throw new Error('No rows deleted');
 	}
 }

@@ -56,6 +56,10 @@ export class SheetRecordModel extends Model<Database['sheetRecord']> {
 	}
 
 	public async delete({ id }: { id: SheetRecordId }): Promise<void> {
-		await this.db.deleteFrom('sheetRecord').where('sheetRecord.id', '=', id).execute();
+		const result = await this.db
+			.deleteFrom('sheetRecord')
+			.where('sheetRecord.id', '=', id)
+			.execute();
+		if (Number(result[0].numDeletedRows) == 0) throw new Error('No rows deleted');
 	}
 }

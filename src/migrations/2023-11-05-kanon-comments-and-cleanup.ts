@@ -89,6 +89,7 @@ export async function up(db: Kysely<any>): Promise<void> {
 	await db.schema
 		.alterTable('channel_default_character')
 		.alterColumn('channel_id', col => col.setDataType('text'))
+		.alterColumn('user_id', col => col.setDataType('text'))
 		.execute();
 
 	await db.schema

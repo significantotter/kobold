@@ -9,7 +9,7 @@ export type ChannelDefaultCharacterChannelId = string;
 
 /** Represents the table public.channel_default_character */
 export default interface ChannelDefaultCharacterTable {
-  /** Database type: pg_catalog.varchar */
+  /** Database type: pg_catalog.text */
   userId: ColumnType<ChannelDefaultCharacterUserId, ChannelDefaultCharacterUserId, ChannelDefaultCharacterUserId | null>;
 
   /** Database type: pg_catalog.text */

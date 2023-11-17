@@ -70,7 +70,11 @@ await kanel.processDatabase({
 				return { path, name };
 			},
 			getZodIdentifierMetadata: defaultGetZodIdentifierMetadata,
-			zodTypeMap: { ...defaultZodTypeMap, 'pg_catalog.numeric': 'z.number()' },
+			zodTypeMap: {
+				...defaultZodTypeMap,
+				'pg_catalog.numeric': 'z.number()',
+				'pg_catalog.int4': 'z.number().int().max(2147483647)',
+			},
 		}),
 		makeKyselyHook({
 			databaseFilename: 'Database',

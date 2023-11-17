@@ -12,21 +12,21 @@ export default interface KnexMigrationsLockTable {
   isLocked: ColumnType<number | null, number | null, number | null>;
 }
 
-export const knexMigrationsLockIndex = z.number();
+export const knexMigrationsLockIndex = z.number().int().max(2147483647);
 
 export const zKnexMigrationsLock = z.strictObject({
   index: knexMigrationsLockIndex,
-  isLocked: z.number().nullable(),
+  isLocked: z.number().int().max(2147483647).nullable(),
 });
 
 export const zKnexMigrationsLockInitializer = z.strictObject({
   index: knexMigrationsLockIndex.optional(),
-  isLocked: z.number().optional().nullable(),
+  isLocked: z.number().int().max(2147483647).optional().nullable(),
 });
 
 export const zKnexMigrationsLockMutator = z.strictObject({
   index: knexMigrationsLockIndex.optional(),
-  isLocked: z.number().optional().nullable(),
+  isLocked: z.number().int().max(2147483647).optional().nullable(),
 });
 
 export type KnexMigrationsLock = Selectable<KnexMigrationsLockTable>;

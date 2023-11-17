@@ -27,7 +27,7 @@ export default interface GameTable {
   lastUpdatedAt: ColumnType<Date, Date | string | null, Date | string | null>;
 }
 
-export const gameId = z.number();
+export const gameId = z.number().int().max(2147483647);
 
 export const zGame = z.strictObject({
   id: gameId,

@@ -136,6 +136,7 @@ export class CharacterModel extends Model<Database['character']> {
 			.updateTable('character')
 			.set({ isActiveCharacter: false })
 			.where('character.userId', '=', userId)
+			.returningAll()
 			.execute();
 
 		const result = await this.db
@@ -171,6 +172,10 @@ export class CharacterModel extends Model<Database['character']> {
 	}
 
 	public async delete({ id }: { id: CharacterId }): Promise<void> {
-		await this.db.deleteFrom('character').where('character.id', '=', id).execute();
+		const result = await this.db
+			.deleteFrom('character')
+			.where('character.id', '=', id)
+			.execute();
+		if (Number(result[0].numDeletedRows) == 0) throw new Error('No rows deleted');
 	}
 }

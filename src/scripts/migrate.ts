@@ -11,7 +11,10 @@ const __dirname = path.dirname(__filename);
 async function migrateToLatest() {
 	const db = new Kysely<any>({
 		dialect: new PostgresDialect({
-			pool: new pg.Pool({ connectionString: Config.database.url }),
+			pool: new pg.Pool({
+				connectionString:
+					process.env.NODE_ENV === 'TEST' ? Config.database.testUrl : Config.database.url,
+			}),
 		}),
 	});
 

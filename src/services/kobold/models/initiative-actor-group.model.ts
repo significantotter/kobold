@@ -96,9 +96,10 @@ export class InitiativeActorGroupModel extends Model<Database['initiativeActorGr
 	}
 
 	public async delete({ id }: { id: InitiativeActorGroupId }): Promise<void> {
-		await this.db
+		const result = await this.db
 			.deleteFrom('initiativeActorGroup')
 			.where('initiativeActorGroup.id', '=', id)
 			.execute();
+		if (Number(result[0].numDeletedRows) == 0) throw new Error('No rows deleted');
 	}
 }

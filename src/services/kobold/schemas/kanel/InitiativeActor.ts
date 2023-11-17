@@ -47,7 +47,7 @@ export default interface InitiativeActorTable {
   sheetRecordId: ColumnType<SheetRecordId, SheetRecordId, SheetRecordId | null>;
 }
 
-export const initiativeActorId = z.number();
+export const initiativeActorId = z.number().int().max(2147483647);
 
 export const zInitiativeActor = z.strictObject({
   id: initiativeActorId,

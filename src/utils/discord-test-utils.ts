@@ -9,13 +9,47 @@ import {
 	GuildMemberFlags,
 	PermissionsBitField,
 } from 'discord.js';
+import { sql } from 'kysely';
 import _ from 'lodash';
 import { Config } from '../config/config.js';
 import { getDialect } from '../services/db.dialect.js';
 import { Kobold } from '../services/kobold/kobold.model.js';
+import { generateMock } from '@anatine/zod-mock';
+import { zCharacterInitializer, zSheetRecordInitializer } from '../services/kobold/index.js';
 
 const postgresDialect = await getDialect(Config.database.testUrl);
 export const vitestKobold: Kobold = new Kobold(postgresDialect);
+
+export class resourceFactories {
+	public static async sheetRecord() {
+		const fakeSheetRecordMock = generateMock(zSheetRecordInitializer);
+		return await vitestKobold.sheetRecord.create(fakeSheetRecordMock);
+	}
+	public static async character() {
+		const sheetRecord = await resourceFactories.sheetRecord();
+		const fakeCharacterMock = generateMock(zCharacterInitializer, {});
+		vitestKobold.character.create(fakeCharacterMock);
+	}
+}
+
+export function truncateDbForTests() {
+	return vitestKobold.db.executeQuery(
+		sql`
+			TRUNCATE "channel_default_character" CASCADE;
+			TRUNCATE "character" CASCADE;
+			ALTER SEQUENCE "character_id_seq" RESTART WITH 1;
+			TRUNCATE "characters_in_games" CASCADE;
+			TRUNCATE "game" CASCADE;
+			TRUNCATE "guild_default_character" CASCADE;
+			TRUNCATE "initiative_actor_group" CASCADE;
+			TRUNCATE "initiative_actor" CASCADE;
+			TRUNCATE "initiative" CASCADE;
+			TRUNCATE "sheet_record" CASCADE;
+			TRUNCATE "user_settings" CASCADE;
+			TRUNCATE "wg_auth_token" CASCADE;
+		`.compile(vitestKobold.db)
+	);
+}
 
 export class MockChatInputCommandInteraction extends ChatInputCommandInteraction {
 	constructor(mockOptions?: { optionResults?: { [k: string]: any } }) {

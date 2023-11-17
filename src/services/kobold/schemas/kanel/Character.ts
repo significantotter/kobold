@@ -35,12 +35,12 @@ export default interface CharacterTable {
   sheetRecordId: ColumnType<SheetRecordId, SheetRecordId, SheetRecordId | null>;
 }
 
-export const characterId = z.number();
+export const characterId = z.number().int().max(2147483647);
 
 export const zCharacter = z.strictObject({
   id: characterId,
   userId: z.string(),
-  charId: z.number(),
+  charId: z.number().int().max(2147483647),
   isActiveCharacter: z.boolean(),
   createdAt: z.date(),
   lastUpdatedAt: z.date(),
@@ -52,7 +52,7 @@ export const zCharacter = z.strictObject({
 export const zCharacterInitializer = z.strictObject({
   id: characterId.optional(),
   userId: z.string(),
-  charId: z.number(),
+  charId: z.number().int().max(2147483647),
   isActiveCharacter: z.boolean().optional(),
   createdAt: z.date().optional(),
   lastUpdatedAt: z.date().optional(),
@@ -64,7 +64,7 @@ export const zCharacterInitializer = z.strictObject({
 export const zCharacterMutator = z.strictObject({
   id: characterId.optional(),
   userId: z.string().optional(),
-  charId: z.number().optional(),
+  charId: z.number().int().max(2147483647).optional(),
   isActiveCharacter: z.boolean().optional(),
   createdAt: z.date().optional(),
   lastUpdatedAt: z.date().optional(),

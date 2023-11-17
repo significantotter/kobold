@@ -1,14 +1,51 @@
-import { zCharacter, type Character } from '../kanel/Character.js';
-import { zChannelDefaultCharacter } from '../kanel/ChannelDefaultCharacter.js';
-import { zCharactersInGames } from '../kanel/CharactersInGames.js';
-import { zGame } from '../kanel/Game.js';
-import { zGuildDefaultCharacter } from '../kanel/GuildDefaultCharacter.js';
-import { zInitiative } from '../kanel/Initiative.js';
-import { zInitiativeActor } from '../kanel/InitiativeActor.js';
-import { zInitiativeActorGroup } from '../kanel/InitiativeActorGroup.js';
-import { zSheetRecord } from '../kanel/SheetRecord.js';
-import { zUserSettings } from '../kanel/UserSettings.js';
-import { zWgAuthToken } from '../kanel/WgAuthToken.js';
+import {
+	zCharacter,
+	zCharacterInitializer,
+	zCharacterMutator,
+	type Character,
+} from '../kanel/Character.js';
+import {
+	zChannelDefaultCharacter,
+	zChannelDefaultCharacterInitializer,
+	zChannelDefaultCharacterMutator,
+} from '../kanel/ChannelDefaultCharacter.js';
+import {
+	zCharactersInGames,
+	zCharactersInGamesInitializer,
+	zCharactersInGamesMutator,
+} from '../kanel/CharactersInGames.js';
+import { zGame, zGameInitializer, zGameMutator } from '../kanel/Game.js';
+import {
+	zGuildDefaultCharacter,
+	zGuildDefaultCharacterInitializer,
+	zGuildDefaultCharacterMutator,
+} from '../kanel/GuildDefaultCharacter.js';
+import { zInitiative, zInitiativeInitializer, zInitiativeMutator } from '../kanel/Initiative.js';
+import {
+	zInitiativeActor,
+	zInitiativeActorInitializer,
+	zInitiativeActorMutator,
+} from '../kanel/InitiativeActor.js';
+import {
+	zInitiativeActorGroup,
+	zInitiativeActorGroupInitializer,
+	zInitiativeActorGroupMutator,
+} from '../kanel/InitiativeActorGroup.js';
+import {
+	zSheetRecord,
+	zSheetRecordInitializer,
+	zSheetRecordMutator,
+} from '../kanel/SheetRecord.js';
+import {
+	zUserSettings,
+	zUserSettingsInitializer,
+	zUserSettingsMutator,
+} from '../kanel/UserSettings.js';
+import {
+	zWgAuthToken,
+	zWgAuthTokenInitializer,
+	zWgAuthTokenMutator,
+} from '../kanel/WgAuthToken.js';
 import { zAction, zModifier, zRollMacro, zSheet } from '../shared/index.js';
 import { z } from 'zod';
 import {
@@ -24,6 +61,18 @@ const zExtendedSheetRecord = zSheetRecord.extend({
 	modifiers: z.array(zModifier),
 	actions: z.array(zAction),
 	rollMacros: z.array(zRollMacro),
+});
+const zExtendedSheetRecordInitializer = zSheetRecordInitializer.extend({
+	sheet: zSheet,
+	modifiers: z.array(zModifier),
+	actions: z.array(zAction),
+	rollMacros: z.array(zRollMacro),
+});
+const zExtendedSheetRecordMutator = zSheetRecordMutator.extend({
+	sheet: zSheet.optional(),
+	modifiers: z.array(zModifier).optional(),
+	actions: z.array(zAction).optional(),
+	rollMacros: z.array(zRollMacro).optional(),
 });
 
 // relations:
@@ -85,6 +134,30 @@ export {
 	zExtendedSheetRecord as zSheetRecord,
 	zUserSettings,
 	zWgAuthToken,
+	// initializers
+	zCharacterInitializer,
+	zChannelDefaultCharacterInitializer,
+	zCharactersInGamesInitializer,
+	zGameInitializer,
+	zGuildDefaultCharacterInitializer,
+	zInitiativeInitializer,
+	zInitiativeActorInitializer,
+	zInitiativeActorGroupInitializer,
+	zExtendedSheetRecordInitializer as zSheetRecordInitializer,
+	zUserSettingsInitializer,
+	zWgAuthTokenInitializer,
+	// mutators
+	zCharacterMutator,
+	zChannelDefaultCharacterMutator,
+	zCharactersInGamesMutator,
+	zGameMutator,
+	zGuildDefaultCharacterMutator,
+	zInitiativeMutator,
+	zInitiativeActorMutator,
+	zInitiativeActorGroupMutator,
+	zExtendedSheetRecordMutator as zSheetRecordMutator,
+	zUserSettingsMutator,
+	zWgAuthTokenMutator,
 	// relation schemas
 	zCharacterWithRelations,
 	zInitiativeActorWithRelations,

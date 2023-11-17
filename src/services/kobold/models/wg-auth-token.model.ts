@@ -64,6 +64,7 @@ export class WgAuthTokenModel extends Model<Database['wgAuthToken']> {
 		if (id != null) query = query.where('wgAuthToken.id', '=', id);
 		if (charId != null) query = query.where('wgAuthToken.charId', '=', charId);
 
-		await query.execute();
+		const result = await query.execute();
+		if (Number(result[0].numDeletedRows) == 0) throw new Error('No rows deleted');
 	}
 }

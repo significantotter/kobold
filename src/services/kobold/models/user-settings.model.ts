@@ -55,9 +55,10 @@ export class UserSettingsModel extends Model<Database['userSettings']> {
 	}
 
 	public async delete({ userId }: { userId: UserSettingsUserId }): Promise<void> {
-		await this.db
+		const result = await this.db
 			.deleteFrom('userSettings')
 			.where('userSettings.userId', '=', userId)
 			.execute();
+		if (Number(result[0].numDeletedRows) == 0) throw new Error('No rows deleted');
 	}
 }

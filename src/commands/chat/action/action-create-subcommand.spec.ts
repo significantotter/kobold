@@ -20,7 +20,6 @@ describe('ActionCreateSubCommand', () => {
 	let mockInteraction: ChatInputCommandInteraction;
 
 	beforeEach(() => {
-		// Initialize your mocks here
 		mockInteraction = new MockChatInputCommandInteraction();
 		command = new ActionCreateSubCommand();
 	});

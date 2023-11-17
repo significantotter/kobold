@@ -155,6 +155,10 @@ export class InitiativeModel extends Model<Database['initiative']> {
 	}
 
 	public async delete({ id }: { id: InitiativeId }): Promise<void> {
-		await this.db.deleteFrom('initiative').where('initiative.id', '=', id).execute();
+		const result = await this.db
+			.deleteFrom('initiative')
+			.where('initiative.id', '=', id)
+			.execute();
+		if (Number(result[0].numDeletedRows) == 0) throw new Error('No rows deleted');
 	}
 }

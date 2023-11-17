@@ -131,6 +131,7 @@ export class GameModel extends Model<Database['game']> {
 	}
 
 	public async delete({ id }: { id: GameId }): Promise<void> {
-		await this.db.deleteFrom('game').where('game.id', '=', id).execute();
+		const result = await this.db.deleteFrom('game').where('game.id', '=', id).execute();
+		if (Number(result[0].numDeletedRows) == 0) throw new Error('No rows deleted');
 	}
 }

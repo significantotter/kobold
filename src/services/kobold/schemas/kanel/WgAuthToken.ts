@@ -24,11 +24,11 @@ export default interface WgAuthTokenTable {
   tokenType: ColumnType<string, string, string | null>;
 }
 
-export const wgAuthTokenId = z.number();
+export const wgAuthTokenId = z.number().int().max(2147483647);
 
 export const zWgAuthToken = z.strictObject({
   id: wgAuthTokenId,
-  charId: z.number(),
+  charId: z.number().int().max(2147483647),
   accessToken: z.string(),
   expiresAt: z.date(),
   accessRights: z.string(),
@@ -37,7 +37,7 @@ export const zWgAuthToken = z.strictObject({
 
 export const zWgAuthTokenInitializer = z.strictObject({
   id: wgAuthTokenId.optional(),
-  charId: z.number(),
+  charId: z.number().int().max(2147483647),
   accessToken: z.string(),
   expiresAt: z.date(),
   accessRights: z.string(),
@@ -46,7 +46,7 @@ export const zWgAuthTokenInitializer = z.strictObject({
 
 export const zWgAuthTokenMutator = z.strictObject({
   id: wgAuthTokenId.optional(),
-  charId: z.number().optional(),
+  charId: z.number().int().max(2147483647).optional(),
   accessToken: z.string().optional(),
   expiresAt: z.date().optional(),
   accessRights: z.string().optional(),

@@ -66,10 +66,11 @@ export class GuildDefaultCharacterModel extends Model<Database['guildDefaultChar
 		userId: GuildDefaultCharacterUserId;
 		guildId: GuildDefaultCharacterGuildId;
 	}): Promise<void> {
-		await this.db
+		const result = await this.db
 			.deleteFrom('guildDefaultCharacter')
 			.where('guildDefaultCharacter.userId', '=', userId)
 			.where('guildDefaultCharacter.guildId', '=', guildId)
 			.execute();
+		if (Number(result[0].numDeletedRows) == 0) throw new Error('No rows deleted');
 	}
 }

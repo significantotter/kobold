@@ -29,7 +29,7 @@ export default interface InitiativeActorGroupTable {
   lastUpdatedAt: ColumnType<Date, Date | string | null, Date | string | null>;
 }
 
-export const initiativeActorGroupId = z.number();
+export const initiativeActorGroupId = z.number().int().max(2147483647);
 
 export const zInitiativeActorGroup = z.strictObject({
   id: initiativeActorGroupId,

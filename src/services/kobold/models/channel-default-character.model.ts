@@ -31,7 +31,7 @@ export class ChannelDefaultCharacterModel extends Model<Database['channelDefault
 		channelId?: string;
 		characterId?: number;
 	}): Promise<ChannelDefaultCharacter | null> {
-		let query = await this.db.selectFrom('channelDefaultCharacter').selectAll();
+		let query = this.db.selectFrom('channelDefaultCharacter').selectAll();
 		if (userId) query = query.where('channelDefaultCharacter.userId', '=', userId);
 		if (channelId) query = query.where('channelDefaultCharacter.channelId', '=', channelId);
 		if (characterId)
@@ -59,6 +59,7 @@ export class ChannelDefaultCharacterModel extends Model<Database['channelDefault
 		if (channelId) query = query.where('channelDefaultCharacter.channelId', '=', channelId);
 
 		const result = await query.returningAll().execute();
+		if (result.length === 0) throw new Error('No rows updated');
 		return result[0];
 	}
 
@@ -74,6 +75,7 @@ export class ChannelDefaultCharacterModel extends Model<Database['channelDefault
 		if (userId) query = query.where('channelDefaultCharacter.userId', '=', userId);
 		if (channelId) query = query.where('channelDefaultCharacter.channelId', '=', channelId);
 
-		await query.execute();
+		const result = await query.execute();
+		if (Number(result[0].numDeletedRows) == 0) throw new Error('No rows deleted');
 	}
 }

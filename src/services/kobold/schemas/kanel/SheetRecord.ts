@@ -34,7 +34,7 @@ export default interface SheetRecordTable {
   trackerGuildId: ColumnType<string | null, string | null, string | null>;
 }
 
-export const sheetRecordId = z.number();
+export const sheetRecordId = z.number().int().max(2147483647);
 
 export const zSheetRecord = z.strictObject({
   id: sheetRecordId,

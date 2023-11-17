@@ -16,17 +16,17 @@ export const kyselyMigrationLockId = z.string();
 
 export const zKyselyMigrationLock = z.strictObject({
   id: kyselyMigrationLockId,
-  isLocked: z.number(),
+  isLocked: z.number().int().max(2147483647),
 });
 
 export const zKyselyMigrationLockInitializer = z.strictObject({
   id: kyselyMigrationLockId,
-  isLocked: z.number().optional(),
+  isLocked: z.number().int().max(2147483647).optional(),
 });
 
 export const zKyselyMigrationLockMutator = z.strictObject({
   id: kyselyMigrationLockId.optional(),
-  isLocked: z.number().optional(),
+  isLocked: z.number().int().max(2147483647).optional(),
 });
 
 export type KyselyMigrationLock = Selectable<KyselyMigrationLockTable>;
