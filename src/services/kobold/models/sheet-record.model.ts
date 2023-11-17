@@ -46,8 +46,8 @@ export class SheetRecordModel extends Model<Database['sheetRecord']> {
 			.set({
 				...args,
 				modifiers: args.modifiers !== undefined ? sqlJSON(args.modifiers) : undefined,
-				actions: args.modifiers !== undefined ? sqlJSON(args.actions) : undefined,
-				rollMacros: args.modifiers !== undefined ? sqlJSON(args.rollMacros) : undefined,
+				actions: args.actions !== undefined ? sqlJSON(args.actions) : undefined,
+				rollMacros: args.rollMacros !== undefined ? sqlJSON(args.rollMacros) : undefined,
 			})
 			.where('sheetRecord.id', '=', id)
 			.returningAll()

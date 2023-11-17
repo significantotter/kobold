@@ -51,4 +51,9 @@
 	"i18n-ally.keystyle": "nested",
 	"i18n-ally.localesPaths": ["src/i18n", "coverage/lcov-report/i18n"],
 	"i18n-ally.namespace": true,
+	"editor.codeActionsOnSave": {
+		"source.fixAll": true,
+		"source.organizeImports": true,
+		
+	}
 }

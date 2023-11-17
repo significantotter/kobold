@@ -55,6 +55,7 @@
 		"import:pf2etools": "NODE_OPTIONS='--max-old-space-size=4096' npm run build && node dist/src/services/pf2etools/pf2eTools-import.js"
 	},
 	"dependencies": {
+		"@anatine/zod-mock": "^3.13.3",
 		"@faker-js/faker": "^8.0.2",
 		"better-sqlite3": "^8.6.0",
 		"class-transformer": "0.5.1",
@@ -95,8 +96,7 @@
 		"type-fest": "^4.3.1",
 		"typesafe-i18n": "^5.26.2",
 		"xxhashjs": "^0.2.2",
-		"zod": "^3.22.2",
-		"zod-fixture": "^2.5.0"
+		"zod": "^3.22.2"
 	},
 	"devDependencies": {
 		"@types/better-sqlite3": "^7.6.5",

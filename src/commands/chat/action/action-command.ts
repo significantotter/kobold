@@ -1,23 +1,22 @@
 import {
+	ApplicationCommandOptionChoiceData,
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
 	ChatInputCommandInteraction,
 	PermissionsString,
-	ApplicationCommandOptionChoiceData,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 
-import { CommandUtils } from '../../../utils/index.js';
-import { Command, CommandDeferType } from '../../index.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { ActionOptions } from './action-command-options.js';
 import L from '../../../i18n/i18n-node.js';
+import { TranslationFunctions } from '../../../i18n/i18n-types.js';
+import { CommandUtils } from '../../../utils/index.js';
 import { InjectedServices } from '../../command.js';
-import { Kobold } from '../../../services/kobold/index.js';
+import { Command, CommandDeferType } from '../../index.js';
+import { ActionOptions } from './action-command-options.js';
 
 export class ActionCommand implements Command {
 	public names = [L.en.commands.action.name()];

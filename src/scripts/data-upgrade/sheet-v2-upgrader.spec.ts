@@ -1,23 +1,7 @@
 import { parse } from 'csv-parse/sync';
 import { readFileSync } from 'fs';
-import { join, dirname } from 'path';
+import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
-import {
-	ActionV1,
-	ModifierV1,
-	RollV1,
-	SheetAdjustmentV1,
-	SheetV1,
-	zCharacterV1,
-} from './character.v1.zod.js';
-import {
-	upgradeAction,
-	upgradeAttack,
-	upgradeModifier,
-	upgradeRoll,
-	upgradeSheet,
-	upgradeSheetAdjustment,
-} from './sheet-v2-upgrader.js';
 import {
 	AbilityEnum,
 	Action,
@@ -34,6 +18,22 @@ import {
 	TextRoll,
 	zSheet,
 } from '../../services/kobold/index.js';
+import {
+	ActionV1,
+	ModifierV1,
+	RollV1,
+	SheetAdjustmentV1,
+	SheetV1,
+	zCharacterV1,
+} from './character.v1.zod.js';
+import {
+	upgradeAction,
+	upgradeAttack,
+	upgradeModifier,
+	upgradeRoll,
+	upgradeSheet,
+	upgradeSheetAdjustment,
+} from './sheet-v2-upgrader.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -93,8 +93,6 @@ function parseOldCharacterData(data: any) {
 	};
 	const parsed = zCharacterV1.safeParse(asCharacter);
 	if (!parsed.success) {
-		console.dir(asCharacter, { depth: null });
-		console.dir(parsed.error.format(), { depth: null });
 		throw new Error();
 	}
 	return parsed.data;
@@ -350,7 +348,6 @@ describe('sheet-v2-upgrader', () => {
 				},
 			];
 			const upgradedModifiers = oldModifiers.map(upgradeModifier);
-			console.log(upgradedModifiers);
 		});
 
 		it('should throw an error for an invalid modifier', () => {
@@ -379,6 +376,7 @@ describe('sheet-v2-upgrader', () => {
 			const expectedAttack = {
 				name: 'Attack 1',
 				damage: [{ dice: '1d6', type: null }],
+				effects: [],
 				traits: ['trait1', 'trait2'],
 				toHit: 2,
 				range: '30 ft',
@@ -401,6 +399,7 @@ describe('sheet-v2-upgrader', () => {
 			const expectedAttack = {
 				name: 'Attack 1',
 				damage: [{ dice: '1d6', type: null }],
+				effects: [],
 				traits: ['trait1', 'trait2'],
 				toHit: null,
 				range: '30 ft',
@@ -422,6 +421,7 @@ describe('sheet-v2-upgrader', () => {
 			const expectedAttack = {
 				name: 'Attack 1',
 				damage: [{ dice: '1d6', type: null }],
+				effects: [],
 				traits: [],
 				toHit: 2,
 				range: '30 ft',

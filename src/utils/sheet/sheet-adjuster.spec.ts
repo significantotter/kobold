@@ -447,6 +447,7 @@ describe('SheetAttackAdjuster', () => {
 			expect(sheet.attacks).toContainEqual({
 				toHit: 5,
 				damage: [{ dice: '1d6', type: 'cold or fire' }],
+				effects: [],
 				name: 'Foo',
 				range: null,
 				traits: [],
@@ -467,6 +468,7 @@ describe('SheetAttackAdjuster', () => {
 			expect(sheet.attacks).toContainEqual({
 				toHit: 5,
 				damage: [{ dice: '1d6', type: 'cold or fire' }],
+				effects: [],
 				name: 'Foo',
 				range: null,
 				traits: [],
@@ -496,6 +498,7 @@ describe('SheetAttackAdjuster', () => {
 			expect(sheet.attacks).toContainEqual({
 				toHit: 5,
 				damage: [{ dice: '1d6', type: 'cold or fire' }],
+				effects: [],
 				name: 'Foo',
 				range: null,
 				traits: [],
@@ -526,6 +529,7 @@ describe('SheetAttackAdjuster', () => {
 				{
 					toHit: 10,
 					damage: [{ dice: '1d4', type: 'cold' }],
+					effects: [],
 					name: 'Bar',
 					range: null,
 					traits: [],
