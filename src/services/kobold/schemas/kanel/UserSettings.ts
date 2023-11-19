@@ -1,3 +1,4 @@
+import type { InitStatsNotificationEnum, RollCompactModeEnum, InlineRollsDisplayEnum } from './../kanel-types.js';
 import type { ColumnType, Selectable, Insertable, Updateable } from 'kysely';
 import { z } from 'zod';
 
@@ -9,13 +10,13 @@ export default interface UserSettingsTable {
   userId: ColumnType<UserSettingsUserId, UserSettingsUserId, UserSettingsUserId | null>;
 
   /** Database type: pg_catalog.text */
-  initStatsNotification: ColumnType<string, string | null, string | null>;
+  initStatsNotification: ColumnType<InitStatsNotificationEnum, InitStatsNotificationEnum | null, InitStatsNotificationEnum | null>;
 
   /** Database type: pg_catalog.text */
-  rollCompactMode: ColumnType<string, string | null, string | null>;
+  rollCompactMode: ColumnType<RollCompactModeEnum, RollCompactModeEnum | null, RollCompactModeEnum | null>;
 
   /** Database type: pg_catalog.text */
-  inlineRollsDisplay: ColumnType<string, string | null, string | null>;
+  inlineRollsDisplay: ColumnType<InlineRollsDisplayEnum, InlineRollsDisplayEnum | null, InlineRollsDisplayEnum | null>;
 }
 
 export const userSettingsUserId = z.string();

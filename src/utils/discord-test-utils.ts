@@ -25,6 +25,8 @@ import {
 	InitiativeActor,
 	InitiativeActorGroup,
 	SheetRecord,
+	UserSettings,
+	WgAuthToken,
 	zChannelDefaultCharacterInitializer,
 	zCharacterInitializer,
 	zGameInitializer,
@@ -33,6 +35,8 @@ import {
 	zInitiativeActorInitializer,
 	zInitiativeInitializer,
 	zSheetRecordInitializer,
+	zUserSettingsInitializer,
+	zWgAuthTokenInitializer,
 } from '../services/kobold/index.js';
 
 const postgresDialect = await getDialect(Config.database.testUrl);
@@ -151,6 +155,20 @@ export class ResourceFactories {
 			...fakeInitiativeActorGroupMock,
 			...partialInitiativeActorGroup,
 			initiativeId,
+		});
+	}
+	public static async userSettings(partialUserSettings?: Partial<UserSettings>) {
+		const fakeUserSettingsMock = generateMock(zUserSettingsInitializer);
+		return await vitestKobold.userSettings.create({
+			...fakeUserSettingsMock,
+			...partialUserSettings,
+		});
+	}
+	public static async wgAuthToken(partialWgAuthToken?: Partial<WgAuthToken>) {
+		const fakeWgAuthTokenMock = generateMock(zWgAuthTokenInitializer);
+		return await vitestKobold.wgAuthToken.create({
+			...fakeWgAuthTokenMock,
+			...partialWgAuthToken,
 		});
 	}
 }

@@ -40,8 +40,8 @@ export class UserSettingsModel extends Model<Database['userSettings']> {
 			.set(args)
 			.where('userSettings.userId', '=', userId)
 			.returningAll()
-			.execute();
-		return result[0];
+			.executeTakeFirstOrThrow();
+		return result;
 	}
 
 	public async upsert(args: UserSettings): Promise<UserSettings> {

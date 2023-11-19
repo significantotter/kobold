@@ -2,7 +2,14 @@ import { APIEmbedField } from 'discord.js';
 import _ from 'lodash';
 import L from '../i18n/i18n-node.js';
 import { TranslationFunctions } from '../i18n/i18n-types.js';
-import { Attribute, CharacterWithRelations, UserSettings } from '../services/kobold/index.js';
+import {
+	Attribute,
+	CharacterWithRelations,
+	InitStatsNotificationEnum,
+	InlineRollsDisplayEnum,
+	RollCompactModeEnum,
+	UserSettings,
+} from '../services/kobold/index.js';
 import { KoboldError } from './KoboldError.js';
 import { Creature } from './creature.js';
 import {
@@ -60,9 +67,9 @@ export class RollBuilder {
 		this.targetCreature = targetCreature || null;
 		this.userSettings = userSettings ?? {
 			userId: '',
-			inlineRollsDisplay: 'detailed',
-			rollCompactMode: 'normal',
-			initStatsNotification: 'every_round',
+			inlineRollsDisplay: InlineRollsDisplayEnum.detailed,
+			rollCompactMode: RollCompactModeEnum.normal,
+			initStatsNotification: InitStatsNotificationEnum.every_round,
 		};
 
 		const actorText =

@@ -55,6 +55,33 @@ import {
 	InitiativeActorWithRelations,
 	InitiativeWithRelations,
 } from './relations-schemas.js';
+import {
+	InitStatsNotificationEnum,
+	InlineRollsDisplayEnum,
+	RollCompactModeEnum,
+} from './enum-helpers.js';
+
+const zUserSettingsWithEnums = zUserSettings.merge(
+	z.strictObject({
+		initStatsNotification: z.nativeEnum(InitStatsNotificationEnum),
+		rollCompactMode: z.nativeEnum(RollCompactModeEnum),
+		inlineRollsDisplay: z.nativeEnum(InlineRollsDisplayEnum),
+	})
+);
+const zUserSettingsWithEnumsInitializer = zUserSettingsInitializer.merge(
+	z.strictObject({
+		initStatsNotification: z.nativeEnum(InitStatsNotificationEnum),
+		rollCompactMode: z.nativeEnum(RollCompactModeEnum),
+		inlineRollsDisplay: z.nativeEnum(InlineRollsDisplayEnum),
+	})
+);
+const zUserSettingsWithEnumsMutator = zUserSettingsMutator.merge(
+	z.strictObject({
+		initStatsNotification: z.nativeEnum(InitStatsNotificationEnum),
+		rollCompactMode: z.nativeEnum(RollCompactModeEnum),
+		inlineRollsDisplay: z.nativeEnum(InlineRollsDisplayEnum),
+	})
+);
 
 const zExtendedSheetRecord = zSheetRecord.extend({
 	sheet: zSheet,
@@ -132,7 +159,7 @@ export {
 	zInitiativeActor,
 	zInitiativeActorGroup,
 	zExtendedSheetRecord as zSheetRecord,
-	zUserSettings,
+	zUserSettingsWithEnums as zUserSettings,
 	zWgAuthToken,
 	// initializers
 	zCharacterInitializer,
@@ -144,7 +171,7 @@ export {
 	zInitiativeActorInitializer,
 	zInitiativeActorGroupInitializer,
 	zExtendedSheetRecordInitializer as zSheetRecordInitializer,
-	zUserSettingsInitializer,
+	zUserSettingsWithEnumsInitializer as zUserSettingsInitializer,
 	zWgAuthTokenInitializer,
 	// mutators
 	zCharacterMutator,
@@ -156,7 +183,7 @@ export {
 	zInitiativeActorMutator,
 	zInitiativeActorGroupMutator,
 	zExtendedSheetRecordMutator as zSheetRecordMutator,
-	zUserSettingsMutator,
+	zUserSettingsWithEnumsMutator as zUserSettingsMutator,
 	zWgAuthTokenMutator,
 	// relation schemas
 	zCharacterWithRelations,

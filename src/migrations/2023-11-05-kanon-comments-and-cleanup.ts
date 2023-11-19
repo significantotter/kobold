@@ -100,39 +100,21 @@ export async function up(db: Kysely<any>): Promise<void> {
 
 	// no way in native kysely to comment a column, so we have to do so manually
 	await db.executeQuery(
-		sql`COMMENT ON COLUMN "character"."sheet" IS '@type(Sheet, ''./../kanel-types'', true, false, true)'`.compile(
-			db
-		)
-	);
-	await db.executeQuery(
-		sql`COMMENT ON COLUMN "character"."modifiers" IS '@type(Modifiers, ''./../kanel-types'', true, false, true)'`.compile(
-			db
-		)
-	);
-	await db.executeQuery(
-		sql`COMMENT ON COLUMN "character"."actions" IS '@type(Actions, ''./../kanel-types'', true, false, true)'`.compile(
-			db
-		)
-	);
-	await db.executeQuery(
-		sql`COMMENT ON COLUMN "character"."roll_macros" IS '@type(RollMacros, ''./../kanel-types'', true, false, true)'`.compile(
-			db
-		)
-	);
-	await db.executeQuery(
-		sql`COMMENT ON COLUMN "initiative_actor"."sheet" IS '@type(Sheet, ''./../kanel-types'', true, false, true)'`.compile(
-			db
-		)
-	);
-	await db.executeQuery(
-		sql`COMMENT ON COLUMN "npc"."data" IS '@type(NpcData, ''./../kanel-types'', true, false, true)'`.compile(
-			db
-		)
-	);
-	await db.executeQuery(
-		sql`COMMENT ON COLUMN "npc"."fluff" IS '@type(NpcFluff, ''./../kanel-types'', true, false, true)'`.compile(
-			db
-		)
+		sql`
+		COMMENT ON COLUMN "character"."sheet" IS '@type(Sheet, ''./../kanel-types'', true, false, true)';
+		COMMENT ON COLUMN "character"."modifiers" IS '@type(Modifiers, ''./../kanel-types'', true, false, true)';
+		COMMENT ON COLUMN "character"."actions" IS '@type(Actions, ''./../kanel-types'', true, false, true)';
+		COMMENT ON COLUMN "character"."roll_macros" IS '@type(RollMacros, ''./../kanel-types'', true, false, true)';
+
+		COMMENT ON COLUMN "initiative_actor"."sheet" IS '@type(Sheet, ''./../kanel-types'', true, false, true)';
+
+		COMMENT ON COLUMN "npc"."data" IS '@type(NpcData, ''./../kanel-types'', true, false, true)';
+		COMMENT ON COLUMN "npc"."fluff" IS '@type(NpcFluff, ''./../kanel-types'', true, false, true)';
+
+		COMMENT ON COLUMN "user_settings"."init_stats_notification" IS '@type(InitStatsNotificationEnum, ''./../kanel-types'', true, false, true)';
+		COMMENT ON COLUMN "user_settings"."roll_compact_mode" IS '@type(RollCompactModeEnum, ''./../kanel-types'', true, false, true)';
+		COMMENT ON COLUMN "user_settings"."inline_rolls_display" IS '@type(InlineRollsDisplayEnum, ''./../kanel-types'', true, false, true)';
+	`.compile(db)
 	);
 }
 

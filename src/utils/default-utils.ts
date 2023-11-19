@@ -1,12 +1,17 @@
-import { UserSettings } from '../services/kobold/index.js';
+import {
+	InitStatsNotificationEnum,
+	InlineRollsDisplayEnum,
+	RollCompactModeEnum,
+	UserSettings,
+} from '../services/kobold/index.js';
 
 export class DefaultUtils {
 	public static get userSettings(): UserSettings {
 		return {
 			userId: '',
-			rollCompactMode: 'normal',
-			initStatsNotification: 'every_round',
-			inlineRollsDisplay: 'detailed',
+			inlineRollsDisplay: InlineRollsDisplayEnum.detailed,
+			rollCompactMode: RollCompactModeEnum.normal,
+			initStatsNotification: InitStatsNotificationEnum.every_round,
 		};
 	}
 }

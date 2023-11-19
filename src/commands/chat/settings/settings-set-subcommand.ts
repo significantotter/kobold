@@ -14,7 +14,12 @@ import { SettingsOptions } from './settings-command-options.js';
 import _ from 'lodash';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { Kobold, UserSettings } from '../../../services/kobold/index.js';
+import {
+	Kobold,
+	UserSettings,
+	isInitStatsNotificationEnum,
+	isInlineRollsDisplayEnum,
+} from '../../../services/kobold/index.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
 import { InteractionUtils } from '../../../utils/interaction-utils.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
@@ -75,33 +80,34 @@ export class SettingsSetSubCommand implements Command {
 		// validate
 		let trimmedOptionName = _.camelCase(option.trim());
 		let settingDbName: keyof UserSettings;
-		let parsedValue: string;
+		let parsedValue = value.replaceAll(' ', '_');
+
+		const updates: Partial<UserSettings> = {};
 
 		if (trimmedOptionName === 'initiativeTrackerNotifications') {
 			settingDbName = 'initStatsNotification';
-			if (!['never', 'every turn', 'every round', 'whenever hidden'].includes(value)) {
+			if (!isInitStatsNotificationEnum(parsedValue)) {
 				throw new KoboldError(
 					'Yip! The value for "initiative-tracker-notifications" must be one of "never", ' +
 						'"every turn", "every round", or "whenever hidden".'
 				);
 			}
-			parsedValue = value.replaceAll(' ', '_');
+			updates.initStatsNotification = parsedValue;
 		} else if (trimmedOptionName === 'inlineRollsDisplay') {
 			settingDbName = 'inlineRollsDisplay';
-			if (!['compact', 'detailed'].includes(value)) {
+			if (!isInlineRollsDisplayEnum(parsedValue)) {
 				throw new KoboldError(
 					'Yip! The value for "inline-rolls-display" must be one of "compact", or "detailed".'
 				);
 			}
-			parsedValue = value.replaceAll(' ', '_');
+			updates.inlineRollsDisplay = parsedValue;
 		} else {
 			throw new KoboldError(`Yip! "${option}" is not a valid option.`);
 		}
 
 		// fetch the value to determine whether to insert or update
 
-		userSettings[settingDbName] = parsedValue;
-		await kobold.userSettings.upsert(userSettings);
+		await kobold.userSettings.upsert({ ...userSettings, ...updates });
 
 		await InteractionUtils.send(intr, `Yip! "${option}" has been set to "${value}".`);
 	}

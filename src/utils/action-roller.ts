@@ -11,7 +11,10 @@ import {
 	AttackOrSkillRoll,
 	Attribute,
 	DamageRoll,
+	InitStatsNotificationEnum,
+	InlineRollsDisplayEnum,
 	Roll,
+	RollCompactModeEnum,
 	RollTypeEnum,
 	SaveRoll,
 	SheetInfoLists,
@@ -79,9 +82,9 @@ export class ActionRoller {
 		if (!userSettings) {
 			this.userSettings = {
 				userId: '',
-				inlineRollsDisplay: 'detailed',
-				rollCompactMode: 'normal',
-				initStatsNotification: 'every_round',
+				inlineRollsDisplay: InlineRollsDisplayEnum.detailed,
+				rollCompactMode: RollCompactModeEnum.normal,
+				initStatsNotification: InitStatsNotificationEnum.every_round,
 			};
 		}
 	}

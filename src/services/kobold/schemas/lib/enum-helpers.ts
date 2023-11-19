@@ -18,8 +18,7 @@ import {
 	StatSubGroupEnum,
 } from '../shared/sheet.zod.js';
 
-// use helpers taking startup time to avoid list iterations at runtime
-
+// Zod Enum Helpers
 const actionTypeValueMap = _.keyBy(Object.values(ActionTypeEnum), _.identity);
 export function isActionTypeEnum(value: any): value is ActionTypeEnum {
 	return actionTypeValueMap[value] !== undefined;
@@ -100,4 +99,41 @@ export function isRollTypeEnum(value: any): value is RollTypeEnum {
 const modifierTypeValueMap = _.keyBy(Object.values(ModifierTypeEnum), _.identity);
 export function isModifierTypeEnum(value: any): value is ModifierTypeEnum {
 	return modifierTypeValueMap[value] !== undefined;
+}
+
+/** User Settings Enums */
+
+export enum InitStatsNotificationEnum {
+	never = 'never',
+	every_turn = 'every_turn',
+	every_round = 'every_round',
+	whenever_hidden = 'whenever_hidden',
+}
+export const initStatsNotificationValueMap = _.keyBy(
+	Object.values(InitStatsNotificationEnum),
+	_.identity
+);
+export function isInitStatsNotificationEnum(value: any): value is InitStatsNotificationEnum {
+	return initStatsNotificationValueMap[value] !== undefined;
+}
+
+export enum RollCompactModeEnum {
+	normal = 'normal',
+	compact = 'compact',
+}
+export const rollCompactModeValueMap = _.keyBy(Object.values(RollCompactModeEnum), _.identity);
+export function isRollCompactModeEnum(value: any): value is RollCompactModeEnum {
+	return rollCompactModeValueMap[value] !== undefined;
+}
+
+export enum InlineRollsDisplayEnum {
+	detailed = 'detailed',
+	compact = 'compact',
+}
+export const inlineRollsDisplayValueMap = _.keyBy(
+	Object.values(InlineRollsDisplayEnum),
+	_.identity
+);
+export function isInlineRollsDisplayEnum(value: any): value is InlineRollsDisplayEnum {
+	return inlineRollsDisplayValueMap[value] !== undefined;
 }
