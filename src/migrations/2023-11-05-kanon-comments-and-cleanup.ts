@@ -210,6 +210,7 @@ export async function down(db: Kysely<any>): Promise<void> {
 
 	await db.schema
 		.alterTable('initiative_actor_group')
+		.alterColumn('initiative_result', col => col.setDataType('numeric(20, 2)'))
 		.alterColumn('created_at', col => col.dropNotNull())
 		.alterColumn('last_updated_at', col => col.dropNotNull())
 		.execute();

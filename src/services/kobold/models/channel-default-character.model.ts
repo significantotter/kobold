@@ -58,9 +58,8 @@ export class ChannelDefaultCharacterModel extends Model<Database['channelDefault
 		if (userId) query = query.where('channelDefaultCharacter.userId', '=', userId);
 		if (channelId) query = query.where('channelDefaultCharacter.channelId', '=', channelId);
 
-		const result = await query.returningAll().execute();
-		if (result.length === 0) throw new Error('No rows updated');
-		return result[0];
+		const result = await query.returningAll().executeTakeFirstOrThrow();
+		return result;
 	}
 
 	public async delete({

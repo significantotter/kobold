@@ -54,8 +54,7 @@ export class WgAuthTokenModel extends Model<Database['wgAuthToken']> {
 		if (id != null) query = query.where('wgAuthToken.id', '=', id);
 		if (charId != null) query = query.where('wgAuthToken.charId', '=', charId);
 
-		const result = await query.returningAll().execute();
-		return result[0];
+		return await query.returningAll().executeTakeFirstOrThrow();
 	}
 
 	public async delete({ id, charId }: { id?: WgAuthTokenId; charId?: number }): Promise<void> {

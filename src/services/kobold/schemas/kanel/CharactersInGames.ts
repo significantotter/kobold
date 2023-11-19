@@ -5,6 +5,10 @@ import type { CharacterId } from './Character.js';
 import type { ColumnType, Selectable, Insertable, Updateable } from 'kysely';
 import { z } from 'zod';
 
+export type CharactersInGamesCreatedAt = Date;
+
+export type CharactersInGamesLastUpdatedAt = Date;
+
 /** Represents the table public.characters_in_games */
 export default interface CharactersInGamesTable {
   /** Database type: pg_catalog.int4 */
@@ -14,31 +18,35 @@ export default interface CharactersInGamesTable {
   characterId: ColumnType<CharacterId, CharacterId, CharacterId | null>;
 
   /** Database type: pg_catalog.timestamptz */
-  createdAt: ColumnType<Date, Date | string | null, Date | string | null>;
+  createdAt: ColumnType<CharactersInGamesCreatedAt, CharactersInGamesCreatedAt | null, CharactersInGamesCreatedAt | null>;
 
   /** Database type: pg_catalog.timestamptz */
-  lastUpdatedAt: ColumnType<Date, Date | string | null, Date | string | null>;
+  lastUpdatedAt: ColumnType<CharactersInGamesLastUpdatedAt, CharactersInGamesLastUpdatedAt | null, CharactersInGamesLastUpdatedAt | null>;
 }
+
+export const charactersInGamesCreatedAt = z.date();
+
+export const charactersInGamesLastUpdatedAt = z.date();
 
 export const zCharactersInGames = z.strictObject({
   gameId: gameId,
   characterId: characterId,
-  createdAt: z.date(),
-  lastUpdatedAt: z.date(),
+  createdAt: charactersInGamesCreatedAt,
+  lastUpdatedAt: charactersInGamesLastUpdatedAt,
 });
 
 export const zCharactersInGamesInitializer = z.strictObject({
   gameId: gameId,
   characterId: characterId,
-  createdAt: z.date().optional(),
-  lastUpdatedAt: z.date().optional(),
+  createdAt: charactersInGamesCreatedAt.optional(),
+  lastUpdatedAt: charactersInGamesLastUpdatedAt.optional(),
 });
 
 export const zCharactersInGamesMutator = z.strictObject({
   gameId: gameId.optional(),
   characterId: characterId.optional(),
-  createdAt: z.date().optional(),
-  lastUpdatedAt: z.date().optional(),
+  createdAt: charactersInGamesCreatedAt.optional(),
+  lastUpdatedAt: charactersInGamesLastUpdatedAt.optional(),
 });
 
 export type CharactersInGames = Selectable<CharactersInGamesTable>;

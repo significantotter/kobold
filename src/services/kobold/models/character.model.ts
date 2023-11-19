@@ -167,8 +167,8 @@ export class CharacterModel extends Model<Database['character']> {
 				channelDefaultCharacterForCharacter(eb),
 				sheetRecordForCharacter(eb),
 			])
-			.execute();
-		return result[0];
+			.executeTakeFirstOrThrow();
+		return result;
 	}
 
 	public async delete({ id }: { id: CharacterId }): Promise<void> {

@@ -150,8 +150,8 @@ export class InitiativeModel extends Model<Database['initiative']> {
 				actorsForInitiative(eb),
 				actorGroupsForInitiative(eb),
 			])
-			.execute();
-		return buildRelationFromQuery(result)[0];
+			.executeTakeFirstOrThrow();
+		return buildRelationFromQuery([result])[0];
 	}
 
 	public async delete({ id }: { id: InitiativeId }): Promise<void> {

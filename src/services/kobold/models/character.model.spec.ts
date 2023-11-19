@@ -1,27 +1,18 @@
 import { generateMock } from '@anatine/zod-mock';
-import { truncateDbForTests, vitestKobold } from '../../../utils/discord-test-utils.js';
 import {
-	Character,
-	SheetRecord,
-	zChannelDefaultCharacterInitializer,
-	zCharacterInitializer,
-	zGuildDefaultCharacterInitializer,
-	zSheetRecordInitializer,
-} from '../index.js';
+	ResourceFactories,
+	truncateDbForTests,
+	vitestKobold,
+} from '../../../utils/discord-test-utils.js';
+import { zCharacterInitializer } from '../index.js';
 
 describe('CharacterModel', () => {
-	let fakeSheetRecord: SheetRecord;
-
-	beforeEach(async () => {
-		const fakeSheetRecordMock = generateMock(zSheetRecordInitializer);
-		fakeSheetRecord = await vitestKobold.sheetRecord.create(fakeSheetRecordMock);
-	});
 	afterEach(async () => {
 		await truncateDbForTests;
 	});
-
 	describe('create, read', () => {
 		it('creates a new character, reads it, and returns the character plus relations', async () => {
+			const fakeSheetRecord = await ResourceFactories.sheetRecord();
 			const fakeCharacterMock = generateMock(zCharacterInitializer);
 			fakeCharacterMock.sheetRecordId = fakeSheetRecord.id;
 			const fakeCharacterMockWithRelations = {
@@ -43,21 +34,20 @@ describe('CharacterModel', () => {
 		});
 
 		it('reads the relations of the character', async () => {
-			const fakeCharacterMock = generateMock(zCharacterInitializer);
-			fakeCharacterMock.sheetRecordId = fakeSheetRecord.id;
-			const created = await vitestKobold.character.create(fakeCharacterMock);
-			const guildDefaultCharacterMock = generateMock(zGuildDefaultCharacterInitializer);
-			guildDefaultCharacterMock.characterId = created.id;
-			const guildDefaultCharacter =
-				await vitestKobold.guildDefaultCharacter.create(guildDefaultCharacterMock);
-			const channelDefaultCharacterMock = generateMock(zChannelDefaultCharacterInitializer);
-			channelDefaultCharacterMock.characterId = created.id;
-			const channelDefaultCharacter = await vitestKobold.channelDefaultCharacter.create(
-				channelDefaultCharacterMock
-			);
-			const read = await vitestKobold.character.read({ id: created.id });
+			const fakeSheetRecord = await ResourceFactories.sheetRecord();
+			const fakeCharacter = await ResourceFactories.character({
+				sheetRecordId: fakeSheetRecord.id,
+			});
+			const guildDefaultCharacter = await ResourceFactories.guildDefaultCharacter({
+				characterId: fakeCharacter.id,
+			});
+			const channelDefaultCharacter = await ResourceFactories.channelDefaultCharacter({
+				characterId: fakeCharacter.id,
+			});
+
+			const read = await vitestKobold.character.read({ id: fakeCharacter.id });
 			expect(read).toEqual({
-				...created,
+				...fakeCharacter,
 				guildDefaultCharacters: [guildDefaultCharacter],
 				channelDefaultCharacters: [channelDefaultCharacter],
 				sheetRecord: fakeSheetRecord,
@@ -66,34 +56,28 @@ describe('CharacterModel', () => {
 	});
 	describe('update', () => {
 		it('updates a character', async () => {
-			const fakeCharacterMock = generateMock(zCharacterInitializer);
-			fakeCharacterMock.sheetRecordId = fakeSheetRecord.id;
-			const created = await vitestKobold.character.create(fakeCharacterMock);
+			const fakeCharacter = await ResourceFactories.character();
 			const updated = await vitestKobold.character.update(
-				{ id: created.id },
+				{ id: fakeCharacter.id },
 				{ name: 'new name' }
 			);
 			expect(updated).toEqual({
-				...created,
+				...fakeCharacter,
 				name: 'new name',
 			});
 		});
 		it('fails to update a character if the sheetRecordId is invalid', async () => {
-			const fakeCharacterMock = generateMock(zCharacterInitializer);
-			fakeCharacterMock.sheetRecordId = fakeSheetRecord.id;
-			const created = await vitestKobold.character.create(fakeCharacterMock);
+			const fakeCharacter = await ResourceFactories.character();
 			await expect(
-				vitestKobold.character.update({ id: created.id }, { sheetRecordId: -1 })
+				vitestKobold.character.update({ id: fakeCharacter.id }, { sheetRecordId: -1 })
 			).rejects.toThrow();
 		});
 	});
 	describe('delete', () => {
 		it('deletes a character', async () => {
-			const fakeCharacterMock = generateMock(zCharacterInitializer);
-			fakeCharacterMock.sheetRecordId = fakeSheetRecord.id;
-			const created = await vitestKobold.character.create(fakeCharacterMock);
-			await vitestKobold.character.delete({ id: created.id });
-			const read = await vitestKobold.character.read({ id: created.id });
+			const fakeCharacter = await ResourceFactories.character();
+			await vitestKobold.character.delete({ id: fakeCharacter.id });
+			const read = await vitestKobold.character.read({ id: fakeCharacter.id });
 			expect(read).toEqual(null);
 		});
 		it('fails to delete a character if the character does not exist', async () => {
@@ -102,33 +86,41 @@ describe('CharacterModel', () => {
 	});
 	describe('setIsActive, readActive', () => {
 		it('sets the active character for a user', async () => {
-			const fakeCharacterMock = generateMock(zCharacterInitializer);
-			fakeCharacterMock.sheetRecordId = fakeSheetRecord.id;
-			const created = await vitestKobold.character.create(fakeCharacterMock);
+			const fakeSheetRecord = await ResourceFactories.sheetRecord();
+			const fakeCharacter = await ResourceFactories.character({
+				sheetRecordId: fakeSheetRecord.id,
+			});
 			const createdWithRelations = {
-				...created,
+				...fakeCharacter,
 				sheetRecord: fakeSheetRecord,
 				guildDefaultCharacters: [],
 				channelDefaultCharacters: [],
 			};
-			await vitestKobold.character.setIsActive({ id: created.id, userId: created.userId });
-			const read = await vitestKobold.character.readActive({ userId: created.userId });
+			await vitestKobold.character.setIsActive({
+				id: fakeCharacter.id,
+				userId: fakeCharacter.userId,
+			});
+			const read = await vitestKobold.character.readActive({ userId: fakeCharacter.userId });
 			expect(read?.isActiveCharacter).toEqual(true);
 		});
 		it('unsets any existing active character for a user, but not any other user', async () => {
-			const fakeCharacterMock = generateMock(zCharacterInitializer);
-			const fakeCharacterMock2 = generateMock(zCharacterInitializer);
-			const fakeCharacterMock3 = generateMock(zCharacterInitializer);
-			fakeCharacterMock.sheetRecordId = fakeSheetRecord.id;
-			fakeCharacterMock2.sheetRecordId = fakeSheetRecord.id;
-			fakeCharacterMock2.isActiveCharacter = true;
-			fakeCharacterMock2.userId = fakeCharacterMock.userId;
-			fakeCharacterMock3.sheetRecordId = fakeSheetRecord.id;
-			fakeCharacterMock3.isActiveCharacter = true;
+			const fakeSheetRecord = await ResourceFactories.sheetRecord();
 			const [character1, character2, character3] = await Promise.all([
-				vitestKobold.character.create(fakeCharacterMock),
-				vitestKobold.character.create(fakeCharacterMock2),
-				vitestKobold.character.create(fakeCharacterMock3),
+				ResourceFactories.character({
+					sheetRecordId: fakeSheetRecord.id,
+					isActiveCharacter: false,
+					userId: 'foo',
+				}),
+				ResourceFactories.character({
+					sheetRecordId: fakeSheetRecord.id,
+					isActiveCharacter: true,
+					userId: 'foo',
+				}),
+				ResourceFactories.character({
+					sheetRecordId: fakeSheetRecord.id,
+					isActiveCharacter: true,
+					userId: 'bar',
+				}),
 			]);
 			await vitestKobold.character.setIsActive({
 				id: character1.id,
@@ -147,27 +139,34 @@ describe('CharacterModel', () => {
 	});
 	describe('readMany', () => {
 		it('reads many characters', async () => {
-			const fakeCharacterMock = generateMock(zCharacterInitializer);
-			fakeCharacterMock.sheetRecordId = fakeSheetRecord.id;
-			const fakeCharacterMock2 = generateMock(zCharacterInitializer);
-			fakeCharacterMock2.sheetRecordId = fakeSheetRecord.id;
-			fakeCharacterMock2.name = fakeCharacterMock.name;
-			const fakeCharacterMock3 = generateMock(zCharacterInitializer);
-			fakeCharacterMock3.sheetRecordId = fakeSheetRecord.id;
-			fakeCharacterMock3.userId = fakeCharacterMock.userId;
-
+			const fakeSheetRecord = await ResourceFactories.sheetRecord();
 			const [character1, character2, character3] = await Promise.all([
-				vitestKobold.character.create(fakeCharacterMock),
-				vitestKobold.character.create(fakeCharacterMock2),
-				vitestKobold.character.create(fakeCharacterMock3),
+				ResourceFactories.character({
+					sheetRecordId: fakeSheetRecord.id,
+					isActiveCharacter: false,
+					userId: 'foo',
+					name: 'foo',
+				}),
+				ResourceFactories.character({
+					sheetRecordId: fakeSheetRecord.id,
+					isActiveCharacter: true,
+					userId: 'bar',
+					name: 'foo',
+				}),
+				ResourceFactories.character({
+					sheetRecordId: fakeSheetRecord.id,
+					isActiveCharacter: true,
+					userId: 'foo',
+					name: 'bar',
+				}),
 			]);
 
-			const read = await vitestKobold.character.readMany({ name: fakeCharacterMock.name });
+			const read = await vitestKobold.character.readMany({ name: 'foo' });
 			expect(read).toContainEqual(character1);
 			expect(read).toContainEqual(character2);
 			expect(read).not.toContainEqual(character3);
 			const read2 = await vitestKobold.character.readMany({
-				userId: fakeCharacterMock.userId,
+				userId: 'foo',
 			});
 			expect(read2).toContainEqual(character1);
 			expect(read2).toContainEqual(character3);

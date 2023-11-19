@@ -1,4 +1,4 @@
-import { ExpressionBuilder, Kysely } from 'kysely';
+import { ExpressionBuilder, Kysely, OperandExpression, SqlBool } from 'kysely';
 import { jsonArrayFrom } from 'kysely/helpers/postgres';
 import {
 	channelDefaultCharacterForCharacter,
@@ -7,6 +7,7 @@ import {
 } from '../lib/shared-relation-builders.js';
 import { Database, GameId, GameUpdate, GameWithRelations, NewGame } from '../schemas/index.js';
 import { Model } from './model.js';
+import { and } from 'drizzle-orm';
 
 export function charactersForGame(
 	eb: ExpressionBuilder<Database, 'game'>,
@@ -41,6 +42,9 @@ export class GameModel extends Model<Database['game']> {
 		return result[0];
 	}
 
+	/**
+	 * Note: GuildId and GmUserId are Or'd Together, everything else is And'd as usual
+	 */
 	public async readMany({
 		guildId,
 		userId,
@@ -56,18 +60,22 @@ export class GameModel extends Model<Database['game']> {
 			.selectFrom('game')
 			.selectAll('game')
 			.select(eb => [charactersForGame(eb, { guildId, userId })])
-			.where(({ eb, or }) => {
-				const ebs = [];
+			.where(({ eb, or, and }) => {
+				const ors: OperandExpression<SqlBool>[] = [];
+				const ands: OperandExpression<SqlBool>[] = [];
 				if (guildId != null) {
-					ebs.push(eb(`guildId`, '=', guildId));
+					ors.push(eb(`guildId`, '=', guildId));
 				}
 				if (gmUserId != null) {
-					ebs.push(eb(`gmUserId`, '=', gmUserId));
+					ors.push(eb(`gmUserId`, '=', gmUserId));
 				}
 				if (name != null) {
-					ebs.push(eb(`name`, 'ilike', name));
+					ands.push(eb(`name`, 'ilike', name));
 				}
-				return or(ebs);
+				if (ors.length) {
+					ands.push(or(ors));
+				}
+				return and(ands);
 			});
 
 		return await query.execute();
@@ -92,8 +100,8 @@ export class GameModel extends Model<Database['game']> {
 			.where('game.id', '=', id)
 			.returningAll()
 			.returning(eb => [charactersForGame(eb)])
-			.execute();
-		return result[0];
+			.executeTakeFirstOrThrow();
+		return result;
 	}
 
 	public async updateMany(

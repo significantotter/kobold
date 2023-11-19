@@ -25,7 +25,7 @@ export function actorsForGroup(eb: ExpressionBuilder<Database, 'initiativeActorG
 			.selectFrom('initiativeActor')
 			.selectAll('initiativeActor')
 			.select(eb => [sheetRecordForActor(eb)])
-			.whereRef('initiativeActorGroup.id', '=', 'initiativeActor.initiativeId')
+			.whereRef('initiativeActorGroup.id', '=', 'initiativeActor.initiativeActorGroupId')
 	).as('actors');
 }
 
@@ -91,8 +91,8 @@ export class InitiativeActorGroupModel extends Model<Database['initiativeActorGr
 			.where('initiativeActorGroup.id', '=', id)
 			.returningAll()
 			.returning(eb => [actorsForGroup(eb), initiativeForActorGroup(eb)])
-			.execute();
-		return transformQueryOutputToRelations(result)[0];
+			.executeTakeFirstOrThrow();
+		return transformQueryOutputToRelations([result])[0];
 	}
 
 	public async delete({ id }: { id: InitiativeActorGroupId }): Promise<void> {

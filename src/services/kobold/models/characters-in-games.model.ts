@@ -55,8 +55,8 @@ export class CharactersInGamesModel extends Model<Database['charactersInGames']>
 			.where('charactersInGames.characterId', '=', characterId)
 			.where('charactersInGames.gameId', '=', gameId)
 			.returningAll()
-			.execute();
-		return result[0];
+			.executeTakeFirstOrThrow();
+		return result;
 	}
 
 	public async delete({

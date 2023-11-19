@@ -50,8 +50,8 @@ export class UserSettingsModel extends Model<Database['userSettings']> {
 			.values(args)
 			.onConflict(oc => oc.column('userId').doUpdateSet(args))
 			.returningAll()
-			.execute();
-		return result[0];
+			.executeTakeFirstOrThrow();
+		return result;
 	}
 
 	public async delete({ userId }: { userId: UserSettingsUserId }): Promise<void> {

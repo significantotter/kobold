@@ -1,10 +1,9 @@
 import { Kysely } from 'kysely';
 import {
-	Database,
 	GuildDefaultCharacter,
-	GuildDefaultCharacterGuildId,
 	GuildDefaultCharacterUpdate,
 	GuildDefaultCharacterUserId,
+	Database,
 	NewGuildDefaultCharacter,
 } from '../schemas/index.js';
 import { Model } from './model.js';
@@ -26,16 +25,17 @@ export class GuildDefaultCharacterModel extends Model<Database['guildDefaultChar
 	public async read({
 		userId,
 		guildId,
+		characterId,
 	}: {
-		userId: GuildDefaultCharacterUserId;
-		guildId: GuildDefaultCharacterGuildId;
+		userId?: GuildDefaultCharacterUserId;
+		guildId?: string;
+		characterId?: number;
 	}): Promise<GuildDefaultCharacter | null> {
-		const result = await this.db
-			.selectFrom('guildDefaultCharacter')
-			.selectAll()
-			.where('guildDefaultCharacter.userId', '=', userId)
-			.where('guildDefaultCharacter.guildId', '=', guildId)
-			.execute();
+		let query = this.db.selectFrom('guildDefaultCharacter').selectAll();
+		if (userId) query = query.where('guildDefaultCharacter.userId', '=', userId);
+		if (guildId) query = query.where('guildDefaultCharacter.guildId', '=', guildId);
+		if (characterId) query = query.where('guildDefaultCharacter.characterId', '=', characterId);
+		const result = await query.execute();
 		return result[0] ?? null;
 	}
 
@@ -45,18 +45,20 @@ export class GuildDefaultCharacterModel extends Model<Database['guildDefaultChar
 			guildId,
 		}: {
 			userId: GuildDefaultCharacterUserId;
-			guildId: GuildDefaultCharacterGuildId;
+			guildId: string;
 		},
 		args: GuildDefaultCharacterUpdate
 	): Promise<GuildDefaultCharacter> {
-		const result = await this.db
+		let query = this.db
 			.updateTable('guildDefaultCharacter')
 			.set(args)
-			.where('guildDefaultCharacter.userId', '=', userId)
-			.where('guildDefaultCharacter.guildId', '=', guildId)
-			.returningAll()
-			.execute();
-		return result[0];
+			.where('guildDefaultCharacter.userId', '=', userId);
+
+		if (userId) query = query.where('guildDefaultCharacter.userId', '=', userId);
+		if (guildId) query = query.where('guildDefaultCharacter.guildId', '=', guildId);
+
+		const result = await query.returningAll().executeTakeFirstOrThrow();
+		return result;
 	}
 
 	public async delete({
@@ -64,13 +66,14 @@ export class GuildDefaultCharacterModel extends Model<Database['guildDefaultChar
 		guildId,
 	}: {
 		userId: GuildDefaultCharacterUserId;
-		guildId: GuildDefaultCharacterGuildId;
+		guildId: string;
 	}): Promise<void> {
-		const result = await this.db
-			.deleteFrom('guildDefaultCharacter')
-			.where('guildDefaultCharacter.userId', '=', userId)
-			.where('guildDefaultCharacter.guildId', '=', guildId)
-			.execute();
+		let query = this.db.deleteFrom('guildDefaultCharacter');
+
+		if (userId) query = query.where('guildDefaultCharacter.userId', '=', userId);
+		if (guildId) query = query.where('guildDefaultCharacter.guildId', '=', guildId);
+
+		const result = await query.execute();
 		if (Number(result[0].numDeletedRows) == 0) throw new Error('No rows deleted');
 	}
 }

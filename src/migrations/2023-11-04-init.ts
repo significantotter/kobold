@@ -56,6 +56,7 @@ export async function up(db: Kysely<any>): Promise<void> {
 		)
 		.addColumn('created_at', 'timestamptz', col => col.defaultTo(sql`CURRENT_TIMESTAMP`))
 		.addColumn('last_updated_at', 'timestamptz', col => col.defaultTo(sql`CURRENT_TIMESTAMP`))
+		.addPrimaryKeyConstraint('characters_in_games_pkey', ['game_id', 'character_id'])
 		.execute();
 
 	await db.schema

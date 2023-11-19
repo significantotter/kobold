@@ -118,8 +118,8 @@ export class InitiativeActorModel extends Model<Database['initiativeActor']> {
 			]);
 		if (id) query = query.where('initiativeActor.id', '=', id);
 		if (characterId) query = query.where('initiativeActor.characterId', '=', characterId);
-		const result = await query.execute();
-		return result[0];
+		const result = await query.executeTakeFirstOrThrow();
+		return result;
 	}
 
 	public async delete({ id }: { id: InitiativeActorId }): Promise<void> {
