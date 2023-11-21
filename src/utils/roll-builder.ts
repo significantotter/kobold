@@ -89,6 +89,7 @@ export class RollBuilder {
 	public addMultiRoll({
 		rollTitle,
 		rollExpressions,
+		skipModifiers,
 		rollFromTarget = false,
 	}: {
 		rollTitle?: string;
@@ -100,6 +101,7 @@ export class RollBuilder {
 			modifierMultiplier?: number;
 			extraAttributes?: Attribute[];
 		}[];
+		skipModifiers?: boolean;
 		rollFromTarget?: boolean;
 	}) {
 		const title = rollTitle || '\u200B';
@@ -111,8 +113,8 @@ export class RollBuilder {
 				tags: rollExpression.tags,
 				extraAttributes: rollExpression.extraAttributes,
 				modifierMultiplier: rollExpression.modifierMultiplier,
+				skipModifiers: skipModifiers ?? false,
 				creature: (rollFromTarget ? this.targetCreature : this.creature) ?? undefined,
-				LL: this.LL,
 			}),
 			name: rollExpression.name,
 		}));
@@ -173,6 +175,7 @@ export class RollBuilder {
 		showTags = true,
 		rollType,
 		rollFromTarget = false,
+		skipModifiers = false,
 	}: {
 		rollExpression: string;
 		rollTitle?: string;
@@ -184,6 +187,7 @@ export class RollBuilder {
 		showTags?: boolean;
 		rollType?: 'attack' | 'skill-challenge' | 'damage' | 'save';
 		rollFromTarget?: boolean;
+		skipModifiers?: boolean;
 	}): DiceRollResult | ErrorResult {
 		try {
 			const rollField = DiceUtils.parseAndEvaluateDiceExpression({
@@ -193,7 +197,7 @@ export class RollBuilder {
 				extraAttributes: extraAttributes ?? [],
 				multiplier,
 				creature: (rollFromTarget ? this.targetCreature : this.creature) ?? undefined,
-				LL: this.LL,
+				skipModifiers,
 			});
 			const title = rollTitle || '\u200B';
 			let totalTags = tags || [];
@@ -292,9 +296,11 @@ export class RollBuilder {
 	evaluateRollsInText({
 		text,
 		extraAttributes,
+		skipModifiers = false,
 		tags,
 	}: {
 		text: string;
+		skipModifiers?: boolean;
 		extraAttributes?: Attribute[];
 		tags?: string[];
 	}) {
@@ -309,8 +315,8 @@ export class RollBuilder {
 					const rollResult = DiceUtils.parseAndEvaluateDiceExpression({
 						rollExpression,
 						extraAttributes,
+						skipModifiers,
 						creature: this.creature ?? undefined,
-						LL: this.LL,
 						tags,
 					});
 					let resultText = '';

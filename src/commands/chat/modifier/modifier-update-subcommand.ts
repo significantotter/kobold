@@ -132,7 +132,6 @@ export class ModifierUpdateSubCommand implements Command {
 				DiceUtils.parseAndEvaluateDiceExpression({
 					rollExpression: newFieldValue,
 					creature: Creature.fromSheetRecord(activeCharacter.sheetRecord),
-					LL: L.en,
 				});
 				targetModifier.value = newFieldValue;
 			} catch (err) {

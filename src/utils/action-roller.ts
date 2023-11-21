@@ -138,6 +138,7 @@ export class ActionRoller {
 			targetDC: options.targetDC,
 			showTags: false,
 			rollType: 'skill-challenge',
+			skipModifiers: !(roll.allowRollModifiers ?? true),
 		});
 		if (result.type !== 'error') {
 			// update the extra attributes for the next roll
@@ -199,6 +200,7 @@ export class ActionRoller {
 			targetDC: options.targetDC,
 			showTags: false,
 			rollType: 'attack',
+			skipModifiers: !(roll.allowRollModifiers ?? true),
 		});
 		if (result.type !== 'error' && result.results.total) {
 			// update the extra attributes for the next roll
@@ -255,6 +257,7 @@ export class ActionRoller {
 				showTags: false,
 				rollType: 'save',
 				rollFromTarget: true,
+				skipModifiers: !(roll.allowRollModifiers ?? true),
 			});
 			if (result.type !== 'error') {
 				// Just record text that there should be a save here
@@ -426,6 +429,7 @@ export class ActionRoller {
 				tags,
 				extraAttributes: currentExtraAttributes,
 				multiplier,
+				skipModifiers: !(roll.allowRollModifiers ?? true),
 				showTags: false,
 			});
 		} else if (roll.damageType) {
@@ -481,7 +485,20 @@ export class ActionRoller {
 		const effectTerm = healInstead ? 'healing' : 'damage';
 		const tags = [...this.tags, effectTerm];
 		let currentExtraAttributes = _.values(extraAttributes);
-		const rollExpressions = [];
+		const rollExpressions: {
+			name: string;
+			damageType: string | null;
+			rollExpression: string;
+			tags: string[];
+			extraAttributes: {
+				name: string;
+				type: string;
+				value: number;
+				aliases: string[];
+				tags: string[];
+			}[];
+			modifierMultiplier: number;
+		}[] = [];
 
 		let rollCritSuccessExpression = roll.criticalSuccessRoll;
 		let rollSuccessExpression = roll.successRoll;
@@ -643,6 +660,7 @@ export class ActionRoller {
 		}
 
 		const results = rollBuilder.addMultiRoll({
+			skipModifiers: !(roll.allowRollModifiers ?? true),
 			rollTitle: roll.name,
 			rollExpressions: rollExpressions,
 		});
@@ -873,6 +891,7 @@ export class ActionRoller {
 								rollExpression: roll?.targetDC ?? '',
 								creature: this.creature,
 								tags: this.tags,
+								skipModifiers: true,
 								extraAttributes: _.values(extraAttributes),
 							});
 							rollTargetValue = testRollResult.results.total;
@@ -912,6 +931,7 @@ export class ActionRoller {
 							rollExpression: roll?.targetDC ?? '',
 							creature: this.creature,
 							tags: this.tags,
+							skipModifiers: true,
 							extraAttributes: _.values(extraAttributes),
 						});
 						rollTargetValue = testRollResult.results.total;

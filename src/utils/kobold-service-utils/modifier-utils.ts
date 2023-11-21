@@ -111,7 +111,6 @@ export class ModifierUtils {
 						creature,
 						extraAttributes: attributes,
 						tags,
-						LL: L.en,
 					});
 
 					const modifierHasDice = ModifierUtils.diceWereRolled(

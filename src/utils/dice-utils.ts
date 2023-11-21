@@ -6,6 +6,7 @@ import L from '../i18n/i18n-node.js';
 import { TranslationFunctions } from '../i18n/i18n-types.js';
 import { Attribute, Modifier } from '../services/kobold/index.js';
 import type { Creature } from './creature.js';
+import { WritableDeep } from 'type-fest';
 
 export interface ComputedDiceResult extends DiceResult {
 	total: number;
@@ -23,7 +24,7 @@ export class DiceRollError extends Error {
 }
 
 export interface DiceRollResult extends APIEmbedField {
-	results: DiceResult;
+	results: WritableDeep<DiceResult>;
 	targetDC?: number;
 	success?: 'critical success' | 'success' | 'failure' | 'critical failure';
 	type: 'dice';
@@ -253,10 +254,9 @@ export class DiceUtils {
 		creature,
 		tags,
 		extraAttributes,
-		skipModifiers,
+		skipModifiers = false,
 		multiplier,
 		modifierMultiplier,
-		LL = L.en,
 	}: {
 		rollExpression: string;
 		damageType?: string;
@@ -266,15 +266,13 @@ export class DiceUtils {
 		skipModifiers?: boolean;
 		multiplier?: number;
 		modifierMultiplier?: number;
-		LL?: TranslationFunctions;
 	}): {
 		value: string;
 		parsedExpression: string;
-		results: ComputedDiceResult;
+		results: WritableDeep<DiceResult>;
 		multiplier?: number;
 		totalTags: string[];
 	} {
-		let totalTags = tags || [];
 		let displayExpression = rollExpression;
 		try {
 			let parseResults = DiceUtils.parseDiceExpression({
@@ -293,8 +291,7 @@ export class DiceUtils {
 			let roll = new Dice(undefined, undefined, {
 				maxRollTimes: 20, // limit to 20 rolls
 				maxDiceSides: 100, // limit to 100 dice faces
-			}).roll(parsedExpression);
-			const results: ComputedDiceResult = { ...roll, total: 0, renderedExpression: '' };
+			}).roll(parsedExpression) as WritableDeep<DiceResult>;
 
 			if (roll.errors?.length) {
 				throw new DiceRollError(
@@ -304,11 +301,11 @@ export class DiceUtils {
 			}
 
 			if (multiplier !== undefined && multiplier !== 1) {
-				results.renderedExpression = `(${roll.renderedExpression.toString()}) * ${multiplier}`;
+				roll.renderedExpression = `(${roll.renderedExpression.toString()}) * ${multiplier}`;
 			}
-			results.total = Math.floor(roll.total * (multiplier ?? 1));
+			roll.total = Math.floor(roll.total * (multiplier ?? 1));
 
-			const message = LL.utils.dice.rollResult({
+			const message = L.en.utils.dice.rollResult({
 				rollExpression: displayExpression,
 				rollRenderedExpression: roll.renderedExpression.toString(),
 				rollTotal: `${roll.total} ${damageType ?? ''}`,
@@ -317,7 +314,7 @@ export class DiceUtils {
 			return {
 				value: message,
 				parsedExpression,
-				results,
+				results: roll,
 				multiplier,
 				totalTags,
 			};
@@ -326,7 +323,7 @@ export class DiceUtils {
 				throw err;
 			} else {
 				throw new DiceRollError(
-					LL.utils.dice.diceRollError({
+					L.en.utils.dice.diceRollError({
 						rollExpression: rollExpression,
 					}),
 					rollExpression

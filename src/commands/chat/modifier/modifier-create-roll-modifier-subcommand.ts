@@ -99,7 +99,6 @@ export class ModifierCreateRollModifierSubCommand implements Command {
 			DiceUtils.parseAndEvaluateDiceExpression({
 				rollExpression: String(value),
 				creature: Creature.fromSheetRecord(activeCharacter.sheetRecord),
-				LL: L.en,
 			});
 		} catch (err) {
 			await InteractionUtils.send(
