@@ -698,6 +698,7 @@ export function convertWanderersGuideCharToSheet(
 			},
 			heroPoints: {
 				...baseSheet.baseCounters.heroPoints,
+				max: 3,
 				current: characterData.heroPoints ?? 0,
 			},
 		},
@@ -982,7 +983,7 @@ export function convertPathBuilderToSheet(
 				current: pathBuilderSheet.focusPoints ?? 0,
 				max: pathBuilderSheet.focusPoints,
 			},
-			heroPoints: baseSheet.baseCounters.heroPoints,
+			heroPoints: { ...baseSheet.baseCounters.heroPoints, max: 3 },
 		},
 		weaknessesResistances: {
 			resistances: [],

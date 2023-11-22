@@ -74,9 +74,9 @@ export class GameplaySetSubCommand implements Command {
 			option,
 			value
 		);
-		if (!initialValue || !updatedValue) {
+		if (initialValue == null || updatedValue == null) {
 			throw new KoboldError(
-				`Yip! Something went wrong! I couldn't update the property ${option} to ${value}.}`
+				`Yip! Something went wrong! I couldn't update the property ${option} to ${value}.`
 			);
 		}
 		let message;

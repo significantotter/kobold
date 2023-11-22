@@ -939,7 +939,9 @@ export class SheetProperties {
 		}
 
 		allStats = allStats.filter(stat =>
-			targetGroups.some(group => SheetStatProperties.statGroups[group].includes(stat))
+			targetGroups.some(group =>
+				SheetStatProperties.statGroups[group].includes(stat as SheetStatKeys)
+			)
 		);
 
 		// now we have all the stats that match our criteria, so we can build the properties
