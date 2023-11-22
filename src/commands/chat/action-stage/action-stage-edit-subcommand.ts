@@ -226,8 +226,6 @@ export class ActionStageEditSubCommand implements Command {
 			const roll = matchedAction.rolls.splice(rollIndex, 1)[0];
 			matchedAction.rolls = [...matchedAction.rolls, roll];
 		}
-		console.log(finalValue, fieldToEdit, newValue);
-		console.log(matchedAction);
 
 		await kobold.sheetRecord.update(
 			{ id: activeCharacter.sheetRecordId },
