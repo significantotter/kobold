@@ -111,7 +111,7 @@ export class ActionStageEditSubCommand implements Command {
 
 		let invalid = false;
 		// validate the strings into different types based on which field is being edited
-		if (roll.type === 'attack') {
+		if (roll.type === 'attack' || roll.type === 'skill-challenge') {
 			if (!['name', 'targetDC', 'roll', 'allowRollModifiers'].includes(fieldToEdit)) {
 				invalid = true;
 			}
@@ -155,7 +155,10 @@ export class ActionStageEditSubCommand implements Command {
 			) {
 				invalid = true;
 			}
+		} else {
+			invalid = true;
 		}
+
 		if (invalid) {
 			await InteractionUtils.send(
 				intr,
@@ -213,6 +216,8 @@ export class ActionStageEditSubCommand implements Command {
 			);
 			return;
 		}
+		// TODO improve the typing in this file to avoid this explicit any
+		(roll as any)[fieldToEdit] = finalValue;
 
 		if (moveTo === 'top') {
 			const roll = matchedAction.rolls.splice(rollIndex, 1)[0];
@@ -221,6 +226,8 @@ export class ActionStageEditSubCommand implements Command {
 			const roll = matchedAction.rolls.splice(rollIndex, 1)[0];
 			matchedAction.rolls = [...matchedAction.rolls, roll];
 		}
+		console.log(finalValue, fieldToEdit, newValue);
+		console.log(matchedAction);
 
 		await kobold.sheetRecord.update(
 			{ id: activeCharacter.sheetRecordId },
