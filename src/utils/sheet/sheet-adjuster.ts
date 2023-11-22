@@ -565,11 +565,11 @@ export class SheetAttackAdjuster implements SheetPropertyGroupAdjuster<Sheet['at
 
 		for (const value of splitValue) {
 			let toHitMatch = toHitRegex.exec(value);
-			if (toHitMatch) {
-				toHitClause = parseInt(toHitMatch[1]);
+			if (toHitMatch && toHitMatch[1].trim()) {
+				toHitClause = parseInt(toHitMatch[1].trim());
 			}
 			let damageMatch = damageRegex.exec(value);
-			if (damageMatch) {
+			if (damageMatch && damageMatch[1].trim()) {
 				damageValues = damageMatch[1]
 					.split(innerSeparator)
 					.map(damage => damage.trim())
@@ -581,19 +581,19 @@ export class SheetAttackAdjuster implements SheetPropertyGroupAdjuster<Sheet['at
 					});
 			}
 			let rangeMatch = rangeRegex.exec(value);
-			if (rangeMatch) {
+			if (rangeMatch && rangeMatch[1].trim()) {
 				range = rangeMatch[1].trim();
 			}
 			let traitsMatch = traitsRegex.exec(value);
-			if (traitsMatch) {
+			if (traitsMatch && traitsMatch[1].trim()) {
 				traits = traitsMatch[1].split(innerSeparator).map(trait => trait.trim());
 			}
 			let effectsMatch = effectsRegex.exec(value);
-			if (effectsMatch) {
+			if (effectsMatch && effectsMatch[1].trim()) {
 				effects = effectsMatch[1].split(innerSeparator).map(trait => trait.trim());
 			}
 			let notesMatch = notesRegex.exec(value);
-			if (notesMatch) {
+			if (notesMatch && notesMatch[1].trim()) {
 				notes = notesMatch[1].trim();
 			}
 		}

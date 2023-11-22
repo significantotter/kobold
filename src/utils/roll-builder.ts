@@ -230,7 +230,7 @@ export class RollBuilder {
 						rollResult.results?.reducedExpression
 					);
 				} catch (err) {
-					console.log(err);
+					console.warn(err);
 				}
 
 				let result: 'critical success' | 'success' | 'failure' | 'critical failure';

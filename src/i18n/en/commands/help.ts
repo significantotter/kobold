@@ -130,6 +130,20 @@ export default {
 			},
 		},
 	},
+	compendium: {
+		name: 'compendium',
+		value: 'compendium',
+		description: 'Help for the /compendium command',
+		interactions: {
+			embed: {
+				title: '/compendium Commands',
+				thumbnail: refs.links.thumbnail,
+				description:
+					'Compendium commands display information about various ' +
+					'creatures, items, spells, and other game content.',
+			},
+		},
+	},
 	init: {
 		name: 'init',
 		value: 'init',

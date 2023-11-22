@@ -3,7 +3,8 @@ export default {
 	description: 'Commands for fetching information about PF2E.',
 	search: {
 		name: 'search',
-		description: 'Display pathfinder 2E data from pf2etools',
+		description: 'Displays pathfinder 2E data from pf2etools',
+		options: '[search-term] ',
+		usage: '[search-term]: The pf2e content to look up',
 	},
-	all: {},
 };

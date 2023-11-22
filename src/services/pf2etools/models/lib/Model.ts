@@ -23,7 +23,6 @@ export abstract class Model<T extends z.ZodTypeAny, K extends SQLiteTable<TableC
 
 		for (const jsonFile of jsonFiles) {
 			for (const resource of this.resourceListFromFile(jsonFile)) {
-				console.log(resource?.name);
 				const parse = this.z.safeParse(resource);
 
 				if (!parse.success) {

@@ -56,7 +56,7 @@ export class GameplayDamageSubCommand implements Command {
 			true
 		);
 		const amount = intr.options.getNumber(GameplayOptions.GAMEPLAY_DAMAGE_AMOUNT.name, true);
-		const type = intr.options.getString(GameplayOptions.GAMEPLAY_DAMAGE_TYPE.name, true);
+		const type = intr.options.getString(GameplayOptions.GAMEPLAY_DAMAGE_TYPE.name);
 
 		const { gameUtils, creatureUtils } = new KoboldUtils(kobold);
 
@@ -67,7 +67,7 @@ export class GameplayDamageSubCommand implements Command {
 
 		let message = '';
 		if (amount >= 0) {
-			const damageResult = creature.applyDamage(amount, type);
+			const damageResult = creature.applyDamage(amount, type ?? 'untyped');
 
 			message = EmbedUtils.buildDamageResultText({
 				initialDamageAmount: amount,

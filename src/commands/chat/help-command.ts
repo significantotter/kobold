@@ -64,6 +64,12 @@ export class HelpCommand implements Command {
 				options: [],
 			},
 			{
+				name: L.en.commands.help.compendium.name(),
+				description: L.en.commands.help.compendium.description(),
+				type: ApplicationCommandOptionType.Subcommand,
+				options: [],
+			},
+			{
 				name: L.en.commands.help.init.name(),
 				description: L.en.commands.help.init.description(),
 				type: ApplicationCommandOptionType.Subcommand,
@@ -253,6 +259,10 @@ export class HelpCommand implements Command {
 							`\`/${LL.commands.character.name()} ${LL.commands.character.update.name()}\` ${LL.commands.character.update.description()}`,
 					},
 					{
+						name: LL.commands.compendium.name(),
+						value: `\`/${LL.commands.compendium.name()} ${LL.commands.compendium.search.name()}\` ${LL.commands.compendium.search.description()}`,
+					},
+					{
 						name: LL.commands.roll.name(),
 						value:
 							`\`/${LL.commands.roll.name()} ${LL.commands.roll.dice.name()}\` ${LL.commands.roll.dice.description()}\n` +
@@ -364,6 +374,16 @@ export class HelpCommand implements Command {
 						LL.commands.character.remove.name(),
 					].map(command =>
 						createCommandOperationHelpField(LL.commands.character.name(), command, LL)
+					)
+				);
+				break;
+			}
+			case L.en.commands.help.compendium.name(): {
+				embed.setTitle(LL.commands.help.compendium.interactions.embed.title());
+				embed.setDescription(LL.commands.help.compendium.interactions.embed.description());
+				embed.addFields(
+					[LL.commands.compendium.search.name()].map(command =>
+						createCommandOperationHelpField(LL.commands.compendium.name(), command, LL)
 					)
 				);
 				break;

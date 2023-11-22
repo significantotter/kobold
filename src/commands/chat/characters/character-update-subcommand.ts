@@ -230,7 +230,7 @@ export class CharacterUpdateSubCommand implements Command {
 					activeCharacter.sheetRecord
 				);
 			} catch (err) {
-				console.log(err);
+				console.warn(err);
 				if ((axios.default ?? axios).isAxiosError(err) && err?.response?.status === 401) {
 					//token expired!
 					await kobold.wgAuthToken.delete({

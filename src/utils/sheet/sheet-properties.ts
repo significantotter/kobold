@@ -229,7 +229,7 @@ export class SheetStatProperties {
 	> = {
 		// casting
 		arcaneBonus: {
-			aliases: ['arcane', 'arcanetotal', 'arcaneattack', 'arcaneatk'],
+			aliases: ['castingarcane', 'arcane', 'arcanetotal', 'arcaneattack', 'arcaneatk'],
 			baseKey: SheetStatKeys.arcane,
 			subKey: StatSubGroupEnum.bonus,
 		},
@@ -249,7 +249,7 @@ export class SheetStatProperties {
 			subKey: StatSubGroupEnum.ability,
 		},
 		divineBonus: {
-			aliases: ['divine', 'divinetotal', 'divineattack', 'divineatk'],
+			aliases: ['castingdivine', 'divine', 'divinetotal', 'divineattack', 'divineatk'],
 			baseKey: SheetStatKeys.divine,
 			subKey: StatSubGroupEnum.bonus,
 		},
@@ -269,7 +269,7 @@ export class SheetStatProperties {
 			subKey: StatSubGroupEnum.ability,
 		},
 		occultBonus: {
-			aliases: ['occult', 'occulttotal', 'occultattack', 'occultatk'],
+			aliases: ['castingoccult', 'occult', 'occulttotal', 'occultattack', 'occultatk'],
 			baseKey: SheetStatKeys.occult,
 			subKey: StatSubGroupEnum.bonus,
 		},
@@ -289,7 +289,7 @@ export class SheetStatProperties {
 			subKey: StatSubGroupEnum.ability,
 		},
 		primalBonus: {
-			aliases: ['primal', 'primaltotal', 'primalattack', 'primalatk'],
+			aliases: ['castingprimal', 'primal', 'primaltotal', 'primalattack', 'primalatk'],
 			baseKey: SheetStatKeys.primal,
 			subKey: StatSubGroupEnum.bonus,
 		},

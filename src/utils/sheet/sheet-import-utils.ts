@@ -8,11 +8,17 @@ import {
 	SheetAttack,
 	SheetStatKeys,
 	isAbilityEnum,
+	isSheetIntegerKeys,
+	isSheetStatKeys,
 } from '../../services/kobold/index.js';
 import { PathBuilder } from '../../services/pathbuilder/pathbuilder.js';
 import { Creature, CreatureFluff, Stat } from '../../services/pf2etools/schemas/index-types.js';
 import { WG } from '../../services/wanderers-guide/wanderers-guide.js';
-import { SheetProperties, SheetStatProperties } from './sheet-properties.js';
+import {
+	SheetIntegerProperties,
+	SheetProperties,
+	SheetStatProperties,
+} from './sheet-properties.js';
 import { SheetUtils } from './sheet-utils.js';
 
 function parsePf2eStat(stat: Stat | number | null): { bonus: number | null; note: string } {
@@ -189,9 +195,9 @@ export function convertBestiaryCreatureToSheet(
 		}
 		let dc = bonus !== null ? 10 + bonus : null;
 
-		if (skillName in baseSheet.stats) {
-			baseSheet.stats[skillName as SheetStatKeys] = {
-				...baseSheet.stats[skillName as SheetStatKeys],
+		if (isSheetStatKeys(skillName)) {
+			baseSheet.stats[skillName] = {
+				...baseSheet.stats[skillName],
 				bonus,
 				dc,
 				note,
@@ -887,17 +893,21 @@ export function convertPathBuilderToSheet(
 			baseSheet.intProperties.dexterity +
 			mods(statKey);
 		const statProfMod = pathBuilderSheet.proficiencies[statKey] ?? 0;
-		let stat: ProficiencyStat;
-		if (
-			statKey in
-			[
-				SheetStatProperties.statGroups.saves,
-				SheetStatProperties.statGroups.skills,
-				SheetStatProperties.statGroups.checks,
-			].flat()
-		) {
-			let sheetStatKey = statKey as SheetStatKeys;
-			stat = baseSheet.stats[sheetStatKey];
+		let stat: ProficiencyStat | undefined = undefined;
+
+		const statKeyAlias =
+			SheetProperties.aliases[SheetProperties.standardizePropKey(statKey.toLowerCase())];
+
+		if (statKeyAlias && SheetProperties.properties[statKeyAlias]) {
+			const property = SheetProperties.properties[statKeyAlias];
+			if ('baseKey' in property) {
+				let sheetStatKey = property.baseKey;
+				stat = baseSheet.stats[sheetStatKey];
+			} else {
+				if (isSheetIntegerKeys(statKeyAlias)) {
+					baseSheet.intProperties[statKeyAlias] = statProfMod;
+				}
+			}
 		} else {
 			stat = {
 				name: statKey,
@@ -909,7 +919,7 @@ export function convertPathBuilderToSheet(
 			};
 			baseSheet.additionalSkills.push(stat);
 		}
-		applyValuesToStatInPlace(baseSheet, stat, statBonus, null, statProfMod);
+		if (stat) applyValuesToStatInPlace(baseSheet, stat, statBonus, null, statProfMod);
 	}
 
 	const sheet: Sheet = {

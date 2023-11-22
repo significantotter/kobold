@@ -137,7 +137,7 @@ export class Creature {
 
 		const bonus = this.interpretBonus(stat);
 
-		return `${stat.name}: \`${bonus > 0 ? '+' : ''}${bonus}\`, (DC \`${this.interpretDc(
+		return `*${stat.name}*: \`${bonus > 0 ? '+' : ''}${bonus}\`, (DC \`${this.interpretDc(
 			stat
 		)}\`)`;
 	}
@@ -233,9 +233,9 @@ export class Creature {
 		const abilityText = Object.entries(this.abilities)
 			.map(
 				([abilityName, abilityValue]) =>
-					`${
+					`*${
 						SheetProperties.shorthandFromAbility[abilityName as AbilityEnum]
-					} \`${abilityValue}\``
+					}* \`${abilityValue}\``
 			)
 			.join(', ');
 		return abilityText.length ? `${title}${abilityText}` : '';
@@ -265,20 +265,20 @@ export class Creature {
 		const title = includeTitle ? 'Spellcasting: ' : '';
 		for (const castingStat of this.castingStats) {
 			const castingStatText = this.generateStatBonusDcText(castingStat);
-			if (castingStatText) castingStats.push(castingStatText);
+			if (castingStatText && !!castingStat.proficiency) castingStats.push(castingStatText);
 		}
 		return castingStats.length ? `${title}${castingStats.join(', ')}` : '';
 	}
 
 	public sheetAttacksText(includeTitle: boolean = false): string {
 		const attackLines = [];
-		for (const attack of this.sheet.attacks) {
-			let builtAttack = `**${_.capitalize(attack.name)}**`;
+		for (const attack of this.attacks) {
+			let builtAttack = `*${_.capitalize(attack.name)}*`;
 			if (attack.toHit != null) builtAttack += ` \`+${attack.toHit}\``;
 			if (attack.traits?.length) builtAttack += ` (${attack.traits.join(', ')})`;
-			builtAttack += `,`;
+
 			if (attack.damage?.length) {
-				builtAttack += ` **Damage:** ${attack.damage
+				builtAttack += ` *Damage:* ${attack.damage
 					.map(d => `\`${d.dice}${d.type ? ` ${d.type}` : ''}\``)
 					.join(', ')}`;
 			}
@@ -644,7 +644,7 @@ export class Creature {
 	public get bonusAttacks(): SheetAttack[] {
 		const bonusAttacks: SheetAttack[] = [];
 
-		if (!this.statIsUnset(this.sheet.stats.arcane)) {
+		if (!this.statIsUnset(this.sheet.stats.arcane) && !!this.sheet.stats.arcane.proficiency) {
 			bonusAttacks.push({
 				name: 'Arcane Spell Attack',
 				toHit: this.statBonuses.arcane,
@@ -656,7 +656,7 @@ export class Creature {
 			});
 		}
 
-		if (!this.statIsUnset(this.sheet.stats.divine)) {
+		if (!this.statIsUnset(this.sheet.stats.divine) && !!this.sheet.stats.divine.proficiency) {
 			bonusAttacks.push({
 				name: 'Divine Spell Attack',
 				toHit: this.statBonuses.divine,
@@ -668,7 +668,7 @@ export class Creature {
 			});
 		}
 
-		if (!this.statIsUnset(this.sheet.stats.occult)) {
+		if (!this.statIsUnset(this.sheet.stats.occult) && !!this.sheet.stats.occult.proficiency) {
 			bonusAttacks.push({
 				name: 'Occult Spell Attack',
 				toHit: this.statBonuses.occult,
@@ -680,7 +680,7 @@ export class Creature {
 			});
 		}
 
-		if (!this.statIsUnset(this.sheet.stats.primal)) {
+		if (!this.statIsUnset(this.sheet.stats.primal) && !!this.sheet.stats.primal.proficiency) {
 			bonusAttacks.push({
 				name: 'Primal Spell Attack',
 				toHit: this.statBonuses.primal,
@@ -692,7 +692,7 @@ export class Creature {
 			});
 		}
 
-		if (!this.statIsUnset(this.sheet.stats.class)) {
+		if (!this.statIsUnset(this.sheet.stats.class) && !!this.sheet.stats.class.proficiency) {
 			bonusAttacks.push({
 				name: 'Class Attack',
 				toHit: this.statBonuses.class,
@@ -713,7 +713,7 @@ export class Creature {
 		if (maxWeaponMod !== -99) {
 			const level = this.sheet.staticInfo.level ?? 0;
 			bonusAttacks.push({
-				name: '**Melee** (strength, best proficiency)',
+				name: 'Melee (strength, best proficiency)',
 				toHit: maxWeaponMod + level + this.abilities.strength,
 				damage: [],
 				effects: [],
@@ -722,7 +722,7 @@ export class Creature {
 				traits: ['attack', 'strength', 'melee'],
 			});
 			bonusAttacks.push({
-				name: '**Ranged/Finesse** (dexterity, best proficiency)',
+				name: 'Ranged/Finesse (dexterity, best proficiency)',
 				toHit: maxWeaponMod + level + this.abilities.dexterity,
 				damage: [],
 				effects: [],
