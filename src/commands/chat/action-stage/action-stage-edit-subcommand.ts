@@ -16,6 +16,7 @@ import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { ActionStageOptions } from './action-stage-command-options.js';
+import _ from 'lodash';
 
 export class ActionStageEditSubCommand implements Command {
 	public names = [L.en.commands.actionStage.edit.name()];
@@ -64,6 +65,92 @@ export class ActionStageEditSubCommand implements Command {
 
 			//return the matched rolls
 			return matchedActionRolls;
+		}
+		if (option.name === ActionStageOptions.ACTION_STAGE_EDIT_OPTION.name) {
+			const allChoices = Object.entries(
+				L.en.commandOptions.actionStageStageEditOption.choices
+			).map(([, value]) => ({
+				name: value.name(),
+				value: value.value(),
+			}));
+
+			const actionRollTarget = intr.options.getString(
+				ActionStageOptions.ACTION_ROLL_TARGET_OPTION.name
+			);
+			if (!actionRollTarget) return allChoices;
+			const [actionName, action] = actionRollTarget.split(' -- ').map(term => term.trim());
+
+			const match =
+				intr.options.getString(ActionStageOptions.ACTION_STAGE_EDIT_OPTION.name) ?? '';
+
+			const koboldUtils = new KoboldUtils(kobold);
+			const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+				activeCharacter: true,
+			});
+
+			//find a roll on the character matching the autocomplete string
+			const matchedAction = activeCharacter.sheetRecord.actions.find(
+				action => action.name.toLocaleLowerCase() === actionName.toLocaleLowerCase()
+			);
+			if (!matchedAction) {
+				return allChoices;
+			}
+			const rollIndex = matchedAction.rolls.findIndex(
+				roll => roll.name.toLocaleLowerCase() === action.toLocaleLowerCase()
+			);
+			if (rollIndex === -1) {
+				return allChoices;
+			}
+			const roll = matchedAction.rolls[rollIndex];
+
+			let validEditOptions: (keyof typeof L.en.commandOptions.actionStageStageEditOption.choices)[] =
+				[];
+			if (roll.type === 'attack' || roll.type === 'skill-challenge') {
+				validEditOptions = ['name', 'attackTargetDC', 'attackRoll', 'allowRollModifiers'];
+			} else if (roll.type === 'damage') {
+				validEditOptions = [
+					'name',
+					'basicDamageRoll',
+					'allowRollModifiers',
+					'damageType',
+					'healInsteadOfDamage',
+				];
+			} else if (roll.type === 'advanced-damage') {
+				validEditOptions = [
+					'name',
+					'advancedDamageSuccessRoll',
+					'advancedDamageFailureRoll',
+					'advancedDamageCritSuccessRoll',
+					'advancedDamageCritFailureRoll',
+					'allowRollModifiers',
+					'healInsteadOfDamage',
+				];
+			} else if (roll.type === 'save') {
+				validEditOptions = ['name', 'saveRollType', 'saveTargetDC', 'allowRollModifiers'];
+			} else if (roll.type === 'text') {
+				validEditOptions = [
+					'name',
+					'defaultText',
+					'successText',
+					'failureText',
+					'criticalSuccessText',
+					'criticalFailureText',
+					'allowRollModifiers',
+					'textExtraTags',
+				];
+			} else {
+				return allChoices;
+			}
+			return Object.entries(
+				_.pick(L.en.commandOptions.actionStageStageEditOption.choices, validEditOptions)
+			)
+				.map(([, value]) => ({
+					name: value.name(),
+					value: value.value(),
+				}))
+				.filter(choice =>
+					choice.name.toLocaleLowerCase().includes(match.toLocaleLowerCase())
+				);
 		}
 	}
 
@@ -116,7 +203,15 @@ export class ActionStageEditSubCommand implements Command {
 				invalid = true;
 			}
 		} else if (roll.type === 'damage') {
-			if (!['name', 'roll', 'allowRollModifiers', 'damageType'].includes(fieldToEdit)) {
+			if (
+				![
+					'name',
+					'roll',
+					'allowRollModifiers',
+					'damageType',
+					'healInsteadOfDamage',
+				].includes(fieldToEdit)
+			) {
 				invalid = true;
 			}
 		} else if (roll.type === 'advanced-damage') {
@@ -128,6 +223,7 @@ export class ActionStageEditSubCommand implements Command {
 					'criticalSuccessRoll',
 					'criticalFailureRoll',
 					'allowRollModifiers',
+					'healInsteadOfDamage',
 				].includes(fieldToEdit)
 			) {
 				invalid = true;

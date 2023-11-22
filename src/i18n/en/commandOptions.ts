@@ -268,6 +268,7 @@ export default {
 			criticalSuccessText: { name: 'text-critical-success', value: 'criticalSuccessText' },
 			criticalFailureText: { name: 'text-critical-failure', value: 'criticalFailureText' },
 			textExtraTags: { name: 'text-extra-tags', value: 'textExtraTags' },
+			healInsteadOfDamage: { name: 'heal-instead-of-damage', value: 'healInsteadOfDamage' },
 		},
 	},
 	actionStageStageMoveOption: {

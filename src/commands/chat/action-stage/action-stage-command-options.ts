@@ -32,81 +32,82 @@ export class ActionStageOptions {
 		name: L.en.commandOptions.actionStageStageEditOption.name(),
 		description: L.en.commandOptions.actionStageStageEditOption.description(),
 		required: true,
+		autocomplete: true,
 		type: ApplicationCommandOptionType.String,
-		choices: [
-			{
-				name: L.en.commandOptions.actionStageStageEditOption.choices.name.name(),
-				value: L.en.commandOptions.actionStageStageEditOption.choices.name.value(),
-			},
-			{
-				name: L.en.commandOptions.actionStageStageEditOption.choices.damageType.name(),
-				value: L.en.commandOptions.actionStageStageEditOption.choices.damageType.value(),
-			},
-			{
-				name: L.en.commandOptions.actionStageStageEditOption.choices.allowRollModifiers.name(),
-				value: L.en.commandOptions.actionStageStageEditOption.choices.allowRollModifiers.value(),
-			},
-			{
-				name: L.en.commandOptions.actionStageStageEditOption.choices.attackTargetDC.name(),
-				value: L.en.commandOptions.actionStageStageEditOption.choices.attackTargetDC.value(),
-			},
-			{
-				name: L.en.commandOptions.actionStageStageEditOption.choices.attackRoll.name(),
-				value: L.en.commandOptions.actionStageStageEditOption.choices.attackRoll.value(),
-			},
-			{
-				name: L.en.commandOptions.actionStageStageEditOption.choices.basicDamageRoll.name(),
-				value: L.en.commandOptions.actionStageStageEditOption.choices.basicDamageRoll.value(),
-			},
-			{
-				name: L.en.commandOptions.actionStageStageEditOption.choices.advancedDamageCritSuccessRoll.name(),
-				value: L.en.commandOptions.actionStageStageEditOption.choices.advancedDamageCritSuccessRoll.value(),
-			},
-			{
-				name: L.en.commandOptions.actionStageStageEditOption.choices.advancedDamageSuccessRoll.name(),
-				value: L.en.commandOptions.actionStageStageEditOption.choices.advancedDamageSuccessRoll.value(),
-			},
-			{
-				name: L.en.commandOptions.actionStageStageEditOption.choices.advancedDamageFailureRoll.name(),
-				value: L.en.commandOptions.actionStageStageEditOption.choices.advancedDamageFailureRoll.value(),
-			},
-			{
-				name: L.en.commandOptions.actionStageStageEditOption.choices.advancedDamageCritFailureRoll.name(),
-				value: L.en.commandOptions.actionStageStageEditOption.choices.advancedDamageCritFailureRoll.value(),
-			},
-			{
-				name: L.en.commandOptions.actionStageStageEditOption.choices.saveRollType.name(),
-				value: L.en.commandOptions.actionStageStageEditOption.choices.saveRollType.value(),
-			},
-			{
-				name: L.en.commandOptions.actionStageStageEditOption.choices.saveTargetDC.name(),
-				value: L.en.commandOptions.actionStageStageEditOption.choices.saveTargetDC.value(),
-			},
-			{
-				name: L.en.commandOptions.actionStageStageEditOption.choices.defaultText.name(),
-				value: L.en.commandOptions.actionStageStageEditOption.choices.defaultText.value(),
-			},
-			{
-				name: L.en.commandOptions.actionStageStageEditOption.choices.successText.name(),
-				value: L.en.commandOptions.actionStageStageEditOption.choices.successText.value(),
-			},
-			{
-				name: L.en.commandOptions.actionStageStageEditOption.choices.failureText.name(),
-				value: L.en.commandOptions.actionStageStageEditOption.choices.failureText.value(),
-			},
-			{
-				name: L.en.commandOptions.actionStageStageEditOption.choices.criticalSuccessText.name(),
-				value: L.en.commandOptions.actionStageStageEditOption.choices.criticalSuccessText.value(),
-			},
-			{
-				name: L.en.commandOptions.actionStageStageEditOption.choices.criticalFailureText.name(),
-				value: L.en.commandOptions.actionStageStageEditOption.choices.criticalFailureText.value(),
-			},
-			{
-				name: L.en.commandOptions.actionStageStageEditOption.choices.textExtraTags.name(),
-				value: L.en.commandOptions.actionStageStageEditOption.choices.textExtraTags.value(),
-			},
-		],
+		// choices: [
+		// 	{
+		// 		name: L.en.commandOptions.actionStageStageEditOption.choices.name.name(),
+		// 		value: L.en.commandOptions.actionStageStageEditOption.choices.name.value(),
+		// 	},
+		// 	{
+		// 		name: L.en.commandOptions.actionStageStageEditOption.choices.damageType.name(),
+		// 		value: L.en.commandOptions.actionStageStageEditOption.choices.damageType.value(),
+		// 	},
+		// 	{
+		// 		name: L.en.commandOptions.actionStageStageEditOption.choices.allowRollModifiers.name(),
+		// 		value: L.en.commandOptions.actionStageStageEditOption.choices.allowRollModifiers.value(),
+		// 	},
+		// 	{
+		// 		name: L.en.commandOptions.actionStageStageEditOption.choices.attackTargetDC.name(),
+		// 		value: L.en.commandOptions.actionStageStageEditOption.choices.attackTargetDC.value(),
+		// 	},
+		// 	{
+		// 		name: L.en.commandOptions.actionStageStageEditOption.choices.attackRoll.name(),
+		// 		value: L.en.commandOptions.actionStageStageEditOption.choices.attackRoll.value(),
+		// 	},
+		// 	{
+		// 		name: L.en.commandOptions.actionStageStageEditOption.choices.basicDamageRoll.name(),
+		// 		value: L.en.commandOptions.actionStageStageEditOption.choices.basicDamageRoll.value(),
+		// 	},
+		// 	{
+		// 		name: L.en.commandOptions.actionStageStageEditOption.choices.advancedDamageCritSuccessRoll.name(),
+		// 		value: L.en.commandOptions.actionStageStageEditOption.choices.advancedDamageCritSuccessRoll.value(),
+		// 	},
+		// 	{
+		// 		name: L.en.commandOptions.actionStageStageEditOption.choices.advancedDamageSuccessRoll.name(),
+		// 		value: L.en.commandOptions.actionStageStageEditOption.choices.advancedDamageSuccessRoll.value(),
+		// 	},
+		// 	{
+		// 		name: L.en.commandOptions.actionStageStageEditOption.choices.advancedDamageFailureRoll.name(),
+		// 		value: L.en.commandOptions.actionStageStageEditOption.choices.advancedDamageFailureRoll.value(),
+		// 	},
+		// 	{
+		// 		name: L.en.commandOptions.actionStageStageEditOption.choices.advancedDamageCritFailureRoll.name(),
+		// 		value: L.en.commandOptions.actionStageStageEditOption.choices.advancedDamageCritFailureRoll.value(),
+		// 	},
+		// 	{
+		// 		name: L.en.commandOptions.actionStageStageEditOption.choices.saveRollType.name(),
+		// 		value: L.en.commandOptions.actionStageStageEditOption.choices.saveRollType.value(),
+		// 	},
+		// 	{
+		// 		name: L.en.commandOptions.actionStageStageEditOption.choices.saveTargetDC.name(),
+		// 		value: L.en.commandOptions.actionStageStageEditOption.choices.saveTargetDC.value(),
+		// 	},
+		// 	{
+		// 		name: L.en.commandOptions.actionStageStageEditOption.choices.defaultText.name(),
+		// 		value: L.en.commandOptions.actionStageStageEditOption.choices.defaultText.value(),
+		// 	},
+		// 	{
+		// 		name: L.en.commandOptions.actionStageStageEditOption.choices.successText.name(),
+		// 		value: L.en.commandOptions.actionStageStageEditOption.choices.successText.value(),
+		// 	},
+		// 	{
+		// 		name: L.en.commandOptions.actionStageStageEditOption.choices.failureText.name(),
+		// 		value: L.en.commandOptions.actionStageStageEditOption.choices.failureText.value(),
+		// 	},
+		// 	{
+		// 		name: L.en.commandOptions.actionStageStageEditOption.choices.criticalSuccessText.name(),
+		// 		value: L.en.commandOptions.actionStageStageEditOption.choices.criticalSuccessText.value(),
+		// 	},
+		// 	{
+		// 		name: L.en.commandOptions.actionStageStageEditOption.choices.criticalFailureText.name(),
+		// 		value: L.en.commandOptions.actionStageStageEditOption.choices.criticalFailureText.value(),
+		// 	},
+		// 	{
+		// 		name: L.en.commandOptions.actionStageStageEditOption.choices.textExtraTags.name(),
+		// 		value: L.en.commandOptions.actionStageStageEditOption.choices.textExtraTags.value(),
+		// 	},
+		// ],
 	};
 	public static readonly ACTION_STAGE_EDIT_VALUE: APIApplicationCommandBasicOption = {
 		name: L.en.commandOptions.actionStageEditValue.name(),
