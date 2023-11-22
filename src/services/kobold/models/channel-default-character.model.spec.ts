@@ -119,4 +119,27 @@ describe('ChannelDefaultCharacterModel', () => {
 			).rejects.toThrow('No rows deleted');
 		});
 	});
+	describe('deleteIfExists', () => {
+		it('deletes a channel default character', async () => {
+			const channelDefaultCharacter = await ResourceFactories.channelDefaultCharacter();
+			await vitestKobold.channelDefaultCharacter.deleteIfExists({
+				userId: channelDefaultCharacter.userId,
+				channelId: channelDefaultCharacter.channelId,
+			});
+			const read = await vitestKobold.channelDefaultCharacter.read({
+				userId: channelDefaultCharacter.userId,
+				channelId: channelDefaultCharacter.channelId,
+			});
+			expect(read).toEqual(null);
+		});
+		it('fails silently when deleting a channel default character that does not exist', async () => {
+			const fakeChannelDefaultCharacter = generateMock(zChannelDefaultCharacterInitializer);
+			expect(
+				vitestKobold.channelDefaultCharacter.deleteIfExists({
+					userId: fakeChannelDefaultCharacter.userId,
+					channelId: fakeChannelDefaultCharacter.channelId,
+				})
+			).resolves.toBeUndefined();
+		});
+	});
 });

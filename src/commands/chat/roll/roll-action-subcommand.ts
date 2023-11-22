@@ -58,7 +58,6 @@ export class RollActionSubCommand implements Command {
 				return [];
 			}
 			//find an action on the character matching the autocomplete string
-			const creature = Creature.fromSheetRecord(activeCharacter.sheetRecord);
 			const matchedActions = FinderHelpers.matchAllActions(
 				activeCharacter.sheetRecord,
 				match

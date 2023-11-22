@@ -29,10 +29,10 @@ export class CharactersInGamesModel extends Model<Database['charactersInGames']>
 		gameId: number;
 	}): Promise<CharactersInGames | null> {
 		let query = this.db.selectFrom('charactersInGames').selectAll();
-		if (characterId != null) {
+		if (characterId !== undefined) {
 			query = query.where('charactersInGames.characterId', '=', characterId);
 		}
-		if (gameId != null) {
+		if (gameId !== undefined) {
 			query = query.where('charactersInGames.gameId', '=', gameId);
 		}
 		const result = await query.execute();

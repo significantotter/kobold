@@ -51,16 +51,16 @@ export class CharacterModel extends Model<Database['character']> {
 			])
 			.where('character.userId', '=', userId)
 			.execute();
-		const activeCharacter = result.filter(character => character.isActiveCharacter);
-		if (activeCharacter.length) return activeCharacter[0];
-		const guildDefaultCharacter = result.filter(
-			character => character.guildDefaultCharacters.length
-		);
-		if (guildDefaultCharacter.length) return guildDefaultCharacter[0];
 		const channelDefaultCharacter = result.filter(
 			character => character.channelDefaultCharacters.length
 		);
 		if (channelDefaultCharacter.length) return channelDefaultCharacter[0];
+		const guildDefaultCharacter = result.filter(
+			character => character.guildDefaultCharacters.length
+		);
+		if (guildDefaultCharacter.length) return guildDefaultCharacter[0];
+		const activeCharacter = result.filter(character => character.isActiveCharacter);
+		if (activeCharacter.length) return activeCharacter[0];
 		return null;
 	}
 
@@ -83,8 +83,8 @@ export class CharacterModel extends Model<Database['character']> {
 				channelDefaultCharacterForCharacter(eb, { channelId }),
 				sheetRecordForCharacter(eb),
 			]);
-		if (userId) query = query.where('character.userId', '=', userId);
-		if (name) query = query.where('character.name', 'ilike', `%${name}%`);
+		if (userId !== undefined) query = query.where('character.userId', '=', userId);
+		if (name !== undefined) query = query.where('character.name', 'ilike', `%${name}%`);
 
 		return query.execute();
 	}
@@ -115,11 +115,12 @@ export class CharacterModel extends Model<Database['character']> {
 		else {
 			query = query.where('character.userId', '=', params.userId);
 		}
-		if (params.name) query = query.where('character.name', 'ilike', `%${params.name}%`);
-		if (params.charId) {
+		if (params.name !== undefined)
+			query = query.where('character.name', 'ilike', `%${params.name}%`);
+		if (params.charId !== undefined) {
 			query = query.where('character.charId', '=', params.charId);
 		}
-		if (params.importSource) {
+		if (params.importSource !== undefined) {
 			query = query.where('character.importSource', '=', params.importSource);
 		}
 		return (await query.executeTakeFirst()) ?? null;

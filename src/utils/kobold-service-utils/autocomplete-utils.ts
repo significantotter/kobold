@@ -1,7 +1,7 @@
 import { AutocompleteInteraction, CacheType } from 'discord.js';
 import { sql } from 'drizzle-orm';
 import _ from 'lodash';
-import { InitiativeActor, Kobold } from '../../services/kobold/index.js';
+import { CharacterWithRelations, InitiativeActor, Kobold } from '../../services/kobold/index.js';
 import { CompendiumModel } from '../../services/pf2etools/compendium.model.js';
 import { CompendiumUtils } from '../../services/pf2etools/utils/compendium-utils.js';
 import { Creature } from '../creature.js';
@@ -246,45 +246,16 @@ export class AutocompleteUtils {
 	}
 
 	public async getAllTargetOptions(intr: AutocompleteInteraction<CacheType>, matchText: string) {
-		let [currentInit, targetGames, activeCharacter] = await Promise.all([
-			this.koboldUtils.initiativeUtils.getInitiativeForChannelOrNull(intr.channel),
-			this.koboldUtils.gameUtils.getWhereUserHasCharacter(intr.user.id, intr.guildId),
-			this.koboldUtils.characterUtils.getActiveCharacter(intr),
-		]);
-
-		// only take the games that we're GM'ing in, or that our active character is in
-		targetGames = targetGames.filter(
-			game =>
-				game.gmUserId === intr.user.id ||
-				game.characters.find(c => c.id === activeCharacter?.id)
-		);
-
-		// the character options can be any game character or the user's active character
-		let characterOptions = targetGames
-			.flatMap(game => game.characters)
-			// flat map can give us undefined values, so filter them out
-			.filter(result => !!result)
-			.map(character => ({ name: character.name, value: character.name }));
-		if (activeCharacter) {
-			characterOptions = characterOptions.concat({
-				name: activeCharacter.name,
-				value: activeCharacter.name,
-			});
-		}
-		const actorOptions = (currentInit?.actors ?? [])
-			.filter(actor => actor.name.toLocaleLowerCase().includes(matchText.toLocaleLowerCase()))
-			.map(actor => ({
-				name: actor.name,
-				value: actor.name,
-			}));
+		const { characterOptions, actorOptions } =
+			await this.koboldUtils.gameUtils.getAllTargetableOptions(intr);
 
 		const allOptions = [
 			{ name: '(None)', value: '__NONE__' },
-			...characterOptions,
-			...actorOptions,
+			...actorOptions.map(c => ({ name: c.name, value: c.name })),
+			...characterOptions.map(c => ({ name: c.name, value: c.name })),
 		];
 
 		//return the matched actors, removing any duplicates
-		return _.uniqBy(allOptions, 'name');
+		return _.uniqBy(allOptions, 'name').sort((a, b) => a.name.localeCompare(b.name));
 	}
 }

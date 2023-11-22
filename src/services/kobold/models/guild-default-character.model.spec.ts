@@ -112,4 +112,27 @@ describe('GuildDefaultCharacterModel', () => {
 			).rejects.toThrow('No rows deleted');
 		});
 	});
+	describe('deleteIfExists', () => {
+		it('deletes a guild default character', async () => {
+			const guildDefaultCharacter = await ResourceFactories.guildDefaultCharacter();
+			await vitestKobold.guildDefaultCharacter.deleteIfExists({
+				userId: guildDefaultCharacter.userId,
+				guildId: guildDefaultCharacter.guildId,
+			});
+			const read = await vitestKobold.guildDefaultCharacter.read({
+				userId: guildDefaultCharacter.userId,
+				guildId: guildDefaultCharacter.guildId,
+			});
+			expect(read).toEqual(null);
+		});
+		it('fails silently when deleting a guild default character that does not exist', async () => {
+			const fakeGuildDefaultCharacter = generateMock(zGuildDefaultCharacterInitializer);
+			expect(
+				vitestKobold.guildDefaultCharacter.deleteIfExists({
+					userId: fakeGuildDefaultCharacter.userId,
+					guildId: fakeGuildDefaultCharacter.guildId,
+				})
+			).resolves.toBeUndefined();
+		});
+	});
 });

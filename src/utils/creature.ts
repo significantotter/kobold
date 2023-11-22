@@ -137,7 +137,7 @@ export class Creature {
 
 		const bonus = this.interpretBonus(stat);
 
-		return `*${stat.name}*: \`${bonus > 0 ? '+' : ''}${bonus}\`, (DC \`${this.interpretDc(
+		return `*${stat.name}*: \`${bonus > 0 ? '+' : ''}${bonus}\` (DC \`${this.interpretDc(
 			stat
 		)}\`)`;
 	}
@@ -295,12 +295,12 @@ export class Creature {
 	public trackerTitleText() {
 		let title = '';
 		if (this.sheet.info.url) {
-			title += `[${this.name}](${this.sheet.info.url}) Tracker \``;
+			title += `[${this.name}](${this.sheet.info.url}) Tracker`;
 		} else {
 			title += `${this.name} Tracker`;
 		}
 		if (this.sheet.staticInfo.level)
-			title += `Level ${this.sheet.staticInfo.level ?? 'unknown'}`;
+			title += ` Level ${this.sheet.staticInfo.level ?? 'unknown'}`;
 		if (this.sheet.info.heritage) title += ` ${this.sheet.info.heritage}`;
 		if (this.sheet.info.ancestry) title += ` ${this.sheet.info.ancestry}`;
 		if (this.sheet.info.class) title += ` ${this.sheet.info.class}`;

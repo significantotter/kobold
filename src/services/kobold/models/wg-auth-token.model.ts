@@ -31,8 +31,8 @@ export class WgAuthTokenModel extends Model<Database['wgAuthToken']> {
 	}): Promise<WgAuthToken | null> {
 		let query = this.db.selectFrom('wgAuthToken').selectAll();
 
-		if (id) query = query.where('wgAuthToken.id', '=', id);
-		if (charId) query = query.where('wgAuthToken.charId', '=', charId);
+		if (id !== undefined) query = query.where('wgAuthToken.id', '=', id);
+		if (charId !== undefined) query = query.where('wgAuthToken.charId', '=', charId);
 
 		const result = await query.orderBy('expiresAt desc').executeTakeFirst();
 
@@ -51,8 +51,8 @@ export class WgAuthTokenModel extends Model<Database['wgAuthToken']> {
 	): Promise<WgAuthToken> {
 		let query = this.db.updateTable('wgAuthToken').set(args);
 
-		if (id != null) query = query.where('wgAuthToken.id', '=', id);
-		if (charId != null) query = query.where('wgAuthToken.charId', '=', charId);
+		if (id !== undefined) query = query.where('wgAuthToken.id', '=', id);
+		if (charId !== undefined) query = query.where('wgAuthToken.charId', '=', charId);
 
 		return await query.returningAll().executeTakeFirstOrThrow();
 	}
@@ -60,8 +60,8 @@ export class WgAuthTokenModel extends Model<Database['wgAuthToken']> {
 	public async delete({ id, charId }: { id?: WgAuthTokenId; charId?: number }): Promise<void> {
 		let query = this.db.deleteFrom('wgAuthToken');
 
-		if (id != null) query = query.where('wgAuthToken.id', '=', id);
-		if (charId != null) query = query.where('wgAuthToken.charId', '=', charId);
+		if (id !== undefined) query = query.where('wgAuthToken.id', '=', id);
+		if (charId !== undefined) query = query.where('wgAuthToken.charId', '=', charId);
 
 		const result = await query.execute();
 		if (Number(result[0].numDeletedRows) == 0) throw new Error('No rows deleted');

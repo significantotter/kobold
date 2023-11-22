@@ -1,4 +1,9 @@
-import { AutocompleteInteraction, CacheType, ChatInputCommandInteraction } from 'discord.js';
+import {
+	AutocompleteInteraction,
+	CacheType,
+	ChatInputCommandInteraction,
+	Interaction,
+} from 'discord.js';
 import L from '../../i18n/i18n-node.js';
 import {
 	Character,
@@ -10,6 +15,7 @@ import {
 } from '../../services/kobold/index.js';
 import { KoboldError } from '../KoboldError.js';
 import type { KoboldUtils } from './kobold-utils.js';
+import _ from 'lodash';
 
 export class GameUtils {
 	kobold: Kobold;
@@ -76,28 +82,71 @@ export class GameUtils {
 		}));
 	}
 
+	public async getAllTargetableOptions(intr: Interaction<CacheType>) {
+		let [currentInit, targetGames, ownedCharacters] = await Promise.all([
+			this.koboldUtils.initiativeUtils.getInitiativeForChannelOrNull(intr.channel),
+			this.koboldUtils.gameUtils.getWhereUserHasCharacter(intr.user.id, intr.guildId),
+			this.koboldUtils.kobold.character.readMany({ userId: intr.user.id }),
+		]);
+
+		let channelDefaultCharacter: CharacterWithRelations | undefined = undefined;
+		let guildDefaultCharacter: CharacterWithRelations | undefined = undefined;
+		let currentActiveCharacter: CharacterWithRelations | undefined = undefined;
+		for (const character of ownedCharacters) {
+			if (intr.channelId && character.channelDefaultCharacters.length) {
+				channelDefaultCharacter = character.channelDefaultCharacters.find(
+					c => c.channelId === intr.channelId
+				)
+					? character
+					: undefined;
+			}
+			if (intr.guildId && character.guildDefaultCharacters.length) {
+				guildDefaultCharacter = character.guildDefaultCharacters.find(
+					c => c.guildId === intr.guildId
+				)
+					? character
+					: undefined;
+			}
+			if (character.isActiveCharacter) {
+				currentActiveCharacter = character;
+			}
+		}
+		const activeCharacter =
+			channelDefaultCharacter ?? guildDefaultCharacter ?? currentActiveCharacter;
+
+		// only take the games that we're GM'ing in, or that our active character is in
+		targetGames = targetGames.filter(
+			game =>
+				game.gmUserId === intr.user.id ||
+				game.characters.find(c => c.id === activeCharacter?.id)
+		);
+
+		// the character options can be any game character or the user's active character
+		let characterOptions = targetGames
+			.flatMap(game => game.characters)
+			// flat map can give us undefined values, so filter them out
+			.filter(result => !!result);
+		if (activeCharacter) {
+			characterOptions = characterOptions.concat(ownedCharacters);
+		}
+		const actorOptions = currentInit?.actors ?? [];
+
+		//return the matched actors, removing any duplicates
+		return {
+			characterOptions,
+			actorOptions,
+		};
+	}
+
 	public async getCharacterOrInitActorTarget(
-		intr: ChatInputCommandInteraction<CacheType> | AutocompleteInteraction<CacheType>,
+		intr: Interaction<CacheType>,
 		targetName: string
 	): Promise<{
 		targetSheetRecord: SheetRecord;
 		hideStats: boolean;
 		targetName: string;
 	}> {
-		const [joinedGames, initResult, activeCharacter] = await Promise.all([
-			this.kobold.game.readMany({
-				userId: intr.user.id,
-				guildId: intr.guildId ?? undefined,
-			}),
-			this.koboldUtils.initiativeUtils.getInitiativeForChannelOrNull(intr.channel),
-			this.koboldUtils.characterUtils.getActiveCharacter(intr),
-		]);
-
-		let characterOptions: CharacterWithRelations[] = joinedGames.flatMap(
-			game => game.characters
-		);
-
-		if (activeCharacter) characterOptions = characterOptions.concat(activeCharacter);
+		const { characterOptions, actorOptions } = await this.getAllTargetableOptions(intr);
 
 		// find a match from the game characters or active character
 		let matchedCharacter = characterOptions.find(
@@ -105,17 +154,14 @@ export class GameUtils {
 		);
 
 		// find a match in the init actors
-		let matchedInitActor: InitiativeActorWithRelations | null;
-
-		matchedInitActor =
-			(initResult?.actors ?? []).find(
-				actor => actor.name.trim().toLowerCase() === targetName.trim().toLowerCase()
-			) ?? null;
+		let matchedInitActor = actorOptions.find(
+			actor => actor.name.trim().toLowerCase() === targetName.trim().toLowerCase()
+		);
 
 		const targetSheetRecord =
 			matchedInitActor?.sheetRecord ?? matchedCharacter?.sheetRecord ?? null;
 		const hideStats = matchedInitActor?.hideStats ?? false;
-		const actualTargetName = matchedInitActor?.name ?? matchedCharacter?.name ?? null;
+		const actualTargetName = matchedInitActor?.name ?? matchedCharacter?.name;
 
 		if (!targetSheetRecord) {
 			throw new KoboldError(

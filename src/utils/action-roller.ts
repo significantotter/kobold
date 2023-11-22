@@ -76,7 +76,7 @@ export class ActionRoller {
 	) {
 		this.action = action;
 		this.tags = _.uniq([...(action?.tags ?? [])]);
-		if (this.action?.type) this.tags.push(this.action.type);
+		if (this.action?.type === 'spell') this.tags.push('spell');
 		this.options = options;
 
 		if (!userSettings) {

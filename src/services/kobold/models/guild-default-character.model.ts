@@ -32,9 +32,11 @@ export class GuildDefaultCharacterModel extends Model<Database['guildDefaultChar
 		characterId?: number;
 	}): Promise<GuildDefaultCharacter | null> {
 		let query = this.db.selectFrom('guildDefaultCharacter').selectAll();
-		if (userId) query = query.where('guildDefaultCharacter.userId', '=', userId);
-		if (guildId) query = query.where('guildDefaultCharacter.guildId', '=', guildId);
-		if (characterId) query = query.where('guildDefaultCharacter.characterId', '=', characterId);
+		if (userId !== undefined) query = query.where('guildDefaultCharacter.userId', '=', userId);
+		if (guildId !== undefined)
+			query = query.where('guildDefaultCharacter.guildId', '=', guildId);
+		if (characterId !== undefined)
+			query = query.where('guildDefaultCharacter.characterId', '=', characterId);
 		const result = await query.execute();
 		return result[0] ?? null;
 	}
@@ -54,8 +56,9 @@ export class GuildDefaultCharacterModel extends Model<Database['guildDefaultChar
 			.set(args)
 			.where('guildDefaultCharacter.userId', '=', userId);
 
-		if (userId) query = query.where('guildDefaultCharacter.userId', '=', userId);
-		if (guildId) query = query.where('guildDefaultCharacter.guildId', '=', guildId);
+		if (userId !== undefined) query = query.where('guildDefaultCharacter.userId', '=', userId);
+		if (guildId !== undefined)
+			query = query.where('guildDefaultCharacter.guildId', '=', guildId);
 
 		const result = await query.returningAll().executeTakeFirstOrThrow();
 		return result;
@@ -70,10 +73,27 @@ export class GuildDefaultCharacterModel extends Model<Database['guildDefaultChar
 	}): Promise<void> {
 		let query = this.db.deleteFrom('guildDefaultCharacter');
 
-		if (userId) query = query.where('guildDefaultCharacter.userId', '=', userId);
-		if (guildId) query = query.where('guildDefaultCharacter.guildId', '=', guildId);
+		if (userId !== undefined) query = query.where('guildDefaultCharacter.userId', '=', userId);
+		if (guildId !== undefined)
+			query = query.where('guildDefaultCharacter.guildId', '=', guildId);
 
 		const result = await query.execute();
 		if (Number(result[0].numDeletedRows) == 0) throw new Error('No rows deleted');
+	}
+
+	public async deleteIfExists(args: {
+		userId: GuildDefaultCharacterUserId;
+		guildId: string;
+	}): Promise<void> {
+		{
+			try {
+				return await this.delete(args);
+			} catch (err) {
+				if (err instanceof Error && err.message.toLowerCase() === 'no rows deleted') {
+					return;
+				}
+				throw err;
+			}
+		}
 	}
 }

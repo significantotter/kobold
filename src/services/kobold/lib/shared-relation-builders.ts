@@ -13,10 +13,10 @@ export function channelDefaultCharacterForCharacter(
 			.whereRef('channelDefaultCharacter.characterId', '=', 'character.id')
 			.where(ebChannel => {
 				const ands = [];
-				if (userId != null) {
+				if (userId !== undefined) {
 					ands.push(ebChannel(`channelDefaultCharacter.userId`, '=', userId));
 				}
-				if (channelId != null) {
+				if (channelId !== undefined) {
 					ands.push(ebChannel(`channelDefaultCharacter.channelId`, '=', channelId));
 				}
 				return ebChannel.and(ands);
@@ -35,10 +35,10 @@ export function guildDefaultCharacterForCharacter(
 			.whereRef('guildDefaultCharacter.characterId', '=', 'character.id')
 			.where(ebChannel => {
 				const ands = [];
-				if (userId != null) {
+				if (userId !== undefined) {
 					ands.push(ebChannel(`guildDefaultCharacter.userId`, '=', userId));
 				}
-				if (guildId != null) {
+				if (guildId !== undefined) {
 					ands.push(ebChannel(`guildDefaultCharacter.guildId`, '=', guildId));
 				}
 				return ebChannel.and(ands);

@@ -116,8 +116,9 @@ export class InitiativeActorModel extends Model<Database['initiativeActor']> {
 				characterForActor(eb),
 				sheetRecordForActor(eb),
 			]);
-		if (id) query = query.where('initiativeActor.id', '=', id);
-		if (characterId) query = query.where('initiativeActor.characterId', '=', characterId);
+		if (id !== undefined) query = query.where('initiativeActor.id', '=', id);
+		if (characterId !== undefined)
+			query = query.where('initiativeActor.characterId', '=', characterId);
 		const result = await query.executeTakeFirstOrThrow();
 		return result;
 	}

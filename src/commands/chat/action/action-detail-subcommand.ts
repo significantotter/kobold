@@ -110,6 +110,7 @@ export class ActionDetailSubCommand implements Command {
 			} else if (roll.type === 'damage') {
 				let description = ``;
 				description += `\ndamage: ${roll.roll} ${roll.damageType ?? ''}`;
+				if (roll.healInsteadOfDamage) description += `\n(heals instead of damaging)`;
 				const field = { name: roll.name, value: description };
 				actionDetailEmbed.addFields([field]);
 			} else if (roll.type === 'advanced-damage') {
@@ -122,6 +123,7 @@ export class ActionDetailSubCommand implements Command {
 				description += `\nCritical Failure: ${roll.criticalFailureRoll ?? 'none'} ${
 					roll.damageType ?? ''
 				}`;
+				if (roll.healInsteadOfDamage) description += `\n(heals instead of damaging)`;
 				const field = { name: roll.name, value: description };
 				actionDetailEmbed.addFields([field]);
 			} else if (roll.type === 'text') {

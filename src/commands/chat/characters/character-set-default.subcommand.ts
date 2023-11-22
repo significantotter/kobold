@@ -87,13 +87,14 @@ export class CharacterSetDefaultSubCommand implements Command {
 
 		if (targetCharacter) {
 			if (defaultScope === L.en.commandOptions.setDefaultScope.choices.channel.value()) {
-				if (!currentChannelId)
+				if (!currentChannelId) {
 					throw new KoboldError(
 						'Yip! You must be in a server to set a channel default character.'
 					);
+				}
 
 				//set all other characters as not the default for this user in this channel
-				await kobold.channelDefaultCharacter.delete({
+				await kobold.channelDefaultCharacter.deleteIfExists({
 					userId: intr.user.id,
 					channelId: currentChannelId,
 				});
@@ -107,13 +108,14 @@ export class CharacterSetDefaultSubCommand implements Command {
 			} else if (
 				defaultScope === L.en.commandOptions.setDefaultScope.choices.server.value()
 			) {
-				if (!currentGuildId)
+				if (!currentGuildId) {
 					throw new KoboldError(
 						'Yip! You must be in a server to set a server default character.'
 					);
+				}
 
 				//set all other characters as not the default for this user in this guild
-				await kobold.guildDefaultCharacter.delete({
+				await kobold.guildDefaultCharacter.deleteIfExists({
 					userId: intr.user.id,
 					guildId: currentGuildId,
 				});
@@ -136,26 +138,54 @@ export class CharacterSetDefaultSubCommand implements Command {
 			if ('__NONE__'.includes(charName)) {
 				//unset the server default character.
 				if (defaultScope === L.en.commandOptions.setDefaultScope.choices.channel.value()) {
-					if (!currentChannelId)
+					if (!currentChannelId) {
 						throw new KoboldError(
 							'Yip! You must be in a server to set a channel default character.'
 						);
-					await kobold.channelDefaultCharacter.delete({
-						userId: intr.user.id,
-						channelId: currentChannelId,
-					});
+					}
+					try {
+						await kobold.channelDefaultCharacter.delete({
+							userId: intr.user.id,
+							channelId: currentChannelId,
+						});
+					} catch (err) {
+						if (
+							err instanceof Error &&
+							err.message.toLowerCase() === 'no rows deleted'
+						) {
+							InteractionUtils.send(
+								intr,
+								"Yip! You already didn't have a default character in this channel."
+							);
+							return;
+						} else throw err;
+					}
 				} else if (
 					defaultScope === L.en.commandOptions.setDefaultScope.choices.server.value()
 				) {
-					if (!currentGuildId)
+					if (!currentGuildId) {
 						throw new KoboldError(
 							'Yip! You must be in a server to set a server default character.'
 						);
+					}
 
-					await await kobold.guildDefaultCharacter.delete({
-						userId: intr.user.id,
-						guildId: currentGuildId,
-					});
+					try {
+						await await kobold.guildDefaultCharacter.delete({
+							userId: intr.user.id,
+							guildId: currentGuildId,
+						});
+					} catch (err) {
+						if (
+							err instanceof Error &&
+							err.message.toLowerCase() === 'no rows deleted'
+						) {
+							InteractionUtils.send(
+								intr,
+								"Yip! You already didn't have a default character in this channel."
+							);
+							return;
+						} else throw err;
+					}
 				}
 				await InteractionUtils.send(
 					intr,

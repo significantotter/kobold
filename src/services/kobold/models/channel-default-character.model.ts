@@ -32,9 +32,11 @@ export class ChannelDefaultCharacterModel extends Model<Database['channelDefault
 		characterId?: number;
 	}): Promise<ChannelDefaultCharacter | null> {
 		let query = this.db.selectFrom('channelDefaultCharacter').selectAll();
-		if (userId) query = query.where('channelDefaultCharacter.userId', '=', userId);
-		if (channelId) query = query.where('channelDefaultCharacter.channelId', '=', channelId);
-		if (characterId)
+		if (userId !== undefined)
+			query = query.where('channelDefaultCharacter.userId', '=', userId);
+		if (channelId !== undefined)
+			query = query.where('channelDefaultCharacter.channelId', '=', channelId);
+		if (characterId !== undefined)
 			query = query.where('channelDefaultCharacter.characterId', '=', characterId);
 		const result = await query.execute();
 		return result[0] ?? null;
@@ -55,8 +57,10 @@ export class ChannelDefaultCharacterModel extends Model<Database['channelDefault
 			.set(args)
 			.where('channelDefaultCharacter.userId', '=', userId);
 
-		if (userId) query = query.where('channelDefaultCharacter.userId', '=', userId);
-		if (channelId) query = query.where('channelDefaultCharacter.channelId', '=', channelId);
+		if (userId !== undefined)
+			query = query.where('channelDefaultCharacter.userId', '=', userId);
+		if (channelId !== undefined)
+			query = query.where('channelDefaultCharacter.channelId', '=', channelId);
 
 		const result = await query.returningAll().executeTakeFirstOrThrow();
 		return result;
@@ -71,10 +75,28 @@ export class ChannelDefaultCharacterModel extends Model<Database['channelDefault
 	}): Promise<void> {
 		let query = this.db.deleteFrom('channelDefaultCharacter');
 
-		if (userId) query = query.where('channelDefaultCharacter.userId', '=', userId);
-		if (channelId) query = query.where('channelDefaultCharacter.channelId', '=', channelId);
+		if (userId !== undefined)
+			query = query.where('channelDefaultCharacter.userId', '=', userId);
+		if (channelId !== undefined)
+			query = query.where('channelDefaultCharacter.channelId', '=', channelId);
 
 		const result = await query.execute();
 		if (Number(result[0].numDeletedRows) == 0) throw new Error('No rows deleted');
+	}
+
+	public async deleteIfExists(args: {
+		userId: ChannelDefaultCharacterUserId;
+		channelId: string;
+	}): Promise<void> {
+		{
+			try {
+				return await this.delete(args);
+			} catch (err) {
+				if (err instanceof Error && err.message.toLowerCase() === 'no rows deleted') {
+					return;
+				}
+				throw err;
+			}
+		}
 	}
 }
