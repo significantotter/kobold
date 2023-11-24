@@ -16,8 +16,6 @@ export class ModifierUtils {
 		tags: string[]
 	): boolean {
 		if (modifier.modifierType === 'sheet') return false;
-		// compile the modifier's target tags
-		const tagExpression = compileExpression(modifier.targetTags ?? '');
 
 		const possibleTags = (modifier.targetTags ?? '').match(/([A-Za-z][A-Za-z_0-9]*)/g);
 
@@ -52,6 +50,8 @@ export class ModifierUtils {
 
 		let modifierValidForTags;
 		try {
+			// compile the modifier's target tags
+			const tagExpression = compileExpression(modifier.targetTags ?? '');
 			modifierValidForTags = tagExpression(tagTruthValues);
 		} catch (err) {
 			//an invalid tag expression sneaked in! Don't catastrophically fail, though
