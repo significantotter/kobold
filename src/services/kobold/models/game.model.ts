@@ -63,14 +63,14 @@ export class GameModel extends Model<Database['game']> {
 			.where(({ eb, or, and }) => {
 				const ors: OperandExpression<SqlBool>[] = [];
 				const ands: OperandExpression<SqlBool>[] = [];
-				if (guildId !== undefined) {
-					ors.push(eb(`guildId`, '=', guildId));
-				}
 				if (gmUserId !== undefined) {
 					ors.push(eb(`gmUserId`, '=', gmUserId));
 				}
 				if (name !== undefined) {
 					ands.push(eb(`name`, 'ilike', name));
+				}
+				if (guildId !== undefined) {
+					ands.push(eb(`guildId`, '=', guildId));
 				}
 				if (ors.length) {
 					ands.push(or(ors));

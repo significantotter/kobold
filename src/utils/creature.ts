@@ -278,11 +278,11 @@ export class Creature {
 			if (attack.traits?.length) builtAttack += ` (${attack.traits.join(', ')})`;
 
 			if (attack.damage?.length) {
-				builtAttack += ` *Damage:* ${attack.damage
-					.map(d => `\`${d.dice}${d.type ? ` ${d.type}` : ''}\``)
-					.join(', ')}`;
+				builtAttack += ` *Damage:* \`${attack.damage
+					.map(d => `${d.dice}${d.type ? ` ${d.type}` : ''}`)
+					.join(', ')}\``;
 			}
-			if (attack.effects.length) {
+			if (attack.effects?.length) {
 				builtAttack += ' plus ' + StringUtils.oxfordListJoin(attack.effects);
 			}
 			attackLines.push(builtAttack);

@@ -120,7 +120,7 @@ describe('GameModel', () => {
 				guildId: 'foo',
 				gmUserId: 'foo',
 			});
-			expect(read4.sort()).toEqual([game1, game2, game3].sort());
+			expect(read4.sort()).toEqual([game1].sort());
 
 			const read5 = await vitestKobold.game.readMany({
 				guildId: 'foo',
