@@ -72,9 +72,16 @@ export class CharacterUpdateSubCommand implements Command {
 			);
 			return;
 		} else if (activeCharacter.importSource === 'pastebin') {
-			const url = intr.options.getString(CharacterOptions.IMPORT_PASTEBIN_OPTION.name, true);
+			const url = intr.options.getString(CharacterOptions.IMPORT_PASTEBIN_OPTION.name);
 			const useStamina =
 				intr.options.getBoolean(CharacterOptions.IMPORT_USE_STAMINA_OPTION.name) ?? false;
+
+			if (!url) {
+				throw new KoboldError(
+					'Yip! This character was created with PasteBin. You must provide' +
+						' a PasteBin url to update your character sheet with new changes.'
+				);
+			}
 
 			const importId = TextParseHelpers.parsePasteBinIdFromText(url);
 

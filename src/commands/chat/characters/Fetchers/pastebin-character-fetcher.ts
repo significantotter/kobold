@@ -40,10 +40,9 @@ export class PasteBinCharacterFetcher extends CharacterFetcher<
 		actions: Action[];
 		rollMacros: RollMacro[];
 	}> {
-		const characterText = await new PasteBin({}).get({ paste_key: args.url }).catch(() => {
+		const characterJSON = await new PasteBin({}).get({ paste_key: args.url }).catch(() => {
 			throw new KoboldError(`Yip! I couldn't access the url "${args.url}".`);
 		});
-		const characterJSON = JSON.parse(characterText);
 
 		// sheet record properties
 		let sheet: Sheet;

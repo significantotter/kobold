@@ -2,6 +2,7 @@
 export { CharacterCommand } from './characters/character-command.js';
 export { CharacterImportPathbuilderSubCommand } from './characters/character-import-pathbuilder-subcommand.js';
 export { CharacterImportWanderersGuideSubCommand } from './characters/character-import-wanderers-guide-subcommand.js';
+export { CharacterImportPasteBinSubCommand } from './characters/character-import-pastebin-subcommand.js';
 export { CharacterListSubCommand } from './characters/character-list-subcommand.js';
 export { CharacterRemoveSubCommand } from './characters/character-remove-subcommand.js';
 export { CharacterSetActiveSubCommand } from './characters/character-set-active-subcommand.js';

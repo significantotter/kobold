@@ -56,7 +56,6 @@ export abstract class CharacterFetcher<SourceData, FetchArgs> {
 	}
 	public async confirmUpdateName(oldName: string, newName: string) {
 		// confirm the update
-		console.log(this.importSource);
 		const prompt = await this.intr.followUp({
 			content:
 				`**WARNING:** The character name on the target sheet ${newName} does not ` +

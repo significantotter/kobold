@@ -50,10 +50,7 @@ export class CharacterCommand implements Command {
 				name: L.en.commands.character.importPasteBin.name(),
 				description: L.en.commands.character.importPasteBin.description(),
 				type: ApplicationCommandOptionType.Subcommand,
-				options: [
-					CharacterOptions.IMPORT_PASTEBIN_OPTION,
-					CharacterOptions.IMPORT_USE_STAMINA_OPTION,
-				],
+				options: [CharacterOptions.IMPORT_PASTEBIN_OPTION],
 			},
 			{
 				// LIST

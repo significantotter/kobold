@@ -28,6 +28,7 @@ import {
 	// character
 	CharacterCommand,
 	CharacterImportPathbuilderSubCommand,
+	CharacterImportPasteBinSubCommand,
 	CharacterImportWanderersGuideSubCommand,
 	CharacterListSubCommand,
 	CharacterRemoveSubCommand,
@@ -159,6 +160,7 @@ async function start(): Promise<void> {
 			new CharacterSetDefaultSubCommand(),
 			new CharacterImportWanderersGuideSubCommand(),
 			new CharacterImportPathbuilderSubCommand(),
+			new CharacterImportPasteBinSubCommand(),
 			new CharacterUpdateSubCommand(),
 			new CharacterRemoveSubCommand(),
 		]),

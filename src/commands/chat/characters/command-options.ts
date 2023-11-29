@@ -34,7 +34,7 @@ export class CharacterOptions {
 		name: L.en.commandOptions.pastebinUrl.name(),
 		description: L.en.commandOptions.pastebinUrl.description(),
 		required: true,
-		type: ApplicationCommandOptionType.Number,
+		type: ApplicationCommandOptionType.String,
 	};
 	public static readonly IMPORT_USE_STAMINA_OPTION: APIApplicationCommandBasicOption = {
 		name: L.en.commandOptions.useStamina.name(),
