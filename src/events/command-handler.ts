@@ -133,7 +133,7 @@ export class CommandHandler implements EventHandler {
 			// Kobold Errors are expected error messages encountered through regular use of the bot
 			// These result in a simple response message and no error logging
 			if (error instanceof KoboldError) {
-				await InteractionUtils.send(intr, error.responseMessage);
+				await InteractionUtils.send(intr, error.responseMessage, error.ephemeral);
 				return;
 			}
 			await this.sendError(intr);

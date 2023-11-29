@@ -26,7 +26,7 @@ export class TextParseHelpers {
 	 * Parses the text to find a pastebin id out of a url or parses full string as a number
 	 * @param text either a pastebin url, or simply a pastebin post id
 	 */
-	public static parsePastebinIdFromText(text: string): string | null {
+	public static parsePasteBinIdFromText(text: string): string | null {
 		const trimmedText = text.trim();
 		let pastebinId: string | null = null;
 		if (/^([A-Za-z0-9]+)$/.test(trimmedText)) {

@@ -54,7 +54,7 @@ export class ModifierImportSubCommand implements Command {
 			.getString(ModifierOptions.MODIFIER_IMPORT_URL.name, true)
 			.trim();
 
-		const importId = TextParseHelpers.parsePastebinIdFromText(importUrl);
+		const importId = TextParseHelpers.parsePasteBinIdFromText(importUrl);
 
 		if (!importId) {
 			await InteractionUtils.send(intr, LL.commands.modifier.import.interactions.badUrl());

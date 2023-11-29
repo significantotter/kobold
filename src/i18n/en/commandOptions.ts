@@ -283,11 +283,11 @@ export default {
 	// CHARACTER
 
 	wgUrl: {
-		name: 'url',
+		name: 'wg-url',
 		description: "The url of your wanderer's guide character.",
 	},
 	pbJsonId: {
-		name: 'json-id',
+		name: 'pathbuilder-json-id',
 		description: 'The most recent json export id for your PathBuilder character.',
 	},
 	pastebinUrl: {

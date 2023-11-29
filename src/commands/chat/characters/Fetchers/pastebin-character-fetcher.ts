@@ -18,13 +18,13 @@ import { Creature } from '../../../../utils/creature.js';
 import { SheetProperties } from '../../../../utils/sheet/sheet-properties.js';
 import { CharacterFetcher } from './character-fetcher.js';
 
-export const zPastebinImport = z.object({
+export const zPasteBinImport = z.object({
 	sheet: zSheet.optional(),
 	modifiers: z.array(zModifier).optional(),
 	actions: z.array(zAction).optional(),
 	rollMacros: z.array(zRollMacro).optional(),
 });
-export class PastebinCharacterFetcher extends CharacterFetcher<
+export class PasteBinCharacterFetcher extends CharacterFetcher<
 	{
 		sheet: Sheet;
 		modifiers: Modifier[];
@@ -51,7 +51,7 @@ export class PastebinCharacterFetcher extends CharacterFetcher<
 		let actions: Action[];
 		let rollMacros: RollMacro[];
 
-		const parseResult = zPastebinImport.safeParse(characterJSON);
+		const parseResult = zPasteBinImport.safeParse(characterJSON);
 		if (parseResult.success) {
 			sheet = parseResult.data.sheet || SheetProperties.defaultSheet;
 			modifiers = parseResult.data.modifiers || [];

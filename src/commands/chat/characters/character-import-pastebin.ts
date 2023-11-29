@@ -14,21 +14,21 @@ import { type Command, CommandDeferType } from '../../index.js';
 import { CharacterOptions } from './command-options.js';
 import { TextParseHelpers } from '../../../utils/kobold-helpers/text-parse-helpers.js';
 import { z } from 'zod';
-import { PastebinCharacterFetcher } from './Fetchers/pastebin-character-fetcher.js';
+import { PasteBinCharacterFetcher } from './Fetchers/pastebin-character-fetcher.js';
 
-export const zPastebinImport = z.object({
+export const zPasteBinImport = z.object({
 	sheet: zSheet.optional(),
 	modifiers: z.array(zModifier).optional(),
 	actions: z.array(zAction).optional(),
 	rollMacros: z.array(zRollMacro).optional(),
 });
 
-export class CharacterImportPastebinSubCommand implements Command {
-	public names = [L.en.commands.character.importPastebin.name()];
+export class CharacterImportPasteBinSubCommand implements Command {
+	public names = [L.en.commands.character.importPasteBin.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.character.importPastebin.name(),
-		description: L.en.commands.character.importPastebin.description(),
+		name: L.en.commands.character.importPasteBin.name(),
+		description: L.en.commands.character.importPasteBin.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -40,23 +40,21 @@ export class CharacterImportPastebinSubCommand implements Command {
 		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
-		const url = intr.options.getString(CharacterOptions.IMPORT_PATHBUILDER_OPTION.name, true);
-		const useStamina =
-			intr.options.getBoolean(CharacterOptions.IMPORT_USE_STAMINA_OPTION.name) ?? false;
+		const url = intr.options.getString(CharacterOptions.IMPORT_PASTEBIN_OPTION.name, true);
 
-		const importId = TextParseHelpers.parsePastebinIdFromText(url);
+		const importId = TextParseHelpers.parsePasteBinIdFromText(url);
 
 		if (!importId) {
 			await InteractionUtils.send(intr, `Yip! I couldn't parse the url "${url}".`);
 			return;
 		}
-		const fetcher = new PastebinCharacterFetcher(intr, kobold, intr.user.id);
+		const fetcher = new PasteBinCharacterFetcher(intr, kobold, intr.user.id);
 		const newCharacter = await fetcher.create({ url: importId });
 
 		//send success message
 		await InteractionUtils.send(
 			intr,
-			LL.commands.character.importPastebin.interactions.success({
+			LL.commands.character.importPasteBin.interactions.success({
 				characterName: newCharacter.name,
 			})
 		);

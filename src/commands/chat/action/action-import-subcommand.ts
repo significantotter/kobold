@@ -54,7 +54,7 @@ export class ActionImportSubCommand implements Command {
 			.getString(ActionOptions.ACTION_IMPORT_URL_OPTION.name, true)
 			.trim();
 
-		const importId = TextParseHelpers.parsePastebinIdFromText(importUrl);
+		const importId = TextParseHelpers.parsePasteBinIdFromText(importUrl);
 
 		if (!importId) {
 			await InteractionUtils.send(intr, LL.commands.action.import.interactions.badUrl());

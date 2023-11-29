@@ -46,7 +46,7 @@ export class CharacterImportPathbuilderSubCommand implements Command {
 			);
 			return;
 		}
-		const fetcher = new PathbuilderCharacterFetcher(intr, kobold, intr.user.id);
+		const fetcher = new PathbuilderCharacterFetcher(intr, kobold, intr.user.id, { useStamina });
 		const newCharacter = await fetcher.create({ jsonId });
 
 		//send success message

@@ -42,9 +42,7 @@ describe('WgCharacterFetcher', () => {
 				})),
 			}));
 
-			const result = await fetcher.fetchSourceData({ charId: 12345 }, {
-				charId: 12345,
-			} as any);
+			const result = await fetcher.fetchSourceData({ charId: 12345 });
 
 			expect(result).toEqual(mockData);
 		});

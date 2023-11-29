@@ -3,7 +3,8 @@
 export class KoboldError extends Error {
 	public constructor(
 		public responseMessage: string,
-		errorMessage?: string
+		errorMessage?: string,
+		public ephemeral = false
 	) {
 		super(errorMessage ?? responseMessage);
 	}

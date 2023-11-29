@@ -100,7 +100,7 @@ describe('CharacterFetcher', () => {
 			const updatedCharacter = await fetcher.update(args);
 
 			expect(fetcher.fetchSourceData).toHaveBeenCalledWith(args);
-			expect(fetcher.confirmUpdateName).toHaveBeenCalledWith(fetcher.intr, 'oldName', 'test');
+			expect(fetcher.confirmUpdateName).toHaveBeenCalledWith('oldName', 'test');
 			expect(mockKobold.character.readActive).toHaveBeenCalledWith({
 				userId: 5,
 				channelId: undefined,
@@ -141,7 +141,7 @@ describe('CharacterFetcher', () => {
 			const oldName = 'oldName';
 			const newName = 'newName';
 
-			await fetcher.confirmUpdateName(mockInteraction as any, oldName, newName);
+			await fetcher.confirmUpdateName(oldName, newName);
 
 			expect(mockInteraction.editReply).toHaveBeenCalled();
 		});

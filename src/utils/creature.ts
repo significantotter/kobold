@@ -911,6 +911,12 @@ export class Creature {
 				sheet.baseCounters[baseCounterKey].current =
 					updateFrom.baseCounters[baseCounterKey].current ??
 					sheet.baseCounters[baseCounterKey].current;
+				if (sheet.baseCounters[baseCounterKey].max !== null) {
+					sheet.baseCounters[baseCounterKey].current = Math.min(
+						sheet.baseCounters[baseCounterKey].current,
+						sheet.baseCounters[baseCounterKey].max!
+					);
+				}
 			}
 		}
 		return sheet;

@@ -29,7 +29,7 @@ export class CharacterCommand implements Command {
 
 		options: [
 			{
-				// IMPORT
+				// IMPORT WG
 				name: L.en.commands.character.importWanderersGuide.name(),
 				description: L.en.commands.character.importWanderersGuide.description(),
 				type: ApplicationCommandOptionType.Subcommand,
@@ -42,6 +42,16 @@ export class CharacterCommand implements Command {
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					CharacterOptions.IMPORT_PATHBUILDER_OPTION,
+					CharacterOptions.IMPORT_USE_STAMINA_OPTION,
+				],
+			},
+			{
+				// IMPORT PasteBin
+				name: L.en.commands.character.importPasteBin.name(),
+				description: L.en.commands.character.importPasteBin.description(),
+				type: ApplicationCommandOptionType.Subcommand,
+				options: [
+					CharacterOptions.IMPORT_PASTEBIN_OPTION,
 					CharacterOptions.IMPORT_USE_STAMINA_OPTION,
 				],
 			},
@@ -85,7 +95,10 @@ export class CharacterCommand implements Command {
 				name: L.en.commands.character.update.name(),
 				description: L.en.commands.character.update.description(),
 				type: ApplicationCommandOptionType.Subcommand,
-				options: [{ ...CharacterOptions.IMPORT_PATHBUILDER_OPTION, required: false }],
+				options: [
+					{ ...CharacterOptions.IMPORT_PATHBUILDER_OPTION, required: false },
+					{ ...CharacterOptions.IMPORT_PASTEBIN_OPTION, required: false },
+				],
 			},
 		],
 	};

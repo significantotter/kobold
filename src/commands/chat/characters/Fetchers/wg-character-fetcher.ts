@@ -192,38 +192,41 @@ export class WgCharacterFetcher extends CharacterFetcher<
 	public requestAccessToken(charId: number, expired: boolean = false): never {
 		// The user needs to authenticate!
 		const respond =
-			this.intr.deferred || this.intr.replied ? this.intr.followUp : this.intr.reply;
+			this.intr.deferred || this.intr.replied
+				? this.intr.followUp.bind(this.intr)
+				: this.intr.reply.bind(this.intr);
 		if (expired) {
-			respond(L.en.commands.character.interactions.expiredToken());
+			respond({
+				content: L.en.commands.character.interactions.expiredToken(),
+				ephemeral: true,
+			});
 		} else {
-			respond(
-				L.en.commands.character.interactions.authenticationRequest({
+			respond({
+				content: L.en.commands.character.interactions.authenticationRequest({
 					action: 'fetch',
-				})
-			);
+				}),
+				ephemeral: true,
+			});
 		}
 		throw new KoboldError(
 			L.en.commands.character.interactions.authenticationLink({
 				wgBaseUrl: Config.wanderersGuide.oauthBaseUrl,
 				charId: charId,
-			})
+			}),
+			undefined,
+			true
 		);
 	}
 
-	public async fetchSourceData(
-		args: { charId: number },
-		activeCharacter?: Character
-	): Promise<{
+	public async fetchSourceData(args: { charId: number }): Promise<{
 		characterData: WG.CharacterApiResponse;
 		calculatedStats: WG.CharacterCalculatedStatsApiResponse;
 	}> {
-		let token: string | undefined = undefined;
-		if (activeCharacter) {
-			const authToken = await this.kobold.wgAuthToken.read({
-				charId: activeCharacter.charId,
-			});
-			if (authToken?.accessToken) token = authToken.accessToken;
-		}
+		let token: string | undefined = (
+			await this.kobold.wgAuthToken.read({
+				charId: args.charId,
+			})
+		)?.accessToken;
 
 		// create a token, throwing an error and ending the process
 		if (!token) {
@@ -234,7 +237,6 @@ export class WgCharacterFetcher extends CharacterFetcher<
 				return await this.fetchWgCharacterFromToken(args.charId, token);
 			} catch (err) {
 				// on an error, end the process and figure out what kind of error we have
-				console.warn(err);
 				if ((axios.default ?? axios).isAxiosError(err) && err?.response?.status === 401) {
 					//token expired!
 					// the catch ensures we don't fail if no tokens are deleted

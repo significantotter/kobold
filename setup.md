@@ -48,11 +48,11 @@ Then, go to the netlify deploys tab and click Trigger Deploy -> Deploy Site
 
 Go back to your wanderer's guide account page and edit the client/api key item. Update the redirect URL to https://\<your netlify app name\>.netlify.app/.netlify/functions/oauthCallback
 
-# Get a Pastebin API key if you want
+# Get a PasteBin API key if you want
 
 You can skip this, but import/export functions won't work.
 
-Go to Pastebin.com and make an account or log in.
+Go to PasteBin.com and make an account or log in.
 
 Go to https://pastebin.com/doc_api and save the API key under Your Unique Developer API Key to the same secure location.
 

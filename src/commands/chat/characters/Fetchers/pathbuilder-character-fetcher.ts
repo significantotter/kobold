@@ -1,16 +1,29 @@
 import { refs } from '../../../../constants/common-text.js';
 import L from '../../../../i18n/i18n-node.js';
-import { CharacterWithRelations, NewSheetRecord } from '../../../../services/kobold/index.js';
+import {
+	CharacterWithRelations,
+	Kobold,
+	NewSheetRecord,
+} from '../../../../services/kobold/index.js';
 import { PathBuilder } from '../../../../services/pathbuilder/index.js';
 import { KoboldError } from '../../../../utils/KoboldError.js';
 import { Creature } from '../../../../utils/creature.js';
 import { CharacterFetcher } from './character-fetcher.js';
 import type { PathBuilder as PB } from '../../../../services/pathbuilder/pathbuilder.js';
+import { CommandInteraction, CacheType } from 'discord.js';
 
 export class PathbuilderCharacterFetcher extends CharacterFetcher<
 	PB.Character,
 	{ jsonId: number }
 > {
+	constructor(
+		intr: CommandInteraction<CacheType>,
+		kobold: Kobold,
+		userId: string,
+		public options: { useStamina: boolean } = { useStamina: false }
+	) {
+		super(intr, kobold, userId);
+	}
 	public importSource = 'pathbuilder';
 	public async fetchSourceData(args: { jsonId: number }): Promise<PB.Character> {
 		const pathBuilderChar = await new PathBuilder().get({ characterJsonId: args.jsonId });
@@ -28,7 +41,9 @@ export class PathbuilderCharacterFetcher extends CharacterFetcher<
 		sourceData: PB.Character,
 		activeCharacter?: CharacterWithRelations
 	): NewSheetRecord {
-		const creature = Creature.fromPathBuilder(sourceData, activeCharacter?.sheetRecord);
+		const creature = Creature.fromPathBuilder(sourceData, activeCharacter?.sheetRecord, {
+			useStamina: this.options.useStamina,
+		});
 		return {
 			sheet: creature._sheet,
 			actions: creature.actions,

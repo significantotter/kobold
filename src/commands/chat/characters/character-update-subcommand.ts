@@ -15,6 +15,8 @@ import { Command, CommandDeferType } from '../../index.js';
 import { CharacterOptions } from './command-options.js';
 import { PathbuilderCharacterFetcher } from './Fetchers/pathbuilder-character-fetcher.js';
 import { WgCharacterFetcher } from './Fetchers/wg-character-fetcher.js';
+import { TextParseHelpers } from '../../../utils/kobold-helpers/text-parse-helpers.js';
+import { PasteBinCharacterFetcher } from './Fetchers/pastebin-character-fetcher.js';
 
 export class CharacterUpdateSubCommand implements Command {
 	public names = [L.en.commands.character.update.name()];
@@ -58,7 +60,7 @@ export class CharacterUpdateSubCommand implements Command {
 			}
 
 			const fetcher = new PathbuilderCharacterFetcher(intr, kobold, intr.user.id);
-			const newCharacter = await fetcher.create({ jsonId });
+			const newCharacter = await fetcher.update({ jsonId });
 
 			//send success message
 
@@ -70,12 +72,33 @@ export class CharacterUpdateSubCommand implements Command {
 			);
 			return;
 		} else if (activeCharacter.importSource === 'pastebin') {
+			const url = intr.options.getString(CharacterOptions.IMPORT_PASTEBIN_OPTION.name, true);
+			const useStamina =
+				intr.options.getBoolean(CharacterOptions.IMPORT_USE_STAMINA_OPTION.name) ?? false;
+
+			const importId = TextParseHelpers.parsePasteBinIdFromText(url);
+
+			if (!importId) {
+				await InteractionUtils.send(intr, `Yip! I couldn't parse the url "${url}".`);
+				return;
+			}
+			const fetcher = new PasteBinCharacterFetcher(intr, kobold, intr.user.id);
+			const newCharacter = await fetcher.update({ url: importId });
+
+			//send success message
+			await InteractionUtils.send(
+				intr,
+				LL.commands.character.importPasteBin.interactions.success({
+					characterName: newCharacter.name,
+				})
+			);
+			return;
 		}
 		//otherwise wanderer's guide
 		else {
 			//check for token access
 			const fetcher = new WgCharacterFetcher(intr, kobold, intr.user.id);
-			const newCharacter = await fetcher.create({ charId: activeCharacter.charId });
+			const newCharacter = await fetcher.update({ charId: activeCharacter.charId });
 
 			await InteractionUtils.send(
 				intr,

@@ -51,25 +51,22 @@ export abstract class CharacterFetcher<SourceData, FetchArgs> {
 			importSource: this.importSource,
 			charId: this.getCharId(args),
 		});
+		await this.kobold.character.setIsActive({ id: createdCharacter.id, userId: this.userId });
 		return createdCharacter;
 	}
-	public async confirmUpdateName(
-		intr: CommandInteraction<CacheType>,
-		oldName: string,
-		newName: string
-	) {
+	public async confirmUpdateName(oldName: string, newName: string) {
 		// confirm the update
-		const prompt = await intr.followUp({
+		console.log(this.importSource);
+		const prompt = await this.intr.followUp({
 			content:
 				`**WARNING:** The character name on the target sheet ${newName} does not ` +
-					`match your active character's name ${oldName}. If this sheet is not the one you want to update, ` +
-					`please re-export the correct character and try again.` +
-					this.importSource ===
-				'pathbuilder'
+				`match your active character's name ${oldName}. If this sheet is not the one you want to update, ` +
+				`please re-export the correct character and try again.` +
+				(this.importSource === 'pathbuilder'
 					? '\n\n**NOTE:** If you are using Pathbuilder, you must re-export your character and use the new json id to ' +
 					  'update your character sheet with new changes. Otherwise, I will just reload the data from the last ' +
 					  'time you exported ANY character.'
-					: '',
+					: ''),
 			components: [
 				{
 					type: ComponentType.ActionRow,
@@ -96,7 +93,7 @@ export abstract class CharacterFetcher<SourceData, FetchArgs> {
 		const result = await CollectorUtils.collectByButton(
 			prompt,
 			async buttonInteraction => {
-				if (buttonInteraction.user.id !== intr.user.id) {
+				if (buttonInteraction.user.id !== this.intr.user.id) {
 					return;
 				}
 				switch (buttonInteraction.customId) {
@@ -109,11 +106,11 @@ export abstract class CharacterFetcher<SourceData, FetchArgs> {
 			{
 				time: 50000,
 				reset: true,
-				target: intr.user,
+				target: this.intr.user,
 				stopFilter: message => message.content.toLowerCase() === 'stop',
 				onExpire: async () => {
 					timedOut = true;
-					await InteractionUtils.editReply(intr, {
+					await InteractionUtils.editReply(this.intr, {
 						content:
 							L.en.commands.character.remove.interactions.removeConfirmation.expired(),
 						components: [],
@@ -122,7 +119,7 @@ export abstract class CharacterFetcher<SourceData, FetchArgs> {
 			}
 		);
 		if (result && result.value !== 'update') {
-			await InteractionUtils.editReply(intr, {
+			await InteractionUtils.editReply(this.intr, {
 				content: L.en.sharedInteractions.choiceRegistered({
 					choice: 'Cancel',
 				}),
@@ -135,7 +132,7 @@ export abstract class CharacterFetcher<SourceData, FetchArgs> {
 				})
 			);
 		} else {
-			await InteractionUtils.editReply(intr, {
+			await InteractionUtils.editReply(this.intr, {
 				content: L.en.sharedInteractions.choiceRegistered({
 					choice: 'Update',
 				}),
@@ -153,11 +150,7 @@ export abstract class CharacterFetcher<SourceData, FetchArgs> {
 
 		if (activeCharacter.name !== sheetRecord.sheet.staticInfo.name) {
 			// throws an error if they don't confirm
-			await this.confirmUpdateName(
-				this.intr,
-				activeCharacter.name,
-				sheetRecord.sheet.staticInfo.name
-			);
+			await this.confirmUpdateName(activeCharacter.name, sheetRecord.sheet.staticInfo.name);
 		}
 
 		sheetRecord.sheet = Creature.preserveSheetTrackerValues(

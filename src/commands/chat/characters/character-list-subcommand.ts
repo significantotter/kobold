@@ -43,6 +43,12 @@ export class CharacterListSubCommand implements Command {
 			)
 		);
 
+		const channelDefault = ownedCharacters.find(character =>
+			character.channelDefaultCharacters.find(
+				channelDefault => channelDefault.channelId == intr.channelId
+			)
+		);
+
 		if (!ownedCharacters.length) {
 			//send success message
 			await InteractionUtils.send(
@@ -64,6 +70,8 @@ export class CharacterListSubCommand implements Command {
 							characterName: character.name,
 							activeText: character.isActiveCharacter ? ' (active)' : '',
 							serverDefaultText: isServerDefault ? ' (server default)' : '',
+							channelDefaultText:
+								channelDefault?.id == character.id ? ' (channel default)' : '',
 						}
 					),
 					value: LL.commands.character.list.interactions.characterListEmbed.characterFieldValue(

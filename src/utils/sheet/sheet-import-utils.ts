@@ -14,11 +14,7 @@ import {
 import { PathBuilder } from '../../services/pathbuilder/pathbuilder.js';
 import { Creature, CreatureFluff, Stat } from '../../services/pf2etools/schemas/index-types.js';
 import { WG } from '../../services/wanderers-guide/wanderers-guide.js';
-import {
-	SheetIntegerProperties,
-	SheetProperties,
-	SheetStatProperties,
-} from './sheet-properties.js';
+import { SheetProperties, SheetStatProperties } from './sheet-properties.js';
 import { SheetUtils } from './sheet-utils.js';
 
 function parsePf2eStat(stat: Stat | number | null): { bonus: number | null; note: string } {
@@ -515,15 +511,6 @@ export function convertWanderersGuideCharToSheet(
 
 	let maxHp = calculatedStats.maxHP ?? 0;
 
-	if (characterData.variantStamina === 1 && calculatedStats.maxStamina !== null) {
-		const conMod = scoreToBonus(baseSheet.intProperties.constitution ?? 10);
-		let classHp =
-			(calculatedStats.maxStamina - conMod * characterData.level) / characterData.level;
-		let expectedNormalMaxHp = (classHp * 2 + conMod) * characterData.level;
-		let hpDiff = expectedNormalMaxHp - maxHp;
-		maxHp = classHp * characterData.level + hpDiff;
-	}
-
 	// casting stats
 	if (calculatedStats.arcaneSpellProfMod !== null) {
 		baseSheet.stats.arcane = {
@@ -677,8 +664,8 @@ export function convertWanderersGuideCharToSheet(
 		baseCounters: {
 			hp: {
 				...baseSheet.baseCounters.hp,
-				max: maxHp,
-				current: maxHp,
+				max: calculatedStats.maxHP ?? 0,
+				current: calculatedStats.maxHP ?? 0,
 			},
 			tempHp: {
 				...baseSheet.baseCounters.tempHp,
