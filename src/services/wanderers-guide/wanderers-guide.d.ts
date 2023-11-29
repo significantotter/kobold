@@ -22,7 +22,7 @@ export namespace WG {
 		classID: null | number;
 		classID_2: null | number;
 		inventoryID: number;
-		notes: any;
+		notes?: any;
 		infoJSON: null | {
 			gender?: string;
 			beliefs?: string;
@@ -33,9 +33,9 @@ export namespace WG {
 			pronouns?: string;
 			[key: string]: any;
 		};
-		rollHistoryJSON: any;
-		details: any;
-		customCode: any;
+		rollHistoryJSON?: any;
+		details?: any;
+		customCode?: any;
 		dataID: null | number;
 		currentStamina: null | number;
 		currentResolve: null | number;
@@ -68,7 +68,7 @@ export namespace WG {
 		sourceLevel: number;
 		sourceCode: string;
 		sourceCodeSNum: string;
-		value: any;
+		value?: any;
 		createdAt: string;
 		updatedAt: string;
 		[k: string]: any;
@@ -171,7 +171,7 @@ export namespace WG {
 		name: string | null;
 		entryID: number | null;
 		parentEntryID: number | null;
-		sourceText: any;
+		sourceText?: any;
 		value: number | null;
 		[key: string]: any;
 	}
@@ -328,17 +328,17 @@ export namespace WG {
 		id: number;
 		classID: number;
 		name: string;
-		level: any;
+		level?: any;
 		description: string | null;
 		code: string;
 		selectType: string;
 		selectOptionFor: number;
 		displayInSheet: number;
-		indivClassName: any;
-		indivClassAbilName: any;
+		indivClassName?: any;
+		indivClassAbilName?: any;
 		isArchived: number;
 		contentSrc: string;
-		homebrewID: any;
+		homebrewID?: any;
 		createdAt: string;
 		updatedAt: string;
 		[k: string]: any;
@@ -360,14 +360,14 @@ export namespace WG {
 			tSkills: string;
 			tSkillsMore: number;
 			tWeapons: string;
-			weaponsExtra: any;
+			weaponsExtra?: any;
 			tArmor: string;
 			tagID: number;
 			artworkURL: string;
-			code: any;
+			code?: any;
 			isArchived: number;
 			contentSrc: string;
-			homebrewID: any;
+			homebrewID?: any;
 			version: string;
 			createdAt: string;
 			updatedAt: string;
@@ -396,7 +396,7 @@ export namespace WG {
 		isArchived: number;
 		contentSrc: string;
 		indivAncestryName?: any;
-		homebrewID: any;
+		homebrewID?: any;
 		artworkURL?: string | null;
 		version?: string;
 		createdAt: string;
@@ -408,9 +408,9 @@ export namespace WG {
 		id: number;
 		name: string;
 		speakers: string;
-		script: any;
+		script?: any;
 		description: string | null;
-		homebrewID: any;
+		homebrewID?: any;
 		createdAt: string;
 		updatedAt: string;
 		[k: string]: any;
@@ -420,8 +420,8 @@ export namespace WG {
 		name: string;
 		description: string | null;
 		code: string;
-		itemWeaponID: any;
-		overrides: any;
+		itemWeaponID?: any;
+		overrides?: any;
 		[k: string]: any;
 	}
 
@@ -434,14 +434,14 @@ export namespace WG {
 		speed: number;
 		description: string;
 		visionSenseID: number;
-		additionalSenseID: any;
+		additionalSenseID?: any;
 		physicalFeatureOneID: number;
 		physicalFeatureTwoID: number;
 		tagID: number;
-		artworkURL: any;
+		artworkURL?: any;
 		isArchived: number;
 		contentSrc: string;
-		homebrewID: any;
+		homebrewID?: any;
 		version: string;
 		createdAt: string;
 		updatedAt: string;
@@ -503,7 +503,7 @@ export namespace WG {
 		code: string;
 		isArchived: number;
 		contentSrc: string;
-		homebrewID: any;
+		homebrewID?: any;
 		version: string;
 		createdAt: string;
 		updatedAt: string;

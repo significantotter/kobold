@@ -16,7 +16,12 @@ import { GameplayOptions } from './gameplay-command-options.js';
 import { ChatArgs } from '../../../constants/chat-args.js';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { CharacterWithRelations, Kobold } from '../../../services/kobold/index.js';
+import {
+	CharacterWithRelations,
+	Kobold,
+	SheetRecordTrackerModeEnum,
+	isSheetRecordTrackerModeEnum,
+} from '../../../services/kobold/index.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
 import { Creature } from '../../../utils/creature.js';
 import { InteractionUtils } from '../../../utils/interaction-utils.js';
@@ -63,14 +68,22 @@ export class GameplayTrackerSubCommand implements Command {
 	): Promise<void> {
 		const targetCharacterName = intr.options.getString(ChatArgs.SET_ACTIVE_NAME_OPTION.name);
 		const trackerMode =
-			intr.options.getString(GameplayOptions.GAMEPLAY_TRACKER_MODE.name) ?? 'basic_stats';
+			intr.options.getString(GameplayOptions.GAMEPLAY_TRACKER_MODE.name) ??
+			SheetRecordTrackerModeEnum.basic_stats;
 		const gameplayTargetChannel = intr.options.getChannel(
 			GameplayOptions.GAMEPLAY_TARGET_CHANNEL.name,
 			false,
 			[ChannelType.GuildText]
 		);
 		const koboldUtils = new KoboldUtils(kobold);
-		const { characterUtils } = new KoboldUtils(kobold);
+		const { characterUtils } = koboldUtils;
+
+		if (!isSheetRecordTrackerModeEnum(trackerMode)) {
+			throw new KoboldError(
+				`Yip! Please use one of the suggested options ` +
+					`for trackerMode! I didn't understand "${trackerMode}".`
+			);
+		}
 
 		// try and find that charcter
 		let targetCharacter: CharacterWithRelations | null;

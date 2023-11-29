@@ -64,8 +64,6 @@ export async function up(db: Kysely<any>): Promise<void> {
 		.alterColumn('tracker_guild_id', col => col.setDataType('text'))
 		.execute();
 
-	// await db.schema.alterTable('wg_auth_token').execute();
-
 	await db.schema
 		.alterTable('initiative')
 		.dropColumn('round_message_ids')

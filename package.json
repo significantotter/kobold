@@ -16,6 +16,7 @@
 	"scripts": {
 		"rebuild": ".\\node_modules\\.bin\\electron-rebuild.cmd -f -m ./node_modules/better-sqlite3",
 		"kanel": "tsx ./src/scripts/kanel-generate.ts",
+		"generate-json-schemas": "tsx ./src/scripts/generate-json-schemas.ts",
 		"data-upgrade": "tsx ./src/scripts/upgrade-sheets-v2.ts",
 		"check-circular": "madge --circular --extensions ts ./src",
 		"migrate": "tsx ./src/scripts/migrate.ts",
@@ -96,7 +97,8 @@
 		"type-fest": "^4.3.1",
 		"typesafe-i18n": "^5.26.2",
 		"xxhashjs": "^0.2.2",
-		"zod": "^3.22.2"
+		"zod": "^3.22.2",
+		"zod-validation-error": "^2.1.0"
 	},
 	"devDependencies": {
 		"@types/better-sqlite3": "^7.6.5",
@@ -128,7 +130,9 @@
 		"tsx": "^4.1.2",
 		"typescript": "^5.2",
 		"vitest": "^0.34.4",
-		"zod-fixture": "^2.5.0"
+		"zod-fixture": "^2.5.0",
+		"zod-to-json-schema": "^3.22.0",
+		"zod-to-ts": "^1.2.0"
 	},
 	"madge": {
 		"tsConfig": "./tsconfig.json",

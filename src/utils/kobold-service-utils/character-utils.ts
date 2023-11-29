@@ -1,4 +1,4 @@
-import { AutocompleteInteraction, CacheType, CommandInteraction, Interaction } from 'discord.js';
+import { BaseInteraction, CacheType, CommandInteraction, Interaction } from 'discord.js';
 import { Character, CharacterWithRelations, Kobold } from '../../services/kobold/index.js';
 import { StringUtils } from '../string-utils.js';
 import type { KoboldUtils } from './kobold-utils.js';
@@ -33,7 +33,7 @@ export class CharacterUtils {
 	 * @returns the active character for the user, or null if one is not present
 	 */
 	public async getActiveCharacter(
-		intr: Interaction<CacheType>
+		intr: BaseInteraction<CacheType>
 	): Promise<CharacterWithRelations | null> {
 		const { user, guildId, channelId } = intr;
 		const userId = user.id;

@@ -290,6 +290,10 @@ export default {
 		name: 'json-id',
 		description: 'The most recent json export id for your PathBuilder character.',
 	},
+	pastebinUrl: {
+		name: 'pastebin-url',
+		description: 'The pastebin link to the saved kobold character data.',
+	},
 	useStamina: {
 		name: 'use-stamina',
 		description:

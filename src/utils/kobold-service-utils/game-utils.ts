@@ -1,15 +1,9 @@
-import {
-	AutocompleteInteraction,
-	CacheType,
-	ChatInputCommandInteraction,
-	Interaction,
-} from 'discord.js';
+import { BaseInteraction, CacheType } from 'discord.js';
 import L from '../../i18n/i18n-node.js';
 import {
 	Character,
 	CharacterWithRelations,
 	GameWithRelations,
-	InitiativeActorWithRelations,
 	Kobold,
 	SheetRecord,
 } from '../../services/kobold/index.js';
@@ -82,7 +76,7 @@ export class GameUtils {
 		}));
 	}
 
-	public async getAllTargetableOptions(intr: Interaction<CacheType>) {
+	public async getAllTargetableOptions(intr: BaseInteraction<CacheType>) {
 		let [currentInit, targetGames, ownedCharacters] = await Promise.all([
 			this.koboldUtils.initiativeUtils.getInitiativeForChannelOrNull(intr.channel),
 			this.koboldUtils.gameUtils.getWhereUserHasCharacter(intr.user.id, intr.guildId),
@@ -139,7 +133,7 @@ export class GameUtils {
 	}
 
 	public async getCharacterOrInitActorTarget(
-		intr: Interaction<CacheType>,
+		intr: BaseInteraction<CacheType>,
 		targetName: string
 	): Promise<{
 		targetSheetRecord: SheetRecord;

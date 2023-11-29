@@ -30,6 +30,12 @@ export class CharacterOptions {
 		required: true,
 		type: ApplicationCommandOptionType.Number,
 	};
+	public static readonly IMPORT_PASTEBIN_OPTION: APIApplicationCommandBasicOption = {
+		name: L.en.commandOptions.pastebinUrl.name(),
+		description: L.en.commandOptions.pastebinUrl.description(),
+		required: true,
+		type: ApplicationCommandOptionType.Number,
+	};
 	public static readonly IMPORT_USE_STAMINA_OPTION: APIApplicationCommandBasicOption = {
 		name: L.en.commandOptions.useStamina.name(),
 		description: L.en.commandOptions.useStamina.description(),

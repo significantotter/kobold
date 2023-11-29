@@ -9,6 +9,7 @@ import type {
 	InlineRollsDisplayEnum,
 	RollCompactModeEnum,
 } from './lib/enum-helpers.js';
+import type { SheetRecordTrackerModeEnum } from './shared/sheet.zod.js';
 
 export type Actions = Action[];
 export type Modifiers = Modifier[];
@@ -21,4 +22,5 @@ export type {
 	InitStatsNotificationEnum,
 	InlineRollsDisplayEnum,
 	RollCompactModeEnum,
+	SheetRecordTrackerModeEnum,
 };

@@ -46,7 +46,13 @@ import {
 	zWgAuthTokenInitializer,
 	zWgAuthTokenMutator,
 } from '../kanel/WgAuthToken.js';
-import { zAction, zModifier, zRollMacro, zSheet } from '../shared/index.js';
+import {
+	SheetRecordTrackerModeEnum,
+	zAction,
+	zModifier,
+	zRollMacro,
+	zSheet,
+} from '../shared/index.js';
 import { z } from 'zod';
 import {
 	CharacterWithRelations,
@@ -88,18 +94,27 @@ const zExtendedSheetRecord = zSheetRecord.extend({
 	modifiers: z.array(zModifier),
 	actions: z.array(zAction),
 	rollMacros: z.array(zRollMacro),
+	trackerMode: z
+		.nativeEnum(SheetRecordTrackerModeEnum)
+		.default(SheetRecordTrackerModeEnum.counters_only),
 });
 const zExtendedSheetRecordInitializer = zSheetRecordInitializer.extend({
 	sheet: zSheet,
 	modifiers: z.array(zModifier),
 	actions: z.array(zAction),
 	rollMacros: z.array(zRollMacro),
+	trackerMode: z
+		.nativeEnum(SheetRecordTrackerModeEnum)
+		.default(SheetRecordTrackerModeEnum.counters_only),
 });
 const zExtendedSheetRecordMutator = zSheetRecordMutator.extend({
 	sheet: zSheet.optional(),
 	modifiers: z.array(zModifier).optional(),
 	actions: z.array(zAction).optional(),
 	rollMacros: z.array(zRollMacro).optional(),
+	trackerMode: z
+		.nativeEnum(SheetRecordTrackerModeEnum)
+		.default(SheetRecordTrackerModeEnum.counters_only),
 });
 
 // relations:
@@ -191,4 +206,6 @@ export {
 	zInitiativeActorGroupWithRelations,
 	zInitiativeWithRelations,
 	zGameWithRelations,
+	// enums
+	SheetRecordTrackerModeEnum,
 };

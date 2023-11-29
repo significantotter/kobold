@@ -1,22 +1,18 @@
-import { default as axios } from 'axios';
 import {
 	ApplicationCommandType,
 	ChatInputCommandInteraction,
 	PermissionsString,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
-import { CharacterWithRelations } from '../../../services/kobold/index.js';
 
-import { Config } from '../../../config/config.js';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold } from '../../../services/kobold/index.js';
-import { Creature } from '../../../utils/creature.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { TextParseHelpers } from '../../../utils/kobold-helpers/text-parse-helpers.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { CharacterOptions } from './command-options.js';
-import { CharacterHelpers } from './helpers.js';
+import { WgCharacterFetcher } from './Fetchers/wg-character-fetcher.js';
 
 export class CharacterImportWanderersGuideSubCommand implements Command {
 	public names = [L.en.commands.character.importWanderersGuide.name()];
@@ -46,120 +42,16 @@ export class CharacterImportWanderersGuideSubCommand implements Command {
 			);
 			return;
 		}
+		const fetcher = new WgCharacterFetcher(intr, kobold, intr.user.id);
+		const newCharacter = await fetcher.create({ charId });
 
-		//check if we have a token
-		const [tokenResults, existingCharacter] = await Promise.all([
-			kobold.wgAuthToken.read({ charId }),
-			kobold.character.read({ charId, importSource: 'wg', userId: intr.user.id }),
-		]);
+		//send success message
 
-		if (existingCharacter) {
-			await InteractionUtils.send(
-				intr,
-				LL.commands.character.importWanderersGuide.interactions.characterAlreadyExists({
-					characterName: existingCharacter.name,
-				})
-			);
-			return;
-		} else if (!tokenResults) {
-			// The user needs to authenticate!
-			await InteractionUtils.send(
-				intr,
-				LL.commands.character.interactions.authenticationRequest({
-					action: 'import',
-				})
-			);
-			await InteractionUtils.send(
-				intr,
-				LL.commands.character.interactions.authenticationLink({
-					wgBaseUrl: Config.wanderersGuide.oauthBaseUrl,
-					charId: charId,
-				}),
-				true
-			);
-			return;
-		} else {
-			// We have the authentication token! Fetch the user's sheet
-			const token = tokenResults.accessToken;
-			let creature: Creature;
-
-			//TODO: merge this with the one in helpers as a util
-			try {
-				creature = await CharacterHelpers.fetchWgCharacterFromToken(charId, token);
-			} catch (err) {
-				if ((axios.default ?? axios).isAxiosError(err) && err.response?.status === 401) {
-					//token expired!
-					await kobold.wgAuthToken.delete({
-						charId,
-					});
-					await InteractionUtils.send(
-						intr,
-						LL.commands.character.interactions.expiredToken()
-					);
-					await InteractionUtils.send(
-						intr,
-						LL.commands.character.interactions.authenticationLink({
-							wgBaseUrl: Config.wanderersGuide.oauthBaseUrl,
-							charId: charId,
-						}),
-						true
-					);
-					return;
-				} else if (
-					(axios.default ?? axios).isAxiosError(err) &&
-					err.response?.status === 429
-				) {
-					await InteractionUtils.send(
-						intr,
-						LL.commands.character.interactions.tooManyWGRequests()
-					);
-					return;
-				} else {
-					//otherwise, something else went wrong that we want to be a real error
-					throw err;
-				}
-			}
-			const duplicateNameChar: CharacterWithRelations | undefined = (
-				await kobold.character.readMany({
-					name: creature.name,
-					userId: intr.user.id,
-				})
-			)[0];
-
-			if (duplicateNameChar) {
-				await InteractionUtils.send(
-					intr,
-					LL.commands.character.importWanderersGuide.interactions.characterAlreadyExists({
-						characterName: creature.name,
-					})
-				);
-				return;
-			}
-
-			// store sheet in db
-			const newSheetRecord = await kobold.sheetRecord.create({ sheet: creature._sheet });
-			const newCharacter = await kobold.character.create({
-				userId: intr.user.id,
-				name: creature.name,
-				charId,
-				sheetRecordId: newSheetRecord.id,
-				isActiveCharacter: true,
-				importSource: 'wg',
-			});
-
-			await kobold.character.setIsActive({
-				id: newCharacter.id,
-				userId: intr.user.id,
-			});
-
-			//send success message
-
-			await InteractionUtils.send(
-				intr,
-				LL.commands.character.importWanderersGuide.interactions.success({
-					characterName: newCharacter.name,
-				})
-			);
-		}
+		await InteractionUtils.send(
+			intr,
+			LL.commands.character.importWanderersGuide.interactions.success({
+				characterName: newCharacter.name,
+			})
+		);
 	}
 }

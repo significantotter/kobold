@@ -1,4 +1,4 @@
-import type { Sheet, Modifiers, Actions, RollMacros } from './../kanel-types.js';
+import type { Sheet, Modifiers, Actions, RollMacros, SheetRecordTrackerModeEnum } from './../kanel-types.js';
 import type { ColumnType, Selectable, Insertable, Updateable } from 'kysely';
 import { z } from 'zod';
 
@@ -22,7 +22,7 @@ export default interface SheetRecordTable {
   rollMacros: ColumnType<RollMacros, RollMacros | null, RollMacros | null>;
 
   /** Database type: pg_catalog.text */
-  trackerMode: ColumnType<string | null, string | null, string | null>;
+  trackerMode: ColumnType<SheetRecordTrackerModeEnum | null, SheetRecordTrackerModeEnum | null, SheetRecordTrackerModeEnum | null>;
 
   /** Database type: pg_catalog.text */
   trackerMessageId: ColumnType<string | null, string | null, string | null>;

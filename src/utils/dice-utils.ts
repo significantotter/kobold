@@ -4,7 +4,7 @@ import _ from 'lodash';
 import { attributeShorthands, staticAttributes } from '../constants/attributes.js';
 import L from '../i18n/i18n-node.js';
 import { TranslationFunctions } from '../i18n/i18n-types.js';
-import { Attribute, Modifier } from '../services/kobold/index.js';
+import { Attribute, Modifier, RollMacro } from '../services/kobold/index.js';
 import type { Creature } from './creature.js';
 import { WritableDeep } from 'type-fest';
 
@@ -172,6 +172,33 @@ export class DiceUtils {
 		return [finalExpression, _.uniq(newTags)];
 	}
 
+	/**
+	 * Uses a creature's roll macros to expand a roll
+	 */
+	public static expandRollWithMacros(rollExpression: string, rollMacros: RollMacro[]): string {
+		const maxDepth = 10;
+		let resultRollExpression = rollExpression.toLocaleLowerCase();
+		for (let i = 0; i < maxDepth; i++) {
+			// we can allow up to 10 recursive applications of macros before giving up.
+			let rollExpressionBeforeExpanding = resultRollExpression;
+
+			resultRollExpression = resultRollExpression.replaceAll(
+				/\[([^\[\]]*)\]/g,
+				(match, potentialMacro) => {
+					potentialMacro = potentialMacro.trim().toLowerCase();
+					const matchedMacro = rollMacros.find(
+						macro => macro.name.toLowerCase() === potentialMacro
+					);
+					return matchedMacro ? matchedMacro.macro : match;
+				}
+			);
+
+			// if we haven't changed the roll expression, then we're done checking macros
+			if (rollExpressionBeforeExpanding === resultRollExpression) break;
+		}
+		return resultRollExpression;
+	}
+
 	public static parseDiceExpression({
 		rollExpression,
 		creature,
@@ -191,7 +218,7 @@ export class DiceUtils {
 		let finalTags: string[] = [];
 
 		let expandedExpression = creature
-			? creature.expandRollWithMacros(rollExpression)
+			? this.expandRollWithMacros(rollExpression, creature.rollMacros)
 			: rollExpression;
 
 		// check for any referenced creature attributes in the roll
@@ -215,7 +242,7 @@ export class DiceUtils {
 			// the parsed expression just has the math for the dice roller to use
 
 			const expandedModifier = creature
-				? creature.expandRollWithMacros(modifier.value.toString())
+				? this.expandRollWithMacros(modifier.value.toString(), creature.rollMacros)
 				: modifier.value.toString();
 
 			const [parsedModifier] = DiceUtils.parseAttributes(

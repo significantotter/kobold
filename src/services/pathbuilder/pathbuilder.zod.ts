@@ -1,7 +1,6 @@
 import { z } from 'zod';
-import { zAbilityScoreSchema } from '../pf2etools/schemas/index.js';
 
-export const zAbilitySchema = z.union([
+export const abilitySchema = z.union([
 	z.literal('str'),
 	z.literal('dex'),
 	z.literal('con'),
@@ -10,7 +9,7 @@ export const zAbilitySchema = z.union([
 	z.literal('cha'),
 ]);
 
-export const zAbilityUppercaseSchema = z.union([
+export const abilityUppercaseSchema = z.union([
 	z.literal('Str'),
 	z.literal('Dex'),
 	z.literal('Con'),
@@ -19,14 +18,14 @@ export const zAbilityUppercaseSchema = z.union([
 	z.literal('Cha'),
 ]);
 
-export const zSpellTraditionSchema = z.union([
+export const spellTraditionSchema = z.union([
 	z.literal('arcane'),
 	z.literal('divine'),
 	z.literal('occult'),
 	z.literal('primal'),
 ]);
 
-export const zPathBuilderAttributesSchema = z.strictObject({
+export const zPathBuilderAttributesSchema = z.object({
 	ancestryhp: z.number(),
 	classhp: z.number(),
 	bonushp: z.number(),
@@ -35,18 +34,22 @@ export const zPathBuilderAttributesSchema = z.strictObject({
 	speedBonus: z.number(),
 });
 
-export const zPathBuilderAbilitiesSchema = z
-	.object({
-		breakdown: z.strictObject({
-			ancestryFree: z.array(zAbilityUppercaseSchema),
-			ancestryBoosts: z.array(zAbilityUppercaseSchema),
-			ancestryFlaws: z.array(zAbilityUppercaseSchema),
-			backgroundBoosts: z.array(zAbilityUppercaseSchema),
-			classBoosts: z.array(zAbilityUppercaseSchema),
-			mapLevelledBoosts: z.record(z.array(zAbilityUppercaseSchema)),
-		}),
-	})
-	.extend(zAbilityScoreSchema.shape);
+export const zPathBuilderAbilitiesSchema = z.object({
+	str: z.number(),
+	dex: z.number(),
+	con: z.number(),
+	int: z.number(),
+	wis: z.number(),
+	cha: z.number(),
+	breakdown: z.object({
+		ancestryFree: z.array(abilityUppercaseSchema),
+		ancestryBoosts: z.array(abilityUppercaseSchema),
+		ancestryFlaws: z.array(abilityUppercaseSchema),
+		backgroundBoosts: z.array(abilityUppercaseSchema),
+		classBoosts: z.array(abilityUppercaseSchema),
+		mapLevelledBoosts: z.record(z.array(abilityUppercaseSchema)),
+	}),
+});
 
 export const zPathBuilderProficienciesSchema = z.object({
 	classDC: z.number().optional(),
@@ -158,9 +161,9 @@ export const zPathBuilderSpellsAtLevelSchema = z.object({
 
 export const zPathBuilderSpellCastingSchema = z.object({
 	name: z.string(),
-	magicTradition: zSpellTraditionSchema,
+	magicTradition: spellTraditionSchema,
 	spellcastingType: z.string(),
-	ability: zAbilitySchema,
+	ability: abilitySchema,
 	proficiency: z.number(),
 	spells: z.array(zPathBuilderSpellsAtLevelSchema),
 	perDay: z.tuple([
@@ -248,7 +251,7 @@ export const zPathBuilderCharacterSchema = z.object({
 	}),
 });
 
-export const pathBuilderJsonExportSchema = z.object({
+export const zPathBuilderJsonExportSchema = z.object({
 	success: z.boolean(),
 	build: zPathBuilderCharacterSchema,
 });

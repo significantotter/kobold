@@ -4,7 +4,7 @@ import {
 	truncateDbForTests,
 	vitestKobold,
 } from '../../../utils/discord-test-utils.js';
-import { InitiativeActorGroup, zInitiativeActorGroupInitializer } from '../index.js';
+import { zInitiativeActorGroupInitializer } from '../index.js';
 import _ from 'lodash';
 
 describe('InitiativeActorGroupModel', () => {

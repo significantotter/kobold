@@ -974,26 +974,4 @@ export class Creature {
 		);
 		return untyped.concat(_.flatten(_.values(bonuses)), _.flatten(_.values(penalties)));
 	}
-
-	/**
-	 * Uses a creature's roll macros to expand a roll
-	 */
-	public expandRollWithMacros(rollExpression: string): string {
-		const creatureRollMacros = this.rollMacros || [];
-		const maxDepth = 10;
-		let resultRollExpression = rollExpression.toLocaleLowerCase();
-		for (let i = 0; i < maxDepth; i++) {
-			let rollExpressionBeforeExpanding = resultRollExpression;
-			// replace every instance of each macro in the rollExpression with the macro's value
-			for (const macro of creatureRollMacros) {
-				resultRollExpression = resultRollExpression.replaceAll(
-					`[${macro.name.toLocaleLowerCase()}]`,
-					macro.macro
-				);
-			}
-			// if we haven't changed the roll expression, then we're done checking macros
-			if (rollExpressionBeforeExpanding === resultRollExpression) break;
-		}
-		return resultRollExpression;
-	}
 }

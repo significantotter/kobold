@@ -65,30 +65,30 @@ describe('ModifierUtils', () => {
 			);
 			expect(result).toBe(true);
 		});
-		test('characters not usable by filtrex or in attributes throw an error', () => {
-			expect(() =>
-				ModifierUtils.isModifierValidForTags(
+		test('characters not usable by filtrex or in attributes return false', () => {
+			const valid = ModifierUtils.isModifierValidForTags(
+				{
+					name: 'test',
+					type: SheetAdjustmentTypeEnum.status,
+					value: '2',
+					targetTags: '__foo = 5',
+					isActive: false,
+					description: null,
+					modifierType: ModifierTypeEnum.roll,
+				},
+				[
 					{
-						name: 'test',
-						type: SheetAdjustmentTypeEnum.status,
-						value: '2',
-						targetTags: '__foo = 5',
-						isActive: false,
-						description: null,
-						modifierType: ModifierTypeEnum.roll,
+						name: 'foo',
+						aliases: ['foo'],
+						type: SheetAdjustmentTypeEnum.circumstance,
+						value: 5,
+						tags: ['foo'],
 					},
-					[
-						{
-							name: 'foo',
-							aliases: ['foo'],
-							type: SheetAdjustmentTypeEnum.circumstance,
-							value: 5,
-							tags: ['foo'],
-						},
-					],
-					['attack', 'electricity']
-				)
-			).toThrow();
+				],
+				['attack', 'electricity']
+			);
+
+			expect(valid).toBe(false);
 		});
 	});
 

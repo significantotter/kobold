@@ -79,6 +79,27 @@ describe('Dice Utils', function () {
 			expect(otherDice).toBe('{( 2 / 5 fire )d20kl...10} >= 14');
 		});
 	});
+
+	describe('expandRollWithMacros', () => {
+		it('should correctly expand macros', () => {
+			const rollMacros = [
+				{ name: 'macro1', macro: '2d6' },
+				{ name: 'macro2', macro: '1d8' },
+			];
+			const rollExpression = '[macro1] + [strength] + [macro2]';
+			const expected = '2d6 + [strength] + 1d8';
+
+			expect(DiceUtils.expandRollWithMacros(rollExpression, rollMacros)).toBe(expected);
+		});
+
+		it('should stop after 10 recursive applications', () => {
+			const rollMacros = [{ name: 'macro', macro: '[macro]' }];
+			const rollExpression = '[macro]';
+			const expected = '[macro]';
+
+			expect(DiceUtils.expandRollWithMacros(rollExpression, rollMacros)).toBe(expected);
+		});
+	});
 });
 
 describe('RollBuilder', function () {

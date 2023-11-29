@@ -37,6 +37,11 @@ export async function up(db: Kysely<any>): Promise<void> {
 			db
 		)
 	);
+	await db.executeQuery(
+		sql`COMMENT ON COLUMN "sheet_record"."tracker_mode" IS '@type(SheetRecordTrackerModeEnum, ''./../kanel-types'', true, false, true)'`.compile(
+			db
+		)
+	);
 
 	// Move Character Actor Sheets to the new Sheet Table
 
