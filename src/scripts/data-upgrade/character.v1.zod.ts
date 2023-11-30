@@ -440,7 +440,7 @@ export const zSheetV1 = z
 					.nullable()
 					.optional()
 					.describe("The character's maximum stamina points."),
-				immunities: z.array(z.string()).describe("The character's immunities."),
+				immunities: z.array(z.string()).default([]).describe("The character's immunities."),
 				resistances: z
 					.array(
 						z.strictObject({
@@ -453,6 +453,7 @@ export const zSheetV1 = z
 							type: z.string().describe("the damage type that's resisted"),
 						})
 					)
+					.default([])
 					.describe("The character's resistances."),
 				weaknesses: z
 					.array(
@@ -465,6 +466,7 @@ export const zSheetV1 = z
 							type: z.string().describe('the damage type that of the weakness'),
 						})
 					)
+					.default([])
 					.describe("The character's weaknesses."),
 				ac: z
 					.number()
