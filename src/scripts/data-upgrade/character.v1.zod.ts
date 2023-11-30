@@ -274,7 +274,7 @@ export const zSheetV1 = z
 					.nullable()
 					.optional()
 					.describe("The character's background."),
-				traits: z.array(z.string()).describe("The character's traits."),
+				traits: z.array(z.string()).default([]).describe("The character's traits."),
 				usesStamina: z
 					.boolean()
 					.optional()
