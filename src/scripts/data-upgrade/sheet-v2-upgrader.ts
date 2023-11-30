@@ -131,6 +131,7 @@ export function upgradeAction(action: ActionV1): Action {
 	const rolls: Roll[] = defaultedAction.rolls.map(upgradeRoll);
 	return {
 		...defaultedAction,
+		description: defaultedAction.description ?? '',
 		type: actionType,
 		actionCost,
 		rolls,
@@ -240,9 +241,9 @@ export function upgradeSheet(sheet: SheetV1): Sheet {
 				proficiency: proficiency ?? null,
 			};
 		} else {
-			let parsedBonus = null;
+			let parsedBonus: number | null = null;
 			if (proficiency != null && stat.ability !== null) {
-				parsedBonus = proficiency + level + abilities[stat.ability];
+				parsedBonus = proficiency + level + abilities[stat.ability!];
 			}
 			return {
 				...stat,

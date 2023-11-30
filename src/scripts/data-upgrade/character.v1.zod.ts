@@ -165,7 +165,7 @@ export type ActionV1 = z.infer<typeof zActionV1>;
 export const zActionV1 = z
 	.object({
 		name: z.string(),
-		description: z.string(),
+		description: z.string().optional(),
 		type: z.string(),
 		actionCost: z.string().nullable(),
 		baseLevel: z.number().nullable(),
