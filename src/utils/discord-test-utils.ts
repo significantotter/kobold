@@ -211,6 +211,7 @@ export class MockChatInputCommandInteraction extends ChatInputCommandInteraction
 			application_id: 'applicationId',
 			type: 2, // Type 2 is APPLICATION_COMMAND
 			locale: 'en-US',
+			entitlements: [],
 			channel: {
 				id: 'channelId',
 				type: ChannelType.GuildText,
