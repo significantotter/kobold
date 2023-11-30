@@ -460,6 +460,7 @@ export const zSheetV1 = z
 							amount: z
 								.number()
 								.int()
+								.default(0)
 								.describe('the amount of weakness for this type of damage'),
 							type: z.string().describe('the damage type that of the weakness'),
 						})
