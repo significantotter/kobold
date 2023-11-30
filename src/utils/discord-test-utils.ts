@@ -204,7 +204,7 @@ export class MockChatInputCommandInteraction extends ChatInputCommandInteraction
 				'DirectMessageReactions',
 			],
 		};
-		const mockClient = new Client(options); // Create a mock Client instance
+		const mockClient = new Client(options) as Client<true>; // Create a mock Client instance
 
 		super(mockClient, {
 			id: 'interactionId',
