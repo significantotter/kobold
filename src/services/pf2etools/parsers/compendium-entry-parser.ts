@@ -471,28 +471,31 @@ export class EntryParser {
 		if (this.embedParser) {
 			if (entry.tag === 'background')
 				return this.embedDataToString(
-					parseBackground.call(this.embedParser, entry.data as Background)
+					parseBackground.call(this.embedParser, entry.data as Background) ??
+						(entry as unknown as Background)
 				);
 			if (entry.tag === 'hazard')
 				return this.embedDataToString(
-					parseHazard.call(this.embedParser, entry.data as Hazard)
+					parseHazard.call(this.embedParser, entry.data as Hazard) ??
+						(entry as unknown as Hazard)
 				);
 			if (entry.tag === 'ritual')
 				return this.embedDataToString(
-					parseRitual.call(this.embedParser, entry.data as Ritual)
+					parseRitual.call(this.embedParser, entry.data as Ritual) ??
+						(entry as unknown as Ritual)
 				);
-			if (entry.tag === 'action') console.log(entry);
-			return this.embedDataToString(
-				parseAction.call(
-					this.embedParser,
-					(entry.data as Action) ?? (entry as unknown as Action)
-				)
-			);
-			if (entry.tag === 'curse') return ``;
-			if (entry.tag === 'item') return ``;
-			if (entry.tag === 'spell') return ``;
-			if (entry.tag === 'place') return ``;
-			if (entry.tag === 'disease') return ``;
+			if (entry.tag === 'action')
+				return this.embedDataToString(
+					parseAction.call(
+						this.embedParser,
+						(entry.data as Action) ?? (entry as unknown as Action)
+					)
+				);
+			if (entry.tag === 'curse') return `(See Curse "${entry.name}")`;
+			if (entry.tag === 'item') return `(See Item "${entry.name}")`;
+			if (entry.tag === 'spell') return `(See Spell "${entry.name}")`;
+			if (entry.tag === 'place') return `(See Place "${entry.name}")`;
+			if (entry.tag === 'disease') return `(See Disease "${entry.name}")`;
 			if (entry.tag === 'eidolon') return `(See Eidolon "${entry.name}")`;
 			if (entry.tag === 'creature') return `(See Creature "${entry.name}")`;
 		}
