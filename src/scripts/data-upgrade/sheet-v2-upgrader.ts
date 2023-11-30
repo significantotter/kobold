@@ -208,9 +208,14 @@ export function upgradeModifier(modifier: ModifierV1): Modifier {
 }
 
 export function upgradeSheet(sheet: SheetV1): Sheet {
-	const defaultedSheet = zSheetV1.parse(sheet);
+	sheet = zSheetV1.parse(sheet);
 	const baseSheet = getDefaultSheet();
-	const keyAbility: AbilityEnum | null = isAbilityEnum(sheet.info.keyability)
+
+	if (!sheet.info) {
+		sheet.info = { name: 'unnamed character', traits: [], keyability: null };
+	}
+
+	const keyAbility: AbilityEnum | null = isAbilityEnum(sheet.info?.keyability)
 		? sheet.info.keyability
 		: null;
 
@@ -305,7 +310,7 @@ export function upgradeSheet(sheet: SheetV1): Sheet {
 		};
 	}
 
-	const level = defaultedSheet.info.level ?? 0;
+	const level = sheet.info.level ?? 0;
 	const abilities = {
 		strength: sheet.abilities.strength ? scoreToModifier(sheet.abilities.strength) : 0,
 		dexterity: sheet.abilities.dexterity ? scoreToModifier(sheet.abilities.dexterity) : 0,

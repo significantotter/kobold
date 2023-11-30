@@ -280,6 +280,7 @@ export const zSheetV1 = z
 					.optional()
 					.describe('Whether the character follows alternate stamina rules.'),
 			})
+			.optional()
 			.describe('The general character sheet formation.'),
 		abilities: z
 			.object({
