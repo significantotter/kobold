@@ -715,7 +715,7 @@ export function convertWanderersGuideCharToSheet(
 	return sheet;
 }
 
-export function applyStatOverrides(sheet: Sheet, statString: string): PartialDeep<Sheet> {
+export function applyStatOverrides(sheet: Sheet, statString: string): Sheet {
 	// treat the stat override string as just a bunch of sheet modifier adjustments
 	const adjustments = SheetUtils.stringToSheetAdjustments(statString);
 	const adjustedSheet = SheetUtils.adjustSheetWithSheetAdjustments(sheet, adjustments);

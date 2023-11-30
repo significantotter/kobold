@@ -371,8 +371,8 @@ export class SheetBaseCounterAdjuster implements SheetPropertyGroupAdjuster<Shee
 	public static deserializeAdjustment = SheetIntegerAdjuster.deserializeAdjustment;
 	public adjust(adjustment: SheetAdjustment): void {
 		const prop = adjustment.property as SheetBaseCounterKeys;
-		const sheetIntegerAdjustment = SheetIntegerAdjuster.deserializeAdjustment(adjustment);
-		if (!sheetIntegerAdjustment || !(prop in this.sheetBaseCounterProperties)) {
+		const sheetBaseCounterAdjustment = SheetIntegerAdjuster.deserializeAdjustment(adjustment);
+		if (!sheetBaseCounterAdjustment || !(prop in this.sheetBaseCounterProperties)) {
 			throw new KoboldError(
 				'something went wrong parsing the adjustment',
 				JSON.stringify(adjustment)
@@ -382,14 +382,14 @@ export class SheetBaseCounterAdjuster implements SheetPropertyGroupAdjuster<Shee
 		switch (adjustment.operation) {
 			case SheetAdjustmentOperationEnum['+']:
 				this.sheetBaseCounterProperties[prop].max =
-					currentValue + sheetIntegerAdjustment.parsed;
+					currentValue + sheetBaseCounterAdjustment.parsed;
 				break;
 			case SheetAdjustmentOperationEnum['-']:
 				this.sheetBaseCounterProperties[prop].max =
-					currentValue - sheetIntegerAdjustment.parsed;
+					currentValue - sheetBaseCounterAdjustment.parsed;
 				break;
 			case SheetAdjustmentOperationEnum['=']:
-				this.sheetBaseCounterProperties[prop].max = sheetIntegerAdjustment.parsed;
+				this.sheetBaseCounterProperties[prop].max = sheetBaseCounterAdjustment.parsed;
 				break;
 		}
 	}

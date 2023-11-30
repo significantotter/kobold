@@ -130,7 +130,14 @@ export class InitAddSubCommand implements Command {
 		let finalName: string = actorName;
 
 		if (customStatsString) {
-			applyStatOverrides(sheet, customStatsString);
+			sheet = applyStatOverrides(sheet, customStatsString);
+			const creature = new Creature(sheet, {
+				actions: [],
+				rollMacros: [],
+				modifiers: [],
+			});
+			creature.recover();
+			sheet = creature._sheet;
 		}
 
 		let nameCount = 1;
