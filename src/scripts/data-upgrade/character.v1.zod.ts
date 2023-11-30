@@ -857,6 +857,7 @@ export const zSheetV1 = z
 								.describe('The lore proficiencyModifer.'),
 						})
 					)
+					.default([])
 					.describe("The character's lore skills."),
 			})
 			.optional()
