@@ -17,6 +17,7 @@ import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js
 import { Command, CommandDeferType } from '../../index.js';
 import { ActionStageOptions } from './action-stage-command-options.js';
 import _ from 'lodash';
+import { LocalizedString } from 'typesafe-i18n';
 
 export class ActionStageEditSubCommand implements Command {
 	public names = [L.en.commands.actionStage.edit.name()];
@@ -69,7 +70,7 @@ export class ActionStageEditSubCommand implements Command {
 		if (option.name === ActionStageOptions.ACTION_STAGE_EDIT_OPTION.name) {
 			const allChoices = Object.entries(
 				L.en.commandOptions.actionStageStageEditOption.choices
-			).map(([, value]) => ({
+			).map(([name, value]: [string, any]) => ({
 				name: value.name(),
 				value: value.value(),
 			}));
