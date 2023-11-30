@@ -391,8 +391,11 @@ export const zSheetV1 = z
 					.nullable()
 					.optional()
 					.describe("The character's perception proficiency modifier."),
-				languages: z.array(z.string()).describe("The character's spoken languages."),
-				senses: z.array(z.string()).describe("The character's senses."),
+				languages: z
+					.array(z.string())
+					.default([])
+					.describe("The character's spoken languages."),
+				senses: z.array(z.string()).default([]).describe("The character's senses."),
 			})
 			.optional()
 			.describe('The general attributes for the character.'),
