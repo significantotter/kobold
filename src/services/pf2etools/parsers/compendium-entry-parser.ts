@@ -456,6 +456,7 @@ export class EntryParser {
 		if (entry.sections) {
 			genericLines.push(
 				entry.sections
+					.filter(_.identity)
 					.map(sectionGroup =>
 						sectionGroup.map(section => this.parseEntries(section)).join(this.delimiter)
 					)
@@ -480,10 +481,13 @@ export class EntryParser {
 				return this.embedDataToString(
 					parseRitual.call(this.embedParser, entry.data as Ritual)
 				);
-			if (entry.tag === 'action')
-				return this.embedDataToString(
-					parseAction.call(this.embedParser, entry.data as Action)
-				);
+			if (entry.tag === 'action') console.log(entry);
+			return this.embedDataToString(
+				parseAction.call(
+					this.embedParser,
+					(entry.data as Action) ?? (entry as unknown as Action)
+				)
+			);
 			if (entry.tag === 'curse') return ``;
 			if (entry.tag === 'item') return ``;
 			if (entry.tag === 'spell') return ``;

@@ -2,41 +2,41 @@ import type { EmbedData } from 'discord.js';
 import type { Action } from '../../schemas/index.js';
 import type { CompendiumEmbedParser } from '../compendium-parser.js';
 
-export async function _parseAction(this: CompendiumEmbedParser, ability: Action) {
-	const preprocessedData = (await this.preprocessData(ability)) as Action;
+export async function _parseAction(this: CompendiumEmbedParser, action: Action) {
+	const preprocessedData = (await this.preprocessData(action)) as Action;
 	return parseAction.call(this, preprocessedData);
 }
-export function parseAction(this: CompendiumEmbedParser, ability: Action): EmbedData {
-	const title = `${ability.name} ${
-		ability.activity ? this.entryParser.parseActivity(ability.activity) : ''
+export function parseAction(this: CompendiumEmbedParser, action: Action): EmbedData {
+	const title = `${action.name} ${
+		action.activity ? this.entryParser.parseActivity(action.activity) : ''
 	}`;
 	let description: string[] = [];
-	if (ability.traits?.length) {
-		description.push(`(${ability.traits.join(', ')})`);
+	if (action.traits?.length) {
+		description.push(`(${action.traits.join(', ')})`);
 	}
-	if (ability.cost) {
-		description.push(`**Cost:** ${ability.cost}`);
+	if (action.cost) {
+		description.push(`**Cost:** ${action.cost}`);
 	}
-	if (ability.prerequisites) {
-		description.push(`**Prerequisites:** ${ability.prerequisites}`);
+	if (action.prerequisites) {
+		description.push(`**Prerequisites:** ${action.prerequisites}`);
 	}
-	if (ability.requirements) {
-		description.push(`**Requirements:** ${ability.requirements}`);
+	if (action.requirements) {
+		description.push(`**Requirements:** ${action.requirements}`);
 	}
-	if (ability.frequency) {
-		description.push(`${this.helpers.parseFrequency(ability.frequency)}`);
+	if (action.frequency) {
+		description.push(`${this.helpers.parseFrequency(action.frequency)}`);
 	}
-	if (ability.trigger) {
-		description.push(`**Trigger** ${ability.trigger}`);
+	if (action.trigger) {
+		description.push(`**Trigger** ${action.trigger}`);
 	}
-	if (ability.overcome) {
-		description.push(`**Overcome** ${ability.overcome}`);
+	if (action.overcome) {
+		description.push(`**Overcome** ${action.overcome}`);
 	}
-	if (ability.entries?.length) {
-		description.push(this.entryParser.parseEntries(ability.entries));
+	if (action.entries?.length) {
+		description.push(this.entryParser.parseEntries(action.entries));
 	}
-	if (ability.special?.length) {
-		description.push(`**Special** ${ability.special.join(', ')}`);
+	if (action.special?.length) {
+		description.push(`**Special** ${action.special.join(', ')}`);
 	}
 	return {
 		title: title,
