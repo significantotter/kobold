@@ -403,7 +403,12 @@ export const zSheetV1 = z
 					.nullable()
 					.optional()
 					.describe("The character's current hit points."),
-				maxHp: z.number().int().nullable().describe("The character's maximum hit points."),
+				maxHp: z
+					.number()
+					.int()
+					.nullable()
+					.default(null)
+					.describe("The character's maximum hit points."),
 				tempHp: z
 					.number()
 					.int()
@@ -459,7 +464,12 @@ export const zSheetV1 = z
 						})
 					)
 					.describe("The character's weaknesses."),
-				ac: z.number().int().nullable().describe("The character's armor class"),
+				ac: z
+					.number()
+					.int()
+					.nullable()
+					.default(null)
+					.describe("The character's armor class"),
 				heavyProfMod: z
 					.number()
 					.int()
@@ -595,21 +605,36 @@ export const zSheetV1 = z
 			.describe("The character's casting stats."),
 		saves: z
 			.object({
-				fortitude: z.number().int().nullable().describe("The character's fortitude save."),
+				fortitude: z
+					.number()
+					.int()
+					.nullable()
+					.default(null)
+					.describe("The character's fortitude save."),
 				fortitudeProfMod: z
 					.number()
 					.int()
 					.nullable()
 					.optional()
 					.describe("The character's fortitude proficiency modifier."),
-				reflex: z.number().int().nullable().describe("The character's reflex save."),
+				reflex: z
+					.number()
+					.int()
+					.nullable()
+					.default(null)
+					.describe("The character's reflex save."),
 				reflexProfMod: z
 					.number()
 					.int()
 					.nullable()
 					.optional()
 					.describe("The character's reflex proficiency modifier."),
-				will: z.number().int().nullable().describe("The character's will save."),
+				will: z
+					.number()
+					.int()
+					.nullable()
+					.default(null)
+					.describe("The character's will save."),
 				willProfMod: z
 					.number()
 					.int()
