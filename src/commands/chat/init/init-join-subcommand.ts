@@ -1,34 +1,36 @@
 import {
+	ApplicationCommandOptionChoiceData,
 	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
 	ChatInputCommandInteraction,
-	EmbedBuilder,
 	PermissionsString,
-	ApplicationCommandOptionChoiceData,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 
-import { EventData } from '../../../models/internal-models.js';
-import { InteractionUtils } from '../../../utils/index.js';
-import { Command, CommandDeferType } from '../../index.js';
-import { InitiativeUtils, InitiativeBuilder } from '../../../utils/initiative-utils.js';
+import _ from 'lodash';
 import { ChatArgs } from '../../../constants/chat-args.js';
-import { CharacterUtils } from '../../../utils/character-utils.js';
-import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
+import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { Language } from '../../../models/enum-helpers/index.js';
+import { Kobold } from '../../../services/kobold/index.js';
+import { Creature } from '../../../utils/creature.js';
+import { InteractionUtils } from '../../../utils/index.js';
+import { InitiativeBuilder, InitiativeBuilderUtils } from '../../../utils/initiative-builder.js';
+import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
+import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { Command, CommandDeferType } from '../../index.js';
 import { InitOptions } from './init-command-options.js';
-import { SettingsUtils } from '../../../utils/settings-utils.js';
+import { KoboldError } from '../../../utils/KoboldError.js';
 
 export class InitJoinSubCommand implements Command {
-	public names = [Language.LL.commands.init.join.name()];
+	public names = [L.en.commands.init.join.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.init.join.name(),
-		description: Language.LL.commands.init.join.description(),
+		name: L.en.commands.init.join.name(),
+		description: L.en.commands.init.join.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -38,22 +40,24 @@ export class InitJoinSubCommand implements Command {
 
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
-		option: AutocompleteFocusedOption
-	): Promise<ApplicationCommandOptionChoiceData[]> {
+		option: AutocompleteFocusedOption,
+		{ kobold }: { kobold: Kobold }
+	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === ChatArgs.SKILL_CHOICE_OPTION.name) {
+			const { characterUtils } = new KoboldUtils(kobold);
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(ChatArgs.SKILL_CHOICE_OPTION.name);
+			const match = intr.options.getString(ChatArgs.SKILL_CHOICE_OPTION.name) ?? '';
 
 			//get the active character
-			const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
+			const activeCharacter = await characterUtils.getActiveCharacter(intr);
 			if (!activeCharacter) {
 				//no choices if we don't have a character to match against
 				return [];
 			}
 			//find a skill on the character matching the autocomplete string
-			const matchedSkills = CharacterUtils.findPossibleSkillFromString(
-				activeCharacter,
+			const matchedSkills = FinderHelpers.matchAllSkills(
+				Creature.fromSheetRecord(activeCharacter.sheetRecord),
 				match
 			).map(skill => ({ name: skill.name, value: skill.name }));
 			//return the matched skills
@@ -63,34 +67,26 @@ export class InitJoinSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
-		const [currentInitResponse, activeCharacter, userSettings] = await Promise.all([
-			InitiativeUtils.getInitiativeForChannel(intr.channel, {
-				sendErrors: true,
-				LL,
-			}),
-			CharacterUtils.getActiveCharacter(intr),
-			SettingsUtils.getSettingsForUser(intr),
-		]);
-		if (currentInitResponse.errorMessage) {
-			await InteractionUtils.send(intr, currentInitResponse.errorMessage);
-			return;
-		}
-		const currentInit = currentInitResponse.init;
-		if (!activeCharacter) {
+		const koboldUtils: KoboldUtils = new KoboldUtils(kobold);
+		const { initiativeUtils } = koboldUtils;
+		const { currentInitiative, activeCharacter, userSettings } =
+			await koboldUtils.fetchNonNullableDataForCommand(intr, {
+				currentInitiative: true,
+				activeCharacter: true,
+				userSettings: true,
+			});
+
+		if (
+			currentInitiative &&
+			currentInitiative.actors.find(actor => actor.characterId === activeCharacter.id)
+		) {
 			await InteractionUtils.send(
 				intr,
-				Language.LL.commands.init.interactions.noActiveCharacter()
-			);
-			return;
-		}
-		if (currentInit.actors.find(actor => actor.characterId === activeCharacter.id)) {
-			await InteractionUtils.send(
-				intr,
-				Language.LL.commands.init.join.interactions.characterAlreadyInInit({
-					characterName: activeCharacter.sheet.info.name,
+				L.en.commands.init.join.interactions.characterAlreadyInInit({
+					characterName: activeCharacter.name,
 				})
 			);
 			return;
@@ -100,28 +96,46 @@ export class InitJoinSubCommand implements Command {
 		const diceExpression = intr.options.getString(ChatArgs.ROLL_EXPRESSION_OPTION.name);
 		const hideStats = intr.options.getBoolean(InitOptions.INIT_HIDE_STATS_OPTION.name) ?? false;
 
-		const rollResultMessage = await InitiativeUtils.addCharacterToInitiative({
+		const rollResult = await InitiativeBuilderUtils.rollNewInitiative({
 			character: activeCharacter,
-			currentInit,
-			initiativeValue,
 			skillChoice,
 			diceExpression,
-			userName: intr.user.username,
-			userId: intr.user.id,
-			hideStats,
+			initiativeValue,
 			userSettings,
-			LL,
+		});
+		const initiativeResult = _.isNumber(rollResult)
+			? rollResult
+			: rollResult.getRollTotalArray()[0] ?? 0;
+
+		const actorName = InitiativeBuilderUtils.getUniqueInitActorName(
+			currentInitiative,
+			activeCharacter.name
+		);
+
+		await koboldUtils.initiativeUtils.createActorFromCharacter({
+			initiativeId: currentInitiative.id,
+			character: activeCharacter,
+			name: actorName,
+			initiativeResult,
+			hideStats,
 		});
 
+		const embed = InitiativeBuilderUtils.initiativeJoinEmbed(rollResult, actorName);
+
+		const newInitiative = await initiativeUtils.getInitiativeForChannel(intr.channel);
+
+		if (!newInitiative)
+			throw new KoboldError(
+				"Yip! Something went wrong and I couldn't find this channel's initiative"
+			);
+
 		const initBuilder = new InitiativeBuilder({
-			initiative: currentInit,
-			actors: currentInit.actors,
-			groups: currentInit.actorGroups,
-			LL,
+			initiative: newInitiative,
 		});
-		await InteractionUtils.send(intr, rollResultMessage);
-		if (currentInit.currentRound === 0) {
-			await InitiativeUtils.sendNewRoundMessage(intr, initBuilder);
+
+		await InteractionUtils.send(intr, embed);
+		if (currentInitiative.currentRound === 0) {
+			await InitiativeBuilderUtils.sendNewRoundMessage(intr, initBuilder);
 		} else {
 			const embed = await KoboldEmbed.roundFromInitiativeBuilder(initBuilder, LL);
 			await InteractionUtils.send(intr, { embeds: [embed] });

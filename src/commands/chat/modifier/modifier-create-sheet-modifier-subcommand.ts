@@ -1,27 +1,34 @@
-import { ModifierOptions } from './modifier-command-options.js';
 import {
 	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 	ChatInputCommandInteraction,
 	PermissionsString,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
+import { ModifierOptions } from './modifier-command-options.js';
 
-import { EventData } from '../../../models/internal-models.js';
-import { Character } from '../../../services/kobold/models/index.js';
-import { InteractionUtils, StringUtils } from '../../../utils/index.js';
-import { Command, CommandDeferType } from '../../index.js';
+import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { Language } from '../../../models/enum-helpers/index.js';
-import { CharacterUtils } from '../../../utils/character-utils.js';
-import { Creature } from '../../../utils/creature.js';
+import {
+	Kobold,
+	ModifierTypeEnum,
+	SheetAdjustment,
+	SheetAdjustmentTypeEnum,
+	isSheetAdjustmentTypeEnum,
+} from '../../../services/kobold/index.js';
+import { KoboldError } from '../../../utils/KoboldError.js';
+import { InteractionUtils } from '../../../utils/index.js';
+import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { SheetUtils } from '../../../utils/sheet/sheet-utils.js';
+import { Command, CommandDeferType } from '../../index.js';
 
 export class ModifierCreateSheetModifierSubCommand implements Command {
-	public names = [Language.LL.commands.modifier.createSheetModifier.name()];
+	public names = [L.en.commands.modifier.createSheetModifier.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.modifier.createSheetModifier.name(),
-		description: Language.LL.commands.modifier.createSheetModifier.description(),
+		name: L.en.commands.modifier.createSheetModifier.name(),
+		description: L.en.commands.modifier.createSheetModifier.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -31,67 +38,83 @@ export class ModifierCreateSheetModifierSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
-		if (!activeCharacter) {
-			await InteractionUtils.send(
-				intr,
-				LL.commands.character.interactions.noActiveCharacter()
+		const koboldUtils = new KoboldUtils(kobold);
+		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+			activeCharacter: true,
+		});
+		let name = intr.options
+			.getString(ModifierOptions.MODIFIER_NAME_OPTION.name, true)
+			.trim()
+			.toLowerCase();
+		let modifierType = (
+			intr.options.getString(ModifierOptions.MODIFIER_TYPE_OPTION.name) ??
+			SheetAdjustmentTypeEnum.untyped
+		)
+			.trim()
+			.toLowerCase();
+
+		if (!isSheetAdjustmentTypeEnum(modifierType)) {
+			throw new KoboldError(
+				`Yip! ${modifierType} is not a valid modifier type! Please use one ` +
+					`of the suggested options when entering the modifier type or leave it blank.`
 			);
-			return;
 		}
-		let name = (intr.options.getString(ModifierOptions.MODIFIER_NAME_OPTION.name) ?? '')
-			.trim()
-			.toLowerCase();
-		let modifierType = (intr.options.getString(ModifierOptions.MODIFIER_TYPE_OPTION.name) ?? '')
-			.trim()
-			.toLowerCase();
+
 		const description = intr.options.getString(
 			ModifierOptions.MODIFIER_DESCRIPTION_OPTION.name
 		);
 		const modifierSheetValues = intr.options.getString(
-			ModifierOptions.MODIFIER_SHEET_VALUES_OPTION.name
+			ModifierOptions.MODIFIER_SHEET_VALUES_OPTION.name,
+			true
 		);
 
-		const creature = new Creature(activeCharacter.sheet);
+		const parsedSheetAdjustments: SheetAdjustment[] =
+			SheetUtils.stringToSheetAdjustments(modifierSheetValues);
 
-		const parsedSheetValues: Character['modifiers'][0]['sheetAdjustments'] =
-			StringUtils.parseSheetModifiers(modifierSheetValues, creature);
+		// make sure that the adjustments are valid and can be applied to a sheet
+		SheetUtils.adjustSheetWithSheetAdjustments(
+			activeCharacter.sheetRecord.sheet,
+			parsedSheetAdjustments
+		);
 
 		// make sure the name does't already exist in the character's modifiers
-		if (activeCharacter.getModifierByName(name)) {
+		if (FinderHelpers.getModifierByName(activeCharacter.sheetRecord, name)) {
 			await InteractionUtils.send(
 				intr,
 				LL.commands.modifier.createRollModifier.interactions.alreadyExists({
 					modifierName: name,
-					characterName: activeCharacter.sheet.info.name,
+					characterName: activeCharacter.name,
 				})
 			);
 			return;
 		}
 
-		await Character.query().updateAndFetchById(activeCharacter.id, {
-			modifiers: [
-				...activeCharacter.modifiers,
-				{
-					name,
-					isActive: true,
-					description,
-					type: modifierType,
-					sheetAdjustments: parsedSheetValues,
-					modifierType: 'sheet',
-				},
-			],
-		});
+		await kobold.sheetRecord.update(
+			{ id: activeCharacter.sheetRecordId },
+			{
+				modifiers: [
+					...activeCharacter.sheetRecord.modifiers,
+					{
+						name,
+						isActive: true,
+						description,
+						type: modifierType,
+						sheetAdjustments: parsedSheetAdjustments,
+						modifierType: ModifierTypeEnum.sheet,
+					},
+				],
+			}
+		);
 
 		//send a response
 		await InteractionUtils.send(
 			intr,
 			LL.commands.modifier.createRollModifier.interactions.created({
 				modifierName: name,
-				characterName: activeCharacter.sheet.info.name,
+				characterName: activeCharacter.name,
 			})
 		);
 		return;

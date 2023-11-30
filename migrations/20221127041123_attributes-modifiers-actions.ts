@@ -1,6 +1,6 @@
 import { Knex } from 'knex';
 
-const attributeAbilityMap = {
+const attributeAbilityMap: { [k: string]: string } = {
 	Acrobatics: 'dexterity',
 	Arcana: 'intelligence',
 	Athletics: 'strength',
@@ -74,7 +74,7 @@ export async function up(knex: Knex): Promise<void> {
 
 				{ name: 'speed', type: 'base', value: calculatedStats.totalSpeed, tags: ['speed'] },
 				{
-					name: 'classDC',
+					name: 'classDc',
 					type: 'base',
 					value: calculatedStats.totalClassDC,
 					tags: ['classDc'],

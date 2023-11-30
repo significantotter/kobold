@@ -1,34 +1,33 @@
-import { Character, Game, GuildDefaultCharacter } from '../../../services/kobold/models/index.js';
 import {
-	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
-	ChatInputCommandInteraction,
-	PermissionsString,
-	AutocompleteInteraction,
-	AutocompleteFocusedOption,
 	ApplicationCommandOptionChoiceData,
-	CacheType,
-	ComponentType,
+	ApplicationCommandType,
+	AutocompleteFocusedOption,
+	AutocompleteInteraction,
 	ButtonStyle,
+	CacheType,
+	ChatInputCommandInteraction,
+	ComponentType,
+	PermissionsString,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
+import { Kobold } from '../../../services/kobold/index.js';
 
-import { EventData } from '../../../models/internal-models.js';
-import { InteractionUtils } from '../../../utils/index.js';
-import { Command, CommandDeferType } from '../../index.js';
-import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
-import { Language } from '../../../models/enum-helpers/index.js';
+import _ from 'lodash';
+import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { CollectorUtils } from '../../../utils/collector-utils.js';
+import { InteractionUtils } from '../../../utils/index.js';
+import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { Command, CommandDeferType } from '../../index.js';
 import { ActionOptions } from './action-command-options.js';
-import { CharacterUtils } from '../../../utils/character-utils.js';
-import _ from 'lodash';
 
 export class ActionRemoveSubCommand implements Command {
-	public names = [Language.LL.commands.action.remove.name()];
+	public names = [L.en.commands.action.remove.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.action.remove.name(),
-		description: Language.LL.commands.action.remove.description(),
+		name: L.en.commands.action.remove.name(),
+		description: L.en.commands.action.remove.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -37,22 +36,24 @@ export class ActionRemoveSubCommand implements Command {
 
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
-		option: AutocompleteFocusedOption
-	): Promise<ApplicationCommandOptionChoiceData[]> {
+		option: AutocompleteFocusedOption,
+		{ kobold }: { kobold: Kobold }
+	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === ActionOptions.ACTION_TARGET_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(ActionOptions.ACTION_TARGET_OPTION.name);
+			const match = intr.options.getString(ActionOptions.ACTION_TARGET_OPTION.name) ?? '';
 
 			//get the active character
-			const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
+			const { characterUtils } = new KoboldUtils(kobold);
+			const activeCharacter = await characterUtils.getActiveCharacter(intr);
 			if (!activeCharacter) {
 				//no choices if we don't have a character to match against
 				return [];
 			}
 			//find an action on the character matching the autocomplete string
-			const matchedActions = CharacterUtils.findPossibleActionFromString(
-				activeCharacter,
+			const matchedActions = FinderHelpers.matchAllActions(
+				activeCharacter.sheetRecord,
 				match
 			).map(action => ({
 				name: action.name,
@@ -65,13 +66,20 @@ export class ActionRemoveSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
-		const actionChoice = intr.options.getString(ActionOptions.ACTION_TARGET_OPTION.name);
-		//get the active character
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
-		const targetAction = activeCharacter.getActionByName(actionChoice);
+		const actionChoice = intr.options.getString(ActionOptions.ACTION_TARGET_OPTION.name, true);
+
+		const koboldUtils = new KoboldUtils(kobold);
+		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+			activeCharacter: true,
+		});
+
+		const targetAction = FinderHelpers.getActionByName(
+			activeCharacter.sheetRecord,
+			actionChoice
+		);
 		if (targetAction) {
 			// ask for confirmation
 
@@ -130,21 +138,25 @@ export class ActionRemoveSubCommand implements Command {
 					},
 				}
 			);
-			await InteractionUtils.editReply(intr, {
-				content: LL.sharedInteractions.choiceRegistered({
-					choice: _.capitalize(result.value),
-				}),
-				components: [],
-			});
+			if (result) {
+				await InteractionUtils.editReply(intr, {
+					content: LL.sharedInteractions.choiceRegistered({
+						choice: _.capitalize(result.value),
+					}),
+					components: [],
+				});
+			}
 			// remove the action
-			if (result.value === 'remove') {
+			if (result && result.value === 'remove') {
 				const actionsWithoutRemoved = _.filter(
-					activeCharacter.actions,
+					activeCharacter.sheetRecord.actions,
 					action => action.name.toLocaleLowerCase() !== actionChoice.toLocaleLowerCase()
 				);
-				await Character.query()
-					.patch({ actions: actionsWithoutRemoved })
-					.where({ userId: intr.user.id });
+
+				await kobold.sheetRecord.update(
+					{ id: activeCharacter.sheetRecordId },
+					{ actions: actionsWithoutRemoved }
+				);
 
 				await InteractionUtils.send(
 					intr,

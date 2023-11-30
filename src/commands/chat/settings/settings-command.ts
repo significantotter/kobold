@@ -1,37 +1,37 @@
-import { Language } from './../../../models/enum-helpers/language.js';
 import {
+	ApplicationCommandOptionChoiceData,
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
 	ChatInputCommandInteraction,
 	PermissionsString,
-	ApplicationCommandOptionChoiceData,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 
-import { EventData } from '../../../models/internal-models.js';
+import L from '../../../i18n/i18n-node.js';
 import { CommandUtils } from '../../../utils/index.js';
+import { InjectedServices } from '../../command.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { SettingsOptions } from './settings-command-options.js';
 
 export class SettingsCommand implements Command {
-	public names = [Language.LL.commands.settings.name()];
+	public names = [L.en.commands.settings.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.settings.name(),
-		description: Language.LL.commands.settings.description(),
+		name: L.en.commands.settings.name(),
+		description: L.en.commands.settings.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 
 		options: [
 			{
-				name: Language.LL.commands.settings.set.name(),
-				description: Language.LL.commands.settings.set.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				name: L.en.commands.settings.set.name(),
+				description: L.en.commands.settings.set.description(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [SettingsOptions.SETTINGS_SET_OPTION, SettingsOptions.SETTINGS_SET_VALUE],
 			},
 		],
@@ -44,8 +44,9 @@ export class SettingsCommand implements Command {
 
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
-		option: AutocompleteFocusedOption
-	): Promise<ApplicationCommandOptionChoiceData[]> {
+		option: AutocompleteFocusedOption,
+		services: InjectedServices
+	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 
 		const command = CommandUtils.getSubCommandByName(
@@ -56,13 +57,13 @@ export class SettingsCommand implements Command {
 			return;
 		}
 
-		return await command.autocomplete(intr, option);
+		return await command.autocomplete(intr, option, services);
 	}
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		services: InjectedServices
 	): Promise<void> {
 		if (!intr.isChatInputCommand()) return;
 		const command = CommandUtils.getSubCommandByName(
@@ -73,9 +74,9 @@ export class SettingsCommand implements Command {
 			return;
 		}
 
-		const passesChecks = await CommandUtils.runChecks(command, intr, data);
+		let passesChecks = await CommandUtils.runChecks(command, intr);
 		if (passesChecks) {
-			await command.execute(intr, data, LL);
+			await command.execute(intr, LL, services);
 		}
 	}
 }

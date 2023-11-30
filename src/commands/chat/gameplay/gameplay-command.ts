@@ -1,38 +1,38 @@
-import { Language } from '../../../models/enum-helpers/language.js';
 import {
+	ApplicationCommandOptionChoiceData,
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
 	ChatInputCommandInteraction,
 	PermissionsString,
-	ApplicationCommandOptionChoiceData,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 
-import { EventData } from '../../../models/internal-models.js';
+import { ChatArgs } from '../../../constants/chat-args.js';
+import L from '../../../i18n/i18n-node.js';
 import { CommandUtils } from '../../../utils/index.js';
+import { InjectedServices } from '../../command.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { GameplayOptions } from './gameplay-command-options.js';
-import { ChatArgs } from '../../../constants/chat-args.js';
 
 export class GameplayCommand implements Command {
-	public names = [Language.LL.commands.gameplay.name()];
+	public names = [L.en.commands.gameplay.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.gameplay.name(),
-		description: Language.LL.commands.gameplay.description(),
+		name: L.en.commands.gameplay.name(),
+		description: L.en.commands.gameplay.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 
 		options: [
 			{
-				name: Language.LL.commands.gameplay.damage.name(),
-				description: Language.LL.commands.gameplay.damage.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				name: L.en.commands.gameplay.damage.name(),
+				description: L.en.commands.gameplay.damage.description(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					{ ...GameplayOptions.GAMEPLAY_TARGET_CHARACTER, required: true },
 					GameplayOptions.GAMEPLAY_DAMAGE_AMOUNT,
@@ -40,9 +40,9 @@ export class GameplayCommand implements Command {
 				],
 			},
 			{
-				name: Language.LL.commands.gameplay.set.name(),
-				description: Language.LL.commands.gameplay.set.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				name: L.en.commands.gameplay.set.name(),
+				description: L.en.commands.gameplay.set.description(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					GameplayOptions.GAMEPLAY_SET_OPTION,
 					GameplayOptions.GAMEPLAY_SET_VALUE,
@@ -50,15 +50,15 @@ export class GameplayCommand implements Command {
 				],
 			},
 			{
-				name: Language.LL.commands.gameplay.recover.name(),
-				description: Language.LL.commands.gameplay.recover.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				name: L.en.commands.gameplay.recover.name(),
+				description: L.en.commands.gameplay.recover.description(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [GameplayOptions.GAMEPLAY_TARGET_CHARACTER],
 			},
 			{
-				name: Language.LL.commands.gameplay.tracker.name(),
-				description: Language.LL.commands.gameplay.tracker.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				name: L.en.commands.gameplay.tracker.name(),
+				description: L.en.commands.gameplay.tracker.description(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					{ ...ChatArgs.SET_ACTIVE_NAME_OPTION, required: false },
 					GameplayOptions.GAMEPLAY_TARGET_CHANNEL,
@@ -75,8 +75,9 @@ export class GameplayCommand implements Command {
 
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
-		option: AutocompleteFocusedOption
-	): Promise<ApplicationCommandOptionChoiceData[]> {
+		option: AutocompleteFocusedOption,
+		services: InjectedServices
+	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 
 		const command = CommandUtils.getSubCommandByName(
@@ -87,13 +88,13 @@ export class GameplayCommand implements Command {
 			return;
 		}
 
-		return await command.autocomplete(intr, option);
+		return await command.autocomplete(intr, option, services);
 	}
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		services: InjectedServices
 	): Promise<void> {
 		if (!intr.isChatInputCommand()) return;
 		const command = CommandUtils.getSubCommandByName(
@@ -104,9 +105,9 @@ export class GameplayCommand implements Command {
 			return;
 		}
 
-		const passesChecks = await CommandUtils.runChecks(command, intr, data);
+		let passesChecks = await CommandUtils.runChecks(command, intr);
 		if (passesChecks) {
-			await command.execute(intr, data, LL);
+			await command.execute(intr, LL, services);
 		}
 	}
 }

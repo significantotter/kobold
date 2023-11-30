@@ -1,32 +1,31 @@
 import {
+	ApplicationCommandOptionChoiceData,
 	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
 	ChatInputCommandInteraction,
 	PermissionsString,
-	ApplicationCommandOptionChoiceData,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 
 import { GameplayOptions } from './gameplay-command-options.js';
-import { EventData } from '../../../models/internal-models.js';
-import { Command, CommandDeferType } from '../../index.js';
-import { Language } from '../../../models/enum-helpers/index.js';
+
+import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { InteractionUtils } from '../../../utils/interaction-utils.js';
-import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
-import _ from 'lodash';
+import { Kobold } from '../../../services/kobold/kobold.model.js';
 import { Creature } from '../../../utils/creature.js';
+import { InteractionUtils } from '../../../utils/interaction-utils.js';
 import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
-import { GameUtils } from '../../../utils/game-utils.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { Command, CommandDeferType } from '../../index.js';
 
 export class GameplayDamageSubCommand implements Command {
-	public names = [Language.LL.commands.gameplay.damage.name()];
+	public names = [L.en.commands.gameplay.damage.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.gameplay.damage.name(),
-		description: Language.LL.commands.gameplay.damage.description(),
+		name: L.en.commands.gameplay.damage.name(),
+		description: L.en.commands.gameplay.damage.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -35,35 +34,40 @@ export class GameplayDamageSubCommand implements Command {
 
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
-		option: AutocompleteFocusedOption
-	): Promise<ApplicationCommandOptionChoiceData[]> {
+		option: AutocompleteFocusedOption,
+		{ kobold }: { kobold: Kobold }
+	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name) {
-			return await AutocompleteUtils.getAllTargetOptions(intr, option.value);
+			const match =
+				intr.options.getString(GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name) ?? '';
+			const { autocompleteUtils } = new KoboldUtils(kobold);
+			return await autocompleteUtils.getAllTargetOptions(intr, match);
 		}
 	}
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const targetCharacter = intr.options.getString(
-			GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name
+			GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name,
+			true
 		);
-		const amount = intr.options.getNumber(GameplayOptions.GAMEPLAY_DAMAGE_AMOUNT.name);
+		const amount = intr.options.getNumber(GameplayOptions.GAMEPLAY_DAMAGE_AMOUNT.name, true);
 		const type = intr.options.getString(GameplayOptions.GAMEPLAY_DAMAGE_TYPE.name);
 
-		const { characterOrInitActorTargets } = await GameUtils.getCharacterOrInitActorTarget(
-			intr,
-			targetCharacter
-		);
+		const { gameUtils, creatureUtils } = new KoboldUtils(kobold);
 
-		const sheet = characterOrInitActorTargets[0].sheet;
-		const creature = new Creature(sheet);
+		const { targetSheetRecord, hideStats, targetName } =
+			await gameUtils.getCharacterOrInitActorTarget(intr, targetCharacter);
+
+		const creature = Creature.fromSheetRecord(targetSheetRecord);
+
 		let message = '';
 		if (amount >= 0) {
-			const damageResult = creature.applyDamage(amount, type);
+			const damageResult = creature.applyDamage(amount, type ?? 'untyped');
 
 			message = EmbedUtils.buildDamageResultText({
 				initialDamageAmount: amount,
@@ -90,7 +94,7 @@ export class GameplayDamageSubCommand implements Command {
 				targetCreatureSheet: creature.sheet,
 			});
 		}
-		await characterOrInitActorTargets[0].saveSheet(intr, creature.sheet);
+		await creatureUtils.saveSheet(intr, targetSheetRecord);
 
 		await InteractionUtils.send(intr, message);
 	}

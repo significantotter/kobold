@@ -4,6 +4,7 @@ import { AncestryApi } from './ancestry-api/index.js';
 import { BackgroundApi } from './background-api/index.js';
 import { HeritageApi } from './heritage-api/index.js';
 import { VHeritageApi } from './v-heritage-api/index.js';
+export * from './wanderers-guide.zod.js';
 
 interface httpHeaders {
 	[key: string]: number | string;
@@ -13,7 +14,7 @@ interface WanderersGuideConstructorParams {
 	apiKey?: string;
 }
 export class WanderersGuide {
-	headers: httpHeaders;
+	headers?: httpHeaders;
 	constructor({ token: accessToken, apiKey }: WanderersGuideConstructorParams) {
 		if (accessToken) {
 			this.headers = { authorization: `Bearer ${accessToken}` };

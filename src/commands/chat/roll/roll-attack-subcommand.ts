@@ -1,37 +1,34 @@
 import {
+	ApplicationCommandOptionChoiceData,
 	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
 	ChatInputCommandInteraction,
 	PermissionsString,
-	ApplicationCommandOptionChoiceData,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 
 import { ChatArgs } from '../../../constants/index.js';
-import { EventData } from '../../../models/internal-models.js';
-import { InteractionUtils } from '../../../utils/index.js';
-import { Command, CommandDeferType } from '../../index.js';
-import { CharacterUtils } from '../../../utils/character-utils.js';
-import { DiceUtils } from '../../../utils/dice-utils.js';
+
+import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { Language } from '../../../models/enum-helpers/index.js';
+import { Kobold, SheetRecord } from '../../../services/kobold/index.js';
+import { ActionRoller } from '../../../utils/action-roller.js';
 import { Creature } from '../../../utils/creature.js';
-import { InitOptions } from '../init/init-command-options.js';
-import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
-import { InitiativeActor } from '../../../services/kobold/models/index.js';
 import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
-import { GameUtils } from '../../../utils/game-utils.js';
-import { SettingsUtils } from '../../../utils/settings-utils.js';
+import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { Command, CommandDeferType } from '../../index.js';
+import { InitOptions } from '../init/init-command-options.js';
 
 export class RollAttackSubCommand implements Command {
-	public names = [Language.LL.commands.roll.attack.name()];
+	public names = [L.en.commands.roll.attack.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.roll.attack.name(),
-		description: Language.LL.commands.roll.attack.description(),
+		name: L.en.commands.roll.attack.name(),
+		description: L.en.commands.roll.attack.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -41,22 +38,26 @@ export class RollAttackSubCommand implements Command {
 
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
-		option: AutocompleteFocusedOption
-	): Promise<ApplicationCommandOptionChoiceData[]> {
+		option: AutocompleteFocusedOption,
+		{ kobold }: { kobold: Kobold }
+	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === ChatArgs.ATTACK_CHOICE_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(ChatArgs.ATTACK_CHOICE_OPTION.name);
+			const match = intr.options.getString(ChatArgs.ATTACK_CHOICE_OPTION.name) ?? '';
 
 			//get the active character
-			const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
+			const koboldUtils: KoboldUtils = new KoboldUtils(kobold);
+			const { activeCharacter } = await koboldUtils.fetchDataForCommand(intr, {
+				activeCharacter: true,
+			});
 			if (!activeCharacter) {
 				//no choices if we don't have a character to match against
 				return [];
 			}
 			//find a attack on the character matching the autocomplete string
-			const matchedAttack = CharacterUtils.findPossibleAttackFromString(
-				activeCharacter,
+			const matchedAttack = FinderHelpers.matchAllAttacks(
+				Creature.fromSheetRecord(activeCharacter.sheetRecord),
 				match
 			).map(attack => ({
 				name: attack.name,
@@ -67,87 +68,88 @@ export class RollAttackSubCommand implements Command {
 		}
 		if (option.name === InitOptions.INIT_CHARACTER_TARGET.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(InitOptions.INIT_CHARACTER_TARGET.name);
+			const match = intr.options.getString(InitOptions.INIT_CHARACTER_TARGET.name) ?? '';
+			const koboldUtils: KoboldUtils = new KoboldUtils(kobold);
 
-			return await AutocompleteUtils.getAllTargetOptions(intr, match);
+			return await koboldUtils.autocompleteUtils.getAllTargetOptions(intr, match);
 		}
 	}
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
-		const attackChoice = intr.options.getString(ChatArgs.ATTACK_CHOICE_OPTION.name);
-		const targetInitActorName = intr.options.getString(InitOptions.INIT_CHARACTER_TARGET.name);
-		const attackModifierExpression = intr.options.getString(
-			ChatArgs.ATTACK_ROLL_MODIFIER_OPTION.name
+		const attackChoice = intr.options.getString(ChatArgs.ATTACK_CHOICE_OPTION.name, true);
+		const targetSheetName = intr.options.getString(
+			InitOptions.INIT_CHARACTER_TARGET.name,
+			true
 		);
-		const damageModifierExpression = intr.options.getString(
-			ChatArgs.DAMAGE_ROLL_MODIFIER_OPTION.name
-		);
-		const rollNote = intr.options.getString(ChatArgs.ROLL_NOTE_OPTION.name);
+		const attackModifierExpression =
+			intr.options.getString(ChatArgs.ATTACK_ROLL_MODIFIER_OPTION.name) ?? '';
+		const damageModifierExpression =
+			intr.options.getString(ChatArgs.DAMAGE_ROLL_MODIFIER_OPTION.name) ?? '';
+		const rollNote = intr.options.getString(ChatArgs.ROLL_NOTE_OPTION.name) ?? '';
 		const targetAC = intr.options.getInteger(ChatArgs.ROLL_TARGET_AC_OPTION.name);
 
-		const secretRoll = intr.options.getString(ChatArgs.ROLL_SECRET_OPTION.name);
+		const secretRoll =
+			intr.options.getString(ChatArgs.ROLL_SECRET_OPTION.name) ??
+			L.en.commandOptions.rollSecret.choices.public.value();
 
-		const [activeCharacter, userSettings, activeGame] = await Promise.all([
-			CharacterUtils.getActiveCharacter(intr),
-			SettingsUtils.getSettingsForUser(intr),
-			GameUtils.getActiveGame(intr.user.id, intr.guildId),
-		]);
-		if (!activeCharacter) {
-			await InteractionUtils.send(
-				intr,
-				Language.LL.commands.roll.interactions.noActiveCharacter()
-			);
-			return;
-		}
+		const koboldUtils: KoboldUtils = new KoboldUtils(kobold);
+		const { gameUtils, creatureUtils } = koboldUtils;
+		const { activeCharacter, userSettings, activeGame } = await koboldUtils.fetchDataForCommand(
+			intr,
+			{
+				activeGame: true,
+				activeCharacter: true,
+				userSettings: true,
+			}
+		);
+		koboldUtils.assertActiveCharacterNotNull(activeCharacter);
 
-		const creature = Creature.fromCharacter(activeCharacter);
+		const creature = Creature.fromSheetRecord(activeCharacter.sheetRecord);
 
-		let targetCreature: Creature | undefined;
-		let targetActor: InitiativeActor | undefined;
+		let targetSheetRecord: SheetRecord | null = null;
+		let targetCreature: Creature | null = null;
+		let hideStats = false;
 
 		if (
-			targetInitActorName &&
-			targetInitActorName.trim().toLocaleLowerCase() != '__none__' &&
-			targetInitActorName.trim().toLocaleLowerCase() != '(none)'
+			targetSheetName &&
+			targetSheetName.trim().toLocaleLowerCase() != '__none__' &&
+			targetSheetName.trim().toLocaleLowerCase() != '(none)'
 		) {
-			const { targetCharacter, targetInitActor } =
-				await GameUtils.getCharacterOrInitActorTarget(intr, targetInitActorName);
-			targetActor = targetInitActor ?? targetCharacter;
-			targetCreature = Creature.fromModelWithSheet(targetActor);
+			const results = await gameUtils.getCharacterOrInitActorTarget(intr, targetSheetName);
+			targetSheetRecord = results.targetSheetRecord;
+			hideStats = results.hideStats;
+			targetCreature = Creature.fromSheetRecord(targetSheetRecord);
 		}
 
-		const { builtRoll, actionRoller } = DiceUtils.rollCreatureAttack({
+		const { builtRoll, actionRoller } = ActionRoller.fromCreatureAttack({
 			creature,
 			targetCreature,
 			attackName: attackChoice,
 			rollNote,
 			attackModifierExpression,
 			damageModifierExpression,
-			targetAC,
+			targetAC: targetAC ?? undefined,
 			userSettings,
-			LL,
 		});
-
-		if (targetCreature) {
-			// apply any effects from the action to the creature
-			await targetActor.$query().patch({ sheet: targetCreature.sheet });
-		}
 
 		const embed = builtRoll.compileEmbed({ forceFields: true });
 
-		if (targetCreature && actionRoller.shouldDisplayDamageText()) {
-			await targetActor.saveSheet(intr, actionRoller.targetCreature.sheet);
+		if (targetCreature && targetSheetRecord) {
+			// apply any effects from the action to the creature
+			await creatureUtils.saveSheet(intr, {
+				...targetSheetRecord,
+				sheet: targetCreature._sheet,
+			});
 
 			const damageField = await EmbedUtils.getOrSendActionDamageField({
 				intr,
 				actionRoller,
-				hideStats: targetActor.hideStats,
-				targetNameOverwrite: targetActor.name,
-				LL,
+				hideStats,
+				targetNameOverwrite: targetSheetName,
 			});
 
 			embed.addFields(damageField);

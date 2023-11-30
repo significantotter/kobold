@@ -1,4 +1,4 @@
-import { ActivityType, Client, ClientOptions, Presence } from 'discord.js';
+import { ActivityType, Awaitable, Client, ClientOptions, Presence } from 'discord.js';
 
 export class CustomClient extends Client {
 	constructor(clientOptions: ClientOptions) {
@@ -7,14 +7,14 @@ export class CustomClient extends Client {
 
 	public setPresence(
 		type: Exclude<ActivityType, ActivityType.Custom>,
-		name: string,
-		url: string
-	): Presence {
+		name?: string,
+		url?: string
+	): Awaitable<Presence | undefined> {
 		return this.user?.setPresence({
 			activities: [
 				{
 					type,
-					name,
+					name: name ?? '',
 					url,
 				},
 			],

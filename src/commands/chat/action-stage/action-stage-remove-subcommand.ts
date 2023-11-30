@@ -1,31 +1,28 @@
-import { Character, Game, GuildDefaultCharacter } from '../../../services/kobold/models/index.js';
 import {
-	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
-	ChatInputCommandInteraction,
-	PermissionsString,
 	ApplicationCommandOptionChoiceData,
+	ApplicationCommandType,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
+	ChatInputCommandInteraction,
+	PermissionsString,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 
-import { EventData } from '../../../models/internal-models.js';
-import { InteractionUtils } from '../../../utils/index.js';
-import { Command, CommandDeferType } from '../../index.js';
-import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
-import { Language } from '../../../models/enum-helpers/index.js';
+import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { CollectorUtils } from '../../../utils/collector-utils.js';
-import { CharacterUtils } from '../../../utils/character-utils.js';
+import { Kobold } from '../../../services/kobold/index.js';
+import { InteractionUtils } from '../../../utils/index.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { Command, CommandDeferType } from '../../index.js';
 import { ActionStageOptions } from './action-stage-command-options.js';
 
 export class ActionStageRemoveSubCommand implements Command {
-	public names = [Language.LL.commands.actionStage.remove.name()];
+	public names = [L.en.commands.actionStage.remove.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.actionStage.remove.name(),
-		description: Language.LL.commands.actionStage.remove.description(),
+		name: L.en.commands.actionStage.remove.name(),
+		description: L.en.commands.actionStage.remove.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -34,15 +31,18 @@ export class ActionStageRemoveSubCommand implements Command {
 
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
-		option: AutocompleteFocusedOption
-	): Promise<ApplicationCommandOptionChoiceData[]> {
+		option: AutocompleteFocusedOption,
+		{ kobold }: { kobold: Kobold }
+	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === ActionStageOptions.ACTION_ROLL_TARGET_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(ActionStageOptions.ACTION_ROLL_TARGET_OPTION.name);
+			const match =
+				intr.options.getString(ActionStageOptions.ACTION_ROLL_TARGET_OPTION.name) ?? '';
 
 			//get the active character
-			const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
+			const { characterUtils } = new KoboldUtils(kobold);
+			const activeCharacter = await characterUtils.getActiveCharacter(intr);
 			if (!activeCharacter) {
 				//no choices if we don't have a character to match against
 				return [];
@@ -50,7 +50,7 @@ export class ActionStageRemoveSubCommand implements Command {
 			//find a roll on the character matching the autocomplete string
 
 			const matchedActionRolls: ApplicationCommandOptionChoiceData[] = [];
-			for (const action of activeCharacter.actions || []) {
+			for (const action of activeCharacter.sheetRecord.actions || []) {
 				for (const roll of action.rolls) {
 					const rollMatchText = `${action.name.toLocaleLowerCase()} -- ${roll.name.toLocaleLowerCase()}`;
 					if (rollMatchText.includes(match.toLocaleLowerCase())) {
@@ -69,8 +69,8 @@ export class ActionStageRemoveSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const actionRollTarget = intr.options.getString(
 			ActionStageOptions.ACTION_ROLL_TARGET_OPTION.name,
@@ -78,18 +78,13 @@ export class ActionStageRemoveSubCommand implements Command {
 		);
 		const [actionName, action] = actionRollTarget.split(' -- ').map(term => term.trim());
 
-		//get the active character
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
-		if (!activeCharacter) {
-			await InteractionUtils.send(
-				intr,
-				LL.commands.character.interactions.noActiveCharacter()
-			);
-			return;
-		}
+		const koboldUtils = new KoboldUtils(kobold);
+		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+			activeCharacter: true,
+		});
 
 		//find a roll on the character matching the autocomplete string
-		const matchedAction = activeCharacter.actions?.find(
+		const matchedAction = activeCharacter.sheetRecord.actions?.find(
 			action => action.name.toLocaleLowerCase() === actionName.toLocaleLowerCase()
 		);
 		if (!matchedAction) {
@@ -106,10 +101,11 @@ export class ActionStageRemoveSubCommand implements Command {
 		const rollName = matchedAction.rolls[rollIndex].name;
 		matchedAction.rolls.splice(rollIndex, 1);
 
-		//save the character
-		await Character.query().patchAndFetchById(activeCharacter.id, {
-			actions: activeCharacter.actions,
-		});
+		//save the actions
+		await kobold.sheetRecord.update(
+			{ id: activeCharacter.sheetRecordId },
+			{ actions: activeCharacter.sheetRecord.actions }
+		);
 
 		//send a confirmation message
 		await InteractionUtils.send(

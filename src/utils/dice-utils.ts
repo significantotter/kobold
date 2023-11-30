@@ -1,19 +1,30 @@
-import { Character } from './../services/kobold/models/character/character.model.js';
-import { APIEmbedField, ChatInputCommandInteraction } from 'discord.js';
 import { Dice, DiceResult } from 'dice-typescript';
+import { APIEmbedField } from 'discord.js';
 import _ from 'lodash';
-import { RollBuilder } from './roll-builder.js';
-import { TranslationFunctions } from '../i18n/i18n-types.js';
-import { Language } from '../models/enum-helpers/index.js';
 import { attributeShorthands, staticAttributes } from '../constants/attributes.js';
-import { Creature } from './creature.js';
-import { ActionRoller } from './action-roller.js';
-import { getEmoji } from '../constants/emoji.js';
-import { EmbedUtils, KoboldEmbed } from './kobold-embed-utils.js';
-import { UserSettings } from '../services/kobold/models/index.js';
+import L from '../i18n/i18n-node.js';
+import { TranslationFunctions } from '../i18n/i18n-types.js';
+import { Attribute, Modifier, RollMacro } from '../services/kobold/index.js';
+import type { Creature } from './creature.js';
+import { WritableDeep } from 'type-fest';
+
+export interface ComputedDiceResult extends DiceResult {
+	total: number;
+	renderedExpression: string;
+}
+
+export class DiceRollError extends Error {
+	constructor(
+		message: string,
+		public diceExpression?: string
+	) {
+		super(message);
+		this.name = 'DiceRollError';
+	}
+}
 
 export interface DiceRollResult extends APIEmbedField {
-	results: DiceResult | null;
+	results: WritableDeep<DiceResult>;
 	targetDC?: number;
 	success?: 'critical success' | 'success' | 'failure' | 'critical failure';
 	type: 'dice';
@@ -31,14 +42,24 @@ export interface TextResult {
 	type: 'text';
 }
 
-export type ResultField = DiceRollResult | MultiRollResult | TextResult;
+export interface ErrorResult {
+	type: 'error';
+	value: string;
+}
+
+export type ResultField = DiceRollResult | MultiRollResult | TextResult | ErrorResult;
 
 const attributeRegex = /(\[[\w \-_\.]{2,}\])/g;
 
 const damageTypeMatch = / [A-Za-z \-_,\/]+$/;
 export class DiceUtils {
-	public static parseDiceFromWgDamageField(wgDamageField: string): string {
+	public static removeNonDice(wgDamageField: string): string {
 		return wgDamageField.replace(damageTypeMatch, '');
+	}
+	public static getNonDice(wgDamageField: string): string | null {
+		const match = wgDamageField.match(damageTypeMatch);
+		if (!match) return null;
+		else return match[0];
 	}
 
 	public static addNumberToDiceExpression(diceExpression: string, number: number): string {
@@ -61,10 +82,12 @@ export class DiceUtils {
 	}
 
 	public static buildDiceExpression(
-		baseDice?: string,
-		bonus?: string,
-		modifierExpression?: string
+		baseDice?: string | null,
+		bonus?: string | null,
+		modifierExpression?: string | null
 	) {
+		if (!baseDice && !bonus && !modifierExpression) return '';
+
 		//if we have a bonus, and the bonus does not start with + or -
 		if (bonus?.length && !['-', '+'].includes(bonus.charAt(0))) {
 			//add a sign to the bonus
@@ -72,25 +95,21 @@ export class DiceUtils {
 		}
 
 		//if we have a bonus, but no base dice, base the dice on a d20
-		if (bonus && !baseDice) {
+		if (bonus && !bonus.includes('d20') && !baseDice) {
 			baseDice = 'd20';
 		}
 
 		let wrappedModifierExpression = '';
 		if (modifierExpression) wrappedModifierExpression = `+(${modifierExpression})`;
 
-		return `${baseDice}${bonus || ''}${wrappedModifierExpression}`;
+		return `${baseDice ?? ''}${bonus ?? ''}${wrappedModifierExpression ?? ''}`;
 	}
 
 	public static parseAttribute(
 		token: string,
 		creature?: Creature,
-		extraAttributes?: {
-			name: string;
-			value: number;
-			tags?: string[];
-		}[]
-	): [number | null, string[]] {
+		extraAttributes?: Attribute[]
+	): [number, string[]] {
 		const attributes = creature?.attributes || [];
 
 		const trimRegex = /[\[\]\\ _\-]/g;
@@ -106,22 +125,21 @@ export class DiceUtils {
 			attributeObject =>
 				attributeObject.name.replace(trimRegex, '').toLowerCase() === attributeName
 		);
-		let extraAttribute: { tags?: string[]; value: number; [k: string]: any } = {
-			value: undefined,
-			tags: [],
-		};
+		let extraAttribute: { tags?: string[]; value: number; [k: string]: any } | undefined =
+			undefined;
 		if (extraAttributes) {
-			extraAttribute = extraAttributes.find(
+			const potentialExtraAttribute = extraAttributes.find(
 				attributeObject =>
 					attributeObject.name.replace(trimRegex, '').toLowerCase() === attributeName
 			);
+			if (potentialExtraAttribute) extraAttribute = potentialExtraAttribute;
 		}
 
 		if (attribute?.value !== undefined) {
 			return [attribute.value, attribute.tags];
 		} else if (staticAttribute?.value !== undefined) {
 			return [staticAttribute.value, []];
-		} else if (extraAttribute?.value !== undefined) {
+		} else if (extraAttribute && extraAttribute?.value !== undefined) {
 			return [extraAttribute.value, extraAttribute?.tags || []];
 		} else {
 			return [0, []];
@@ -131,11 +149,7 @@ export class DiceUtils {
 	public static parseAttributes(
 		rollExpression: string,
 		creature?: Creature,
-		extraAttributes: {
-			name: string;
-			value: number;
-			tags?: string[];
-		}[] = []
+		extraAttributes: Attribute[] = []
 	): [string, string[]] {
 		const splitExpression = rollExpression.split(attributeRegex);
 		const newTags = [];
@@ -158,6 +172,33 @@ export class DiceUtils {
 		return [finalExpression, _.uniq(newTags)];
 	}
 
+	/**
+	 * Uses a creature's roll macros to expand a roll
+	 */
+	public static expandRollWithMacros(rollExpression: string, rollMacros: RollMacro[]): string {
+		const maxDepth = 10;
+		let resultRollExpression = rollExpression.toLocaleLowerCase();
+		for (let i = 0; i < maxDepth; i++) {
+			// we can allow up to 10 recursive applications of macros before giving up.
+			let rollExpressionBeforeExpanding = resultRollExpression;
+
+			resultRollExpression = resultRollExpression.replaceAll(
+				/\[([^\[\]]*)\]/g,
+				(match, potentialMacro) => {
+					potentialMacro = potentialMacro.trim().toLowerCase();
+					const matchedMacro = rollMacros.find(
+						macro => macro.name.toLowerCase() === potentialMacro
+					);
+					return matchedMacro ? matchedMacro.macro : match;
+				}
+			);
+
+			// if we haven't changed the roll expression, then we're done checking macros
+			if (rollExpressionBeforeExpanding === resultRollExpression) break;
+		}
+		return resultRollExpression;
+	}
+
 	public static parseDiceExpression({
 		rollExpression,
 		creature,
@@ -170,18 +211,14 @@ export class DiceUtils {
 		creature?: Creature;
 		tags?: string[];
 		skipModifiers?: boolean;
-		extraAttributes?: {
-			name: string;
-			value: number;
-			tags?: string[];
-		}[];
+		extraAttributes?: Attribute[];
 		modifierMultiplier?: number;
 	}) {
-		let modifiers = [];
-		let finalTags = [];
+		let modifiers: Modifier[] = [];
+		let finalTags: string[] = [];
 
 		let expandedExpression = creature
-			? creature.expandRollWithMacros(rollExpression)
+			? this.expandRollWithMacros(rollExpression, creature.rollMacros)
 			: rollExpression;
 
 		// check for any referenced creature attributes in the roll
@@ -196,15 +233,16 @@ export class DiceUtils {
 
 		// if we have a creature and tags, check for active modifiers
 		if (creature && finalTags.length && !skipModifiers) {
-			modifiers = creature.getModifiersFromTags(finalTags, extraAttributes);
+			modifiers = creature.getModifiersFromTags(finalTags, extraAttributes ?? []);
 		}
 		for (const modifier of modifiers) {
+			if (modifier.modifierType === 'sheet') continue;
 			// add to both the parsed expression and the initial roll expression
 			// the roll expression shows the user the meaning behind the roll values, while
 			// the parsed expression just has the math for the dice roller to use
 
 			const expandedModifier = creature
-				? creature.expandRollWithMacros(modifier.value.toString())
+				? this.expandRollWithMacros(modifier.value.toString(), creature.rollMacros)
 				: modifier.value.toString();
 
 			const [parsedModifier] = DiceUtils.parseAttributes(
@@ -243,41 +281,25 @@ export class DiceUtils {
 		creature,
 		tags,
 		extraAttributes,
-		skipModifiers,
+		skipModifiers = false,
 		multiplier,
 		modifierMultiplier,
-		LL = Language.LL,
 	}: {
 		rollExpression: string;
 		damageType?: string;
 		creature?: Creature;
 		tags?: string[];
-		extraAttributes?: {
-			name: string;
-			value: number;
-			tags?: string[];
-		}[];
+		extraAttributes?: Attribute[];
 		skipModifiers?: boolean;
 		multiplier?: number;
 		modifierMultiplier?: number;
-		LL?: TranslationFunctions;
-	}) {
-		const rollInformation: {
-			value: string;
-			parsedExpression: string;
-			results: DiceResult | null;
-			multiplier?: number;
-			totalTags: string[];
-			error: boolean;
-		} = {
-			value: '',
-			parsedExpression: '',
-			results: null,
-			multiplier: null,
-			totalTags: [],
-			error: false,
-		};
-		let totalTags = tags || [];
+	}): {
+		value: string;
+		parsedExpression: string;
+		results: WritableDeep<DiceResult>;
+		multiplier?: number;
+		totalTags: string[];
+	} {
 		let displayExpression = rollExpression;
 		try {
 			let parseResults = DiceUtils.parseDiceExpression({
@@ -291,270 +313,49 @@ export class DiceUtils {
 
 			displayExpression = parseResults.displayExpression;
 			const parsedExpression = parseResults.rollExpression;
-			rollInformation.parsedExpression = parsedExpression;
-			rollInformation.totalTags = parseResults.tags;
+			const totalTags = parseResults.tags;
 
-			let roll = new Dice(null, null, {
+			let roll = new Dice(undefined, undefined, {
 				maxRollTimes: 20, // limit to 20 rolls
 				maxDiceSides: 100, // limit to 100 dice faces
-			}).roll(parsedExpression);
+			}).roll(parsedExpression) as WritableDeep<DiceResult>;
+
 			if (roll.errors?.length) {
-				rollInformation.value = LL.utils.dice.diceRollOtherErrors({
-					rollErrors: roll.errors.map(err => err.message).join('\n'),
-				});
-				rollInformation.error = true;
-			} else {
-				const untypedRoll: any = roll;
-				if (multiplier !== undefined && multiplier !== 1) {
-					untypedRoll.total = Math.floor(untypedRoll.total * multiplier);
-					untypedRoll.renderedExpression = `(${untypedRoll.renderedExpression.toString()}) * ${multiplier}`;
-				}
-				rollInformation.value = LL.utils.dice.rollResult({
-					rollExpression: displayExpression,
-					rollRenderedExpression: roll.renderedExpression.toString(),
-					rollTotal: `${roll.total} ${damageType ?? ''}`,
-				});
-				rollInformation.results = roll;
+				throw new DiceRollError(
+					roll.errors.map(err => err.message).join('\n'),
+					roll.renderedExpression.toString()
+				);
 			}
-		} catch (err) {
-			console.warn(err);
-			rollInformation.value = LL.utils.dice.diceRollError({
+
+			if (multiplier !== undefined && multiplier !== 1) {
+				roll.renderedExpression = `(${roll.renderedExpression.toString()}) * ${multiplier}`;
+			}
+			roll.total = Math.floor(roll.total * (multiplier ?? 1));
+
+			const message = L.en.utils.dice.rollResult({
 				rollExpression: displayExpression,
+				rollRenderedExpression: roll.renderedExpression.toString(),
+				rollTotal: `${roll.total} ${damageType ?? ''}`,
 			});
-			rollInformation.error = true;
-		}
-		return rollInformation;
-	}
-	public static rollSimpleCreatureRoll({
-		userName,
-		actorName,
-		creature,
-		attributeName,
-		rollNote,
-		modifierExpression,
-		description,
-		tags,
-		userSettings,
-		LL,
-	}: {
-		userName?: string;
-		actorName?: string;
-		creature: Creature;
-		attributeName: string;
-		rollNote?: string;
-		modifierExpression?: string;
-		description?: string;
-		tags?: string[];
-		userSettings?: UserSettings;
-		LL?: TranslationFunctions;
-	}): RollBuilder {
-		LL = LL || Language.LL;
 
-		const roll = creature.rolls[attributeName.toLowerCase()];
-		if (!roll) return null;
-
-		const rollBuilder = new RollBuilder({
-			actorName: actorName ?? creature.sheet.info.name ?? userName,
-			creature: creature,
-			rollNote,
-			rollDescription:
-				description ||
-				LL.utils.dice.rolledAction({
-					actionName: _.startCase(roll.name),
-				}),
-			userSettings,
-		});
-		rollBuilder.addRoll({
-			rollExpression: DiceUtils.buildDiceExpression(
-				'd20',
-				String(roll.bonus),
-				modifierExpression
-			),
-			tags: (tags || []).concat(roll.tags),
-		});
-		return rollBuilder;
-	}
-	public static rollCreatureAttack({
-		creature,
-		targetCreature,
-		attackName,
-		rollNote,
-		attackModifierExpression,
-		damageModifierExpression,
-		targetAC,
-		userSettings,
-		LL,
-	}: {
-		creature: Creature;
-		targetCreature?: Creature;
-		attackName: string;
-		rollNote?: string;
-		attackModifierExpression?: string;
-		damageModifierExpression?: string;
-		targetAC?: number;
-		userSettings?: UserSettings;
-		LL;
-	}): { actionRoller: ActionRoller; builtRoll: RollBuilder } {
-		const targetAttack = creature.attackRolls[attackName.toLowerCase()];
-
-		// build a little action from the attack!
-		const action: Character['actions'][0] = {
-			name: targetAttack.name,
-			type: 'attack',
-			actionCost: 'oneAction',
-			tags: [],
-			rolls: [],
-		};
-		// add the attack roll
-		if (targetAttack.toHit) {
-			action.rolls.push({
-				type: 'attack',
-				name: 'To Hit',
-				roll: DiceUtils.buildDiceExpression(
-					'd20',
-					String(targetAttack.toHit),
-					attackModifierExpression
-				),
-				targetDC: 'AC',
-				allowRollModifiers: true,
-			});
-		}
-
-		// add the first damage roll with damage modifiers
-		if (targetAttack.damage[0]) {
-			action.rolls.push({
-				type: 'damage',
-				name: 'Damage',
-				roll: DiceUtils.buildDiceExpression(
-					String(DiceUtils.parseDiceFromWgDamageField(targetAttack.damage[0].dice)),
-					null,
-					damageModifierExpression
-				),
-				damageType: targetAttack.damage[0].type,
-				allowRollModifiers: true,
-			});
-		}
-		for (let i = 1; i < targetAttack.damage.length; i++) {
-			action.rolls.push({
-				type: 'damage',
-				name: 'Damage',
-				roll: DiceUtils.buildDiceExpression(
-					String(DiceUtils.parseDiceFromWgDamageField(targetAttack.damage[i].dice)),
-					null
-				),
-				damageType: targetAttack.damage[i].type,
-				allowRollModifiers: false,
-			});
-		}
-
-		const actionRoller = new ActionRoller(userSettings, action, creature, targetCreature);
-		const builtRoll = actionRoller.buildRoll(
-			rollNote,
-			Language.LL.commands.roll.attack.interactions.rollEmbed.rollDescription({
-				attackName: targetAttack.name,
-			}),
-			{
-				targetDC: targetAC,
-			}
-		);
-		return {
-			actionRoller,
-			builtRoll,
-		};
-	}
-	public static async rollCreatureDice(
-		creature: Creature,
-		rollChoice: string,
-		intr: ChatInputCommandInteraction,
-		options: {
-			overwriteCreatureName?: string;
-			rollNote?: string;
-			modifierExpression?: string;
-			damageModifierExpression?: string;
-			targetAC?: number;
-			targetCreature?: Creature;
-			hideStats?: boolean;
-			targetNameOverwrite?: string;
-			sourceNameOverwrite?: string;
-			userSettings?: UserSettings;
-			LL?: TranslationFunctions;
-		}
-	): Promise<{ error: boolean; message: string | KoboldEmbed; actionRoller?: ActionRoller }> {
-		const LL = options.LL ?? Language.LL;
-		const targetRoll = creature.rolls[rollChoice] ?? creature.attackRolls[rollChoice];
-
-		const targetAction = creature.keyedActions[rollChoice];
-		let actionRoller: ActionRoller;
-
-		if (!targetRoll) {
 			return {
-				error: true,
-				message: LL.commands.init.roll.interactions.invalidRoll(),
+				value: message,
+				parsedExpression,
+				results: roll,
+				multiplier,
+				totalTags,
 			};
+		} catch (err) {
+			if (err instanceof DiceRollError) {
+				throw err;
+			} else {
+				throw new DiceRollError(
+					L.en.utils.dice.diceRollError({
+						rollExpression: rollExpression,
+					}),
+					rollExpression
+				);
+			}
 		}
-
-		let embed: KoboldEmbed;
-
-		if (['skill', 'ability', 'save', 'spell', 'check'].includes(targetRoll.type)) {
-			const response = await DiceUtils.rollSimpleCreatureRoll({
-				actorName: options.overwriteCreatureName,
-				creature,
-				attributeName: targetRoll.name,
-				rollNote: options.rollNote ?? '',
-				modifierExpression: options.modifierExpression,
-				LL,
-			});
-
-			return { error: false, message: response.compileEmbed() };
-		} else if (targetRoll.type === 'attack') {
-			let attackResult = DiceUtils.rollCreatureAttack({
-				creature,
-				targetCreature: options.targetCreature,
-				attackName: targetRoll.name,
-				rollNote: options.rollNote,
-				attackModifierExpression: options.modifierExpression,
-				damageModifierExpression: options.damageModifierExpression,
-				targetAC: options.targetAC,
-				LL,
-			});
-
-			actionRoller = attackResult.actionRoller;
-
-			embed = attackResult.builtRoll.compileEmbed({ forceFields: true });
-		} else if (targetAction) {
-			const actionRoller = new ActionRoller(
-				options.userSettings,
-				targetAction,
-				creature,
-				options.targetCreature
-			);
-
-			const builtRoll = actionRoller.buildRoll(options.rollNote, targetAction.description, {
-				attackModifierExpression: options.modifierExpression,
-				damageModifierExpression: options.damageModifierExpression,
-				title: `${getEmoji(intr, targetAction.actionCost)} ${
-					creature.sheet.info.name
-				} used ${targetAction.name}!`,
-			});
-
-			embed = builtRoll.compileEmbed({ forceFields: true, showTags: false });
-
-			embed = EmbedUtils.describeActionResult({
-				embed,
-				action: targetAction,
-			});
-
-			embed.addFields(
-				await EmbedUtils.getOrSendActionDamageField({
-					intr,
-					hideStats: options.hideStats,
-					actionRoller,
-					sourceNameOverwrite: options.sourceNameOverwrite,
-					targetNameOverwrite: options.targetNameOverwrite,
-					LL,
-				})
-			);
-		}
-		return { error: false, message: embed, actionRoller };
 	}
 }

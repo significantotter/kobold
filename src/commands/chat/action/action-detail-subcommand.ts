@@ -1,33 +1,31 @@
-import { Character, Game, GuildDefaultCharacter } from '../../../services/kobold/models/index.js';
 import {
-	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
-	ChatInputCommandInteraction,
-	PermissionsString,
 	ApplicationCommandOptionChoiceData,
+	ApplicationCommandType,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
+	ChatInputCommandInteraction,
+	PermissionsString,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 
-import { EventData } from '../../../models/internal-models.js';
-import { InteractionUtils } from '../../../utils/index.js';
-import { Command, CommandDeferType } from '../../index.js';
-import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
-import { Language } from '../../../models/enum-helpers/index.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { CollectorUtils } from '../../../utils/collector-utils.js';
-import { CharacterUtils } from '../../../utils/character-utils.js';
-import _ from 'lodash';
-import { ActionOptions } from './action-command-options.js';
 import { getEmoji } from '../../../constants/emoji.js';
+import L from '../../../i18n/i18n-node.js';
+import { TranslationFunctions } from '../../../i18n/i18n-types.js';
+import { Kobold } from '../../../services/kobold/kobold.model.js';
+import { InteractionUtils } from '../../../utils/index.js';
+import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
+import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { Command, CommandDeferType } from '../../index.js';
+import { ActionOptions } from './action-command-options.js';
 
 export class ActionDetailSubCommand implements Command {
-	public names = [Language.LL.commands.action.detail.name()];
+	public names = [L.en.commands.action.detail.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.action.detail.name(),
-		description: Language.LL.commands.action.detail.description(),
+		name: L.en.commands.action.detail.name(),
+		description: L.en.commands.action.detail.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -36,22 +34,24 @@ export class ActionDetailSubCommand implements Command {
 
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
-		option: AutocompleteFocusedOption
-	): Promise<ApplicationCommandOptionChoiceData[]> {
+		option: AutocompleteFocusedOption,
+		{ kobold }: { kobold: Kobold }
+	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === ActionOptions.ACTION_TARGET_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(ActionOptions.ACTION_TARGET_OPTION.name);
+			const match = intr.options.getString(ActionOptions.ACTION_TARGET_OPTION.name) ?? '';
 
 			//get the active character
-			const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
+			const { characterUtils } = new KoboldUtils(kobold);
+			const activeCharacter = await characterUtils.getActiveCharacter(intr);
 			if (!activeCharacter) {
 				//no choices if we don't have a character to match against
 				return [];
 			}
 			//find an action on the character matching the autocomplete string
-			const matchedActions = CharacterUtils.findPossibleActionFromString(
-				activeCharacter,
+			const matchedActions = FinderHelpers.matchAllActions(
+				activeCharacter.sheetRecord,
 				match
 			).map(action => ({
 				name: action.name,
@@ -64,20 +64,20 @@ export class ActionDetailSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
-		const actionChoice = intr.options.getString(ActionOptions.ACTION_TARGET_OPTION.name);
-		//get the active character
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
-		if (!activeCharacter) {
-			await InteractionUtils.send(
-				intr,
-				LL.commands.character.interactions.noActiveCharacter()
-			);
-			return;
-		}
-		const targetAction = activeCharacter.getActionByName(actionChoice);
+		const actionChoice = intr.options.getString(ActionOptions.ACTION_TARGET_OPTION.name, true);
+
+		const koboldUtils = new KoboldUtils(kobold);
+		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+			activeCharacter: true,
+		});
+
+		const targetAction = FinderHelpers.getActionByName(
+			activeCharacter.sheetRecord,
+			actionChoice
+		);
 		if (!targetAction) {
 			await InteractionUtils.send(intr, LL.commands.action.interactions.notFound());
 			return;
@@ -110,6 +110,7 @@ export class ActionDetailSubCommand implements Command {
 			} else if (roll.type === 'damage') {
 				let description = ``;
 				description += `\ndamage: ${roll.roll} ${roll.damageType ?? ''}`;
+				if (roll.healInsteadOfDamage) description += `\n(heals instead of damaging)`;
 				const field = { name: roll.name, value: description };
 				actionDetailEmbed.addFields([field]);
 			} else if (roll.type === 'advanced-damage') {
@@ -122,6 +123,7 @@ export class ActionDetailSubCommand implements Command {
 				description += `\nCritical Failure: ${roll.criticalFailureRoll ?? 'none'} ${
 					roll.damageType ?? ''
 				}`;
+				if (roll.healInsteadOfDamage) description += `\n(heals instead of damaging)`;
 				const field = { name: roll.name, value: description };
 				actionDetailEmbed.addFields([field]);
 			} else if (roll.type === 'text') {

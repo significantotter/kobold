@@ -3,7 +3,7 @@ import { Request, Response, Router } from 'express';
 import router from 'express-promise-router';
 
 import { GetGuildsResponse } from '../models/cluster-api/index.js';
-import { Controller } from './index.js';
+import { Controller } from './controller.js';
 import { Config } from './../config/config.js';
 
 export class GuildsController implements Controller {
@@ -11,13 +11,13 @@ export class GuildsController implements Controller {
 	public router: Router = router();
 	public authToken: string = Config.api.secret;
 
-	constructor(private shardManager: ShardingManager) {}
+	constructor(protected shardManager: ShardingManager) {}
 
 	public register(): void {
 		this.router.get('/', (req, res) => this.getGuilds(req, res));
 	}
 
-	private async getGuilds(req: Request, res: Response): Promise<void> {
+	protected async getGuilds(req: Request, res: Response): Promise<void> {
 		let guilds: string[] = [
 			...new Set(
 				(

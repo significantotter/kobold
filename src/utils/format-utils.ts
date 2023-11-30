@@ -1,4 +1,4 @@
-import { Locale, Guild } from 'discord.js';
+import { Guild, Locale } from 'discord.js';
 import { Duration } from 'luxon'; // TODO: Missing types
 
 export class FormatUtils {
@@ -22,11 +22,11 @@ export class FormatUtils {
 		return `<@!${discordId}>`;
 	}
 
-	public static duration(milliseconds: number, langCode: Locale): string {
+	public static duration(milliseconds: number): string {
 		return Duration.fromObject(
 			Object.fromEntries(
 				Object.entries(
-					Duration.fromMillis(milliseconds, { locale: langCode })
+					Duration.fromMillis(milliseconds, { locale: Locale.EnglishUS })
 						.shiftTo(
 							'year',
 							'quarter',

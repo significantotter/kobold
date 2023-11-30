@@ -12,6 +12,6 @@ class NamedScoreFactoryClass extends Factory<
 > {}
 
 export const NamedScoreFactory = NamedScoreFactoryClass.define(() => ({
-	Name: faker.random.words(1),
-	Score: faker.datatype.number({ min: -2, max: 30 }),
+	Name: faker.word.words(1),
+	Score: faker.number.int({ min: -2, max: 30 }),
 }));

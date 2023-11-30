@@ -57,7 +57,7 @@ export default {
 	},
 	export: {
 		name: 'export',
-		description: 'Exports actions to a Pastebin url.',
+		description: 'Exports actions to a PasteBin url.',
 		interactions: {
 			success:
 				"Yip! I've saved {characterName}'s modifiers to [this PasteBin link]({pasteBinLink})",

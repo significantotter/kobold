@@ -24,7 +24,7 @@ let logger = pino.default(
 );
 
 export class Logger {
-	private static shardId: number;
+	protected static shardId: number;
 
 	public static info(message: string, obj?: any): void {
 		obj ? logger.info(obj, message) : logger.info(message);
@@ -54,6 +54,7 @@ export class Logger {
 				resText = await obj.text();
 			} catch {
 				// Ignore
+				resText = '';
 			}
 			logger
 				.child({

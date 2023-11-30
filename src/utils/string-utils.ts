@@ -1,56 +1,12 @@
-import removeMarkdown from 'remove-markdown';
-import { Character } from '../services/kobold/models/index.js';
-import { KoboldError } from './KoboldError.js';
-import { Creature } from './creature.js';
 import _ from 'lodash';
-import { SheetUtils } from './sheet-utils.js';
+import removeMarkdown from 'remove-markdown';
 
 export class StringUtils {
-	public static parseSheetModifiers(
-		input: string,
-		creature: Creature
-	): Character['modifiers'][0]['sheetAdjustments'] {
-		const modifierList = input.split(';').filter(result => result.trim() !== '');
-		if (!modifierList.length) {
-			throw new KoboldError("Yip! I didn't find any modifiers in what you sent me!");
-		}
-		const modifiers = modifierList.map(modifier => {
-			const modifierRegex = /([A-Za-z _-]+)\s*([\+\-\=])\s*(.+)/g;
-			const match = modifierRegex.exec(modifier);
-			if (!match) {
-				throw new KoboldError(
-					`Yip! I couldn't understand the modifier "${modifier}". Modifiers must be ` +
-						`in the format "Attribute Name + 1; Other Attribute - 1;final attribute = 1". Spaces are optional.`
-				);
-			}
-			let [, attributeName, operator, value] = match.map(result => result.trim());
-
-			// validate each result
-			// attributeName must be a valid sheet property
-			if (!SheetUtils.validateSheetProperty(attributeName)) {
-				throw new KoboldError(
-					`Yip! I couldn't find a sheet attribute named "${attributeName}".`
-				);
-			}
-			// operator must be +, -, or =
-			if (!['+', '-', '='].includes(operator)) {
-				throw new KoboldError(
-					`Yip! I couldn't understand the operator "${operator}". Operators must be +, -, or =.`
-				);
-			}
-			// value must be a number if it's a numeric value
-			if (SheetUtils.sheetPropertyIsNumeric(attributeName) && isNaN(Number(value))) {
-				throw new KoboldError(
-					`Yip! ${attributeName} "${value}" couldn't be converted to a number.`
-				);
-			}
-			return {
-				property: attributeName,
-				operation: operator as '+' | '-' | '=',
-				value: value,
-			};
-		});
-		return modifiers;
+	public static oxfordListJoin(arr: string[]) {
+		if (arr.length === 1) return arr[0];
+		const firsts = arr.slice(0, arr.length - 1);
+		const last = arr[arr.length - 1];
+		return firsts.join(', ') + ' and ' + last;
 	}
 
 	public static truncate(input: string, length: number, addEllipsis: boolean = false): string {
@@ -65,43 +21,106 @@ export class StringUtils {
 
 		return output;
 	}
+	/**
+	 * Finds the array item whose Name property is closest to 'name'. Useful for loose string matching skills, etc.
+	 * @param name the name to match
+	 * @param matchTargets the targets of the match with property .Name
+	 * @returns the closest matchTarget to name
+	 */
+	public static getBestNameMatch<
+		T extends {
+			Name: string;
+		},
+	>(name: string, matchTargets: T[]): T | null {
+		if (matchTargets.length === 0) return null;
+
+		let lowestMatchTarget = matchTargets[0];
+		let lowestMatchTargetDistance = StringUtils.levenshteinDistance(
+			(matchTargets[0].Name || '').toLowerCase(),
+			name.toLowerCase()
+		);
+		for (let i = 1; i < matchTargets.length; i++) {
+			const currentMatchTargetDistance = StringUtils.levenshteinDistance(
+				(matchTargets[i].Name || '').toLowerCase(),
+				name.toLowerCase()
+			);
+			if (currentMatchTargetDistance < lowestMatchTargetDistance) {
+				lowestMatchTarget = matchTargets[i];
+				lowestMatchTargetDistance = currentMatchTargetDistance;
+			}
+		}
+		return lowestMatchTarget;
+	}
+
+	public static nameMatchGeneric<
+		T extends {
+			name?: string;
+		},
+	>(options: T[], name: string): T | null {
+		let thing: T | null;
+		if (options.length === 0) {
+			return null;
+		} else {
+			const nameMatch = StringUtils.getBestNameMatch<{ Name: string; thing: T }>(
+				name,
+				options.map(thing => ({
+					Name: String(thing.name),
+					thing: thing,
+				}))
+			);
+			thing = nameMatch?.thing ?? null;
+		}
+		return thing;
+	}
+
+	public static stringsToCommaPhrase(strings: string[]): string {
+		return strings
+			.map((value, index, arr) => `${index === arr.length - 1 ? 'or ' : ''}"${value}"`)
+			.join(', ');
+	}
 
 	public static stripMarkdown(input: string): string {
 		return removeMarkdown(input);
 	}
 
-	public static findClosestInObjectArray<T extends object>(
+	public static findClosestInObjectArray<T extends { [k: string]: any }>(
 		targetWord: string,
-		wordArray: T[],
-		propertyName
-	): T {
-		if (!wordArray || wordArray.length === 0) return undefined;
-		return wordArray.sort(
-			StringUtils.generateSorterByWordDistance(targetWord, word => word[propertyName])
+		objectArray: T[],
+		propertyName: string
+	): T | undefined {
+		if (!objectArray || objectArray.length === 0) return undefined;
+		return objectArray.sort(
+			StringUtils.generateSorterByWordDistance<T>(targetWord, obj =>
+				_.isString(obj[propertyName]) ? obj[propertyName] : null
+			)
 		)[0];
 	}
 
 	public static findBestValueByKeyMatch(
 		targetWord: string,
-		wordObject: { [key: string]: any }
+		wordObject: { [key: string]: unknown }
 	): any {
 		if (!wordObject) return undefined;
 		const word = this.findClosestWord(targetWord, Object.keys(wordObject));
+		if (!word) return undefined;
 		return wordObject[word];
 	}
 
-	public static findClosestWord(targetWord: string, wordArray: string[]): string {
+	public static findClosestWord(targetWord: string, wordArray: string[]): string | undefined {
 		if (!wordArray || wordArray.length === 0) return undefined;
 		return wordArray.sort(
-			StringUtils.generateSorterByWordDistance(targetWord, word => word)
+			StringUtils.generateSorterByWordDistance<string>(targetWord, word => word)
 		)[0];
 	}
 
-	public static generateSorterByWordDistance(
+	public static generateSorterByWordDistance<T>(
 		targetWord: string,
-		inputToStringFn: (input: any) => string
+		inputToStringFn: (input: T) => string
 	) {
-		return (a, b) => {
+		return (a: T | null, b: T | null) => {
+			if (a === null && b === null) return 0;
+			if (a === null) return 1;
+			if (b === null) return -1;
 			const aDistance = StringUtils.levenshteinDistance(targetWord, inputToStringFn(a));
 			const bDistance = StringUtils.levenshteinDistance(targetWord, inputToStringFn(b));
 			return aDistance - bDistance;

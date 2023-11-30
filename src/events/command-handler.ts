@@ -10,24 +10,27 @@ import { RateLimiter } from 'discord.js-rate-limiter';
 
 import { Command, CommandDeferType } from '../commands/index.js';
 import { DiscordLimits } from '../constants/index.js';
-import { EventData } from '../models/internal-models.js';
-import { Lang, Logger } from '../services/index.js';
+import { Logger } from '../services/index.js';
 import { CommandUtils, InteractionUtils } from '../utils/index.js';
-import { EventHandler } from './index.js';
+import { EventHandler } from './event-handler.js';
 import { Config } from './../config/config.js';
-import Logs from './../config/lang/logs.json' assert { type: 'json' };
-import { Language } from '../models/enum-helpers/language.js';
 import { KoboldEmbed } from '../utils/kobold-embed-utils.js';
-import { refs } from '../i18n/en/common.js';
+import { refs } from '../constants/common-text.js';
 import { KoboldError } from '../utils/KoboldError.js';
+import L from '../i18n/i18n-node.js';
+import { filterNotNullOrUndefined } from '../utils/type-guards.js';
+import { InjectedServices } from '../commands/command.js';
 
 export class CommandHandler implements EventHandler {
-	private rateLimiter = new RateLimiter(
+	protected rateLimiter = new RateLimiter(
 		Config.rateLimiting.commands.amount,
 		Config.rateLimiting.commands.interval * 1000
 	);
 
-	constructor(public commands: Command[]) {}
+	constructor(
+		public commands: Command[],
+		public injectedServices: Required<InjectedServices>
+	) {}
 
 	public async process(intr: CommandInteraction | AutocompleteInteraction): Promise<void> {
 		// Don't respond to self, or other bots
@@ -41,7 +44,7 @@ export class CommandHandler implements EventHandler {
 						intr.commandName,
 						intr.options.getSubcommandGroup(false),
 						intr.options.getSubcommand(false),
-				  ].filter(Boolean)
+				  ].filter(filterNotNullOrUndefined)
 				: [intr.commandName];
 		let commandName = commandParts.join(' ');
 
@@ -49,9 +52,7 @@ export class CommandHandler implements EventHandler {
 		let command = CommandUtils.findCommand(this.commands, commandParts);
 		if (!command) {
 			Logger.error(
-				Logs.error.commandNotFound
-					.replaceAll('{INTERACTION_ID}', intr.id)
-					.replaceAll('{COMMAND_NAME}', commandName)
+				`[${intr.id}] A command with the name '${commandName}' could not be found.`
 			);
 			return;
 		}
@@ -59,16 +60,14 @@ export class CommandHandler implements EventHandler {
 		if (intr instanceof AutocompleteInteraction) {
 			if (!command.autocomplete) {
 				Logger.error(
-					Logs.error.autocompleteNotFound
-						.replaceAll('{INTERACTION_ID}', intr.id)
-						.replaceAll('{COMMAND_NAME}', commandName)
+					`[{INTERACTION_ID}] An autocomplete method for the '${intr.id}' option on the '${commandName}' command could not be found.`
 				);
 				return;
 			}
 
 			try {
 				let option = intr.options.getFocused(true);
-				let choices = await command.autocomplete(intr, option);
+				let choices = await command.autocomplete(intr, option, this.injectedServices);
 				await InteractionUtils.respond(
 					intr,
 					choices?.slice(0, DiscordLimits.CHOICES_PER_AUTOCOMPLETE)
@@ -78,22 +77,13 @@ export class CommandHandler implements EventHandler {
 					intr.channel instanceof TextChannel ||
 						intr.channel instanceof NewsChannel ||
 						intr.channel instanceof ThreadChannel
-						? Logs.error.autocompleteGuild
-								.replaceAll('{INTERACTION_ID}', intr.id)
-								.replaceAll('{OPTION_NAME}', commandName)
-								.replaceAll('{COMMAND_NAME}', commandName)
-								.replaceAll('{USER_TAG}', intr.user.tag)
-								.replaceAll('{USER_ID}', intr.user.id)
-								.replaceAll('{CHANNEL_NAME}', intr.channel.name)
-								.replaceAll('{CHANNEL_ID}', intr.channel.id)
-								.replaceAll('{GUILD_NAME}', intr.guild?.name)
-								.replaceAll('{GUILD_ID}', intr.guild?.id)
-						: Logs.error.autocompleteOther
-								.replaceAll('{INTERACTION_ID}', intr.id)
-								.replaceAll('{OPTION_NAME}', commandName)
-								.replaceAll('{COMMAND_NAME}', commandName)
-								.replaceAll('{USER_TAG}', intr.user.tag)
-								.replaceAll('{USER_ID}', intr.user.id),
+						? `[${intr.id}] An error occurred while executing the '${commandName}' autocomplete` +
+								` on the '${commandName}' command for user '${intr.user.tag}' (${intr.user.id}) ` +
+								`in channel '${intr.channel.name}' (${intr.channel.id}) in guild` +
+								` '${intr.guild?.name ?? ''}' (${intr.guild?.id ?? ''}).`
+						: `[${intr.id}] An error occurred while executing the ` +
+								`'${commandName}' autocomplete on the '${commandName}' command ` +
+								`for user '${intr.user.tag}' (${intr.user.id}).`,
 					error
 				);
 			}
@@ -112,7 +102,7 @@ export class CommandHandler implements EventHandler {
 		if (intr instanceof ChatInputCommandInteraction && command?.commands) {
 			const subCommandName = intr.options.getSubcommand();
 			const subCommand = CommandUtils.getSubCommandByName(command?.commands, subCommandName);
-			if (subCommand.deferType !== undefined) deferType = subCommand.deferType;
+			if (subCommand && subCommand.deferType !== undefined) deferType = subCommand.deferType;
 		}
 
 		switch (deferType) {
@@ -131,60 +121,50 @@ export class CommandHandler implements EventHandler {
 			return;
 		}
 
-		// TODO: Get data from database
-		let data = new EventData();
-
 		try {
 			// Check if interaction passes command checks
-			let passesChecks = await CommandUtils.runChecks(command, intr, data);
+			let passesChecks = await CommandUtils.runChecks(command, intr);
 			if (passesChecks) {
 				// Execute the command
-				const LL = Language.localize(data.lang());
-				await command.execute(intr, data, LL);
+				const LL = L.en;
+				await command.execute(intr, LL, this.injectedServices);
 			}
 		} catch (error) {
 			// Kobold Errors are expected error messages encountered through regular use of the bot
 			// These result in a simple response message and no error logging
 			if (error instanceof KoboldError) {
-				await InteractionUtils.send(intr, error.responseMessage);
+				await InteractionUtils.send(intr, error.responseMessage, error.ephemeral);
 				return;
 			}
-			await this.sendError(intr, data);
+			await this.sendError(intr);
 
 			// Log command error
 			Logger.error(
 				intr.channel instanceof TextChannel ||
 					intr.channel instanceof NewsChannel ||
 					intr.channel instanceof ThreadChannel
-					? Logs.error.commandGuild
-							.replaceAll('{INTERACTION_ID}', intr.id)
-							.replaceAll('{COMMAND_NAME}', commandName)
-							.replaceAll('{USER_TAG}', intr.user.tag)
-							.replaceAll('{USER_ID}', intr.user.id)
-							.replaceAll('{CHANNEL_NAME}', intr.channel.name)
-							.replaceAll('{CHANNEL_ID}', intr.channel.id)
-							.replaceAll('{GUILD_NAME}', intr.guild?.name)
-							.replaceAll('{GUILD_ID}', intr.guild?.id)
-					: Logs.error.commandOther
-							.replaceAll('{INTERACTION_ID}', intr.id)
-							.replaceAll('{COMMAND_NAME}', commandName)
-							.replaceAll('{USER_TAG}', intr.user.tag)
-							.replaceAll('{USER_ID}', intr.user.id),
+					? `[${intr.id}] An error occurred while executing the '${commandName}' autocomplete` +
+							` on the '${commandName}' command for user '${intr.user.tag}' (${intr.user.id}) ` +
+							`in channel '${intr.channel.name}' (${intr.channel.id}) in guild` +
+							` '${intr.guild?.name ?? ''}' (${intr.guild?.id ?? ''}).`
+					: `[${intr.id}] An error occurred while executing the ` +
+							`'${commandName}' autocomplete on the '${commandName}' command ` +
+							`for user '${intr.user.tag}' (${intr.user.id}).`,
 				error
 			);
 		}
 	}
 
-	private async sendError(intr: CommandInteraction, data: EventData): Promise<void> {
+	protected async sendError(intr: CommandInteraction): Promise<void> {
 		try {
 			const embed = new KoboldEmbed();
 			embed.setTitle('Something went Wrong!');
 			embed.setDescription(
-				`Kobold ran into an unexpected error. If you want to report this issue, let my creator know on [my support server](${refs.links.support}).`
+				`Kobold ran into an unexpected error. ${refs.embedLinks.errorReport}`
 			);
 			await InteractionUtils.send(intr, embed);
 		} catch {
-			// Ignore
+			console.error('Failed to send error message!');
 		}
 	}
 }

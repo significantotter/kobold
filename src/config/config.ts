@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+import _ from 'lodash';
 dotenv.config();
 
 const env = process.env;
@@ -47,6 +48,8 @@ interface config {
 		updateServerCount: {
 			schedule: string;
 			log: boolean;
+			runOnce: boolean;
+			initialDelaySecs: number;
 		};
 	};
 	rateLimiting: {
@@ -83,11 +86,45 @@ interface config {
 			value: string;
 		};
 	};
+	botSites: {
+		name: string;
+		enabled: boolean;
+		url: string;
+		authorization: string;
+		body: string;
+	}[];
 }
 
 function parseEnvArray(envVariable: string) {
 	if (envVariable == '') return [];
 	return (envVariable || '').split(',');
+}
+function parseEnvObjectArray(envVariable: string, params: { [k: string]: string }) {
+	if (envVariable == '') return [];
+	try {
+		const initialResult = JSON.parse(envVariable) as any[];
+		if (!_.isArray(initialResult)) throw new Error('Not an array');
+		const parsedResult: { [k: string]: any } = [];
+		for (const envObject of initialResult) {
+			const currentParsedObject: { [k: string]: any } = {};
+			for (const [key, value] of Object.entries(params)) {
+				if (!envObject[key])
+					throw new Error(`Missing key ${key} on object ${JSON.stringify(envObject)}`);
+				else if (typeof envObject[key] !== value) {
+					throw new Error(
+						`Key ${key} on object ${JSON.stringify(envObject)} is not of type ${value}`
+					);
+				} else {
+					currentParsedObject[key] = envObject[key];
+				}
+			}
+			parsedResult.push(currentParsedObject);
+		}
+		return parsedResult;
+	} catch (err) {
+		console.warn('Error parsing bot sites env from: ' + envVariable);
+		console.warn(err);
+	}
 }
 
 function parseEnvObject(envVariable: string) {
@@ -106,12 +143,12 @@ function parseEnvBoolean(envVariable: string) {
 }
 
 export const Config: config = Object.freeze({
-	developers: parseEnvArray(env.DEVELOPER_IDS) ?? [],
-	adminGuilds: parseEnvArray(env.ADMIN_GUILD_IDS) ?? [],
+	developers: parseEnvArray(env.DEVELOPER_IDS ?? '') ?? [],
+	adminGuilds: parseEnvArray(env.ADMIN_GUILD_IDS ?? '') ?? [],
 	client: {
 		id: env.CLIENT_ID ?? '',
 		token: env.CLIENT_TOKEN ?? '',
-		intents: parseEnvArray(env.CLIENT_INTENTS) ?? [
+		intents: parseEnvArray(env.CLIENT_INTENTS ?? '') ?? [
 			'Guilds',
 			'GuildMessages',
 			'GuildEmojisAndStickers',
@@ -119,8 +156,8 @@ export const Config: config = Object.freeze({
 			'DirectMessages',
 			'DirectMessageReactions',
 		],
-		partials: parseEnvArray(env.CLIENT_PARTIALS) ?? ['Message', 'Channel', 'Reaction'],
-		caches: parseEnvObject(env.CLIENT_CACHES) ?? {
+		partials: parseEnvArray(env.CLIENT_PARTIALS ?? '') ?? ['Message', 'Channel', 'Reaction'],
+		caches: parseEnvObject(env.CLIENT_CACHES ?? '') ?? {
 			BaseGuildEmojiManager: 0,
 			GuildBanManager: 0,
 			GuildInviteManager: 0,
@@ -143,20 +180,20 @@ export const Config: config = Object.freeze({
 		testUrl: env.DATABASE_TEST_URL ?? '',
 	},
 	api: {
-		port: parseEnvNumber(env.API_PORT) ?? 8080,
+		port: parseEnvNumber(env.API_PORT ?? '') ?? 8080,
 		secret: env.API_SECRET ?? '',
 	},
 	pastebin: {
 		apiKey: env.PASTEBIN_API_KEY ?? '',
 	},
 	sharding: {
-		spawnDelay: parseEnvNumber(env.SHARDING_SPAWN_DELAY) ?? 5,
-		spawnTimeout: parseEnvNumber(env.SHARDING_SPAWN_TIMEOUT) ?? 300,
-		serversPerShard: parseEnvNumber(env.SHARDING_SERVERS_PER_SHARD) ?? 1000,
+		spawnDelay: parseEnvNumber(env.SHARDING_SPAWN_DELAY ?? '') ?? 5,
+		spawnTimeout: parseEnvNumber(env.SHARDING_SPAWN_TIMEOUT ?? '') ?? 300,
+		serversPerShard: parseEnvNumber(env.SHARDING_SERVERS_PER_SHARD ?? '') ?? 1000,
 	},
 	clustering: {
-		enabled: parseEnvBoolean(env.CLUSTERING_ENABLED) ?? false,
-		shardCount: parseEnvNumber(env.CLUSTERING_SHARD_COUNT) ?? 16,
+		enabled: parseEnvBoolean(env.CLUSTERING_ENABLED ?? '') ?? false,
+		shardCount: parseEnvNumber(env.CLUSTERING_SHARD_COUNT ?? '') ?? 16,
 		callbackUrl: env.CLUSTERING_CALLBACK_URL ?? 'http://localhost:8080/',
 		masterApi: {
 			url: env.CLUSTERING_MASTER_API_URL ?? 'http://localhost:5000/',
@@ -166,41 +203,52 @@ export const Config: config = Object.freeze({
 	jobs: {
 		updateServerCount: {
 			schedule: env.JOBS_UPDATE_SERVER_COUNT_SCHEDULE ?? '0 */10 * * * *',
-			log: parseEnvBoolean(env.JOBS_UPDATE_SERVER_COUNT_LOG) ?? false,
+			log: parseEnvBoolean(env.JOBS_UPDATE_SERVER_COUNT_LOG ?? '') ?? false,
+			runOnce: parseEnvBoolean(env.JOBS_UPDATE_SERVER_COUNT_RUN_ONCE ?? '') ?? false,
+			initialDelaySecs:
+				parseEnvNumber(env.JOBS_UPDATE_SERVER_COUNT_RUN_INITIAL_DELAY_SECS ?? '') ?? 0,
 		},
 	},
 	rateLimiting: {
 		commands: {
-			amount: parseEnvNumber(env.RATE_LIMITING_COMMANDS_AMOUNT) ?? 10,
-			interval: parseEnvNumber(env.RATE_LIMITING_COMMANDS_INTERVAL) ?? 30,
+			amount: parseEnvNumber(env.RATE_LIMITING_COMMANDS_AMOUNT ?? '') ?? 10,
+			interval: parseEnvNumber(env.RATE_LIMITING_COMMANDS_INTERVAL ?? '') ?? 30,
 		},
 		buttons: {
-			amount: parseEnvNumber(env.RATE_LIMITING_BUTTONS_AMOUNT) ?? 10,
-			interval: parseEnvNumber(env.RATE_LIMITING_BUTTONS_INTERVAL) ?? 30,
+			amount: parseEnvNumber(env.RATE_LIMITING_BUTTONS_AMOUNT ?? '') ?? 10,
+			interval: parseEnvNumber(env.RATE_LIMITING_BUTTONS_INTERVAL ?? '') ?? 30,
 		},
 		triggers: {
-			amount: parseEnvNumber(env.RATE_LIMITING_TRIGGERS_AMOUNT) ?? 10,
-			interval: parseEnvNumber(env.RATE_LIMITING_TRIGGERS_INTERVAL) ?? 30,
+			amount: parseEnvNumber(env.RATE_LIMITING_TRIGGERS_AMOUNT ?? '') ?? 10,
+			interval: parseEnvNumber(env.RATE_LIMITING_TRIGGERS_INTERVAL ?? '') ?? 30,
 		},
 		reactions: {
-			amount: parseEnvNumber(env.RATE_LIMITING_REACTIONS_AMOUNT) ?? 10,
-			interval: parseEnvNumber(env.RATE_LIMITING_REACTIONS_INTERVAL) ?? 30,
+			amount: parseEnvNumber(env.RATE_LIMITING_REACTIONS_AMOUNT ?? '') ?? 10,
+			interval: parseEnvNumber(env.RATE_LIMITING_REACTIONS_INTERVAL ?? '') ?? 30,
 		},
 	},
 	logging: {
-		pretty: parseEnvBoolean(env.LOGGING_PRETTY) ?? true,
+		pretty: parseEnvBoolean(env.LOGGING_PRETTY ?? '') ?? true,
 		rateLimit: {
-			minTimeout: parseEnvNumber(env.LOGGING_RATE_LIMIT_MIN_TIMEOUT) ?? 30,
+			minTimeout: parseEnvNumber(env.LOGGING_RATE_LIMIT_MIN_TIMEOUT ?? '') ?? 30,
 		},
 	},
 	debug: {
 		dummyMode: {
-			enabled: parseEnvBoolean(env.DEBUG_DUMMY_MODE_ENABLED) ?? false,
-			whiteList: parseEnvArray(env.DEBUG_DUMMY_MODE_WHITELIST) ?? [],
+			enabled: parseEnvBoolean(env.DEBUG_DUMMY_MODE_ENABLED ?? '') ?? false,
+			whiteList: parseEnvArray(env.DEBUG_DUMMY_MODE_WHITELIST ?? '') ?? [],
 		},
 		shardMode: {
-			enabled: parseEnvBoolean(env.DEBUG_SHARD_MODE_ENABLED) ?? false,
+			enabled: parseEnvBoolean(env.DEBUG_SHARD_MODE_ENABLED ?? '') ?? false,
 			value: env.DEBUG_SHARD_MODE_VALUE ?? 'worker',
 		},
 	},
+	botSites:
+		(parseEnvObjectArray(env.BOT_SITES_0 ?? '', {
+			name: 'string',
+			enabled: 'boolean',
+			url: 'string',
+			authorization: 'string',
+			body: 'string',
+		}) as config['botSites']) ?? [],
 });

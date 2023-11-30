@@ -1,26 +1,27 @@
 import {
 	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 	ChatInputCommandInteraction,
 	PermissionsString,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
+import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { Language } from '../../../models/enum-helpers/index.js';
 
-import { EventData } from '../../../models/internal-models.js';
-import { Initiative } from '../../../services/kobold/models/index.js';
+import { Kobold } from '../../../services/kobold/index.js';
+import { KoboldError } from '../../../utils/KoboldError.js';
 import { InteractionUtils } from '../../../utils/index.js';
-import { InitiativeBuilder } from '../../../utils/initiative-utils.js';
+import { InitiativeBuilder } from '../../../utils/initiative-builder.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Command, CommandDeferType } from '../../index.js';
 
 export class InitStartSubCommand implements Command {
-	public names = [Language.LL.commands.init.start.name()];
+	public names = [L.en.commands.init.start.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.init.start.name(),
-		description: Language.LL.commands.init.show.description(),
+		name: L.en.commands.init.start.name(),
+		description: L.en.commands.init.show.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -30,8 +31,8 @@ export class InitStartSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const startingUser = intr.user.id;
 		if (!intr.channel || !intr.channel.id) {
@@ -41,35 +42,40 @@ export class InitStartSubCommand implements Command {
 			);
 			return;
 		}
-
-		const initBuilder = new InitiativeBuilder({ LL });
-		const embed = await KoboldEmbed.roundFromInitiativeBuilder(initBuilder, LL);
-
-		const message = await InteractionUtils.send(intr, embed);
+		const koboldUtils = new KoboldUtils(kobold);
+		const { currentInitiative } = await koboldUtils.fetchDataForCommand(intr, {
+			currentInitiative: true,
+		});
+		if (currentInitiative) {
+			throw new KoboldError(LL.commands.init.start.interactions.initExistsError());
+		}
 
 		try {
-			const init = await Initiative.query()
-				.withGraphFetched('[actors, actorGroups]')
-				.insertAndFetch({
-					gmUserId: startingUser,
-					channelId: intr.channel.id,
-					roundMessageIds: [],
-				});
-			initBuilder.set({ initiative: init, actors: init.actors, groups: init.actorGroups });
+			const init = await kobold.initiative.create({
+				gmUserId: startingUser,
+				channelId: intr.channelId,
+				currentTurnGroupId: null,
+				currentRound: 0,
+			});
+
+			const initBuilder = new InitiativeBuilder({
+				initiative: init,
+				actors: init.actors,
+				groups: init.actorGroups,
+				LL,
+			});
+			const embed = await KoboldEmbed.roundFromInitiativeBuilder(initBuilder, LL);
+			const message = await InteractionUtils.send(intr, embed);
+
 			const updatedEmbed = await KoboldEmbed.roundFromInitiativeBuilder(initBuilder, LL);
-			await message.edit({ embeds: [updatedEmbed] });
+			message
+				? await message.edit({ embeds: [updatedEmbed] })
+				: InteractionUtils.send(intr, updatedEmbed);
 		} catch (err) {
-			if (err.name === 'UniqueViolationError') {
-				await Promise.all([
-					message.edit(LL.commands.init.start.interactions.initExistsError()),
-					message.suppressEmbeds(true),
-				]);
-			} else {
-				await Promise.all([
-					message.edit(LL.commands.init.start.interactions.otherError()),
-					message.suppressEmbeds(true),
-				]);
-				console.error(err);
+			if (err instanceof KoboldError) throw err;
+			else {
+				console.warn(err);
+				throw new KoboldError(LL.commands.init.start.interactions.otherError());
 			}
 		}
 	}

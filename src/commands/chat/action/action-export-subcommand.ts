@@ -1,28 +1,25 @@
-import { Character, Game, GuildDefaultCharacter } from '../../../services/kobold/models/index.js';
 import {
 	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 	ChatInputCommandInteraction,
 	PermissionsString,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 
-import { EventData } from '../../../models/internal-models.js';
-import { InteractionUtils } from '../../../utils/index.js';
-import { Command, CommandDeferType } from '../../index.js';
-import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
-import { Language } from '../../../models/enum-helpers/index.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { CollectorUtils } from '../../../utils/collector-utils.js';
-import { PasteBin } from '../../../services/pastebin/index.js';
-import { CharacterUtils } from '../../../utils/character-utils.js';
 import { Config } from '../../../config/config.js';
+import L from '../../../i18n/i18n-node.js';
+import { TranslationFunctions } from '../../../i18n/i18n-types.js';
+import { Kobold } from '../../../services/kobold/kobold.model.js';
+import { PasteBin } from '../../../services/pastebin/index.js';
+import { InteractionUtils } from '../../../utils/index.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { Command, CommandDeferType } from '../../index.js';
 
 export class ActionExportSubCommand implements Command {
-	public names = [Language.LL.commands.action.export.name()];
+	public names = [L.en.commands.action.export.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.action.export.name(),
-		description: Language.LL.commands.action.export.description(),
+		name: L.en.commands.action.export.name(),
+		description: L.en.commands.action.export.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -31,28 +28,25 @@ export class ActionExportSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
-		if (!activeCharacter) {
-			await InteractionUtils.send(
-				intr,
-				LL.commands.character.interactions.noActiveCharacter()
-			);
-			return;
-		}
-		const actions = activeCharacter.actions;
+		const koboldUtils = new KoboldUtils(kobold);
+		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+			activeCharacter: true,
+		});
+
+		const actions = activeCharacter.sheetRecord.actions;
 
 		const pastebinPost = await new PasteBin({ apiKey: Config.pastebin.apiKey }).post({
 			code: JSON.stringify(actions),
-			name: `${activeCharacter.sheet.info.name}'s Actions`,
+			name: `${activeCharacter.name}'s Actions`,
 		});
 
 		await InteractionUtils.send(
 			intr,
 			LL.commands.action.export.interactions.success({
-				characterName: activeCharacter.sheet.info.name,
+				characterName: activeCharacter.name,
 				pasteBinLink: pastebinPost,
 			})
 		);

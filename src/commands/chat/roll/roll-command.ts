@@ -1,62 +1,39 @@
-import { Language } from './../../../models/enum-helpers/language.js';
 import {
+	ApplicationCommandOptionChoiceData,
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
 	ChatInputCommandInteraction,
 	PermissionsString,
-	ApplicationCommandOptionChoiceData,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 import { ChatArgs } from '../../../constants/chat-args.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 
-import { EventData } from '../../../models/internal-models.js';
-import { CommandUtils, InteractionUtils } from '../../../utils/index.js';
+import L from '../../../i18n/i18n-node.js';
+import { CommandUtils } from '../../../utils/index.js';
+import { InjectedServices } from '../../command.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { ActionOptions } from '../action/action-command-options.js';
 import { InitOptions } from '../init/init-command-options.js';
 
 export class RollCommand implements Command {
-	public names = [Language.LL.commands.roll.name()];
+	public names = [L.en.commands.roll.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.roll.name(),
-		description: Language.LL.commands.roll.description(),
+		name: L.en.commands.roll.name(),
+		description: L.en.commands.roll.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 
 		options: [
 			{
-				name: Language.LL.commands.roll.ability.name(),
-				description: Language.LL.commands.roll.ability.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
-				options: [
-					{
-						...ChatArgs.ABILITY_CHOICE_OPTION,
-						required: true,
-					},
-					{
-						...ChatArgs.ROLL_MODIFIER_OPTION,
-						required: false,
-					},
-					{
-						...ChatArgs.ROLL_NOTE_OPTION,
-						required: false,
-					},
-					{
-						...ChatArgs.ROLL_SECRET_OPTION,
-						required: false,
-					},
-				],
-			},
-			{
-				name: Language.LL.commands.roll.action.name(),
-				description: Language.LL.commands.roll.action.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				name: L.en.commands.roll.action.name(),
+				description: L.en.commands.roll.action.description(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					{
 						...ActionOptions.ACTION_TARGET_OPTION,
@@ -85,9 +62,9 @@ export class RollCommand implements Command {
 				],
 			},
 			{
-				name: Language.LL.commands.roll.attack.name(),
-				description: Language.LL.commands.roll.attack.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				name: L.en.commands.roll.attack.name(),
+				description: L.en.commands.roll.attack.description(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					{
 						...ChatArgs.ATTACK_CHOICE_OPTION,
@@ -114,9 +91,9 @@ export class RollCommand implements Command {
 				],
 			},
 			{
-				name: Language.LL.commands.roll.dice.name(),
-				description: Language.LL.commands.roll.dice.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				name: L.en.commands.roll.dice.name(),
+				description: L.en.commands.roll.dice.description(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					{
 						...ChatArgs.ROLL_EXPRESSION_OPTION,
@@ -133,9 +110,9 @@ export class RollCommand implements Command {
 				],
 			},
 			{
-				name: Language.LL.commands.roll.perception.name(),
-				description: Language.LL.commands.roll.perception.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				name: L.en.commands.roll.perception.name(),
+				description: L.en.commands.roll.perception.description(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					{
 						...ChatArgs.ROLL_MODIFIER_OPTION,
@@ -152,9 +129,9 @@ export class RollCommand implements Command {
 				],
 			},
 			{
-				name: Language.LL.commands.roll.save.name(),
-				description: Language.LL.commands.roll.save.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				name: L.en.commands.roll.save.name(),
+				description: L.en.commands.roll.save.description(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					{
 						...ChatArgs.SAVE_CHOICE_OPTION,
@@ -175,9 +152,9 @@ export class RollCommand implements Command {
 				],
 			},
 			{
-				name: Language.LL.commands.roll.skill.name(),
-				description: Language.LL.commands.roll.skill.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				name: L.en.commands.roll.skill.name(),
+				description: L.en.commands.roll.skill.description(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					{
 						...ChatArgs.SKILL_CHOICE_OPTION,
@@ -207,8 +184,9 @@ export class RollCommand implements Command {
 
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
-		option: AutocompleteFocusedOption
-	): Promise<ApplicationCommandOptionChoiceData[]> {
+		option: AutocompleteFocusedOption,
+		services: InjectedServices
+	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 
 		const command = CommandUtils.getSubCommandByName(
@@ -219,13 +197,13 @@ export class RollCommand implements Command {
 			return;
 		}
 
-		return await command.autocomplete(intr, option);
+		return await command.autocomplete(intr, option, services);
 	}
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		services: InjectedServices
 	): Promise<void> {
 		if (!intr.isChatInputCommand()) return;
 		const command = CommandUtils.getSubCommandByName(
@@ -236,9 +214,9 @@ export class RollCommand implements Command {
 			return;
 		}
 
-		const passesChecks = await CommandUtils.runChecks(command, intr, data);
+		let passesChecks = await CommandUtils.runChecks(command, intr);
 		if (passesChecks) {
-			await command.execute(intr, data, LL);
+			await command.execute(intr, LL, services);
 		}
 	}
 }

@@ -1,28 +1,27 @@
 import {
 	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
-	ChatInputCommandInteraction,
-	PermissionsString,
-	ComponentType,
 	ButtonStyle,
+	ChatInputCommandInteraction,
+	ComponentType,
+	PermissionsString,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 
-import { EventData } from '../../../models/internal-models.js';
-import { InteractionUtils } from '../../../utils/index.js';
-import { Command, CommandDeferType } from '../../index.js';
-import { InitiativeUtils } from '../../../utils/initiative-utils.js';
-import { Initiative } from '../../../services/kobold/models/index.js';
+import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { Language } from '../../../models/enum-helpers/index.js';
+import { Kobold } from '../../../services/kobold/index.js';
 import { CollectorUtils } from '../../../utils/collector-utils.js';
+import { InteractionUtils } from '../../../utils/index.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { Command, CommandDeferType } from '../../index.js';
 
 export class InitEndSubCommand implements Command {
-	public names = [Language.LL.commands.init.end.name()];
+	public names = [L.en.commands.init.end.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.init.end.name(),
-		description: Language.LL.commands.init.end.description(),
+		name: L.en.commands.init.end.name(),
+		description: L.en.commands.init.end.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -32,18 +31,13 @@ export class InitEndSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
-		const currentInitResponse = await InitiativeUtils.getInitiativeForChannel(intr.channel, {
-			sendErrors: true,
-			LL,
+		const koboldUtils = new KoboldUtils(kobold);
+		const { currentInitiative } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+			currentInitiative: true,
 		});
-		if (currentInitResponse.errorMessage) {
-			await InteractionUtils.send(intr, currentInitResponse.errorMessage);
-			return;
-		}
-		const currentInit = currentInitResponse.init;
 
 		const prompt = await intr.reply({
 			content: LL.commands.init.end.interactions.confirmation.text(),
@@ -97,16 +91,16 @@ export class InitEndSubCommand implements Command {
 				},
 			}
 		);
-		if (result.value === 'cancel') {
+		if (result && result.value === 'cancel') {
 			await InteractionUtils.editReply(intr, {
 				content: LL.sharedInteractions.choiceRegistered({
 					choice: 'Cancel',
 				}),
 				components: [],
 			});
-			await InteractionUtils.send(intr, Language.LL.commands.init.end.interactions.cancel());
+			await InteractionUtils.send(intr, L.en.commands.init.end.interactions.cancel());
 			return;
-		} else if (result.value === 'end') {
+		} else if (result && result.value === 'end') {
 			await InteractionUtils.editReply(intr, {
 				content: LL.sharedInteractions.choiceRegistered({
 					choice: 'End',
@@ -114,17 +108,11 @@ export class InitEndSubCommand implements Command {
 				components: [],
 			});
 			try {
-				await Initiative.query().deleteById(currentInit.id);
-				await InteractionUtils.send(
-					intr,
-					Language.LL.commands.init.end.interactions.success()
-				);
+				await kobold.initiative.delete({ id: currentInitiative.id });
+				await InteractionUtils.send(intr, L.en.commands.init.end.interactions.success());
 				return;
 			} catch (err) {
-				await InteractionUtils.send(
-					intr,
-					Language.LL.commands.init.end.interactions.error()
-				);
+				await InteractionUtils.send(intr, L.en.commands.init.end.interactions.error());
 				console.error(err);
 			}
 		} else {

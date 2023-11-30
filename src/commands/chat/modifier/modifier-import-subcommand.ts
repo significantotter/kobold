@@ -1,40 +1,35 @@
-import { ModifierOptions } from './modifier-command-options.js';
 import {
 	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 	ChatInputCommandInteraction,
 	PermissionsString,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
+import { ModifierOptions } from './modifier-command-options.js';
 
-import { EventData } from '../../../models/internal-models.js';
-import { Character } from '../../../services/kobold/models/index.js';
-import { InteractionUtils } from '../../../utils/index.js';
-import { Command, CommandDeferType } from '../../index.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { Language } from '../../../models/enum-helpers/index.js';
-import { CharacterUtils } from '../../../utils/character-utils.js';
 import { compileExpression } from 'filtrex';
-import { PasteBin } from '../../../services/pastebin/index.js';
-import characterSchema from './../../../services/kobold/models/character/character.schema.json' assert { type: 'json' };
-import Ajv from 'ajv';
-import addFormats from 'ajv-formats';
 import _ from 'lodash';
+import L from '../../../i18n/i18n-node.js';
+import { TranslationFunctions } from '../../../i18n/i18n-types.js';
+import { Kobold, Modifier, zModifier } from '../../../services/kobold/index.js';
+import { PasteBin } from '../../../services/pastebin/index.js';
 import {
 	ignoreOnConflict,
 	overwriteOnConflict,
 	renameOnConflict,
 	replaceAll,
 } from '../../../utils/import-utils.js';
-const ajv = new Ajv.default({ allowUnionTypes: true });
-addFormats.default(ajv);
+import { InteractionUtils } from '../../../utils/index.js';
+import { TextParseHelpers } from '../../../utils/kobold-helpers/text-parse-helpers.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { Command, CommandDeferType } from '../../index.js';
 
 export class ModifierImportSubCommand implements Command {
-	public names = [Language.LL.commands.modifier.import.name()];
+	public names = [L.en.commands.modifier.import.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.modifier.import.name(),
-		description: Language.LL.commands.modifier.import.description(),
+		name: L.en.commands.modifier.import.name(),
+		description: L.en.commands.modifier.import.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -44,31 +39,29 @@ export class ModifierImportSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
-		if (!activeCharacter) {
-			await InteractionUtils.send(
-				intr,
-				LL.commands.character.interactions.noActiveCharacter()
-			);
-			return;
-		}
+		const koboldUtils = new KoboldUtils(kobold);
+		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+			activeCharacter: true,
+		});
 		let importMode = intr.options
-			.getString(ModifierOptions.MODIFIER_IMPORT_MODE.name)
+			.getString(ModifierOptions.MODIFIER_IMPORT_MODE.name, true)
 			.trim()
 			.toLowerCase();
-		let importUrl = intr.options.getString(ModifierOptions.MODIFIER_IMPORT_URL.name).trim();
+		let importUrl = intr.options
+			.getString(ModifierOptions.MODIFIER_IMPORT_URL.name, true)
+			.trim();
 
-		const importId = CharacterUtils.parsePastebinIdFromText(importUrl);
+		const importId = TextParseHelpers.parsePasteBinIdFromText(importUrl);
 
 		if (!importId) {
 			await InteractionUtils.send(intr, LL.commands.modifier.import.interactions.badUrl());
 			return;
 		}
 
-		let newModifiers = [];
+		let newModifiers: Modifier[] = [];
 
 		let invalidJson = false;
 		try {
@@ -78,13 +71,15 @@ export class ModifierImportSubCommand implements Command {
 			} else {
 				newModifiers = JSON.parse(modifiersText);
 			}
-			const valid = ajv.validate(characterSchema.properties.modifiers, newModifiers);
-			if (!valid) {
+			const valid = zModifier.safeParse(newModifiers);
+			if (!valid.success) {
 				invalidJson = true;
 			} else {
 				for (const modifier of newModifiers) {
-					// throws an error on an invalid expression
-					compileExpression(modifier.targetTags);
+					if (modifier.modifierType === 'roll') {
+						// throws an error on an invalid expression
+						compileExpression(modifier.targetTags ?? '');
+					}
 				}
 			}
 		} catch (err) {
@@ -98,27 +93,22 @@ export class ModifierImportSubCommand implements Command {
 			);
 			return;
 		}
-		const currentModifiers = activeCharacter.modifiers;
+		const currentModifiers = activeCharacter.sheetRecord.modifiers;
 
-		let finalModifiers: Character['modifiers'] = [];
+		let finalModifiers: Modifier[] = [];
 
-		if (
-			importMode ===
-			Language.LL.commandOptions.modifierImportMode.choices.fullyReplace.value()
-		) {
+		if (importMode === L.en.commandOptions.modifierImportMode.choices.fullyReplace.value()) {
 			finalModifiers = replaceAll(currentModifiers, newModifiers);
 		} else if (
-			importMode === Language.LL.commandOptions.modifierImportMode.choices.overwrite.value()
+			importMode === L.en.commandOptions.modifierImportMode.choices.overwrite.value()
 		) {
 			finalModifiers = overwriteOnConflict(currentModifiers, newModifiers);
 		} else if (
-			importMode ===
-			Language.LL.commandOptions.modifierImportMode.choices.renameOnConflict.value()
+			importMode === L.en.commandOptions.modifierImportMode.choices.renameOnConflict.value()
 		) {
 			finalModifiers = renameOnConflict(currentModifiers, newModifiers);
 		} else if (
-			importMode ===
-			Language.LL.commandOptions.modifierImportMode.choices.ignoreOnConflict.value()
+			importMode === L.en.commandOptions.modifierImportMode.choices.ignoreOnConflict.value()
 		) {
 			finalModifiers = ignoreOnConflict(currentModifiers, newModifiers);
 		} else {
@@ -130,14 +120,19 @@ export class ModifierImportSubCommand implements Command {
 			return;
 		}
 
-		await Character.query().patchAndFetchById(activeCharacter.id, {
-			modifiers: finalModifiers,
-		});
+		await kobold.sheetRecord.update(
+			{
+				id: activeCharacter.sheetRecordId,
+			},
+			{
+				modifiers: finalModifiers,
+			}
+		);
 
 		await InteractionUtils.send(
 			intr,
 			LL.commands.modifier.import.interactions.imported({
-				characterName: activeCharacter.sheet.info.name,
+				characterName: activeCharacter.name,
 			})
 		);
 		return;

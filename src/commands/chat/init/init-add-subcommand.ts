@@ -1,42 +1,44 @@
-import { DiceUtils } from './../../../utils/dice-utils.js';
-import { RollBuilder } from '../../../utils/roll-builder.js';
-import { InitiativeActor } from './../../../services/kobold/models/initiative-actor/initiative-actor.model.js';
 import {
+	ApplicationCommandOptionChoiceData,
 	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
+	AutocompleteFocusedOption,
+	AutocompleteInteraction,
+	CacheType,
 	ChatInputCommandInteraction,
 	EmbedBuilder,
 	PermissionsString,
-	AutocompleteInteraction,
-	ApplicationCommandOptionChoiceData,
-	AutocompleteFocusedOption,
-	CacheType,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
+import { DiceUtils } from '../../../utils/dice-utils.js';
+import { RollBuilder } from '../../../utils/roll-builder.js';
 
-import { EventData } from '../../../models/internal-models.js';
-import { InteractionUtils, StringUtils } from '../../../utils/index.js';
-import { Command, CommandDeferType } from '../../index.js';
-import { InitiativeUtils, InitiativeBuilder } from '../../../utils/initiative-utils.js';
-import { ChatArgs } from '../../../constants/chat-args.js';
-import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { Language } from '../../../models/enum-helpers/language.js';
-import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
-import { Npc, Sheet } from '../../../services/kobold/models/index.js';
-import { Creature } from '../../../utils/creature.js';
 import _ from 'lodash';
+import { ChatArgs } from '../../../constants/chat-args.js';
+import L from '../../../i18n/i18n-node.js';
+import { TranslationFunctions } from '../../../i18n/i18n-types.js';
+import { Kobold } from '../../../services/kobold/index.js';
+import { CompendiumModel } from '../../../services/pf2etools/compendium.model.js';
+import { Creature } from '../../../utils/creature.js';
+import { InteractionUtils, StringUtils } from '../../../utils/index.js';
+import { InitiativeBuilder, InitiativeBuilderUtils } from '../../../utils/initiative-builder.js';
+import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { NpcUtils } from '../../../utils/kobold-service-utils/npc-utils.js';
+import {
+	applyStatOverrides,
+	convertBestiaryCreatureToSheet,
+} from '../../../utils/sheet/sheet-import-utils.js';
+import { SheetProperties } from '../../../utils/sheet/sheet-properties.js';
+import { Command, CommandDeferType } from '../../index.js';
 import { InitOptions } from './init-command-options.js';
-import { generateStatOverrides } from '../../../utils/sheet-import-utils.js';
-import { KoboldError } from '../../../utils/KoboldError.js';
-import { SettingsUtils } from '../../../utils/settings-utils.js';
 
 export class InitAddSubCommand implements Command {
-	public names = [Language.LL.commands.init.add.name()];
+	public names = [L.en.commands.init.add.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.init.add.name(),
-		description: Language.LL.commands.init.add.description(),
+		name: L.en.commands.init.add.name(),
+		description: L.en.commands.init.add.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -46,16 +48,25 @@ export class InitAddSubCommand implements Command {
 
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
-		option: AutocompleteFocusedOption
-	): Promise<ApplicationCommandOptionChoiceData[]> {
-		if (!intr.isAutocomplete()) return;
+		option: AutocompleteFocusedOption,
+		{ kobold, compendium }: { kobold: Kobold; compendium: CompendiumModel }
+	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
+		if (!intr.isAutocomplete()) return [];
 		if (option.name === InitOptions.INIT_CREATURE_OPTION.name) {
 			const match = intr.options.getString(InitOptions.INIT_CREATURE_OPTION.name);
-			const npcs = await AutocompleteUtils.getBestiaryNpcs(intr, match);
+			const { autocompleteUtils } = new KoboldUtils(kobold);
+			const npcs = await autocompleteUtils.getBestiaryCreatures(
+				intr,
+				compendium,
+				match ?? ''
+			);
 			if (npcs.length > 20) {
 				npcs.unshift({ name: 'Custom NPC', value: 'Custom NPC' });
 			} else {
-				const sorter = StringUtils.generateSorterByWordDistance(match, c => c.name);
+				const sorter = StringUtils.generateSorterByWordDistance<{
+					name: string;
+					value: string;
+				}>(match ?? '', c => c.name);
 				npcs.sort(sorter);
 				npcs.push({ name: 'Custom NPC', value: 'Custom NPC' });
 				return npcs;
@@ -66,24 +77,18 @@ export class InitAddSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold, compendium }: { kobold: Kobold; compendium: CompendiumModel }
 	): Promise<void> {
-		const [currentInitResponse, userSettings] = await Promise.all([
-			InitiativeUtils.getInitiativeForChannel(intr.channel, {
-				sendErrors: true,
-				LL,
-			}),
-			SettingsUtils.getSettingsForUser(intr),
-		]);
-		if (currentInitResponse.errorMessage) {
-			await InteractionUtils.send(intr, currentInitResponse.errorMessage);
-			return;
-		}
-		const currentInit = currentInitResponse.init;
+		const koboldUtils = new KoboldUtils(kobold);
+		const { currentInitiative, userSettings } =
+			await koboldUtils.fetchNonNullableDataForCommand(intr, {
+				currentInitiative: true,
+				userSettings: true,
+			});
 
 		let actorName = intr.options.getString(InitOptions.ACTOR_NAME_OPTION.name);
-		const targetCreature = intr.options.getString(InitOptions.INIT_CREATURE_OPTION.name);
+		const targetCreature = intr.options.getString(InitOptions.INIT_CREATURE_OPTION.name, true);
 		const customStatsString = intr.options.getString(InitOptions.INIT_CUSTOM_STATS_OPTION.name);
 		const initiativeValue = intr.options.getNumber(InitOptions.INIT_VALUE_OPTION.name);
 		const diceExpression = intr.options.getString(ChatArgs.ROLL_EXPRESSION_OPTION.name);
@@ -92,14 +97,10 @@ export class InitAddSubCommand implements Command {
 			.trim()
 			.toLocaleLowerCase();
 
-		let creature: Creature = null;
-		let sheet: Sheet = null;
-		let referenceNpcName = null;
+		let sheet = SheetProperties.defaultSheet;
+		let referenceNpcName: string | null = null;
 
-		if (targetCreature.toLowerCase().trim() == 'custom npc') {
-			if (!actorName) actorName = 'unnamed enemy';
-			sheet = { info: { name: actorName } };
-		} else {
+		if (targetCreature.toLowerCase().trim() != 'custom npc') {
 			const npcNameSourceRegex = /(.*) \((.*)\)/;
 			const [fullMatch, matchedName, matchedSource] =
 				npcNameSourceRegex.exec(targetCreature) ?? [];
@@ -109,66 +110,67 @@ export class InitAddSubCommand implements Command {
 				name = matchedName;
 				source = matchedSource;
 			}
-			// search for the npc's name case insensitively
-			let npcPromise = Npc.query().whereRaw('name ilike ?', [`%${name ?? ''}%`]);
-			// if we're targeting a specific source book, add that to the search
-			if (source)
-				npcPromise = npcPromise.andWhereRaw("(data->'source')::TEXT ilike ?", [
-					`%${source ?? ''}%`,
-				]);
-			const npcs = await npcPromise;
-			if (!npcPromise)
-				throw new KoboldError(`Yip! I couldn't find ${fullMatch} in the bestiary!`);
-			const npc = StringUtils.findClosestInObjectArray(name, npcs, 'name');
-			const variantData = await npc.fetchVariantDataIfExists();
-			if (!actorName) actorName = (template ? `${_.capitalize(template)} ` : '') + npc.name;
-			creature = Creature.fromBestiaryEntry(variantData, npc.fluff, {
+			const { bestiaryCreature, bestiaryCreatureFluff } =
+				await NpcUtils.fetchCompendiumCreatureData(intr, compendium, name, source);
+
+			sheet = convertBestiaryCreatureToSheet(bestiaryCreature, bestiaryCreatureFluff, {
 				useStamina: false,
 				template,
 				customName: actorName || undefined,
 			});
-			sheet = creature.sheet;
-			referenceNpcName = npc.name;
+			referenceNpcName = bestiaryCreature.name;
+
+			if (!actorName)
+				actorName = (template ? `${_.capitalize(template)} ` : '') + bestiaryCreature.name;
 		}
 
+		if (!actorName) actorName = 'unnamed enemy';
+		sheet = _.merge(sheet, { staticInfo: { name: actorName } });
+
+		let finalName: string = actorName;
+
 		if (customStatsString) {
-			const statOverrides = generateStatOverrides(customStatsString);
-			sheet = _.merge(sheet, statOverrides);
+			applyStatOverrides(sheet, customStatsString);
 		}
 
 		let nameCount = 1;
-		let existingName = currentInit.actors.find(
-			actor => actor.name.toLowerCase() === actorName.toLowerCase()
+		let existingName = currentInitiative.actors.find(
+			actor => actor.name.toLowerCase() === finalName.toLowerCase()
 		);
-		const baseName = actorName;
+
 		if (existingName) {
 			while (
-				currentInit.actors.find(
-					actor => actor.name.toLowerCase() === actorName.toLowerCase()
+				currentInitiative.actors.find(
+					actor => actor.name.toLowerCase() === finalName.toLowerCase()
 				)
 			) {
-				actorName = baseName + `-${nameCount++}`;
+				finalName = actorName + `-${nameCount++}`;
 			}
 		}
+
+		const sheetRecord = await kobold.sheetRecord.create({ sheet });
+
 		let finalInitiative = 0;
 		let rollResultMessage: EmbedBuilder;
+
 		if (initiativeValue) {
 			finalInitiative = initiativeValue;
 			rollResultMessage = new KoboldEmbed()
 				.setTitle(
-					Language.LL.commands.init.add.interactions.joinedEmbed.joinedTitle({
-						actorName,
+					L.en.commands.init.add.interactions.joinedEmbed.joinedTitle({
+						actorName: finalName,
 					})
 				)
 				.setDescription(
-					Language.LL.commands.init.add.interactions.joinedEmbed.description({
+					L.en.commands.init.add.interactions.joinedEmbed.description({
 						finalInitiative,
 					})
 				);
 		} else {
+			const creature = Creature.fromSheetRecord(sheetRecord);
 			const rollBuilder = new RollBuilder({
-				title: Language.LL.commands.init.add.interactions.joinedEmbed.rolledTitle({
-					actorName,
+				title: L.en.commands.init.add.interactions.joinedEmbed.rolledTitle({
+					actorName: finalName,
 				}),
 				userSettings,
 				LL,
@@ -176,7 +178,7 @@ export class InitAddSubCommand implements Command {
 			rollBuilder.addRoll({
 				rollExpression: DiceUtils.buildDiceExpression(
 					'd20',
-					String(sheet?.general?.perception || 0),
+					String(creature.statBonuses.perception || 0),
 					diceExpression
 				),
 				tags: ['skill', 'perception', 'initiative'],
@@ -185,42 +187,35 @@ export class InitAddSubCommand implements Command {
 			rollResultMessage = rollBuilder.compileEmbed();
 		}
 
-		const targetMessageId = currentInit.roundMessageIds[currentInit.currentRound || 0];
-		if (targetMessageId) {
-			const targetMessage = await intr.channel.messages.fetch(targetMessageId);
-			rollResultMessage.addFields([
-				{
-					name: Language.LL.commands.init.add.interactions.joinedEmbed.roundField.name(),
-					value: Language.LL.commands.init.add.interactions.joinedEmbed.roundField.value({
-						currentRound: currentInit.currentRound,
-						url: targetMessage.url,
-					}),
-				},
-			]);
-		}
-		const newActor = await InitiativeActor.query().insertGraphAndFetch({
-			initiativeId: currentInit.id,
+		const newActorGroup = await kobold.initiativeActorGroup.create({
+			initiativeId: currentInitiative.id,
+			userId: intr.user.id,
+			name: actorName,
+			initiativeResult: finalInitiative,
+		});
+
+		const newActor = await kobold.initiativeActor.create({
+			initiativeId: currentInitiative.id,
+			sheetRecordId: sheetRecord.id,
 			name: actorName,
 			userId: intr.user.id,
-			sheet: sheet,
 			referenceNpcName,
 			hideStats,
-
-			actorGroup: {
-				initiativeId: currentInit.id,
-				userId: intr.user.id,
-				name: actorName,
-				initiativeResult: finalInitiative,
-			},
+			initiativeActorGroupId: newActorGroup.id,
 		});
+		newActor.actorGroup = newActorGroup;
+		newActor.initiative = currentInitiative;
+		newActorGroup.actors.push(newActor);
+		newActorGroup.initiative = currentInitiative;
+		currentInitiative.actorGroups.push(newActorGroup);
+		currentInitiative.actors.push(newActor);
 
 		const initBuilder = new InitiativeBuilder({
-			initiative: currentInit,
-			actors: currentInit.actors.concat(newActor),
-			groups: currentInit.actorGroups.concat(newActor.actorGroup),
-			LL,
+			initiative: currentInitiative,
+			actors: currentInitiative.actors,
+			groups: currentInitiative.actorGroups,
 		});
-		await InitiativeUtils.sendNewRoundMessage(intr, initBuilder);
+		await InitiativeBuilderUtils.sendNewRoundMessage(intr, initBuilder);
 		await InteractionUtils.send(intr, rollResultMessage);
 	}
 }

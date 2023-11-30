@@ -1,29 +1,29 @@
-import { WanderersGuide } from '../../../services/wanderers-guide/index.js';
-import { Character } from '../../../services/kobold/models/index.js';
 import {
+	ApplicationCommandOptionChoiceData,
 	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
 	ChatInputCommandInteraction,
 	PermissionsString,
-	ApplicationCommandOptionChoiceData,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
+import { Kobold } from '../../../services/kobold/index.js';
 
 import { ChatArgs } from '../../../constants/index.js';
-import { EventData } from '../../../models/internal-models.js';
-import { InteractionUtils } from '../../../utils/index.js';
-import { Command, CommandDeferType } from '../../index.js';
-import { Language } from '../../../models/enum-helpers/index.js';
+
+import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
+import { InteractionUtils } from '../../../utils/index.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { Command, CommandDeferType } from '../../index.js';
 
 export class CharacterSetActiveSubCommand implements Command {
-	public names = [Language.LL.commands.character.setActive.name()];
+	public names = [L.en.commands.character.setActive.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.character.setActive.name(),
-		description: Language.LL.commands.character.setActive.description(),
+		name: L.en.commands.character.setActive.name(),
+		description: L.en.commands.character.setActive.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -32,15 +32,17 @@ export class CharacterSetActiveSubCommand implements Command {
 
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
-		option: AutocompleteFocusedOption
-	): Promise<ApplicationCommandOptionChoiceData[]> {
+		option: AutocompleteFocusedOption,
+		{ kobold }: { kobold: Kobold }
+	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === ChatArgs.SET_ACTIVE_NAME_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(ChatArgs.SET_ACTIVE_NAME_OPTION.name);
+			const match = intr.options.getString(ChatArgs.SET_ACTIVE_NAME_OPTION.name) ?? '';
 
+			const { characterUtils } = new KoboldUtils(kobold);
 			//get the character matches
-			const options = await Character.queryControlledCharacterByName(match, intr.user.id);
+			const options = await characterUtils.findOwnedCharacterByName(match, intr.user.id);
 
 			//return the matched characters
 			return options.map(character => ({
@@ -52,26 +54,20 @@ export class CharacterSetActiveSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
-		const charName = intr.options.getString(ChatArgs.SET_ACTIVE_NAME_OPTION.name);
+		const charName = intr.options.getString(ChatArgs.SET_ACTIVE_NAME_OPTION.name, true);
+
+		const { characterUtils } = new KoboldUtils(kobold);
 
 		// try and find that charcter
 		const targetCharacter = (
-			await Character.queryControlledCharacterByName(charName, intr.user.id)
+			await characterUtils.findOwnedCharacterByName(charName, intr.user.id)
 		)[0];
 
 		if (targetCharacter) {
-			//set all other characters as not active
-			await Character.query()
-				.patch({ isActiveCharacter: false })
-				.where({ userId: intr.user.id });
-
-			//set the character as active
-			await Character.query().patchAndFetchById(targetCharacter.id, {
-				isActiveCharacter: true,
-			});
+			await kobold.character.setIsActive({ id: targetCharacter.id, userId: intr.user.id });
 
 			//send success message
 			await InteractionUtils.send(

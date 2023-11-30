@@ -1,41 +1,38 @@
 import {
-	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
-	ChatInputCommandInteraction,
-	PermissionsString,
 	ApplicationCommandOptionChoiceData,
+	ApplicationCommandType,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
+	ChatInputCommandInteraction,
+	PermissionsString,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 
 import { ChatArgs } from '../../../constants/index.js';
-import { EventData } from '../../../models/internal-models.js';
-import { InteractionUtils } from '../../../utils/index.js';
-import { Command, CommandDeferType } from '../../index.js';
-import { DiceUtils } from '../../../utils/dice-utils.js';
-import { RollBuilder } from '../../../utils/roll-builder.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { Language } from '../../../models/enum-helpers/index.js';
-import { GameUtils } from '../../../utils/game-utils.js';
+
 import _ from 'lodash';
-import { GameOptions } from './game-command-options.js';
-import { ModelWithSheet } from '../../../services/kobold/models/index.js';
-import { EmbedUtils, KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
-import { Creature } from '../../../utils/creature.js';
-import { InitOptions } from '../init/init-command-options.js';
-import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
-import { ActionRoller } from '../../../utils/action-roller.js';
 import { getEmoji } from '../../../constants/emoji.js';
-import { SettingsUtils } from '../../../utils/settings-utils.js';
+import L from '../../../i18n/i18n-node.js';
+import { TranslationFunctions } from '../../../i18n/i18n-types.js';
+import { Kobold, SheetRecord } from '../../../services/kobold/index.js';
+import { ActionRoller } from '../../../utils/action-roller.js';
+import { Creature } from '../../../utils/creature.js';
+import { InteractionUtils } from '../../../utils/index.js';
+import { EmbedUtils, KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { RollBuilder } from '../../../utils/roll-builder.js';
+import { Command, CommandDeferType } from '../../index.js';
+import { InitOptions } from '../init/init-command-options.js';
+import { GameOptions } from './game-command-options.js';
 
 export class GameRollSubCommand implements Command {
-	public names = [Language.LL.commands.game.roll.name()];
+	public names = [L.en.commands.game.roll.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.game.roll.name(),
-		description: Language.LL.commands.game.roll.description(),
+		name: L.en.commands.game.roll.name(),
+		description: L.en.commands.game.roll.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -45,19 +42,23 @@ export class GameRollSubCommand implements Command {
 
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
-		option: AutocompleteFocusedOption
-	): Promise<ApplicationCommandOptionChoiceData[]> {
+		option: AutocompleteFocusedOption,
+		{ kobold }: { kobold: Kobold }
+	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === GameOptions.GAME_TARGET_CHARACTER.name) {
-			const targetCharacter = intr.options.getString(GameOptions.GAME_TARGET_CHARACTER.name);
+			const targetCharacter =
+				intr.options.getString(GameOptions.GAME_TARGET_CHARACTER.name) ?? '';
 
-			const activeGame = await GameUtils.getActiveGame(intr.user.id, intr.guildId);
-			return GameUtils.autocompleteGameCharacter(targetCharacter, activeGame);
+			const { gameUtils } = new KoboldUtils(kobold);
+			const activeGame = await gameUtils.getActiveGame(intr.user.id, intr.guildId ?? '');
+			return gameUtils.autocompleteGameCharacter(targetCharacter, activeGame);
 		} else if (option.name === GameOptions.GAME_ROLL_TYPE.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(GameOptions.GAME_ROLL_TYPE.name);
+			const match = intr.options.getString(GameOptions.GAME_ROLL_TYPE.name) ?? '';
 
-			const activeGame = await GameUtils.getActiveGame(intr.user.id, intr.guildId);
+			const { gameUtils } = new KoboldUtils(kobold);
+			const activeGame = await gameUtils.getActiveGame(intr.user.id, intr.guildId ?? '');
 
 			if (!activeGame) return [];
 
@@ -66,11 +67,11 @@ export class GameRollSubCommand implements Command {
 
 			let results: { name: string; value: string }[] = [];
 			for (const character of activeGame?.characters || []) {
-				const creature = new Creature(character.sheet);
+				const creature = Creature.fromSheetRecord(character.sheetRecord);
 
 				const allRolls = [
 					..._.keys(creature.attackRolls),
-					...character.actions.map(action => action?.name),
+					...creature.actions.map(action => action?.name),
 					..._.keys(creature.rolls),
 				];
 
@@ -88,48 +89,58 @@ export class GameRollSubCommand implements Command {
 			return results;
 		} else if (option.name === InitOptions.INIT_CHARACTER_TARGET.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(InitOptions.INIT_CHARACTER_TARGET.name);
+			const match = intr.options.getString(InitOptions.INIT_CHARACTER_TARGET.name) ?? '';
 
-			return await AutocompleteUtils.getAllTargetOptions(intr, match);
+			const { autocompleteUtils } = new KoboldUtils(kobold);
+			return await autocompleteUtils.getAllTargetOptions(intr, match);
 		}
 	}
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		if (!intr.isChatInputCommand()) return;
-		const rollType = intr.options.getString(GameOptions.GAME_ROLL_TYPE.name);
-		const diceExpression = intr.options.getString(GameOptions.GAME_DICE_ROLL_OR_MODIFIER.name);
+		const rollType = intr.options.getString(GameOptions.GAME_ROLL_TYPE.name, true);
+		const diceExpression =
+			intr.options.getString(GameOptions.GAME_DICE_ROLL_OR_MODIFIER.name) ?? '';
 		const targetCharacterName = intr.options.getString(GameOptions.GAME_TARGET_CHARACTER.name);
-		const targetInitActorName = intr.options.getString(InitOptions.INIT_CHARACTER_TARGET.name);
+		const targetSheetName = intr.options.getString(InitOptions.INIT_CHARACTER_TARGET.name);
 
-		const secretRoll = intr.options.getString(ChatArgs.ROLL_SECRET_OPTION.name);
+		const secretRoll =
+			intr.options.getString(ChatArgs.ROLL_SECRET_OPTION.name) ??
+			L.en.commandOptions.rollSecret.choices.public.value();
 
-		const [activeGame, userSettings] = await Promise.all([
-			GameUtils.getActiveGame(intr.user.id, intr.guildId),
-			SettingsUtils.getSettingsForUser(intr),
-		]);
+		const koboldUtils = new KoboldUtils(kobold);
+		const { gameUtils, creatureUtils } = koboldUtils;
+		const { activeGame, userSettings } = await koboldUtils.fetchNonNullableDataForCommand(
+			intr,
+			{
+				activeGame: true,
+				userSettings: true,
+			}
+		);
 
-		if (!activeGame) {
-			await InteractionUtils.send(
-				intr,
-				Language.LL.commands.game.interactions.activeGameNotFound()
-			);
-			return;
-		}
 		const embeds: KoboldEmbed[] = [];
 
-		let targetCreature: Creature | undefined;
-		let targetActor: ModelWithSheet | undefined;
+		let targetSheetRecord: SheetRecord | null = null;
+		let targetCreature: Creature | null = null;
+		let targetName: string | null = targetSheetName;
+		let hideStats = false;
 
-		if (targetInitActorName && targetInitActorName !== '__NONE__') {
-			const { targetCharacter, targetInitActor } =
-				await GameUtils.getCharacterOrInitActorTarget(intr, targetInitActorName);
-			targetActor = targetInitActor ?? targetCharacter;
-			targetCreature = Creature.fromModelWithSheet(targetActor);
+		if (
+			targetSheetName &&
+			targetSheetName.trim().toLocaleLowerCase() != '__none__' &&
+			targetSheetName.trim().toLocaleLowerCase() != '(none)'
+		) {
+			const results = await gameUtils.getCharacterOrInitActorTarget(intr, targetSheetName);
+			targetSheetRecord = results.targetSheetRecord;
+			hideStats = results.hideStats;
+			targetName = results.targetName;
+			targetCreature = Creature.fromSheetRecord(targetSheetRecord);
 		}
+
 		if (activeGame.characters.length === 0) {
 			await InteractionUtils.send(
 				intr,
@@ -143,17 +154,17 @@ export class GameRollSubCommand implements Command {
 				targetCharacterName &&
 				targetCharacterName.toLocaleLowerCase().trim().length > 0 &&
 				targetCharacterName.toLocaleLowerCase().trim() !==
-					character.sheet.info.name.toLocaleLowerCase().trim()
+					character.name.toLocaleLowerCase().trim()
 			) {
 				continue;
 			}
 
-			const creature = Creature.fromCharacter(character);
+			const creature = Creature.fromSheetRecord(character.sheetRecord);
 			const rollOptions = {
 				...creature.rolls,
 				...creature.attackRolls,
 			};
-			const targetAction = character.actions.find(action => {
+			const targetAction = creature.actions.find(action => {
 				return (
 					action.name.toLocaleLowerCase().trim() === rollType.toLocaleLowerCase().trim()
 				);
@@ -166,11 +177,11 @@ export class GameRollSubCommand implements Command {
 					targetCreature
 				);
 
-				const builtRoll = actionRoller.buildRoll(null, targetAction.description, {
+				const builtRoll = actionRoller.buildRoll('', targetAction.description ?? '', {
 					attackModifierExpression: diceExpression,
 					damageModifierExpression: '',
 					title: `${getEmoji(intr, targetAction.actionCost)} ${
-						creature.sheet.info.name
+						creature.sheet.staticInfo.name
 					} used ${targetAction.name}!`,
 				});
 
@@ -181,23 +192,23 @@ export class GameRollSubCommand implements Command {
 					action: targetAction,
 				});
 
-				if (targetCreature && actionRoller.shouldDisplayDamageText()) {
-					await targetActor.saveSheet(intr, actionRoller.targetCreature.sheet);
+				if (targetSheetRecord && targetCreature && actionRoller.shouldDisplayDamageText()) {
+					await creatureUtils.saveSheet(intr, targetSheetRecord);
 
 					const damageField = await EmbedUtils.getOrSendActionDamageField({
 						intr,
 						actionRoller,
-						hideStats: targetActor.hideStats,
-						targetNameOverwrite: targetActor.name,
-						LL,
+						hideStats: hideStats,
+						targetNameOverwrite: targetSheetName!,
 					});
 					embed.addFields(damageField);
 				}
 				embeds.push(embed);
 			} else if (rollOptions[rollType.trim().toLocaleLowerCase()]) {
-				const rollResult = await DiceUtils.rollCreatureDice(creature, rollType, intr, {
+				const rollResult = await ActionRoller.fromCreatureRoll(creature, rollType, intr, {
 					modifierExpression: diceExpression,
 					targetCreature,
+					hideStats: hideStats ?? false,
 				});
 				let embed: KoboldEmbed;
 
@@ -208,18 +219,18 @@ export class GameRollSubCommand implements Command {
 				}
 
 				if (
+					targetSheetRecord &&
 					targetCreature &&
 					rollResult.actionRoller &&
 					rollResult.actionRoller.shouldDisplayDamageText()
 				) {
-					await targetActor.saveSheet(intr, rollResult.actionRoller.targetCreature.sheet);
+					await creatureUtils.saveSheet(intr, targetSheetRecord);
 
 					const damageField = await EmbedUtils.getOrSendActionDamageField({
 						intr,
 						actionRoller: rollResult.actionRoller,
-						hideStats: targetActor.hideStats,
-						targetNameOverwrite: targetActor.name,
-						LL,
+						hideStats: hideStats,
+						targetNameOverwrite: targetSheetName!,
 					});
 
 					embed.addFields(damageField);
@@ -231,7 +242,6 @@ export class GameRollSubCommand implements Command {
 					actorName: intr.user.username,
 					rollDescription: LL.commands.roll.dice.interactions.rolledDice(),
 					userSettings,
-					LL,
 				});
 				rollBuilder.addRoll({ rollExpression: diceExpression });
 				embeds.push(rollBuilder.compileEmbed());

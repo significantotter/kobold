@@ -1,26 +1,26 @@
 import { APIApplicationCommandBasicOption, ApplicationCommandOptionType } from 'discord.js';
-import { Language } from '../../../models/enum-helpers/index.js';
+import L from '../../../i18n/i18n-node.js';
 
 export class SettingsOptions {
 	public static readonly SETTINGS_SET_OPTION: APIApplicationCommandBasicOption = {
-		name: Language.LL.commandOptions.settingsSetOption.name(),
-		description: Language.LL.commandOptions.settingsSetOption.description(),
+		name: L.en.commandOptions.settingsSetOption.name(),
+		description: L.en.commandOptions.settingsSetOption.description(),
 		required: true,
 		type: ApplicationCommandOptionType.String,
 		choices: [
 			{
-				name: Language.LL.commandOptions.settingsSetOption.choices.initTrackerNotifications.name(),
-				value: Language.LL.commandOptions.settingsSetOption.choices.initTrackerNotifications.value(),
+				name: L.en.commandOptions.settingsSetOption.choices.initTrackerNotifications.name(),
+				value: L.en.commandOptions.settingsSetOption.choices.initTrackerNotifications.value(),
 			},
 			{
-				name: Language.LL.commandOptions.settingsSetOption.choices.inlineRollsDisplay.name(),
-				value: Language.LL.commandOptions.settingsSetOption.choices.inlineRollsDisplay.value(),
+				name: L.en.commandOptions.settingsSetOption.choices.inlineRollsDisplay.name(),
+				value: L.en.commandOptions.settingsSetOption.choices.inlineRollsDisplay.value(),
 			},
 		],
 	};
 	public static readonly SETTINGS_SET_VALUE: APIApplicationCommandBasicOption = {
-		name: Language.LL.commandOptions.settingsSetValue.name(),
-		description: Language.LL.commandOptions.settingsSetValue.description(),
+		name: L.en.commandOptions.settingsSetValue.name(),
+		description: L.en.commandOptions.settingsSetValue.description(),
 		required: true,
 		autocomplete: true,
 		type: ApplicationCommandOptionType.String,

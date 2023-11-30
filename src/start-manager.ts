@@ -1,19 +1,19 @@
-import './config/config.js';
 import { ShardingManager } from 'discord.js';
 import 'reflect-metadata';
+import './config/config.js';
 
+import { Config } from './config/config.js';
 import { GuildsController, RootController, ShardsController } from './controllers/index.js';
-import { Job, UpdateServerCountJob } from './jobs/index.js';
+import { UpdateServerCountJob } from './jobs/index.js';
 import { Api } from './models/api.js';
 import { Manager } from './models/manager.js';
-import { DBModel, HttpService, JobService, Logger, MasterApiService } from './services/index.js';
+import { HttpService, JobService, Logger, MasterApiService } from './services/index.js';
+import { Job } from './services/job-service.js';
 import { MathUtils, ShardUtils } from './utils/index.js';
-import { Config } from './config/config.js';
-import Logs from './config/lang/logs.json' assert { type: 'json' };
+import { filterNotNullOrUndefined } from './utils/type-guards.js';
 
 async function start(): Promise<void> {
-	Logger.info(Logs.info.appStarted);
-	DBModel.init(Config.database.url);
+	Logger.info(`Application started.`);
 
 	// Dependencies
 	let httpService = new HttpService();
@@ -40,16 +40,16 @@ async function start(): Promise<void> {
 			totalShards = recommendedShards;
 		}
 	} catch (error) {
-		Logger.error(Logs.error.retrieveShards, error);
+		Logger.error(`An error occurred while retrieving which shards to spawn.`, error);
 		return;
 	}
 
 	if (shardList.length === 0) {
-		Logger.warn(Logs.warn.managerNoShards);
+		Logger.warn(`No shards to spawn.`);
 		return;
 	}
 
-	let shardManager = new ShardingManager('dist/start-bot.js', {
+	let shardManager = new ShardingManager('dist/src/start-bot.js', {
 		token: Config.client.token,
 		mode: (Config.debug.shardMode.enabled ? Config.debug.shardMode.value : 'process') as any,
 		respawn: true,
@@ -61,7 +61,7 @@ async function start(): Promise<void> {
 	let jobs: Job[] = [
 		Config.clustering.enabled ? undefined : new UpdateServerCountJob(shardManager, httpService),
 		// TODO: Add new jobs here
-	].filter(Boolean);
+	].filter(filterNotNullOrUndefined);
 
 	let manager = new Manager(shardManager, new JobService(jobs));
 
@@ -80,9 +80,9 @@ async function start(): Promise<void> {
 }
 
 process.on('unhandledRejection', (reason, _promise) => {
-	Logger.error(Logs.error.unhandledRejection, reason);
+	Logger.error(`An unhandled promise rejection occurred.`, reason);
 });
 
 start().catch(error => {
-	Logger.error(Logs.error.unspecified, error);
+	Logger.error(`An unspecified error occurred.`, error);
 });

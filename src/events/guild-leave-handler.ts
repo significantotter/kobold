@@ -1,7 +1,7 @@
 import { Guild } from 'discord.js';
 
 import { Logger } from '../services/index.js';
-import { EventHandler } from './index.js';
+import { EventHandler } from './event-handler.js';
 import Logs from './../config/lang/logs.json' assert { type: 'json' };
 
 export class GuildLeaveHandler implements EventHandler {

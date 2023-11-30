@@ -1,27 +1,23 @@
-import { Character, Game, GuildDefaultCharacter } from '../../../services/kobold/models/index.js';
 import {
 	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 	ChatInputCommandInteraction,
 	PermissionsString,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
+import { Kobold } from '../../../services/kobold/index.js';
 
-import { EventData } from '../../../models/internal-models.js';
-import { InteractionUtils } from '../../../utils/index.js';
-import { Command, CommandDeferType } from '../../index.js';
-import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
-import { Language } from '../../../models/enum-helpers/index.js';
+import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { CollectorUtils } from '../../../utils/collector-utils.js';
-import { CharacterUtils } from '../../../utils/character-utils.js';
-import _ from 'lodash';
+import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { Command, CommandDeferType } from '../../index.js';
 
 export class ActionListSubCommand implements Command {
-	public names = [Language.LL.commands.action.list.name()];
+	public names = [L.en.commands.action.list.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.action.list.name(),
-		description: Language.LL.commands.action.list.description(),
+		name: L.en.commands.action.list.name(),
+		description: L.en.commands.action.list.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -30,22 +26,19 @@ export class ActionListSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
-		if (!activeCharacter) {
-			await InteractionUtils.send(
-				intr,
-				LL.commands.character.interactions.noActiveCharacter()
-			);
-			return;
-		}
-		const actions = activeCharacter.actions;
+		const koboldUtils = new KoboldUtils(kobold);
+		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+			activeCharacter: true,
+		});
+
+		const actions = activeCharacter.sheetRecord.actions;
 		const fields = [];
 		for (const action of actions.sort((a, b) => (a.name || '').localeCompare(b.name))) {
 			let description = action.description || '\u200B';
-			if (action.description?.length >= 1000)
+			if ((action.description ?? '').length >= 1000)
 				description = description.substring(0, 1000) + '...';
 			fields.push({
 				name: action.name || 'unnamed action',

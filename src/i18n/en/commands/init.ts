@@ -89,10 +89,6 @@ export default {
 				title: '{characterName}  joined Initiative!',
 				setDescription: 'Initiative: {initValue}',
 				rollDescription: 'rolled initiative!',
-				roundField: {
-					name: '\u200B',
-					value: 'Initiative Round {currentRound}',
-				},
 			},
 		},
 	},
@@ -121,10 +117,6 @@ export default {
 				rolledTitle: '{actorName} rolled initiative!',
 				joinedTitle: '{actorName} joined initiative!',
 				description: 'Initiative: {finalInitiative}',
-				roundField: {
-					name: '\u200B',
-					value: `[Initiative Round {currentRound}]({url})`,
-				},
 			},
 		},
 	},

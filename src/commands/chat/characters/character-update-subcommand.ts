@@ -1,37 +1,29 @@
-import { Character, InitiativeActor } from '../../../services/kobold/models/index.js';
 import {
 	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 	ChatInputCommandInteraction,
 	PermissionsString,
-	ComponentType,
-	ButtonStyle,
-	ButtonInteraction,
-	CacheType,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
+import { Kobold } from '../../../services/kobold/index.js';
 
-import { EventData } from '../../../models/internal-models.js';
-import { InteractionUtils } from '../../../utils/index.js';
-import { Command, CommandDeferType } from '../../index.js';
-import { WgToken } from '../../../services/kobold/models/index.js';
-import { CharacterHelpers } from './helpers.js';
-import { CharacterUtils } from '../../../utils/character-utils.js';
-import { Language } from '../../../models/enum-helpers/index.js';
+import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { Config } from '../../../config/config.js';
-import { CharacterOptions } from './command-options.js';
-import { refs } from '../../../i18n/en/common.js';
-import { PathBuilder } from '../../../services/pathbuilder/index.js';
-import { Creature } from '../../../utils/creature.js';
-import { CollectorUtils } from '../../../utils/collector-utils.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
+import { InteractionUtils } from '../../../utils/index.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { Command, CommandDeferType } from '../../index.js';
+import { CharacterOptions } from './command-options.js';
+import { PathbuilderCharacterFetcher } from './Fetchers/pathbuilder-character-fetcher.js';
+import { WgCharacterFetcher } from './Fetchers/wg-character-fetcher.js';
+import { TextParseHelpers } from '../../../utils/kobold-helpers/text-parse-helpers.js';
+import { PasteBinCharacterFetcher } from './Fetchers/pastebin-character-fetcher.js';
 
 export class CharacterUpdateSubCommand implements Command {
-	public names = [Language.LL.commands.character.update.name()];
+	public names = [L.en.commands.character.update.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.character.update.name(),
-		description: Language.LL.commands.character.update.description(),
+		name: L.en.commands.character.update.name(),
+		description: L.en.commands.character.update.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -40,18 +32,15 @@ export class CharacterUpdateSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		//check if we have an active character
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
-		if (!activeCharacter) {
-			await InteractionUtils.send(
-				intr,
-				LL.commands.character.interactions.noActiveCharacter()
-			);
-			return;
-		}
+		const koboldUtils = new KoboldUtils(kobold);
+		const { creatureUtils } = koboldUtils;
+		let { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+			activeCharacter: true,
+		});
 
 		if (activeCharacter.importSource === 'pathbuilder') {
 			let jsonId = intr.options.getNumber(CharacterOptions.IMPORT_PATHBUILDER_OPTION.name);
@@ -64,225 +53,64 @@ export class CharacterUpdateSubCommand implements Command {
 					'id to update your character sheet with new changes. Otherwise, I will just ' +
 					'reload the data from the last exported pathbuilder json id.';
 			}
-
-			const pathBuilderChar = await new PathBuilder().get({ characterJsonId: jsonId });
-
-			if (!pathBuilderChar.success) {
-				await InteractionUtils.send(
-					intr,
-					LL.commands.character.importPathbuilder.interactions.failedRequest({
-						supportServerUrl: refs.links.support,
-					})
+			if (!jsonId) {
+				throw new KoboldError(
+					'Yip! You must provide a pathbuilder json id to update your character sheet with new changes.'
 				);
 			}
 
-			let creature: Creature;
-			try {
-				creature = Creature.fromPathBuilder(pathBuilderChar.build, activeCharacter.sheet);
-			} catch (err) {
-				// try to load the sheet without the previous character sheet
-				// if this fails, we accept the 500 error
-				creature = Creature.fromPathBuilder(pathBuilderChar.build);
-			}
-
-			let result: {
-				intr: ButtonInteraction<CacheType>;
-				value: string;
-			};
-
-			if (creature.name !== activeCharacter.name) {
-				// confirm the update
-				const prompt = await intr.followUp({
-					content:
-						`**WARNING:** The character name on the target sheet ${creature.name} does not ` +
-						`match your active character's name ${activeCharacter.name}. Pathbuilder only ` +
-						`remembers the **Last JSON export** you've done! If this sheet is not the one you want to update, ` +
-						`please re-export the correct pathbuilder character and try again.`,
-					components: [
-						{
-							type: ComponentType.ActionRow,
-							components: [
-								{
-									type: ComponentType.Button,
-									label: 'UPDATE',
-									customId: 'update',
-									style: ButtonStyle.Danger,
-								},
-								{
-									type: ComponentType.Button,
-									label: 'CANCEL',
-									customId: 'cancel',
-									style: ButtonStyle.Primary,
-								},
-							],
-						},
-					],
-					ephemeral: true,
-					fetchReply: true,
-				});
-				let timedOut = false;
-				result = await CollectorUtils.collectByButton(
-					prompt,
-					async buttonInteraction => {
-						if (buttonInteraction.user.id !== intr.user.id) {
-							return;
-						}
-						switch (buttonInteraction.customId) {
-							case 'update':
-								return { intr: buttonInteraction, value: 'update' };
-							default:
-								return { intr: buttonInteraction, value: 'cancel' };
-						}
-					},
-					{
-						time: 50000,
-						reset: true,
-						target: intr.user,
-						stopFilter: message => message.content.toLowerCase() === 'stop',
-						onExpire: async () => {
-							timedOut = true;
-							await InteractionUtils.editReply(intr, {
-								content:
-									LL.commands.character.remove.interactions.removeConfirmation.expired(),
-								components: [],
-							});
-						},
-					}
-				);
-				if (result.value !== 'update') {
-					await InteractionUtils.editReply(intr, {
-						content: LL.sharedInteractions.choiceRegistered({
-							choice: 'Cancel',
-						}),
-						components: [],
-					});
-					// cancel
-					await InteractionUtils.send(intr, {
-						content: LL.commands.character.update.interactions.canceled({
-							characterName: activeCharacter.name,
-						}),
-						components: [],
-					});
-					return;
-				} else {
-					await InteractionUtils.editReply(intr, {
-						content: LL.sharedInteractions.choiceRegistered({
-							choice: 'Update',
-						}),
-						components: [],
-					});
-				}
-			}
-			// set current characters owned by user to inactive state
-			await Character.query()
-				.patch({ isActiveCharacter: false })
-				.where({ userId: intr.user.id });
-
-			// store sheet in db
-			const updatedCharacter = await Character.query().patchAndFetchById(activeCharacter.id, {
-				name: creature.sheet.info.name,
-				charId: jsonId,
-				userId: intr.user.id,
-				sheet: creature.sheet,
-				isActiveCharacter: true,
-				importSource: 'pathbuilder',
-			});
-			await InitiativeActor.query()
-				.patch({ sheet: creature.sheet })
-				.where({ characterId: updatedCharacter.id });
-
-			await updatedCharacter.updateTracker(intr, creature.sheet);
+			const fetcher = new PathbuilderCharacterFetcher(intr, kobold, intr.user.id);
+			const newCharacter = await fetcher.update({ jsonId });
 
 			//send success message
 
 			await InteractionUtils.send(
 				intr,
 				LL.commands.character.update.interactions.success({
-					characterName: updatedCharacter.sheet.info.name,
+					characterName: newCharacter.name,
 				}) + newSheetUpdateWarning
+			);
+			return;
+		} else if (activeCharacter.importSource === 'pastebin') {
+			const url = intr.options.getString(CharacterOptions.IMPORT_PASTEBIN_OPTION.name);
+			const useStamina =
+				intr.options.getBoolean(CharacterOptions.IMPORT_USE_STAMINA_OPTION.name) ?? false;
+
+			if (!url) {
+				throw new KoboldError(
+					'Yip! This character was created with PasteBin. You must provide' +
+						' a PasteBin url to update your character sheet with new changes.'
+				);
+			}
+
+			const importId = TextParseHelpers.parsePasteBinIdFromText(url);
+
+			if (!importId) {
+				await InteractionUtils.send(intr, `Yip! I couldn't parse the url "${url}".`);
+				return;
+			}
+			const fetcher = new PasteBinCharacterFetcher(intr, kobold, intr.user.id);
+			const newCharacter = await fetcher.update({ url: importId });
+
+			//send success message
+			await InteractionUtils.send(
+				intr,
+				LL.commands.character.importPasteBin.interactions.success({
+					characterName: newCharacter.name,
+				})
 			);
 			return;
 		}
 		//otherwise wanderer's guide
 		else {
 			//check for token access
-			const token = await WgToken.query().where({ charId: activeCharacter.charId });
-
-			if (!token.length) {
-				// The user needs to authenticate!
-				await InteractionUtils.send(
-					intr,
-					LL.commands.character.interactions.authenticationRequest({
-						action: 'update',
-					})
-				);
-				await InteractionUtils.send(
-					intr,
-					LL.commands.character.interactions.authenticationLink({
-						wgBaseUrl: Config.wanderersGuide.oauthBaseUrl,
-						charId: activeCharacter.charId,
-					}),
-					true
-				);
-				return;
-			}
-			let fetchedCharacter;
-			try {
-				fetchedCharacter = await CharacterHelpers.fetchWgCharacterFromToken(
-					activeCharacter.charId,
-					token[0].accessToken,
-					activeCharacter.sheet
-				);
-			} catch (err) {
-				console.log(err);
-				if (err?.response?.status === 401) {
-					//token expired!
-					await WgToken.query().delete().where({ charId: activeCharacter.charId });
-					await InteractionUtils.send(
-						intr,
-						LL.commands.character.interactions.expiredToken()
-					);
-					await InteractionUtils.send(
-						intr,
-						LL.commands.character.interactions.authenticationLink({
-							wgBaseUrl: Config.wanderersGuide.oauthBaseUrl,
-							charId: activeCharacter.charId,
-						}),
-						true
-					);
-					return;
-				} else if (err?.response?.status === 429) {
-					await InteractionUtils.send(
-						intr,
-						LL.commands.character.interactions.tooManyWGRequests()
-					);
-					return;
-				} else {
-					//otherwise, something else went wrong that we want to be a real error
-					throw err;
-				}
-			}
-
-			// store sheet in db
-			const updatedCharacter = await Character.query().updateAndFetchById(
-				activeCharacter.id,
-				{
-					userId: intr.user.id,
-					...fetchedCharacter,
-				}
-			);
-			await InitiativeActor.query()
-				.patch({ sheet: fetchedCharacter.sheet })
-				.where({ characterId: updatedCharacter.id });
-
-			await updatedCharacter.updateTracker(intr, fetchedCharacter.sheet);
-
-			//send success message
+			const fetcher = new WgCharacterFetcher(intr, kobold, intr.user.id);
+			const newCharacter = await fetcher.update({ charId: activeCharacter.charId });
 
 			await InteractionUtils.send(
 				intr,
 				LL.commands.character.update.interactions.success({
-					characterName: updatedCharacter.name,
+					characterName: newCharacter.name,
 				})
 			);
 		}

@@ -74,8 +74,7 @@ export default {
 				'Yip! A modifier named {modifierName} already exists for {characterName}.',
 			invalidTags:
 				"Yip! I didn't understand the target tag expression you provided. Tags can be" +
-				' any expression in a format like "attack or skill". ' +
-				'See [this link](https://github.com/joewalnes/filtrex) for more details.',
+				' any expression in a format like "attack or skill".',
 			doesntEvaluateError: 'Yip! That modifier is not a valid number or dice roll.',
 		},
 	},

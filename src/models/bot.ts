@@ -3,6 +3,7 @@ import {
 	CommandInteraction,
 	ButtonInteraction,
 	Client,
+	Events,
 	Guild,
 	Interaction,
 	Message,
@@ -10,9 +11,8 @@ import {
 	PartialMessageReaction,
 	PartialUser,
 	RateLimitData,
-	User,
-	Events,
 	RESTEvents,
+	User,
 } from 'discord.js';
 
 import {
@@ -29,18 +29,18 @@ import { Config } from './../config/config.js';
 import Logs from './../config/lang/logs.json' assert { type: 'json' };
 
 export class Bot {
-	private ready = false;
+	protected ready = false;
 
 	constructor(
-		private token: string,
-		private client: Client,
-		private guildJoinHandler: GuildJoinHandler,
-		private guildLeaveHandler: GuildLeaveHandler,
-		private messageHandler: MessageHandler,
-		private commandHandler: CommandHandler,
-		private buttonHandler: ButtonHandler,
-		private reactionHandler: ReactionHandler,
-		private jobService: JobService
+		protected token: string,
+		protected client: Client,
+		protected guildJoinHandler: GuildJoinHandler,
+		protected guildLeaveHandler: GuildLeaveHandler,
+		protected messageHandler: MessageHandler,
+		protected commandHandler: CommandHandler,
+		protected buttonHandler: ButtonHandler,
+		protected reactionHandler: ReactionHandler,
+		protected jobService: JobService
 	) {}
 
 	public async start(): Promise<void> {
@@ -48,10 +48,12 @@ export class Bot {
 		await this.login(this.token);
 	}
 
-	private registerListeners(): void {
+	protected registerListeners(): void {
 		this.client.on(Events.ClientReady, () => this.onReady());
-		this.client.on(Events.ShardReady, (shardId: number, unavailableGuilds: Set<string>) =>
-			this.onShardReady(shardId, unavailableGuilds)
+		this.client.on(
+			Events.ShardReady,
+			(shardId: number, unavailableGuilds: Set<string> | undefined) =>
+				this.onShardReady(shardId, unavailableGuilds ?? new Set())
 		);
 		this.client.on(Events.GuildCreate, (guild: Guild) => this.onGuildJoin(guild));
 		this.client.on(Events.GuildDelete, (guild: Guild) => this.onGuildLeave(guild));
@@ -62,13 +64,12 @@ export class Bot {
 			(messageReaction: MessageReaction | PartialMessageReaction, user: User | PartialUser) =>
 				this.onReaction(messageReaction, user)
 		);
-		// for some reason this enum got removed?
 		this.client.rest.on(RESTEvents.RateLimited, (rateLimitData: RateLimitData) =>
 			this.onRateLimit(rateLimitData)
 		);
 	}
 
-	private async login(token: string): Promise<void> {
+	protected async login(token: string): Promise<void> {
 		try {
 			await this.client.login(token);
 		} catch (error) {
@@ -77,8 +78,8 @@ export class Bot {
 		}
 	}
 
-	private async onReady(): Promise<void> {
-		let userTag = this.client.user?.tag;
+	protected async onReady(): Promise<void> {
+		let userTag = this.client.user?.tag ?? '';
 		Logger.info(Logs.info.clientLogin.replaceAll('{USER_TAG}', userTag));
 
 		if (!Config.debug.dummyMode.enabled) {
@@ -89,11 +90,11 @@ export class Bot {
 		Logger.info(Logs.info.clientReady);
 	}
 
-	private onShardReady(shardId: number, _unavailableGuilds: Set<string>): void {
+	protected onShardReady(shardId: number, _unavailableGuilds: Set<string>): void {
 		Logger.setShardId(shardId);
 	}
 
-	private async onGuildJoin(guild: Guild): Promise<void> {
+	protected async onGuildJoin(guild: Guild): Promise<void> {
 		if (!this.ready || Config.debug.dummyMode.enabled) {
 			return;
 		}
@@ -105,7 +106,7 @@ export class Bot {
 		}
 	}
 
-	private async onGuildLeave(guild: Guild): Promise<void> {
+	protected async onGuildLeave(guild: Guild): Promise<void> {
 		if (!this.ready || Config.debug.dummyMode.enabled) {
 			return;
 		}
@@ -117,32 +118,32 @@ export class Bot {
 		}
 	}
 
-	private async onMessage(msg: Message): Promise<void> {
+	protected async onMessage(msg: Message): Promise<void> {
 		if (
 			!this.ready ||
 			(Config.debug.dummyMode.enabled &&
-				!Config.debug.dummyMode.whiteList.includes(msg.author.id))
+				!(Config.debug.dummyMode.whiteList ?? []).includes(msg.author.id))
 		) {
 			return;
 		}
 
-		msg = await PartialUtils.fillMessage(msg);
-		if (!msg) {
-			return;
-		}
-
 		try {
-			await this.messageHandler.process(msg);
+			const filledMessage = await PartialUtils.fillMessage(msg);
+			if (!filledMessage) {
+				return;
+			}
+
+			await this.messageHandler.process(filledMessage);
 		} catch (error) {
 			Logger.error(Logs.error.message, error);
 		}
 	}
 
-	private async onInteraction(intr: Interaction): Promise<void> {
+	protected async onInteraction(intr: Interaction): Promise<void> {
 		if (
 			!this.ready ||
 			(Config.debug.dummyMode.enabled &&
-				!Config.debug.dummyMode.whiteList.includes(intr.user.id))
+				!(Config.debug.dummyMode.whiteList ?? []).includes(intr.user.id))
 		) {
 			return;
 		}
@@ -162,40 +163,40 @@ export class Bot {
 		}
 	}
 
-	private async onReaction(
+	protected async onReaction(
 		msgReaction: MessageReaction | PartialMessageReaction,
 		reactor: User | PartialUser
 	): Promise<void> {
 		if (
 			!this.ready ||
 			(Config.debug.dummyMode.enabled &&
-				!Config.debug.dummyMode.whiteList.includes(reactor.id))
+				!(Config.debug.dummyMode.whiteList ?? []).includes(reactor.id))
 		) {
 			return;
 		}
 
-		msgReaction = await PartialUtils.fillReaction(msgReaction);
-		if (!msgReaction) {
-			return;
-		}
-
-		reactor = await PartialUtils.fillUser(reactor);
-		if (!reactor) {
-			return;
-		}
-
 		try {
+			const filledReaction = await PartialUtils.fillReaction(msgReaction);
+			if (!filledReaction) {
+				return;
+			}
+
+			const filledReactor = await PartialUtils.fillUser(reactor);
+			if (!filledReactor) {
+				return;
+			}
+
 			await this.reactionHandler.process(
-				msgReaction,
+				filledReaction,
 				msgReaction.message as Message,
-				reactor
+				filledReactor
 			);
 		} catch (error) {
 			Logger.error(Logs.error.reaction, error);
 		}
 	}
 
-	private async onRateLimit(rateLimitData: RateLimitData): Promise<void> {
+	protected async onRateLimit(rateLimitData: RateLimitData): Promise<void> {
 		if (rateLimitData.timeToReset >= Config.logging.rateLimit.minTimeout * 1000) {
 			Logger.error(Logs.error.apiRateLimit, rateLimitData);
 		}

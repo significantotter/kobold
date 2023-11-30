@@ -12,6 +12,6 @@ class NamedBonusFactoryClass extends Factory<
 > {}
 
 export const NamedBonusFactory = NamedBonusFactoryClass.define(() => ({
-	Name: faker.random.words(1),
-	Bonus: faker.datatype.number({ min: -2, max: 30 }),
+	Name: faker.word.words(1),
+	Bonus: faker.number.int({ min: -2, max: 30 }),
 }));

@@ -6,6 +6,7 @@ export default {
 		doesntEvaluateError: 'Yip! That macro causes an error when I try to evaluate it.',
 		emptyValueError: "Yip! You can't use an empty value!",
 		notFound: "Yip! I couldn't find a modifier with that name.",
+		requiresActiveCharacter: 'Yip! You need to have an active character to use roll macros.',
 	},
 	list: {
 		name: 'list',

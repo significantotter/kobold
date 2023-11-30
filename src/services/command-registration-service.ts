@@ -1,5 +1,5 @@
 import { Command } from './../commands/command.js';
-import { REST } from '@discordjs/rest';
+import { REST } from 'discord.js';
 import {
 	APIApplicationCommand,
 	RESTGetAPIApplicationCommandsResult,
@@ -13,7 +13,7 @@ import { Config } from './../config/config.js';
 import Logs from './../config/lang/logs.json' assert { type: 'json' };
 
 export class CommandRegistrationService {
-	constructor(private rest: REST) {}
+	constructor(protected rest: REST) {}
 
 	public async process(commands: Command[], args: string[]): Promise<void> {
 		let localCmds = commands.map(command => command.metadata);
@@ -38,7 +38,7 @@ export class CommandRegistrationService {
 			commands.find(
 				command =>
 					command.metadata.name === existingCommand.name &&
-					!command.restrictedGuilds.includes(existingCommand.guild_id)
+					!(command.restrictedGuilds ?? []).includes(existingCommand.guild_id ?? '')
 			)
 		);
 
@@ -95,9 +95,14 @@ export class CommandRegistrationService {
 						)
 					);
 					for (let localCmd of localCmdsOnRemoteMetadata) {
-						await this.rest.post(Routes.applicationCommands(Config.client.id), {
-							body: localCmd,
-						});
+						try {
+							await this.rest.post(Routes.applicationCommands(Config.client.id), {
+								body: localCmd,
+							});
+						} catch (err) {
+							Logger.info('Error when trying to register ', localCmd.name);
+							throw err;
+						}
 					}
 					Logger.info(Logs.info.commandActionUpdated);
 				}
@@ -178,7 +183,7 @@ export class CommandRegistrationService {
 		}
 	}
 
-	private formatCommandList(
+	protected formatCommandList(
 		cmds: RESTPostAPIApplicationCommandsJSONBody[] | APIApplicationCommand[]
 	): string {
 		return cmds.length > 0

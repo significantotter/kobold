@@ -19,7 +19,7 @@ const IGNORED_ERRORS = [
 ];
 
 export class PartialUtils {
-	public static async fillUser(user: User | PartialUser): Promise<User> {
+	public static async fillUser(user: User | PartialUser): Promise<User | undefined> {
 		if (user.partial) {
 			try {
 				return await user.fetch();
@@ -39,7 +39,7 @@ export class PartialUtils {
 		return user as User;
 	}
 
-	public static async fillMessage(msg: Message | PartialMessage): Promise<Message> {
+	public static async fillMessage(msg: Message | PartialMessage): Promise<Message | undefined> {
 		if (msg.partial) {
 			try {
 				return await msg.fetch();
@@ -61,7 +61,7 @@ export class PartialUtils {
 
 	public static async fillReaction(
 		msgReaction: MessageReaction | PartialMessageReaction
-	): Promise<MessageReaction> {
+	): Promise<MessageReaction | undefined> {
 		if (msgReaction.partial) {
 			try {
 				msgReaction = await msgReaction.fetch();
@@ -77,11 +77,11 @@ export class PartialUtils {
 				}
 			}
 		}
-
-		msgReaction.message = await this.fillMessage(msgReaction.message);
-		if (!msgReaction.message) {
+		const message = await this.fillMessage(msgReaction.message);
+		if (!message) {
 			return;
 		}
+		msgReaction.message = message;
 
 		return msgReaction as MessageReaction;
 	}

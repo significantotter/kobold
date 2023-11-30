@@ -70,6 +70,24 @@ export default {
 			success: `Yip! I've successfully imported {characterName}!`,
 		},
 	},
+	importPasteBin: {
+		name: 'import-pastebin',
+		options: '[url] ',
+		usage: '_[url]_: the pastebin url with the character you want to import',
+		description: 'Imports kobold-format Character data saved in pastebin',
+		expandedDescription:
+			'Imports a kobold character from a PasteBin URL. This command should be used ' +
+			'in conjunction with a third party tool that exports characters in Kobold sheet formatting.',
+		interactions: {
+			invalidUrl:
+				`Yip! I couldn't find any character at the url '{url}'. Check ` +
+				`and make sure you copied it over correctly!`,
+			characterAlreadyExists:
+				`Yip! You already have a character named {characterName}!` +
+				` Did you mean to /character update?`,
+			success: `Yip! I've successfully imported {characterName}!`,
+		},
+	},
 	list: {
 		name: 'list',
 		description: 'lists all active characters',
@@ -81,7 +99,8 @@ export default {
 			noCharacters: `Yip! You don't have any characters yet! Use /import to import some!`,
 			characterListEmbed: {
 				title: 'Characters',
-				characterFieldName: '{characterName}{activeText?}{serverDefaultText?}',
+				characterFieldName:
+					'{characterName}{activeText?}{serverDefaultText?}{channelDefaultText?}',
 				characterFieldValue: 'Level {level} {heritage} {ancestry} {classes}',
 			},
 		},

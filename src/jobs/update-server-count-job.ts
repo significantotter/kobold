@@ -1,43 +1,48 @@
-import { ActivityType, ShardingManager } from 'discord.js';
+import { ActivityType, Client, ShardingManager } from 'discord.js';
+import { createRequire } from 'node:module';
 
 import { CustomClient } from '../extensions/index.js';
 import { BotSite } from '../models/config-models.js';
-import { HttpService, Lang, Logger } from '../services/index.js';
+import { HttpService, Logger } from '../services/index.js';
 import { ShardUtils } from '../utils/index.js';
-import { Job } from './index.js';
-import { Config } from './../config/config.js';
-import Logs from './../config/lang/logs.json' assert { type: 'json' };
+import { Config } from '../config/config.js';
+import { Job } from '../services/job-service.js';
 
-let BotSites: BotSite[] = [];
+const require = createRequire(import.meta.url);
 
 export class UpdateServerCountJob implements Job {
 	public name = 'Update Server Count';
 	public schedule: string = Config.jobs.updateServerCount.schedule;
 	public log: boolean = Config.jobs.updateServerCount.log;
+	public runOnce: boolean = Config.jobs.updateServerCount.runOnce;
+	public initialDelaySecs: number = Config.jobs.updateServerCount.initialDelaySecs;
 
-	private botSites: BotSite[];
+	protected botSites: BotSite[];
 
-	constructor(private shardManager: ShardingManager, private httpService: HttpService) {
-		this.botSites = BotSites.filter(botSite => botSite.enabled);
+	constructor(
+		protected shardManager: ShardingManager,
+		protected httpService: HttpService
+	) {
+		this.botSites = Config.botSites.filter(botSite => botSite.enabled);
 	}
 
 	public async run(): Promise<void> {
 		let serverCount = await ShardUtils.serverCount(this.shardManager);
 
-		let type: ActivityType = ActivityType.Streaming;
+		let type = ActivityType.Streaming;
 		let name = `to ${serverCount.toLocaleString()} servers`;
-		let url = Lang.getCom('links.stream');
+		let url = '';
 
 		await this.shardManager.broadcastEval(
-			(client: CustomClient, context) => {
-				return client.setPresence(context.type, context.name, context.url);
+			(client: Client, context) => {
+				return client instanceof CustomClient
+					? client.setPresence(context.type, context.name, context.url)
+					: undefined;
 			},
 			{ context: { type, name, url } }
 		);
 
-		Logger.info(
-			Logs.info.updatedServerCount.replaceAll('{SERVER_COUNT}', serverCount.toLocaleString())
-		);
+		Logger.info(`Updated server count. Connected to ${serverCount} total servers.`);
 
 		for (let botSite of this.botSites) {
 			try {
@@ -50,14 +55,21 @@ export class UpdateServerCountJob implements Job {
 					throw res;
 				}
 			} catch (error) {
-				Logger.error(
-					Logs.error.updatedServerCountSite.replaceAll('{BOT_SITE}', botSite.name),
-					error
-				);
+				if (error instanceof Error) {
+					Logger.error(
+						`An error occurred while updating the server count on '${botSite.name}'`,
+						error
+					);
+				} else {
+					Logger.error(
+						`An error occurred while updating the server count on '${botSite.name}'`
+					);
+					console.error(error);
+				}
 				continue;
 			}
 
-			Logger.info(Logs.info.updatedServerCountSite.replaceAll('{BOT_SITE}', botSite.name));
+			Logger.info(`Updated server count on '${botSite.name}'`);
 		}
 	}
 }

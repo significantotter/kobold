@@ -1,69 +1,69 @@
 import {
+	ApplicationCommandOptionChoiceData,
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
 	ChatInputCommandInteraction,
 	PermissionsString,
-	ApplicationCommandOptionChoiceData,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 import { ChatArgs } from '../../../constants/chat-args.js';
+import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { Language } from '../../../models/enum-helpers/index.js';
 
-import { EventData } from '../../../models/internal-models.js';
-import { CommandUtils, InteractionUtils } from '../../../utils/index.js';
+import { CommandUtils } from '../../../utils/index.js';
+import { InjectedServices } from '../../command.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { InitOptions } from './init-command-options.js';
 
 export class InitCommand implements Command {
-	public names = [Language.LL.commands.init.name()];
+	public names = [L.en.commands.init.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.init.name(),
-		description: Language.LL.commands.init.description(),
+		name: L.en.commands.init.name(),
+		description: L.en.commands.init.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 
 		options: [
 			{
-				name: Language.LL.commands.init.start.name(),
-				description: Language.LL.commands.init.start.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				name: L.en.commands.init.start.name(),
+				description: L.en.commands.init.start.description(),
+				type: ApplicationCommandOptionType.Subcommand,
 			},
 			{
-				name: Language.LL.commands.init.show.name(),
-				description: Language.LL.commands.init.show.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				name: L.en.commands.init.show.name(),
+				description: L.en.commands.init.show.description(),
+				type: ApplicationCommandOptionType.Subcommand,
 			},
 			{
-				name: Language.LL.commands.init.next.name(),
-				description: Language.LL.commands.init.next.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				name: L.en.commands.init.next.name(),
+				description: L.en.commands.init.next.description(),
+				type: ApplicationCommandOptionType.Subcommand,
 			},
 			{
-				name: Language.LL.commands.init.prev.name(),
-				description: Language.LL.commands.init.prev.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				name: L.en.commands.init.prev.name(),
+				description: L.en.commands.init.prev.description(),
+				type: ApplicationCommandOptionType.Subcommand,
 			},
 			{
-				name: Language.LL.commands.init.jumpTo.name(),
-				description: Language.LL.commands.init.jumpTo.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				name: L.en.commands.init.jumpTo.name(),
+				description: L.en.commands.init.jumpTo.description(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [{ ...InitOptions.INIT_CHARACTER_OPTION, required: true }],
 			},
 			{
-				name: Language.LL.commands.init.join.name(),
-				description: Language.LL.commands.init.join.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				name: L.en.commands.init.join.name(),
+				description: L.en.commands.init.join.description(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					{
 						...ChatArgs.SKILL_CHOICE_OPTION,
 						description:
-							Language.LL.commandOptions.skillChoice.overwrites.initJoinDescription(),
+							L.en.commandOptions.skillChoice.overwrites.initJoinDescription(),
 						required: false,
 					},
 					{
@@ -81,9 +81,9 @@ export class InitCommand implements Command {
 				],
 			},
 			{
-				name: Language.LL.commands.init.add.name(),
-				description: Language.LL.commands.init.add.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				name: L.en.commands.init.add.name(),
+				description: L.en.commands.init.add.description(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					InitOptions.INIT_CREATURE_OPTION,
 					{
@@ -94,7 +94,7 @@ export class InitCommand implements Command {
 					{
 						...ChatArgs.ROLL_EXPRESSION_OPTION,
 						description:
-							Language.LL.commandOptions.rollExpression.overwrites.initAddDescription(),
+							L.en.commandOptions.rollExpression.overwrites.initAddDescription(),
 						required: false,
 					},
 					{
@@ -106,9 +106,9 @@ export class InitCommand implements Command {
 				],
 			},
 			{
-				name: Language.LL.commands.init.set.name(),
-				description: Language.LL.commands.init.set.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				name: L.en.commands.init.set.name(),
+				description: L.en.commands.init.set.description(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					{
 						...InitOptions.INIT_CHARACTER_OPTION,
@@ -119,15 +119,15 @@ export class InitCommand implements Command {
 				],
 			},
 			{
-				name: Language.LL.commands.init.remove.name(),
-				description: Language.LL.commands.init.remove.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				name: L.en.commands.init.remove.name(),
+				description: L.en.commands.init.remove.description(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [{ ...InitOptions.INIT_CHARACTER_OPTION, required: true }],
 			},
 			{
-				name: Language.LL.commands.init.statBlock.name(),
-				description: Language.LL.commands.init.statBlock.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				name: L.en.commands.init.statBlock.name(),
+				description: L.en.commands.init.statBlock.description(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					{
 						...InitOptions.INIT_CHARACTER_OPTION,
@@ -137,9 +137,9 @@ export class InitCommand implements Command {
 				],
 			},
 			{
-				name: Language.LL.commands.init.roll.name(),
-				description: Language.LL.commands.init.roll.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				name: L.en.commands.init.roll.name(),
+				description: L.en.commands.init.roll.description(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					{
 						...InitOptions.INIT_CHARACTER_OPTION,
@@ -170,9 +170,9 @@ export class InitCommand implements Command {
 				],
 			},
 			{
-				name: Language.LL.commands.init.end.name(),
-				description: Language.LL.commands.init.end.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				name: L.en.commands.init.end.name(),
+				description: L.en.commands.init.end.description(),
+				type: ApplicationCommandOptionType.Subcommand,
 			},
 		],
 	};
@@ -184,8 +184,9 @@ export class InitCommand implements Command {
 
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
-		option: AutocompleteFocusedOption
-	): Promise<ApplicationCommandOptionChoiceData[]> {
+		option: AutocompleteFocusedOption,
+		services: InjectedServices
+	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 
 		let command = CommandUtils.getSubCommandByName(this.commands, intr.options.getSubcommand());
@@ -193,13 +194,13 @@ export class InitCommand implements Command {
 			return;
 		}
 
-		return await command.autocomplete(intr, option);
+		return await command.autocomplete(intr, option, services);
 	}
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		services: InjectedServices
 	): Promise<void> {
 		if (!intr.isChatInputCommand()) return;
 		let command = CommandUtils.getSubCommandByName(this.commands, intr.options.getSubcommand());
@@ -207,9 +208,9 @@ export class InitCommand implements Command {
 			return;
 		}
 
-		let passesChecks = await CommandUtils.runChecks(command, intr, data);
+		let passesChecks = await CommandUtils.runChecks(command, intr);
 		if (passesChecks) {
-			await command.execute(intr, data, LL);
+			await command.execute(intr, LL, services);
 		}
 	}
 }

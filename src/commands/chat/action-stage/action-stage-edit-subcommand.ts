@@ -1,31 +1,29 @@
-import { Character, Game, GuildDefaultCharacter } from '../../../services/kobold/models/index.js';
 import {
-	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
-	ChatInputCommandInteraction,
-	PermissionsString,
 	ApplicationCommandOptionChoiceData,
+	ApplicationCommandType,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
+	ChatInputCommandInteraction,
+	PermissionsString,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
+import { Kobold } from '../../../services/kobold/index.js';
 
-import { EventData } from '../../../models/internal-models.js';
-import { InteractionUtils } from '../../../utils/index.js';
-import { Command, CommandDeferType } from '../../index.js';
-import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
-import { Language } from '../../../models/enum-helpers/index.js';
+import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { CollectorUtils } from '../../../utils/collector-utils.js';
-import { CharacterUtils } from '../../../utils/character-utils.js';
+import { InteractionUtils } from '../../../utils/index.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { Command, CommandDeferType } from '../../index.js';
 import { ActionStageOptions } from './action-stage-command-options.js';
+import _ from 'lodash';
 
 export class ActionStageEditSubCommand implements Command {
-	public names = [Language.LL.commands.actionStage.edit.name()];
+	public names = [L.en.commands.actionStage.edit.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.actionStage.edit.name(),
-		description: Language.LL.commands.actionStage.edit.description(),
+		name: L.en.commands.actionStage.edit.name(),
+		description: L.en.commands.actionStage.edit.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -34,15 +32,18 @@ export class ActionStageEditSubCommand implements Command {
 
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
-		option: AutocompleteFocusedOption
-	): Promise<ApplicationCommandOptionChoiceData[]> {
+		option: AutocompleteFocusedOption,
+		{ kobold }: { kobold: Kobold }
+	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === ActionStageOptions.ACTION_ROLL_TARGET_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(ActionStageOptions.ACTION_ROLL_TARGET_OPTION.name);
+			const match =
+				intr.options.getString(ActionStageOptions.ACTION_ROLL_TARGET_OPTION.name) ?? '';
 
 			//get the active character
-			const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
+			const { characterUtils } = new KoboldUtils(kobold);
+			const activeCharacter = await characterUtils.getActiveCharacter(intr);
 			if (!activeCharacter) {
 				//no choices if we don't have a character to match against
 				return [];
@@ -50,7 +51,7 @@ export class ActionStageEditSubCommand implements Command {
 			//find a roll on the character matching the autocomplete string
 
 			const matchedActionRolls: ApplicationCommandOptionChoiceData[] = [];
-			for (const action of activeCharacter.actions || []) {
+			for (const action of activeCharacter.sheetRecord.actions || []) {
 				for (const roll of action.rolls) {
 					const rollMatchText = `${action.name.toLocaleLowerCase()} -- ${roll.name.toLocaleLowerCase()}`;
 					if (rollMatchText.includes(match.toLocaleLowerCase())) {
@@ -65,12 +66,98 @@ export class ActionStageEditSubCommand implements Command {
 			//return the matched rolls
 			return matchedActionRolls;
 		}
+		if (option.name === ActionStageOptions.ACTION_STAGE_EDIT_OPTION.name) {
+			const allChoices = Object.entries(
+				L.en.commandOptions.actionStageStageEditOption.choices
+			).map(([, value]) => ({
+				name: value.name(),
+				value: value.value(),
+			}));
+
+			const actionRollTarget = intr.options.getString(
+				ActionStageOptions.ACTION_ROLL_TARGET_OPTION.name
+			);
+			if (!actionRollTarget) return allChoices;
+			const [actionName, action] = actionRollTarget.split(' -- ').map(term => term.trim());
+
+			const match =
+				intr.options.getString(ActionStageOptions.ACTION_STAGE_EDIT_OPTION.name) ?? '';
+
+			const koboldUtils = new KoboldUtils(kobold);
+			const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+				activeCharacter: true,
+			});
+
+			//find a roll on the character matching the autocomplete string
+			const matchedAction = activeCharacter.sheetRecord.actions.find(
+				action => action.name.toLocaleLowerCase() === actionName.toLocaleLowerCase()
+			);
+			if (!matchedAction) {
+				return allChoices;
+			}
+			const rollIndex = matchedAction.rolls.findIndex(
+				roll => roll.name.toLocaleLowerCase() === action.toLocaleLowerCase()
+			);
+			if (rollIndex === -1) {
+				return allChoices;
+			}
+			const roll = matchedAction.rolls[rollIndex];
+
+			let validEditOptions: (keyof typeof L.en.commandOptions.actionStageStageEditOption.choices)[] =
+				[];
+			if (roll.type === 'attack' || roll.type === 'skill-challenge') {
+				validEditOptions = ['name', 'attackTargetDC', 'attackRoll', 'allowRollModifiers'];
+			} else if (roll.type === 'damage') {
+				validEditOptions = [
+					'name',
+					'basicDamageRoll',
+					'allowRollModifiers',
+					'damageType',
+					'healInsteadOfDamage',
+				];
+			} else if (roll.type === 'advanced-damage') {
+				validEditOptions = [
+					'name',
+					'advancedDamageSuccessRoll',
+					'advancedDamageFailureRoll',
+					'advancedDamageCritSuccessRoll',
+					'advancedDamageCritFailureRoll',
+					'allowRollModifiers',
+					'healInsteadOfDamage',
+				];
+			} else if (roll.type === 'save') {
+				validEditOptions = ['name', 'saveRollType', 'saveTargetDC', 'allowRollModifiers'];
+			} else if (roll.type === 'text') {
+				validEditOptions = [
+					'name',
+					'defaultText',
+					'successText',
+					'failureText',
+					'criticalSuccessText',
+					'criticalFailureText',
+					'allowRollModifiers',
+					'textExtraTags',
+				];
+			} else {
+				return allChoices;
+			}
+			return Object.entries(
+				_.pick(L.en.commandOptions.actionStageStageEditOption.choices, validEditOptions)
+			)
+				.map(([, value]) => ({
+					name: value.name(),
+					value: value.value(),
+				}))
+				.filter(choice =>
+					choice.name.toLocaleLowerCase().includes(match.toLocaleLowerCase())
+				);
+		}
 	}
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const actionRollTarget = intr.options.getString(
 			ActionStageOptions.ACTION_ROLL_TARGET_OPTION.name,
@@ -87,18 +174,13 @@ export class ActionStageEditSubCommand implements Command {
 		);
 		const [actionName, action] = actionRollTarget.split(' -- ').map(term => term.trim());
 
-		//get the active character
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
-		if (!activeCharacter) {
-			await InteractionUtils.send(
-				intr,
-				LL.commands.character.interactions.noActiveCharacter()
-			);
-			return;
-		}
+		const koboldUtils = new KoboldUtils(kobold);
+		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+			activeCharacter: true,
+		});
 
 		//find a roll on the character matching the autocomplete string
-		const matchedAction = activeCharacter.actions?.find(
+		const matchedAction = activeCharacter.sheetRecord.actions.find(
 			action => action.name.toLocaleLowerCase() === actionName.toLocaleLowerCase()
 		);
 		if (!matchedAction) {
@@ -116,12 +198,20 @@ export class ActionStageEditSubCommand implements Command {
 
 		let invalid = false;
 		// validate the strings into different types based on which field is being edited
-		if (roll.type === 'attack') {
-			if (!['name', 'targetDC', 'roll', 'allowRollModifier'].includes(fieldToEdit)) {
+		if (roll.type === 'attack' || roll.type === 'skill-challenge') {
+			if (!['name', 'targetDC', 'roll', 'allowRollModifiers'].includes(fieldToEdit)) {
 				invalid = true;
 			}
 		} else if (roll.type === 'damage') {
-			if (!['name', 'roll', 'allowRollModifier', 'damageType'].includes(fieldToEdit)) {
+			if (
+				![
+					'name',
+					'roll',
+					'allowRollModifiers',
+					'damageType',
+					'healInsteadOfDamage',
+				].includes(fieldToEdit)
+			) {
 				invalid = true;
 			}
 		} else if (roll.type === 'advanced-damage') {
@@ -132,14 +222,17 @@ export class ActionStageEditSubCommand implements Command {
 					'failureRoll',
 					'criticalSuccessRoll',
 					'criticalFailureRoll',
-					'allowRollModifier',
+					'allowRollModifiers',
+					'healInsteadOfDamage',
 				].includes(fieldToEdit)
 			) {
 				invalid = true;
 			}
 		} else if (roll.type === 'save') {
 			if (
-				!['name', 'saveRollType', 'saveTargetDC', 'allowRollModifier'].includes(fieldToEdit)
+				!['name', 'saveRollType', 'saveTargetDC', 'allowRollModifiers'].includes(
+					fieldToEdit
+				)
 			) {
 				invalid = true;
 			}
@@ -152,13 +245,16 @@ export class ActionStageEditSubCommand implements Command {
 					'failureText',
 					'criticalSuccessText',
 					'criticalFailureText',
-					'allowRollModifier',
+					'allowRollModifiers',
 					'extraTags',
 				].includes(fieldToEdit)
 			) {
 				invalid = true;
 			}
+		} else {
+			invalid = true;
 		}
+
 		if (invalid) {
 			await InteractionUtils.send(
 				intr,
@@ -202,7 +298,7 @@ export class ActionStageEditSubCommand implements Command {
 		}
 
 		// boolean values
-		else if (['allowRollModifier'].includes(fieldToEdit)) {
+		else if (['allowRollModifiers'].includes(fieldToEdit)) {
 			finalValue = ['true', 'yes', '1', 'ok', 'okay'].includes(
 				newValue.toLocaleLowerCase().trim()
 			);
@@ -216,6 +312,8 @@ export class ActionStageEditSubCommand implements Command {
 			);
 			return;
 		}
+		// TODO improve the typing in this file to avoid this explicit any
+		(roll as any)[fieldToEdit] = finalValue;
 
 		if (moveTo === 'top') {
 			const roll = matchedAction.rolls.splice(rollIndex, 1)[0];
@@ -223,13 +321,12 @@ export class ActionStageEditSubCommand implements Command {
 		} else if (moveTo === 'bottom') {
 			const roll = matchedAction.rolls.splice(rollIndex, 1)[0];
 			matchedAction.rolls = [...matchedAction.rolls, roll];
-		} else {
-			matchedAction.rolls[rollIndex][fieldToEdit] = finalValue;
 		}
 
-		await Character.query().updateAndFetchById(activeCharacter.id, {
-			actions: activeCharacter.actions,
-		});
+		await kobold.sheetRecord.update(
+			{ id: activeCharacter.sheetRecordId },
+			{ actions: activeCharacter.sheetRecord.actions }
+		);
 
 		//send a confirmation message
 		await InteractionUtils.send(

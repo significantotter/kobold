@@ -237,7 +237,7 @@ export default {
 		choices: {
 			name: { name: 'name', value: 'name' },
 			damageType: { name: 'damage-type', value: 'damageType' },
-			allowRollModifier: { name: 'allow-roll-modifier', value: 'allowRollModifier' },
+			allowRollModifiers: { name: 'allow-roll-modifier', value: 'allowRollModifiers' },
 			attackTargetDC: { name: 'attack-target-dc', value: 'targetDC' },
 			attackRoll: { name: 'attack-roll', value: 'roll' },
 			basicDamageRoll: { name: 'basic-damage-roll', value: 'roll' },
@@ -268,6 +268,7 @@ export default {
 			criticalSuccessText: { name: 'text-critical-success', value: 'criticalSuccessText' },
 			criticalFailureText: { name: 'text-critical-failure', value: 'criticalFailureText' },
 			textExtraTags: { name: 'text-extra-tags', value: 'textExtraTags' },
+			healInsteadOfDamage: { name: 'heal-instead-of-damage', value: 'healInsteadOfDamage' },
 		},
 	},
 	actionStageStageMoveOption: {
@@ -282,12 +283,16 @@ export default {
 	// CHARACTER
 
 	wgUrl: {
-		name: 'url',
+		name: 'wg-url',
 		description: "The url of your wanderer's guide character.",
 	},
 	pbJsonId: {
-		name: 'json-id',
+		name: 'pathbuilder-json-id',
 		description: 'The most recent json export id for your PathBuilder character.',
+	},
+	pastebinUrl: {
+		name: 'pastebin-url',
+		description: 'The pastebin link to the saved kobold character data.',
 	},
 	useStamina: {
 		name: 'use-stamina',
@@ -532,6 +537,24 @@ export default {
 	modifierType: {
 		name: 'type',
 		description: 'The optional type (status, item, or circumstance) of the modifier.',
+		choices: {
+			status: {
+				name: 'status',
+				value: 'status',
+			},
+			item: {
+				name: 'item',
+				value: 'item',
+			},
+			circumstance: {
+				name: 'circumstance',
+				value: 'circumstance',
+			},
+			untyped: {
+				name: 'untyped',
+				value: 'untyped',
+			},
+		},
 	},
 	modifierDescription: {
 		name: 'description',
@@ -642,10 +665,6 @@ export default {
 		overwrites: {
 			initJoinDescription: 'The skill to use for initiative instead of perception.',
 		},
-	},
-	abilityChoice: {
-		name: 'ability',
-		description: 'The ability to roll.',
 	},
 	attackChoice: {
 		name: 'attack',
@@ -770,5 +789,12 @@ export default {
 	settingsSetValue: {
 		name: 'value',
 		description: 'The value to set the option to.',
+	},
+
+	// COMPENDIUM
+
+	commandSearch: {
+		name: 'search',
+		description: "The name of the thing you're searching for.",
 	},
 };

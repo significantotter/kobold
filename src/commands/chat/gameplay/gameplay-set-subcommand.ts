@@ -1,34 +1,32 @@
 import {
+	ApplicationCommandOptionChoiceData,
 	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
 	ChatInputCommandInteraction,
 	PermissionsString,
-	ApplicationCommandOptionChoiceData,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 
 import { GameplayOptions } from './gameplay-command-options.js';
-import { EventData } from '../../../models/internal-models.js';
-import { Command, CommandDeferType } from '../../index.js';
-import { Language } from '../../../models/enum-helpers/index.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { InteractionUtils } from '../../../utils/interaction-utils.js';
-import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
-import { GameplayUtils } from '../../../utils/gameplay-utils.js';
+
 import _ from 'lodash';
-import { SettableSheetOption } from '../../../utils/creature.js';
-import { CharacterUtils } from '../../../utils/character-utils.js';
-import { Character, InitiativeActor } from '../../../services/kobold/models/index.js';
-import { GameUtils } from '../../../utils/game-utils.js';
+import L from '../../../i18n/i18n-node.js';
+import { TranslationFunctions } from '../../../i18n/i18n-types.js';
+import { Kobold, SheetBaseCounterKeys } from '../../../services/kobold/index.js';
+import { KoboldError } from '../../../utils/KoboldError.js';
+import { Creature } from '../../../utils/creature.js';
+import { InteractionUtils } from '../../../utils/interaction-utils.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { Command, CommandDeferType } from '../../index.js';
 
 export class GameplaySetSubCommand implements Command {
-	public names = [Language.LL.commands.gameplay.set.name()];
+	public names = [L.en.commands.gameplay.set.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.gameplay.set.name(),
-		description: Language.LL.commands.gameplay.set.description(),
+		name: L.en.commands.gameplay.set.name(),
+		description: L.en.commands.gameplay.set.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -37,55 +35,61 @@ export class GameplaySetSubCommand implements Command {
 
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
-		option: AutocompleteFocusedOption
-	): Promise<ApplicationCommandOptionChoiceData[]> {
+		option: AutocompleteFocusedOption,
+		{ kobold }: { kobold: Kobold }
+	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name) {
-			return await AutocompleteUtils.getAllTargetOptions(intr, option.value);
+			const { autocompleteUtils } = new KoboldUtils(kobold);
+			return await autocompleteUtils.getAllTargetOptions(intr, option.value);
 		}
 	}
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: any }
 	): Promise<void> {
 		const targetCharacter = intr.options.getString(
-			GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name
+			GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name,
+			true
 		);
 		const option = _.camelCase(
-			intr.options.getString(GameplayOptions.GAMEPLAY_SET_OPTION.name)
-		) as SettableSheetOption;
-		const value = intr.options.getString(GameplayOptions.GAMEPLAY_SET_VALUE.name);
+			intr.options.getString(GameplayOptions.GAMEPLAY_SET_OPTION.name, true)
+		) as SheetBaseCounterKeys;
 
-		const { characterOrInitActorTargets } = await GameUtils.getCharacterOrInitActorTarget(
-			intr,
-			targetCharacter
-		);
+		const value = intr.options.getString(GameplayOptions.GAMEPLAY_SET_VALUE.name, true);
 
-		const { initialValue, updatedValue } = await GameplayUtils.setGameplayStats(
+		const { gameUtils, gameplayUtils } = new KoboldUtils(kobold);
+
+		const { targetSheetRecord, hideStats, targetName } =
+			await gameUtils.getCharacterOrInitActorTarget(intr, targetCharacter);
+
+		const creature = Creature.fromSheetRecord(targetSheetRecord);
+
+		const { initialValue, updatedValue } = await gameplayUtils.setGameplayStats(
 			intr,
-			characterOrInitActorTargets,
+			targetSheetRecord,
+			creature,
 			option,
 			value
 		);
+		if (initialValue == null || updatedValue == null) {
+			throw new KoboldError(
+				`Yip! Something went wrong! I couldn't update the property ${option} to ${value}.`
+			);
+		}
 		let message;
 
-		if (
-			characterOrInitActorTargets.some(
-				character => character instanceof InitiativeActor && character.hideStats
-			)
-		) {
+		if (hideStats) {
 			let verbed = 'increased';
 			let diff = updatedValue - initialValue;
 			if (diff < 0) {
 				verbed = 'decreased';
 			}
-			message = `Yip! I ${verbed} ${
-				characterOrInitActorTargets[0].name
-			}'s ${option} by ${Math.abs(diff)}.`;
+			message = `Yip! I ${verbed} ${targetName}'s ${option} by ${Math.abs(diff)}.`;
 		} else {
-			message = `Yip! I updated ${characterOrInitActorTargets[0].name}'s ${option} from ${initialValue} to ${updatedValue}.`;
+			message = `Yip! I updated ${targetName}'s ${option} from ${initialValue} to ${updatedValue}.`;
 		}
 		if (option === 'hp' && updatedValue == 0) {
 			message += " They're down!";

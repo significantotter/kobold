@@ -1,1 +1,1 @@
-export { Command, CommandDeferType } from './command.js';
+export { type Command, CommandDeferType } from './command.js';

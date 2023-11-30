@@ -1,7 +1,7 @@
 import { Knex } from 'knex';
-import { Creature } from '../dist/utils/creature.js';
+import { Creature } from '../src/utils/creature.js';
 import _ from 'lodash';
-import { Character } from '../dist/services/kobold/models/index.js';
+import { Character } from '../src/services/kobold/index.js';
 
 export async function up(knex: Knex): Promise<void> {
 	await knex.schema.createTable('bestiary_files_loaded', function (table) {
@@ -46,7 +46,10 @@ export async function up(knex: Knex): Promise<void> {
 			...characterUpdates.map(update => {
 				return knex('character')
 					.where('id', update.id)
-					.update({ sheet: JSON.stringify(update.sheet), name: update.sheet.info.name })
+					.update({
+						sheet: JSON.stringify(update.sheet),
+						name: update.sheet.staticInfo.name,
+					})
 					.transacting(trx);
 			}),
 			...characterUpdates.map(update => {

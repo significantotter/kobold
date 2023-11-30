@@ -1,35 +1,34 @@
 import {
-	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
-	ChatInputCommandInteraction,
 	ApplicationCommandOptionChoiceData,
+	ApplicationCommandType,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
-	CacheType,
-	PermissionsString,
-	ComponentType,
 	ButtonStyle,
+	CacheType,
+	ChatInputCommandInteraction,
+	ComponentType,
+	PermissionsString,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 
-import { EventData } from '../../../models/internal-models.js';
-import { InteractionUtils } from '../../../utils/index.js';
-import { Command, CommandDeferType } from '../../index.js';
-import { Character } from '../../../services/kobold/models/index.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { Language } from '../../../models/enum-helpers/index.js';
-import { CollectorUtils } from '../../../utils/collector-utils.js';
-import { CharacterUtils } from '../../../utils/character-utils.js';
-import { RollMacroOptions } from './roll-macro-command-options.js';
 import _ from 'lodash';
-import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
+import L from '../../../i18n/i18n-node.js';
+import { TranslationFunctions } from '../../../i18n/i18n-types.js';
+import { Kobold } from '../../../services/kobold/index.js';
+import { CollectorUtils } from '../../../utils/collector-utils.js';
+import { InteractionUtils } from '../../../utils/index.js';
+import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { Command, CommandDeferType } from '../../index.js';
+import { RollMacroOptions } from './roll-macro-command-options.js';
 
 export class RollMacroRemoveSubCommand implements Command {
-	public names = [Language.LL.commands.rollMacro.remove.name()];
+	public names = [L.en.commands.rollMacro.remove.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.rollMacro.remove.name(),
-		description: Language.LL.commands.rollMacro.remove.description(),
+		name: L.en.commands.rollMacro.remove.name(),
+		description: L.en.commands.rollMacro.remove.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -39,26 +38,40 @@ export class RollMacroRemoveSubCommand implements Command {
 
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
-		option: AutocompleteFocusedOption
-	): Promise<ApplicationCommandOptionChoiceData[]> {
+		option: AutocompleteFocusedOption,
+		{ kobold }: { kobold: Kobold }
+	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === RollMacroOptions.MACRO_NAME_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(RollMacroOptions.MACRO_NAME_OPTION.name);
+			const match = intr.options.getString(RollMacroOptions.MACRO_NAME_OPTION.name) ?? '';
 
-			return await AutocompleteUtils.getAllMatchingRollsMacrosForCharacter(intr, match);
+			return await new KoboldUtils(
+				kobold
+			).autocompleteUtils.getAllMatchingRollsMacrosForCharacter(intr, match);
 		}
 	}
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
-		const rollMacroChoice = intr.options.getString(RollMacroOptions.MACRO_NAME_OPTION.name);
-		//get the active character
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
-		const targetRollMacro = activeCharacter.getRollMacroByName(rollMacroChoice);
+		const koboldUtils = new KoboldUtils(kobold);
+		const { characterUtils } = koboldUtils;
+		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+			activeCharacter: true,
+		});
+
+		const rollMacroChoice = intr.options.getString(
+			RollMacroOptions.MACRO_NAME_OPTION.name,
+			true
+		);
+
+		const targetRollMacro = FinderHelpers.getRollMacroByName(
+			activeCharacter.sheetRecord,
+			rollMacroChoice
+		);
 		if (targetRollMacro) {
 			// ask for confirmation
 
@@ -117,22 +130,25 @@ export class RollMacroRemoveSubCommand implements Command {
 					},
 				}
 			);
-			await InteractionUtils.editReply(intr, {
-				content: LL.sharedInteractions.choiceRegistered({
-					choice: _.capitalize(result.value),
-				}),
-				components: [],
-			});
+			if (result) {
+				await InteractionUtils.editReply(intr, {
+					content: LL.sharedInteractions.choiceRegistered({
+						choice: _.capitalize(result.value),
+					}),
+					components: [],
+				});
+			}
 			// remove the rollMacro
-			if (result.value === 'remove') {
+			if (result && result.value === 'remove') {
 				const rollMacrosWithoutRemoved = _.filter(
-					activeCharacter.rollMacros,
+					activeCharacter.sheetRecord.rollMacros,
 					rollMacro =>
 						rollMacro.name.toLocaleLowerCase() !== rollMacroChoice.toLocaleLowerCase()
 				);
-				await Character.query()
-					.patch({ rollMacros: rollMacrosWithoutRemoved })
-					.where({ userId: intr.user.id });
+				await kobold.sheetRecord.update(
+					{ id: activeCharacter.sheetRecord.id },
+					{ rollMacros: rollMacrosWithoutRemoved }
+				);
 
 				await InteractionUtils.send(
 					intr,

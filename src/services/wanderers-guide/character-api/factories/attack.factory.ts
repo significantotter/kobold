@@ -33,9 +33,9 @@ const damageTypes = [
 ];
 
 export const AttackFactory = AttackFactoryClass.define(() => ({
-	Name: faker.random.words(1),
-	Bonus: faker.datatype.number({ min: -2, max: 30 }),
-	Damage: `${faker.datatype.number({ min: 1, max: 10 })}d${faker.helpers.arrayElement(
+	Name: faker.word.words(1),
+	Bonus: faker.number.int({ min: -2, max: 30 }),
+	Damage: `${faker.number.int({ min: 1, max: 10 })}d${faker.helpers.arrayElement(
 		diceSizes
 	)} ${faker.helpers.arrayElement(damageTypes)}`,
 }));

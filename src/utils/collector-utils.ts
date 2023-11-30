@@ -13,6 +13,7 @@ import {
 	TextBasedChannel,
 	User,
 } from 'discord.js';
+import _ from 'lodash';
 
 export class CollectorUtils {
 	/**
@@ -33,46 +34,43 @@ export class CollectorUtils {
 		  }
 		| undefined
 	> {
-		options = Object.assign(
-			{
-				time: 120000,
-				reset: true,
-			} as CollectOptions,
-			options
-		);
+		const defaultedOptions = _.defaults(options, {
+			time: 120000,
+			reset: true,
+		});
 
 		return new Promise(async (resolve, reject) => {
 			let btnCollector = message.createMessageComponentCollector({
 				componentType: ComponentType.Button,
 				filter: intr => {
-					if (options.target) {
-						return intr.user.id === options.target.id;
+					if (defaultedOptions.target) {
+						return intr.user.id === defaultedOptions.target.id;
 					}
 
 					return true;
 				},
-				time: options.time,
+				time: defaultedOptions.time,
 			});
 
 			let stopCollector = message.channel.createMessageCollector({
 				filter: message => {
-					if (!options.stopFilter) {
+					if (!defaultedOptions.stopFilter) {
 						return false;
 					}
 
-					let stop = options.stopFilter(message);
+					let stop = defaultedOptions.stopFilter(message);
 					if (!stop) {
 						return false;
 					}
 
-					if (options.target) {
-						return message.author.id === options.target.id;
+					if (defaultedOptions.target) {
+						return message.author.id === defaultedOptions.target.id;
 					}
 
 					return true;
 				},
 				// Make sure message collector is ahead of reaction collector
-				time: options.time + 1000,
+				time: defaultedOptions.time + 1000,
 			});
 
 			let expired = true;
@@ -80,7 +78,7 @@ export class CollectorUtils {
 			btnCollector.on('collect', async (intr: ButtonInteraction) => {
 				let result = await retriever(intr);
 				if (result === undefined) {
-					if (options.reset) {
+					if (defaultedOptions.reset) {
 						btnCollector.resetTimer();
 						stopCollector.resetTimer();
 					}
@@ -95,8 +93,8 @@ export class CollectorUtils {
 
 			btnCollector.on('end', async collected => {
 				stopCollector.stop();
-				if (expired && options.onExpire) {
-					await options.onExpire();
+				if (expired && defaultedOptions.onExpire) {
+					await defaultedOptions.onExpire();
 				}
 			});
 
@@ -126,46 +124,43 @@ export class CollectorUtils {
 		  }
 		| undefined
 	> {
-		options = Object.assign(
-			{
-				time: 120000,
-				reset: true,
-			} as CollectOptions,
-			options
-		);
+		const defaultedOptions = _.defaults(options, {
+			time: 120000,
+			reset: true,
+		});
 
 		return new Promise(async (resolve, reject) => {
 			let smCollector = message.createMessageComponentCollector({
 				componentType: ComponentType.SelectMenu,
 				filter: intr => {
-					if (options.target) {
-						return intr.user.id === options.target.id;
+					if (defaultedOptions.target) {
+						return intr.user.id === defaultedOptions.target.id;
 					}
 
 					return true;
 				},
-				time: options.time,
+				time: defaultedOptions.time,
 			});
 
 			let stopCollector = message.channel.createMessageCollector({
 				filter: message => {
-					if (!options.stopFilter) {
+					if (!defaultedOptions.stopFilter) {
 						return false;
 					}
 
-					let stop = options.stopFilter(message);
+					let stop = defaultedOptions.stopFilter(message);
 					if (!stop) {
 						return false;
 					}
 
-					if (options.target) {
-						return message.author.id === options.target.id;
+					if (defaultedOptions.target) {
+						return message.author.id === defaultedOptions.target.id;
 					}
 
 					return true;
 				},
 				// Make sure message collector is ahead of reaction collector
-				time: options.time + 1000,
+				time: defaultedOptions.time + 1000,
 			});
 
 			let expired = true;
@@ -173,7 +168,7 @@ export class CollectorUtils {
 			smCollector.on('collect', async (intr: SelectMenuInteraction) => {
 				let result = await retriever(intr);
 				if (result === undefined) {
-					if (options.reset) {
+					if (defaultedOptions.reset) {
 						smCollector.resetTimer();
 						stopCollector.resetTimer();
 					}
@@ -188,8 +183,8 @@ export class CollectorUtils {
 
 			smCollector.on('end', async collected => {
 				stopCollector.stop();
-				if (expired && options.onExpire) {
-					await options.onExpire();
+				if (expired && defaultedOptions.onExpire) {
+					await defaultedOptions.onExpire();
 				}
 			});
 
@@ -221,46 +216,43 @@ export class CollectorUtils {
 		  }
 		| undefined
 	> {
-		options = Object.assign(
-			{
-				time: 120000,
-				reset: true,
-			} as CollectOptions,
-			options
-		);
+		const defaultedOptions = _.defaults(options, {
+			time: 120000,
+			reset: true,
+		});
 
 		return new Promise(async (resolve, reject) => {
 			let btnCollector = message.createMessageComponentCollector({
 				componentType: ComponentType.Button,
 				filter: intr => {
-					if (options.target) {
-						return intr.user.id === options.target.id;
+					if (defaultedOptions.target) {
+						return intr.user.id === defaultedOptions.target.id;
 					}
 
 					return true;
 				},
-				time: options.time,
+				time: defaultedOptions.time,
 			});
 
 			let stopCollector = message.channel.createMessageCollector({
 				filter: message => {
-					if (!options.stopFilter) {
+					if (!defaultedOptions.stopFilter) {
 						return false;
 					}
 
-					let stop = options.stopFilter(message);
+					let stop = defaultedOptions.stopFilter(message);
 					if (!stop) {
 						return false;
 					}
 
-					if (options.target) {
-						return message.author.id === options.target.id;
+					if (defaultedOptions.target) {
+						return message.author.id === defaultedOptions.target.id;
 					}
 
 					return true;
 				},
 				// Make sure message collector is ahead of reaction collector
-				time: options.time + 1000,
+				time: defaultedOptions.time + 1000,
 			});
 
 			let expired = true;
@@ -274,7 +266,7 @@ export class CollectorUtils {
 					modalIntr = await intr.awaitModalSubmit({
 						filter: (modalIntr: ModalSubmitInteraction) =>
 							modalIntr.customId === `modal-${intr.id}`,
-						time: options.time,
+						time: defaultedOptions.time,
 					});
 				} catch (error) {
 					// Timed out
@@ -283,7 +275,7 @@ export class CollectorUtils {
 
 				let result = await retriever(modalIntr);
 				if (result === undefined) {
-					if (options.reset) {
+					if (defaultedOptions.reset) {
 						btnCollector.resetTimer();
 						stopCollector.resetTimer();
 					}
@@ -298,8 +290,8 @@ export class CollectorUtils {
 
 			btnCollector.on('end', async collected => {
 				stopCollector.stop();
-				if (expired && options.onExpire) {
-					await options.onExpire();
+				if (expired && defaultedOptions.onExpire) {
+					await defaultedOptions.onExpire();
 				}
 			});
 
@@ -323,45 +315,42 @@ export class CollectorUtils {
 		retriever: ReactionRetriever<T>,
 		options: CollectOptions = {}
 	): Promise<T | undefined> {
-		options = Object.assign(
-			{
-				time: 120000,
-				reset: true,
-			} as CollectOptions,
-			options
-		);
+		const defaultedOptions = _.defaults(options, {
+			time: 120000,
+			reset: true,
+		});
 
 		return new Promise(async (resolve, reject) => {
 			let reactCollector = message.createReactionCollector({
 				filter: (msgReaction, reactor) => {
-					if (options.target) {
-						return reactor.id === options.target.id;
+					if (defaultedOptions.target) {
+						return reactor.id === defaultedOptions.target.id;
 					}
 
 					return true;
 				},
-				time: options.time,
+				time: defaultedOptions.time,
 			});
 
 			let stopCollector = message.channel.createMessageCollector({
 				filter: message => {
-					if (!options.stopFilter) {
+					if (!defaultedOptions.stopFilter) {
 						return false;
 					}
 
-					let stop = options.stopFilter(message);
+					let stop = defaultedOptions.stopFilter(message);
 					if (!stop) {
 						return false;
 					}
 
-					if (options.target) {
-						return message.author.id === options.target.id;
+					if (defaultedOptions.target) {
+						return message.author.id === defaultedOptions.target.id;
 					}
 
 					return true;
 				},
 				// Make sure message collector is ahead of reaction collector
-				time: options.time + 1000,
+				time: defaultedOptions.time + 1000,
 			});
 
 			let expired = true;
@@ -369,7 +358,7 @@ export class CollectorUtils {
 			reactCollector.on('collect', async (msgReaction: MessageReaction, reactor: User) => {
 				let result = await retriever(msgReaction, reactor);
 				if (result === undefined) {
-					if (options.reset) {
+					if (defaultedOptions.reset) {
 						reactCollector.resetTimer();
 						stopCollector.resetTimer();
 					}
@@ -384,8 +373,8 @@ export class CollectorUtils {
 
 			reactCollector.on('end', async collected => {
 				stopCollector.stop();
-				if (expired && options.onExpire) {
-					await options.onExpire();
+				if (expired && defaultedOptions.onExpire) {
+					await defaultedOptions.onExpire();
 				}
 			});
 
@@ -409,51 +398,48 @@ export class CollectorUtils {
 		retriever: MessageRetriever<T>,
 		options: CollectOptions = {}
 	): Promise<T | undefined> {
-		options = Object.assign(
-			{
-				time: 120000,
-				reset: true,
-			} as CollectOptions,
-			options
-		);
+		const defaultedOptions = _.defaults(options, {
+			time: 120000,
+			reset: true,
+		});
 
 		return new Promise(async (resolve, reject) => {
 			let msgCollector = channel.createMessageCollector({
 				filter: message => {
-					if (options.target) {
-						return message.author.id === options.target.id;
+					if (defaultedOptions.target) {
+						return message.author.id === defaultedOptions.target.id;
 					}
 
 					return true;
 				},
-				time: options.time,
+				time: defaultedOptions.time,
 			});
 
 			let stopCollector = channel.createMessageCollector({
 				filter: message => {
-					if (!options.stopFilter) {
+					if (!defaultedOptions.stopFilter) {
 						return false;
 					}
 
-					let stop = options.stopFilter(message);
+					let stop = defaultedOptions.stopFilter(message);
 					if (!stop) {
 						return false;
 					}
 
-					if (options.target) {
-						return message.author.id === options.target.id;
+					if (defaultedOptions.target) {
+						return message.author.id === defaultedOptions.target.id;
 					}
 
 					return true;
 				},
 				// Make sure message collector is ahead of reaction collector
-				time: options.time + 1000,
+				time: defaultedOptions.time + 1000,
 			});
 
 			let expired = true;
 
 			msgCollector.on('collect', async (nextMsg: Message) => {
-				let stop = options.stopFilter(nextMsg);
+				let stop = defaultedOptions?.stopFilter?.(nextMsg);
 				if (stop) {
 					// Let the stopCollector handle
 					return;
@@ -461,7 +447,7 @@ export class CollectorUtils {
 
 				let result = await retriever(nextMsg);
 				if (result === undefined) {
-					if (options.reset) {
+					if (defaultedOptions.reset) {
 						msgCollector.resetTimer();
 						stopCollector.resetTimer();
 					}
@@ -476,8 +462,8 @@ export class CollectorUtils {
 
 			msgCollector.on('end', async collected => {
 				stopCollector.stop();
-				if (expired && options.onExpire) {
-					await options.onExpire();
+				if (expired && defaultedOptions.onExpire) {
+					await defaultedOptions.onExpire();
 				}
 			});
 

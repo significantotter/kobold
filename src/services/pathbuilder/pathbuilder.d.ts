@@ -35,7 +35,7 @@ export namespace PathBuilder {
 			string | null,
 			string | undefined | null,
 			number | undefined | null,
-			...any
+			...any,
 		][];
 		specials?: string[];
 		lores?: [string?, number?, ...any][];
@@ -205,7 +205,7 @@ export namespace PathBuilder {
 			number,
 			number,
 			number,
-			number
+			number,
 		];
 	}
 

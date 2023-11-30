@@ -1,10 +1,10 @@
 import {
-	replaceAll,
 	NamedThing,
 	ignoreOnConflict,
-	renameOnConflict,
 	overwriteOnConflict,
-} from './../../../utils/import-utils.js';
+	renameOnConflict,
+	replaceAll,
+} from '../../../utils/import-utils.js';
 
 describe('Modifier Helpers', () => {
 	describe('replaceAll', () => {

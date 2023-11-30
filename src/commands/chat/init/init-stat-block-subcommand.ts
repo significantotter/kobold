@@ -1,38 +1,33 @@
-import { InitiativeActorGroup } from '../../../services/kobold/models/initiative-actor-group/initiative-actor-group.model.js';
-import { InitiativeActor } from '../../../services/kobold/models/initiative-actor/initiative-actor.model.js';
-import { ChatArgs } from '../../../constants/chat-args.js';
 import {
+	ApplicationCommandOptionChoiceData,
 	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
-	ChatInputCommandInteraction,
-	PermissionsString,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
-	ApplicationCommandOptionChoiceData,
+	ChatInputCommandInteraction,
+	PermissionsString,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
+import { ChatArgs } from '../../../constants/chat-args.js';
 
-import { EventData } from '../../../models/internal-models.js';
-import { CharacterUtils } from '../../../utils/character-utils.js';
-import { InteractionUtils } from '../../../utils/index.js';
-import { InitiativeUtils, InitiativeBuilder } from '../../../utils/initiative-utils.js';
-import { Command, CommandDeferType } from '../../index.js';
-import _ from 'lodash';
-import { Initiative } from '../../../services/kobold/models/index.js';
-import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
+import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { Language } from '../../../models/enum-helpers/index.js';
-import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
+import { Kobold } from '../../../services/kobold/kobold.model.js';
 import { Creature } from '../../../utils/creature.js';
+import { InteractionUtils } from '../../../utils/index.js';
+import { InitiativeBuilderUtils } from '../../../utils/initiative-builder.js';
+import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { Command, CommandDeferType } from '../../index.js';
 import { InitOptions } from './init-command-options.js';
 
 export class InitStatBlockSubCommand implements Command {
-	public names = [Language.LL.commands.init.statBlock.name()];
+	public names = [L.en.commands.init.statBlock.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.init.statBlock.name(),
-		description: Language.LL.commands.init.statBlock.description(),
+		name: L.en.commands.init.statBlock.name(),
+		description: L.en.commands.init.statBlock.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -42,61 +37,56 @@ export class InitStatBlockSubCommand implements Command {
 
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
-		option: AutocompleteFocusedOption
-	): Promise<ApplicationCommandOptionChoiceData[]> {
+		option: AutocompleteFocusedOption,
+		{ kobold }: { kobold: Kobold }
+	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === InitOptions.INIT_CHARACTER_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
 			const match = intr.options.getString(InitOptions.INIT_CHARACTER_OPTION.name);
 
-			return await AutocompleteUtils.getAllControllableInitiativeActors(intr, match);
+			const { autocompleteUtils } = new KoboldUtils(kobold);
+			return await autocompleteUtils.getAllControllableInitiativeActors(intr, match);
 		}
 	}
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
-		const targetCharacterName = intr.options.getString(InitOptions.INIT_CHARACTER_OPTION.name);
+		const targetCharacterName = intr.options.getString(
+			InitOptions.INIT_CHARACTER_OPTION.name,
+			true
+		);
 		const secretMessage = intr.options.getString(ChatArgs.ROLL_SECRET_OPTION.name);
 		const isSecretMessage =
-			secretMessage === Language.LL.commandOptions.statBlockSecret.choices.secret.value();
+			secretMessage === L.en.commandOptions.statBlockSecret.choices.secret.value();
 
-		const currentInitResponse = await InitiativeUtils.getInitiativeForChannel(intr.channel, {
-			sendErrors: true,
-			LL,
+		const koboldUtils = new KoboldUtils(kobold);
+		const { currentInitiative } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+			currentInitiative: true,
 		});
-		if (currentInitResponse.errorMessage) {
-			await InteractionUtils.send(intr, currentInitResponse.errorMessage);
-			return;
-		}
-		const currentInit = currentInitResponse.init;
 
-		const targetActor = await InitiativeUtils.getNameMatchActorFromInitiative(
+		const actor = await InitiativeBuilderUtils.getNameMatchActorFromInitiative(
 			intr.user.id,
-			currentInit,
+			currentInitiative,
 			targetCharacterName,
-			LL,
 			true
 		);
 
-		if (targetActor.errorMessage) {
-			await InteractionUtils.send(intr, targetActor.errorMessage);
-			return;
-		}
-
-		const actor = targetActor.actor;
-
 		let sheetEmbed: KoboldEmbed;
-		if (actor.sheet) {
-			const creature = new Creature(actor.sheet, actor.name);
-			sheetEmbed = creature.compileSheetEmbed();
-		} else {
-			sheetEmbed = new KoboldEmbed();
-			sheetEmbed.setTitle(actor.name);
-			sheetEmbed.setDescription('No sheet found!');
-		}
+		const creature = new Creature(
+			actor.sheetRecord.sheet,
+			{
+				actions: actor.sheetRecord.actions,
+				modifiers: actor.sheetRecord.modifiers,
+				rollMacros: actor.sheetRecord.rollMacros,
+			},
+			actor.name
+		);
+		sheetEmbed = creature.compileSheetEmbed();
+
 		await InteractionUtils.send(intr, sheetEmbed, isSecretMessage);
 	}
 }

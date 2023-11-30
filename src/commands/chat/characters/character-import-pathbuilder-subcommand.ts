@@ -1,32 +1,25 @@
-import { Language } from '../../../models/enum-helpers/language.js';
-import { Character } from '../../../services/kobold/models/index.js';
 import {
 	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 	ChatInputCommandInteraction,
 	PermissionsString,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
+import { Kobold } from '../../../services/kobold/index.js';
 
-import { EventData } from '../../../models/internal-models.js';
+import _ from 'lodash';
+import L from '../../../i18n/i18n-node.js';
+import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command, CommandDeferType } from '../../index.js';
-import { WgToken } from '../../../services/kobold/models/index.js';
-import { CharacterHelpers } from './helpers.js';
-import { Config } from '../../../config/config.js';
-import { CharacterUtils } from '../../../utils/character-utils.js';
 import { CharacterOptions } from './command-options.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import _ from 'lodash';
-import { PathBuilder } from '../../../services/pathbuilder/index.js';
-import { Creature } from '../../../utils/creature.js';
-import { refs } from '../../../i18n/en/common.js';
+import { PathbuilderCharacterFetcher } from './Fetchers/pathbuilder-character-fetcher.js';
 
 export class CharacterImportPathbuilderSubCommand implements Command {
-	public names = [Language.LL.commands.character.importPathbuilder.name()];
+	public names = [L.en.commands.character.importPathbuilder.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.character.importPathbuilder.name(),
-		description: Language.LL.commands.character.importPathbuilder.description(),
+		name: L.en.commands.character.importPathbuilder.name(),
+		description: L.en.commands.character.importPathbuilder.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -35,11 +28,15 @@ export class CharacterImportPathbuilderSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
-		const jsonId = intr.options.getNumber(CharacterOptions.IMPORT_PATHBUILDER_OPTION.name);
-		const useStamina = intr.options.getBoolean(CharacterOptions.IMPORT_USE_STAMINA_OPTION.name);
+		const jsonId = intr.options.getNumber(
+			CharacterOptions.IMPORT_PATHBUILDER_OPTION.name,
+			true
+		);
+		const useStamina =
+			intr.options.getBoolean(CharacterOptions.IMPORT_USE_STAMINA_OPTION.name) ?? false;
 		if (!_.isInteger(jsonId) || jsonId < 1) {
 			await InteractionUtils.send(
 				intr,
@@ -49,65 +46,16 @@ export class CharacterImportPathbuilderSubCommand implements Command {
 			);
 			return;
 		}
+		const fetcher = new PathbuilderCharacterFetcher(intr, kobold, intr.user.id, { useStamina });
+		const newCharacter = await fetcher.create({ jsonId });
 
-		//check if we have an existing character
-		const pathBuilderChar = await new PathBuilder().get({ characterJsonId: jsonId });
-		if (!pathBuilderChar.success) {
-			await InteractionUtils.send(
-				intr,
-				LL.commands.character.importPathbuilder.interactions.failedRequest({
-					supportServerUrl: refs.links.support,
-				})
-			);
-		}
+		//send success message
 
-		const existingCharacter = await Character.query()
-			.where({
-				userId: intr.user.id,
+		await InteractionUtils.send(
+			intr,
+			LL.commands.character.importPathbuilder.interactions.success({
+				characterName: newCharacter.name,
 			})
-			.andWhereRaw(
-				'name ILIKE ?',
-				(pathBuilderChar?.build?.name ?? 'unnamed character').trim()
-			);
-
-		if (existingCharacter.length) {
-			const character = existingCharacter[0];
-			await InteractionUtils.send(
-				intr,
-				LL.commands.character.importPathbuilder.interactions.characterAlreadyExists({
-					characterName: character.name,
-				})
-			);
-			return;
-		} else {
-			// the character doesn't exist yet and we fetched it correctly
-			const creature = Creature.fromPathBuilder(pathBuilderChar.build, null, {
-				useStamina,
-			});
-
-			// set current characters owned by user to inactive state
-			await Character.query()
-				.patch({ isActiveCharacter: false })
-				.where({ userId: intr.user.id });
-
-			// store sheet in db
-			const newCharacter = await Character.query().insertAndFetch({
-				name: creature.name,
-				charId: jsonId,
-				userId: intr.user.id,
-				sheet: creature.sheet,
-				isActiveCharacter: true,
-				importSource: 'pathbuilder',
-			});
-
-			//send success message
-
-			await InteractionUtils.send(
-				intr,
-				LL.commands.character.importPathbuilder.interactions.success({
-					characterName: newCharacter.name,
-				})
-			);
-		}
+		);
 	}
 }

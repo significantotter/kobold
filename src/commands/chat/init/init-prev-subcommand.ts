@@ -1,34 +1,27 @@
-import { InitiativeUtils, InitiativeBuilder } from '../../../utils/initiative-utils.js';
-import { ChatArgs } from '../../../constants/chat-args.js';
 import {
 	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 	ChatInputCommandInteraction,
 	PermissionsString,
-	EmbedBuilder,
-	AutocompleteFocusedOption,
-	AutocompleteInteraction,
-	CacheType,
-	ApplicationCommandOptionChoiceData,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
+import { InitiativeBuilder } from '../../../utils/initiative-builder.js';
 
-import { EventData } from '../../../models/internal-models.js';
-import { InteractionUtils } from '../../../utils/index.js';
-import { Command, CommandDeferType } from '../../index.js';
 import _ from 'lodash';
-import { Initiative } from '../../../services/kobold/models/index.js';
-import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
+import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { Language } from '../../../models/enum-helpers/index.js';
-import { SettingsUtils } from '../../../utils/settings-utils.js';
+import { Kobold } from '../../../services/kobold/index.js';
+import { InteractionUtils } from '../../../utils/index.js';
+import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { Command, CommandDeferType } from '../../index.js';
 
 export class InitPrevSubCommand implements Command {
-	public names = [Language.LL.commands.init.prev.name()];
+	public names = [L.en.commands.init.prev.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.init.prev.name(),
-		description: Language.LL.commands.init.prev.description(),
+		name: L.en.commands.init.prev.name(),
+		description: L.en.commands.init.prev.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -38,36 +31,28 @@ export class InitPrevSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
-		const [initResult, userSettings] = await Promise.all([
-			InitiativeUtils.getInitiativeForChannel(intr.channel, {
-				sendErrors: true,
-				LL,
-			}),
-			SettingsUtils.getSettingsForUser(intr),
-		]);
-		if (initResult.errorMessage) {
-			await InteractionUtils.send(intr, initResult.errorMessage);
-			return;
-		}
+		const koboldUtils = new KoboldUtils(kobold);
+		const { currentInitiative, userSettings } =
+			await koboldUtils.fetchNonNullableDataForCommand(intr, {
+				currentInitiative: true,
+				userSettings: true,
+			});
 
 		const initBuilder = new InitiativeBuilder({
-			initiative: initResult.init,
+			initiative: currentInitiative,
 			userSettings,
 			LL,
 		});
 		const previousTurn = initBuilder.getPreviousTurnChanges();
 		const currentTurn = initBuilder.getCurrentTurnInfo();
-		if (previousTurn.errorMessage) {
-			await InteractionUtils.send(intr, previousTurn.errorMessage);
-			return;
-		}
 
-		const updatedInitiative = await Initiative.query()
-			.patchAndFetchById(initResult.init.id, previousTurn)
-			.withGraphFetched('[actors.[character], actorGroups]');
+		const updatedInitiative = await kobold.initiative.update(
+			{ id: currentInitiative.id },
+			previousTurn
+		);
 
 		initBuilder.set({
 			initiative: updatedInitiative,
@@ -79,7 +64,7 @@ export class InitPrevSubCommand implements Command {
 		const activeGroup = initBuilder.activeGroup;
 
 		await InteractionUtils.send(intr, {
-			content: `<@!${activeGroup.userId}>`,
+			content: activeGroup ? `<@!${activeGroup.userId}>` : undefined,
 			embeds: [currentTurnEmbed],
 		});
 		if (_.some(initBuilder.activeActors, actor => actor.hideStats)) {

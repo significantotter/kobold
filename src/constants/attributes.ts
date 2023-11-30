@@ -1,13 +1,13 @@
-import { Sheet } from '../services/kobold/models/index.js';
+import { Sheet } from '../services/kobold/index.js';
 
 export const staticAttributes = (sheet?: Sheet) => {
-	if (sheet && sheet?.info?.level) {
+	if (sheet && sheet.staticInfo.level !== null) {
 		return [
-			{ name: 'untrained', value: sheet.info.level + 0 },
-			{ name: 'trained', value: sheet.info.level + 2 },
-			{ name: 'expert', value: sheet.info.level + 4 },
-			{ name: 'master', value: sheet.info.level + 6 },
-			{ name: 'legendary', value: sheet.info.level + 8 },
+			{ name: 'untrained', value: (sheet.staticInfo.level ?? 0) + 0 },
+			{ name: 'trained', value: (sheet.staticInfo.level ?? 0) + 2 },
+			{ name: 'expert', value: (sheet.staticInfo.level ?? 0) + 4 },
+			{ name: 'master', value: (sheet.staticInfo.level ?? 0) + 6 },
+			{ name: 'legendary', value: (sheet.staticInfo.level ?? 0) + 8 },
 		];
 	} else {
 		return [
@@ -20,7 +20,7 @@ export const staticAttributes = (sheet?: Sheet) => {
 	}
 };
 
-export const attributeShorthands = {
+export const attributeShorthands: { [k: string]: string } = {
 	str: 'strength',
 	dex: 'dexterity',
 	con: 'constitution',

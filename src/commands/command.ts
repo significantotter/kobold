@@ -1,15 +1,17 @@
-import { TranslationFunctions } from './../i18n/i18n-types.js';
 import {
-	RESTPostAPIApplicationCommandsJSONBody,
+	ApplicationCommandOptionChoiceData,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CommandInteraction,
 	PermissionsString,
-	ApplicationCommandOptionChoiceData,
+	RESTPostAPIApplicationCommandsJSONBody,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
+import { Kobold } from '../services/kobold/index.js';
+import { CompendiumModel } from '../services/pf2etools/compendium.model.js';
+import { TranslationFunctions } from './../i18n/i18n-types.js';
 
-import { EventData } from '../models/internal-models.js';
+export interface InjectedCommandData {}
 
 export interface Command {
 	names: String[];
@@ -21,9 +23,19 @@ export interface Command {
 	commands?: Command[];
 	autocomplete?(
 		intr: AutocompleteInteraction,
-		option: AutocompleteFocusedOption
-	): Promise<ApplicationCommandOptionChoiceData[]>;
-	execute(intr: CommandInteraction, data: EventData, LL: TranslationFunctions): Promise<void>;
+		option: AutocompleteFocusedOption,
+		services?: Partial<InjectedServices>
+	): Promise<ApplicationCommandOptionChoiceData[] | undefined>;
+	execute(
+		intr: CommandInteraction,
+		LL: TranslationFunctions,
+		services?: Partial<InjectedServices>
+	): Promise<void>;
+}
+
+export interface InjectedServices {
+	compendium: CompendiumModel;
+	kobold: Kobold;
 }
 
 export enum CommandDeferType {

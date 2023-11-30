@@ -1,25 +1,23 @@
 import {
 	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 	ChatInputCommandInteraction,
 	PermissionsString,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 
-import { EventData } from '../../../models/internal-models.js';
-import { InteractionUtils } from '../../../utils/index.js';
-import { Command, CommandDeferType } from '../../index.js';
-import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
-import { Language } from '../../../models/enum-helpers/index.js';
+import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { CharacterUtils } from '../../../utils/character-utils.js';
-import _ from 'lodash';
+import { Kobold } from '../../../services/kobold/index.js';
+import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { Command, CommandDeferType } from '../../index.js';
 
 export class RollMacroListSubCommand implements Command {
-	public names = [Language.LL.commands.rollMacro.list.name()];
+	public names = [L.en.commands.rollMacro.list.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.rollMacro.list.name(),
-		description: Language.LL.commands.rollMacro.list.description(),
+		name: L.en.commands.rollMacro.list.name(),
+		description: L.en.commands.rollMacro.list.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -28,18 +26,15 @@ export class RollMacroListSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
-		if (!activeCharacter) {
-			await InteractionUtils.send(
-				intr,
-				LL.commands.character.interactions.noActiveCharacter()
-			);
-			return;
-		}
-		const rollMacros = activeCharacter.rollMacros;
+		const koboldUtils = new KoboldUtils(kobold);
+		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+			activeCharacter: true,
+		});
+
+		const rollMacros = activeCharacter.sheetRecord.rollMacros;
 		const fields = [];
 		for (const rollMacro of rollMacros.sort((a, b) => (a.name || '').localeCompare(b.name))) {
 			fields.push({
@@ -51,7 +46,7 @@ export class RollMacroListSubCommand implements Command {
 
 		const embed = await new KoboldEmbed();
 		embed.setCharacter(activeCharacter);
-		embed.setTitle(`${activeCharacter.sheet.info.name}'s Roll Macros`);
+		embed.setTitle(`${activeCharacter.name}'s Roll Macros`);
 		embed.addFields(fields);
 		await embed.sendBatches(intr);
 	}

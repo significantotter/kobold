@@ -1,29 +1,34 @@
-import { ModifierOptions } from './modifier-command-options.js';
 import {
 	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 	ChatInputCommandInteraction,
 	PermissionsString,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
+import { ModifierOptions } from './modifier-command-options.js';
 
-import { EventData } from '../../../models/internal-models.js';
-import { Character } from '../../../services/kobold/models/index.js';
-import { InteractionUtils } from '../../../utils/index.js';
-import { Command, CommandDeferType } from '../../index.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { Language } from '../../../models/enum-helpers/index.js';
-import { CharacterUtils } from '../../../utils/character-utils.js';
 import { compileExpression } from 'filtrex';
-import { DiceUtils } from '../../../utils/dice-utils.js';
+import L from '../../../i18n/i18n-node.js';
+import { TranslationFunctions } from '../../../i18n/i18n-types.js';
+import {
+	Kobold,
+	ModifierTypeEnum,
+	isSheetAdjustmentTypeEnum,
+} from '../../../services/kobold/index.js';
+import { KoboldError } from '../../../utils/KoboldError.js';
 import { Creature } from '../../../utils/creature.js';
+import { DiceUtils } from '../../../utils/dice-utils.js';
+import { InteractionUtils } from '../../../utils/index.js';
+import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { Command, CommandDeferType } from '../../index.js';
 
 export class ModifierCreateRollModifierSubCommand implements Command {
-	public names = [Language.LL.commands.modifier.createRollModifier.name()];
+	public names = [L.en.commands.modifier.createRollModifier.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.modifier.createRollModifier.name(),
-		description: Language.LL.commands.modifier.createRollModifier.description(),
+		name: L.en.commands.modifier.createRollModifier.name(),
+		description: L.en.commands.modifier.createRollModifier.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -33,38 +38,45 @@ export class ModifierCreateRollModifierSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
-		if (!activeCharacter) {
-			await InteractionUtils.send(
-				intr,
-				LL.commands.character.interactions.noActiveCharacter()
-			);
-			return;
-		}
-		let name = (intr.options.getString(ModifierOptions.MODIFIER_NAME_OPTION.name) ?? '')
+		const koboldUtils = new KoboldUtils(kobold);
+		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+			activeCharacter: true,
+		});
+		let name = intr.options
+			.getString(ModifierOptions.MODIFIER_NAME_OPTION.name, true)
 			.trim()
 			.toLowerCase();
-		let modifierType = (intr.options.getString(ModifierOptions.MODIFIER_TYPE_OPTION.name) ?? '')
+		let modifierType = (
+			intr.options.getString(ModifierOptions.MODIFIER_TYPE_OPTION.name) ??
+			L.en.commandOptions.modifierType.choices.untyped.value()
+		)
 			.trim()
 			.toLowerCase();
 		const description = intr.options.getString(
 			ModifierOptions.MODIFIER_DESCRIPTION_OPTION.name
 		);
 		const value = intr.options.getString(ModifierOptions.MODIFIER_VALUE_OPTION.name);
-		let targetTags = (
-			intr.options.getString(ModifierOptions.MODIFIER_TARGET_TAGS_OPTION.name) ?? ''
-		).trim();
+		let targetTags = intr.options
+			.getString(ModifierOptions.MODIFIER_TARGET_TAGS_OPTION.name, true)
+			.trim();
+
+		if (!isSheetAdjustmentTypeEnum(modifierType)) {
+			throw new KoboldError(
+				`Yip! ${modifierType} is not a valid modifier type! Please use one ` +
+					`of the suggested options when entering the modifier type or leave it blank.`
+			);
+		}
 
 		// make sure the name does't already exist in the character's modifiers
-		if (activeCharacter.getModifierByName(name)) {
+		if (FinderHelpers.getModifierByName(activeCharacter.sheetRecord, name)) {
 			await InteractionUtils.send(
 				intr,
 				LL.commands.modifier.createRollModifier.interactions.alreadyExists({
 					modifierName: name,
-					characterName: activeCharacter.sheet.info.name,
+					characterName: activeCharacter.name,
 				})
 			);
 			return;
@@ -83,41 +95,44 @@ export class ModifierCreateRollModifierSubCommand implements Command {
 		}
 
 		// we must be able to evaluate the modifier as a roll for this character
-		const result = DiceUtils.parseAndEvaluateDiceExpression({
-			rollExpression: value,
-			creature: Creature.fromCharacter(activeCharacter),
-			LL: Language.LL,
-		});
-
-		if (result.error) {
+		try {
+			DiceUtils.parseAndEvaluateDiceExpression({
+				rollExpression: String(value),
+				creature: Creature.fromSheetRecord(activeCharacter.sheetRecord),
+			});
+		} catch (err) {
 			await InteractionUtils.send(
 				intr,
 				LL.commands.modifier.createRollModifier.interactions.doesntEvaluateError()
 			);
 			return;
 		}
+		if (!value) throw new KoboldError(`Yip! I couldn't parse that modifier value!`);
 
-		await Character.query().updateAndFetchById(activeCharacter.id, {
-			modifiers: [
-				...activeCharacter.modifiers,
-				{
-					name,
-					isActive: true,
-					description,
-					value,
-					type: modifierType,
-					modifierType: 'roll',
-					targetTags,
-				},
-			],
-		});
+		await kobold.sheetRecord.update(
+			{ id: activeCharacter.sheetRecordId },
+			{
+				modifiers: [
+					...activeCharacter.sheetRecord.modifiers,
+					{
+						name,
+						isActive: true,
+						description,
+						value,
+						type: modifierType,
+						modifierType: ModifierTypeEnum.roll,
+						targetTags,
+					},
+				],
+			}
+		);
 
 		//send a response
 		await InteractionUtils.send(
 			intr,
 			LL.commands.modifier.createRollModifier.interactions.created({
 				modifierName: name,
-				characterName: activeCharacter.sheet.info.name,
+				characterName: activeCharacter.name,
 			})
 		);
 		return;

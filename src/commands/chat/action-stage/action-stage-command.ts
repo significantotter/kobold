@@ -1,61 +1,69 @@
 import {
+	ApplicationCommandOptionChoiceData,
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
 	ChatInputCommandInteraction,
 	PermissionsString,
-	ApplicationCommandOptionChoiceData,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
-import { Language } from '../../../models/enum-helpers/index.js';
+import L from '../../../i18n/i18n-node.js';
 
-import { EventData } from '../../../models/internal-models.js';
-import { CommandUtils, InteractionUtils } from '../../../utils/index.js';
-import { Command, CommandDeferType } from '../../index.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
+import { CommandUtils } from '../../../utils/index.js';
+import { InjectedServices } from '../../command.js';
+import { Command, CommandDeferType } from '../../index.js';
 import { ActionStageOptions } from './action-stage-command-options.js';
 
 export class ActionStageCommand implements Command {
-	public names = [Language.LL.commands.actionStage.name()];
+	public names = [L.en.commands.actionStage.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.actionStage.name(),
-		description: Language.LL.commands.actionStage.description(),
+		name: L.en.commands.actionStage.name(),
+		description: L.en.commands.actionStage.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 
 		options: [
 			{
-				name: Language.LL.commands.actionStage.addAttack.name(),
-				description: Language.LL.commands.actionStage.addAttack.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				name: L.en.commands.actionStage.addAttack.name(),
+				description: L.en.commands.actionStage.addAttack.description(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					ActionStageOptions.ACTION_TARGET_OPTION,
 					ActionStageOptions.ACTION_ROLL_NAME_OPTION,
 					ActionStageOptions.ACTION_DICE_ROLL_OPTION,
-					{ ...ActionStageOptions.ACTION_ROLL_TARGET_DC_OPTION, autocomplete: true },
+					{
+						...ActionStageOptions.ACTION_ROLL_TARGET_DC_OPTION,
+						autocomplete: true,
+						choices: undefined,
+					},
 					ActionStageOptions.ACTION_ROLL_ALLOW_MODIFIERS,
 				],
 			},
 			{
-				name: Language.LL.commands.actionStage.addSkillChallenge.name(),
-				description: Language.LL.commands.actionStage.addSkillChallenge.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				name: L.en.commands.actionStage.addSkillChallenge.name(),
+				description: L.en.commands.actionStage.addSkillChallenge.description(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					ActionStageOptions.ACTION_TARGET_OPTION,
 					ActionStageOptions.ACTION_ROLL_NAME_OPTION,
 					ActionStageOptions.ACTION_DICE_ROLL_OPTION,
-					{ ...ActionStageOptions.ACTION_ROLL_TARGET_DC_OPTION, autocomplete: true },
+					{
+						...ActionStageOptions.ACTION_ROLL_TARGET_DC_OPTION,
+						autocomplete: true,
+						choices: undefined,
+					},
 					ActionStageOptions.ACTION_ROLL_ALLOW_MODIFIERS,
 				],
 			},
 			{
-				name: Language.LL.commands.actionStage.addBasicDamage.name(),
-				description: Language.LL.commands.actionStage.addBasicDamage.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				name: L.en.commands.actionStage.addBasicDamage.name(),
+				description: L.en.commands.actionStage.addBasicDamage.description(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					ActionStageOptions.ACTION_TARGET_OPTION,
 					ActionStageOptions.ACTION_ROLL_NAME_OPTION,
@@ -65,9 +73,9 @@ export class ActionStageCommand implements Command {
 				],
 			},
 			{
-				name: Language.LL.commands.actionStage.addAdvancedDamage.name(),
-				description: Language.LL.commands.actionStage.addAdvancedDamage.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				name: L.en.commands.actionStage.addAdvancedDamage.name(),
+				description: L.en.commands.actionStage.addAdvancedDamage.description(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					ActionStageOptions.ACTION_TARGET_OPTION,
 					ActionStageOptions.ACTION_ROLL_NAME_OPTION,
@@ -80,11 +88,11 @@ export class ActionStageCommand implements Command {
 				],
 			},
 			{
-				name: Language.LL.commands.actionStage.addText.name(),
-				description: Language.LL.commands.actionStage.addText.description({
+				name: L.en.commands.actionStage.addText.name(),
+				description: L.en.commands.actionStage.addText.description({
 					addTextRollInput: '{{}}',
 				}),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					ActionStageOptions.ACTION_TARGET_OPTION,
 					ActionStageOptions.ACTION_ROLL_NAME_OPTION,
@@ -97,9 +105,9 @@ export class ActionStageCommand implements Command {
 				],
 			},
 			{
-				name: Language.LL.commands.actionStage.addSave.name(),
-				description: Language.LL.commands.actionStage.addSave.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				name: L.en.commands.actionStage.addSave.name(),
+				description: L.en.commands.actionStage.addSave.description(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					ActionStageOptions.ACTION_TARGET_OPTION,
 					ActionStageOptions.ACTION_ROLL_NAME_OPTION,
@@ -108,9 +116,9 @@ export class ActionStageCommand implements Command {
 				],
 			},
 			{
-				name: Language.LL.commands.actionStage.edit.name(),
-				description: Language.LL.commands.actionStage.edit.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				name: L.en.commands.actionStage.edit.name(),
+				description: L.en.commands.actionStage.edit.description(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					ActionStageOptions.ACTION_ROLL_TARGET_OPTION,
 					ActionStageOptions.ACTION_STAGE_EDIT_OPTION,
@@ -119,9 +127,9 @@ export class ActionStageCommand implements Command {
 				],
 			},
 			{
-				name: Language.LL.commands.actionStage.remove.name(),
-				description: Language.LL.commands.actionStage.remove.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				name: L.en.commands.actionStage.remove.name(),
+				description: L.en.commands.actionStage.remove.description(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [ActionStageOptions.ACTION_ROLL_TARGET_OPTION],
 			},
 		],
@@ -134,8 +142,9 @@ export class ActionStageCommand implements Command {
 
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
-		option: AutocompleteFocusedOption
-	): Promise<ApplicationCommandOptionChoiceData[]> {
+		option: AutocompleteFocusedOption,
+		services: InjectedServices
+	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 
 		let command = CommandUtils.getSubCommandByName(this.commands, intr.options.getSubcommand());
@@ -143,13 +152,13 @@ export class ActionStageCommand implements Command {
 			return;
 		}
 
-		return await command.autocomplete(intr, option);
+		return await command.autocomplete(intr, option, services);
 	}
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		services: InjectedServices
 	): Promise<void> {
 		if (!intr.isChatInputCommand()) return;
 		let command = CommandUtils.getSubCommandByName(this.commands, intr.options.getSubcommand());
@@ -157,9 +166,9 @@ export class ActionStageCommand implements Command {
 			return;
 		}
 
-		let passesChecks = await CommandUtils.runChecks(command, intr, data);
+		let passesChecks = await CommandUtils.runChecks(command, intr);
 		if (passesChecks) {
-			await command.execute(intr, data, LL);
+			await command.execute(intr, LL, services);
 		}
 	}
 }

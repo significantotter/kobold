@@ -1,103 +1,125 @@
-import { Language } from '../../../models/enum-helpers/language.js';
 import {
+	ApplicationCommandOptionChoiceData,
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
 	ChatInputCommandInteraction,
 	PermissionsString,
-	ApplicationCommandOptionChoiceData,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
-import { ModifierOptions } from './modifier-command-options.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
+import { ModifierOptions } from './modifier-command-options.js';
 
-import { EventData } from '../../../models/internal-models.js';
-import { CommandUtils, InteractionUtils } from '../../../utils/index.js';
+import L from '../../../i18n/i18n-node.js';
+import { CommandUtils } from '../../../utils/index.js';
+import { InjectedServices } from '../../command.js';
 import { Command, CommandDeferType } from '../../index.js';
 
 export class ModifierCommand implements Command {
-	public names = [Language.LL.commands.modifier.name()];
+	public names = [L.en.commands.modifier.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.modifier.name(),
-		description: Language.LL.commands.modifier.description(),
+		name: L.en.commands.modifier.name(),
+		description: L.en.commands.modifier.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 
 		options: [
 			{
-				name: Language.LL.commands.modifier.list.name(),
-				description: Language.LL.commands.modifier.list.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				name: L.en.commands.modifier.list.name(),
+				description: L.en.commands.modifier.list.description(),
+				type: ApplicationCommandOptionType.Subcommand,
 			},
 			{
-				name: Language.LL.commands.modifier.detail.name(),
-				description: Language.LL.commands.modifier.detail.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
-				options: [{ ...ModifierOptions.MODIFIER_NAME_OPTION, autocomplete: true }],
+				name: L.en.commands.modifier.detail.name(),
+				description: L.en.commands.modifier.detail.description(),
+				type: ApplicationCommandOptionType.Subcommand,
+				options: [
+					{
+						...ModifierOptions.MODIFIER_NAME_OPTION,
+						autocomplete: true,
+						choices: undefined,
+					},
+				],
 			},
 			{
-				name: Language.LL.commands.modifier.export.name(),
-				description: Language.LL.commands.modifier.export.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				name: L.en.commands.modifier.export.name(),
+				description: L.en.commands.modifier.export.description(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [],
 			},
 			{
-				name: Language.LL.commands.modifier.import.name(),
-				description: Language.LL.commands.modifier.import.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				name: L.en.commands.modifier.import.name(),
+				description: L.en.commands.modifier.import.description(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					ModifierOptions.MODIFIER_IMPORT_URL,
 					ModifierOptions.MODIFIER_IMPORT_MODE,
 				],
 			},
 			{
-				name: Language.LL.commands.modifier.createSheetModifier.name(),
-				description: Language.LL.commands.modifier.createSheetModifier.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				name: L.en.commands.modifier.createSheetModifier.name(),
+				description: L.en.commands.modifier.createSheetModifier.description(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					ModifierOptions.MODIFIER_NAME_OPTION,
-					ModifierOptions.MODIFIER_TYPE_OPTION,
 					ModifierOptions.MODIFIER_SHEET_VALUES_OPTION,
+					ModifierOptions.MODIFIER_TYPE_OPTION,
 					ModifierOptions.MODIFIER_DESCRIPTION_OPTION,
 				],
 			},
 			{
-				name: Language.LL.commands.modifier.createRollModifier.name(),
-				description: Language.LL.commands.modifier.createRollModifier.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				name: L.en.commands.modifier.createRollModifier.name(),
+				description: L.en.commands.modifier.createRollModifier.description(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					ModifierOptions.MODIFIER_NAME_OPTION,
-					ModifierOptions.MODIFIER_TYPE_OPTION,
 					ModifierOptions.MODIFIER_VALUE_OPTION,
 					ModifierOptions.MODIFIER_TARGET_TAGS_OPTION,
+					ModifierOptions.MODIFIER_TYPE_OPTION,
 					ModifierOptions.MODIFIER_DESCRIPTION_OPTION,
 				],
 			},
 			{
-				name: Language.LL.commands.modifier.toggle.name(),
-				description: Language.LL.commands.modifier.toggle.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
-				options: [{ ...ModifierOptions.MODIFIER_NAME_OPTION, autocomplete: true }],
+				name: L.en.commands.modifier.toggle.name(),
+				description: L.en.commands.modifier.toggle.description(),
+				type: ApplicationCommandOptionType.Subcommand,
+				options: [
+					{
+						...ModifierOptions.MODIFIER_NAME_OPTION,
+						autocomplete: true,
+						choices: undefined,
+					},
+				],
 			},
 			{
-				name: Language.LL.commands.modifier.update.name(),
-				description: Language.LL.commands.modifier.update.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
+				name: L.en.commands.modifier.update.name(),
+				description: L.en.commands.modifier.update.description(),
+				type: ApplicationCommandOptionType.Subcommand,
 				options: [
-					{ ...ModifierOptions.MODIFIER_NAME_OPTION, autocomplete: true },
+					{
+						...ModifierOptions.MODIFIER_NAME_OPTION,
+						autocomplete: true,
+						choices: undefined,
+					},
 					ModifierOptions.MODIFIER_SET_OPTION,
 					ModifierOptions.MODIFIER_SET_VALUE_OPTION,
 				],
 			},
 			{
-				name: Language.LL.commands.modifier.remove.name(),
-				description: Language.LL.commands.modifier.remove.description(),
-				type: ApplicationCommandOptionType.Subcommand.valueOf(),
-				options: [{ ...ModifierOptions.MODIFIER_NAME_OPTION, autocomplete: true }],
+				name: L.en.commands.modifier.remove.name(),
+				description: L.en.commands.modifier.remove.description(),
+				type: ApplicationCommandOptionType.Subcommand,
+				options: [
+					{
+						...ModifierOptions.MODIFIER_NAME_OPTION,
+						autocomplete: true,
+						choices: undefined,
+					},
+				],
 			},
 		],
 	};
@@ -109,8 +131,9 @@ export class ModifierCommand implements Command {
 
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
-		option: AutocompleteFocusedOption
-	): Promise<ApplicationCommandOptionChoiceData[]> {
+		option: AutocompleteFocusedOption,
+		services: InjectedServices
+	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 
 		const command = CommandUtils.getSubCommandByName(
@@ -121,13 +144,13 @@ export class ModifierCommand implements Command {
 			return;
 		}
 
-		return await command.autocomplete(intr, option);
+		return await command.autocomplete(intr, option, services);
 	}
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		services: InjectedServices
 	): Promise<void> {
 		if (!intr.isChatInputCommand()) return;
 		const command = CommandUtils.getSubCommandByName(
@@ -138,9 +161,9 @@ export class ModifierCommand implements Command {
 			return;
 		}
 
-		const passesChecks = await CommandUtils.runChecks(command, intr, data);
+		let passesChecks = await CommandUtils.runChecks(command, intr);
 		if (passesChecks) {
-			await command.execute(intr, data, LL);
+			await command.execute(intr, LL, services);
 		}
 	}
 }

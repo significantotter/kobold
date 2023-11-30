@@ -1,100 +1,103 @@
+import { GatewayIntentBits, Options, Partials, REST, disableValidators } from 'discord.js';
+import 'reflect-metadata';
 import './config/config.js';
-import { REST } from '@discordjs/rest';
-import { Options, GatewayIntentBits, Partials, disableValidators } from 'discord.js';
 
 import { Button } from './buttons/index.js';
 import {
+	// action
+	ActionCommand,
+	ActionCreateSubCommand,
+	ActionDetailSubCommand,
+	ActionEditSubCommand,
+	ActionExportSubCommand,
+	ActionImportSubCommand,
+	ActionListSubCommand,
+	ActionRemoveSubCommand,
+	ActionStageAddAdvancedDamageSubCommand,
+	ActionStageAddAttackSubCommand,
+	ActionStageAddBasicDamageSubCommand,
+	ActionStageAddSaveSubCommand,
+	ActionStageAddSkillChallengeSubCommand,
+	ActionStageAddTextSubCommand,
+	//action stage
+	ActionStageCommand,
+	ActionStageEditSubCommand,
+	ActionStageRemoveSubCommand,
+	// admin
+	AdminCommand,
 	// character
 	CharacterCommand,
+	CharacterImportPathbuilderSubCommand,
+	CharacterImportPasteBinSubCommand,
+	CharacterImportWanderersGuideSubCommand,
+	CharacterListSubCommand,
+	CharacterRemoveSubCommand,
 	CharacterSetActiveSubCommand,
 	CharacterSetDefaultSubCommand,
-	CharacterListSubCommand,
-	CharacterUpdateSubCommand,
-	CharacterRemoveSubCommand,
-	CharacterImportWanderersGuideSubCommand,
-	CharacterImportPathbuilderSubCommand,
 	CharacterSheetSubCommand,
-	// roll
-	RollCommand,
-	RollDiceSubCommand,
-	RollSkillSubCommand,
-	RollSaveSubCommand,
-	RollPerceptionSubCommand,
-	RollAbilitySubCommand,
-	RollAttackSubCommand,
-	RollActionSubCommand,
+	CharacterUpdateSubCommand,
+	// compendium
+	CompendiumCommand,
+	CompendiumSearchSubCommand,
+	// game
+	GameCommand,
+	GameInitSubCommand,
+	GameListSubCommand,
+	GameManageSubCommand,
+	GameRollSubCommand,
+	// gameplay
+	GameplayCommand,
+	GameplayDamageSubCommand,
+	GameplayRecoverSubCommand,
+	GameplaySetSubCommand,
+	GameplayTrackerSubCommand,
+	// help
+	HelpCommand,
+	InitAddSubCommand,
 	// init
 	InitCommand,
-	InitAddSubCommand,
-	InitSetSubCommand,
-	InitShowSubCommand,
-	InitStatBlockSubCommand,
-	InitRollSubCommand,
+	InitEndSubCommand,
+	InitJoinSubCommand,
+	InitJumpToSubCommand,
 	InitNextSubCommand,
 	InitPrevSubCommand,
-	InitJumpToSubCommand,
-	InitStartSubCommand,
-	InitJoinSubCommand,
 	InitRemoveSubCommand,
-	InitEndSubCommand,
+	InitRollSubCommand,
+	InitSetSubCommand,
+	InitShowSubCommand,
+	InitStartSubCommand,
+	InitStatBlockSubCommand,
 	// modifier
 	ModifierCommand,
 	ModifierCreateRollModifierSubCommand,
 	ModifierCreateSheetModifierSubCommand,
-	ModifierRemoveSubCommand,
-	ModifierListSubCommand,
 	ModifierDetailSubCommand,
 	ModifierExportSubCommand,
 	ModifierImportSubCommand,
-	ModifierUpdateSubCommand,
+	ModifierListSubCommand,
+	ModifierRemoveSubCommand,
 	ModifierToggleSubCommand,
-	// game
-	GameCommand,
-	GameManageSubCommand,
-	GameRollSubCommand,
-	GameInitSubCommand,
-	GameListSubCommand,
-	// gameplay
-	GameplayCommand,
-	GameplayDamageSubCommand,
-	GameplaySetSubCommand,
-	GameplayRecoverSubCommand,
-	GameplayTrackerSubCommand,
-	// action
-	ActionCommand,
-	ActionListSubCommand,
-	ActionDetailSubCommand,
-	ActionCreateSubCommand,
-	ActionRemoveSubCommand,
-	ActionEditSubCommand,
-	ActionImportSubCommand,
-	ActionExportSubCommand,
-	//action stage
-	ActionStageCommand,
-	ActionStageAddAttackSubCommand,
-	ActionStageAddSkillChallengeSubCommand,
-	ActionStageAddSaveSubCommand,
-	ActionStageAddTextSubCommand,
-	ActionStageAddBasicDamageSubCommand,
-	ActionStageAddAdvancedDamageSubCommand,
-	ActionStageEditSubCommand,
-	ActionStageRemoveSubCommand,
+	ModifierUpdateSubCommand,
+	RollActionSubCommand,
+	RollAttackSubCommand,
+	// roll
+	RollCommand,
+	RollDiceSubCommand,
 	// roll macro
 	RollMacroCommand,
-	RollMacroListSubCommand,
 	RollMacroCreateSubCommand,
-	RollMacroUpdateSubCommand,
+	RollMacroListSubCommand,
 	RollMacroRemoveSubCommand,
+	RollMacroUpdateSubCommand,
+	RollPerceptionSubCommand,
+	RollSaveSubCommand,
+	RollSkillSubCommand,
 	// settings
 	SettingsCommand,
 	SettingsSetSubCommand,
-
-	// help
-	HelpCommand,
-	// admin
-	AdminCommand,
 } from './commands/chat/index.js';
 import { Command } from './commands/index.js';
+import { Config } from './config/config.js';
 import {
 	ButtonHandler,
 	CommandHandler,
@@ -105,29 +108,34 @@ import {
 	TriggerHandler,
 } from './events/index.js';
 import { CustomClient } from './extensions/index.js';
-import { Job } from './jobs/index.js';
 import { Bot } from './models/bot.js';
 import { Reaction } from './reactions/index.js';
-import { CommandRegistrationService, DBModel, JobService, Logger } from './services/index.js';
+import { getDialect } from './services/db.dialect.js';
+import { CommandRegistrationService, JobService, Logger } from './services/index.js';
+import { Job } from './services/job-service.js';
+import { Kobold } from './services/kobold/index.js';
+import { CompendiumModel } from './services/pf2etools/compendium.model.js';
+import { db } from './services/pf2etools/pf2eTools.db.js';
 import { Trigger } from './triggers/index.js';
-import { Config } from './config/config.js';
-import Logs from './config/lang/logs.json' assert { type: 'json' };
-import { checkAndLoadBestiaryFiles } from './services/pf2etools/bestiaryLoader.js';
 
 // this is to prevent embeds breaking on "addFields" when adding more than an embed can hold
 // because we batch our embeds afterwards instead of before assigning fields
 disableValidators();
 
 async function start(): Promise<void> {
-	DBModel.init(Config.database.url);
+	const PostgresDialect = getDialect(Config.database.url);
+	const kobold = new Kobold(PostgresDialect);
 
-	// asynchronously load the bestiary files
-	checkAndLoadBestiaryFiles();
+	const compendium = new CompendiumModel(db);
 
 	// Client
 	let client = new CustomClient({
-		intents: (Config.client.intents as string[]).map(intent => GatewayIntentBits[intent]),
-		partials: (Config.client.partials as string[]).map(partial => Partials[partial]),
+		intents: (Config.client.intents as string[]).map(
+			intent => GatewayIntentBits[intent as keyof typeof GatewayIntentBits]
+		),
+		partials: (Config.client.partials as string[]).map(
+			partial => Partials[partial as keyof typeof Partials]
+		),
 		makeCache: Options.cacheWithLimits({
 			// Keep default caching behavior
 			...Options.DefaultMakeCacheSettings,
@@ -152,9 +160,13 @@ async function start(): Promise<void> {
 			new CharacterSetDefaultSubCommand(),
 			new CharacterImportWanderersGuideSubCommand(),
 			new CharacterImportPathbuilderSubCommand(),
+			new CharacterImportPasteBinSubCommand(),
 			new CharacterUpdateSubCommand(),
 			new CharacterRemoveSubCommand(),
 		]),
+
+		// Compendium Commands
+		new CompendiumCommand([new CompendiumSearchSubCommand()]),
 
 		//Roll Commands
 		new RollCommand([
@@ -164,7 +176,6 @@ async function start(): Promise<void> {
 			new RollSkillSubCommand(),
 			new RollSaveSubCommand(),
 			new RollPerceptionSubCommand(),
-			new RollAbilitySubCommand(),
 		]),
 
 		// Init commands
@@ -262,7 +273,7 @@ async function start(): Promise<void> {
 	// Event handlers
 	let guildJoinHandler = new GuildJoinHandler();
 	let guildLeaveHandler = new GuildLeaveHandler();
-	let commandHandler = new CommandHandler(commands);
+	let commandHandler = new CommandHandler(commands, { compendium, kobold });
 	let buttonHandler = new ButtonHandler(buttons);
 	let triggerHandler = new TriggerHandler(triggers);
 	let messageHandler = new MessageHandler(triggerHandler);
@@ -293,7 +304,7 @@ async function start(): Promise<void> {
 			let commandRegistrationService = new CommandRegistrationService(rest);
 			await commandRegistrationService.process(commands, process.argv);
 		} catch (error) {
-			Logger.error(Logs.error.commandAction, error);
+			Logger.error('An error occurred while running a command action.', error);
 		}
 		process.exit();
 	}
@@ -302,9 +313,9 @@ async function start(): Promise<void> {
 }
 
 process.on('unhandledRejection', (reason, _promise) => {
-	Logger.error(Logs.error.unhandledRejection, reason);
+	Logger.error('An unhandled promise rejection occurred.', reason);
 });
 
 start().catch(error => {
-	Logger.error(Logs.error.unspecified, error);
+	Logger.error('An unspecified error occurred', error);
 });

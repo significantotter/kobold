@@ -1,33 +1,36 @@
 import {
+	ApplicationCommandOptionChoiceData,
 	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
 	ChatInputCommandInteraction,
 	PermissionsString,
-	ApplicationCommandOptionChoiceData,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 
 import { SettingsOptions } from './settings-command-options.js';
-import { EventData } from '../../../models/internal-models.js';
-import { Command, CommandDeferType } from '../../index.js';
-import { Language } from '../../../models/enum-helpers/index.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { InteractionUtils } from '../../../utils/interaction-utils.js';
-import { AutocompleteUtils } from '../../../utils/autocomplete-utils.js';
+
 import _ from 'lodash';
-import { SettableSheetOption } from '../../../utils/creature.js';
-import { InitiativeActor, UserSettings } from '../../../services/kobold/models/index.js';
-import { GameUtils } from '../../../utils/game-utils.js';
+import L from '../../../i18n/i18n-node.js';
+import { TranslationFunctions } from '../../../i18n/i18n-types.js';
+import {
+	Kobold,
+	UserSettings,
+	isInitStatsNotificationEnum,
+	isInlineRollsDisplayEnum,
+} from '../../../services/kobold/index.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
+import { InteractionUtils } from '../../../utils/interaction-utils.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { Command, CommandDeferType } from '../../index.js';
 
 export class SettingsSetSubCommand implements Command {
-	public names = [Language.LL.commands.settings.set.name()];
+	public names = [L.en.commands.settings.set.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.settings.set.name(),
-		description: Language.LL.commands.settings.set.description(),
+		name: L.en.commands.settings.set.name(),
+		description: L.en.commands.settings.set.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -36,8 +39,9 @@ export class SettingsSetSubCommand implements Command {
 
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
-		option: AutocompleteFocusedOption
-	): Promise<ApplicationCommandOptionChoiceData[]> {
+		option: AutocompleteFocusedOption,
+		{ kobold }: { kobold: Kobold }
+	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (
 			option.name === SettingsOptions.SETTINGS_SET_VALUE.name &&
@@ -62,51 +66,48 @@ export class SettingsSetSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
-		const option = intr.options.getString(SettingsOptions.SETTINGS_SET_OPTION.name);
-		const value = intr.options.getString(SettingsOptions.SETTINGS_SET_VALUE.name);
+		const option = intr.options.getString(SettingsOptions.SETTINGS_SET_OPTION.name, true);
+		const value = intr.options.getString(SettingsOptions.SETTINGS_SET_VALUE.name, true);
+
+		const koboldUtils = new KoboldUtils(kobold);
+		const { userSettings } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+			userSettings: true,
+		});
 
 		// validate
 		let trimmedOptionName = _.camelCase(option.trim());
-		let settingDbName: string;
-		let parsedValue: string;
+		let settingDbName: keyof UserSettings;
+		let parsedValue = value.replaceAll(' ', '_');
+
+		const updates: Partial<UserSettings> = {};
 
 		if (trimmedOptionName === 'initiativeTrackerNotifications') {
 			settingDbName = 'initStatsNotification';
-			if (!['never', 'every turn', 'every round', 'whenever hidden'].includes(value)) {
+			if (!isInitStatsNotificationEnum(parsedValue)) {
 				throw new KoboldError(
 					'Yip! The value for "initiative-tracker-notifications" must be one of "never", ' +
 						'"every turn", "every round", or "whenever hidden".'
 				);
 			}
-			parsedValue = value.replaceAll(' ', '_');
+			updates.initStatsNotification = parsedValue;
 		} else if (trimmedOptionName === 'inlineRollsDisplay') {
 			settingDbName = 'inlineRollsDisplay';
-			if (!['compact', 'detailed'].includes(value)) {
+			if (!isInlineRollsDisplayEnum(parsedValue)) {
 				throw new KoboldError(
 					'Yip! The value for "inline-rolls-display" must be one of "compact", or "detailed".'
 				);
 			}
-			parsedValue = value.replaceAll(' ', '_');
+			updates.inlineRollsDisplay = parsedValue;
 		} else {
 			throw new KoboldError(`Yip! "${option}" is not a valid option.`);
 		}
 
 		// fetch the value to determine whether to insert or update
-		const existingSetting = await UserSettings.query().findOne({ userId: intr.user.id });
 
-		let result;
-		if (existingSetting) {
-			existingSetting[settingDbName] = parsedValue;
-			result = await existingSetting.$query().patch();
-		} else {
-			result = await UserSettings.query().insert({
-				userId: intr.user.id,
-				[settingDbName]: parsedValue,
-			});
-		}
+		await kobold.userSettings.upsert({ ...userSettings, ...updates });
 
 		await InteractionUtils.send(intr, `Yip! "${option}" has been set to "${value}".`);
 	}

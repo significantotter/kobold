@@ -1,27 +1,26 @@
-import { KoboldEmbed } from './../../../utils/kobold-embed-utils.js';
 import {
 	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 	ChatInputCommandInteraction,
 	PermissionsString,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 
-import { EventData } from '../../../models/internal-models.js';
-import { InteractionUtils } from '../../../utils/index.js';
-import { Command, CommandDeferType } from '../../index.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { Language } from '../../../models/enum-helpers/index.js';
-import { CharacterUtils } from '../../../utils/character-utils.js';
-import { PasteBin } from '../../../services/pastebin/index.js';
 import { Config } from '../../../config/config.js';
+import L from '../../../i18n/i18n-node.js';
+import { TranslationFunctions } from '../../../i18n/i18n-types.js';
+import { Kobold } from '../../../services/kobold/kobold.model.js';
+import { PasteBin } from '../../../services/pastebin/index.js';
+import { InteractionUtils } from '../../../utils/index.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { Command, CommandDeferType } from '../../index.js';
 
 export class ModifierExportSubCommand implements Command {
-	public names = [Language.LL.commands.modifier.export.name()];
+	public names = [L.en.commands.modifier.export.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.modifier.export.name(),
-		description: Language.LL.commands.modifier.export.description(),
+		name: L.en.commands.modifier.export.name(),
+		description: L.en.commands.modifier.export.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -31,28 +30,24 @@ export class ModifierExportSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
-		if (!activeCharacter) {
-			await InteractionUtils.send(
-				intr,
-				LL.commands.character.interactions.noActiveCharacter()
-			);
-			return;
-		}
-		const modifiers = activeCharacter.modifiers;
+		const koboldUtils = new KoboldUtils(kobold);
+		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+			activeCharacter: true,
+		});
+		const modifiers = activeCharacter.sheetRecord.modifiers;
 
 		const pastebinPost = await new PasteBin({ apiKey: Config.pastebin.apiKey }).post({
 			code: JSON.stringify(modifiers),
-			name: `${activeCharacter.sheet.info.name}'s Modifiers`,
+			name: `${activeCharacter.name}'s Modifiers`,
 		});
 
 		await InteractionUtils.send(
 			intr,
 			LL.commands.modifier.export.interactions.success({
-				characterName: activeCharacter.sheet.info.name,
+				characterName: activeCharacter.name,
 				pasteBinLink: pastebinPost,
 			})
 		);

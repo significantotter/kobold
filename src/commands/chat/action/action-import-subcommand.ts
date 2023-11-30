@@ -1,38 +1,35 @@
-import { Character, Game, GuildDefaultCharacter } from '../../../services/kobold/models/index.js';
 import {
 	ApplicationCommandType,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 	ChatInputCommandInteraction,
 	PermissionsString,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
+import { Action, zAction } from '../../../services/kobold/index.js';
 
-import { EventData } from '../../../models/internal-models.js';
-import { InteractionUtils } from '../../../utils/index.js';
-import { Command, CommandDeferType } from '../../index.js';
-import { Language } from '../../../models/enum-helpers/index.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import Ajv from 'ajv';
-import addFormats from 'ajv-formats';
-import { compileExpression } from 'filtrex';
 import _ from 'lodash';
+import { z } from 'zod';
+import L from '../../../i18n/i18n-node.js';
+import { TranslationFunctions } from '../../../i18n/i18n-types.js';
+import { Kobold } from '../../../services/kobold/index.js';
 import { PasteBin } from '../../../services/pastebin/index.js';
-import { CharacterUtils } from '../../../utils/character-utils.js';
 import {
-	replaceAll,
+	ignoreOnConflict,
 	overwriteOnConflict,
 	renameOnConflict,
-	ignoreOnConflict,
+	replaceAll,
 } from '../../../utils/import-utils.js';
+import { InteractionUtils } from '../../../utils/index.js';
+import { TextParseHelpers } from '../../../utils/kobold-helpers/text-parse-helpers.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { Command, CommandDeferType } from '../../index.js';
 import { ActionOptions } from '../action/action-command-options.js';
-import characterSchema from './../../../services/kobold/models/character/character.schema.json' assert { type: 'json' };
-const ajv = new Ajv.default({ allowUnionTypes: true });
 
 export class ActionImportSubCommand implements Command {
-	public names = [Language.LL.commands.action.import.name()];
+	public names = [L.en.commands.action.import.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: Language.LL.commands.action.import.name(),
-		description: Language.LL.commands.action.import.description(),
+		name: L.en.commands.action.import.name(),
+		description: L.en.commands.action.import.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -41,33 +38,30 @@ export class ActionImportSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		data: EventData,
-		LL: TranslationFunctions
+		LL: TranslationFunctions,
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
-		const activeCharacter = await CharacterUtils.getActiveCharacter(intr);
-		if (!activeCharacter) {
-			await InteractionUtils.send(
-				intr,
-				LL.commands.character.interactions.noActiveCharacter()
-			);
-			return;
-		}
+		const koboldUtils = new KoboldUtils(kobold);
+		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+			activeCharacter: true,
+		});
+
 		let importMode = intr.options
-			.getString(ActionOptions.ACTION_IMPORT_MODE_OPTION.name)
+			.getString(ActionOptions.ACTION_IMPORT_MODE_OPTION.name, true)
 			.trim()
 			.toLowerCase();
-		let importUrl = (
-			intr.options.getString(ActionOptions.ACTION_IMPORT_URL_OPTION.name) ?? ''
-		).trim();
+		let importUrl = intr.options
+			.getString(ActionOptions.ACTION_IMPORT_URL_OPTION.name, true)
+			.trim();
 
-		const importId = CharacterUtils.parsePastebinIdFromText(importUrl);
+		const importId = TextParseHelpers.parsePasteBinIdFromText(importUrl);
 
 		if (!importId) {
 			await InteractionUtils.send(intr, LL.commands.action.import.interactions.badUrl());
 			return;
 		}
 
-		let newActions: Character['actions'] = [];
+		let newActions: Action[] = [];
 
 		let invalidJson = false;
 		try {
@@ -77,10 +71,7 @@ export class ActionImportSubCommand implements Command {
 			} else {
 				newActions = JSON.parse(actionsText);
 			}
-			const valid = ajv.validate(characterSchema.properties.actions, newActions);
-			if (!valid) {
-				invalidJson = true;
-			}
+			newActions = z.array(zAction).parse(newActions);
 		} catch (err) {
 			console.warn(err);
 			invalidJson = true;
@@ -92,26 +83,20 @@ export class ActionImportSubCommand implements Command {
 			);
 			return;
 		}
-		const currentActions = activeCharacter.actions;
+		const currentActions = activeCharacter.sheetRecord.actions;
 
-		let finalActions: Character['actions'] = [];
+		let finalActions: Action[] = [];
 
-		if (
-			importMode === Language.LL.commandOptions.actionImportMode.choices.fullyReplace.value()
-		) {
+		if (importMode === L.en.commandOptions.actionImportMode.choices.fullyReplace.value()) {
 			finalActions = replaceAll(currentActions, newActions);
-		} else if (
-			importMode === Language.LL.commandOptions.actionImportMode.choices.overwrite.value()
-		) {
+		} else if (importMode === L.en.commandOptions.actionImportMode.choices.overwrite.value()) {
 			finalActions = overwriteOnConflict(currentActions, newActions);
 		} else if (
-			importMode ===
-			Language.LL.commandOptions.actionImportMode.choices.renameOnConflict.value()
+			importMode === L.en.commandOptions.actionImportMode.choices.renameOnConflict.value()
 		) {
 			finalActions = renameOnConflict(currentActions, newActions);
 		} else if (
-			importMode ===
-			Language.LL.commandOptions.actionImportMode.choices.ignoreOnConflict.value()
+			importMode === L.en.commandOptions.actionImportMode.choices.ignoreOnConflict.value()
 		) {
 			finalActions = ignoreOnConflict(currentActions, newActions);
 		} else {
@@ -123,9 +108,10 @@ export class ActionImportSubCommand implements Command {
 			return;
 		}
 
-		await Character.query().patchAndFetchById(activeCharacter.id, {
-			actions: finalActions,
-		});
+		await kobold.sheetRecord.update(
+			{ id: activeCharacter.sheetRecordId },
+			{ actions: finalActions }
+		);
 
 		await InteractionUtils.send(
 			intr,
