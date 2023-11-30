@@ -320,6 +320,7 @@ export const zSheetV1 = z
 					.optional()
 					.describe("The character's charisma score."),
 			})
+			.optional()
 			.describe("The character's primary ability scores."),
 		general: z
 			.object({
@@ -392,6 +393,7 @@ export const zSheetV1 = z
 				languages: z.array(z.string()).describe("The character's spoken languages."),
 				senses: z.array(z.string()).describe("The character's senses."),
 			})
+			.optional()
 			.describe('The general attributes for the character.'),
 		defenses: z
 			.object({
@@ -483,6 +485,7 @@ export const zSheetV1 = z
 					.optional()
 					.describe("The character's unarmored proficiency modifier."),
 			})
+			.optional()
 			.describe('The character defensive attributes.'),
 		offense: z
 			.object({
@@ -511,6 +514,7 @@ export const zSheetV1 = z
 					.optional()
 					.describe("The character's advanced weapon proficiency modifier."),
 			})
+			.optional()
 			.describe("The character's offensive attributes."),
 		castingStats: z
 			.object({
@@ -587,6 +591,7 @@ export const zSheetV1 = z
 					.optional()
 					.describe("The character's primal casting proficiency modifier."),
 			})
+			.optional()
 			.describe("The character's casting stats."),
 		saves: z
 			.object({
@@ -612,6 +617,7 @@ export const zSheetV1 = z
 					.optional()
 					.describe("The character's will proficiency modifier."),
 			})
+			.optional()
 			.describe("The character's saving throw attributes."),
 		skills: z
 			.object({
@@ -821,8 +827,9 @@ export const zSheetV1 = z
 					)
 					.describe("The character's lore skills."),
 			})
+			.optional()
 			.describe("The character's skill attributes."),
-		attacks: z.array(zAttackV1).describe("The character's attacks."),
+		attacks: z.array(zAttackV1).describe("The character's attacks.").default([]),
 		sourceData: z.object({}).describe('The source data the sheet was parsed from').default({}),
 		modifiers: z
 			.array(zModifierV1)

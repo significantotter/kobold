@@ -214,6 +214,97 @@ export function upgradeSheet(sheet: SheetV1): Sheet {
 		? sheet.info.keyability
 		: null;
 
+	if (!sheet.abilities) {
+		sheet.abilities = {
+			strength: null,
+			dexterity: null,
+			constitution: null,
+			intelligence: null,
+			wisdom: null,
+			charisma: null,
+		};
+	}
+	if (!sheet.general) {
+		sheet.general = {
+			speed: null,
+			flySpeed: null,
+			swimSpeed: null,
+			climbSpeed: null,
+			currentHeroPoints: null,
+			currentFocusPoints: null,
+			focusPoints: null,
+			perception: null,
+			classAttack: null,
+			languages: [],
+			senses: [],
+		};
+	}
+	if (!sheet.defenses) {
+		sheet.defenses = {
+			immunities: [],
+			resistances: [],
+			weaknesses: [],
+			currentStamina: null,
+			maxStamina: null,
+			currentResolve: null,
+			maxResolve: null,
+			ac: null,
+			maxHp: null,
+			currentHp: null,
+		};
+	}
+	if (!sheet.offense) {
+		sheet.offense = {
+			martialProfMod: null,
+			simpleProfMod: null,
+			unarmedProfMod: null,
+			advancedProfMod: null,
+		};
+	}
+	if (!sheet.castingStats) {
+		sheet.castingStats = {
+			arcaneAttack: null,
+			arcaneProfMod: null,
+			divineAttack: null,
+			divineProfMod: null,
+			occultAttack: null,
+			occultProfMod: null,
+			primalAttack: null,
+			primalProfMod: null,
+		};
+	}
+	if (!sheet.skills) {
+		sheet.skills = {
+			acrobatics: null,
+			arcana: null,
+			athletics: null,
+			crafting: null,
+			deception: null,
+			diplomacy: null,
+			intimidation: null,
+			medicine: null,
+			nature: null,
+			occultism: null,
+			performance: null,
+			religion: null,
+			society: null,
+			stealth: null,
+			survival: null,
+			thievery: null,
+			lores: [],
+		};
+	}
+	if (!sheet.saves) {
+		sheet.saves = {
+			fortitude: null,
+			reflex: null,
+			will: null,
+			fortitudeProfMod: null,
+			reflexProfMod: null,
+			willProfMod: null,
+		};
+	}
+
 	const level = defaultedSheet.info.level ?? 0;
 	const abilities = {
 		strength: sheet.abilities.strength ? scoreToModifier(sheet.abilities.strength) : 0,
