@@ -173,7 +173,7 @@ export class RollActionSubCommand implements Command {
 			targetDC,
 		});
 
-		if (targetCreature && targetSheetRecord) {
+		if (targetCreature && targetSheetRecord && actionRoller.shouldDisplayDamageText()) {
 			// apply any effects from the action to the creature
 			await creatureUtils.saveSheet(intr, {
 				...targetSheetRecord,
