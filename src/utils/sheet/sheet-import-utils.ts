@@ -876,10 +876,6 @@ export function convertPathBuilderToSheet(
 
 	let statKey: keyof PathBuilder.Proficiencies;
 	for (statKey in pathBuilderSheet.proficiencies) {
-		const statBonus =
-			pathBuilderProfToScore(pathBuilderSheet.proficiencies[statKey]) +
-			baseSheet.intProperties.dexterity +
-			mods(statKey);
 		const statProfMod = pathBuilderSheet.proficiencies[statKey] ?? 0;
 		let stat: ProficiencyStat | undefined = undefined;
 
@@ -907,7 +903,13 @@ export function convertPathBuilderToSheet(
 			};
 			baseSheet.additionalSkills.push(stat);
 		}
-		if (stat) applyValuesToStatInPlace(baseSheet, stat, statBonus, null, statProfMod);
+		if (!stat) continue;
+		const statBonus =
+			pathBuilderProfToScore(pathBuilderSheet.proficiencies[statKey]) +
+			(baseSheet.intProperties[stat.ability ?? AbilityEnum.intelligence] ?? 0) +
+			mods(statKey);
+
+		applyValuesToStatInPlace(baseSheet, stat, statBonus, null, statProfMod);
 	}
 
 	const sheet: Sheet = {
