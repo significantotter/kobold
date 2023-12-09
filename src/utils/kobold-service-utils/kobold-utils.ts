@@ -97,14 +97,14 @@ export class KoboldUtils {
 				activeGame,
 				currentInitiative,
 			},
-			_.identity()
+			val => val !== undefined
 		) as { [k in keyof T]: k extends keyof InjectedData ? InjectedData[k] : never };
 	}
 	public async fetchNonNullableDataForCommand<T extends InjectableCommandData>(
 		intr: Interaction,
 		usesData: T
 	) {
-		return this.fetchDataForCommand(intr, usesData).then(data => {
+		return await this.fetchDataForCommand(intr, usesData).then(data => {
 			this.assertDataNotNull(data);
 			return data;
 		});
@@ -126,27 +126,25 @@ export class KoboldUtils {
 		data: InjectedData['activeCharacter'] | null
 	): asserts data is NonNullable<InjectedData['activeCharacter']> {
 		if (data == null)
-			throw new KoboldError(
-				"Yip! You don't have any active characters! Use /import to import one."
-			);
+			throw new KoboldError("Yip! You don't have any characters! Use /import to import one.");
 	}
 
 	public assertActiveGameNotNull(
 		data: InjectedData['activeGame'] | null
 	): asserts data is NonNullable<InjectedData['activeGame']> {
 		if (data == null)
-			throw new KoboldError('Yip! You must have an active character to use this command.');
+			throw new KoboldError('Yip! You must have an active game to use this command.');
 	}
 
 	public assertCurrentInitiativeNotNull(
 		data: InjectedData['currentInitiative'] | null
 	): asserts data is NonNullable<InjectedData['currentInitiative']> {
 		if (data == null)
-			throw new KoboldError('Yip! You must have an active character to use this command.');
+			throw new KoboldError('Yip! You must be in an initiative to use this command.');
 	}
 
 	public assertOwnedCharactersNotEmpty(data: InjectedData['ownedCharacters'] | null) {
 		if (data == null)
-			throw new KoboldError('Yip! You must have an active character to use this command.');
+			throw new KoboldError("Yip! You don't have any characters! Use /import to import one.");
 	}
 }
