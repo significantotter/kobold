@@ -760,7 +760,8 @@ export function convertPathBuilderToSheet(
 	};
 
 	const trimmedKeyAbility = pathBuilderSheet.keyability.trim().toLowerCase();
-	const keyAbility = isAbilityEnum(trimmedKeyAbility) ? trimmedKeyAbility : null;
+	const standardizedAbility = SheetProperties.abilityFromAlias[trimmedKeyAbility];
+	const keyAbility = isAbilityEnum(standardizedAbility) ? standardizedAbility : null;
 
 	// these are modifying values from different sources for certain stats
 	// for example, item bonuses to skills
@@ -776,6 +777,8 @@ export function convertPathBuilderToSheet(
 	};
 
 	const baseSheet = SheetProperties.defaultSheet;
+	baseSheet.stats.class.ability = keyAbility;
+
 	baseSheet.intProperties.strength =
 		scoreToBonus(pathBuilderSheet.abilities.str) + mods('strength');
 	baseSheet.intProperties.dexterity =
@@ -869,7 +872,7 @@ export function convertPathBuilderToSheet(
 	applyValuesToStatInPlace(
 		baseSheet,
 		baseSheet.stats.class,
-		keyAbilityBonus,
+		null,
 		null,
 		pathBuilderSheet.proficiencies.classDC ?? null
 	);
