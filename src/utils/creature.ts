@@ -225,6 +225,10 @@ export class Creature {
 			gameplayInfoLines.push(`Traits: ${this.sheet.infoLists.traits.join(', ')}`);
 		if (this.sheet.info.background)
 			gameplayInfoLines.push(`Background: ${this.sheet.info.background}`);
+		if (this.sheet.infoLists.languages.length)
+			gameplayInfoLines.push(`Languages: ${this.sheet.infoLists.languages.join(', ')}`);
+		if (this.sheet.infoLists.senses.length)
+			gameplayInfoLines.push(`Senses: ${this.sheet.infoLists.senses.join(', ')}`);
 		return gameplayInfoLines.join('\n');
 	}
 
