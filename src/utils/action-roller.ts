@@ -695,7 +695,8 @@ export class ActionRoller {
 
 		// Determine if there's applied damage
 		let appliedDamage = 0;
-		if (lastTargetingActionType !== 'none' && lastTargetingResult) {
+		// If we have a prior action result, we apply the damage based on the result
+		if (lastTargetingActionType !== 'none') {
 			if (lastTargetingResult === 'critical success') {
 				appliedDamage = critSuccessDamageResult?.results?.total || 0;
 			}
@@ -714,8 +715,14 @@ export class ActionRoller {
 			if (lastTargetingResult === 'critical failure') {
 				appliedDamage = critFailureDamageResult?.results?.total || 0;
 			}
+		} else {
+			//Otherwise just use all of the results
+			appliedDamage =
+				(critSuccessDamageResult?.results?.total || 0) +
+				(damageResult?.results?.total || 0) +
+				(appliedDamage = failureDamageResult?.results?.total || 0) +
+				(appliedDamage = critFailureDamageResult?.results?.total || 0);
 		}
-
 		// update the extra attributes for the next roll
 		extraAttributes[`roll${rollCounter}`] = {
 			name: `roll${rollCounter}`,

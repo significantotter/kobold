@@ -68,6 +68,7 @@ export class ActionStageCommand implements Command {
 					ActionStageOptions.ACTION_TARGET_OPTION,
 					ActionStageOptions.ACTION_ROLL_NAME_OPTION,
 					ActionStageOptions.ACTION_BASIC_DAMAGE_DICE_ROLL_OPTION,
+					ActionStageOptions.ACTION_STAGE_DAMAGE_TYPE,
 					ActionStageOptions.ACTION_ROLL_ALLOW_MODIFIERS,
 					ActionStageOptions.ACTION_ROLL_HEAL_INSTEAD_OF_DAMAGE,
 				],
@@ -79,6 +80,7 @@ export class ActionStageCommand implements Command {
 				options: [
 					ActionStageOptions.ACTION_TARGET_OPTION,
 					ActionStageOptions.ACTION_ROLL_NAME_OPTION,
+					ActionStageOptions.ACTION_STAGE_DAMAGE_TYPE,
 					ActionStageOptions.ACTION_SUCCESS_DICE_ROLL_OPTION,
 					ActionStageOptions.ACTION_CRITICAL_SUCCESS_DICE_ROLL_OPTION,
 					ActionStageOptions.ACTION_CRITICAL_FAILURE_DICE_ROLL_OPTION,

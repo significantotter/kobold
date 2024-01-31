@@ -186,7 +186,7 @@ export class ActionStageOptions {
 	public static readonly ACTION_STAGE_DAMAGE_TYPE: APIApplicationCommandBasicOption = {
 		name: L.en.commandOptions.actionStageDamageType.name(),
 		description: L.en.commandOptions.actionStageDamageType.description(),
-		required: false,
+		required: true,
 		type: ApplicationCommandOptionType.String,
 	};
 	public static readonly ACTION_BASIC_DAMAGE_DICE_ROLL_OPTION: APIApplicationCommandBasicOption =

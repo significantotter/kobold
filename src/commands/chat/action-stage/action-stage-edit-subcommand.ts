@@ -219,6 +219,7 @@ export class ActionStageEditSubCommand implements Command {
 			if (
 				![
 					'name',
+					'damageType',
 					'successRoll',
 					'failureRoll',
 					'criticalSuccessRoll',
