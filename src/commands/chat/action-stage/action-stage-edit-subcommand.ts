@@ -119,6 +119,7 @@ export class ActionStageEditSubCommand implements Command {
 			} else if (roll.type === 'advanced-damage') {
 				validEditOptions = [
 					'name',
+					'damageType',
 					'advancedDamageSuccessRoll',
 					'advancedDamageFailureRoll',
 					'advancedDamageCritSuccessRoll',
