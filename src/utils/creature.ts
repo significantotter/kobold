@@ -126,9 +126,9 @@ export class Creature {
 
 	public statIsUnset(stat: ProficiencyStat): boolean {
 		return (
-			stat.bonus === null ||
-			stat.dc === null ||
-			(stat.proficiency === null && stat.ability === null)
+			stat.bonus === null &&
+			stat.dc === null &&
+			(stat.proficiency === null || stat.ability === null)
 		);
 	}
 
@@ -255,13 +255,14 @@ export class Creature {
 	}
 	public sheetSkillText(includeTitle: boolean = true): string {
 		const title = includeTitle ? 'Skills: ' : '';
-		const skillTextLines = [];
+		let skillTextLines = [];
 		for (const skill of this.skills.sort((a, b) =>
 			a.name.toString().localeCompare(b.name.toString())
 		)) {
 			//avoid null values
 			skillTextLines.push(this.generateStatBonusText(skill));
 		}
+		skillTextLines = skillTextLines.filter(_.identity);
 		return skillTextLines.length ? `${title}${skillTextLines.join('\n')}` : '';
 	}
 	public sheetCastingStatText(includeTitle: boolean = true): string {
@@ -386,9 +387,10 @@ export class Creature {
 		if (skillText) {
 			const skillBatches = _.chunk(skillText.split('\n'), 7);
 			for (const skillGroup of skillBatches) {
-				sheetEmbed.addFields([
-					{ name: 'Skills', value: skillGroup.join('\n'), inline: true },
-				]);
+				if (skillGroup.length)
+					sheetEmbed.addFields([
+						{ name: 'Skills', value: skillGroup.join('\n'), inline: true },
+					]);
 			}
 		}
 		return sheetEmbed;
