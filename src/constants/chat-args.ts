@@ -27,6 +27,24 @@ export class ChatArgs {
 		required: true,
 		type: ApplicationCommandOptionType.String,
 	};
+	public static readonly ROLL_OVERWRITE_ATTACK_OPTION: APIApplicationCommandBasicOption = {
+		name: L.en.commandOptions.rollOverwriteAttack.name(),
+		description: L.en.commandOptions.rollOverwriteAttack.description(),
+		required: false,
+		type: ApplicationCommandOptionType.String,
+	};
+	public static readonly ROLL_OVERWRITE_SAVE_OPTION: APIApplicationCommandBasicOption = {
+		name: L.en.commandOptions.rollOverwriteSave.name(),
+		description: L.en.commandOptions.rollOverwriteSave.description(),
+		required: false,
+		type: ApplicationCommandOptionType.String,
+	};
+	public static readonly ROLL_OVERWRITE_DAMAGE_OPTION: APIApplicationCommandBasicOption = {
+		name: L.en.commandOptions.rollOverwriteDamage.name(),
+		description: L.en.commandOptions.rollOverwriteDamage.description(),
+		required: false,
+		type: ApplicationCommandOptionType.String,
+	};
 	public static readonly ROLL_SECRET_OPTION: APIApplicationCommandBasicOption = {
 		name: L.en.commandOptions.rollSecret.name(),
 		description: L.en.commandOptions.rollSecret.description(),

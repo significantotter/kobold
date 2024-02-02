@@ -290,6 +290,15 @@ export function convertBestiaryCreatureToSheet(
 				.map(result => result.type)
 		);
 
+		let damageChallengeAdjustment = challengeAdjustment * 2;
+		let damageChallengeText =
+			damageChallengeAdjustment > 0
+				? `+${damageChallengeAdjustment}`
+				: damageChallengeAdjustment.toString();
+		if (damageRolls.length > 0 && damageRolls[0].dice) {
+			damageRolls[0].dice += damageChallengeText;
+		}
+
 		attacks.push({
 			name: attack.name,
 			range: attack.range ? attack.range.toString() : null,

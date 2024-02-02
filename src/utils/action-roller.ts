@@ -65,6 +65,7 @@ export class ActionRoller {
 	public triggeredWeaknesses: SheetWeaknessesResistances['weaknesses'] = [];
 	public triggeredResistances: SheetWeaknessesResistances['resistances'] = [];
 	public triggeredImmunities: SheetInfoLists['immunities'] = [];
+	protected damageRollOverwriteIfUnused: string | null = null;
 	constructor(
 		public userSettings: UserSettings | null,
 		public action: Action,
@@ -72,8 +73,12 @@ export class ActionRoller {
 		public targetCreature?: Creature | null,
 		public options?: {
 			heightenLevel?: number;
+			attackRollOverwrite?: string;
+			damageRollOverwrite?: string;
+			saveRollOverwrite?: string;
 		}
 	) {
+		this.damageRollOverwriteIfUnused = options?.damageRollOverwrite ?? null;
 		this.action = action;
 		this.tags = _.uniq([...(action?.tags ?? [])]);
 		if (this.action?.type === 'spell') this.tags.push('spell');
@@ -119,12 +124,13 @@ export class ActionRoller {
 		rollCounter: number
 	) {
 		const rollName = roll.name;
-		let rollExpression = roll.roll;
-		const allowRollModifiers = roll.allowRollModifiers ?? true;
+		let rollExpression = this.options?.attackRollOverwrite ?? roll.roll;
+		const skipModifiers =
+			!!this.options?.attackRollOverwrite || !(roll.allowRollModifiers ?? true);
 		let currentExtraAttributes = _.values(extraAttributes);
 		let tags = _.uniq(this.tags);
 
-		if (allowRollModifiers && options.attackModifierExpression) {
+		if (!skipModifiers && options.attackModifierExpression) {
 			// add the attack modifier expression
 			rollExpression = `${rollExpression}+(${options.attackModifierExpression})`;
 		}
@@ -138,7 +144,7 @@ export class ActionRoller {
 			targetDC: options.targetDC,
 			showTags: false,
 			rollType: 'skill-challenge',
-			skipModifiers: !(roll.allowRollModifiers ?? true),
+			skipModifiers,
 		});
 		if (result.type !== 'error') {
 			// update the extra attributes for the next roll
@@ -179,19 +185,19 @@ export class ActionRoller {
 		rollCounter: number
 	) {
 		const rollName = roll.name;
-		let rollExpression = roll.roll;
-		const allowRollModifiers = roll.allowRollModifiers ?? true;
+		let rollExpression = this.options?.attackRollOverwrite ?? roll.roll;
+		const skipModifiers =
+			!!this.options?.attackRollOverwrite || !(roll.allowRollModifiers ?? true);
 		let currentExtraAttributes = _.values(extraAttributes);
 		let tags = [...this.tags];
 
 		if ((roll.targetDC ?? '').toLowerCase() === 'ac') tags = _.uniq([...tags, 'attack']);
 
-		if (allowRollModifiers && options.attackModifierExpression) {
+		if (!skipModifiers && options.attackModifierExpression) {
 			// add the attack modifier expression
 			rollExpression = `${rollExpression}+(${options.attackModifierExpression})`;
 		}
 
-		// Roll the attack
 		const result = rollBuilder.addRoll({
 			rollTitle: rollName || 'Attack',
 			rollExpression,
@@ -200,7 +206,7 @@ export class ActionRoller {
 			targetDC: options.targetDC,
 			showTags: false,
 			rollType: 'attack',
-			skipModifiers: !(roll.allowRollModifiers ?? true),
+			skipModifiers,
 		});
 		if (result.type !== 'error' && result.results.total) {
 			// update the extra attributes for the next roll
@@ -247,17 +253,20 @@ export class ActionRoller {
 		}
 		let currentExtraAttributes = _.values(extraAttributes);
 		if (options.saveDiceRoll) {
+			let saveDiceRoll = this.options?.saveRollOverwrite ?? options.saveDiceRoll;
+			const skipModifiers =
+				!!this.options?.saveRollOverwrite || !(roll.allowRollModifiers ?? true);
 			// Roll the save
 			const result = rollBuilder.addRoll({
 				rollTitle: `${targetDcClause}${roll.saveRollType} check VS. ${roll.saveTargetDC}`,
-				rollExpression: options.saveDiceRoll,
+				rollExpression: saveDiceRoll,
 				tags,
 				extraAttributes: currentExtraAttributes,
 				targetDC: options.targetDC,
 				showTags: false,
 				rollType: 'save',
 				rollFromTarget: true,
-				skipModifiers: !(roll.allowRollModifiers ?? true),
+				skipModifiers,
 			});
 			if (result.type !== 'error') {
 				// Just record text that there should be a save here
@@ -384,8 +393,13 @@ export class ActionRoller {
 		const effectTerm = healInstead ? 'healing' : 'damage';
 		const tags = [...this.tags, effectTerm];
 		let currentExtraAttributes = _.values(extraAttributes);
-		let rollExpression = roll.roll;
-		if (options.damageModifierExpression) {
+		let rollExpression = this.damageRollOverwriteIfUnused ?? roll.roll;
+		const skipModifiers =
+			!!this.damageRollOverwriteIfUnused || !(roll.allowRollModifiers ?? true);
+
+		this.damageRollOverwriteIfUnused = null;
+
+		if (!skipModifiers && options.damageModifierExpression) {
 			rollExpression = `${rollExpression ?? ''} +(${
 				options.damageModifierExpression
 			})`.trim();
@@ -429,7 +443,7 @@ export class ActionRoller {
 				tags,
 				extraAttributes: currentExtraAttributes,
 				multiplier,
-				skipModifiers: !(roll.allowRollModifiers ?? true),
+				skipModifiers,
 				showTags: false,
 			});
 		} else if (roll.damageType) {
@@ -485,6 +499,9 @@ export class ActionRoller {
 		const effectTerm = healInstead ? 'healing' : 'damage';
 		const tags = [...this.tags, effectTerm];
 		let currentExtraAttributes = _.values(extraAttributes);
+		const skipModifiers =
+			!!this.damageRollOverwriteIfUnused || !(roll.allowRollModifiers ?? true);
+
 		const rollExpressions: {
 			name: string;
 			damageType: string | null;
@@ -500,15 +517,19 @@ export class ActionRoller {
 			modifierMultiplier: number;
 		}[] = [];
 
-		let rollCritSuccessExpression = roll.criticalSuccessRoll;
-		let rollSuccessExpression = roll.successRoll;
-		let rollCritFailureExpression = roll.criticalFailureRoll;
-		let rollFailureExpression = roll.failureRoll;
+		let rollCritSuccessExpression =
+			this.damageRollOverwriteIfUnused ?? roll.criticalSuccessRoll;
+		let rollSuccessExpression = this.damageRollOverwriteIfUnused ?? roll.successRoll;
+		let rollCritFailureExpression =
+			this.damageRollOverwriteIfUnused ?? roll.criticalFailureRoll;
+		let rollFailureExpression = this.damageRollOverwriteIfUnused ?? roll.failureRoll;
 
 		let rolledSuccessDamage = false;
 		let rolledFailureDamage = false;
 		let rolledCritSuccessDamage = false;
 		let rolledCritFailureDamage = false;
+
+		this.damageRollOverwriteIfUnused = null;
 
 		// if we have a previous attack result that was a crit success or we're rolling after an attack with no knowledge of success, we roll crit damage
 		if (
@@ -523,7 +544,7 @@ export class ActionRoller {
 		) {
 			rolledCritSuccessDamage = true;
 
-			if (roll.allowRollModifiers && options.damageModifierExpression) {
+			if (!skipModifiers && options.damageModifierExpression) {
 				// add the doubled damage modifier expression
 				rollCritSuccessExpression = `${rollCritSuccessExpression}+2*(${options.damageModifierExpression})`;
 			}
@@ -557,7 +578,7 @@ export class ActionRoller {
 			// without a previous attack result, roll both damage and crit damage
 			rolledSuccessDamage = true;
 
-			if (roll.allowRollModifiers && options.damageModifierExpression) {
+			if (!skipModifiers && options.damageModifierExpression) {
 				// add the damage modifier expression
 				rollSuccessExpression = `${rollSuccessExpression}+(${options.damageModifierExpression})`;
 			}
@@ -590,7 +611,7 @@ export class ActionRoller {
 			// without a previous attack result, roll both damage and crit damage
 			rolledFailureDamage = true;
 
-			if (roll.allowRollModifiers && options.damageModifierExpression) {
+			if (!skipModifiers && options.damageModifierExpression) {
 				// add the damage modifier expression
 				rollFailureExpression = `${rollFailureExpression}+(${options.damageModifierExpression})`;
 			}
@@ -621,7 +642,7 @@ export class ActionRoller {
 			// without a previous attack result, roll both damage and crit damage
 			rolledCritFailureDamage = true;
 
-			if (roll.allowRollModifiers && options.damageModifierExpression) {
+			if (!skipModifiers && options.damageModifierExpression) {
 				// add the damage modifier expression
 				rollCritFailureExpression = `${rollCritFailureExpression}+(${options.damageModifierExpression})`;
 			}
@@ -660,7 +681,7 @@ export class ActionRoller {
 		}
 
 		const results = rollBuilder.addMultiRoll({
-			skipModifiers: !(roll.allowRollModifiers ?? true),
+			skipModifiers,
 			rollTitle: roll.name,
 			rollExpressions: rollExpressions,
 		});
@@ -1048,6 +1069,8 @@ export class ActionRoller {
 		damageModifierExpression,
 		targetAC,
 		userSettings,
+		attackRollOverwrite,
+		damageRollOverwrite,
 	}: {
 		creature: Creature;
 		targetCreature?: Creature | null;
@@ -1057,6 +1080,8 @@ export class ActionRoller {
 		damageModifierExpression?: string;
 		targetAC?: number;
 		userSettings?: UserSettings;
+		attackRollOverwrite?: string;
+		damageRollOverwrite?: string;
 	}): { actionRoller: ActionRoller; builtRoll: RollBuilder } {
 		const targetAttack = creature.attackRolls[attackName.toLowerCase()];
 		if (!targetAttack)
@@ -1134,7 +1159,11 @@ export class ActionRoller {
 			userSettings ?? null,
 			action,
 			creature,
-			targetCreature
+			targetCreature,
+			{
+				attackRollOverwrite,
+				damageRollOverwrite,
+			}
 		);
 		const builtRoll = actionRoller.buildRoll(
 			rollNote ?? '',

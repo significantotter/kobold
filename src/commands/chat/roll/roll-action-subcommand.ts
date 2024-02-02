@@ -95,6 +95,12 @@ export class RollActionSubCommand implements Command {
 			intr.options.getString(ChatArgs.ATTACK_ROLL_MODIFIER_OPTION.name) ?? '';
 		const damageModifierExpression =
 			intr.options.getString(ChatArgs.DAMAGE_ROLL_MODIFIER_OPTION.name) ?? '';
+		const attackRollOverwrite =
+			intr.options.getString(ChatArgs.ROLL_OVERWRITE_ATTACK_OPTION.name) ?? undefined;
+		const saveRollOverwrite =
+			intr.options.getString(ChatArgs.ROLL_OVERWRITE_SAVE_OPTION.name) ?? undefined;
+		const damageRollOverwrite =
+			intr.options.getString(ChatArgs.ROLL_OVERWRITE_DAMAGE_OPTION.name) ?? undefined;
 		const heightenLevel =
 			intr.options.getInteger(ChatArgs.HEIGHTEN_LEVEL_OPTION.name) ?? undefined;
 		const targetDC = intr.options.getInteger(ChatArgs.ROLL_TARGET_DC_OPTION.name) ?? undefined;
@@ -150,6 +156,9 @@ export class RollActionSubCommand implements Command {
 			targetCreature,
 			{
 				heightenLevel,
+				attackRollOverwrite,
+				saveRollOverwrite,
+				damageRollOverwrite,
 			}
 		);
 

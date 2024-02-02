@@ -158,6 +158,9 @@ export class InitCommand implements Command {
 						...ChatArgs.DAMAGE_ROLL_MODIFIER_OPTION,
 						required: false,
 					},
+					ChatArgs.ROLL_OVERWRITE_ATTACK_OPTION,
+					ChatArgs.ROLL_OVERWRITE_SAVE_OPTION,
+					ChatArgs.ROLL_OVERWRITE_DAMAGE_OPTION,
 					{
 						...ChatArgs.ROLL_NOTE_OPTION,
 						required: false,

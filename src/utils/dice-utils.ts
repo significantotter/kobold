@@ -332,11 +332,12 @@ export class DiceUtils {
 			}
 			roll.total = Math.floor(roll.total * (multiplier ?? 1));
 
-			const message = L.en.utils.dice.rollResult({
-				rollExpression: displayExpression,
-				rollRenderedExpression: roll.renderedExpression.toString(),
-				rollTotal: `${roll.total} ${damageType ?? ''}`,
-			});
+			const rollRenderedExpression = roll.renderedExpression.toString();
+			let message = displayExpression;
+			if (rollRenderedExpression !== displayExpression) {
+				message += `\n${rollRenderedExpression}`;
+			}
+			message += `\n total = \`${`${roll.total} ${damageType ?? ''}`.trimEnd()}\``;
 
 			return {
 				value: message,

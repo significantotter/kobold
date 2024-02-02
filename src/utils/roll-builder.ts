@@ -105,7 +105,6 @@ export class RollBuilder {
 		rollFromTarget?: boolean;
 	}) {
 		const title = rollTitle || '\u200B';
-		let values = '';
 		const rollFields = rollExpressions.map(rollExpression => ({
 			...DiceUtils.parseAndEvaluateDiceExpression({
 				rollExpression: rollExpression.rollExpression,

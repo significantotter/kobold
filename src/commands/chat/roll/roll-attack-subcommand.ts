@@ -89,6 +89,10 @@ export class RollAttackSubCommand implements Command {
 			intr.options.getString(ChatArgs.ATTACK_ROLL_MODIFIER_OPTION.name) ?? '';
 		const damageModifierExpression =
 			intr.options.getString(ChatArgs.DAMAGE_ROLL_MODIFIER_OPTION.name) ?? '';
+		const attackRollOverwrite =
+			intr.options.getString(ChatArgs.ROLL_OVERWRITE_ATTACK_OPTION.name) ?? undefined;
+		const damageRollOverwrite =
+			intr.options.getString(ChatArgs.ROLL_OVERWRITE_DAMAGE_OPTION.name) ?? undefined;
 		const rollNote = intr.options.getString(ChatArgs.ROLL_NOTE_OPTION.name) ?? '';
 		const targetAC = intr.options.getInteger(ChatArgs.ROLL_TARGET_AC_OPTION.name);
 
@@ -134,6 +138,8 @@ export class RollAttackSubCommand implements Command {
 			damageModifierExpression,
 			targetAC: targetAC ?? undefined,
 			userSettings,
+			attackRollOverwrite: attackRollOverwrite,
+			damageRollOverwrite: damageRollOverwrite,
 		});
 
 		const embed = builtRoll.compileEmbed({ forceFields: true });
