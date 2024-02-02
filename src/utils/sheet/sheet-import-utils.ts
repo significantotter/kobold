@@ -73,6 +73,7 @@ function applyValuesToStatInPlace(
 
 	// apply the stat values. We can use prof mods + abilities to
 	// infer any missing bonus
+
 	if (parsedBonus === null && parsedProficiency !== null && stat.ability !== null) {
 		parsedBonus =
 			parsedProficiency +
@@ -289,6 +290,15 @@ export function convertBestiaryCreatureToSheet(
 				.map(result => result.type)
 		);
 
+		let damageChallengeAdjustment = challengeAdjustment * 2;
+		let damageChallengeText =
+			damageChallengeAdjustment > 0
+				? `+${damageChallengeAdjustment}`
+				: damageChallengeAdjustment.toString();
+		if (damageRolls.length > 0 && damageRolls[0].dice) {
+			damageRolls[0].dice += damageChallengeText;
+		}
+
 		attacks.push({
 			name: attack.name,
 			range: attack.range ? attack.range.toString() : null,
@@ -480,9 +490,9 @@ export function convertWanderersGuideCharToSheet(
 		' '
 	);
 
-	const level = characterData.level;
-
 	const baseSheet = SheetProperties.defaultSheet;
+	const level = characterData.level;
+	baseSheet.staticInfo.level = level;
 
 	for (const ability of calculatedStats.totalAbilityScores) {
 		const abilityNameFirstThree = ability.Name.trim().toLowerCase().slice(0, 3);
@@ -777,6 +787,7 @@ export function convertPathBuilderToSheet(
 	};
 
 	const baseSheet = SheetProperties.defaultSheet;
+	baseSheet.staticInfo.level = pathBuilderSheet.level;
 	baseSheet.stats.class.ability = keyAbility;
 
 	baseSheet.intProperties.strength =
@@ -913,6 +924,23 @@ export function convertPathBuilderToSheet(
 			mods(statKey);
 
 		applyValuesToStatInPlace(baseSheet, stat, statBonus, null, statProfMod);
+	}
+
+	for (const [loreName, loreProfMod] of pathBuilderSheet.lores ?? []) {
+		const loreStat: ProficiencyStat = {
+			name: loreName + ' Lore' ?? 'Unknown Lore',
+			proficiency: loreProfMod ?? 0,
+			bonus: null,
+			dc: null,
+			note: null,
+			ability:
+				// special case for esoteric lore for Thaumaturge
+				(loreName ?? '').toLowerCase() === 'esoteric'
+					? AbilityEnum.charisma
+					: AbilityEnum.intelligence,
+		};
+		baseSheet.additionalSkills.push(loreStat);
+		applyValuesToStatInPlace(baseSheet, loreStat, null, null, loreProfMod ?? 0);
 	}
 
 	const sheet: Sheet = {

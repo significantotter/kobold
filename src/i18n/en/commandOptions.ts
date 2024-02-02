@@ -670,6 +670,18 @@ export default {
 		name: 'attack',
 		description: 'The attack to roll.',
 	},
+	rollOverwriteAttack: {
+		name: 'overwrite-attack-roll',
+		description: 'An alternate attack roll replacing all attack rolls',
+	},
+	rollOverwriteSave: {
+		name: 'overwrite-save-roll',
+		description: 'An alternate save roll replacing all save rolls',
+	},
+	rollOverwriteDamage: {
+		name: 'overwrite-damage-roll',
+		description: 'An alternate damage roll replacing the FIRST damage roll.',
+	},
 	rollExpression: {
 		name: 'dice',
 		description: 'The dice expression to roll. Similar to Roll20 dice rolls.',

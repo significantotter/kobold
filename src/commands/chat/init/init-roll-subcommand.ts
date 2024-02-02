@@ -86,6 +86,13 @@ export class InitRollSubCommand implements Command {
 			true
 		);
 
+		const attackRollOverwrite =
+			intr.options.getString(ChatArgs.ROLL_OVERWRITE_ATTACK_OPTION.name) ?? undefined;
+		const saveRollOverwrite =
+			intr.options.getString(ChatArgs.ROLL_OVERWRITE_SAVE_OPTION.name) ?? undefined;
+		const damageRollOverwrite =
+			intr.options.getString(ChatArgs.ROLL_OVERWRITE_DAMAGE_OPTION.name) ?? undefined;
+
 		const modifierExpression = intr.options.getString(ChatArgs.ROLL_MODIFIER_OPTION.name) ?? '';
 		const damageModifierExpression =
 			intr.options.getString(ChatArgs.DAMAGE_ROLL_MODIFIER_OPTION.name) ?? '';
@@ -150,7 +157,12 @@ export class InitRollSubCommand implements Command {
 				userSettings,
 				targetAction,
 				creature,
-				targetCreature
+				targetCreature,
+				{
+					attackRollOverwrite,
+					saveRollOverwrite,
+					damageRollOverwrite,
+				}
 			);
 
 			const builtRoll = actionRoller.buildRoll(rollNote, targetAction.description ?? '', {
@@ -201,6 +213,8 @@ export class InitRollSubCommand implements Command {
 				rollNote,
 				attackModifierExpression: modifierExpression,
 				damageModifierExpression,
+				attackRollOverwrite,
+				damageRollOverwrite,
 				targetAC,
 				userSettings,
 			});
