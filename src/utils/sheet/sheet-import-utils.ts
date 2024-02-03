@@ -292,7 +292,9 @@ export function convertBestiaryCreatureToSheet(
 
 		let damageChallengeAdjustment = challengeAdjustment * 2;
 		let damageChallengeText =
-			damageChallengeAdjustment !== 0 ? `+${damageChallengeAdjustment}` : '';
+			damageChallengeAdjustment !== 0 && damageChallengeAdjustment != null
+				? `+${damageChallengeAdjustment}`
+				: '';
 		if (damageRolls.length > 0 && damageRolls[0].dice) {
 			damageRolls[0].dice += damageChallengeText;
 		}
