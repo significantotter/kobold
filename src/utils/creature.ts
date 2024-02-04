@@ -906,6 +906,10 @@ export class Creature {
 		return _.keys(this.rolls);
 	}
 
+	public getAttribute(attributeName: string): Attribute | null {
+		return AttributeUtils.getAttributeByName(this, attributeName);
+	}
+
 	public get attributes() {
 		return AttributeUtils.getAttributes(this);
 	}

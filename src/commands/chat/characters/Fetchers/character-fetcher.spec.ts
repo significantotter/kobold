@@ -2,7 +2,10 @@ import { CommandInteraction, CacheType } from 'discord.js';
 import { NewSheetRecord } from '../../../../services/kobold/index.js';
 import { CharacterFetcher } from './character-fetcher.js';
 
-const fakeIntr = { user: { id: 5 }, userId: 5 } as unknown as CommandInteraction<CacheType>;
+const fakeIntr = {
+	user: { id: 5 },
+	userId: 5,
+} as unknown as CommandInteraction<CacheType>;
 
 class MockCharacterFetcher extends CharacterFetcher<any, any> {
 	importSource = 'test';
@@ -32,6 +35,7 @@ describe('CharacterFetcher', () => {
 					sheetRecord: { sheet: { staticInfo: { name: 'oldName' } } },
 				}),
 				create: vitest.fn().mockResolvedValue({ name: 'test' }),
+				setIsActive: vitest.fn(),
 			},
 			sheetRecord: {
 				create: vitest
@@ -112,7 +116,7 @@ describe('CharacterFetcher', () => {
 			);
 			expect(mockKobold.character.update).toHaveBeenCalledWith(
 				{ id: 'activeCharId' },
-				{ name: 'test' }
+				{ name: 'test', charId: 1 }
 			);
 			expect(updatedCharacter.name).toBe('test');
 		});
@@ -137,10 +141,11 @@ describe('CharacterFetcher', () => {
 				followUp: vitest.fn().mockResolvedValue({}),
 				user: { id: 'testUserId' },
 				editReply: vitest.fn().mockResolvedValue({}),
-			};
+			} as unknown as CommandInteraction<CacheType>;
 			const oldName = 'oldName';
 			const newName = 'newName';
 
+			fetcher = new MockCharacterFetcher(mockInteraction, mockKobold, 'testUserId');
 			await fetcher.confirmUpdateName(oldName, newName);
 
 			expect(mockInteraction.editReply).toHaveBeenCalled();

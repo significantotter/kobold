@@ -34,6 +34,7 @@ export abstract class CharacterFetcher<SourceData, FetchArgs> {
 		activeCharacter?: CharacterWithRelations
 	): NewSheetRecord;
 	public abstract getCharId(args: FetchArgs): number;
+
 	public async create(args: FetchArgs): Promise<Character> {
 		const sourceData = await this.fetchSourceData(args);
 		const sheetRecord = this.convertSheetRecord(sourceData);
@@ -163,7 +164,7 @@ export abstract class CharacterFetcher<SourceData, FetchArgs> {
 		);
 		return await this.kobold.character.update(
 			{ id: activeCharacter.id },
-			{ name: updatedSheetRecord.sheet.staticInfo.name }
+			{ name: updatedSheetRecord.sheet.staticInfo.name, charId: this.getCharId(args) }
 		);
 	}
 }

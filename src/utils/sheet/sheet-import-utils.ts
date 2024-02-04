@@ -519,8 +519,6 @@ export function convertWanderersGuideCharToSheet(
 		}
 	}
 
-	let maxHp = calculatedStats.maxHP ?? 0;
-
 	// casting stats
 	if (calculatedStats.arcaneSpellProfMod !== null) {
 		baseSheet.stats.arcane = {
@@ -1022,7 +1020,10 @@ export function convertPathBuilderToSheet(
 			}
 
 			const mainDamage = {
-				dice: numDice + (weapon.die ?? '') + ' + ' + weapon.damageBonus,
+				dice:
+					numDice +
+					(weapon.die ?? '') +
+					(weapon.damageBonus ? ' + ' + weapon.damageBonus : ''),
 				type: weapon.damageType,
 				// base type isn't provided by pathbuilder
 			};

@@ -29,14 +29,12 @@ describe('PasteBinCharacterFetcher', () => {
 			};
 			vitest.mock('../../../../services/pastebin/index.js', () => ({
 				PasteBin: vitest.fn(() => ({
-					get: vitest.fn().mockResolvedValue(
-						JSON.stringify({
-							sheet: SheetProperties.defaultSheet,
-							modifiers: [],
-							actions: [],
-							rollMacros: [],
-						})
-					),
+					get: vitest.fn().mockResolvedValue({
+						sheet: SheetProperties.defaultSheet,
+						modifiers: [],
+						actions: [],
+						rollMacros: [],
+					}),
 				})),
 			}));
 

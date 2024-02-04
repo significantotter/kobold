@@ -110,17 +110,12 @@ export class DiceUtils {
 		creature?: Creature,
 		extraAttributes?: Attribute[]
 	): [number, string[]] {
-		const attributes = creature?.attributes || [];
-
 		const trimRegex = /[\[\]\\ _\-]/g;
 		const trimmedToken = token.replace(trimRegex, '').trim().toLowerCase();
 
 		const attributeName = attributeShorthands[trimmedToken] || trimmedToken;
 
-		const attribute = attributes.find(
-			attributeObject =>
-				attributeObject.name.replace(trimRegex, '').toLowerCase() === attributeName
-		);
+		const attribute = creature?.getAttribute?.(attributeName);
 		const staticAttribute = staticAttributes(creature?.sheet).find(
 			attributeObject =>
 				attributeObject.name.replace(trimRegex, '').toLowerCase() === attributeName

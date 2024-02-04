@@ -1,173 +1,245 @@
 import _ from 'lodash';
-import type { Attribute, Counter, ProficiencyStat } from '../services/kobold/index.js';
+import {
+	isSheetIntegerKeys,
+	type Attribute,
+	StatSubGroupEnum,
+	isStatSubGroupEnum,
+	isSheetBaseCounterKeys,
+	SheetIntegerKeys,
+	SheetStatKeys,
+	SheetBaseCounterKeys,
+} from '../services/kobold/index.js';
 import type { Creature } from './creature.js';
-import { SheetProperties } from './sheet/sheet-properties.js';
+import {
+	SheetAdditionalSkillProperties,
+	SheetBaseCounterProperties,
+	SheetIntegerProperties,
+	SheetProperties,
+	SheetStatProperties,
+	SheetStatPropertyKey,
+	SheetWeaknessResistanceProperties,
+} from './sheet/sheet-properties.js';
 
 export class AttributeUtils {
-	public static statToAttributes(
-		creature: Creature,
-		stat: ProficiencyStat,
-		attrType: string,
-		aliasTerm?: string
-	): Attribute[] {
-		if (aliasTerm == undefined) aliasTerm = attrType;
-		const name = SheetProperties.standardizeCustomPropName(stat.name);
-		const aliasableName = name.replaceAll(' ', '');
-		return [
-			{
-				name: name,
-				aliases: _.uniq([
-					aliasableName + attrType + 'bonus',
-					aliasableName + attrType + 'attack',
-					aliasableName + 'bonus',
-					aliasableName + 'attack',
-					aliasableName,
-				]),
-				type: 'attr',
-				value: creature.interpretBonus(stat),
-				tags: ['attr', attrType, name, stat.ability ?? ''].filter(_.identity),
-			},
-			{
-				name: name + 'Dc',
-				type: 'attr',
-				aliases: _.uniq([
-					aliasableName + attrType + 'dc',
-					aliasableName + attrType + 'defense',
-					aliasableName + 'dc',
-					aliasableName + 'defense',
-				]),
-				value: creature.interpretDc(stat),
-				tags: ['attr', attrType, name, stat.ability ?? ''].filter(_.identity),
-			},
-			{
-				name: name + 'Proficiency',
-				type: 'attr',
-				aliases: _.uniq([
-					aliasableName + attrType + 'proficiency',
-					aliasableName + attrType + 'proficiencymodifier',
-					aliasableName + attrType + 'proficiencymod',
-					aliasableName + attrType + 'prof',
-					aliasableName + attrType + 'profmod',
-					aliasableName + 'proficiency',
-					aliasableName + 'proficiencymodifier',
-					aliasableName + 'proficiencymod',
-					aliasableName + 'profmod',
-				]),
-				value: stat.proficiency ?? 0,
-				tags: ['attr', attrType, name, stat.ability ?? ''].filter(_.identity),
-			},
-		];
-	}
-
-	public static counterToAttributes(counter: Counter): Attribute[] {
-		const name = SheetProperties.standardizeCustomPropName(counter.name);
-		const aliasableName = name.replaceAll(' ', '');
-		const attributes = [];
-		if (counter.max != null) {
-			attributes.push({
-				name: 'max' + name,
-				aliases: ['max' + aliasableName, aliasableName],
-				type: 'counter',
-				value: counter.max ?? 0,
-				tags: ['attr', name].filter(_.identity),
-			});
-		}
-		if ('current' in counter) {
-			attributes.push({
-				name: 'current' + name,
-				type: 'counter',
-				aliases: ['current' + aliasableName],
-				value: counter.current,
-				tags: ['attr', name].filter(_.identity),
-			});
-		} else {
-			attributes.push({
-				name: 'current' + name,
-				type: 'counter',
-				aliases: ['current' + aliasableName],
-				value: counter.active.filter(_.identity).length,
-				tags: ['attr', name].filter(_.identity),
-			});
-		}
+	public static computedSheetProperties(creature: Creature): Attribute[] {
+		const attributes: Attribute[] = [];
+		// attack proficiencies with level
+		attributes.push(
+			...['unarmed', 'simple', 'martial', 'advanced'].map(name => {
+				let proficiency = 0;
+				switch (name) {
+					case 'unarmed':
+						proficiency = creature.sheet.intProperties.unarmedProficiency ?? 0;
+						break;
+					case 'simple':
+						proficiency = creature.sheet.intProperties.simpleProficiency ?? 0;
+						break;
+					case 'martial':
+						proficiency = creature.sheet.intProperties.martialProficiency ?? 0;
+						break;
+					case 'advanced':
+						proficiency = creature.sheet.intProperties.advancedProficiency ?? 0;
+						break;
+				}
+				return {
+					name,
+					aliases: [
+						name,
+						name + 'weapon',
+						name + 'attack',
+						name + 'proficiency',
+						name + 'prof',
+						name + 'profmod',
+						name + 'weaponprof',
+						name + 'attackprof',
+						name + 'weaponprofmod',
+						name + 'attackprofmod',
+						name + 'weaponproficiency',
+						name + 'attackproficiency',
+					],
+					type: 'attack',
+					value: (creature.sheet.staticInfo.level ?? 0) + proficiency,
+					tags: [],
+				};
+			})
+		);
+		// armor proficiencies with level
+		attributes.push(
+			...['unarmored', 'light', 'medium', 'heavy'].map(name => {
+				let proficiency = 0;
+				switch (name) {
+					case 'unarmored':
+						proficiency = creature.sheet.intProperties.unarmoredProficiency ?? 0;
+						break;
+					case 'light':
+						proficiency = creature.sheet.intProperties.lightProficiency ?? 0;
+						break;
+					case 'medium':
+						proficiency = creature.sheet.intProperties.mediumProficiency ?? 0;
+						break;
+					case 'heavy':
+						proficiency = creature.sheet.intProperties.heavyProficiency ?? 0;
+						break;
+				}
+				return {
+					name,
+					aliases: [
+						name,
+						name + 'armor',
+						name + 'defense',
+						name + 'proficiency',
+						name + 'armorprof',
+						name + 'defenseprof',
+						name + 'armorproficiency',
+						name + 'defenseproficiency',
+					],
+					type: 'armor',
+					value: (creature.sheet.staticInfo.level ?? 0) + proficiency,
+					tags: [],
+				};
+			})
+		);
+		// general trained/legendary/master/untrained proficiencies with level
+		attributes.push(
+			...['trained', 'expert', 'master', 'legendary'].map(name => {
+				let proficiency = 0;
+				switch (name) {
+					case 'trained':
+						proficiency = 2;
+						break;
+					case 'expert':
+						proficiency = 4;
+						break;
+					case 'master':
+						proficiency = 6;
+						break;
+					case 'legendary':
+						proficiency = 8;
+						break;
+				}
+				return {
+					name,
+					aliases: [
+						name,
+						name + 'total',
+						name + 'bonus',
+						name + 'mod',
+						name + 'modifier',
+					],
+					type: 'proficiency',
+					value: (creature.sheet.staticInfo.level ?? 0) + proficiency,
+					tags: [],
+				};
+			})
+		);
 		return attributes;
 	}
 
-	public static intPropertyToAttribute(
-		intProperty: { name: string; value: number | null },
-		attrType: string,
-		aliasTerm?: string
-	): Attribute {
-		if (aliasTerm == undefined) aliasTerm = attrType;
-		const aliasableName = SheetProperties.standardizeCustomPropName(
-			intProperty.name.replaceAll(' ', '')
+	public static getAttributeByName(creature: Creature, name: string): Attribute | null {
+		const standardizedName = SheetProperties.standardizeProperty(name);
+		const standardizedCustomPropName = SheetProperties.standardizeCustomPropName(name);
+		for (const attribute of this.computedSheetProperties(creature)) {
+			if (attribute.aliases.includes(standardizedName.toLowerCase())) {
+				return attribute;
+			}
+		}
+
+		if (
+			isSheetIntegerKeys(standardizedName) &&
+			creature.sheet.intProperties[standardizedName]
+		) {
+			const property = SheetIntegerProperties.properties[standardizedName];
+			return {
+				aliases: property.aliases,
+				type: property.type,
+				value: creature.sheet.intProperties[standardizedName] ?? 0,
+				name: standardizedName,
+				tags: property.tags,
+			};
+		}
+		if (SheetStatProperties.isSheetStatPropertyName(standardizedName)) {
+			const property = SheetStatProperties.properties[standardizedName];
+			if (property.subKey === StatSubGroupEnum.ability) return null;
+			return {
+				aliases: property.aliases,
+				type: property.type,
+				value: creature.sheet.stats[property.baseKey][property.subKey] ?? 0,
+				name: standardizedName,
+				tags: property.tags,
+			};
+		}
+		const standardizedCounterName = standardizedName
+			.replaceAll('current', '')
+			.replaceAll('Current', '')
+			.trim();
+		if (isSheetBaseCounterKeys(standardizedCounterName)) {
+			const property = SheetProperties.properties[standardizedCounterName];
+			const sheetValue = creature.sheet.baseCounters[standardizedCounterName];
+			const currentValue = standardizedName.includes('current');
+			return {
+				aliases: property.aliases,
+				type: property.type,
+				value: (currentValue ? sheetValue.current : sheetValue.max) ?? 0,
+				name: (currentValue ? 'current' : 'max') + _.capitalize(standardizedCounterName),
+				tags: property.tags,
+			};
+		}
+
+		const propertyMatch = SheetAdditionalSkillProperties.propertyNameRegex.exec(
+			standardizedCustomPropName
 		);
-		return {
-			name: intProperty.name,
-			aliases: _.uniq([aliasableName, aliasableName + aliasTerm]),
-			type: 'attr',
-			value: intProperty.value ?? 0,
-			tags: ['attr', intProperty.name].filter(_.identity),
-		};
-	}
+		const additionalSkill = creature.sheet.additionalSkills.find(
+			skill => skill.name === propertyMatch?.[1]
+		);
+		const additionalSkillSubKey = propertyMatch?.[2] ?? 'bonus';
+		if (additionalSkill && isStatSubGroupEnum(additionalSkillSubKey)) {
+			if (additionalSkillSubKey === StatSubGroupEnum.ability) return null;
+			return {
+				aliases: [],
+				type: 'skill',
+				value: additionalSkill[additionalSkillSubKey] ?? 0,
+				name: additionalSkill.name,
+				tags: ['skill', 'intelligence', 'lore'],
+			};
+		}
 
-	public static intWeaponProfPropertyToAttribute(intProperty: {
-		name: string;
-		value: number | null;
-	}): Attribute {
-		const name = intProperty.name;
-		return {
-			name: name,
-			aliases: [
-				name,
-				name + 'weapon',
-				name + 'attack',
-				name + 'proficiency',
-				name + 'prof',
-				name + 'profmod',
-				name + 'weaponprof',
-				name + 'attackprof',
-				name + 'weaponprofmod',
-				name + 'attackprofmod',
-				name + 'weaponproficiency',
-				name + 'attackproficiency',
-			],
-			type: 'attr',
-			value: intProperty.value ?? 0,
-			tags: ['attr', name].filter(_.identity),
-		};
-	}
+		const weakResMatch = SheetWeaknessResistanceProperties.propertyNameRegex.exec(
+			standardizedCustomPropName
+		);
+		const weakness = creature.sheet.weaknessesResistances.weaknesses.find(
+			weakness => weakness.type === weakResMatch?.[1]
+		);
+		const resistance = creature.sheet.weaknessesResistances.resistances.find(
+			resistance => resistance.type === weakResMatch?.[1]
+		);
+		const weaknessResistance = weakness ?? resistance;
+		if (weaknessResistance) {
+			const type = weakness ? 'weakness' : 'resistance';
+			return {
+				aliases: [],
+				type: type,
+				value: weaknessResistance.amount,
+				name: weaknessResistance.type + ' ' + type,
+				tags: [],
+			};
+		}
 
-	public static intArmorProfPropertyToAttribute(intProperty: {
-		name: string;
-		value: number | null;
-	}): Attribute {
-		const name = intProperty.name;
-		return {
-			name: name,
-			aliases: [
-				name,
-				name + 'armor',
-				name + 'defense',
-				name + 'proficiency',
-				name + 'prof',
-				name + 'profmod',
-				name + 'armorprof',
-				name + 'defenseprof',
-				name + 'armorprofmod',
-				name + 'defenseprofmod',
-				name + 'armorproficiency',
-				name + 'defenseproficiency',
-			],
-			type: 'attr',
-			value: intProperty.value ?? 0,
-			tags: ['attr', name].filter(_.identity),
-		};
+		if (standardizedName === 'level') {
+			return {
+				aliases: ['level'],
+				name: 'level',
+				type: 'base',
+				value: creature.sheet.staticInfo.level ?? 0,
+				tags: ['level'],
+			};
+		}
+		return null;
 	}
 
 	public static getAttributes(creature: Creature): Attribute[] {
-		const baseAttributes: Attribute[] = [];
+		const attributes: Attribute[] = [];
 
-		baseAttributes.push({
+		attributes.push({
 			aliases: ['level'],
 			name: 'level',
 			type: 'base',
@@ -175,53 +247,99 @@ export class AttributeUtils {
 			tags: ['level'],
 		});
 
-		baseAttributes.push(
-			...creature.saves.map(save => this.statToAttributes(creature, save, 'save')).flat()
-		);
-		baseAttributes.push(
-			...creature.skills.map(skill => this.statToAttributes(creature, skill, 'skill')).flat()
-		);
-		baseAttributes.push(
-			...creature.castingStats
-				.map(spell => this.statToAttributes(creature, spell, 'casting', 'spell'))
-				.flat()
-		);
-		baseAttributes.push(
-			...this.statToAttributes(creature, creature.sheet.stats.class, 'class', '')
-		);
-		baseAttributes.push(
-			...this.statToAttributes(creature, creature.sheet.stats.perception, 'perception', '')
-		);
+		attributes.push(...this.computedSheetProperties(creature));
 
-		baseAttributes.push(
-			...creature.counters.map(counter => this.counterToAttributes(counter)).flat()
-		);
+		let intKey: SheetIntegerKeys;
+		for (intKey in SheetIntegerProperties.properties) {
+			const property = SheetIntegerProperties.properties[intKey];
+			if (property) {
+				attributes.push({
+					aliases: property.aliases,
+					type: property.type,
+					value: creature.sheet.intProperties[intKey] ?? 0,
+					name: intKey,
+					tags: property.tags,
+				});
+			}
+		}
 
-		baseAttributes.push({
-			name: 'ac',
-			aliases: ['ac', 'armorclass', 'armor'],
-			type: 'attr',
-			value: creature.ac,
-			tags: ['attr', 'ac'].filter(_.identity),
-		});
+		let statKey: SheetStatPropertyKey;
+		for (statKey in SheetStatProperties.properties) {
+			const property = SheetStatProperties.properties[statKey];
+			if (property.subKey === StatSubGroupEnum.ability) continue;
 
-		baseAttributes.push(
-			...creature.abilityList.map(ability => this.intPropertyToAttribute(ability, 'ability'))
-		);
-		baseAttributes.push(
-			...creature.speeds.map(ability => this.intPropertyToAttribute(ability, 'speed'))
-		);
-		baseAttributes.push(
-			...creature.weaponProficiencies.map(ability =>
-				this.intWeaponProfPropertyToAttribute(ability)
-			)
-		);
-		baseAttributes.push(
-			...creature.armorProficiencies.map(ability =>
-				this.intArmorProfPropertyToAttribute(ability)
-			)
-		);
+			attributes.push({
+				aliases: property.aliases,
+				type: property.type,
+				value: creature.sheet.stats[property.baseKey][property.subKey] ?? 0,
+				name: statKey,
+				tags: property.tags,
+			});
+		}
 
-		return baseAttributes;
+		let counterKey: SheetBaseCounterKeys;
+		for (counterKey in SheetBaseCounterProperties.properties) {
+			const property = SheetBaseCounterProperties.properties[counterKey];
+			attributes.push({
+				aliases: [],
+				type: property.type,
+				value: creature.sheet.baseCounters[counterKey].max ?? 0,
+				name: 'max' + _.capitalize(counterKey),
+				tags: property.tags,
+			});
+			attributes.push({
+				aliases: property.aliases,
+				type: property.type,
+				value: creature.sheet.baseCounters[counterKey].current ?? 0,
+				name: 'current' + _.capitalize(counterKey),
+				tags: property.tags,
+			});
+		}
+
+		for (const skill of creature.sheet.additionalSkills) {
+			attributes.push({
+				aliases: [skill.name + ' attack', skill.name],
+				type: 'skill',
+				value: skill.bonus ?? 0,
+				name: skill.name + 'bonus',
+				tags: ['skill', 'intelligence', 'lore'],
+			});
+			attributes.push({
+				aliases: [],
+				type: 'skill',
+				value: skill.dc ?? 0,
+				name: skill.name + ' dc',
+				tags: ['skill', 'intelligence', 'lore'],
+			});
+			attributes.push({
+				aliases: [],
+				type: 'skill',
+				value: skill.proficiency ?? 0,
+				name: skill.name + ' proficiency',
+				tags: ['skill', 'intelligence', 'lore'],
+			});
+		}
+
+		for (const weakness of creature.sheet.weaknessesResistances.weaknesses) {
+			attributes.push({
+				aliases: [],
+				type: 'weakness',
+				value: weakness.amount,
+				name: weakness.type + ' weakness',
+				tags: [],
+			});
+		}
+
+		for (const resistance of creature.sheet.weaknessesResistances.resistances) {
+			attributes.push({
+				aliases: [],
+				type: 'resistance',
+				value: resistance.amount,
+				name: resistance.type + ' resistance',
+				tags: [],
+			});
+		}
+
+		return attributes;
 	}
 }
