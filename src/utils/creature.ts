@@ -380,7 +380,22 @@ export class Creature {
 			sheetEmbed.addFields([{ name: 'Spellcasting', value: castingStatText }]);
 
 		let attackText = this.sheetAttacksText(false);
-		if (attackText) sheetEmbed.addFields([{ name: 'Attacks', value: attackText }]);
+		if (attackText && attackText.length >= 950) {
+			const attackLines = attackText.split('\n');
+			let currentAttackText = '';
+			for (const attackLine of attackLines) {
+				if (currentAttackText.length + attackLine.length >= 600) {
+					sheetEmbed.addFields([{ name: 'Attacks', value: currentAttackText }]);
+					currentAttackText = '';
+				}
+				currentAttackText += attackLine + '\n';
+			}
+			if (currentAttackText) {
+				sheetEmbed.addFields([{ name: 'Attacks', value: currentAttackText }]);
+			}
+		} else if (attackText) {
+			sheetEmbed.addFields([{ name: 'Attacks', value: attackText }]);
+		}
 
 		// Skills
 		let skillText = this.sheetSkillText(false);
