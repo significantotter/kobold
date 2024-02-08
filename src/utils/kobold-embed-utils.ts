@@ -176,7 +176,7 @@ export class KoboldEmbed extends EmbedBuilder {
 	public isOverSized() {
 		return (
 			this.determineEmbedFieldTextLength() + this.determineEmbedMetaTextLength() > 6000 ||
-			(this.data?.fields ?? []).length > 25
+			(this.data?.fields ?? []).length > 24
 		);
 	}
 
@@ -272,7 +272,7 @@ export class KoboldEmbed extends EmbedBuilder {
 			if (extraEmbeds.length > 0) {
 				const mostRecentExtraEmbed = extraEmbeds[0];
 				canAddFieldToEmbed =
-					(mostRecentExtraEmbed.data.fields ?? []).length < 25 &&
+					(mostRecentExtraEmbed.data.fields ?? []).length < 24 &&
 					mostRecentExtraEmbed.determineEmbedFieldTextLength() +
 						splicedField.name.length +
 						splicedField.value.length <
