@@ -627,7 +627,6 @@ export function convertWanderersGuideCharToSheet(
 				ability: AbilityEnum.intelligence,
 			};
 			baseSheet.additionalSkills.push(stat);
-			continue;
 		}
 		let bonus = wgSkill.Bonus ?? null;
 		if (_.isString(bonus)) bonus = parseInt(bonus);
