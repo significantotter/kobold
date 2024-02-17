@@ -29,17 +29,17 @@
 		"clean": "git clean -xdf --exclude=\"/src/config/**/*\"",
 		"clean:dry": "git clean -xdf --exclude=\"/src/config/**/*\" --dry-run",
 		"build-types": "NODE_OPTIONS='--max-old-space-size=4096' node src/scripts/compileTypes.js",
-		"build": "NODE_OPTIONS='--max-old-space-size=4096' npm run typesafe-i18n && npm run build-types && tsc --project tsconfig.json",
-		"commands:view": "npm run build && node --enable-source-maps dist/src/start-bot.js commands view",
-		"commands:register": "NODE_OPTIONS='--max-old-space-size=4096' npm run build && node --enable-source-maps dist/src/start-bot.js commands register",
-		"commands:rename": "npm run build && node --enable-source-maps dist/src/start-bot.js commands rename",
-		"commands:delete": "npm run build && node --enable-source-maps dist/src/start-bot.js commands delete",
-		"commands:clear": "NODE_OPTIONS='--max-old-space-size=4096' npm run build && node --enable-source-maps dist/src/start-bot.js commands clear",
-		"start": "npm run start:bot",
-		"start:bot": "NODE_OPTIONS='--max-old-space-size=4096' npm run build && node --enable-source-maps dist/src/start-bot.js",
-		"start:manager": "NODE_OPTIONS='--max-old-space-size=4096' npm run build && node --enable-source-maps dist/src/start-manager.js",
-		"start:prod": "NODE_OPTIONS='--max-old-space-size=4096' npm run build && npm run commands:clear-prod && npm run commands:register-prod && npm run start:manager-prod",
-		"start:pm2": "npm run build && npm run pm2:start",
+		"build": "NODE_OPTIONS='--max-old-space-size=4096' pnpm run typesafe-i18n && pnpm run build-types && tsc --project tsconfig.json",
+		"commands:view": "pnpm run build && node --enable-source-maps dist/src/start-bot.js commands view",
+		"commands:register": "NODE_OPTIONS='--max-old-space-size=4096' pnpm run build && node --enable-source-maps dist/src/start-bot.js commands register",
+		"commands:rename": "pnpm run build && node --enable-source-maps dist/src/start-bot.js commands rename",
+		"commands:delete": "pnpm run build && node --enable-source-maps dist/src/start-bot.js commands delete",
+		"commands:clear": "NODE_OPTIONS='--max-old-space-size=4096' pnpm run build && node --enable-source-maps dist/src/start-bot.js commands clear",
+		"start": "pnpm run start:bot",
+		"start:bot": "NODE_OPTIONS='--max-old-space-size=4096' pnpm run build && node --enable-source-maps dist/src/start-bot.js",
+		"start:manager": "NODE_OPTIONS='--max-old-space-size=4096' pnpm run build && node --enable-source-maps dist/src/start-manager.js",
+		"start:prod": "NODE_OPTIONS='--max-old-space-size=4096' pnpm run build && pnpm run commands:clear-prod && pnpm run commands:register-prod && pnpm run start:manager-prod",
+		"start:pm2": "pnpm run build && pnpm run pm2:start",
 		"pm2:start": "pm2 start process.json",
 		"pm2:stop": "pm2 stop process.json",
 		"pm2:delete": "pm2 delete process.json",
@@ -48,12 +48,12 @@
 		"knex": "NODE_OPTIONS='--max-old-space-size=4096' NODE_OPTIONS='--loader ts-node/esm' knex",
 		"test": "vitest",
 		"replace-i18n-types": "cp ./src/i18n/i18n-types.prod.ts ./src/i18n/i18n-types.ts",
-		"build-prod": "NODE_OPTIONS='--max-old-space-size=4096' npm run replace-i18n-types && npm run build-types && tsc --project tsconfig.json",
+		"build-prod": "NODE_OPTIONS='--max-old-space-size=4096' pnpm run replace-i18n-types && pnpm run build-types && tsc --project tsconfig.json",
 		"commands:clear-prod": "NODE_OPTIONS='--max-old-space-size=4096' node dist/src/start-bot.js commands clear ",
 		"commands:register-prod": "NODE_OPTIONS='--max-old-space-size=4096' node dist/src/start-bot.js commands register",
 		"start:bot-prod": "NODE_OPTIONS='--max-old-space-size=4096' node dist/src/start-bot.js",
 		"start:manager-prod": "NODE_OPTIONS='--max-old-space-size=4096' node dist/src/start-manager.js",
-		"import:pf2etools": "NODE_OPTIONS='--max-old-space-size=4096' npm run build && node dist/src/services/pf2etools/pf2eTools-import.js"
+		"import:pf2etools": "NODE_OPTIONS='--max-old-space-size=4096' pnpm run build && node dist/src/services/pf2etools/pf2eTools-import.js"
 	},
 	"dependencies": {
 		"@anatine/zod-mock": "^3.13.3",
@@ -104,7 +104,7 @@
 		"@types/better-sqlite3": "^7.6.5",
 		"@types/express": "4.17.17",
 		"@types/luxon": "3.3.2",
-		"@types/node": "^20.6.0",
+		"@types/node": "^20.11.19",
 		"@types/node-schedule": "2.1.0",
 		"@types/pg": "^8.10.2",
 		"@types/remove-markdown": "0.3.1",
@@ -141,5 +141,6 @@
 				"skipTypeImports": true
 			}
 		}
-	}
+	},
+	"packageManager": "pnpm@8.15.3+sha256.fc4a49bd609550a41e14d20efbce802a4b892aa4cac877322de2f0924f122991"
 }
