@@ -4,7 +4,7 @@ import util from 'node:util';
 import { Controller } from '../controllers/index.js';
 import { checkAuth, handleError } from '../middleware/index.js';
 import { Logger } from '../services/index.js';
-import { Config } from '../config/config.js';
+import { Config } from 'kobold-config';
 
 type UnpackedPromise<T> = T extends Promise<infer U> ? U : T;
 type GenericFunction<TS extends any[], R> = (...args: TS) => R;

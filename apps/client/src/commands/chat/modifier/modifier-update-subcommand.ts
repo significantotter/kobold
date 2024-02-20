@@ -13,7 +13,7 @@ import { RateLimiter } from 'discord.js-rate-limiter';
 import { compileExpression } from 'filtrex';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { Kobold, SheetAdjustmentTypeEnum } from '../../../services/kobold/index.js';
+import { Kobold, SheetAdjustmentTypeEnum } from 'kobold-db';
 import { KoboldError } from '../../../utils/KoboldError.js';
 import { Creature } from '../../../utils/creature.js';
 import { DiceUtils } from '../../../utils/dice-utils.js';

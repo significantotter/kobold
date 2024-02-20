@@ -1,1 +1,1 @@
-export { Reaction } from './reaction.js';
+export type { Reaction } from './reaction.js';

@@ -5,7 +5,7 @@ export class PathBuilder {
 	constructor() {}
 
 	public async get({ characterJsonId }: { characterJsonId: number }) {
-		return (await axios.default.get('https://pathbuilder2e.com/json.php?id=' + characterJsonId))
+		return (await axios.get('https://pathbuilder2e.com/json.php?id=' + characterJsonId))
 			.data as PathBuilderTypes.JsonExport;
 	}
 }

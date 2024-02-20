@@ -15,7 +15,7 @@ import { InteractionUtils } from '../../utils/interaction-utils.js';
 import { KoboldEmbed } from '../../utils/kobold-embed-utils.js';
 import { ShardUtils } from '../../utils/shard-utils.js';
 import { Command, CommandDeferType, InjectedServices } from '../command.js';
-import { Config } from './../../config/config.js';
+import { Config } from 'kobold-config';
 
 export class AdminCommand implements Command {
 	public names = [L.en.commands.admin.name()];

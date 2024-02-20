@@ -10,9 +10,9 @@ import {
 	isAbilityEnum,
 	isSheetIntegerKeys,
 	isSheetStatKeys,
-} from '../../services/kobold/index.js';
+} from 'kobold-db';
 import { PathBuilder } from '../../services/pathbuilder/pathbuilder.js';
-import { Creature, CreatureFluff, Stat } from '../../services/pf2etools/schemas/index-types.js';
+import type { Creature, CreatureFluff, Stat } from 'pf2etools-data';
 import { WG } from '../../services/wanderers-guide/wanderers-guide.js';
 import { SheetProperties, SheetStatProperties } from './sheet-properties.js';
 import { SheetUtils } from './sheet-utils.js';
@@ -450,22 +450,22 @@ export function convertBestiaryCreatureToSheet(
 					? {
 							type: res,
 							amount: 0,
-					  }
+						}
 					: {
 							type: res.name,
 							amount: res.amount ?? 0,
-					  }
+						}
 			),
 			weaknesses: (bestiaryEntry.defenses?.weaknesses || []).map(weak =>
 				_.isString(weak)
 					? {
 							type: weak,
 							amount: 0,
-					  }
+						}
 					: {
 							type: weak.name,
 							amount: weak.amount ?? 0,
-					  }
+						}
 			),
 		},
 		stats: baseSheet.stats,

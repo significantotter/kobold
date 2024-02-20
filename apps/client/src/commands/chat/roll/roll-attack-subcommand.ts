@@ -14,7 +14,7 @@ import { ChatArgs } from '../../../constants/index.js';
 
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { Kobold, SheetRecord } from '../../../services/kobold/index.js';
+import { Kobold, SheetRecord } from 'kobold-db';
 import { ActionRoller } from '../../../utils/action-roller.js';
 import { Creature } from '../../../utils/creature.js';
 import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';

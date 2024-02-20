@@ -1,4 +1,4 @@
-import { AbilityEnum } from '../services/kobold/index.js';
+import { AbilityEnum } from 'kobold-db';
 import { AttributeUtils } from './attribute-utils.js';
 import { Creature } from './creature.js';
 import { SheetProperties } from './sheet/sheet-properties.js';

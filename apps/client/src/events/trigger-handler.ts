@@ -2,7 +2,7 @@ import { Message } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 
 import { Trigger } from '../triggers/index.js';
-import { Config } from './../config/config.js';
+import { Config } from 'kobold-config';
 
 export class TriggerHandler {
 	protected rateLimiter = new RateLimiter(

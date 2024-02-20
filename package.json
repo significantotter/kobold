@@ -1,13 +1,31 @@
 {
-	"name": "Kobold",
+	"name": "kobold",
 	"version": "1.0.0",
 	"author": "Significantotter",
 	"description": "A discord.js bot for Pathfinder 2e play by post games.",
 	"license": "MIT",
+	"type": "module",
 	"private": true,
 	"scripts": {},
 	"devDependencies": {
-		"turbo": "^1.7.0"
+		"turbo": "^1.7.0",
+		"eslint": "^8.49.0"
+	},
+	"pnpm": {
+		"overrides": {
+			"better-sqlite3": "^8.7.0",
+			"discord.js": "^14.13.0",
+			"dotenv": "^16.3.1",
+			"kysely": "^0.26.3",
+			"lodash": "^4.17.21",
+			"pm2": "^5.3.0",
+			"tsx": "^4.1.2",
+			"typescript": "^5.3",
+			"type-fest": "^4.3.1",
+			"ts-node": "^10.9.1",
+			"vitest": "^0.34.4",
+			"zod": "^3.22.2"
+		}
 	},
 	"packageManager": "pnpm@8.15.3+sha256.fc4a49bd609550a41e14d20efbce802a4b892aa4cac877322de2f0924f122991"
 }

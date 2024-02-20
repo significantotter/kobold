@@ -1,5 +1,5 @@
 import { CommandInteraction, CacheType } from 'discord.js';
-import { NewSheetRecord } from '../../../../services/kobold/index.js';
+import { NewSheetRecord } from 'kobold-db';
 import { CharacterFetcher } from './character-fetcher.js';
 
 const fakeIntr = {

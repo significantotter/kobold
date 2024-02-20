@@ -3,7 +3,7 @@ import {
 	InlineRollsDisplayEnum,
 	RollCompactModeEnum,
 	UserSettings,
-} from '../services/kobold/index.js';
+} from 'kobold-db';
 
 export class DefaultUtils {
 	public static get userSettings(): UserSettings {

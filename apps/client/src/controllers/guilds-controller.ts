@@ -4,7 +4,7 @@ import router from 'express-promise-router';
 
 import { GetGuildsResponse } from '../models/cluster-api/index.js';
 import { Controller } from './controller.js';
-import { Config } from './../config/config.js';
+import { Config } from 'kobold-config';
 
 export class GuildsController implements Controller {
 	public path = '/guilds';

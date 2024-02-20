@@ -7,8 +7,8 @@ import {
 	RESTPostAPIApplicationCommandsJSONBody,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
-import { Kobold } from '../services/kobold/index.js';
-import { CompendiumModel } from '../services/pf2etools/compendium.model.js';
+import { Kobold } from 'kobold-db';
+import { CompendiumModel } from 'pf2etools-data';
 import { TranslationFunctions } from './../i18n/i18n-types.js';
 
 export interface InjectedCommandData {}

@@ -4,7 +4,7 @@ import {
 	ChannelType,
 } from 'discord.js';
 import L from '../../../i18n/i18n-node.js';
-import { SheetBaseCounterKeys } from '../../../services/kobold/index.js';
+import { SheetBaseCounterKeys } from 'kobold-db';
 
 export class GameplayOptions {
 	public static readonly GAMEPLAY_SET_OPTION: APIApplicationCommandBasicOption = {

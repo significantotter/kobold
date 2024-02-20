@@ -1,6 +1,6 @@
 import { CommandInteraction, CacheType } from 'discord.js';
 import { PathbuilderCharacterFetcher } from './pathbuilder-character-fetcher.js';
-import { truncateDbForTests, vitestKobold } from '../../../../utils/discord-test-utils.js';
+import { truncateDbForTests, vitestKobold } from 'kobold-db/test-utils';
 import { zPathBuilderCharacterSchema } from '../../../../services/pathbuilder/pathbuilder.zod.js';
 import { generateMock } from '@anatine/zod-mock';
 

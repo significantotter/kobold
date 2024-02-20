@@ -1,6 +1,6 @@
 import { GatewayIntentBits, Options, Partials, REST, disableValidators } from 'discord.js';
 import 'reflect-metadata';
-import './config/config.js';
+import 'kobold-config';
 
 import { Button } from './buttons/index.js';
 import {
@@ -97,7 +97,7 @@ import {
 	SettingsSetSubCommand,
 } from './commands/chat/index.js';
 import { Command } from './commands/index.js';
-import { Config } from './config/config.js';
+import { Config } from 'kobold-config';
 import {
 	ButtonHandler,
 	CommandHandler,
@@ -113,9 +113,8 @@ import { Reaction } from './reactions/index.js';
 import { getDialect } from './services/db.dialect.js';
 import { CommandRegistrationService, JobService, Logger } from './services/index.js';
 import { Job } from './services/job-service.js';
-import { Kobold } from './services/kobold/index.js';
-import { CompendiumModel } from './services/pf2etools/compendium.model.js';
-import { db } from './services/pf2etools/pf2eTools.db.js';
+import { Kobold } from 'kobold-db';
+import { CompendiumModel, CompendiumDb } from 'pf2etools-data';
 import { Trigger } from './triggers/index.js';
 
 // this is to prevent embeds breaking on "addFields" when adding more than an embed can hold
@@ -126,7 +125,7 @@ async function start(): Promise<void> {
 	const PostgresDialect = getDialect(Config.database.url);
 	const kobold = new Kobold(PostgresDialect);
 
-	const compendium = new CompendiumModel(db);
+	const compendium = new CompendiumModel(CompendiumDb);
 
 	// Client
 	let client = new CustomClient({

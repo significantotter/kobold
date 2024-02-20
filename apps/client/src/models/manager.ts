@@ -1,8 +1,7 @@
 import { Shard, ShardingManager } from 'discord.js';
 
 import { JobService, Logger } from '../services/index.js';
-import { Config } from './../config/config.js';
-import Logs from './../config/lang/logs.json' assert { type: 'json' };
+import { Config } from 'kobold-config';
 
 export class Manager {
 	constructor(
@@ -17,18 +16,16 @@ export class Manager {
 
 		try {
 			Logger.info(
-				Logs.info.managerSpawningShards
-					.replaceAll('{SHARD_COUNT}', shardList.length.toLocaleString())
-					.replaceAll('{SHARD_LIST}', shardList.join(', '))
+				`Spawning ${shardList.length.toLocaleString()} shards: [${shardList.join(', ')}].`
 			);
 			await this.shardManager.spawn({
 				amount: this.shardManager.totalShards,
 				delay: Config.sharding.spawnDelay * 1000,
 				timeout: Config.sharding.spawnTimeout * 1000,
 			});
-			Logger.info(Logs.info.managerAllShardsSpawned);
+			Logger.info(`All shards have been spawned.`);
 		} catch (error) {
-			Logger.error(Logs.error.managerSpawningShards, error);
+			Logger.error(`An error occurred while spawning shards.`, error);
 			return;
 		}
 
@@ -44,6 +41,6 @@ export class Manager {
 	}
 
 	protected onShardCreate(shard: Shard): void {
-		Logger.info(Logs.info.managerLaunchedShard.replaceAll('{SHARD_ID}', shard.id.toString()));
+		`Launched Shard ${shard.id.toString()}.`;
 	}
 }

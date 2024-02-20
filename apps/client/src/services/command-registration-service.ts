@@ -9,8 +9,7 @@ import {
 } from 'discord.js';
 
 import { Logger } from './logger.js';
-import { Config } from './../config/config.js';
-import Logs from './../config/lang/logs.json' assert { type: 'json' };
+import { Config } from 'kobold-config';
 
 export class CommandRegistrationService {
 	constructor(protected rest: REST) {}
@@ -45,26 +44,16 @@ export class CommandRegistrationService {
 		switch (args[3]) {
 			case 'view': {
 				Logger.info(
-					Logs.info.commandActionView
-						.replaceAll(
-							'{LOCAL_AND_REMOTE_LIST}',
-							this.formatCommandList(localCmdsOnRemoteMetadata)
-						)
-						.replaceAll(
-							'{LOCAL_ONLY_LIST}',
-							this.formatCommandList(localCmdsOnlyMetadata)
-						)
-						.replaceAll('{REMOTE_ONLY_LIST}', this.formatCommandList(remoteCmdsOnly))
+					`\nLocal and remote:\n    ${this.formatCommandList(localCmdsOnRemoteMetadata)}\n` +
+						`Local only:\n    ${this.formatCommandList(localCmdsOnlyMetadata)}\n` +
+						`Remote only:\n    ${this.formatCommandList(remoteCmdsOnly)}`
 				);
 				return;
 			}
 			case 'register': {
 				if (localCmdsOnly.length > 0) {
 					Logger.info(
-						Logs.info.commandActionCreating.replaceAll(
-							'{COMMAND_LIST}',
-							this.formatCommandList(localCmdsOnlyMetadata)
-						)
+						`Creating commands: ${this.formatCommandList(localCmdsOnlyMetadata)}`
 					);
 					//insert new guilds
 					for (let localCmd of localCmdsOnly) {
@@ -84,15 +73,12 @@ export class CommandRegistrationService {
 							});
 						}
 					}
-					Logger.info(Logs.info.commandActionCreated);
+					Logger.info(`Commands created.`);
 				}
 
 				if (localCmdsOnRemoteMetadata.length > 0) {
 					Logger.info(
-						Logs.info.commandActionUpdating.replaceAll(
-							'{COMMAND_LIST}',
-							this.formatCommandList(localCmdsOnRemoteMetadata)
-						)
+						`Updating commands: ${this.formatCommandList(localCmdsOnRemoteMetadata)}`
 					);
 					for (let localCmd of localCmdsOnRemoteMetadata) {
 						try {
@@ -104,7 +90,7 @@ export class CommandRegistrationService {
 							throw err;
 						}
 					}
-					Logger.info(Logs.info.commandActionUpdated);
+					Logger.info(`Commands updated.`);
 				}
 
 				return;
@@ -113,61 +99,46 @@ export class CommandRegistrationService {
 				let oldName = args[4];
 				let newName = args[5];
 				if (!(oldName && newName)) {
-					Logger.error(Logs.error.commandActionRenameMissingArg);
+					Logger.error(`Please supply the current command name and new command name.`);
 					return;
 				}
 
 				let remoteCmd = remoteCmds.find(remoteCmd => remoteCmd.name == oldName);
 				if (!remoteCmd) {
-					Logger.error(
-						Logs.error.commandActionNotFound.replaceAll('{COMMAND_NAME}', oldName)
-					);
+					Logger.error(`Could not find a command with the name '${oldName}'.`);
 					return;
 				}
 
-				Logger.info(
-					Logs.info.commandActionRenaming
-						.replaceAll('{OLD_COMMAND_NAME}', remoteCmd.name)
-						.replaceAll('{NEW_COMMAND_NAME}', newName)
-				);
+				Logger.info(`Renaming command: '${remoteCmd.name}' --> '${newName}'`);
 				let body: RESTPatchAPIApplicationCommandJSONBody = {
 					name: newName,
 				};
 				await this.rest.patch(Routes.applicationCommand(Config.client.id, remoteCmd.id), {
 					body,
 				});
-				Logger.info(Logs.info.commandActionRenamed);
+				Logger.info(`Command renamed.`);
 				return;
 			}
 			case 'delete': {
 				let name = args[4];
 				if (!name) {
-					Logger.error(Logs.error.commandActionDeleteMissingArg);
+					Logger.error(`Please supply a command name to delete.`);
 					return;
 				}
 
 				let remoteCmd = remoteCmds.find(remoteCmd => remoteCmd.name == name);
 				if (!remoteCmd) {
-					Logger.error(
-						Logs.error.commandActionNotFound.replaceAll('{COMMAND_NAME}', name)
-					);
+					Logger.error(`Could not find a command with the name '${name}'.`);
 					return;
 				}
 
-				Logger.info(
-					Logs.info.commandActionDeleting.replaceAll('{COMMAND_NAME}', remoteCmd.name)
-				);
+				Logger.info(`Deleting command: '${remoteCmd.name}'`);
 				await this.rest.delete(Routes.applicationCommand(Config.client.id, remoteCmd.id));
-				Logger.info(Logs.info.commandActionDeleted);
+				Logger.info(`Command deleted.`);
 				return;
 			}
 			case 'clear': {
-				Logger.info(
-					Logs.info.commandActionClearing.replaceAll(
-						'{COMMAND_LIST}',
-						this.formatCommandList(remoteCmds)
-					)
-				);
+				Logger.info(`Deleting all commands: ${this.formatCommandList(remoteCmds)}`);
 				await this.rest.put(Routes.applicationCommands(Config.client.id), { body: [] });
 				for (const command of commands) {
 					for (const guildId of command?.restrictedGuilds || []) {
@@ -177,7 +148,7 @@ export class CommandRegistrationService {
 						);
 					}
 				}
-				Logger.info(Logs.info.commandActionCleared);
+				Logger.info(`Commands deleted.`);
 				return;
 			}
 		}

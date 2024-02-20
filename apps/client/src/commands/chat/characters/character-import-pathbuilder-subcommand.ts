@@ -4,7 +4,7 @@ import {
 	PermissionsString,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
-import { Kobold } from '../../../services/kobold/index.js';
+import { Kobold } from 'kobold-db';
 
 import _ from 'lodash';
 import L from '../../../i18n/i18n-node.js';

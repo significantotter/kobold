@@ -4,7 +4,7 @@ import {
 	zWgCharacterCalculatedStatsApiResponseSchema,
 } from '../../../../services/wanderers-guide/wanderers-guide.zod.js';
 import { CommandInteraction, CacheType } from 'discord.js';
-import { truncateDbForTests, vitestKobold } from '../../../../utils/discord-test-utils.js';
+import { truncateDbForTests, vitestKobold } from 'kobold-db/test-utils';
 import { generateMock } from '@anatine/zod-mock';
 import { faker } from '@faker-js/faker';
 const fakeIntr = { user: { id: 5 }, userId: 5 } as unknown as CommandInteraction<CacheType>;

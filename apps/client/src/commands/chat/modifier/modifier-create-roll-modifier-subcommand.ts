@@ -10,11 +10,7 @@ import { ModifierOptions } from './modifier-command-options.js';
 import { compileExpression } from 'filtrex';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import {
-	Kobold,
-	ModifierTypeEnum,
-	isSheetAdjustmentTypeEnum,
-} from '../../../services/kobold/index.js';
+import { Kobold, ModifierTypeEnum, isSheetAdjustmentTypeEnum } from 'kobold-db';
 import { KoboldError } from '../../../utils/KoboldError.js';
 import { Creature } from '../../../utils/creature.js';
 import { DiceUtils } from '../../../utils/dice-utils.js';

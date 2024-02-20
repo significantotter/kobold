@@ -13,7 +13,7 @@ import { GameplayOptions } from './gameplay-command-options.js';
 
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { Kobold } from '../../../services/kobold/kobold.model.js';
+import { Kobold } from 'kobold-db';
 import { Creature } from '../../../utils/creature.js';
 import { InteractionUtils } from '../../../utils/interaction-utils.js';
 import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';

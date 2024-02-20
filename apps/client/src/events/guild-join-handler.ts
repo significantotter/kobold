@@ -2,7 +2,6 @@ import { Guild, Locale } from 'discord.js';
 
 import { Logger } from '../services/index.js';
 import { ClientUtils, MessageUtils } from '../utils/index.js';
-import Logs from './../config/lang/logs.json' assert { type: 'json' };
 import { KoboldEmbed } from '../utils/kobold-embed-utils.js';
 import { refs } from '../constants/common-text.js';
 import _ from 'lodash';
@@ -32,11 +31,7 @@ const welcomeEmbed = new KoboldEmbed({
 
 export class GuildJoinHandler implements EventHandler {
 	public async process(guild: Guild): Promise<void> {
-		Logger.info(
-			Logs.info.guildJoined
-				.replaceAll('{GUILD_NAME}', guild.name)
-				.replaceAll('{GUILD_ID}', guild.id)
-		);
+		Logger.info(`Guild '${guild.name}' (${guild.id}) joined.`);
 
 		// TODO: Get data from database
 		// let data = new EventData();

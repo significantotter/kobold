@@ -7,7 +7,7 @@ import {
 	InitiativeWithRelations,
 	Kobold,
 	UserSettings,
-} from '../../services/kobold/index.js';
+} from 'kobold-db';
 import { KoboldError } from '../KoboldError.js';
 import { AutocompleteUtils } from './autocomplete-utils.js';
 import { CharacterUtils } from './character-utils.js';
@@ -60,7 +60,7 @@ export class KoboldUtils {
 					userId: intr.user.id,
 					guildId: intr.guild?.id,
 					channelId: intr.channel?.id,
-			  })
+				})
 			: Promise.resolve(undefined);
 
 		let ownedCharactersPromise = usesData.ownedCharacters

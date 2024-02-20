@@ -9,7 +9,7 @@ import {
 	InitiativeActorWithRelations,
 	InitiativeWithRelations,
 	UserSettings,
-} from '../services/kobold/index.js';
+} from 'kobold-db';
 import { KoboldError } from './KoboldError.js';
 import { Creature } from './creature.js';
 import { DefaultUtils } from './default-utils.js';

@@ -29,26 +29,23 @@ export class CharacterApi {
 	}
 
 	async get(characterId: number): Promise<WG.CharacterApiResponse> {
-		const response = await axios.default.get(`${this.baseURL}/${characterId}`, {
+		const response = await axios.get(`${this.baseURL}/${characterId}`, {
 			headers: this.wg.headers,
 		});
 		const character: WG.CharacterApiResponse = CharacterApi.parseApiResponse(response.data);
 		return character;
 	}
 	async getCalculatedStats(characterId: number): Promise<WG.CharacterCalculatedStatsApiResponse> {
-		const response = await axios.default.get(
-			`${this.baseURL}/${characterId}/calculated-stats`,
-			{
-				headers: this.wg.headers,
-			}
-		);
+		const response = await axios.get(`${this.baseURL}/${characterId}/calculated-stats`, {
+			headers: this.wg.headers,
+		});
 		const calculatedStats: WG.CharacterCalculatedStatsApiResponse =
 			CharacterApi.parseApiResponse(response.data);
 		return calculatedStats;
 	}
 
 	async getMetadata(characterId: number): Promise<WG.CharacterMetadataApiResponse> {
-		const response = await axios.default.get(`${this.baseURL}/${characterId}/metadata`, {
+		const response = await axios.get(`${this.baseURL}/${characterId}/metadata`, {
 			headers: this.wg.headers,
 		});
 		const metadata: WG.CharacterMetadataApiResponse = CharacterApi.parseApiResponse(
@@ -58,7 +55,7 @@ export class CharacterApi {
 	}
 
 	async getSpells(characterId: number): Promise<WG.CharacterSpellApiResponse> {
-		const response = await axios.default.get(`${this.baseURL}/${characterId}/spell`, {
+		const response = await axios.get(`${this.baseURL}/${characterId}/spell`, {
 			headers: this.wg.headers,
 		});
 		const metadata: WG.CharacterSpellApiResponse = CharacterApi.parseApiResponse(response.data);
@@ -66,7 +63,7 @@ export class CharacterApi {
 	}
 
 	async getInventory(characterId: number): Promise<WG.CharacterInventoryApiResponse> {
-		const response = await axios.default.get(`${this.baseURL}/${characterId}/inventory`, {
+		const response = await axios.get(`${this.baseURL}/${characterId}/inventory`, {
 			headers: this.wg.headers,
 		});
 		const metadata: WG.CharacterInventoryApiResponse = CharacterApi.parseApiResponse(
@@ -76,7 +73,7 @@ export class CharacterApi {
 	}
 
 	async getConditions(characterId: number): Promise<WG.CharacterConditionsApiResponse> {
-		const response = await axios.default.get(`${this.baseURL}/${characterId}/conditions`, {
+		const response = await axios.get(`${this.baseURL}/${characterId}/conditions`, {
 			headers: this.wg.headers,
 		});
 		const metadata: WG.CharacterConditionsApiResponse = CharacterApi.parseApiResponse(

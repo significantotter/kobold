@@ -1,10 +1,6 @@
 import { CommandInteraction, CacheType, ComponentType, ButtonStyle } from 'discord.js';
-import {
-	NewSheetRecord,
-	Character,
-	CharacterWithRelations,
-} from '../../../../services/kobold/index.js';
-import { Kobold } from '../../../../services/kobold/kobold.model.js';
+import { NewSheetRecord, Character, CharacterWithRelations } from 'kobold-db';
+import { Kobold } from 'kobold-db';
 import { KoboldError } from '../../../../utils/KoboldError.js';
 import { CollectorUtils } from '../../../../utils/collector-utils.js';
 import { Creature } from '../../../../utils/creature.js';
@@ -64,8 +60,8 @@ export abstract class CharacterFetcher<SourceData, FetchArgs> {
 				`please re-export the correct character and try again.` +
 				(this.importSource === 'pathbuilder'
 					? '\n\n**NOTE:** If you are using Pathbuilder, you must re-export your character and use the new json id to ' +
-					  'update your character sheet with new changes. Otherwise, I will just reload the data from the last ' +
-					  'time you exported ANY character.'
+						'update your character sheet with new changes. Otherwise, I will just reload the data from the last ' +
+						'time you exported ANY character.'
 					: ''),
 			components: [
 				{

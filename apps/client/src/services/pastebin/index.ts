@@ -16,13 +16,13 @@ export class PasteBin {
 		formData.append('api_paste_expire_date', expires);
 		formData.append('api_paste_name', name);
 		return (
-			await axios.default.post('https://pastebin.com/api/api_post.php', formData, {
+			await axios.post('https://pastebin.com/api/api_post.php', formData, {
 				headers: formData.getHeaders(),
 			})
 		).data;
 	}
 
 	public async get({ paste_key }: { paste_key: string }) {
-		return (await axios.default.get('https://pastebin.com/raw/' + paste_key)).data;
+		return (await axios.get('https://pastebin.com/raw/' + paste_key)).data;
 	}
 }

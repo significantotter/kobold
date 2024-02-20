@@ -4,7 +4,7 @@ import _ from 'lodash';
 import { attributeShorthands, staticAttributes } from '../constants/attributes.js';
 import L from '../i18n/i18n-node.js';
 import { TranslationFunctions } from '../i18n/i18n-types.js';
-import { Attribute, Modifier, RollMacro } from '../services/kobold/index.js';
+import { Attribute, Modifier, RollMacro } from 'kobold-db';
 import type { Creature } from './creature.js';
 import { WritableDeep } from 'type-fest';
 

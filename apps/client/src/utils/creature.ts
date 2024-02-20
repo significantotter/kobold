@@ -1,13 +1,6 @@
 import { BaseMessageOptions } from 'discord.js';
 import _ from 'lodash';
-import type {
-	Action,
-	Attribute,
-	Modifier,
-	RollMacro,
-	Sheet,
-	SheetRecord,
-} from '../services/kobold/index.js';
+import type { Action, Attribute, Modifier, RollMacro, Sheet, SheetRecord } from 'kobold-db';
 import {
 	AbilityEnum,
 	Counter,
@@ -15,7 +8,7 @@ import {
 	SheetAttack,
 	SheetBaseCounterKeys,
 	SheetStatKeys,
-} from '../services/kobold/index.js';
+} from 'kobold-db';
 import { PathBuilder } from '../services/pathbuilder/pathbuilder.js';
 import { WG } from '../services/wanderers-guide/wanderers-guide.js';
 import { KoboldError } from './KoboldError.js';
@@ -931,8 +924,8 @@ export class Creature {
 
 	public static preserveSheetTrackerValues(sheet: Sheet, updateFrom?: Sheet): Sheet {
 		if (updateFrom) {
-			let baseCounterKey: SheetBaseCounterKeys;
-			for (baseCounterKey in sheet.baseCounters) {
+			for (const key in sheet.baseCounters) {
+				const baseCounterKey: SheetBaseCounterKeys = key as SheetBaseCounterKeys;
 				sheet.baseCounters[baseCounterKey].current =
 					updateFrom.baseCounters[baseCounterKey].current ??
 					sheet.baseCounters[baseCounterKey].current;

@@ -1,5 +1,5 @@
 import L from '../i18n/i18n-node.js';
-import { Attribute, CharacterWithRelations } from '../services/kobold/index.js';
+import { Attribute, CharacterWithRelations } from 'kobold-db';
 import { Creature } from './creature.js';
 import { DiceUtils } from './dice-utils.js';
 import { RollBuilder } from './roll-builder.js';

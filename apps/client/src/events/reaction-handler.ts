@@ -3,7 +3,7 @@ import { RateLimiter } from 'discord.js-rate-limiter';
 
 import { Reaction } from '../reactions/index.js';
 import { EventHandler } from './event-handler.js';
-import { Config } from './../config/config.js';
+import { Config } from 'kobold-config';
 
 export class ReactionHandler implements EventHandler {
 	protected rateLimiter = new RateLimiter(

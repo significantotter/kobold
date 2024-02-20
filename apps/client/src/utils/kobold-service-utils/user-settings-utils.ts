@@ -1,6 +1,6 @@
 import type { Interaction } from 'discord.js';
 import _ from 'lodash';
-import type { Kobold, UserSettings } from '../../services/kobold/index.js';
+import type { Kobold, UserSettings } from 'kobold-db';
 import { DefaultUtils } from '../default-utils.js';
 import type { KoboldUtils } from './kobold-utils.js';
 

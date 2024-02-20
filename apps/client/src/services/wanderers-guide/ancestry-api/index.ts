@@ -12,21 +12,21 @@ export class AncestryApi {
 	}
 
 	async get(ancestryId: number): Promise<WG.AncestryApiResponse> {
-		const response = await axios.default.get(`${this.baseURL}?id=${ancestryId}`, {
+		const response = await axios.get(`${this.baseURL}?id=${ancestryId}`, {
 			headers: this.wg.headers,
 		});
 		return response.data as WG.AncestryApiResponse;
 	}
 
 	async getName(ancestryName: string): Promise<WG.AncestryApiResponse> {
-		const response = await axios.default.get(`${this.baseURL}?name=${ancestryName}`, {
+		const response = await axios.get(`${this.baseURL}?name=${ancestryName}`, {
 			headers: this.wg.headers,
 		});
 		return response.data as WG.AncestryApiResponse;
 	}
 
 	async getAll(): Promise<WG.AncestryApiMapResponse> {
-		const response = await axios.default.get(`${this.baseURL}/all}`, {
+		const response = await axios.get(`${this.baseURL}/all}`, {
 			headers: this.wg.headers,
 		});
 		return response.data as WG.AncestryApiMapResponse;

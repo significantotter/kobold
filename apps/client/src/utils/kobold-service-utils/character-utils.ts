@@ -1,5 +1,5 @@
 import { BaseInteraction, CacheType, CommandInteraction, Interaction } from 'discord.js';
-import { Character, CharacterWithRelations, Kobold } from '../../services/kobold/index.js';
+import { Character, CharacterWithRelations, Kobold } from 'kobold-db';
 import { StringUtils } from '../string-utils.js';
 import type { KoboldUtils } from './kobold-utils.js';
 

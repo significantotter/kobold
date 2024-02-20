@@ -14,7 +14,7 @@ import { GameplayOptions } from './gameplay-command-options.js';
 import _ from 'lodash';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { Kobold, SheetBaseCounterKeys } from '../../../services/kobold/index.js';
+import { Kobold, SheetBaseCounterKeys } from 'kobold-db';
 import { KoboldError } from '../../../utils/KoboldError.js';
 import { Creature } from '../../../utils/creature.js';
 import { InteractionUtils } from '../../../utils/interaction-utils.js';

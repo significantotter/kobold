@@ -1,5 +1,5 @@
 import type { ChatInputCommandInteraction } from 'discord.js';
-import type { Kobold, SheetRecord } from '../../services/kobold/index.js';
+import type { Kobold, SheetRecord } from 'kobold-db';
 import { Creature } from '../creature.js';
 import type { KoboldUtils } from './kobold-utils.js';
 

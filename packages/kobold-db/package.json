@@ -1,0 +1,49 @@
+{
+	"name": "kobold-db",
+	"version": "1.0.0",
+	"author": "Significantotter",
+	"description": "A model-based interface for the Kobold database.",
+	"license": "MIT",
+	"private": true,
+	"type": "module",
+	"main": "./src/index.js",
+	"types": "./src/index.js",
+	"exports": {
+		".": {
+			"default": "./dist/index.js",
+			"types": "./dist/index.d.ts"
+		},
+		"./test-utils": {
+			"default": "./dist/test-utils.js",
+			"types": "./dist/test-utils.d.ts"
+		}
+	},
+	"scripts": {
+		"build": "pnpm run compile",
+		"compile": "tsc -p tsconfig.build.json",
+		"test": "vitest"
+	},
+	"dependencies": {
+		"date-fns": "^2.30.0",
+		"kobold-config": "workspace:*",
+		"kysely": "^0.26.3",
+		"lodash": "^4.17.21",
+		"pf2etools-data": "workspace:*",
+		"pg": "^8.11.3",
+		"zod": "^3.22.2"
+	},
+	"devDependencies": {
+		"@anatine/zod-mock": "^3.13.3",
+		"@kristiandupont/recase": "^1.2.1",
+		"@types/lodash": "^4.14.202",
+		"@types/pg": "^8.11.0",
+		"dotenv": "^16.3.1",
+		"kanel": "^3.5.5",
+		"kanel-kysely": "^0.2.1",
+		"kanel-zod": "^1.2.3",
+		"tagged-comment-parser": "^1.3.6",
+		"type-fest": "^4.3.1",
+		"typescript": "^5.3",
+		"vitest": "^0.34.4"
+	}
+}

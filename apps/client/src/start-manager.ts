@@ -1,8 +1,8 @@
 import { ShardingManager } from 'discord.js';
 import 'reflect-metadata';
-import './config/config.js';
+import 'kobold-config';
 
-import { Config } from './config/config.js';
+import { Config } from 'kobold-config';
 import { GuildsController, RootController, ShardsController } from './controllers/index.js';
 import { UpdateServerCountJob } from './jobs/index.js';
 import { Api } from './models/api.js';

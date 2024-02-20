@@ -12,7 +12,7 @@
 			"cache": false,
 			"persistent": true
 		},
-		"start": {"dependsOn": ["^start"], "cache": false},
+		"start": { "dependsOn": ["^start"], "cache": false },
 		"type-check": {}
 	}
 }

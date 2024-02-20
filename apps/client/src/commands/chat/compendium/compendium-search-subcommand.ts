@@ -13,15 +13,15 @@ import {
 import { getEmoji } from '../../../constants/emoji.js';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { CompendiumModel } from '../../../services/pf2etools/compendium.model.js';
-import { CompendiumEmbedParser } from '../../../services/pf2etools/parsers/compendium-parser.js';
-import { CompendiumUtils } from '../../../services/pf2etools/utils/compendium-utils.js';
+import { CompendiumModel } from 'pf2etools-data';
+import { CompendiumEmbedParser } from 'pf2etools-data';
+import { CompendiumUtils } from 'pf2etools-data';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { CompendiumOptions } from './compendium-command-options.js';
 
 import _ from 'lodash';
-import { Kobold } from '../../../services/kobold/kobold.model.js';
+import { Kobold } from 'kobold-db';
 import type {
 	Ability,
 	Action,
@@ -60,7 +60,7 @@ import type {
 	VariantRule,
 	Vehicle,
 	VersatileHeritage,
-} from '../../../services/pf2etools/schemas/index-types.js';
+} from 'pf2etools-data';
 import { KoboldError } from '../../../utils/KoboldError.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { StringUtils } from '../../../utils/string-utils.js';
@@ -125,7 +125,7 @@ export class CompendiumSearchSubCommand implements Command {
 					? {
 							model,
 							search: value[0].search,
-					  }
+						}
 					: null
 			)
 			.filter(_.identity)

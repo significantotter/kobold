@@ -11,7 +11,7 @@ import {
 	zModifier,
 	zRollMacro,
 	zSheet,
-} from '../../../../services/kobold/index.js';
+} from 'kobold-db';
 import { PasteBin } from '../../../../services/pastebin/index.js';
 import { KoboldError } from '../../../../utils/KoboldError.js';
 import { Creature } from '../../../../utils/creature.js';

@@ -1,7 +1,7 @@
 import { DiscordAPIError } from 'discord.js';
 import { Response } from 'node-fetch';
 import pino from 'pino';
-import { Config } from './../config/config.js';
+import { Config } from 'kobold-config';
 
 let logger = pino.default(
 	{
@@ -19,7 +19,7 @@ let logger = pino.default(
 					ignore: 'pid,hostname',
 					translateTime: 'yyyy-mm-dd HH:MM:ss.l',
 				},
-		  })
+			})
 		: undefined
 );
 

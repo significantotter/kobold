@@ -1,5 +1,5 @@
 import { BaseInteraction, CacheType, ChatInputCommandInteraction } from 'discord.js';
-import { ActionCostEnum, isActionCostEnum } from '../services/kobold/index.js';
+import { ActionCostEnum, isActionCostEnum } from 'kobold-db';
 
 type EmojiOptions = Exclude<ActionCostEnum, ActionCostEnum.variableActions | ActionCostEnum.none>;
 

@@ -19,7 +19,7 @@ import {
 	UserSettings,
 	isInitStatsNotificationEnum,
 	isInlineRollsDisplayEnum,
-} from '../../../services/kobold/index.js';
+} from 'kobold-db';
 import { KoboldError } from '../../../utils/KoboldError.js';
 import { InteractionUtils } from '../../../utils/interaction-utils.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';

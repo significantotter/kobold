@@ -1,17 +1,12 @@
-import { Config } from '../../../../config/config.js';
+import { Config } from 'kobold-config';
 import L from '../../../../i18n/i18n-node.js';
-import {
-	SheetRecord,
-	Character,
-	CharacterWithRelations,
-	NewSheetRecord,
-} from '../../../../services/kobold/index.js';
+import { SheetRecord, Character, CharacterWithRelations, NewSheetRecord } from 'kobold-db';
 import { WanderersGuide } from '../../../../services/wanderers-guide/index.js';
 import { WG } from '../../../../services/wanderers-guide/wanderers-guide.js';
 import { KoboldError } from '../../../../utils/KoboldError.js';
 import { Creature } from '../../../../utils/creature.js';
 import { CharacterFetcher } from './character-fetcher.js';
-import { default as axios } from 'axios';
+import axios from 'axios';
 
 export class WgCharacterFetcher extends CharacterFetcher<
 	{
@@ -237,15 +232,12 @@ export class WgCharacterFetcher extends CharacterFetcher<
 				return await this.fetchWgCharacterFromToken(args.charId, token);
 			} catch (err) {
 				// on an error, end the process and figure out what kind of error we have
-				if ((axios.default ?? axios).isAxiosError(err) && err?.response?.status === 401) {
+				if (axios.isAxiosError(err) && err?.response?.status === 401) {
 					//token expired!
 					// the catch ensures we don't fail if no tokens are deleted
 					this.kobold.wgAuthToken.delete({ charId: args.charId }).catch(() => {});
 					this.requestAccessToken(args.charId, true);
-				} else if (
-					(axios.default ?? axios).isAxiosError(err) &&
-					err?.response?.status === 429
-				) {
+				} else if (axios.isAxiosError(err) && err?.response?.status === 429) {
 					throw new KoboldError(L.en.commands.character.interactions.tooManyWGRequests());
 				} else {
 					//otherwise, something else went wrong that we want to be a real error

@@ -1,9 +1,4 @@
-import {
-	Attribute,
-	Modifier,
-	ModifierTypeEnum,
-	SheetAdjustmentTypeEnum,
-} from '../../services/kobold/index.js';
+import { Attribute, Modifier, ModifierTypeEnum, SheetAdjustmentTypeEnum } from 'kobold-db';
 import { ModifierUtils } from './modifier-utils.js';
 
 describe('ModifierUtils', () => {

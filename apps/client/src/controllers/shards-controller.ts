@@ -12,7 +12,7 @@ import {
 } from '../models/cluster-api/index.js';
 import { Logger } from '../services/index.js';
 import { Controller } from './controller.js';
-import { Config } from './../config/config.js';
+import { Config } from 'kobold-config';
 
 export class ShardsController implements Controller {
 	public path = '/shards';

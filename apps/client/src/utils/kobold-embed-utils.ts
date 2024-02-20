@@ -16,7 +16,7 @@ import {
 	SheetInfoLists,
 	SheetRecord,
 	SheetWeaknessesResistances,
-} from '../services/kobold/index.js';
+} from 'kobold-db';
 import { KoboldError } from './KoboldError.js';
 import type { ActionRoller } from './action-roller.js';
 import type { InitiativeBuilder, TurnData } from './initiative-builder.js';

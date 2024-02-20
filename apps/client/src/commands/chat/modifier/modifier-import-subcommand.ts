@@ -11,7 +11,7 @@ import { compileExpression } from 'filtrex';
 import _ from 'lodash';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { Kobold, Modifier, zModifier } from '../../../services/kobold/index.js';
+import { Kobold, Modifier, zModifier } from 'kobold-db';
 import { PasteBin } from '../../../services/pastebin/index.js';
 import {
 	ignoreOnConflict,

@@ -1,30 +1,26 @@
 {
+	"extends": "../../tsconfig.base.json",
 	"compilerOptions": {
+		"lib": ["es2023"],
+		"module": "Node16",
 		"target": "ESNext",
-		"module": "NodeNext",
-		"moduleResolution": "NodeNext",
+		"moduleResolution": "node16",
+
 		"composite": true,
-		"lib": ["es2021"],
-		"declaration": true,
-		"declarationMap": true,
 		"sourceMap": true,
-		"outDir": "./dist",
-		"rootDir": "./",
-		"strict": true,
-		"resolveJsonModule": true,
-		"esModuleInterop": true,
+		"rootDir": "./src",
+		"outDir": "dist",
 		"experimentalDecorators": true,
 		"emitDecoratorMetadata": true,
-		"skipLibCheck": true,
-		"forceConsistentCasingInFileNames": true,
-		"disableSizeLimit": true,
-		"types": ["vitest/globals"]
+		"disableSizeLimit": true
 	},
-	"ts-node": {
-		"transpileOnly": true,
-		"files": true,
-		"module": "NodeNext"
-	},
-	"include": ["src/**/*.ts", "src/**/*.json", "types.d.ts"],
-	"exclude": ["dist", "src/migrations", "node_modules", "tests", "knexfile.ts"]
+	"include": ["src/**/*"],
+	"exclude": [
+		"dist",
+		"src/migrations",
+		"node_modules",
+		"knexfile.ts",
+		"**/*.spec.ts",
+		"**/*.test.ts"
+	]
 }

@@ -4,13 +4,13 @@ import {
 	PermissionsString,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
-import { Action, zAction } from '../../../services/kobold/index.js';
+import { Action, zAction } from 'kobold-db';
 
 import _ from 'lodash';
 import { z } from 'zod';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { Kobold } from '../../../services/kobold/index.js';
+import { Kobold } from 'kobold-db';
 import { PasteBin } from '../../../services/pastebin/index.js';
 import {
 	ignoreOnConflict,

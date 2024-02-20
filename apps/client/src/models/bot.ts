@@ -25,8 +25,7 @@ import {
 } from '../events/index.js';
 import { JobService, Logger } from '../services/index.js';
 import { PartialUtils } from '../utils/index.js';
-import { Config } from './../config/config.js';
-import Logs from './../config/lang/logs.json' assert { type: 'json' };
+import { Config } from 'kobold-config';
 
 export class Bot {
 	protected ready = false;
@@ -73,21 +72,21 @@ export class Bot {
 		try {
 			await this.client.login(token);
 		} catch (error) {
-			Logger.error(Logs.error.clientLogin, error);
+			Logger.error(`An error occurred while the client attempted to login.`, error);
 			return;
 		}
 	}
 
 	protected async onReady(): Promise<void> {
 		let userTag = this.client.user?.tag ?? '';
-		Logger.info(Logs.info.clientLogin.replaceAll('{USER_TAG}', userTag));
+		Logger.info(`Client logged in as '${userTag}'.`);
 
 		if (!Config.debug.dummyMode.enabled) {
 			this.jobService.start();
 		}
 
 		this.ready = true;
-		Logger.info(Logs.info.clientReady);
+		Logger.info(`Client is ready!`);
 	}
 
 	protected onShardReady(shardId: number, _unavailableGuilds: Set<string>): void {
@@ -102,7 +101,7 @@ export class Bot {
 		try {
 			await this.guildJoinHandler.process(guild);
 		} catch (error) {
-			Logger.error(Logs.error.guildJoin, error);
+			Logger.error(`"An error occurred while processing a guild join.`, error);
 		}
 	}
 
@@ -114,7 +113,7 @@ export class Bot {
 		try {
 			await this.guildLeaveHandler.process(guild);
 		} catch (error) {
-			Logger.error(Logs.error.guildLeave, error);
+			Logger.error(`An error occurred while processing a guild leave.`, error);
 		}
 	}
 
@@ -135,7 +134,7 @@ export class Bot {
 
 			await this.messageHandler.process(filledMessage);
 		} catch (error) {
-			Logger.error(Logs.error.message, error);
+			Logger.error(`An error occurred while processing a message.`, error);
 		}
 	}
 
@@ -152,13 +151,13 @@ export class Bot {
 			try {
 				await this.commandHandler.process(intr);
 			} catch (error) {
-				Logger.error(Logs.error.command, error);
+				Logger.error(`An error occurred while processing a command interaction.`, error);
 			}
 		} else if (intr instanceof ButtonInteraction) {
 			try {
 				await this.buttonHandler.process(intr);
 			} catch (error) {
-				Logger.error(Logs.error.button, error);
+				Logger.error(`An error occurred while processing a button interaction.`, error);
 			}
 		}
 	}
@@ -192,13 +191,13 @@ export class Bot {
 				filledReactor
 			);
 		} catch (error) {
-			Logger.error(Logs.error.reaction, error);
+			Logger.error(`An error occurred while processing a reaction.`, error);
 		}
 	}
 
 	protected async onRateLimit(rateLimitData: RateLimitData): Promise<void> {
 		if (rateLimitData.timeToReset >= Config.logging.rateLimit.minTimeout * 1000) {
-			Logger.error(Logs.error.apiRateLimit, rateLimitData);
+			Logger.error(`A rate limit was hit while making a request.`, rateLimitData);
 		}
 	}
 }
