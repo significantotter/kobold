@@ -6,7 +6,7 @@
 	"license": "MIT",
 	"private": true,
 	"engines": {
-		"node": ">=20.6.1"
+		"node": ">=21.6.2"
 	},
 	"main": "dist/start-bot.js",
 	"exports": [

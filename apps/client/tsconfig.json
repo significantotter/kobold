@@ -12,7 +12,11 @@
 		"outDir": "dist",
 		"experimentalDecorators": true,
 		"emitDecoratorMetadata": true,
-		"disableSizeLimit": true
+		"disableSizeLimit": true,
+		"types": ["vitest/globals"],
+		"paths": {
+			"kobold-db/test-utils": ["../../packages/kobold-db/dist/test-utils.d.ts"]
+		}
 	},
 	"include": ["src/**/*"],
 	"exclude": [
@@ -20,7 +24,6 @@
 		"src/migrations",
 		"node_modules",
 		"knexfile.ts",
-		"**/*.spec.ts",
-		"**/*.test.ts"
+		"src/services/pf2etools/Pf2eTools/**/*"
 	]
 }
