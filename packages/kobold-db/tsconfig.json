@@ -7,7 +7,9 @@
 		"moduleResolution": "Bundler",
 		"rootDir": "./src",
 		"outDir": "dist",
-		"esModuleInterop": true
+		"esModuleInterop": true,
+		"types": ["vitest/globals"]
 	},
-	"exclude": ["dist", "node_modules", "knexfile.ts"]
+
+	"exclude": ["dist", "node_modules", "knexfile.ts", "*.config.ts", "vitest.setup.ts"]
 }

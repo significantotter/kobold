@@ -1,6 +1,5 @@
-import { initiativeId } from './Initiative.js';
-import type { InitiativeId } from './Initiative.js';
-import type { ColumnType, Selectable, Insertable, Updateable } from 'kysely';
+import { initiativeId, type InitiativeId } from './Initiative.js';
+import { type ColumnType, type Selectable, type Insertable, type Updateable } from 'kysely';
 import { z } from 'zod';
 
 export type InitiativeActorGroupId = number;
@@ -8,30 +7,30 @@ export type InitiativeActorGroupId = number;
 /** Represents the table public.initiative_actor_group */
 export default interface InitiativeActorGroupTable {
   /** Database type: pg_catalog.int4 */
-  id: ColumnType<InitiativeActorGroupId, InitiativeActorGroupId | null, InitiativeActorGroupId | null>;
+  id: ColumnType<InitiativeActorGroupId, InitiativeActorGroupId | undefined, InitiativeActorGroupId>;
 
   /** Database type: pg_catalog.int4 */
-  initiativeId: ColumnType<InitiativeId, InitiativeId, InitiativeId | null>;
+  initiativeId: ColumnType<InitiativeId, InitiativeId, InitiativeId>;
 
   /** Database type: pg_catalog.text */
-  userId: ColumnType<string, string, string | null>;
+  userId: ColumnType<string, string, string>;
 
   /** Database type: pg_catalog.text */
-  name: ColumnType<string, string, string | null>;
+  name: ColumnType<string, string, string>;
 
   /** Database type: pg_catalog.numeric */
-  initiativeResult: ColumnType<number, number, number | null>;
+  initiativeResult: ColumnType<number, number, number>;
 
   /** Database type: pg_catalog.timestamptz */
-  createdAt: ColumnType<Date, Date | string | null, Date | string | null>;
+  createdAt: ColumnType<Date, Date | string | undefined, Date | string>;
 
   /** Database type: pg_catalog.timestamptz */
-  lastUpdatedAt: ColumnType<Date, Date | string | null, Date | string | null>;
+  lastUpdatedAt: ColumnType<Date, Date | string | undefined, Date | string>;
 }
 
 export const initiativeActorGroupId = z.number().int().max(2147483647);
 
-export const zInitiativeActorGroup = z.strictObject({
+export const zInitiativeActorGroup = z.object({
   id: initiativeActorGroupId,
   initiativeId: initiativeId,
   userId: z.string(),
@@ -41,7 +40,7 @@ export const zInitiativeActorGroup = z.strictObject({
   lastUpdatedAt: z.date(),
 });
 
-export const zInitiativeActorGroupInitializer = z.strictObject({
+export const zInitiativeActorGroupInitializer = z.object({
   id: initiativeActorGroupId.optional(),
   initiativeId: initiativeId,
   userId: z.string(),
@@ -51,7 +50,7 @@ export const zInitiativeActorGroupInitializer = z.strictObject({
   lastUpdatedAt: z.date().optional(),
 });
 
-export const zInitiativeActorGroupMutator = z.strictObject({
+export const zInitiativeActorGroupMutator = z.object({
   id: initiativeActorGroupId.optional(),
   initiativeId: initiativeId.optional(),
   userId: z.string().optional(),

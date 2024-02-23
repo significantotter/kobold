@@ -1,4 +1,4 @@
-import type { ColumnType, Selectable, Insertable, Updateable } from 'kysely';
+import { type ColumnType, type Selectable, type Insertable, type Updateable } from 'kysely';
 import { z } from 'zod';
 
 export type KnexMigrationsId = number;
@@ -6,7 +6,7 @@ export type KnexMigrationsId = number;
 /** Represents the table public.knex_migrations */
 export default interface KnexMigrationsTable {
   /** Database type: pg_catalog.int4 */
-  id: ColumnType<KnexMigrationsId, KnexMigrationsId | null, KnexMigrationsId | null>;
+  id: ColumnType<KnexMigrationsId, KnexMigrationsId | undefined, KnexMigrationsId>;
 
   /** Database type: pg_catalog.varchar */
   name: ColumnType<string | null, string | null, string | null>;
@@ -20,21 +20,21 @@ export default interface KnexMigrationsTable {
 
 export const knexMigrationsId = z.number().int().max(2147483647);
 
-export const zKnexMigrations = z.strictObject({
+export const zKnexMigrations = z.object({
   id: knexMigrationsId,
   name: z.string().nullable(),
   batch: z.number().int().max(2147483647).nullable(),
   migrationTime: z.date().nullable(),
 });
 
-export const zKnexMigrationsInitializer = z.strictObject({
+export const zKnexMigrationsInitializer = z.object({
   id: knexMigrationsId.optional(),
   name: z.string().optional().nullable(),
   batch: z.number().int().max(2147483647).optional().nullable(),
   migrationTime: z.date().optional().nullable(),
 });
 
-export const zKnexMigrationsMutator = z.strictObject({
+export const zKnexMigrationsMutator = z.object({
   id: knexMigrationsId.optional(),
   name: z.string().optional().nullable(),
   batch: z.number().int().max(2147483647).optional().nullable(),

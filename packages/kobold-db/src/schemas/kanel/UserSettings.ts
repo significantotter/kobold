@@ -1,61 +1,41 @@
-import type {
-  InitStatsNotificationEnum,
-  RollCompactModeEnum,
-  InlineRollsDisplayEnum,
-} from "../kanel-types.js";
-import type { ColumnType, Selectable, Insertable, Updateable } from "kysely";
-import { z } from "zod";
+import { type InitStatsNotificationEnum, type RollCompactModeEnum, type InlineRollsDisplayEnum } from './../kanel-types.js';
+import { type ColumnType, type Selectable, type Insertable, type Updateable } from 'kysely';
+import { z } from 'zod';
 
 export type UserSettingsUserId = string;
 
 /** Represents the table public.user_settings */
 export default interface UserSettingsTable {
   /** Database type: pg_catalog.text */
-  userId: ColumnType<
-    UserSettingsUserId,
-    UserSettingsUserId,
-    UserSettingsUserId | null
-  >;
+  userId: ColumnType<UserSettingsUserId, UserSettingsUserId, UserSettingsUserId>;
 
   /** Database type: pg_catalog.text */
-  initStatsNotification: ColumnType<
-    InitStatsNotificationEnum,
-    InitStatsNotificationEnum | null,
-    InitStatsNotificationEnum | null
-  >;
+  initStatsNotification: ColumnType<InitStatsNotificationEnum, InitStatsNotificationEnum | undefined, InitStatsNotificationEnum>;
 
   /** Database type: pg_catalog.text */
-  rollCompactMode: ColumnType<
-    RollCompactModeEnum,
-    RollCompactModeEnum | null,
-    RollCompactModeEnum | null
-  >;
+  rollCompactMode: ColumnType<RollCompactModeEnum, RollCompactModeEnum | undefined, RollCompactModeEnum>;
 
   /** Database type: pg_catalog.text */
-  inlineRollsDisplay: ColumnType<
-    InlineRollsDisplayEnum,
-    InlineRollsDisplayEnum | null,
-    InlineRollsDisplayEnum | null
-  >;
+  inlineRollsDisplay: ColumnType<InlineRollsDisplayEnum, InlineRollsDisplayEnum | undefined, InlineRollsDisplayEnum>;
 }
 
 export const userSettingsUserId = z.string();
 
-export const zUserSettings = z.strictObject({
+export const zUserSettings = z.object({
   userId: userSettingsUserId,
   initStatsNotification: z.string(),
   rollCompactMode: z.string(),
   inlineRollsDisplay: z.string(),
 });
 
-export const zUserSettingsInitializer = z.strictObject({
+export const zUserSettingsInitializer = z.object({
   userId: userSettingsUserId,
   initStatsNotification: z.string().optional(),
   rollCompactMode: z.string().optional(),
   inlineRollsDisplay: z.string().optional(),
 });
 
-export const zUserSettingsMutator = z.strictObject({
+export const zUserSettingsMutator = z.object({
   userId: userSettingsUserId.optional(),
   initStatsNotification: z.string().optional(),
   rollCompactMode: z.string().optional(),

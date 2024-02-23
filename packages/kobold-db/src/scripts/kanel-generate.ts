@@ -1,6 +1,6 @@
 // @ts-check
 import kanel, { Details, InstantiatedConfig, Output, Path, PreRenderHook } from 'kanel';
-import 'kobold-config';
+import { Config } from 'kobold-config';
 import kk from 'kanel-kysely';
 import kz from 'kanel-zod';
 import { recase } from '@kristiandupont/recase';
@@ -11,7 +11,7 @@ const { makeKyselyHook } = kk;
 const { makeGenerateZodSchemas, defaultGetZodIdentifierMetadata, defaultZodTypeMap } = kz;
 const toPascalCase = recase('snake', 'pascal');
 
-const outputPath = './src/services/kobold/schemas/kanel';
+const outputPath = './src/schemas/kanel';
 
 function convertESMPaths(path: string, lines: string[], instantiatedConfig: InstantiatedConfig) {
 	return lines.map(line =>
@@ -46,7 +46,7 @@ const removeSchemaInference: PreRenderHook = (
 };
 
 await kanel.processDatabase({
-	connection: process.env.DATABASE_URL ?? '',
+	connection: Config.database.url ?? '',
 	outputPath,
 	schemas: ['public'],
 	resolveViews: true,
@@ -74,7 +74,7 @@ await kanel.processDatabase({
 				'pg_catalog.numeric': 'z.number()',
 				'pg_catalog.int4': 'z.number().int().max(2147483647)',
 			},
-			castToSchema: true,
+			castToSchema: false,
 		}),
 		makeKyselyHook({
 			databaseFilename: 'Database',

@@ -1,38 +1,28 @@
-import type {
-  Sheet,
-  Modifiers,
-  Actions,
-  RollMacros,
-  SheetRecordTrackerModeEnum,
-} from "../kanel-types.js";
-import type { ColumnType, Selectable, Insertable, Updateable } from "kysely";
-import { z } from "zod";
+import { type Sheet, type Modifiers, type Actions, type RollMacros, type SheetRecordTrackerModeEnum } from './../kanel-types.js';
+import { type ColumnType, type Selectable, type Insertable, type Updateable } from 'kysely';
+import { z } from 'zod';
 
 export type SheetRecordId = number;
 
 /** Represents the table public.sheet_record */
 export default interface SheetRecordTable {
   /** Database type: pg_catalog.int4 */
-  id: ColumnType<SheetRecordId, SheetRecordId | null, SheetRecordId | null>;
+  id: ColumnType<SheetRecordId, SheetRecordId | undefined, SheetRecordId>;
 
   /** Database type: pg_catalog.jsonb */
-  sheet: ColumnType<Sheet, Sheet, Sheet | null>;
+  sheet: ColumnType<Sheet, Sheet, Sheet>;
 
   /** Database type: pg_catalog.jsonb */
-  modifiers: ColumnType<Modifiers, Modifiers | null, Modifiers | null>;
+  modifiers: ColumnType<Modifiers, Modifiers | undefined, Modifiers>;
 
   /** Database type: pg_catalog.jsonb */
-  actions: ColumnType<Actions, Actions | null, Actions | null>;
+  actions: ColumnType<Actions, Actions | undefined, Actions>;
 
   /** Database type: pg_catalog.jsonb */
-  rollMacros: ColumnType<RollMacros, RollMacros | null, RollMacros | null>;
+  rollMacros: ColumnType<RollMacros, RollMacros | undefined, RollMacros>;
 
   /** Database type: pg_catalog.text */
-  trackerMode: ColumnType<
-    SheetRecordTrackerModeEnum | null,
-    SheetRecordTrackerModeEnum | null,
-    SheetRecordTrackerModeEnum | null
-  >;
+  trackerMode: ColumnType<SheetRecordTrackerModeEnum | null, SheetRecordTrackerModeEnum | null, SheetRecordTrackerModeEnum | null>;
 
   /** Database type: pg_catalog.text */
   trackerMessageId: ColumnType<string | null, string | null, string | null>;
@@ -46,7 +36,7 @@ export default interface SheetRecordTable {
 
 export const sheetRecordId = z.number().int().max(2147483647);
 
-export const zSheetRecord = z.strictObject({
+export const zSheetRecord = z.object({
   id: sheetRecordId,
   sheet: z.unknown(),
   modifiers: z.unknown(),
@@ -58,7 +48,7 @@ export const zSheetRecord = z.strictObject({
   trackerGuildId: z.string().nullable(),
 });
 
-export const zSheetRecordInitializer = z.strictObject({
+export const zSheetRecordInitializer = z.object({
   id: sheetRecordId.optional(),
   sheet: z.unknown(),
   modifiers: z.unknown().optional(),
@@ -70,7 +60,7 @@ export const zSheetRecordInitializer = z.strictObject({
   trackerGuildId: z.string().optional().nullable(),
 });
 
-export const zSheetRecordMutator = z.strictObject({
+export const zSheetRecordMutator = z.object({
   id: sheetRecordId.optional(),
   sheet: z.unknown().optional(),
   modifiers: z.unknown().optional(),

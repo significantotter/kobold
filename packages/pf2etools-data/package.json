@@ -16,7 +16,7 @@
 		"build": "pnpm run compile",
 		"compile": "tsc -p tsconfig.build.json",
 		"reset-pf2etools-db": "rm -f ./compendium.db && touch ./compendium.db && drizzle-kit push:sqlite --config=./drizzle.config.ts",
-		"import:pf2etools": "NODE_OPTIONS='--max-old-space-size=4096' pnpm run build && node dist/scripts/pf2eTools-import.js"
+		"import:pf2etools": "node --loader ts-node/esm src/scripts/pf2eTools-import.ts"
 	},
 	"dependencies": {
 		"better-sqlite3": "^8.7.0",

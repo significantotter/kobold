@@ -1,4 +1,4 @@
-import type { ColumnType, Selectable, Insertable, Updateable } from 'kysely';
+import { type ColumnType, type Selectable, type Insertable, type Updateable } from 'kysely';
 import { z } from 'zod';
 
 export type InitiativeId = number;
@@ -6,30 +6,30 @@ export type InitiativeId = number;
 /** Represents the table public.initiative */
 export default interface InitiativeTable {
   /** Database type: pg_catalog.int4 */
-  id: ColumnType<InitiativeId, InitiativeId | null, InitiativeId | null>;
+  id: ColumnType<InitiativeId, InitiativeId | undefined, InitiativeId>;
 
   /** Database type: pg_catalog.text */
-  channelId: ColumnType<string, string, string | null>;
+  channelId: ColumnType<string, string, string>;
 
   /** Database type: pg_catalog.text */
-  gmUserId: ColumnType<string, string, string | null>;
+  gmUserId: ColumnType<string, string, string>;
 
   /** Database type: pg_catalog.int4 */
-  currentRound: ColumnType<number, number | null, number | null>;
+  currentRound: ColumnType<number, number | undefined, number>;
 
   /** Database type: pg_catalog.int4 */
   currentTurnGroupId: ColumnType<number | null, number | null, number | null>;
 
   /** Database type: pg_catalog.timestamptz */
-  createdAt: ColumnType<Date, Date | string | null, Date | string | null>;
+  createdAt: ColumnType<Date, Date | string | undefined, Date | string>;
 
   /** Database type: pg_catalog.timestamptz */
-  lastUpdatedAt: ColumnType<Date, Date | string | null, Date | string | null>;
+  lastUpdatedAt: ColumnType<Date, Date | string | undefined, Date | string>;
 }
 
 export const initiativeId = z.number().int().max(2147483647);
 
-export const zInitiative = z.strictObject({
+export const zInitiative = z.object({
   id: initiativeId,
   channelId: z.string(),
   gmUserId: z.string(),
@@ -39,7 +39,7 @@ export const zInitiative = z.strictObject({
   lastUpdatedAt: z.date(),
 });
 
-export const zInitiativeInitializer = z.strictObject({
+export const zInitiativeInitializer = z.object({
   id: initiativeId.optional(),
   channelId: z.string(),
   gmUserId: z.string(),
@@ -49,7 +49,7 @@ export const zInitiativeInitializer = z.strictObject({
   lastUpdatedAt: z.date().optional(),
 });
 
-export const zInitiativeMutator = z.strictObject({
+export const zInitiativeMutator = z.object({
   id: initiativeId.optional(),
   channelId: z.string().optional(),
   gmUserId: z.string().optional(),

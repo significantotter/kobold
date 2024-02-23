@@ -1,12 +1,8 @@
-import { initiativeId } from './Initiative.js';
-import type { InitiativeId } from './Initiative.js';
-import { initiativeActorGroupId } from './InitiativeActorGroup.js';
-import type { InitiativeActorGroupId } from './InitiativeActorGroup.js';
-import { characterId } from './Character.js';
-import type { CharacterId } from './Character.js';
-import { sheetRecordId } from './SheetRecord.js';
-import type { SheetRecordId } from './SheetRecord.js';
-import type { ColumnType, Selectable, Insertable, Updateable } from 'kysely';
+import { initiativeId, type InitiativeId } from './Initiative.js';
+import { initiativeActorGroupId, type InitiativeActorGroupId } from './InitiativeActorGroup.js';
+import { characterId, type CharacterId } from './Character.js';
+import { sheetRecordId, type SheetRecordId } from './SheetRecord.js';
+import { type ColumnType, type Selectable, type Insertable, type Updateable } from 'kysely';
 import { z } from 'zod';
 
 export type InitiativeActorId = number;
@@ -14,42 +10,42 @@ export type InitiativeActorId = number;
 /** Represents the table public.initiative_actor */
 export default interface InitiativeActorTable {
   /** Database type: pg_catalog.int4 */
-  id: ColumnType<InitiativeActorId, InitiativeActorId | null, InitiativeActorId | null>;
+  id: ColumnType<InitiativeActorId, InitiativeActorId | undefined, InitiativeActorId>;
 
   /** Database type: pg_catalog.int4 */
-  initiativeId: ColumnType<InitiativeId, InitiativeId, InitiativeId | null>;
+  initiativeId: ColumnType<InitiativeId, InitiativeId, InitiativeId>;
 
   /** Database type: pg_catalog.int4 */
-  initiativeActorGroupId: ColumnType<InitiativeActorGroupId, InitiativeActorGroupId, InitiativeActorGroupId | null>;
+  initiativeActorGroupId: ColumnType<InitiativeActorGroupId, InitiativeActorGroupId, InitiativeActorGroupId>;
 
   /** Database type: pg_catalog.int4 */
   characterId: ColumnType<CharacterId | null, CharacterId | null, CharacterId | null>;
 
   /** Database type: pg_catalog.text */
-  userId: ColumnType<string, string, string | null>;
+  userId: ColumnType<string, string, string>;
 
   /** Database type: pg_catalog.text */
-  name: ColumnType<string, string, string | null>;
+  name: ColumnType<string, string, string>;
 
   /** Database type: pg_catalog.timestamptz */
-  createdAt: ColumnType<Date, Date | string | null, Date | string | null>;
+  createdAt: ColumnType<Date, Date | string | undefined, Date | string>;
 
   /** Database type: pg_catalog.timestamptz */
-  lastUpdatedAt: ColumnType<Date, Date | string | null, Date | string | null>;
+  lastUpdatedAt: ColumnType<Date, Date | string | undefined, Date | string>;
 
   /** Database type: pg_catalog.text */
   referenceNpcName: ColumnType<string | null, string | null, string | null>;
 
   /** Database type: pg_catalog.bool */
-  hideStats: ColumnType<boolean, boolean | null, boolean | null>;
+  hideStats: ColumnType<boolean, boolean | undefined, boolean>;
 
   /** Database type: pg_catalog.int4 */
-  sheetRecordId: ColumnType<SheetRecordId, SheetRecordId, SheetRecordId | null>;
+  sheetRecordId: ColumnType<SheetRecordId, SheetRecordId, SheetRecordId>;
 }
 
 export const initiativeActorId = z.number().int().max(2147483647);
 
-export const zInitiativeActor = z.strictObject({
+export const zInitiativeActor = z.object({
   id: initiativeActorId,
   initiativeId: initiativeId,
   initiativeActorGroupId: initiativeActorGroupId,
@@ -63,7 +59,7 @@ export const zInitiativeActor = z.strictObject({
   sheetRecordId: sheetRecordId,
 });
 
-export const zInitiativeActorInitializer = z.strictObject({
+export const zInitiativeActorInitializer = z.object({
   id: initiativeActorId.optional(),
   initiativeId: initiativeId,
   initiativeActorGroupId: initiativeActorGroupId,
@@ -77,7 +73,7 @@ export const zInitiativeActorInitializer = z.strictObject({
   sheetRecordId: sheetRecordId,
 });
 
-export const zInitiativeActorMutator = z.strictObject({
+export const zInitiativeActorMutator = z.object({
   id: initiativeActorId.optional(),
   initiativeId: initiativeId.optional(),
   initiativeActorGroupId: initiativeActorGroupId.optional(),
