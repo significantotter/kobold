@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import removeMarkdown from 'remove-markdown';
 
 export class StringUtils {
 	public static oxfordListJoin(arr: string[]) {
@@ -77,10 +76,6 @@ export class StringUtils {
 		return strings
 			.map((value, index, arr) => `${index === arr.length - 1 ? 'or ' : ''}"${value}"`)
 			.join(', ');
-	}
-
-	public static stripMarkdown(input: string): string {
-		return removeMarkdown(input);
 	}
 
 	public static findClosestInObjectArray<T extends { [k: string]: any }>(

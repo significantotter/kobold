@@ -23,5 +23,6 @@
 		"transpileOnly": true,
 		"files": true,
 		"module": "NodeNext"
-	}
+	},
+	"exclude": ["node_modules", "dist"]
 }

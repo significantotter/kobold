@@ -15,15 +15,9 @@
 		"disableSizeLimit": true,
 		"types": ["vitest/globals"],
 		"paths": {
-			"kobold-db/test-utils": ["../../packages/kobold-db/dist/test-utils.d.ts"]
+			"kobold-db/test-utils": ["../../packages/kobold-db/src/test-utils"]
 		}
 	},
 	"include": ["src/**/*"],
-	"exclude": [
-		"dist",
-		"src/migrations",
-		"node_modules",
-		"knexfile.ts",
-		"src/services/pf2etools/Pf2eTools/**/*"
-	]
+	"exclude": ["dist", "node_modules"]
 }

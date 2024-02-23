@@ -1,6 +1,6 @@
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import { createTypeAlias, printNode, zodToTs } from 'zod-to-ts';
-import { zPasteBinImport } from '../../../../apps/client/src/commands/chat/characters/character-import-pastebin-subcommand.js';
+import { zPasteBinImport } from '../commands/chat/characters/character-import-pastebin-subcommand.js';
 import fs from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';

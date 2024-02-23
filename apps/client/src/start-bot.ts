@@ -110,10 +110,9 @@ import {
 import { CustomClient } from './extensions/index.js';
 import { Bot } from './models/bot.js';
 import { Reaction } from './reactions/index.js';
-import { getDialect } from './services/db.dialect.js';
 import { CommandRegistrationService, JobService, Logger } from './services/index.js';
 import { Job } from './services/job-service.js';
-import { Kobold } from 'kobold-db';
+import { Kobold, getDialect } from 'kobold-db';
 import { CompendiumModel, CompendiumDb } from 'pf2etools-data';
 import { Trigger } from './triggers/index.js';
 

@@ -1,5 +1,5 @@
-import { Guild, Locale } from 'discord.js';
-import { Duration } from 'luxon'; // TODO: Missing types
+import { Guild } from 'discord.js';
+import { intervalToDuration, formatDuration } from 'date-fns';
 
 export class FormatUtils {
 	public static roleMention(guild: Guild, discordId: string): string {
@@ -23,23 +23,6 @@ export class FormatUtils {
 	}
 
 	public static duration(milliseconds: number): string {
-		return Duration.fromObject(
-			Object.fromEntries(
-				Object.entries(
-					Duration.fromMillis(milliseconds, { locale: Locale.EnglishUS })
-						.shiftTo(
-							'year',
-							'quarter',
-							'month',
-							'week',
-							'day',
-							'hour',
-							'minute',
-							'second'
-						)
-						.toObject()
-				).filter(([_, value]) => !!value) // Remove units that are 0
-			)
-		).toHuman({ maximumFractionDigits: 0 });
+		return formatDuration(intervalToDuration({ start: 0, end: milliseconds }));
 	}
 }

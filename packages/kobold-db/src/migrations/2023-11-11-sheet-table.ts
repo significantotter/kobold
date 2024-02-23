@@ -1,3 +1,4 @@
+import { ExpressionBuilder } from 'kysely';
 import { Kysely, sql } from 'kysely';
 
 export async function up(db: Kysely<any>): Promise<void> {
@@ -182,7 +183,7 @@ export async function down(db: Kysely<any>): Promise<void> {
 
 	await db
 		.updateTable('character')
-		.set(eb => ({
+		.set((eb: ExpressionBuilder<any, any>) => ({
 			sheet: eb.ref(`sheet_record.sheet`),
 			modifiers: eb.ref(`sheet_record.modifiers`),
 			actions: eb.ref(`sheet_record.actions`),
@@ -203,7 +204,7 @@ export async function down(db: Kysely<any>): Promise<void> {
 
 	await db
 		.updateTable('initiative_actor')
-		.set(eb => ({
+		.set((eb: ExpressionBuilder<any, any>) => ({
 			sheet: eb.ref(`sheet_record.sheet`),
 		}))
 		.from('sheet_record')
