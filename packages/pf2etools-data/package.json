@@ -31,6 +31,7 @@
 		"@types/better-sqlite3": "^7.6.5",
 		"@types/lodash": "^4.14.202",
 		"drizzle-kit": "^0.20.14",
-		"typescript": "^5.3"
+		"typescript": "^5.3",
+		"vitest": "^0.34.4"
 	}
 }

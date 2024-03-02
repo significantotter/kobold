@@ -809,7 +809,7 @@ export function convertPathBuilderToSheet(
 		maxStamina =
 			(pathBuilderSheet.attributes.classhp / 2 + baseSheet.intProperties.constitution) *
 			pathBuilderSheet.level;
-		maxResolve = baseSheet.intProperties[pathBuilderSheet.keyability as AbilityEnum];
+		maxResolve = baseSheet.intProperties[keyAbility!] ?? 0;
 	} else {
 		hp =
 			pathBuilderSheet.attributes.ancestryhp +
