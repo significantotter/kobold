@@ -18,8 +18,8 @@ RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm fetch -
 RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install --frozen-lockfile
 COPY . .
 ENV NODE_OPTIONS --max-old-space-size=4096
-RUN turbo prune kobold-client --docker
 RUN turbo build --filter="kobold-client"
+RUN turbo prune kobold-client --docker
  
 FROM base
 WORKDIR /app
