@@ -16,7 +16,7 @@ ARG PROJECT
 
 WORKDIR /app
 COPY . .
-RUN turbo prune --scope=${PROJECT} --docker
+RUN turbo prune --scope=kobold-client --docker
 
 # Build the project
 FROM base AS builder
@@ -38,7 +38,7 @@ RUN --mount=type=cache,id=pnpm,target=~/.pnpm-store  apk add --no-cache --virtua
 # Copy source code of isolated subworkspace
 COPY --from=pruner /app/out/full/ .
 
-RUN turbo build --filter=${PROJECT}
+RUN turbo build --filter=kobold-client
 RUN --mount=type=cache,id=pnpm,target=~/.pnpm-store pnpm prune --prod --no-optional
 RUN rm -rf ./**/*/src
 
@@ -54,7 +54,7 @@ WORKDIR /app
 
 COPY --from=builder --chown=nodejs:nodejs /app .
 
-WORKDIR /app/apps/${PROJECT}
+WORKDIR /app/apps/kobold-client
 
 ENV NODE_ENV=production NODE_OPTIONS=--max-old-space-size=4096
 CMD ["node", "./dist/start-manager.js"]

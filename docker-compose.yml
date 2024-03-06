@@ -6,8 +6,6 @@ services:
         build:
             context: .
             dockerfile: ./Dockerfile
-            args:
-                - PROJECT=kobold-client
             # tags:
             #     - 'significantotter/kobold-images:latest'
         restart: always
