@@ -8,7 +8,7 @@ import { Config } from 'kobold-config';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-async function migrateToLatest() {
+export async function migrateToLatest() {
 	const db = new Kysely<any>({
 		dialect: new PostgresDialect({
 			pool: new pg.Pool({
@@ -24,7 +24,7 @@ async function migrateToLatest() {
 			fs,
 			path,
 			// This needs to be an absolute path.
-			migrationFolder: path.join(__dirname, './../migrations'),
+			migrationFolder: path.join(__dirname, './migrations'),
 		}),
 	});
 
@@ -46,5 +46,3 @@ async function migrateToLatest() {
 
 	await db.destroy();
 }
-
-migrateToLatest();

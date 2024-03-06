@@ -11,8 +11,27 @@ import { HttpService, JobService, Logger, MasterApiService } from './services/in
 import { Job } from './services/job-service.js';
 import { MathUtils, ShardUtils } from './utils/index.js';
 import { filterNotNullOrUndefined } from './utils/type-guards.js';
+import { migrateToLatest } from 'kobold-db';
+import { spawn } from 'child_process';
 
 async function start(): Promise<void> {
+	Logger.info(`Migrating Database.`);
+	await migrateToLatest();
+	Logger.info(`Starting Command Registration Subprocess.`);
+	const commandRegistration = spawn('node', ['dist/start-bot.js', 'commands', 'register'], {
+		stdio: 'inherit',
+	});
+	commandRegistration.stdout?.on?.('data', data => {
+		Logger.info(`stdout: ${data}`);
+	});
+
+	commandRegistration.stderr?.on?.('data', data => {
+		Logger.error(`stderr: ${data}`);
+	});
+
+	commandRegistration.on('close', code => {
+		Logger.info(`Command Registration Subprocess exited with code ${code}`);
+	});
 	Logger.info(`Application started.`);
 
 	// Dependencies
