@@ -2,8 +2,12 @@ version: '3'
 
 services:
     client:
-        container_name: client
+        container_name: kobold-client
         build:
             context: .
             dockerfile: ./Dockerfile
+            args:
+                - PROJECT=kobold-client
+            tags:
+                - 'significantotter/kobold-images:latest'
         restart: always
