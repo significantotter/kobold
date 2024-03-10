@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+    client:
+        container_name: kobold-client
+        build:
+            context: .
+            dockerfile: ./Dockerfile
+            # tags:
+            #     - 'significantotter/kobold-images:latest'
+        restart: always

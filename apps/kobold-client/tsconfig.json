@@ -1,0 +1,23 @@
+{
+	"extends": "../../tsconfig.base.json",
+	"compilerOptions": {
+		"lib": ["es2023"],
+		"module": "Node16",
+		"target": "ESNext",
+		"moduleResolution": "node16",
+
+		"composite": true,
+		"sourceMap": true,
+		"rootDir": "./src",
+		"outDir": "dist",
+		"experimentalDecorators": true,
+		"emitDecoratorMetadata": true,
+		"disableSizeLimit": true,
+		"types": ["vitest/globals"],
+		"paths": {
+			"kobold-db/test-utils": ["../../packages/kobold-db/src/test-utils"]
+		}
+	},
+	"include": ["src/**/*"],
+	"exclude": ["dist", "node_modules", "*.config.ts", "vitest.setup.ts"]
+}
