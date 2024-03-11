@@ -104,7 +104,7 @@ export default {
 			'_[*custom-stats*] optional_: Custom stats for a custom npc or to overwrite on a bestiary creature. ' +
 			'Enter values in the format statName=statValue, separated by semicolons. If the value is a list like with immunities, ' +
 			'separate each value with a comma. For weaknesses/resistances, follow this example: ' +
-			'"hp=30;ac=21;immunities=poison,electricity;weaknesses=fire:5,cold:10',
+			'"hp=30;ac=21;immunities=poison,electricity;fire weakness=5;cold resistance=10',
 		description: `Adds an NPC or minion to initiative`,
 		expandedDescription:
 			'Adds a bestiary creature to the initiative. By default, the creature will ' +
