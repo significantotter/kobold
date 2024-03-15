@@ -45,14 +45,10 @@ export class RollPerceptionSubCommand implements Command {
 			L.en.commandOptions.rollSecret.choices.public.value();
 
 		const koboldUtils: KoboldUtils = new KoboldUtils(kobold);
-		const { activeCharacter, userSettings, activeGame } = await koboldUtils.fetchDataForCommand(
-			intr,
-			{
-				activeGame: true,
-				activeCharacter: true,
-				userSettings: true,
-			}
-		);
+		const { activeCharacter, userSettings } = await koboldUtils.fetchDataForCommand(intr, {
+			activeCharacter: true,
+			userSettings: true,
+		});
 		koboldUtils.assertActiveCharacterNotNull(activeCharacter);
 
 		const creature = Creature.fromSheetRecord(activeCharacter.sheetRecord);
@@ -77,6 +73,11 @@ export class RollPerceptionSubCommand implements Command {
 		});
 		const response = rollBuilder.compileEmbed();
 
-		await EmbedUtils.dispatchEmbeds(intr, [response], secretRoll, activeGame?.gmUserId);
+		await EmbedUtils.dispatchEmbeds(
+			intr,
+			[response],
+			secretRoll,
+			activeCharacter?.game?.gmUserId
+		);
 	}
 }

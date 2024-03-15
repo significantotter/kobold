@@ -107,12 +107,10 @@ export class InitRollSubCommand implements Command {
 		const { gameUtils, creatureUtils } = new KoboldUtils(kobold);
 
 		const koboldUtils: KoboldUtils = new KoboldUtils(kobold);
-		const { currentInitiative, userSettings, activeGame } =
-			await koboldUtils.fetchDataForCommand(intr, {
-				currentInitiative: true,
-				userSettings: true,
-				activeGame: true,
-			});
+		const { currentInitiative, userSettings } = await koboldUtils.fetchDataForCommand(intr, {
+			currentInitiative: true,
+			userSettings: true,
+		});
 		koboldUtils.assertCurrentInitiativeNotNull(currentInitiative);
 
 		const actor = InitiativeBuilderUtils.getNameMatchActorFromInitiative(
@@ -236,6 +234,11 @@ export class InitRollSubCommand implements Command {
 		} else {
 			throw new KoboldError(`Yip! I ran into trouble rolling ${targetRoll}`);
 		}
-		await EmbedUtils.dispatchEmbeds(intr, [embed], secretRoll, activeGame?.gmUserId);
+		await EmbedUtils.dispatchEmbeds(
+			intr,
+			[embed],
+			secretRoll,
+			actor?.game?.gmUserId ?? currentInitiative.gmUserId
+		);
 	}
 }

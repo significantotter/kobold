@@ -254,6 +254,6 @@ export class GameRollSubCommand implements Command {
 				embeds.push(noRollFoundEmbed);
 			}
 		}
-		await EmbedUtils.dispatchEmbeds(intr, embeds, secretRoll, activeGame?.gmUserId);
+		await EmbedUtils.dispatchEmbeds(intr, embeds, secretRoll, activeGame.gmUserId);
 	}
 }

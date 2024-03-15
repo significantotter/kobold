@@ -81,8 +81,7 @@ export class RollSkillSubCommand implements Command {
 			L.en.commandOptions.rollSecret.choices.public.value();
 
 		const koboldUtils: KoboldUtils = new KoboldUtils(kobold);
-		const { activeGame, activeCharacter } = await koboldUtils.fetchDataForCommand(intr, {
-			activeGame: true,
+		const { activeCharacter } = await koboldUtils.fetchDataForCommand(intr, {
 			activeCharacter: true,
 		});
 		koboldUtils.assertActiveCharacterNotNull(activeCharacter);
@@ -102,6 +101,6 @@ export class RollSkillSubCommand implements Command {
 
 		const embed = rollResult.compileEmbed();
 
-		await EmbedUtils.dispatchEmbeds(intr, [embed], secretRoll, activeGame?.gmUserId);
+		await EmbedUtils.dispatchEmbeds(intr, [embed], secretRoll, activeCharacter.game?.gmUserId);
 	}
 }
