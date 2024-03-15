@@ -6,7 +6,6 @@ import { generateMock } from '@anatine/zod-mock';
 import {
 	ChannelDefaultCharacter,
 	Character,
-	CharactersInGames,
 	Game,
 	GuildDefaultCharacter,
 	Initiative,
@@ -108,16 +107,6 @@ export class ResourceFactories {
 		return await vitestKobold.game.create({
 			...fakeGameMock,
 			...partialGame,
-		});
-	}
-	public static async charactersInGames(partialCharactersInGames?: Partial<CharactersInGames>) {
-		const gameId = partialCharactersInGames?.gameId ?? (await ResourceFactories.game()).id;
-		const characterId =
-			partialCharactersInGames?.characterId ?? (await ResourceFactories.character()).id;
-		return await vitestKobold.charactersInGames.create({
-			...partialCharactersInGames,
-			gameId,
-			characterId,
 		});
 	}
 

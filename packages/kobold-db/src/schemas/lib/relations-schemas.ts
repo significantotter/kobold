@@ -13,12 +13,14 @@ export type CharacterWithRelations = Character & {
 	channelDefaultCharacters: ChannelDefaultCharacter[];
 	guildDefaultCharacters: GuildDefaultCharacter[];
 	sheetRecord: SheetRecord;
+	game?: Game | null;
 };
 
 export type InitiativeActorWithRelations = InitiativeActor & {
 	initiative?: Initiative | null;
 	actorGroup: InitiativeActorGroup;
 	sheetRecord: SheetRecord;
+	game?: Game | null;
 };
 
 export type InitiativeActorGroupWithRelations = InitiativeActorGroup & {

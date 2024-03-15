@@ -9,11 +9,6 @@ import {
 	zChannelDefaultCharacterInitializer,
 	zChannelDefaultCharacterMutator,
 } from '../kanel/ChannelDefaultCharacter.js';
-import {
-	zCharactersInGames,
-	zCharactersInGamesInitializer,
-	zCharactersInGamesMutator,
-} from '../kanel/CharactersInGames.js';
 import { zGame, zGameInitializer, zGameMutator } from '../kanel/Game.js';
 import {
 	zGuildDefaultCharacter,
@@ -167,7 +162,6 @@ export {
 	// base schemas
 	zCharacter,
 	zChannelDefaultCharacter,
-	zCharactersInGames,
 	zGame,
 	zGuildDefaultCharacter,
 	zInitiative,
@@ -179,7 +173,6 @@ export {
 	// initializers
 	zCharacterInitializer,
 	zChannelDefaultCharacterInitializer,
-	zCharactersInGamesInitializer,
 	zGameInitializer,
 	zGuildDefaultCharacterInitializer,
 	zInitiativeInitializer,
@@ -191,7 +184,6 @@ export {
 	// mutators
 	zCharacterMutator,
 	zChannelDefaultCharacterMutator,
-	zCharactersInGamesMutator,
 	zGameMutator,
 	zGuildDefaultCharacterMutator,
 	zInitiativeMutator,

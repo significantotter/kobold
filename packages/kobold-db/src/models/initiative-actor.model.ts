@@ -6,6 +6,7 @@ import {
 } from '../lib/shared-relation-builders.js';
 import {
 	Database,
+	Game,
 	Initiative,
 	InitiativeActorGroup,
 	InitiativeActorId,
@@ -62,6 +63,14 @@ function sheetRecordForActor(eb: ExpressionBuilder<Database, 'initiativeActor'>)
 		.as('sheetRecord');
 }
 
+function GameForActor(eb: ExpressionBuilder<Database, 'initiativeActor'>) {
+	return jsonObjectFrom(
+		eb.selectFrom('game').selectAll('game').whereRef('game.id', '=', 'initiativeActor.gameId')
+	)
+		.$castTo<Game>()
+		.as('game');
+}
+
 export class InitiativeActorModel extends Model<Database['initiativeActor']> {
 	constructor(db: Kysely<Database>) {
 		super(db);
@@ -77,6 +86,7 @@ export class InitiativeActorModel extends Model<Database['initiativeActor']> {
 				initiativeForActor(eb),
 				characterForActor(eb),
 				sheetRecordForActor(eb),
+				GameForActor(eb),
 			])
 			.execute();
 		return result[0];
@@ -95,6 +105,7 @@ export class InitiativeActorModel extends Model<Database['initiativeActor']> {
 				initiativeForActor(eb),
 				characterForActor(eb),
 				sheetRecordForActor(eb),
+				GameForActor(eb),
 			])
 			.where('initiativeActor.id', '=', id)
 			.execute();
@@ -115,6 +126,7 @@ export class InitiativeActorModel extends Model<Database['initiativeActor']> {
 				initiativeForActor(eb),
 				characterForActor(eb),
 				sheetRecordForActor(eb),
+				GameForActor(eb),
 			]);
 		if (id !== undefined) query = query.where('initiativeActor.id', '=', id);
 		if (characterId !== undefined)

@@ -6,11 +6,6 @@ export type {
 	ChannelDefaultCharacterUpdate,
 } from './kanel/ChannelDefaultCharacter.js';
 export type { CharacterId, Character, NewCharacter, CharacterUpdate } from './kanel/Character.js';
-export type {
-	CharactersInGames,
-	NewCharactersInGames,
-	CharactersInGamesUpdate,
-} from './kanel/CharactersInGames.js';
 export type { GameId, Game, NewGame, GameUpdate } from './kanel/Game.js';
 export type {
 	GuildDefaultCharacterUserId,
@@ -58,7 +53,6 @@ export type {
 
 export type { default as ChannelDefaultCharacterTable } from './kanel/ChannelDefaultCharacter.js';
 export type { default as CharacterTable } from './kanel/Character.js';
-export type { default as CharactersInGamesTable } from './kanel/CharactersInGames.js';
 export type { default as Database } from './kanel/Database.js';
 export type { default as GameTable } from './kanel/Game.js';
 export type { default as GuildDefaultCharacterTable } from './kanel/GuildDefaultCharacter.js';

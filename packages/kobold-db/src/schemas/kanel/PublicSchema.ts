@@ -3,7 +3,6 @@ import { type default as KyselyMigrationLockTable } from './KyselyMigrationLock.
 import { type default as SheetRecordTable } from './SheetRecord.js';
 import { type default as ChannelDefaultCharacterTable } from './ChannelDefaultCharacter.js';
 import { type default as CharacterTable } from './Character.js';
-import { type default as CharactersInGamesTable } from './CharactersInGames.js';
 import { type default as GameTable } from './Game.js';
 import { type default as GuildDefaultCharacterTable } from './GuildDefaultCharacter.js';
 import { type default as InitiativeTable } from './Initiative.js';
@@ -15,33 +14,31 @@ import { type default as UserSettingsTable } from './UserSettings.js';
 import { type default as WgAuthTokenTable } from './WgAuthToken.js';
 
 export default interface PublicSchema {
-  kyselyMigration: KyselyMigrationTable;
+	kyselyMigration: KyselyMigrationTable;
 
-  kyselyMigrationLock: KyselyMigrationLockTable;
+	kyselyMigrationLock: KyselyMigrationLockTable;
 
-  sheetRecord: SheetRecordTable;
+	sheetRecord: SheetRecordTable;
 
-  channelDefaultCharacter: ChannelDefaultCharacterTable;
+	channelDefaultCharacter: ChannelDefaultCharacterTable;
 
-  character: CharacterTable;
+	character: CharacterTable;
 
-  charactersInGames: CharactersInGamesTable;
+	game: GameTable;
 
-  game: GameTable;
+	guildDefaultCharacter: GuildDefaultCharacterTable;
 
-  guildDefaultCharacter: GuildDefaultCharacterTable;
+	initiative: InitiativeTable;
 
-  initiative: InitiativeTable;
+	initiativeActor: InitiativeActorTable;
 
-  initiativeActor: InitiativeActorTable;
+	initiativeActorGroup: InitiativeActorGroupTable;
 
-  initiativeActorGroup: InitiativeActorGroupTable;
+	knexMigrations: KnexMigrationsTable;
 
-  knexMigrations: KnexMigrationsTable;
+	knexMigrationsLock: KnexMigrationsLockTable;
 
-  knexMigrationsLock: KnexMigrationsLockTable;
+	userSettings: UserSettingsTable;
 
-  userSettings: UserSettingsTable;
-
-  wgAuthToken: WgAuthTokenTable;
+	wgAuthToken: WgAuthTokenTable;
 }

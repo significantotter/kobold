@@ -10,6 +10,7 @@ const mocks = {
 		return {
 			name: 'Character Name',
 			id: 1,
+			gameId: null,
 			createdAt: new Date(),
 			lastUpdatedAt: new Date(),
 			userId: 'user1',

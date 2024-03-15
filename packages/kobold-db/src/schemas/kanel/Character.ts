@@ -1,6 +1,7 @@
 import { sheetRecordId, type SheetRecordId } from './SheetRecord.js';
 import { type ColumnType, type Selectable, type Insertable, type Updateable } from 'kysely';
 import { z } from 'zod';
+import { gameId, GameId } from './Game.js';
 
 export type CharacterId = number;
 
@@ -14,6 +15,9 @@ export default interface CharacterTable {
 
 	/** Database type: pg_catalog.int4 */
 	charId: ColumnType<number, number, number>;
+
+	/** Database type: pg_catalog.int4 */
+	gameId: ColumnType<GameId | null, GameId | null, GameId | null>;
 
 	/** Database type: pg_catalog.bool */
 	isActiveCharacter: ColumnType<boolean, boolean | undefined, boolean>;
@@ -46,6 +50,7 @@ export const zCharacter = z.object({
 	name: z.string(),
 	importSource: z.string(),
 	sheetRecordId: sheetRecordId,
+	gameId: gameId,
 });
 
 export const zCharacterInitializer = z.object({
@@ -58,6 +63,7 @@ export const zCharacterInitializer = z.object({
 	name: z.string(),
 	importSource: z.string(),
 	sheetRecordId: sheetRecordId,
+	gameId: gameId.optional(),
 });
 
 export const zCharacterMutator = z.object({
@@ -70,6 +76,7 @@ export const zCharacterMutator = z.object({
 	name: z.string().optional(),
 	importSource: z.string().optional(),
 	sheetRecordId: sheetRecordId.optional(),
+	gameId: gameId.optional(),
 });
 
 export type Character = Selectable<CharacterTable>;

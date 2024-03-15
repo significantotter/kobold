@@ -1,5 +1,4 @@
 import { CamelCasePlugin, Kysely, ParseJSONResultsPlugin, PostgresDialect } from 'kysely';
-import { CharactersInGamesModel } from './models/characters-in-games.model.js';
 import {
 	ChannelDefaultCharacterModel,
 	CharacterModel,
@@ -19,7 +18,6 @@ export class Kobold {
 
 	public channelDefaultCharacter: ChannelDefaultCharacterModel;
 	public character: CharacterModel;
-	public charactersInGames: CharactersInGamesModel;
 	public game: GameModel;
 	public guildDefaultCharacter: GuildDefaultCharacterModel;
 	public initiative: InitiativeModel;
@@ -36,7 +34,6 @@ export class Kobold {
 		});
 		this.channelDefaultCharacter = new ChannelDefaultCharacterModel(this.db);
 		this.character = new CharacterModel(this.db);
-		this.charactersInGames = new CharactersInGamesModel(this.db);
 		this.game = new GameModel(this.db);
 		this.guildDefaultCharacter = new GuildDefaultCharacterModel(this.db);
 		this.initiative = new InitiativeModel(this.db);

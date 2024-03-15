@@ -23,16 +23,6 @@ describe('GameModel', () => {
 				ResourceFactories.character(),
 				ResourceFactories.character(),
 			]);
-			await Promise.all([
-				ResourceFactories.charactersInGames({
-					characterId: fakeCharacter.id,
-					gameId: fakeGame.id,
-				}),
-				ResourceFactories.charactersInGames({
-					characterId: fakeCharacter2.id,
-					gameId: fakeGame.id,
-				}),
-			]);
 
 			const read = await vitestKobold.game.read({ id: fakeGame.id });
 			expect(read).toMatchObject({

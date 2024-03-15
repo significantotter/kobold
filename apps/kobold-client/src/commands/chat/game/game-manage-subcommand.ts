@@ -143,10 +143,12 @@ export class GameManageSubCommand implements Command {
 					);
 
 					if (targetCharacter) {
-						await kobold.charactersInGames.delete({
-							characterId: targetCharacter.id,
-							gameId: targetGame.id,
-						});
+						await kobold.character.update(
+							{ id: targetCharacter.id },
+							{
+								gameId: null,
+							}
+						);
 
 						await InteractionUtils.send(
 							intr,
@@ -299,10 +301,10 @@ export class GameManageSubCommand implements Command {
 					);
 				} else {
 					//relate the two!
-					await kobold.charactersInGames.create({
-						characterId: activeCharacter.id,
-						gameId: targetGame.id,
-					});
+					await kobold.character.update(
+						{ id: activeCharacter.id },
+						{ gameId: targetGame.id }
+					);
 					await InteractionUtils.send(
 						intr,
 						LL.commands.game.manage.interactions.joinSuccess({
@@ -331,7 +333,7 @@ export class GameManageSubCommand implements Command {
 					);
 				} else if (
 					(targetGame.characters || []).filter(
-						character => character.id === activeCharacter.id
+						character => character.id !== activeCharacter.id
 					).length > 0
 				) {
 					await InteractionUtils.send(
@@ -343,10 +345,14 @@ export class GameManageSubCommand implements Command {
 					);
 				} else {
 					//unrelate the two!
-					await kobold.charactersInGames.delete({
-						characterId: activeCharacter.id,
-						gameId: targetGame.id,
-					});
+					await kobold.character.update(
+						{
+							id: activeCharacter.id,
+						},
+						{
+							gameId: null,
+						}
+					);
 					await InteractionUtils.send(
 						intr,
 						LL.commands.game.manage.interactions.leaveSuccess({
