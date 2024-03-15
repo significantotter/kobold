@@ -15,11 +15,16 @@ import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold } from 'kobold-db';
 import { InteractionUtils } from '../../../utils/index.js';
-import { InitiativeBuilder, InitiativeBuilderUtils } from '../../../utils/initiative-builder.js';
+import {
+	InitiativeBuilder,
+	InitiativeBuilderUtils,
+	TurnData,
+} from '../../../utils/initiative-builder.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { InitOptions } from './init-command-options.js';
+import { KoboldError } from '../../../utils/KoboldError.js';
 
 export class InitRemoveSubCommand implements Command {
 	public names = [L.en.commands.init.remove.name()];
@@ -107,9 +112,23 @@ export class InitRemoveSubCommand implements Command {
 				LL,
 			});
 			let currentTurn = initBuilder.getCurrentTurnInfo();
-			let previousTurn = initBuilder.getPreviousTurnChanges();
+			let updatedTurn: TurnData;
+			try {
+				updatedTurn = initBuilder.getPreviousTurnChanges();
+			} catch (e) {
+				console.log('Error getting previous turn changes', e);
+				if (e instanceof KoboldError) {
+					// this is an edge case where we can't go to the previous turn on
+					// the first turn, but remove the first character from initiative
+					updatedTurn = initBuilder.getJumpToTurnChanges(initBuilder.groups[1].name);
+					console.log(updatedTurn);
+				} else {
+					throw e;
+				}
+			}
 
 			const updatedInitiative = await kobold.initiative.read({ id: currentInitiative.id });
+			updatedInitiative!.currentTurnGroupId = updatedTurn.currentTurnGroupId;
 
 			if (!updatedInitiative)
 				throw new Error('Initiative was already deleted while trying to remove an actor');
@@ -135,7 +154,7 @@ export class InitRemoveSubCommand implements Command {
 				await KoboldEmbed.dmInitiativeWithHiddenStats({
 					intr,
 					currentTurn,
-					targetTurn: previousTurn,
+					targetTurn: updatedTurn,
 					initBuilder,
 					LL,
 				});
