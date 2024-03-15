@@ -824,6 +824,7 @@ export function convertPathBuilderToSheet(
 
 	// spellcasting stats
 	for (const spellcasting of pathBuilderSheet.spellCasters) {
+		const currentStat = _.cloneDeep(baseSheet.stats[spellcasting.magicTradition]);
 		const spellAbility =
 			SheetProperties.abilityFromAlias[spellcasting.ability.trim().toLowerCase()] ??
 			AbilityEnum.intelligence;
@@ -836,6 +837,12 @@ export function convertPathBuilderToSheet(
 			null,
 			spellcasting.proficiency
 		);
+		if (
+			currentStat.bonus != null &&
+			currentStat.bonus > baseSheet.stats[spellcasting.magicTradition].bonus!
+		) {
+			baseSheet.stats[spellcasting.magicTradition] = currentStat;
+		}
 	}
 	for (const focusCastingTradition in pathBuilderSheet.focus) {
 		if (focusCastingTradition in baseSheet.stats) {
