@@ -95,6 +95,7 @@ export class CharacterCommand implements Command {
 				options: [
 					{ ...CharacterOptions.IMPORT_PATHBUILDER_OPTION, required: false },
 					{ ...CharacterOptions.IMPORT_PASTEBIN_OPTION, required: false },
+					CharacterOptions.IMPORT_USE_STAMINA_OPTION,
 				],
 			},
 		],
