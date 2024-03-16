@@ -21,8 +21,7 @@ export function charactersForGame(
 				guildDefaultCharacterForCharacter(ebCharacter, { guildId, userId }),
 				sheetRecordForCharacter(ebCharacter),
 			])
-			.innerJoin('charactersInGames', 'character.id', 'charactersInGames.characterId')
-			.whereRef('charactersInGames.gameId', '=', 'game.id')
+			.whereRef('character.gameId', '=', 'game.id')
 	).as('characters');
 }
 

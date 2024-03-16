@@ -83,14 +83,10 @@ export class RollSaveSubCommand implements Command {
 			L.en.commandOptions.rollSecret.choices.public.value();
 
 		const koboldUtils: KoboldUtils = new KoboldUtils(kobold);
-		const { activeCharacter, userSettings, activeGame } = await koboldUtils.fetchDataForCommand(
-			intr,
-			{
-				activeGame: true,
-				activeCharacter: true,
-				userSettings: true,
-			}
-		);
+		const { activeCharacter, userSettings } = await koboldUtils.fetchDataForCommand(intr, {
+			activeCharacter: true,
+			userSettings: true,
+		});
 		koboldUtils.assertActiveCharacterNotNull(activeCharacter);
 
 		const creature = Creature.fromSheetRecord(activeCharacter.sheetRecord);
@@ -112,6 +108,6 @@ export class RollSaveSubCommand implements Command {
 
 		const embed = rollResult.compileEmbed();
 
-		await EmbedUtils.dispatchEmbeds(intr, [embed], secretRoll, activeGame?.gmUserId);
+		await EmbedUtils.dispatchEmbeds(intr, [embed], secretRoll, activeCharacter.game?.gmUserId);
 	}
 }

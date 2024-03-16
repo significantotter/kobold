@@ -1,4 +1,8 @@
-import { APIApplicationCommandBasicOption, ApplicationCommandOptionType } from 'discord.js';
+import {
+	APIApplicationCommandBasicOption,
+	APIApplicationCommandStringOption,
+	ApplicationCommandOptionType,
+} from 'discord.js';
 import L from '../../../i18n/i18n-node.js';
 
 export class InitOptions {
@@ -7,6 +11,12 @@ export class InitOptions {
 		description: L.en.commandOptions.initValue.description(),
 		required: false,
 		type: ApplicationCommandOptionType.Number,
+	};
+	public static readonly INIT_NOTE_OPTION: APIApplicationCommandStringOption = {
+		name: L.en.commandOptions.initValue.name(),
+		description: L.en.commandOptions.initValue.description(),
+		required: true,
+		type: ApplicationCommandOptionType.String,
 	};
 	public static readonly INIT_ADD_TEMPLATE_OPTION: APIApplicationCommandBasicOption = {
 		name: L.en.commandOptions.template.name(),

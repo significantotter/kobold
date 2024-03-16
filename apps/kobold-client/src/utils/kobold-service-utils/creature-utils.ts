@@ -20,7 +20,8 @@ export class CreatureUtils {
 
 	public async updateSheetTracker(intr: ChatInputCommandInteraction, target: SheetRecord) {
 		const creature = Creature.fromSheetRecord(target);
-		const tracker = await creature.compileTracker(target.trackerMode ?? 'counters_only');
+		const embed = await creature.compileEmbed('Tracker', target.trackerMode ?? 'counters_only');
+		const tracker = { content: embed.data.description, embeds: [] };
 		try {
 			if (
 				!intr?.client?.guilds ||

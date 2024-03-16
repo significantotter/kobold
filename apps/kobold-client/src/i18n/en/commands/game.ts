@@ -38,6 +38,21 @@ export default {
 			leaveSuccess: 'Yip! {characterName} left the game "{gameName}"!',
 		},
 	},
+	partyStatus: {
+		name: 'party-status',
+		usage:
+			'**[*game-target-character*]**: Restricts the roll to one or all specified character.\n' +
+			'_[*sheet-style*] optional_: Whether to show only counters like hp, basic stats, or a full sheet.',
+		description: 'Displays the status of all party members.',
+	},
+	give: {
+		name: 'give',
+		usage:
+			'**[*game-target-character*]**: Restricts the roll to one or all specified character.\n' +
+			'[option]: The type of resource to give of (eg. hp, hero points, etc).\n' +
+			'[amount]: The amount to give. Put "-" before to take the amount away',
+		description: 'Gives certain resources to players in the game.',
+	},
 	init: {
 		name: 'init',
 		description:
@@ -51,10 +66,10 @@ export default {
 		description: 'Rolls dice for all characters in a game (or optionally one). GM only.',
 		options: '[game-roll-type] [*dice-roll-or-modifier*] [*game-target-character*] [*secret*]',
 		usage:
+			'**[*game-target-character*]**: Restricts the roll to one or all specified character.\n' +
 			'**[game-roll-type]**: The name of the ability to roll.\n' +
 			'**[*dice-roll-or-modifier*] optional**: A dice expression to roll ("1d20 - 1d4 + 3"). Added to the end ' +
 			'of the roll if choosing a skill/ability/save. Alternatively, a simple modifier value ("5" or "-3").\n' +
-			'**[*game-target-character*] optional**: Restricts the roll to just the specified character.\n' +
 			'**[target-character] optional**: The target character for an attack or action. Select (None) for no target.\n' +
 			'**[*secret*] optional**: Choose to either leave the roll public (default), hide the roll entirely, ' +
 			'hide the roll, but publicly notify the channel that a roll has been made, or send the roll to your gm.',

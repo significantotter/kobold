@@ -27,6 +27,7 @@ export { RollSkillSubCommand } from './roll/roll-skill-subcommand.js';
 export { InitAddSubCommand } from './init/init-add-subcommand.js';
 export { InitCommand } from './init/init-command.js';
 export { InitEndSubCommand } from './init/init-end-subcommand.js';
+export { InitNoteSubCommand } from './init/init-note-subcommand.js';
 export { InitJoinSubCommand } from './init/init-join-subcommand.js';
 export { InitJumpToSubCommand } from './init/init-jump-to-subcommand.js';
 export { InitNextSubCommand } from './init/init-next-subcommand.js';
@@ -56,6 +57,8 @@ export { GameInitSubCommand } from './game/game-init-subcommand.js';
 export { GameListSubCommand } from './game/game-list-subcommand.js';
 export { GameManageSubCommand } from './game/game-manage-subcommand.js';
 export { GameRollSubCommand } from './game/game-roll-subcommand.js';
+export { GamePartyStatusSubCommand } from './game/game-party-status-subcommand.js';
+export { GameGiveSubCommand } from './game/game-give-subcommand.js';
 
 // gameplay command
 export { GameplayCommand } from './gameplay/gameplay-command.js';

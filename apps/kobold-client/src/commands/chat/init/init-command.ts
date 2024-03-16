@@ -106,6 +106,18 @@ export class InitCommand implements Command {
 				],
 			},
 			{
+				name: L.en.commands.init.note.name(),
+				description: L.en.commands.init.note.description(),
+				type: ApplicationCommandOptionType.Subcommand,
+				options: [
+					{
+						...InitOptions.INIT_CHARACTER_OPTION,
+						required: true,
+					},
+					InitOptions.INIT_NOTE_OPTION,
+				],
+			},
+			{
 				name: L.en.commands.init.set.name(),
 				description: L.en.commands.init.set.description(),
 				type: ApplicationCommandOptionType.Subcommand,

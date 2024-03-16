@@ -3,11 +3,10 @@
 
 	"compilerOptions": {
 		"target": "ESNext",
-		"module": "ESNext",
-		"moduleResolution": "Bundler",
+		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
 		"rootDir": "./src",
-		"outDir": "dist",
-		"esModuleInterop": true
+		"outDir": "dist"
 	},
 	"exclude": ["dist", "node_modules", "*.config.ts", "vitest.setup.ts"]
 }

@@ -37,10 +37,15 @@ export class CharacterUpdateSubCommand implements Command {
 	): Promise<void> {
 		//check if we have an active character
 		const koboldUtils = new KoboldUtils(kobold);
-		const { creatureUtils } = koboldUtils;
+		const useStamina = intr.options.getBoolean(CharacterOptions.IMPORT_USE_STAMINA_OPTION.name);
 		let { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
 			activeCharacter: true,
 		});
+		if (activeCharacter.importSource !== 'pathbuilder' && useStamina != null) {
+			throw new KoboldError(
+				"Yip! You can only use the stamina option with pathbuilder characters. Wanderer's Guide characters import stamina settings automatically."
+			);
+		}
 
 		if (activeCharacter.importSource === 'pathbuilder') {
 			let jsonId = intr.options.getNumber(CharacterOptions.IMPORT_PATHBUILDER_OPTION.name);
@@ -59,7 +64,18 @@ export class CharacterUpdateSubCommand implements Command {
 				);
 			}
 
-			const fetcher = new PathbuilderCharacterFetcher(intr, kobold, intr.user.id);
+			let options:
+				| {
+						useStamina: boolean;
+				  }
+				| undefined;
+
+			if (useStamina != null)
+				options = {
+					useStamina,
+				};
+
+			const fetcher = new PathbuilderCharacterFetcher(intr, kobold, intr.user.id, options);
 			const newCharacter = await fetcher.update({ jsonId });
 
 			//send success message

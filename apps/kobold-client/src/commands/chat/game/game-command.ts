@@ -41,6 +41,7 @@ export class GameCommand implements Command {
 				description: L.en.commands.game.init.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [
+					GameOptions.GAME_TARGET_CHARACTER,
 					{
 						...ChatArgs.SKILL_CHOICE_OPTION,
 						description:
@@ -58,7 +59,22 @@ export class GameCommand implements Command {
 						...InitOptions.INIT_VALUE_OPTION,
 						required: false,
 					},
+				],
+			},
+			{
+				name: L.en.commands.game.partyStatus.name(),
+				description: L.en.commands.game.partyStatus.description(),
+				type: ApplicationCommandOptionType.Subcommand,
+				options: [GameOptions.GAME_TARGET_CHARACTER, GameOptions.GAME_SHEET_STYLE],
+			},
+			{
+				name: L.en.commands.game.give.name(),
+				description: L.en.commands.game.give.description(),
+				type: ApplicationCommandOptionType.Subcommand,
+				options: [
 					GameOptions.GAME_TARGET_CHARACTER,
+					GameOptions.GAME_GIVE_OPTION,
+					GameOptions.GAME_GIVE_AMOUNT,
 				],
 			},
 			{
@@ -66,9 +82,9 @@ export class GameCommand implements Command {
 				description: L.en.commands.game.roll.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [
+					GameOptions.GAME_TARGET_CHARACTER,
 					GameOptions.GAME_ROLL_TYPE,
 					GameOptions.GAME_DICE_ROLL_OR_MODIFIER,
-					GameOptions.GAME_TARGET_CHARACTER,
 					{ ...InitOptions.INIT_CHARACTER_TARGET, required: false },
 					ChatArgs.ROLL_SECRET_OPTION,
 				],

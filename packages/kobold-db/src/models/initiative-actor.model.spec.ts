@@ -10,6 +10,7 @@ describe('InitiativeActorModel', () => {
 	describe('create, read', () => {
 		it('creates a new initiativeActor, reads it, and returns the initiativeActor plus relations', async () => {
 			const initiative = await ResourceFactories.initiative();
+			const game = await ResourceFactories.game();
 			const initiativeActorGroup = await ResourceFactories.initiativeActorGroup({
 				initiativeId: initiative.id,
 			});
@@ -17,6 +18,7 @@ describe('InitiativeActorModel', () => {
 			const character = await ResourceFactories.character({ sheetRecordId: sheetRecord.id });
 			const fakeInitiativeActorMock = generateMock(zInitiativeActorInitializer);
 
+			fakeInitiativeActorMock.gameId = game.id;
 			fakeInitiativeActorMock.initiativeId = initiative.id;
 			fakeInitiativeActorMock.initiativeActorGroupId = initiativeActorGroup.id;
 			fakeInitiativeActorMock.characterId = character.id;

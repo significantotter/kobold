@@ -52,7 +52,8 @@ export default {
 		options: '[*target-character*] [*target-channel*]',
 		usage:
 			'_[*target-character*] optional_: The target character that you control. Defaults to your active character.' +
-			'_[*target-channel*] optional_: The target channel that you have access to. Defaults to the current channel.',
+			'_[*target-channel*] optional_: The target channel that you have access to. Defaults to the current channel.' +
+			'_[*tracker-mode*] optional_: Whether to show only counters like hp, basic stats, or a full sheet.',
 		description:
 			'Sets up a tracker to follow the changing statistics of one of your characters.',
 		expandedDescription:

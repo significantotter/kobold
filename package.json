@@ -8,8 +8,9 @@
 	"private": true,
 	"scripts": {},
 	"devDependencies": {
-		"turbo": "^1.7.0",
-		"eslint": "^8.49.0"
+		"eslint": "^8.49.0",
+		"nodemon": "^3.1.0",
+		"turbo": "^1.7.0"
 	},
 	"pnpm": {
 		"overrides": {
@@ -22,9 +23,9 @@
 			"tsx": "^4.1.2",
 			"typescript": "^5.3",
 			"type-fest": "^4.3.1",
-			"ts-node": "^10.9.1",
 			"vitest": "^0.34.4",
-			"zod": "^3.22.2"
+			"zod": "^3.22.2",
+			"ts-node": "^10.9.2"
 		}
 	},
 	"packageManager": "pnpm@8.15.3+sha256.fc4a49bd609550a41e14d20efbce802a4b892aa4cac877322de2f0924f122991"

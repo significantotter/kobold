@@ -136,13 +136,16 @@ export class GameplayTrackerSubCommand implements Command {
 
 		const creature = Creature.fromSheetRecord(targetSheetRecord);
 
-		const trackerDisplay = creature.compileTracker(trackerMode);
+		const trackerDisplay = creature.compileEmbed('Tracker', trackerMode);
 
 		let trackerResponse: Message<boolean> | undefined;
 		if (!gameplayTargetChannel) {
 			trackerResponse = await InteractionUtils.send(intr, trackerDisplay);
 		} else {
-			trackerResponse = await gameplayTargetChannel.send(trackerDisplay);
+			trackerResponse = await gameplayTargetChannel.send({
+				content: trackerDisplay.data.description,
+				embeds: [],
+			});
 			await InteractionUtils.send(intr, `Yip! I created the tracker for ${creature.name}.`);
 		}
 		if (!trackerResponse) {

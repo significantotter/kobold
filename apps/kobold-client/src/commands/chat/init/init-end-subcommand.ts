@@ -110,6 +110,7 @@ export class InitEndSubCommand implements Command {
 			try {
 				await kobold.initiative.delete({ id: currentInitiative.id });
 				await InteractionUtils.send(intr, L.en.commands.init.end.interactions.success());
+				await kobold.sheetRecord.deleteOrphaned();
 				return;
 			} catch (err) {
 				await InteractionUtils.send(intr, L.en.commands.init.end.interactions.error());

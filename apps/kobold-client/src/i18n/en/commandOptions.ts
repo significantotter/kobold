@@ -425,9 +425,47 @@ export default {
 		name: 'target-channel',
 		description: 'What channel to send the tracker to. Defaults to your current channel.',
 	},
+	gameSheetStyle: {
+		name: 'sheet-style',
+		description: 'How much information to display for each character.',
+	},
+	gameGiveOption: {
+		name: 'what-to-give',
+		description: 'What resource to give.',
+		choices: {
+			hp: {
+				name: 'hp',
+				value: 'hp',
+			},
+			tempHp: {
+				name: 'tempHp',
+				value: 'tempHp',
+			},
+			stamina: {
+				name: 'stamina',
+				value: 'stamina',
+			},
+			resolve: {
+				name: 'resolve',
+				value: 'resolve',
+			},
+			heroPoints: {
+				name: 'hero points',
+				value: 'hero-points',
+			},
+			focusPoints: {
+				name: 'focus points',
+				value: 'focus-points',
+			},
+		},
+	},
+	gameGiveAmount: {
+		name: 'amount',
+		description: 'How much of the resource to give.',
+	},
 	gameplayTrackerMode: {
 		name: 'tracker-mode',
-		description: 'How much data to track for the character?',
+		description: 'How much information to track for the character.',
 		choices: {
 			countersOnly: {
 				name: 'counters-only',
@@ -449,6 +487,10 @@ export default {
 	initValue: {
 		name: 'value',
 		description: 'A value to set your initiative to. Overwrites any other init options.',
+	},
+	initNote: {
+		name: 'note',
+		description: 'A note displayed in the initiative tracker. "-" or "none" to remove.',
 	},
 	template: {
 		name: 'template',

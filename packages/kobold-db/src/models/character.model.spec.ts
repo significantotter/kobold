@@ -1,6 +1,7 @@
 import { generateMock } from '@anatine/zod-mock';
 import { zCharacterInitializer } from '../index.js';
 import { truncateDbForTests, ResourceFactories, vitestKobold } from '../test-utils.js';
+import _ from 'lodash';
 
 describe('CharacterModel', () => {
 	afterEach(async () => {
@@ -9,10 +10,32 @@ describe('CharacterModel', () => {
 	describe('create, read', () => {
 		it('creates a new character, reads it, and returns the character plus relations', async () => {
 			const fakeSheetRecord = await ResourceFactories.sheetRecord();
+			const fakeGame = await ResourceFactories.game();
 			const fakeCharacterMock = generateMock(zCharacterInitializer);
 			fakeCharacterMock.sheetRecordId = fakeSheetRecord.id;
+			fakeCharacterMock.gameId = fakeGame.id;
 			const fakeCharacterMockWithRelations = {
 				...fakeCharacterMock,
+				game: _.omit(fakeGame, 'createdAt', 'lastUpdatedAt', 'characters'),
+				sheetRecord: fakeSheetRecord,
+				guildDefaultCharacters: [],
+				channelDefaultCharacters: [],
+			};
+			const created = await vitestKobold.character.create(fakeCharacterMock);
+			const read = await vitestKobold.character.read({ id: created.id });
+			expect(created).toMatchObject(fakeCharacterMockWithRelations);
+			expect(read).toMatchObject(fakeCharacterMockWithRelations);
+		});
+		it('creates a new character with no relations', async () => {
+			const fakeSheetRecord = await ResourceFactories.sheetRecord();
+			let fakeCharacterMock = generateMock(zCharacterInitializer);
+			fakeCharacterMock.sheetRecordId = fakeSheetRecord.id;
+			delete fakeCharacterMock.gameId;
+
+			const fakeCharacterMockWithRelations = {
+				...fakeCharacterMock,
+				game: null,
+				gameId: null,
 				sheetRecord: fakeSheetRecord,
 				guildDefaultCharacters: [],
 				channelDefaultCharacters: [],

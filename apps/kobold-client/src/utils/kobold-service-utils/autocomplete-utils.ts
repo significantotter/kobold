@@ -256,6 +256,12 @@ export class AutocompleteUtils {
 		];
 
 		//return the matched actors, removing any duplicates
-		return _.uniqBy(allOptions, 'name').sort((a, b) => a.name.localeCompare(b.name));
+		const result = _.uniqBy(allOptions, 'name').sort((a, b) => a.name.localeCompare(b.name));
+
+		if (matchText.length)
+			return result.filter(option =>
+				option.name.toLowerCase().includes(matchText.toLowerCase())
+			);
+		return result;
 	}
 }

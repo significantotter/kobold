@@ -93,7 +93,7 @@ const fakeEmojiConverter = (emoji: string) =>
 		oneAction: '1a',
 		twoActions: '2a',
 		threeActions: '3a',
-	})[emoji] ?? emoji;
+	}[emoji] ?? emoji);
 
 export class EntryParser {
 	helpers: SharedParsers;
@@ -778,7 +778,6 @@ export class EntryParser {
 		if (feat.access) descriptionLines.push(`**Access** ${feat.access}`);
 		if (feat.cost) descriptionLines.push(`**Cost** ${feat.cost}`);
 		if (feat.prerequisites) descriptionLines.push(`**Prerequisites** ${feat.prerequisites}`);
-		if (feat.access) descriptionLines.push(`**Access** ${feat.access}`);
 
 		if (feat.entries) descriptionLines.push(this.parseEntries(feat.entries));
 

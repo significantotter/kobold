@@ -3,7 +3,6 @@ import { type default as KyselyMigrationLockTable } from './KyselyMigrationLock.
 import { type default as SheetRecordTable } from './SheetRecord.js';
 import { type default as ChannelDefaultCharacterTable } from './ChannelDefaultCharacter.js';
 import { type default as CharacterTable } from './Character.js';
-import { type default as CharactersInGamesTable } from './CharactersInGames.js';
 import { type default as GameTable } from './Game.js';
 import { type default as GuildDefaultCharacterTable } from './GuildDefaultCharacter.js';
 import { type default as InitiativeTable } from './Initiative.js';
@@ -24,8 +23,6 @@ export default interface PublicSchema {
   channelDefaultCharacter: ChannelDefaultCharacterTable;
 
   character: CharacterTable;
-
-  charactersInGames: CharactersInGamesTable;
 
   game: GameTable;
 

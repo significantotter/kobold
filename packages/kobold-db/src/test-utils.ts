@@ -6,7 +6,6 @@ import { generateMock } from '@anatine/zod-mock';
 import {
 	ChannelDefaultCharacter,
 	Character,
-	CharactersInGames,
 	Game,
 	GuildDefaultCharacter,
 	Initiative,
@@ -63,6 +62,7 @@ export class ResourceFactories {
 	public static async character(partialCharacter?: Partial<Character>) {
 		const sheetRecordId =
 			partialCharacter?.sheetRecordId ?? (await ResourceFactories.sheetRecord()).id;
+		const gameId = partialCharacter?.gameId ?? (await ResourceFactories.game()).id;
 		const fakeCharacterMock = generateMock(zCharacterInitializer);
 		delete fakeCharacterMock.id;
 		delete fakeCharacterMock.createdAt;
@@ -71,6 +71,7 @@ export class ResourceFactories {
 			...fakeCharacterMock,
 			...partialCharacter,
 			sheetRecordId,
+			gameId,
 		});
 	}
 	public static async channelDefaultCharacter(
@@ -110,16 +111,6 @@ export class ResourceFactories {
 			...partialGame,
 		});
 	}
-	public static async charactersInGames(partialCharactersInGames?: Partial<CharactersInGames>) {
-		const gameId = partialCharactersInGames?.gameId ?? (await ResourceFactories.game()).id;
-		const characterId =
-			partialCharactersInGames?.characterId ?? (await ResourceFactories.character()).id;
-		return await vitestKobold.charactersInGames.create({
-			...partialCharactersInGames,
-			gameId,
-			characterId,
-		});
-	}
 
 	public static async initiative(partialInitiative?: Partial<Initiative>) {
 		const fakeInitiativeMock = generateMock(zInitiativeInitializer);
@@ -135,6 +126,7 @@ export class ResourceFactories {
 	public static async initiativeActor(partialInitiativeActor?: Partial<InitiativeActor>) {
 		const initiativeId =
 			partialInitiativeActor?.initiativeId ?? (await ResourceFactories.initiative()).id;
+		const gameId = partialInitiativeActor?.gameId ?? (await ResourceFactories.game()).id;
 		const initiativeActorGroupId =
 			partialInitiativeActor?.initiativeActorGroupId ??
 			(await ResourceFactories.initiativeActorGroup({ initiativeId: initiativeId })).id;
@@ -150,6 +142,7 @@ export class ResourceFactories {
 			initiativeActorGroupId,
 			characterId,
 			sheetRecordId,
+			gameId,
 		});
 	}
 
@@ -188,7 +181,6 @@ export function truncateDbForTests() {
 			TRUNCATE "channel_default_character" CASCADE;
 			TRUNCATE "character" CASCADE;
 			ALTER SEQUENCE "character_id_seq" RESTART WITH 1;
-			TRUNCATE "characters_in_games" CASCADE;
 			TRUNCATE "game" CASCADE;
 			TRUNCATE "guild_default_character" CASCADE;
 			TRUNCATE "initiative_actor_group" CASCADE;

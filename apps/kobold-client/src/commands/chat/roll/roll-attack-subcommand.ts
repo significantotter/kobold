@@ -102,14 +102,10 @@ export class RollAttackSubCommand implements Command {
 
 		const koboldUtils: KoboldUtils = new KoboldUtils(kobold);
 		const { gameUtils, creatureUtils } = koboldUtils;
-		const { activeCharacter, userSettings, activeGame } = await koboldUtils.fetchDataForCommand(
-			intr,
-			{
-				activeGame: true,
-				activeCharacter: true,
-				userSettings: true,
-			}
-		);
+		const { activeCharacter, userSettings } = await koboldUtils.fetchDataForCommand(intr, {
+			activeCharacter: true,
+			userSettings: true,
+		});
 		koboldUtils.assertActiveCharacterNotNull(activeCharacter);
 
 		const creature = Creature.fromSheetRecord(activeCharacter.sheetRecord);
@@ -161,6 +157,6 @@ export class RollAttackSubCommand implements Command {
 			embed.addFields(damageField);
 		}
 
-		await EmbedUtils.dispatchEmbeds(intr, [embed], secretRoll, activeGame?.gmUserId);
+		await EmbedUtils.dispatchEmbeds(intr, [embed], secretRoll, activeCharacter.game?.gmUserId);
 	}
 }

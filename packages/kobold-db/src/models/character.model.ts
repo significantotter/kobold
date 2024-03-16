@@ -1,6 +1,7 @@
 import { Kysely } from 'kysely';
 import {
 	channelDefaultCharacterForCharacter,
+	gameForCharacter,
 	guildDefaultCharacterForCharacter,
 	sheetRecordForCharacter,
 } from '../lib/shared-relation-builders.js';
@@ -27,6 +28,7 @@ export class CharacterModel extends Model<Database['character']> {
 				guildDefaultCharacterForCharacter(eb),
 				channelDefaultCharacterForCharacter(eb),
 				sheetRecordForCharacter(eb),
+				gameForCharacter(eb),
 			])
 			.execute();
 		return result[0];
@@ -48,6 +50,7 @@ export class CharacterModel extends Model<Database['character']> {
 				guildDefaultCharacterForCharacter(eb, { guildId }),
 				channelDefaultCharacterForCharacter(eb, { channelId }),
 				sheetRecordForCharacter(eb),
+				gameForCharacter(eb),
 			])
 			.where('character.userId', '=', userId)
 			.execute();
@@ -82,6 +85,7 @@ export class CharacterModel extends Model<Database['character']> {
 				guildDefaultCharacterForCharacter(eb, { guildId }),
 				channelDefaultCharacterForCharacter(eb, { channelId }),
 				sheetRecordForCharacter(eb),
+				gameForCharacter(eb),
 			]);
 		if (userId !== undefined) query = query.where('character.userId', '=', userId);
 		if (name !== undefined) query = query.where('character.name', 'ilike', `%${name}%`);
@@ -110,6 +114,7 @@ export class CharacterModel extends Model<Database['character']> {
 				guildDefaultCharacterForCharacter(eb),
 				channelDefaultCharacterForCharacter(eb),
 				sheetRecordForCharacter(eb),
+				gameForCharacter(eb),
 			]);
 		if ('id' in params) query = query.where('character.id', '=', params.id);
 		else {
@@ -149,6 +154,7 @@ export class CharacterModel extends Model<Database['character']> {
 				guildDefaultCharacterForCharacter(eb),
 				channelDefaultCharacterForCharacter(eb),
 				sheetRecordForCharacter(eb),
+				gameForCharacter(eb),
 			])
 			.execute();
 		return result[0];
@@ -167,6 +173,7 @@ export class CharacterModel extends Model<Database['character']> {
 				guildDefaultCharacterForCharacter(eb),
 				channelDefaultCharacterForCharacter(eb),
 				sheetRecordForCharacter(eb),
+				gameForCharacter(eb),
 			])
 			.executeTakeFirstOrThrow();
 		return result;

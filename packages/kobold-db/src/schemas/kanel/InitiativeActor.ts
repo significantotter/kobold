@@ -2,6 +2,7 @@ import { initiativeId, type InitiativeId } from './Initiative.js';
 import { initiativeActorGroupId, type InitiativeActorGroupId } from './InitiativeActorGroup.js';
 import { characterId, type CharacterId } from './Character.js';
 import { sheetRecordId, type SheetRecordId } from './SheetRecord.js';
+import { gameId, type GameId } from './Game.js';
 import { type ColumnType, type Selectable, type Insertable, type Updateable } from 'kysely';
 import { z } from 'zod';
 
@@ -41,6 +42,12 @@ export default interface InitiativeActorTable {
 
   /** Database type: pg_catalog.int4 */
   sheetRecordId: ColumnType<SheetRecordId, SheetRecordId, SheetRecordId>;
+
+  /** Database type: pg_catalog.int4 */
+  gameId: ColumnType<GameId | null, GameId | null, GameId | null>;
+
+  /** Database type: pg_catalog.text */
+  note: ColumnType<string | null, string | null, string | null>;
 }
 
 export const initiativeActorId = z.number().int().max(2147483647);
@@ -57,6 +64,8 @@ export const zInitiativeActor = z.object({
   referenceNpcName: z.string().nullable(),
   hideStats: z.boolean(),
   sheetRecordId: sheetRecordId,
+  gameId: gameId.nullable(),
+  note: z.string().nullable(),
 });
 
 export const zInitiativeActorInitializer = z.object({
@@ -71,6 +80,8 @@ export const zInitiativeActorInitializer = z.object({
   referenceNpcName: z.string().optional().nullable(),
   hideStats: z.boolean().optional(),
   sheetRecordId: sheetRecordId,
+  gameId: gameId.optional().nullable(),
+  note: z.string().optional().nullable(),
 });
 
 export const zInitiativeActorMutator = z.object({
@@ -85,6 +96,8 @@ export const zInitiativeActorMutator = z.object({
   referenceNpcName: z.string().optional().nullable(),
   hideStats: z.boolean().optional(),
   sheetRecordId: sheetRecordId.optional(),
+  gameId: gameId.optional().nullable(),
+  note: z.string().optional().nullable(),
 });
 
 export type InitiativeActor = Selectable<InitiativeActorTable>;

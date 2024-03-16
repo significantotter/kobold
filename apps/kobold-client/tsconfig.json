@@ -2,9 +2,9 @@
 	"extends": "../../tsconfig.base.json",
 	"compilerOptions": {
 		"lib": ["es2023"],
-		"module": "Node16",
 		"target": "ESNext",
-		"moduleResolution": "node16",
+		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
 
 		"composite": true,
 		"sourceMap": true,

@@ -44,14 +44,10 @@ export class RollDiceSubCommand implements Command {
 		const rollNote = intr.options.getString(ChatArgs.ROLL_NOTE_OPTION.name) ?? '';
 
 		const koboldUtils: KoboldUtils = new KoboldUtils(kobold);
-		let { activeCharacter, userSettings, activeGame } = await koboldUtils.fetchDataForCommand(
-			intr,
-			{
-				activeGame: true,
-				activeCharacter: true,
-				userSettings: true,
-			}
-		);
+		let { activeCharacter, userSettings } = await koboldUtils.fetchDataForCommand(intr, {
+			activeCharacter: true,
+			userSettings: true,
+		});
 
 		//only use the active character if the roll uses character attributes
 		if (!/(\[[\w \-_\.]{2,}\])/g.test(diceExpression)) {
@@ -69,6 +65,11 @@ export class RollDiceSubCommand implements Command {
 		rollBuilder.addRoll({ rollExpression: diceExpression, rollTitle: '' });
 		const response = rollBuilder.compileEmbed();
 
-		await EmbedUtils.dispatchEmbeds(intr, [response], secretRoll, activeGame?.gmUserId);
+		await EmbedUtils.dispatchEmbeds(
+			intr,
+			[response],
+			secretRoll,
+			activeCharacter?.game?.gmUserId
+		);
 	}
 }

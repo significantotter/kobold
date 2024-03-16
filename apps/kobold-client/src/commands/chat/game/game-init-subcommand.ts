@@ -106,7 +106,10 @@ export class GameInitSubCommand implements Command {
 		const initiativeValue = intr.options.getNumber(InitOptions.INIT_VALUE_OPTION.name);
 		const skillChoice = intr.options.getString(ChatArgs.SKILL_CHOICE_OPTION.name);
 		const diceExpression = intr.options.getString(ChatArgs.ROLL_EXPRESSION_OPTION.name);
-		const targetCharacter = intr.options.getString(GameOptions.GAME_TARGET_CHARACTER.name);
+		const targetCharacter = intr.options.getString(
+			GameOptions.GAME_TARGET_CHARACTER.name,
+			true
+		);
 
 		if (activeGame.characters.length === 0) {
 			await InteractionUtils.send(
@@ -136,8 +139,9 @@ export class GameInitSubCommand implements Command {
 
 		for (const character of _.uniqBy(activeGame.characters, 'id')) {
 			if (
-				// the character is already in the init
-				currentInitiative.actors.find(actor => actor.characterId === character.id) ||
+				(targetCharacter !== 'All Players' &&
+					// the character is already in the init
+					currentInitiative.actors.find(actor => actor.characterId === character.id)) ||
 				// we have a target character and this isn't it
 				(targetCharacter &&
 					targetCharacter.toLocaleLowerCase().trim().length > 0 &&

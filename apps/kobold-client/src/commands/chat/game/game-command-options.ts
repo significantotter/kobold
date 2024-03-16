@@ -1,7 +1,45 @@
 import { APIApplicationCommandBasicOption, ApplicationCommandOptionType } from 'discord.js';
 import L from '../../../i18n/i18n-node.js';
+import { SheetBaseCounterKeys } from 'kobold-db';
 
 export class GameOptions {
+	public static readonly GAME_GIVE_OPTION: APIApplicationCommandBasicOption = {
+		name: L.en.commandOptions.gameGiveOption.name(),
+		description: L.en.commandOptions.gameGiveOption.description(),
+		required: true,
+		type: ApplicationCommandOptionType.String,
+		choices: Object.values(SheetBaseCounterKeys).map(key => ({
+			name: L.en.commandOptions.gameGiveOption.choices[key].name(),
+			value: L.en.commandOptions.gameGiveOption.choices[key].value(),
+		})),
+	};
+	public static readonly GAME_GIVE_AMOUNT: APIApplicationCommandBasicOption = {
+		name: L.en.commandOptions.gameGiveAmount.name(),
+		description: L.en.commandOptions.gameGiveAmount.description(),
+		required: true,
+		autocomplete: false,
+		type: ApplicationCommandOptionType.String,
+	};
+	public static readonly GAME_SHEET_STYLE: APIApplicationCommandBasicOption = {
+		name: L.en.commandOptions.gameSheetStyle.name(),
+		description: L.en.commandOptions.gameSheetStyle.description(),
+		required: false,
+		type: ApplicationCommandOptionType.String,
+		choices: [
+			{
+				name: L.en.commandOptions.gameplayTrackerMode.choices.countersOnly.name(),
+				value: L.en.commandOptions.gameplayTrackerMode.choices.countersOnly.value(),
+			},
+			{
+				name: L.en.commandOptions.gameplayTrackerMode.choices.basicStats.name(),
+				value: L.en.commandOptions.gameplayTrackerMode.choices.basicStats.value(),
+			},
+			{
+				name: L.en.commandOptions.gameplayTrackerMode.choices.fullSheet.name(),
+				value: L.en.commandOptions.gameplayTrackerMode.choices.fullSheet.value(),
+			},
+		],
+	};
 	public static readonly GAME_MANAGE_OPTION: APIApplicationCommandBasicOption = {
 		name: L.en.commandOptions.gameManageOption.name(),
 		description: L.en.commandOptions.gameManageOption.description(),
@@ -51,7 +89,7 @@ export class GameOptions {
 	public static readonly GAME_TARGET_CHARACTER: APIApplicationCommandBasicOption = {
 		name: L.en.commandOptions.gameTargetCharacter.name(),
 		description: L.en.commandOptions.gameTargetCharacter.description(),
-		required: false,
+		required: true,
 		autocomplete: true,
 		type: ApplicationCommandOptionType.String,
 	};

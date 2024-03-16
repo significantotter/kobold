@@ -58,8 +58,14 @@ export class GameUtils {
 	public async autocompleteGameCharacter(
 		targetCharacterName: String,
 		activeGame?: GameWithRelations | null
-	) {
-		if (!activeGame?.characters) return [];
+	): Promise<{ name: string; value: string }[]> {
+		if (!activeGame?.characters)
+			return [
+				{
+					name: 'All Players',
+					value: 'All Players',
+				},
+			];
 
 		const matches: Character[] = [];
 		for (const character of activeGame.characters) {
@@ -70,10 +76,12 @@ export class GameUtils {
 				matches.push(character);
 			}
 		}
-		return matches.map(character => ({
+		const result = matches.map(character => ({
 			name: character.name,
 			value: character.name,
 		}));
+		result.unshift({ name: 'All Players', value: 'All Players' });
+		return result;
 	}
 
 	public async getAllTargetableOptions(intr: BaseInteraction<CacheType>) {

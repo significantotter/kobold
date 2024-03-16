@@ -68,6 +68,18 @@ export default {
 		usage: '_[character]_: The name of a character in the initiative order.',
 		description: `Jumps to a specific participant in the initiative order`,
 	},
+	note: {
+		name: 'note',
+		options: '[name]',
+		usage:
+			'_[name]_: The name of a character in the initiative.\n' +
+			'_[note]_: The note to add to the character.\n' +
+			'To remove a note, use any of: "-", "none", "clear", "remove", "x", or "."\n',
+		description: `Sets a note for a character in the initiative.`,
+		expandedDescription:
+			`Sets a note for a character in the initiative.\n` +
+			'To split a note over multiple lines, use "\\n" or "|" between the lines.',
+	},
 	join: {
 		name: 'join',
 		options: '[*skill*] [*dice*] [*value*] [*hide-stats*]',
@@ -104,7 +116,7 @@ export default {
 			'_[*custom-stats*] optional_: Custom stats for a custom npc or to overwrite on a bestiary creature. ' +
 			'Enter values in the format statName=statValue, separated by semicolons. If the value is a list like with immunities, ' +
 			'separate each value with a comma. For weaknesses/resistances, follow this example: ' +
-			'"hp=30;ac=21;immunities=poison,electricity;weaknesses=fire:5,cold:10',
+			'"hp=30;ac=21;immunities=poison,electricity;fire weakness=5;cold resistance=10',
 		description: `Adds an NPC or minion to initiative`,
 		expandedDescription:
 			'Adds a bestiary creature to the initiative. By default, the creature will ' +

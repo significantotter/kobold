@@ -42,6 +42,8 @@ import {
 	// game
 	GameCommand,
 	GameInitSubCommand,
+	GamePartyStatusSubCommand,
+	GameGiveSubCommand,
 	GameListSubCommand,
 	GameManageSubCommand,
 	GameRollSubCommand,
@@ -59,6 +61,7 @@ import {
 	InitEndSubCommand,
 	InitJoinSubCommand,
 	InitJumpToSubCommand,
+	InitNoteSubCommand,
 	InitNextSubCommand,
 	InitPrevSubCommand,
 	InitRemoveSubCommand,
@@ -184,6 +187,7 @@ async function start(): Promise<void> {
 			new InitShowSubCommand(),
 			new InitStatBlockSubCommand(),
 			new InitRollSubCommand(),
+			new InitNoteSubCommand(),
 			new InitNextSubCommand(),
 			new InitPrevSubCommand(),
 			new InitJumpToSubCommand(),
@@ -209,6 +213,8 @@ async function start(): Promise<void> {
 		new GameCommand([
 			new GameRollSubCommand(),
 			new GameInitSubCommand(),
+			new GamePartyStatusSubCommand(),
+			new GameGiveSubCommand(),
 			new GameListSubCommand(),
 			new GameManageSubCommand(),
 		]),

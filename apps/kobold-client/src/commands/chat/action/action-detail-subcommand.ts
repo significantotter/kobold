@@ -107,6 +107,14 @@ export class ActionDetailSubCommand implements Command {
 				}
 				const field = { name: roll.name, value: description };
 				actionDetailEmbed.addFields([field]);
+			} else if (roll.type === 'skill-challenge') {
+				let description = `Skill Challenge\n`;
+				if (roll.targetDC) description += `Roll: ${roll.roll} vs ${roll.targetDC}`;
+				else {
+					description += roll.roll;
+				}
+				const field = { name: roll.name, value: description };
+				actionDetailEmbed.addFields([field]);
 			} else if (roll.type === 'damage') {
 				let description = ``;
 				description += `\ndamage: ${roll.roll} ${roll.damageType ?? ''}`;

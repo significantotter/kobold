@@ -105,7 +105,10 @@ export class GameRollSubCommand implements Command {
 		const rollType = intr.options.getString(GameOptions.GAME_ROLL_TYPE.name, true);
 		const diceExpression =
 			intr.options.getString(GameOptions.GAME_DICE_ROLL_OR_MODIFIER.name) ?? '';
-		const targetCharacterName = intr.options.getString(GameOptions.GAME_TARGET_CHARACTER.name);
+		const targetCharacterName = intr.options.getString(
+			GameOptions.GAME_TARGET_CHARACTER.name,
+			true
+		);
 		const targetSheetName = intr.options.getString(InitOptions.INIT_CHARACTER_TARGET.name);
 
 		const secretRoll =
@@ -151,7 +154,7 @@ export class GameRollSubCommand implements Command {
 
 		for (const character of _.uniqBy(activeGame.characters, 'id')) {
 			if (
-				targetCharacterName &&
+				targetCharacterName !== 'All Players' &&
 				targetCharacterName.toLocaleLowerCase().trim().length > 0 &&
 				targetCharacterName.toLocaleLowerCase().trim() !==
 					character.name.toLocaleLowerCase().trim()
@@ -254,6 +257,6 @@ export class GameRollSubCommand implements Command {
 				embeds.push(noRollFoundEmbed);
 			}
 		}
-		await EmbedUtils.dispatchEmbeds(intr, embeds, secretRoll, activeGame?.gmUserId);
+		await EmbedUtils.dispatchEmbeds(intr, embeds, secretRoll, activeGame.gmUserId);
 	}
 }
