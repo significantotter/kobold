@@ -918,7 +918,7 @@ export class ActionRoller {
 							const testRollResult = DiceUtils.parseAndEvaluateDiceExpression({
 								rollExpression: roll?.targetDC ?? '',
 								creature: this.creature,
-								tags: this.tags,
+								tags: [...this.tags, 'attack'],
 								skipModifiers: true,
 								extraAttributes: _.values(extraAttributes),
 							});
@@ -958,7 +958,7 @@ export class ActionRoller {
 						const testRollResult = DiceUtils.parseAndEvaluateDiceExpression({
 							rollExpression: roll?.targetDC ?? '',
 							creature: this.creature,
-							tags: this.tags,
+							tags: [...this.tags, 'skill'],
 							skipModifiers: true,
 							extraAttributes: _.values(extraAttributes),
 						});
