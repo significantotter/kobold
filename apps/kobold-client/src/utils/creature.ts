@@ -290,12 +290,12 @@ export class Creature {
 		return attackText.length ? `${title}${attackText}` : '';
 	}
 
-	public trackerTitleText() {
+	public titleBlock(sheetType: string = 'Sheet') {
 		let title = '';
 		if (this.sheet.info.url) {
-			title += `[${this.name}](${this.sheet.info.url}) Tracker`;
+			title += `[${this.name}](${this.sheet.info.url}) ${_.capitalize(sheetType)}`;
 		} else {
-			title += `${this.name} Tracker`;
+			title += `${this.name} ${_.capitalize(sheetType)}`;
 		}
 		if (this.sheet.staticInfo.level)
 			title += ` Level ${this.sheet.staticInfo.level ?? 'unknown'}`;
@@ -315,14 +315,14 @@ export class Creature {
 		return title;
 	}
 
-	public compileTracker(mode: string): BaseMessageOptions {
+	public compileEmbed(sheetType: string, mode: string = 'full_sheet'): KoboldEmbed {
 		const contentGroups = [];
 
 		if (mode === 'full_sheet') {
 			//full sheet
-			return { embeds: [this.compileSheetEmbed()] };
+			return this.fullSheetData();
 		} else {
-			contentGroups.push(this.trackerTitleText());
+			contentGroups.push(this.titleBlock(sheetType));
 			contentGroups.push(this.sheetBasicStatsText());
 			if (mode === 'basic_stats') {
 				contentGroups.push(this.sheetDefensiveStatText());
@@ -330,10 +330,17 @@ export class Creature {
 				contentGroups.push(this.sheetCastingStatText());
 			}
 		}
-		return { content: contentGroups.join('\n'), embeds: [] };
+		const sheetEmbed = new KoboldEmbed({
+			title: this.name,
+			description: contentGroups.join('\n'),
+		});
+		if (this.sheet.info.url) sheetEmbed.setURL(this.sheet.info.url);
+		if (this.sheet.info.imageURL) sheetEmbed.setThumbnail(this.sheet.info.imageURL);
+		sheetEmbed.setDescription(contentGroups.join('\n'));
+		return sheetEmbed;
 	}
 
-	public compileSheetEmbed(): KoboldEmbed {
+	public fullSheetData(): KoboldEmbed {
 		const sheetEmbed = new KoboldEmbed();
 
 		// sheet metadata

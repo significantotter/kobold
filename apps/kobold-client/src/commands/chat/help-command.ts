@@ -307,7 +307,9 @@ export class HelpCommand implements Command {
 							`\`/${LL.commands.game.name()} ${LL.commands.game.manage.name()}\` ${LL.commands.game.manage.description()}\n` +
 							`\`/${LL.commands.game.name()} ${LL.commands.game.roll.name()}\` ${LL.commands.game.roll.description()}\n` +
 							`\`/${LL.commands.game.name()} ${LL.commands.game.init.name()}\` ${LL.commands.game.init.description()}\n` +
-							`\`/${LL.commands.game.name()} ${LL.commands.game.list.name()}\` ${LL.commands.game.list.description()}\n`,
+							`\`/${LL.commands.game.name()} ${LL.commands.game.list.name()}\` ${LL.commands.game.list.description()}\n` +
+							`\`/${LL.commands.game.name()} ${LL.commands.game.partyStatus.name()}\` ${LL.commands.game.partyStatus.description()}\n` +
+							`\`/${LL.commands.game.name()} ${LL.commands.game.give.name()}\` ${LL.commands.game.give.description()}\n`,
 					},
 					{
 						name: LL.commands.gameplay.name(),

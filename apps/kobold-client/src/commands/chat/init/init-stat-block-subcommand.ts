@@ -85,7 +85,7 @@ export class InitStatBlockSubCommand implements Command {
 			},
 			actor.name
 		);
-		sheetEmbed = creature.compileSheetEmbed();
+		sheetEmbed = creature.compileEmbed('Sheet');
 
 		await InteractionUtils.send(intr, sheetEmbed, isSecretMessage);
 	}

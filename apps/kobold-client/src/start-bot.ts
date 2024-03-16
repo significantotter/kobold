@@ -42,6 +42,8 @@ import {
 	// game
 	GameCommand,
 	GameInitSubCommand,
+	GamePartyStatusSubCommand,
+	GameGiveSubCommand,
 	GameListSubCommand,
 	GameManageSubCommand,
 	GameRollSubCommand,
@@ -211,6 +213,8 @@ async function start(): Promise<void> {
 		new GameCommand([
 			new GameRollSubCommand(),
 			new GameInitSubCommand(),
+			new GamePartyStatusSubCommand(),
+			new GameGiveSubCommand(),
 			new GameListSubCommand(),
 			new GameManageSubCommand(),
 		]),

@@ -75,7 +75,8 @@ export default {
 			'_[name]_: The name of a character in the initiative.\n' +
 			'_[note]_: The note to add to the character.\n' +
 			'To remove a note, use any of: "-", "none", "clear", "remove", "x", or "."\n',
-		description:
+		description: `Sets a note for a character in the initiative.`,
+		expandedDescription:
 			`Sets a note for a character in the initiative.\n` +
 			'To split a note over multiple lines, use "\\n" or "|" between the lines.',
 	},

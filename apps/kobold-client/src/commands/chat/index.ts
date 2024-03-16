@@ -57,6 +57,8 @@ export { GameInitSubCommand } from './game/game-init-subcommand.js';
 export { GameListSubCommand } from './game/game-list-subcommand.js';
 export { GameManageSubCommand } from './game/game-manage-subcommand.js';
 export { GameRollSubCommand } from './game/game-roll-subcommand.js';
+export { GamePartyStatusSubCommand } from './game/game-party-status-subcommand.js';
+export { GameGiveSubCommand } from './game/game-give-subcommand.js';
 
 // gameplay command
 export { GameplayCommand } from './gameplay/gameplay-command.js';

@@ -16,16 +16,13 @@ import { spawn } from 'child_process';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 async function start(): Promise<void> {
 	Logger.info(`Migrating Database.`);
 	await migrateToLatest();
 	Logger.info(`Starting Command Registration Subprocess.`);
 	const commandRegistration = spawn(
 		'node',
-		[path.join(__dirname, 'start-bot.js'), 'commands', 'register'],
+		[path.join('dist', `start-bot.js`), 'commands', 'register'],
 		{
 			stdio: 'inherit',
 		}
