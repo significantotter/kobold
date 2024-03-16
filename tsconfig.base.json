@@ -22,7 +22,7 @@
 	"ts-node": {
 		"transpileOnly": true,
 		"files": true,
-		"module": "NodeNext"
+		"esm": true
 	},
 	"exclude": ["node_modules", "dist", "*.config.ts", "vitest.setup.ts"]
 }
