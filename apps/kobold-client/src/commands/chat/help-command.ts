@@ -398,6 +398,7 @@ export class HelpCommand implements Command {
 						LL.commands.init.join.name(),
 						LL.commands.init.add.name(),
 						LL.commands.init.roll.name(),
+						LL.commands.init.note.name(),
 						LL.commands.init.statBlock.name(),
 						LL.commands.init.next.name(),
 						LL.commands.init.prev.name(),

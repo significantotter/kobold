@@ -231,22 +231,34 @@ export class InitiativeBuilder {
 		const actorsInGroup = this.actorsByGroup[actorGroup.id] || [];
 		const isActiveGroup = this.init.currentTurnGroupId === actorGroup.id;
 		let turnText = '';
-		let extraSymbol = ' ';
+		let turnSymbol = ' ';
+		let noteSymbol = '.';
 		if (isActiveGroup) {
-			extraSymbol = '#';
+			turnSymbol = '#';
+			noteSymbol = '>';
 		}
 		turnText += '\n';
 		if (actorsInGroup.length === 1 && actorsInGroup[0].name === actorGroup.name) {
 			//We're just displaying the actor in its initiative slot
-			turnText += `${extraSymbol} ${actorGroup.initiativeResult}: ${actorGroup.name}`;
+			turnText += `${turnSymbol} ${actorGroup.initiativeResult}: ${actorGroup.name}`;
 			turnText += this.generateActorStatDisplayString(actorsInGroup[0], options);
+			if (actorsInGroup[0].note)
+				turnText += `\\n${actorsInGroup[0].note}`
+					.split(/\\n|\|/)
+					.map(text => text.trim())
+					.join(`\n${noteSymbol}     `);
 		} else {
-			turnText += `${extraSymbol} ${actorGroup.initiativeResult}: ${actorGroup.name}\n`;
+			turnText += `${turnSymbol} ${actorGroup.initiativeResult}. ${actorGroup.name}\n`;
 			const sortedActors = actorsInGroup.sort((a, b) => a.name.localeCompare(b.name));
 			for (let i = 0; i < sortedActors.length; i++) {
 				turnText += `       ${i}. ${sortedActors[i].name}`;
 				turnText += this.generateActorStatDisplayString(sortedActors[i], options);
 				turnText += `\n`;
+				if (sortedActors[i].note)
+					turnText += `\\n${sortedActors[i].note}`
+						.split(/\\n|\|/)
+						.map(text => text.trim())
+						.join(`\n${noteSymbol}    `);
 			}
 		}
 		return turnText;

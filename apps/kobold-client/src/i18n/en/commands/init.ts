@@ -68,6 +68,17 @@ export default {
 		usage: '_[character]_: The name of a character in the initiative order.',
 		description: `Jumps to a specific participant in the initiative order`,
 	},
+	note: {
+		name: 'note',
+		options: '[name]',
+		usage:
+			'_[name]_: The name of a character in the initiative.\n' +
+			'_[note]_: The note to add to the character.\n' +
+			'To remove a note, use any of: "-", "none", "clear", "remove", "x", or "."\n',
+		description:
+			`Sets a note for a character in the initiative.\n` +
+			'To split a note over multiple lines, use "\\n" or "|" between the lines.',
+	},
 	join: {
 		name: 'join',
 		options: '[*skill*] [*dice*] [*value*] [*hide-stats*]',

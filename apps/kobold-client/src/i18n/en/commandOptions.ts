@@ -450,6 +450,10 @@ export default {
 		name: 'value',
 		description: 'A value to set your initiative to. Overwrites any other init options.',
 	},
+	initNote: {
+		name: 'note',
+		description: 'A note displayed in the initiative tracker. "-" or "none" to remove.',
+	},
 	template: {
 		name: 'template',
 		description: 'Optionally apply a template to the added creature.',

@@ -14,31 +14,31 @@ import { type default as UserSettingsTable } from './UserSettings.js';
 import { type default as WgAuthTokenTable } from './WgAuthToken.js';
 
 export default interface PublicSchema {
-	kyselyMigration: KyselyMigrationTable;
+  kyselyMigration: KyselyMigrationTable;
 
-	kyselyMigrationLock: KyselyMigrationLockTable;
+  kyselyMigrationLock: KyselyMigrationLockTable;
 
-	sheetRecord: SheetRecordTable;
+  sheetRecord: SheetRecordTable;
 
-	channelDefaultCharacter: ChannelDefaultCharacterTable;
+  channelDefaultCharacter: ChannelDefaultCharacterTable;
 
-	character: CharacterTable;
+  character: CharacterTable;
 
-	game: GameTable;
+  game: GameTable;
 
-	guildDefaultCharacter: GuildDefaultCharacterTable;
+  guildDefaultCharacter: GuildDefaultCharacterTable;
 
-	initiative: InitiativeTable;
+  initiative: InitiativeTable;
 
-	initiativeActor: InitiativeActorTable;
+  initiativeActor: InitiativeActorTable;
 
-	initiativeActorGroup: InitiativeActorGroupTable;
+  initiativeActorGroup: InitiativeActorGroupTable;
 
-	knexMigrations: KnexMigrationsTable;
+  knexMigrations: KnexMigrationsTable;
 
-	knexMigrationsLock: KnexMigrationsLockTable;
+  knexMigrationsLock: KnexMigrationsLockTable;
 
-	userSettings: UserSettingsTable;
+  userSettings: UserSettingsTable;
 
-	wgAuthToken: WgAuthTokenTable;
+  wgAuthToken: WgAuthTokenTable;
 }
