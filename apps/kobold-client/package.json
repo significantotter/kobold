@@ -90,7 +90,9 @@
 		"prettier": "^3.0.3",
 		"vitest": "^0.34.4",
 		"zod-to-json-schema": "^3.22.0",
-		"zod-to-ts": "^1.2.0"
+		"zod-to-ts": "^1.2.0",
+		"typescript": "^5.3",
+		"ts-node": "^10.9.2"
 	},
 	"madge": {
 		"tsConfig": "./tsconfig.json",
