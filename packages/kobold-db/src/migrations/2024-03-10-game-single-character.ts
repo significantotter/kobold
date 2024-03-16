@@ -3,11 +3,11 @@ import { Kysely, sql } from 'kysely';
 export async function up(db: Kysely<any>): Promise<void> {
 	db.schema
 		.alterTable('character')
-		.addColumn('game_id', 'integer', col => col.references('game.id').onDelete('cascade'))
+		.addColumn('game_id', 'integer', col => col.references('game.id').onDelete('set null'))
 		.execute();
 	db.schema
 		.alterTable('initiative_actor')
-		.addColumn('game_id', 'integer', col => col.references('game.id').onDelete('cascade'))
+		.addColumn('game_id', 'integer', col => col.references('game.id').onDelete('set null'))
 		.execute();
 	db.executeQuery(
 		sql`

@@ -62,4 +62,27 @@ export class SheetRecordModel extends Model<Database['sheetRecord']> {
 			.execute();
 		if (Number(result[0].numDeletedRows) == 0) throw new Error('No rows deleted');
 	}
+
+	public async deleteOrphaned() {
+		const result = await this.db
+			.deleteFrom('sheetRecord')
+			.where(eb => {
+				const characterExists = eb.exists(ebInner =>
+					ebInner
+						.selectFrom('character')
+						.selectAll()
+						.whereRef('character.sheetRecordId', '=', 'sheetRecord.id')
+				);
+				const initActorExists = eb.exists(ebInner =>
+					ebInner
+						.selectFrom('initiativeActor')
+						.selectAll()
+						.whereRef('initiativeActor.sheetRecordId', '=', 'sheetRecord.id')
+				);
+
+				return eb.not(eb.or([characterExists, initActorExists]));
+			})
+			.execute();
+		return result[0];
+	}
 }

@@ -46,4 +46,31 @@ describe('SheetRecordModel', () => {
 			await expect(vitestKobold.sheetRecord.delete({ id: -1 })).rejects.toThrow();
 		});
 	});
+	describe('deleteOrphaned', () => {
+		it('deletes orphaned sheetRecords', async () => {
+			const initActor2 = await ResourceFactories.initiativeActor();
+			const [orphanedSheetRecord, character, initActor, character2] = await Promise.all([
+				ResourceFactories.sheetRecord(),
+				ResourceFactories.character(),
+				ResourceFactories.initiativeActor(),
+				ResourceFactories.character({ sheetRecordId: initActor2.sheetRecordId }),
+			]);
+
+			const result = await vitestKobold.sheetRecord.deleteOrphaned();
+			expect(result.numDeletedRows).toEqual(BigInt(1));
+
+			// Assert: Check that the orphaned records were deleted
+			const allRecords = await vitestKobold.db
+				.selectFrom('sheetRecord')
+				.select('id')
+				.execute();
+			const allIds = allRecords.map(r => r.id);
+			// Note: You'll need to replace this with actual code to check the records
+			expect(allIds).not.toContain(orphanedSheetRecord.id);
+			expect(allIds).toContain(character.sheetRecordId);
+			expect(allIds).toContain(initActor.sheetRecordId);
+			expect(allIds).toContain(character2.sheetRecordId);
+			expect(allIds).toContain(initActor2.sheetRecordId);
+		});
+	});
 });

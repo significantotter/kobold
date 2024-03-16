@@ -20,16 +20,16 @@ describe('GameModel', () => {
 		it('reads the relations of the game', async () => {
 			const fakeGame = await ResourceFactories.game();
 			const [fakeCharacter, fakeCharacter2] = await Promise.all([
-				ResourceFactories.character(),
-				ResourceFactories.character(),
+				ResourceFactories.character({ gameId: fakeGame.id }),
+				ResourceFactories.character({ gameId: fakeGame.id }),
 			]);
 
 			const read = await vitestKobold.game.read({ id: fakeGame.id });
 			expect(read).toMatchObject({
 				...fakeGame,
 				characters: [
-					_.omit(fakeCharacter, 'createdAt', 'lastUpdatedAt'),
-					_.omit(fakeCharacter2, 'createdAt', 'lastUpdatedAt'),
+					_.omit(fakeCharacter, 'createdAt', 'lastUpdatedAt', 'game'),
+					_.omit(fakeCharacter2, 'createdAt', 'lastUpdatedAt', 'game'),
 				],
 			});
 		});

@@ -24,9 +24,10 @@
 		"knex": "NODE_OPTIONS='--max-old-space-size=4096' NODE_OPTIONS='--loader ts-node/esm' knex",
 		"kanel": "node --loader=ts-node/esm ./src/scripts/kanel-generate.ts",
 		"migrate": "node --loader=ts-node/esm ./src/scripts/run-migrate.ts",
-		"migrate:down": "node --loader=ts-node/esm ./src/scripts/migrate-down.ts",
-		"migrate:test": "NODE_ENV=TEST node --loader=ts-node/esm ./src/scripts/migrate.ts",
-		"test": "vitest"
+		"migrate-down": "node --loader=ts-node/esm ./src/scripts/migrate-down.ts",
+		"migrate:test": "NODE_ENV=TEST node --loader=ts-node/esm ./src/scripts/run-migrate.ts",
+		"migrate-down:test": "NODE_ENV=TEST node --loader=ts-node/esm ./src/scripts/migrate-down.ts",
+		"test": "pnpm run migrate:test && vitest"
 	},
 	"dependencies": {
 		"date-fns": "^2.30.0",
