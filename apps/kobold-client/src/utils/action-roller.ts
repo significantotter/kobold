@@ -987,11 +987,11 @@ export class ActionRoller {
 			} else if (rollType === 'save') {
 				let rollTargetValue = overwriteTargetDc;
 				let saveRoll = options.saveDiceRoll;
-				if (this.creature) {
+				if (this.creature && !rollTargetValue) {
 					rollTargetValue =
 						this.creature.getDC(roll.saveTargetDC ?? '') ?? rollTargetValue;
 				}
-				if (this.targetCreature) {
+				if (this.targetCreature && !saveRoll) {
 					const saveRollBonus =
 						this.targetCreature.rolls[(roll.saveRollType ?? '').trim().toLowerCase()]
 							?.bonus;
