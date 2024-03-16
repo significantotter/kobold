@@ -4,7 +4,7 @@ import 'kobold-config';
 
 import { Config } from 'kobold-config';
 import { GuildsController, RootController, ShardsController } from './controllers/index.js';
-import { UpdateServerCountJob, CleanOrphanedSheetRecordsJob } from './jobs/index.js';
+import { UpdateServerCountJob } from './jobs/index.js';
 import { Api } from './models/api.js';
 import { Manager } from './models/manager.js';
 import { HttpService, JobService, Logger, MasterApiService } from './services/index.js';
