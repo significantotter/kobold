@@ -139,14 +139,13 @@ export class GameInitSubCommand implements Command {
 
 		for (const character of _.uniqBy(activeGame.characters, 'id')) {
 			if (
-				(targetCharacter !== 'All Players' &&
-					// the character is already in the init
-					currentInitiative.actors.find(actor => actor.characterId === character.id)) ||
-				// we have a target character and this isn't it
-				(targetCharacter &&
-					targetCharacter.toLocaleLowerCase().trim().length > 0 &&
-					targetCharacter.toLocaleLowerCase().trim() !==
-						character.name.toLocaleLowerCase().trim())
+				targetCharacter !== 'All Players' && // the character is already in the init
+				(currentInitiative.actors.find(actor => actor.characterId === character.id) ||
+					// we have a target character and this isn't it
+					(targetCharacter &&
+						targetCharacter.toLocaleLowerCase().trim().length > 0 &&
+						targetCharacter.toLocaleLowerCase().trim() !==
+							character.name.toLocaleLowerCase().trim()))
 			) {
 				continue;
 			}
