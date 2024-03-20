@@ -5,13 +5,13 @@ import {
 	PermissionsString,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
-import { KoboldEmbed } from '../../utils/kobold-embed-utils.js';
+import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 
 import _ from 'lodash';
-import L from '../../i18n/i18n-node.js';
-import { TranslationFunctions } from '../../i18n/i18n-types.js';
-import { InjectedServices } from '../command.js';
-import { Command, CommandDeferType } from '../index.js';
+import L from '../../../i18n/i18n-node.js';
+import { TranslationFunctions } from '../../../i18n/i18n-types.js';
+import { InjectedServices } from '../../command.js';
+import { Command, CommandDeferType } from '../../index.js';
 
 function createCommandOperationHelpField(
 	command: string,

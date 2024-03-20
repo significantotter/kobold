@@ -5,10 +5,6 @@ export default {
 	interactions: {
 		notFound: "Yip! I couldn't find a modifier with that name.",
 		detailHeader: '{modifierName}{modifierIsActive}',
-		detailBodyRoll:
-			'{modifierDescriptionText}\nType: `{modifierType}`\nValue: `{modifierValue}`\nApplies to: `{modifierTargetTags}`',
-		detailBodySheet:
-			'{modifierDescriptionText}\nType: `{modifierType}`\nValues: `{modifierSheetValues}`',
 	},
 	list: {
 		name: 'list',
@@ -17,6 +13,10 @@ export default {
 	detail: {
 		name: 'detail',
 		description: 'Describes a modifier available to your active character.',
+	},
+	severity: {
+		name: 'severity',
+		description: 'Set the severity of a modifier.',
 	},
 	toggle: {
 		name: 'toggle',

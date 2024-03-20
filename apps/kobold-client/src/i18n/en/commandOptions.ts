@@ -607,6 +607,10 @@ export default {
 		description:
 			'The value applied by the modifier to dice rolls. Can be a number or a dice expression.',
 	},
+	modifierSeverity: {
+		name: 'severity',
+		description: 'A measure of a modifier\'s effect. Use "[severity]" in the value.',
+	},
 	modifierTargetTags: {
 		name: 'target-tags',
 		description:

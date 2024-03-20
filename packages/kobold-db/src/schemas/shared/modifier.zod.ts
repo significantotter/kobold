@@ -51,6 +51,7 @@ export const zSheetModifier = z
 		isActive: z.boolean().default(false),
 		description: z.string().nullable().default(null),
 		type: z.nativeEnum(SheetAdjustmentTypeEnum).default(SheetAdjustmentTypeEnum.untyped),
+		severity: z.number().nullable().default(null),
 		sheetAdjustments: z.array(zSheetAdjustment).default([]),
 	})
 	.describe('A sheet modifier. The sheetAdjustments are applied to the sheet.');
@@ -63,6 +64,7 @@ export const zRollModifier = z
 		isActive: z.boolean().default(false),
 		description: z.string().nullable().default(null),
 		type: z.nativeEnum(SheetAdjustmentTypeEnum).default(SheetAdjustmentTypeEnum.untyped),
+		severity: z.number().nullable().default(null),
 		value: z.coerce.string(),
 		targetTags: z.string().nullable(),
 	})

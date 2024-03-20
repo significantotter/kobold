@@ -7,6 +7,7 @@ import {
 	SheetAdjustment,
 	SheetAdjustmentOperationEnum,
 	SheetAdjustmentTypeEnum,
+	SheetModifier,
 	SheetStatKeys,
 } from 'kobold-db';
 import { KoboldError } from '../KoboldError.js';
@@ -46,6 +47,7 @@ describe('SheetUtils', () => {
 					description: '',
 					modifierType: ModifierTypeEnum.sheet,
 					isActive: true,
+					severity: 2,
 					type: SheetAdjustmentTypeEnum.untyped,
 					sheetAdjustments: [
 						{
@@ -53,14 +55,14 @@ describe('SheetUtils', () => {
 							propertyType: AdjustablePropertyEnum.intProperty,
 							property: AbilityEnum.strength,
 							operation: SheetAdjustmentOperationEnum['+'],
-							value: '2',
+							value: ' [severity ]',
 						},
 						{
 							type: SheetAdjustmentTypeEnum.untyped,
 							propertyType: AdjustablePropertyEnum.stat,
 							property: SheetStatKeys.fortitude,
 							operation: SheetAdjustmentOperationEnum['+'],
-							value: '3',
+							value: ' 3',
 						},
 					],
 				},
@@ -69,6 +71,7 @@ describe('SheetUtils', () => {
 					description: '',
 					modifierType: ModifierTypeEnum.sheet,
 					isActive: false,
+					severity: null,
 					type: SheetAdjustmentTypeEnum.untyped,
 					sheetAdjustments: [
 						{
@@ -85,6 +88,7 @@ describe('SheetUtils', () => {
 					description: '',
 					modifierType: ModifierTypeEnum.roll,
 					isActive: true,
+					severity: null,
 					type: SheetAdjustmentTypeEnum.status,
 					value: '1d4',
 					targetTags: 'attack',
@@ -104,6 +108,7 @@ describe('SheetUtils', () => {
 					description: '',
 					modifierType: ModifierTypeEnum.sheet,
 					isActive: false,
+					severity: null,
 					type: SheetAdjustmentTypeEnum.untyped,
 					sheetAdjustments: [
 						{
@@ -120,6 +125,7 @@ describe('SheetUtils', () => {
 					description: '',
 					modifierType: ModifierTypeEnum.roll,
 					isActive: true,
+					severity: null,
 					type: SheetAdjustmentTypeEnum.status,
 					value: '1d4',
 					targetTags: 'attack',

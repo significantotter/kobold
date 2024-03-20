@@ -9,7 +9,6 @@ import {
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
-import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
@@ -21,12 +20,12 @@ import { Command, CommandDeferType } from '../../index.js';
 import { ModifierOptions } from './modifier-command-options.js';
 import { ModifierHelpers } from './modifier-helpers.js';
 
-export class ModifierDetailSubCommand implements Command {
-	public names = [L.en.commands.modifier.detail.name()];
+export class ModifierSeveritySubCommand implements Command {
+	public names = [L.en.commands.modifier.severity.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.modifier.detail.name(),
-		description: L.en.commands.modifier.detail.description(),
+		name: L.en.commands.modifier.severity.name(),
+		description: L.en.commands.modifier.severity.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -69,39 +68,48 @@ export class ModifierDetailSubCommand implements Command {
 		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
-		let name = intr.options
+		const modifierName = intr.options
 			.getString(ModifierOptions.MODIFIER_NAME_OPTION.name, true)
-			.trim()
-			.toLowerCase();
+			.trim();
+		const newSeverity = intr.options
+			.getString(ModifierOptions.MODIFIER_SEVERITY_VALUE.name, true)
+			.toLocaleLowerCase()
+			.trim();
 
+		//check if we have an active character
 		const koboldUtils = new KoboldUtils(kobold);
 		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
 			activeCharacter: true,
 		});
-		const modifier = FinderHelpers.getModifierByName(activeCharacter.sheetRecord, name);
 
-		if (!modifier) {
+		const targetModifier = FinderHelpers.getModifierByName(
+			activeCharacter.sheetRecord,
+			modifierName
+		);
+		if (!targetModifier) {
 			// no matching modifier found
 			await InteractionUtils.send(intr, LL.commands.modifier.interactions.notFound());
 			return;
 		}
+		targetModifier.severity = ModifierHelpers.validateSeverity(newSeverity);
 
-		const embed = await new KoboldEmbed();
-		embed.setCharacter(activeCharacter);
-		embed.setTitle(
-			LL.commands.modifier.interactions.detailHeader({
-				modifierName: modifier.name,
-				modifierIsActive: modifier.isActive ? ' (active)' : '',
-			})
+		await kobold.sheetRecord.update(
+			{ id: activeCharacter.sheetRecordId },
+			{
+				modifiers: activeCharacter.sheetRecord.modifiers,
+			}
 		);
-		let modifierDescription: string;
-		if (modifier.modifierType === 'roll') {
-			modifierDescription = ModifierHelpers.detailRollModifier(modifier);
-		} else {
-			modifierDescription = ModifierHelpers.detailSheetModifier(modifier);
-		}
-		embed.setDescription(modifierDescription);
 
-		await InteractionUtils.send(intr, { embeds: [embed] });
+		if (targetModifier.severity === null) {
+			await InteractionUtils.send(
+				intr,
+				`Yip! I removed the severity value from the modifier "${modifierName}".`
+			);
+		} else {
+			await InteractionUtils.send(
+				intr,
+				`Yip! I updated the severity of the modifier "${modifierName}" to ${newSeverity}.`
+			);
+		}
 	}
 }

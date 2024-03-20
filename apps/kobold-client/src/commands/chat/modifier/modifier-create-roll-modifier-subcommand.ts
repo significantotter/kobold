@@ -18,6 +18,7 @@ import { InteractionUtils } from '../../../utils/index.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Command, CommandDeferType } from '../../index.js';
+import { ModifierHelpers } from './modifier-helpers.js';
 
 export class ModifierCreateRollModifierSubCommand implements Command {
 	public names = [L.en.commands.modifier.createRollModifier.name()];
@@ -51,6 +52,8 @@ export class ModifierCreateRollModifierSubCommand implements Command {
 		)
 			.trim()
 			.toLowerCase();
+		const modifierSeverity =
+			intr.options.getString(ModifierOptions.MODIFIER_SEVERITY_VALUE.name) ?? null;
 		const description = intr.options.getString(
 			ModifierOptions.MODIFIER_DESCRIPTION_OPTION.name
 		);
@@ -65,6 +68,8 @@ export class ModifierCreateRollModifierSubCommand implements Command {
 					`of the suggested options when entering the modifier type or leave it blank.`
 			);
 		}
+
+		const modifierSeverityValidated = ModifierHelpers.validateSeverity(modifierSeverity);
 
 		// make sure the name does't already exist in the character's modifiers
 		if (FinderHelpers.getModifierByName(activeCharacter.sheetRecord, name)) {
@@ -94,6 +99,15 @@ export class ModifierCreateRollModifierSubCommand implements Command {
 		try {
 			DiceUtils.parseAndEvaluateDiceExpression({
 				rollExpression: String(value),
+				extraAttributes: [
+					{
+						value: modifierSeverityValidated ?? 0,
+						type: modifierType,
+						name: 'severity',
+						tags: [],
+						aliases: [],
+					},
+				],
 				creature: Creature.fromSheetRecord(activeCharacter.sheetRecord),
 			});
 		} catch (err) {
@@ -115,6 +129,7 @@ export class ModifierCreateRollModifierSubCommand implements Command {
 						isActive: true,
 						description,
 						value,
+						severity: modifierSeverityValidated,
 						type: modifierType,
 						modifierType: ModifierTypeEnum.roll,
 						targetTags,

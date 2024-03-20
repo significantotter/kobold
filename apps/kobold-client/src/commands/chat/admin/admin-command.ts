@@ -9,12 +9,12 @@ import { RateLimiter } from 'discord.js-rate-limiter';
 import { filesize } from 'filesize';
 import os from 'node:os';
 import typescript from 'typescript';
-import L from '../../i18n/i18n-node.js';
-import { TranslationFunctions } from '../../i18n/i18n-types.js';
-import { InteractionUtils } from '../../utils/interaction-utils.js';
-import { KoboldEmbed } from '../../utils/kobold-embed-utils.js';
-import { ShardUtils } from '../../utils/shard-utils.js';
-import { Command, CommandDeferType, InjectedServices } from '../command.js';
+import L from '../../../i18n/i18n-node.js';
+import { TranslationFunctions } from '../../../i18n/i18n-types.js';
+import { InteractionUtils } from '../../../utils/interaction-utils.js';
+import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
+import { ShardUtils } from '../../../utils/shard-utils.js';
+import { Command, CommandDeferType, InjectedServices } from '../../command.js';
 import { Config } from 'kobold-config';
 
 export class AdminCommand implements Command {

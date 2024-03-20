@@ -15,6 +15,7 @@ import ActionCommand from './commands/action.js';
 import ActionStageCommand from './commands/actionStage.js';
 import SharedInteractions from './sharedInteractions.js';
 import CompendiumCommand from './commands/compendium.js';
+import ConditionCommand from './commands/condition.js';
 
 const en: BaseTranslation = {
 	terms: {
@@ -26,6 +27,7 @@ const en: BaseTranslation = {
 		action: ActionCommand,
 		actionStage: ActionStageCommand,
 		compendium: CompendiumCommand,
+		condition: ConditionCommand,
 		help: HelpCommand,
 		character: CharacterCommand,
 		init: InitCommand,

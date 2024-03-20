@@ -11,6 +11,7 @@ import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import {
 	Kobold,
+	Modifier,
 	ModifierTypeEnum,
 	SheetAdjustment,
 	SheetAdjustmentTypeEnum,
@@ -22,6 +23,7 @@ import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { SheetUtils } from '../../../utils/sheet/sheet-utils.js';
 import { Command, CommandDeferType } from '../../index.js';
+import { ModifierHelpers } from './modifier-helpers.js';
 
 export class ModifierCreateSheetModifierSubCommand implements Command {
 	public names = [L.en.commands.modifier.createSheetModifier.name()];
@@ -55,6 +57,8 @@ export class ModifierCreateSheetModifierSubCommand implements Command {
 		)
 			.trim()
 			.toLowerCase();
+		const modifierSeverity =
+			intr.options.getString(ModifierOptions.MODIFIER_SEVERITY_VALUE.name) ?? null;
 
 		if (!isSheetAdjustmentTypeEnum(modifierType)) {
 			throw new KoboldError(
@@ -62,6 +66,8 @@ export class ModifierCreateSheetModifierSubCommand implements Command {
 					`of the suggested options when entering the modifier type or leave it blank.`
 			);
 		}
+
+		const modifierSeverityValidated = ModifierHelpers.validateSeverity(modifierSeverity);
 
 		const description = intr.options.getString(
 			ModifierOptions.MODIFIER_DESCRIPTION_OPTION.name
@@ -73,12 +79,6 @@ export class ModifierCreateSheetModifierSubCommand implements Command {
 
 		const parsedSheetAdjustments: SheetAdjustment[] =
 			SheetUtils.stringToSheetAdjustments(modifierSheetValues);
-
-		// make sure that the adjustments are valid and can be applied to a sheet
-		SheetUtils.adjustSheetWithSheetAdjustments(
-			activeCharacter.sheetRecord.sheet,
-			parsedSheetAdjustments
-		);
 
 		// make sure the name does't already exist in the character's modifiers
 		if (FinderHelpers.getModifierByName(activeCharacter.sheetRecord, name)) {
@@ -92,20 +92,23 @@ export class ModifierCreateSheetModifierSubCommand implements Command {
 			return;
 		}
 
+		const newModifier: Modifier = {
+			name,
+			isActive: true,
+			description,
+			type: modifierType,
+			severity: modifierSeverityValidated,
+			sheetAdjustments: parsedSheetAdjustments,
+			modifierType: ModifierTypeEnum.sheet,
+		};
+
+		// make sure that the adjustments are valid and can be applied to a sheet
+		SheetUtils.adjustSheetWithModifiers(activeCharacter.sheetRecord.sheet, [newModifier]);
+
 		await kobold.sheetRecord.update(
 			{ id: activeCharacter.sheetRecordId },
 			{
-				modifiers: [
-					...activeCharacter.sheetRecord.modifiers,
-					{
-						name,
-						isActive: true,
-						description,
-						type: modifierType,
-						sheetAdjustments: parsedSheetAdjustments,
-						modifierType: ModifierTypeEnum.sheet,
-					},
-				],
+				modifiers: [...activeCharacter.sheetRecord.modifiers, newModifier],
 			}
 		);
 

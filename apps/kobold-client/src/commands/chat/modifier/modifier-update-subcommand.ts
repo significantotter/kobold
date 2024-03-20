@@ -131,6 +131,15 @@ export class ModifierUpdateSubCommand implements Command {
 				// we must be able to evaluate the modifier as a roll for this character
 				DiceUtils.parseAndEvaluateDiceExpression({
 					rollExpression: newFieldValue,
+					extraAttributes: [
+						{
+							name: 'severity',
+							value: targetModifier.severity ?? 0,
+							type: targetModifier.type,
+							tags: [],
+							aliases: [],
+						},
+					],
 					creature: Creature.fromSheetRecord(activeCharacter.sheetRecord),
 				});
 				targetModifier.value = newFieldValue;
@@ -181,10 +190,9 @@ export class ModifierUpdateSubCommand implements Command {
 			}
 			targetModifier.sheetAdjustments = SheetUtils.stringToSheetAdjustments(newFieldValue);
 			// attempt to use the adjustments to make sure they're valid
-			SheetUtils.adjustSheetWithSheetAdjustments(
-				activeCharacter.sheetRecord.sheet,
-				targetModifier.sheetAdjustments
-			);
+			SheetUtils.adjustSheetWithModifiers(activeCharacter.sheetRecord.sheet, [
+				targetModifier,
+			]);
 		} else {
 			// if a field wasn't provided, or the field isn't present in our options, send an error
 			await InteractionUtils.send(

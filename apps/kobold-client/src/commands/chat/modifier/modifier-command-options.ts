@@ -22,6 +22,12 @@ export class ModifierOptions {
 			},
 		],
 	};
+	public static readonly MODIFIER_SEVERITY_VALUE: APIApplicationCommandBasicOption = {
+		name: L.en.commandOptions.modifierSeverity.name(),
+		description: L.en.commandOptions.modifierSeverity.description(),
+		required: false,
+		type: ApplicationCommandOptionType.String,
+	};
 	public static readonly MODIFIER_NAME_OPTION: APIApplicationCommandBasicOption = {
 		name: L.en.commandOptions.modifierName.name(),
 		description: L.en.commandOptions.modifierName.description(),

@@ -12,6 +12,7 @@ import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold } from 'kobold-db';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Command, CommandDeferType } from '../../index.js';
+import { ModifierHelpers } from './modifier-helpers.js';
 
 export class ModifierListSubCommand implements Command {
 	public names = [L.en.commands.modifier.list.name()];
@@ -40,22 +41,9 @@ export class ModifierListSubCommand implements Command {
 		for (const modifier of modifiers.sort((a, b) => (a.name || '').localeCompare(b.name))) {
 			let value: string;
 			if (modifier.modifierType === 'roll') {
-				value = LL.commands.modifier.interactions.detailBodyRoll({
-					modifierDescriptionText: modifier.description,
-					modifierType: modifier.type || 'untyped',
-					modifierValue: modifier.value,
-					modifierTargetTags: modifier.targetTags,
-				});
+				value = ModifierHelpers.detailRollModifier(modifier);
 			} else {
-				value = LL.commands.modifier.interactions.detailBodySheet({
-					modifierDescriptionText: modifier.description,
-					modifierType: modifier.type || 'untyped',
-					modifierSheetValues: modifier.sheetAdjustments
-						.map(sheetAdjustment => {
-							return `${sheetAdjustment.property} ${sheetAdjustment.operation} ${sheetAdjustment.value}`;
-						})
-						.join(', '),
-				});
+				value = ModifierHelpers.detailSheetModifier(modifier);
 			}
 
 			fields.push({

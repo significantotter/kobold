@@ -68,6 +68,7 @@ export class ModifierCommand implements Command {
 					ModifierOptions.MODIFIER_NAME_OPTION,
 					ModifierOptions.MODIFIER_SHEET_VALUES_OPTION,
 					ModifierOptions.MODIFIER_TYPE_OPTION,
+					ModifierOptions.MODIFIER_SEVERITY_VALUE,
 					ModifierOptions.MODIFIER_DESCRIPTION_OPTION,
 				],
 			},
@@ -80,6 +81,7 @@ export class ModifierCommand implements Command {
 					ModifierOptions.MODIFIER_VALUE_OPTION,
 					ModifierOptions.MODIFIER_TARGET_TAGS_OPTION,
 					ModifierOptions.MODIFIER_TYPE_OPTION,
+					ModifierOptions.MODIFIER_SEVERITY_VALUE,
 					ModifierOptions.MODIFIER_DESCRIPTION_OPTION,
 				],
 			},
@@ -92,6 +94,22 @@ export class ModifierCommand implements Command {
 						...ModifierOptions.MODIFIER_NAME_OPTION,
 						autocomplete: true,
 						choices: undefined,
+					},
+				],
+			},
+			{
+				name: L.en.commands.modifier.severity.name(),
+				description: L.en.commands.modifier.severity.description(),
+				type: ApplicationCommandOptionType.Subcommand,
+				options: [
+					{
+						...ModifierOptions.MODIFIER_NAME_OPTION,
+						autocomplete: true,
+						choices: undefined,
+					},
+					{
+						...ModifierOptions.MODIFIER_SEVERITY_VALUE,
+						required: true,
 					},
 				],
 			},

@@ -1,14 +1,42 @@
 import { compileExpression } from 'filtrex';
 import L from '../../i18n/i18n-node.js';
-import { Attribute, Kobold, Modifier, RollModifier } from 'kobold-db';
+import { Attribute, Kobold, Modifier, RollModifier, SheetModifier } from 'kobold-db';
 import type { Creature } from '../creature.js';
 import { DiceUtils } from '../dice-utils.js';
 import type { KoboldUtils } from './kobold-utils.js';
+import _ from 'lodash';
 
+const severityRegex = /\[[\W_\*]*severity[\W_\*]*\]/gi;
 export class ModifierUtils {
 	private kobold: Kobold;
+	public static severityRegex = severityRegex;
 	constructor(koboldUtils: KoboldUtils) {
 		this.kobold = koboldUtils.kobold;
+	}
+	public static getSeverityAppliedModifier<T extends SheetModifier | RollModifier>(
+		modifier: T
+	): T {
+		const adjustedModifier = _.cloneDeep(modifier);
+		if (adjustedModifier.modifierType === 'sheet') {
+			if (adjustedModifier.severity != null) {
+				adjustedModifier.sheetAdjustments.forEach(
+					adjustment =>
+						(adjustment.value = adjustment.value.replaceAll(
+							severityRegex,
+							adjustedModifier.severity!.toString()
+						))
+				);
+			}
+			return adjustedModifier;
+		} else {
+			if (adjustedModifier.severity != null) {
+				adjustedModifier.value = adjustedModifier.value.replaceAll(
+					severityRegex,
+					adjustedModifier.severity!.toString()
+				);
+			}
+			return adjustedModifier;
+		}
 	}
 	public static isModifierValidForTags(
 		modifier: Modifier,
@@ -89,19 +117,30 @@ export class ModifierUtils {
 		let penalties: { [k: string]: RollModifier } = {};
 		const untyped: Modifier[] = [];
 		// for each modifier, check if it targets any tags for this roll
-		for (const modifier of modifiers) {
+		for (const modifierIter of modifiers) {
 			// if this modifier isn't active, move to the next one
-			if (!modifier.isActive || modifier.modifierType === 'sheet' || modifier.value == null)
+			if (
+				!modifierIter.isActive ||
+				modifierIter.modifierType === 'sheet' ||
+				modifierIter.value == null
+			)
 				continue;
 
 			const modifierValidForTags = ModifierUtils.isModifierValidForTags(
-				modifier,
+				modifierIter,
 				attributes,
 				sanitizedTags
 			);
 
 			// check if any tags match between the modifier and the provided tags
 			if (modifierValidForTags) {
+				// if the modifier has a severity, replace any severity text in the modifier with the actual severity
+				let modifier: RollModifier;
+				if (modifierIter.severity !== null) {
+					modifier = this.getSeverityAppliedModifier(modifierIter);
+				} else {
+					modifier = modifierIter;
+				}
 				try {
 					// A modifier can either be numeric or have a dice roll. We check to see if it's numeric.
 					// If it's numeric, we evaluate it and use that number to add to the roll.

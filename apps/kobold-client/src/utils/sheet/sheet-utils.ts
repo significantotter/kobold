@@ -11,6 +11,7 @@ import { KoboldError } from '../KoboldError.js';
 import { SheetAdjuster } from './sheet-adjuster.js';
 import { SheetAdjustmentBucketer } from './sheet-adjustment-bucketer.js';
 import { SheetProperties } from './sheet-properties.js';
+import { ModifierUtils } from '../kobold-service-utils/modifier-utils.js';
 
 export class SheetUtils {
 	public static adjustSheetWithModifiers(sheet: Sheet, modifiers: Modifier[]) {
@@ -18,9 +19,13 @@ export class SheetUtils {
 			.filter((modifier): modifier is SheetModifier => modifier.modifierType === 'sheet')
 			.filter(modifier => modifier.isActive);
 
+		const severityAppliedActiveModifiers = activeSheetModifiers.map(
+			ModifierUtils.getSeverityAppliedModifier
+		);
+
 		return this.adjustSheetWithSheetAdjustments(
 			sheet,
-			activeSheetModifiers.flatMap(modifier => modifier.sheetAdjustments)
+			severityAppliedActiveModifiers.flatMap(modifier => modifier.sheetAdjustments)
 		);
 	}
 
@@ -48,7 +53,13 @@ export class SheetUtils {
 				operation: operator as SheetAdjustmentOperationEnum,
 				value: value,
 			};
-			if (!SheetAdjuster.validateSheetAdjustment(sheetAdjustment)) {
+			//TODO we should just allow some attributes in sheet modifiers.
+			if (
+				!SheetAdjuster.validateSheetAdjustment({
+					...sheetAdjustment,
+					value: sheetAdjustment.value.replaceAll(ModifierUtils.severityRegex, '1'),
+				})
+			) {
 				throw new KoboldError(`Yip! I couldn't understand the adjustment "${segment}".`);
 			}
 			return sheetAdjustment;
