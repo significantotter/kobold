@@ -17,6 +17,7 @@ import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { CommandUtils } from '../../../utils/index.js';
 import { InjectedServices } from '../../command.js';
 import { Command, CommandDeferType } from '../../index.js';
+import { GameOptions } from '../game/game-command-options.js';
 
 export class CharacterCommand implements Command {
 	public names = [L.en.commands.character.name()];
@@ -86,6 +87,7 @@ export class CharacterCommand implements Command {
 				name: L.en.commands.character.sheet.name(),
 				description: L.en.commands.character.sheet.description(),
 				type: ApplicationCommandOptionType.Subcommand,
+				options: [GameOptions.GAME_SHEET_STYLE],
 			},
 			{
 				// UPDATE
