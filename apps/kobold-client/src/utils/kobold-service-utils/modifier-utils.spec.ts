@@ -3,21 +3,17 @@ import {
 	AdjustablePropertyEnum,
 	Attribute,
 	Modifier,
-	ModifierTypeEnum,
-	RollModifier,
 	SheetAdjustmentOperationEnum,
 	SheetAdjustmentTypeEnum,
-	SheetModifier,
 } from 'kobold-db';
 import { ModifierUtils } from './modifier-utils.js';
 
 describe('ModifierUtils', () => {
-	describe('applySheetModifierSeverity', () => {
+	describe('applyRollModifierSeverity', () => {
 		it('should replace sheet modifier severity placeholder with actual severity value', () => {
-			const modifier: SheetModifier = {
+			const modifier: Modifier = {
 				name: 'foo',
 				description: '',
-				modifierType: ModifierTypeEnum.sheet,
 				isActive: true,
 				severity: 2,
 				type: SheetAdjustmentTypeEnum.untyped,
@@ -30,9 +26,11 @@ describe('ModifierUtils', () => {
 						value: ' [severity ]',
 					},
 				],
+				rollAdjustment: null,
+				rollTargetTags: null,
 			};
 
-			const expectedModifier: SheetModifier = {
+			const expectedModifier: Modifier = {
 				...modifier,
 				sheetAdjustments: [
 					{
@@ -46,20 +44,20 @@ describe('ModifierUtils', () => {
 			expect(result).toEqual(expectedModifier);
 		});
 		it('should replace roll modifier severity placeholder with actual severity value', () => {
-			const modifier: RollModifier = {
+			const modifier: Modifier = {
 				name: 'test',
 				type: SheetAdjustmentTypeEnum.status,
-				value: '1+[ severity]',
 				severity: 3,
-				targetTags: 'attack and (fire or bludgeoning)',
+				rollAdjustment: '1+[ severity]',
+				rollTargetTags: 'attack and (fire or bludgeoning)',
+				sheetAdjustments: [],
 				isActive: false,
 				description: null,
-				modifierType: ModifierTypeEnum.roll,
 			};
 
-			const expectedModifier: RollModifier = {
+			const expectedModifier: Modifier = {
 				...modifier,
-				value: '1+3',
+				rollAdjustment: '1+3',
 			};
 
 			const result = ModifierUtils.getSeverityAppliedModifier(modifier);
@@ -72,12 +70,12 @@ describe('ModifierUtils', () => {
 				{
 					name: 'test',
 					type: SheetAdjustmentTypeEnum.status,
-					value: '[severity]',
+					rollAdjustment: '[severity]',
+					rollTargetTags: 'attack and (fire or bludgeoning)',
+					sheetAdjustments: [],
 					severity: 2,
-					targetTags: 'attack and (fire or bludgeoning)',
 					isActive: false,
 					description: null,
-					modifierType: ModifierTypeEnum.roll,
 				},
 				[],
 				['attack', 'bludgeoning']
@@ -89,12 +87,12 @@ describe('ModifierUtils', () => {
 				{
 					name: 'test',
 					type: SheetAdjustmentTypeEnum.status,
-					value: '2',
+					rollAdjustment: '2',
 					severity: null,
-					targetTags: 'attack and (fire or bludgeoning)',
+					rollTargetTags: 'attack and (fire or bludgeoning)',
+					sheetAdjustments: [],
 					isActive: false,
 					description: null,
-					modifierType: ModifierTypeEnum.roll,
 				},
 				[],
 				['attack', 'electricity']
@@ -106,13 +104,13 @@ describe('ModifierUtils', () => {
 				{
 					name: 'test',
 					type: SheetAdjustmentTypeEnum.status,
-					value: '2',
-					targetTags:
+					rollAdjustment: '2',
+					rollTargetTags:
 						'attack and (fire or bludgeoning) or __foo not in (3, 6) or abs(max(__foo, 6)) == ceil(min(7, 4.6)) or floor(log(10)) < 5 or round(random()) == sqrt(4)',
+					sheetAdjustments: [],
 					isActive: false,
 					severity: null,
 					description: null,
-					modifierType: ModifierTypeEnum.roll,
 				},
 				[
 					{
@@ -132,12 +130,12 @@ describe('ModifierUtils', () => {
 				{
 					name: 'test',
 					type: SheetAdjustmentTypeEnum.status,
-					value: '2',
-					targetTags: '__foo = 5',
+					rollAdjustment: '2',
+					rollTargetTags: '__foo = 5',
+					sheetAdjustments: [],
 					isActive: false,
 					severity: null,
 					description: null,
-					modifierType: ModifierTypeEnum.roll,
 				},
 				[
 					{
@@ -163,176 +161,176 @@ describe('ModifierUtils', () => {
 					isActive: true,
 					severity: null,
 					type: SheetAdjustmentTypeEnum.status,
-					value: '2',
-					targetTags: 'attack and (fire or bludgeoning)',
+					rollAdjustment: '2',
+					rollTargetTags: 'attack and (fire or bludgeoning)',
 
+					sheetAdjustments: [],
 					description: null,
-					modifierType: ModifierTypeEnum.roll,
 				},
 				{
 					name: 'statusBonus2',
 					isActive: true,
 					severity: null,
 					type: SheetAdjustmentTypeEnum.status,
-					value: '1',
-					targetTags: 'attack and (fire or bludgeoning)',
+					rollAdjustment: '1',
+					rollTargetTags: 'attack and (fire or bludgeoning)',
 
+					sheetAdjustments: [],
 					description: null,
-					modifierType: ModifierTypeEnum.roll,
 				},
 				{
 					name: 'statusBonus3',
 					isActive: true,
 					severity: null,
 					type: SheetAdjustmentTypeEnum.status,
-					value: '-1',
-					targetTags: 'attack and (fire or bludgeoning)',
+					rollAdjustment: '-1',
+					rollTargetTags: 'attack and (fire or bludgeoning)',
 
+					sheetAdjustments: [],
 					description: null,
-					modifierType: ModifierTypeEnum.roll,
 				},
 				{
 					name: 'statusBonus4',
 					isActive: true,
 					severity: null,
 					type: SheetAdjustmentTypeEnum.status,
-					value: '-2',
-					targetTags: 'attack and (fire or bludgeoning)',
+					rollAdjustment: '-2',
+					rollTargetTags: 'attack and (fire or bludgeoning)',
 
+					sheetAdjustments: [],
 					description: null,
-					modifierType: ModifierTypeEnum.roll,
 				},
 				{
 					name: 'untypedBonus',
 					isActive: true,
 					severity: null,
 					type: SheetAdjustmentTypeEnum.untyped,
-					value: '2',
-					targetTags: 'attack and (fire or bludgeoning)',
+					rollAdjustment: '2',
+					rollTargetTags: 'attack and (fire or bludgeoning)',
 
+					sheetAdjustments: [],
 					description: null,
-					modifierType: ModifierTypeEnum.roll,
 				},
 				{
 					name: 'untypedBonus2',
 					isActive: true,
 					severity: null,
 					type: SheetAdjustmentTypeEnum.untyped,
-					value: '1',
-					targetTags: 'attack and (fire or bludgeoning)',
+					rollAdjustment: '1',
+					rollTargetTags: 'attack and (fire or bludgeoning)',
 
+					sheetAdjustments: [],
 					description: null,
-					modifierType: ModifierTypeEnum.roll,
 				},
 				{
 					name: 'untypedBonus3',
 					isActive: true,
 					severity: null,
 					type: SheetAdjustmentTypeEnum.untyped,
-					value: '-1',
-					targetTags: 'attack and (fire or bludgeoning)',
+					rollAdjustment: '-1',
+					rollTargetTags: 'attack and (fire or bludgeoning)',
 
+					sheetAdjustments: [],
 					description: null,
-					modifierType: ModifierTypeEnum.roll,
 				},
 				{
 					name: 'untypedBonus4',
 					isActive: true,
 					severity: null,
 					type: SheetAdjustmentTypeEnum.untyped,
-					value: '-2',
-					targetTags: 'attack and (fire or bludgeoning)',
+					rollAdjustment: '-2',
+					rollTargetTags: 'attack and (fire or bludgeoning)',
 
+					sheetAdjustments: [],
 					description: null,
-					modifierType: ModifierTypeEnum.roll,
 				},
 				{
 					name: 'fooBonus',
 					isActive: true,
 					severity: null,
 					type: SheetAdjustmentTypeEnum.circumstance,
-					value: '2',
-					targetTags: 'attack and (fire or bludgeoning)',
+					rollAdjustment: '2',
+					rollTargetTags: 'attack and (fire or bludgeoning)',
 
+					sheetAdjustments: [],
 					description: null,
-					modifierType: ModifierTypeEnum.roll,
 				},
 				{
 					name: 'fooBonus2',
 					isActive: true,
 					severity: null,
 					type: SheetAdjustmentTypeEnum.circumstance,
-					value: '1',
-					targetTags: 'attack and (fire or bludgeoning)',
+					rollAdjustment: '1',
+					rollTargetTags: 'attack and (fire or bludgeoning)',
 
+					sheetAdjustments: [],
 					description: null,
-					modifierType: ModifierTypeEnum.roll,
 				},
 				{
 					name: 'fooBonus3',
 					isActive: true,
 					severity: null,
 					type: SheetAdjustmentTypeEnum.circumstance,
-					value: '-1',
-					targetTags: 'attack and (fire or bludgeoning)',
+					rollAdjustment: '-1',
+					rollTargetTags: 'attack and (fire or bludgeoning)',
 
+					sheetAdjustments: [],
 					description: null,
-					modifierType: ModifierTypeEnum.roll,
 				},
 				{
 					name: 'foo bonus 4',
 					isActive: true,
 					severity: null,
 					type: SheetAdjustmentTypeEnum.circumstance,
-					value: '-2',
-					targetTags: 'attack and (fire or bludgeoning)',
+					rollAdjustment: '-2',
+					rollTargetTags: 'attack and (fire or bludgeoning)',
 
+					sheetAdjustments: [],
 					description: null,
-					modifierType: ModifierTypeEnum.roll,
 				},
 				{
 					name: 'unmatchingBonus',
 					isActive: true,
 					severity: null,
 					type: SheetAdjustmentTypeEnum.circumstance,
-					value: '3',
-					targetTags: 'attack and (fire and bludgeoning)',
+					rollAdjustment: '3',
+					rollTargetTags: 'attack and (fire and bludgeoning)',
 
+					sheetAdjustments: [],
 					description: null,
-					modifierType: ModifierTypeEnum.roll,
 				},
 				{
 					name: 'unmatchingPenalty',
 					isActive: true,
 					severity: null,
 					type: SheetAdjustmentTypeEnum.circumstance,
-					value: '-3',
-					targetTags: 'attack and (fire and bludgeoning)',
+					rollAdjustment: '-3',
+					rollTargetTags: 'attack and (fire and bludgeoning)',
 
+					sheetAdjustments: [],
 					description: null,
-					modifierType: ModifierTypeEnum.roll,
 				},
 				{
 					name: 'unmatchingUntyped',
 					isActive: true,
 					severity: null,
 					type: SheetAdjustmentTypeEnum.circumstance,
-					value: '3',
-					targetTags: 'attack and (fire and bludgeoning)',
+					rollAdjustment: '3',
+					rollTargetTags: 'attack and (fire and bludgeoning)',
 
+					sheetAdjustments: [],
 					description: null,
-					modifierType: ModifierTypeEnum.roll,
 				},
 				{
 					name: 'not active',
 					isActive: false,
 					severity: null,
 					type: SheetAdjustmentTypeEnum.circumstance,
-					value: '3',
-					targetTags: 'attack and (fire and bludgeoning)',
+					rollAdjustment: '3',
+					rollTargetTags: 'attack and (fire and bludgeoning)',
 
+					sheetAdjustments: [],
 					description: null,
-					modifierType: ModifierTypeEnum.roll,
 				},
 			];
 			let attributes: Attribute[] = [
@@ -359,10 +357,9 @@ describe('ModifierUtils', () => {
 					severity: null,
 					type: SheetAdjustmentTypeEnum.circumstance,
 					value: '2',
-					targetTags: 'attack and (fire or bludgeoning)',
+					rollTargetTags: 'attack and (fire or bludgeoning)',
 
 					description: null,
-					modifierType: ModifierTypeEnum.roll,
 				},
 
 				status: {
@@ -371,10 +368,9 @@ describe('ModifierUtils', () => {
 					severity: null,
 					type: SheetAdjustmentTypeEnum.status,
 					value: '2',
-					targetTags: 'attack and (fire or bludgeoning)',
+					rollTargetTags: 'attack and (fire or bludgeoning)',
 
 					description: null,
-					modifierType: ModifierTypeEnum.roll,
 				},
 			});
 			expect(penalties).toStrictEqual({
@@ -384,10 +380,9 @@ describe('ModifierUtils', () => {
 					severity: null,
 					type: SheetAdjustmentTypeEnum.circumstance,
 					value: '-2',
-					targetTags: 'attack and (fire or bludgeoning)',
+					rollTargetTags: 'attack and (fire or bludgeoning)',
 
 					description: null,
-					modifierType: ModifierTypeEnum.roll,
 				},
 
 				status: {
@@ -396,10 +391,9 @@ describe('ModifierUtils', () => {
 					severity: null,
 					type: SheetAdjustmentTypeEnum.status,
 					value: '-2',
-					targetTags: 'attack and (fire or bludgeoning)',
+					rollTargetTags: 'attack and (fire or bludgeoning)',
 
 					description: null,
-					modifierType: ModifierTypeEnum.roll,
 				},
 			});
 			expect(untyped).toStrictEqual([
@@ -409,10 +403,9 @@ describe('ModifierUtils', () => {
 					severity: null,
 					type: SheetAdjustmentTypeEnum.untyped,
 					value: '2',
-					targetTags: 'attack and (fire or bludgeoning)',
+					rollTargetTags: 'attack and (fire or bludgeoning)',
 
 					description: null,
-					modifierType: ModifierTypeEnum.roll,
 				},
 				{
 					name: 'untypedBonus2',
@@ -420,10 +413,9 @@ describe('ModifierUtils', () => {
 					severity: null,
 					type: SheetAdjustmentTypeEnum.untyped,
 					value: '1',
-					targetTags: 'attack and (fire or bludgeoning)',
+					rollTargetTags: 'attack and (fire or bludgeoning)',
 
 					description: null,
-					modifierType: ModifierTypeEnum.roll,
 				},
 				{
 					name: 'untypedBonus3',
@@ -431,10 +423,9 @@ describe('ModifierUtils', () => {
 					severity: null,
 					type: SheetAdjustmentTypeEnum.untyped,
 					value: '-1',
-					targetTags: 'attack and (fire or bludgeoning)',
+					rollTargetTags: 'attack and (fire or bludgeoning)',
 
 					description: null,
-					modifierType: ModifierTypeEnum.roll,
 				},
 				{
 					name: 'untypedBonus4',
@@ -442,10 +433,9 @@ describe('ModifierUtils', () => {
 					severity: null,
 					type: SheetAdjustmentTypeEnum.untyped,
 					value: '-2',
-					targetTags: 'attack and (fire or bludgeoning)',
+					rollTargetTags: 'attack and (fire or bludgeoning)',
 
 					description: null,
-					modifierType: ModifierTypeEnum.roll,
 				},
 			]);
 		});

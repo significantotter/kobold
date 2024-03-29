@@ -41,10 +41,35 @@ export default {
 			},
 		},
 	},
-	createRollModifier: {
-		name: 'create-roll-modifier',
-		description: 'Creates a roll modifier for the active character.',
+	createModifier: {
+		name: 'create-modifier',
+		description: 'Creates a modifier for the active character.',
+		usage:
+			'[name]: The name of the sheet modifier.\n' +
+			'[type]: The in-game type of the modifier. "untyped" will always stack.\n' +
+			'[sheet-adjustment]: The properties to modify and their values. For example: ' +
+			'"ac=20;dex checks-1;occultAttack+2;" This would overwrite your ac to 20, ' +
+			'subtract 1 from of all your dexterity dice checks, and increase your occult spell attack by 2\n' +
+			'[roll-adjustment]: The roll portion of the modifier. For example: "1d6" \n' +
+			'[roll-target-tags]: The tags that the roll portion of the modifier applies to. For example: "attack or skill"',
 		expandedDescription:
+			"Sheet modifiers are conditional bonuses or penalties that apply to a character's sheet. " +
+			'They can be used to modify any value on your character sheet. \n\n' +
+			'Formatting sheet modifiers is simple. The format is: `property=value;property+value;property-value`. ' +
+			'You provide properties, values, and either "+", "-", or "=" to modify the property. You can + or - or = any ' +
+			'numeric property. But a property like "imageURL" can only be set with =, since it isn\'t a number. ' +
+			'Use ";" to separate multiple properties\n\n' +
+			'**Numeric Properties:** \n\n' +
+			'General: age, fly speed, swim speed, climb speed, focus points, perception\n' +
+			'Attributes: strength, dexterity, constitution, intelligence, wisdom, charisma, speed, ' +
+			'Defenses: ac, max hp, max resolve, max stamina \n' +
+			'Abilities/Spellcasting: class dc, class attack, arcane attack, arcane dc, divine attack, divine dc \n' +
+			'occult attack, occult dc, primal attack, primal dc, ' +
+			'Saves: fortitude, reflex, will, acrobatics \n' +
+			'Skills: athletics, crafting, deception, diplomacy, intimidation, medicine, nature, occultism, ' +
+			'performance, religion, society, stealth, survival, thievery\n\n' +
+			'**Non-numeric Properties:** \n' +
+			'name, description, gender, age, alignment, deity, imageURL, size \n\n\n' +
 			'Roll modifiers are conditional bonuses or penalties that apply to certain dice rolls. ' +
 			'Which dice rolls are affected is based on a system of "tags." For example, every attack roll has ' +
 			'the `attack` tag and every skill roll has the `skill` tag. A full list of tags are available under ' +
@@ -77,34 +102,6 @@ export default {
 				' any expression in a format like "attack or skill".',
 			doesntEvaluateError: 'Yip! That modifier is not a valid number or dice roll.',
 		},
-	},
-	createSheetModifier: {
-		name: 'create-sheet-modifier',
-		description: 'Creates a sheet modifier for the active character.',
-		usage:
-			'[name]: The name of the sheet modifier.\n' +
-			'[type]: The in-game type of the modifier. "untyped" will always stack.\n' +
-			'[sheet-values]: The properties to modify and their values. For example: ' +
-			'"ac=20;dex checks-1;occultAttack+2;" This would overwrite your ac to 20, ' +
-			'subtract 1 from of all your dexterity dice checks, and increase your occult spell attack by 2\n',
-		expandedDescription:
-			"Sheet modifiers are conditional bonuses or penalties that apply to a character's sheet. " +
-			'They can be used to modify any value on your character sheet. \n\n' +
-			'Formatting sheet modifiers is simple. The format is: `property=value;property+value;property-value`. ' +
-			'You provide properties, values, and either "+", "-", or "=" to modify the property. You can + or - or = any ' +
-			'numeric property. But a property like "imageURL" can only be set with =, since it isn\'t a number. ' +
-			'Use ";" to separate multiple properties\n\n' +
-			'**Numeric Properties:** \n\n' +
-			'General: age, fly speed, swim speed, climb speed, focus points, perception\n' +
-			'Attributes: strength, dexterity, constitution, intelligence, wisdom, charisma, speed, ' +
-			'Defenses: ac, max hp, max resolve, max stamina \n' +
-			'Abilities/Spellcasting: class dc, class attack, arcane attack, arcane dc, divine attack, divine dc \n' +
-			'occult attack, occult dc, primal attack, primal dc, ' +
-			'Saves: fortitude, reflex, will, acrobatics \n' +
-			'Skills: athletics, crafting, deception, diplomacy, intimidation, medicine, nature, occultism, ' +
-			'performance, religion, society, stealth, survival, thievery\n\n' +
-			'**Non-numeric Properties:** \n' +
-			'name, description, gender, age, alignment, deity, imageURL, size ',
 	},
 	remove: {
 		name: 'remove',

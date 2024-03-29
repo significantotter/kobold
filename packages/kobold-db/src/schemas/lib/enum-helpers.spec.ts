@@ -3,7 +3,6 @@ import {
 	ActionCostEnum,
 	ActionTypeEnum,
 	AdjustablePropertyEnum,
-	ModifierTypeEnum,
 	RollTypeEnum,
 	SheetAdjustmentOperationEnum,
 	SheetAdjustmentTypeEnum,
@@ -24,7 +23,6 @@ import {
 	InlineRollsDisplayEnum,
 	RollCompactModeEnum,
 	isInlineRollsDisplayEnum,
-	isModifierTypeEnum,
 	isRollCompactModeEnum,
 	isRollTypeEnum,
 	isSheetAdjustmentOperationEnum,
@@ -250,17 +248,6 @@ describe('Enum Helpers', () => {
 
 		it('should return false for invalid RollTypeEnum values', () => {
 			expect(isRollTypeEnum('invalid_value')).toBe(false);
-		});
-	});
-
-	describe('isModifierTypeEnum', () => {
-		it('should return true for valid ModifierTypeEnum values', () => {
-			expect(isModifierTypeEnum(ModifierTypeEnum.roll)).toBe(true);
-			expect(isModifierTypeEnum(ModifierTypeEnum.sheet)).toBe(true);
-		});
-
-		it('should return false for invalid ModifierTypeEnum values', () => {
-			expect(isModifierTypeEnum('invalid_value')).toBe(false);
 		});
 	});
 

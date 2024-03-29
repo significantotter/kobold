@@ -2,12 +2,10 @@ import {
 	AbilityEnum,
 	AdjustablePropertyEnum,
 	Modifier,
-	ModifierTypeEnum,
 	Sheet,
 	SheetAdjustment,
 	SheetAdjustmentOperationEnum,
 	SheetAdjustmentTypeEnum,
-	SheetModifier,
 	SheetStatKeys,
 } from 'kobold-db';
 import { KoboldError } from '../KoboldError.js';
@@ -45,7 +43,6 @@ describe('SheetUtils', () => {
 				{
 					name: 'foo',
 					description: '',
-					modifierType: ModifierTypeEnum.sheet,
 					isActive: true,
 					severity: 2,
 					type: SheetAdjustmentTypeEnum.untyped,
@@ -65,11 +62,12 @@ describe('SheetUtils', () => {
 							value: ' 3',
 						},
 					],
+					rollAdjustment: null,
+					rollTargetTags: null,
 				},
 				{
 					name: 'foo',
 					description: '',
-					modifierType: ModifierTypeEnum.sheet,
 					isActive: false,
 					severity: null,
 					type: SheetAdjustmentTypeEnum.untyped,
@@ -82,16 +80,18 @@ describe('SheetUtils', () => {
 							value: '3',
 						},
 					],
+					rollAdjustment: null,
+					rollTargetTags: null,
 				},
 				{
 					name: 'bar',
 					description: '',
-					modifierType: ModifierTypeEnum.roll,
 					isActive: true,
 					severity: null,
 					type: SheetAdjustmentTypeEnum.status,
-					value: '1d4',
-					targetTags: 'attack',
+					rollAdjustment: '1d4',
+					rollTargetTags: 'attack',
+					sheetAdjustments: [],
 				},
 			];
 			const adjustedSheet = SheetUtils.adjustSheetWithModifiers(sheet, modifiers);
@@ -106,7 +106,6 @@ describe('SheetUtils', () => {
 				{
 					name: 'foo',
 					description: '',
-					modifierType: ModifierTypeEnum.sheet,
 					isActive: false,
 					severity: null,
 					type: SheetAdjustmentTypeEnum.untyped,
@@ -119,16 +118,18 @@ describe('SheetUtils', () => {
 							value: '1',
 						},
 					],
+					rollAdjustment: null,
+					rollTargetTags: null,
 				},
 				{
 					name: 'bar',
 					description: '',
-					modifierType: ModifierTypeEnum.roll,
 					isActive: true,
 					severity: null,
 					type: SheetAdjustmentTypeEnum.status,
-					value: '1d4',
-					targetTags: 'attack',
+					rollAdjustment: '1d4',
+					rollTargetTags: 'attack',
+					sheetAdjustments: [],
 				},
 			];
 			const adjustedSheet = SheetUtils.adjustSheetWithModifiers(sheet, modifiers);

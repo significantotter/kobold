@@ -998,7 +998,7 @@ export class Creature {
 	 */
 	public getModifiersFromTags(tags: string[], extraAttributes?: Attribute[]): Modifier[] {
 		const { untyped, bonuses, penalties } = ModifierUtils.parseBonusesForTagsFromModifiers(
-			this.modifiers.filter(modifier => modifier.modifierType === 'roll'),
+			this.modifiers.filter(modifier => modifier.rollTargetTags),
 			[...(this.attributes as Attribute[]), ...(extraAttributes || [])],
 			tags,
 			this

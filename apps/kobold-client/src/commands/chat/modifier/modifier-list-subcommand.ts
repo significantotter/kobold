@@ -40,11 +40,7 @@ export class ModifierListSubCommand implements Command {
 		const fields = [];
 		for (const modifier of modifiers.sort((a, b) => (a.name || '').localeCompare(b.name))) {
 			let value: string;
-			if (modifier.modifierType === 'roll') {
-				value = ModifierHelpers.detailRollModifier(modifier);
-			} else {
-				value = ModifierHelpers.detailSheetModifier(modifier);
-			}
+			value = ModifierHelpers.detailModifier(modifier);
 
 			fields.push({
 				name: LL.commands.modifier.interactions.detailHeader({

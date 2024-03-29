@@ -231,14 +231,14 @@ export class DiceUtils {
 			modifiers = creature.getModifiersFromTags(finalTags, extraAttributes ?? []);
 		}
 		for (const modifier of modifiers) {
-			if (modifier.modifierType === 'sheet') continue;
+			if (!modifier.rollAdjustment || !modifier.rollTargetTags) continue;
 			// add to both the parsed expression and the initial roll expression
 			// the roll expression shows the user the meaning behind the roll values, while
 			// the parsed expression just has the math for the dice roller to use
 
 			const expandedModifier = creature
-				? this.expandRollWithMacros(modifier.value.toString(), creature.rollMacros)
-				: modifier.value.toString();
+				? this.expandRollWithMacros(modifier.rollAdjustment, creature.rollMacros)
+				: modifier.rollAdjustment;
 
 			const [parsedModifier] = DiceUtils.parseAttributes(
 				expandedModifier,
@@ -248,9 +248,7 @@ export class DiceUtils {
 
 			const modifierMultiplierText =
 				modifierMultiplier ?? 1 !== 1 ? `x${modifierMultiplier ?? 1}` : '';
-			displayExpression += ` + "${
-				modifier.name
-			}" ${modifier.value.toString()}${modifierMultiplierText}`;
+			displayExpression += ` + "${modifier.name}" ${modifier.rollAdjustment}${modifierMultiplierText}`;
 			if (modifierMultiplier && modifierMultiplier !== 1) {
 				parsedExpression += ` +((${parsedModifier})*(${modifierMultiplier ?? 1}))`;
 			} else parsedExpression += ` +(${parsedModifier})`;

@@ -64,22 +64,22 @@ export class ModifierOptions {
 		required: false,
 		type: ApplicationCommandOptionType.String,
 	};
-	public static readonly MODIFIER_VALUE_OPTION: APIApplicationCommandBasicOption = {
-		name: L.en.commandOptions.modifierValue.name(),
-		description: L.en.commandOptions.modifierValue.description(),
-		required: true,
+	public static readonly MODIFIER_ROLL_ADJUSTMENT: APIApplicationCommandBasicOption = {
+		name: L.en.commandOptions.modifierRollAdjustment.name(),
+		description: L.en.commandOptions.modifierRollAdjustment.description(),
+		required: false,
 		type: ApplicationCommandOptionType.String,
 	};
-	public static readonly MODIFIER_TARGET_TAGS_OPTION: APIApplicationCommandBasicOption = {
+	public static readonly MODIFIER_ROLL_TARGET_TAGS_OPTION: APIApplicationCommandBasicOption = {
 		name: L.en.commandOptions.modifierTargetTags.name(),
 		description: L.en.commandOptions.modifierTargetTags.description(),
-		required: true,
+		required: false,
 		type: ApplicationCommandOptionType.String,
 	};
 	public static readonly MODIFIER_SHEET_VALUES_OPTION: APIApplicationCommandBasicOption = {
 		name: L.en.commandOptions.modifierSheetValues.name(),
 		description: L.en.commandOptions.modifierSheetValues.description(),
-		required: true,
+		required: false,
 		type: ApplicationCommandOptionType.String,
 	};
 
@@ -102,12 +102,12 @@ export class ModifierOptions {
 				value: L.en.commandOptions.modifierSetOption.choices.type.value(),
 			},
 			{
-				name: L.en.commandOptions.modifierSetOption.choices.value.name(),
-				value: L.en.commandOptions.modifierSetOption.choices.value.value(),
+				name: L.en.commandOptions.modifierSetOption.choices.rollAdjustment.name(),
+				value: L.en.commandOptions.modifierSetOption.choices.rollAdjustment.value(),
 			},
 			{
-				name: L.en.commandOptions.modifierSetOption.choices.targetTags.name(),
-				value: L.en.commandOptions.modifierSetOption.choices.targetTags.value(),
+				name: L.en.commandOptions.modifierSetOption.choices.rollTargetTags.name(),
+				value: L.en.commandOptions.modifierSetOption.choices.rollTargetTags.value(),
 			},
 			{
 				name: L.en.commandOptions.modifierSetOption.choices.sheetValues.name(),

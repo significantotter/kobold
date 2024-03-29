@@ -12,7 +12,6 @@ import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import {
 	Kobold,
 	Modifier,
-	ModifierTypeEnum,
 	SheetAdjustment,
 	SheetAdjustmentTypeEnum,
 	isSheetAdjustmentTypeEnum,
@@ -24,13 +23,16 @@ import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js
 import { SheetUtils } from '../../../utils/sheet/sheet-utils.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { ModifierHelpers } from './modifier-helpers.js';
+import { compileExpression } from 'filtrex';
+import { DiceUtils } from '../../../utils/dice-utils.js';
+import { Creature } from '../../../utils/creature.js';
 
-export class ModifierCreateSheetModifierSubCommand implements Command {
-	public names = [L.en.commands.modifier.createSheetModifier.name()];
+export class ModifierCreateModifierSubCommand implements Command {
+	public names = [L.en.commands.modifier.createModifier.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.modifier.createSheetModifier.name(),
-		description: L.en.commands.modifier.createSheetModifier.description(),
+		name: L.en.commands.modifier.createModifier.name(),
+		description: L.en.commands.modifier.createModifier.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -60,12 +62,13 @@ export class ModifierCreateSheetModifierSubCommand implements Command {
 		const modifierSeverity =
 			intr.options.getString(ModifierOptions.MODIFIER_SEVERITY_VALUE.name) ?? null;
 
-		if (!isSheetAdjustmentTypeEnum(modifierType)) {
-			throw new KoboldError(
-				`Yip! ${modifierType} is not a valid modifier type! Please use one ` +
-					`of the suggested options when entering the modifier type or leave it blank.`
-			);
-		}
+		const rollAdjustment = intr.options.getString(
+			ModifierOptions.MODIFIER_ROLL_ADJUSTMENT.name
+		);
+		let rollTargetTagsUnparsed = intr.options.getString(
+			ModifierOptions.MODIFIER_ROLL_TARGET_TAGS_OPTION.name
+		);
+		let rollTargetTags = rollTargetTagsUnparsed ? rollTargetTagsUnparsed.trim() : null;
 
 		const modifierSeverityValidated = ModifierHelpers.validateSeverity(modifierSeverity);
 
@@ -73,18 +76,89 @@ export class ModifierCreateSheetModifierSubCommand implements Command {
 			ModifierOptions.MODIFIER_DESCRIPTION_OPTION.name
 		);
 		const modifierSheetValues = intr.options.getString(
-			ModifierOptions.MODIFIER_SHEET_VALUES_OPTION.name,
-			true
+			ModifierOptions.MODIFIER_SHEET_VALUES_OPTION.name
 		);
 
-		const parsedSheetAdjustments: SheetAdjustment[] =
-			SheetUtils.stringToSheetAdjustments(modifierSheetValues);
+		if (!isSheetAdjustmentTypeEnum(modifierType)) {
+			throw new KoboldError(
+				`Yip! ${modifierType} is not a valid modifier type! Please use one ` +
+					`of the suggested options when entering the modifier type or leave it blank.`
+			);
+		}
+		// check various failure conditions
+		// we can't have target tags but no roll adjustment
+		if (rollTargetTags && !rollAdjustment) {
+			await InteractionUtils.send(
+				intr,
+				'Yip! You need to provide a roll adjustment if you want to use target tags!'
+			);
+			return;
+		}
+		// we can't have a roll adjustment but no target tags
+		if (rollAdjustment && !rollTargetTags) {
+			await InteractionUtils.send(
+				intr,
+				'Yip! You need to provide target tags if you want to use a roll adjustment!'
+			);
+			return;
+		}
+		// we can't have neither a roll adjustment nor a sheet adjustment
+		if (!rollAdjustment && !modifierSheetValues) {
+			await InteractionUtils.send(
+				intr,
+				'Yip! You need to provide either a roll adjustment or a sheet adjustment!'
+			);
+			return;
+		}
 
+		if (rollAdjustment && rollTargetTags) {
+			// the tags for the modifier have to be valid
+			try {
+				compileExpression(rollTargetTags);
+			} catch (err) {
+				// the tags are in an invalid format
+				await InteractionUtils.send(
+					intr,
+					LL.commands.modifier.createModifier.interactions.invalidTags()
+				);
+				return;
+			}
+
+			// we must be able to evaluate the modifier as a roll for this character
+			try {
+				DiceUtils.parseAndEvaluateDiceExpression({
+					rollExpression: String(rollAdjustment),
+					extraAttributes: [
+						{
+							value: modifierSeverityValidated ?? 0,
+							type: modifierType,
+							name: 'severity',
+							tags: [],
+							aliases: [],
+						},
+					],
+					creature: Creature.fromSheetRecord(activeCharacter.sheetRecord),
+				});
+			} catch (err) {
+				await InteractionUtils.send(
+					intr,
+					LL.commands.modifier.createModifier.interactions.doesntEvaluateError()
+				);
+				return;
+			}
+			if (!rollAdjustment)
+				throw new KoboldError(`Yip! I couldn't parse that modifier value!`);
+		}
+
+		let parsedSheetAdjustments: SheetAdjustment[] = [];
+		if (modifierSheetValues) {
+			parsedSheetAdjustments = SheetUtils.stringToSheetAdjustments(modifierSheetValues);
+		}
 		// make sure the name does't already exist in the character's modifiers
 		if (FinderHelpers.getModifierByName(activeCharacter.sheetRecord, name)) {
 			await InteractionUtils.send(
 				intr,
-				LL.commands.modifier.createRollModifier.interactions.alreadyExists({
+				LL.commands.modifier.createModifier.interactions.alreadyExists({
 					modifierName: name,
 					characterName: activeCharacter.name,
 				})
@@ -99,7 +173,8 @@ export class ModifierCreateSheetModifierSubCommand implements Command {
 			type: modifierType,
 			severity: modifierSeverityValidated,
 			sheetAdjustments: parsedSheetAdjustments,
-			modifierType: ModifierTypeEnum.sheet,
+			rollTargetTags,
+			rollAdjustment,
 		};
 
 		// make sure that the adjustments are valid and can be applied to a sheet
@@ -115,7 +190,7 @@ export class ModifierCreateSheetModifierSubCommand implements Command {
 		//send a response
 		await InteractionUtils.send(
 			intr,
-			LL.commands.modifier.createRollModifier.interactions.created({
+			LL.commands.modifier.createModifier.interactions.created({
 				modifierName: name,
 				characterName: activeCharacter.name,
 			})

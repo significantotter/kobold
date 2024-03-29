@@ -94,12 +94,7 @@ export class ModifierDetailSubCommand implements Command {
 				modifierIsActive: modifier.isActive ? ' (active)' : '',
 			})
 		);
-		let modifierDescription: string;
-		if (modifier.modifierType === 'roll') {
-			modifierDescription = ModifierHelpers.detailRollModifier(modifier);
-		} else {
-			modifierDescription = ModifierHelpers.detailSheetModifier(modifier);
-		}
+		let modifierDescription: string = ModifierHelpers.detailModifier(modifier);
 		embed.setDescription(modifierDescription);
 
 		await InteractionUtils.send(intr, { embeds: [embed] });

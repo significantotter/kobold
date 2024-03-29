@@ -2,7 +2,6 @@ import _ from 'lodash';
 import { ActionCostEnum, ActionTypeEnum } from '../shared/action.zod.js';
 import {
 	AdjustablePropertyEnum,
-	ModifierTypeEnum,
 	SheetAdjustmentOperationEnum,
 	SheetAdjustmentTypeEnum,
 } from '../shared/modifier.zod.js';
@@ -103,11 +102,6 @@ export function isStatSubGroupEnum(value: any): value is StatSubGroupEnum {
 const rollTypeValueMap = _.keyBy(Object.values(RollTypeEnum), _.identity);
 export function isRollTypeEnum(value: any): value is RollTypeEnum {
 	return rollTypeValueMap[value] !== undefined;
-}
-
-const modifierTypeValueMap = _.keyBy(Object.values(ModifierTypeEnum), _.identity);
-export function isModifierTypeEnum(value: any): value is ModifierTypeEnum {
-	return modifierTypeValueMap[value] !== undefined;
 }
 
 /** User Settings Enums */

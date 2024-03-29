@@ -602,17 +602,16 @@ export default {
 		name: 'description',
 		description: 'A description for the modifier.',
 	},
-	modifierValue: {
-		name: 'value',
-		description:
-			'The value applied by the modifier to dice rolls. Can be a number or a dice expression.',
+	modifierRollAdjustment: {
+		name: 'roll-adjustment',
+		description: 'The amount to adjust a dice roll. Can be a number or a dice expression.',
 	},
 	modifierSeverity: {
 		name: 'severity',
 		description: 'A measure of a modifier\'s effect. Use "[severity]" in the value.',
 	},
 	modifierTargetTags: {
-		name: 'target-tags',
+		name: 'roll-target-tags',
 		description:
 			'A set of tags for the rolls that this modifier applies to. For example "skill or attack or save"',
 	},
@@ -636,13 +635,13 @@ export default {
 				name: 'type',
 				value: 'type',
 			},
-			value: {
-				name: 'value',
-				value: 'value',
+			rollAdjustment: {
+				name: 'roll-adjustment',
+				value: 'roll-adjustment',
 			},
-			targetTags: {
-				name: 'target-tags',
-				value: 'target-tags',
+			rollTargetTags: {
+				name: 'roll-target-tags',
+				value: 'roll-target-tags',
 			},
 			sheetValues: {
 				name: 'sheet-values',

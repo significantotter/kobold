@@ -1,6 +1,6 @@
 import { compileExpression } from 'filtrex';
 import L from '../../i18n/i18n-node.js';
-import { Attribute, Kobold, Modifier, RollModifier, SheetModifier } from 'kobold-db';
+import { Attribute, Kobold, Modifier } from 'kobold-db';
 import type { Creature } from '../creature.js';
 import { DiceUtils } from '../dice-utils.js';
 import type { KoboldUtils } from './kobold-utils.js';
@@ -13,12 +13,10 @@ export class ModifierUtils {
 	constructor(koboldUtils: KoboldUtils) {
 		this.kobold = koboldUtils.kobold;
 	}
-	public static getSeverityAppliedModifier<T extends SheetModifier | RollModifier>(
-		modifier: T
-	): T {
+	public static getSeverityAppliedModifier(modifier: Modifier) {
 		const adjustedModifier = _.cloneDeep(modifier);
-		if (adjustedModifier.modifierType === 'sheet') {
-			if (adjustedModifier.severity != null) {
+		if (adjustedModifier.severity != null) {
+			if (adjustedModifier.sheetAdjustments.length) {
 				adjustedModifier.sheetAdjustments.forEach(
 					adjustment =>
 						(adjustment.value = adjustment.value.replaceAll(
@@ -26,26 +24,23 @@ export class ModifierUtils {
 							adjustedModifier.severity!.toString()
 						))
 				);
-			}
-			return adjustedModifier;
-		} else {
-			if (adjustedModifier.severity != null) {
-				adjustedModifier.value = adjustedModifier.value.replaceAll(
+			} else if (adjustedModifier.rollAdjustment) {
+				adjustedModifier.rollAdjustment = adjustedModifier.rollAdjustment.replaceAll(
 					severityRegex,
 					adjustedModifier.severity!.toString()
 				);
 			}
-			return adjustedModifier;
 		}
+		return adjustedModifier;
 	}
 	public static isModifierValidForTags(
 		modifier: Modifier,
 		attributes: Attribute[],
 		tags: string[]
 	): boolean {
-		if (modifier.modifierType === 'sheet') return false;
+		if (modifier.sheetAdjustments.length) return false;
 
-		const possibleTags = (modifier.targetTags ?? '').match(/([A-Za-z][A-Za-z_0-9]*)/g);
+		const possibleTags = (modifier.rollTargetTags ?? '').match(/([A-Za-z][A-Za-z_0-9]*)/g);
 
 		let tagTruthValues: { [k: string]: boolean | number } = {};
 
@@ -79,7 +74,7 @@ export class ModifierUtils {
 		let modifierValidForTags;
 		try {
 			// compile the modifier's target tags
-			const tagExpression = compileExpression(modifier.targetTags ?? '');
+			const tagExpression = compileExpression(modifier.rollTargetTags ?? '');
 			modifierValidForTags = tagExpression(tagTruthValues);
 		} catch (err) {
 			//an invalid tag expression sneaked in! Don't catastrophically fail, though
@@ -113,16 +108,16 @@ export class ModifierUtils {
 		creature?: Creature
 	) {
 		const sanitizedTags = tags.map(tag => (tag ?? '').toLocaleLowerCase().trim());
-		let bonuses: { [k: string]: RollModifier } = {};
-		let penalties: { [k: string]: RollModifier } = {};
+		let bonuses: { [k: string]: Modifier } = {};
+		let penalties: { [k: string]: Modifier } = {};
 		const untyped: Modifier[] = [];
 		// for each modifier, check if it targets any tags for this roll
 		for (const modifierIter of modifiers) {
 			// if this modifier isn't active, move to the next one
 			if (
 				!modifierIter.isActive ||
-				modifierIter.modifierType === 'sheet' ||
-				modifierIter.value == null
+				modifierIter.sheetAdjustments ||
+				modifierIter.rollAdjustment == null
 			)
 				continue;
 
@@ -135,7 +130,7 @@ export class ModifierUtils {
 			// check if any tags match between the modifier and the provided tags
 			if (modifierValidForTags) {
 				// if the modifier has a severity, replace any severity text in the modifier with the actual severity
-				let modifier: RollModifier;
+				let modifier: Modifier;
 				if (modifierIter.severity !== null) {
 					modifier = this.getSeverityAppliedModifier(modifierIter);
 				} else {
@@ -145,7 +140,7 @@ export class ModifierUtils {
 					// A modifier can either be numeric or have a dice roll. We check to see if it's numeric.
 					// If it's numeric, we evaluate it and use that number to add to the roll.
 					let modifierSubRoll = DiceUtils.parseAndEvaluateDiceExpression({
-						rollExpression: modifier.value.toString(),
+						rollExpression: modifier.rollAdjustment!.toString(),
 						skipModifiers: true, // we don't want any possibility of an infinite loop here
 						creature,
 						extraAttributes: attributes,
@@ -181,7 +176,10 @@ export class ModifierUtils {
 					else if (modifierSubRoll.results.total > 0) {
 						// apply a bonus
 						if (bonuses[modifierType]) {
-							if (Number(parsedModifier.value) > Number(bonuses[modifierType].value))
+							if (
+								Number(parsedModifier.rollAdjustment) >
+								Number(bonuses[modifierType].rollAdjustment)
+							)
 								bonuses[modifierType] = parsedModifier;
 						} else {
 							bonuses[modifierType] = parsedModifier;
@@ -190,7 +188,8 @@ export class ModifierUtils {
 						// apply a penalty
 						if (penalties[modifierType]) {
 							if (
-								Number(parsedModifier.value) < Number(penalties[modifierType].value)
+								Number(parsedModifier.rollAdjustment) <
+								Number(penalties[modifierType].rollAdjustment)
 							)
 								penalties[modifierType] = parsedModifier;
 						} else {

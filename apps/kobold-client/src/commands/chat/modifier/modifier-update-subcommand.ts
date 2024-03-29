@@ -101,7 +101,7 @@ export class ModifierUpdateSubCommand implements Command {
 		}
 
 		// validate the updates
-		if (fieldToChange === 'name') {
+		if (fieldToChange === L.en.commandOptions.modifierSetOption.choices.name.value()) {
 			//a name can't be an empty string
 			if (newFieldValue === '') {
 				await InteractionUtils.send(
@@ -121,12 +121,9 @@ export class ModifierUpdateSubCommand implements Command {
 			} else {
 				targetModifier.name = newFieldValue;
 			}
-		} else if (fieldToChange === 'value') {
-			if (targetModifier.modifierType === 'sheet') {
-				throw new KoboldError(
-					'Yip! Sheet modifiers don\'t have a "value". You probably meant to update the "sheet-values" field.'
-				);
-			}
+		} else if (
+			fieldToChange === L.en.commandOptions.modifierSetOption.choices.rollAdjustment.value()
+		) {
 			try {
 				// we must be able to evaluate the modifier as a roll for this character
 				DiceUtils.parseAndEvaluateDiceExpression({
@@ -142,19 +139,18 @@ export class ModifierUpdateSubCommand implements Command {
 					],
 					creature: Creature.fromSheetRecord(activeCharacter.sheetRecord),
 				});
-				targetModifier.value = newFieldValue;
+				targetModifier.rollAdjustment = newFieldValue;
 			} catch (err) {
 				await InteractionUtils.send(
 					intr,
-					LL.commands.modifier.createRollModifier.interactions.doesntEvaluateError()
+					LL.commands.modifier.createModifier.interactions.doesntEvaluateError()
 				);
 				return;
 			}
-		} else if (fieldToChange === 'target-tags') {
-			if (targetModifier.modifierType === 'sheet') {
-				throw new KoboldError('Yip! Sheet modifiers don\'t have "target tags".');
-			}
-			fieldToChange = 'targetTags';
+		} else if (
+			fieldToChange === L.en.commandOptions.modifierSetOption.choices.rollTargetTags.value()
+		) {
+			fieldToChange = 'rollTargetTags';
 			// parse the target tags
 			try {
 				compileExpression(newFieldValue);
@@ -162,11 +158,11 @@ export class ModifierUpdateSubCommand implements Command {
 				// the tags are in an invalid format
 				await InteractionUtils.send(
 					intr,
-					LL.commands.modifier.createRollModifier.interactions.invalidTags()
+					LL.commands.modifier.createModifier.interactions.invalidTags()
 				);
 				return;
 			}
-			targetModifier.targetTags = newFieldValue;
+			targetModifier.rollTargetTags = newFieldValue;
 		} else if (fieldToChange === 'type') {
 			const newType = newFieldValue.trim().toLowerCase();
 			if (!newType) targetModifier.type = SheetAdjustmentTypeEnum.untyped;
@@ -183,11 +179,6 @@ export class ModifierUpdateSubCommand implements Command {
 			if (!newFieldValue) targetModifier.description = null;
 			else targetModifier.description = newFieldValue;
 		} else if (fieldToChange === 'sheet-values') {
-			if (targetModifier.modifierType === 'roll') {
-				throw new KoboldError(
-					'Yip! Roll modifiers don\'t have "sheet values". Maybe you meant to update "value"?'
-				);
-			}
 			targetModifier.sheetAdjustments = SheetUtils.stringToSheetAdjustments(newFieldValue);
 			// attempt to use the adjustments to make sure they're valid
 			SheetUtils.adjustSheetWithModifiers(activeCharacter.sheetRecord.sheet, [

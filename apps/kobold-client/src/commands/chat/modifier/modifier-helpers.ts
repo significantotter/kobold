@@ -1,4 +1,4 @@
-import { RollModifier, SheetModifier } from 'kobold-db';
+import { Modifier } from 'kobold-db';
 import { KoboldError } from '../../../utils/KoboldError.js';
 
 export class ModifierHelpers {
@@ -14,27 +14,20 @@ export class ModifierHelpers {
 			);
 		}
 	}
-	public static detailSheetModifier(modifier: SheetModifier) {
+	public static detailModifier(modifier: Modifier) {
 		const modifierTextLines = [];
 		if (modifier.description) modifierTextLines.push(`${modifier.description}`);
 		modifierTextLines.push(`Type: \`${modifier.type || 'untyped'}\``);
 		if (modifier.severity != null) modifierTextLines.push(`Severity: \`${modifier.severity}\``);
 		modifierTextLines.push(
-			`Values: \`${modifier.sheetAdjustments
+			`Sheet Adjustments: \`${modifier.sheetAdjustments
 				.map(sheetAdjustment => {
 					return `${sheetAdjustment.property} ${sheetAdjustment.operation} ${sheetAdjustment.value}`;
 				})
 				.join(', ')}\``
 		);
-		return modifierTextLines.join('\n');
-	}
-	public static detailRollModifier(modifier: RollModifier) {
-		const modifierTextLines = [];
-		if (modifier.description) modifierTextLines.push(`\`${modifier.description}\``);
-		modifierTextLines.push(`Type: \`${modifier.type || 'untyped'}\``);
-		if (modifier.severity != null) modifierTextLines.push(`Severity: \`${modifier.severity}\``);
-		modifierTextLines.push(`Value: \`${modifier.value}\``);
-		modifierTextLines.push(`Applies to: \`${modifier.targetTags}\``);
+		modifierTextLines.push(`Roll Adjustments: \`${modifier.rollAdjustment}\``);
+		modifierTextLines.push(`Roll Tags to Adjust: \`${modifier.rollTargetTags}\``);
 		return modifierTextLines.join('\n');
 	}
 }
