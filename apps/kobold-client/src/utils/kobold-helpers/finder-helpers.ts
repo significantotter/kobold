@@ -41,6 +41,17 @@ export class FinderHelpers {
 	}
 
 	/**
+	 * Fetches a sheetRecord's modifier by the modifier name
+	 * @param name the name of the modifier
+	 * @returns the modifier
+	 */
+	public static getConditionByName(sheetRecord: SheetRecord, name: string): Modifier | undefined {
+		return sheetRecord.conditions.find(
+			modifier => modifier.name.toLocaleLowerCase().trim() === name.toLocaleLowerCase().trim()
+		);
+	}
+
+	/**
 	 * Given a string, finds all skills containing that string on a given creature
 	 * @param targetSheet the creature to check for matching skills
 	 * @param skillText the text to match to skills
@@ -114,6 +125,25 @@ export class FinderHelpers {
 			}
 		}
 		return matchedModifiers;
+	}
+
+	/**
+	 * Given a string, finds all conditions containing that string on a given sheet record
+	 * @param targetSheetRecord the sheet record to check for matching conditions
+	 * @param conditionText the text to match to conditions
+	 * @returns all conditions that contain the given conditionText
+	 */
+	public static matchAllConditions(
+		targetSheetRecord: SheetRecord,
+		conditionText: string
+	): Modifier[] {
+		const matchedConditions = [];
+		for (const condition of targetSheetRecord.conditions || []) {
+			if (condition.name.toLowerCase().includes(conditionText.toLowerCase())) {
+				matchedConditions.push(condition);
+			}
+		}
+		return matchedConditions;
 	}
 
 	/**

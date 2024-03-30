@@ -12,6 +12,7 @@ import { ModifierCommandExport } from './modifier/index.js';
 import { RollMacroCommandExport } from './roll-macro/index.js';
 import { RollCommandExport } from './roll/index.js';
 import { SettingsCommandExport } from './settings/index.js';
+import { ConditionCommandExport } from './condition/index.js';
 
 export const ChatCommandExports: CommandExport[] = [
 	ActionCommandExport,
@@ -27,4 +28,5 @@ export const ChatCommandExports: CommandExport[] = [
 	RollCommandExport,
 	RollMacroCommandExport,
 	SettingsCommandExport,
+	ConditionCommandExport,
 ];

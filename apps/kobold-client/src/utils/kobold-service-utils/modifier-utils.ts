@@ -6,39 +6,25 @@ import { DiceUtils } from '../dice-utils.js';
 import type { KoboldUtils } from './kobold-utils.js';
 import _ from 'lodash';
 
-const severityRegex = /\[[\W_\*]*severity[\W_\*]*\]/gi;
+const severityRegex = /\[[^\w\-\[]*severity[^\w\-\]]*\]/gi;
 export class ModifierUtils {
 	private kobold: Kobold;
 	public static severityRegex = severityRegex;
 	constructor(koboldUtils: KoboldUtils) {
 		this.kobold = koboldUtils.kobold;
 	}
-	public static getSeverityAppliedModifier(modifier: Modifier) {
-		const adjustedModifier = _.cloneDeep(modifier);
-		if (adjustedModifier.severity != null) {
-			if (adjustedModifier.sheetAdjustments.length) {
-				adjustedModifier.sheetAdjustments.forEach(
-					adjustment =>
-						(adjustment.value = adjustment.value.replaceAll(
-							severityRegex,
-							adjustedModifier.severity!.toString()
-						))
-				);
-			} else if (adjustedModifier.rollAdjustment) {
-				adjustedModifier.rollAdjustment = adjustedModifier.rollAdjustment.replaceAll(
-					severityRegex,
-					adjustedModifier.severity!.toString()
-				);
-			}
-		}
-		return adjustedModifier;
+	public static getSeverityAppliedModifier(modifier: Modifier): Modifier {
+		//if we just shift into text first, we can replace all blocks like "-[ severity]" into something like "-0"
+		return JSON.parse(
+			JSON.stringify(modifier).replaceAll(severityRegex, (modifier.severity ?? 0).toString())
+		);
 	}
 	public static isModifierValidForTags(
 		modifier: Modifier,
 		attributes: Attribute[],
 		tags: string[]
 	): boolean {
-		if (modifier.sheetAdjustments.length) return false;
+		if (!modifier.rollTargetTags?.length) return false;
 
 		const possibleTags = (modifier.rollTargetTags ?? '').match(/([A-Za-z][A-Za-z_0-9]*)/g);
 
@@ -114,12 +100,7 @@ export class ModifierUtils {
 		// for each modifier, check if it targets any tags for this roll
 		for (const modifierIter of modifiers) {
 			// if this modifier isn't active, move to the next one
-			if (
-				!modifierIter.isActive ||
-				modifierIter.sheetAdjustments ||
-				modifierIter.rollAdjustment == null
-			)
-				continue;
+			if (!modifierIter.isActive || modifierIter.rollAdjustment == null) continue;
 
 			const modifierValidForTags = ModifierUtils.isModifierValidForTags(
 				modifierIter,
@@ -151,7 +132,10 @@ export class ModifierUtils {
 						modifierSubRoll.results?.reducedExpression ?? {}
 					);
 
-					const parsedModifier = { ...modifier, value: modifierSubRoll.parsedExpression };
+					const parsedModifier = {
+						...modifier,
+						rollAdjustment: modifierSubRoll.parsedExpression,
+					};
 
 					// Otherwise, we just add the full modifier to the dice roll as if it were an untyped numeric modifier.
 

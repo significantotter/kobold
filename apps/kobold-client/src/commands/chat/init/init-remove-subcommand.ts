@@ -116,12 +116,11 @@ export class InitRemoveSubCommand implements Command {
 			try {
 				updatedTurn = initBuilder.getPreviousTurnChanges();
 			} catch (e) {
-				console.log('Error getting previous turn changes', e);
+				console.warn('Error getting previous turn changes', e);
 				if (e instanceof KoboldError) {
 					// this is an edge case where we can't go to the previous turn on
 					// the first turn, but remove the first character from initiative
 					updatedTurn = initBuilder.getJumpToTurnChanges(initBuilder.groups[1].name);
-					console.log(updatedTurn);
 				} else {
 					throw e;
 				}

@@ -5,6 +5,7 @@ import {
 	SheetAdjustment,
 	SheetAdjustmentOperationEnum,
 	SheetAdjustmentTypeEnum,
+	getDefaultSheet,
 } from 'kobold-db';
 import { KoboldError } from '../KoboldError.js';
 import { SheetAdjuster } from './sheet-adjuster.js';
@@ -21,16 +22,14 @@ export class SheetUtils {
 		const severityAppliedActiveModifiers = activeSheetModifiers.map(
 			ModifierUtils.getSeverityAppliedModifier
 		);
-
 		return this.adjustSheetWithSheetAdjustments(
 			sheet,
 			severityAppliedActiveModifiers.flatMap(modifier => modifier.sheetAdjustments)
 		);
 	}
-
 	public static stringToSheetAdjustments(input: string): SheetAdjustment[] {
 		const adjustmentSegments = input.split(';').filter(result => result.trim() !== '');
-		const adjustments = adjustmentSegments.map(segment => {
+		const sheetAdjustments = adjustmentSegments.flatMap(segment => {
 			const adjustmentParts = /([^=+-]+)([=+-])(.+)/.exec(segment);
 			if (!adjustmentParts) {
 				throw new KoboldError(
@@ -52,6 +51,7 @@ export class SheetUtils {
 				operation: operator as SheetAdjustmentOperationEnum,
 				value: value,
 			};
+
 			//TODO we should just allow some attributes in sheet modifiers.
 			if (
 				!SheetAdjuster.validateSheetAdjustment({
@@ -61,9 +61,10 @@ export class SheetUtils {
 			) {
 				throw new KoboldError(`Yip! I couldn't understand the adjustment "${segment}".`);
 			}
+
 			return sheetAdjustment;
 		});
-		return adjustments;
+		return sheetAdjustments;
 	}
 
 	public static adjustSheetWithSheetAdjustments(
@@ -77,8 +78,8 @@ export class SheetUtils {
 			if (SheetProperties.isPropertyGroup(standardizedProperty)) {
 				// split the adjustment into many property adjustments if it's a group
 				const properties = SheetProperties.propertyGroupToSheetProperties(
-					sheet,
-					standardizedProperty
+					standardizedProperty,
+					sheet
 				);
 
 				const spreadAdjustments = properties.map(property => ({

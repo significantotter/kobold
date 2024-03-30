@@ -1143,7 +1143,10 @@ export class SheetProperties {
 		// however, all keys have to match exactly 1 group, ability, or subgroup
 		return !!group && [ability, group, subGroup].filter(_.identity).length === keys.length;
 	}
-	public static propertyGroupToSheetProperties(sheet: Sheet, property: string) {
+	public static propertyGroupToSheetProperties(
+		property: string,
+		sheet: Sheet = SheetProperties.defaultSheet
+	) {
 		let [...keys] = _.kebabCase(property).trim().toLowerCase().split('-');
 
 		let ability: AbilityEnum | undefined,

@@ -9,7 +9,7 @@ import {
 	SheetStatKeys,
 } from 'kobold-db';
 import { KoboldError } from '../KoboldError.js';
-import { SheetProperties } from './sheet-properties.js';
+import { SheetProperties, SheetStatProperties } from './sheet-properties.js';
 import { SheetUtils } from './sheet-utils.js';
 
 function sheetWithTestProperties(): Sheet {
@@ -155,6 +155,34 @@ describe('SheetUtils', () => {
 					property: AbilityEnum.dexterity,
 					operation: SheetAdjustmentOperationEnum['-'],
 					value: '1',
+				},
+			];
+			expect(SheetUtils.stringToSheetAdjustments(input)).toEqual(adjustments);
+		});
+
+		it('should properly parse a group', () => {
+			const input = 'str skills+1';
+			const sheet: Sheet = sheetWithTestProperties();
+			const adjustments: SheetAdjustment[] = [
+				{
+					type: SheetAdjustmentTypeEnum.untyped,
+					propertyType: AdjustablePropertyEnum.statGroup,
+					property: 'str skills',
+					operation: SheetAdjustmentOperationEnum['+'],
+					value: '1',
+				},
+			];
+			expect(SheetUtils.stringToSheetAdjustments(input)).toEqual(adjustments);
+		});
+		it('should properly parse a group with severity', () => {
+			const input = 'str skills-[severity]';
+			const adjustments: SheetAdjustment[] = [
+				{
+					type: SheetAdjustmentTypeEnum.untyped,
+					propertyType: AdjustablePropertyEnum.statGroup,
+					property: 'str skills',
+					operation: SheetAdjustmentOperationEnum['-'],
+					value: '[severity]',
 				},
 			];
 			expect(SheetUtils.stringToSheetAdjustments(input)).toEqual(adjustments);

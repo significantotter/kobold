@@ -19,15 +19,18 @@ export class ModifierHelpers {
 		if (modifier.description) modifierTextLines.push(`${modifier.description}`);
 		modifierTextLines.push(`Type: \`${modifier.type || 'untyped'}\``);
 		if (modifier.severity != null) modifierTextLines.push(`Severity: \`${modifier.severity}\``);
-		modifierTextLines.push(
-			`Sheet Adjustments: \`${modifier.sheetAdjustments
-				.map(sheetAdjustment => {
-					return `${sheetAdjustment.property} ${sheetAdjustment.operation} ${sheetAdjustment.value}`;
-				})
-				.join(', ')}\``
-		);
-		modifierTextLines.push(`Roll Adjustments: \`${modifier.rollAdjustment}\``);
-		modifierTextLines.push(`Roll Tags to Adjust: \`${modifier.rollTargetTags}\``);
+		if (modifier.sheetAdjustments.length)
+			modifierTextLines.push(
+				`Sheet Adjustments: \`${modifier.sheetAdjustments
+					.map(sheetAdjustment => {
+						return `${sheetAdjustment.property} ${sheetAdjustment.operation} ${sheetAdjustment.value}`;
+					})
+					.join(', ')}\``
+			);
+		if (modifier.rollAdjustment) {
+			modifierTextLines.push(`Roll Adjustments: \`${modifier.rollAdjustment}\``);
+			modifierTextLines.push(`Roll Tags to Adjust: \`${modifier.rollTargetTags}\``);
+		}
 		return modifierTextLines.join('\n');
 	}
 }

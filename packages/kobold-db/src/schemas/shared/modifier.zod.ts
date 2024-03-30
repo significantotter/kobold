@@ -21,6 +21,7 @@ export enum AdjustablePropertyEnum {
 	stat = 'stat',
 	attack = 'attack',
 	extraSkill = 'extraSkill',
+	statGroup = 'statGroup',
 	none = '',
 }
 

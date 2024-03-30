@@ -264,4 +264,24 @@ export class AutocompleteUtils {
 			);
 		return result;
 	}
+
+	public async getAllModifiersForAllCharacters(
+		intr: AutocompleteInteraction<CacheType>,
+		matchText: string
+	) {
+		const characters = await this.kobold.character.readMany({ userId: intr.user.id });
+		const modifiersWithCharacterName: string[] = [];
+		for (const character of characters) {
+			const modifiers = character.sheetRecord.modifiers;
+			for (const modifier of modifiers) {
+				modifiersWithCharacterName.push(`${character.name} - ${modifier.name}`);
+			}
+		}
+		return modifiersWithCharacterName
+			.filter(modifier => modifier.toLowerCase().includes(matchText.toLowerCase()))
+			.map(modifier => ({
+				name: modifier,
+				value: modifier,
+			}));
+	}
 }

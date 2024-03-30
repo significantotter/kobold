@@ -8,7 +8,7 @@ export class Pf2eToolsLoader {
 	public async load() {
 		await this.db.delete(schema.Search);
 		for (const Model of Object.values(Models)) {
-			console.log(`**importing ${Model.name}**`);
+			console.info(`**importing ${Model.name}**`);
 			const model = new Model(this.db);
 			await model.import();
 		}

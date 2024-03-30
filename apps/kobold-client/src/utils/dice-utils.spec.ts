@@ -24,6 +24,7 @@ const mocks = {
 				id: 1,
 				sheet: SheetProperties.defaultSheet,
 				modifiers: [],
+				conditions: [],
 				actions: [],
 				rollMacros: [],
 				trackerMode: null,
