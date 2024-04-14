@@ -51,7 +51,11 @@ export class ConditionCommand implements Command {
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					GameplayOptions.GAMEPLAY_TARGET_CHARACTER,
-					ModifierOptions.MODIFIER_NAME_OPTION,
+					{
+						...ModifierOptions.MODIFIER_NAME_OPTION,
+						autocomplete: true,
+						choices: undefined,
+					},
 				],
 			},
 			{

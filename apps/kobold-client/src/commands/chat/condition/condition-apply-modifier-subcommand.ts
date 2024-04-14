@@ -47,6 +47,7 @@ export class ConditionApplyModifierSubCommand implements Command {
 			const { autocompleteUtils } = new KoboldUtils(kobold);
 			return await autocompleteUtils.getAllTargetOptions(intr, match);
 		}
+		console.log(option.name);
 		if (option.name === ModifierOptions.MODIFIER_NAME_OPTION.name) {
 			const match = intr.options.getString(ModifierOptions.MODIFIER_NAME_OPTION.name) ?? '';
 
