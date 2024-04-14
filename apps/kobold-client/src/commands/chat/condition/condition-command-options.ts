@@ -2,9 +2,9 @@ import { APIApplicationCommandBasicOption, ApplicationCommandOptionType } from '
 import L from '../../../i18n/i18n-node.js';
 
 export class ConditionOptions {
-	public static readonly MODIFIER_NAME_OPTION: APIApplicationCommandBasicOption = {
-		name: L.en.commandOptions.modifierName.name(),
-		description: L.en.commandOptions.modifierName.description(),
+	public static readonly CONDITION_NAME_OPTION: APIApplicationCommandBasicOption = {
+		name: L.en.commandOptions.conditionName.name(),
+		description: L.en.commandOptions.conditionName.description(),
 		autocomplete: true,
 		required: true,
 		type: ApplicationCommandOptionType.String,

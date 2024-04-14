@@ -21,8 +21,8 @@ import { InteractionUtils } from '../../../utils/index.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Command, CommandDeferType } from '../../index.js';
-import { ModifierOptions } from '../modifier/modifier-command-options.js';
 import { GameplayOptions } from '../gameplay/gameplay-command-options.js';
+import { ConditionOptions } from './condition-command-options.js';
 
 export class ConditionRemoveSubCommand implements Command {
 	public names = [L.en.commands.condition.remove.name()];
@@ -49,31 +49,18 @@ export class ConditionRemoveSubCommand implements Command {
 			const { autocompleteUtils } = new KoboldUtils(kobold);
 			return await autocompleteUtils.getAllTargetOptions(intr, match);
 		}
-		if (option.name === ModifierOptions.MODIFIER_NAME_OPTION.name) {
+		if (option.name === ConditionOptions.CONDITION_NAME_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(ModifierOptions.MODIFIER_NAME_OPTION.name) ?? '';
+			const match = intr.options.getString(ConditionOptions.CONDITION_NAME_OPTION.name) ?? '';
 			const targetCharacterName =
 				intr.options.getString(GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name) ?? '';
 
-			const { gameUtils } = new KoboldUtils(kobold);
+			const { autocompleteUtils } = new KoboldUtils(kobold);
 			try {
-				const { targetSheetRecord } = await gameUtils.getCharacterOrInitActorTarget(
-					intr,
-					targetCharacterName
-				);
-				//find a save on the character matching the autocomplete string
-				const matchedConditions = FinderHelpers.matchAllConditions(
-					targetSheetRecord,
-					match
-				).map(condition => ({
-					name: condition.name,
-					value: condition.name,
-				}));
-				//return the matched saves
-				return matchedConditions;
+				return autocompleteUtils.getConditionsOnTarget(intr, targetCharacterName, match);
 			} catch (err) {
 				// failed to match a target, so return []
-				return;
+				return [];
 			}
 		}
 	}
@@ -84,7 +71,7 @@ export class ConditionRemoveSubCommand implements Command {
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const conditionChoice = intr.options.getString(
-			ModifierOptions.MODIFIER_NAME_OPTION.name,
+			ConditionOptions.CONDITION_NAME_OPTION.name,
 			true
 		);
 		const targetCharacterName = intr.options.getString(

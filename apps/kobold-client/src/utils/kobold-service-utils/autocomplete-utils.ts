@@ -289,4 +289,26 @@ export class AutocompleteUtils {
 				value: modifier,
 			}));
 	}
+
+	public async getConditionsOnTarget(
+		intr: AutocompleteInteraction<CacheType>,
+		targetCharacterName: string,
+		conditionName: string
+	) {
+		const { targetSheetRecord } =
+			await this.koboldUtils.gameUtils.getCharacterOrInitActorTarget(
+				intr,
+				targetCharacterName
+			);
+		//find a save on the character matching the autocomplete string
+		const matchedConditions = FinderHelpers.matchAllConditions(
+			targetSheetRecord,
+			conditionName
+		).map(condition => ({
+			name: condition.name,
+			value: condition.name,
+		}));
+		//return the matched saves
+		return matchedConditions;
+	}
 }

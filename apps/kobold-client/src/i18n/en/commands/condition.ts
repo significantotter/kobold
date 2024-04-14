@@ -30,6 +30,19 @@ export default {
 		name: 'list',
 		description: "Lists all of a character's conditions",
 	},
+	set: {
+		name: 'set',
+		description: 'Sets a property of a condition on a target',
+		interactions: {
+			invalidOptionError: 'Yip! Please send a valid option to update.',
+			emptyNameError: "Yip! You can't use an empty name!",
+			nameExistsError: 'Yip! A condition with that name already exists.',
+			valueNotNumberError: 'Yip! You can only update a condition value with a number.',
+			successEmbed: {
+				title: "Yip! {characterName} had their condition {conditionName}'s {fieldToChange} set to {newFieldValue}.",
+			},
+		},
+	},
 	remove: {
 		name: 'remove',
 		description: 'Removes a condition from a target',

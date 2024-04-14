@@ -23,15 +23,17 @@ import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { SheetUtils } from '../../../utils/sheet/sheet-utils.js';
 import { Command, CommandDeferType } from '../../index.js';
-import { ModifierOptions } from './modifier-command-options.js';
+import { ModifierOptions } from './../modifier/modifier-command-options.js';
 import _ from 'lodash';
+import { GameplayOptions } from '../gameplay/gameplay-command-options.js';
+import { ConditionOptions } from './condition-command-options.js';
 
-export class ModifierUpdateSubCommand implements Command {
-	public names = [L.en.commands.modifier.update.name()];
+export class ConditionSetSubCommand implements Command {
+	public names = [L.en.commands.condition.set.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.modifier.update.name(),
-		description: L.en.commands.modifier.update.description(),
+		name: L.en.commands.condition.set.name(),
+		description: L.en.commands.condition.set.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -45,27 +47,25 @@ export class ModifierUpdateSubCommand implements Command {
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === ModifierOptions.MODIFIER_NAME_OPTION.name) {
+		if (option.name === GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name) {
+			const match =
+				intr.options.getString(GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name) ?? '';
+			const { autocompleteUtils } = new KoboldUtils(kobold);
+			return await autocompleteUtils.getAllTargetOptions(intr, match);
+		}
+		if (option.name === ConditionOptions.CONDITION_NAME_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(ModifierOptions.MODIFIER_NAME_OPTION.name) ?? '';
+			const match = intr.options.getString(ConditionOptions.CONDITION_NAME_OPTION.name) ?? '';
+			const targetCharacterName =
+				intr.options.getString(GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name) ?? '';
 
-			//get the active character
-			const { characterUtils } = new KoboldUtils(kobold);
-			const activeCharacter = await characterUtils.getActiveCharacter(intr);
-			if (!activeCharacter) {
-				//no choices if we don't have a character to match against
+			const { autocompleteUtils } = new KoboldUtils(kobold);
+			try {
+				return autocompleteUtils.getConditionsOnTarget(intr, targetCharacterName, match);
+			} catch (err) {
+				// failed to match a target, so return []
 				return [];
 			}
-			//find a save on the character matching the autocomplete string
-			const matchedModifiers = FinderHelpers.matchAllModifiers(
-				activeCharacter.sheetRecord,
-				match
-			).map(modifier => ({
-				name: modifier.name,
-				value: modifier.name,
-			}));
-			//return the matched saves
-			return matchedModifiers;
 		}
 	}
 
@@ -74,8 +74,11 @@ export class ModifierUpdateSubCommand implements Command {
 		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
-		const modifierName = intr.options
-			.getString(ModifierOptions.MODIFIER_NAME_OPTION.name, true)
+		const targetCharacterName = intr.options
+			.getString(GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name, true)
+			.trim();
+		const conditionName = intr.options
+			.getString(ConditionOptions.CONDITION_NAME_OPTION.name, true)
 			.trim();
 		let fieldToChange = intr.options
 			.getString(ModifierOptions.MODIFIER_SET_OPTION.name, true)
@@ -86,18 +89,16 @@ export class ModifierUpdateSubCommand implements Command {
 			.trim();
 
 		//check if we have an active character
-		const koboldUtils = new KoboldUtils(kobold);
-		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
-			activeCharacter: true,
-		});
-
-		const targetModifier = FinderHelpers.getModifierByName(
-			activeCharacter.sheetRecord,
-			modifierName
+		const { gameUtils } = new KoboldUtils(kobold);
+		const { targetSheetRecord, targetName } = await gameUtils.getCharacterOrInitActorTarget(
+			intr,
+			targetCharacterName
 		);
-		if (!targetModifier) {
-			// no matching modifier found
-			await InteractionUtils.send(intr, LL.commands.modifier.interactions.notFound());
+
+		const targetCondition = FinderHelpers.getConditionByName(targetSheetRecord, conditionName);
+		if (!targetCondition) {
+			// no matching condition found
+			await InteractionUtils.send(intr, LL.commands.condition.interactions.notFound());
 			return;
 		}
 
@@ -107,45 +108,43 @@ export class ModifierUpdateSubCommand implements Command {
 			if (newFieldValue === '') {
 				await InteractionUtils.send(
 					intr,
-					LL.commands.modifier.update.interactions.emptyNameError()
+					LL.commands.condition.set.interactions.emptyNameError()
 				);
 				return;
-				//a name can't already be a modifier
-			} else if (
-				FinderHelpers.getModifierByName(activeCharacter.sheetRecord, newFieldValue)
-			) {
+				//a name can't already be a condition
+			} else if (FinderHelpers.getConditionByName(targetSheetRecord, newFieldValue)) {
 				await InteractionUtils.send(
 					intr,
-					LL.commands.modifier.update.interactions.nameExistsError()
+					LL.commands.condition.set.interactions.nameExistsError()
 				);
 				return;
 			} else {
-				targetModifier.name = newFieldValue;
+				targetCondition.name = newFieldValue;
 			}
 		} else if (
 			fieldToChange ===
 			L.en.commandOptions.modifierUpdateOption.choices.rollAdjustment.value()
 		) {
 			try {
-				// we must be able to evaluate the modifier as a roll for this character
+				// we must be able to evaluate the condition as a roll for this character
 				DiceUtils.parseAndEvaluateDiceExpression({
 					rollExpression: newFieldValue,
 					extraAttributes: [
 						{
 							name: 'severity',
-							value: targetModifier.severity ?? 0,
-							type: targetModifier.type,
+							value: targetCondition.severity ?? 0,
+							type: targetCondition.type,
 							tags: [],
 							aliases: [],
 						},
 					],
-					creature: Creature.fromSheetRecord(activeCharacter.sheetRecord),
+					creature: Creature.fromSheetRecord(targetSheetRecord),
 				});
-				targetModifier.rollAdjustment = newFieldValue;
+				targetCondition.rollAdjustment = newFieldValue;
 			} catch (err) {
 				await InteractionUtils.send(
 					intr,
-					LL.commands.modifier.createModifier.interactions.doesntEvaluateError()
+					LL.commands.condition.interactions.doesntEvaluateError()
 				);
 				return;
 			}
@@ -159,18 +158,15 @@ export class ModifierUpdateSubCommand implements Command {
 				compileExpression(newFieldValue);
 			} catch (err) {
 				// the tags are in an invalid format
-				await InteractionUtils.send(
-					intr,
-					LL.commands.modifier.createModifier.interactions.invalidTags()
-				);
+				await InteractionUtils.send(intr, LL.commands.condition.interactions.invalidTags());
 				return;
 			}
-			targetModifier.rollTargetTags = newFieldValue;
+			targetCondition.rollTargetTags = newFieldValue;
 		} else if (fieldToChange === 'type') {
 			const newType = newFieldValue.trim().toLowerCase();
-			if (!newType) targetModifier.type = SheetAdjustmentTypeEnum.untyped;
+			if (!newType) targetCondition.type = SheetAdjustmentTypeEnum.untyped;
 			else if (newType in SheetAdjustmentTypeEnum) {
-				targetModifier.type = newType as SheetAdjustmentTypeEnum;
+				targetCondition.type = newType as SheetAdjustmentTypeEnum;
 			} else {
 				throw new KoboldError(
 					`Yip! The type must be one of ${StringUtils.stringsToCommaPhrase(
@@ -179,42 +175,40 @@ export class ModifierUpdateSubCommand implements Command {
 				);
 			}
 		} else if (fieldToChange === 'description') {
-			if (!newFieldValue) targetModifier.description = null;
-			else targetModifier.description = newFieldValue;
+			if (!newFieldValue) targetCondition.description = null;
+			else targetCondition.description = newFieldValue;
 		} else if (fieldToChange === 'severity') {
-			if (newFieldValue == null) targetModifier.severity = null;
+			if (newFieldValue == null) targetCondition.severity = null;
 			if (!/[0-9]+(\.[0-9]*)?/.test(newFieldValue.trim()))
 				throw new KoboldError('Severity must be a number');
-			else targetModifier.severity = Number(newFieldValue);
+			else targetCondition.severity = Number(newFieldValue);
 		} else if (fieldToChange === 'sheet-values') {
-			targetModifier.sheetAdjustments = SheetUtils.stringToSheetAdjustments(newFieldValue);
+			targetCondition.sheetAdjustments = SheetUtils.stringToSheetAdjustments(newFieldValue);
 			// attempt to use the adjustments to make sure they're valid
-			SheetUtils.adjustSheetWithModifiers(activeCharacter.sheetRecord.sheet, [
-				targetModifier,
-			]);
+			SheetUtils.adjustSheetWithModifiers(targetSheetRecord.sheet, [targetCondition]);
 		} else {
 			// if a field wasn't provided, or the field isn't present in our options, send an error
 			await InteractionUtils.send(
 				intr,
-				LL.commands.modifier.update.interactions.invalidOptionError()
+				LL.commands.condition.set.interactions.invalidOptionError()
 			);
 			return;
 		}
 		// just in case the update is for the name
-		const nameBeforeUpdate = targetModifier.name;
+		const nameBeforeUpdate = targetCondition.name;
 
 		await kobold.sheetRecord.update(
-			{ id: activeCharacter.sheetRecordId },
+			{ id: targetSheetRecord.id },
 			{
-				modifiers: activeCharacter.sheetRecord.modifiers,
+				conditions: targetSheetRecord.conditions,
 			}
 		);
 
 		const updateEmbed = new KoboldEmbed();
 		updateEmbed.setTitle(
-			LL.commands.modifier.update.interactions.successEmbed.title({
-				characterName: activeCharacter.name,
-				modifierName: nameBeforeUpdate,
+			LL.commands.condition.set.interactions.successEmbed.title({
+				characterName: targetName,
+				conditionName: nameBeforeUpdate,
 				fieldToChange,
 				newFieldValue,
 			})

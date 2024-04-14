@@ -576,6 +576,10 @@ export default {
 		name: 'name',
 		description: 'The name of the modifier.',
 	},
+	conditionName: {
+		name: 'name',
+		description: 'The name of the condition.',
+	},
 	modifierType: {
 		name: 'type',
 		description: 'The optional type (status, item, or circumstance) of the modifier.',
@@ -619,7 +623,7 @@ export default {
 		name: 'sheet-values',
 		description: 'How to alter the sheet values. For example "maxHp+5;ac=20;will-1"',
 	},
-	modifierSetOption: {
+	modifierUpdateOption: {
 		name: 'option',
 		description: 'The modifier option to alter.',
 		choices: {
@@ -647,9 +651,13 @@ export default {
 				name: 'sheet-values',
 				value: 'sheet-values',
 			},
+			severity: {
+				name: 'severity',
+				value: 'severity',
+			},
 		},
 	},
-	modifierSetValue: {
+	modifierUpdateValue: {
 		name: 'value',
 		description: 'The value to set the option to.',
 	},

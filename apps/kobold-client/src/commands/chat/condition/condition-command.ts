@@ -51,7 +51,7 @@ export class ConditionCommand implements Command {
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					GameplayOptions.GAMEPLAY_TARGET_CHARACTER,
-					ConditionOptions.MODIFIER_NAME_OPTION,
+					ModifierOptions.MODIFIER_NAME_OPTION,
 				],
 			},
 			{
@@ -61,12 +61,23 @@ export class ConditionCommand implements Command {
 				options: [GameplayOptions.GAMEPLAY_TARGET_CHARACTER],
 			},
 			{
+				name: L.en.commands.condition.set.name(),
+				description: L.en.commands.condition.set.description(),
+				type: ApplicationCommandOptionType.Subcommand,
+				options: [
+					GameplayOptions.GAMEPLAY_TARGET_CHARACTER,
+					ConditionOptions.CONDITION_NAME_OPTION,
+					ModifierOptions.MODIFIER_SET_OPTION,
+					ModifierOptions.MODIFIER_SET_VALUE_OPTION,
+				],
+			},
+			{
 				name: L.en.commands.condition.remove.name(),
 				description: L.en.commands.condition.remove.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					GameplayOptions.GAMEPLAY_TARGET_CHARACTER,
-					ConditionOptions.MODIFIER_NAME_OPTION,
+					ConditionOptions.CONDITION_NAME_OPTION,
 				],
 			},
 			{
@@ -75,7 +86,7 @@ export class ConditionCommand implements Command {
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					GameplayOptions.GAMEPLAY_TARGET_CHARACTER,
-					ConditionOptions.MODIFIER_NAME_OPTION,
+					ConditionOptions.CONDITION_NAME_OPTION,
 					{ ...ModifierOptions.MODIFIER_SEVERITY_VALUE, required: true },
 				],
 			},
