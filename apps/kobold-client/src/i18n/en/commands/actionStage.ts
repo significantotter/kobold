@@ -46,9 +46,9 @@ export default {
 				'Yip! You must provide at least one save result to add a save to an action!',
 		},
 	},
-	edit: {
-		name: 'edit',
-		description: 'Edits a roll, text, or save on an action. "none" clears a field.',
+	set: {
+		name: 'set',
+		description: 'Sets a field on an action stage. "none" clears the field.',
 		interactions: {
 			success:
 				'Yip! {actionStageOption} was set to {newValue} for action stage {actionStageName} in the action {actionName}.',

@@ -32,6 +32,9 @@ export default interface SheetRecordTable {
 
   /** Database type: pg_catalog.text */
   trackerGuildId: ColumnType<string | null, string | null, string | null>;
+
+  /** Database type: pg_catalog.jsonb */
+  conditions: ColumnType<Modifiers, Modifiers | undefined, Modifiers>;
 }
 
 export const sheetRecordId = z.number().int().max(2147483647);
@@ -46,6 +49,7 @@ export const zSheetRecord = z.object({
   trackerMessageId: z.string().nullable(),
   trackerChannelId: z.string().nullable(),
   trackerGuildId: z.string().nullable(),
+  conditions: z.unknown(),
 });
 
 export const zSheetRecordInitializer = z.object({
@@ -58,6 +62,7 @@ export const zSheetRecordInitializer = z.object({
   trackerMessageId: z.string().optional().nullable(),
   trackerChannelId: z.string().optional().nullable(),
   trackerGuildId: z.string().optional().nullable(),
+  conditions: z.unknown().optional(),
 });
 
 export const zSheetRecordMutator = z.object({
@@ -70,6 +75,7 @@ export const zSheetRecordMutator = z.object({
   trackerMessageId: z.string().optional().nullable(),
   trackerChannelId: z.string().optional().nullable(),
   trackerGuildId: z.string().optional().nullable(),
+  conditions: z.unknown().optional(),
 });
 
 export type SheetRecord = Selectable<SheetRecordTable>;

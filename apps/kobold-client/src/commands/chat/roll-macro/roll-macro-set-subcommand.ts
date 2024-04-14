@@ -23,12 +23,12 @@ import { RollBuilder } from '../../../utils/roll-builder.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { RollMacroOptions } from './roll-macro-command-options.js';
 
-export class RollMacroUpdateSubCommand implements Command {
-	public names = [L.en.commands.rollMacro.update.name()];
+export class RollMacroSetSubCommand implements Command {
+	public names = [L.en.commands.rollMacro.set.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.rollMacro.update.name(),
-		description: L.en.commands.rollMacro.update.description(),
+		name: L.en.commands.rollMacro.set.name(),
+		description: L.en.commands.rollMacro.set.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -105,7 +105,7 @@ export class RollMacroUpdateSubCommand implements Command {
 
 		const updateEmbed = new KoboldEmbed();
 		updateEmbed.setTitle(
-			LL.commands.rollMacro.update.interactions.successEmbed.title({
+			LL.commands.rollMacro.set.interactions.successEmbed.title({
 				characterName: activeCharacter.name,
 				macroName: targetRollMacro.name,
 				newMacroValue: macro,

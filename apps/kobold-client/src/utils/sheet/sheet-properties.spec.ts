@@ -17,6 +17,7 @@ describe('SheetProperties', () => {
 		it('should return true for a valid property group', () => {
 			expect(SheetProperties.isPropertyGroup('constitution-saves')).toBe(true);
 			expect(SheetProperties.isPropertyGroup('skills')).toBe(true);
+			expect(SheetProperties.isPropertyGroup('STR skills')).toBe(true);
 			expect(SheetProperties.isPropertyGroup('skill')).toBe(true);
 			expect(SheetProperties.isPropertyGroup('intelligence casting dcs')).toBe(true);
 			expect(SheetProperties.isPropertyGroup('con class-bonus')).toBe(true);
@@ -36,7 +37,7 @@ describe('SheetProperties', () => {
 	describe('propertyGroupToSheetProperties', () => {
 		const sheet = SheetProperties.defaultSheet;
 		it('should convert a valid property group to an array of sheet properties', () => {
-			expect(SheetProperties.propertyGroupToSheetProperties(sheet, 'dex skills')).toEqual([
+			expect(SheetProperties.propertyGroupToSheetProperties('dex skills', sheet)).toEqual([
 				'acrobaticsBonus',
 				'acrobaticsDc',
 				'stealthBonus',
@@ -44,9 +45,7 @@ describe('SheetProperties', () => {
 				'thieveryBonus',
 				'thieveryDc',
 			]);
-			expect(
-				SheetProperties.propertyGroupToSheetProperties(sheet, 'wisdom check dcs')
-			).toEqual([
+			expect(SheetProperties.propertyGroupToSheetProperties('wisdom check dcs')).toEqual([
 				'perceptionDc',
 				'willDc',
 				'medicineDc',
@@ -86,8 +85,8 @@ describe('SheetProperties', () => {
 			];
 
 			const testGroup = SheetProperties.propertyGroupToSheetProperties(
-				additionalSkillsSheet,
-				'skills'
+				'skills',
+				additionalSkillsSheet
 			);
 
 			[
@@ -101,14 +100,14 @@ describe('SheetProperties', () => {
 
 			expect(
 				SheetProperties.propertyGroupToSheetProperties(
-					additionalSkillsSheet,
-					'str skill dcs'
+					'str skill dcs',
+					additionalSkillsSheet
 				)
 			).toEqual(['athleticsDc', 'someSkillDc']);
 		});
 
 		it('should throw an error for an invalid property group', () => {
-			expect(SheetProperties.propertyGroupToSheetProperties(sheet, 'foo')).toEqual([]);
+			expect(SheetProperties.propertyGroupToSheetProperties('foo', sheet)).toEqual([]);
 		});
 	});
 });

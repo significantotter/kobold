@@ -86,44 +86,44 @@ export class ActionOptions {
 		type: ApplicationCommandOptionType.String,
 	};
 	public static readonly ACTION_EDIT_OPTION: APIApplicationCommandBasicOption = {
-		name: L.en.commandOptions.actionEditOption.name(),
-		description: L.en.commandOptions.actionEditOption.description(),
+		name: L.en.commandOptions.actionSetOption.name(),
+		description: L.en.commandOptions.actionSetOption.description(),
 		required: true,
 		type: ApplicationCommandOptionType.String,
 		choices: [
 			{
-				name: L.en.commandOptions.actionEditOption.choices.name.name(),
-				value: L.en.commandOptions.actionEditOption.choices.name.value(),
+				name: L.en.commandOptions.actionSetOption.choices.name.name(),
+				value: L.en.commandOptions.actionSetOption.choices.name.value(),
 			},
 			{
-				name: L.en.commandOptions.actionEditOption.choices.description.name(),
-				value: L.en.commandOptions.actionEditOption.choices.description.value(),
+				name: L.en.commandOptions.actionSetOption.choices.description.name(),
+				value: L.en.commandOptions.actionSetOption.choices.description.value(),
 			},
 			{
-				name: L.en.commandOptions.actionEditOption.choices.type.name(),
-				value: L.en.commandOptions.actionEditOption.choices.type.value(),
+				name: L.en.commandOptions.actionSetOption.choices.type.name(),
+				value: L.en.commandOptions.actionSetOption.choices.type.value(),
 			},
 			{
-				name: L.en.commandOptions.actionEditOption.choices.actionCost.name(),
-				value: L.en.commandOptions.actionEditOption.choices.actionCost.value(),
+				name: L.en.commandOptions.actionSetOption.choices.actionCost.name(),
+				value: L.en.commandOptions.actionSetOption.choices.actionCost.value(),
 			},
 			{
-				name: L.en.commandOptions.actionEditOption.choices.baseLevel.name(),
-				value: L.en.commandOptions.actionEditOption.choices.baseLevel.value(),
+				name: L.en.commandOptions.actionSetOption.choices.baseLevel.name(),
+				value: L.en.commandOptions.actionSetOption.choices.baseLevel.value(),
 			},
 			{
-				name: L.en.commandOptions.actionEditOption.choices.tags.name(),
-				value: L.en.commandOptions.actionEditOption.choices.tags.value(),
+				name: L.en.commandOptions.actionSetOption.choices.tags.name(),
+				value: L.en.commandOptions.actionSetOption.choices.tags.value(),
 			},
 			{
-				name: L.en.commandOptions.actionEditOption.choices.autoHeighten.name(),
-				value: L.en.commandOptions.actionEditOption.choices.autoHeighten.value(),
+				name: L.en.commandOptions.actionSetOption.choices.autoHeighten.name(),
+				value: L.en.commandOptions.actionSetOption.choices.autoHeighten.value(),
 			},
 		],
 	};
 	public static readonly ACTION_EDIT_VALUE: APIApplicationCommandBasicOption = {
-		name: L.en.commandOptions.actionEditValue.name(),
-		description: L.en.commandOptions.actionEditValue.description(),
+		name: L.en.commandOptions.actionSetValue.name(),
+		description: L.en.commandOptions.actionSetValue.description(),
 		required: true,
 		type: ApplicationCommandOptionType.String,
 	};

@@ -41,10 +41,10 @@ export class InitNoteSubCommand implements Command {
 		if (!intr.isAutocomplete()) return;
 		if (option.name === InitOptions.INIT_CHARACTER_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(InitOptions.INIT_CHARACTER_OPTION.name);
+			const match = intr.options.getString(InitOptions.INIT_CHARACTER_OPTION.name) ?? '';
 
 			const { autocompleteUtils } = new KoboldUtils(kobold);
-			return await autocompleteUtils.getAllControllableInitiativeActors(intr, match);
+			return await autocompleteUtils.getInitTargetOptions(intr, match, false);
 		}
 	}
 
@@ -58,7 +58,11 @@ export class InitNoteSubCommand implements Command {
 			true
 		);
 		let note = intr.options.getString(InitOptions.INIT_NOTE_OPTION.name, true);
-		if (['-', 'none', 'clear', 'remove', 'x', '', '.'].includes(note.trim().toLowerCase())) {
+		if (
+			['-', 'none', 'clear', 'remove', 'x', '', '.', '""', "''", '``'].includes(
+				note.trim().toLowerCase()
+			)
+		) {
 			note = '';
 		}
 

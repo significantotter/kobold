@@ -76,9 +76,9 @@ export class ModifierImportSubCommand implements Command {
 				invalidJson = true;
 			} else {
 				for (const modifier of newModifiers) {
-					if (modifier.modifierType === 'roll') {
+					if (modifier.rollTargetTags) {
 						// throws an error on an invalid expression
-						compileExpression(modifier.targetTags ?? '');
+						compileExpression(modifier.rollTargetTags ?? '');
 					}
 				}
 			}

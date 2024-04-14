@@ -5,28 +5,31 @@ import {
 	SheetAdjustment,
 	SheetAdjustmentOperationEnum,
 	SheetAdjustmentTypeEnum,
-	SheetModifier,
+	getDefaultSheet,
 } from 'kobold-db';
 import { KoboldError } from '../KoboldError.js';
 import { SheetAdjuster } from './sheet-adjuster.js';
 import { SheetAdjustmentBucketer } from './sheet-adjustment-bucketer.js';
 import { SheetProperties } from './sheet-properties.js';
+import { ModifierUtils } from '../kobold-service-utils/modifier-utils.js';
 
 export class SheetUtils {
 	public static adjustSheetWithModifiers(sheet: Sheet, modifiers: Modifier[]) {
-		const activeSheetModifiers: SheetModifier[] = modifiers
-			.filter((modifier): modifier is SheetModifier => modifier.modifierType === 'sheet')
+		const activeSheetModifiers: Modifier[] = modifiers
+			.filter((modifier): modifier is Modifier => modifier.sheetAdjustments.length > 0)
 			.filter(modifier => modifier.isActive);
 
+		const severityAppliedActiveModifiers = activeSheetModifiers.map(
+			ModifierUtils.getSeverityAppliedModifier
+		);
 		return this.adjustSheetWithSheetAdjustments(
 			sheet,
-			activeSheetModifiers.flatMap(modifier => modifier.sheetAdjustments)
+			severityAppliedActiveModifiers.flatMap(modifier => modifier.sheetAdjustments)
 		);
 	}
-
 	public static stringToSheetAdjustments(input: string): SheetAdjustment[] {
 		const adjustmentSegments = input.split(';').filter(result => result.trim() !== '');
-		const adjustments = adjustmentSegments.map(segment => {
+		const sheetAdjustments = adjustmentSegments.flatMap(segment => {
 			const adjustmentParts = /([^=+-]+)([=+-])(.+)/.exec(segment);
 			if (!adjustmentParts) {
 				throw new KoboldError(
@@ -48,12 +51,20 @@ export class SheetUtils {
 				operation: operator as SheetAdjustmentOperationEnum,
 				value: value,
 			};
-			if (!SheetAdjuster.validateSheetAdjustment(sheetAdjustment)) {
+
+			//TODO we should just allow some attributes in sheet modifiers.
+			if (
+				!SheetAdjuster.validateSheetAdjustment({
+					...sheetAdjustment,
+					value: sheetAdjustment.value.replaceAll(ModifierUtils.severityRegex, '1'),
+				})
+			) {
 				throw new KoboldError(`Yip! I couldn't understand the adjustment "${segment}".`);
 			}
+
 			return sheetAdjustment;
 		});
-		return adjustments;
+		return sheetAdjustments;
 	}
 
 	public static adjustSheetWithSheetAdjustments(
@@ -67,8 +78,8 @@ export class SheetUtils {
 			if (SheetProperties.isPropertyGroup(standardizedProperty)) {
 				// split the adjustment into many property adjustments if it's a group
 				const properties = SheetProperties.propertyGroupToSheetProperties(
-					sheet,
-					standardizedProperty
+					standardizedProperty,
+					sheet
 				);
 
 				const spreadAdjustments = properties.map(property => ({

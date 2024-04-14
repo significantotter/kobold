@@ -61,25 +61,16 @@ export class ModifierCommand implements Command {
 				],
 			},
 			{
-				name: L.en.commands.modifier.createSheetModifier.name(),
-				description: L.en.commands.modifier.createSheetModifier.description(),
+				name: L.en.commands.modifier.createModifier.name(),
+				description: L.en.commands.modifier.createModifier.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					ModifierOptions.MODIFIER_NAME_OPTION,
 					ModifierOptions.MODIFIER_SHEET_VALUES_OPTION,
+					ModifierOptions.MODIFIER_ROLL_ADJUSTMENT,
+					ModifierOptions.MODIFIER_ROLL_TARGET_TAGS_OPTION,
 					ModifierOptions.MODIFIER_TYPE_OPTION,
-					ModifierOptions.MODIFIER_DESCRIPTION_OPTION,
-				],
-			},
-			{
-				name: L.en.commands.modifier.createRollModifier.name(),
-				description: L.en.commands.modifier.createRollModifier.description(),
-				type: ApplicationCommandOptionType.Subcommand,
-				options: [
-					ModifierOptions.MODIFIER_NAME_OPTION,
-					ModifierOptions.MODIFIER_VALUE_OPTION,
-					ModifierOptions.MODIFIER_TARGET_TAGS_OPTION,
-					ModifierOptions.MODIFIER_TYPE_OPTION,
+					ModifierOptions.MODIFIER_SEVERITY_VALUE,
 					ModifierOptions.MODIFIER_DESCRIPTION_OPTION,
 				],
 			},
@@ -96,8 +87,24 @@ export class ModifierCommand implements Command {
 				],
 			},
 			{
-				name: L.en.commands.modifier.update.name(),
-				description: L.en.commands.modifier.update.description(),
+				name: L.en.commands.modifier.severity.name(),
+				description: L.en.commands.modifier.severity.description(),
+				type: ApplicationCommandOptionType.Subcommand,
+				options: [
+					{
+						...ModifierOptions.MODIFIER_NAME_OPTION,
+						autocomplete: true,
+						choices: undefined,
+					},
+					{
+						...ModifierOptions.MODIFIER_SEVERITY_VALUE,
+						required: true,
+					},
+				],
+			},
+			{
+				name: L.en.commands.modifier.set.name(),
+				description: L.en.commands.modifier.set.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					{

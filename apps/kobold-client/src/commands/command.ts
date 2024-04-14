@@ -11,6 +11,18 @@ import { Kobold } from 'kobold-db';
 import { CompendiumModel } from 'pf2etools-data';
 import { TranslationFunctions } from './../i18n/i18n-types.js';
 
+interface SubCommandConstructor {
+	new (): Command;
+}
+
+interface CommandConstructor {
+	new (commands: Command[]): Command;
+}
+
+export interface CommandExport {
+	command: CommandConstructor;
+	subCommands: SubCommandConstructor[];
+}
 export interface InjectedCommandData {}
 
 export interface Command {

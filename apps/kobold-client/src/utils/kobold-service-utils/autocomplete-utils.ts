@@ -191,7 +191,11 @@ export class AutocompleteUtils {
 		}));
 	}
 
-	public async getInitTargetOptions(intr: AutocompleteInteraction<CacheType>, matchText: string) {
+	public async getInitTargetOptions(
+		intr: AutocompleteInteraction<CacheType>,
+		matchText: string,
+		includeNone: boolean = true
+	) {
 		const currentInit = await this.koboldUtils.initiativeUtils.getInitiativeForChannelOrNull(
 			intr.channel
 		);
@@ -202,13 +206,14 @@ export class AutocompleteUtils {
 		);
 
 		//return the matched actors
-		return [
-			{ name: '(None)', value: '__NONE__' },
-			...actorOptions.map(actor => ({
-				name: actor.name,
-				value: actor.name,
-			})),
-		];
+		const results = actorOptions.map(actor => ({
+			name: actor.name,
+			value: actor.name,
+		}));
+
+		if (includeNone) results.unshift({ name: '(None)', value: '__NONE__' });
+
+		return results;
 	}
 
 	public async getMatchingRollsForInitiativeSheet(
@@ -256,12 +261,54 @@ export class AutocompleteUtils {
 		];
 
 		//return the matched actors, removing any duplicates
-		const result = _.uniqBy(allOptions, 'name').sort((a, b) => a.name.localeCompare(b.name));
+		const result = _.uniqBy(allOptions, 'name');
 
 		if (matchText.length)
 			return result.filter(option =>
 				option.name.toLowerCase().includes(matchText.toLowerCase())
 			);
 		return result;
+	}
+
+	public async getAllModifiersForAllCharacters(
+		intr: AutocompleteInteraction<CacheType>,
+		matchText: string
+	) {
+		const characters = await this.kobold.character.readMany({ userId: intr.user.id });
+		const modifiersWithCharacterName: string[] = [];
+		for (const character of characters) {
+			const modifiers = character.sheetRecord.modifiers;
+			for (const modifier of modifiers) {
+				modifiersWithCharacterName.push(`${character.name} - ${modifier.name}`);
+			}
+		}
+		return modifiersWithCharacterName
+			.filter(modifier => modifier.toLowerCase().includes(matchText.toLowerCase()))
+			.map(modifier => ({
+				name: modifier,
+				value: modifier,
+			}));
+	}
+
+	public async getConditionsOnTarget(
+		intr: AutocompleteInteraction<CacheType>,
+		targetCharacterName: string,
+		conditionName: string
+	) {
+		const { targetSheetRecord } =
+			await this.koboldUtils.gameUtils.getCharacterOrInitActorTarget(
+				intr,
+				targetCharacterName
+			);
+		//find a save on the character matching the autocomplete string
+		const matchedConditions = FinderHelpers.matchAllConditions(
+			targetSheetRecord,
+			conditionName
+		).map(condition => ({
+			name: condition.name,
+			value: condition.name,
+		}));
+		//return the matched saves
+		return matchedConditions;
 	}
 }

@@ -4,9 +4,9 @@ import {
 	overwriteOnConflict,
 	renameOnConflict,
 	replaceAll,
-} from '../../../utils/import-utils.js';
+} from './import-utils.js';
 
-describe('Modifier Helpers', () => {
+describe('Import Utils', () => {
 	describe('replaceAll', () => {
 		test('an empty array is replaced with values', () => {
 			const existing: NamedThing[] = [];

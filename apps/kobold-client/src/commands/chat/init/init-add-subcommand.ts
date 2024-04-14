@@ -131,10 +131,12 @@ export class InitAddSubCommand implements Command {
 
 		if (customStatsString) {
 			sheet = applyStatOverrides(sheet, customStatsString);
-			const creature = new Creature(sheet, {
+			const creature = new Creature({
+				sheet,
 				actions: [],
 				rollMacros: [],
 				modifiers: [],
+				conditions: [],
 			});
 			creature.recover();
 			sheet = creature._sheet;

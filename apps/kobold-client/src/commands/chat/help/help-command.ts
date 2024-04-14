@@ -5,13 +5,13 @@ import {
 	PermissionsString,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
-import { KoboldEmbed } from '../../utils/kobold-embed-utils.js';
+import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 
 import _ from 'lodash';
-import L from '../../i18n/i18n-node.js';
-import { TranslationFunctions } from '../../i18n/i18n-types.js';
-import { InjectedServices } from '../command.js';
-import { Command, CommandDeferType } from '../index.js';
+import L from '../../../i18n/i18n-node.js';
+import { TranslationFunctions } from '../../../i18n/i18n-types.js';
+import { InjectedServices } from '../../command.js';
+import { Command, CommandDeferType } from '../../index.js';
 
 function createCommandOperationHelpField(
 	command: string,
@@ -84,6 +84,12 @@ export class HelpCommand implements Command {
 			{
 				name: L.en.commands.help.modifier.name(),
 				description: L.en.commands.help.modifier.description(),
+				type: ApplicationCommandOptionType.Subcommand,
+				options: [],
+			},
+			{
+				name: L.en.commands.help.condition.name(),
+				description: L.en.commands.help.condition.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [],
 			},
@@ -289,14 +295,22 @@ export class HelpCommand implements Command {
 							`\`/${LL.commands.init.name()} ${LL.commands.init.end.name()}\` ${LL.commands.init.end.description()}\n`,
 					},
 					{
+						name: LL.commands.condition.name(),
+						value:
+							`\`/${LL.commands.condition.name()} ${LL.commands.condition.applyCustom.name()}\` ${LL.commands.condition.applyCustom.description()}\n` +
+							`\`/${LL.commands.condition.name()} ${LL.commands.condition.applyModifier.name()}\` ${LL.commands.condition.applyModifier.description()}\n` +
+							`\`/${LL.commands.condition.name()} ${LL.commands.condition.list.name()}\` ${LL.commands.condition.list.description()}\n` +
+							`\`/${LL.commands.condition.name()} ${LL.commands.condition.remove.name()}\` ${LL.commands.condition.remove.description()}\n` +
+							`\`/${LL.commands.condition.name()} ${LL.commands.condition.severity.name()}\` ${LL.commands.condition.severity.description()}\n`,
+					},
+					{
 						name: LL.commands.modifier.name(),
 						value:
-							`\`/${LL.commands.modifier.name()} ${LL.commands.modifier.createSheetModifier.name()}\` ${LL.commands.modifier.createSheetModifier.description()}\n` +
-							`\`/${LL.commands.modifier.name()} ${LL.commands.modifier.createRollModifier.name()}\` ${LL.commands.modifier.createRollModifier.description()}\n` +
+							`\`/${LL.commands.modifier.name()} ${LL.commands.modifier.createModifier.name()}\` ${LL.commands.modifier.createModifier.description()}\n` +
 							`\`/${LL.commands.modifier.name()} ${LL.commands.modifier.toggle.name()}\` ${LL.commands.modifier.toggle.description()}\n` +
 							`\`/${LL.commands.modifier.name()} ${LL.commands.modifier.list.name()}\` ${LL.commands.modifier.list.description()}\n` +
 							`\`/${LL.commands.modifier.name()} ${LL.commands.modifier.detail.name()}\` ${LL.commands.modifier.detail.description()}\n` +
-							`\`/${LL.commands.modifier.name()} ${LL.commands.modifier.update.name()}\` ${LL.commands.modifier.update.description()}\n` +
+							`\`/${LL.commands.modifier.name()} ${LL.commands.modifier.set.name()}\` ${LL.commands.modifier.set.description()}\n` +
 							`\`/${LL.commands.modifier.name()} ${LL.commands.modifier.remove.name()}\` ${LL.commands.modifier.remove.description()}\n` +
 							`\`/${LL.commands.modifier.name()} ${LL.commands.modifier.import.name()}\` ${LL.commands.modifier.import.description()}\n` +
 							`\`/${LL.commands.modifier.name()} ${LL.commands.modifier.export.name()}\` ${LL.commands.modifier.export.description()}\n`,
@@ -324,7 +338,7 @@ export class HelpCommand implements Command {
 						value:
 							`\`/${LL.commands.action.name()} ${LL.commands.action.create.name()}\` ${LL.commands.action.create.description()}\n` +
 							`\`/${LL.commands.action.name()} ${LL.commands.action.detail.name()}\` ${LL.commands.action.detail.description()}\n` +
-							`\`/${LL.commands.action.name()} ${LL.commands.action.edit.name()}\` ${LL.commands.action.edit.description()}\n` +
+							`\`/${LL.commands.action.name()} ${LL.commands.action.set.name()}\` ${LL.commands.action.set.description()}\n` +
 							`\`/${LL.commands.action.name()} ${LL.commands.action.export.name()}\` ${LL.commands.action.export.description()}\n` +
 							`\`/${LL.commands.action.name()} ${LL.commands.action.import.name()}\` ${LL.commands.action.import.description()}\n` +
 							`\`/${LL.commands.action.name()} ${LL.commands.action.list.name()}\` ${LL.commands.action.list.description()}\n` +
@@ -343,14 +357,14 @@ export class HelpCommand implements Command {
 									addTextRollInput: '{{}}',
 								}
 							)}\n` +
-							`\`/${LL.commands.actionStage.name()} ${LL.commands.actionStage.edit.name()}\` ${LL.commands.actionStage.edit.description()}\n` +
+							`\`/${LL.commands.actionStage.name()} ${LL.commands.actionStage.set.name()}\` ${LL.commands.actionStage.set.description()}\n` +
 							`\`/${LL.commands.actionStage.name()} ${LL.commands.actionStage.remove.name()}\` ${LL.commands.actionStage.remove.description()}\n`,
 					},
 					{
 						name: LL.commands.rollMacro.name(),
 						value:
 							`\`/${LL.commands.rollMacro.name()} ${LL.commands.rollMacro.create.name()}\` ${LL.commands.rollMacro.create.description()}\n` +
-							`\`/${LL.commands.rollMacro.name()} ${LL.commands.rollMacro.update.name()}\` ${LL.commands.rollMacro.update.description()}\n` +
+							`\`/${LL.commands.rollMacro.name()} ${LL.commands.rollMacro.set.name()}\` ${LL.commands.rollMacro.set.description()}\n` +
 							`\`/${LL.commands.rollMacro.name()} ${LL.commands.rollMacro.list.name()}\` ${LL.commands.rollMacro.list.description()}\n` +
 							`\`/${LL.commands.rollMacro.name()} ${LL.commands.rollMacro.remove.name()}\` ${LL.commands.rollMacro.remove.description()}\n`,
 					},
@@ -431,17 +445,32 @@ export class HelpCommand implements Command {
 				);
 				break;
 			}
+			case L.en.commands.help.condition.name(): {
+				embed.setTitle(LL.commands.help.condition.interactions.embed.title());
+				embed.setDescription(LL.commands.help.condition.interactions.embed.description());
+				embed.addFields(
+					[
+						LL.commands.condition.applyCustom.name(),
+						LL.commands.condition.applyModifier.name(),
+						LL.commands.condition.list.name(),
+						LL.commands.condition.remove.name(),
+						LL.commands.condition.severity.name(),
+					].map(command =>
+						createCommandOperationHelpField(LL.commands.condition.name(), command, LL)
+					)
+				);
+				break;
+			}
 			case L.en.commands.help.modifier.name(): {
 				embed.setTitle(LL.commands.help.modifier.interactions.embed.title());
 				embed.setDescription(LL.commands.help.modifier.interactions.embed.description());
 				embed.addFields(
 					[
-						LL.commands.modifier.createSheetModifier.name(),
-						LL.commands.modifier.createRollModifier.name(),
+						LL.commands.modifier.createModifier.name(),
 						LL.commands.modifier.toggle.name(),
 						LL.commands.modifier.list.name(),
 						LL.commands.modifier.detail.name(),
-						LL.commands.modifier.update.name(),
+						LL.commands.modifier.set.name(),
 						LL.commands.modifier.remove.name(),
 						LL.commands.modifier.import.name(),
 						LL.commands.modifier.export.name(),
@@ -490,7 +519,7 @@ export class HelpCommand implements Command {
 						LL.commands.action.create.name(),
 						LL.commands.action.detail.name(),
 						LL.commands.action.list.name(),
-						LL.commands.action.edit.name(),
+						LL.commands.action.set.name(),
 						LL.commands.action.remove.name(),
 						LL.commands.action.export.name(),
 						LL.commands.action.import.name(),
@@ -510,7 +539,7 @@ export class HelpCommand implements Command {
 					LL.commands.actionStage.addSave.name(),
 					LL.commands.actionStage.addBasicDamage.name(),
 					LL.commands.actionStage.addAdvancedDamage.name(),
-					LL.commands.actionStage.edit.name(),
+					LL.commands.actionStage.set.name(),
 					LL.commands.actionStage.remove.name(),
 				].map(command =>
 					createCommandOperationHelpField(LL.commands.actionStage.name(), command, LL)
@@ -532,7 +561,7 @@ export class HelpCommand implements Command {
 					[
 						LL.commands.rollMacro.list.name(),
 						LL.commands.rollMacro.create.name(),
-						LL.commands.rollMacro.update.name(),
+						LL.commands.rollMacro.set.name(),
 						LL.commands.rollMacro.remove.name(),
 					].map(command =>
 						createCommandOperationHelpField(LL.commands.rollMacro.name(), command, LL)

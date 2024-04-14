@@ -62,25 +62,36 @@ export class Creature {
 	public actions: Action[];
 	public rollMacros: RollMacro[];
 	public modifiers: Modifier[];
+	public conditions: Modifier[];
+	public _sheet: Sheet;
 	constructor(
-		public _sheet: Sheet,
 		{
-			actions,
-			rollMacros,
-			modifiers,
+			sheet,
+			actions = [],
+			rollMacros = [],
+			modifiers = [],
+			conditions = [],
 		}: {
+			sheet: Sheet;
 			actions: Action[];
 			rollMacros: RollMacro[];
 			modifiers: Modifier[];
+			conditions: Modifier[];
 		},
-		protected _name?: string
+		public _name?: string
 	) {
 		const sheetDefaults: Sheet = SheetProperties.defaultSheet;
 		this.actions = actions;
 		this.rollMacros = rollMacros;
 		this.modifiers = modifiers;
+		this.conditions = conditions;
+		this._sheet = sheet;
+		if (!this._name) this._name = sheet.staticInfo.name;
 		this._sheet = _.defaultsDeep(this._sheet, sheetDefaults);
-		this._adjustedSheet = SheetUtils.adjustSheetWithModifiers(this._sheet, this.modifiers);
+		this._adjustedSheet = SheetUtils.adjustSheetWithModifiers(this._sheet, [
+			...this.modifiers,
+			...this.conditions,
+		]);
 	}
 
 	public get sheet(): Sheet {
@@ -949,11 +960,7 @@ export class Creature {
 
 	public static fromSheetRecord(sheetRecord: SheetRecord): Creature {
 		let sheet = { ...sheetRecord.sheet };
-		return new Creature(sheetRecord.sheet, {
-			actions: sheetRecord.actions ?? [],
-			modifiers: sheetRecord.modifiers ?? [],
-			rollMacros: sheetRecord.rollMacros ?? [],
-		});
+		return new Creature(sheetRecord);
 	}
 
 	public static fromWandererersGuide(
@@ -963,10 +970,12 @@ export class Creature {
 	): Creature {
 		let sheet = convertWanderersGuideCharToSheet(calculatedStats, characterData);
 		sheet = Creature.preserveSheetTrackerValues(sheet, updateFrom?.sheet);
-		return new Creature(sheet, {
+		return new Creature({
+			sheet,
 			actions: updateFrom?.actions ?? [],
 			modifiers: updateFrom?.modifiers ?? [],
 			rollMacros: updateFrom?.rollMacros ?? [],
+			conditions: updateFrom?.conditions ?? [],
 		});
 	}
 
@@ -982,10 +991,12 @@ export class Creature {
 			sheet.info.imageURL = updateFrom.sheet.info.imageURL ?? sheet.info.imageURL;
 		}
 		sheet = Creature.preserveSheetTrackerValues(sheet, updateFrom?.sheet);
-		return new Creature(sheet, {
+		return new Creature({
+			sheet,
 			actions: updateFrom?.actions ?? [],
 			modifiers: updateFrom?.modifiers ?? [],
 			rollMacros: updateFrom?.rollMacros ?? [],
+			conditions: updateFrom?.conditions ?? [],
 		});
 	}
 
@@ -998,7 +1009,7 @@ export class Creature {
 	 */
 	public getModifiersFromTags(tags: string[], extraAttributes?: Attribute[]): Modifier[] {
 		const { untyped, bonuses, penalties } = ModifierUtils.parseBonusesForTagsFromModifiers(
-			this.modifiers.filter(modifier => modifier.modifierType === 'roll'),
+			this.modifiers.filter(modifier => modifier.rollTargetTags),
 			[...(this.attributes as Attribute[]), ...(extraAttributes || [])],
 			tags,
 			this

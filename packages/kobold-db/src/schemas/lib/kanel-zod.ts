@@ -87,6 +87,7 @@ const zUserSettingsWithEnumsMutator = zUserSettingsMutator.merge(
 const zExtendedSheetRecord = zSheetRecord.extend({
 	sheet: zSheet,
 	modifiers: z.array(zModifier),
+	conditions: z.array(zModifier),
 	actions: z.array(zAction),
 	rollMacros: z.array(zRollMacro),
 	trackerMode: z
@@ -96,6 +97,7 @@ const zExtendedSheetRecord = zSheetRecord.extend({
 const zExtendedSheetRecordInitializer = zSheetRecordInitializer.extend({
 	sheet: zSheet,
 	modifiers: z.array(zModifier),
+	conditions: z.array(zModifier),
 	actions: z.array(zAction),
 	rollMacros: z.array(zRollMacro),
 	trackerMode: z
@@ -105,6 +107,7 @@ const zExtendedSheetRecordInitializer = zSheetRecordInitializer.extend({
 const zExtendedSheetRecordMutator = zSheetRecordMutator.extend({
 	sheet: zSheet.optional(),
 	modifiers: z.array(zModifier).optional(),
+	conditions: z.array(zModifier).optional(),
 	actions: z.array(zAction).optional(),
 	rollMacros: z.array(zRollMacro).optional(),
 	trackerMode: z

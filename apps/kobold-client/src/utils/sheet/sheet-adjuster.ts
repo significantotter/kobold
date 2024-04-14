@@ -101,6 +101,10 @@ export class SheetAdjuster {
 			case AdjustablePropertyEnum.attack:
 				this.attackAdjuster.adjust(adjustment);
 				break;
+			case AdjustablePropertyEnum.statGroup:
+				throw new KoboldError(
+					'Stat groups should have been spread at the bucketing stage.'
+				);
 			default:
 				throw new KoboldError(
 					`Property ${adjustment.property} is not a valid sheet property`
@@ -122,7 +126,10 @@ export class SheetAdjuster {
 			return AdjustablePropertyEnum.baseCounter;
 		else if (SheetStatProperties.aliases[lowerStandardizedProperty])
 			return AdjustablePropertyEnum.stat;
-
+		// stat groups
+		else if (SheetProperties.isPropertyGroup(lowerStandardizedProperty)) {
+			return AdjustablePropertyEnum.statGroup;
+		}
 		// regexes
 		if (property.match(SheetWeaknessResistanceProperties.propertyNameRegex))
 			return AdjustablePropertyEnum.weaknessResistance;
@@ -175,6 +182,22 @@ export class SheetAdjuster {
 				const parsedStat = SheetStatAdjuster.deserializeAdjustment(sheetAdjustment);
 				if (!parsedStat || SheetStatAdjuster.discardAdjustment(sheetAdjustment)) {
 					return false;
+				}
+				break;
+			case AdjustablePropertyEnum.statGroup:
+				const spreadStatGroup = SheetProperties.propertyGroupToSheetProperties(
+					sheetAdjustment.property
+				);
+				for (const property of spreadStatGroup) {
+					const spreadAdjustment = {
+						...sheetAdjustment,
+						property,
+						propertyType: AdjustablePropertyEnum.stat,
+					};
+					const parsedStat = SheetStatAdjuster.deserializeAdjustment(spreadAdjustment);
+					if (!parsedStat || SheetStatAdjuster.discardAdjustment(spreadAdjustment)) {
+						return false;
+					}
 				}
 				break;
 			case AdjustablePropertyEnum.weaknessResistance:
@@ -864,7 +887,7 @@ export class SheetWeaknessResistanceAdjuster
 
 // Type check object to make sure that all adjusters are accounted for
 const allBuckets: {
-	[k in Exclude<AdjustablePropertyEnum, ''>]: Object;
+	[k in Exclude<AdjustablePropertyEnum, '' | 'statGroup'>]: Object;
 } = {
 	info: SheetInfoAdjuster,
 	infoList: SheetInfoListAdjuster,

@@ -24,13 +24,14 @@ import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js
 import { SheetUtils } from '../../../utils/sheet/sheet-utils.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { ModifierOptions } from './modifier-command-options.js';
+import _ from 'lodash';
 
-export class ModifierUpdateSubCommand implements Command {
-	public names = [L.en.commands.modifier.update.name()];
+export class ModifierSetSubCommand implements Command {
+	public names = [L.en.commands.modifier.set.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.modifier.update.name(),
-		description: L.en.commands.modifier.update.description(),
+		name: L.en.commands.modifier.set.name(),
+		description: L.en.commands.modifier.set.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -101,12 +102,12 @@ export class ModifierUpdateSubCommand implements Command {
 		}
 
 		// validate the updates
-		if (fieldToChange === 'name') {
+		if (fieldToChange === L.en.commandOptions.modifierUpdateOption.choices.name.value()) {
 			//a name can't be an empty string
 			if (newFieldValue === '') {
 				await InteractionUtils.send(
 					intr,
-					LL.commands.modifier.update.interactions.emptyNameError()
+					LL.commands.modifier.set.interactions.emptyNameError()
 				);
 				return;
 				//a name can't already be a modifier
@@ -115,37 +116,44 @@ export class ModifierUpdateSubCommand implements Command {
 			) {
 				await InteractionUtils.send(
 					intr,
-					LL.commands.modifier.update.interactions.nameExistsError()
+					LL.commands.modifier.set.interactions.nameExistsError()
 				);
 				return;
 			} else {
 				targetModifier.name = newFieldValue;
 			}
-		} else if (fieldToChange === 'value') {
-			if (targetModifier.modifierType === 'sheet') {
-				throw new KoboldError(
-					'Yip! Sheet modifiers don\'t have a "value". You probably meant to update the "sheet-values" field.'
-				);
-			}
+		} else if (
+			fieldToChange ===
+			L.en.commandOptions.modifierUpdateOption.choices.rollAdjustment.value()
+		) {
 			try {
 				// we must be able to evaluate the modifier as a roll for this character
 				DiceUtils.parseAndEvaluateDiceExpression({
 					rollExpression: newFieldValue,
+					extraAttributes: [
+						{
+							name: 'severity',
+							value: targetModifier.severity ?? 0,
+							type: targetModifier.type,
+							tags: [],
+							aliases: [],
+						},
+					],
 					creature: Creature.fromSheetRecord(activeCharacter.sheetRecord),
 				});
-				targetModifier.value = newFieldValue;
+				targetModifier.rollAdjustment = newFieldValue;
 			} catch (err) {
 				await InteractionUtils.send(
 					intr,
-					LL.commands.modifier.createRollModifier.interactions.doesntEvaluateError()
+					LL.commands.modifier.createModifier.interactions.doesntEvaluateError()
 				);
 				return;
 			}
-		} else if (fieldToChange === 'target-tags') {
-			if (targetModifier.modifierType === 'sheet') {
-				throw new KoboldError('Yip! Sheet modifiers don\'t have "target tags".');
-			}
-			fieldToChange = 'targetTags';
+		} else if (
+			fieldToChange ===
+			L.en.commandOptions.modifierUpdateOption.choices.rollTargetTags.value()
+		) {
+			fieldToChange = 'rollTargetTags';
 			// parse the target tags
 			try {
 				compileExpression(newFieldValue);
@@ -153,11 +161,11 @@ export class ModifierUpdateSubCommand implements Command {
 				// the tags are in an invalid format
 				await InteractionUtils.send(
 					intr,
-					LL.commands.modifier.createRollModifier.interactions.invalidTags()
+					LL.commands.modifier.createModifier.interactions.invalidTags()
 				);
 				return;
 			}
-			targetModifier.targetTags = newFieldValue;
+			targetModifier.rollTargetTags = newFieldValue;
 		} else if (fieldToChange === 'type') {
 			const newType = newFieldValue.trim().toLowerCase();
 			if (!newType) targetModifier.type = SheetAdjustmentTypeEnum.untyped;
@@ -173,23 +181,22 @@ export class ModifierUpdateSubCommand implements Command {
 		} else if (fieldToChange === 'description') {
 			if (!newFieldValue) targetModifier.description = null;
 			else targetModifier.description = newFieldValue;
+		} else if (fieldToChange === 'severity') {
+			if (newFieldValue == null) targetModifier.severity = null;
+			if (!/[0-9]+(\.[0-9]*)?/.test(newFieldValue.trim()))
+				throw new KoboldError('Severity must be a number');
+			else targetModifier.severity = Number(newFieldValue);
 		} else if (fieldToChange === 'sheet-values') {
-			if (targetModifier.modifierType === 'roll') {
-				throw new KoboldError(
-					'Yip! Roll modifiers don\'t have "sheet values". Maybe you meant to update "value"?'
-				);
-			}
 			targetModifier.sheetAdjustments = SheetUtils.stringToSheetAdjustments(newFieldValue);
 			// attempt to use the adjustments to make sure they're valid
-			SheetUtils.adjustSheetWithSheetAdjustments(
-				activeCharacter.sheetRecord.sheet,
-				targetModifier.sheetAdjustments
-			);
+			SheetUtils.adjustSheetWithModifiers(activeCharacter.sheetRecord.sheet, [
+				targetModifier,
+			]);
 		} else {
 			// if a field wasn't provided, or the field isn't present in our options, send an error
 			await InteractionUtils.send(
 				intr,
-				LL.commands.modifier.update.interactions.invalidOptionError()
+				LL.commands.modifier.set.interactions.invalidOptionError()
 			);
 			return;
 		}
@@ -205,7 +212,7 @@ export class ModifierUpdateSubCommand implements Command {
 
 		const updateEmbed = new KoboldEmbed();
 		updateEmbed.setTitle(
-			LL.commands.modifier.update.interactions.successEmbed.title({
+			LL.commands.modifier.set.interactions.successEmbed.title({
 				characterName: activeCharacter.name,
 				modifierName: nameBeforeUpdate,
 				fieldToChange,

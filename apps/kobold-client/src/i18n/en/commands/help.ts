@@ -178,6 +178,24 @@ export default {
 			},
 		},
 	},
+	condition: {
+		name: 'condition',
+		value: 'condition',
+		description: 'Help for the /condition command',
+		interactions: {
+			embed: {
+				title: '/condition Commands',
+				thumbnail: refs.links.thumbnail,
+				description:
+					'Conditions are temporary modifiers that you apply to targets and later ' +
+					'Remove. They operate very similarly to modifiers, and you can use ' +
+					'modifiers from your own characters as templates to apply conditions ' +
+					'(using the `/condition apply-modifier` command). You can also make them' +
+					'from scratch using the `/condition apply-custom` command. ' +
+					'Just like modifiers, conditions have severity values.',
+			},
+		},
+	},
 	modifier: {
 		name: 'modifier',
 		value: 'modifier',
@@ -330,7 +348,7 @@ export default {
 					'So, she creates it with the following command:\n\n' +
 					'`/action create name:Produce Flame action-type:spell actions:two auto-heighten:True tags:fire,cantrip,bloodline`\n\n' +
 					'Next, she wants to remember the details of the spell without looking it up. She adds a text field to always display ' +
-					'the spell\'s information. Every stage needs a name so it can be edited/removed later, so she calls it "Details"\n\n' +
+					'the spell\'s information. Every stage needs a name so it can be updated/removed later, so she calls it "Details"\n\n' +
 					'`/action-stage add-text action:Produce Flame roll-name:Details default-text:Range 30 feet; Targets 1 creature`\n\n' +
 					'Now she needs to have the attack roll to hit! Lilac uses her primal spell attack roll to check for a hit, but that value \n' +
 					"isn't stored in her attributes by kobold. So first, she'll add a simple roll macro that she can use for her primal attacks " +
@@ -355,7 +373,7 @@ export default {
 					'for dangerous sorcery and her blood magic to the damage!). So, she creates it with the following command:\n\n' +
 					'`/action create name:Fireball action-type:spell actions:two base-level:3 tags:fire,instantaneous,bloodline`\n\n' +
 					'Next, she wants to remember the details of the spell without looking it up. She adds a text field to always display ' +
-					'the spell\'s information. Every stage needs a name so it can be edited/removed later, so she calls it "Details"\n\n' +
+					'the spell\'s information. Every stage needs a name so it can be updated/removed later, so she calls it "Details"\n\n' +
 					'`/action-stage add-text action:Fireball roll-name:Details default-text:Range 500 feet; Area 20-foot burst`\n\n' +
 					'The effects of Fireball depend on whether the target succeeds or fails a will save against her Primal Spell DC. ' +
 					'So Lilac adds a save stage to the action.\n\n' +
@@ -373,7 +391,7 @@ export default {
 					'So, she creates it with the following command:\n\n' +
 					'`/action create name:Phantom Pain action-type:spell actions:two base-level:1 tags:mental, nonlethal`\n\n' +
 					'Next, she wants to remember the details of the spell without looking it up. She adds a text field to always display ' +
-					'the spell\'s information. Every stage needs a name so it can be edited/removed later, so she calls it "Details"\n\n' +
+					'the spell\'s information. Every stage needs a name so it can be updated/removed later, so she calls it "Details"\n\n' +
 					'`/action-stage add-text action:Phantom Pain roll-name:Details default-text:Range 30 feet; Targets 1 creature`\n\n' +
 					'The effects of Phantom Pain depend on whether the target succeeds or fails a will save against her occult spell DC. ' +
 					'So Portia adds a save stage to the action.\n\n' +
@@ -403,7 +421,7 @@ export default {
 					"She selects AC as the attack's target DC.\n\n" +
 					'`/action-stage add-attack action: Paired Shots roll-name: First Strike To Hit dice-roll: d20 + [slidePistolToHit] target-ac-save-or-skill: AC`\n\n' +
 					'She plans to add stronger striking runes to her weapons in the future, so before creating her damage roll, ' +
-					'she sets up a macro for her pistols. She can easily update her damage in the future by editing the macros.' +
+					'she sets up a macro for her pistols. She can easily update her damage in the future by updating the macros.' +
 					' damage and critical damage.\n\n' +
 					'`/roll-macro create name:slidePistolDamage value:2d6`\n\n' +
 					'`/roll-macro create name:slidePistolCritDamage value:2d10`\n\n' +
@@ -446,7 +464,7 @@ export default {
 				title: '/action Commands',
 				thumbnail: refs.links.thumbnail,
 				description:
-					"The action commands are used to create/edit/remove custom actions, allowing a player to set up prebuilt rolls using the character's stats.\n\n" +
+					"The action commands are used to create/update/remove custom actions, allowing a player to set up prebuilt rolls using the character's stats.\n\n" +
 					'Create a custom action with \n`/action create type:[spell, attack, other] name:[name of the new action]`\n\n' +
 					'Then add rolls to the action using the commands detailed in `/help action-stage`\n\n' +
 					'Use the help command `/help action-creation-walkthrough` for examples of how to make custom actions from start to finish!\n\n',

@@ -16,10 +16,11 @@ import {
 	SheetStatAdjustment,
 	SheetWeaknessResistanceAdjuster,
 } from './sheet-adjuster.js';
+import { SheetProperties } from './sheet-properties.js';
 
 export class SheetAdjustmentBucketer {
 	protected buckets: Record<
-		Exclude<SheetAdjustment['propertyType'], ''>,
+		Exclude<SheetAdjustment['propertyType'], '' | 'statGroup'>,
 		SheetPropertyGroupBucket<any>
 	>;
 	constructor(protected sheet: Sheet) {
@@ -36,8 +37,31 @@ export class SheetAdjustmentBucketer {
 	}
 
 	addToBucket(adjustment: SheetAdjustment) {
+		let adjustments = [adjustment];
 		if (adjustment.propertyType == '') return;
-		return this.buckets[adjustment.propertyType].sortToBucket(adjustment);
+		else if (adjustment.propertyType === AdjustablePropertyEnum.statGroup) {
+			// spread the adjustment
+
+			// split the adjustment into many property adjustments if it's a group
+			const properties = SheetProperties.propertyGroupToSheetProperties(
+				adjustment.property,
+				this.sheet
+			);
+
+			const spreadAdjustments = properties.map(property => ({
+				...adjustment,
+				propertyType: AdjustablePropertyEnum.stat,
+				property,
+			}));
+
+			adjustments = spreadAdjustments;
+			// add each adjustment to the bucketer
+			for (const spreadAdjustment of spreadAdjustments) {
+				this.addToBucket(spreadAdjustment);
+			}
+		} else {
+			this.buckets[adjustment.propertyType].sortToBucket(adjustment);
+		}
 	}
 
 	reduceBuckets(): SheetAdjustment[] {
@@ -406,7 +430,7 @@ export class AttackBucket extends SheetPropertyGroupBucket<SheetAttackAdjustment
 
 // Type check object to make sure that all buckets are accounted for
 const allBuckets: {
-	[k in Exclude<AdjustablePropertyEnum, ''>]: typeof SheetPropertyGroupBucket<any>;
+	[k in Exclude<AdjustablePropertyEnum, '' | 'statGroup'>]: typeof SheetPropertyGroupBucket<any>;
 } = {
 	info: SheetInfoBucket,
 	infoList: SheetInfoListsBucket,

@@ -2,7 +2,6 @@ import {
 	AbilityEnum,
 	AdjustablePropertyEnum,
 	Modifier,
-	ModifierTypeEnum,
 	Sheet,
 	SheetAdjustment,
 	SheetAdjustmentOperationEnum,
@@ -10,7 +9,7 @@ import {
 	SheetStatKeys,
 } from 'kobold-db';
 import { KoboldError } from '../KoboldError.js';
-import { SheetProperties } from './sheet-properties.js';
+import { SheetProperties, SheetStatProperties } from './sheet-properties.js';
 import { SheetUtils } from './sheet-utils.js';
 
 function sheetWithTestProperties(): Sheet {
@@ -44,8 +43,8 @@ describe('SheetUtils', () => {
 				{
 					name: 'foo',
 					description: '',
-					modifierType: ModifierTypeEnum.sheet,
 					isActive: true,
+					severity: 2,
 					type: SheetAdjustmentTypeEnum.untyped,
 					sheetAdjustments: [
 						{
@@ -53,22 +52,24 @@ describe('SheetUtils', () => {
 							propertyType: AdjustablePropertyEnum.intProperty,
 							property: AbilityEnum.strength,
 							operation: SheetAdjustmentOperationEnum['+'],
-							value: '2',
+							value: ' [severity ]',
 						},
 						{
 							type: SheetAdjustmentTypeEnum.untyped,
 							propertyType: AdjustablePropertyEnum.stat,
 							property: SheetStatKeys.fortitude,
 							operation: SheetAdjustmentOperationEnum['+'],
-							value: '3',
+							value: ' 3',
 						},
 					],
+					rollAdjustment: null,
+					rollTargetTags: null,
 				},
 				{
 					name: 'foo',
 					description: '',
-					modifierType: ModifierTypeEnum.sheet,
 					isActive: false,
+					severity: null,
 					type: SheetAdjustmentTypeEnum.untyped,
 					sheetAdjustments: [
 						{
@@ -79,15 +80,18 @@ describe('SheetUtils', () => {
 							value: '3',
 						},
 					],
+					rollAdjustment: null,
+					rollTargetTags: null,
 				},
 				{
 					name: 'bar',
 					description: '',
-					modifierType: ModifierTypeEnum.roll,
 					isActive: true,
+					severity: null,
 					type: SheetAdjustmentTypeEnum.status,
-					value: '1d4',
-					targetTags: 'attack',
+					rollAdjustment: '1d4',
+					rollTargetTags: 'attack',
+					sheetAdjustments: [],
 				},
 			];
 			const adjustedSheet = SheetUtils.adjustSheetWithModifiers(sheet, modifiers);
@@ -102,8 +106,8 @@ describe('SheetUtils', () => {
 				{
 					name: 'foo',
 					description: '',
-					modifierType: ModifierTypeEnum.sheet,
 					isActive: false,
+					severity: null,
 					type: SheetAdjustmentTypeEnum.untyped,
 					sheetAdjustments: [
 						{
@@ -114,15 +118,18 @@ describe('SheetUtils', () => {
 							value: '1',
 						},
 					],
+					rollAdjustment: null,
+					rollTargetTags: null,
 				},
 				{
 					name: 'bar',
 					description: '',
-					modifierType: ModifierTypeEnum.roll,
 					isActive: true,
+					severity: null,
 					type: SheetAdjustmentTypeEnum.status,
-					value: '1d4',
-					targetTags: 'attack',
+					rollAdjustment: '1d4',
+					rollTargetTags: 'attack',
+					sheetAdjustments: [],
 				},
 			];
 			const adjustedSheet = SheetUtils.adjustSheetWithModifiers(sheet, modifiers);
@@ -148,6 +155,34 @@ describe('SheetUtils', () => {
 					property: AbilityEnum.dexterity,
 					operation: SheetAdjustmentOperationEnum['-'],
 					value: '1',
+				},
+			];
+			expect(SheetUtils.stringToSheetAdjustments(input)).toEqual(adjustments);
+		});
+
+		it('should properly parse a group', () => {
+			const input = 'str skills+1';
+			const sheet: Sheet = sheetWithTestProperties();
+			const adjustments: SheetAdjustment[] = [
+				{
+					type: SheetAdjustmentTypeEnum.untyped,
+					propertyType: AdjustablePropertyEnum.statGroup,
+					property: 'str skills',
+					operation: SheetAdjustmentOperationEnum['+'],
+					value: '1',
+				},
+			];
+			expect(SheetUtils.stringToSheetAdjustments(input)).toEqual(adjustments);
+		});
+		it('should properly parse a group with severity', () => {
+			const input = 'str skills-[severity]';
+			const adjustments: SheetAdjustment[] = [
+				{
+					type: SheetAdjustmentTypeEnum.untyped,
+					propertyType: AdjustablePropertyEnum.statGroup,
+					property: 'str skills',
+					operation: SheetAdjustmentOperationEnum['-'],
+					value: '[severity]',
 				},
 			];
 			expect(SheetUtils.stringToSheetAdjustments(input)).toEqual(adjustments);

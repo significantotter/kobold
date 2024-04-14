@@ -19,12 +19,12 @@ import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js
 import { Command, CommandDeferType } from '../../index.js';
 import { ActionOptions } from './action-command-options.js';
 
-export class ActionEditSubCommand implements Command {
-	public names = [L.en.commands.action.edit.name()];
+export class ActionSetSubCommand implements Command {
+	public names = [L.en.commands.action.set.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.action.edit.name(),
-		description: L.en.commands.action.edit.description(),
+		name: L.en.commands.action.set.name(),
+		description: L.en.commands.action.set.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -66,7 +66,7 @@ export class ActionEditSubCommand implements Command {
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const actionTarget = intr.options.getString(ActionOptions.ACTION_TARGET_OPTION.name, true);
-		const fieldToEdit = intr.options.getString(ActionOptions.ACTION_EDIT_OPTION.name, true);
+		const fieldToUpdate = intr.options.getString(ActionOptions.ACTION_EDIT_OPTION.name, true);
 		const newValue = intr.options.getString(ActionOptions.ACTION_EDIT_VALUE.name, true);
 
 		const koboldUtils = new KoboldUtils(kobold);
@@ -82,24 +82,24 @@ export class ActionEditSubCommand implements Command {
 			await InteractionUtils.send(intr, LL.commands.action.interactions.notFound());
 			return;
 		}
-		// just in case we need to edit the name of the action, save it here
+		// just in case we need to set the name of the action, save it here
 		const currentActionName = matchedAction.name;
 
-		// validate the strings into different types based on which field is being edited
+		// validate the strings into different types based on which field is being updated
 
 		// string values
-		if (['name', 'description'].includes(fieldToEdit)) {
-			matchedAction[fieldToEdit as 'name' | 'description'] = newValue.trim();
+		if (['name', 'description'].includes(fieldToUpdate)) {
+			matchedAction[fieldToUpdate as 'name' | 'description'] = newValue.trim();
 		}
 		// enum values
-		else if (fieldToEdit === 'type') {
+		else if (fieldToUpdate === 'type') {
 			const enumValue = newValue.toLocaleLowerCase().trim();
 			if (isActionTypeEnum(enumValue)) {
 				matchedAction.type = enumValue;
 			} else {
-				throw new KoboldError(LL.commands.action.edit.interactions.invalidActionType());
+				throw new KoboldError(LL.commands.action.set.interactions.invalidActionType());
 			}
-		} else if (fieldToEdit === 'actionCost') {
+		} else if (fieldToUpdate === 'actionCost') {
 			const actionInputMap: Record<string, ActionCostEnum | undefined> = {
 				one: ActionCostEnum.oneAction,
 				two: ActionCostEnum.twoActions,
@@ -120,32 +120,32 @@ export class ActionEditSubCommand implements Command {
 			if (finalValue) {
 				matchedAction.actionCost = finalValue;
 			} else {
-				throw new KoboldError(LL.commands.action.edit.interactions.invalidActionCost());
+				throw new KoboldError(LL.commands.action.set.interactions.invalidActionCost());
 			}
 		}
 		// integer values
-		else if (['baseLevel'].includes(fieldToEdit)) {
+		else if (['baseLevel'].includes(fieldToUpdate)) {
 			const parsedValue = parseInt(newValue.trim());
 			if (isNaN(parsedValue) || parsedValue < 1) {
-				throw new KoboldError(LL.commands.action.edit.interactions.invalidInteger());
+				throw new KoboldError(LL.commands.action.set.interactions.invalidInteger());
 			} else {
 				matchedAction.baseLevel = parsedValue;
 			}
 		}
 		// string array values
-		else if (['tags'].includes(fieldToEdit)) {
+		else if (['tags'].includes(fieldToUpdate)) {
 			matchedAction.tags = newValue.split(',').map(tag => tag.trim());
 		}
 
 		// boolean values
-		else if (['autoHeighten'].includes(fieldToEdit)) {
+		else if (['autoHeighten'].includes(fieldToUpdate)) {
 			const autoHeighten = ['true', 'yes', '1', 'ok', 'okay'].includes(
 				newValue.toLocaleLowerCase().trim()
 			);
 			matchedAction.autoHeighten = autoHeighten;
 		} else {
 			// invalid field
-			throw new KoboldError(LL.commands.action.edit.interactions.unknownField());
+			throw new KoboldError(LL.commands.action.set.interactions.unknownField());
 		}
 
 		await kobold.sheetRecord.update(
@@ -156,8 +156,8 @@ export class ActionEditSubCommand implements Command {
 		//send a confirmation message
 		await InteractionUtils.send(
 			intr,
-			LL.commands.action.edit.interactions.success({
-				actionOption: fieldToEdit,
+			LL.commands.action.set.interactions.success({
+				actionOption: fieldToUpdate,
 				newValue: newValue,
 				actionName: currentActionName,
 			})

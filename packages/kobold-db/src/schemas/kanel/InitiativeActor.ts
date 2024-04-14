@@ -47,7 +47,7 @@ export default interface InitiativeActorTable {
   gameId: ColumnType<GameId | null, GameId | null, GameId | null>;
 
   /** Database type: pg_catalog.text */
-  note: ColumnType<string | null, string | null, string | null>;
+  note: ColumnType<string, string | undefined, string>;
 }
 
 export const initiativeActorId = z.number().int().max(2147483647);
@@ -65,7 +65,7 @@ export const zInitiativeActor = z.object({
   hideStats: z.boolean(),
   sheetRecordId: sheetRecordId,
   gameId: gameId.nullable(),
-  note: z.string().nullable(),
+  note: z.string(),
 });
 
 export const zInitiativeActorInitializer = z.object({
@@ -81,7 +81,7 @@ export const zInitiativeActorInitializer = z.object({
   hideStats: z.boolean().optional(),
   sheetRecordId: sheetRecordId,
   gameId: gameId.optional().nullable(),
-  note: z.string().optional().nullable(),
+  note: z.string().optional(),
 });
 
 export const zInitiativeActorMutator = z.object({
@@ -97,7 +97,7 @@ export const zInitiativeActorMutator = z.object({
   hideStats: z.boolean().optional(),
   sheetRecordId: sheetRecordId.optional(),
   gameId: gameId.optional().nullable(),
-  note: z.string().optional().nullable(),
+  note: z.string().optional(),
 });
 
 export type InitiativeActor = Selectable<InitiativeActorTable>;

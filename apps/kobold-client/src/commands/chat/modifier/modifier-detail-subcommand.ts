@@ -19,6 +19,7 @@ import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { ModifierOptions } from './modifier-command-options.js';
+import { ModifierHelpers } from './modifier-helpers.js';
 
 export class ModifierDetailSubCommand implements Command {
 	public names = [L.en.commands.modifier.detail.name()];
@@ -93,25 +94,7 @@ export class ModifierDetailSubCommand implements Command {
 				modifierIsActive: modifier.isActive ? ' (active)' : '',
 			})
 		);
-		let modifierDescription: string;
-		if (modifier.modifierType === 'roll') {
-			modifierDescription = LL.commands.modifier.interactions.detailBodyRoll({
-				modifierDescriptionText: modifier.description,
-				modifierType: modifier.type || 'untyped',
-				modifierValue: modifier.value,
-				modifierTargetTags: modifier.targetTags,
-			});
-		} else {
-			modifierDescription = LL.commands.modifier.interactions.detailBodySheet({
-				modifierDescriptionText: modifier.description,
-				modifierType: modifier.type || 'untyped',
-				modifierSheetValues: modifier.sheetAdjustments
-					.map(sheetAdjustment => {
-						return `${sheetAdjustment.property} ${sheetAdjustment.operation} ${sheetAdjustment.value}`;
-					})
-					.join(', '),
-			});
-		}
+		let modifierDescription: string = ModifierHelpers.detailModifier(modifier);
 		embed.setDescription(modifierDescription);
 
 		await InteractionUtils.send(intr, { embeds: [embed] });

@@ -65,9 +65,9 @@ export default {
 		name: 'auto-heighten',
 		description: "Whether to default [actionLevel] to half the character's level rounded up.",
 	},
-	actionEditOption: {
-		name: 'edit-option',
-		description: 'The option to edit.',
+	actionSetOption: {
+		name: 'set-option',
+		description: 'The field to set to a new value.',
 		choices: {
 			name: { name: 'name', value: 'name' },
 			description: { name: 'description', value: 'description' },
@@ -78,8 +78,8 @@ export default {
 			autoHeighten: { name: 'auto-heighten', value: 'autoHeighten' },
 		},
 	},
-	actionEditValue: {
-		name: 'edit-value',
+	actionSetValue: {
+		name: 'set-value',
 		description: 'The value to change the option to.',
 	},
 	actionTags: {
@@ -123,8 +123,8 @@ export default {
 		name: 'action',
 		description: 'The target action.',
 	},
-	actionStageEditValue: {
-		name: 'edit-value',
+	actionStageSetValue: {
+		name: 'set-value',
 		description: 'The value to change the option to.',
 	},
 	actionStageRollName: {
@@ -231,9 +231,9 @@ export default {
 		name: 'target-roll',
 		description: 'The target roll.',
 	},
-	actionStageStageEditOption: {
-		name: 'edit-option',
-		description: 'The option to edit.',
+	actionStageStageUpdateOption: {
+		name: 'set-option',
+		description: 'The field to set to a new value.',
 		choices: {
 			name: { name: 'name', value: 'name' },
 			damageType: { name: 'damage-type', value: 'damageType' },
@@ -273,7 +273,7 @@ export default {
 	},
 	actionStageStageMoveOption: {
 		name: 'move-to',
-		description: 'The option to edit.',
+		description: 'Whether to move the stage to the top or bottom.',
 		choices: {
 			top: { name: 'top', value: 'top' },
 			bottom: { name: 'bottom', value: 'bottom' },
@@ -576,6 +576,10 @@ export default {
 		name: 'name',
 		description: 'The name of the modifier.',
 	},
+	conditionName: {
+		name: 'name',
+		description: 'The name of the condition.',
+	},
 	modifierType: {
 		name: 'type',
 		description: 'The optional type (status, item, or circumstance) of the modifier.',
@@ -602,13 +606,16 @@ export default {
 		name: 'description',
 		description: 'A description for the modifier.',
 	},
-	modifierValue: {
-		name: 'value',
-		description:
-			'The value applied by the modifier to dice rolls. Can be a number or a dice expression.',
+	modifierRollAdjustment: {
+		name: 'roll-adjustment',
+		description: 'The amount to adjust a dice roll. Can be a number or a dice expression.',
+	},
+	modifierSeverity: {
+		name: 'severity',
+		description: 'A measure of a modifier\'s effect. Use "[severity]" in the value.',
 	},
 	modifierTargetTags: {
-		name: 'target-tags',
+		name: 'roll-target-tags',
 		description:
 			'A set of tags for the rolls that this modifier applies to. For example "skill or attack or save"',
 	},
@@ -616,7 +623,7 @@ export default {
 		name: 'sheet-values',
 		description: 'How to alter the sheet values. For example "maxHp+5;ac=20;will-1"',
 	},
-	modifierSetOption: {
+	modifierUpdateOption: {
 		name: 'option',
 		description: 'The modifier option to alter.',
 		choices: {
@@ -632,21 +639,25 @@ export default {
 				name: 'type',
 				value: 'type',
 			},
-			value: {
-				name: 'value',
-				value: 'value',
+			rollAdjustment: {
+				name: 'roll-adjustment',
+				value: 'roll-adjustment',
 			},
-			targetTags: {
-				name: 'target-tags',
-				value: 'target-tags',
+			rollTargetTags: {
+				name: 'roll-target-tags',
+				value: 'roll-target-tags',
 			},
 			sheetValues: {
 				name: 'sheet-values',
 				value: 'sheet-values',
 			},
+			severity: {
+				name: 'severity',
+				value: 'severity',
+			},
 		},
 	},
-	modifierSetValue: {
+	modifierUpdateValue: {
 		name: 'value',
 		description: 'The value to set the option to.',
 	},
@@ -828,7 +839,7 @@ export default {
 
 	settingsSetOption: {
 		name: 'option',
-		description: 'The option to edit.',
+		description: 'The option to update.',
 		choices: {
 			initTrackerNotifications: {
 				name: 'initiative-tracker-notifications',
