@@ -310,7 +310,7 @@ export class HelpCommand implements Command {
 							`\`/${LL.commands.modifier.name()} ${LL.commands.modifier.toggle.name()}\` ${LL.commands.modifier.toggle.description()}\n` +
 							`\`/${LL.commands.modifier.name()} ${LL.commands.modifier.list.name()}\` ${LL.commands.modifier.list.description()}\n` +
 							`\`/${LL.commands.modifier.name()} ${LL.commands.modifier.detail.name()}\` ${LL.commands.modifier.detail.description()}\n` +
-							`\`/${LL.commands.modifier.name()} ${LL.commands.modifier.update.name()}\` ${LL.commands.modifier.update.description()}\n` +
+							`\`/${LL.commands.modifier.name()} ${LL.commands.modifier.set.name()}\` ${LL.commands.modifier.set.description()}\n` +
 							`\`/${LL.commands.modifier.name()} ${LL.commands.modifier.remove.name()}\` ${LL.commands.modifier.remove.description()}\n` +
 							`\`/${LL.commands.modifier.name()} ${LL.commands.modifier.import.name()}\` ${LL.commands.modifier.import.description()}\n` +
 							`\`/${LL.commands.modifier.name()} ${LL.commands.modifier.export.name()}\` ${LL.commands.modifier.export.description()}\n`,
@@ -364,7 +364,7 @@ export class HelpCommand implements Command {
 						name: LL.commands.rollMacro.name(),
 						value:
 							`\`/${LL.commands.rollMacro.name()} ${LL.commands.rollMacro.create.name()}\` ${LL.commands.rollMacro.create.description()}\n` +
-							`\`/${LL.commands.rollMacro.name()} ${LL.commands.rollMacro.update.name()}\` ${LL.commands.rollMacro.update.description()}\n` +
+							`\`/${LL.commands.rollMacro.name()} ${LL.commands.rollMacro.set.name()}\` ${LL.commands.rollMacro.set.description()}\n` +
 							`\`/${LL.commands.rollMacro.name()} ${LL.commands.rollMacro.list.name()}\` ${LL.commands.rollMacro.list.description()}\n` +
 							`\`/${LL.commands.rollMacro.name()} ${LL.commands.rollMacro.remove.name()}\` ${LL.commands.rollMacro.remove.description()}\n`,
 					},
@@ -470,7 +470,7 @@ export class HelpCommand implements Command {
 						LL.commands.modifier.toggle.name(),
 						LL.commands.modifier.list.name(),
 						LL.commands.modifier.detail.name(),
-						LL.commands.modifier.update.name(),
+						LL.commands.modifier.set.name(),
 						LL.commands.modifier.remove.name(),
 						LL.commands.modifier.import.name(),
 						LL.commands.modifier.export.name(),
@@ -561,7 +561,7 @@ export class HelpCommand implements Command {
 					[
 						LL.commands.rollMacro.list.name(),
 						LL.commands.rollMacro.create.name(),
-						LL.commands.rollMacro.update.name(),
+						LL.commands.rollMacro.set.name(),
 						LL.commands.rollMacro.remove.name(),
 					].map(command =>
 						createCommandOperationHelpField(LL.commands.rollMacro.name(), command, LL)

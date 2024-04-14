@@ -28,14 +28,14 @@ export default {
 			inactive: 'inactive',
 		},
 	},
-	update: {
-		name: 'update',
-		description: 'Updates a modifier for your active character.',
+	set: {
+		name: 'set',
+		description: 'Sets a field for a modifier for your active character.',
 		interactions: {
-			invalidOptionError: 'Yip! Please send a valid option to update.',
+			invalidOptionError: 'Yip! Please send a valid option to set.',
 			emptyNameError: "Yip! You can't use an empty name!",
 			nameExistsError: 'Yip! A modifier with that name already exists.',
-			valueNotNumberError: 'Yip! You can only update a modifier value with a number.',
+			valueNotNumberError: 'Yip! You can only set a modifier value with a number.',
 			successEmbed: {
 				title: "Yip! {characterName} had their modifier {modifierName}'s {fieldToChange} set to {newFieldValue}.",
 			},

@@ -26,12 +26,12 @@ import { Command, CommandDeferType } from '../../index.js';
 import { ModifierOptions } from './modifier-command-options.js';
 import _ from 'lodash';
 
-export class ModifierUpdateSubCommand implements Command {
-	public names = [L.en.commands.modifier.update.name()];
+export class ModifierSetSubCommand implements Command {
+	public names = [L.en.commands.modifier.set.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.modifier.update.name(),
-		description: L.en.commands.modifier.update.description(),
+		name: L.en.commands.modifier.set.name(),
+		description: L.en.commands.modifier.set.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -107,7 +107,7 @@ export class ModifierUpdateSubCommand implements Command {
 			if (newFieldValue === '') {
 				await InteractionUtils.send(
 					intr,
-					LL.commands.modifier.update.interactions.emptyNameError()
+					LL.commands.modifier.set.interactions.emptyNameError()
 				);
 				return;
 				//a name can't already be a modifier
@@ -116,7 +116,7 @@ export class ModifierUpdateSubCommand implements Command {
 			) {
 				await InteractionUtils.send(
 					intr,
-					LL.commands.modifier.update.interactions.nameExistsError()
+					LL.commands.modifier.set.interactions.nameExistsError()
 				);
 				return;
 			} else {
@@ -196,7 +196,7 @@ export class ModifierUpdateSubCommand implements Command {
 			// if a field wasn't provided, or the field isn't present in our options, send an error
 			await InteractionUtils.send(
 				intr,
-				LL.commands.modifier.update.interactions.invalidOptionError()
+				LL.commands.modifier.set.interactions.invalidOptionError()
 			);
 			return;
 		}
@@ -212,7 +212,7 @@ export class ModifierUpdateSubCommand implements Command {
 
 		const updateEmbed = new KoboldEmbed();
 		updateEmbed.setTitle(
-			LL.commands.modifier.update.interactions.successEmbed.title({
+			LL.commands.modifier.set.interactions.successEmbed.title({
 				characterName: activeCharacter.name,
 				modifierName: nameBeforeUpdate,
 				fieldToChange,

@@ -40,8 +40,8 @@ export class RollMacroCommand implements Command {
 				options: [RollMacroOptions.MACRO_NAME_OPTION, RollMacroOptions.MACRO_VALUE_OPTION],
 			},
 			{
-				name: L.en.commands.rollMacro.update.name(),
-				description: L.en.commands.rollMacro.update.description(),
+				name: L.en.commands.rollMacro.set.name(),
+				description: L.en.commands.rollMacro.set.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					{

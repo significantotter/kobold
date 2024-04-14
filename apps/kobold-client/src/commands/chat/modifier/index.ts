@@ -8,7 +8,7 @@ import { ModifierListSubCommand } from './modifier-list-subcommand.js';
 import { ModifierRemoveSubCommand } from './modifier-remove-subcommand.js';
 import { ModifierSeveritySubCommand } from './modifier-severity-subcommand.js';
 import { ModifierToggleSubCommand } from './modifier-toggle-subcommand.js';
-import { ModifierUpdateSubCommand } from './modifier-update-subcommand.js';
+import { ModifierSetSubCommand } from './modifier-set-subcommand.js';
 
 export const ModifierCommandExport: CommandExport = {
 	command: ModifierCommand,
@@ -21,6 +21,6 @@ export const ModifierCommandExport: CommandExport = {
 		ModifierRemoveSubCommand,
 		ModifierToggleSubCommand,
 		ModifierSeveritySubCommand,
-		ModifierUpdateSubCommand,
+		ModifierSetSubCommand,
 	],
 };

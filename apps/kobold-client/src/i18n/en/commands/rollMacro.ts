@@ -21,9 +21,9 @@ export default {
 				'Yip! A roll macro named {macroName} already exists for {characterName}.',
 		},
 	},
-	update: {
-		name: 'update',
-		description: 'Updates a roll macro for your active character.',
+	set: {
+		name: 'set',
+		description: 'Sets the value of a roll macro for your active character.',
 		interactions: {
 			successEmbed: {
 				title: "Yip! {characterName} had their roll macro {macroName} set to '{newMacroValue}'.",

@@ -103,8 +103,8 @@ export class ModifierCommand implements Command {
 				],
 			},
 			{
-				name: L.en.commands.modifier.update.name(),
-				description: L.en.commands.modifier.update.description(),
+				name: L.en.commands.modifier.set.name(),
+				description: L.en.commands.modifier.set.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					{
