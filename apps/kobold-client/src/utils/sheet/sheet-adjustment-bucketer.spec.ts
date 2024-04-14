@@ -559,7 +559,7 @@ describe('SheetIntegerPropertyBucket', () => {
 				propertyType: AdjustablePropertyEnum.intProperty,
 				operation: SheetAdjustmentOperationEnum['-'],
 				property: AbilityEnum.strength,
-				parsed: 5,
+				parsed: 10,
 			});
 		});
 	});
@@ -636,7 +636,7 @@ describe('StatBucket', () => {
 			});
 		});
 
-		it('should serialize a stat adjustment wit a dc', () => {
+		it('should serialize a stat adjustment with a dc', () => {
 			const adjustment: SheetStatAdjustment = {
 				type: SheetAdjustmentTypeEnum.untyped,
 				operation: SheetAdjustmentOperationEnum['='],

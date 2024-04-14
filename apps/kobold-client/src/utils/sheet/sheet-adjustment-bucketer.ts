@@ -178,41 +178,31 @@ export class SheetIntegerPropertyBucket extends SheetPropertyGroupBucket<SheetIn
 		currentAdjustment: SheetIntegerAdjustment,
 		newAdjustment: SheetIntegerAdjustment
 	): SheetIntegerAdjustment {
+		const currentValue =
+			currentAdjustment.operation === '-'
+				? -currentAdjustment.parsed
+				: currentAdjustment.parsed;
+		const newValue =
+			newAdjustment.operation === '-' ? -newAdjustment.parsed : newAdjustment.parsed;
 		if (newAdjustment.operation === '=') return newAdjustment;
-		else if (newAdjustment.operation === '+') {
-			const combinedValue = currentAdjustment.parsed + newAdjustment.parsed;
+		else
 			return {
 				...currentAdjustment,
-				parsed: combinedValue,
+				parsed: currentValue + newValue,
 			};
-		} else {
-			// operation is -
-			const combinedValue = currentAdjustment.parsed - newAdjustment.parsed;
-			return {
-				...currentAdjustment,
-				parsed: combinedValue,
-			};
-		}
 	}
 	public combineSameType(
 		currentAdjustment: SheetIntegerAdjustment,
 		newAdjustment: SheetIntegerAdjustment
 	): SheetIntegerAdjustment {
-		if (newAdjustment.operation === '+') {
+		if (newAdjustment.operation === '+' || newAdjustment.operation === '-') {
 			const max = _.maxBy(
 				[currentAdjustment, newAdjustment],
 				(adjustment: SheetIntegerAdjustment) => adjustment.parsed
 			);
 			if (max) return max;
-		} else if (newAdjustment.operation === '-') {
-			// operation is -
-			const min = _.minBy(
-				[currentAdjustment, newAdjustment],
-				(adjustment: SheetIntegerAdjustment) => adjustment.parsed
-			);
-			if (min) return min;
 		} // otherwise (newAdjustment.operation === '=')
-		// or maxBy/minBy returned null, which is impossible because the array is non-empty
+		// or maxBy returned null, which is impossible because the array is non-empty
 		// and the adjustments are non-nullable
 		return newAdjustment;
 	}
@@ -241,19 +231,16 @@ export class StatBucket extends SheetPropertyGroupBucket<SheetStatAdjustment> {
 			typeof newAdjustment.parsed.value === 'number'
 		) {
 			if (newAdjustment.operation === '=') return newAdjustment;
-			else if (newAdjustment.operation === '+') {
-				const combinedValue = currentAdjustment.parsed.value + newAdjustment.parsed.value;
-				return {
-					...currentAdjustment,
-					parsed: {
-						baseKey: currentAdjustment.parsed.baseKey,
-						subKey: currentAdjustment.parsed.subKey,
-						value: combinedValue,
-					},
-				};
-			} else {
-				// operation is -
-				const combinedValue = currentAdjustment.parsed.value - newAdjustment.parsed.value;
+			else {
+				const currentValue =
+					currentAdjustment.operation === '-'
+						? -currentAdjustment.parsed.value
+						: currentAdjustment.parsed.value;
+				const newValue =
+					newAdjustment.operation === '-'
+						? -newAdjustment.parsed.value
+						: newAdjustment.parsed.value;
+				const combinedValue = currentValue + newValue;
 				return {
 					...currentAdjustment,
 					parsed: {
@@ -291,19 +278,12 @@ export class StatBucket extends SheetPropertyGroupBucket<SheetStatAdjustment> {
 			typeof currentAdjustment.parsed.value === 'number' &&
 			typeof newAdjustment.parsed.value === 'number'
 		) {
-			if (newAdjustment.operation === '+') {
+			if (newAdjustment.operation === '+' || newAdjustment.operation === '-') {
 				const max = _.maxBy(
 					[currentAdjustment, newAdjustment],
 					(adjustment: SheetStatAdjustment) => adjustment.parsed.value
 				);
 				if (max) return max;
-			} else if (newAdjustment.operation === '-') {
-				// operation is -
-				const min = _.minBy(
-					[currentAdjustment, newAdjustment],
-					(adjustment: SheetStatAdjustment) => adjustment.parsed.value
-				);
-				if (min) return min;
 			} // otherwise (newAdjustment.operation === '=')
 			// or maxBy/minBy returned null, which is impossible because the array is non-empty
 			// and the adjustments are non-nullable
@@ -335,19 +315,16 @@ export class ExtraSkillBucket extends SheetPropertyGroupBucket<SheetExtraSkillAd
 			typeof newAdjustment.parsed.value === 'number'
 		) {
 			if (newAdjustment.operation === '=') return newAdjustment;
-			else if (newAdjustment.operation === '+') {
-				const combinedValue = currentAdjustment.parsed.value + newAdjustment.parsed.value;
-				return {
-					...currentAdjustment,
-					parsed: {
-						baseKey: currentAdjustment.parsed.baseKey,
-						subKey: currentAdjustment.parsed.subKey,
-						value: combinedValue,
-					},
-				};
-			} else {
-				// operation is -
-				const combinedValue = currentAdjustment.parsed.value - newAdjustment.parsed.value;
+			else {
+				const currentValue =
+					currentAdjustment.operation === '-'
+						? -currentAdjustment.parsed.value
+						: currentAdjustment.parsed.value;
+				const newValue =
+					newAdjustment.operation === '-'
+						? -newAdjustment.parsed.value
+						: newAdjustment.parsed.value;
+				const combinedValue = currentValue + newValue;
 				return {
 					...currentAdjustment,
 					parsed: {
@@ -385,19 +362,12 @@ export class ExtraSkillBucket extends SheetPropertyGroupBucket<SheetExtraSkillAd
 			typeof currentAdjustment.parsed.value === 'number' &&
 			typeof newAdjustment.parsed.value === 'number'
 		) {
-			if (newAdjustment.operation === '+') {
+			if (newAdjustment.operation === '+' || newAdjustment.operation === '-') {
 				const max = _.maxBy(
 					[currentAdjustment, newAdjustment],
 					(adjustment: SheetExtraSkillAdjustment) => adjustment.parsed.value
 				);
 				if (max) return max;
-			} else if (newAdjustment.operation === '-') {
-				// operation is -
-				const min = _.minBy(
-					[currentAdjustment, newAdjustment],
-					(adjustment: SheetExtraSkillAdjustment) => adjustment.parsed.value
-				);
-				if (min) return min;
 			} // otherwise (newAdjustment.operation === '=')
 			// or maxBy/minBy returned null, which is impossible because the array is non-empty
 			// and the adjustments are non-nullable
