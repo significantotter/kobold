@@ -19,12 +19,12 @@ import { ActionStageOptions } from './action-stage-command-options.js';
 import _ from 'lodash';
 import { LocalizedString } from 'typesafe-i18n';
 
-export class ActionStageUpdateSubCommand implements Command {
-	public names = [L.en.commands.actionStage.update.name()];
+export class ActionStageSetSubCommand implements Command {
+	public names = [L.en.commands.actionStage.set.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.actionStage.update.name(),
-		description: L.en.commands.actionStage.update.description(),
+		name: L.en.commands.actionStage.set.name(),
+		description: L.en.commands.actionStage.set.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -261,7 +261,7 @@ export class ActionStageUpdateSubCommand implements Command {
 		if (invalid) {
 			await InteractionUtils.send(
 				intr,
-				LL.commands.actionStage.update.interactions.invalidField({
+				LL.commands.actionStage.set.interactions.invalidField({
 					stageType: roll.type,
 				})
 			);
@@ -311,7 +311,7 @@ export class ActionStageUpdateSubCommand implements Command {
 			// invalid field
 			await InteractionUtils.send(
 				intr,
-				LL.commands.actionStage.update.interactions.unknownField()
+				LL.commands.actionStage.set.interactions.unknownField()
 			);
 			return;
 		}
@@ -334,7 +334,7 @@ export class ActionStageUpdateSubCommand implements Command {
 		//send a confirmation message
 		await InteractionUtils.send(
 			intr,
-			LL.commands.actionStage.update.interactions.success({
+			LL.commands.actionStage.set.interactions.success({
 				actionStageOption: fieldToUpdate,
 				newValue: newValue,
 				actionStageName: currentActionName,

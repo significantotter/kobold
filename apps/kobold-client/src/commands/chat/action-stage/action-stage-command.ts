@@ -118,8 +118,8 @@ export class ActionStageCommand implements Command {
 				],
 			},
 			{
-				name: L.en.commands.actionStage.update.name(),
-				description: L.en.commands.actionStage.update.description(),
+				name: L.en.commands.actionStage.set.name(),
+				description: L.en.commands.actionStage.set.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					ActionStageOptions.ACTION_ROLL_TARGET_OPTION,

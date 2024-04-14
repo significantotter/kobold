@@ -6,7 +6,7 @@ import { ActionStageAddSaveSubCommand } from './action-stage-add-save-subcommand
 import { ActionStageAddSkillChallengeSubCommand } from './action-stage-add-skill-challenge-subcommand.js';
 import { ActionStageAddTextSubCommand } from './action-stage-add-text-subcommand.js';
 import { ActionStageCommand } from './action-stage-command.js';
-import { ActionStageUpdateSubCommand } from './action-stage-update-subcommand.js';
+import { ActionStageSetSubCommand } from './action-stage-set-subcommand.js';
 import { ActionStageRemoveSubCommand } from './action-stage-remove-subcommand.js';
 
 export const ActionStageCommandExport: CommandExport = {
@@ -18,7 +18,7 @@ export const ActionStageCommandExport: CommandExport = {
 		ActionStageAddSaveSubCommand,
 		ActionStageAddSkillChallengeSubCommand,
 		ActionStageAddTextSubCommand,
-		ActionStageUpdateSubCommand,
+		ActionStageSetSubCommand,
 		ActionStageRemoveSubCommand,
 	],
 };

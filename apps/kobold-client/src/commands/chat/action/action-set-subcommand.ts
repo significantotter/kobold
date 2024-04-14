@@ -19,12 +19,12 @@ import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js
 import { Command, CommandDeferType } from '../../index.js';
 import { ActionOptions } from './action-command-options.js';
 
-export class ActionUpdateSubCommand implements Command {
-	public names = [L.en.commands.action.update.name()];
+export class ActionSetSubCommand implements Command {
+	public names = [L.en.commands.action.set.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.action.update.name(),
-		description: L.en.commands.action.update.description(),
+		name: L.en.commands.action.set.name(),
+		description: L.en.commands.action.set.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -82,7 +82,7 @@ export class ActionUpdateSubCommand implements Command {
 			await InteractionUtils.send(intr, LL.commands.action.interactions.notFound());
 			return;
 		}
-		// just in case we need to update the name of the action, save it here
+		// just in case we need to set the name of the action, save it here
 		const currentActionName = matchedAction.name;
 
 		// validate the strings into different types based on which field is being updated
@@ -97,7 +97,7 @@ export class ActionUpdateSubCommand implements Command {
 			if (isActionTypeEnum(enumValue)) {
 				matchedAction.type = enumValue;
 			} else {
-				throw new KoboldError(LL.commands.action.update.interactions.invalidActionType());
+				throw new KoboldError(LL.commands.action.set.interactions.invalidActionType());
 			}
 		} else if (fieldToUpdate === 'actionCost') {
 			const actionInputMap: Record<string, ActionCostEnum | undefined> = {
@@ -120,14 +120,14 @@ export class ActionUpdateSubCommand implements Command {
 			if (finalValue) {
 				matchedAction.actionCost = finalValue;
 			} else {
-				throw new KoboldError(LL.commands.action.update.interactions.invalidActionCost());
+				throw new KoboldError(LL.commands.action.set.interactions.invalidActionCost());
 			}
 		}
 		// integer values
 		else if (['baseLevel'].includes(fieldToUpdate)) {
 			const parsedValue = parseInt(newValue.trim());
 			if (isNaN(parsedValue) || parsedValue < 1) {
-				throw new KoboldError(LL.commands.action.update.interactions.invalidInteger());
+				throw new KoboldError(LL.commands.action.set.interactions.invalidInteger());
 			} else {
 				matchedAction.baseLevel = parsedValue;
 			}
@@ -145,7 +145,7 @@ export class ActionUpdateSubCommand implements Command {
 			matchedAction.autoHeighten = autoHeighten;
 		} else {
 			// invalid field
-			throw new KoboldError(LL.commands.action.update.interactions.unknownField());
+			throw new KoboldError(LL.commands.action.set.interactions.unknownField());
 		}
 
 		await kobold.sheetRecord.update(
@@ -156,7 +156,7 @@ export class ActionUpdateSubCommand implements Command {
 		//send a confirmation message
 		await InteractionUtils.send(
 			intr,
-			LL.commands.action.update.interactions.success({
+			LL.commands.action.set.interactions.success({
 				actionOption: fieldToUpdate,
 				newValue: newValue,
 				actionName: currentActionName,

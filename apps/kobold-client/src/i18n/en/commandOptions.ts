@@ -65,9 +65,9 @@ export default {
 		name: 'auto-heighten',
 		description: "Whether to default [actionLevel] to half the character's level rounded up.",
 	},
-	actionUpdateOption: {
-		name: 'update-option',
-		description: 'The option to update.',
+	actionSetOption: {
+		name: 'set-option',
+		description: 'The field to set to a new value.',
 		choices: {
 			name: { name: 'name', value: 'name' },
 			description: { name: 'description', value: 'description' },
@@ -78,8 +78,8 @@ export default {
 			autoHeighten: { name: 'auto-heighten', value: 'autoHeighten' },
 		},
 	},
-	actionUpdateValue: {
-		name: 'update-value',
+	actionSetValue: {
+		name: 'set-value',
 		description: 'The value to change the option to.',
 	},
 	actionTags: {
@@ -123,8 +123,8 @@ export default {
 		name: 'action',
 		description: 'The target action.',
 	},
-	actionStageUpdateValue: {
-		name: 'update-value',
+	actionStageSetValue: {
+		name: 'set-value',
 		description: 'The value to change the option to.',
 	},
 	actionStageRollName: {
@@ -232,8 +232,8 @@ export default {
 		description: 'The target roll.',
 	},
 	actionStageStageUpdateOption: {
-		name: 'update-option',
-		description: 'The option to update.',
+		name: 'set-option',
+		description: 'The field to set to a new value.',
 		choices: {
 			name: { name: 'name', value: 'name' },
 			damageType: { name: 'damage-type', value: 'damageType' },
@@ -273,7 +273,7 @@ export default {
 	},
 	actionStageStageMoveOption: {
 		name: 'move-to',
-		description: 'The option to update.',
+		description: 'Whether to move the stage to the top or bottom.',
 		choices: {
 			top: { name: 'top', value: 'top' },
 			bottom: { name: 'bottom', value: 'bottom' },

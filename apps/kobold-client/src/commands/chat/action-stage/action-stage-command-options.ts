@@ -36,8 +36,8 @@ export class ActionStageOptions {
 		type: ApplicationCommandOptionType.String,
 	};
 	public static readonly ACTION_STAGE_EDIT_VALUE: APIApplicationCommandBasicOption = {
-		name: L.en.commandOptions.actionStageUpdateValue.name(),
-		description: L.en.commandOptions.actionStageUpdateValue.description(),
+		name: L.en.commandOptions.actionStageSetValue.name(),
+		description: L.en.commandOptions.actionStageSetValue.description(),
 		required: true,
 		type: ApplicationCommandOptionType.String,
 	};

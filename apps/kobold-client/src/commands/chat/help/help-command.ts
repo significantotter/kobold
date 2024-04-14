@@ -338,7 +338,7 @@ export class HelpCommand implements Command {
 						value:
 							`\`/${LL.commands.action.name()} ${LL.commands.action.create.name()}\` ${LL.commands.action.create.description()}\n` +
 							`\`/${LL.commands.action.name()} ${LL.commands.action.detail.name()}\` ${LL.commands.action.detail.description()}\n` +
-							`\`/${LL.commands.action.name()} ${LL.commands.action.update.name()}\` ${LL.commands.action.update.description()}\n` +
+							`\`/${LL.commands.action.name()} ${LL.commands.action.set.name()}\` ${LL.commands.action.set.description()}\n` +
 							`\`/${LL.commands.action.name()} ${LL.commands.action.export.name()}\` ${LL.commands.action.export.description()}\n` +
 							`\`/${LL.commands.action.name()} ${LL.commands.action.import.name()}\` ${LL.commands.action.import.description()}\n` +
 							`\`/${LL.commands.action.name()} ${LL.commands.action.list.name()}\` ${LL.commands.action.list.description()}\n` +
@@ -357,7 +357,7 @@ export class HelpCommand implements Command {
 									addTextRollInput: '{{}}',
 								}
 							)}\n` +
-							`\`/${LL.commands.actionStage.name()} ${LL.commands.actionStage.update.name()}\` ${LL.commands.actionStage.update.description()}\n` +
+							`\`/${LL.commands.actionStage.name()} ${LL.commands.actionStage.set.name()}\` ${LL.commands.actionStage.set.description()}\n` +
 							`\`/${LL.commands.actionStage.name()} ${LL.commands.actionStage.remove.name()}\` ${LL.commands.actionStage.remove.description()}\n`,
 					},
 					{
@@ -519,7 +519,7 @@ export class HelpCommand implements Command {
 						LL.commands.action.create.name(),
 						LL.commands.action.detail.name(),
 						LL.commands.action.list.name(),
-						LL.commands.action.update.name(),
+						LL.commands.action.set.name(),
 						LL.commands.action.remove.name(),
 						LL.commands.action.export.name(),
 						LL.commands.action.import.name(),
@@ -539,7 +539,7 @@ export class HelpCommand implements Command {
 					LL.commands.actionStage.addSave.name(),
 					LL.commands.actionStage.addBasicDamage.name(),
 					LL.commands.actionStage.addAdvancedDamage.name(),
-					LL.commands.actionStage.update.name(),
+					LL.commands.actionStage.set.name(),
 					LL.commands.actionStage.remove.name(),
 				].map(command =>
 					createCommandOperationHelpField(LL.commands.actionStage.name(), command, LL)
