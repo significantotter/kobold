@@ -31,6 +31,7 @@ import { Creature } from '../../../utils/creature.js';
 import { GameplayOptions } from '../gameplay/gameplay-command-options.js';
 import { ModifierHelpers } from '../modifier/modifier-helpers.js';
 import { ModifierOptions } from '../modifier/modifier-command-options.js';
+import { ConditionOptions } from './condition-command-options.js';
 
 export class ConditionApplyCustomSubCommand implements Command {
 	public names = [L.en.commands.condition.applyCustom.name()];
@@ -76,16 +77,16 @@ export class ConditionApplyCustomSubCommand implements Command {
 		);
 
 		let name = intr.options
-			.getString(ModifierOptions.MODIFIER_NAME_OPTION.name, true)
+			.getString(ConditionOptions.CONDITION_NAME_OPTION.name, true)
 			.trim()
 			.toLowerCase();
-		let modifierType = (
+		let conditionType = (
 			intr.options.getString(ModifierOptions.MODIFIER_TYPE_OPTION.name) ??
 			SheetAdjustmentTypeEnum.untyped
 		)
 			.trim()
 			.toLowerCase();
-		const modifierSeverity =
+		const conditionSeverity =
 			intr.options.getString(ModifierOptions.MODIFIER_SEVERITY_VALUE.name) ?? null;
 
 		const rollAdjustment = intr.options.getString(
@@ -99,13 +100,13 @@ export class ConditionApplyCustomSubCommand implements Command {
 		const description = intr.options.getString(
 			ModifierOptions.MODIFIER_DESCRIPTION_OPTION.name
 		);
-		const modifierSheetValues = intr.options.getString(
+		const conditionSheetValues = intr.options.getString(
 			ModifierOptions.MODIFIER_SHEET_VALUES_OPTION.name
 		);
 
-		if (!isSheetAdjustmentTypeEnum(modifierType)) {
+		if (!isSheetAdjustmentTypeEnum(conditionType)) {
 			throw new KoboldError(
-				`Yip! ${modifierType} is not a valid type! Please use one ` +
+				`Yip! ${conditionType} is not a valid type! Please use one ` +
 					`of the suggested options when entering the condition type or leave it blank.`
 			);
 		}
@@ -127,7 +128,7 @@ export class ConditionApplyCustomSubCommand implements Command {
 			return;
 		}
 		// we can't have neither a roll adjustment nor a sheet adjustment
-		if (!rollAdjustment && !modifierSheetValues) {
+		if (!rollAdjustment && !conditionSheetValues) {
 			await InteractionUtils.send(
 				intr,
 				'Yip! You need to provide either a roll adjustment or a sheet adjustment!'
@@ -136,7 +137,7 @@ export class ConditionApplyCustomSubCommand implements Command {
 		}
 
 		if (rollAdjustment && rollTargetTags) {
-			// the tags for the modifier have to be valid
+			// the tags for the condition have to be valid
 			try {
 				compileExpression(rollTargetTags);
 			} catch (err) {
@@ -145,14 +146,14 @@ export class ConditionApplyCustomSubCommand implements Command {
 				return;
 			}
 
-			// we must be able to evaluate the modifier as a roll for this character
+			// we must be able to evaluate the condition as a roll for this character
 			try {
 				DiceUtils.parseAndEvaluateDiceExpression({
 					rollExpression: String(rollAdjustment),
 					extraAttributes: [
 						{
 							value: 1,
-							type: modifierType,
+							type: conditionType,
 							name: 'severity',
 							tags: [],
 							aliases: [],
@@ -168,15 +169,15 @@ export class ConditionApplyCustomSubCommand implements Command {
 				return;
 			}
 			if (!rollAdjustment)
-				throw new KoboldError(`Yip! I couldn't parse that modifier value!`);
+				throw new KoboldError(`Yip! I couldn't parse that condition value!`);
 		}
 
 		let parsedSheetAdjustments: SheetAdjustment[] = [];
-		if (modifierSheetValues) {
-			parsedSheetAdjustments = SheetUtils.stringToSheetAdjustments(modifierSheetValues);
+		if (conditionSheetValues) {
+			parsedSheetAdjustments = SheetUtils.stringToSheetAdjustments(conditionSheetValues);
 		}
-		// make sure the name does't already exist in the character's modifiers
-		if (FinderHelpers.getModifierByName(targetSheetRecord, name)) {
+		// make sure the name does't already exist in the character's conditions
+		if (FinderHelpers.getConditionByName(targetSheetRecord, name)) {
 			await InteractionUtils.send(
 				intr,
 				LL.commands.condition.interactions.alreadyExists({
@@ -187,27 +188,27 @@ export class ConditionApplyCustomSubCommand implements Command {
 			return;
 		}
 
-		const newModifier: Modifier = {
+		const newCondition: Modifier = {
 			name,
 			isActive: true,
 			description,
-			type: modifierType,
+			type: conditionType,
 			severity: null,
 			sheetAdjustments: parsedSheetAdjustments,
 			rollTargetTags,
 			rollAdjustment,
 		};
-		if (modifierSeverity != null) {
-			newModifier.severity = ModifierHelpers.validateSeverity(modifierSeverity);
+		if (conditionSeverity != null) {
+			newCondition.severity = ModifierHelpers.validateSeverity(conditionSeverity);
 		}
 
 		// make sure that the adjustments are valid and can be applied to a sheet
-		SheetUtils.adjustSheetWithModifiers(targetSheetRecord.sheet, [newModifier]);
+		SheetUtils.adjustSheetWithModifiers(targetSheetRecord.sheet, [newCondition]);
 
 		await kobold.sheetRecord.update(
 			{ id: targetSheetRecord.id },
 			{
-				modifiers: [...targetSheetRecord.modifiers, newModifier],
+				conditions: [...targetSheetRecord.conditions, newCondition],
 			}
 		);
 
