@@ -2,7 +2,7 @@ import { CommandExport } from '../../command.js';
 import { ActionCommand } from './action-command.js';
 import { ActionCreateSubCommand } from './action-create-subcommand.js';
 import { ActionDetailSubCommand } from './action-detail-subcommand.js';
-import { ActionEditSubCommand } from './action-edit-subcommand.js';
+import { ActionUpdateSubCommand } from './action-update-subcommand.js';
 import { ActionExportSubCommand } from './action-export-subcommand.js';
 import { ActionImportSubCommand } from './action-import-subcommand.js';
 import { ActionListSubCommand } from './action-list-subcommand.js';
@@ -13,7 +13,7 @@ export const ActionCommandExport: CommandExport = {
 	subCommands: [
 		ActionCreateSubCommand,
 		ActionDetailSubCommand,
-		ActionEditSubCommand,
+		ActionUpdateSubCommand,
 		ActionExportSubCommand,
 		ActionImportSubCommand,
 		ActionListSubCommand,

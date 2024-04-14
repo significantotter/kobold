@@ -65,9 +65,9 @@ export default {
 		name: 'auto-heighten',
 		description: "Whether to default [actionLevel] to half the character's level rounded up.",
 	},
-	actionEditOption: {
-		name: 'edit-option',
-		description: 'The option to edit.',
+	actionUpdateOption: {
+		name: 'update-option',
+		description: 'The option to update.',
 		choices: {
 			name: { name: 'name', value: 'name' },
 			description: { name: 'description', value: 'description' },
@@ -78,8 +78,8 @@ export default {
 			autoHeighten: { name: 'auto-heighten', value: 'autoHeighten' },
 		},
 	},
-	actionEditValue: {
-		name: 'edit-value',
+	actionUpdateValue: {
+		name: 'update-value',
 		description: 'The value to change the option to.',
 	},
 	actionTags: {
@@ -123,8 +123,8 @@ export default {
 		name: 'action',
 		description: 'The target action.',
 	},
-	actionStageEditValue: {
-		name: 'edit-value',
+	actionStageUpdateValue: {
+		name: 'update-value',
 		description: 'The value to change the option to.',
 	},
 	actionStageRollName: {
@@ -231,9 +231,9 @@ export default {
 		name: 'target-roll',
 		description: 'The target roll.',
 	},
-	actionStageStageEditOption: {
-		name: 'edit-option',
-		description: 'The option to edit.',
+	actionStageStageUpdateOption: {
+		name: 'update-option',
+		description: 'The option to update.',
 		choices: {
 			name: { name: 'name', value: 'name' },
 			damageType: { name: 'damage-type', value: 'damageType' },
@@ -273,7 +273,7 @@ export default {
 	},
 	actionStageStageMoveOption: {
 		name: 'move-to',
-		description: 'The option to edit.',
+		description: 'The option to update.',
 		choices: {
 			top: { name: 'top', value: 'top' },
 			bottom: { name: 'bottom', value: 'bottom' },
@@ -831,7 +831,7 @@ export default {
 
 	settingsSetOption: {
 		name: 'option',
-		description: 'The option to edit.',
+		description: 'The option to update.',
 		choices: {
 			initTrackerNotifications: {
 				name: 'initiative-tracker-notifications',

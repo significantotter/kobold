@@ -29,9 +29,9 @@ export default {
 			success: 'Yip! I removed the action {actionName}.',
 		},
 	},
-	edit: {
-		name: 'edit',
-		description: 'Edits an action. "none" clears a field.',
+	update: {
+		name: 'update',
+		description: 'Updates an action. "none" clears a field.',
 		interactions: {
 			success: 'Yip! {actionOption} was set to {newValue} for the action {actionName}.',
 			invalidActionType: 'Yip! The valid action types are "spell", "attack", and "other".',

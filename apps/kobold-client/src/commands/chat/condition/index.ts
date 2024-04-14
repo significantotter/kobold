@@ -2,6 +2,7 @@ import { CommandExport } from '../../command.js';
 import { ConditionApplyCustomSubCommand } from './condition-apply-custom-subcommand.js';
 import { ConditionApplyModifierSubCommand } from './condition-apply-modifier-subcommand.js';
 import { ConditionCommand } from './condition-command.js';
+import { ConditionListSubCommand } from './condition-list-subcommand.js';
 import { ConditionRemoveSubCommand } from './condition-remove-subcommand.js';
 import { ConditionSeveritySubCommand } from './condition-severity-subcommand.js';
 
@@ -10,6 +11,7 @@ export const ConditionCommandExport: CommandExport = {
 	subCommands: [
 		ConditionApplyCustomSubCommand,
 		ConditionApplyModifierSubCommand,
+		ConditionListSubCommand,
 		ConditionRemoveSubCommand,
 		ConditionSeveritySubCommand,
 	],

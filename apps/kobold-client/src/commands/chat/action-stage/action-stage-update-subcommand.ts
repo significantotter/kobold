@@ -19,12 +19,12 @@ import { ActionStageOptions } from './action-stage-command-options.js';
 import _ from 'lodash';
 import { LocalizedString } from 'typesafe-i18n';
 
-export class ActionStageEditSubCommand implements Command {
-	public names = [L.en.commands.actionStage.edit.name()];
+export class ActionStageUpdateSubCommand implements Command {
+	public names = [L.en.commands.actionStage.update.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.actionStage.edit.name(),
-		description: L.en.commands.actionStage.edit.description(),
+		name: L.en.commands.actionStage.update.name(),
+		description: L.en.commands.actionStage.update.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -69,7 +69,7 @@ export class ActionStageEditSubCommand implements Command {
 		}
 		if (option.name === ActionStageOptions.ACTION_STAGE_EDIT_OPTION.name) {
 			const allChoices = Object.entries(
-				L.en.commandOptions.actionStageStageEditOption.choices
+				L.en.commandOptions.actionStageStageUpdateOption.choices
 			).map(([name, value]: [string, any]) => ({
 				name: value.name(),
 				value: value.value(),
@@ -104,12 +104,12 @@ export class ActionStageEditSubCommand implements Command {
 			}
 			const roll = matchedAction.rolls[rollIndex];
 
-			let validEditOptions: (keyof typeof L.en.commandOptions.actionStageStageEditOption.choices)[] =
+			let validUpdateOptions: (keyof typeof L.en.commandOptions.actionStageStageUpdateOption.choices)[] =
 				[];
 			if (roll.type === 'attack' || roll.type === 'skill-challenge') {
-				validEditOptions = ['name', 'attackTargetDC', 'attackRoll', 'allowRollModifiers'];
+				validUpdateOptions = ['name', 'attackTargetDC', 'attackRoll', 'allowRollModifiers'];
 			} else if (roll.type === 'damage') {
-				validEditOptions = [
+				validUpdateOptions = [
 					'name',
 					'basicDamageRoll',
 					'allowRollModifiers',
@@ -117,7 +117,7 @@ export class ActionStageEditSubCommand implements Command {
 					'healInsteadOfDamage',
 				];
 			} else if (roll.type === 'advanced-damage') {
-				validEditOptions = [
+				validUpdateOptions = [
 					'name',
 					'damageType',
 					'advancedDamageSuccessRoll',
@@ -128,9 +128,9 @@ export class ActionStageEditSubCommand implements Command {
 					'healInsteadOfDamage',
 				];
 			} else if (roll.type === 'save') {
-				validEditOptions = ['name', 'saveRollType', 'saveTargetDC', 'allowRollModifiers'];
+				validUpdateOptions = ['name', 'saveRollType', 'saveTargetDC', 'allowRollModifiers'];
 			} else if (roll.type === 'text') {
-				validEditOptions = [
+				validUpdateOptions = [
 					'name',
 					'defaultText',
 					'successText',
@@ -144,7 +144,7 @@ export class ActionStageEditSubCommand implements Command {
 				return allChoices;
 			}
 			return Object.entries(
-				_.pick(L.en.commandOptions.actionStageStageEditOption.choices, validEditOptions)
+				_.pick(L.en.commandOptions.actionStageStageUpdateOption.choices, validUpdateOptions)
 			)
 				.map(([, value]) => ({
 					name: value.name(),
@@ -165,7 +165,7 @@ export class ActionStageEditSubCommand implements Command {
 			ActionStageOptions.ACTION_ROLL_TARGET_OPTION.name,
 			true
 		);
-		const fieldToEdit = intr.options.getString(
+		const fieldToUpdate = intr.options.getString(
 			ActionStageOptions.ACTION_STAGE_EDIT_OPTION.name,
 			true
 		);
@@ -199,9 +199,9 @@ export class ActionStageEditSubCommand implements Command {
 		const roll = matchedAction.rolls[rollIndex];
 
 		let invalid = false;
-		// validate the strings into different types based on which field is being edited
+		// validate the strings into different types based on which field is being updated
 		if (roll.type === 'attack' || roll.type === 'skill-challenge') {
-			if (!['name', 'targetDC', 'roll', 'allowRollModifiers'].includes(fieldToEdit)) {
+			if (!['name', 'targetDC', 'roll', 'allowRollModifiers'].includes(fieldToUpdate)) {
 				invalid = true;
 			}
 		} else if (roll.type === 'damage') {
@@ -212,7 +212,7 @@ export class ActionStageEditSubCommand implements Command {
 					'allowRollModifiers',
 					'damageType',
 					'healInsteadOfDamage',
-				].includes(fieldToEdit)
+				].includes(fieldToUpdate)
 			) {
 				invalid = true;
 			}
@@ -227,14 +227,14 @@ export class ActionStageEditSubCommand implements Command {
 					'criticalFailureRoll',
 					'allowRollModifiers',
 					'healInsteadOfDamage',
-				].includes(fieldToEdit)
+				].includes(fieldToUpdate)
 			) {
 				invalid = true;
 			}
 		} else if (roll.type === 'save') {
 			if (
 				!['name', 'saveRollType', 'saveTargetDC', 'allowRollModifiers'].includes(
-					fieldToEdit
+					fieldToUpdate
 				)
 			) {
 				invalid = true;
@@ -250,7 +250,7 @@ export class ActionStageEditSubCommand implements Command {
 					'criticalFailureText',
 					'allowRollModifiers',
 					'extraTags',
-				].includes(fieldToEdit)
+				].includes(fieldToUpdate)
 			) {
 				invalid = true;
 			}
@@ -261,17 +261,17 @@ export class ActionStageEditSubCommand implements Command {
 		if (invalid) {
 			await InteractionUtils.send(
 				intr,
-				LL.commands.actionStage.edit.interactions.invalidField({
+				LL.commands.actionStage.update.interactions.invalidField({
 					stageType: roll.type,
 				})
 			);
 			return;
 		}
 
-		// just in case we need to edit the name of the action, save it here
+		// just in case we need to update the name of the action, save it here
 		const currentActionName = roll.name;
 
-		// validate the strings into different types based on which field is being edited
+		// validate the strings into different types based on which field is being updated
 		let finalValue;
 
 		// string values
@@ -292,7 +292,7 @@ export class ActionStageEditSubCommand implements Command {
 				'criticalFailureText',
 				'saveRollType',
 				'saveTargetDC',
-			].includes(fieldToEdit)
+			].includes(fieldToUpdate)
 		) {
 			finalValue = newValue.trim();
 			if (['none', 'null', 'nil', 'undefined', ''].includes(finalValue.toLocaleLowerCase())) {
@@ -301,22 +301,22 @@ export class ActionStageEditSubCommand implements Command {
 		}
 
 		// boolean values
-		else if (['allowRollModifiers'].includes(fieldToEdit)) {
+		else if (['allowRollModifiers'].includes(fieldToUpdate)) {
 			finalValue = ['true', 'yes', '1', 'ok', 'okay'].includes(
 				newValue.toLocaleLowerCase().trim()
 			);
-		} else if (['textExtraTags'].includes(fieldToEdit)) {
+		} else if (['textExtraTags'].includes(fieldToUpdate)) {
 			finalValue = newValue.split(',').map(tag => tag.trim());
 		} else {
 			// invalid field
 			await InteractionUtils.send(
 				intr,
-				LL.commands.actionStage.edit.interactions.unknownField()
+				LL.commands.actionStage.update.interactions.unknownField()
 			);
 			return;
 		}
 		// TODO improve the typing in this file to avoid this explicit any
-		(roll as any)[fieldToEdit] = finalValue;
+		(roll as any)[fieldToUpdate] = finalValue;
 
 		if (moveTo === 'top') {
 			const roll = matchedAction.rolls.splice(rollIndex, 1)[0];
@@ -334,8 +334,8 @@ export class ActionStageEditSubCommand implements Command {
 		//send a confirmation message
 		await InteractionUtils.send(
 			intr,
-			LL.commands.actionStage.edit.interactions.success({
-				actionStageOption: fieldToEdit,
+			LL.commands.actionStage.update.interactions.success({
+				actionStageOption: fieldToUpdate,
 				newValue: newValue,
 				actionStageName: currentActionName,
 				actionName: matchedAction.name,

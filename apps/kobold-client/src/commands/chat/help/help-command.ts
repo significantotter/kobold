@@ -88,6 +88,12 @@ export class HelpCommand implements Command {
 				options: [],
 			},
 			{
+				name: L.en.commands.help.condition.name(),
+				description: L.en.commands.help.condition.description(),
+				type: ApplicationCommandOptionType.Subcommand,
+				options: [],
+			},
+			{
 				name: L.en.commands.help.game.name(),
 				description: L.en.commands.help.game.description(),
 				type: ApplicationCommandOptionType.Subcommand,
@@ -289,6 +295,15 @@ export class HelpCommand implements Command {
 							`\`/${LL.commands.init.name()} ${LL.commands.init.end.name()}\` ${LL.commands.init.end.description()}\n`,
 					},
 					{
+						name: LL.commands.condition.name(),
+						value:
+							`\`/${LL.commands.condition.name()} ${LL.commands.condition.applyCustom.name()}\` ${LL.commands.condition.applyCustom.description()}\n` +
+							`\`/${LL.commands.condition.name()} ${LL.commands.condition.applyModifier.name()}\` ${LL.commands.condition.applyModifier.description()}\n` +
+							`\`/${LL.commands.condition.name()} ${LL.commands.condition.list.name()}\` ${LL.commands.condition.list.description()}\n` +
+							`\`/${LL.commands.condition.name()} ${LL.commands.condition.remove.name()}\` ${LL.commands.condition.remove.description()}\n` +
+							`\`/${LL.commands.condition.name()} ${LL.commands.condition.severity.name()}\` ${LL.commands.condition.severity.description()}\n`,
+					},
+					{
 						name: LL.commands.modifier.name(),
 						value:
 							`\`/${LL.commands.modifier.name()} ${LL.commands.modifier.createModifier.name()}\` ${LL.commands.modifier.createModifier.description()}\n` +
@@ -323,7 +338,7 @@ export class HelpCommand implements Command {
 						value:
 							`\`/${LL.commands.action.name()} ${LL.commands.action.create.name()}\` ${LL.commands.action.create.description()}\n` +
 							`\`/${LL.commands.action.name()} ${LL.commands.action.detail.name()}\` ${LL.commands.action.detail.description()}\n` +
-							`\`/${LL.commands.action.name()} ${LL.commands.action.edit.name()}\` ${LL.commands.action.edit.description()}\n` +
+							`\`/${LL.commands.action.name()} ${LL.commands.action.update.name()}\` ${LL.commands.action.update.description()}\n` +
 							`\`/${LL.commands.action.name()} ${LL.commands.action.export.name()}\` ${LL.commands.action.export.description()}\n` +
 							`\`/${LL.commands.action.name()} ${LL.commands.action.import.name()}\` ${LL.commands.action.import.description()}\n` +
 							`\`/${LL.commands.action.name()} ${LL.commands.action.list.name()}\` ${LL.commands.action.list.description()}\n` +
@@ -342,7 +357,7 @@ export class HelpCommand implements Command {
 									addTextRollInput: '{{}}',
 								}
 							)}\n` +
-							`\`/${LL.commands.actionStage.name()} ${LL.commands.actionStage.edit.name()}\` ${LL.commands.actionStage.edit.description()}\n` +
+							`\`/${LL.commands.actionStage.name()} ${LL.commands.actionStage.update.name()}\` ${LL.commands.actionStage.update.description()}\n` +
 							`\`/${LL.commands.actionStage.name()} ${LL.commands.actionStage.remove.name()}\` ${LL.commands.actionStage.remove.description()}\n`,
 					},
 					{
@@ -430,6 +445,22 @@ export class HelpCommand implements Command {
 				);
 				break;
 			}
+			case L.en.commands.help.condition.name(): {
+				embed.setTitle(LL.commands.help.condition.interactions.embed.title());
+				embed.setDescription(LL.commands.help.condition.interactions.embed.description());
+				embed.addFields(
+					[
+						LL.commands.condition.applyCustom.name(),
+						LL.commands.condition.applyModifier.name(),
+						LL.commands.condition.list.name(),
+						LL.commands.condition.remove.name(),
+						LL.commands.condition.severity.name(),
+					].map(command =>
+						createCommandOperationHelpField(LL.commands.condition.name(), command, LL)
+					)
+				);
+				break;
+			}
 			case L.en.commands.help.modifier.name(): {
 				embed.setTitle(LL.commands.help.modifier.interactions.embed.title());
 				embed.setDescription(LL.commands.help.modifier.interactions.embed.description());
@@ -488,7 +519,7 @@ export class HelpCommand implements Command {
 						LL.commands.action.create.name(),
 						LL.commands.action.detail.name(),
 						LL.commands.action.list.name(),
-						LL.commands.action.edit.name(),
+						LL.commands.action.update.name(),
 						LL.commands.action.remove.name(),
 						LL.commands.action.export.name(),
 						LL.commands.action.import.name(),
@@ -508,7 +539,7 @@ export class HelpCommand implements Command {
 					LL.commands.actionStage.addSave.name(),
 					LL.commands.actionStage.addBasicDamage.name(),
 					LL.commands.actionStage.addAdvancedDamage.name(),
-					LL.commands.actionStage.edit.name(),
+					LL.commands.actionStage.update.name(),
 					LL.commands.actionStage.remove.name(),
 				].map(command =>
 					createCommandOperationHelpField(LL.commands.actionStage.name(), command, LL)

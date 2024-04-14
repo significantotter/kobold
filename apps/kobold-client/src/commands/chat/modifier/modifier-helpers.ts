@@ -28,7 +28,7 @@ export class ModifierHelpers {
 					.join(', ')}\``
 			);
 		if (modifier.rollAdjustment) {
-			modifierTextLines.push(`Roll Adjustments: \`${modifier.rollAdjustment}\``);
+			modifierTextLines.push(`Roll Adjustment: \`${modifier.rollAdjustment}\``);
 			modifierTextLines.push(`Roll Tags to Adjust: \`${modifier.rollTargetTags}\``);
 		}
 		return modifierTextLines.join('\n');

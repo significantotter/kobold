@@ -18,6 +18,7 @@ import { InjectedServices } from '../../command.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { ModifierOptions } from '../modifier/modifier-command-options.js';
 import { GameplayOptions } from '../gameplay/gameplay-command-options.js';
+import { ConditionOptions } from './condition-command-options.js';
 
 export class ConditionCommand implements Command {
 	public names = [L.en.commands.condition.name()];
@@ -35,7 +36,13 @@ export class ConditionCommand implements Command {
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					GameplayOptions.GAMEPLAY_TARGET_CHARACTER,
+					ModifierOptions.MODIFIER_NAME_OPTION,
 					ModifierOptions.MODIFIER_SEVERITY_VALUE,
+					ModifierOptions.MODIFIER_SHEET_VALUES_OPTION,
+					ModifierOptions.MODIFIER_ROLL_ADJUSTMENT,
+					ModifierOptions.MODIFIER_ROLL_TARGET_TAGS_OPTION,
+					ModifierOptions.MODIFIER_TYPE_OPTION,
+					ModifierOptions.MODIFIER_DESCRIPTION_OPTION,
 				],
 			},
 			{
@@ -44,26 +51,33 @@ export class ConditionCommand implements Command {
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					GameplayOptions.GAMEPLAY_TARGET_CHARACTER,
-					ModifierOptions.MODIFIER_NAME_OPTION,
-					ModifierOptions.MODIFIER_SHEET_VALUES_OPTION,
-					ModifierOptions.MODIFIER_ROLL_ADJUSTMENT,
-					ModifierOptions.MODIFIER_ROLL_TARGET_TAGS_OPTION,
-					ModifierOptions.MODIFIER_TYPE_OPTION,
-					ModifierOptions.MODIFIER_SEVERITY_VALUE,
-					ModifierOptions.MODIFIER_DESCRIPTION_OPTION,
+					ConditionOptions.MODIFIER_NAME_OPTION,
 				],
+			},
+			{
+				name: L.en.commands.condition.list.name(),
+				description: L.en.commands.condition.list.description(),
+				type: ApplicationCommandOptionType.Subcommand,
+				options: [GameplayOptions.GAMEPLAY_TARGET_CHARACTER],
 			},
 			{
 				name: L.en.commands.condition.remove.name(),
 				description: L.en.commands.condition.remove.description(),
 				type: ApplicationCommandOptionType.Subcommand,
-				options: [GameplayOptions.GAMEPLAY_TARGET_CHARACTER],
+				options: [
+					GameplayOptions.GAMEPLAY_TARGET_CHARACTER,
+					ConditionOptions.MODIFIER_NAME_OPTION,
+				],
 			},
 			{
 				name: L.en.commands.condition.severity.name(),
 				description: L.en.commands.condition.severity.description(),
 				type: ApplicationCommandOptionType.Subcommand,
-				options: [GameplayOptions.GAMEPLAY_TARGET_CHARACTER],
+				options: [
+					GameplayOptions.GAMEPLAY_TARGET_CHARACTER,
+					ConditionOptions.MODIFIER_NAME_OPTION,
+					{ ...ModifierOptions.MODIFIER_SEVERITY_VALUE, required: true },
+				],
 			},
 		],
 	};

@@ -191,7 +191,11 @@ export class AutocompleteUtils {
 		}));
 	}
 
-	public async getInitTargetOptions(intr: AutocompleteInteraction<CacheType>, matchText: string) {
+	public async getInitTargetOptions(
+		intr: AutocompleteInteraction<CacheType>,
+		matchText: string,
+		includeNone: boolean = true
+	) {
 		const currentInit = await this.koboldUtils.initiativeUtils.getInitiativeForChannelOrNull(
 			intr.channel
 		);
@@ -202,13 +206,14 @@ export class AutocompleteUtils {
 		);
 
 		//return the matched actors
-		return [
-			{ name: '(None)', value: '__NONE__' },
-			...actorOptions.map(actor => ({
-				name: actor.name,
-				value: actor.name,
-			})),
-		];
+		const results = actorOptions.map(actor => ({
+			name: actor.name,
+			value: actor.name,
+		}));
+
+		if (includeNone) results.unshift({ name: '(None)', value: '__NONE__' });
+
+		return results;
 	}
 
 	public async getMatchingRollsForInitiativeSheet(
@@ -256,7 +261,7 @@ export class AutocompleteUtils {
 		];
 
 		//return the matched actors, removing any duplicates
-		const result = _.uniqBy(allOptions, 'name').sort((a, b) => a.name.localeCompare(b.name));
+		const result = _.uniqBy(allOptions, 'name');
 
 		if (matchText.length)
 			return result.filter(option =>

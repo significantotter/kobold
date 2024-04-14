@@ -22,11 +22,11 @@ import { ModifierHelpers } from '../modifier/modifier-helpers.js';
 import { GameplayOptions } from '../gameplay/gameplay-command-options.js';
 
 export class ConditionSeveritySubCommand implements Command {
-	public names = [L.en.commands.modifier.severity.name()];
+	public names = [L.en.commands.condition.severity.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.modifier.severity.name(),
-		description: L.en.commands.modifier.severity.description(),
+		name: L.en.commands.condition.severity.name(),
+		description: L.en.commands.condition.severity.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -49,24 +49,29 @@ export class ConditionSeveritySubCommand implements Command {
 		if (option.name === ModifierOptions.MODIFIER_NAME_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
 			const match = intr.options.getString(ModifierOptions.MODIFIER_NAME_OPTION.name) ?? '';
+			const targetCharacterName =
+				intr.options.getString(GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name) ?? '';
 
-			//get the active character
-			const { characterUtils } = new KoboldUtils(kobold);
-			const activeCharacter = await characterUtils.getActiveCharacter(intr);
-			if (!activeCharacter) {
-				//no choices if we don't have a character to match against
-				return [];
+			const { gameUtils } = new KoboldUtils(kobold);
+			try {
+				const { targetSheetRecord } = await gameUtils.getCharacterOrInitActorTarget(
+					intr,
+					targetCharacterName
+				);
+				//find a save on the character matching the autocomplete string
+				const matchedConditions = FinderHelpers.matchAllConditions(
+					targetSheetRecord,
+					match
+				).map(condition => ({
+					name: condition.name,
+					value: condition.name,
+				}));
+				//return the matched saves
+				return matchedConditions;
+			} catch (err) {
+				// failed to match a target, so return []
+				return;
 			}
-			//find a save on the character matching the autocomplete string
-			const matchedModifiers = FinderHelpers.matchAllModifiers(
-				activeCharacter.sheetRecord,
-				match
-			).map(modifier => ({
-				name: modifier.name,
-				value: modifier.name,
-			}));
-			//return the matched saves
-			return matchedModifiers;
 		}
 	}
 
@@ -82,32 +87,33 @@ export class ConditionSeveritySubCommand implements Command {
 			.getString(ModifierOptions.MODIFIER_SEVERITY_VALUE.name, true)
 			.toLocaleLowerCase()
 			.trim();
-		const targetCharacter = intr.options.getString(
+		const targetCharacterName = intr.options.getString(
 			GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name,
 			true
 		);
+		const { gameUtils } = new KoboldUtils(kobold);
+		const targetCharacter = await gameUtils.getCharacterOrInitActorTarget(
+			intr,
+			targetCharacterName
+		);
 
 		//check if we have an active character
-		const koboldUtils = new KoboldUtils(kobold);
-		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
-			activeCharacter: true,
-		});
 
 		const targetCondition = FinderHelpers.getConditionByName(
-			activeCharacter.sheetRecord,
+			targetCharacter.targetSheetRecord,
 			conditionName
 		);
 		if (!targetCondition) {
 			// no matching modifier found
-			await InteractionUtils.send(intr, LL.commands.modifier.interactions.notFound());
+			await InteractionUtils.send(intr, LL.commands.condition.interactions.notFound());
 			return;
 		}
 		targetCondition.severity = ModifierHelpers.validateSeverity(newSeverity);
 
 		await kobold.sheetRecord.update(
-			{ id: activeCharacter.sheetRecordId },
+			{ id: targetCharacter.targetSheetRecord.id },
 			{
-				conditions: activeCharacter.sheetRecord.conditions,
+				conditions: targetCharacter.targetSheetRecord.conditions,
 			}
 		);
 

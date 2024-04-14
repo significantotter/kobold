@@ -19,6 +19,7 @@ export class SheetRecordModel extends Model<Database['sheetRecord']> {
 			.insertInto('sheetRecord')
 			.values({
 				...args,
+				conditions: args.conditions !== undefined ? sqlJSON(args.conditions) : undefined,
 				modifiers: args.modifiers !== undefined ? sqlJSON(args.modifiers) : undefined,
 				actions: args.modifiers !== undefined ? sqlJSON(args.actions) : undefined,
 				rollMacros: args.modifiers !== undefined ? sqlJSON(args.rollMacros) : undefined,
@@ -45,6 +46,7 @@ export class SheetRecordModel extends Model<Database['sheetRecord']> {
 			.updateTable('sheetRecord')
 			.set({
 				...args,
+				conditions: args.conditions !== undefined ? sqlJSON(args.conditions) : undefined,
 				modifiers: args.modifiers !== undefined ? sqlJSON(args.modifiers) : undefined,
 				actions: args.actions !== undefined ? sqlJSON(args.actions) : undefined,
 				rollMacros: args.rollMacros !== undefined ? sqlJSON(args.rollMacros) : undefined,

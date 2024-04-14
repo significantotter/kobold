@@ -25,11 +25,11 @@ import { ModifierOptions } from '../modifier/modifier-command-options.js';
 import { GameplayOptions } from '../gameplay/gameplay-command-options.js';
 
 export class ConditionRemoveSubCommand implements Command {
-	public names = [L.en.commands.modifier.remove.name()];
+	public names = [L.en.commands.condition.remove.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.modifier.remove.name(),
-		description: L.en.commands.modifier.remove.description(),
+		name: L.en.commands.condition.remove.name(),
+		description: L.en.commands.condition.remove.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -52,24 +52,29 @@ export class ConditionRemoveSubCommand implements Command {
 		if (option.name === ModifierOptions.MODIFIER_NAME_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
 			const match = intr.options.getString(ModifierOptions.MODIFIER_NAME_OPTION.name) ?? '';
+			const targetCharacterName =
+				intr.options.getString(GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name) ?? '';
 
-			//get the active character
-			const { characterUtils } = new KoboldUtils(kobold);
-			const activeCharacter = await characterUtils.getActiveCharacter(intr);
-			if (!activeCharacter) {
-				//no choices if we don't have a character to match against
-				return [];
+			const { gameUtils } = new KoboldUtils(kobold);
+			try {
+				const { targetSheetRecord } = await gameUtils.getCharacterOrInitActorTarget(
+					intr,
+					targetCharacterName
+				);
+				//find a save on the character matching the autocomplete string
+				const matchedConditions = FinderHelpers.matchAllConditions(
+					targetSheetRecord,
+					match
+				).map(condition => ({
+					name: condition.name,
+					value: condition.name,
+				}));
+				//return the matched saves
+				return matchedConditions;
+			} catch (err) {
+				// failed to match a target, so return []
+				return;
 			}
-			//find a save on the character matching the autocomplete string
-			const matchedConditions = FinderHelpers.matchAllConditions(
-				activeCharacter.sheetRecord,
-				match
-			).map(condition => ({
-				name: condition.name,
-				value: condition.name,
-			}));
-			//return the matched saves
-			return matchedConditions;
 		}
 	}
 
@@ -82,25 +87,25 @@ export class ConditionRemoveSubCommand implements Command {
 			ModifierOptions.MODIFIER_NAME_OPTION.name,
 			true
 		);
-		const targetCharacter = intr.options.getString(
+		const targetCharacterName = intr.options.getString(
 			GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name,
 			true
 		);
-		//get the active character
-		const koboldUtils = new KoboldUtils(kobold);
-		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
-			activeCharacter: true,
-		});
+		const { gameUtils } = new KoboldUtils(kobold);
+		const { targetSheetRecord } = await gameUtils.getCharacterOrInitActorTarget(
+			intr,
+			targetCharacterName
+		);
 		const targetCondition = FinderHelpers.getConditionByName(
-			activeCharacter.sheetRecord,
+			targetSheetRecord,
 			conditionChoice
 		);
 		if (targetCondition) {
 			// ask for confirmation
 
 			const prompt = await intr.reply({
-				content: LL.commands.modifier.remove.interactions.removeConfirmation.text({
-					modifierName: targetCondition.name,
+				content: LL.commands.condition.interactions.removeConfirmation.text({
+					conditionName: targetCondition.name,
 				}),
 				components: [
 					{
@@ -108,13 +113,13 @@ export class ConditionRemoveSubCommand implements Command {
 						components: [
 							{
 								type: ComponentType.Button,
-								label: LL.commands.modifier.remove.interactions.removeConfirmation.removeButton(),
+								label: LL.commands.condition.interactions.removeConfirmation.removeButton(),
 								customId: 'remove',
 								style: ButtonStyle.Danger,
 							},
 							{
 								type: ComponentType.Button,
-								label: LL.commands.modifier.remove.interactions.removeConfirmation.cancelButton(),
+								label: LL.commands.condition.interactions.removeConfirmation.cancelButton(),
 								customId: 'cancel',
 								style: ButtonStyle.Primary,
 							},
@@ -147,7 +152,7 @@ export class ConditionRemoveSubCommand implements Command {
 						timedOut = true;
 						await InteractionUtils.editReply(intr, {
 							content:
-								LL.commands.modifier.remove.interactions.removeConfirmation.expired(),
+								LL.commands.condition.interactions.removeConfirmation.expired(),
 							components: [],
 						});
 					},
@@ -161,39 +166,36 @@ export class ConditionRemoveSubCommand implements Command {
 					components: [],
 				});
 			}
-			// remove the modifier
+			// remove the condition
 			if (result && result.value === 'remove') {
-				const modifiersWithoutRemoved = _.filter(
-					activeCharacter.sheetRecord.modifiers,
-					modifier =>
-						modifier.name.toLocaleLowerCase() !== conditionChoice.toLocaleLowerCase()
+				const conditionsWithoutRemoved = _.filter(
+					targetSheetRecord.conditions,
+					condition =>
+						condition.name.toLocaleLowerCase() !== conditionChoice.toLocaleLowerCase()
 				);
 				await kobold.sheetRecord.update(
-					{ id: activeCharacter.sheetRecordId },
+					{ id: targetSheetRecord.id },
 					{
-						modifiers: modifiersWithoutRemoved,
+						conditions: conditionsWithoutRemoved,
 					}
 				);
 
 				await InteractionUtils.send(
 					intr,
-					LL.commands.modifier.remove.interactions.success({
-						modifierName: targetCondition.name,
+					LL.commands.condition.interactions.success({
+						conditionName: targetCondition.name,
 					})
 				);
 				return;
 			}
 			// cancel
 			else {
-				await InteractionUtils.send(
-					intr,
-					LL.commands.modifier.remove.interactions.cancel()
-				);
+				await InteractionUtils.send(intr, LL.commands.condition.interactions.cancel());
 				return;
 			}
 		} else {
-			// no matching modifier found
-			await InteractionUtils.send(intr, LL.commands.modifier.interactions.notFound());
+			// no matching condition found
+			await InteractionUtils.send(intr, LL.commands.condition.interactions.notFound());
 			return;
 		}
 	}

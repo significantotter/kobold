@@ -33,11 +33,11 @@ import { ModifierHelpers } from '../modifier/modifier-helpers.js';
 import { ModifierOptions } from '../modifier/modifier-command-options.js';
 
 export class ConditionApplyCustomSubCommand implements Command {
-	public names = [L.en.commands.modifier.createModifier.name()];
+	public names = [L.en.commands.condition.applyCustom.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.modifier.createModifier.name(),
-		description: L.en.commands.modifier.createModifier.description(),
+		name: L.en.commands.condition.applyCustom.name(),
+		description: L.en.commands.condition.applyCustom.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -96,8 +96,6 @@ export class ConditionApplyCustomSubCommand implements Command {
 		);
 		let rollTargetTags = rollTargetTagsUnparsed ? rollTargetTagsUnparsed.trim() : null;
 
-		const modifierSeverityValidated = ModifierHelpers.validateSeverity(modifierSeverity);
-
 		const description = intr.options.getString(
 			ModifierOptions.MODIFIER_DESCRIPTION_OPTION.name
 		);
@@ -143,10 +141,7 @@ export class ConditionApplyCustomSubCommand implements Command {
 				compileExpression(rollTargetTags);
 			} catch (err) {
 				// the tags are in an invalid format
-				await InteractionUtils.send(
-					intr,
-					LL.commands.modifier.createModifier.interactions.invalidTags()
-				);
+				await InteractionUtils.send(intr, LL.commands.condition.interactions.invalidTags());
 				return;
 			}
 
@@ -156,7 +151,7 @@ export class ConditionApplyCustomSubCommand implements Command {
 					rollExpression: String(rollAdjustment),
 					extraAttributes: [
 						{
-							value: modifierSeverityValidated ?? 0,
+							value: 1,
 							type: modifierType,
 							name: 'severity',
 							tags: [],
@@ -168,7 +163,7 @@ export class ConditionApplyCustomSubCommand implements Command {
 			} catch (err) {
 				await InteractionUtils.send(
 					intr,
-					LL.commands.modifier.createModifier.interactions.doesntEvaluateError()
+					LL.commands.condition.interactions.doesntEvaluateError()
 				);
 				return;
 			}
@@ -184,8 +179,8 @@ export class ConditionApplyCustomSubCommand implements Command {
 		if (FinderHelpers.getModifierByName(targetSheetRecord, name)) {
 			await InteractionUtils.send(
 				intr,
-				LL.commands.modifier.createModifier.interactions.alreadyExists({
-					modifierName: name,
+				LL.commands.condition.interactions.alreadyExists({
+					conditionName: name,
 					characterName: targetSheetRecord.sheet.staticInfo.name,
 				})
 			);
@@ -197,11 +192,14 @@ export class ConditionApplyCustomSubCommand implements Command {
 			isActive: true,
 			description,
 			type: modifierType,
-			severity: modifierSeverityValidated,
+			severity: null,
 			sheetAdjustments: parsedSheetAdjustments,
 			rollTargetTags,
 			rollAdjustment,
 		};
+		if (modifierSeverity != null) {
+			newModifier.severity = ModifierHelpers.validateSeverity(modifierSeverity);
+		}
 
 		// make sure that the adjustments are valid and can be applied to a sheet
 		SheetUtils.adjustSheetWithModifiers(targetSheetRecord.sheet, [newModifier]);
@@ -216,8 +214,8 @@ export class ConditionApplyCustomSubCommand implements Command {
 		//send a response
 		await InteractionUtils.send(
 			intr,
-			LL.commands.modifier.createModifier.interactions.created({
-				modifierName: name,
+			LL.commands.condition.interactions.created({
+				conditionName: name,
 				characterName: targetSheetRecord.sheet.staticInfo.name,
 			})
 		);

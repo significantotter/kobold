@@ -39,11 +39,13 @@ sheet.additionalSkills.push({
 sheet.staticInfo.level = 2;
 sheet.weaknessesResistances.resistances.push({ type: 'fire', amount: 5 });
 sheet.weaknessesResistances.weaknesses.push({ type: 'cold', amount: 5 });
-const creature = new Creature(
+const creature = new Creature({
 	sheet,
-	{ actions: [], modifiers: [], rollMacros: [] },
-	'test creature'
-);
+	actions: [],
+	rollMacros: [],
+	modifiers: [],
+	conditions: [],
+});
 
 describe('computedSheetProperties', () => {
 	it('should correctly compute attributes for a given creature', () => {

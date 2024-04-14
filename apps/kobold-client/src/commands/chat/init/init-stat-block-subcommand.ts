@@ -76,15 +76,7 @@ export class InitStatBlockSubCommand implements Command {
 		);
 
 		let sheetEmbed: KoboldEmbed;
-		const creature = new Creature(
-			actor.sheetRecord.sheet,
-			{
-				actions: actor.sheetRecord.actions,
-				modifiers: actor.sheetRecord.modifiers,
-				rollMacros: actor.sheetRecord.rollMacros,
-			},
-			actor.name
-		);
+		const creature = new Creature(actor.sheetRecord);
 		sheetEmbed = creature.compileEmbed('Sheet');
 
 		await InteractionUtils.send(intr, sheetEmbed, isSecretMessage);

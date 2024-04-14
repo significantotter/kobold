@@ -67,8 +67,8 @@ export class ActionCommand implements Command {
 				],
 			},
 			{
-				name: L.en.commands.action.edit.name(),
-				description: L.en.commands.action.edit.description(),
+				name: L.en.commands.action.update.name(),
+				description: L.en.commands.action.update.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					ActionOptions.ACTION_TARGET_OPTION,
