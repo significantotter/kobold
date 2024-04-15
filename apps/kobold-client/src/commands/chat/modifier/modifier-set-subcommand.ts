@@ -156,7 +156,7 @@ export class ModifierSetSubCommand implements Command {
 			});
 			if (!newFieldValue) targetModifier.description = null;
 			else targetModifier.description = newFieldValue;
-		} else if (fieldToChange === 'note') {
+		} else if (fieldToChange === 'initiative-note') {
 			if (!newFieldValue) targetModifier.note = null;
 			else
 				targetModifier.note = InputParseUtils.parseAsNullableString(newFieldValue, {

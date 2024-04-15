@@ -158,7 +158,7 @@ export class ConditionSetSubCommand implements Command {
 			});
 			if (!newFieldValue) targetCondition.description = null;
 			else targetCondition.description = newFieldValue;
-		} else if (fieldToChange === 'note') {
+		} else if (fieldToChange === 'initiative-note') {
 			if (!newFieldValue) targetCondition.note = null;
 			else
 				targetCondition.note = InputParseUtils.parseAsNullableString(newFieldValue, {
