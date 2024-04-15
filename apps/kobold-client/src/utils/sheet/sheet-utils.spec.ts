@@ -64,6 +64,7 @@ describe('SheetUtils', () => {
 					],
 					rollAdjustment: null,
 					rollTargetTags: null,
+					note: null,
 				},
 				{
 					name: 'foo',
@@ -82,6 +83,7 @@ describe('SheetUtils', () => {
 					],
 					rollAdjustment: null,
 					rollTargetTags: null,
+					note: null,
 				},
 				{
 					name: 'bar',
@@ -92,6 +94,7 @@ describe('SheetUtils', () => {
 					rollAdjustment: '1d4',
 					rollTargetTags: 'attack',
 					sheetAdjustments: [],
+					note: null,
 				},
 			];
 			const adjustedSheet = SheetUtils.adjustSheetWithModifiers(sheet, modifiers);
@@ -120,6 +123,7 @@ describe('SheetUtils', () => {
 					],
 					rollAdjustment: null,
 					rollTargetTags: null,
+					note: null,
 				},
 				{
 					name: 'bar',
@@ -130,6 +134,7 @@ describe('SheetUtils', () => {
 					rollAdjustment: '1d4',
 					rollTargetTags: 'attack',
 					sheetAdjustments: [],
+					note: null,
 				},
 			];
 			const adjustedSheet = SheetUtils.adjustSheetWithModifiers(sheet, modifiers);

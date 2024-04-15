@@ -55,7 +55,7 @@ export class AutocompleteUtils {
 			//no choices if we don't have a character to match against
 			return [];
 		}
-		const creature = Creature.fromSheetRecord(activeCharacter.sheetRecord);
+		const creature = new Creature(activeCharacter.sheetRecord);
 
 		//find a save on the character matching the autocomplete string
 		const matchedActions = FinderHelpers.matchAllActions(
@@ -82,7 +82,7 @@ export class AutocompleteUtils {
 			return [];
 		}
 
-		const creature = Creature.fromSheetRecord(character.sheetRecord);
+		const creature = new Creature(character.sheetRecord);
 
 		// add skills
 		const matchedSkills = FinderHelpers.matchAllSkills(creature, matchText).map(
@@ -233,7 +233,7 @@ export class AutocompleteUtils {
 			false
 		);
 
-		const creature = Creature.fromSheetRecord(actor.sheetRecord);
+		const creature = new Creature(actor.sheetRecord);
 
 		const allRolls = _.uniq([
 			..._.keys(creature.attackRolls),

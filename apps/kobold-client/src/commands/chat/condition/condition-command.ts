@@ -37,12 +37,13 @@ export class ConditionCommand implements Command {
 				options: [
 					GameplayOptions.GAMEPLAY_TARGET_CHARACTER,
 					ModifierOptions.MODIFIER_NAME_OPTION,
-					ModifierOptions.MODIFIER_SEVERITY_VALUE,
+					ModifierOptions.MODIFIER_SEVERITY_VALUE_OPTION,
 					ModifierOptions.MODIFIER_SHEET_VALUES_OPTION,
 					ModifierOptions.MODIFIER_ROLL_ADJUSTMENT,
 					ModifierOptions.MODIFIER_ROLL_TARGET_TAGS_OPTION,
 					ModifierOptions.MODIFIER_TYPE_OPTION,
 					ModifierOptions.MODIFIER_DESCRIPTION_OPTION,
+					ModifierOptions.MODIFIER_INITIATIVE_NOTE_OPTION,
 				],
 			},
 			{
@@ -91,7 +92,7 @@ export class ConditionCommand implements Command {
 				options: [
 					GameplayOptions.GAMEPLAY_TARGET_CHARACTER,
 					ConditionOptions.CONDITION_NAME_OPTION,
-					{ ...ModifierOptions.MODIFIER_SEVERITY_VALUE, required: true },
+					{ ...ModifierOptions.MODIFIER_SEVERITY_VALUE_OPTION, required: true },
 				],
 			},
 		],

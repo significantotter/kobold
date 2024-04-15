@@ -21,6 +21,7 @@ import { ModifierOptions } from '../modifier/modifier-command-options.js';
 import { ModifierHelpers } from '../modifier/modifier-helpers.js';
 import { GameplayOptions } from '../gameplay/gameplay-command-options.js';
 import { ConditionOptions } from './condition-command-options.js';
+import { InputParseUtils } from '../../../utils/input-parse-utils.js';
 
 export class ConditionSeveritySubCommand implements Command {
 	public names = [L.en.commands.condition.severity.name()];
@@ -72,7 +73,7 @@ export class ConditionSeveritySubCommand implements Command {
 			.getString(ConditionOptions.CONDITION_NAME_OPTION.name, true)
 			.trim();
 		const newSeverity = intr.options
-			.getString(ModifierOptions.MODIFIER_SEVERITY_VALUE.name, true)
+			.getString(ModifierOptions.MODIFIER_SEVERITY_VALUE_OPTION.name, true)
 			.toLocaleLowerCase()
 			.trim();
 		const targetCharacterName = intr.options.getString(
@@ -96,7 +97,7 @@ export class ConditionSeveritySubCommand implements Command {
 			await InteractionUtils.send(intr, LL.commands.condition.interactions.notFound());
 			return;
 		}
-		targetCondition.severity = ModifierHelpers.validateSeverity(newSeverity);
+		targetCondition.severity = InputParseUtils.parseAsNullableNumber(newSeverity);
 
 		await kobold.sheetRecord.update(
 			{ id: targetCharacter.targetSheetRecord.id },

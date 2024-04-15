@@ -21,6 +21,7 @@ import { Command, CommandDeferType } from '../../index.js';
 import { GameplayOptions } from '../gameplay/gameplay-command-options.js';
 import { ModifierHelpers } from '../modifier/modifier-helpers.js';
 import { ModifierOptions } from '../modifier/modifier-command-options.js';
+import { InputParseUtils } from '../../../utils/input-parse-utils.js';
 
 export class ConditionApplyModifierSubCommand implements Command {
 	public names = [L.en.commands.condition.applyModifier.name()];
@@ -47,7 +48,6 @@ export class ConditionApplyModifierSubCommand implements Command {
 			const { autocompleteUtils } = new KoboldUtils(kobold);
 			return await autocompleteUtils.getAllTargetOptions(intr, match);
 		}
-		console.log(option.name);
 		if (option.name === ModifierOptions.MODIFIER_NAME_OPTION.name) {
 			const match = intr.options.getString(ModifierOptions.MODIFIER_NAME_OPTION.name) ?? '';
 
@@ -116,13 +116,11 @@ export class ConditionApplyModifierSubCommand implements Command {
 		}
 
 		const modifierSeverity =
-			intr.options.getString(ModifierOptions.MODIFIER_SEVERITY_VALUE.name) ?? null;
+			intr.options.getString(ModifierOptions.MODIFIER_SEVERITY_VALUE_OPTION.name) ?? null;
 
-		if (modifierSeverity != null) {
-			const modifierSeverityValidated = ModifierHelpers.validateSeverity(modifierSeverity);
+		const modifierSeverityValidated = InputParseUtils.parseAsNullableNumber(modifierSeverity);
+		modifier.severity = modifierSeverityValidated;
 
-			modifier.severity = modifierSeverityValidated;
-		}
 		modifier.isActive = true;
 
 		// make sure the name does't already exist in the character's modifiers

@@ -4,10 +4,13 @@ import L from '../i18n/i18n-node.js';
 import { TranslationFunctions } from '../i18n/i18n-types.js';
 import {
 	CharacterWithRelations,
+	InitStatsNotificationEnum,
 	InitiativeActor,
 	InitiativeActorGroup,
 	InitiativeActorWithRelations,
 	InitiativeWithRelations,
+	InlineRollsDisplayEnum,
+	RollCompactModeEnum,
 	UserSettings,
 } from 'kobold-db';
 import { KoboldError } from './KoboldError.js';
@@ -219,6 +222,92 @@ export class InitiativeBuilder {
 	}
 
 	/**
+	 * Note, this does not also display the initiative value. That is part of the
+	 * group display text found in getActorGroupTurnText().
+	 */
+	public getActorTurnText(
+		actor: InitiativeActorWithRelations,
+		isActive: boolean,
+		options: {
+			showHiddenCreatureStats?: boolean;
+		} = { showHiddenCreatureStats: false }
+	) {
+		let noteSymbol = '.';
+		if (isActive) {
+			noteSymbol = '>';
+		}
+		let turnText = '';
+
+		// generate any stats for the actor (hp, thp, etc.)
+		turnText += this.generateActorStatDisplayString(actor, options);
+
+		// prepare our roll builder for if we need to parse inline rolls in notes
+		const rollBuilder = new RollBuilder({
+			actorName: actor.name,
+			creature: new Creature(actor.sheetRecord),
+			userSettings: {
+				initStatsNotification: InitStatsNotificationEnum.never,
+				rollCompactMode: RollCompactModeEnum.compact,
+				inlineRollsDisplay: InlineRollsDisplayEnum.compact,
+				userId: '',
+			},
+		});
+
+		// find any notes on the actor's sheet from active modifiers or conditions
+		const sheetNotes = [...actor.sheetRecord.modifiers, ...actor.sheetRecord.conditions]
+			.filter(modifier => modifier.isActive)
+			.map(modifier => {
+				if (modifier?.note?.includes('{{') && modifier?.note?.includes('}}')) {
+					// evaluate any inline rolls in the note
+					// using the modifier's severity as an attribute
+					return rollBuilder.evaluateRollsInText({
+						text: modifier.note,
+						extraAttributes: [
+							{
+								name: 'severity',
+								value: modifier.severity ?? 0,
+								type: modifier.type,
+								tags: [],
+								aliases: [],
+							},
+						],
+						wrapChar: '',
+					});
+				}
+				return modifier?.note;
+			});
+
+		// parse any inline rolls for custom notes on the actor
+		let actorNote = actor?.note;
+		if (actorNote) {
+			if (actorNote.includes('{{') && actorNote.includes('}}')) {
+				actorNote = rollBuilder.evaluateRollsInText({
+					text: actorNote,
+					wrapChar: '',
+				});
+			}
+		}
+		// split the custom notes into multiple lines based on the separators
+		const actorNotes = actorNote.split(/\\n|\|/);
+
+		// remove any notes that are null or empty strings after parsing
+		const allNotes: string[] = [...sheetNotes, ...actorNotes].filter(
+			(note): note is string => note != null && note.trim() !== ''
+		);
+
+		// if we have any notes:
+		if (allNotes.length) {
+			// add a blank note to the beginning of the list to ensure the first note
+			// has the correct prefix
+			allNotes.unshift('');
+			let noteText = `${allNotes.map(text => text.trim()).join(`\n${noteSymbol}     `)}`;
+			// add the resulting note text to the turn text
+			turnText += noteText;
+		}
+		return turnText;
+	}
+
+	/**
 	 * Creates a string that displays information for an actor group in an initiative display
 	 * @param actorGroup The actor group to generate text for
 	 */
@@ -232,33 +321,19 @@ export class InitiativeBuilder {
 		const isActiveGroup = this.init.currentTurnGroupId === actorGroup.id;
 		let turnText = '';
 		let turnSymbol = ' ';
-		let noteSymbol = '.';
 		if (isActiveGroup) {
 			turnSymbol = '#';
-			noteSymbol = '>';
 		}
 		turnText += '\n';
 		if (actorsInGroup.length === 1 && actorsInGroup[0].name === actorGroup.name) {
-			//We're just displaying the actor in its initiative slot
 			turnText += `${turnSymbol} ${actorGroup.initiativeResult}: ${actorGroup.name}`;
-			turnText += this.generateActorStatDisplayString(actorsInGroup[0], options);
-			if (actorsInGroup[0].note)
-				turnText += `\\n${actorsInGroup[0].note}`
-					.split(/\\n|\|/)
-					.map(text => text.trim())
-					.join(`\n${noteSymbol}     `);
+			turnText += this.getActorTurnText(actorsInGroup[0], isActiveGroup, options);
 		} else {
 			turnText += `${turnSymbol} ${actorGroup.initiativeResult}. ${actorGroup.name}\n`;
 			const sortedActors = actorsInGroup.sort((a, b) => a.name.localeCompare(b.name));
 			for (let i = 0; i < sortedActors.length; i++) {
 				turnText += `       ${i}. ${sortedActors[i].name}`;
-				turnText += this.generateActorStatDisplayString(sortedActors[i], options);
-				turnText += `\n`;
-				if (sortedActors[i].note)
-					turnText += `\\n${sortedActors[i].note}`
-						.split(/\\n|\|/)
-						.map(text => text.trim())
-						.join(`\n${noteSymbol}    `);
+				turnText += this.getActorTurnText(sortedActors[i], isActiveGroup, options);
 			}
 		}
 		return turnText;
@@ -380,7 +455,7 @@ export class InitiativeBuilderUtils {
 			finalInitiative = initiativeValue;
 		} else if (skillChoice) {
 			rollBuilderResponse = await RollBuilder.fromSimpleCreatureRoll({
-				creature: Creature.fromSheetRecord(character.sheetRecord),
+				creature: new Creature(character.sheetRecord),
 				attributeName: skillChoice,
 				modifierExpression: diceExpression,
 				tags: ['initiative'],
@@ -402,7 +477,7 @@ export class InitiativeBuilderUtils {
 			finalInitiative = rollBuilderResponse.getRollTotalArray()[0] ?? 0;
 		} else {
 			rollBuilderResponse = await RollBuilder.fromSimpleCreatureRoll({
-				creature: Creature.fromSheetRecord(character.sheetRecord),
+				creature: new Creature(character.sheetRecord),
 				attributeName: 'perception',
 				modifierExpression: diceExpression,
 				tags: ['initiative'],

@@ -62,7 +62,7 @@ export class RollBuilder {
 		this.footer = '';
 		this.creature = creature || null;
 		if (character && !this.creature) {
-			this.creature = Creature.fromSheetRecord(character.sheetRecord);
+			this.creature = new Creature(character.sheetRecord);
 		}
 		this.targetCreature = targetCreature || null;
 		this.userSettings = userSettings ?? {
@@ -292,16 +292,18 @@ export class RollBuilder {
 		}
 	}
 
-	evaluateRollsInText({
+	public evaluateRollsInText({
 		text,
 		extraAttributes,
 		skipModifiers = false,
 		tags,
+		wrapChar = '`',
 	}: {
 		text: string;
 		skipModifiers?: boolean;
 		extraAttributes?: Attribute[];
 		tags?: string[];
+		wrapChar?: string;
 	}) {
 		// parse and evaluate any rolls in the text
 		const finalString = [];
@@ -323,11 +325,11 @@ export class RollBuilder {
 						this.userSettings?.inlineRollsDisplay === 'compact' ||
 						rollResult.results.renderedExpression == rollResult.results.total.toString()
 					) {
-						resultText = '`' + rollResult.results.total.toString() + '`';
+						resultText = wrapChar + rollResult.results.total.toString() + wrapChar;
 					} else {
-						resultText = `\`${
+						resultText = `${wrapChar}${
 							rollResult.results.total
-						}="${rollResult.results.renderedExpression.toString()}"\``;
+						}="${rollResult.results.renderedExpression.toString()}"${wrapChar}`;
 					}
 					finalString.push(resultText, postRollExpressionText);
 				} catch (err) {
@@ -335,7 +337,7 @@ export class RollBuilder {
 						return `Failed to parse ${err.diceExpression}`;
 					else {
 						console.warn(err);
-						return `Failed to parse the provided roll`;
+						return `Failed to parse a roll clause within a {{ }} block in this text: "${text}"`;
 					}
 				}
 			} else {

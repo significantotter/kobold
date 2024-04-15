@@ -70,8 +70,9 @@ export class ModifierCommand implements Command {
 					ModifierOptions.MODIFIER_ROLL_ADJUSTMENT,
 					ModifierOptions.MODIFIER_ROLL_TARGET_TAGS_OPTION,
 					ModifierOptions.MODIFIER_TYPE_OPTION,
-					ModifierOptions.MODIFIER_SEVERITY_VALUE,
+					ModifierOptions.MODIFIER_SEVERITY_VALUE_OPTION,
 					ModifierOptions.MODIFIER_DESCRIPTION_OPTION,
+					ModifierOptions.MODIFIER_INITIATIVE_NOTE_OPTION,
 				],
 			},
 			{
@@ -97,7 +98,7 @@ export class ModifierCommand implements Command {
 						choices: undefined,
 					},
 					{
-						...ModifierOptions.MODIFIER_SEVERITY_VALUE,
+						...ModifierOptions.MODIFIER_SEVERITY_VALUE_OPTION,
 						required: true,
 					},
 				],

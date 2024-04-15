@@ -10,21 +10,19 @@ import {
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 
-import { compileExpression } from 'filtrex';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold, SheetAdjustmentTypeEnum } from 'kobold-db';
 import { KoboldError } from '../../../utils/KoboldError.js';
 import { Creature } from '../../../utils/creature.js';
-import { DiceUtils } from '../../../utils/dice-utils.js';
 import { InteractionUtils, StringUtils } from '../../../utils/index.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { SheetUtils } from '../../../utils/sheet/sheet-utils.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { ModifierOptions } from './modifier-command-options.js';
 import _ from 'lodash';
+import { InputParseUtils } from '../../../utils/input-parse-utils.js';
 
 export class ModifierSetSubCommand implements Command {
 	public names = [L.en.commands.modifier.set.name()];
@@ -102,45 +100,24 @@ export class ModifierSetSubCommand implements Command {
 		}
 
 		// validate the updates
-		if (fieldToChange === L.en.commandOptions.modifierUpdateOption.choices.name.value()) {
-			//a name can't be an empty string
-			if (newFieldValue === '') {
-				await InteractionUtils.send(
-					intr,
-					LL.commands.modifier.set.interactions.emptyNameError()
-				);
-				return;
-				//a name can't already be a modifier
-			} else if (
-				FinderHelpers.getModifierByName(activeCharacter.sheetRecord, newFieldValue)
-			) {
-				await InteractionUtils.send(
-					intr,
-					LL.commands.modifier.set.interactions.nameExistsError()
-				);
-				return;
+		if (fieldToChange === L.en.commandOptions.modifierSetOption.choices.name.value()) {
+			if (FinderHelpers.getModifierByName(activeCharacter.sheetRecord, newFieldValue)) {
+				throw new KoboldError(LL.commands.modifier.set.interactions.nameExistsError());
 			} else {
-				targetModifier.name = newFieldValue;
+				targetModifier.name = InputParseUtils.parseAsString(newFieldValue, {
+					minLength: 3,
+					maxLength: 20,
+				});
 			}
 		} else if (
-			fieldToChange ===
-			L.en.commandOptions.modifierUpdateOption.choices.rollAdjustment.value()
+			fieldToChange === L.en.commandOptions.modifierSetOption.choices.rollAdjustment.value()
 		) {
 			try {
 				// we must be able to evaluate the modifier as a roll for this character
-				DiceUtils.parseAndEvaluateDiceExpression({
-					rollExpression: newFieldValue,
-					extraAttributes: [
-						{
-							name: 'severity',
-							value: targetModifier.severity ?? 0,
-							type: targetModifier.type,
-							tags: [],
-							aliases: [],
-						},
-					],
-					creature: Creature.fromSheetRecord(activeCharacter.sheetRecord),
-				});
+				InputParseUtils.isValidDiceExpression(
+					newFieldValue,
+					new Creature(activeCharacter.sheetRecord)
+				);
 				targetModifier.rollAdjustment = newFieldValue;
 			} catch (err) {
 				await InteractionUtils.send(
@@ -150,20 +127,15 @@ export class ModifierSetSubCommand implements Command {
 				return;
 			}
 		} else if (
-			fieldToChange ===
-			L.en.commandOptions.modifierUpdateOption.choices.rollTargetTags.value()
+			fieldToChange === L.en.commandOptions.modifierSetOption.choices.rollTargetTags.value()
 		) {
 			fieldToChange = 'rollTargetTags';
 			// parse the target tags
-			try {
-				compileExpression(newFieldValue);
-			} catch (err) {
+			if (!InputParseUtils.isValidRollTargetTags(newFieldValue)) {
 				// the tags are in an invalid format
-				await InteractionUtils.send(
-					intr,
-					LL.commands.modifier.createModifier.interactions.invalidTags()
+				throw new KoboldError(
+					LL.commands.modifier.createModifier.interactions.invalidTags.toString()
 				);
-				return;
 			}
 			targetModifier.rollTargetTags = newFieldValue;
 		} else if (fieldToChange === 'type') {
@@ -179,19 +151,22 @@ export class ModifierSetSubCommand implements Command {
 				);
 			}
 		} else if (fieldToChange === 'description') {
+			targetModifier.description = InputParseUtils.parseAsNullableString(newFieldValue, {
+				maxLength: 300,
+			});
 			if (!newFieldValue) targetModifier.description = null;
 			else targetModifier.description = newFieldValue;
+		} else if (fieldToChange === 'note') {
+			if (!newFieldValue) targetModifier.note = null;
+			else
+				targetModifier.note = InputParseUtils.parseAsNullableString(newFieldValue, {
+					maxLength: 40,
+				});
 		} else if (fieldToChange === 'severity') {
-			if (newFieldValue == null) targetModifier.severity = null;
-			if (!/[0-9]+(\.[0-9]*)?/.test(newFieldValue.trim()))
-				throw new KoboldError('Severity must be a number');
-			else targetModifier.severity = Number(newFieldValue);
+			targetModifier.severity = InputParseUtils.parseAsNullableNumber(newFieldValue);
 		} else if (fieldToChange === 'sheet-values') {
-			targetModifier.sheetAdjustments = SheetUtils.stringToSheetAdjustments(newFieldValue);
-			// attempt to use the adjustments to make sure they're valid
-			SheetUtils.adjustSheetWithModifiers(activeCharacter.sheetRecord.sheet, [
-				targetModifier,
-			]);
+			targetModifier.sheetAdjustments =
+				InputParseUtils.parseAsSheetAdjustments(newFieldValue);
 		} else {
 			// if a field wasn't provided, or the field isn't present in our options, send an error
 			await InteractionUtils.send(

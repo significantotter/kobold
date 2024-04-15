@@ -50,5 +50,6 @@ export const zModifier = z
 		sheetAdjustments: z.array(zSheetAdjustment).default([]),
 		rollAdjustment: z.coerce.string().nullable().default(null),
 		rollTargetTags: z.string().nullable().default(null),
+		note: z.string().nullable().default(null),
 	})
 	.describe('A modifier is a bonus or penalty that can be applied to rolls or sheet properties.');

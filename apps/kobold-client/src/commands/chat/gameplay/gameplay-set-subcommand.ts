@@ -65,7 +65,7 @@ export class GameplaySetSubCommand implements Command {
 		const { targetSheetRecord, hideStats, targetName } =
 			await gameUtils.getCharacterOrInitActorTarget(intr, targetCharacter);
 
-		const creature = Creature.fromSheetRecord(targetSheetRecord);
+		const creature = new Creature(targetSheetRecord);
 
 		const { initialValue, updatedValue } = await gameplayUtils.setGameplayStats(
 			intr,

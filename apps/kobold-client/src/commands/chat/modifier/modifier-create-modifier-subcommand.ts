@@ -26,6 +26,7 @@ import { ModifierHelpers } from './modifier-helpers.js';
 import { compileExpression } from 'filtrex';
 import { DiceUtils } from '../../../utils/dice-utils.js';
 import { Creature } from '../../../utils/creature.js';
+import { InputParseUtils } from '../../../utils/input-parse-utils.js';
 
 export class ModifierCreateModifierSubCommand implements Command {
 	public names = [L.en.commands.modifier.createModifier.name()];
@@ -60,7 +61,7 @@ export class ModifierCreateModifierSubCommand implements Command {
 			.trim()
 			.toLowerCase();
 		const modifierSeverity =
-			intr.options.getString(ModifierOptions.MODIFIER_SEVERITY_VALUE.name) ?? null;
+			intr.options.getString(ModifierOptions.MODIFIER_SEVERITY_VALUE_OPTION.name) ?? null;
 
 		const rollAdjustment = intr.options.getString(
 			ModifierOptions.MODIFIER_ROLL_ADJUSTMENT.name
@@ -70,11 +71,8 @@ export class ModifierCreateModifierSubCommand implements Command {
 		);
 		let rollTargetTags = rollTargetTagsUnparsed ? rollTargetTagsUnparsed.trim() : null;
 
-		const modifierSeverityValidated = ModifierHelpers.validateSeverity(modifierSeverity);
-
-		const description = intr.options.getString(
-			ModifierOptions.MODIFIER_DESCRIPTION_OPTION.name
-		);
+		let description = intr.options.getString(ModifierOptions.MODIFIER_DESCRIPTION_OPTION.name);
+		let note = intr.options.getString(ModifierOptions.MODIFIER_INITIATIVE_NOTE_OPTION.name);
 		const modifierSheetValues = intr.options.getString(
 			ModifierOptions.MODIFIER_SHEET_VALUES_OPTION.name
 		);
@@ -113,46 +111,29 @@ export class ModifierCreateModifierSubCommand implements Command {
 
 		if (rollAdjustment && rollTargetTags) {
 			// the tags for the modifier have to be valid
-			try {
-				compileExpression(rollTargetTags);
-			} catch (err) {
-				// the tags are in an invalid format
-				await InteractionUtils.send(
-					intr,
+			if (!InputParseUtils.isValidRollTargetTags(rollTargetTags)) {
+				throw new KoboldError(
 					LL.commands.modifier.createModifier.interactions.invalidTags()
 				);
-				return;
 			}
-
-			// we must be able to evaluate the modifier as a roll for this character
-			try {
-				DiceUtils.parseAndEvaluateDiceExpression({
-					rollExpression: String(rollAdjustment),
-					extraAttributes: [
-						{
-							value: modifierSeverityValidated ?? 0,
-							type: modifierType,
-							name: 'severity',
-							tags: [],
-							aliases: [],
-						},
-					],
-					creature: Creature.fromSheetRecord(activeCharacter.sheetRecord),
-				});
-			} catch (err) {
-				await InteractionUtils.send(
-					intr,
+			if (
+				!InputParseUtils.isValidDiceExpression(
+					rollAdjustment,
+					new Creature(activeCharacter.sheetRecord)
+				)
+			) {
+				throw new KoboldError(
 					LL.commands.modifier.createModifier.interactions.doesntEvaluateError()
 				);
-				return;
 			}
-			if (!rollAdjustment)
-				throw new KoboldError(`Yip! I couldn't parse that modifier value!`);
 		}
 
 		let parsedSheetAdjustments: SheetAdjustment[] = [];
 		if (modifierSheetValues) {
-			parsedSheetAdjustments = SheetUtils.stringToSheetAdjustments(modifierSheetValues);
+			parsedSheetAdjustments = InputParseUtils.parseAsSheetAdjustments(
+				modifierSheetValues,
+				activeCharacter.sheetRecord.sheet
+			);
 		}
 		// make sure the name does't already exist in the character's modifiers
 		if (FinderHelpers.getModifierByName(activeCharacter.sheetRecord, name)) {
@@ -169,12 +150,13 @@ export class ModifierCreateModifierSubCommand implements Command {
 		const newModifier: Modifier = {
 			name,
 			isActive: true,
-			description,
+			description: InputParseUtils.parseAsNullableString(description, { maxLength: 300 }),
 			type: modifierType,
-			severity: modifierSeverityValidated,
+			severity: InputParseUtils.parseAsNullableNumber(modifierSeverity),
 			sheetAdjustments: parsedSheetAdjustments,
 			rollTargetTags,
 			rollAdjustment,
+			note: InputParseUtils.parseAsNullableString(note, { maxLength: 40 }),
 		};
 
 		// make sure that the adjustments are valid and can be applied to a sheet

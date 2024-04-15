@@ -120,7 +120,7 @@ export class RollActionSubCommand implements Command {
 		});
 		koboldUtils.assertActiveCharacterNotNull(activeCharacter);
 
-		const creature = Creature.fromSheetRecord(activeCharacter.sheetRecord);
+		const creature = new Creature(activeCharacter.sheetRecord);
 
 		const targetAction = creature.actions.find(
 			action => action.name.toLocaleLowerCase() === targetActionName.toLocaleLowerCase()
@@ -138,7 +138,7 @@ export class RollActionSubCommand implements Command {
 			const results = await gameUtils.getCharacterOrInitActorTarget(intr, targetSheetName);
 			targetSheetRecord = results.targetSheetRecord;
 			hideStats = results.hideStats;
-			targetCreature = Creature.fromSheetRecord(targetSheetRecord);
+			targetCreature = new Creature(targetSheetRecord);
 		}
 
 		if (!targetAction) {

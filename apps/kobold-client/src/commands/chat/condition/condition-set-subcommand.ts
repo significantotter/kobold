@@ -27,6 +27,7 @@ import { ModifierOptions } from './../modifier/modifier-command-options.js';
 import _ from 'lodash';
 import { GameplayOptions } from '../gameplay/gameplay-command-options.js';
 import { ConditionOptions } from './condition-command-options.js';
+import { InputParseUtils } from '../../../utils/input-parse-utils.js';
 
 export class ConditionSetSubCommand implements Command {
 	public names = [L.en.commands.condition.set.name()];
@@ -103,43 +104,24 @@ export class ConditionSetSubCommand implements Command {
 		}
 
 		// validate the updates
-		if (fieldToChange === L.en.commandOptions.modifierUpdateOption.choices.name.value()) {
-			//a name can't be an empty string
-			if (newFieldValue === '') {
-				await InteractionUtils.send(
-					intr,
-					LL.commands.condition.set.interactions.emptyNameError()
-				);
-				return;
-				//a name can't already be a condition
-			} else if (FinderHelpers.getConditionByName(targetSheetRecord, newFieldValue)) {
-				await InteractionUtils.send(
-					intr,
-					LL.commands.condition.set.interactions.nameExistsError()
-				);
-				return;
+		if (fieldToChange === L.en.commandOptions.modifierSetOption.choices.name.value()) {
+			if (FinderHelpers.getModifierByName(targetSheetRecord, newFieldValue)) {
+				throw new KoboldError(LL.commands.modifier.set.interactions.nameExistsError());
 			} else {
-				targetCondition.name = newFieldValue;
+				targetCondition.name = InputParseUtils.parseAsString(newFieldValue, {
+					minLength: 3,
+					maxLength: 20,
+				});
 			}
 		} else if (
-			fieldToChange ===
-			L.en.commandOptions.modifierUpdateOption.choices.rollAdjustment.value()
+			fieldToChange === L.en.commandOptions.modifierSetOption.choices.rollAdjustment.value()
 		) {
 			try {
 				// we must be able to evaluate the condition as a roll for this character
-				DiceUtils.parseAndEvaluateDiceExpression({
-					rollExpression: newFieldValue,
-					extraAttributes: [
-						{
-							name: 'severity',
-							value: targetCondition.severity ?? 0,
-							type: targetCondition.type,
-							tags: [],
-							aliases: [],
-						},
-					],
-					creature: Creature.fromSheetRecord(targetSheetRecord),
-				});
+				InputParseUtils.isValidDiceExpression(
+					newFieldValue,
+					new Creature(targetSheetRecord)
+				);
 				targetCondition.rollAdjustment = newFieldValue;
 			} catch (err) {
 				await InteractionUtils.send(
@@ -149,17 +131,13 @@ export class ConditionSetSubCommand implements Command {
 				return;
 			}
 		} else if (
-			fieldToChange ===
-			L.en.commandOptions.modifierUpdateOption.choices.rollTargetTags.value()
+			fieldToChange === L.en.commandOptions.modifierSetOption.choices.rollTargetTags.value()
 		) {
 			fieldToChange = 'rollTargetTags';
 			// parse the target tags
-			try {
-				compileExpression(newFieldValue);
-			} catch (err) {
+			if (!InputParseUtils.isValidRollTargetTags(newFieldValue)) {
 				// the tags are in an invalid format
-				await InteractionUtils.send(intr, LL.commands.condition.interactions.invalidTags());
-				return;
+				throw new KoboldError(LL.commands.condition.interactions.invalidTags());
 			}
 			targetCondition.rollTargetTags = newFieldValue;
 		} else if (fieldToChange === 'type') {
@@ -175,22 +153,28 @@ export class ConditionSetSubCommand implements Command {
 				);
 			}
 		} else if (fieldToChange === 'description') {
+			targetCondition.description = InputParseUtils.parseAsNullableString(newFieldValue, {
+				maxLength: 300,
+			});
 			if (!newFieldValue) targetCondition.description = null;
 			else targetCondition.description = newFieldValue;
+		} else if (fieldToChange === 'note') {
+			if (!newFieldValue) targetCondition.note = null;
+			else
+				targetCondition.note = InputParseUtils.parseAsNullableString(newFieldValue, {
+					maxLength: 40,
+				});
 		} else if (fieldToChange === 'severity') {
 			if (newFieldValue == null) targetCondition.severity = null;
-			if (!/[0-9]+(\.[0-9]*)?/.test(newFieldValue.trim()))
-				throw new KoboldError('Severity must be a number');
-			else targetCondition.severity = Number(newFieldValue);
+			else targetCondition.severity = InputParseUtils.parseAsNumber(newFieldValue);
 		} else if (fieldToChange === 'sheet-values') {
-			targetCondition.sheetAdjustments = SheetUtils.stringToSheetAdjustments(newFieldValue);
-			// attempt to use the adjustments to make sure they're valid
-			SheetUtils.adjustSheetWithModifiers(targetSheetRecord.sheet, [targetCondition]);
+			targetCondition.sheetAdjustments =
+				InputParseUtils.parseAsSheetAdjustments(newFieldValue);
 		} else {
 			// if a field wasn't provided, or the field isn't present in our options, send an error
 			await InteractionUtils.send(
 				intr,
-				LL.commands.condition.set.interactions.invalidOptionError()
+				LL.commands.modifier.set.interactions.invalidOptionError()
 			);
 			return;
 		}

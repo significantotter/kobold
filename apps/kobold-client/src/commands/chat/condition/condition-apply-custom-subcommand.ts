@@ -32,6 +32,7 @@ import { GameplayOptions } from '../gameplay/gameplay-command-options.js';
 import { ModifierHelpers } from '../modifier/modifier-helpers.js';
 import { ModifierOptions } from '../modifier/modifier-command-options.js';
 import { ConditionOptions } from './condition-command-options.js';
+import { InputParseUtils } from '../../../utils/input-parse-utils.js';
 
 export class ConditionApplyCustomSubCommand implements Command {
 	public names = [L.en.commands.condition.applyCustom.name()];
@@ -87,19 +88,18 @@ export class ConditionApplyCustomSubCommand implements Command {
 			.trim()
 			.toLowerCase();
 		const conditionSeverity =
-			intr.options.getString(ModifierOptions.MODIFIER_SEVERITY_VALUE.name) ?? null;
+			intr.options.getString(ModifierOptions.MODIFIER_SEVERITY_VALUE_OPTION.name) ?? null;
 
 		const rollAdjustment = intr.options.getString(
 			ModifierOptions.MODIFIER_ROLL_ADJUSTMENT.name
 		);
-		let rollTargetTagsUnparsed = intr.options.getString(
+		const rollTargetTagsUnparsed = intr.options.getString(
 			ModifierOptions.MODIFIER_ROLL_TARGET_TAGS_OPTION.name
 		);
 		let rollTargetTags = rollTargetTagsUnparsed ? rollTargetTagsUnparsed.trim() : null;
 
-		const description = intr.options.getString(
-			ModifierOptions.MODIFIER_DESCRIPTION_OPTION.name
-		);
+		let description = intr.options.getString(ModifierOptions.MODIFIER_DESCRIPTION_OPTION.name);
+		let note = intr.options.getString(ModifierOptions.MODIFIER_INITIATIVE_NOTE_OPTION.name);
 		const conditionSheetValues = intr.options.getString(
 			ModifierOptions.MODIFIER_SHEET_VALUES_OPTION.name
 		);
@@ -137,44 +137,30 @@ export class ConditionApplyCustomSubCommand implements Command {
 		}
 
 		if (rollAdjustment && rollTargetTags) {
-			// the tags for the condition have to be valid
-			try {
-				compileExpression(rollTargetTags);
-			} catch (err) {
-				// the tags are in an invalid format
-				await InteractionUtils.send(intr, LL.commands.condition.interactions.invalidTags());
-				return;
-			}
-
-			// we must be able to evaluate the condition as a roll for this character
-			try {
-				DiceUtils.parseAndEvaluateDiceExpression({
-					rollExpression: String(rollAdjustment),
-					extraAttributes: [
-						{
-							value: 1,
-							type: conditionType,
-							name: 'severity',
-							tags: [],
-							aliases: [],
-						},
-					],
-					creature: Creature.fromSheetRecord(targetSheetRecord),
-				});
-			} catch (err) {
-				await InteractionUtils.send(
-					intr,
-					LL.commands.condition.interactions.doesntEvaluateError()
+			// the tags for the modifier have to be valid
+			if (!InputParseUtils.isValidRollTargetTags(rollTargetTags)) {
+				throw new KoboldError(
+					LL.commands.modifier.createModifier.interactions.invalidTags()
 				);
-				return;
 			}
-			if (!rollAdjustment)
-				throw new KoboldError(`Yip! I couldn't parse that condition value!`);
+			if (
+				!InputParseUtils.isValidDiceExpression(
+					rollAdjustment,
+					new Creature(targetSheetRecord)
+				)
+			) {
+				throw new KoboldError(
+					LL.commands.modifier.createModifier.interactions.doesntEvaluateError()
+				);
+			}
 		}
 
 		let parsedSheetAdjustments: SheetAdjustment[] = [];
 		if (conditionSheetValues) {
-			parsedSheetAdjustments = SheetUtils.stringToSheetAdjustments(conditionSheetValues);
+			parsedSheetAdjustments = InputParseUtils.parseAsSheetAdjustments(
+				conditionSheetValues,
+				targetSheetRecord.sheet
+			);
 		}
 		// make sure the name does't already exist in the character's conditions
 		if (FinderHelpers.getConditionByName(targetSheetRecord, name)) {
@@ -189,18 +175,19 @@ export class ConditionApplyCustomSubCommand implements Command {
 		}
 
 		const newCondition: Modifier = {
-			name,
+			name: InputParseUtils.parseAsString(name, {
+				minLength: 3,
+				maxLength: 20,
+			}),
 			isActive: true,
-			description,
+			description: InputParseUtils.parseAsNullableString(description, { maxLength: 300 }),
 			type: conditionType,
-			severity: null,
+			severity: InputParseUtils.parseAsNullableNumber(conditionSeverity),
 			sheetAdjustments: parsedSheetAdjustments,
 			rollTargetTags,
 			rollAdjustment,
+			note: InputParseUtils.parseAsNullableString(note, { maxLength: 40 }),
 		};
-		if (conditionSeverity != null) {
-			newCondition.severity = ModifierHelpers.validateSeverity(conditionSeverity);
-		}
 
 		// make sure that the adjustments are valid and can be applied to a sheet
 		SheetUtils.adjustSheetWithModifiers(targetSheetRecord.sheet, [newCondition]);

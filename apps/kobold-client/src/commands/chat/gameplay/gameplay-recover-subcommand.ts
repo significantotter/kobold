@@ -56,7 +56,7 @@ export class GameplayRecoverSubCommand implements Command {
 
 		const { targetSheetRecord, hideStats, targetName } =
 			await gameUtils.getCharacterOrInitActorTarget(intr, targetCharacter);
-		const targetCreature = Creature.fromSheetRecord(targetSheetRecord);
+		const targetCreature = new Creature(targetSheetRecord);
 
 		const recoverValues = await gameplayUtils.recoverGameplayStats(
 			intr,

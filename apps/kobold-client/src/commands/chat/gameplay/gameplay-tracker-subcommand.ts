@@ -134,7 +134,7 @@ export class GameplayTrackerSubCommand implements Command {
 			}
 		}
 
-		const creature = Creature.fromSheetRecord(targetSheetRecord);
+		const creature = new Creature(targetSheetRecord);
 
 		const trackerDisplay = creature.compileEmbed('Tracker', trackerMode);
 

@@ -22,9 +22,15 @@ export class ModifierOptions {
 			},
 		],
 	};
-	public static readonly MODIFIER_SEVERITY_VALUE: APIApplicationCommandBasicOption = {
+	public static readonly MODIFIER_SEVERITY_VALUE_OPTION: APIApplicationCommandBasicOption = {
 		name: L.en.commandOptions.modifierSeverity.name(),
 		description: L.en.commandOptions.modifierSeverity.description(),
+		required: false,
+		type: ApplicationCommandOptionType.String,
+	};
+	public static readonly MODIFIER_INITIATIVE_NOTE_OPTION: APIApplicationCommandBasicOption = {
+		name: L.en.commandOptions.modifierInitiativeNote.name(),
+		description: L.en.commandOptions.modifierInitiativeNote.description(),
 		required: false,
 		type: ApplicationCommandOptionType.String,
 	};
@@ -84,40 +90,44 @@ export class ModifierOptions {
 	};
 
 	public static readonly MODIFIER_SET_OPTION: APIApplicationCommandBasicOption = {
-		name: L.en.commandOptions.modifierUpdateOption.name(),
-		description: L.en.commandOptions.modifierUpdateOption.description(),
+		name: L.en.commandOptions.modifierSetOption.name(),
+		description: L.en.commandOptions.modifierSetOption.description(),
 		required: true,
 		type: ApplicationCommandOptionType.String,
 		choices: [
 			{
-				name: L.en.commandOptions.modifierUpdateOption.choices.name.name(),
-				value: L.en.commandOptions.modifierUpdateOption.choices.name.value(),
+				name: L.en.commandOptions.modifierSetOption.choices.name.name(),
+				value: L.en.commandOptions.modifierSetOption.choices.name.value(),
 			},
 			{
-				name: L.en.commandOptions.modifierUpdateOption.choices.description.name(),
-				value: L.en.commandOptions.modifierUpdateOption.choices.description.value(),
+				name: L.en.commandOptions.modifierSetOption.choices.description.name(),
+				value: L.en.commandOptions.modifierSetOption.choices.description.value(),
 			},
 			{
-				name: L.en.commandOptions.modifierUpdateOption.choices.type.name(),
-				value: L.en.commandOptions.modifierUpdateOption.choices.type.value(),
+				name: L.en.commandOptions.modifierSetOption.choices.type.name(),
+				value: L.en.commandOptions.modifierSetOption.choices.type.value(),
 			},
 			{
-				name: L.en.commandOptions.modifierUpdateOption.choices.rollAdjustment.name(),
-				value: L.en.commandOptions.modifierUpdateOption.choices.rollAdjustment.value(),
+				name: L.en.commandOptions.modifierSetOption.choices.rollAdjustment.name(),
+				value: L.en.commandOptions.modifierSetOption.choices.rollAdjustment.value(),
 			},
 			{
-				name: L.en.commandOptions.modifierUpdateOption.choices.rollTargetTags.name(),
-				value: L.en.commandOptions.modifierUpdateOption.choices.rollTargetTags.value(),
+				name: L.en.commandOptions.modifierSetOption.choices.rollTargetTags.name(),
+				value: L.en.commandOptions.modifierSetOption.choices.rollTargetTags.value(),
 			},
 			{
-				name: L.en.commandOptions.modifierUpdateOption.choices.sheetValues.name(),
-				value: L.en.commandOptions.modifierUpdateOption.choices.sheetValues.value(),
+				name: L.en.commandOptions.modifierSetOption.choices.sheetValues.name(),
+				value: L.en.commandOptions.modifierSetOption.choices.sheetValues.value(),
+			},
+			{
+				name: L.en.commandOptions.modifierSetOption.choices.note.name(),
+				value: L.en.commandOptions.modifierSetOption.choices.note.value(),
 			},
 		],
 	};
 	public static readonly MODIFIER_SET_VALUE_OPTION: APIApplicationCommandBasicOption = {
-		name: L.en.commandOptions.modifierUpdateValue.name(),
-		description: L.en.commandOptions.modifierUpdateValue.description(),
+		name: L.en.commandOptions.modifierSetValue.name(),
+		description: L.en.commandOptions.modifierSetValue.description(),
 		required: true,
 		type: ApplicationCommandOptionType.String,
 	};

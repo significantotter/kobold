@@ -176,7 +176,7 @@ export class InitAddSubCommand implements Command {
 					})
 				);
 		} else {
-			const creature = Creature.fromSheetRecord(sheetRecord);
+			const creature = new Creature(sheetRecord);
 			const rollBuilder = new RollBuilder({
 				title: L.en.commands.init.add.interactions.joinedEmbed.rolledTitle({
 					actorName: finalName,

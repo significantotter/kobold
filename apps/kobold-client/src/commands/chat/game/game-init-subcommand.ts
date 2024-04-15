@@ -66,7 +66,7 @@ export class GameInitSubCommand implements Command {
 			const choices: Set<string> = new Set();
 			for (const character of game.characters || []) {
 				const matchedSkills = FinderHelpers.matchAllSkills(
-					Creature.fromSheetRecord(character.sheetRecord),
+					new Creature(character.sheetRecord),
 					match
 				).map(skill => skill.name);
 				for (const skill of matchedSkills) {

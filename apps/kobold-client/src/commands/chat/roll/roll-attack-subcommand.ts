@@ -57,7 +57,7 @@ export class RollAttackSubCommand implements Command {
 			}
 			//find a attack on the character matching the autocomplete string
 			const matchedAttack = FinderHelpers.matchAllAttacks(
-				Creature.fromSheetRecord(activeCharacter.sheetRecord),
+				new Creature(activeCharacter.sheetRecord),
 				match
 			).map(attack => ({
 				name: attack.name,
@@ -108,7 +108,7 @@ export class RollAttackSubCommand implements Command {
 		});
 		koboldUtils.assertActiveCharacterNotNull(activeCharacter);
 
-		const creature = Creature.fromSheetRecord(activeCharacter.sheetRecord);
+		const creature = new Creature(activeCharacter.sheetRecord);
 
 		let targetSheetRecord: SheetRecord | null = null;
 		let targetCreature: Creature | null = null;
@@ -122,7 +122,7 @@ export class RollAttackSubCommand implements Command {
 			const results = await gameUtils.getCharacterOrInitActorTarget(intr, targetSheetName);
 			targetSheetRecord = results.targetSheetRecord;
 			hideStats = results.hideStats;
-			targetCreature = Creature.fromSheetRecord(targetSheetRecord);
+			targetCreature = new Creature(targetSheetRecord);
 		}
 
 		const { builtRoll, actionRoller } = ActionRoller.fromCreatureAttack({

@@ -57,7 +57,7 @@ export class InitJoinSubCommand implements Command {
 			}
 			//find a skill on the character matching the autocomplete string
 			const matchedSkills = FinderHelpers.matchAllSkills(
-				Creature.fromSheetRecord(activeCharacter.sheetRecord),
+				new Creature(activeCharacter.sheetRecord),
 				match
 			).map(skill => ({ name: skill.name, value: skill.name }));
 			//return the matched skills

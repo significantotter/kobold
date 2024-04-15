@@ -15,6 +15,7 @@ describe('ModifierUtils', () => {
 				name: 'foo',
 				description: '',
 				isActive: true,
+				note: null,
 				severity: 2,
 				type: SheetAdjustmentTypeEnum.untyped,
 				sheetAdjustments: [
@@ -48,6 +49,7 @@ describe('ModifierUtils', () => {
 				name: 'test',
 				type: SheetAdjustmentTypeEnum.status,
 				severity: 3,
+				note: null,
 				rollAdjustment: '1+[ severity]',
 				rollTargetTags: 'attack and (fire or bludgeoning)',
 				sheetAdjustments: [],
@@ -73,6 +75,7 @@ describe('ModifierUtils', () => {
 					rollAdjustment: '[severity]',
 					rollTargetTags: 'attack and (fire or bludgeoning)',
 					sheetAdjustments: [],
+					note: null,
 					severity: 2,
 					isActive: false,
 					description: null,
@@ -88,6 +91,7 @@ describe('ModifierUtils', () => {
 					name: 'test',
 					type: SheetAdjustmentTypeEnum.status,
 					rollAdjustment: '2',
+					note: null,
 					severity: null,
 					rollTargetTags: 'attack and (fire or bludgeoning)',
 					sheetAdjustments: [],
@@ -109,6 +113,7 @@ describe('ModifierUtils', () => {
 						'attack and (fire or bludgeoning) or __foo not in (3, 6) or abs(max(__foo, 6)) == ceil(min(7, 4.6)) or floor(log(10)) < 5 or round(random()) == sqrt(4)',
 					sheetAdjustments: [],
 					isActive: false,
+					note: null,
 					severity: null,
 					description: null,
 				},
@@ -134,6 +139,7 @@ describe('ModifierUtils', () => {
 					rollTargetTags: '__foo = 5',
 					sheetAdjustments: [],
 					isActive: false,
+					note: null,
 					severity: null,
 					description: null,
 				},
@@ -159,6 +165,7 @@ describe('ModifierUtils', () => {
 				{
 					name: 'statusBonus',
 					isActive: true,
+					note: null,
 					severity: null,
 					type: SheetAdjustmentTypeEnum.status,
 					rollAdjustment: '2',
@@ -170,6 +177,7 @@ describe('ModifierUtils', () => {
 				{
 					name: 'statusBonus2',
 					isActive: true,
+					note: null,
 					severity: null,
 					type: SheetAdjustmentTypeEnum.status,
 					rollAdjustment: '1',
@@ -181,6 +189,7 @@ describe('ModifierUtils', () => {
 				{
 					name: 'statusBonus3',
 					isActive: true,
+					note: null,
 					severity: null,
 					type: SheetAdjustmentTypeEnum.status,
 					rollAdjustment: '-1',
@@ -192,6 +201,7 @@ describe('ModifierUtils', () => {
 				{
 					name: 'statusBonus4',
 					isActive: true,
+					note: null,
 					severity: null,
 					type: SheetAdjustmentTypeEnum.status,
 					rollAdjustment: '-2',
@@ -203,6 +213,7 @@ describe('ModifierUtils', () => {
 				{
 					name: 'untypedBonus',
 					isActive: true,
+					note: null,
 					severity: null,
 					type: SheetAdjustmentTypeEnum.untyped,
 					rollAdjustment: '2',
@@ -214,6 +225,7 @@ describe('ModifierUtils', () => {
 				{
 					name: 'untypedBonus2',
 					isActive: true,
+					note: null,
 					severity: null,
 					type: SheetAdjustmentTypeEnum.untyped,
 					rollAdjustment: '1',
@@ -225,6 +237,7 @@ describe('ModifierUtils', () => {
 				{
 					name: 'untypedBonus3',
 					isActive: true,
+					note: null,
 					severity: null,
 					type: SheetAdjustmentTypeEnum.untyped,
 					rollAdjustment: '-1',
@@ -236,6 +249,7 @@ describe('ModifierUtils', () => {
 				{
 					name: 'untypedBonus4',
 					isActive: true,
+					note: null,
 					severity: null,
 					type: SheetAdjustmentTypeEnum.untyped,
 					rollAdjustment: '-2',
@@ -247,6 +261,7 @@ describe('ModifierUtils', () => {
 				{
 					name: 'fooBonus',
 					isActive: true,
+					note: null,
 					severity: null,
 					type: SheetAdjustmentTypeEnum.circumstance,
 					rollAdjustment: '2',
@@ -258,6 +273,7 @@ describe('ModifierUtils', () => {
 				{
 					name: 'fooBonus2',
 					isActive: true,
+					note: null,
 					severity: null,
 					type: SheetAdjustmentTypeEnum.circumstance,
 					rollAdjustment: '1',
@@ -269,6 +285,7 @@ describe('ModifierUtils', () => {
 				{
 					name: 'fooBonus3',
 					isActive: true,
+					note: null,
 					severity: null,
 					type: SheetAdjustmentTypeEnum.circumstance,
 					rollAdjustment: '-1',
@@ -280,6 +297,7 @@ describe('ModifierUtils', () => {
 				{
 					name: 'foo bonus 4',
 					isActive: true,
+					note: null,
 					severity: null,
 					type: SheetAdjustmentTypeEnum.circumstance,
 					rollAdjustment: '-2',
@@ -291,6 +309,7 @@ describe('ModifierUtils', () => {
 				{
 					name: 'unmatchingBonus',
 					isActive: true,
+					note: null,
 					severity: null,
 					type: SheetAdjustmentTypeEnum.circumstance,
 					rollAdjustment: '3',
@@ -302,6 +321,7 @@ describe('ModifierUtils', () => {
 				{
 					name: 'unmatchingPenalty',
 					isActive: true,
+					note: null,
 					severity: null,
 					type: SheetAdjustmentTypeEnum.circumstance,
 					rollAdjustment: '-3',
@@ -313,6 +333,7 @@ describe('ModifierUtils', () => {
 				{
 					name: 'unmatchingUntyped',
 					isActive: true,
+					note: null,
 					severity: null,
 					type: SheetAdjustmentTypeEnum.circumstance,
 					rollAdjustment: '3',
@@ -324,6 +345,7 @@ describe('ModifierUtils', () => {
 				{
 					name: 'not active',
 					isActive: false,
+					note: null,
 					severity: null,
 					type: SheetAdjustmentTypeEnum.circumstance,
 					rollAdjustment: '3',
@@ -354,6 +376,7 @@ describe('ModifierUtils', () => {
 				circumstance: {
 					name: 'fooBonus',
 					isActive: true,
+					note: null,
 					severity: null,
 					type: SheetAdjustmentTypeEnum.circumstance,
 					rollAdjustment: '2',
@@ -366,6 +389,7 @@ describe('ModifierUtils', () => {
 				status: {
 					name: 'statusBonus',
 					isActive: true,
+					note: null,
 					severity: null,
 					type: SheetAdjustmentTypeEnum.status,
 					rollAdjustment: '2',
@@ -379,6 +403,7 @@ describe('ModifierUtils', () => {
 				circumstance: {
 					name: 'foo bonus 4',
 					isActive: true,
+					note: null,
 					severity: null,
 					type: SheetAdjustmentTypeEnum.circumstance,
 					rollAdjustment: '-2',
@@ -391,6 +416,7 @@ describe('ModifierUtils', () => {
 				status: {
 					name: 'statusBonus4',
 					isActive: true,
+					note: null,
 					severity: null,
 					type: SheetAdjustmentTypeEnum.status,
 					rollAdjustment: '-2',
@@ -404,6 +430,7 @@ describe('ModifierUtils', () => {
 				{
 					name: 'untypedBonus',
 					isActive: true,
+					note: null,
 					severity: null,
 					type: SheetAdjustmentTypeEnum.untyped,
 					rollAdjustment: '2',
@@ -415,6 +442,7 @@ describe('ModifierUtils', () => {
 				{
 					name: 'untypedBonus2',
 					isActive: true,
+					note: null,
 					severity: null,
 					type: SheetAdjustmentTypeEnum.untyped,
 					rollAdjustment: '1',
@@ -426,6 +454,7 @@ describe('ModifierUtils', () => {
 				{
 					name: 'untypedBonus3',
 					isActive: true,
+					note: null,
 					severity: null,
 					type: SheetAdjustmentTypeEnum.untyped,
 					rollAdjustment: '-1',
@@ -437,6 +466,7 @@ describe('ModifierUtils', () => {
 				{
 					name: 'untypedBonus4',
 					isActive: true,
+					note: null,
 					severity: null,
 					type: SheetAdjustmentTypeEnum.untyped,
 					rollAdjustment: '-2',

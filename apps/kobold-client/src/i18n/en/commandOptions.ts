@@ -606,6 +606,10 @@ export default {
 		name: 'description',
 		description: 'A description for the modifier.',
 	},
+	modifierInitiativeNote: {
+		name: 'initiative-note',
+		description: 'A note to display in initiative when active.',
+	},
 	modifierRollAdjustment: {
 		name: 'roll-adjustment',
 		description: 'The amount to adjust a dice roll. Can be a number or a dice expression.',
@@ -623,7 +627,7 @@ export default {
 		name: 'sheet-values',
 		description: 'How to alter the sheet values. For example "maxHp+5;ac=20;will-1"',
 	},
-	modifierUpdateOption: {
+	modifierSetOption: {
 		name: 'option',
 		description: 'The modifier option to alter.',
 		choices: {
@@ -655,9 +659,13 @@ export default {
 				name: 'severity',
 				value: 'severity',
 			},
+			note: {
+				name: 'initiative-note',
+				value: 'initiative-note',
+			},
 		},
 	},
-	modifierUpdateValue: {
+	modifierSetValue: {
 		name: 'value',
 		description: 'The value to set the option to.',
 	},

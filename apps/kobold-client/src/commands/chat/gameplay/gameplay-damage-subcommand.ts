@@ -63,7 +63,7 @@ export class GameplayDamageSubCommand implements Command {
 		const { targetSheetRecord, hideStats, targetName } =
 			await gameUtils.getCharacterOrInitActorTarget(intr, targetCharacter);
 
-		const creature = Creature.fromSheetRecord(targetSheetRecord);
+		const creature = new Creature(targetSheetRecord);
 
 		let message = '';
 		if (amount >= 0) {

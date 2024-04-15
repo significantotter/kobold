@@ -19,6 +19,7 @@ import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js
 import { Command, CommandDeferType } from '../../index.js';
 import { ModifierOptions } from './modifier-command-options.js';
 import { ModifierHelpers } from './modifier-helpers.js';
+import { InputParseUtils } from '../../../utils/input-parse-utils.js';
 
 export class ModifierSeveritySubCommand implements Command {
 	public names = [L.en.commands.modifier.severity.name()];
@@ -72,7 +73,7 @@ export class ModifierSeveritySubCommand implements Command {
 			.getString(ModifierOptions.MODIFIER_NAME_OPTION.name, true)
 			.trim();
 		const newSeverity = intr.options
-			.getString(ModifierOptions.MODIFIER_SEVERITY_VALUE.name, true)
+			.getString(ModifierOptions.MODIFIER_SEVERITY_VALUE_OPTION.name, true)
 			.toLocaleLowerCase()
 			.trim();
 
@@ -91,7 +92,7 @@ export class ModifierSeveritySubCommand implements Command {
 			await InteractionUtils.send(intr, LL.commands.modifier.interactions.notFound());
 			return;
 		}
-		targetModifier.severity = ModifierHelpers.validateSeverity(newSeverity);
+		targetModifier.severity = InputParseUtils.parseAsNullableNumber(newSeverity);
 
 		await kobold.sheetRecord.update(
 			{ id: activeCharacter.sheetRecordId },
