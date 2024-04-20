@@ -7,7 +7,7 @@ export class BackgroundApi {
 	baseURL: string;
 
 	constructor(wanderersGuide: WanderersGuide) {
-		this.baseURL = 'https://wanderersguide.app/api/background';
+		this.baseURL = 'https://legacy.wanderersguide.app/api/background';
 		this.wg = wanderersGuide;
 	}
 

@@ -7,7 +7,7 @@ const links = {
 	support: 'https://discord.gg/6bS2GM59uj',
 	template: 'https://github.com/KevinNovak/Discord-Bot-TypeScript-Template',
 	vote: 'https://top.gg/bot/909138081163137094',
-	wanderersGuide: 'https://wanderersguide.app',
+	wanderersGuide: 'https://legacy.wanderersguide.app',
 	pathbuilder: 'https://pathbuilder2e.com',
 	pf2etools: 'https://pf2etools.com/',
 	stream: '',
@@ -38,7 +38,7 @@ export let refs = {
 		template: `[Built with Kevin Novak's Discord Bot TypeScript Template](${links.template})`,
 		vote: `[Vote for Kobold!](${links.vote})`,
 		pathbuilder: `[Pathbuilder 2E](https://pathbuilder2e.com)`,
-		wanderersGuide: `[Wanderer's Guide](https://wanderersguide.app)`,
+		wanderersGuide: `[Wanderer's Guide](https://legacy.wanderersguide.app)`,
 		errorReport: `If you want to report this issue, let my creator know on [my support server](${links.support}).`,
 	},
 	importantCommands: [

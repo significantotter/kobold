@@ -7,7 +7,7 @@ export class VHeritageApi {
 	baseURL: string;
 
 	constructor(wanderersGuide: WanderersGuide) {
-		this.baseURL = 'https://wanderersguide.app/api/v-heritage';
+		this.baseURL = 'https://legacy.wanderersguide.app/api/v-heritage';
 		this.wg = wanderersGuide;
 	}
 

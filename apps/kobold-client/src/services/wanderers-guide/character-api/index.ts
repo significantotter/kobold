@@ -7,7 +7,7 @@ export class CharacterApi {
 	baseURL: string;
 
 	constructor(wanderersGuide: WanderersGuide) {
-		this.baseURL = 'https://wanderersguide.app/api/char';
+		this.baseURL = 'https://legacy.wanderersguide.app/api/char';
 		this.wg = wanderersGuide;
 	}
 

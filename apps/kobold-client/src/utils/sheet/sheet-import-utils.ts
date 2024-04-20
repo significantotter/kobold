@@ -642,7 +642,7 @@ export function convertWanderersGuideCharToSheet(
 			keyAbility: null,
 		},
 		info: {
-			url: `https://wanderersguide.app/profile/characters/${characterData.id}`,
+			url: `https://legacy.wanderersguide.app/profile/characters/${characterData.id}`,
 			description: null,
 			gender: characterData?.infoJSON?.gender ?? null,
 			age: characterData?.infoJSON?.age,

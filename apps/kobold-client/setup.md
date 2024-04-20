@@ -18,7 +18,7 @@ Go to project settings near the bottom, then select database. Wait for Supabase 
 
 # Getting a Wanderer's Guide API Key
 
-Go to [Wanderer's Guide](https://wanderersguide.app/) and log in.
+Go to [Wanderer's Guide](https://legacy.wanderersguide.app/) and log in.
 
 Navigate to your Account page, and then hit + on your Clients and API Keys.
 
