@@ -291,10 +291,19 @@ export function convertBestiaryCreatureToSheet(
 		);
 
 		let damageChallengeAdjustment = challengeAdjustment * 2;
-		let damageChallengeText =
-			damageChallengeAdjustment !== 0 && damageChallengeAdjustment != null
-				? `+${damageChallengeAdjustment}`
-				: '';
+		let damageChallengeText = '';
+
+		if (damageChallengeAdjustment !== 0 && damageChallengeAdjustment != null) {
+			if (damageChallengeAdjustment > 0) {
+				damageChallengeText = `+${damageChallengeAdjustment}`;
+			} else {
+				damageChallengeText = `${damageChallengeAdjustment}`;
+			}
+		}
+
+		damageChallengeAdjustment !== 0 && damageChallengeAdjustment != null
+			? `${damageChallengeAdjustment}`
+			: '';
 		if (damageRolls.length > 0 && damageRolls[0].dice) {
 			damageRolls[0].dice += damageChallengeText;
 		}
