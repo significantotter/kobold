@@ -150,13 +150,19 @@ export class ModifierCreateModifierSubCommand implements Command {
 		const newModifier: Modifier = {
 			name,
 			isActive: true,
-			description: InputParseUtils.parseAsNullableString(description, { maxLength: 300 }),
+			description: InputParseUtils.parseAsNullableString(description, {
+				inputName: 'description',
+				maxLength: 300,
+			}),
 			type: modifierType,
 			severity: InputParseUtils.parseAsNullableNumber(modifierSeverity),
 			sheetAdjustments: parsedSheetAdjustments,
 			rollTargetTags,
 			rollAdjustment,
-			note: InputParseUtils.parseAsNullableString(note, { maxLength: 40 }),
+			note: InputParseUtils.parseAsNullableString(note, {
+				inputName: 'initiative-note',
+				maxLength: 40,
+			}),
 		};
 
 		// make sure that the adjustments are valid and can be applied to a sheet

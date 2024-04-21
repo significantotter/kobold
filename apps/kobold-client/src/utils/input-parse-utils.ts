@@ -5,6 +5,7 @@ import L from '../i18n/i18n-node.js';
 import { compileExpression } from 'filtrex';
 import { Creature } from './creature.js';
 import { DiceUtils } from './dice-utils.js';
+import _ from 'lodash';
 
 export class InputParseUtils {
 	/**
@@ -41,26 +42,34 @@ export class InputParseUtils {
 	}
 	static parseAsString(
 		input: string,
-		{ maxLength, minLength }: { maxLength?: number; minLength?: number } = {}
+		{
+			maxLength,
+			minLength,
+			inputName,
+		}: { maxLength?: number; minLength?: number; inputName?: string } = {}
 	): string {
 		if (this.isValidString(input, { minLength, maxLength })) {
 			return input;
 		} else {
-			let minMessage = `greater than ${minLength}`;
-			let maxMessage = `less than ${maxLength}`;
+			let minMessage = minLength != undefined ? `greater than ${minLength}` : '';
+			let maxMessage = maxLength != undefined ? `less than ${maxLength}` : '';
 			throw new KoboldError(
-				`Yip! The input must be ${[minMessage, maxMessage].join(' and ')}.`
+				`Yip! ${inputName ?? 'The input'} must be ${[minMessage, maxMessage].filter(_.identity).join(' and ')} characters.`
 			);
 		}
 	}
 	static parseAsNullableString(
 		input: string | null,
-		{ maxLength, minLength }: { maxLength?: number; minLength?: number } = {}
+		{
+			maxLength,
+			minLength,
+			inputName,
+		}: { maxLength?: number; minLength?: number; inputName?: string } = {}
 	): string | null {
 		if (input === null || this.isNullString(input)) {
 			return null;
 		} else {
-			return this.parseAsString(input, { maxLength, minLength });
+			return this.parseAsString(input, { maxLength, minLength, inputName });
 		}
 	}
 

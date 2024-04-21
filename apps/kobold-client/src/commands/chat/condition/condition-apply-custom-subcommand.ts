@@ -176,17 +176,24 @@ export class ConditionApplyCustomSubCommand implements Command {
 
 		const newCondition: Modifier = {
 			name: InputParseUtils.parseAsString(name, {
+				inputName: 'name',
 				minLength: 3,
 				maxLength: 20,
 			}),
 			isActive: true,
-			description: InputParseUtils.parseAsNullableString(description, { maxLength: 300 }),
+			description: InputParseUtils.parseAsNullableString(description, {
+				inputName: 'description',
+				maxLength: 300,
+			}),
 			type: conditionType,
 			severity: InputParseUtils.parseAsNullableNumber(conditionSeverity),
 			sheetAdjustments: parsedSheetAdjustments,
 			rollTargetTags,
 			rollAdjustment,
-			note: InputParseUtils.parseAsNullableString(note, { maxLength: 40 }),
+			note: InputParseUtils.parseAsNullableString(note, {
+				inputName: 'initiative-note',
+				maxLength: 40,
+			}),
 		};
 
 		// make sure that the adjustments are valid and can be applied to a sheet
