@@ -31,8 +31,9 @@
 		"@types/better-sqlite3": "^7.6.5",
 		"@types/lodash": "^4.14.202",
 		"drizzle-kit": "^0.20.14",
-		"vitest": "^0.34.4",
+		"eslint": "^8.56.0",
+		"ts-node": "^10.9.2",
 		"typescript": "^5.3",
-		"ts-node": "^10.9.2"
+		"vitest": "^0.34.4"
 	}
 }

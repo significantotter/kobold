@@ -23,7 +23,7 @@ importers:
   .:
     devDependencies:
       eslint:
-        specifier: ^8.49.0
+        specifier: ^8.56.0
         version: 8.56.0
       nodemon:
         specifier: ^3.1.0
@@ -149,6 +149,9 @@ importers:
       drizzle-kit:
         specifier: ^0.20.14
         version: 0.20.14
+      eslint:
+        specifier: ^8.56.0
+        version: 8.56.0
       eslint-plugin-import:
         specifier: ^2.28.1
         version: 2.29.1(@typescript-eslint/parser@6.21.0(eslint@8.56.0)(typescript@5.3.3))(eslint@8.56.0)
@@ -192,6 +195,9 @@ importers:
       '@types/lodash':
         specifier: ^4.14.202
         version: 4.14.202
+      eslint:
+        specifier: ^8.56.0
+        version: 8.56.0
       ts-node:
         specifier: ^10.9.2
         version: 10.9.2(@types/node@20.11.19)(typescript@5.3.3)
@@ -244,6 +250,9 @@ importers:
       dotenv:
         specifier: ^16.3.1
         version: 16.4.4
+      eslint:
+        specifier: ^8.56.0
+        version: 8.56.0
       kanel:
         specifier: ^3.5.5
         version: 3.8.7
@@ -302,6 +311,9 @@ importers:
       drizzle-kit:
         specifier: ^0.20.14
         version: 0.20.14
+      eslint:
+        specifier: ^8.56.0
+        version: 8.56.0
       ts-node:
         specifier: ^10.9.2
         version: 10.9.2(@types/node@20.11.19)(typescript@5.3.3)

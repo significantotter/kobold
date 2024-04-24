@@ -8,7 +8,7 @@
 	"private": true,
 	"scripts": {},
 	"devDependencies": {
-		"eslint": "^8.49.0",
+		"eslint": "^8.56.0",
 		"nodemon": "^3.1.0",
 		"turbo": "^1.7.0"
 	},
