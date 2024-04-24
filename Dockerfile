@@ -7,7 +7,7 @@ RUN apk add --no-cache libc6-compat
 
 # Setup pnpm and turbo on the alpine base
 FROM alpine as base
-RUN npm install pnpm turbo --global
+RUN npm install pnpm@9.0.4 turbo --global
 RUN pnpm config set store-dir ~/.pnpm-store
 
 # Prune projects
