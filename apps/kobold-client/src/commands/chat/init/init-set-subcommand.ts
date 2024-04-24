@@ -93,7 +93,7 @@ export class InitSetSubCommand implements Command {
 		let finalValue: any = newFieldValue;
 
 		// validate the updates
-		if (fieldToChange === targetCharacterName) {
+		if (fieldToChange === 'name') {
 			//a name can't be an empty string
 			if (newFieldValue === '') {
 				await InteractionUtils.send(
@@ -129,6 +129,7 @@ export class InitSetSubCommand implements Command {
 		if (fieldToChange === 'player-is-gm') {
 			finalValue = actor.userId;
 		}
+
 		if (fieldToChange === 'hide-stats') {
 			finalValue = ['true', 'yes', '1', 'ok', 'okay'].includes(
 				newFieldValue.toLocaleLowerCase().trim()
@@ -159,6 +160,17 @@ export class InitSetSubCommand implements Command {
 						name: finalValue,
 					}
 				);
+				// if this is NOT a character's sheet, we should update
+				// the name on the sheet as well.
+				if (!actor.characterId) {
+					actor.sheetRecord.sheet.staticInfo.name = finalValue;
+					await kobold.sheetRecord.update(
+						{ id: actor.sheetRecordId },
+						{
+							sheet: actor.sheetRecord.sheet,
+						}
+					);
+				}
 			}
 		} else if (fieldToChange === 'hide-stats') {
 			await kobold.initiativeActor.update(

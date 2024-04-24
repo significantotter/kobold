@@ -157,7 +157,7 @@ export class EntryParser {
 		return '';
 	}
 
-	public parseActivity(activity: Activity) {
+	public parseActivity(activity: Activity, convertEmoji: boolean = true) {
 		if (!activity) return '';
 		if (activity.entry) {
 			if (_.isString(activity.entry)) {
@@ -167,17 +167,18 @@ export class EntryParser {
 		}
 		if (activity.customUnit) return `${activity.number} ${activity.customUnit}`;
 		const unit = activity.unit ?? 'action';
+		const emojiConverter = convertEmoji ? this.emojiConverter : (emoji: string) => emoji;
 		if (unit === 'reaction') {
-			return this.emojiConverter('reaction');
+			return emojiConverter('reaction');
 		} else if (unit === 'free') {
-			return this.emojiConverter('freeAction');
+			return emojiConverter('freeAction');
 		} else if (['action', 'actions'].includes(unit)) {
 			if (activity.number === 1) {
-				return this.emojiConverter('oneAction');
+				return emojiConverter('oneAction');
 			} else if (activity.number === 2) {
-				return this.emojiConverter('twoActions');
+				return emojiConverter('twoActions');
 			} else if (activity.number === 3) {
-				return this.emojiConverter('threeActions');
+				return emojiConverter('threeActions');
 			}
 		}
 		return `${activity.number ?? ''} ${unit}`.trim();

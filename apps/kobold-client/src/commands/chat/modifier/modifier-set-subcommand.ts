@@ -105,6 +105,7 @@ export class ModifierSetSubCommand implements Command {
 				throw new KoboldError(LL.commands.modifier.set.interactions.nameExistsError());
 			} else {
 				targetModifier.name = InputParseUtils.parseAsString(newFieldValue, {
+					inputName: fieldToChange,
 					minLength: 3,
 					maxLength: 20,
 				});
@@ -116,7 +117,7 @@ export class ModifierSetSubCommand implements Command {
 				// we must be able to evaluate the modifier as a roll for this character
 				InputParseUtils.isValidDiceExpression(
 					newFieldValue,
-					new Creature(activeCharacter.sheetRecord)
+					new Creature(activeCharacter.sheetRecord, undefined, intr)
 				);
 				targetModifier.rollAdjustment = newFieldValue;
 			} catch (err) {
@@ -152,6 +153,7 @@ export class ModifierSetSubCommand implements Command {
 			}
 		} else if (fieldToChange === 'description') {
 			targetModifier.description = InputParseUtils.parseAsNullableString(newFieldValue, {
+				inputName: fieldToChange,
 				maxLength: 300,
 			});
 			if (!newFieldValue) targetModifier.description = null;
@@ -160,6 +162,7 @@ export class ModifierSetSubCommand implements Command {
 			if (!newFieldValue) targetModifier.note = null;
 			else
 				targetModifier.note = InputParseUtils.parseAsNullableString(newFieldValue, {
+					inputName: fieldToChange,
 					maxLength: 40,
 				});
 		} else if (fieldToChange === 'severity') {

@@ -84,7 +84,7 @@ export class GamePartyStatusSubCommand implements Command {
 				continue;
 			}
 
-			const creature = new Creature(character.sheetRecord);
+			const creature = new Creature(character.sheetRecord, undefined, intr);
 			embeds.push(creature.compileEmbed('Sheet', sheetStyle));
 		}
 		await InteractionUtils.send(intr, { embeds });

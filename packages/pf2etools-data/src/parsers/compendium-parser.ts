@@ -49,10 +49,7 @@ export class CompendiumEmbedParser {
 	public helpers: SharedParsers;
 	public files: AttachmentBuilder[];
 	public entryParser: EntryParser;
-	constructor(
-		public model: CompendiumModel,
-		public emojiConverter: { (emoji: string): string }
-	) {
+	constructor(public model: CompendiumModel, public emojiConverter: { (emoji: string): string }) {
 		this.files = [];
 		this.helpers = new SharedParsers();
 		this.entryParser = new EntryParser({ delimiter: '\n', emojiConverter, embedParser: this });

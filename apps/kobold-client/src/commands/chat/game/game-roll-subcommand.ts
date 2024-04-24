@@ -67,7 +67,7 @@ export class GameRollSubCommand implements Command {
 
 			let results: { name: string; value: string }[] = [];
 			for (const character of activeGame?.characters || []) {
-				const creature = new Creature(character.sheetRecord);
+				const creature = new Creature(character.sheetRecord, undefined, intr);
 
 				const allRolls = [
 					..._.keys(creature.attackRolls),
@@ -141,7 +141,7 @@ export class GameRollSubCommand implements Command {
 			targetSheetRecord = results.targetSheetRecord;
 			hideStats = results.hideStats;
 			targetName = results.targetName;
-			targetCreature = new Creature(targetSheetRecord);
+			targetCreature = new Creature(targetSheetRecord, undefined, intr);
 		}
 
 		if (activeGame.characters.length === 0) {
@@ -162,7 +162,7 @@ export class GameRollSubCommand implements Command {
 				continue;
 			}
 
-			const creature = new Creature(character.sheetRecord);
+			const creature = new Creature(character.sheetRecord, undefined, intr);
 			const rollOptions = {
 				...creature.rolls,
 				...creature.attackRolls,
