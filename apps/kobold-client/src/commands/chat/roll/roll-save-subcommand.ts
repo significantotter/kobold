@@ -57,7 +57,7 @@ export class RollSaveSubCommand implements Command {
 			}
 			//find a save on the character matching the autocomplete string
 			const matchedSaves = FinderHelpers.matchAllSaves(
-				new Creature(activeCharacter.sheetRecord),
+				new Creature(activeCharacter.sheetRecord, undefined, intr),
 				match
 			).map(save => ({
 				name: save.name,
@@ -89,7 +89,7 @@ export class RollSaveSubCommand implements Command {
 		});
 		koboldUtils.assertActiveCharacterNotNull(activeCharacter);
 
-		const creature = new Creature(activeCharacter.sheetRecord);
+		const creature = new Creature(activeCharacter.sheetRecord, undefined, intr);
 
 		const targetRoll = StringUtils.findBestValueByKeyMatch(
 			saveChoice,

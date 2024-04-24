@@ -117,7 +117,7 @@ export class ModifierSetSubCommand implements Command {
 				// we must be able to evaluate the modifier as a roll for this character
 				InputParseUtils.isValidDiceExpression(
 					newFieldValue,
-					new Creature(activeCharacter.sheetRecord)
+					new Creature(activeCharacter.sheetRecord, undefined, intr)
 				);
 				targetModifier.rollAdjustment = newFieldValue;
 			} catch (err) {

@@ -119,7 +119,7 @@ export class ModifierCreateModifierSubCommand implements Command {
 			if (
 				!InputParseUtils.isValidDiceExpression(
 					rollAdjustment,
-					new Creature(activeCharacter.sheetRecord)
+					new Creature(activeCharacter.sheetRecord, undefined, intr)
 				)
 			) {
 				throw new KoboldError(

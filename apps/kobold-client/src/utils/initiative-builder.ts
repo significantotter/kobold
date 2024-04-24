@@ -244,7 +244,7 @@ export class InitiativeBuilder {
 		// prepare our roll builder for if we need to parse inline rolls in notes
 		const rollBuilder = new RollBuilder({
 			actorName: actor.name,
-			creature: new Creature(actor.sheetRecord),
+			creature: new Creature(actor.sheetRecord, actor.name),
 			userSettings: {
 				initStatsNotification: InitStatsNotificationEnum.never,
 				rollCompactMode: RollCompactModeEnum.compact,

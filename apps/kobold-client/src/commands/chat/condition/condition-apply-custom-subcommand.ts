@@ -146,7 +146,7 @@ export class ConditionApplyCustomSubCommand implements Command {
 			if (
 				!InputParseUtils.isValidDiceExpression(
 					rollAdjustment,
-					new Creature(targetSheetRecord)
+					new Creature(targetSheetRecord, undefined, intr)
 				)
 			) {
 				throw new KoboldError(

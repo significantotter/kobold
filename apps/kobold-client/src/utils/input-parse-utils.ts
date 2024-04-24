@@ -98,7 +98,7 @@ export class InputParseUtils {
 	): SheetAdjustment[] {
 		// attempt to use the adjustments to make sure they're valid
 		const sheetAdjustments = SheetUtils.stringToSheetAdjustments(input);
-		SheetUtils.adjustSheetWithModifiers(getDefaultSheet(), [
+		SheetUtils.adjustSheetWithModifiers(targetSheet, [
 			{
 				name: 'test',
 				description: null,

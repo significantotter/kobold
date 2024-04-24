@@ -17,21 +17,26 @@ import _ from 'lodash';
 import { ChatArgs } from '../../../constants/chat-args.js';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { Kobold } from 'kobold-db';
-import { CompendiumModel } from 'pf2etools-data';
+import { Action, ActionCostEnum, ActionTypeEnum, Kobold, RollTypeEnum } from 'kobold-db';
+import {
+	AbilityEntry,
+	CompendiumEmbedParser,
+	CompendiumModel,
+	parseActivityRaw,
+} from 'pf2etools-data';
 import { Creature } from '../../../utils/creature.js';
 import { InteractionUtils, StringUtils } from '../../../utils/index.js';
 import { InitiativeBuilder, InitiativeBuilderUtils } from '../../../utils/initiative-builder.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { NpcUtils } from '../../../utils/kobold-service-utils/npc-utils.js';
-import {
-	applyStatOverrides,
-	convertBestiaryCreatureToSheet,
-} from '../../../utils/sheet/sheet-import-utils.js';
+import { convertCompendiumCreatureToSheet } from '../../../utils/sheet/sheet-import-compendium.js';
 import { SheetProperties } from '../../../utils/sheet/sheet-properties.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { InitOptions } from './init-command-options.js';
+import { SheetUtils } from '../../../utils/sheet/sheet-utils.js';
+import { getEmoji } from '../../../constants/emoji.js';
+import { filterNotNullOrUndefined } from '../../../utils/type-guards.js';
 
 export class InitAddSubCommand implements Command {
 	public names = [L.en.commands.init.add.name()];
@@ -98,6 +103,7 @@ export class InitAddSubCommand implements Command {
 			.toLocaleLowerCase();
 
 		let sheet = SheetProperties.defaultSheet;
+		const actions: Action[] = [];
 		let referenceNpcName: string | null = null;
 
 		if (targetCreature.toLowerCase().trim() != 'custom npc') {
@@ -113,12 +119,62 @@ export class InitAddSubCommand implements Command {
 			const { bestiaryCreature, bestiaryCreatureFluff } =
 				await NpcUtils.fetchCompendiumCreatureData(intr, compendium, name, source);
 
-			sheet = convertBestiaryCreatureToSheet(bestiaryCreature, bestiaryCreatureFluff, {
+			const compendiumEmbedParser = new CompendiumEmbedParser(compendium, emojiData =>
+				getEmoji(intr, emojiData)
+			);
+			sheet = convertCompendiumCreatureToSheet(bestiaryCreature, bestiaryCreatureFluff, {
 				useStamina: false,
 				template,
 				customName: actorName || undefined,
 			});
 			referenceNpcName = bestiaryCreature.name;
+
+			// convert bestiary abilities to sheet abilities
+			// TODO: this should be moved to a utility function
+			const allAbilities = [
+				bestiaryCreature.abilities?.top,
+				bestiaryCreature.abilities?.mid,
+				bestiaryCreature.abilities?.bot,
+			]
+				.flat()
+				.filter(filterNotNullOrUndefined);
+
+			for (const ability of allAbilities) {
+				console.log(parseActivityRaw((ability as AbilityEntry).activity));
+				const actionCost: ActionCostEnum =
+					'activity' in ability
+						? (compendiumEmbedParser.entryParser.parseActivity(
+								ability.activity!,
+								false
+							) as ActionCostEnum)
+						: ActionCostEnum.none;
+				const title = ability.name ?? 'Ability';
+				console.log(ability);
+				actions.push({
+					type: ActionTypeEnum.other,
+					name: title,
+					description: null,
+					actionCost: actionCost,
+					baseLevel: null,
+					autoHeighten: false,
+					tags: [],
+					rolls: [
+						{
+							name: 'Details',
+							type: RollTypeEnum.text,
+							defaultText: compendiumEmbedParser.entryParser.parseEntries(
+								ability.entries ?? []
+							),
+							allowRollModifiers: false,
+							criticalSuccessText: null,
+							successText: null,
+							failureText: null,
+							criticalFailureText: null,
+							extraTags: [],
+						},
+					],
+				});
+			}
 
 			if (!actorName)
 				actorName = (template ? `${_.capitalize(template)} ` : '') + bestiaryCreature.name;
@@ -130,14 +186,21 @@ export class InitAddSubCommand implements Command {
 		let finalName: string = actorName;
 
 		if (customStatsString) {
-			sheet = applyStatOverrides(sheet, customStatsString);
-			const creature = new Creature({
-				sheet,
-				actions: [],
-				rollMacros: [],
-				modifiers: [],
-				conditions: [],
-			});
+			// treat the stat override string as just a bunch of sheet modifier adjustments
+			const adjustments = SheetUtils.stringToSheetAdjustments(customStatsString);
+			const adjustedSheet = SheetUtils.adjustSheetWithSheetAdjustments(sheet, adjustments);
+
+			const creature = new Creature(
+				{
+					sheet: adjustedSheet,
+					actions,
+					rollMacros: [],
+					modifiers: [],
+					conditions: [],
+				},
+				undefined,
+				intr
+			);
 			creature.recover();
 			sheet = creature._sheet;
 		}
@@ -157,7 +220,7 @@ export class InitAddSubCommand implements Command {
 			}
 		}
 
-		const sheetRecord = await kobold.sheetRecord.create({ sheet });
+		const sheetRecord = await kobold.sheetRecord.create({ sheet, actions });
 
 		let finalInitiative = 0;
 		let rollResultMessage: EmbedBuilder;
@@ -176,7 +239,7 @@ export class InitAddSubCommand implements Command {
 					})
 				);
 		} else {
-			const creature = new Creature(sheetRecord);
+			const creature = new Creature(sheetRecord, undefined, intr);
 			const rollBuilder = new RollBuilder({
 				title: L.en.commands.init.add.interactions.joinedEmbed.rolledTitle({
 					actorName: finalName,

@@ -58,7 +58,7 @@ export class RollSkillSubCommand implements Command {
 			}
 			//find a skill on the character matching the autocomplete string
 			const matchedSkills = FinderHelpers.matchAllSkills(
-				new Creature(activeCharacter.sheetRecord),
+				new Creature(activeCharacter.sheetRecord, undefined, intr),
 				match
 			).map(skill => ({ name: skill.name, value: skill.name }));
 			//return the matched skills
@@ -86,7 +86,7 @@ export class RollSkillSubCommand implements Command {
 		});
 		koboldUtils.assertActiveCharacterNotNull(activeCharacter);
 
-		const creature = new Creature(activeCharacter.sheetRecord);
+		const creature = new Creature(activeCharacter.sheetRecord, undefined, intr);
 
 		const targetRoll = StringUtils.findBestValueByKeyMatch(skillChoice, creature.skillRolls);
 

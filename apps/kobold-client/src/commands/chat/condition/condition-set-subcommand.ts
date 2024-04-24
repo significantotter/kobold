@@ -121,7 +121,7 @@ export class ConditionSetSubCommand implements Command {
 				// we must be able to evaluate the condition as a roll for this character
 				InputParseUtils.isValidDiceExpression(
 					newFieldValue,
-					new Creature(targetSheetRecord)
+					new Creature(targetSheetRecord, undefined, intr)
 				);
 				targetCondition.rollAdjustment = newFieldValue;
 			} catch (err) {

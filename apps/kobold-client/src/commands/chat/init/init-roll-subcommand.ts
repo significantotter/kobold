@@ -132,10 +132,10 @@ export class InitRollSubCommand implements Command {
 			const results = await gameUtils.getCharacterOrInitActorTarget(intr, targetSheetName);
 			targetSheetRecord = results.targetSheetRecord;
 			hideStats = results.hideStats;
-			targetCreature = new Creature(targetSheetRecord);
+			targetCreature = new Creature(targetSheetRecord, targetSheetName, intr);
 		}
 
-		const creature = new Creature(actor.sheetRecord);
+		const creature = new Creature(actor.sheetRecord, actor.name, intr);
 
 		const targetRoll = creature.attackRolls[rollChoice] ?? creature.rolls[rollChoice];
 

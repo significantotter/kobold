@@ -1,6 +1,18 @@
-import { BaseMessageOptions } from 'discord.js';
+import { Interaction } from 'discord.js';
 import _ from 'lodash';
-import type { Action, Attribute, Modifier, RollMacro, Sheet, SheetRecord } from 'kobold-db';
+import type {
+	Action,
+	AttackOrSkillRoll,
+	Attribute,
+	DamageRoll,
+	Modifier,
+	Roll,
+	RollMacro,
+	SaveRoll,
+	Sheet,
+	SheetRecord,
+	TextRoll,
+} from 'kobold-db';
 import {
 	AbilityEnum,
 	Counter,
@@ -16,10 +28,6 @@ import { AttributeUtils } from './attribute-utils.js';
 import { KoboldEmbed } from './kobold-embed-utils.js';
 import { ModifierUtils } from './kobold-service-utils/modifier-utils.js';
 import {
-	convertPathBuilderToSheet,
-	convertWanderersGuideCharToSheet,
-} from './sheet/sheet-import-utils.js';
-import {
 	SheetIntegerGroupEnum,
 	SheetIntegerProperties,
 	SheetProperties,
@@ -28,6 +36,9 @@ import {
 } from './sheet/sheet-properties.js';
 import { SheetUtils } from './sheet/sheet-utils.js';
 import { StringUtils } from './string-utils.js';
+import { convertWanderersGuideCharToSheet } from './sheet/sheet-import-wg.js';
+import { convertPathBuilderToSheet } from './sheet/sheet-import-pathbuilder.js';
+import { getEmoji } from '../constants/emoji.js';
 
 const damageTypeShorthands: { [shorthand: string]: string } = {
 	piercing: 'p',
@@ -78,7 +89,8 @@ export class Creature {
 			modifiers: Modifier[];
 			conditions: Modifier[];
 		},
-		public _name?: string
+		public _name?: string,
+		public intr?: Interaction
 	) {
 		const sheetDefaults: Sheet = SheetProperties.defaultSheet;
 		this.actions = actions;
@@ -301,6 +313,74 @@ export class Creature {
 		return attackText.length ? `${title}${attackText}` : '';
 	}
 
+	public sheetActionsText(includeTitle: boolean = false) {
+		const actionLines = [];
+		for (const action of this.actions) {
+			let shortenedDescription = StringUtils.truncate(action.description ?? '', 100, true);
+			if (shortenedDescription.length > 100) shortenedDescription += '...';
+			let actionRollsText = '';
+			if (action.rolls.length) {
+				const attackRolls: AttackOrSkillRoll[] = action.rolls.filter(
+					(roll: Roll): roll is AttackOrSkillRoll => roll.type === 'attack'
+				);
+				const saveRolls = action.rolls.filter(
+					(roll: Roll): roll is SaveRoll => roll.type === 'save'
+				);
+				const damageRolls = action.rolls.filter(
+					(roll: Roll): roll is DamageRoll => roll.type === 'damage'
+				);
+				const textRolls = action.rolls.filter(
+					(roll: Roll): roll is TextRoll => roll.type === 'text'
+				);
+				let attackRollText = '';
+				let saveRollText = '';
+				let damageRollText = '';
+				let textRollsText = '';
+				if (attackRolls.length) {
+					attackRollText = attackRolls
+						.map(roll => {
+							return `${roll.roll}${roll.targetDC == 'AC' || null ? '' : ` vs DC ${roll.targetDC}`}`;
+						})
+						.join(', ');
+				}
+				if (saveRolls.length) {
+					saveRollText = saveRolls
+						.map(roll => {
+							return `${roll.saveRollType} vs DC ${this.getDC(roll.saveTargetDC ?? '')}`;
+						})
+						.join(', ');
+				}
+				if (damageRolls.length) {
+					damageRollText = damageRolls
+						.map(roll => {
+							return `${roll.roll} ${roll.damageType ?? ''}`;
+						})
+						.join(', ');
+				}
+				if (textRolls.length) {
+					textRollsText = textRolls
+						.map(roll => {
+							return `${StringUtils.truncate(roll.defaultText ?? '', 100, true)}`;
+						})
+						.filter(_.identity)
+						.join(', ');
+				}
+				actionRollsText = [attackRollText, saveRollText, damageRollText, textRollsText]
+					.filter(_.identity)
+					.join('; ');
+			}
+			const actionCost =
+				action.actionCost && action.actionCost !== 'none'
+					? `${getEmoji(this.intr, action.actionCost)}`
+					: '';
+			const actionText = `*${action.name}* ${actionCost}: ${actionRollsText.length ? actionRollsText : action.description}`;
+			actionLines.push(actionText);
+		}
+		const actionText = actionLines.join('\n');
+		const title = includeTitle ? 'Actions: ' : '';
+		return actionText.length ? `${title}${actionText}` : '';
+	}
+
 	public titleBlock(sheetType: string = 'Sheet') {
 		let title = '';
 		if (this.sheet.info.url) {
@@ -406,6 +486,23 @@ export class Creature {
 			}
 		} else if (attackText) {
 			sheetEmbed.addFields([{ name: 'Attacks', value: attackText }]);
+		}
+		let actionText = this.sheetActionsText(false);
+		if (actionText && actionText.length >= 950) {
+			const actionLines = actionText.split('\n');
+			let currentActionText = '';
+			for (const actionLine of actionLines) {
+				if (currentActionText.length + actionLine.length >= 600) {
+					sheetEmbed.addFields([{ name: 'Actions', value: currentActionText }]);
+					currentActionText = '';
+				}
+				currentActionText += actionLine + '\n';
+			}
+			if (currentActionText) {
+				sheetEmbed.addFields([{ name: 'Actions', value: currentActionText }]);
+			}
+		} else if (actionText) {
+			sheetEmbed.addFields([{ name: 'Actions', value: actionText }]);
 		}
 
 		// Skills
