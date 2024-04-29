@@ -7,7 +7,7 @@ import {
 	SheetAdjustmentOperationEnum,
 	SheetAdjustmentTypeEnum,
 	SheetStatKeys,
-} from 'kobold-db';
+} from '@kobold/db';
 import { KoboldError } from '../KoboldError.js';
 import { SheetProperties, SheetStatProperties } from './sheet-properties.js';
 import { SheetUtils } from './sheet-utils.js';

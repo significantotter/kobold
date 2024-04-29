@@ -1,4 +1,4 @@
-import { Sheet } from 'kobold-db';
+import { Sheet } from '@kobold/db';
 
 export const staticAttributes = (sheet?: Sheet) => {
 	if (sheet && sheet.staticInfo.level !== null) {

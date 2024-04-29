@@ -15,11 +15,13 @@ import _ from 'lodash';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import {
+	DefaultCompendiumEnum,
 	Kobold,
 	UserSettings,
+	isDefaultCompendiumEnum,
 	isInitStatsNotificationEnum,
 	isInlineRollsDisplayEnum,
-} from 'kobold-db';
+} from '@kobold/db';
 import { KoboldError } from '../../../utils/KoboldError.js';
 import { InteractionUtils } from '../../../utils/interaction-utils.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
@@ -58,6 +60,15 @@ export class SettingsSetSubCommand implements Command {
 				'inline-rolls-display'
 		) {
 			return ['detailed', 'compact'].map(choice => ({
+				name: choice,
+				value: choice,
+			}));
+		} else if (
+			option.name === SettingsOptions.SETTINGS_SET_VALUE.name &&
+			intr.options.getString(SettingsOptions.SETTINGS_SET_OPTION.name) ===
+				'default-compendium'
+		) {
+			return [DefaultCompendiumEnum.nethys, DefaultCompendiumEnum.pf2etools].map(choice => ({
 				name: choice,
 				value: choice,
 			}));
@@ -101,6 +112,14 @@ export class SettingsSetSubCommand implements Command {
 				);
 			}
 			updates.inlineRollsDisplay = parsedValue;
+		} else if (trimmedOptionName === 'defaultCompendium') {
+			settingDbName = 'defaultCompendium';
+			if (!isDefaultCompendiumEnum(parsedValue)) {
+				throw new KoboldError(
+					'Yip! The value for "inline-rolls-display" must be one of "compact", or "detailed".'
+				);
+			}
+			updates.defaultCompendium = parsedValue;
 		} else {
 			throw new KoboldError(`Yip! "${option}" is not a valid option.`);
 		}

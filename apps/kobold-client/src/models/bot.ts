@@ -25,7 +25,7 @@ import {
 } from '../events/index.js';
 import { JobService, Logger } from '../services/index.js';
 import { PartialUtils } from '../utils/index.js';
-import { Config } from 'kobold-config';
+import { Config } from '@kobold/config';
 
 export class Bot {
 	protected ready = false;

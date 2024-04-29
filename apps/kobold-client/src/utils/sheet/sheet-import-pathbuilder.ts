@@ -6,7 +6,7 @@ import {
 	ProficiencyStat,
 	isSheetIntegerKeys,
 	SheetAttack,
-} from 'kobold-db';
+} from '@kobold/db';
 import _ from 'lodash';
 import { PathBuilder } from '../../services/pathbuilder/pathbuilder.js';
 import { scoreToBonus, applyValuesToStatInPlace } from './sheet-import-utils.js';

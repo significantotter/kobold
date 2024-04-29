@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { AdjustablePropertyEnum, Sheet, SheetAdjustment, StatSubGroupEnum } from 'kobold-db';
+import { AdjustablePropertyEnum, Sheet, SheetAdjustment, StatSubGroupEnum } from '@kobold/db';
 import { KoboldError } from '../KoboldError.js';
 import {
 	SheetAdditionalSkillAdjuster,

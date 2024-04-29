@@ -1,48 +1,45 @@
 import { AutocompleteInteraction, CacheType } from 'discord.js';
 import { sql } from 'drizzle-orm';
 import _ from 'lodash';
-import { CharacterWithRelations, InitiativeActor, Kobold } from 'kobold-db';
-import { CompendiumModel } from 'pf2etools-data';
-import { CompendiumUtils } from 'pf2etools-data';
+import { CharacterWithRelations, InitiativeActor, Kobold } from '@kobold/db';
+import { Pf2eToolsCompendiumModel } from '@kobold/pf2etools';
+import { Pf2eToolsUtils } from '@kobold/pf2etools';
 import { Creature } from '../creature.js';
 import { InitiativeBuilderUtils } from '../initiative-builder.js';
 import { FinderHelpers } from '../kobold-helpers/finder-helpers.js';
-import { StringUtils } from '../string-utils.js';
+import { StringUtils } from '@kobold/base-utils';
 import type { KoboldUtils } from './kobold-utils.js';
-import { DrizzleUtils } from 'pf2etools-data';
+import { DrizzleUtils } from '@kobold/pf2etools';
+import { NethysDb } from '@kobold/nethys';
 
 export class AutocompleteUtils {
 	public kobold: Kobold;
 	constructor(private koboldUtils: KoboldUtils) {
 		this.kobold = koboldUtils.kobold;
 	}
-	public async searchCompendium(
-		intr: AutocompleteInteraction<CacheType>,
-		matchText: string,
-		compendium: CompendiumModel
-	) {
-		const choices = await CompendiumUtils.getSearchNameValue(matchText, compendium);
 
-		const sorter = StringUtils.generateSorterByWordDistance<{
-			name: string;
-			value: string;
-		}>(matchText, c => c.name);
-		return choices.sort(sorter).slice(0, 50);
-	}
-
-	public async getBestiaryCreatures(
+	public async getPf2eToolsBestiaryCreatures(
 		intr: AutocompleteInteraction<CacheType>,
-		compendium: CompendiumModel,
+		pf2eToolsCompendium: Pf2eToolsCompendiumModel,
 		matchText: string
 	) {
-		const targetBestiaryCreatures = await compendium.db.query.Creatures.findMany({
-			where: DrizzleUtils.ilike(compendium.creatures.table.search, `%${matchText}%`),
+		const targetBestiaryCreatures = await pf2eToolsCompendium.db.query.Creatures.findMany({
+			where: DrizzleUtils.ilike(pf2eToolsCompendium.creatures.table.search, `%${matchText}%`),
 			orderBy: sql`RANDOM()`,
 			limit: 49,
 		});
 		return targetBestiaryCreatures.map(npc => {
 			return { name: npc.search, value: npc.search };
 		});
+	}
+	public async getNethysBestiaryCreatures(nethysCompendium: NethysDb, matchText: string) {
+		const searchResults = await nethysCompendium.searchTerm(matchText, {
+			searchTermOnly: true,
+			randomOrder: true,
+			limit: 50,
+			bestiary: true,
+		});
+		return searchResults.map(result => ({ name: result.search, value: result.search }));
 	}
 
 	public async getTargetActionForActiveCharacter(

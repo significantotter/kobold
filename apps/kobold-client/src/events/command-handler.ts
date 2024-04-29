@@ -13,7 +13,7 @@ import { DiscordLimits } from '../constants/index.js';
 import { Logger } from '../services/index.js';
 import { CommandUtils, InteractionUtils } from '../utils/index.js';
 import { EventHandler } from './event-handler.js';
-import { Config } from 'kobold-config';
+import { Config } from '@kobold/config';
 import { KoboldEmbed } from '../utils/kobold-embed-utils.js';
 import { refs } from '../constants/common-text.js';
 import { KoboldError } from '../utils/KoboldError.js';

@@ -5,7 +5,7 @@ import {
 	Modifier,
 	SheetAdjustmentOperationEnum,
 	SheetAdjustmentTypeEnum,
-} from 'kobold-db';
+} from '@kobold/db';
 import { ModifierUtils } from './modifier-utils.js';
 
 describe('ModifierUtils', () => {

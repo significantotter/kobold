@@ -4,7 +4,7 @@ import { RateLimiter } from 'discord.js-rate-limiter';
 import { Button, ButtonDeferType } from '../buttons/index.js';
 import { InteractionUtils } from '../utils/index.js';
 import { EventHandler } from './event-handler.js';
-import { Config } from 'kobold-config';
+import { Config } from '@kobold/config';
 
 export class ButtonHandler implements EventHandler {
 	protected rateLimiter = new RateLimiter(

@@ -1,4 +1,4 @@
-import { Modifier } from 'kobold-db';
+import { Modifier } from '@kobold/db';
 import { KoboldError } from '../../../utils/KoboldError.js';
 
 export class ModifierHelpers {

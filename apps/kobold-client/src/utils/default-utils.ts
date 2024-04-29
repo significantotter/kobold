@@ -1,9 +1,10 @@
 import {
+	DefaultCompendiumEnum,
 	InitStatsNotificationEnum,
 	InlineRollsDisplayEnum,
 	RollCompactModeEnum,
 	UserSettings,
-} from 'kobold-db';
+} from '@kobold/db';
 
 export class DefaultUtils {
 	public static get userSettings(): UserSettings {
@@ -12,6 +13,7 @@ export class DefaultUtils {
 			inlineRollsDisplay: InlineRollsDisplayEnum.detailed,
 			rollCompactMode: RollCompactModeEnum.normal,
 			initStatsNotification: InitStatsNotificationEnum.every_round,
+			defaultCompendium: DefaultCompendiumEnum.nethys,
 		};
 	}
 }

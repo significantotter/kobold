@@ -16,7 +16,7 @@ import _ from 'lodash';
 import { getEmoji } from '../../../constants/emoji.js';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { Kobold, SheetRecord } from 'kobold-db';
+import { Kobold, SheetRecord } from '@kobold/db';
 import { ActionRoller } from '../../../utils/action-roller.js';
 import { Creature } from '../../../utils/creature.js';
 import { InteractionUtils } from '../../../utils/index.js';

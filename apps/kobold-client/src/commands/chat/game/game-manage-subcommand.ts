@@ -13,7 +13,7 @@ import { GameOptions } from './game-command-options.js';
 
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { GameWithRelations, Kobold } from 'kobold-db';
+import { GameWithRelations, Kobold } from '@kobold/db';
 import { KoboldError } from '../../../utils/KoboldError.js';
 import { InteractionUtils } from '../../../utils/interaction-utils.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';

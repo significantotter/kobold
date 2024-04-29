@@ -21,7 +21,7 @@ import {
 	SheetWeaknessesResistances,
 	TextRoll,
 	UserSettings,
-} from 'kobold-db';
+} from '@kobold/db';
 import { KoboldError } from './KoboldError.js';
 import { Creature } from './creature.js';
 import {
@@ -34,7 +34,8 @@ import {
 } from './dice-utils.js';
 import { EmbedUtils, KoboldEmbed } from './kobold-embed-utils.js';
 import { RollBuilder } from './roll-builder.js';
-import { StringUtils } from './string-utils.js';
+import { StringUtils } from '@kobold/base-utils';
+import { DefaultUtils } from './default-utils.js';
 
 type ContestedRollTypes = 'attack' | 'skill-challenge' | 'save' | 'none';
 type ResultRollTypes = 'damage' | 'advanced-damage' | 'text';
@@ -85,12 +86,7 @@ export class ActionRoller {
 		this.options = options;
 
 		if (!userSettings) {
-			this.userSettings = {
-				userId: '',
-				inlineRollsDisplay: InlineRollsDisplayEnum.detailed,
-				rollCompactMode: RollCompactModeEnum.normal,
-				initStatsNotification: InitStatsNotificationEnum.every_round,
-			};
+			this.userSettings = DefaultUtils.userSettings;
 		}
 	}
 

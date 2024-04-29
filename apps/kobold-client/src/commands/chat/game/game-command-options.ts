@@ -1,6 +1,6 @@
 import { APIApplicationCommandBasicOption, ApplicationCommandOptionType } from 'discord.js';
 import L from '../../../i18n/i18n-node.js';
-import { SheetBaseCounterKeys } from 'kobold-db';
+import { SheetBaseCounterKeys } from '@kobold/db';
 
 export class GameOptions {
 	public static readonly GAME_GIVE_OPTION: APIApplicationCommandBasicOption = {

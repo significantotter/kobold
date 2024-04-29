@@ -9,7 +9,7 @@ import {
 } from 'discord.js';
 
 import { Logger } from './logger.js';
-import { Config } from 'kobold-config';
+import { Config } from '@kobold/config';
 
 export class CommandRegistrationService {
 	constructor(protected rest: REST) {}

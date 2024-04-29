@@ -1,6 +1,6 @@
 import { URL } from 'node:url';
 
-import { Config } from 'kobold-config';
+import { Config } from '@kobold/config';
 import { HttpService } from '../http-service.js';
 import {
 	LoginClusterResponse,

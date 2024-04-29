@@ -857,6 +857,10 @@ export default {
 				name: 'inline-rolls-display',
 				value: 'inline-rolls-display',
 			},
+			defaultCompendium: {
+				name: 'default-compendium',
+				value: 'default-compendium',
+			},
 		},
 	},
 	settingsSetValue: {
@@ -866,8 +870,22 @@ export default {
 
 	// COMPENDIUM
 
-	commandSearch: {
+	compendiumSearch: {
 		name: 'search',
 		description: "The name of the thing you're searching for.",
+	},
+	compendiumSearchChoice: {
+		name: 'search',
+		description: "The name of the thing you're searching for.",
+		choices: {
+			archivesOfNeythys: {
+				name: 'archives-of-nethys',
+				value: 'archives-of-nethys',
+			},
+			pf2eTools: {
+				name: 'pf2eTools',
+				value: 'pf2eTools',
+			},
+		},
 	},
 };

@@ -1,7 +1,7 @@
 import { PostgresDialect, sql } from 'kysely';
 import pg from 'pg';
 import _ from 'lodash';
-import { Config } from 'kobold-config';
+import { Config } from '@kobold/config';
 import { generateMock } from '@anatine/zod-mock';
 import {
 	ChannelDefaultCharacter,

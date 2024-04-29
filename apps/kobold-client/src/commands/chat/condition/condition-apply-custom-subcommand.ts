@@ -18,7 +18,7 @@ import {
 	SheetAdjustment,
 	SheetAdjustmentTypeEnum,
 	isSheetAdjustmentTypeEnum,
-} from 'kobold-db';
+} from '@kobold/db';
 import { KoboldError } from '../../../utils/KoboldError.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';

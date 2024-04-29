@@ -1,7 +1,7 @@
 import { CommandInteraction, CacheType } from 'discord.js';
 import { PasteBinCharacterFetcher } from './pastebin-character-fetcher.js';
-import { truncateDbForTests, vitestKobold } from 'kobold-db/test-utils';
-import { Sheet } from 'kobold-db';
+import { truncateDbForTests, vitestKobold } from '@kobold/db/test-utils';
+import { Sheet } from '@kobold/db';
 import { SheetProperties } from '../../../../utils/sheet/sheet-properties.js';
 vitest.mock('pastebin-api');
 

@@ -138,5 +138,49 @@ describe('KoboldEmbedUtils', () => {
 				expect(embed.data.title).toContain('Round 0');
 			});
 		});
+		describe('splitField', () => {
+			it('should split field value at newlines', () => {
+				const field = {
+					name: 'Test',
+					value: 'a'.repeat(300) + '\n' + 'b'.repeat(400) + '\n' + 'c'.repeat(700),
+				};
+				const result = new KoboldEmbed().splitField(field);
+				expect(result.length).toBe(2);
+				expect(result[0].value.length).toBe(701);
+				expect(result[1].value.length).toBe(700);
+			});
+
+			it('should split field value at periods', () => {
+				const field = {
+					name: 'Test',
+					value: 'a'.repeat(900) + '.' + 'b'.repeat(900),
+				};
+				const result = new KoboldEmbed().splitField(field);
+				expect(result.length).toBe(2);
+				expect(result[0].value.length).toBe(900);
+				expect(result[1].value.length).toBe(900);
+			});
+
+			it('should split field value at spaces', () => {
+				const field = {
+					name: 'Test',
+					value: 'a'.repeat(1000) + ' ' + 'b'.repeat(1000),
+				};
+				const result = new KoboldEmbed().splitField(field);
+				expect(result.length).toBe(2);
+				expect(result[0].value.length).toBe(1000);
+				expect(result[1].value.length).toBe(1000);
+			});
+			it('should split field value at spaces', () => {
+				const field = {
+					name: 'Test',
+					value: 'a'.repeat(200) + ' ' + 'b'.repeat(1000),
+				};
+				const result = new KoboldEmbed().splitField(field);
+				expect(result.length).toBe(2);
+				expect(result[0].value.length).toBe(200);
+				expect(result[1].value.length).toBe(1000);
+			});
+		});
 	});
 });

@@ -16,7 +16,7 @@ import {
 	SheetInfoLists,
 	SheetRecord,
 	SheetWeaknessesResistances,
-} from 'kobold-db';
+} from '@kobold/db';
 import { KoboldError } from './KoboldError.js';
 import type { ActionRoller } from './action-roller.js';
 import type { InitiativeBuilder, TurnData } from './initiative-builder.js';
@@ -181,46 +181,67 @@ export class KoboldEmbed extends EmbedBuilder {
 	}
 
 	public splitField(field: APIEmbedField) {
-		// leave the name the same, adding 'cont\'d' to the end of split fields, splitting values on word boundaries if possible
 		const splitFields: APIEmbedField[] = [];
 
-		// first, split on newlines
-		const splitValues = field.value.split('\n');
+		const splitLines = field.value.split('\n');
 
-		// add values to a field until a value would make it too large. If a single value + a name is too large, split on spaces
 		let newField: APIEmbedField = {
 			name: field.name,
 			value: '',
 		};
-		for (const splitValue of splitValues) {
-			if (splitValue.length + field.name.length > 1024) {
-				// split the value on periods
-				const splitWords = splitValue.split('.');
-				for (const splitWord of splitWords) {
-					if (newField.value.length + splitWord.length > 1024) {
-						// add the new field to the list of fields
-						splitFields.push(newField);
-						// create a new field
-						newField = {
-							name: '\u200b',
-							value: '',
-						};
-					}
-					newField.value += splitWord + '.';
-				}
-			}
-			if (newField.value.length + splitValue.length > 1024) {
-				// add the new field to the list of fields
+
+		for (const line of splitLines) {
+			if (
+				newField.value.length + field.name.length > 800 &&
+				newField.value.length + field.name.length + line.length > 1024
+			) {
+				// just start a new field
 				splitFields.push(newField);
-				// create a new field
 				newField = {
 					name: '\u200b',
 					value: '',
 				};
 			}
-			newField.value += splitValue + '\n';
+			if (newField.value.length + field.name.length + line.length > 1024) {
+				const splitSentences = line.split('.');
+				for (const sentence of splitSentences) {
+					if (
+						newField.value.length + field.name.length > 800 &&
+						newField.value.length + field.name.length + sentence.length > 1024
+					) {
+						// just start a new field
+						splitFields.push(newField);
+						newField = {
+							name: '\u200b',
+							value: '',
+						};
+					}
+					if (newField.value.length + field.name.length + sentence.length > 1024) {
+						const splitWords = sentence.split(' ');
+						for (const word of splitWords) {
+							if (newField.value.length + field.name.length + word.length > 1024) {
+								newField.value = newField.value.trim();
+								splitFields.push(newField);
+								newField = {
+									name: '\u200b',
+									value: word,
+								};
+							} else {
+								newField.value += newField.value ? ` ${word}` : word;
+							}
+						}
+					} else {
+						newField.value += newField.value.length ? `.${sentence}` : sentence;
+					}
+				}
+			} else {
+				newField.value += newField ? `\n${line}` : line;
+			}
 		}
-		if (newField.value.length > 0) splitFields.push(newField);
+
+		newField.value = newField.value.trim();
+		splitFields.push(newField); // push the last field
+
 		return splitFields;
 	}
 
@@ -308,13 +329,14 @@ export class KoboldEmbed extends EmbedBuilder {
 
 	public batchEmbeds() {
 		const splitEmbeds = this.splitEmbedIfTooLong();
-		const embedBatches: KoboldEmbed[][] = [];
 		return _.chunk(splitEmbeds, 1);
 	}
 	public static prepareEmbeds(embeds: KoboldEmbed[]) {
 		const finalEmbeds: KoboldEmbed[] = [];
 		for (const embed of embeds) {
 			if (!embed) continue;
+			embed.splitDescriptionToFields();
+			embed.splitFieldsThatAreTooLong();
 			embed.splitEmbedIfTooLong();
 			const splitEmbeds = embed.splitEmbedIfTooLong();
 			finalEmbeds.push(...splitEmbeds);
@@ -369,6 +391,11 @@ export class KoboldEmbed extends EmbedBuilder {
 				currentChunkLength += line.length + 2; //lines are each joined with \n, adding 2
 			}
 		}
+		if (currentChunk.length) {
+			if (currentChunkContinuesCodeBlock) currentChunk.push('```');
+			if (currentChunkContinuesQuote) currentChunk.push('`');
+			descriptionChunks.push(currentChunk);
+		}
 		// add the first four chunks to the description
 		this.setDescription(descriptionChunks.slice(0, 4).flat(2).join('\n'));
 		this.addFields(
@@ -412,6 +439,7 @@ export class KoboldEmbed extends EmbedBuilder {
 		this.splitDescriptionToFields();
 		this.splitFieldsThatAreTooLong();
 		const splitEmbeds = this.splitEmbedIfTooLong();
+		// console.dir(splitEmbeds, { depth: null });
 		for (const embed of splitEmbeds) {
 			await InteractionUtils.send(intr, embed, isEphemeral);
 		}

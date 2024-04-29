@@ -3,7 +3,7 @@ import pg from 'pg';
 import { promises as fs } from 'fs';
 import { Kysely, Migrator, PostgresDialect, FileMigrationProvider } from 'kysely';
 import { fileURLToPath } from 'url';
-import { Config } from 'kobold-config';
+import { Config } from '@kobold/config';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

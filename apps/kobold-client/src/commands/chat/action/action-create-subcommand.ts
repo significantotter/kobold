@@ -4,7 +4,7 @@ import {
 	PermissionsString,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
-import { ActionCostEnum, ActionTypeEnum, Kobold } from 'kobold-db';
+import { ActionCostEnum, ActionTypeEnum, Kobold } from '@kobold/db';
 
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';

@@ -21,7 +21,7 @@ import {
 	Kobold,
 	SheetRecordTrackerModeEnum,
 	isSheetRecordTrackerModeEnum,
-} from 'kobold-db';
+} from '@kobold/db';
 import { KoboldError } from '../../../utils/KoboldError.js';
 import { Creature } from '../../../utils/creature.js';
 import { InteractionUtils } from '../../../utils/interaction-utils.js';

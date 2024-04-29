@@ -1,0 +1,197 @@
+{
+  "id": "ffeac235-2647-4b4c-ab58-a5dd1cb0988a",
+  "prevId": "9f407654-7cee-4c37-9228-a27b35cbd841",
+  "version": "5",
+  "dialect": "pg",
+  "tables": {
+    "nethys_bestiary": {
+      "name": "nethys_bestiary",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "category": {
+          "name": "category",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "level": {
+          "name": "level",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "elastic_index": {
+          "name": "elastic_index",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "elastic_id": {
+          "name": "elastic_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nethys_id": {
+          "name": "nethys_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "search": {
+          "name": "search",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "exclude_from_search": {
+          "name": "exclude_from_search",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tags": {
+          "name": "tags",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "data": {
+          "name": "data",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "nethys_compendium_elastic_id_unique": {
+          "name": "nethys_compendium_elastic_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "elastic_id"
+          ]
+        },
+        "nethys_compendium_nethys_id_unique": {
+          "name": "nethys_compendium_nethys_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "nethys_id"
+          ]
+        }
+      }
+    },
+    "nethys_compendium": {
+      "name": "nethys_compendium",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "category": {
+          "name": "category",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "level": {
+          "name": "level",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "elastic_index": {
+          "name": "elastic_index",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "elastic_id": {
+          "name": "elastic_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nethys_id": {
+          "name": "nethys_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "search": {
+          "name": "search",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "exclude_from_search": {
+          "name": "exclude_from_search",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tags": {
+          "name": "tags",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "data": {
+          "name": "data",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "nethys_compendium_elastic_id_unique": {
+          "name": "nethys_compendium_elastic_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "elastic_id"
+          ]
+        },
+        "nethys_compendium_nethys_id_unique": {
+          "name": "nethys_compendium_nethys_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "nethys_id"
+          ]
+        }
+      }
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

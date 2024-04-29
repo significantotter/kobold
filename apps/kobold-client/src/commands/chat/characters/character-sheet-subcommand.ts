@@ -7,7 +7,7 @@ import {
 
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { Kobold, SheetRecordTrackerModeEnum } from 'kobold-db';
+import { Kobold, SheetRecordTrackerModeEnum } from '@kobold/db';
 import { Creature } from '../../../utils/creature.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';

@@ -37,6 +37,8 @@ import {
 	isInitStatsNotificationEnum,
 	InitStatsNotificationEnum,
 	isSheetRecordTrackerModeEnum,
+	DefaultCompendiumEnum,
+	isDefaultCompendiumEnum,
 } from './enum-helpers.js';
 
 describe('Enum Helpers', () => {
@@ -285,6 +287,17 @@ describe('Enum Helpers', () => {
 
 		it('should return false for invalid InlineRollsDisplayEnum values', () => {
 			expect(isInlineRollsDisplayEnum('invalid_value')).toBe(false);
+		});
+	});
+
+	describe('isDefaultCompendiumEnum', () => {
+		it('should return true for valid DefaultCompendiumEnum values', () => {
+			expect(isDefaultCompendiumEnum(DefaultCompendiumEnum.nethys)).toBe(true);
+			expect(isDefaultCompendiumEnum(DefaultCompendiumEnum.pf2etools)).toBe(true);
+		});
+
+		it('should return false for invalid DefaultCompendiumEnum values', () => {
+			expect(isDefaultCompendiumEnum('invalid_value')).toBe(false);
 		});
 	});
 });

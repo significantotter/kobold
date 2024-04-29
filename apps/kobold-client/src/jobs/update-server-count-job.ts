@@ -5,7 +5,7 @@ import { CustomClient } from '../extensions/index.js';
 import { BotSite } from '../models/config-models.js';
 import { HttpService, Logger } from '../services/index.js';
 import { ShardUtils } from '../utils/index.js';
-import { Config } from 'kobold-config';
+import { Config } from '@kobold/config';
 import { Job } from '../services/job-service.js';
 
 const require = createRequire(import.meta.url);

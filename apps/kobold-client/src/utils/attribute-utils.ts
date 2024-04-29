@@ -8,7 +8,7 @@ import {
 	SheetIntegerKeys,
 	SheetStatKeys,
 	SheetBaseCounterKeys,
-} from 'kobold-db';
+} from '@kobold/db';
 import type { Creature } from './creature.js';
 import {
 	SheetAdditionalSkillProperties,

@@ -129,6 +129,15 @@ export function isRollCompactModeEnum(value: any): value is RollCompactModeEnum 
 	return rollCompactModeValueMap[value] !== undefined;
 }
 
+export enum DefaultCompendiumEnum {
+	nethys = 'nethys',
+	pf2etools = 'pf2etools',
+}
+export const defaultCompendiumValueMap = _.keyBy(Object.values(DefaultCompendiumEnum), _.identity);
+export function isDefaultCompendiumEnum(value: any): value is DefaultCompendiumEnum {
+	return defaultCompendiumValueMap[value] !== undefined;
+}
+
 export enum InlineRollsDisplayEnum {
 	detailed = 'detailed',
 	compact = 'compact',

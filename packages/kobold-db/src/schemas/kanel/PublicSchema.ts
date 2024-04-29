@@ -12,6 +12,8 @@ import { type default as KnexMigrationsTable } from './KnexMigrations.js';
 import { type default as KnexMigrationsLockTable } from './KnexMigrationsLock.js';
 import { type default as UserSettingsTable } from './UserSettings.js';
 import { type default as WgAuthTokenTable } from './WgAuthToken.js';
+import { type default as NethysBestiaryTable } from './NethysBestiary.js';
+import { type default as NethysCompendiumTable } from './NethysCompendium.js';
 
 export default interface PublicSchema {
   kyselyMigration: KyselyMigrationTable;
@@ -41,4 +43,8 @@ export default interface PublicSchema {
   userSettings: UserSettingsTable;
 
   wgAuthToken: WgAuthTokenTable;
+
+  nethysBestiary: NethysBestiaryTable;
+
+  nethysCompendium: NethysCompendiumTable;
 }

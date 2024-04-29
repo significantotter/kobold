@@ -1,5 +1,5 @@
 {
-	"name": "kobold-db",
+	"name": "@kobold/db",
 	"version": "1.0.0",
 	"author": "Significantotter",
 	"description": "A model-based interface for the Kobold database.",
@@ -32,10 +32,10 @@
 	"dependencies": {
 		"date-fns": "^2.30.0",
 		"knex": "^2.5.1",
-		"kobold-config": "workspace:*",
+		"@kobold/config": "workspace:*",
 		"kysely": "^0.26.3",
 		"lodash": "^4.17.21",
-		"pf2etools-data": "workspace:*",
+		"@kobold/pf2etools": "workspace:*",
 		"pg": "^8.11.3",
 		"zod": "^3.22.2"
 	},

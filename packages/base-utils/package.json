@@ -1,0 +1,27 @@
+{
+	"name": "@kobold/base-utils",
+	"version": "1.0.0",
+	"author": "Significantotter",
+	"description": "An interface and parser for nethys data.",
+	"license": "MIT",
+	"private": true,
+	"type": "module",
+	"main": "./src/index.js",
+	"types": "./src/index.js",
+	"exports": {
+		"default": "./dist/index.js",
+		"types": "./dist/index.d.ts"
+	},
+	"scripts": {
+		"build": "pnpm run compile",
+		"compile": "tsc -p tsconfig.build.json",
+		"test": "vitest"
+	},
+	"dependencies": {},
+	"devDependencies": {
+		"eslint": "^8.56.0",
+		"ts-node": "^10.9.2",
+		"typescript": "^5.3",
+		"vitest": "^0.34.4"
+	}
+}

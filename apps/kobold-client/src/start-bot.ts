@@ -1,11 +1,10 @@
 import { GatewayIntentBits, Options, Partials, REST, disableValidators } from 'discord.js';
 import 'reflect-metadata';
-import 'kobold-config';
+import { Config } from '@kobold/config';
 
 import { Button } from './buttons/index.js';
 import { ChatCommandExports } from './commands/chat/index.js';
 import { Command } from './commands/index.js';
-import { Config } from 'kobold-config';
 import {
 	ButtonHandler,
 	CommandHandler,
@@ -20,9 +19,10 @@ import { Bot } from './models/bot.js';
 import { Reaction } from './reactions/index.js';
 import { CommandRegistrationService, JobService, Logger } from './services/index.js';
 import { Job } from './services/job-service.js';
-import { Kobold, getDialect } from 'kobold-db';
-import { CompendiumModel, CompendiumDb } from 'pf2etools-data';
+import { Kobold, getDialect } from '@kobold/db';
+import { Pf2eToolsCompendiumModel, CompendiumDb } from '@kobold/pf2etools';
 import { Trigger } from './triggers/index.js';
+import { NethysDb } from '@kobold/nethys';
 
 // this is to prevent embeds breaking on "addFields" when adding more than an embed can hold
 // because we batch our embeds afterwards instead of before assigning fields
@@ -30,9 +30,9 @@ disableValidators();
 
 async function start(): Promise<void> {
 	const PostgresDialect = getDialect(Config.database.url);
+	const nethysCompendium = new NethysDb(Config.database.url);
 	const kobold = new Kobold(PostgresDialect);
-
-	const compendium = new CompendiumModel(CompendiumDb);
+	const pf2eToolsCompendium = new Pf2eToolsCompendiumModel(CompendiumDb);
 
 	// Client
 	let client = new CustomClient({
@@ -74,7 +74,11 @@ async function start(): Promise<void> {
 	// Event handlers
 	let guildJoinHandler = new GuildJoinHandler();
 	let guildLeaveHandler = new GuildLeaveHandler();
-	let commandHandler = new CommandHandler(commands, { compendium, kobold });
+	let commandHandler = new CommandHandler(commands, {
+		pf2eToolsCompendium,
+		nethysCompendium,
+		kobold,
+	});
 	let buttonHandler = new ButtonHandler(buttons);
 	let triggerHandler = new TriggerHandler(triggers);
 	let messageHandler = new MessageHandler(triggerHandler);
