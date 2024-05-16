@@ -192,6 +192,10 @@ importers:
         version: 1.2.0(typescript@5.4.5)(zod@3.23.4)
 
   packages/base-utils:
+    dependencies:
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
     devDependencies:
       eslint:
         specifier: ^8.56.0
