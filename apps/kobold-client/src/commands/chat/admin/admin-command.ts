@@ -1,13 +1,14 @@
-import djs, {
+import {
 	ApplicationCommandType,
 	ChatInputCommandInteraction,
 	Locale,
 	PermissionsString,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
+	version,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 import { filesize } from 'filesize';
-import os from 'node:os';
+import os from 'os';
 import typescript from 'typescript';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
@@ -73,7 +74,7 @@ export class AdminCommand implements Command {
 						`**Node.js**: ${process.version}`,
 						`**TypeScript**: v${typescript.version}`,
 						`**ECMAScript**:"ESNext"`,
-						`**discord.js**: v${djs.version}`,
+						`**discord.js**: v${version}`,
 					].join('\n'),
 				},
 				{

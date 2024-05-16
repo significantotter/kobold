@@ -30,12 +30,12 @@
 		"test": "pnpm run migrate:test && vitest"
 	},
 	"dependencies": {
+		"@kobold/config": "workspace:*",
+		"@kobold/pf2etools": "workspace:*",
 		"date-fns": "^2.30.0",
 		"knex": "^2.5.1",
-		"@kobold/config": "workspace:*",
 		"kysely": "^0.26.3",
 		"lodash": "^4.17.21",
-		"@kobold/pf2etools": "workspace:*",
 		"pg": "^8.11.3",
 		"zod": "^3.22.2"
 	},
@@ -43,6 +43,7 @@
 		"@anatine/zod-mock": "^3.13.3",
 		"@kristiandupont/recase": "^1.2.1",
 		"@types/lodash": "^4.14.202",
+		"@types/node": "^20.11.19",
 		"@types/pg": "^8.11.0",
 		"dotenv": "^16.3.1",
 		"eslint": "^8.56.0",

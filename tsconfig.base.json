@@ -16,7 +16,7 @@
 		"strict": true,
 		"types": ["vitest/globals"],
 		"paths": {
-			"kobold-db/test-utils": ["./packages/kobold-db/src/test-utils.ts"]
+			"@kobold/db/test-utils": ["./packages/kobold-db/src/test-utils.ts"]
 		}
 	},
 	"ts-node": {
