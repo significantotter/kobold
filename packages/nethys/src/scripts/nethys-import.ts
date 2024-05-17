@@ -5,7 +5,7 @@ import { sql } from 'drizzle-orm';
 import { SearchRequest } from '@elastic/elasticsearch/lib/api/types.js';
 import { CompendiumEntry } from '../schemas/index.js';
 export function valueAsJsonb(input: unknown) {
-	return sql`${input}::jsonb`;
+	return sql.raw(`'${JSON.stringify(input).replaceAll("'", "''")}'::jsonb`);
 }
 
 export class NethysLoader {
@@ -17,7 +17,7 @@ export class NethysLoader {
 	) {
 		this.client = new Client({ node: url });
 	}
-	protected pageSize = 2000;
+	protected pageSize = 1000;
 
 	// Scroll utility
 	public async *getScroll() {
@@ -66,7 +66,7 @@ export class NethysLoader {
 				search: `(${data.category}${
 					'level' in data && data.level != null ? ' ' + data.level : ''
 				}) ${data.name}`,
-				tags: valueAsJsonb(('trait' in data ? data.trait : []) ?? []),
+				tags: valueAsJsonb(data.trait ?? []),
 				data: valueAsJsonb(data),
 			};
 		});
@@ -75,15 +75,15 @@ export class NethysLoader {
 			batches.push(values.slice(i, i + 1000));
 		}
 		for (const batch of batches) {
-			await db
+			const insert = db
 				.insert(compendium)
 				.values(batch)
 				.onConflictDoUpdate({
 					target: compendium.elasticId,
 					set: { data: sql`EXCLUDED.data`, elasticIndex: sql`EXCLUDED.elastic_index` },
 					setWhere: sql`EXCLUDED.elastic_index > nethys_compendium.elastic_index`,
-				})
-				.execute();
+				});
+			await insert.execute();
 			const creatureBatch = values.filter(v => v.category.toLowerCase() === 'creature');
 			if (creatureBatch.length > 0) {
 				await db
