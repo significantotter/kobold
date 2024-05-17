@@ -278,6 +278,7 @@ export class InitAddSubCommand implements Command {
 				)
 			) {
 				finalName = actorName + `-${nameCount++}`;
+				sheet.staticInfo.name = finalName;
 			}
 		}
 

@@ -398,7 +398,7 @@ export class NethysSheetImporter {
 		for (const attackMatch of attackMatches) {
 			const parsedMatch = await this.nethysParser.parseNethysMarkdown(attackMatch[0]);
 			const parsedMatchWithoutLinks = this.nethysParser.stripMarkdownLinks(parsedMatch);
-			const nameBonusClause = /([\w \(\)]+) ([+-][0-9]+)/gi;
+			const nameBonusClause = /[\_\*]?([\w \(\)]+)[\_\*]? ([+-][0-9]+)/gi;
 			const traitsClause = /\(([^<>\(\)]+)\)/gi;
 			const damageClause = /(?<=,\W*Damage\*\*|,\W*Effect\*\*)(.*)/gi;
 			const nameBonusResults = Array.from(
@@ -411,7 +411,8 @@ export class NethysSheetImporter {
 			const actionCost = this.parseActionCost(parsedMatchWithoutLinks);
 
 			const attackName = nameBonusResults?.[1]?.toString()?.trim();
-			const attackBonus = parseInt(nameBonusResults?.[2]?.toString()?.trim());
+			const attackBonus =
+				parseInt(nameBonusResults?.[2]?.toString()?.trim()) + this.rollAdjustment;
 			const traits = traitsResults?.[1]?.toString().split(', ') ?? [];
 			const damageClauses = damageResults?.[1]?.toString().split(/ plus | and /) ?? [];
 			const rolls: Roll[] = [];
@@ -420,18 +421,25 @@ export class NethysSheetImporter {
 				name: 'To Hit',
 				type: RollTypeEnum.attack,
 				roll: `1d20${attackBonus >= 0 ? '+' : ''}${attackBonus}`,
-				targetDC: null,
+				targetDC: 'AC',
 				allowRollModifiers: true,
 			});
 
 			for (let i = 0; i < damageClauses.length; i++) {
 				const damageResult = this.parseDamageEffectClause(damageClauses[i]);
 				if (damageResult.rollType === 'damage') {
+					let damage = damageResult.dice ?? null;
+					if (i === 0) {
+						damage = damageResult.dice
+							? damageResult.dice +
+								`${this.rollAdjustment > 0 ? '+' : ''}${this.rollAdjustment}`
+							: null;
+					}
 					rolls.push({
 						name: `Damage${damageClauses.length === 1 ? '' : ' ' + i}`,
 						type: RollTypeEnum.damage,
 						damageType: damageResult.type ?? null,
-						roll: damageResult.dice ?? null,
+						roll: damage,
 						healInsteadOfDamage: false,
 						allowRollModifiers: true,
 					});
