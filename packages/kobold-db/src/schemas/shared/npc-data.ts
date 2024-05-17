@@ -1,4 +1,4 @@
-import type { Creature, CreatureFluff } from 'pf2etools-data';
+import type { Creature, CreatureFluff } from '@kobold/pf2etools';
 
 export type NpcData = Creature;
 

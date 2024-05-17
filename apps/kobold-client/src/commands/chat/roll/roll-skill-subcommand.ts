@@ -14,14 +14,14 @@ import { ChatArgs } from '../../../constants/index.js';
 
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { Kobold } from 'kobold-db';
+import { Kobold } from '@kobold/db';
 import { Creature } from '../../../utils/creature.js';
-import { StringUtils } from '../../../utils/index.js';
 import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { RollBuilder } from '../../../utils/roll-builder.js';
 import { Command, CommandDeferType } from '../../index.js';
+import { StringUtils } from '@kobold/base-utils';
 
 export class RollSkillSubCommand implements Command {
 	public names = [L.en.commands.roll.skill.name()];

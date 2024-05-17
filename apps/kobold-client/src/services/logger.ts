@@ -1,7 +1,7 @@
 import { DiscordAPIError } from 'discord.js';
 import { Response } from 'node-fetch';
 import pino from 'pino';
-import { Config } from 'kobold-config';
+import { Config } from '@kobold/config';
 
 let logger = pino.default(
 	{

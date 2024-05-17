@@ -12,7 +12,7 @@ import type {
 	Sheet,
 	SheetRecord,
 	TextRoll,
-} from 'kobold-db';
+} from '@kobold/db';
 import {
 	AbilityEnum,
 	Counter,
@@ -20,7 +20,7 @@ import {
 	SheetAttack,
 	SheetBaseCounterKeys,
 	SheetStatKeys,
-} from 'kobold-db';
+} from '@kobold/db';
 import { PathBuilder } from '../services/pathbuilder/pathbuilder.js';
 import { WG } from '../services/wanderers-guide/wanderers-guide.js';
 import { KoboldError } from './KoboldError.js';
@@ -35,7 +35,7 @@ import {
 	StatGroupEnum,
 } from './sheet/sheet-properties.js';
 import { SheetUtils } from './sheet/sheet-utils.js';
-import { StringUtils } from './string-utils.js';
+import { StringUtils } from '@kobold/base-utils';
 import { convertWanderersGuideCharToSheet } from './sheet/sheet-import-wg.js';
 import { convertPathBuilderToSheet } from './sheet/sheet-import-pathbuilder.js';
 import { getEmoji } from '../constants/emoji.js';

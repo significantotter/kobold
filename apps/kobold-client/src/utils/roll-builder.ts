@@ -5,11 +5,12 @@ import { TranslationFunctions } from '../i18n/i18n-types.js';
 import {
 	Attribute,
 	CharacterWithRelations,
+	DefaultCompendiumEnum,
 	InitStatsNotificationEnum,
 	InlineRollsDisplayEnum,
 	RollCompactModeEnum,
 	UserSettings,
-} from 'kobold-db';
+} from '@kobold/db';
 import { KoboldError } from './KoboldError.js';
 import { Creature } from './creature.js';
 import {
@@ -22,6 +23,7 @@ import {
 	TextResult,
 } from './dice-utils.js';
 import { KoboldEmbed } from './kobold-embed-utils.js';
+import { DefaultUtils } from './default-utils.js';
 
 export class RollBuilder {
 	protected userSettings: UserSettings | null;
@@ -65,12 +67,7 @@ export class RollBuilder {
 			this.creature = new Creature(character.sheetRecord);
 		}
 		this.targetCreature = targetCreature || null;
-		this.userSettings = userSettings ?? {
-			userId: '',
-			inlineRollsDisplay: InlineRollsDisplayEnum.detailed,
-			rollCompactMode: RollCompactModeEnum.normal,
-			initStatsNotification: InitStatsNotificationEnum.every_round,
-		};
+		this.userSettings = userSettings ?? DefaultUtils.userSettings;
 
 		const actorText =
 			actorName || character?.name || this.creature?.sheet?.staticInfo?.name || '';

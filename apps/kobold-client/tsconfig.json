@@ -15,7 +15,7 @@
 		"disableSizeLimit": true,
 		"types": ["vitest/globals"],
 		"paths": {
-			"kobold-db/test-utils": ["../../packages/kobold-db/src/test-utils"]
+			"@kobold/db/test-utils": ["../../packages/@kobold/db/src/test-utils"]
 		}
 	},
 	"include": ["src/**/*"],

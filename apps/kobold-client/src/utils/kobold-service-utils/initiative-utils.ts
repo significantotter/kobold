@@ -1,6 +1,6 @@
 import { ChatInputCommandInteraction, TextBasedChannel } from 'discord.js';
 import L from '../../i18n/i18n-node.js';
-import { CharacterWithRelations, InitiativeWithRelations, Kobold, Sheet } from 'kobold-db';
+import { CharacterWithRelations, InitiativeWithRelations, Kobold, Sheet } from '@kobold/db';
 import { KoboldError } from '../KoboldError.js';
 import { InitiativeBuilderUtils } from '../initiative-builder.js';
 import type { KoboldUtils } from './kobold-utils.js';

@@ -13,7 +13,7 @@ import {
 	SheetWeaknessesResistances,
 	StatSubGroupEnum,
 	getDefaultSheet,
-} from 'kobold-db';
+} from '@kobold/db';
 import { literalKeys } from '../type-guards.js';
 
 function standardizePropKey(name: string): string {

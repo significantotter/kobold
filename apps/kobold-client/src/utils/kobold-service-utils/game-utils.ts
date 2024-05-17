@@ -6,7 +6,7 @@ import {
 	GameWithRelations,
 	Kobold,
 	SheetRecord,
-} from 'kobold-db';
+} from '@kobold/db';
 import { KoboldError } from '../KoboldError.js';
 import type { KoboldUtils } from './kobold-utils.js';
 import _ from 'lodash';

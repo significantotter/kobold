@@ -1,0 +1,61 @@
+{
+	"name": "@kobold/nethys",
+	"version": "1.0.0",
+	"author": "Significantotter",
+	"description": "An interface and parser for nethys data.",
+	"license": "MIT",
+	"private": true,
+	"type": "module",
+	"main": "./src/index.js",
+	"types": "./src/index.js",
+	"exports": {
+		"default": "./dist/index.js",
+		"types": "./dist/index.d.ts"
+	},
+	"scripts": {
+		"build": "pnpm run compile",
+		"compile": "tsc -p tsconfig.build.json",
+		"nethys:import": "node --loader ts-node/esm src/scripts/nethys-import.ts",
+		"drizzle:parse-types": "node --loader ts-node/esm src/scripts/parse-nethys-types.ts",
+		"drizzle:reset-db": "rm -f ./nethys.db && touch ./nethys.db && drizzle-kit push:sqlite --config=./drizzle.config.ts",
+		"drizzle:generate": "drizzle-kit generate:pg",
+		"drizzle:migrate": "node --loader ts-node/esm src/scripts/migrate.ts",
+		"test": "vitest"
+	},
+	"dependencies": {
+		"@kobold/config": "workspace:*",
+		"discord.js": "^14.13.0",
+		"drizzle-orm": "^0.30.9",
+		"hast-util-from-text": "^3.0.0",
+		"hast-util-to-html": "^9.0.1",
+		"hast-util-to-string": "^3.0.0",
+		"lodash": "^4.17.21",
+		"postgres": "^3.4.4",
+		"rehype-raw": "^7.0.0",
+		"rehype-remark": "^10.0.0",
+		"rehype-rewrite": "^4.0.2",
+		"rehype-stringify": "^10.0.0",
+		"remark": "^15.0.1",
+		"remark-parse": "^11.0.0",
+		"remark-prettier": "^2.0.0",
+		"remark-rehype": "^11.1.0",
+		"remark-stringify": "^11.0.0",
+		"unified": "^11.0.4",
+		"zod": "^3.22.2"
+	},
+	"devDependencies": {
+		"@elastic/elasticsearch": "^8.13.1",
+		"@types/hast": "^3.0.4",
+		"@types/lodash": "^4.14.202",
+		"@types/mdast": "^4.0.3",
+		"@types/node": "^20.11.19",
+		"drizzle-kit": "^0.20.14",
+		"eslint": "^8.56.0",
+		"hast-util-to-mdast": "^10.1.0",
+		"node-fetch": "3.3.2",
+		"quicktype-core": "^23.0.156",
+		"ts-node": "^10.9.2",
+		"typescript": "^5.3",
+		"vitest": "^0.34.4"
+	}
+}

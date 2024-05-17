@@ -7,9 +7,10 @@ import {
 	RESTPostAPIApplicationCommandsJSONBody,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
-import { Kobold } from 'kobold-db';
-import { CompendiumModel } from 'pf2etools-data';
+import { Kobold } from '@kobold/db';
+import { Pf2eToolsCompendiumModel } from '@kobold/pf2etools';
 import { TranslationFunctions } from './../i18n/i18n-types.js';
+import { NethysDb } from '@kobold/nethys';
 
 interface SubCommandConstructor {
 	new (): Command;
@@ -46,8 +47,9 @@ export interface Command {
 }
 
 export interface InjectedServices {
-	compendium: CompendiumModel;
+	pf2eToolsCompendium: Pf2eToolsCompendiumModel;
 	kobold: Kobold;
+	nethysCompendium: NethysDb;
 }
 
 export enum CommandDeferType {

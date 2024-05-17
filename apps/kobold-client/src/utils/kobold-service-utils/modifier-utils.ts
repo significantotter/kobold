@@ -1,6 +1,6 @@
 import { compileExpression } from 'filtrex';
 import L from '../../i18n/i18n-node.js';
-import { Attribute, Kobold, Modifier } from 'kobold-db';
+import { Attribute, Kobold, Modifier } from '@kobold/db';
 import type { Creature } from '../creature.js';
 import { DiceUtils } from '../dice-utils.js';
 import type { KoboldUtils } from './kobold-utils.js';

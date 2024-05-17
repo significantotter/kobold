@@ -1,0 +1,12 @@
+{
+	"extends": "../../tsconfig.base.json",
+
+	"compilerOptions": {
+		"target": "ESNext",
+		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
+		"rootDir": "./src",
+		"outDir": "dist"
+	},
+	"exclude": ["dist", "node_modules", "*.config.ts", "vitest.setup.ts"]
+}

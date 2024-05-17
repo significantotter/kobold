@@ -12,12 +12,13 @@ import { RateLimiter } from 'discord.js-rate-limiter';
 
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { InitiativeActorWithRelations, Kobold } from 'kobold-db';
-import { InteractionUtils, StringUtils } from '../../../utils/index.js';
+import { InitiativeActorWithRelations, Kobold } from '@kobold/db';
+import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { InitOptions } from './init-command-options.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
+import { StringUtils } from '@kobold/base-utils';
 
 export class InitNoteSubCommand implements Command {
 	public names = [L.en.commands.init.note.name()];

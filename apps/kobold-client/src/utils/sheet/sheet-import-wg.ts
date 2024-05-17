@@ -1,4 +1,4 @@
-import { Sheet, ProficiencyStat, AbilityEnum } from 'kobold-db';
+import { Sheet, ProficiencyStat, AbilityEnum } from '@kobold/db';
 import _ from 'lodash';
 import { WG } from '../../services/wanderers-guide/wanderers-guide.js';
 import { SheetProperties, SheetStatProperties } from './sheet-properties.js';

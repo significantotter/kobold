@@ -1,8 +1,6 @@
 import { ShardingManager } from 'discord.js';
 import 'reflect-metadata';
-import 'kobold-config';
-
-import { Config } from 'kobold-config';
+import { Config } from '@kobold/config';
 import { GuildsController, RootController, ShardsController } from './controllers/index.js';
 import { UpdateServerCountJob } from './jobs/index.js';
 import { Api } from './models/api.js';
@@ -11,7 +9,7 @@ import { HttpService, JobService, Logger, MasterApiService } from './services/in
 import { Job } from './services/job-service.js';
 import { MathUtils, ShardUtils } from './utils/index.js';
 import { filterNotNullOrUndefined } from './utils/type-guards.js';
-import { migrateToLatest } from 'kobold-db';
+import { migrateToLatest } from '@kobold/db';
 import { spawn } from 'child_process';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';

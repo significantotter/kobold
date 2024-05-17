@@ -1,8 +1,8 @@
 import { generateMock } from '@anatine/zod-mock';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import L from '../../../i18n/i18n-node.js';
-import { zAction, zCharacterWithRelations, zSheetRecord } from 'kobold-db';
-import { vitestKobold } from 'kobold-db/test-utils';
+import { zAction, zCharacterWithRelations, zSheetRecord } from '@kobold/db';
+import { vitestKobold } from '@kobold/db/test-utils';
 import { InteractionUtils } from '../../../utils/index.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';

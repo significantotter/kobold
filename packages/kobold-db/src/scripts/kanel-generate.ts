@@ -1,6 +1,6 @@
 // @ts-check
 import kanel, { Details, InstantiatedConfig, Output, Path, PreRenderHook } from 'kanel';
-import { Config } from 'kobold-config';
+import { Config } from '@kobold/config';
 import kk from 'kanel-kysely';
 import kz from 'kanel-zod';
 import { recase } from '@kristiandupont/recase';

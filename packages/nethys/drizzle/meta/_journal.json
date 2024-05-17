@@ -1,0 +1,48 @@
+{
+  "version": "5",
+  "dialect": "pg",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1714796042156,
+      "tag": "0000_illegal_mesmero",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1714797190839,
+      "tag": "0001_flat_switch",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1714799469202,
+      "tag": "0002_workable_patch",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1714933334332,
+      "tag": "0003_legal_satana",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1714934181831,
+      "tag": "0004_uneven_silver_sable",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1714934614216,
+      "tag": "0005_whole_spitfire",
+      "breakpoints": true
+    }
+  ]
+}

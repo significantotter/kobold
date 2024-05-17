@@ -17,6 +17,7 @@
 			"better-sqlite3": "^8.7.0",
 			"discord.js": "^14.13.0",
 			"dotenv": "^16.3.1",
+			"drizzle-orm": "^0.30.9",
 			"eslint": "^8.56.0",
 			"kysely": "^0.26.3",
 			"lodash": "^4.17.21",

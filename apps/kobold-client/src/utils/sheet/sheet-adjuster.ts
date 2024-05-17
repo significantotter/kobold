@@ -16,7 +16,7 @@ import {
 	SheetStatKeys,
 	SheetStats,
 	StatSubGroupEnum,
-} from 'kobold-db';
+} from '@kobold/db';
 import { KoboldError } from '../KoboldError.js';
 import {
 	SheetAdditionalSkillProperties,

@@ -16,6 +16,10 @@ export class SettingsOptions {
 				name: L.en.commandOptions.settingsSetOption.choices.inlineRollsDisplay.name(),
 				value: L.en.commandOptions.settingsSetOption.choices.inlineRollsDisplay.value(),
 			},
+			{
+				name: L.en.commandOptions.settingsSetOption.choices.defaultCompendium.name(),
+				value: L.en.commandOptions.settingsSetOption.choices.defaultCompendium.value(),
+			},
 		],
 	};
 	public static readonly SETTINGS_SET_VALUE: APIApplicationCommandBasicOption = {

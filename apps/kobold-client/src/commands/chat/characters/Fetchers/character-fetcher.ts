@@ -1,6 +1,6 @@
 import { CommandInteraction, CacheType, ComponentType, ButtonStyle } from 'discord.js';
-import { NewSheetRecord, Character, CharacterWithRelations } from 'kobold-db';
-import { Kobold } from 'kobold-db';
+import { NewSheetRecord, Character, CharacterWithRelations } from '@kobold/db';
+import { Kobold } from '@kobold/db';
 import { KoboldError } from '../../../../utils/KoboldError.js';
 import { CollectorUtils } from '../../../../utils/collector-utils.js';
 import { Creature } from '../../../../utils/creature.js';

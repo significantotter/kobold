@@ -9,7 +9,7 @@ import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { Kobold } from 'kobold-db';
+import { Kobold } from '@kobold/db';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { ModifierHelpers } from './modifier-helpers.js';

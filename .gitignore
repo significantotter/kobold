@@ -3,9 +3,6 @@
 # =====================================================
 /dist
 /temp
-/**/config/**/*.json
-!/**/config/**/*.example.json
-!/**/config/lang/**/*.json
 .DS_Store
 /**/i18n-types.ts
 **/*.csv

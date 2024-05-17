@@ -1,6 +1,6 @@
-import { Config } from 'kobold-config';
+import { Config } from '@kobold/config';
 import L from '../../../../i18n/i18n-node.js';
-import { SheetRecord, Character, CharacterWithRelations, NewSheetRecord } from 'kobold-db';
+import { SheetRecord, Character, CharacterWithRelations, NewSheetRecord } from '@kobold/db';
 import { WanderersGuide } from '../../../../services/wanderers-guide/index.js';
 import { WG } from '../../../../services/wanderers-guide/wanderers-guide.js';
 import { KoboldError } from '../../../../utils/KoboldError.js';

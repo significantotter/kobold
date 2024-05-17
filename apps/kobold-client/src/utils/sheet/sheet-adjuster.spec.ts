@@ -5,7 +5,7 @@ import {
 	SheetAdjustment,
 	SheetAdjustmentOperationEnum,
 	SheetAdjustmentTypeEnum,
-} from 'kobold-db';
+} from '@kobold/db';
 import { KoboldError } from '../KoboldError.js';
 import {
 	SheetAdditionalSkillAdjuster,

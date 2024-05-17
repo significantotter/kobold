@@ -1,7 +1,7 @@
 import { Shard, ShardingManager } from 'discord.js';
 
 import { JobService, Logger } from '../services/index.js';
-import { Config } from 'kobold-config';
+import { Config } from '@kobold/config';
 
 export class Manager {
 	constructor(

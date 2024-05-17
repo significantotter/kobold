@@ -57,6 +57,7 @@ import {
 	InitiativeWithRelations,
 } from './relations-schemas.js';
 import {
+	DefaultCompendiumEnum,
 	InitStatsNotificationEnum,
 	InlineRollsDisplayEnum,
 	RollCompactModeEnum,
@@ -74,6 +75,7 @@ const zUserSettingsWithEnumsInitializer = zUserSettingsInitializer.merge(
 		initStatsNotification: z.nativeEnum(InitStatsNotificationEnum),
 		rollCompactMode: z.nativeEnum(RollCompactModeEnum),
 		inlineRollsDisplay: z.nativeEnum(InlineRollsDisplayEnum),
+		defaultCompendium: z.nativeEnum(DefaultCompendiumEnum),
 	})
 );
 const zUserSettingsWithEnumsMutator = zUserSettingsMutator.merge(

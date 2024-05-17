@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { ProficiencyStat, Sheet } from 'kobold-db';
+import { ProficiencyStat, Sheet } from '@kobold/db';
 
 export function scoreToBonus(score: number) {
 	return Math.floor((score - 10) / 2);

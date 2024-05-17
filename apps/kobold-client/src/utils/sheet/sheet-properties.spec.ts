@@ -1,4 +1,4 @@
-import { AbilityEnum } from 'kobold-db';
+import { AbilityEnum } from '@kobold/db';
 import { SheetProperties } from './sheet-properties.js';
 
 describe('SheetProperties', () => {

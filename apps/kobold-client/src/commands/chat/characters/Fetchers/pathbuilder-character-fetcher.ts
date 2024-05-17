@@ -1,6 +1,6 @@
 import { refs } from '../../../../constants/common-text.js';
 import L from '../../../../i18n/i18n-node.js';
-import { CharacterWithRelations, Kobold, NewSheetRecord } from 'kobold-db';
+import { CharacterWithRelations, Kobold, NewSheetRecord } from '@kobold/db';
 import { PathBuilder } from '../../../../services/pathbuilder/index.js';
 import { KoboldError } from '../../../../utils/KoboldError.js';
 import { Creature } from '../../../../utils/creature.js';

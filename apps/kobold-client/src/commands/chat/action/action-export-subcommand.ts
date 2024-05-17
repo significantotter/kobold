@@ -5,10 +5,10 @@ import {
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 
-import { Config } from 'kobold-config';
+import { Config } from '@kobold/config';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { Kobold } from 'kobold-db';
+import { Kobold } from '@kobold/db';
 import { PasteBin } from '../../../services/pastebin/index.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';

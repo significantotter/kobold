@@ -4,6 +4,7 @@ import L from '../i18n/i18n-node.js';
 import { TranslationFunctions } from '../i18n/i18n-types.js';
 import {
 	CharacterWithRelations,
+	DefaultCompendiumEnum,
 	InitStatsNotificationEnum,
 	InitiativeActor,
 	InitiativeActorGroup,
@@ -12,14 +13,14 @@ import {
 	InlineRollsDisplayEnum,
 	RollCompactModeEnum,
 	UserSettings,
-} from 'kobold-db';
+} from '@kobold/db';
 import { KoboldError } from './KoboldError.js';
 import { Creature } from './creature.js';
 import { DefaultUtils } from './default-utils.js';
 import { InteractionUtils } from './interaction-utils.js';
 import { KoboldEmbed } from './kobold-embed-utils.js';
 import { RollBuilder } from './roll-builder.js';
-import { StringUtils } from './string-utils.js';
+import { StringUtils } from '@kobold/base-utils';
 
 export type TurnData = {
 	currentRound: number;
@@ -249,6 +250,7 @@ export class InitiativeBuilder {
 				initStatsNotification: InitStatsNotificationEnum.never,
 				rollCompactMode: RollCompactModeEnum.compact,
 				inlineRollsDisplay: InlineRollsDisplayEnum.compact,
+				defaultCompendium: DefaultCompendiumEnum.nethys,
 				userId: '',
 			},
 		});

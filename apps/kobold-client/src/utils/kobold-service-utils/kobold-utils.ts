@@ -7,7 +7,7 @@ import {
 	InitiativeWithRelations,
 	Kobold,
 	UserSettings,
-} from 'kobold-db';
+} from '@kobold/db';
 import { KoboldError } from '../KoboldError.js';
 import { AutocompleteUtils } from './autocomplete-utils.js';
 import { CharacterUtils } from './character-utils.js';
