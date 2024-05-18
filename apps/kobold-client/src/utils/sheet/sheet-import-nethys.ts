@@ -432,7 +432,7 @@ export class NethysSheetImporter {
 					if (i === 0) {
 						damage = damageResult.dice
 							? damageResult.dice +
-								`${this.rollAdjustment > 0 ? '+' : ''}${this.rollAdjustment}`
+								`${this.rollAdjustment >= 0 ? '+' : ''}${this.rollAdjustment}`
 							: null;
 					}
 					rolls.push({
