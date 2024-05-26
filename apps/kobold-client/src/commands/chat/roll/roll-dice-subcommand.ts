@@ -49,13 +49,15 @@ export class RollDiceSubCommand implements Command {
 			userSettings: true,
 		});
 
-		//only use the active character if the roll uses character attributes
+		// only use the active character in the roll if the roll uses character attributes
+		// however, use a different variable so we don't break send-to-gm
+		let characterForRoll = activeCharacter;
 		if (!/(\[[\w \-_\.]{2,}\])/g.test(diceExpression)) {
-			activeCharacter = null;
+			characterForRoll = null;
 		}
 
 		const rollBuilder = new RollBuilder({
-			character: activeCharacter || null,
+			character: characterForRoll ?? null,
 			actorName: intr.user.username,
 			rollDescription: LL.commands.roll.dice.interactions.rolledDice(),
 			rollNote,
