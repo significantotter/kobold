@@ -98,6 +98,8 @@ export function getDefaultSheet(): Sheet {
 					recoverable: true,
 				},
 			},
+			counterGroups: [],
+			countersOutsideGroups: [],
 			stats: {
 				// Perception
 				perception: {

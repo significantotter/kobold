@@ -22,3 +22,10 @@ export const zNumericCounter = z.strictObject({
 
 export type Counter = z.infer<typeof zCounter>;
 export const zCounter = z.discriminatedUnion('style', [zPreparedCounter, zNumericCounter]);
+
+export type CounterGroup = z.infer<typeof zCounterGroup>;
+export const zCounterGroup = z.strictObject({
+	name: z.string(),
+	description: z.string().nullable().default(null),
+	counters: z.array(zCounter),
+});

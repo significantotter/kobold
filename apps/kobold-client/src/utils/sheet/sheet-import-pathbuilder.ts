@@ -292,6 +292,8 @@ export function convertPathBuilderToSheet(
 			},
 			heroPoints: { ...baseSheet.baseCounters.heroPoints, max: 3 },
 		},
+		counterGroups: baseSheet.counterGroups,
+		countersOutsideGroups: baseSheet.countersOutsideGroups,
 		weaknessesResistances: {
 			resistances: [],
 			weaknesses: [],

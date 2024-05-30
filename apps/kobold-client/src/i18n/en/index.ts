@@ -1,6 +1,8 @@
 import type { BaseTranslation } from '../i18n-types.js';
 import AdminCommand from './commands/admin.js';
 import CharacterCommand from './commands/character.js';
+import CounterCommand from './commands/counter.js';
+import CounterGroupCommand from './commands/counterGroup.js';
 import GameCommand from './commands/game.js';
 import GameplayCommand from './commands/gameplay.js';
 import HelpCommand from './commands/help.js';
@@ -28,6 +30,8 @@ const en: BaseTranslation = {
 		actionStage: ActionStageCommand,
 		compendium: CompendiumCommand,
 		condition: ConditionCommand,
+		counter: CounterCommand,
+		counterGroup: CounterGroupCommand,
 		help: HelpCommand,
 		character: CharacterCommand,
 		init: InitCommand,

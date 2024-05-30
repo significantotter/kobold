@@ -403,6 +403,8 @@ export function convertPf2eToolsCreatureToSheet(
 				max: focusPoints,
 			},
 		},
+		counterGroups: baseSheet.counterGroups,
+		countersOutsideGroups: baseSheet.countersOutsideGroups,
 		weaknessesResistances: {
 			resistances: (bestiaryEntry.defenses?.resistances || []).map(res =>
 				_.isString(res)

@@ -831,6 +831,70 @@ export default {
 		description: 'A note about the reason for the roll.',
 	},
 
+	// COUNTER GROUPS
+	counterGroupName: {
+		name: 'name',
+		description: 'The name of the counter group.',
+	},
+	counterGroupDescription: {
+		name: 'description',
+		description: 'The description of the counter group.',
+	},
+	counterGroupReorderCounter: {
+		name: 'reorder-counter',
+		description: 'The name of the counter to change the position of in the group.',
+		choices: {
+			top: { name: 'top', value: 'top' },
+			up: { name: 'up', value: 'up' },
+			down: { name: 'down', value: 'down' },
+			bottom: { name: 'bottom', value: 'bottom' },
+		},
+	},
+	counterGroupSetOption: {
+		name: 'set-option',
+		description: 'The field to set to a new value.',
+		choices: {
+			name: { name: 'name', value: 'name' },
+			description: { name: 'description', value: 'description' },
+		},
+	},
+	counterGroupSetValue: {
+		name: 'value',
+		description: 'The value to change the option to.',
+	},
+
+	// COUNTER GROUPS
+	counterName: {
+		name: 'name',
+		description: 'The name of the counter .',
+	},
+	counterStyle: {
+		name: 'style',
+		description: 'The style of the counter.',
+	},
+	counterMax: {
+		name: 'max',
+		description: 'The max of the counter.',
+	},
+	counterRecoverable: {
+		name: 'recoverable',
+		description: 'The recoverable of the counter.',
+	},
+	counterSetOption: {
+		name: 'set-option',
+		description: 'The field to set to a new value.',
+		choices: {
+			name: { name: 'name', value: 'name' },
+			style: { name: 'style', value: 'style' },
+			max: { name: 'max', value: 'max' },
+			recoverable: { name: 'recoverable', value: 'recoverable' },
+		},
+	},
+	counterSetValue: {
+		name: 'value',
+		description: 'The value to change the option to.',
+	},
+
 	// ROLL MACROS
 
 	rollMacroName: {

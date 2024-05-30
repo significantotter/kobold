@@ -41,6 +41,35 @@ export class FinderHelpers {
 	}
 
 	/**
+	 * Fetches a sheetRecord's counter group by the counter group name
+	 * @param name the name of the counter group
+	 * @returns the counter group
+	 */
+	public static getCounterGroupByName(
+		counterGroups: SheetRecord['sheet']['counterGroups'],
+		name: string
+	): SheetRecord['sheet']['counterGroups'][0] | undefined {
+		return counterGroups.find(
+			counterGroup =>
+				counterGroup.name.toLocaleLowerCase().trim() === name.toLocaleLowerCase().trim()
+		);
+	}
+
+	/**
+	 * Fetches a sheetRecord's counter group by the counter group name
+	 * @param name the name of the counter group
+	 * @returns the counter group
+	 */
+	public static getCounterByName(
+		counters: SheetRecord['sheet']['countersOutsideGroups'],
+		name: string
+	): SheetRecord['sheet']['countersOutsideGroups'][0] | undefined {
+		return counters.find(
+			counter => counter.name.toLocaleLowerCase().trim() === name.toLocaleLowerCase().trim()
+		);
+	}
+
+	/**
 	 * Fetches a sheetRecord's modifier by the modifier name
 	 * @param name the name of the modifier
 	 * @returns the modifier
