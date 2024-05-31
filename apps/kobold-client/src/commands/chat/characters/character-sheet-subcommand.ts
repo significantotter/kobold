@@ -42,6 +42,6 @@ export class CharacterSheetSubCommand implements Command {
 		const creature = new Creature(activeCharacter.sheetRecord, undefined, intr);
 		const embed = creature.compileEmbed('Sheet', sheetStyle);
 
-		await InteractionUtils.send(intr, embed);
+		await embed.sendBatches(intr);
 	}
 }
