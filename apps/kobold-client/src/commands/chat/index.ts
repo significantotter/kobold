@@ -13,6 +13,8 @@ import { RollMacroCommandExport } from './roll-macro/index.js';
 import { RollCommandExport } from './roll/index.js';
 import { SettingsCommandExport } from './settings/index.js';
 import { ConditionCommandExport } from './condition/index.js';
+import { CounterCommandExport } from './counter/index.js';
+import { CounterGroupCommandExport } from './counter-group/index.js';
 
 export const ChatCommandExports: CommandExport[] = [
 	ActionCommandExport,
@@ -20,6 +22,8 @@ export const ChatCommandExports: CommandExport[] = [
 	AdminCommandExport,
 	CharactersCommandExport,
 	CompendiumCommandExport,
+	CounterCommandExport,
+	CounterGroupCommandExport,
 	GameCommandExport,
 	GameplayCommandExport,
 	HelpCommandExport,

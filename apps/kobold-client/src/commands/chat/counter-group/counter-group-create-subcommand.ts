@@ -13,7 +13,6 @@ import { Kobold } from '@kobold/db';
 import { InteractionUtils } from '../../../utils/index.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { RollBuilder } from '../../../utils/roll-builder.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { InputParseUtils } from '../../../utils/input-parse-utils.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
@@ -49,6 +48,15 @@ export class CounterGroupCreateSubCommand implements Command {
 
 		if (!InputParseUtils.isValidString(name, { maxLength: 50 })) {
 			throw new KoboldError(`Yip! The counter group name must be less than 50 characters!`);
+		}
+		const { counter } = FinderHelpers.getCounterByName(activeCharacter.sheetRecord.sheet, name);
+		if (counter) {
+			throw new KoboldError(
+				LL.commands.counterGroup.create.interactions.alreadyExists({
+					groupName: name,
+					characterName: activeCharacter.name,
+				})
+			);
 		}
 		if (description && !InputParseUtils.isValidString(description, { maxLength: 300 })) {
 			throw new KoboldError(

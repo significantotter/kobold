@@ -1,5 +1,9 @@
 import {
+	ApplicationCommandOptionChoiceData,
 	ApplicationCommandType,
+	AutocompleteFocusedOption,
+	AutocompleteInteraction,
+	CacheType,
 	ChatInputCommandInteraction,
 	PermissionsString,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -15,18 +19,38 @@ import { CounterGroupHelpers } from './counter-group-helpers.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { CounterGroupOptions } from './counter-group-command-options.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
+import { CounterUtils } from '../../../utils/counter-utils.js';
+import { InteractionUtils } from '../../../utils/interaction-utils.js';
 
-export class CounterGroupDisplaySubCommand implements Command {
-	public names = [L.en.commands.counterGroup.display.name()];
+export class CounterGroupResetSubCommand implements Command {
+	public names = [L.en.commands.counterGroup.reset.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.counterGroup.display.name(),
-		description: L.en.commands.counterGroup.display.description(),
+		name: L.en.commands.counterGroup.reset.name(),
+		description: L.en.commands.counterGroup.reset.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
 	public deferType = CommandDeferType.NONE;
 	public requireClientPerms: PermissionsString[] = [];
+
+	public async autocomplete(
+		intr: AutocompleteInteraction<CacheType>,
+		option: AutocompleteFocusedOption,
+		{ kobold }: { kobold: Kobold }
+	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
+		if (!intr.isAutocomplete()) return;
+		if (option.name === CounterGroupOptions.COUNTER_GROUP_NAME_OPTION.name) {
+			const koboldUtils = new KoboldUtils(kobold);
+			const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+				activeCharacter: true,
+			});
+			return activeCharacter.sheetRecord.sheet.counterGroups.map(group => ({
+				name: group.name,
+				value: group.name,
+			}));
+		}
+	}
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
@@ -53,11 +77,24 @@ export class CounterGroupDisplaySubCommand implements Command {
 				})
 			);
 		}
+		for (const counter of counterGroup.counters) {
+			CounterUtils.resetCounter(counter);
+		}
+		await kobold.sheetRecord.update(
+			{ id: activeCharacter.sheetRecord.id },
+			{
+				sheet: activeCharacter.sheetRecord.sheet,
+			}
+		);
 
-		const embed = await new KoboldEmbed();
-		embed.setCharacter(activeCharacter);
-		embed.setTitle(`${activeCharacter.name}'s Counter Groups`);
+		const embed = new KoboldEmbed().setTitle(
+			LL.commands.counterGroup.reset.interactions.reset({
+				groupName: counterGroup.name,
+				characterName: activeCharacter.name,
+			})
+		);
 		embed.setDescription(CounterGroupHelpers.detailCounterGroup(counterGroup));
+
 		await embed.sendBatches(intr);
 	}
 }

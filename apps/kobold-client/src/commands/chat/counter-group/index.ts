@@ -5,6 +5,7 @@ import { CounterGroupListSubCommand } from './counter-group-list-subcommand.js';
 import { CounterGroupDisplaySubCommand } from './counter-group-display-subcommand.js';
 import { CounterGroupRemoveSubCommand } from './counter-group-remove-subcommand.js';
 import { CounterGroupSetSubCommand } from './counter-group-set-subcommand.js';
+import { CounterGroupResetSubCommand } from './counter-group-reset-subcommand.js';
 
 export const CounterGroupCommandExport: CommandExport = {
 	command: CounterGroupCommand,
@@ -14,5 +15,6 @@ export const CounterGroupCommandExport: CommandExport = {
 		CounterGroupDisplaySubCommand,
 		CounterGroupRemoveSubCommand,
 		CounterGroupSetSubCommand,
+		CounterGroupResetSubCommand,
 	],
 };

@@ -18,6 +18,7 @@ import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { ActionOptions } from './action-command-options.js';
+import { InputParseUtils } from '../../../utils/input-parse-utils.js';
 
 export class ActionSetSubCommand implements Command {
 	public names = [L.en.commands.action.set.name()];
@@ -89,6 +90,22 @@ export class ActionSetSubCommand implements Command {
 
 		// string values
 		if (['name', 'description'].includes(fieldToUpdate)) {
+			if (
+				fieldToUpdate === 'name' &&
+				!InputParseUtils.isValidString(fieldToUpdate, { maxLength: 50 })
+			) {
+				throw new KoboldError(
+					`Yip! The counter group name must be less than 50 characters!`
+				);
+			}
+			if (
+				fieldToUpdate === 'description' &&
+				!InputParseUtils.isValidString(fieldToUpdate, { maxLength: 300 })
+			) {
+				throw new KoboldError(
+					`Yip! The counter group description must be less than 300 characters!`
+				);
+			}
 			matchedAction[fieldToUpdate as 'name' | 'description'] = newValue.trim();
 		}
 		// enum values

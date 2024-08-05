@@ -23,6 +23,7 @@ import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js
 import { Command, CommandDeferType } from '../../index.js';
 import { CounterOptions } from './counter-command-options.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
+import { AutocompleteUtils } from '../../../utils/kobold-service-utils/autocomplete-utils.js';
 
 export class CounterRemoveSubCommand implements Command {
 	public names = [L.en.commands.counter.remove.name()];
@@ -43,15 +44,11 @@ export class CounterRemoveSubCommand implements Command {
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === CounterOptions.COUNTER_GROUP_NAME_OPTION.name) {
+		if (option.name === CounterOptions.COUNTER_NAME_OPTION.name) {
 			const koboldUtils = new KoboldUtils(kobold);
-			const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
-				activeCharacter: true,
-			});
-			return activeCharacter.sheetRecord.sheet.counters.map(group => ({
-				name: group.name,
-				value: group.name,
-			}));
+			const autocompleteUtils = new AutocompleteUtils(koboldUtils);
+			const match = intr.options.getString(CounterOptions.COUNTER_NAME_OPTION.name) ?? '';
+			return autocompleteUtils.getCounters(intr, match);
 		}
 	}
 
@@ -66,16 +63,17 @@ export class CounterRemoveSubCommand implements Command {
 		});
 		const name = intr.options.getString(CounterOptions.COUNTER_NAME_OPTION.name, true).trim();
 
-		const targetCounter = activeCharacter.sheetRecord.sheet.counters.find(
-			group => group.name.toLowerCase() === name.toLowerCase()
+		const { counter, group } = FinderHelpers.getCounterByName(
+			activeCharacter.sheetRecord.sheet,
+			name
 		);
-		if (!targetCounter) {
-			throw new KoboldError(LL.commands.counter.interactions.notFound({ groupName: name }));
+		if (!counter) {
+			throw new KoboldError(LL.commands.counter.interactions.notFound({ counterName: name }));
 		}
 
 		const prompt = await intr.reply({
 			content: LL.commands.counter.remove.interactions.removeConfirmation.text({
-				groupName: targetCounter.name,
+				counterName: counter.name,
 			}),
 			components: [
 				{
@@ -139,22 +137,26 @@ export class CounterRemoveSubCommand implements Command {
 		// remove the counter
 		if (result && result.value === 'remove') {
 			if (timedOut) return;
-			const updatedCounters = activeCharacter.sheetRecord.sheet.counters.filter(
-				group => group.name.toLowerCase() !== targetCounter.name.toLowerCase()
-			);
+			if (group) {
+				group.counters = group.counters.filter(
+					c => c.name.toLowerCase() !== counter.name.toLowerCase()
+				);
+			} else {
+				activeCharacter.sheetRecord.sheet.countersOutsideGroups =
+					activeCharacter.sheetRecord.sheet.countersOutsideGroups.filter(
+						c => c.name.toLowerCase() !== counter.name.toLowerCase()
+					);
+			}
 			await kobold.sheetRecord.update(
 				{ id: activeCharacter.sheetRecord.id },
 				{
-					sheet: {
-						...activeCharacter.sheetRecord.sheet,
-						counters: updatedCounters,
-					},
+					sheet: activeCharacter.sheetRecord.sheet,
 				}
 			);
 			await InteractionUtils.send(
 				intr,
 				LL.commands.counter.remove.interactions.success({
-					groupName: targetCounter.name,
+					counterName: counter.name,
 				})
 			);
 		}

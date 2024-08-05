@@ -19,18 +19,17 @@ import { AutocompleteUtils } from '../../../utils/kobold-service-utils/autocompl
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
 import { InteractionUtils } from '../../../utils/interaction-utils.js';
-import _, { find } from 'lodash';
-import { InputParseUtils } from '../../../utils/input-parse-utils.js';
+import _ from 'lodash';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
-import { CounterHelpers } from './counter-helpers.js';
 import { CounterGroupHelpers } from '../counter-group/counter-group-helpers.js';
+import { CounterHelpers } from './counter-helpers.js';
 
-export class CounterPrepareSubCommand implements Command {
-	public names = [L.en.commands.counter.prepare.name()];
+export class CounterValueSubCommand implements Command {
+	public names = [L.en.commands.counter.value.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.counter.prepare.name(),
-		description: L.en.commands.counter.prepare.description(),
+		name: L.en.commands.counter.value.name(),
+		description: L.en.commands.counter.value.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -48,25 +47,8 @@ export class CounterPrepareSubCommand implements Command {
 			const autocompleteUtils = new AutocompleteUtils(koboldUtils);
 			const match = intr.options.getString(CounterOptions.COUNTER_NAME_OPTION.name) ?? '';
 			return autocompleteUtils.getCounters(intr, match, {
-				styles: [CounterStyleEnum.prepared],
+				styles: [CounterStyleEnum.default, CounterStyleEnum.dots],
 			});
-		}
-		if (option.name === CounterOptions.COUNTER_SLOT_OPTION.name) {
-			const counter = intr.options.getString(CounterOptions.COUNTER_NAME_OPTION.name);
-			if (!counter) return;
-			const koboldUtils = new KoboldUtils(kobold);
-			const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
-				activeCharacter: true,
-			});
-			const { counter: counterData } = FinderHelpers.getCounterByName(
-				activeCharacter.sheetRecord.sheet,
-				counter
-			);
-			if (!counterData || counterData.style !== CounterStyleEnum.prepared) return;
-			return counterData.prepared.map((slot, index) => ({
-				name: `${index} ${counterData.active[index] ? '✓' : '✗'} ${slot ?? '(empty)'}`,
-				value: `${index} ${counterData.active[index] ? '✓' : '✗'} ${slot ?? '(empty)'}`,
-			}));
 		}
 	}
 
@@ -82,23 +64,12 @@ export class CounterPrepareSubCommand implements Command {
 		const targetCounterName = intr.options
 			.getString(CounterOptions.COUNTER_NAME_OPTION.name, true)
 			.trim();
-		const targetSlot = intr.options
-			.getString(CounterOptions.COUNTER_SLOT_OPTION.name, true)
-			.trim();
-		const newAbility = intr.options
-			.getString(CounterOptions.COUNTER_PREPARE_SLOT_OPTION.name, true)
-			.trim();
-		const [slotIndexString] = targetSlot.replaceAll('✓', ':').replaceAll('✗', ':').split(': ');
+		const value = intr.options.getString(CounterOptions.COUNTER_VALUE_OPTION.name, true).trim();
 
 		const { counter, group } = FinderHelpers.getCounterByName(
 			activeCharacter.sheetRecord.sheet,
 			targetCounterName
 		);
-
-		if (!InputParseUtils.isValidString(newAbility, { maxLength: 50 })) {
-			throw new KoboldError(`Yip! The prepared ability must be less than 50 characters!`);
-		}
-
 		if (!counter) {
 			throw new KoboldError(
 				LL.commands.counter.interactions.notFound({
@@ -107,19 +78,28 @@ export class CounterPrepareSubCommand implements Command {
 			);
 		}
 
-		if (counter.style !== CounterStyleEnum.prepared) {
+		if (counter?.style === CounterStyleEnum.prepared) {
 			throw new KoboldError(
-				LL.commands.counter.interactions.notPrepared({
+				LL.commands.counter.interactions.notNumeric({
 					counterName: targetCounterName,
 				})
 			);
 		}
 
-		if (counter.active.length <= Number(slotIndexString)) {
-			throw new KoboldError("Yip! I couldn't find that slot!");
+		if (!value.match(/^[+-]? *\d+$/)) {
+			throw new KoboldError(
+				'Yip! The value must be a number! Use + or - before the number to increase or decrease the counter.'
+			);
 		}
-
-		counter.prepared[Number(slotIndexString)] = newAbility;
+		const adjustExistingValue = value.charAt(0) === '+' || value.charAt(0) === '-';
+		const valueNumber = parseInt(value);
+		if (adjustExistingValue) {
+			counter.current += valueNumber;
+		} else {
+			counter.current = valueNumber;
+		}
+		if (counter.current < 0) counter.current = 0;
+		if (counter.max && counter.current > counter.max) counter.current = counter.max;
 
 		await kobold.sheetRecord.update(
 			{ id: activeCharacter.sheetRecord.id },
@@ -127,13 +107,26 @@ export class CounterPrepareSubCommand implements Command {
 				sheet: activeCharacter.sheetRecord.sheet,
 			}
 		);
-		const embed = new KoboldEmbed().setTitle(
-			LL.commands.counter.prepare.interactions.prepared({
+
+		let updateText = '';
+		if (adjustExistingValue) {
+			updateText = LL.commands.counter.value.interactions.adjustValue({
+				changeType: valueNumber > 0 ? 'added' : 'removed',
+				toFrom: valueNumber > 0 ? 'to' : 'from',
+				changeValue: Math.abs(valueNumber),
+				maxMin: counter.current === counter.max ? ' the max of' : '',
+				newValue: counter.current,
 				counterName: counter.name,
-				slotName: newAbility,
-				characterName: activeCharacter.name,
-			})
-		);
+			});
+		} else {
+			updateText = LL.commands.counter.value.interactions.setValue({
+				counterName: counter.name,
+				maxMin: counter.current === counter.max ? ' the max of' : '',
+				newValue: counter.current,
+			});
+		}
+
+		const embed = new KoboldEmbed().setTitle(updateText);
 		if (group) {
 			embed.setFields({
 				name: group.name,
@@ -142,6 +135,7 @@ export class CounterPrepareSubCommand implements Command {
 		} else {
 			embed.setFields({ name: counter.name, value: CounterHelpers.detailCounter(counter) });
 		}
+
 		await embed.sendBatches(intr);
 	}
 }

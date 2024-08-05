@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { Action, Modifier, RollMacro, SheetRecord } from '@kobold/db';
+import { Action, Counter, Modifier, RollMacro, Sheet, SheetRecord } from '@kobold/db';
 import { Creature, roll, rollable } from '../creature.js';
 
 export class FinderHelpers {
@@ -60,13 +60,32 @@ export class FinderHelpers {
 	 * @param name the name of the counter group
 	 * @returns the counter group
 	 */
-	public static getCounterByName(
-		counters: SheetRecord['sheet']['countersOutsideGroups'],
-		name: string
-	): SheetRecord['sheet']['countersOutsideGroups'][0] | undefined {
-		return counters.find(
-			counter => counter.name.toLocaleLowerCase().trim() === name.toLocaleLowerCase().trim()
-		);
+	public static getCounterByName(sheet: Sheet, name: string) {
+		let [counterName, groupName] = name
+			.replaceAll(')', '')
+			.trim()
+			.toLocaleLowerCase()
+			.split(' (');
+
+		if (groupName) {
+			for (const counterGroup of sheet.counterGroups) {
+				if (groupName && groupName !== counterGroup.name.toLocaleLowerCase().trim())
+					continue;
+				const counter = counterGroup.counters.find(
+					counter => counter.name.toLocaleLowerCase().trim() === counterName
+				);
+				if (counter) {
+					return { counter, group: counterGroup };
+				}
+			}
+		} else {
+			for (const counter of sheet.countersOutsideGroups) {
+				if (counter.name.toLocaleLowerCase().trim() === counterName) {
+					return { counter, group: null };
+				}
+			}
+		}
+		return { counter: null, group: null };
 	}
 
 	/**

@@ -68,6 +68,18 @@ export class CounterGroupCommand implements Command {
 				],
 			},
 			{
+				name: L.en.commands.counterGroup.reset.name(),
+				description: L.en.commands.counterGroup.reset.description(),
+				type: ApplicationCommandOptionType.Subcommand,
+				options: [
+					{
+						...CounterGroupOptions.COUNTER_GROUP_NAME_OPTION,
+						autocomplete: true,
+						choices: undefined,
+					},
+				],
+			},
+			{
 				name: L.en.commands.counterGroup.remove.name(),
 				description: L.en.commands.counterGroup.remove.description(),
 				type: ApplicationCommandOptionType.Subcommand,

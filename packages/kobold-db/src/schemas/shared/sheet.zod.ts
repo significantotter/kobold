@@ -1,6 +1,13 @@
 import { z } from 'zod';
 import { zNullableInteger, zRecordOf } from '../lib/helpers.zod.js';
-import { Counter, CounterGroup, zCounter, zCounterGroup, zNumericCounter } from './counter.zod.js';
+import {
+	Counter,
+	CounterGroup,
+	CounterStyleEnum,
+	zCounter,
+	zCounterGroup,
+	zNumericCounter,
+} from './counter.zod.js';
 
 export enum AbilityEnum {
 	strength = 'strength',
@@ -187,10 +194,12 @@ export type SheetBaseCounters = z.infer<typeof zSheetBaseCounters>;
 export const zSheetBaseCounters = zRecordOf(
 	SheetBaseCounterKeys,
 	zNumericCounter.default(() => ({
-		style: 'default' as const,
+		style: CounterStyleEnum.default as const,
 		name: '',
+		description: null,
 		current: 0,
 		max: null,
+		recoverTo: -1,
 		recoverable: true,
 	}))
 ).describe('The non-configurable base counters for a sheet.');

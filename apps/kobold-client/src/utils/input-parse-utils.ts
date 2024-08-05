@@ -9,6 +9,12 @@ import _ from 'lodash';
 
 export class InputParseUtils {
 	/**
+	 * Convert the input into a valid boolean
+	 */
+	static parseAsBoolean(input: string): boolean {
+		return ['true', 'yes', '1', 'ok', 'okay'].includes(input.trim().toLowerCase());
+	}
+	/**
 	 * Whether the input string is a text value indicating it should be replaced by
 	 * a null value. Ex. "no", "none", "null", "clear", "remove", "x", or "''"
 	 */

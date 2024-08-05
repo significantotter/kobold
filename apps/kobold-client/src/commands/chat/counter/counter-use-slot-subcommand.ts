@@ -19,18 +19,19 @@ import { AutocompleteUtils } from '../../../utils/kobold-service-utils/autocompl
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
 import { InteractionUtils } from '../../../utils/interaction-utils.js';
-import _, { find } from 'lodash';
+import _ from 'lodash';
+import { index } from 'drizzle-orm/mysql-core';
 import { InputParseUtils } from '../../../utils/input-parse-utils.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
-import { CounterHelpers } from './counter-helpers.js';
 import { CounterGroupHelpers } from '../counter-group/counter-group-helpers.js';
+import { CounterHelpers } from './counter-helpers.js';
 
-export class CounterPrepareSubCommand implements Command {
-	public names = [L.en.commands.counter.prepare.name()];
+export class CounterUseSlotSubCommand implements Command {
+	public names = [L.en.commands.counter.useSlot.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.counter.prepare.name(),
-		description: L.en.commands.counter.prepare.description(),
+		name: L.en.commands.counter.useSlot.name(),
+		description: L.en.commands.counter.useSlot.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -82,22 +83,33 @@ export class CounterPrepareSubCommand implements Command {
 		const targetCounterName = intr.options
 			.getString(CounterOptions.COUNTER_NAME_OPTION.name, true)
 			.trim();
+		const resetSlot = intr.options.getBoolean(CounterOptions.COUNTER_RESET_SLOT_OPTION.name);
 		const targetSlot = intr.options
 			.getString(CounterOptions.COUNTER_SLOT_OPTION.name, true)
 			.trim();
-		const newAbility = intr.options
-			.getString(CounterOptions.COUNTER_PREPARE_SLOT_OPTION.name, true)
-			.trim();
-		const [slotIndexString] = targetSlot.replaceAll('✓', ':').replaceAll('✗', ':').split(': ');
+		const [slotIndexString, ...slotValues] = targetSlot
+			.replaceAll('✓', ':')
+			.replaceAll('✗', ':')
+			.split(': ');
+		const slotValue = slotValues.join(': ');
+		if (!InputParseUtils.isValidNumber(slotIndexString)) {
+			throw new KoboldError("Yip! I couldn't find that slot");
+		}
+		const slotIndex = InputParseUtils.parseAsNumber(slotIndexString);
 
 		const { counter, group } = FinderHelpers.getCounterByName(
 			activeCharacter.sheetRecord.sheet,
 			targetCounterName
 		);
 
-		if (!InputParseUtils.isValidString(newAbility, { maxLength: 50 })) {
-			throw new KoboldError(`Yip! The prepared ability must be less than 50 characters!`);
+		if (counter?.style !== CounterStyleEnum.prepared) {
+			throw new KoboldError(
+				LL.commands.counter.interactions.notPrepared({
+					counterName: targetCounterName,
+				})
+			);
 		}
+		counter.active[slotIndex] = resetSlot ?? false ? true : false;
 
 		if (!counter) {
 			throw new KoboldError(
@@ -107,20 +119,6 @@ export class CounterPrepareSubCommand implements Command {
 			);
 		}
 
-		if (counter.style !== CounterStyleEnum.prepared) {
-			throw new KoboldError(
-				LL.commands.counter.interactions.notPrepared({
-					counterName: targetCounterName,
-				})
-			);
-		}
-
-		if (counter.active.length <= Number(slotIndexString)) {
-			throw new KoboldError("Yip! I couldn't find that slot!");
-		}
-
-		counter.prepared[Number(slotIndexString)] = newAbility;
-
 		await kobold.sheetRecord.update(
 			{ id: activeCharacter.sheetRecord.id },
 			{
@@ -128,9 +126,10 @@ export class CounterPrepareSubCommand implements Command {
 			}
 		);
 		const embed = new KoboldEmbed().setTitle(
-			LL.commands.counter.prepare.interactions.prepared({
-				counterName: counter.name,
-				slotName: newAbility,
+			LL.commands.counter.useSlot.interactions.usedSlot({
+				counterName: group ? `${group.name}: ${counter.name}` : counter.name,
+				usedOrReset: resetSlot ? 'reset' : 'used',
+				slotName: slotValue,
 				characterName: activeCharacter.name,
 			})
 		);
@@ -142,6 +141,7 @@ export class CounterPrepareSubCommand implements Command {
 		} else {
 			embed.setFields({ name: counter.name, value: CounterHelpers.detailCounter(counter) });
 		}
-		await embed.sendBatches(intr);
+
+		embed.sendBatches(intr);
 	}
 }

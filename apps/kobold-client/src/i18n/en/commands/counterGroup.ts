@@ -13,6 +13,13 @@ export default {
 		name: 'display',
 		description: 'Displays a counter group for your active character.',
 	},
+	reset: {
+		name: 'reset',
+		description: "Resets all counters within a character's counter group.",
+		interactions: {
+			reset: "Yip! I reset all the counters in {characterName}'s counter group {groupName}.",
+		},
+	},
 	create: {
 		name: 'create',
 		description: 'Creates a counter group for the active character.',
@@ -28,7 +35,7 @@ export default {
 		interactions: {
 			invalidOptionError: 'Yip! Please choose a valid option to set.',
 			stringTooLong: "Yip! {propertyName} can't be longer than {numCharacters} characters!",
-			nameExistsError: 'Yip! A modifier with that name already exists.',
+			nameExistsError: 'Yip! A counter group with that name already exists.',
 			successEmbed: {
 				title: "Yip! I set {propertyName} on {groupName} to {newPropertyValue}'.",
 			},

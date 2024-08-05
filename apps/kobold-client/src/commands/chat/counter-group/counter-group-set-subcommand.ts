@@ -14,12 +14,10 @@ import _ from 'lodash';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold } from '@kobold/db';
-import { DiceRollResult } from '../../../utils/dice-utils.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { RollBuilder } from '../../../utils/roll-builder.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { CounterGroupOptions } from './counter-group-command-options.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
@@ -89,6 +87,7 @@ export class CounterGroupSetSubCommand implements Command {
 					})
 				);
 			}
+			targetCounterGroup.name = newGroupValue;
 		} else if (
 			newGroupOption === L.en.commandOptions.counterGroupSetOption.choices.description.value()
 		) {
@@ -100,9 +99,17 @@ export class CounterGroupSetSubCommand implements Command {
 					})
 				);
 			}
+			targetCounterGroup.description = newGroupValue;
 		} else {
 			throw new KoboldError(LL.commands.counterGroup.set.interactions.invalidOptionError());
 		}
+
+		await kobold.sheetRecord.update(
+			{ id: activeCharacter.sheetRecord.id },
+			{
+				sheet: activeCharacter.sheetRecord.sheet,
+			}
+		);
 
 		const updateEmbed = new KoboldEmbed();
 		updateEmbed.setTitle(

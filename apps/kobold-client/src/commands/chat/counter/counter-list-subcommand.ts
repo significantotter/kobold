@@ -1,4 +1,5 @@
 import {
+	APIEmbedField,
 	ApplicationCommandType,
 	ChatInputCommandInteraction,
 	PermissionsString,
@@ -12,6 +13,8 @@ import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { CounterHelpers } from './counter-helpers.js';
+import { CounterOptions } from './counter-command-options.js';
+import { CounterGroupHelpers } from '../counter-group/counter-group-helpers.js';
 
 export class CounterListSubCommand implements Command {
 	public names = [L.en.commands.counter.list.name()];
@@ -30,6 +33,8 @@ export class CounterListSubCommand implements Command {
 		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
+		let hideGroups =
+			intr.options.getBoolean(CounterOptions.COUNTER_LIST_HIDE_GROUPS_OPTION.name) ?? false;
 		const koboldUtils = new KoboldUtils(kobold);
 		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
 			activeCharacter: true,
@@ -37,9 +42,16 @@ export class CounterListSubCommand implements Command {
 
 		const embed = await new KoboldEmbed();
 		embed.setCharacter(activeCharacter);
-		embed.setTitle(`${activeCharacter.name}'s Counter s`);
+		embed.setTitle(`${activeCharacter.name}'s Counters`);
+
 		embed.setFields(
-			activeCharacter.sheetRecord.sheet.counters.map(counter => ({
+			...(!hideGroups
+				? activeCharacter.sheetRecord.sheet.counterGroups.map(counterGroup => ({
+						name: counterGroup.name,
+						value: CounterGroupHelpers.detailCounterGroup(counterGroup),
+					}))
+				: []),
+			...activeCharacter.sheetRecord.sheet.countersOutsideGroups.map(counter => ({
 				name: counter.name,
 				value: CounterHelpers.detailCounter(counter),
 			}))

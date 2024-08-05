@@ -17,6 +17,7 @@ import {
 	SheetWeaknessesResistancesKeys,
 	StatSubGroupEnum,
 } from '../shared/sheet.zod.js';
+import { CounterStyleEnum } from '../shared/counter.zod.js';
 
 // Zod Enum Helpers
 const sheetRecordTrackerModeValueMap = _.keyBy(
@@ -102,6 +103,11 @@ export function isStatSubGroupEnum(value: any): value is StatSubGroupEnum {
 const rollTypeValueMap = _.keyBy(Object.values(RollTypeEnum), _.identity);
 export function isRollTypeEnum(value: any): value is RollTypeEnum {
 	return rollTypeValueMap[value] !== undefined;
+}
+
+const counterStyleValueMap = _.keyBy(Object.values(CounterStyleEnum), _.identity);
+export function isCounterStyleEnum(value: any): value is CounterStyleEnum {
+	return counterStyleValueMap[value] !== undefined;
 }
 
 /** User Settings Enums */

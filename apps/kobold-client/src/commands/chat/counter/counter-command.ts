@@ -31,6 +31,62 @@ export class CounterCommand implements Command {
 				name: L.en.commands.counter.list.name(),
 				description: L.en.commands.counter.list.description(),
 				type: ApplicationCommandOptionType.Subcommand,
+				options: [CounterOptions.COUNTER_LIST_HIDE_GROUPS_OPTION],
+			},
+			{
+				name: L.en.commands.counter.useSlot.name(),
+				description: L.en.commands.counter.useSlot.description(),
+				type: ApplicationCommandOptionType.Subcommand,
+				options: [
+					{
+						...CounterOptions.COUNTER_NAME_OPTION,
+						autocomplete: true,
+						choices: undefined,
+					},
+					CounterOptions.COUNTER_SLOT_OPTION,
+					CounterOptions.COUNTER_RESET_SLOT_OPTION,
+				],
+			},
+			{
+				name: L.en.commands.counter.value.name(),
+				description: L.en.commands.counter.value.description(),
+				type: ApplicationCommandOptionType.Subcommand,
+				options: [
+					{
+						...CounterOptions.COUNTER_NAME_OPTION,
+						autocomplete: true,
+						choices: undefined,
+					},
+					CounterOptions.COUNTER_VALUE_OPTION,
+				],
+			},
+			{
+				name: L.en.commands.counter.prepare.name(),
+				description: L.en.commands.counter.prepare.description(),
+				type: ApplicationCommandOptionType.Subcommand,
+				options: [
+					{
+						...CounterOptions.COUNTER_NAME_OPTION,
+						autocomplete: true,
+						choices: undefined,
+					},
+					CounterOptions.COUNTER_SLOT_OPTION,
+					CounterOptions.COUNTER_PREPARE_SLOT_OPTION,
+				],
+			},
+			{
+				name: L.en.commands.counter.prepareMany.name(),
+				description: L.en.commands.counter.prepareMany.description(),
+				type: ApplicationCommandOptionType.Subcommand,
+				options: [
+					{
+						...CounterOptions.COUNTER_NAME_OPTION,
+						autocomplete: true,
+						choices: undefined,
+					},
+					CounterOptions.COUNTER_PREPARE_MANY_OPTION,
+					CounterOptions.COUNTER_PREPARE_FRESH_OPTION,
+				],
 			},
 			{
 				name: L.en.commands.counter.display.name(),
@@ -49,8 +105,12 @@ export class CounterCommand implements Command {
 				description: L.en.commands.counter.create.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [
+					CounterOptions.COUNTER_STYLE_OPTION,
 					CounterOptions.COUNTER_NAME_OPTION,
-					CounterOptions.COUNTER_DESCRIPTION_OPTION,
+					CounterOptions.COUNTER_MAX_OPTION,
+					CounterOptions.COUNTER_GROUP_NAME_OPTION,
+					CounterOptions.COUNTER_RECOVERABLE_OPTION,
+					CounterOptions.COUNTER_RECOVER_TO_OPTION,
 				],
 			},
 			{
@@ -65,6 +125,18 @@ export class CounterCommand implements Command {
 					},
 					CounterOptions.COUNTER_SET_OPTION_OPTION,
 					CounterOptions.COUNTER_SET_VALUE_OPTION,
+				],
+			},
+			{
+				name: L.en.commands.counter.reset.name(),
+				description: L.en.commands.counter.reset.description(),
+				type: ApplicationCommandOptionType.Subcommand,
+				options: [
+					{
+						...CounterOptions.COUNTER_NAME_OPTION,
+						autocomplete: true,
+						choices: undefined,
+					},
 				],
 			},
 			{

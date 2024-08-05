@@ -13,6 +13,8 @@ import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { ActionOptions } from './action-command-options.js';
+import { InputParseUtils } from '../../../utils/input-parse-utils.js';
+import { KoboldError } from '../../../utils/KoboldError.js';
 
 export class ActionCreateSubCommand implements Command {
 	public names = [L.en.commands.action.create.name()];
@@ -56,6 +58,14 @@ export class ActionCreateSubCommand implements Command {
 				})
 			);
 			return;
+		}
+		if (!InputParseUtils.isValidString(name, { maxLength: 50 })) {
+			throw new KoboldError(`Yip! The counter group name must be less than 50 characters!`);
+		}
+		if (description && !InputParseUtils.isValidString(description, { maxLength: 300 })) {
+			throw new KoboldError(
+				`Yip! The counter group description must be less than 300 characters!`
+			);
 		}
 
 		await kobold.sheetRecord.update(

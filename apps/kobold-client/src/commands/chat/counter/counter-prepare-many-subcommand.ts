@@ -25,12 +25,12 @@ import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { CounterHelpers } from './counter-helpers.js';
 import { CounterGroupHelpers } from '../counter-group/counter-group-helpers.js';
 
-export class CounterPrepareSubCommand implements Command {
-	public names = [L.en.commands.counter.prepare.name()];
+export class CounterPrepareManySubCommand implements Command {
+	public names = [L.en.commands.counter.prepareMany.name()];
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.counter.prepare.name(),
-		description: L.en.commands.counter.prepare.description(),
+		name: L.en.commands.counter.prepareMany.name(),
+		description: L.en.commands.counter.prepareMany.description(),
 		dm_permission: true,
 		default_member_permissions: undefined,
 	};
@@ -51,23 +51,6 @@ export class CounterPrepareSubCommand implements Command {
 				styles: [CounterStyleEnum.prepared],
 			});
 		}
-		if (option.name === CounterOptions.COUNTER_SLOT_OPTION.name) {
-			const counter = intr.options.getString(CounterOptions.COUNTER_NAME_OPTION.name);
-			if (!counter) return;
-			const koboldUtils = new KoboldUtils(kobold);
-			const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
-				activeCharacter: true,
-			});
-			const { counter: counterData } = FinderHelpers.getCounterByName(
-				activeCharacter.sheetRecord.sheet,
-				counter
-			);
-			if (!counterData || counterData.style !== CounterStyleEnum.prepared) return;
-			return counterData.prepared.map((slot, index) => ({
-				name: `${index} ${counterData.active[index] ? '✓' : '✗'} ${slot ?? '(empty)'}`,
-				value: `${index} ${counterData.active[index] ? '✓' : '✗'} ${slot ?? '(empty)'}`,
-			}));
-		}
 	}
 
 	public async execute(
@@ -82,22 +65,26 @@ export class CounterPrepareSubCommand implements Command {
 		const targetCounterName = intr.options
 			.getString(CounterOptions.COUNTER_NAME_OPTION.name, true)
 			.trim();
+		const prepareFresh = intr.options.getBoolean(
+			CounterOptions.COUNTER_PREPARE_FRESH_OPTION.name,
+			true
+		);
 		const targetSlot = intr.options
-			.getString(CounterOptions.COUNTER_SLOT_OPTION.name, true)
+			.getString(CounterOptions.COUNTER_PREPARE_MANY_OPTION.name, true)
 			.trim();
-		const newAbility = intr.options
-			.getString(CounterOptions.COUNTER_PREPARE_SLOT_OPTION.name, true)
-			.trim();
-		const [slotIndexString] = targetSlot.replaceAll('✓', ':').replaceAll('✗', ':').split(': ');
+		const preparedValues = targetSlot.split(',');
+		for (const value of preparedValues) {
+			if (!InputParseUtils.isValidString(value, { maxLength: 50 })) {
+				throw new KoboldError(
+					`Yip! Each prepared ability must be less than 50 characters!`
+				);
+			}
+		}
 
 		const { counter, group } = FinderHelpers.getCounterByName(
 			activeCharacter.sheetRecord.sheet,
 			targetCounterName
 		);
-
-		if (!InputParseUtils.isValidString(newAbility, { maxLength: 50 })) {
-			throw new KoboldError(`Yip! The prepared ability must be less than 50 characters!`);
-		}
 
 		if (!counter) {
 			throw new KoboldError(
@@ -115,11 +102,24 @@ export class CounterPrepareSubCommand implements Command {
 			);
 		}
 
-		if (counter.active.length <= Number(slotIndexString)) {
-			throw new KoboldError("Yip! I couldn't find that slot!");
+		if (prepareFresh) {
+			counter.prepared = counter.prepared.map(() => null);
+			counter.active = counter.active.map(() => true);
+		}
+		// if the number of null slots is less than the number of prepared values, throw an error
+		if (counter.prepared.filter(slot => slot === null).length < preparedValues.length) {
+			throw new KoboldError(
+				'Yip! You tried to prepare more abilities than the counter has slots for!'
+			);
 		}
 
-		counter.prepared[Number(slotIndexString)] = newAbility;
+		for (let i = 0; i < counter.prepared.length; i++) {
+			if (preparedValues.length === 0) break;
+
+			if (counter.prepared[i] === null) {
+				counter.prepared[i] = preparedValues.shift()!;
+			}
+		}
 
 		await kobold.sheetRecord.update(
 			{ id: activeCharacter.sheetRecord.id },
@@ -127,13 +127,10 @@ export class CounterPrepareSubCommand implements Command {
 				sheet: activeCharacter.sheetRecord.sheet,
 			}
 		);
-		const embed = new KoboldEmbed().setTitle(
-			LL.commands.counter.prepare.interactions.prepared({
-				counterName: counter.name,
-				slotName: newAbility,
-				characterName: activeCharacter.name,
-			})
-		);
+
+		const embed = await new KoboldEmbed();
+		embed.setCharacter(activeCharacter);
+		embed.setTitle(`Yip! Prepared values to ${counter.name}`);
 		if (group) {
 			embed.setFields({
 				name: group.name,
