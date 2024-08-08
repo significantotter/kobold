@@ -224,6 +224,8 @@ export function convertWanderersGuideCharToSheet(
 				current: characterData.heroPoints ?? 0,
 			},
 		},
+		counterGroups: baseSheet.counterGroups,
+		countersOutsideGroups: baseSheet.countersOutsideGroups,
 		weaknessesResistances: {
 			resistances: [],
 			weaknesses: [],

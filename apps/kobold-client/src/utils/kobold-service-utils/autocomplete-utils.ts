@@ -1,13 +1,11 @@
 import { AutocompleteInteraction, CacheType } from 'discord.js';
 import { sql } from 'drizzle-orm';
 import _ from 'lodash';
-import { CharacterWithRelations, InitiativeActor, Kobold } from '@kobold/db';
+import { CounterStyleEnum, InitiativeActor, Kobold } from '@kobold/db';
 import { Pf2eToolsCompendiumModel } from '@kobold/pf2etools';
-import { Pf2eToolsUtils } from '@kobold/pf2etools';
 import { Creature } from '../creature.js';
 import { InitiativeBuilderUtils } from '../initiative-builder.js';
 import { FinderHelpers } from '../kobold-helpers/finder-helpers.js';
-import { StringUtils } from '@kobold/base-utils';
 import type { KoboldUtils } from './kobold-utils.js';
 import { DrizzleUtils } from '@kobold/pf2etools';
 import { NethysDb } from '@kobold/nethys';
@@ -18,6 +16,56 @@ export class AutocompleteUtils {
 		this.kobold = koboldUtils.kobold;
 	}
 
+	public async getCounterGroups(
+		intr: AutocompleteInteraction<CacheType>,
+		counterGroupName: string
+	) {
+		const activeCharacter = await this.koboldUtils.characterUtils.getActiveCharacter(intr);
+		if (!activeCharacter) return [];
+
+		return activeCharacter.sheetRecord.sheet.counterGroups
+			.map(group => ({
+				name: group.name,
+				value: group.name,
+			}))
+			.filter(group =>
+				group.name.toLowerCase().includes(counterGroupName.toLowerCase().trim())
+			);
+	}
+	public async getCounters(
+		intr: AutocompleteInteraction<CacheType>,
+		counterName: string,
+		options = { styles: [] as CounterStyleEnum[] }
+	) {
+		const activeCharacter = await this.koboldUtils.characterUtils.getActiveCharacter(intr);
+		if (!activeCharacter) {
+			return [];
+		}
+
+		return [
+			...activeCharacter.sheetRecord.sheet.countersOutsideGroups.filter(
+				counter => !options.styles.length || options.styles.includes(counter.style)
+			),
+			...activeCharacter.sheetRecord.sheet.counterGroups.flatMap(group =>
+				group.counters
+					.filter(
+						counter => !options.styles.length || options.styles.includes(counter.style)
+					)
+					.map(counter => ({
+						...counter,
+						name: `${counter.name} (${group.name})`,
+					}))
+			),
+		]
+			.map(counter => ({
+				name: counter.name,
+				value: counter.name,
+			}))
+			.filter(counter =>
+				counter.name.toLowerCase().includes(counterName.toLowerCase().trim())
+			);
+	}
+
 	public async getPf2eToolsBestiaryCreatures(
 		intr: AutocompleteInteraction<CacheType>,
 		pf2eToolsCompendium: Pf2eToolsCompendiumModel,
@@ -25,7 +73,7 @@ export class AutocompleteUtils {
 	) {
 		const targetBestiaryCreatures = await pf2eToolsCompendium.db.query.Creatures.findMany({
 			where: DrizzleUtils.ilike(pf2eToolsCompendium.creatures.table.search, `%${matchText}%`),
-			orderBy: sql`RANDOM()`,
+			orderBy: sql`RANDOM()` as any,
 			limit: 49,
 		});
 		return targetBestiaryCreatures.map(npc => {

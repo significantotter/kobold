@@ -831,6 +831,122 @@ export default {
 		description: 'A note about the reason for the roll.',
 	},
 
+	// COUNTER GROUPS
+	counterGroupName: {
+		name: 'name',
+		description: 'The name of the counter group.',
+	},
+	counterGroupDescription: {
+		name: 'description',
+		description: 'The description of the counter group.',
+	},
+	counterGroupReorderCounter: {
+		name: 'reorder-counter',
+		description: 'The name of the counter to change the position of in the group.',
+		choices: {
+			top: { name: 'top', value: 'top' },
+			up: { name: 'up', value: 'up' },
+			down: { name: 'down', value: 'down' },
+			bottom: { name: 'bottom', value: 'bottom' },
+		},
+	},
+	counterGroupSetOption: {
+		name: 'set-option',
+		description: 'The field to set to a new value.',
+		choices: {
+			name: { name: 'name', value: 'name' },
+			description: { name: 'description', value: 'description' },
+		},
+	},
+	counterGroupSetValue: {
+		name: 'value',
+		description: 'The value to change the option to.',
+	},
+
+	// COUNTERS
+	counterName: {
+		name: 'name',
+		description: 'The name of the counter.',
+	},
+	counterText: {
+		name: 'text',
+		description: 'The text for the counter.',
+	},
+	counterCounterGroupName: {
+		name: 'group-name',
+		description: 'The name of the counter group.',
+	},
+	counterDescription: {
+		name: 'description',
+		description: 'The description of the counter.',
+	},
+	counterStyle: {
+		name: 'style',
+		description: 'The style of the counter.',
+		choices: {
+			prepared: { name: 'prepared', value: 'prepared' },
+			default: { name: 'default', value: 'default' },
+			dots: { name: 'dots', value: 'dots' },
+		},
+	},
+	counterMax: {
+		name: 'max',
+		description: 'The max value of the counter.',
+	},
+	counterRecoverable: {
+		name: 'recoverable',
+		description: 'Whether the counter is reset when using the recover command.',
+	},
+	counterListHideGroups: {
+		name: 'hide-groups',
+		description: 'Whether to hide counter groups.',
+	},
+	counterRecoverTo: {
+		name: 'recover-to',
+		description: 'The value used after the recover command. -1 is max, -2 is half max.',
+	},
+	counterSetOption: {
+		name: 'set-option',
+		description: 'The field to set to a new value.',
+		choices: {
+			name: { name: 'name', value: 'name' },
+			description: { name: 'description', value: 'description' },
+			style: { name: 'style', value: 'style' },
+			max: { name: 'max', value: 'max' },
+			text: { name: 'text', value: 'text' },
+			recoverTo: { name: 'recoverTo', value: 'recoverTo' },
+			recoverable: { name: 'recoverable', value: 'recoverable' },
+		},
+	},
+	counterSetValue: {
+		name: 'value',
+		description: 'The value to change the option to.',
+	},
+	counterSlot: {
+		name: 'slot',
+		description: 'The slot to use for the counter.',
+	},
+	counterPrepareSlot: {
+		name: 'ability',
+		description: "The ability to prepare in the counter's slot.",
+	},
+	counterPrepareMany: {
+		name: 'values',
+		description: 'The abilities to prepare in the counter, separated by commas.',
+	},
+	counterPrepareFresh: {
+		name: 'prepare-fresh',
+		description: 'Whether to overwrite all existing values before preparing.',
+	},
+	counterResetSlot: {
+		name: 'reset-slot',
+		description: 'Whether to reset the slot to "unused" instead of using it.',
+	},
+	counterValue: {
+		name: 'value',
+		description: 'The value to set the counter to.',
+	},
+
 	// ROLL MACROS
 
 	rollMacroName: {

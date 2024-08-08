@@ -11,6 +11,7 @@ import {
 	CharacterWithRelations,
 	Database,
 	NewCharacter,
+	Sheet,
 } from '../schemas/index.js';
 import { Model } from './model.js';
 

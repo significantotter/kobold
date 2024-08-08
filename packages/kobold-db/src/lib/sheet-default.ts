@@ -1,3 +1,4 @@
+import { CounterStyleEnum } from '../schemas/index.js';
 import { AbilityEnum, Sheet } from '../schemas/shared/sheet.zod.js';
 
 export function getDefaultSheet(): Sheet {
@@ -63,41 +64,67 @@ export function getDefaultSheet(): Sheet {
 			baseCounters: {
 				heroPoints: {
 					name: 'Hero Points',
-					style: 'default',
+					description: null,
+					style: CounterStyleEnum.default,
 					current: 0,
 					max: 0,
+					recoverTo: 1,
 					recoverable: false,
+					text: '',
 				},
 				focusPoints: {
 					name: 'Focus Points',
-					style: 'default',
+					description: null,
+					style: CounterStyleEnum.default,
 					current: 0,
 					max: 0,
+					recoverTo: -1,
 					recoverable: false,
+					text: '',
 				},
-				hp: { name: 'HP', style: 'default', current: 0, max: 0, recoverable: true },
+				hp: {
+					name: 'HP',
+					description: null,
+					style: CounterStyleEnum.default,
+					current: 0,
+					max: 0,
+					recoverTo: -1,
+					recoverable: true,
+					text: '',
+				},
 				tempHp: {
 					name: 'Temp HP',
-					style: 'default',
+					description: null,
+					style: CounterStyleEnum.default,
 					current: 0,
 					max: null,
+					recoverTo: 0,
 					recoverable: true,
+					text: '',
 				},
 				resolve: {
 					name: 'Resolve',
-					style: 'default',
+					description: null,
+					style: CounterStyleEnum.default,
 					current: 0,
 					max: 0,
+					recoverTo: -1,
 					recoverable: true,
+					text: '',
 				},
 				stamina: {
 					name: 'Stamina',
-					style: 'default',
+					description: null,
+					style: CounterStyleEnum.default,
 					current: 0,
 					max: 0,
+					recoverTo: -1,
 					recoverable: true,
+					text: '',
 				},
 			},
+			counterGroups: [],
+			countersOutsideGroups: [],
 			stats: {
 				// Perception
 				perception: {

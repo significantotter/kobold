@@ -318,6 +318,34 @@ export default {
 			},
 		},
 	},
+	counter: {
+		name: 'counter',
+		value: 'counter',
+		description: 'help for the /counter command.',
+		interactions: {
+			embed: {
+				title: '/counter Commands',
+				thumbnail: refs.links.thumbnail,
+				description:
+					"The counter commands are used to make custom counters. There are currently three types of counter. \n\nDefault counters are the standard numeric counters. They display a number, but can't be negative. They can optionally be bounded by a maximum value. \n\nDots counters are similar to default counters, but they are always bounded by a max, the max can't be higher than 20, and they display as a set of filled or empty dots. These are useful for things like focus points or spontaneous spell slots. \n\nPrepared counters are meant for features like prepared spell slots or alchemist infusions. You set a maximum amount of prepared items (up to 20), and then you can use commands to prepare things into those slots. The slots are either active or used, which can be toggled with the use-slot command. When slots are reset, they're set back to active instead of used.\n\n",
+			},
+		},
+	},
+	counterGroup: {
+		name: 'counter-group',
+		value: 'counter-group',
+		description: 'help for the /counter-group command.',
+		interactions: {
+			embed: {
+				title: '/counter-group Commands',
+				thumbnail: refs.links.thumbnail,
+				description:
+					'The counter group commands are used to organize custom counters. ' +
+					'This allows you to group together things like coin denominations or spell slots. ' +
+					"You can reset these counters as a single unit, and they're displayed together.\n\n",
+			},
+		},
+	},
 	gameplay: {
 		name: 'gameplay',
 		value: 'gameplay',

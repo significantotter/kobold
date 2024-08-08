@@ -94,6 +94,18 @@ export class HelpCommand implements Command {
 				options: [],
 			},
 			{
+				name: L.en.commands.help.counter.name(),
+				description: L.en.commands.help.counter.description(),
+				type: ApplicationCommandOptionType.Subcommand,
+				options: [],
+			},
+			{
+				name: L.en.commands.help.counterGroup.name(),
+				description: L.en.commands.help.counterGroup.description(),
+				type: ApplicationCommandOptionType.Subcommand,
+				options: [],
+			},
+			{
 				name: L.en.commands.help.game.name(),
 				description: L.en.commands.help.game.description(),
 				type: ApplicationCommandOptionType.Subcommand,
@@ -334,6 +346,31 @@ export class HelpCommand implements Command {
 							`\`/${LL.commands.gameplay.name()} ${LL.commands.gameplay.tracker.name()}\` ${LL.commands.gameplay.tracker.description()}\n`,
 					},
 					{
+						name: LL.commands.counter.name(),
+						value:
+							`\`/${LL.commands.counter.name()} ${LL.commands.counter.create.name()}\` ${LL.commands.counter.create.description()}\n` +
+							`\`/${LL.commands.counter.name()} ${LL.commands.counter.display.name()}\` ${LL.commands.counter.display.description()}\n` +
+							`\`/${LL.commands.counter.name()} ${LL.commands.counter.list.name()}\` ${LL.commands.counter.list.description()}\n` +
+							`\`/${LL.commands.counter.name()} ${LL.commands.counter.prepareMany.name()}\` ${LL.commands.counter.prepareMany.description()}\n` +
+							`\`/${LL.commands.counter.name()} ${LL.commands.counter.prepare.name()}\` ${LL.commands.counter.prepare.description()}\n` +
+							`\`/${LL.commands.counter.name()} ${LL.commands.counter.remove.name()}\` ${LL.commands.counter.remove.description()}\n` +
+							`\`/${LL.commands.counter.name()} ${LL.commands.counter.reset.name()}\` ${LL.commands.counter.reset.description()}\n` +
+							`\`/${LL.commands.counter.name()} ${LL.commands.counter.set.name()}\` ${LL.commands.counter.set.description()}\n` +
+							`\`/${LL.commands.counter.name()} ${LL.commands.counter.useSlot.name()}\` ${LL.commands.counter.useSlot.description()}\n` +
+							`\`/${LL.commands.counter.name()} ${LL.commands.counter.value.name()}\` ${LL.commands.counter.value.description()}\n`,
+					},
+					{
+						name: LL.commands.counterGroup.name(),
+						value:
+							`\`/${LL.commands.counterGroup.name()} ${LL.commands.counterGroup.set.name()}\` ${LL.commands.counterGroup.set.description()}\n` +
+							`\`/${LL.commands.counterGroup.name()} ${LL.commands.counterGroup.create.name()}\` ${LL.commands.counterGroup.create.description()}\n` +
+							`\`/${LL.commands.counterGroup.name()} ${LL.commands.counterGroup.display.name()}\` ${LL.commands.counterGroup.display.description()}\n` +
+							`\`/${LL.commands.counterGroup.name()} ${LL.commands.counterGroup.list.name()}\` ${LL.commands.counterGroup.list.description()}\n` +
+							`\`/${LL.commands.counterGroup.name()} ${LL.commands.counterGroup.remove.name()}\` ${LL.commands.counterGroup.remove.description()}\n` +
+							`\`/${LL.commands.counterGroup.name()} ${LL.commands.counterGroup.reset.name()}\` ${LL.commands.counterGroup.reset.description()}\n` +
+							`\`/${LL.commands.counterGroup.name()} ${LL.commands.counterGroup.set.name()}\` ${LL.commands.counterGroup.set.description()}\n`,
+					},
+					{
 						name: LL.commands.action.name(),
 						value:
 							`\`/${LL.commands.action.name()} ${LL.commands.action.create.name()}\` ${LL.commands.action.create.description()}\n` +
@@ -506,6 +543,50 @@ export class HelpCommand implements Command {
 						LL.commands.gameplay.tracker.name(),
 					].map(command =>
 						createCommandOperationHelpField(LL.commands.gameplay.name(), command, LL)
+					)
+				);
+				break;
+			}
+			case L.en.commands.help.counter.name(): {
+				embed.setTitle(LL.commands.help.counter.interactions.embed.title());
+				embed.setDescription(LL.commands.help.counter.interactions.embed.description());
+				embed.addFields(
+					[
+						LL.commands.counter.create.name(),
+						LL.commands.counter.display.name(),
+						LL.commands.counter.list.name(),
+						LL.commands.counter.prepareMany.name(),
+						LL.commands.counter.prepare.name(),
+						LL.commands.counter.remove.name(),
+						LL.commands.counter.reset.name(),
+						LL.commands.counter.set.name(),
+						LL.commands.counter.useSlot.name(),
+						LL.commands.counter.value.name(),
+					].map(command =>
+						createCommandOperationHelpField(LL.commands.counter.name(), command, LL)
+					)
+				);
+				break;
+			}
+			case L.en.commands.help.counterGroup.name(): {
+				embed.setTitle(LL.commands.help.counterGroup.interactions.embed.title());
+				embed.setDescription(
+					LL.commands.help.counterGroup.interactions.embed.description()
+				);
+				embed.addFields(
+					[
+						LL.commands.counterGroup.create.name(),
+						LL.commands.counterGroup.display.name(),
+						LL.commands.counterGroup.list.name(),
+						LL.commands.counterGroup.remove.name(),
+						LL.commands.counterGroup.reset.name(),
+						LL.commands.counterGroup.set.name(),
+					].map(command =>
+						createCommandOperationHelpField(
+							LL.commands.counterGroup.name(),
+							command,
+							LL
+						)
 					)
 				);
 				break;

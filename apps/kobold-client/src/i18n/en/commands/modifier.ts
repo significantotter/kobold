@@ -35,7 +35,7 @@ export default {
 			invalidOptionError: 'Yip! Please send a valid option to set.',
 			emptyNameError: "Yip! You can't use an empty name!",
 			nameExistsError: 'Yip! A modifier with that name already exists.',
-			valueNotNumberError: 'Yip! You can only set a modifier value with a number.',
+			valueNotNumberError: 'Yip! You can only set that modifier value with a number.',
 			successEmbed: {
 				title: "Yip! {characterName} had their modifier {modifierName}'s {fieldToChange} set to {newFieldValue}.",
 			},

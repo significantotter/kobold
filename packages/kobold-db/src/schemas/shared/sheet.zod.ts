@@ -1,6 +1,13 @@
 import { z } from 'zod';
 import { zNullableInteger, zRecordOf } from '../lib/helpers.zod.js';
-import { zNumericCounter } from './counter.zod.js';
+import {
+	Counter,
+	CounterGroup,
+	CounterStyleEnum,
+	zCounter,
+	zCounterGroup,
+	zNumericCounter,
+} from './counter.zod.js';
 
 export enum AbilityEnum {
 	strength = 'strength',
@@ -176,7 +183,7 @@ export const zSheetStaticInfo = z
 			.default(false)
 			.describe('Whether the creature follows alternate stamina rules.'),
 	})
-	.describe("A sheet's special case static information.");
+	.describe('Sheet information not modifiable in Kobold.');
 
 export type SheetInfo = z.infer<typeof zSheetInfo>;
 export const zSheetInfo = zRecordOf(SheetInfoKeys, z.string().nullable().default(null)).describe(
@@ -187,13 +194,25 @@ export type SheetBaseCounters = z.infer<typeof zSheetBaseCounters>;
 export const zSheetBaseCounters = zRecordOf(
 	SheetBaseCounterKeys,
 	zNumericCounter.default(() => ({
-		style: 'default' as const,
+		style: CounterStyleEnum.default as const,
 		name: '',
+		description: null,
 		current: 0,
 		max: null,
+		recoverTo: -1,
 		recoverable: true,
 	}))
 ).describe('The non-configurable base counters for a sheet.');
+
+export type SheetCounterGroups = CounterGroup[];
+export const zSheetCounterGroups = zCounterGroup
+	.array()
+	.describe("The configurable counters for a sheet that aren't in a group.");
+
+export type SheetCountersOutsideGroups = Counter[];
+export const zSheetCountersOutsideGroups = zCounter
+	.array()
+	.describe('The configurable counter groups for a sheet.');
 
 export type SheetInfoLists = z.infer<typeof zSheetInfoLists>;
 export const zSheetInfoLists = zRecordOf(
@@ -216,13 +235,15 @@ export enum SheetRecordTrackerModeEnum {
 export type Sheet = z.infer<typeof zSheet>;
 export const zSheet = z
 	.strictObject({
-		staticInfo: zSheetStaticInfo.describe('Sheet information not modifiable in Kobold'),
-		info: zSheetInfo.describe('Textual sheet information'),
+		staticInfo: zSheetStaticInfo,
+		info: zSheetInfo,
 		infoLists: zSheetInfoLists,
 		weaknessesResistances: zSheetWeaknessesResistances,
-		intProperties: zSheetIntegers.describe('All nullable integer properties of a sheet.'),
+		intProperties: zSheetIntegers,
 		stats: zSheetStats,
-		baseCounters: zSheetBaseCounters.describe('All incrementable counters on a sheet'),
+		baseCounters: zSheetBaseCounters,
+		counterGroups: zSheetCounterGroups,
+		countersOutsideGroups: zSheetCountersOutsideGroups,
 		additionalSkills: z
 			.array(zProficiencyStat)
 			.default([])

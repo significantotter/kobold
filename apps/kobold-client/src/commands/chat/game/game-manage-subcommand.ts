@@ -131,7 +131,6 @@ export class GameManageSubCommand implements Command {
 				gmUserId: intr.user.id,
 				name: gameName,
 			});
-			const targetGame = targetGames.length ? targetGames[0] : null;
 
 			if (gameName && characterName) {
 				if (targetGames.length) {
@@ -283,14 +282,10 @@ export class GameManageSubCommand implements Command {
 			return;
 		} else if (option === L.en.commandOptions.gameManageOption.choices.join.name()) {
 			if (targetGame != null) {
-				const activeCharacter = await characterUtils.getActiveCharacter(intr);
-				if (!activeCharacter) {
-					//didn't find the game
-					await InteractionUtils.send(
-						intr,
-						LL.commands.character.interactions.noActiveCharacter()
-					);
-				} else if (
+				const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+					activeCharacter: true,
+				});
+				if (
 					(targetGame.characters || []).filter(
 						character => character.id === activeCharacter.id
 					).length > 0
@@ -325,13 +320,10 @@ export class GameManageSubCommand implements Command {
 			return;
 		} else if (option === L.en.commandOptions.gameManageOption.choices.leave.name()) {
 			if (targetGame) {
-				const activeCharacter = await characterUtils.getActiveCharacter(intr);
-				if (!activeCharacter) {
-					await InteractionUtils.send(
-						intr,
-						LL.commands.character.interactions.noActiveCharacter()
-					);
-				} else if (
+				const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+					activeCharacter: true,
+				});
+				if (
 					(targetGame.characters || []).filter(
 						character => character.id !== activeCharacter.id
 					).length > 0

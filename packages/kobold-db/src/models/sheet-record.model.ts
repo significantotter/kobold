@@ -3,6 +3,7 @@ import { sqlJSON } from '../lib/kysely-json.js';
 import {
 	Database,
 	NewSheetRecord,
+	Sheet,
 	SheetRecord,
 	SheetRecordId,
 	SheetRecordUpdate,
