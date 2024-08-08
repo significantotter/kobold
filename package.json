@@ -10,7 +10,7 @@
 	"devDependencies": {
 		"eslint": "^8.56.0",
 		"nodemon": "^3.1.0",
-		"turbo": "^1.7.0"
+		"turbo": "^2.0.12"
 	},
 	"pnpm": {
 		"overrides": {
@@ -30,5 +30,5 @@
 			"ts-node": "^10.9.2"
 		}
 	},
-	"packageManager": "pnpm@8.15.7+sha256.50783dd0fa303852de2dd1557cd4b9f07cb5b018154a6e76d0f40635d6cee019"
+	"packageManager": "pnpm@9.7.0+sha256.b35018fbfa8f583668b2649e407922a721355cd81f61beeb4ac1d4258e585559"
 }
