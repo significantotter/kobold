@@ -365,8 +365,8 @@ export class KoboldEmbed extends EmbedBuilder {
 			}
 			if (line.length > 1000) {
 				// ignore newline characters when splitting an oversized block
-				const numberOfSegments = Math.ceil(line.length / 1000);
-				const splitLine = _.chunk(line, numberOfSegments).map(segment => segment.join(''));
+				const splitLine = _.chunk(line, 1000).map(segment => segment.join(''));
+
 				for (let splitLineSegment of splitLine) {
 					if (currentChunkContinuesCodeBlock) splitLineSegment = '```' + splitLineSegment;
 					if (currentChunkContinuesQuote) splitLineSegment = '`' + splitLineSegment;
@@ -439,8 +439,8 @@ export class KoboldEmbed extends EmbedBuilder {
 		this.splitDescriptionToFields();
 		this.splitFieldsThatAreTooLong();
 		const splitEmbeds = this.splitEmbedIfTooLong();
-		// console.dir(splitEmbeds, { depth: null });
 		for (const embed of splitEmbeds) {
+			embed.data.fields;
 			await InteractionUtils.send(intr, embed, isEphemeral);
 		}
 	}
