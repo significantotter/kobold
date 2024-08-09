@@ -190,7 +190,7 @@ export class InitRollSubCommand implements Command {
 
 				embed.addFields(damageField);
 			}
-		} else if (['skill', 'ability', 'save', 'spell'].includes(targetRoll.type)) {
+		} else if (['check', 'skill', 'ability', 'save', 'spell'].includes(targetRoll.type)) {
 			const response = await RollBuilder.fromSimpleCreatureRoll({
 				userName: intr.user.username,
 				actorName: actor.name,
@@ -232,7 +232,8 @@ export class InitRollSubCommand implements Command {
 				embed.addFields(damageField);
 			}
 		} else {
-			throw new KoboldError(`Yip! I ran into trouble rolling ${targetRoll}`);
+			console.log(targetRoll);
+			throw new KoboldError(`Yip! I ran into trouble rolling ${targetRoll.name}`);
 		}
 
 		await EmbedUtils.dispatchEmbeds(
