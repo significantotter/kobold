@@ -65,7 +65,7 @@ export class NethysLoader {
 				excludeFromSearch: 'exclude_from_search' in data ? data.exclude_from_search : false,
 				search: `(${data.category}${
 					'level' in data && data.level != null ? ' ' + data.level : ''
-				}) ${data.name}`,
+				}) ${data.name}${'remaster_id' in data ? ' (legacy)' : ''}`,
 				tags: valueAsJsonb(data.trait ?? []),
 				data: valueAsJsonb(data),
 			};
