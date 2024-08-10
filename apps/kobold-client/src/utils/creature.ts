@@ -1051,6 +1051,8 @@ export class Creature {
 					);
 				}
 			}
+			sheet.counterGroups = updateFrom.counterGroups;
+			sheet.countersOutsideGroups = updateFrom.countersOutsideGroups;
 		}
 		return sheet;
 	}
