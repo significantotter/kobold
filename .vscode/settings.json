@@ -42,7 +42,8 @@
 		"respawned",
 		"restjson",
 		"spellcasting",
-		"varchar"
+		"varchar",
+		"vite"
 	],
 	"typescript.preferences.importModuleSpecifierEnding": "js",
 	"prettier.useTabs": true,
