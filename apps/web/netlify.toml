@@ -1,0 +1,3 @@
+[build]
+	command = "turbo build --filter=@kobold/web && cd apps/web && vite build"
+	publish = "apps/web/build"
