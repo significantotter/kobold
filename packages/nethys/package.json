@@ -25,7 +25,7 @@
 	"dependencies": {
 		"@kobold/config": "workspace:*",
 		"discord.js": "^14.13.0",
-		"drizzle-orm": "^0.30.9",
+		"drizzle-orm": "^0.33.0",
 		"hast-util-from-text": "^3.0.0",
 		"hast-util-to-html": "^9.0.1",
 		"hast-util-to-string": "^3.0.0",
@@ -48,7 +48,7 @@
 		"@types/lodash": "^4.14.202",
 		"@types/mdast": "^4.0.3",
 		"@types/node": "^20.11.19",
-		"drizzle-kit": "^0.20.14",
+		"drizzle-kit": "^0.23.1",
 		"eslint": "^8.56.0",
 		"hast-util-to-mdast": "^10.1.0",
 		"node-fetch": "3.3.2",

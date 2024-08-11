@@ -70,7 +70,7 @@ export class NethysLoader {
 				data: valueAsJsonb(data),
 			};
 		});
-		const batches = [];
+		const batches: any[] = [];
 		for (let i = 0; i < values.length; i += 1000) {
 			batches.push(values.slice(i, i + 1000));
 		}

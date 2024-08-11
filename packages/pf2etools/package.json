@@ -14,6 +14,7 @@
 	},
 	"scripts": {
 		"build": "pnpm run compile",
+		"rebuild": "node_modules/.bin/electron-rebuild -f -m ./node_modules/better-sqlite3",
 		"compile": "tsc -p tsconfig.build.json",
 		"reset-pf2etools-db": "rm -f ./compendium.db && touch ./compendium.db && drizzle-kit push:sqlite --config=./drizzle.config.ts",
 		"import:pf2etools": "node --loader ts-node/esm src/scripts/pf2eTools-import.ts"
@@ -21,18 +22,19 @@
 	"dependencies": {
 		"@kobold/base-utils": "workspace:*",
 		"@kobold/config": "workspace:*",
-		"better-sqlite3": "^8.7.0",
+		"better-sqlite3": "11",
 		"discord.js": "^14.13.0",
-		"drizzle-orm": "^0.30.9",
+		"drizzle-orm": "^0.33",
 		"lodash": "^4.17.21",
 		"table": "^6.8.1",
 		"zod": "^3.22.2"
 	},
 	"devDependencies": {
-		"@types/better-sqlite3": "^7.6.5",
+		"@electron/rebuild": "^3.6.0",
+		"@types/better-sqlite3": "^7.6",
 		"@types/lodash": "^4.14.202",
 		"@types/node": "^20.11.19",
-		"drizzle-kit": "^0.20.14",
+		"drizzle-kit": "^0.23.1",
 		"eslint": "^8.56.0",
 		"ts-node": "^10.9.2",
 		"typescript": "^5.3",

@@ -27,8 +27,7 @@ function set_current_component(component) {
   current_component = component;
 }
 function get_current_component() {
-  if (!current_component)
-    throw new Error("Function called outside component initialization");
+  if (!current_component) throw new Error("Function called outside component initialization");
   return current_component;
 }
 function setContext(key, context) {
@@ -59,8 +58,7 @@ const missing_component = {
 };
 function validate_component(component, name) {
   if (!component || !component.$$render) {
-    if (name === "svelte:component")
-      name += " this={...}";
+    if (name === "svelte:component") name += " this={...}";
     throw new Error(
       `<${name}> is not a valid SSR component. You may need to review your build config to ensure that dependencies are compiled, rather than imported as pre-compiled modules. Otherwise you may need to fix a <${name}>.`
     );
