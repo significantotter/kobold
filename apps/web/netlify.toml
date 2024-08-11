@@ -1,5 +1,5 @@
 [build]
 	command = "turbo build --filter=@kobold/web && cd apps/web && pnpm exec vite build"
-	publish = "apps/web/build"
+	publish = "build"
 [functions]
   directory = "apps/web/functions"
