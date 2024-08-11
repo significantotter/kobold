@@ -1,3 +1,2 @@
 [build]
 	command = "turbo build --filter=@kobold/web && cd apps/web && pnpm exec vite build"
-
