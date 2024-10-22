@@ -19,7 +19,7 @@ import { InjectedServices } from '../../command.js';
 import { Command, CommandDeferType } from '../../index.js';
 
 export class ModifierCommand implements Command {
-	public names = [L.en.commands.modifier.name()];
+	public name = L.en.commands.modifier.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.modifier.name(),

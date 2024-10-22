@@ -27,7 +27,7 @@ export interface CommandExport {
 export interface InjectedCommandData {}
 
 export interface Command {
-	names: String[];
+	name: string;
 	metadata: RESTPostAPIApplicationCommandsJSONBody;
 	cooldown?: RateLimiter;
 	deferType: CommandDeferType;

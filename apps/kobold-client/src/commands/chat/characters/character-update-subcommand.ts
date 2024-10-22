@@ -19,7 +19,7 @@ import { TextParseHelpers } from '../../../utils/kobold-helpers/text-parse-helpe
 import { PasteBinCharacterFetcher } from './Fetchers/pastebin-character-fetcher.js';
 
 export class CharacterUpdateSubCommand implements Command {
-	public names = [L.en.commands.character.update.name()];
+	public name = L.en.commands.character.update.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.character.update.name(),

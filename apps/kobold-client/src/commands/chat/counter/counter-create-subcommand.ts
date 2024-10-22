@@ -23,7 +23,7 @@ import { KoboldError } from '../../../utils/KoboldError.js';
 import { AutocompleteUtils } from '../../../utils/kobold-service-utils/autocomplete-utils.js';
 
 export class CounterCreateSubCommand implements Command {
-	public names = [L.en.commands.counter.create.name()];
+	public name = L.en.commands.counter.create.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.counter.create.name(),
@@ -157,7 +157,7 @@ export class CounterCreateSubCommand implements Command {
 				max,
 				current: max ?? 0,
 				recoverable,
-				recoverTo: recoverTo ?? max != null ? -1 : 0,
+				recoverTo: (recoverTo ?? max != null) ? -1 : 0,
 				text,
 			};
 		}

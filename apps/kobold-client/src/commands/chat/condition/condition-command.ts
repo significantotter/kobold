@@ -21,7 +21,7 @@ import { GameplayOptions } from '../gameplay/gameplay-command-options.js';
 import { ConditionOptions } from './condition-command-options.js';
 
 export class ConditionCommand implements Command {
-	public names = [L.en.commands.condition.name()];
+	public name = L.en.commands.condition.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.condition.name(),

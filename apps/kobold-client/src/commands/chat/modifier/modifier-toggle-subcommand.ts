@@ -22,7 +22,7 @@ import { Command, CommandDeferType } from '../../index.js';
 import { ModifierOptions } from './modifier-command-options.js';
 
 export class ModifierToggleSubCommand implements Command {
-	public names = [L.en.commands.modifier.toggle.name()];
+	public name = L.en.commands.modifier.toggle.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.modifier.toggle.name(),

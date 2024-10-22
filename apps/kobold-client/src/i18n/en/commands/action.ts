@@ -12,7 +12,7 @@ export default {
 		description: 'Creates an action.',
 		interactions: {
 			created: 'Yip! I created the action {actionName} for {characterName}.',
-			alreadyExists: 'Yip! A action named {actionName} already exists for {characterName}.',
+			alreadyExists: 'Yip! An action named {actionName} already exists for {characterName}.',
 		},
 	},
 	remove: {

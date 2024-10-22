@@ -56,7 +56,7 @@ export class GameUtils {
 	}
 
 	public async autocompleteGameCharacter(
-		targetCharacterName: String,
+		targetCharacterName: string,
 		activeGame?: GameWithRelations | null
 	): Promise<{ name: string; value: string }[]> {
 		if (!activeGame?.characters)

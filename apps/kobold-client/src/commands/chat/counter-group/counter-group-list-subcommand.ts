@@ -14,7 +14,7 @@ import { Command, CommandDeferType } from '../../index.js';
 import { CounterGroupHelpers } from './counter-group-helpers.js';
 
 export class CounterGroupListSubCommand implements Command {
-	public names = [L.en.commands.counterGroup.list.name()];
+	public name = L.en.commands.counterGroup.list.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.counterGroup.list.name(),

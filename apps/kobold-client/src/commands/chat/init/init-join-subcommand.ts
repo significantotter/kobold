@@ -26,7 +26,7 @@ import { InitOptions } from './init-command-options.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
 
 export class InitJoinSubCommand implements Command {
-	public names = [L.en.commands.init.join.name()];
+	public name = L.en.commands.init.join.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.init.join.name(),
@@ -105,7 +105,7 @@ export class InitJoinSubCommand implements Command {
 		});
 		const initiativeResult = _.isNumber(rollResult)
 			? rollResult
-			: rollResult.getRollTotalArray()[0] ?? 0;
+			: (rollResult.getRollTotalArray()[0] ?? 0);
 
 		const actorName = InitiativeBuilderUtils.getUniqueInitActorName(
 			currentInitiative,

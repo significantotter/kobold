@@ -23,7 +23,7 @@ import { Command, CommandDeferType } from '../../index.js';
 import { ActionOptions } from './action-command-options.js';
 
 export class ActionRemoveSubCommand implements Command {
-	public names = [L.en.commands.action.remove.name()];
+	public name = L.en.commands.action.remove.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.action.remove.name(),

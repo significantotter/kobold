@@ -24,7 +24,7 @@ import { Command, CommandDeferType } from '../../index.js';
 import { InitOptions } from '../init/init-command-options.js';
 
 export class RollAttackSubCommand implements Command {
-	public names = [L.en.commands.roll.attack.name()];
+	public name = L.en.commands.roll.attack.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.roll.attack.name(),

@@ -31,7 +31,7 @@ import { InputParseUtils } from '../../../utils/input-parse-utils.js';
 import { StringUtils } from '@kobold/base-utils';
 
 export class ConditionSetSubCommand implements Command {
-	public names = [L.en.commands.condition.set.name()];
+	public name = L.en.commands.condition.set.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.condition.set.name(),

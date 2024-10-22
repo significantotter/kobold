@@ -27,7 +27,7 @@ import { GameOptions } from './game-command-options.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
 
 export class GameInitSubCommand implements Command {
-	public names = [L.en.commands.game.init.name()];
+	public name = L.en.commands.game.init.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.game.init.name(),
@@ -159,7 +159,7 @@ export class GameInitSubCommand implements Command {
 			});
 			const initiativeResult = _.isNumber(rollResult)
 				? rollResult
-				: rollResult.getRollTotalArray()[0] ?? 0;
+				: (rollResult.getRollTotalArray()[0] ?? 0);
 
 			const actorName = InitiativeBuilderUtils.getUniqueInitActorName(
 				currentInitiative,

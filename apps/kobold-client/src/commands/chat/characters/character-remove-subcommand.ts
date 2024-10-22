@@ -16,7 +16,7 @@ import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js
 import { Command, CommandDeferType } from '../../index.js';
 
 export class CharacterRemoveSubCommand implements Command {
-	public names = [L.en.commands.character.remove.name()];
+	public name = L.en.commands.character.remove.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.character.remove.name(),

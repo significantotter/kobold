@@ -15,7 +15,7 @@ import { CharacterOptions } from './command-options.js';
 import { PathbuilderCharacterFetcher } from './Fetchers/pathbuilder-character-fetcher.js';
 
 export class CharacterImportPathbuilderSubCommand implements Command {
-	public names = [L.en.commands.character.importPathbuilder.name()];
+	public name = L.en.commands.character.importPathbuilder.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.character.importPathbuilder.name(),

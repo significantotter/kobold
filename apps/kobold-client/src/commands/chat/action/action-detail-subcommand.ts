@@ -21,7 +21,7 @@ import { Command, CommandDeferType } from '../../index.js';
 import { ActionOptions } from './action-command-options.js';
 
 export class ActionDetailSubCommand implements Command {
-	public names = [L.en.commands.action.detail.name()];
+	public name = L.en.commands.action.detail.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.action.detail.name(),

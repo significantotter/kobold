@@ -15,7 +15,7 @@ import { CharacterOptions } from './command-options.js';
 import { WgCharacterFetcher } from './Fetchers/wg-character-fetcher.js';
 
 export class CharacterImportWanderersGuideSubCommand implements Command {
-	public names = [L.en.commands.character.importWanderersGuide.name()];
+	public name = L.en.commands.character.importWanderersGuide.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.character.importWanderersGuide.name(),

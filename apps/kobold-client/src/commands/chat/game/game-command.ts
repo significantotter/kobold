@@ -21,7 +21,7 @@ import { InitOptions } from '../init/init-command-options.js';
 import { GameOptions } from './game-command-options.js';
 
 export class GameCommand implements Command {
-	public names = [L.en.commands.game.name()];
+	public name = L.en.commands.game.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.game.name(),

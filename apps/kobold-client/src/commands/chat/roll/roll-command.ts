@@ -21,7 +21,7 @@ import { ActionOptions } from '../action/action-command-options.js';
 import { InitOptions } from '../init/init-command-options.js';
 
 export class RollCommand implements Command {
-	public names = [L.en.commands.roll.name()];
+	public name = L.en.commands.roll.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.roll.name(),

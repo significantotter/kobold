@@ -34,7 +34,7 @@ import { CounterHelpers } from './counter-helpers.js';
 import { CounterGroupHelpers } from '../counter-group/counter-group-helpers.js';
 
 export class CounterSetSubCommand implements Command {
-	public names = [L.en.commands.counter.set.name()];
+	public name = L.en.commands.counter.set.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.counter.set.name(),

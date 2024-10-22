@@ -19,7 +19,7 @@ import { Command, CommandDeferType } from '../../index.js';
 import { CompendiumOptions } from './compendium-command-options.js';
 
 export class CompendiumCommand implements Command {
-	public names = [L.en.commands.compendium.name()];
+	public name = L.en.commands.compendium.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.compendium.name(),

@@ -50,7 +50,7 @@ import { NethysDb } from '@kobold/nethys';
 import { NethysSheetImporter } from '../../../utils/sheet/sheet-import-nethys.js';
 
 export class InitAddSubCommand implements Command {
-	public names = [L.en.commands.init.add.name()];
+	public name = L.en.commands.init.add.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.init.add.name(),

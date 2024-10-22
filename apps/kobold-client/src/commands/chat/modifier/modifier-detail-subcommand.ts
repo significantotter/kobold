@@ -22,7 +22,7 @@ import { ModifierOptions } from './modifier-command-options.js';
 import { ModifierHelpers } from './modifier-helpers.js';
 
 export class ModifierDetailSubCommand implements Command {
-	public names = [L.en.commands.modifier.detail.name()];
+	public name = L.en.commands.modifier.detail.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.modifier.detail.name(),

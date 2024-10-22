@@ -24,7 +24,7 @@ import { KoboldError } from '../../../utils/KoboldError.js';
 import { InputParseUtils } from '../../../utils/input-parse-utils.js';
 
 export class CounterGroupSetSubCommand implements Command {
-	public names = [L.en.commands.counterGroup.set.name()];
+	public name = L.en.commands.counterGroup.set.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.counterGroup.set.name(),

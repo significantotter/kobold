@@ -19,7 +19,7 @@ import { Command, CommandDeferType } from '../../index.js';
 import { GameplayOptions } from './gameplay-command-options.js';
 
 export class GameplayRecoverSubCommand implements Command {
-	public names = [L.en.commands.gameplay.recover.name()];
+	public name = L.en.commands.gameplay.recover.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.gameplay.recover.name(),

@@ -25,7 +25,7 @@ import { GameplayOptions } from '../gameplay/gameplay-command-options.js';
 import { ConditionOptions } from './condition-command-options.js';
 
 export class ConditionRemoveSubCommand implements Command {
-	public names = [L.en.commands.condition.remove.name()];
+	public name = L.en.commands.condition.remove.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.condition.remove.name(),

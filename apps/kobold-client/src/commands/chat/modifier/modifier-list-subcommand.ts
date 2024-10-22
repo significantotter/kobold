@@ -15,7 +15,7 @@ import { Command, CommandDeferType } from '../../index.js';
 import { ModifierHelpers } from './modifier-helpers.js';
 
 export class ModifierListSubCommand implements Command {
-	public names = [L.en.commands.modifier.list.name()];
+	public name = L.en.commands.modifier.list.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.modifier.list.name(),

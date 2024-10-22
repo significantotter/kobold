@@ -21,7 +21,7 @@ import { Command, CommandDeferType } from '../../index.js';
 import { CharacterOptions } from './command-options.js';
 
 export class CharacterSetDefaultSubCommand implements Command {
-	public names = [L.en.commands.character.setDefault.name()];
+	public name = L.en.commands.character.setDefault.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.character.setDefault.name(),

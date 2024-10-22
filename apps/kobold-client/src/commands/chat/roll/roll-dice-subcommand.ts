@@ -17,7 +17,7 @@ import { RollBuilder } from '../../../utils/roll-builder.js';
 import { Command, CommandDeferType } from '../../index.js';
 
 export class RollDiceSubCommand implements Command {
-	public names = [L.en.commands.roll.dice.name()];
+	public name = L.en.commands.roll.dice.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.roll.dice.name(),

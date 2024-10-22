@@ -25,7 +25,7 @@ import { Command, CommandDeferType } from '../../index.js';
 import { ActionOptions } from '../action/action-command-options.js';
 
 export class ActionImportSubCommand implements Command {
-	public names = [L.en.commands.action.import.name()];
+	public name = L.en.commands.action.import.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.action.import.name(),

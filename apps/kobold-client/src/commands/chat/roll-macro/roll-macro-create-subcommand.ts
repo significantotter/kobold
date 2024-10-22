@@ -17,7 +17,7 @@ import { RollBuilder } from '../../../utils/roll-builder.js';
 import { Command, CommandDeferType } from '../../index.js';
 
 export class RollMacroCreateSubCommand implements Command {
-	public names = [L.en.commands.rollMacro.create.name()];
+	public name = L.en.commands.rollMacro.create.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.rollMacro.create.name(),

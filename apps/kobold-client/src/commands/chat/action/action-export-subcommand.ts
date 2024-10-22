@@ -15,7 +15,7 @@ import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js
 import { Command, CommandDeferType } from '../../index.js';
 
 export class ActionExportSubCommand implements Command {
-	public names = [L.en.commands.action.export.name()];
+	public name = L.en.commands.action.export.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.action.export.name(),

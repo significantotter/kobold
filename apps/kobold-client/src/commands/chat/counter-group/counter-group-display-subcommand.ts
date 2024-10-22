@@ -17,7 +17,7 @@ import { CounterGroupOptions } from './counter-group-command-options.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
 
 export class CounterGroupDisplaySubCommand implements Command {
-	public names = [L.en.commands.counterGroup.display.name()];
+	public name = L.en.commands.counterGroup.display.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.counterGroup.display.name(),

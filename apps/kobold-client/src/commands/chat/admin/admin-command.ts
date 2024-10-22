@@ -19,7 +19,7 @@ import { Command, CommandDeferType, InjectedServices } from '../../command.js';
 import { Config } from '@kobold/config';
 
 export class AdminCommand implements Command {
-	public names = [L.en.commands.admin.name()];
+	public name = L.en.commands.admin.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.admin.name(),

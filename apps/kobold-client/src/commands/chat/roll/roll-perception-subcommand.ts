@@ -19,7 +19,7 @@ import { RollBuilder } from '../../../utils/roll-builder.js';
 import { Command, CommandDeferType } from '../../index.js';
 
 export class RollPerceptionSubCommand implements Command {
-	public names = [L.en.commands.roll.perception.name()];
+	public name = L.en.commands.roll.perception.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.roll.perception.name(),

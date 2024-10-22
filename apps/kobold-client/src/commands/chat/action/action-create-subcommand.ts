@@ -17,7 +17,7 @@ import { InputParseUtils } from '../../../utils/input-parse-utils.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
 
 export class ActionCreateSubCommand implements Command {
-	public names = [L.en.commands.action.create.name()];
+	public name = L.en.commands.action.create.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.action.create.name(),

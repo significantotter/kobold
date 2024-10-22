@@ -27,7 +27,7 @@ import { CounterGroupHelpers } from '../counter-group/counter-group-helpers.js';
 import { CounterHelpers } from './counter-helpers.js';
 
 export class CounterUseSlotSubCommand implements Command {
-	public names = [L.en.commands.counter.useSlot.name()];
+	public name = L.en.commands.counter.useSlot.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.counter.useSlot.name(),
@@ -109,7 +109,7 @@ export class CounterUseSlotSubCommand implements Command {
 				})
 			);
 		}
-		counter.active[slotIndex] = resetSlot ?? false ? true : false;
+		counter.active[slotIndex] = (resetSlot ?? false) ? true : false;
 
 		if (!counter) {
 			throw new KoboldError(

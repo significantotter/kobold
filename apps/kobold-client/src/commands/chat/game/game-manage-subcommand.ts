@@ -20,7 +20,7 @@ import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js
 import { Command, CommandDeferType } from '../../index.js';
 
 export class GameManageSubCommand implements Command {
-	public names = [L.en.commands.game.manage.name()];
+	public name = L.en.commands.game.manage.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.game.manage.name(),

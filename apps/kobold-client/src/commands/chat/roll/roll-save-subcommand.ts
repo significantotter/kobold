@@ -24,7 +24,7 @@ import { Command, CommandDeferType } from '../../index.js';
 import { StringUtils } from '@kobold/base-utils';
 
 export class RollSaveSubCommand implements Command {
-	public names = [L.en.commands.roll.save.name()];
+	public name = L.en.commands.roll.save.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.roll.save.name(),

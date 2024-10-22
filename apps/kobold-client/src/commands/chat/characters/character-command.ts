@@ -20,7 +20,7 @@ import { Command, CommandDeferType } from '../../index.js';
 import { GameOptions } from '../game/game-command-options.js';
 
 export class CharacterCommand implements Command {
-	public names = [L.en.commands.character.name()];
+	public name = L.en.commands.character.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.character.name(),
