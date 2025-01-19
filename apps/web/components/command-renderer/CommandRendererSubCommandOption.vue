@@ -33,14 +33,12 @@
 	</tr>
 </template>
 <script setup lang="ts">
+import type { ExtendedOptionDocumentation } from '@kobold/documentation';
 import {
 	ApplicationCommandOptionType,
-	type ExtendedOptionDocumentation,
-} from '@kobold/documentation';
-import type {
-	APIApplicationCommandOption,
-	ApplicationCommandOptionType as ApplicationCommandOptionTypeSource,
-} from 'discord.js';
+	type APIApplicationCommandOption,
+} from 'discord-api-types/v10';
+
 const { option, extendedOptionDocumentation } = defineProps<{
 	extendedOptionDocumentation: ExtendedOptionDocumentation | undefined;
 	option: APIApplicationCommandOption;
@@ -48,7 +46,7 @@ const { option, extendedOptionDocumentation } = defineProps<{
 const hasChoices = 'choices' in option && option?.choices?.length;
 
 // map the discord option type enums to display values
-const ApplicationCommandOptionNameByEnum: Record<ApplicationCommandOptionTypeSource, string> = {
+const ApplicationCommandOptionNameByEnum: Record<ApplicationCommandOptionType, string> = {
 	[ApplicationCommandOptionType.Subcommand]: 'Subcommand',
 	[ApplicationCommandOptionType.SubcommandGroup]: 'SubcommandGroup',
 	[ApplicationCommandOptionType.String]: 'Text',

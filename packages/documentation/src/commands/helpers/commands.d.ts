@@ -1,12 +1,13 @@
-import type {
+import {
 	RESTPostAPIApplicationCommandsJSONBody,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
 	PermissionsString,
 	APIApplicationCommandOption,
-} from 'discord.js';
+} from 'discord-api-types/v10';
 import { CommandDeferType } from '../helpers.ts';
 
 export type CommandOptions = Record<string, APIApplicationCommandOption>;
+export type SpecificCommandOptions<T extends Enum> = { [key in T]: APIApplicationCommandOption };
 
 export interface CommandReference {
 	definition: CommandDefinition<string>;

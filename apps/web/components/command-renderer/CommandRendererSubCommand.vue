@@ -20,23 +20,24 @@
 				</tbody>
 			</table>
 		</div>
-		<h3>Examples</h3>
-		<div
-			v-for="example of subCommandDocumentation.examples"
-			:key="`${commandName}.${subCommand.name}.${example.title}`"
-			class="not-prose"
-		>
-			<h4>{{ example.title }}</h4>
-			<ClientOnly>
-				<discord-messages class="p-1 rounded-md">
-					<bot-interaction
-						:options="subCommand.options ?? {}"
-						:example="example"
-						:command-name="commandName"
-						:sub-command-name="subCommand.name"
-					/> </discord-messages
-			></ClientOnly>
-		</div>
+		<template v-if="subCommandDocumentation.examples.length">
+			<h3>Examples</h3>
+			<div
+				v-for="example of subCommandDocumentation.examples"
+				:key="`${commandName}.${subCommand.name}.${example.title}`"
+				class="not-prose"
+			>
+				<h4>{{ example.title }}</h4>
+				<ClientOnly>
+					<discord-messages class="p-1 rounded-md">
+						<bot-interaction
+							:options="subCommand.options ?? {}"
+							:example="example"
+							:command-name="commandName"
+							:sub-command-name="subCommand.name"
+						/> </discord-messages
+				></ClientOnly></div
+		></template>
 	</Fieldset>
 </template>
 <script setup lang="ts">

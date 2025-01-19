@@ -21,6 +21,13 @@ const koboldPreset = definePreset(Aura, {
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
+	nitro: {
+		esbuild: {
+			options: {
+				target: 'esnext',
+			},
+		},
+	},
 	runtimeConfig: {
 		public: {
 			VITE_BASE_URL: process.env.VITE_BASE_URL,

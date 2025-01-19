@@ -1,12 +1,10 @@
 <template>
-	<div>
-		<template v-if="isMounted">
-			<!-- Markup shared across all pages, ex: NavBar -->
-			<AppHeader />
-			<PeridotImage />
-			<NuxtPage />
-			<AppCopyright
-		/></template>
+	<div v-show="isMounted">
+		<!-- Markup shared across all pages, ex: NavBar -->
+		<AppHeader />
+		<PeridotImage />
+		<NuxtPage />
+		<AppCopyright />
 	</div>
 </template>
 <script setup lang="ts">

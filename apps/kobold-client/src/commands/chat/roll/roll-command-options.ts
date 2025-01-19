@@ -1,26 +1,7 @@
 import { APIApplicationCommandBasicOption, ApplicationCommandOptionType } from 'discord.js';
-import L from '../i18n/i18n-node.js';
+import L from '../../../i18n/i18n-node.js';
 
-export class ChatArgs {
-	public static readonly IMPORT_OPTION: APIApplicationCommandBasicOption = {
-		name: L.en.commandOptions.wgUrl.name(),
-		description: L.en.commandOptions.wgUrl.description(),
-		required: true,
-		type: ApplicationCommandOptionType.String,
-	};
-	public static readonly SET_ACTIVE_NAME_OPTION: APIApplicationCommandBasicOption = {
-		name: L.en.commandOptions.name.name(),
-		description: L.en.commandOptions.name.description(),
-		required: true,
-		autocomplete: true,
-		type: ApplicationCommandOptionType.String,
-	};
-	public static readonly SET_ACTIVE_ID_OPTION: APIApplicationCommandBasicOption = {
-		name: L.en.commandOptions.id.name(),
-		description: L.en.commandOptions.id.description(),
-		required: false,
-		type: ApplicationCommandOptionType.Integer,
-	};
+export class RollOptions {
 	public static readonly ROLL_EXPRESSION_OPTION: APIApplicationCommandBasicOption = {
 		name: L.en.commandOptions.rollExpression.name(),
 		description: L.en.commandOptions.rollExpression.description(),

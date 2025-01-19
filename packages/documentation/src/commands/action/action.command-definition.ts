@@ -1,4 +1,4 @@
-import { ApplicationCommandType, ApplicationCommandOptionType } from '../helpers/discord-enums.js';
+import { ApplicationCommandOptionType, ApplicationCommandType } from 'discord-api-types/v10';
 import type { CommandDefinition } from '../helpers/commands.d.js';
 import { ActionCommandOptionEnum, actionCommandOptions } from './action.command-options.js';
 

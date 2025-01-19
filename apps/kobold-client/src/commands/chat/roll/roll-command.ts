@@ -10,7 +10,6 @@ import {
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
-import { ChatArgs } from '../../../constants/chat-args.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 
 import L from '../../../i18n/i18n-node.js';
@@ -19,6 +18,7 @@ import { InjectedServices } from '../../command.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { ActionOptions } from '../action/action-command-options.js';
 import { InitOptions } from '../init/init-command-options.js';
+import { RollOptions } from './roll-command-options.js';
 
 export class RollCommand implements Command {
 	public name = L.en.commands.roll.name();
@@ -40,28 +40,28 @@ export class RollCommand implements Command {
 						required: true,
 					},
 					{ ...InitOptions.INIT_CHARACTER_TARGET, required: true },
-					ChatArgs.HEIGHTEN_LEVEL_OPTION,
+					RollOptions.HEIGHTEN_LEVEL_OPTION,
 					{
-						...ChatArgs.ATTACK_ROLL_MODIFIER_OPTION,
+						...RollOptions.ATTACK_ROLL_MODIFIER_OPTION,
 						required: false,
 					},
 					{
-						...ChatArgs.DAMAGE_ROLL_MODIFIER_OPTION,
+						...RollOptions.DAMAGE_ROLL_MODIFIER_OPTION,
 						required: false,
 					},
-					ChatArgs.ROLL_OVERWRITE_ATTACK_OPTION,
-					ChatArgs.ROLL_OVERWRITE_SAVE_OPTION,
-					ChatArgs.ROLL_OVERWRITE_DAMAGE_OPTION,
+					RollOptions.ROLL_OVERWRITE_ATTACK_OPTION,
+					RollOptions.ROLL_OVERWRITE_SAVE_OPTION,
+					RollOptions.ROLL_OVERWRITE_DAMAGE_OPTION,
 					{
-						...ChatArgs.ROLL_NOTE_OPTION,
+						...RollOptions.ROLL_NOTE_OPTION,
 						required: false,
 					},
 					{
-						...ChatArgs.ROLL_SECRET_OPTION,
+						...RollOptions.ROLL_SECRET_OPTION,
 						required: false,
 					},
-					ChatArgs.ROLL_TARGET_DC_OPTION,
-					ChatArgs.ROLL_SAVE_DICE_ROLL_OPTION,
+					RollOptions.ROLL_TARGET_DC_OPTION,
+					RollOptions.ROLL_SAVE_DICE_ROLL_OPTION,
 				],
 			},
 			{
@@ -70,29 +70,29 @@ export class RollCommand implements Command {
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					{
-						...ChatArgs.ATTACK_CHOICE_OPTION,
+						...RollOptions.ATTACK_CHOICE_OPTION,
 						required: true,
 					},
 					{ ...InitOptions.INIT_CHARACTER_TARGET, required: true },
 					{
-						...ChatArgs.ATTACK_ROLL_MODIFIER_OPTION,
+						...RollOptions.ATTACK_ROLL_MODIFIER_OPTION,
 						required: false,
 					},
 					{
-						...ChatArgs.DAMAGE_ROLL_MODIFIER_OPTION,
+						...RollOptions.DAMAGE_ROLL_MODIFIER_OPTION,
 						required: false,
 					},
-					ChatArgs.ROLL_OVERWRITE_ATTACK_OPTION,
-					ChatArgs.ROLL_OVERWRITE_DAMAGE_OPTION,
+					RollOptions.ROLL_OVERWRITE_ATTACK_OPTION,
+					RollOptions.ROLL_OVERWRITE_DAMAGE_OPTION,
 					{
-						...ChatArgs.ROLL_NOTE_OPTION,
+						...RollOptions.ROLL_NOTE_OPTION,
 						required: false,
 					},
 					{
-						...ChatArgs.ROLL_SECRET_OPTION,
+						...RollOptions.ROLL_SECRET_OPTION,
 						required: false,
 					},
-					ChatArgs.ROLL_TARGET_AC_OPTION,
+					RollOptions.ROLL_TARGET_AC_OPTION,
 				],
 			},
 			{
@@ -101,15 +101,15 @@ export class RollCommand implements Command {
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					{
-						...ChatArgs.ROLL_EXPRESSION_OPTION,
+						...RollOptions.ROLL_EXPRESSION_OPTION,
 						required: true,
 					},
 					{
-						...ChatArgs.ROLL_NOTE_OPTION,
+						...RollOptions.ROLL_NOTE_OPTION,
 						required: false,
 					},
 					{
-						...ChatArgs.ROLL_SECRET_OPTION,
+						...RollOptions.ROLL_SECRET_OPTION,
 						required: false,
 					},
 				],
@@ -120,15 +120,15 @@ export class RollCommand implements Command {
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					{
-						...ChatArgs.ROLL_MODIFIER_OPTION,
+						...RollOptions.ROLL_MODIFIER_OPTION,
 						required: false,
 					},
 					{
-						...ChatArgs.ROLL_NOTE_OPTION,
+						...RollOptions.ROLL_NOTE_OPTION,
 						required: false,
 					},
 					{
-						...ChatArgs.ROLL_SECRET_OPTION,
+						...RollOptions.ROLL_SECRET_OPTION,
 						required: false,
 					},
 				],
@@ -139,19 +139,19 @@ export class RollCommand implements Command {
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					{
-						...ChatArgs.SAVE_CHOICE_OPTION,
+						...RollOptions.SAVE_CHOICE_OPTION,
 						required: true,
 					},
 					{
-						...ChatArgs.ROLL_MODIFIER_OPTION,
+						...RollOptions.ROLL_MODIFIER_OPTION,
 						required: false,
 					},
 					{
-						...ChatArgs.ROLL_NOTE_OPTION,
+						...RollOptions.ROLL_NOTE_OPTION,
 						required: false,
 					},
 					{
-						...ChatArgs.ROLL_SECRET_OPTION,
+						...RollOptions.ROLL_SECRET_OPTION,
 						required: false,
 					},
 				],
@@ -162,19 +162,19 @@ export class RollCommand implements Command {
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					{
-						...ChatArgs.SKILL_CHOICE_OPTION,
+						...RollOptions.SKILL_CHOICE_OPTION,
 						required: true,
 					},
 					{
-						...ChatArgs.ROLL_MODIFIER_OPTION,
+						...RollOptions.ROLL_MODIFIER_OPTION,
 						required: false,
 					},
 					{
-						...ChatArgs.ROLL_NOTE_OPTION,
+						...RollOptions.ROLL_NOTE_OPTION,
 						required: false,
 					},
 					{
-						...ChatArgs.ROLL_SECRET_OPTION,
+						...RollOptions.ROLL_SECRET_OPTION,
 						required: false,
 					},
 				],

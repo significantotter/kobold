@@ -1,5 +1,4 @@
 import { CommandDocumentation, CommandResponseTypeEnum } from '../helpers/commands.d.js';
-import { profiles } from '../helpers/common.js';
 import { actionCommandDefinition, ActionSubCommandEnum } from './action.command-definition.js';
 
 export const actionCommandDocumentation: CommandDocumentation<typeof actionCommandDefinition> = {
