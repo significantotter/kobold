@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/no-v-html -->
 <template>
 	<discord-embed
 		slot="embeds"
@@ -7,9 +8,9 @@
 		:url="embed.url"
 		:embed-title="applyTerms(embed.title)"
 	>
-		<discord-embed-description v-if="embed.description" slot="description">{{
-			embed.description
-		}}</discord-embed-description>
+		<discord-embed-description v-if="embed.description" slot="description">
+			<div v-html="useMarkdown(embed.description)" />
+		</discord-embed-description>
 		<discord-embed-fields v-if="embed.fields?.length" slot="fields"
 			><discord-embed-field
 				v-for="(field, fieldIndex) of embed.fields"
@@ -29,6 +30,7 @@
 import { discordComponentConfig } from '~/utils/discord-component-config.js';
 import type { CommandDocumentationEmbed } from '@kobold/documentation';
 import { applyTerms } from '~/utils/text.helpers';
+import { useMarkdown } from '../text-renderers/useMarkdown';
 
 const { embed } = defineProps<{
 	embed: CommandDocumentationEmbed;

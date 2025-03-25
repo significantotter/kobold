@@ -41,7 +41,7 @@ export default {
 			characterAlreadyExists:
 				`Yip! You already have a character named {characterName}!` +
 				` Did you mean to /character update?`,
-			success: `Yip! I've successfully imported {characterName}!`,
+			success: `Yip! I've imported {characterName}!`,
 		},
 	},
 	importPathbuilder: {
@@ -67,7 +67,7 @@ export default {
 				'Yip! I ran into an issue importing that character. Try again later, ' +
 				'make sure that the json import id is correct, or contact my developer ' +
 				`in my support server]({supportServerUrl})`,
-			success: `Yip! I've successfully imported {characterName}!`,
+			success: `Yip! I've imported {characterName}!`,
 		},
 	},
 	importPasteBin: {
@@ -85,7 +85,7 @@ export default {
 			characterAlreadyExists:
 				`Yip! You already have a character named {characterName}!` +
 				` Did you mean to /character update?`,
-			success: `Yip! I've successfully imported {characterName}!`,
+			success: `Yip! I've imported {characterName}!`,
 		},
 	},
 	list: {

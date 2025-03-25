@@ -1,16 +1,17 @@
 <template>
-	<main class="container mx-auto grid gap-auto grid-cols-1 prose dark:prose-invert">
+	<main class="container mx-auto grid gap-auto grid-cols-1 prose dark:prose-invert pt-10">
+		<PeridotImage />
 		<div class="child-margin-auto">
 			<h1>Yip!</h1>
 			<h3>Kobold was developed by @SignificantOtter</h3>
 		</div>
 		<p>
-			Kobold integrates the excellent character management websites Pathbuilder 2E and
-			Wanderer's Guide with discord for play by post pathfinder 2E games.
+			Kobold integrates the excellent character management website Pathbuilder 2E with discord
+			for play by post pathfinder 2E games.
 		</p>
 		<h3>Features</h3>
 		<ul>
-			<li>Import characters from Pathbuilder 2E or Wanderer's Guide</li>
+			<li>Import characters from Pathbuilder 2E</li>
 			<li>Roll dice for your character's stats</li>
 			<li>Track characters and NPCs through rounds of initiative</li>
 			<li>Create custom, configurable, rollable actions</li>

@@ -57,7 +57,7 @@ export const actionStageCommandOptions: CommandOptions = {
 	},
 	[ActionStageCommandOptionEnum.defendingStat]: {
 		name: 'defending-stat',
-		description: "Whether you're targeting AC, a save, or a skill DC.",
+		description: "Whether you're targeting AC, a save, or a skill DC. Or a flat number.",
 		required: true,
 		autocomplete: true,
 		type: ApplicationCommandOptionType.String,

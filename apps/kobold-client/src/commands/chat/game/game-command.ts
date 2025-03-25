@@ -10,7 +10,6 @@ import {
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
-import { ChatArgs } from '../../../constants/chat-args.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 
 import L from '../../../i18n/i18n-node.js';
@@ -19,6 +18,7 @@ import { InjectedServices } from '../../command.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { InitOptions } from '../init/init-command-options.js';
 import { GameOptions } from './game-command-options.js';
+import { RollOptions } from '../roll/roll-command-options.js';
 
 export class GameCommand implements Command {
 	public name = L.en.commands.game.name();
@@ -43,13 +43,13 @@ export class GameCommand implements Command {
 				options: [
 					GameOptions.GAME_TARGET_CHARACTER,
 					{
-						...ChatArgs.SKILL_CHOICE_OPTION,
+						...RollOptions.SKILL_CHOICE_OPTION,
 						description:
 							L.en.commandOptions.skillChoice.overwrites.initJoinDescription(),
 						required: false,
 					},
 					{
-						...ChatArgs.ROLL_EXPRESSION_OPTION,
+						...RollOptions.ROLL_EXPRESSION_OPTION,
 						description:
 							'Dice to roll to join initiative. ' +
 							'Modifies your skill if you chose a skill.',
@@ -86,7 +86,7 @@ export class GameCommand implements Command {
 					GameOptions.GAME_ROLL_TYPE,
 					GameOptions.GAME_DICE_ROLL_OR_MODIFIER,
 					{ ...InitOptions.INIT_CHARACTER_TARGET, required: false },
-					ChatArgs.ROLL_SECRET_OPTION,
+					RollOptions.ROLL_SECRET_OPTION,
 				],
 			},
 			{

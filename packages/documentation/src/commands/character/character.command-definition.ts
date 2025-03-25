@@ -4,6 +4,7 @@ import {
 	CharacterCommandOptionEnum,
 	characterCommandOptions,
 } from './character.command-options.js';
+import { GameCommandOptionEnum, gameCommandOptions } from '../game/game.command-options.js';
 
 export enum CharacterSubCommandEnum {
 	importWanderersGuide = 'import-wanderers-guide',
@@ -27,7 +28,7 @@ export const characterCommandDefinition = {
 	},
 	subCommands: {
 		[CharacterSubCommandEnum.importWanderersGuide]: {
-			name: 'import-wanderers-guide',
+			name: CharacterSubCommandEnum.importWanderersGuide,
 			description: "Imports character data from Wanderer's Guide.",
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
@@ -36,7 +37,7 @@ export const characterCommandDefinition = {
 			},
 		},
 		[CharacterSubCommandEnum.importPathbuilder]: {
-			name: 'import-pathbuilder',
+			name: CharacterSubCommandEnum.importPathbuilder,
 			description: 'Imports character data from Pathbuilder.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
@@ -47,7 +48,7 @@ export const characterCommandDefinition = {
 			},
 		},
 		[CharacterSubCommandEnum.importPasteBin]: {
-			name: 'import-pastebin',
+			name: CharacterSubCommandEnum.importPasteBin,
 			description: 'Imports character data from Pastebin.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
@@ -56,19 +57,19 @@ export const characterCommandDefinition = {
 			},
 		},
 		[CharacterSubCommandEnum.list]: {
-			name: 'list',
+			name: CharacterSubCommandEnum.list,
 			description: 'Lists all characters.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {},
 		},
 		[CharacterSubCommandEnum.remove]: {
-			name: 'remove',
+			name: CharacterSubCommandEnum.remove,
 			description: 'Removes a character.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {},
 		},
 		[CharacterSubCommandEnum.setActive]: {
-			name: 'set-active',
+			name: CharacterSubCommandEnum.setActive,
 			description: 'Sets the active character.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
@@ -77,7 +78,7 @@ export const characterCommandDefinition = {
 			},
 		},
 		[CharacterSubCommandEnum.setDefault]: {
-			name: 'set-default',
+			name: CharacterSubCommandEnum.setDefault,
 			description: 'Sets the default character.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
@@ -88,16 +89,16 @@ export const characterCommandDefinition = {
 			},
 		},
 		[CharacterSubCommandEnum.sheet]: {
-			name: 'sheet',
+			name: CharacterSubCommandEnum.sheet,
 			description: 'Displays the character sheet.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				// // Assuming GameOptions.GAME_SHEET_STYLE is defined elsewhere
-				// [GameOptions.GAME_SHEET_STYLE]: GameOptions.GAME_SHEET_STYLE,
+				[GameCommandOptionEnum.gameSheetStyle]:
+					gameCommandOptions[GameCommandOptionEnum.gameSheetStyle],
 			},
 		},
 		[CharacterSubCommandEnum.update]: {
-			name: 'update',
+			name: CharacterSubCommandEnum.update,
 			description: 'Updates character data.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {

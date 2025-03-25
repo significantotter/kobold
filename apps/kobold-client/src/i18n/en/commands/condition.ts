@@ -2,7 +2,7 @@ export default {
 	name: 'condition',
 	description: 'Commands for applying conditions to characters or creatures.',
 	interactions: {
-		created: 'Yip! I created the condition {conditionName} for {characterName}.',
+		created: 'Yip! I applied the condition {conditionName} to {characterName}.',
 		alreadyExists: 'Yip! A condition named {conditionName} already exists for {characterName}.',
 		invalidTags:
 			"Yip! I didn't understand the target tag expression you provided. Tags can be" +

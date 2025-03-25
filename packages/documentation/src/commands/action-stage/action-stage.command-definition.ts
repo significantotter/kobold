@@ -10,7 +10,7 @@ export enum ActionStageSubCommandEnum {
 	addAttack = 'add-attack',
 	addBasicDamage = 'add-basic-damage',
 	addSave = 'add-save',
-	addSkillChllenge = 'add-skill-challenge',
+	addSkillChallenge = 'add-skill-challenge',
 	addText = 'add-text',
 	remove = 'remove',
 	set = 'set',
@@ -25,8 +25,8 @@ export const actionStageCommandDefinition = {
 		default_member_permissions: undefined,
 	},
 	subCommands: {
-		['add-attack']: {
-			name: 'add-attack',
+		[ActionStageSubCommandEnum.addAttack]: {
+			name: ActionStageSubCommandEnum.addAttack,
 			description:
 				"Adds an attack roll to an action. Can also be any type of roll against an enemy's DCs",
 			type: ApplicationCommandOptionType.Subcommand,
@@ -37,14 +37,17 @@ export const actionStageCommandDefinition = {
 					actionStageCommandOptions[ActionStageCommandOptionEnum.rollName],
 				[ActionStageCommandOptionEnum.diceRoll]:
 					actionStageCommandOptions[ActionStageCommandOptionEnum.diceRoll],
-				[ActionStageCommandOptionEnum.defendingStat]:
-					actionStageCommandOptions[ActionStageCommandOptionEnum.defendingStat],
+				[ActionStageCommandOptionEnum.defendingStat]: {
+					...actionStageCommandOptions[ActionStageCommandOptionEnum.defendingStat],
+					autocomplete: true,
+					choices: undefined,
+				},
 				[ActionStageCommandOptionEnum.allowModifiers]:
 					actionStageCommandOptions[ActionStageCommandOptionEnum.allowModifiers],
 			},
 		},
-		['add-skill-challenge']: {
-			name: 'add-skill-challenge',
+		[ActionStageSubCommandEnum.addSkillChallenge]: {
+			name: ActionStageSubCommandEnum.addSkillChallenge,
 			description:
 				'Adds a skill challenge roll to an action. This is any roll against your own DCs.',
 			type: ApplicationCommandOptionType.Subcommand,
@@ -55,14 +58,17 @@ export const actionStageCommandDefinition = {
 					actionStageCommandOptions[ActionStageCommandOptionEnum.rollName],
 				[ActionStageCommandOptionEnum.diceRoll]:
 					actionStageCommandOptions[ActionStageCommandOptionEnum.diceRoll],
-				[ActionStageCommandOptionEnum.targetDc]:
-					actionStageCommandOptions[ActionStageCommandOptionEnum.targetDc],
+				[ActionStageCommandOptionEnum.defendingStat]: {
+					...actionStageCommandOptions[ActionStageCommandOptionEnum.defendingStat],
+					autocomplete: true,
+					choices: undefined,
+				},
 				[ActionStageCommandOptionEnum.allowModifiers]:
 					actionStageCommandOptions[ActionStageCommandOptionEnum.allowModifiers],
 			},
 		},
-		['add-basic-damage']: {
-			name: 'add-basic-damage',
+		[ActionStageSubCommandEnum.addBasicDamage]: {
+			name: ActionStageSubCommandEnum.addBasicDamage,
 			description:
 				'Adds a basic damage roll to an action. Automatically adjusts for crits or failures.',
 			type: ApplicationCommandOptionType.Subcommand,
@@ -81,8 +87,8 @@ export const actionStageCommandDefinition = {
 					actionStageCommandOptions[ActionStageCommandOptionEnum.healInsteadOfDamage],
 			},
 		},
-		['add-advanced-damage']: {
-			name: 'add-advanced-damage',
+		[ActionStageSubCommandEnum.addAdvacedDamage]: {
+			name: ActionStageSubCommandEnum.addAdvacedDamage,
 			description:
 				'Adds an advanced damage roll to an action. Requires manual input for all successes and failures.',
 			type: ApplicationCommandOptionType.Subcommand,
@@ -107,10 +113,10 @@ export const actionStageCommandDefinition = {
 					actionStageCommandOptions[ActionStageCommandOptionEnum.healInsteadOfDamage],
 			},
 		},
-		['add-text']: {
-			name: 'add-text',
+		[ActionStageSubCommandEnum.addText]: {
+			name: ActionStageSubCommandEnum.addText,
 			description:
-				'Adds a text block to an action. Can include dice rolls surrounded by {addTextRollInput}',
+				'Adds a text block to an action. Can include dice rolls surrounded by "{{}}"',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
 				[ActionStageCommandOptionEnum.target]:
@@ -131,8 +137,8 @@ export const actionStageCommandDefinition = {
 					actionStageCommandOptions[ActionStageCommandOptionEnum.extraTags],
 			},
 		},
-		['add-save']: {
-			name: 'add-save',
+		[ActionStageSubCommandEnum.addSave]: {
+			name: ActionStageSubCommandEnum.addSave,
 			description: 'Adds a saving throw to an action',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
@@ -146,8 +152,8 @@ export const actionStageCommandDefinition = {
 					actionStageCommandOptions[ActionStageCommandOptionEnum.abilityDc],
 			},
 		},
-		set: {
-			name: 'set',
+		[ActionStageSubCommandEnum.set]: {
+			name: ActionStageSubCommandEnum.set,
 			description: 'Sets a field on an action stage. "none" clears the field.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
@@ -161,8 +167,8 @@ export const actionStageCommandDefinition = {
 					actionStageCommandOptions[ActionStageCommandOptionEnum.moveOption],
 			},
 		},
-		remove: {
-			name: 'remove',
+		[ActionStageSubCommandEnum.remove]: {
+			name: ActionStageSubCommandEnum.remove,
 			description: 'Removes a roll, text, or save from an action',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {

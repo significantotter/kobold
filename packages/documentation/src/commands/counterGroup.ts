@@ -37,7 +37,7 @@ export default {
 			stringTooLong: "Yip! {propertyName} can't be longer than {numCharacters} characters!",
 			nameExistsError: 'Yip! A counter group with that name already exists.',
 			successEmbed: {
-				title: "Yip! I set {propertyName} on {groupName} to {newPropertyValue}'.",
+				title: "Yip! I set {propertyName} on {groupName} to '{newPropertyValue}'.",
 			},
 		},
 	},

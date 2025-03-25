@@ -16,7 +16,7 @@ export const settingCommandDefinition = {
 	},
 	subCommands: {
 		[SettingSubCommandEnum.set]: {
-			name: 'set',
+			name: SettingSubCommandEnum.set,
 			description: 'Set a user setting.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {

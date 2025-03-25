@@ -75,9 +75,7 @@ export interface CommandDocumentation<T extends CommandDefinition> {
 			name: string;
 			description: string;
 			usage: string | null;
-			extendedOptionDocumentation?: {
-				[k in keyof T['subCommands'][key]['options']]?: ExtendedOptionDocumentation;
-			};
+			extendedOptionDocumentation?: Record<string, ExtendedOptionDocumentation>;
 			examples: {
 				title: string;
 				type: CommandResponseTypeEnum;

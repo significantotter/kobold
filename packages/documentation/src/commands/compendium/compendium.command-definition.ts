@@ -18,7 +18,7 @@ export const compendiumCommandDefinition = {
 	},
 	subCommands: {
 		[CompendiumSubCommandEnum.search]: {
-			name: 'search',
+			name: CompendiumSubCommandEnum.search,
 			description: 'Fetches pathfinder 2E stat-blocks or rules information',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {

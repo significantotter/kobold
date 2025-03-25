@@ -148,8 +148,7 @@ export const actionCommandDocumentation: CommandDocumentation<typeof actionComma
 				{
 					title: 'Imported',
 					type: CommandResponseTypeEnum.success,
-					message:
-						'Yip! I successfully imported those actions to {characterName:Lilac Sootsnout}.',
+					message: 'Yip! I imported those actions to {characterName:Lilac Sootsnout}.',
 					options: {
 						url: 'https://pastebin.com/abc123',
 						mode: 'rename-on-conflict',

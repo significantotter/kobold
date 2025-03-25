@@ -7,7 +7,7 @@ import { InitCommandOptionEnum, initCommandOptions } from '../init/init.command-
 export enum GameSubCommandEnum {
 	manage = 'manage',
 	init = 'init',
-	partyStatus = 'partyStatus',
+	partyStatus = 'party-status',
 	give = 'give',
 	roll = 'roll',
 	list = 'list',
@@ -23,7 +23,7 @@ export const gameCommandDefinition = {
 	},
 	subCommands: {
 		[GameSubCommandEnum.manage]: {
-			name: 'manage',
+			name: GameSubCommandEnum.manage,
 			description:
 				"Manage a a GM'd group of characters. Choose to create, delete, set-active, join, kick, or leave",
 			type: ApplicationCommandOptionType.Subcommand,
@@ -35,7 +35,7 @@ export const gameCommandDefinition = {
 			},
 		},
 		[GameSubCommandEnum.init]: {
-			name: 'init',
+			name: GameSubCommandEnum.init,
 			description:
 				'Starts initiative and adds joins with all characters in the game. GM only.',
 			type: ApplicationCommandOptionType.Subcommand,
@@ -58,7 +58,7 @@ export const gameCommandDefinition = {
 			},
 		},
 		[GameSubCommandEnum.partyStatus]: {
-			name: 'partyStatus',
+			name: GameSubCommandEnum.partyStatus,
 			description: 'Displays the status of all party members.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
@@ -69,7 +69,7 @@ export const gameCommandDefinition = {
 			},
 		},
 		[GameSubCommandEnum.give]: {
-			name: 'give',
+			name: GameSubCommandEnum.give,
 			description: 'Gives certain resources to players in the game.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
@@ -82,7 +82,7 @@ export const gameCommandDefinition = {
 			},
 		},
 		[GameSubCommandEnum.roll]: {
-			name: 'roll',
+			name: GameSubCommandEnum.roll,
 			description: 'Rolls dice for all characters in a game (or optionally one). GM only.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
@@ -99,7 +99,7 @@ export const gameCommandDefinition = {
 			},
 		},
 		[GameSubCommandEnum.list]: {
-			name: 'list',
+			name: GameSubCommandEnum.list,
 			description: 'Lists all of the games you have in this server.',
 			type: ApplicationCommandOptionType.Subcommand,
 		},

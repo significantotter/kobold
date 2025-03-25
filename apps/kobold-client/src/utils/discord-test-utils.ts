@@ -36,6 +36,7 @@ export class MockChatInputCommandInteraction extends ChatInputCommandInteraction
 				type: ChannelType.GuildText,
 				guild_id: 'guildId',
 			},
+			authorizing_integration_owners: {},
 			app_permissions: '',
 			data: {
 				id: 'commandId',

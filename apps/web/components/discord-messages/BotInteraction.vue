@@ -1,7 +1,7 @@
 <template>
 	<discord-message v-bind="discordComponentConfig.profiles.significantotter"
 		>/{{ commandName }} {{ subCommandName ? subCommandName : '' }}
-		<template v-for="exampleOption of Object.keys(example.options)" :key="exampleOption">
+		<template v-for="exampleOption of filteredOptions" :key="exampleOption">
 			<span
 				style="
 					border: 2px solid var(--border-color);
@@ -10,7 +10,7 @@
 					border-radius: 8px 0 0 8px;
 					color: var(--text-color);
 				"
-				>{{ exampleOption }}</span
+				>{{ exampleOption.name }}</span
 			><span
 				style="
 					border: 2px solid var(--border-color);
@@ -19,7 +19,7 @@
 					border-radius: 0 8px 8px 0;
 					color: var(--text-color);
 				"
-				>{{ example.options[exampleOption] }}
+				>{{ example.options[exampleOption.name] }}
 			</span>
 			{{ ' ' }}
 		</template></discord-message
@@ -36,14 +36,15 @@
 import type { CommandDocumentationExample } from '@kobold/documentation';
 import TextWithTerms from '~/components/text-renderers/TextWithTerms.vue';
 import BotEmbed from '~/components/discord-messages/BotEmbed.vue';
-import type { APIApplicationCommandOption } from 'discord.js';
 import { discordComponentConfig } from '~/utils/discord-component-config';
+import type { APIApplicationCommandOption } from 'discord-api-types/v10';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const { options, example } = defineProps<{
-	options: Record<string, APIApplicationCommandOption>;
+	options: APIApplicationCommandOption[];
 	example: CommandDocumentationExample;
 	commandName: string;
 	subCommandName: string;
 }>();
+
+const filteredOptions = options.filter(option => !!example.options[option.name]);
 </script>

@@ -3,19 +3,19 @@ import type { CommandOptions, SpecificCommandOptions } from '../helpers/commands
 
 export enum CompendiumCommandOptionEnum {
 	search = 'search',
-	choice = 'choice',
+	choice = 'compendium-choice',
 }
 
 export const compendiumCommandOptions: CommandOptions = {
 	[CompendiumCommandOptionEnum.search]: {
-		name: 'search',
+		name: CompendiumCommandOptionEnum.search,
 		description: "The name of the thing you're searching for.",
 		required: true,
 		autocomplete: true,
 		type: ApplicationCommandOptionType.String,
 	},
 	[CompendiumCommandOptionEnum.choice]: {
-		name: 'compendium-choice',
+		name: CompendiumCommandOptionEnum.choice,
 		description: 'The compendium to search.',
 		required: true,
 		type: ApplicationCommandOptionType.String,

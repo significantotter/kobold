@@ -7,7 +7,7 @@ export enum ModifierSubCommandEnum {
 	detail = 'detail',
 	export = 'export',
 	import = 'import',
-	createModifier = 'createModifier',
+	createModifier = 'create-modifier',
 	toggle = 'toggle',
 	severity = 'severity',
 	set = 'set',
@@ -24,12 +24,12 @@ export const modifierCommandDefinition = {
 	},
 	subCommands: {
 		[ModifierSubCommandEnum.list]: {
-			name: 'list',
+			name: ModifierSubCommandEnum.list,
 			description: 'Lists all modifiers available to your active character.',
 			type: ApplicationCommandOptionType.Subcommand,
 		},
 		[ModifierSubCommandEnum.detail]: {
-			name: 'detail',
+			name: ModifierSubCommandEnum.detail,
 			description: 'Describes a modifier available to your active character.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
@@ -41,13 +41,13 @@ export const modifierCommandDefinition = {
 			},
 		},
 		[ModifierSubCommandEnum.export]: {
-			name: 'export',
+			name: ModifierSubCommandEnum.export,
 			description:
 				'Exports a chunk of modifier data for you to later import on another character.',
 			type: ApplicationCommandOptionType.Subcommand,
 		},
 		[ModifierSubCommandEnum.import]: {
-			name: 'import',
+			name: ModifierSubCommandEnum.import,
 			description: 'Imports a list of modifier data to a character from PasteBin.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
@@ -58,7 +58,7 @@ export const modifierCommandDefinition = {
 			},
 		},
 		[ModifierSubCommandEnum.createModifier]: {
-			name: 'create-modifier',
+			name: ModifierSubCommandEnum.createModifier,
 			description: 'Creates a modifier for the active character.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
@@ -81,7 +81,7 @@ export const modifierCommandDefinition = {
 			},
 		},
 		[ModifierSubCommandEnum.toggle]: {
-			name: 'toggle',
+			name: ModifierSubCommandEnum.toggle,
 			description:
 				'Toggles whether a modifier is currently applying to your active character.',
 			type: ApplicationCommandOptionType.Subcommand,
@@ -94,7 +94,7 @@ export const modifierCommandDefinition = {
 			},
 		},
 		[ModifierSubCommandEnum.severity]: {
-			name: 'severity',
+			name: ModifierSubCommandEnum.severity,
 			description: 'Set the severity of a modifier.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
@@ -110,7 +110,7 @@ export const modifierCommandDefinition = {
 			},
 		},
 		[ModifierSubCommandEnum.set]: {
-			name: 'set',
+			name: ModifierSubCommandEnum.set,
 			description: 'Sets a field for a modifier for your active character.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
@@ -126,7 +126,7 @@ export const modifierCommandDefinition = {
 			},
 		},
 		[ModifierSubCommandEnum.remove]: {
-			name: 'remove',
+			name: ModifierSubCommandEnum.remove,
 			description: 'Removes a modifier for the active character.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
@@ -705,7 +705,7 @@ export class ModifierOptions {
 				"Yip! I can't figure out how to read that! Try exporting another modifier to check and make " +
 				"sure you're formatting it right!",
 			badUrl: "Yip! I don't understand that Url! Copy the pastebin url for the pasted modifiers directly into the Url field.",
-			imported: 'Yip! I successfully imported those modifiers to {characterName}.',
+			imported: 'Yip! I imported those modifiers to {characterName}.',
 		},
 	},
 };

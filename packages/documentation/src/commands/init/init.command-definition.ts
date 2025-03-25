@@ -29,27 +29,27 @@ export const initCommandDefinition = {
 	},
 	subCommands: {
 		[InitSubCommandEnum.start]: {
-			name: 'start',
+			name: InitSubCommandEnum.start,
 			description: 'Start initiative in the current channel.',
 			type: ApplicationCommandOptionType.Subcommand,
 		},
 		[InitSubCommandEnum.show]: {
-			name: 'show',
+			name: InitSubCommandEnum.show,
 			description: `Displays the current initiative order`,
 			type: ApplicationCommandOptionType.Subcommand,
 		},
 		[InitSubCommandEnum.next]: {
-			name: 'next',
+			name: InitSubCommandEnum.next,
 			description: `Moves to the next participant in the initiative order`,
 			type: ApplicationCommandOptionType.Subcommand,
 		},
 		[InitSubCommandEnum.prev]: {
-			name: 'prev',
+			name: InitSubCommandEnum.prev,
 			description: `Moves to the previous participant in the initiative order`,
 			type: ApplicationCommandOptionType.Subcommand,
 		},
 		[InitSubCommandEnum.jumpTo]: {
-			name: 'jump-to',
+			name: InitSubCommandEnum.jumpTo,
 			description: `Jumps to a specific participant in the initiative order`,
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
@@ -58,7 +58,7 @@ export const initCommandDefinition = {
 			},
 		},
 		[InitSubCommandEnum.join]: {
-			name: 'join',
+			name: InitSubCommandEnum.join,
 			description:
 				'Joins initiative with your active character. Defaults to rolling perception.',
 			type: ApplicationCommandOptionType.Subcommand,
@@ -80,7 +80,7 @@ export const initCommandDefinition = {
 			},
 		},
 		[InitSubCommandEnum.add]: {
-			name: 'add',
+			name: InitSubCommandEnum.add,
 			description: `Adds an NPC or minion to initiative`,
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
@@ -90,10 +90,10 @@ export const initCommandDefinition = {
 				},
 				[InitCommandOptionEnum.initActor]:
 					initCommandOptions[InitCommandOptionEnum.initActor],
-				// [RollCommandOptionEnum.rollExpression]: {
-				// 	...rollCommandOptions[RollCommandOptionEnum.rollExpression],
-				// 	description: 'The dice expression ("1d20+5") to use to join initiative.',
-				// },
+				[RollCommandOptionEnum.rollExpression]: {
+					...rollCommandOptions[RollCommandOptionEnum.rollExpression],
+					description: 'The dice expression ("1d20+5") to use to join initiative.',
+				},
 				[InitCommandOptionEnum.initValue]: {
 					...initCommandOptions[InitCommandOptionEnum.initValue],
 					required: false,
@@ -102,10 +102,12 @@ export const initCommandDefinition = {
 					initCommandOptions[InitCommandOptionEnum.initHideStats],
 				[InitCommandOptionEnum.initCustomStats]:
 					initCommandOptions[InitCommandOptionEnum.initCustomStats],
+				[InitCommandOptionEnum.template]:
+					initCommandOptions[InitCommandOptionEnum.template],
 			},
 		},
 		[InitSubCommandEnum.note]: {
-			name: 'note',
+			name: InitSubCommandEnum.note,
 			description: `Sets a note for a character in the initiative.`,
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
@@ -118,7 +120,7 @@ export const initCommandDefinition = {
 			},
 		},
 		[InitSubCommandEnum.set]: {
-			name: 'set',
+			name: InitSubCommandEnum.set,
 			description: `Sets certain properties of your character for initiative`,
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
@@ -133,7 +135,7 @@ export const initCommandDefinition = {
 			},
 		},
 		[InitSubCommandEnum.remove]: {
-			name: 'remove',
+			name: InitSubCommandEnum.remove,
 			description: `Removes a character from the initiative`,
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
@@ -142,7 +144,7 @@ export const initCommandDefinition = {
 			},
 		},
 		[InitSubCommandEnum.statBlock]: {
-			name: 'stat-block',
+			name: InitSubCommandEnum.statBlock,
 			description: `Displays the statBlock for a creature in the initiative order`,
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
@@ -150,12 +152,12 @@ export const initCommandDefinition = {
 					...initCommandOptions[InitCommandOptionEnum.initCharacter],
 					required: true,
 				},
-				[InitCommandOptionEnum.initHideStats]:
-					initCommandOptions[InitCommandOptionEnum.initHideStats],
+				[RollCommandOptionEnum.rollSecret]:
+					rollCommandOptions[RollCommandOptionEnum.rollSecret],
 			},
 		},
 		[InitSubCommandEnum.roll]: {
-			name: 'roll',
+			name: InitSubCommandEnum.roll,
 			description: `Rolls dice for an initiative member that you control`,
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
@@ -171,18 +173,20 @@ export const initCommandDefinition = {
 					...initCommandOptions[InitCommandOptionEnum.initCharacterTarget],
 					required: true,
 				},
-				// [RollCommandOptionEnum.rollModifier]:
-				// 	rollCommandOptions[RollCommandOptionEnum.rollModifier],
-				// [RollCommandOptionEnum.damageRollModifier]:
-				// 	rollCommandOptions[RollCommandOptionEnum.damageRollModifier],
-				// [RollCommandOptionEnum.rollSecret]:
-				// 	rollCommandOptions[RollCommandOptionEnum.rollSecret],
-				// [RollCommandOptionEnum.rollTargetAc]:
-				// 	rollCommandOptions[RollCommandOptionEnum.rollTargetAc],
+				[RollCommandOptionEnum.rollModifier]:
+					rollCommandOptions[RollCommandOptionEnum.rollModifier],
+				[RollCommandOptionEnum.damageRollModifier]:
+					rollCommandOptions[RollCommandOptionEnum.damageRollModifier],
+				[RollCommandOptionEnum.rollSecret]:
+					rollCommandOptions[RollCommandOptionEnum.rollSecret],
+				[RollCommandOptionEnum.rollTargetAc]:
+					rollCommandOptions[RollCommandOptionEnum.rollTargetAc],
+				[RollCommandOptionEnum.rollNote]:
+					rollCommandOptions[RollCommandOptionEnum.rollNote],
 			},
 		},
 		[InitSubCommandEnum.end]: {
-			name: 'end',
+			name: InitSubCommandEnum.end,
 			description: `Ends the current initiative`,
 			type: ApplicationCommandOptionType.Subcommand,
 		},

@@ -6,10 +6,10 @@ export enum CounterSubCommandEnum {
 	list = 'list',
 	display = 'display',
 	reset = 'reset',
-	useSlot = 'useSlot',
+	useSlot = 'use-slot',
 	value = 'value',
 	prepare = 'prepare',
-	prepareMany = 'prepareMany',
+	prepareMany = 'prepare-many',
 	create = 'create',
 	set = 'set',
 	remove = 'remove',
@@ -24,8 +24,8 @@ export const counterCommandDefinition = {
 		default_member_permissions: undefined,
 	},
 	subCommands: {
-		list: {
-			name: 'list',
+		[CounterSubCommandEnum.list]: {
+			name: CounterSubCommandEnum.list,
 			description: 'Lists all counters available to your active character.',
 			type: ApplicationCommandType.ChatInput,
 			options: {
@@ -33,8 +33,8 @@ export const counterCommandDefinition = {
 					counterCommandOptions[CounterCommandOptionEnum.counterListHideGroups],
 			},
 		},
-		display: {
-			name: 'display',
+		[CounterSubCommandEnum.display]: {
+			name: CounterSubCommandEnum.display,
 			description: 'Displays a counter for your active character.',
 			type: ApplicationCommandType.ChatInput,
 			options: {
@@ -45,8 +45,8 @@ export const counterCommandDefinition = {
 				},
 			},
 		},
-		reset: {
-			name: 'reset',
+		[CounterSubCommandEnum.reset]: {
+			name: CounterSubCommandEnum.reset,
 			description: 'Resets a counter for your active character.',
 			type: ApplicationCommandType.ChatInput,
 			options: {
@@ -57,8 +57,8 @@ export const counterCommandDefinition = {
 				},
 			},
 		},
-		useSlot: {
-			name: 'use-slot',
+		[CounterSubCommandEnum.useSlot]: {
+			name: CounterSubCommandEnum.useSlot,
 			description: 'Uses a prepared slot on a counter for your active character.',
 			type: ApplicationCommandType.ChatInput,
 			options: {
@@ -73,8 +73,8 @@ export const counterCommandDefinition = {
 					counterCommandOptions[CounterCommandOptionEnum.counterResetSlot],
 			},
 		},
-		value: {
-			name: 'value',
+		[CounterSubCommandEnum.value]: {
+			name: CounterSubCommandEnum.value,
 			description: 'Changes the value of a counter for your active character.',
 			type: ApplicationCommandType.ChatInput,
 			options: {
@@ -87,8 +87,8 @@ export const counterCommandDefinition = {
 					counterCommandOptions[CounterCommandOptionEnum.counterValue],
 			},
 		},
-		prepare: {
-			name: 'prepare',
+		[CounterSubCommandEnum.prepare]: {
+			name: CounterSubCommandEnum.prepare,
 			description: "Prepares an expendable ability in a counter's slot.",
 			type: ApplicationCommandType.ChatInput,
 			options: {
@@ -103,8 +103,8 @@ export const counterCommandDefinition = {
 					counterCommandOptions[CounterCommandOptionEnum.counterPrepareSlot],
 			},
 		},
-		prepareMany: {
-			name: 'prepare-many',
+		[CounterSubCommandEnum.prepareMany]: {
+			name: CounterSubCommandEnum.prepareMany,
 			description: "Prepares multiple expendable abilities in a counter's slots.",
 			type: ApplicationCommandType.ChatInput,
 			options: {
@@ -119,8 +119,8 @@ export const counterCommandDefinition = {
 					counterCommandOptions[CounterCommandOptionEnum.counterPrepareFresh],
 			},
 		},
-		create: {
-			name: 'create',
+		[CounterSubCommandEnum.create]: {
+			name: CounterSubCommandEnum.create,
 			description: 'Creates a counter for the active character.',
 			type: ApplicationCommandType.ChatInput,
 			options: {
@@ -138,8 +138,8 @@ export const counterCommandDefinition = {
 					counterCommandOptions[CounterCommandOptionEnum.counterRecoverTo],
 			},
 		},
-		set: {
-			name: 'set',
+		[CounterSubCommandEnum.set]: {
+			name: CounterSubCommandEnum.set,
 			description: 'Sets the value of a counter for your active character.',
 			type: ApplicationCommandType.ChatInput,
 			options: {
@@ -154,8 +154,8 @@ export const counterCommandDefinition = {
 					counterCommandOptions[CounterCommandOptionEnum.counterSetValue],
 			},
 		},
-		remove: {
-			name: 'remove',
+		[CounterSubCommandEnum.remove]: {
+			name: CounterSubCommandEnum.remove,
 			description: 'Removes a counter for the active character.',
 			type: ApplicationCommandType.ChatInput,
 			options: {

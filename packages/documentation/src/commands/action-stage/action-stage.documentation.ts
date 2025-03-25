@@ -3,6 +3,7 @@ import {
 	actionStageCommandDefinition,
 	ActionStageSubCommandEnum,
 } from './action-stage.command-definition.js';
+import { ActionStageCommandOptionEnum } from './action-stage.command-options.js';
 
 export const actionStageCommandDocumentation: CommandDocumentation<
 	typeof actionStageCommandDefinition
@@ -11,7 +12,7 @@ export const actionStageCommandDocumentation: CommandDocumentation<
 	description: 'Commands for building up custom, rollable actions.',
 	subCommands: {
 		[ActionStageSubCommandEnum.addAttack]: {
-			name: 'add-attack',
+			name: ActionStageSubCommandEnum.addAttack,
 			description:
 				"Adds an attack roll to an action. Can also be any type of roll against an enemy's DCs",
 			usage: null,
@@ -22,16 +23,16 @@ export const actionStageCommandDocumentation: CommandDocumentation<
 					message:
 						'Yip! I added an attack roll to the action {actionName:Elemental Blast (1a)}.',
 					options: {
-						['action-target']: 'Elemental Blast (1a)',
-						['roll-name']: 'Attack Roll',
-						['dice-roll']: '1d20 + 5',
-						['defending-stat']: 'AC',
+						[ActionStageCommandOptionEnum.actionTarget]: 'Elemental Blast (1a)',
+						[ActionStageCommandOptionEnum.rollName]: 'Attack Roll',
+						[ActionStageCommandOptionEnum.diceRoll]: '1d20 + 5',
+						[ActionStageCommandOptionEnum.defendingStat]: 'AC',
 					},
 				},
 			],
 		},
-		[ActionStageSubCommandEnum.addSkillChllenge]: {
-			name: 'add-skill-challenge',
+		[ActionStageSubCommandEnum.addSkillChallenge]: {
+			name: ActionStageSubCommandEnum.addSkillChallenge,
 			description:
 				'Adds a skill challenge roll to an action. This is any roll against your own DCs.',
 			usage: null,
@@ -43,15 +44,15 @@ export const actionStageCommandDocumentation: CommandDocumentation<
 						'Yip! I added a skill challenge roll to the action {actionName:Battle Medicine (DC 15)}.',
 					options: {
 						target: 'Battle Medicine (DC 15)',
-						['roll-name']: 'Medicine Check',
-						['dice-roll']: '1d20 + [medicine]',
-						['target-dc']: 15,
+						[ActionStageCommandOptionEnum.rollName]: 'Medicine Check',
+						[ActionStageCommandOptionEnum.diceRoll]: '1d20 + [medicine]',
+						[ActionStageCommandOptionEnum.defendingStat]: 15,
 					},
 				},
 			],
 		},
 		[ActionStageSubCommandEnum.addBasicDamage]: {
-			name: 'add-basic-damage',
+			name: ActionStageSubCommandEnum.addBasicDamage,
 			description: 'Adds a basic damage roll to an action. This is a simple damage roll.',
 			usage: null,
 			examples: [
@@ -70,7 +71,7 @@ export const actionStageCommandDocumentation: CommandDocumentation<
 			],
 		},
 		[ActionStageSubCommandEnum.addAdvacedDamage]: {
-			name: 'add-advanced-damage',
+			name: ActionStageSubCommandEnum.addAdvacedDamage,
 			description:
 				'Adds an advanced damage roll to an action. This is a more complex damage roll.',
 			usage: null,
@@ -91,7 +92,7 @@ export const actionStageCommandDocumentation: CommandDocumentation<
 			],
 		},
 		[ActionStageSubCommandEnum.addSave]: {
-			name: 'add-save',
+			name: ActionStageSubCommandEnum.addSave,
 			description: 'Adds a save roll to an action. This is a roll against a DC.',
 			usage: null,
 			examples: [
@@ -109,7 +110,7 @@ export const actionStageCommandDocumentation: CommandDocumentation<
 			],
 		},
 		[ActionStageSubCommandEnum.addText]: {
-			name: 'add-text',
+			name: ActionStageSubCommandEnum.addText,
 			description: 'Adds text to an action. This is a simple text stage.',
 			usage: null,
 			examples: [
@@ -134,7 +135,7 @@ export const actionStageCommandDocumentation: CommandDocumentation<
 			],
 		},
 		[ActionStageSubCommandEnum.remove]: {
-			name: 'remove',
+			name: ActionStageSubCommandEnum.remove,
 			description: 'Removes a stage from an action.',
 			usage: null,
 			examples: [
@@ -150,7 +151,7 @@ export const actionStageCommandDocumentation: CommandDocumentation<
 			],
 		},
 		[ActionStageSubCommandEnum.set]: {
-			name: 'set',
+			name: ActionStageSubCommandEnum.set,
 			description: 'Sets a stage in an action.',
 			usage: null,
 			examples: [

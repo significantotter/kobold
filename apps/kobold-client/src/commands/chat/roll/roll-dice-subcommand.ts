@@ -6,8 +6,6 @@ import {
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 
-import { ChatArgs } from '../../../constants/index.js';
-
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold } from '@kobold/db';
@@ -15,6 +13,7 @@ import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { RollBuilder } from '../../../utils/roll-builder.js';
 import { Command, CommandDeferType } from '../../index.js';
+import { RollOptions } from './roll-command-options.js';
 
 export class RollDiceSubCommand implements Command {
 	public name = L.en.commands.roll.dice.name();
@@ -35,13 +34,16 @@ export class RollDiceSubCommand implements Command {
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		if (!intr.isChatInputCommand()) return;
-		const diceExpression = intr.options.getString(ChatArgs.ROLL_EXPRESSION_OPTION.name, true);
+		const diceExpression = intr.options.getString(
+			RollOptions.ROLL_EXPRESSION_OPTION.name,
+			true
+		);
 
 		const secretRoll =
-			intr.options.getString(ChatArgs.ROLL_SECRET_OPTION.name) ??
+			intr.options.getString(RollOptions.ROLL_SECRET_OPTION.name) ??
 			L.en.commandOptions.rollSecret.choices.public.value();
 
-		const rollNote = intr.options.getString(ChatArgs.ROLL_NOTE_OPTION.name) ?? '';
+		const rollNote = intr.options.getString(RollOptions.ROLL_NOTE_OPTION.name) ?? '';
 
 		const koboldUtils: KoboldUtils = new KoboldUtils(kobold);
 		let { activeCharacter, userSettings } = await koboldUtils.fetchDataForCommand(intr, {

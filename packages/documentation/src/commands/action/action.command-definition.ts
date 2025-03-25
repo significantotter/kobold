@@ -23,23 +23,23 @@ export const actionCommandDefinition = {
 		default_member_permissions: undefined,
 	},
 	subCommands: {
-		list: {
-			name: 'list',
+		[ActionSubCommandEnum.list]: {
+			name: ActionSubCommandEnum.list,
 			description: "Lists all of your character's actions.",
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {},
 		},
-		detail: {
-			name: 'detail',
+		[ActionSubCommandEnum.detail]: {
+			name: ActionSubCommandEnum.detail,
 			description: 'Describes a specific action.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
 				[OptionEnum.targetAction]: actionCommandOptions[OptionEnum.targetAction],
 			},
 		},
-		create: {
+		[ActionSubCommandEnum.create]: {
 			type: ApplicationCommandType.ChatInput,
-			name: 'create',
+			name: ActionSubCommandEnum.create,
 			description: 'Creates an action.',
 			dm_permission: true,
 			default_member_permissions: undefined,
@@ -53,8 +53,8 @@ export const actionCommandDefinition = {
 				[OptionEnum.tags]: actionCommandOptions[OptionEnum.tags],
 			},
 		},
-		remove: {
-			name: 'remove',
+		[ActionSubCommandEnum.remove]: {
+			name: ActionSubCommandEnum.remove,
 			description: 'Removes an action',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
@@ -65,8 +65,8 @@ export const actionCommandDefinition = {
 				},
 			},
 		},
-		set: {
-			name: 'set',
+		[ActionSubCommandEnum.set]: {
+			name: ActionSubCommandEnum.set,
 			description: 'Sets a field on an action. "none" clears the field.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
@@ -75,8 +75,8 @@ export const actionCommandDefinition = {
 				[OptionEnum.setValue]: actionCommandOptions[OptionEnum.setValue],
 			},
 		},
-		import: {
-			name: 'import',
+		[ActionSubCommandEnum.import]: {
+			name: ActionSubCommandEnum.import,
 			description: 'Imports a list of action data to a character from PasteBin.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
@@ -84,8 +84,8 @@ export const actionCommandDefinition = {
 				[OptionEnum.importMode]: actionCommandOptions[OptionEnum.importMode],
 			},
 		},
-		export: {
-			name: 'export',
+		[ActionSubCommandEnum.export]: {
+			name: ActionSubCommandEnum.export,
 			description: 'Exports actions to a PasteBin url.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {},

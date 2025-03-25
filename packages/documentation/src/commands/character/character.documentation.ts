@@ -11,7 +11,7 @@ export const characterCommandDocumentation: CommandDocumentation<
 	description: 'Commands for managing characters.',
 	subCommands: {
 		[CharacterSubCommandEnum.importWanderersGuide]: {
-			name: 'import-wanderers-guide',
+			name: CharacterSubCommandEnum.importWanderersGuide,
 			description: "Imports character data from Wanderer's Guide.",
 			usage: null,
 			examples: [
@@ -26,7 +26,7 @@ export const characterCommandDocumentation: CommandDocumentation<
 			],
 		},
 		[CharacterSubCommandEnum.importPathbuilder]: {
-			name: 'import-pathbuilder',
+			name: CharacterSubCommandEnum.importPathbuilder,
 			description: 'Imports character data from Pathbuilder.',
 			usage: null,
 			examples: [
@@ -41,7 +41,7 @@ export const characterCommandDocumentation: CommandDocumentation<
 			],
 		},
 		[CharacterSubCommandEnum.importPasteBin]: {
-			name: 'import-pastebin',
+			name: CharacterSubCommandEnum.importPasteBin,
 			description: 'Imports character data from Pastebin.',
 			usage: null,
 			examples: [
@@ -56,7 +56,7 @@ export const characterCommandDocumentation: CommandDocumentation<
 			],
 		},
 		[CharacterSubCommandEnum.list]: {
-			name: 'list',
+			name: CharacterSubCommandEnum.list,
 			description: 'Lists all characters.',
 			usage: null,
 			examples: [
@@ -106,7 +106,7 @@ export const characterCommandDocumentation: CommandDocumentation<
 			],
 		},
 		[CharacterSubCommandEnum.remove]: {
-			name: 'remove',
+			name: CharacterSubCommandEnum.remove,
 			description: 'Removes a character.',
 			usage: null,
 			examples: [
@@ -120,7 +120,7 @@ export const characterCommandDocumentation: CommandDocumentation<
 			],
 		},
 		[CharacterSubCommandEnum.setActive]: {
-			name: 'set-active',
+			name: CharacterSubCommandEnum.setActive,
 			description: 'Sets the active character.',
 			usage: null,
 			examples: [
@@ -135,7 +135,7 @@ export const characterCommandDocumentation: CommandDocumentation<
 			],
 		},
 		[CharacterSubCommandEnum.setDefault]: {
-			name: 'set-default',
+			name: CharacterSubCommandEnum.setDefault,
 			description: 'Sets the default character',
 			usage: null,
 			examples: [
@@ -151,7 +151,7 @@ export const characterCommandDocumentation: CommandDocumentation<
 			],
 		},
 		[CharacterSubCommandEnum.sheet]: {
-			name: 'sheet',
+			name: CharacterSubCommandEnum.sheet,
 			description: 'Displays the character sheet.',
 			usage: null,
 			examples: [
@@ -164,7 +164,7 @@ export const characterCommandDocumentation: CommandDocumentation<
 			],
 		},
 		[CharacterSubCommandEnum.update]: {
-			name: 'update',
+			name: CharacterSubCommandEnum.update,
 			description: 'Updates a character.',
 			usage: null,
 			examples: [

@@ -22,12 +22,12 @@ export const rollMacroCommandDefinition = {
 	},
 	subCommands: {
 		[rollMacroSubCommandEnum.list]: {
-			name: 'list',
+			name: rollMacroSubCommandEnum.list,
 			description: 'Lists all roll macros available to your active character.',
 			type: ApplicationCommandOptionType.Subcommand,
 		},
 		[rollMacroSubCommandEnum.create]: {
-			name: 'create',
+			name: rollMacroSubCommandEnum.create,
 			description: 'Creates a roll macro for the active character.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
@@ -38,7 +38,7 @@ export const rollMacroCommandDefinition = {
 			},
 		},
 		[rollMacroSubCommandEnum.set]: {
-			name: 'set',
+			name: rollMacroSubCommandEnum.set,
 			description: 'Sets the value of a roll macro for your active character.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
@@ -52,7 +52,7 @@ export const rollMacroCommandDefinition = {
 			},
 		},
 		[rollMacroSubCommandEnum.remove]: {
-			name: 'remove',
+			name: rollMacroSubCommandEnum.remove,
 			description: 'Removes a roll macro for the active character.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {

@@ -24,13 +24,13 @@ export const counterGroupCommandDefinition = {
 	},
 	subCommands: {
 		[CounterGroupSubCommandEnum.list]: {
-			name: 'list',
+			name: CounterGroupSubCommandEnum.list,
 			description: 'Lists all counter groups available to your active character.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {},
 		},
 		[CounterGroupSubCommandEnum.display]: {
-			name: 'display',
+			name: CounterGroupSubCommandEnum.display,
 			description: 'Displays a counter group for your active character.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
@@ -42,7 +42,7 @@ export const counterGroupCommandDefinition = {
 			},
 		},
 		[CounterGroupSubCommandEnum.reset]: {
-			name: 'reset',
+			name: CounterGroupSubCommandEnum.reset,
 			description: "Resets all counters within a character's counter group.",
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
@@ -54,7 +54,7 @@ export const counterGroupCommandDefinition = {
 			},
 		},
 		[CounterGroupSubCommandEnum.create]: {
-			name: 'create',
+			name: CounterGroupSubCommandEnum.create,
 			description: 'Creates a counter group for the active character.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
@@ -67,7 +67,7 @@ export const counterGroupCommandDefinition = {
 			},
 		},
 		[CounterGroupSubCommandEnum.set]: {
-			name: 'set',
+			name: CounterGroupSubCommandEnum.set,
 			description: 'Sets the value of a counter group for your active character.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
@@ -83,7 +83,7 @@ export const counterGroupCommandDefinition = {
 			},
 		},
 		[CounterGroupSubCommandEnum.remove]: {
-			name: 'remove',
+			name: CounterGroupSubCommandEnum.remove,
 			description: 'Removes a counter group for the active character.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {

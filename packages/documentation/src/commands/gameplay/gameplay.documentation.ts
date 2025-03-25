@@ -1,37 +1,88 @@
-import { CommandDocumentation } from '../helpers/commands.d.js';
-import { gameplayCommandDefinition } from './gameplay.command-definition.js';
+import { CommandDocumentation, CommandResponseTypeEnum } from '../helpers/commands.d.js';
+import {
+	gameplayCommandDefinition,
+	GameplaySubCommandEnum,
+} from './gameplay.command-definition.js';
+import { GameplayCommandOptionEnum } from './gameplay.command-options.js';
 
 export const gameplayCommandDocumentation: CommandDocumentation<typeof gameplayCommandDefinition> =
 	{
 		name: 'gameplay',
 		description: "Sets a character's gameplay stat (such as hp) to a value",
 		subCommands: {
-			damage: {
-				name: 'damage',
+			[GameplaySubCommandEnum.damage]: {
+				name: GameplaySubCommandEnum.damage,
 				description:
 					'Applies damage to a character, effecting tempHp, stamina (if enabled), and hp.',
 				usage: null,
-				examples: [],
+				examples: [
+					{
+						title: 'Success',
+						type: CommandResponseTypeEnum.success,
+						message: 'Anatase Lightclaw took 5 damage!',
+						options: {
+							[GameplayCommandOptionEnum.gameplayTargetCharacter]:
+								'Anatase Lightclaw',
+							[GameplayCommandOptionEnum.gameplayDamageAmount]: 5,
+							[GameplayCommandOptionEnum.gameplayDamageType]: 'fire',
+						},
+					},
+				],
 			},
-			set: {
-				name: 'set',
-				description: "Sets a character's gameplay stat (such as hp) to a value",
+			[GameplaySubCommandEnum.set]: {
+				name: GameplaySubCommandEnum.set,
+				description: "Yip! I updated Anatase Lightclaw's hp from 18 to 22.",
 				usage: null,
-				examples: [],
+				examples: [
+					{
+						title: 'Success',
+						type: CommandResponseTypeEnum.success,
+						message: 'Stat set successfully.',
+						options: {
+							[GameplayCommandOptionEnum.gameplaySetOption]: 'hp',
+							[GameplayCommandOptionEnum.gameplaySetValue]: 22,
+							[GameplayCommandOptionEnum.gameplayTargetCharacter]:
+								'Anatase Lightclaw',
+						},
+					},
+				],
 			},
-			recover: {
-				name: 'recover',
+			[GameplaySubCommandEnum.recover]: {
+				name: GameplaySubCommandEnum.recover,
 				description:
 					"Resets all of a character/npc's 'recoverable' stats (hp, stamina, resolve) to their maximum values.",
 				usage: null,
-				examples: [],
+				examples: [
+					{
+						title: 'Success',
+						type: CommandResponseTypeEnum.success,
+						message: 'Yip! Anatase Lightclaw recovered! HP increased from 22 to 42',
+						options: {
+							[GameplayCommandOptionEnum.gameplayTargetCharacter]:
+								'Anatase Lightclaw',
+						},
+					},
+				],
 			},
-			tracker: {
-				name: 'tracker',
+			[GameplaySubCommandEnum.tracker]: {
+				name: GameplaySubCommandEnum.tracker,
 				description:
 					'Sets up a tracker to follow the changing statistics of one of your characters.',
 				usage: null,
-				examples: [],
+				examples: [
+					{
+						title: 'Success',
+						type: CommandResponseTypeEnum.success,
+						message:
+							'Anatase Lightclaw Tracker\n\nLevel 3 Spellscale Kobold Monk\n\nHP: `42/42`\n\nHero Points: `1/3`,',
+						options: {
+							[GameplayCommandOptionEnum.gameplayTargetCharacter]:
+								'Anatase Lightclaw',
+							[GameplayCommandOptionEnum.gameplayTargetChannel]: '#trackers',
+							[GameplayCommandOptionEnum.gameplayTrackerMode]: 'full-sheet',
+						},
+					},
+				],
 			},
 		},
 	};
@@ -86,7 +137,7 @@ export const gameplayCommandDocumentation: CommandDocumentation<typeof gameplayC
 		],
 	};
  * 
- *import {
+ * import {
 	APIApplicationCommandBasicOption,
 	ApplicationCommandOptionType,
 	ChannelType,

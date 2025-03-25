@@ -1,8 +1,4 @@
 import { ApplicationCommandOptionType, ApplicationCommandType } from 'discord-api-types/v10';
-import {
-	CharacterCommandOptionEnum,
-	characterCommandOptions,
-} from '../character/character.command-options.js';
 import { CommandDefinition } from '../helpers/commands.d.js';
 import { GameplayCommandOptionEnum, gameplayCommandOptions } from './gameplay.command-options.js';
 
@@ -23,7 +19,7 @@ export const gameplayCommandDefinition = {
 	},
 	subCommands: {
 		[GameplaySubCommandEnum.damage]: {
-			name: 'damage',
+			name: GameplaySubCommandEnum.damage,
 			description:
 				'Applies damage to a character, effecting tempHp, stamina (if enabled), and hp.',
 			type: ApplicationCommandOptionType.Subcommand,
@@ -39,7 +35,7 @@ export const gameplayCommandDefinition = {
 			},
 		},
 		[GameplaySubCommandEnum.set]: {
-			name: 'set',
+			name: GameplaySubCommandEnum.set,
 			description: "Sets a character's gameplay stat (such as hp) to a value",
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
@@ -52,7 +48,7 @@ export const gameplayCommandDefinition = {
 			},
 		},
 		[GameplaySubCommandEnum.recover]: {
-			name: 'recover',
+			name: GameplaySubCommandEnum.recover,
 			description:
 				"Resets all of a character/npc's 'recoverable' stats (hp, stamina, resolve) to their maximum values.",
 			type: ApplicationCommandOptionType.Subcommand,
@@ -62,13 +58,13 @@ export const gameplayCommandDefinition = {
 			},
 		},
 		[GameplaySubCommandEnum.tracker]: {
-			name: 'tracker',
+			name: GameplaySubCommandEnum.tracker,
 			description:
 				'Sets up a tracker to follow the changing statistics of one of your characters.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[CharacterCommandOptionEnum.name]:
-					characterCommandOptions[CharacterCommandOptionEnum.name],
+				[GameplayCommandOptionEnum.gameplayTargetCharacter]:
+					gameplayCommandOptions[GameplayCommandOptionEnum.gameplayTargetCharacter],
 				[GameplayCommandOptionEnum.gameplayTargetChannel]:
 					gameplayCommandOptions[GameplayCommandOptionEnum.gameplayTargetChannel],
 				[GameplayCommandOptionEnum.gameplayTrackerMode]:

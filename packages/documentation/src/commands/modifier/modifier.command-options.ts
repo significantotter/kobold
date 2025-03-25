@@ -748,7 +748,7 @@ export class ModifierOptions {
 				"Yip! I can't figure out how to read that! Try exporting another modifier to check and make " +
 				"sure you're formatting it right!",
 			badUrl: "Yip! I don't understand that Url! Copy the pastebin url for the pasted modifiers directly into the Url field.",
-			imported: 'Yip! I successfully imported those modifiers to {characterName}.',
+			imported: 'Yip! I imported those modifiers to {characterName}.',
 		},
 	},
 };
