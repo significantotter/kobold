@@ -27,7 +27,7 @@ export const handler: Handler = async event => {
 		// wanderer's guide uses a non-standard header auth method
 		// so we can't continue to use the simple-oauth2 module here
 		axiosResponse! = await axios({
-			url: `https://wanderersguide.app/api/oauth2/token?code=${code}&client_id=${process.env.WG_CLIENT_ID}`,
+			url: `https://legacy.wanderersguide.app/api/oauth2/token?code=${code}&client_id=${process.env.WG_CLIENT_ID}`,
 			method: 'post',
 			headers: {
 				authorization: `Apikey ${process.env.WG_API_KEY}`,

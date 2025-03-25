@@ -20,10 +20,10 @@ export const characterAuthClient = function (characterId: string) {
 			secret: process.env.WG_API_KEY ?? '',
 		},
 		auth: {
-			tokenHost: 'https://wanderersguide.app/api',
-			tokenPath: 'https://wanderersguide.app/api/oauth2/token',
-			authorizeHost: `https://wanderersguide.app/api`,
-			authorizePath: `https://wanderersguide.app/api/oauth2/authorize${characterIdString}`,
+			tokenHost: 'https://legacy.wanderersguide.app/api',
+			tokenPath: 'https://legacy.wanderersguide.app/api/oauth2/token',
+			authorizeHost: `https://legacy.wanderersguide.app/api`,
+			authorizePath: `https://legacy.wanderersguide.app/api/oauth2/authorize${characterIdString}`,
 		},
 	});
 };
