@@ -21,9 +21,11 @@ import FloatLabel from 'primevue/floatlabel';
 import Button from 'primevue/button';
 import { ref } from 'vue';
 
-const characterId = ref(null);
+const runtimeConfig = useRuntimeConfig();
 
-function authorize(characterId: string) {
-	window.location.href = `${this.$config.VITE_BASE_URL}/.netlify/functions/oauth?characterId=${characterId}`;
+const characterId = ref('');
+
+function authorize() {
+	window.location.href = `${runtimeConfig.public.VITE_BASE_URL}/.netlify/functions/oauth?characterId=${characterId.value}`;
 }
 </script>

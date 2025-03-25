@@ -133,3 +133,5 @@ dist
 
 # Turborepo
 .turbo
+# Local Netlify folder
+.netlify
