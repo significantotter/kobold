@@ -24,7 +24,7 @@ import { ModifierOptions } from '../modifier/modifier-command-options.js';
 import { InputParseUtils } from '../../../utils/input-parse-utils.js';
 
 export class ConditionApplyModifierSubCommand implements Command {
-	public names = [L.en.commands.condition.applyModifier.name()];
+	public name = L.en.commands.condition.applyModifier.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.condition.applyModifier.name(),

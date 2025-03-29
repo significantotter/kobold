@@ -19,7 +19,7 @@ import { Command, CommandDeferType } from '../../index.js';
 import { ActionStageOptions } from './action-stage-command-options.js';
 
 export class ActionStageAddBasicDamageSubCommand implements Command {
-	public names = [L.en.commands.actionStage.addBasicDamage.name()];
+	public name = L.en.commands.actionStage.addBasicDamage.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.actionStage.addBasicDamage.name(),

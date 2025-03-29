@@ -10,8 +10,6 @@ import {
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 
-import { ChatArgs } from '../../../constants/index.js';
-
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold, SheetRecord } from '@kobold/db';
@@ -22,9 +20,10 @@ import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { InitOptions } from '../init/init-command-options.js';
+import { RollOptions } from './roll-command-options.js';
 
 export class RollAttackSubCommand implements Command {
-	public names = [L.en.commands.roll.attack.name()];
+	public name = L.en.commands.roll.attack.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.roll.attack.name(),
@@ -42,9 +41,9 @@ export class RollAttackSubCommand implements Command {
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === ChatArgs.ATTACK_CHOICE_OPTION.name) {
+		if (option.name === RollOptions.ATTACK_CHOICE_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(ChatArgs.ATTACK_CHOICE_OPTION.name) ?? '';
+			const match = intr.options.getString(RollOptions.ATTACK_CHOICE_OPTION.name) ?? '';
 
 			//get the active character
 			const koboldUtils: KoboldUtils = new KoboldUtils(kobold);
@@ -80,24 +79,24 @@ export class RollAttackSubCommand implements Command {
 		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
-		const attackChoice = intr.options.getString(ChatArgs.ATTACK_CHOICE_OPTION.name, true);
+		const attackChoice = intr.options.getString(RollOptions.ATTACK_CHOICE_OPTION.name, true);
 		const targetSheetName = intr.options.getString(
 			InitOptions.INIT_CHARACTER_TARGET.name,
 			true
 		);
 		const attackModifierExpression =
-			intr.options.getString(ChatArgs.ATTACK_ROLL_MODIFIER_OPTION.name) ?? '';
+			intr.options.getString(RollOptions.ATTACK_ROLL_MODIFIER_OPTION.name) ?? '';
 		const damageModifierExpression =
-			intr.options.getString(ChatArgs.DAMAGE_ROLL_MODIFIER_OPTION.name) ?? '';
+			intr.options.getString(RollOptions.DAMAGE_ROLL_MODIFIER_OPTION.name) ?? '';
 		const attackRollOverwrite =
-			intr.options.getString(ChatArgs.ROLL_OVERWRITE_ATTACK_OPTION.name) ?? undefined;
+			intr.options.getString(RollOptions.ROLL_OVERWRITE_ATTACK_OPTION.name) ?? undefined;
 		const damageRollOverwrite =
-			intr.options.getString(ChatArgs.ROLL_OVERWRITE_DAMAGE_OPTION.name) ?? undefined;
-		const rollNote = intr.options.getString(ChatArgs.ROLL_NOTE_OPTION.name) ?? '';
-		const targetAC = intr.options.getInteger(ChatArgs.ROLL_TARGET_AC_OPTION.name);
+			intr.options.getString(RollOptions.ROLL_OVERWRITE_DAMAGE_OPTION.name) ?? undefined;
+		const rollNote = intr.options.getString(RollOptions.ROLL_NOTE_OPTION.name) ?? '';
+		const targetAC = intr.options.getInteger(RollOptions.ROLL_TARGET_AC_OPTION.name);
 
 		const secretRoll =
-			intr.options.getString(ChatArgs.ROLL_SECRET_OPTION.name) ??
+			intr.options.getString(RollOptions.ROLL_SECRET_OPTION.name) ??
 			L.en.commandOptions.rollSecret.choices.public.value();
 
 		const koboldUtils: KoboldUtils = new KoboldUtils(kobold);

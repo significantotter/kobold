@@ -1,5 +1,9 @@
 import {
+	ApplicationCommandOptionChoiceData,
 	ApplicationCommandType,
+	AutocompleteFocusedOption,
+	AutocompleteInteraction,
+	CacheType,
 	ChatInputCommandInteraction,
 	PermissionsString,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -15,9 +19,10 @@ import { CounterGroupHelpers } from './counter-group-helpers.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { CounterGroupOptions } from './counter-group-command-options.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
+import { AutocompleteUtils } from '../../../utils/kobold-service-utils/autocomplete-utils.js';
 
 export class CounterGroupDisplaySubCommand implements Command {
-	public names = [L.en.commands.counterGroup.display.name()];
+	public name = L.en.commands.counterGroup.display.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.counterGroup.display.name(),
@@ -27,6 +32,21 @@ export class CounterGroupDisplaySubCommand implements Command {
 	};
 	public deferType = CommandDeferType.NONE;
 	public requireClientPerms: PermissionsString[] = [];
+
+	public async autocomplete(
+		intr: AutocompleteInteraction<CacheType>,
+		option: AutocompleteFocusedOption,
+		{ kobold }: { kobold: Kobold }
+	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
+		if (!intr.isAutocomplete()) return;
+		if (option.name === CounterGroupOptions.COUNTER_GROUP_NAME_OPTION.name) {
+			const koboldUtils = new KoboldUtils(kobold);
+			const autocompleteUtils = new AutocompleteUtils(koboldUtils);
+			const match =
+				intr.options.getString(CounterGroupOptions.COUNTER_GROUP_NAME_OPTION.name) ?? '';
+			return autocompleteUtils.getCounterGroups(intr, match);
+		}
+	}
 
 	public async execute(
 		intr: ChatInputCommandInteraction,

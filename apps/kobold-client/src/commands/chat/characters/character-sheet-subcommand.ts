@@ -15,7 +15,7 @@ import { Command, CommandDeferType } from '../../index.js';
 import { GameOptions } from '../game/game-command-options.js';
 
 export class CharacterSheetSubCommand implements Command {
-	public names = [L.en.commands.character.sheet.name()];
+	public name = L.en.commands.character.sheet.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.character.sheet.name(),

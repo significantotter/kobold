@@ -21,7 +21,7 @@ import { KoboldError } from '../../../utils/KoboldError.js';
 import { StringUtils } from '@kobold/base-utils';
 
 export class InitNoteSubCommand implements Command {
-	public names = [L.en.commands.init.note.name()];
+	public name = L.en.commands.init.note.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.init.note.name(),

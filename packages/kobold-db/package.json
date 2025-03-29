@@ -21,7 +21,6 @@
 	"scripts": {
 		"build": "pnpm run compile",
 		"compile": "tsc -p tsconfig.build.json",
-		"knex": "NODE_OPTIONS='--max-old-space-size=4096' NODE_OPTIONS='--loader ts-node/esm' knex",
 		"kanel": "node --loader=ts-node/esm ./src/scripts/kanel-generate.ts",
 		"migrate": "node --loader=ts-node/esm ./src/scripts/run-migrate.ts",
 		"migrate-down": "node --loader=ts-node/esm ./src/scripts/migrate-down.ts",
@@ -33,7 +32,6 @@
 		"@kobold/config": "workspace:*",
 		"@kobold/pf2etools": "workspace:*",
 		"date-fns": "^2.30.0",
-		"knex": "^2.5.1",
 		"kysely": "^0.26.3",
 		"lodash": "^4.17.21",
 		"pg": "^8.11.3",

@@ -14,7 +14,6 @@ import { DiceUtils } from '../../../utils/dice-utils.js';
 import { RollBuilder } from '../../../utils/roll-builder.js';
 
 import _ from 'lodash';
-import { ChatArgs } from '../../../constants/chat-args.js';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import {
@@ -48,9 +47,10 @@ import { filterNotNullOrUndefined } from '../../../utils/type-guards.js';
 import { StringUtils } from '@kobold/base-utils';
 import { NethysDb } from '@kobold/nethys';
 import { NethysSheetImporter } from '../../../utils/sheet/sheet-import-nethys.js';
+import { RollOptions } from '../roll/roll-command-options.js';
 
 export class InitAddSubCommand implements Command {
-	public names = [L.en.commands.init.add.name()];
+	public name = L.en.commands.init.add.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.init.add.name(),
@@ -132,7 +132,7 @@ export class InitAddSubCommand implements Command {
 		const targetCreature = intr.options.getString(InitOptions.INIT_CREATURE_OPTION.name, true);
 		const customStatsString = intr.options.getString(InitOptions.INIT_CUSTOM_STATS_OPTION.name);
 		const initiativeValue = intr.options.getNumber(InitOptions.INIT_VALUE_OPTION.name);
-		const diceExpression = intr.options.getString(ChatArgs.ROLL_EXPRESSION_OPTION.name);
+		const diceExpression = intr.options.getString(RollOptions.ROLL_EXPRESSION_OPTION.name);
 		const hideStats = intr.options.getBoolean(InitOptions.INIT_HIDE_STATS_OPTION.name) ?? true;
 		const template = (intr.options.getString(InitOptions.INIT_ADD_TEMPLATE_OPTION.name) ?? '')
 			.trim()

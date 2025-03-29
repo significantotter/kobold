@@ -10,8 +10,6 @@ import {
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 
-import { ChatArgs } from '../../../constants/index.js';
-
 import { getEmoji } from '../../../constants/emoji.js';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
@@ -25,9 +23,10 @@ import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js
 import { Command, CommandDeferType } from '../../index.js';
 import { ActionOptions } from '../action/action-command-options.js';
 import { InitOptions } from '../init/init-command-options.js';
+import { RollOptions } from './roll-command-options.js';
 
 export class RollActionSubCommand implements Command {
-	public names = [L.en.commands.roll.action.name()];
+	public name = L.en.commands.roll.action.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.roll.action.name(),
@@ -92,23 +91,25 @@ export class RollActionSubCommand implements Command {
 			true
 		);
 		const attackModifierExpression =
-			intr.options.getString(ChatArgs.ATTACK_ROLL_MODIFIER_OPTION.name) ?? '';
+			intr.options.getString(RollOptions.ATTACK_ROLL_MODIFIER_OPTION.name) ?? '';
 		const damageModifierExpression =
-			intr.options.getString(ChatArgs.DAMAGE_ROLL_MODIFIER_OPTION.name) ?? '';
+			intr.options.getString(RollOptions.DAMAGE_ROLL_MODIFIER_OPTION.name) ?? '';
 		const attackRollOverwrite =
-			intr.options.getString(ChatArgs.ROLL_OVERWRITE_ATTACK_OPTION.name) ?? undefined;
+			intr.options.getString(RollOptions.ROLL_OVERWRITE_ATTACK_OPTION.name) ?? undefined;
 		const saveRollOverwrite =
-			intr.options.getString(ChatArgs.ROLL_OVERWRITE_SAVE_OPTION.name) ?? undefined;
+			intr.options.getString(RollOptions.ROLL_OVERWRITE_SAVE_OPTION.name) ?? undefined;
 		const damageRollOverwrite =
-			intr.options.getString(ChatArgs.ROLL_OVERWRITE_DAMAGE_OPTION.name) ?? undefined;
+			intr.options.getString(RollOptions.ROLL_OVERWRITE_DAMAGE_OPTION.name) ?? undefined;
 		const heightenLevel =
-			intr.options.getInteger(ChatArgs.HEIGHTEN_LEVEL_OPTION.name) ?? undefined;
-		const targetDC = intr.options.getInteger(ChatArgs.ROLL_TARGET_DC_OPTION.name) ?? undefined;
-		const saveRollType = intr.options.getString(ChatArgs.ROLL_SAVE_DICE_ROLL_OPTION.name) ?? '';
-		const rollNote = intr.options.getString(ChatArgs.ROLL_NOTE_OPTION.name) ?? '';
+			intr.options.getInteger(RollOptions.HEIGHTEN_LEVEL_OPTION.name) ?? undefined;
+		const targetDC =
+			intr.options.getInteger(RollOptions.ROLL_TARGET_DC_OPTION.name) ?? undefined;
+		const saveRollType =
+			intr.options.getString(RollOptions.ROLL_SAVE_DICE_ROLL_OPTION.name) ?? '';
+		const rollNote = intr.options.getString(RollOptions.ROLL_NOTE_OPTION.name) ?? '';
 
 		const secretRoll =
-			intr.options.getString(ChatArgs.ROLL_SECRET_OPTION.name) ??
+			intr.options.getString(RollOptions.ROLL_SECRET_OPTION.name) ??
 			L.en.commandOptions.rollSecret.choices.public.value();
 
 		const koboldUtils: KoboldUtils = new KoboldUtils(kobold);

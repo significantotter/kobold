@@ -35,7 +35,7 @@ import { ConditionOptions } from './condition-command-options.js';
 import { InputParseUtils } from '../../../utils/input-parse-utils.js';
 
 export class ConditionApplyCustomSubCommand implements Command {
-	public names = [L.en.commands.condition.applyCustom.name()];
+	public name = L.en.commands.condition.applyCustom.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.condition.applyCustom.name(),

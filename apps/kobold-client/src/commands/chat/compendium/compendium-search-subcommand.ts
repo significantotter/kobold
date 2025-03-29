@@ -29,7 +29,7 @@ import { NethysDb, NethysEmoji, NethysParser } from '@kobold/nethys';
 import { InteractionUtils } from '../../../utils/interaction-utils.js';
 
 export class CompendiumSearchSubCommand implements Command {
-	public names = [L.en.commands.compendium.search.name()];
+	public name = L.en.commands.compendium.search.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.compendium.search.name(),

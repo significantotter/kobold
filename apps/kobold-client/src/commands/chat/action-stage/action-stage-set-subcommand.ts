@@ -20,7 +20,7 @@ import _ from 'lodash';
 import { LocalizedString } from 'typesafe-i18n';
 
 export class ActionStageSetSubCommand implements Command {
-	public names = [L.en.commands.actionStage.set.name()];
+	public name = L.en.commands.actionStage.set.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.actionStage.set.name(),

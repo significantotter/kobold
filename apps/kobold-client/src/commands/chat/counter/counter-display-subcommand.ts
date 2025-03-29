@@ -22,7 +22,7 @@ import { KoboldError } from '../../../utils/KoboldError.js';
 import { AutocompleteUtils } from '../../../utils/kobold-service-utils/autocomplete-utils.js';
 
 export class CounterDisplaySubCommand implements Command {
-	public names = [L.en.commands.counter.display.name()];
+	public name = L.en.commands.counter.display.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.counter.display.name(),

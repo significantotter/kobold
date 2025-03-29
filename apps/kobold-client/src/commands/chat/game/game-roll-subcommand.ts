@@ -10,8 +10,6 @@ import {
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 
-import { ChatArgs } from '../../../constants/index.js';
-
 import _ from 'lodash';
 import { getEmoji } from '../../../constants/emoji.js';
 import L from '../../../i18n/i18n-node.js';
@@ -26,9 +24,10 @@ import { RollBuilder } from '../../../utils/roll-builder.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { InitOptions } from '../init/init-command-options.js';
 import { GameOptions } from './game-command-options.js';
+import { RollOptions } from '../roll/roll-command-options.js';
 
 export class GameRollSubCommand implements Command {
-	public names = [L.en.commands.game.roll.name()];
+	public name = L.en.commands.game.roll.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.game.roll.name(),
@@ -112,7 +111,7 @@ export class GameRollSubCommand implements Command {
 		const targetSheetName = intr.options.getString(InitOptions.INIT_CHARACTER_TARGET.name);
 
 		const secretRoll =
-			intr.options.getString(ChatArgs.ROLL_SECRET_OPTION.name) ??
+			intr.options.getString(RollOptions.ROLL_SECRET_OPTION.name) ??
 			L.en.commandOptions.rollSecret.choices.public.value();
 
 		const koboldUtils = new KoboldUtils(kobold);

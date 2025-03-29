@@ -29,7 +29,7 @@ import { Creature } from '../../../utils/creature.js';
 import { InputParseUtils } from '../../../utils/input-parse-utils.js';
 
 export class ModifierCreateModifierSubCommand implements Command {
-	public names = [L.en.commands.modifier.createModifier.name()];
+	public name = L.en.commands.modifier.createModifier.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.modifier.createModifier.name(),

@@ -10,8 +10,6 @@ import {
 } from 'discord.js';
 import { Kobold } from '@kobold/db';
 
-import { ChatArgs } from '../../../constants/index.js';
-
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
@@ -21,7 +19,7 @@ import { Command, CommandDeferType } from '../../index.js';
 import { CharacterOptions } from './command-options.js';
 
 export class CharacterSetDefaultSubCommand implements Command {
-	public names = [L.en.commands.character.setDefault.name()];
+	public name = L.en.commands.character.setDefault.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.character.setDefault.name(),
@@ -38,9 +36,10 @@ export class CharacterSetDefaultSubCommand implements Command {
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === ChatArgs.SET_ACTIVE_NAME_OPTION.name) {
+		if (option.name === CharacterOptions.SET_ACTIVE_NAME_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(ChatArgs.SET_ACTIVE_NAME_OPTION.name) ?? '';
+			const match =
+				intr.options.getString(CharacterOptions.SET_ACTIVE_NAME_OPTION.name) ?? '';
 
 			const { characterUtils } = new KoboldUtils(kobold);
 			const matchedCharacters = await characterUtils.findOwnedCharacterByName(
@@ -74,7 +73,7 @@ export class CharacterSetDefaultSubCommand implements Command {
 			CharacterOptions.CHARACTER_SET_DEFAULT_SCOPE.name,
 			true
 		);
-		const charName = intr.options.getString(ChatArgs.SET_ACTIVE_NAME_OPTION.name, true);
+		const charName = intr.options.getString(CharacterOptions.SET_ACTIVE_NAME_OPTION.name, true);
 		const currentGuildId = intr.guildId;
 		const currentChannelId = intr.channelId;
 

@@ -24,7 +24,7 @@ import { CounterGroupHelpers } from '../counter-group/counter-group-helpers.js';
 import { CounterHelpers } from './counter-helpers.js';
 
 export class CounterResetSubCommand implements Command {
-	public names = [L.en.commands.counter.reset.name()];
+	public name = L.en.commands.counter.reset.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.counter.reset.name(),
@@ -86,7 +86,9 @@ export class CounterResetSubCommand implements Command {
 				counter.current = counter.recoverTo ?? counter.current;
 			}
 			counter.current =
-				counter.recoverTo === -1 ? counter.max ?? 0 : counter.recoverTo ?? counter.current;
+				counter.recoverTo === -1
+					? (counter.max ?? 0)
+					: (counter.recoverTo ?? counter.current);
 		}
 
 		await kobold.sheetRecord.update(

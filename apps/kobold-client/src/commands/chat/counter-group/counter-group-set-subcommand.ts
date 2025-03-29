@@ -22,9 +22,10 @@ import { Command, CommandDeferType } from '../../index.js';
 import { CounterGroupOptions } from './counter-group-command-options.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
 import { InputParseUtils } from '../../../utils/input-parse-utils.js';
+import { AutocompleteUtils } from '../../../utils/kobold-service-utils/autocomplete-utils.js';
 
 export class CounterGroupSetSubCommand implements Command {
-	public names = [L.en.commands.counterGroup.set.name()];
+	public name = L.en.commands.counterGroup.set.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.counterGroup.set.name(),
@@ -42,6 +43,13 @@ export class CounterGroupSetSubCommand implements Command {
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
+		if (option.name === CounterGroupOptions.COUNTER_GROUP_NAME_OPTION.name) {
+			const koboldUtils = new KoboldUtils(kobold);
+			const autocompleteUtils = new AutocompleteUtils(koboldUtils);
+			const match =
+				intr.options.getString(CounterGroupOptions.COUNTER_GROUP_NAME_OPTION.name) ?? '';
+			return autocompleteUtils.getCounterGroups(intr, match);
+		}
 	}
 
 	public async execute(

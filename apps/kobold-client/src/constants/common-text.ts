@@ -103,5 +103,6 @@ export let refs = {
 		UseSoundboard: 'Use Soundboard',
 		UseExternalSounds: 'Use External Sounds',
 		SendVoiceMessages: 'Send Voice Messages',
+		UseExternalApps: 'Use External Applications',
 	},
 };

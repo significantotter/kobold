@@ -18,7 +18,7 @@ import { Command, CommandDeferType } from '../../index.js';
 import { ActionStageOptions } from './action-stage-command-options.js';
 
 export class ActionStageRemoveSubCommand implements Command {
-	public names = [L.en.commands.actionStage.remove.name()];
+	public name = L.en.commands.actionStage.remove.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.actionStage.remove.name(),

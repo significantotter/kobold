@@ -11,7 +11,6 @@ import {
 import { RateLimiter } from 'discord.js-rate-limiter';
 
 import _ from 'lodash';
-import { ChatArgs } from '../../../constants/chat-args.js';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold } from '@kobold/db';
@@ -25,9 +24,10 @@ import { Command, CommandDeferType } from '../../index.js';
 import { InitOptions } from '../init/init-command-options.js';
 import { GameOptions } from './game-command-options.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
+import { RollOptions } from '../roll/roll-command-options.js';
 
 export class GameInitSubCommand implements Command {
-	public names = [L.en.commands.game.init.name()];
+	public name = L.en.commands.game.init.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.game.init.name(),
@@ -52,9 +52,9 @@ export class GameInitSubCommand implements Command {
 			const { gameUtils } = new KoboldUtils(kobold);
 			const activeGame = await gameUtils.getActiveGame(intr.user.id, intr.guildId ?? '');
 			return gameUtils.autocompleteGameCharacter(targetCharacter, activeGame);
-		} else if (option.name === ChatArgs.SKILL_CHOICE_OPTION.name) {
+		} else if (option.name === RollOptions.SKILL_CHOICE_OPTION.name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(ChatArgs.SKILL_CHOICE_OPTION.name) ?? '';
+			const match = intr.options.getString(RollOptions.SKILL_CHOICE_OPTION.name) ?? '';
 
 			const { gameUtils } = new KoboldUtils(kobold);
 			//get the active game
@@ -104,8 +104,8 @@ export class GameInitSubCommand implements Command {
 		koboldUtils.assertActiveGameNotNull(activeGame);
 
 		const initiativeValue = intr.options.getNumber(InitOptions.INIT_VALUE_OPTION.name);
-		const skillChoice = intr.options.getString(ChatArgs.SKILL_CHOICE_OPTION.name);
-		const diceExpression = intr.options.getString(ChatArgs.ROLL_EXPRESSION_OPTION.name);
+		const skillChoice = intr.options.getString(RollOptions.SKILL_CHOICE_OPTION.name);
+		const diceExpression = intr.options.getString(RollOptions.ROLL_EXPRESSION_OPTION.name);
 		const targetCharacter = intr.options.getString(
 			GameOptions.GAME_TARGET_CHARACTER.name,
 			true
@@ -159,7 +159,7 @@ export class GameInitSubCommand implements Command {
 			});
 			const initiativeResult = _.isNumber(rollResult)
 				? rollResult
-				: rollResult.getRollTotalArray()[0] ?? 0;
+				: (rollResult.getRollTotalArray()[0] ?? 0);
 
 			const actorName = InitiativeBuilderUtils.getUniqueInitActorName(
 				currentInitiative,

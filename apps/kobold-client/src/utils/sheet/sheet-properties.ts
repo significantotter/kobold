@@ -1071,7 +1071,7 @@ export class SheetProperties {
 		return getDefaultSheet();
 	}
 
-	public static shorthandFromAbility: { [k in AbilityEnum]: string } = {
+	public static shorthandFromAbility: Record<AbilityEnum, string> = {
 		[AbilityEnum.strength]: 'str',
 		[AbilityEnum.dexterity]: 'dex',
 		[AbilityEnum.constitution]: 'con',

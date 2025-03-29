@@ -889,7 +889,7 @@ export class Creature {
 		);
 	}
 
-	public get abilities(): { [k in AbilityEnum]: number } {
+	public get abilities(): Record<AbilityEnum, number> {
 		return {
 			strength: this.sheet.intProperties.strength ?? 0,
 			dexterity: this.sheet.intProperties.dexterity ?? 0,
@@ -971,11 +971,11 @@ export class Creature {
 		return _.keyBy(this.actions, action => action.name);
 	}
 
-	public get statBonuses(): { [k in SheetStatKeys]: number } {
+	public get statBonuses(): Record<SheetStatKeys, number> {
 		return _.mapValues(this.sheet.stats, stat => this.interpretBonus(stat));
 	}
 
-	public get statDcs(): { [k in SheetStatKeys]: number } {
+	public get statDcs(): Record<SheetStatKeys, number> {
 		return _.mapValues(this.sheet.stats, stat => this.interpretDc(stat));
 	}
 

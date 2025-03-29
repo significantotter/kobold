@@ -86,7 +86,7 @@ export class StringUtils {
 		if (!objectArray || objectArray.length === 0) return undefined;
 		return objectArray.sort(
 			StringUtils.generateSorterByWordDistance<T>(targetWord, obj =>
-				_.isString(obj[propertyName]) ? obj[propertyName] : null
+				_.isString(obj[propertyName]) ? obj[propertyName] : ''
 			)
 		)[0];
 	}

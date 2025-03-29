@@ -234,7 +234,6 @@ export async function nethysMarkdownToDiscordMarkdown(nethysMarkdown: string): P
 	return await pipelineMdToHtml()
 		.use(rehypeRemark)
 		.use(remarkStringify, { tightDefinitions: true })
-		// .use(remarkPrettier, { format: true, report: false })
 		.process(
 			nethysMarkdown
 				// replace <title> with <h1>

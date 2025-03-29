@@ -9,7 +9,6 @@ import {
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
-import { ChatArgs } from '../../../constants/chat-args.js';
 
 import { getEmoji } from '../../../constants/emoji.js';
 import L from '../../../i18n/i18n-node.js';
@@ -25,9 +24,10 @@ import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js
 import { RollBuilder } from '../../../utils/roll-builder.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { InitOptions } from './init-command-options.js';
+import { RollOptions } from '../roll/roll-command-options.js';
 
 export class InitRollSubCommand implements Command {
-	public names = [L.en.commands.init.roll.name()];
+	public name = L.en.commands.init.roll.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.init.roll.name(),
@@ -87,22 +87,24 @@ export class InitRollSubCommand implements Command {
 		);
 
 		const attackRollOverwrite =
-			intr.options.getString(ChatArgs.ROLL_OVERWRITE_ATTACK_OPTION.name) ?? undefined;
+			intr.options.getString(RollOptions.ROLL_OVERWRITE_ATTACK_OPTION.name) ?? undefined;
 		const saveRollOverwrite =
-			intr.options.getString(ChatArgs.ROLL_OVERWRITE_SAVE_OPTION.name) ?? undefined;
+			intr.options.getString(RollOptions.ROLL_OVERWRITE_SAVE_OPTION.name) ?? undefined;
 		const damageRollOverwrite =
-			intr.options.getString(ChatArgs.ROLL_OVERWRITE_DAMAGE_OPTION.name) ?? undefined;
+			intr.options.getString(RollOptions.ROLL_OVERWRITE_DAMAGE_OPTION.name) ?? undefined;
 
-		const modifierExpression = intr.options.getString(ChatArgs.ROLL_MODIFIER_OPTION.name) ?? '';
+		const modifierExpression =
+			intr.options.getString(RollOptions.ROLL_MODIFIER_OPTION.name) ?? '';
 		const damageModifierExpression =
-			intr.options.getString(ChatArgs.DAMAGE_ROLL_MODIFIER_OPTION.name) ?? '';
-		const targetAC = intr.options.getInteger(ChatArgs.ROLL_TARGET_AC_OPTION.name) ?? undefined;
+			intr.options.getString(RollOptions.DAMAGE_ROLL_MODIFIER_OPTION.name) ?? '';
+		const targetAC =
+			intr.options.getInteger(RollOptions.ROLL_TARGET_AC_OPTION.name) ?? undefined;
 
 		const secretRoll =
-			intr.options.getString(ChatArgs.ROLL_SECRET_OPTION.name) ??
+			intr.options.getString(RollOptions.ROLL_SECRET_OPTION.name) ??
 			L.en.commandOptions.rollSecret.choices.public.value();
 
-		const rollNote = intr.options.getString(ChatArgs.ROLL_NOTE_OPTION.name) ?? '';
+		const rollNote = intr.options.getString(RollOptions.ROLL_NOTE_OPTION.name) ?? '';
 
 		const { gameUtils, creatureUtils } = new KoboldUtils(kobold);
 

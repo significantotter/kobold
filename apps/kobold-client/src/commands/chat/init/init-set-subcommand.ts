@@ -22,7 +22,7 @@ import { Command, CommandDeferType } from '../../index.js';
 import { InitOptions } from './init-command-options.js';
 
 export class InitSetSubCommand implements Command {
-	public names = [L.en.commands.init.set.name()];
+	public name = L.en.commands.init.set.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.init.set.name(),

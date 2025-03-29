@@ -21,7 +21,7 @@ import { ActionOptions } from './action-command-options.js';
 import { InputParseUtils } from '../../../utils/input-parse-utils.js';
 
 export class ActionSetSubCommand implements Command {
-	public names = [L.en.commands.action.set.name()];
+	public name = L.en.commands.action.set.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.action.set.name(),

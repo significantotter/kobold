@@ -19,7 +19,7 @@ import { Command, CommandDeferType } from '../../index.js';
 import { SettingsOptions } from './settings-command-options.js';
 
 export class SettingsCommand implements Command {
-	public names = [L.en.commands.settings.name()];
+	public name = L.en.commands.settings.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.settings.name(),

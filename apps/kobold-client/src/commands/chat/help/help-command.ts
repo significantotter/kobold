@@ -34,7 +34,7 @@ function createCommandOperationHelpField(
 }
 
 export class HelpCommand implements Command {
-	public names = [L.en.commands.help.name()];
+	public name = L.en.commands.help.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.help.name(),

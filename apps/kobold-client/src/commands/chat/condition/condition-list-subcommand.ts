@@ -20,7 +20,7 @@ import { ModifierHelpers } from './../modifier/modifier-helpers.js';
 import { GameplayOptions } from '../gameplay/gameplay-command-options.js';
 
 export class ConditionListSubCommand implements Command {
-	public names = [L.en.commands.condition.list.name()];
+	public name = L.en.commands.condition.list.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.condition.list.name(),

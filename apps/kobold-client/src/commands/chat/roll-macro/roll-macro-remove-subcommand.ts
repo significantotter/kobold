@@ -24,7 +24,7 @@ import { Command, CommandDeferType } from '../../index.js';
 import { RollMacroOptions } from './roll-macro-command-options.js';
 
 export class RollMacroRemoveSubCommand implements Command {
-	public names = [L.en.commands.rollMacro.remove.name()];
+	public name = L.en.commands.rollMacro.remove.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.rollMacro.remove.name(),

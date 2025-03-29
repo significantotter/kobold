@@ -17,7 +17,7 @@ import { CounterOptions } from './counter-command-options.js';
 import { CounterGroupHelpers } from '../counter-group/counter-group-helpers.js';
 
 export class CounterListSubCommand implements Command {
-	public names = [L.en.commands.counter.list.name()];
+	public name = L.en.commands.counter.list.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.counter.list.name(),

@@ -14,7 +14,7 @@ import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js
 import { Command, CommandDeferType } from '../../index.js';
 
 export class CharacterListSubCommand implements Command {
-	public names = [L.en.commands.character.list.name()];
+	public name = L.en.commands.character.list.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.character.list.name(),

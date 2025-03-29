@@ -21,7 +21,7 @@ import { GameOptions } from './game-command-options.js';
 import { Creature } from '../../../utils/creature.js';
 
 export class GamePartyStatusSubCommand implements Command {
-	public names = [L.en.commands.game.partyStatus.name()];
+	public name = L.en.commands.game.partyStatus.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.game.partyStatus.name(),

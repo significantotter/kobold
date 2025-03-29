@@ -10,7 +10,6 @@ import {
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
-import { ChatArgs } from '../../../constants/chat-args.js';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 
@@ -18,9 +17,10 @@ import { CommandUtils } from '../../../utils/index.js';
 import { InjectedServices } from '../../command.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { InitOptions } from './init-command-options.js';
+import { RollOptions } from '../roll/roll-command-options.js';
 
 export class InitCommand implements Command {
-	public names = [L.en.commands.init.name()];
+	public name = L.en.commands.init.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.init.name(),
@@ -61,13 +61,13 @@ export class InitCommand implements Command {
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [
 					{
-						...ChatArgs.SKILL_CHOICE_OPTION,
+						...RollOptions.SKILL_CHOICE_OPTION,
 						description:
 							L.en.commandOptions.skillChoice.overwrites.initJoinDescription(),
 						required: false,
 					},
 					{
-						...ChatArgs.ROLL_EXPRESSION_OPTION,
+						...RollOptions.ROLL_EXPRESSION_OPTION,
 						description:
 							'Dice to roll to join initiative. ' +
 							'Modifies your skill if you chose a skill.',
@@ -92,7 +92,7 @@ export class InitCommand implements Command {
 					},
 					InitOptions.INIT_CUSTOM_STATS_OPTION,
 					{
-						...ChatArgs.ROLL_EXPRESSION_OPTION,
+						...RollOptions.ROLL_EXPRESSION_OPTION,
 						description:
 							L.en.commandOptions.rollExpression.overwrites.initAddDescription(),
 						required: false,
@@ -163,25 +163,25 @@ export class InitCommand implements Command {
 					},
 					{ ...InitOptions.INIT_CHARACTER_TARGET, required: true },
 					{
-						...ChatArgs.ROLL_MODIFIER_OPTION,
+						...RollOptions.ROLL_MODIFIER_OPTION,
 						required: false,
 					},
 					{
-						...ChatArgs.DAMAGE_ROLL_MODIFIER_OPTION,
+						...RollOptions.DAMAGE_ROLL_MODIFIER_OPTION,
 						required: false,
 					},
-					ChatArgs.ROLL_OVERWRITE_ATTACK_OPTION,
-					ChatArgs.ROLL_OVERWRITE_SAVE_OPTION,
-					ChatArgs.ROLL_OVERWRITE_DAMAGE_OPTION,
+					RollOptions.ROLL_OVERWRITE_ATTACK_OPTION,
+					RollOptions.ROLL_OVERWRITE_SAVE_OPTION,
+					RollOptions.ROLL_OVERWRITE_DAMAGE_OPTION,
 					{
-						...ChatArgs.ROLL_NOTE_OPTION,
+						...RollOptions.ROLL_NOTE_OPTION,
 						required: false,
 					},
 					{
-						...ChatArgs.ROLL_SECRET_OPTION,
+						...RollOptions.ROLL_SECRET_OPTION,
 						required: false,
 					},
-					ChatArgs.ROLL_TARGET_AC_OPTION,
+					RollOptions.ROLL_TARGET_AC_OPTION,
 				],
 			},
 			{

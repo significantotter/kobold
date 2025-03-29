@@ -26,7 +26,7 @@ import { InputParseUtils } from '../../../utils/input-parse-utils.js';
 import { StringUtils } from '@kobold/base-utils';
 
 export class ModifierSetSubCommand implements Command {
-	public names = [L.en.commands.modifier.set.name()];
+	public name = L.en.commands.modifier.set.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.modifier.set.name(),

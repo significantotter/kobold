@@ -9,6 +9,7 @@ import {
 	MessageReaction,
 	ModalBuilder,
 	ModalSubmitInteraction,
+	PartialGroupDMChannel,
 	SelectMenuInteraction,
 	TextBasedChannel,
 	User,
@@ -40,6 +41,9 @@ export class CollectorUtils {
 		});
 
 		return new Promise(async (resolve, reject) => {
+			if (message.channel instanceof PartialGroupDMChannel) {
+				return reject('Cannot collect in a partial group DM channel');
+			}
 			let btnCollector = message.createMessageComponentCollector({
 				componentType: ComponentType.Button,
 				filter: intr => {
@@ -130,6 +134,9 @@ export class CollectorUtils {
 		});
 
 		return new Promise(async (resolve, reject) => {
+			if (message.channel instanceof PartialGroupDMChannel) {
+				return reject('Cannot collect in a partial group DM channel');
+			}
 			let smCollector = message.createMessageComponentCollector({
 				componentType: ComponentType.SelectMenu,
 				filter: intr => {
@@ -222,6 +229,9 @@ export class CollectorUtils {
 		});
 
 		return new Promise(async (resolve, reject) => {
+			if (message.channel instanceof PartialGroupDMChannel) {
+				return reject('Cannot collect in a partial group DM channel');
+			}
 			let btnCollector = message.createMessageComponentCollector({
 				componentType: ComponentType.Button,
 				filter: intr => {
@@ -321,6 +331,9 @@ export class CollectorUtils {
 		});
 
 		return new Promise(async (resolve, reject) => {
+			if (message.channel instanceof PartialGroupDMChannel) {
+				return reject('Cannot collect in a partial group DM channel');
+			}
 			let reactCollector = message.createReactionCollector({
 				filter: (msgReaction, reactor) => {
 					if (defaultedOptions.target) {
@@ -404,6 +417,9 @@ export class CollectorUtils {
 		});
 
 		return new Promise(async (resolve, reject) => {
+			if (channel instanceof PartialGroupDMChannel) {
+				return reject('Cannot collect in a partial group DM channel');
+			}
 			let msgCollector = channel.createMessageCollector({
 				filter: message => {
 					if (defaultedOptions.target) {

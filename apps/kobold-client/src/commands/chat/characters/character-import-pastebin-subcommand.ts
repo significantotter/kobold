@@ -24,7 +24,7 @@ export const zPasteBinImport = z.object({
 });
 
 export class CharacterImportPasteBinSubCommand implements Command {
-	public names = [L.en.commands.character.importPasteBin.name()];
+	public name = L.en.commands.character.importPasteBin.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.character.importPasteBin.name(),

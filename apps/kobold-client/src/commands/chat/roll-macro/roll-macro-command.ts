@@ -19,7 +19,7 @@ import { InjectedServices } from '../../command.js';
 import { Command, CommandDeferType } from '../../index.js';
 
 export class RollMacroCommand implements Command {
-	public names = [L.en.commands.rollMacro.name()];
+	public name = L.en.commands.rollMacro.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.rollMacro.name(),

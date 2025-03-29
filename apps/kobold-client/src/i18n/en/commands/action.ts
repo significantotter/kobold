@@ -12,7 +12,7 @@ export default {
 		description: 'Creates an action.',
 		interactions: {
 			created: 'Yip! I created the action {actionName} for {characterName}.',
-			alreadyExists: 'Yip! A action named {actionName} already exists for {characterName}.',
+			alreadyExists: 'Yip! An action named {actionName} already exists for {characterName}.',
 		},
 	},
 	remove: {
@@ -52,7 +52,7 @@ export default {
 				"Yip! I can't figure out how to read that! Try exporting another action to check and make " +
 				"sure you're formatting it right!",
 			badUrl: "Yip! I don't understand that Url! Copy the pastebin url for the pasted actions directly into the Url field.",
-			imported: 'Yip! I successfully imported those actions to {characterName}.',
+			imported: 'Yip! I imported those actions to {characterName}.',
 		},
 	},
 	export: {

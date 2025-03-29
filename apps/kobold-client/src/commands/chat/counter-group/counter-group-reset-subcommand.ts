@@ -23,7 +23,7 @@ import { CounterUtils } from '../../../utils/counter-utils.js';
 import { InteractionUtils } from '../../../utils/interaction-utils.js';
 
 export class CounterGroupResetSubCommand implements Command {
-	public names = [L.en.commands.counterGroup.reset.name()];
+	public name = L.en.commands.counterGroup.reset.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.counterGroup.reset.name(),

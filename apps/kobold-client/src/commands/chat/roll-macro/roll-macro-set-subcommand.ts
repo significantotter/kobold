@@ -24,7 +24,7 @@ import { Command, CommandDeferType } from '../../index.js';
 import { RollMacroOptions } from './roll-macro-command-options.js';
 
 export class RollMacroSetSubCommand implements Command {
-	public names = [L.en.commands.rollMacro.set.name()];
+	public name = L.en.commands.rollMacro.set.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.rollMacro.set.name(),

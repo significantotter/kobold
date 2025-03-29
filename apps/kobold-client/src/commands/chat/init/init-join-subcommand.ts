@@ -11,7 +11,6 @@ import {
 import { RateLimiter } from 'discord.js-rate-limiter';
 
 import _ from 'lodash';
-import { ChatArgs } from '../../../constants/chat-args.js';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold } from '@kobold/db';
@@ -24,9 +23,10 @@ import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js
 import { Command, CommandDeferType } from '../../index.js';
 import { InitOptions } from './init-command-options.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
+import { RollOptions } from '../roll/roll-command-options.js';
 
 export class InitJoinSubCommand implements Command {
-	public names = [L.en.commands.init.join.name()];
+	public name = L.en.commands.init.join.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.init.join.name(),
@@ -44,10 +44,10 @@ export class InitJoinSubCommand implements Command {
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === ChatArgs.SKILL_CHOICE_OPTION.name) {
+		if (option.name === RollOptions.SKILL_CHOICE_OPTION.name) {
 			const { characterUtils } = new KoboldUtils(kobold);
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(ChatArgs.SKILL_CHOICE_OPTION.name) ?? '';
+			const match = intr.options.getString(RollOptions.SKILL_CHOICE_OPTION.name) ?? '';
 
 			//get the active character
 			const activeCharacter = await characterUtils.getActiveCharacter(intr);
@@ -92,8 +92,8 @@ export class InitJoinSubCommand implements Command {
 			return;
 		}
 		const initiativeValue = intr.options.getNumber(InitOptions.INIT_VALUE_OPTION.name);
-		const skillChoice = intr.options.getString(ChatArgs.SKILL_CHOICE_OPTION.name);
-		const diceExpression = intr.options.getString(ChatArgs.ROLL_EXPRESSION_OPTION.name);
+		const skillChoice = intr.options.getString(RollOptions.SKILL_CHOICE_OPTION.name);
+		const diceExpression = intr.options.getString(RollOptions.ROLL_EXPRESSION_OPTION.name);
 		const hideStats = intr.options.getBoolean(InitOptions.INIT_HIDE_STATS_OPTION.name) ?? false;
 
 		const rollResult = await InitiativeBuilderUtils.rollNewInitiative({
@@ -105,7 +105,7 @@ export class InitJoinSubCommand implements Command {
 		});
 		const initiativeResult = _.isNumber(rollResult)
 			? rollResult
-			: rollResult.getRollTotalArray()[0] ?? 0;
+			: (rollResult.getRollTotalArray()[0] ?? 0);
 
 		const actorName = InitiativeBuilderUtils.getUniqueInitActorName(
 			currentInitiative,

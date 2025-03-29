@@ -27,7 +27,7 @@ import { InitOptions } from './init-command-options.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
 
 export class InitRemoveSubCommand implements Command {
-	public names = [L.en.commands.init.remove.name()];
+	public name = L.en.commands.init.remove.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.init.remove.name(),

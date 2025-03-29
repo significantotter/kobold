@@ -5,30 +5,21 @@ import { refs } from '../constants/common-text.js';
 import { FormatUtils } from './format-utils.js';
 import { InteractionUtils } from './interaction-utils.js';
 import { KoboldEmbed } from './kobold-embed-utils.js';
+import { StringUtils } from '@kobold/base-utils';
 
 export class CommandUtils {
 	public static getSubCommandByName(commands: Command[], input: string): Command | undefined {
-		return commands.find(command => command.names.includes(input));
+		const closestCommandName = StringUtils.findClosestInObjectArray(input, commands, 'name');
+		if (!closestCommandName) return undefined;
+		return input.trim().toLowerCase() === closestCommandName.name.trim().toLowerCase() ||
+			closestCommandName.name.trim().toLowerCase().includes(input.trim().toLowerCase())
+			? closestCommandName
+			: undefined;
 	}
 	public static findCommand(commands: Command[], commandParts: string[]): Command | undefined {
-		let found = [...commands];
-		let closestMatch: Command | undefined = undefined;
-		for (let [index, commandPart] of commandParts.entries()) {
-			found = found.filter(command => command.names[index] === commandPart);
-			if (found.length === 0) {
-				return closestMatch;
-			}
-
-			if (found.length === 1) {
-				return found[0];
-			}
-
-			let exactMatch = found.find(command => command.names.length === index + 1);
-			if (exactMatch) {
-				closestMatch = exactMatch;
-			}
-		}
-		return closestMatch;
+		return commands.find(
+			command => command.name.trim().toLowerCase() === commandParts[0].trim().toLowerCase()
+		);
 	}
 	public static async runChecks(command: Command, intr: CommandInteraction): Promise<boolean> {
 		if (command.cooldown) {

@@ -24,7 +24,7 @@ import { Command, CommandDeferType } from '../../index.js';
 import { ModifierOptions } from './modifier-command-options.js';
 
 export class ModifierRemoveSubCommand implements Command {
-	public names = [L.en.commands.modifier.remove.name()];
+	public name = L.en.commands.modifier.remove.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.modifier.remove.name(),

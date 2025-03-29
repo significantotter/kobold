@@ -12,15 +12,15 @@ import {
 import { RateLimiter } from 'discord.js-rate-limiter';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 
-import { ChatArgs } from '../../../constants/chat-args.js';
 import L from '../../../i18n/i18n-node.js';
 import { CommandUtils } from '../../../utils/index.js';
 import { InjectedServices } from '../../command.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { GameplayOptions } from './gameplay-command-options.js';
+import { CharacterOptions } from '../characters/command-options.js';
 
 export class GameplayCommand implements Command {
-	public names = [L.en.commands.gameplay.name()];
+	public name = L.en.commands.gameplay.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.gameplay.name(),
@@ -60,7 +60,7 @@ export class GameplayCommand implements Command {
 				description: L.en.commands.gameplay.tracker.description(),
 				type: ApplicationCommandOptionType.Subcommand,
 				options: [
-					{ ...ChatArgs.SET_ACTIVE_NAME_OPTION, required: false },
+					{ ...CharacterOptions.SET_ACTIVE_NAME_OPTION, required: false },
 					GameplayOptions.GAMEPLAY_TARGET_CHANNEL,
 					GameplayOptions.GAMEPLAY_TRACKER_MODE,
 				],
