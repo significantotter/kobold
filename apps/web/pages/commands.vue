@@ -100,7 +100,6 @@ const setTocValueActive = (item: { commandName: string; subCommandName: string }
 	const targetId = item.subCommandName
 		? `${item.commandName}_${item.subCommandName}`
 		: item.commandName;
-	console.log('setting active', targetId);
 	document.getElementById(targetId)?.scrollIntoView({ behavior: 'smooth' });
 };
 
