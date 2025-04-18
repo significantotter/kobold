@@ -22,9 +22,6 @@ import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { SheetUtils } from '../../../utils/sheet/sheet-utils.js';
 import { Command, CommandDeferType } from '../../index.js';
-import { ModifierHelpers } from './modifier-helpers.js';
-import { compileExpression } from 'filtrex';
-import { DiceUtils } from '../../../utils/dice-utils.js';
 import { Creature } from '../../../utils/creature.js';
 import { InputParseUtils } from '../../../utils/input-parse-utils.js';
 
@@ -132,6 +129,7 @@ export class ModifierCreateModifierSubCommand implements Command {
 		if (modifierSheetValues) {
 			parsedSheetAdjustments = InputParseUtils.parseAsSheetAdjustments(
 				modifierSheetValues,
+				modifierType,
 				activeCharacter.sheetRecord.sheet
 			);
 		}

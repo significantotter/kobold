@@ -100,10 +100,11 @@ export class InputParseUtils {
 
 	static parseAsSheetAdjustments(
 		input: string,
+		type: SheetAdjustmentTypeEnum,
 		targetSheet = getDefaultSheet()
 	): SheetAdjustment[] {
 		// attempt to use the adjustments to make sure they're valid
-		const sheetAdjustments = SheetUtils.stringToSheetAdjustments(input);
+		const sheetAdjustments = SheetUtils.stringToSheetAdjustments(input, type);
 		SheetUtils.adjustSheetWithModifiers(targetSheet, [
 			{
 				name: 'test',
