@@ -64,16 +64,11 @@ export class CharacterUpdateSubCommand implements Command {
 				);
 			}
 
-			let options:
-				| {
-						useStamina: boolean;
-				  }
-				| undefined;
-
-			if (useStamina != null)
-				options = {
-					useStamina,
-				};
+			let options: {
+				useStamina: boolean;
+			} = {
+				useStamina: useStamina ?? activeCharacter.sheetRecord.sheet.staticInfo.usesStamina,
+			};
 
 			const fetcher = new PathbuilderCharacterFetcher(intr, kobold, intr.user.id, options);
 			const newCharacter = await fetcher.update({ jsonId });
@@ -89,8 +84,6 @@ export class CharacterUpdateSubCommand implements Command {
 			return;
 		} else if (activeCharacter.importSource === 'pastebin') {
 			const url = intr.options.getString(CharacterOptions.IMPORT_PASTEBIN_OPTION.name);
-			const useStamina =
-				intr.options.getBoolean(CharacterOptions.IMPORT_USE_STAMINA_OPTION.name) ?? false;
 
 			if (!url) {
 				throw new KoboldError(
