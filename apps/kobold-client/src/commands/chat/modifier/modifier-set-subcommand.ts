@@ -169,8 +169,10 @@ export class ModifierSetSubCommand implements Command {
 		} else if (fieldToChange === 'severity') {
 			targetModifier.severity = InputParseUtils.parseAsNullableNumber(newFieldValue);
 		} else if (fieldToChange === 'sheet-values') {
-			targetModifier.sheetAdjustments =
-				InputParseUtils.parseAsSheetAdjustments(newFieldValue);
+			targetModifier.sheetAdjustments = InputParseUtils.parseAsSheetAdjustments(
+				newFieldValue,
+				targetModifier.type
+			);
 		} else {
 			// if a field wasn't provided, or the field isn't present in our options, send an error
 			await InteractionUtils.send(

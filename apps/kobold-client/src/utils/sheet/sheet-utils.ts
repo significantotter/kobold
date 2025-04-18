@@ -27,7 +27,10 @@ export class SheetUtils {
 			severityAppliedActiveModifiers.flatMap(modifier => modifier.sheetAdjustments)
 		);
 	}
-	public static stringToSheetAdjustments(input: string): SheetAdjustment[] {
+	public static stringToSheetAdjustments(
+		input: string,
+		type: SheetAdjustmentTypeEnum
+	): SheetAdjustment[] {
 		const adjustmentSegments = input.split(';').filter(result => result.trim() !== '');
 		const sheetAdjustments = adjustmentSegments.flatMap(segment => {
 			const adjustmentParts = /([^=+-]+)([=+-])(.+)/.exec(segment);
@@ -45,7 +48,7 @@ export class SheetUtils {
 			}
 			const standardizedProperty = SheetProperties.standardizeProperty(attributeName);
 			const sheetAdjustment: SheetAdjustment = {
-				type: SheetAdjustmentTypeEnum.untyped,
+				type,
 				propertyType: SheetAdjuster.getPropertyType(standardizedProperty),
 				property: standardizedProperty,
 				operation: operator as SheetAdjustmentOperationEnum,

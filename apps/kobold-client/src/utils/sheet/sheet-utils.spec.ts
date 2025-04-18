@@ -143,7 +143,7 @@ describe('SheetUtils', () => {
 	});
 
 	describe('stringToSheetAdjustments', () => {
-		it('should convert a string to sheet adjustments', () => {
+		it('should convert a string to, SheetAdjustmentTypeEnum.untyped sheet adjustments', () => {
 			const input = 'Strength + 2; Dex - 1';
 			const sheet: Sheet = sheetWithTestProperties();
 			const adjustments: SheetAdjustment[] = [
@@ -162,7 +162,9 @@ describe('SheetUtils', () => {
 					value: '1',
 				},
 			];
-			expect(SheetUtils.stringToSheetAdjustments(input)).toEqual(adjustments);
+			expect(
+				SheetUtils.stringToSheetAdjustments(input, SheetAdjustmentTypeEnum.untyped)
+			).toEqual(adjustments);
 		});
 
 		it('should properly parse a group', () => {
@@ -177,7 +179,9 @@ describe('SheetUtils', () => {
 					value: '1',
 				},
 			];
-			expect(SheetUtils.stringToSheetAdjustments(input)).toEqual(adjustments);
+			expect(
+				SheetUtils.stringToSheetAdjustments(input, SheetAdjustmentTypeEnum.untyped)
+			).toEqual(adjustments);
 		});
 		it('should properly parse a group with severity', () => {
 			const input = 'str skills-[severity]';
@@ -190,13 +194,17 @@ describe('SheetUtils', () => {
 					value: '[severity]',
 				},
 			];
-			expect(SheetUtils.stringToSheetAdjustments(input)).toEqual(adjustments);
+			expect(
+				SheetUtils.stringToSheetAdjustments(input, SheetAdjustmentTypeEnum.untyped)
+			).toEqual(adjustments);
 		});
 
 		it('should throw an error for an invalid adjustment', () => {
 			const input = 'Strength + foo';
 			const sheet: Sheet = sheetWithTestProperties();
-			expect(() => SheetUtils.stringToSheetAdjustments(input)).toThrow(KoboldError);
+			expect(() =>
+				SheetUtils.stringToSheetAdjustments(input, SheetAdjustmentTypeEnum.untyped)
+			).toThrow(KoboldError);
 		});
 	});
 
@@ -256,7 +264,8 @@ describe('SheetUtils', () => {
 		it('allows a user to add an attack to a sheet', () => {
 			const sheet: Sheet = sheetWithTestProperties();
 			const newAttackAdjustment = SheetUtils.stringToSheetAdjustments(
-				'Claw attack = to hit +2 | damage 1d4 + 1 acid or piercing | traits: agile, finesse, unarmed | notes: "foo"'
+				'Claw attack = to hit +2 | damage 1d4 + 1 acid or piercing | traits: agile, finesse, unarmed | notes: "foo"',
+				SheetAdjustmentTypeEnum.untyped
 			);
 			const adjustedSheet = SheetUtils.adjustSheetWithSheetAdjustments(
 				sheet,
@@ -275,7 +284,8 @@ describe('SheetUtils', () => {
 		it('allows a user to add a lore to a sheet', () => {
 			const sheet: Sheet = sheetWithTestProperties();
 			const newLoreAdjustment = SheetUtils.stringToSheetAdjustments(
-				'kobold lore = -2; kobold lore ability=str'
+				'kobold lore = -2; kobold lore ability=str',
+				SheetAdjustmentTypeEnum.untyped
 			);
 			const adjustedSheet = SheetUtils.adjustSheetWithSheetAdjustments(
 				sheet,
@@ -292,7 +302,8 @@ describe('SheetUtils', () => {
 		it('allows a user to set weaknesses and resistances', () => {
 			const sheet: Sheet = sheetWithTestProperties();
 			const resistAndWeaknessAdjustments = SheetUtils.stringToSheetAdjustments(
-				'fire resistance = 3; fire resist+1; multi word cold weakness +2'
+				'fire resistance = 3; fire resist+1; multi word cold weakness +2',
+				SheetAdjustmentTypeEnum.untyped
 			);
 			const adjustedSheet = SheetUtils.adjustSheetWithSheetAdjustments(
 				sheet,
@@ -311,7 +322,8 @@ describe('SheetUtils', () => {
 		it('allows a user to update stats', () => {
 			const sheet: Sheet = sheetWithTestProperties();
 			const statAdjustments = SheetUtils.stringToSheetAdjustments(
-				'arcana = 4; will dc+1; class ability=con'
+				'arcana = 4; will dc+1; class ability=con',
+				SheetAdjustmentTypeEnum.untyped
 			);
 			const adjustedSheet = SheetUtils.adjustSheetWithSheetAdjustments(
 				sheet,
@@ -330,8 +342,10 @@ describe('SheetUtils', () => {
 			const sheet: Sheet = sheetWithTestProperties();
 			sheet.baseCounters.hp.max = 10;
 			sheet.baseCounters.hp.current = 10;
-			const baseCounterAdjustments =
-				SheetUtils.stringToSheetAdjustments('max hp + 4; hp - 1');
+			const baseCounterAdjustments = SheetUtils.stringToSheetAdjustments(
+				'max hp + 4; hp - 1',
+				SheetAdjustmentTypeEnum.untyped
+			);
 			const adjustedSheet = SheetUtils.adjustSheetWithSheetAdjustments(
 				sheet,
 				baseCounterAdjustments
@@ -346,7 +360,10 @@ describe('SheetUtils', () => {
 		it('allows a user to update an int property', () => {
 			const sheet: Sheet = sheetWithTestProperties();
 			sheet.intProperties.ac = 17;
-			const intPropertyAdjustments = SheetUtils.stringToSheetAdjustments('ac=15; ac+1');
+			const intPropertyAdjustments = SheetUtils.stringToSheetAdjustments(
+				'ac=15; ac+1',
+				SheetAdjustmentTypeEnum.untyped
+			);
 			const adjustedSheet = SheetUtils.adjustSheetWithSheetAdjustments(
 				sheet,
 				intPropertyAdjustments
@@ -357,7 +374,8 @@ describe('SheetUtils', () => {
 		it('allows a user to update an info list property', () => {
 			const sheet: Sheet = sheetWithTestProperties();
 			const infoListPropertyAdjustments = SheetUtils.stringToSheetAdjustments(
-				'languages = common; languages+draconic,elven'
+				'languages = common; languages+draconic,elven',
+				SheetAdjustmentTypeEnum.untyped
 			);
 			const adjustedSheet = SheetUtils.adjustSheetWithSheetAdjustments(
 				sheet,
@@ -369,7 +387,8 @@ describe('SheetUtils', () => {
 		it('allows a user to update an info property', () => {
 			const sheet: Sheet = sheetWithTestProperties();
 			const infoPropertyAdjustment = SheetUtils.stringToSheetAdjustments(
-				'url=https://github.com/significantotter/kobold?foo=%27bar%27'
+				'url=https://github.com/significantotter/kobold?foo=%27bar%27',
+				SheetAdjustmentTypeEnum.untyped
 			);
 			const adjustedSheet = SheetUtils.adjustSheetWithSheetAdjustments(
 				sheet,
@@ -382,7 +401,9 @@ describe('SheetUtils', () => {
 
 		it('does not allow a user to update a non-adjustable properties', () => {
 			const sheet: Sheet = sheetWithTestProperties();
-			expect(() => SheetUtils.stringToSheetAdjustments('name=fred')).toThrow(KoboldError);
+			expect(() =>
+				SheetUtils.stringToSheetAdjustments('name=fred', SheetAdjustmentTypeEnum.untyped)
+			).toThrow(KoboldError);
 		});
 
 		it('should throw an error for an invalid adjustment', () => {

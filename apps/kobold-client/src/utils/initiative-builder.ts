@@ -52,13 +52,28 @@ export class InitiativeBuilder {
 		if (initiative && !actors) actors = initiative.actors;
 		if (initiative && !groups) groups = initiative.actorGroups;
 		this.actorsByGroup = _.groupBy(actors || [], actor => actor.initiativeActorGroupId);
-		this.groups = (groups || []).sort(InitiativeBuilder.groupSortFunction);
+		this.groups = (groups || []).sort(this.groupSortFunction.bind(this));
 		this.userSettings = _.defaults(userSettings, DefaultUtils.userSettings);
 	}
 
-	public static groupSortFunction(a: InitiativeActorGroup, b: InitiativeActorGroup) {
+	public groupSortFunction(a: InitiativeActorGroup, b: InitiativeActorGroup) {
+		// Initially sort by initiative
 		let comparison = b.initiativeResult - a.initiativeResult;
+		if (comparison === 0) {
+			// On a tie, check if the group has a player in it. Groups
+			// without a player go first
+			const aHasPlayer = this.actorsByGroup[a.id]?.some(
+				actor => actor.characterId !== null && actor.characterId !== undefined
+			);
+			const bHasPlayer = this.actorsByGroup[b.id]?.some(
+				actor => actor.characterId !== null && actor.characterId !== undefined
+			);
+			if (aHasPlayer && !bHasPlayer) comparison = 1;
+			else if (!aHasPlayer && bHasPlayer) comparison = -1;
+		}
+		// On an additional tie, sort by name
 		if (comparison === 0) comparison = a.name.localeCompare(b.name);
+		// On an additional tie, sort by id
 		if (comparison === 0) comparison = a.id - b.id;
 		return comparison;
 	}
@@ -93,7 +108,7 @@ export class InitiativeBuilder {
 			this.actorsByGroup = _.groupBy(actors, actor => actor.initiativeActorGroupId);
 		}
 		if (groups !== undefined) {
-			this.groups = groups.sort(InitiativeBuilder.groupSortFunction);
+			this.groups = groups.sort(this.groupSortFunction.bind(this));
 		}
 	}
 

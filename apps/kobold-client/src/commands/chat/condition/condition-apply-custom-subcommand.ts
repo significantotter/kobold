@@ -159,6 +159,7 @@ export class ConditionApplyCustomSubCommand implements Command {
 		if (conditionSheetValues) {
 			parsedSheetAdjustments = InputParseUtils.parseAsSheetAdjustments(
 				conditionSheetValues,
+				conditionType,
 				targetSheetRecord.sheet
 			);
 		}

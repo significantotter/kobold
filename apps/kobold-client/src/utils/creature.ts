@@ -748,6 +748,7 @@ export class Creature {
 	}
 
 	getDC(dcName: string): number | null {
+		if (!isNaN(Number(dcName))) return Number(dcName);
 		const dcPropKey = SheetProperties.standardizeProperty(dcName);
 
 		if (['ac', 'armorclass', 'armor'].includes(dcPropKey))

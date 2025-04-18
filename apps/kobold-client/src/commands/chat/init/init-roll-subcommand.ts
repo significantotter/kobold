@@ -234,7 +234,6 @@ export class InitRollSubCommand implements Command {
 				embed.addFields(damageField);
 			}
 		} else {
-			console.log(targetRoll);
 			throw new KoboldError(`Yip! I ran into trouble rolling ${targetRoll.name}`);
 		}
 
