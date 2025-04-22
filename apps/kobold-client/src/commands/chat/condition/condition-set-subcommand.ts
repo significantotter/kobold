@@ -172,8 +172,10 @@ export class ConditionSetSubCommand implements Command {
 			if (newFieldValue == null) targetCondition.severity = null;
 			else targetCondition.severity = InputParseUtils.parseAsNumber(newFieldValue);
 		} else if (fieldToChange === 'sheet-values') {
-			targetCondition.sheetAdjustments =
-				InputParseUtils.parseAsSheetAdjustments(newFieldValue);
+			targetCondition.sheetAdjustments = InputParseUtils.parseAsSheetAdjustments(
+				newFieldValue,
+				targetCondition.type
+			);
 		} else {
 			// if a field wasn't provided, or the field isn't present in our options, send an error
 			await InteractionUtils.send(

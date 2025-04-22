@@ -103,7 +103,7 @@ export function convertPathBuilderToSheet(
 				pathBuilderSheet.level;
 	}
 
-	let keyAbilityBonus = keyAbility ? baseSheet.intProperties[keyAbility] ?? 0 : 0;
+	let keyAbilityBonus = keyAbility ? (baseSheet.intProperties[keyAbility] ?? 0) : 0;
 
 	// spellcasting stats
 	for (const spellcasting of pathBuilderSheet.spellCasters) {
@@ -215,7 +215,7 @@ export function convertPathBuilderToSheet(
 
 	for (const [loreName, loreProfMod] of pathBuilderSheet.lores ?? []) {
 		const loreStat: ProficiencyStat = {
-			name: loreName + ' Lore' ?? 'Unknown Lore',
+			name: loreName ? loreName + ' Lore' : 'Unknown Lore',
 			proficiency: loreProfMod ?? 0,
 			bonus: null,
 			dc: null,
@@ -310,11 +310,15 @@ export function convertPathBuilderToSheet(
 				numDice = 4;
 			}
 
+			// + - 1 causes an error, so only add the sign if it's >= 0
+			const damageBonus = weapon
+				? weapon.damageBonus >= 0
+					? `+ ${weapon.damageBonus}`
+					: weapon.damageBonus
+				: '';
+
 			const mainDamage = {
-				dice:
-					numDice +
-					(weapon.die ?? '') +
-					(weapon.damageBonus ? ' + ' + weapon.damageBonus : ''),
+				dice: numDice + (weapon.die ?? '') + damageBonus,
 				type: weapon.damageType,
 				// base type isn't provided by pathbuilder
 			};

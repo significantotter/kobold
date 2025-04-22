@@ -24,6 +24,7 @@ import {
 	Kobold,
 	RollTypeEnum,
 	Sheet,
+	SheetAdjustmentTypeEnum,
 } from '@kobold/db';
 import {
 	AbilityEntry,
@@ -248,7 +249,10 @@ export class InitAddSubCommand implements Command {
 
 		if (customStatsString) {
 			// treat the stat override string as just a bunch of sheet modifier adjustments
-			const adjustments = SheetUtils.stringToSheetAdjustments(customStatsString);
+			const adjustments = SheetUtils.stringToSheetAdjustments(
+				customStatsString,
+				SheetAdjustmentTypeEnum.untyped
+			);
 			const adjustedSheet = SheetUtils.adjustSheetWithSheetAdjustments(sheet, adjustments);
 
 			const creature = new Creature(

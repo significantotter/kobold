@@ -1,5 +1,12 @@
 import _ from 'lodash';
-import { AdjustablePropertyEnum, Sheet, SheetAdjustment, StatSubGroupEnum } from '@kobold/db';
+import {
+	AdjustablePropertyEnum,
+	Sheet,
+	SheetAdjustment,
+	SheetAdjustmentOperationEnum,
+	SheetStatKeys,
+	StatSubGroupEnum,
+} from '@kobold/db';
 import { KoboldError } from '../KoboldError.js';
 import {
 	SheetAdditionalSkillAdjuster,
@@ -167,6 +174,45 @@ export class SheetInfoListsBucket extends SheetPropertyGroupBucket<SheetInfoList
 	public discardAdjustment = SheetInfoListAdjuster.discardAdjustment;
 }
 
+function combineNumericAdjustments<
+	T extends {
+		operation: SheetAdjustmentOperationEnum;
+	},
+>(
+	firstAdjustment: T,
+	secondAdjustment: T,
+	valueFromAdjustment: (param: T) => number,
+	setAdjustmentValue: (param: T, value: number) => T
+): T {
+	// if the new adjustment is to set the value, ignore any additions or subtractions
+	if (secondAdjustment.operation === '=') return secondAdjustment;
+	// otherwise, add or subtract the value, then set the operation based on
+	// the sign of the value
+	const firstValue = valueFromAdjustment(firstAdjustment);
+	const secondValue = valueFromAdjustment(secondAdjustment);
+	const currentValue = firstAdjustment.operation === '-' ? -firstValue : firstValue;
+	const newValue = secondAdjustment.operation === '-' ? -secondValue : secondValue;
+	const combinedValue = currentValue + newValue;
+	const operation: SheetAdjustmentOperationEnum =
+		combinedValue < 0 ? SheetAdjustmentOperationEnum['-'] : SheetAdjustmentOperationEnum['+'];
+
+	if (firstAdjustment.operation === '=') {
+		// if the current adjustment is =, set the operation to =
+		// and don't take the absolute value of the combined value
+		const adjustmentWithValue = setAdjustmentValue(firstAdjustment, combinedValue);
+		return {
+			...adjustmentWithValue,
+			operation: SheetAdjustmentOperationEnum['='],
+		};
+	} else {
+		const adjustmentWithValue = setAdjustmentValue(firstAdjustment, Math.abs(combinedValue));
+		return {
+			...adjustmentWithValue,
+			operation,
+		};
+	}
+}
+
 export class SheetIntegerPropertyBucket extends SheetPropertyGroupBucket<SheetIntegerAdjustment> {
 	public serialize = SheetIntegerAdjuster.serializeAdjustment;
 	public deserialize = SheetIntegerAdjuster.deserializeAdjustment;
@@ -178,18 +224,15 @@ export class SheetIntegerPropertyBucket extends SheetPropertyGroupBucket<SheetIn
 		currentAdjustment: SheetIntegerAdjustment,
 		newAdjustment: SheetIntegerAdjustment
 	): SheetIntegerAdjustment {
-		const currentValue =
-			currentAdjustment.operation === '-'
-				? -currentAdjustment.parsed
-				: currentAdjustment.parsed;
-		const newValue =
-			newAdjustment.operation === '-' ? -newAdjustment.parsed : newAdjustment.parsed;
-		if (newAdjustment.operation === '=') return newAdjustment;
-		else
-			return {
-				...currentAdjustment,
-				parsed: currentValue + newValue,
-			};
+		return combineNumericAdjustments(
+			currentAdjustment,
+			newAdjustment,
+			adjustment => adjustment.parsed,
+			(adjustment, value) => ({
+				...adjustment,
+				parsed: value,
+			})
+		);
 	}
 	public combineSameType(
 		currentAdjustment: SheetIntegerAdjustment,
@@ -201,7 +244,8 @@ export class SheetIntegerPropertyBucket extends SheetPropertyGroupBucket<SheetIn
 				(adjustment: SheetIntegerAdjustment) => adjustment.parsed
 			);
 			if (max) return max;
-		} // otherwise (newAdjustment.operation === '=')
+		}
+		// otherwise (newAdjustment.operation === '=')
 		// or maxBy returned null, which is impossible because the array is non-empty
 		// and the adjustments are non-nullable
 		return newAdjustment;
@@ -230,26 +274,22 @@ export class StatBucket extends SheetPropertyGroupBucket<SheetStatAdjustment> {
 			typeof currentAdjustment.parsed.value === 'number' &&
 			typeof newAdjustment.parsed.value === 'number'
 		) {
-			if (newAdjustment.operation === '=') return newAdjustment;
-			else {
-				const currentValue =
-					currentAdjustment.operation === '-'
-						? -currentAdjustment.parsed.value
-						: currentAdjustment.parsed.value;
-				const newValue =
-					newAdjustment.operation === '-'
-						? -newAdjustment.parsed.value
-						: newAdjustment.parsed.value;
-				const combinedValue = currentValue + newValue;
-				return {
-					...currentAdjustment,
+			return combineNumericAdjustments(
+				currentAdjustment,
+				newAdjustment,
+				adjustment => adjustment.parsed.value as number,
+				(adjustment, value) => ({
+					...adjustment,
 					parsed: {
-						baseKey: currentAdjustment.parsed.baseKey,
-						subKey: currentAdjustment.parsed.subKey,
-						value: combinedValue,
+						...(adjustment.parsed as {
+							baseKey: SheetStatKeys;
+							subKey: Exclude<StatSubGroupEnum, StatSubGroupEnum.ability>;
+							value: number;
+						}),
+						value,
 					},
-				};
-			}
+				})
+			);
 		} else {
 			if (newAdjustment.operation === '=' || newAdjustment.operation === '+') {
 				return newAdjustment;
@@ -314,26 +354,22 @@ export class ExtraSkillBucket extends SheetPropertyGroupBucket<SheetExtraSkillAd
 			typeof currentAdjustment.parsed.value === 'number' &&
 			typeof newAdjustment.parsed.value === 'number'
 		) {
-			if (newAdjustment.operation === '=') return newAdjustment;
-			else {
-				const currentValue =
-					currentAdjustment.operation === '-'
-						? -currentAdjustment.parsed.value
-						: currentAdjustment.parsed.value;
-				const newValue =
-					newAdjustment.operation === '-'
-						? -newAdjustment.parsed.value
-						: newAdjustment.parsed.value;
-				const combinedValue = currentValue + newValue;
-				return {
-					...currentAdjustment,
+			return combineNumericAdjustments(
+				currentAdjustment,
+				newAdjustment,
+				adjustment => adjustment.parsed.value as number,
+				(adjustment, value) => ({
+					...adjustment,
 					parsed: {
-						baseKey: currentAdjustment.parsed.baseKey,
-						subKey: currentAdjustment.parsed.subKey,
-						value: combinedValue,
+						...(adjustment.parsed as {
+							baseKey: SheetStatKeys;
+							subKey: Exclude<StatSubGroupEnum, StatSubGroupEnum.ability>;
+							value: number;
+						}),
+						value,
 					},
-				};
-			}
+				})
+			);
 		} else {
 			if (newAdjustment.operation === '=' || newAdjustment.operation === '+') {
 				return newAdjustment;
