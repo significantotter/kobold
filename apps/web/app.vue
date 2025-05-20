@@ -28,6 +28,13 @@ declare global {
 }
 </script>
 <style>
+@media screen and (max-width: 640px) {
+	:root {
+		--p-panel-content-padding: 0px 4px !important;
+		--p-fieldset-padding: 0px 4px !important;
+	}
+}
+
 /* auto center */
 .child-margin-auto > * {
 	text-align: center;
@@ -49,5 +56,6 @@ declare global {
 	grid-area: main;
 	padding: 15px 5px 10px 5px;
 	overflow: auto;
+	position: relative;
 }
 </style>
