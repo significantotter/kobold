@@ -4,7 +4,7 @@
 		:id="`${command.name}`"
 		ref="commands"
 		:key="command.name"
-		class="command-toc command-toc-1"
+		class="command-toc command-toc-1 command-display-panel"
 	>
 		<template #header>
 			<h2 class="m-0">/{{ command.name }}</h2>
@@ -17,7 +17,7 @@
 			ref="subcommands"
 			:key="`subcommand-${command.name}_${subCommand.name}`"
 			:legend="`/ ${command.name} ${subCommand.name}`"
-			class="command-toc command-toc-2"
+			class="command-toc command-toc-2 subcommand-fieldset"
 		>
 			<template #legend
 				><h3 :data-command-name="command.name" class="m-0">
@@ -26,7 +26,10 @@
 			>
 			<p>{{ subCommand.description }}</p>
 			<p v-if="subCommand.usage">Usage: {{ subCommand.usage }}</p>
-			<div v-if="subCommand.options.length" class="bg-emphasis p-2 rounded-lg">
+			<div
+				v-if="subCommand.options.length"
+				class="bg-emphasis p-2 rounded-lg table-container"
+			>
 				<h3 class="mt-0">Options</h3>
 				<table class="m-0">
 					<tbody>
@@ -107,3 +110,20 @@ const commandRefs = useTemplateRef<InstanceType<typeof Fieldset>[]>('commands');
 const subCommandRefs = useTemplateRef<InstanceType<typeof Panel>[]>('subcommands');
 defineExpose({ commandRefs, subCommandRefs });
 </script>
+
+<style scoped lang="scss">
+@media (max-width: 640px) {
+	.table-container {
+		overflow-x: scroll;
+		max-width: 90vw;
+	}
+}
+.command-display-panel {
+	max-width: 100%;
+	overflow-x: hidden;
+}
+.subcommand-fieldset {
+	max-width: 100%;
+	overflow-x: hidden;
+}
+</style>

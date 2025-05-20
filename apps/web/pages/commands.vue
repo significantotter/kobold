@@ -1,7 +1,16 @@
 <template>
-	<div id="commands-grid" class="grid command-grid h-full overflow-hidden">
-		<ClientOnly>
-			<div id="commands-toc" class="container col-start-1 col-end-3 overflow-y-auto">
+	<ClientOnly>
+		<div id="commands-grid" class="grid command-grid h-full overflow-hidden">
+			<Button
+				class="sidebar-toggle"
+				:icon="isSidebarVisible ? 'pi pi-chevron-left' : 'pi pi-chevron-right'"
+				@click="isSidebarVisible = !isSidebarVisible"
+			/>
+			<div
+				id="commands-toc"
+				class="container col-start-1 col-end-3 overflow-y-auto"
+				:class="{ ['small-screen-hidden']: !isSidebarVisible }"
+			>
 				<Menu :model="menuItems">
 					<template #start
 						><h2 class="text-xl font-bold text-center mt-4">
@@ -48,13 +57,15 @@
 				/>
 				<CommandRenderer :commands="commands" />
 			</div>
-		</ClientOnly>
-	</div>
+		</div>
+	</ClientOnly>
 </template>
 <script setup lang="ts">
 import { commands } from '@kobold/documentation';
 import CommandRenderer from '~/components/command-renderer/CommandRenderer.vue';
 import { useActiveScroll } from 'vue-use-active-scroll';
+
+const isSidebarVisible = ref(false);
 
 const subCommandsToc = commands
 	.flatMap(command =>
@@ -101,6 +112,7 @@ const setTocValueActive = (item: { commandName: string; subCommandName: string }
 		? `${item.commandName}_${item.subCommandName}`
 		: item.commandName;
 	document.getElementById(targetId)?.scrollIntoView({ behavior: 'smooth' });
+	isSidebarVisible.value = false;
 };
 
 const commandRenderer: Ref<HTMLElement | null> = ref(null);
@@ -156,11 +168,26 @@ watch(commandActiveId, () => {
 <style lang="scss">
 #commands-grid {
 	grid-template-columns: [l-sidebar] 200px 1fr [content] auto 1fr 1fr;
+
+	@media (max-width: 768px) {
+		grid-template-columns: 1fr;
+		grid-template-rows: auto auto;
+	}
 }
 // set up the table of contents as a separate column
 #commands-toc {
 	overflow-y: auto;
 	grid-column: l-sidebar;
+
+	@media (max-width: 768px) {
+		position: absolute;
+		z-index: 999;
+		grid-column: 1;
+		grid-row: 1;
+		width: 100%;
+		max-height: 100%;
+		overflow: scroll;
+	}
 
 	.p-menu-item.p-focus .p-menu-item-content:has(:not(.selected)) {
 		background: inherit;
@@ -170,6 +197,24 @@ watch(commandActiveId, () => {
 	.p-menu-item-content:has(.selected) {
 		background: var(--p-tag-success-background);
 		color: var(--p-tag-success-color);
+	}
+}
+#commands-toc.small-screen-hidden {
+	@media (max-width: 768px) {
+		display: none;
+	}
+}
+// The toggle for the sidebar only displays on small screens
+.sidebar-toggle.p-button {
+	display: none;
+	position: absolute !important;
+	top: 0px;
+	left: 0px;
+	z-index: 1000;
+	height: 2.5rem;
+
+	@media (max-width: 768px) {
+		display: block;
 	}
 }
 
