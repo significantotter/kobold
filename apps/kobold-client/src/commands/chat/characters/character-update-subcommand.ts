@@ -1,35 +1,23 @@
-import {
-	ApplicationCommandType,
-	ChatInputCommandInteraction,
-	PermissionsString,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
-} from 'discord.js';
+import { ChatInputCommandInteraction } from 'discord.js';
 import { Kobold } from '@kobold/db';
 
-import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { Command, CommandDeferType } from '../../index.js';
+import { Command } from '../../index.js';
 import { CharacterOptions } from './command-options.js';
 import { PathbuilderCharacterFetcher } from './Fetchers/pathbuilder-character-fetcher.js';
 import { WgCharacterFetcher } from './Fetchers/wg-character-fetcher.js';
 import { TextParseHelpers } from '../../../utils/kobold-helpers/text-parse-helpers.js';
 import { PasteBinCharacterFetcher } from './Fetchers/pastebin-character-fetcher.js';
+import { CharacterCommand } from '@kobold/documentation';
+import { BaseCommandClass } from '../../command.js';
 
-export class CharacterUpdateSubCommand implements Command {
-	public name = L.en.commands.character.update.name();
-	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
-		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.character.update.name(),
-		description: L.en.commands.character.update.description(),
-		dm_permission: true,
-		default_member_permissions: undefined,
-	};
-	public deferType = CommandDeferType.PUBLIC;
-	public requireClientPerms: PermissionsString[] = [];
-
+export class CharacterUpdateSubCommand extends BaseCommandClass(
+	CharacterCommand,
+	CharacterCommand.subCommandEnum.update
+) {
 	public async execute(
 		intr: ChatInputCommandInteraction,
 		LL: TranslationFunctions,

@@ -3,10 +3,12 @@ import {
 	ActionStageCommandOptionEnum,
 	actionStageCommandOptions,
 } from './action-stage.command-options.js';
-import { CommandDefinition } from '../helpers/commands.d.js';
+import type { CommandDefinition } from '../helpers/commands.d.ts';
+import { anyUsageContext } from '../helpers/defaults.js';
+import { withOrder } from '../helpers/common.js';
 
 export enum ActionStageSubCommandEnum {
-	addAdvacedDamage = 'add-advanced-damage',
+	addAdvancedDamage = 'add-advanced-damage',
 	addAttack = 'add-attack',
 	addBasicDamage = 'add-basic-damage',
 	addSave = 'add-save',
@@ -21,7 +23,7 @@ export const actionStageCommandDefinition = {
 		description:
 			'Commands for adding stages (rolls, text, and saves) to custom, rollable actions.',
 		type: ApplicationCommandType.ChatInput,
-		dm_permission: true,
+		contexts: anyUsageContext,
 		default_member_permissions: undefined,
 	},
 	subCommands: {
@@ -31,19 +33,26 @@ export const actionStageCommandDefinition = {
 				"Adds an attack roll to an action. Can also be any type of roll against an enemy's DCs",
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[ActionStageCommandOptionEnum.actionTarget]:
+				[ActionStageCommandOptionEnum.actionTarget]: withOrder(
 					actionStageCommandOptions[ActionStageCommandOptionEnum.actionTarget],
-				[ActionStageCommandOptionEnum.rollName]:
+					1
+				),
+				[ActionStageCommandOptionEnum.rollName]: withOrder(
 					actionStageCommandOptions[ActionStageCommandOptionEnum.rollName],
-				[ActionStageCommandOptionEnum.diceRoll]:
+					2
+				),
+				[ActionStageCommandOptionEnum.diceRoll]: withOrder(
 					actionStageCommandOptions[ActionStageCommandOptionEnum.diceRoll],
-				[ActionStageCommandOptionEnum.defendingStat]: {
-					...actionStageCommandOptions[ActionStageCommandOptionEnum.defendingStat],
-					autocomplete: true,
-					choices: undefined,
-				},
-				[ActionStageCommandOptionEnum.allowModifiers]:
+					3
+				),
+				[ActionStageCommandOptionEnum.defendingStat]: withOrder(
+					actionStageCommandOptions[ActionStageCommandOptionEnum.defendingStat],
+					4
+				),
+				[ActionStageCommandOptionEnum.allowModifiers]: withOrder(
 					actionStageCommandOptions[ActionStageCommandOptionEnum.allowModifiers],
+					5
+				),
 			},
 		},
 		[ActionStageSubCommandEnum.addSkillChallenge]: {
@@ -52,19 +61,26 @@ export const actionStageCommandDefinition = {
 				'Adds a skill challenge roll to an action. This is any roll against your own DCs.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[ActionStageCommandOptionEnum.target]:
+				[ActionStageCommandOptionEnum.target]: withOrder(
 					actionStageCommandOptions[ActionStageCommandOptionEnum.target],
-				[ActionStageCommandOptionEnum.rollName]:
+					1
+				),
+				[ActionStageCommandOptionEnum.rollName]: withOrder(
 					actionStageCommandOptions[ActionStageCommandOptionEnum.rollName],
-				[ActionStageCommandOptionEnum.diceRoll]:
+					2
+				),
+				[ActionStageCommandOptionEnum.diceRoll]: withOrder(
 					actionStageCommandOptions[ActionStageCommandOptionEnum.diceRoll],
-				[ActionStageCommandOptionEnum.defendingStat]: {
-					...actionStageCommandOptions[ActionStageCommandOptionEnum.defendingStat],
-					autocomplete: true,
-					choices: undefined,
-				},
-				[ActionStageCommandOptionEnum.allowModifiers]:
+					3
+				),
+				[ActionStageCommandOptionEnum.defendingStat]: withOrder(
+					actionStageCommandOptions[ActionStageCommandOptionEnum.defendingStat],
+					4
+				),
+				[ActionStageCommandOptionEnum.allowModifiers]: withOrder(
 					actionStageCommandOptions[ActionStageCommandOptionEnum.allowModifiers],
+					5
+				),
 			},
 		},
 		[ActionStageSubCommandEnum.addBasicDamage]: {
@@ -73,44 +89,74 @@ export const actionStageCommandDefinition = {
 				'Adds a basic damage roll to an action. Automatically adjusts for crits or failures.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[ActionStageCommandOptionEnum.target]:
+				[ActionStageCommandOptionEnum.target]: withOrder(
 					actionStageCommandOptions[ActionStageCommandOptionEnum.target],
-				[ActionStageCommandOptionEnum.rollName]:
+					1
+				),
+				[ActionStageCommandOptionEnum.rollName]: withOrder(
 					actionStageCommandOptions[ActionStageCommandOptionEnum.rollName],
-				[ActionStageCommandOptionEnum.basicDamageDiceRoll]:
+					2
+				),
+				[ActionStageCommandOptionEnum.basicDamageDiceRoll]: withOrder(
 					actionStageCommandOptions[ActionStageCommandOptionEnum.basicDamageDiceRoll],
-				[ActionStageCommandOptionEnum.damageType]:
+					3
+				),
+				[ActionStageCommandOptionEnum.damageType]: withOrder(
 					actionStageCommandOptions[ActionStageCommandOptionEnum.damageType],
-				[ActionStageCommandOptionEnum.allowModifiers]:
+					4
+				),
+				[ActionStageCommandOptionEnum.allowModifiers]: withOrder(
 					actionStageCommandOptions[ActionStageCommandOptionEnum.allowModifiers],
-				[ActionStageCommandOptionEnum.healInsteadOfDamage]:
+					5
+				),
+				[ActionStageCommandOptionEnum.healInsteadOfDamage]: withOrder(
 					actionStageCommandOptions[ActionStageCommandOptionEnum.healInsteadOfDamage],
+					6
+				),
 			},
 		},
-		[ActionStageSubCommandEnum.addAdvacedDamage]: {
-			name: ActionStageSubCommandEnum.addAdvacedDamage,
+		[ActionStageSubCommandEnum.addAdvancedDamage]: {
+			name: ActionStageSubCommandEnum.addAdvancedDamage,
 			description:
 				'Adds an advanced damage roll to an action. Requires manual input for all successes and failures.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[ActionStageCommandOptionEnum.target]:
+				[ActionStageCommandOptionEnum.target]: withOrder(
 					actionStageCommandOptions[ActionStageCommandOptionEnum.target],
-				[ActionStageCommandOptionEnum.rollName]:
+					1
+				),
+				[ActionStageCommandOptionEnum.rollName]: withOrder(
 					actionStageCommandOptions[ActionStageCommandOptionEnum.rollName],
-				[ActionStageCommandOptionEnum.damageType]:
+					2
+				),
+				[ActionStageCommandOptionEnum.damageType]: withOrder(
 					actionStageCommandOptions[ActionStageCommandOptionEnum.damageType],
-				[ActionStageCommandOptionEnum.successDiceRoll]:
+					3
+				),
+				[ActionStageCommandOptionEnum.successDiceRoll]: withOrder(
 					actionStageCommandOptions[ActionStageCommandOptionEnum.successDiceRoll],
-				[ActionStageCommandOptionEnum.criticalSuccessDiceRoll]:
+					4
+				),
+				[ActionStageCommandOptionEnum.criticalSuccessDiceRoll]: withOrder(
 					actionStageCommandOptions[ActionStageCommandOptionEnum.criticalSuccessDiceRoll],
-				[ActionStageCommandOptionEnum.failureDiceRoll]:
+					5
+				),
+				[ActionStageCommandOptionEnum.failureDiceRoll]: withOrder(
 					actionStageCommandOptions[ActionStageCommandOptionEnum.failureDiceRoll],
-				[ActionStageCommandOptionEnum.criticalFailureDiceRoll]:
+					6
+				),
+				[ActionStageCommandOptionEnum.criticalFailureDiceRoll]: withOrder(
 					actionStageCommandOptions[ActionStageCommandOptionEnum.criticalFailureDiceRoll],
-				[ActionStageCommandOptionEnum.allowModifiers]:
+					7
+				),
+				[ActionStageCommandOptionEnum.allowModifiers]: withOrder(
 					actionStageCommandOptions[ActionStageCommandOptionEnum.allowModifiers],
-				[ActionStageCommandOptionEnum.healInsteadOfDamage]:
+					8
+				),
+				[ActionStageCommandOptionEnum.healInsteadOfDamage]: withOrder(
 					actionStageCommandOptions[ActionStageCommandOptionEnum.healInsteadOfDamage],
+					9
+				),
 			},
 		},
 		[ActionStageSubCommandEnum.addText]: {
@@ -119,22 +165,38 @@ export const actionStageCommandDefinition = {
 				'Adds a text block to an action. Can include dice rolls surrounded by "{{}}"',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[ActionStageCommandOptionEnum.target]:
+				[ActionStageCommandOptionEnum.target]: withOrder(
 					actionStageCommandOptions[ActionStageCommandOptionEnum.target],
-				[ActionStageCommandOptionEnum.rollName]:
+					1
+				),
+				[ActionStageCommandOptionEnum.rollName]: withOrder(
 					actionStageCommandOptions[ActionStageCommandOptionEnum.rollName],
-				[ActionStageCommandOptionEnum.defaultText]:
+					2
+				),
+				[ActionStageCommandOptionEnum.defaultText]: withOrder(
 					actionStageCommandOptions[ActionStageCommandOptionEnum.defaultText],
-				[ActionStageCommandOptionEnum.successText]:
+					3
+				),
+				[ActionStageCommandOptionEnum.successText]: withOrder(
 					actionStageCommandOptions[ActionStageCommandOptionEnum.successText],
-				[ActionStageCommandOptionEnum.criticalSuccessText]:
+					4
+				),
+				[ActionStageCommandOptionEnum.criticalSuccessText]: withOrder(
 					actionStageCommandOptions[ActionStageCommandOptionEnum.criticalSuccessText],
-				[ActionStageCommandOptionEnum.failureText]:
+					5
+				),
+				[ActionStageCommandOptionEnum.failureText]: withOrder(
 					actionStageCommandOptions[ActionStageCommandOptionEnum.failureText],
-				[ActionStageCommandOptionEnum.criticalFailureText]:
+					6
+				),
+				[ActionStageCommandOptionEnum.criticalFailureText]: withOrder(
 					actionStageCommandOptions[ActionStageCommandOptionEnum.criticalFailureText],
-				[ActionStageCommandOptionEnum.extraTags]:
+					7
+				),
+				[ActionStageCommandOptionEnum.extraTags]: withOrder(
 					actionStageCommandOptions[ActionStageCommandOptionEnum.extraTags],
+					8
+				),
 			},
 		},
 		[ActionStageSubCommandEnum.addSave]: {
@@ -142,14 +204,22 @@ export const actionStageCommandDefinition = {
 			description: 'Adds a saving throw to an action',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[ActionStageCommandOptionEnum.target]:
+				[ActionStageCommandOptionEnum.target]: withOrder(
 					actionStageCommandOptions[ActionStageCommandOptionEnum.target],
-				[ActionStageCommandOptionEnum.rollName]:
+					1
+				),
+				[ActionStageCommandOptionEnum.rollName]: withOrder(
 					actionStageCommandOptions[ActionStageCommandOptionEnum.rollName],
-				[ActionStageCommandOptionEnum.saveRollType]:
+					2
+				),
+				[ActionStageCommandOptionEnum.saveRollType]: withOrder(
 					actionStageCommandOptions[ActionStageCommandOptionEnum.saveRollType],
-				[ActionStageCommandOptionEnum.abilityDc]:
+					3
+				),
+				[ActionStageCommandOptionEnum.abilityDc]: withOrder(
 					actionStageCommandOptions[ActionStageCommandOptionEnum.abilityDc],
+					4
+				),
 			},
 		},
 		[ActionStageSubCommandEnum.set]: {
@@ -157,14 +227,22 @@ export const actionStageCommandDefinition = {
 			description: 'Sets a field on an action stage. "none" clears the field.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[ActionStageCommandOptionEnum.target]:
+				[ActionStageCommandOptionEnum.target]: withOrder(
 					actionStageCommandOptions[ActionStageCommandOptionEnum.target],
-				[ActionStageCommandOptionEnum.editOption]:
+					1
+				),
+				[ActionStageCommandOptionEnum.editOption]: withOrder(
 					actionStageCommandOptions[ActionStageCommandOptionEnum.editOption],
-				[ActionStageCommandOptionEnum.editValue]:
+					2
+				),
+				[ActionStageCommandOptionEnum.editValue]: withOrder(
 					actionStageCommandOptions[ActionStageCommandOptionEnum.editValue],
-				[ActionStageCommandOptionEnum.moveOption]:
+					3
+				),
+				[ActionStageCommandOptionEnum.moveOption]: withOrder(
 					actionStageCommandOptions[ActionStageCommandOptionEnum.moveOption],
+					4
+				),
 			},
 		},
 		[ActionStageSubCommandEnum.remove]: {
@@ -172,8 +250,10 @@ export const actionStageCommandDefinition = {
 			description: 'Removes a roll, text, or save from an action',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[ActionStageCommandOptionEnum.target]:
+				[ActionStageCommandOptionEnum.target]: withOrder(
 					actionStageCommandOptions[ActionStageCommandOptionEnum.target],
+					1
+				),
 			},
 		},
 	},

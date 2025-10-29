@@ -1,40 +1,28 @@
 import {
 	ApplicationCommandOptionChoiceData,
-	ApplicationCommandType,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
 	ChatInputCommandInteraction,
-	PermissionsString,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
-import { RateLimiter } from 'discord.js-rate-limiter';
 import { CounterOptions } from './counter-command-options.js';
-
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Counter, CounterStyleEnum, Kobold, Sheet, isCounterStyleEnum } from '@kobold/db';
 import { InteractionUtils } from '../../../utils/index.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { Command, CommandDeferType } from '../../index.js';
+import { Command } from '../../index.js';
 import { InputParseUtils } from '../../../utils/input-parse-utils.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
 import { AutocompleteUtils } from '../../../utils/kobold-service-utils/autocomplete-utils.js';
+import { CounterCommand } from '@kobold/documentation';
+import { BaseCommandClass } from '../../command.js';
 
-export class CounterCreateSubCommand implements Command {
-	public name = L.en.commands.counter.create.name();
-	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
-		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.counter.create.name(),
-		description: L.en.commands.counter.create.description(),
-		dm_permission: true,
-		default_member_permissions: undefined,
-	};
-	public cooldown = new RateLimiter(1, 2000);
-	public deferType = CommandDeferType.PUBLIC;
-	public requireClientPerms: PermissionsString[] = [];
-
+export class CounterCreateSubCommand extends BaseCommandClass(
+	CounterCommand,
+	CounterCommand.subCommandEnum.create
+) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption,

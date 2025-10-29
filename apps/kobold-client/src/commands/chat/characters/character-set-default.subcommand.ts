@@ -1,12 +1,9 @@
 import {
 	ApplicationCommandOptionChoiceData,
-	ApplicationCommandType,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
 	ChatInputCommandInteraction,
-	PermissionsString,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 import { Kobold } from '@kobold/db';
 
@@ -15,21 +12,15 @@ import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { Command, CommandDeferType } from '../../index.js';
+import { Command } from '../../index.js';
 import { CharacterOptions } from './command-options.js';
+import { CharacterCommand } from '@kobold/documentation';
+import { BaseCommandClass } from '../../command.js';
 
-export class CharacterSetDefaultSubCommand implements Command {
-	public name = L.en.commands.character.setDefault.name();
-	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
-		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.character.setDefault.name(),
-		description: L.en.commands.character.setDefault.description(),
-		dm_permission: true,
-		default_member_permissions: undefined,
-	};
-	public deferType = CommandDeferType.PUBLIC;
-	public requireClientPerms: PermissionsString[] = [];
-
+export class CharacterSetDefaultSubCommand extends BaseCommandClass(
+	CharacterCommand,
+	CharacterCommand.subCommandEnum.setDefault
+) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption,

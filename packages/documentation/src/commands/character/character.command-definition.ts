@@ -1,10 +1,12 @@
 import { ApplicationCommandOptionType, ApplicationCommandType } from 'discord-api-types/v10';
-import { CommandDefinition } from '../helpers/commands.d.js';
+import type { CommandDefinition } from '../helpers/commands.d.ts';
 import {
 	CharacterCommandOptionEnum,
 	characterCommandOptions,
 } from './character.command-options.js';
 import { GameCommandOptionEnum, gameCommandOptions } from '../game/game.command-options.js';
+import { anyUsageContext } from '../helpers/defaults.js';
+import { withOrder } from '../helpers/common.js';
 
 export enum CharacterSubCommandEnum {
 	importWanderersGuide = 'import-wanderers-guide',
@@ -23,7 +25,7 @@ export const characterCommandDefinition = {
 		name: 'character',
 		description: 'Commands for managing characters.',
 		type: ApplicationCommandType.ChatInput,
-		dm_permission: true,
+		contexts: anyUsageContext,
 		default_member_permissions: undefined,
 	},
 	subCommands: {
@@ -32,8 +34,10 @@ export const characterCommandDefinition = {
 			description: "Imports character data from Wanderer's Guide.",
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[CharacterCommandOptionEnum.wgUrl]:
+				[CharacterCommandOptionEnum.wgUrl]: withOrder(
 					characterCommandOptions[CharacterCommandOptionEnum.wgUrl],
+					1
+				),
 			},
 		},
 		[CharacterSubCommandEnum.importPathbuilder]: {
@@ -41,10 +45,14 @@ export const characterCommandDefinition = {
 			description: 'Imports character data from Pathbuilder.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[CharacterCommandOptionEnum.pbJsonId]:
+				[CharacterCommandOptionEnum.pbJsonId]: withOrder(
 					characterCommandOptions[CharacterCommandOptionEnum.pbJsonId],
-				[CharacterCommandOptionEnum.useStamina]:
+					1
+				),
+				[CharacterCommandOptionEnum.useStamina]: withOrder(
 					characterCommandOptions[CharacterCommandOptionEnum.useStamina],
+					2
+				),
 			},
 		},
 		[CharacterSubCommandEnum.importPasteBin]: {
@@ -52,8 +60,10 @@ export const characterCommandDefinition = {
 			description: 'Imports character data from Pastebin.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[CharacterCommandOptionEnum.pastebinUrl]:
+				[CharacterCommandOptionEnum.pastebinUrl]: withOrder(
 					characterCommandOptions[CharacterCommandOptionEnum.pastebinUrl],
+					1
+				),
 			},
 		},
 		[CharacterSubCommandEnum.list]: {
@@ -73,8 +83,10 @@ export const characterCommandDefinition = {
 			description: 'Sets the active character.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[CharacterCommandOptionEnum.name]:
+				[CharacterCommandOptionEnum.name]: withOrder(
 					characterCommandOptions[CharacterCommandOptionEnum.name],
+					1
+				),
 			},
 		},
 		[CharacterSubCommandEnum.setDefault]: {
@@ -82,10 +94,14 @@ export const characterCommandDefinition = {
 			description: 'Sets the default character.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[CharacterCommandOptionEnum.setDefaultScope]:
+				[CharacterCommandOptionEnum.setDefaultScope]: withOrder(
 					characterCommandOptions[CharacterCommandOptionEnum.setDefaultScope],
-				[CharacterCommandOptionEnum.name]:
+					1
+				),
+				[CharacterCommandOptionEnum.name]: withOrder(
 					characterCommandOptions[CharacterCommandOptionEnum.name],
+					2
+				),
 			},
 		},
 		[CharacterSubCommandEnum.sheet]: {
@@ -93,8 +109,10 @@ export const characterCommandDefinition = {
 			description: 'Displays the character sheet.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[GameCommandOptionEnum.gameSheetStyle]:
+				[GameCommandOptionEnum.gameSheetStyle]: withOrder(
 					gameCommandOptions[GameCommandOptionEnum.gameSheetStyle],
+					1
+				),
 			},
 		},
 		[CharacterSubCommandEnum.update]: {
@@ -102,16 +120,24 @@ export const characterCommandDefinition = {
 			description: 'Updates character data.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[CharacterCommandOptionEnum.pbJsonId]: {
-					...characterCommandOptions[CharacterCommandOptionEnum.pbJsonId],
-					required: false,
-				},
-				[CharacterCommandOptionEnum.pastebinUrl]: {
-					...characterCommandOptions[CharacterCommandOptionEnum.pastebinUrl],
-					required: false,
-				},
-				[CharacterCommandOptionEnum.useStamina]:
+				[CharacterCommandOptionEnum.pbJsonId]: withOrder(
+					{
+						...characterCommandOptions[CharacterCommandOptionEnum.pbJsonId],
+						required: false,
+					},
+					1
+				),
+				[CharacterCommandOptionEnum.pastebinUrl]: withOrder(
+					{
+						...characterCommandOptions[CharacterCommandOptionEnum.pastebinUrl],
+						required: false,
+					},
+					2
+				),
+				[CharacterCommandOptionEnum.useStamina]: withOrder(
 					characterCommandOptions[CharacterCommandOptionEnum.useStamina],
+					3
+				),
 			},
 		},
 	},

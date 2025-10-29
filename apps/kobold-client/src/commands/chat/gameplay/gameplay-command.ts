@@ -1,78 +1,17 @@
 import {
 	ApplicationCommandOptionChoiceData,
-	ApplicationCommandOptionType,
-	ApplicationCommandType,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
 	ChatInputCommandInteraction,
-	PermissionsString,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
-import { RateLimiter } from 'discord.js-rate-limiter';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-
-import L from '../../../i18n/i18n-node.js';
 import { CommandUtils } from '../../../utils/index.js';
-import { InjectedServices } from '../../command.js';
-import { Command, CommandDeferType } from '../../index.js';
-import { GameplayOptions } from './gameplay-command-options.js';
-import { CharacterOptions } from '../characters/command-options.js';
+import { BaseCommandClass, InjectedServices } from '../../command.js';
+import { Command } from '../../index.js';
+import { GameplayCommand as GameplayCommandDocumentation } from '@kobold/documentation';
 
-export class GameplayCommand implements Command {
-	public name = L.en.commands.gameplay.name();
-	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
-		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.gameplay.name(),
-		description: L.en.commands.gameplay.description(),
-		dm_permission: true,
-		default_member_permissions: undefined,
-
-		options: [
-			{
-				name: L.en.commands.gameplay.damage.name(),
-				description: L.en.commands.gameplay.damage.description(),
-				type: ApplicationCommandOptionType.Subcommand,
-				options: [
-					{ ...GameplayOptions.GAMEPLAY_TARGET_CHARACTER, required: true },
-					GameplayOptions.GAMEPLAY_DAMAGE_AMOUNT,
-					GameplayOptions.GAMEPLAY_DAMAGE_TYPE,
-				],
-			},
-			{
-				name: L.en.commands.gameplay.set.name(),
-				description: L.en.commands.gameplay.set.description(),
-				type: ApplicationCommandOptionType.Subcommand,
-				options: [
-					GameplayOptions.GAMEPLAY_SET_OPTION,
-					GameplayOptions.GAMEPLAY_SET_VALUE,
-					GameplayOptions.GAMEPLAY_TARGET_CHARACTER,
-				],
-			},
-			{
-				name: L.en.commands.gameplay.recover.name(),
-				description: L.en.commands.gameplay.recover.description(),
-				type: ApplicationCommandOptionType.Subcommand,
-				options: [GameplayOptions.GAMEPLAY_TARGET_CHARACTER],
-			},
-			{
-				name: L.en.commands.gameplay.tracker.name(),
-				description: L.en.commands.gameplay.tracker.description(),
-				type: ApplicationCommandOptionType.Subcommand,
-				options: [
-					{ ...CharacterOptions.SET_ACTIVE_NAME_OPTION, required: false },
-					GameplayOptions.GAMEPLAY_TARGET_CHANNEL,
-					GameplayOptions.GAMEPLAY_TRACKER_MODE,
-				],
-			},
-		],
-	};
-	public cooldown = new RateLimiter(1, 2000);
-	public deferType = CommandDeferType.PUBLIC;
-	public requireClientPerms: PermissionsString[] = [];
-
-	constructor(public commands: Command[]) {}
-
+export class GameplayCommand extends BaseCommandClass(GameplayCommandDocumentation) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption,

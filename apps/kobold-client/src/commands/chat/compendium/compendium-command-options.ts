@@ -9,21 +9,4 @@ export class CompendiumOptions {
 		autocomplete: true,
 		type: ApplicationCommandOptionType.String,
 	};
-	public static readonly COMPENDIUM_SEARCH_COMPENDIUM_CHOICE_OPTION: APIApplicationCommandBasicOption =
-		{
-			name: L.en.commandOptions.compendiumSearchChoice.name(),
-			description: L.en.commandOptions.compendiumSearchChoice.description(),
-			required: true,
-			type: ApplicationCommandOptionType.String,
-			choices: [
-				{
-					name: L.en.commandOptions.compendiumSearchChoice.choices.archivesOfNeythys.name(),
-					value: L.en.commandOptions.compendiumSearchChoice.choices.archivesOfNeythys.value(),
-				},
-				{
-					name: L.en.commandOptions.compendiumSearchChoice.choices.pf2eTools.name(),
-					value: L.en.commandOptions.compendiumSearchChoice.choices.pf2eTools.value(),
-				},
-			],
-		};
 }

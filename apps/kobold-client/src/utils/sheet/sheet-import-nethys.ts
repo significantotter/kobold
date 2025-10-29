@@ -46,7 +46,7 @@ export class NethysSheetImporter {
 
 		this.challengeAdjustment =
 			0 + (options?.template === 'elite' ? 1 : 0) - (options?.template === 'weak' ? 1 : 0);
-		this.sheet.staticInfo.level = (bestiaryEntry.level ?? 0) + this.challengeAdjustment ?? 0;
+		this.sheet.staticInfo.level = (bestiaryEntry.level ?? 0) + (this.challengeAdjustment ?? 0);
 
 		this.hpAdjustment = 0;
 		if (this.challengeAdjustment > 0) {
@@ -72,7 +72,7 @@ export class NethysSheetImporter {
 		}
 		this.hpAdjustment *= Math.abs(this.challengeAdjustment) ?? 0;
 
-		this.rollAdjustment = 2 * this.challengeAdjustment ?? 0;
+		this.rollAdjustment = 2 * (this.challengeAdjustment ?? 0);
 	}
 
 	protected applySpellcastingStats() {

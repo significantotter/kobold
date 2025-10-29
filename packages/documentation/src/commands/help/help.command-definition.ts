@@ -1,6 +1,8 @@
 import { ApplicationCommandOptionType, ApplicationCommandType } from 'discord-api-types/v10';
-import { CommandDefinition } from '../helpers/commands.d.js';
+import type { CommandDefinition } from '../helpers/commands.d.ts';
 import { HelpCommandOptionEnum, helpCommandOptions } from './help.command-options.js';
+import { anyUsageContext } from '../helpers/defaults.js';
+import { withOrder } from '../helpers/common.js';
 
 export enum HelpSubCommandEnum {
 	faq = 'faq',
@@ -29,7 +31,7 @@ export const helpCommandDefinition = {
 		name: 'help',
 		description: 'Get help with commands, permissions, FAQ, etc',
 		type: ApplicationCommandType.ChatInput,
-		dm_permission: true,
+		contexts: anyUsageContext,
 		default_member_permissions: undefined,
 	},
 	subCommands: {
@@ -108,8 +110,10 @@ export const helpCommandDefinition = {
 			description: 'Get help with creating a custom action',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[HelpCommandOptionEnum.customActionExample]:
+				[HelpCommandOptionEnum.customActionExample]: withOrder(
 					helpCommandOptions[HelpCommandOptionEnum.customActionExample],
+					1
+				),
 			},
 		},
 		[HelpSubCommandEnum.rollMacro]: {

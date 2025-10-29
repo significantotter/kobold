@@ -1,32 +1,18 @@
-import {
-	ApplicationCommandType,
-	ButtonStyle,
-	ChatInputCommandInteraction,
-	ComponentType,
-	PermissionsString,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
-} from 'discord.js';
+import { ButtonStyle, ChatInputCommandInteraction, ComponentType } from 'discord.js';
 import { Kobold } from '@kobold/db';
 
-import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { CollectorUtils } from '../../../utils/collector-utils.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { Command, CommandDeferType } from '../../index.js';
+import { Command } from '../../index.js';
+import { CharacterCommand } from '@kobold/documentation';
+import { BaseCommandClass } from '../../command.js';
 
-export class CharacterRemoveSubCommand implements Command {
-	public name = L.en.commands.character.remove.name();
-	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
-		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.character.remove.name(),
-		description: L.en.commands.character.remove.description(),
-		dm_permission: true,
-		default_member_permissions: undefined,
-	};
-	public deferType = CommandDeferType.NONE;
-	public requireClientPerms: PermissionsString[] = [];
-
+export class CharacterRemoveSubCommand extends BaseCommandClass(
+	CharacterCommand,
+	CharacterCommand.subCommandEnum.remove
+) {
 	public async execute(
 		intr: ChatInputCommandInteraction,
 		LL: TranslationFunctions,

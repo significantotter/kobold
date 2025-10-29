@@ -16,19 +16,14 @@ import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Command, CommandDeferType } from '../../index.js';
 import { CharacterOptions } from './command-options.js';
+import { anyUsageContext } from '../../command-utils/definitions.js';
+import { CharacterCommand } from '@kobold/documentation';
+import { BaseCommandClass } from '../../command.js';
 
-export class CharacterSetActiveSubCommand implements Command {
-	public name = L.en.commands.character.setActive.name();
-	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
-		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.character.setActive.name(),
-		description: L.en.commands.character.setActive.description(),
-		dm_permission: true,
-		default_member_permissions: undefined,
-	};
-	public deferType = CommandDeferType.PUBLIC;
-	public requireClientPerms: PermissionsString[] = [];
-
+export class CharacterSetActiveSubCommand extends BaseCommandClass(
+	CharacterCommand,
+	CharacterCommand.subCommandEnum.setActive
+) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption,

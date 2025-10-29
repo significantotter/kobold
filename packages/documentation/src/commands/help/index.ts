@@ -1,5 +1,5 @@
-import type { CommandReference } from '../helpers/commands.d.js';
-import { helpCommandDefinition } from './help.command-definition.js';
+import type { CommandReference } from '../helpers/commands.d.ts';
+import { helpCommandDefinition, HelpSubCommandEnum } from './help.command-definition.js';
 import { helpCommandOptions } from './help.command-options.js';
 import { helpCommandDocumentation } from './help.documentation.js';
 
@@ -11,4 +11,5 @@ export const HelpCommand = {
 	definition: helpCommandDefinition,
 	documentation: helpCommandDocumentation,
 	options: helpCommandOptions,
+	subCommandEnum: HelpSubCommandEnum,
 } satisfies CommandReference;

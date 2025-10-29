@@ -2,7 +2,6 @@ import { db, postgresClient } from '../nethys.db.js';
 import { compendium, bestiary } from '../nethys.schema.js';
 import { Client, estypes } from '@elastic/elasticsearch';
 import { sql } from 'drizzle-orm';
-import { SearchRequest } from '@elastic/elasticsearch/lib/api/types.js';
 import { CompendiumEntry } from '../schemas/index.js';
 export function valueAsJsonb(input: unknown) {
 	return sql.raw(`'${JSON.stringify(input).replaceAll("'", "''")}'::jsonb`);
@@ -21,7 +20,7 @@ export class NethysLoader {
 
 	// Scroll utility
 	public async *getScroll() {
-		const params: estypes.SearchRequest | SearchRequest | undefined = {
+		const params: estypes.SearchRequest | undefined = {
 			size: this.pageSize,
 			scroll: '1m',
 			query: {

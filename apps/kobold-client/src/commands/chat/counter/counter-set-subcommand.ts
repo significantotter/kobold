@@ -1,14 +1,10 @@
 import {
 	ApplicationCommandOptionChoiceData,
-	ApplicationCommandType,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
 	ChatInputCommandInteraction,
-	PermissionsString,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
-import { RateLimiter } from 'discord.js-rate-limiter';
 
 import _ from 'lodash';
 import L from '../../../i18n/i18n-node.js';
@@ -25,27 +21,20 @@ import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { Command, CommandDeferType } from '../../index.js';
+import { Command } from '../../index.js';
 import { CounterOptions } from './counter-command-options.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
 import { InputParseUtils } from '../../../utils/input-parse-utils.js';
 import { AutocompleteUtils } from '../../../utils/kobold-service-utils/autocomplete-utils.js';
 import { CounterHelpers } from './counter-helpers.js';
 import { CounterGroupHelpers } from '../counter-group/counter-group-helpers.js';
+import { CounterCommand } from '@kobold/documentation';
+import { BaseCommandClass } from '../../command.js';
 
-export class CounterSetSubCommand implements Command {
-	public name = L.en.commands.counter.set.name();
-	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
-		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.counter.set.name(),
-		description: L.en.commands.counter.set.description(),
-		dm_permission: true,
-		default_member_permissions: undefined,
-	};
-	public cooldown = new RateLimiter(1, 2000);
-	public deferType = CommandDeferType.PUBLIC;
-	public requireClientPerms: PermissionsString[] = [];
-
+export class CounterSetSubCommand extends BaseCommandClass(
+	CounterCommand,
+	CounterCommand.subCommandEnum.set
+) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption,

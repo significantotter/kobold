@@ -1,6 +1,8 @@
 import { ApplicationCommandOptionType, ApplicationCommandType } from 'discord-api-types/v10';
-import type { CommandDefinition } from '../helpers/commands.d.js';
+import type { CommandDefinition } from '../helpers/commands.d.ts';
 import { ActionCommandOptionEnum, actionCommandOptions } from './action.command-options.js';
+import { anyUsageContext } from '../helpers/defaults.js';
+import { withOrder } from '../helpers/common.js';
 
 const OptionEnum = ActionCommandOptionEnum;
 
@@ -19,7 +21,7 @@ export const actionCommandDefinition = {
 		name: 'action',
 		description: 'Commands for creating and modifying custom, rollable actions.',
 		type: ApplicationCommandType.ChatInput,
-		dm_permission: true,
+		contexts: anyUsageContext,
 		default_member_permissions: undefined,
 	},
 	subCommands: {
@@ -34,23 +36,32 @@ export const actionCommandDefinition = {
 			description: 'Describes a specific action.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[OptionEnum.targetAction]: actionCommandOptions[OptionEnum.targetAction],
+				[OptionEnum.targetAction]: withOrder(
+					actionCommandOptions[OptionEnum.targetAction],
+					1
+				),
 			},
 		},
 		[ActionSubCommandEnum.create]: {
 			type: ApplicationCommandType.ChatInput,
 			name: ActionSubCommandEnum.create,
 			description: 'Creates an action.',
-			dm_permission: true,
+			contexts: anyUsageContext,
 			default_member_permissions: undefined,
 			options: {
-				[OptionEnum.name]: actionCommandOptions[OptionEnum.name],
-				[OptionEnum.type]: actionCommandOptions[OptionEnum.type],
-				[OptionEnum.actionCost]: actionCommandOptions[OptionEnum.actionCost],
-				[OptionEnum.description]: actionCommandOptions[OptionEnum.description],
-				[OptionEnum.baseLevel]: actionCommandOptions[OptionEnum.baseLevel],
-				[OptionEnum.autoHeighten]: actionCommandOptions[OptionEnum.autoHeighten],
-				[OptionEnum.tags]: actionCommandOptions[OptionEnum.tags],
+				[OptionEnum.name]: withOrder(actionCommandOptions[OptionEnum.name], 1),
+				[OptionEnum.type]: withOrder(actionCommandOptions[OptionEnum.type], 2),
+				[OptionEnum.actionCost]: withOrder(actionCommandOptions[OptionEnum.actionCost], 3),
+				[OptionEnum.description]: withOrder(
+					actionCommandOptions[OptionEnum.description],
+					4
+				),
+				[OptionEnum.baseLevel]: withOrder(actionCommandOptions[OptionEnum.baseLevel], 5),
+				[OptionEnum.autoHeighten]: withOrder(
+					actionCommandOptions[OptionEnum.autoHeighten],
+					6
+				),
+				[OptionEnum.tags]: withOrder(actionCommandOptions[OptionEnum.tags], 7),
 			},
 		},
 		[ActionSubCommandEnum.remove]: {
@@ -58,11 +69,14 @@ export const actionCommandDefinition = {
 			description: 'Removes an action',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[OptionEnum.targetAction]: {
-					...actionCommandOptions[OptionEnum.targetAction],
-					autocomplete: true,
-					choices: undefined,
-				},
+				[OptionEnum.targetAction]: withOrder(
+					{
+						...actionCommandOptions[OptionEnum.targetAction],
+						autocomplete: true,
+						choices: undefined,
+					},
+					1
+				),
 			},
 		},
 		[ActionSubCommandEnum.set]: {
@@ -70,9 +84,12 @@ export const actionCommandDefinition = {
 			description: 'Sets a field on an action. "none" clears the field.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[OptionEnum.targetAction]: actionCommandOptions[OptionEnum.targetAction],
-				[OptionEnum.setOption]: actionCommandOptions[OptionEnum.setOption],
-				[OptionEnum.setValue]: actionCommandOptions[OptionEnum.setValue],
+				[OptionEnum.targetAction]: withOrder(
+					actionCommandOptions[OptionEnum.targetAction],
+					1
+				),
+				[OptionEnum.setOption]: withOrder(actionCommandOptions[OptionEnum.setOption], 2),
+				[OptionEnum.setValue]: withOrder(actionCommandOptions[OptionEnum.setValue], 3),
 			},
 		},
 		[ActionSubCommandEnum.import]: {
@@ -80,8 +97,8 @@ export const actionCommandDefinition = {
 			description: 'Imports a list of action data to a character from PasteBin.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[OptionEnum.url]: actionCommandOptions[OptionEnum.url],
-				[OptionEnum.importMode]: actionCommandOptions[OptionEnum.importMode],
+				[OptionEnum.url]: withOrder(actionCommandOptions[OptionEnum.url], 1),
+				[OptionEnum.importMode]: withOrder(actionCommandOptions[OptionEnum.importMode], 2),
 			},
 		},
 		[ActionSubCommandEnum.export]: {

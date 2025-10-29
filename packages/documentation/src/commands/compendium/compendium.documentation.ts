@@ -1,4 +1,5 @@
-import { CommandDocumentation, CommandResponseTypeEnum } from '../helpers/commands.d.js';
+import type { CommandDocumentation } from '../helpers/commands.d.ts';
+import { CommandResponseTypeEnum } from '../helpers/enums.js';
 import {
 	compendiumCommandDefinition,
 	CompendiumSubCommandEnum,

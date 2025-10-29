@@ -1,6 +1,7 @@
 import {
 	ApplicationCommandType,
 	ChatInputCommandInteraction,
+	InteractionContextType,
 	Locale,
 	PermissionsString,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -19,12 +20,13 @@ import { Command, CommandDeferType, InjectedServices } from '../../command.js';
 import { Config } from '@kobold/config';
 
 export class AdminCommand implements Command {
+	public commands: Command[] = [];
 	public name = L.en.commands.admin.name();
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
 		name: L.en.commands.admin.name(),
 		description: L.en.commands.admin.description(),
-		dm_permission: false,
+		contexts: [InteractionContextType.Guild],
 		default_member_permissions: undefined,
 	};
 	public cooldown = new RateLimiter(1, 2000);

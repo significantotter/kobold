@@ -1,14 +1,10 @@
 import {
 	ApplicationCommandOptionChoiceData,
-	ApplicationCommandType,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
 	ChatInputCommandInteraction,
-	PermissionsString,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
-import { RateLimiter } from 'discord.js-rate-limiter';
 
 import _ from 'lodash';
 import L from '../../../i18n/i18n-node.js';
@@ -18,25 +14,18 @@ import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { Command, CommandDeferType } from '../../index.js';
+import { Command } from '../../index.js';
 import { CounterGroupOptions } from './counter-group-command-options.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
 import { InputParseUtils } from '../../../utils/input-parse-utils.js';
 import { AutocompleteUtils } from '../../../utils/kobold-service-utils/autocomplete-utils.js';
+import { BaseCommandClass } from '../../command.js';
+import { CounterGroupCommand } from '@kobold/documentation';
 
-export class CounterGroupSetSubCommand implements Command {
-	public name = L.en.commands.counterGroup.set.name();
-	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
-		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.counterGroup.set.name(),
-		description: L.en.commands.counterGroup.set.description(),
-		dm_permission: true,
-		default_member_permissions: undefined,
-	};
-	public cooldown = new RateLimiter(1, 2000);
-	public deferType = CommandDeferType.PUBLIC;
-	public requireClientPerms: PermissionsString[] = [];
-
+export class CounterGroupSetSubCommand extends BaseCommandClass(
+	CounterGroupCommand,
+	CounterGroupCommand.subCommandEnum.set
+) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption,

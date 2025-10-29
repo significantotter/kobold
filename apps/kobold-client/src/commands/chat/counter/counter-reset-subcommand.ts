@@ -1,40 +1,29 @@
 import {
 	ApplicationCommandOptionChoiceData,
-	ApplicationCommandType,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
 	ChatInputCommandInteraction,
-	PermissionsString,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 
-import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold } from '@kobold/db';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { Command, CommandDeferType } from '../../index.js';
+import { Command } from '../../index.js';
 import { CounterOptions } from './counter-command-options.js';
 import { AutocompleteUtils } from '../../../utils/kobold-service-utils/autocomplete-utils.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
-import { InteractionUtils } from '../../../utils/interaction-utils.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { CounterGroupHelpers } from '../counter-group/counter-group-helpers.js';
 import { CounterHelpers } from './counter-helpers.js';
+import { CounterCommand } from '@kobold/documentation';
+import { BaseCommandClass } from '../../command.js';
 
-export class CounterResetSubCommand implements Command {
-	public name = L.en.commands.counter.reset.name();
-	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
-		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.counter.reset.name(),
-		description: L.en.commands.counter.reset.description(),
-		dm_permission: true,
-		default_member_permissions: undefined,
-	};
-	public deferType = CommandDeferType.NONE;
-	public requireClientPerms: PermissionsString[] = [];
-
+export class CounterResetSubCommand extends BaseCommandClass(
+	CounterCommand,
+	CounterCommand.subCommandEnum.reset
+) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption,

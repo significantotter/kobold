@@ -1,5 +1,5 @@
 import { ApplicationCommandOptionType } from 'discord-api-types/v10';
-import type { CommandOptions, SpecificCommandOptions } from '../helpers/commands.d.js';
+import type { CommandOptions, SpecificCommandOptions } from '../helpers/commands.d.ts';
 
 export enum ActionStageCommandOptionEnum {
 	actionTarget = 'action-target',
@@ -60,6 +60,7 @@ export const actionStageCommandOptions: CommandOptions = {
 		description: "Whether you're targeting AC, a save, or a skill DC. Or a flat number.",
 		required: true,
 		autocomplete: true,
+		choices: undefined,
 		type: ApplicationCommandOptionType.String,
 	},
 	[ActionStageCommandOptionEnum.healInsteadOfDamage]: {

@@ -1,5 +1,5 @@
 import { ApplicationCommandOptionType } from 'discord-api-types/v10';
-import type { CommandOptions } from '../helpers/commands.d.js';
+import type { CommandOptions } from '../helpers/commands.d.ts';
 
 export enum ActionCommandOptionEnum {
 	name = 'name',

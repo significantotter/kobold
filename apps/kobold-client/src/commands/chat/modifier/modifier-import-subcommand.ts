@@ -1,12 +1,5 @@
-import {
-	ApplicationCommandType,
-	ChatInputCommandInteraction,
-	PermissionsString,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
-} from 'discord.js';
-import { RateLimiter } from 'discord.js-rate-limiter';
+import { ChatInputCommandInteraction } from 'discord.js';
 import { ModifierOptions } from './modifier-command-options.js';
-
 import { compileExpression } from 'filtrex';
 import _ from 'lodash';
 import L from '../../../i18n/i18n-node.js';
@@ -22,21 +15,14 @@ import {
 import { InteractionUtils } from '../../../utils/index.js';
 import { TextParseHelpers } from '../../../utils/kobold-helpers/text-parse-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { Command, CommandDeferType } from '../../index.js';
+import { Command } from '../../index.js';
+import { ModifierCommand } from '@kobold/documentation';
+import { BaseCommandClass } from '../../command.js';
 
-export class ModifierImportSubCommand implements Command {
-	public name = L.en.commands.modifier.import.name();
-	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
-		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.modifier.import.name(),
-		description: L.en.commands.modifier.import.description(),
-		dm_permission: true,
-		default_member_permissions: undefined,
-	};
-	public cooldown = new RateLimiter(1, 2000);
-	public deferType = CommandDeferType.PUBLIC;
-	public requireClientPerms: PermissionsString[] = [];
-
+export class ModifierImportSubCommand extends BaseCommandClass(
+	ModifierCommand,
+	ModifierCommand.subCommandEnum.import
+) {
 	public async execute(
 		intr: ChatInputCommandInteraction,
 		LL: TranslationFunctions,

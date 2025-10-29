@@ -4,21 +4,19 @@ import {
 	PermissionsString,
 	APIApplicationCommandOption,
 } from 'discord-api-types/v10';
-import { CommandDeferType } from '../helpers.ts';
+import { CommandDeferType } from '../helpers.js';
+import { CommandResponseTypeEnum } from './enums.js';
 
 export type CommandOptions = Record<string, APIApplicationCommandOption>;
-export type SpecificCommandOptions<T extends Enum> = { [key in T]: APIApplicationCommandOption };
+export type SpecificCommandOptions<T extends Enum> = {
+	[key in T]: APIApplicationCommandOption;
+};
 
 export interface CommandReference {
 	definition: CommandDefinition<string>;
 	documentation: CommandDocumentation<CommandDefinition<string>>;
 	options: CommandOptions;
-}
-
-export enum CommandResponseTypeEnum {
-	success = 'success',
-	error = 'error',
-	indeterminate = 'indeterminate',
+	subCommandEnum: Enum;
 }
 
 export interface CommandDefinition<T> {
@@ -92,6 +90,6 @@ export interface SubCommandDefinition {
 	description: string;
 	type: ApplicationCommandOptionType.Subcommand | ApplicationCommandType.ChatInput;
 	options?: Record<string, APIApplicationCommandOption>;
-	dm_permission?: boolean;
+	contexts?: InteractionContextType[];
 	default_member_permissions?: undefined;
 }

@@ -1,40 +1,38 @@
+import { ChatInputCommandInteraction } from 'discord.js';
 import {
-	ApplicationCommandType,
-	ChatInputCommandInteraction,
-	PermissionsString,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
-} from 'discord.js';
-import { Kobold, zAction, zModifier, zRollMacro, zSheet } from '@kobold/db';
+	Action,
+	Kobold,
+	Modifier,
+	RollMacro,
+	Sheet,
+	zAction,
+	zModifier,
+	zRollMacro,
+	zSheet,
+} from '@kobold/db';
 
 import _ from 'lodash';
-import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { InteractionUtils } from '../../../utils/index.js';
-import { type Command, CommandDeferType } from '../../index.js';
+import { type Command } from '../../index.js';
 import { CharacterOptions } from './command-options.js';
 import { TextParseHelpers } from '../../../utils/kobold-helpers/text-parse-helpers.js';
 import { z } from 'zod';
 import { PasteBinCharacterFetcher } from './Fetchers/pastebin-character-fetcher.js';
+import { CharacterCommand } from '@kobold/documentation';
+import { BaseCommandClass } from '../../command.js';
 
 export const zPasteBinImport = z.object({
 	sheet: zSheet.optional(),
-	modifiers: z.array(zModifier).optional(),
-	actions: z.array(zAction).optional(),
-	rollMacros: z.array(zRollMacro).optional(),
+	modifiers: zModifier.array().optional(),
+	actions: zAction.array().optional(),
+	rollMacros: zRollMacro.array().optional(),
 });
 
-export class CharacterImportPasteBinSubCommand implements Command {
-	public name = L.en.commands.character.importPasteBin.name();
-	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
-		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.character.importPasteBin.name(),
-		description: L.en.commands.character.importPasteBin.description(),
-		dm_permission: true,
-		default_member_permissions: undefined,
-	};
-	public deferType = CommandDeferType.PUBLIC;
-	public requireClientPerms: PermissionsString[] = [];
-
+export class CharacterImportPasteBinSubCommand extends BaseCommandClass(
+	CharacterCommand,
+	CharacterCommand.subCommandEnum.importPasteBin
+) {
 	public async execute(
 		intr: ChatInputCommandInteraction,
 		LL: TranslationFunctions,

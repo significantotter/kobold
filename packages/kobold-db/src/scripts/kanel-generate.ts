@@ -3,13 +3,14 @@ import kanel, { Details, InstantiatedConfig, Output, Path, PreRenderHook } from 
 import { Config } from '@kobold/config';
 import kk from 'kanel-kysely';
 import kz from 'kanel-zod';
+// @ts-expect-error
 import { recase } from '@kristiandupont/recase';
 import { tryParse } from 'tagged-comment-parser';
 import { join } from 'path';
 import _ from 'lodash';
 const { makeKyselyHook } = kk;
 const { makeGenerateZodSchemas, defaultGetZodIdentifierMetadata, defaultZodTypeMap } = kz;
-const toPascalCase = recase('snake', 'pascal');
+const toPascalCase = recase('snake', 'pascal') as (ident: string) => string;
 
 const outputPath = './src/schemas/kanel';
 

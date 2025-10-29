@@ -1,38 +1,27 @@
 import {
 	ApplicationCommandOptionChoiceData,
-	ApplicationCommandType,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
 	ChatInputCommandInteraction,
-	PermissionsString,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 
 import { GameplayOptions } from './gameplay-command-options.js';
-
 import _ from 'lodash';
-import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold, SheetBaseCounterKeys } from '@kobold/db';
 import { KoboldError } from '../../../utils/KoboldError.js';
 import { Creature } from '../../../utils/creature.js';
 import { InteractionUtils } from '../../../utils/interaction-utils.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { Command, CommandDeferType } from '../../index.js';
+import { Command } from '../../index.js';
+import { GameplayCommand } from '@kobold/documentation';
+import { BaseCommandClass } from '../../command.js';
 
-export class GameplaySetSubCommand implements Command {
-	public name = L.en.commands.gameplay.set.name();
-	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
-		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.gameplay.set.name(),
-		description: L.en.commands.gameplay.set.description(),
-		dm_permission: true,
-		default_member_permissions: undefined,
-	};
-	public deferType = CommandDeferType.PUBLIC;
-	public requireClientPerms: PermissionsString[] = [];
-
+export class GameplaySetSubCommand extends BaseCommandClass(
+	GameplayCommand,
+	GameplayCommand.subCommandEnum.set
+) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption,

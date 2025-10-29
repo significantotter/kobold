@@ -1,6 +1,8 @@
-import { ApplicationCommandType } from 'discord-api-types/v10';
-import { CommandDefinition } from '../helpers/commands.d.js';
+import { APIApplicationCommandOption, ApplicationCommandType } from 'discord-api-types/v10';
+import type { CommandDefinition } from '../helpers/commands.d.ts';
 import { CounterCommandOptionEnum, counterCommandOptions } from './counter.command-options.js';
+import { anyUsageContext } from '../helpers/defaults.js';
+import { withOrder } from '../helpers/common.js';
 
 export enum CounterSubCommandEnum {
 	list = 'list',
@@ -20,7 +22,7 @@ export const counterCommandDefinition = {
 		name: 'counter',
 		description: 'Custom counters to track xp, per-day abilities, etc.',
 		type: ApplicationCommandType.ChatInput,
-		dm_permission: true,
+		contexts: anyUsageContext,
 		default_member_permissions: undefined,
 	},
 	subCommands: {
@@ -29,8 +31,10 @@ export const counterCommandDefinition = {
 			description: 'Lists all counters available to your active character.',
 			type: ApplicationCommandType.ChatInput,
 			options: {
-				[CounterCommandOptionEnum.counterListHideGroups]:
+				[CounterCommandOptionEnum.counterListHideGroups]: withOrder(
 					counterCommandOptions[CounterCommandOptionEnum.counterListHideGroups],
+					1
+				),
 			},
 		},
 		[CounterSubCommandEnum.display]: {
@@ -38,11 +42,14 @@ export const counterCommandDefinition = {
 			description: 'Displays a counter for your active character.',
 			type: ApplicationCommandType.ChatInput,
 			options: {
-				[CounterCommandOptionEnum.counterName]: {
-					...counterCommandOptions[CounterCommandOptionEnum.counterName],
-					autocomplete: true,
-					choices: undefined,
-				},
+				[CounterCommandOptionEnum.counterName]: withOrder(
+					{
+						...counterCommandOptions[CounterCommandOptionEnum.counterName],
+						autocomplete: true,
+						choices: undefined,
+					} as APIApplicationCommandOption,
+					1
+				),
 			},
 		},
 		[CounterSubCommandEnum.reset]: {
@@ -50,11 +57,14 @@ export const counterCommandDefinition = {
 			description: 'Resets a counter for your active character.',
 			type: ApplicationCommandType.ChatInput,
 			options: {
-				[CounterCommandOptionEnum.counterName]: {
-					...counterCommandOptions[CounterCommandOptionEnum.counterName],
-					autocomplete: true,
-					choices: undefined,
-				},
+				[CounterCommandOptionEnum.counterName]: withOrder(
+					{
+						...counterCommandOptions[CounterCommandOptionEnum.counterName],
+						autocomplete: true,
+						choices: undefined,
+					} as APIApplicationCommandOption,
+					1
+				),
 			},
 		},
 		[CounterSubCommandEnum.useSlot]: {
@@ -62,15 +72,22 @@ export const counterCommandDefinition = {
 			description: 'Uses a prepared slot on a counter for your active character.',
 			type: ApplicationCommandType.ChatInput,
 			options: {
-				[CounterCommandOptionEnum.counterName]: {
-					...counterCommandOptions[CounterCommandOptionEnum.counterName],
-					autocomplete: true,
-					choices: undefined,
-				},
-				[CounterCommandOptionEnum.counterSlot]:
+				[CounterCommandOptionEnum.counterName]: withOrder(
+					{
+						...counterCommandOptions[CounterCommandOptionEnum.counterName],
+						autocomplete: true,
+						choices: undefined,
+					} as APIApplicationCommandOption,
+					1
+				),
+				[CounterCommandOptionEnum.counterSlot]: withOrder(
 					counterCommandOptions[CounterCommandOptionEnum.counterSlot],
-				[CounterCommandOptionEnum.counterResetSlot]:
+					2
+				),
+				[CounterCommandOptionEnum.counterResetSlot]: withOrder(
 					counterCommandOptions[CounterCommandOptionEnum.counterResetSlot],
+					3
+				),
 			},
 		},
 		[CounterSubCommandEnum.value]: {
@@ -78,13 +95,18 @@ export const counterCommandDefinition = {
 			description: 'Changes the value of a counter for your active character.',
 			type: ApplicationCommandType.ChatInput,
 			options: {
-				[CounterCommandOptionEnum.counterName]: {
-					...counterCommandOptions[CounterCommandOptionEnum.counterName],
-					autocomplete: true,
-					choices: undefined,
-				},
-				[CounterCommandOptionEnum.counterValue]:
+				[CounterCommandOptionEnum.counterName]: withOrder(
+					{
+						...counterCommandOptions[CounterCommandOptionEnum.counterName],
+						autocomplete: true,
+						choices: undefined,
+					} as APIApplicationCommandOption,
+					1
+				),
+				[CounterCommandOptionEnum.counterValue]: withOrder(
 					counterCommandOptions[CounterCommandOptionEnum.counterValue],
+					2
+				),
 			},
 		},
 		[CounterSubCommandEnum.prepare]: {
@@ -92,15 +114,22 @@ export const counterCommandDefinition = {
 			description: "Prepares an expendable ability in a counter's slot.",
 			type: ApplicationCommandType.ChatInput,
 			options: {
-				[CounterCommandOptionEnum.counterName]: {
-					...counterCommandOptions[CounterCommandOptionEnum.counterName],
-					autocomplete: true,
-					choices: undefined,
-				},
-				[CounterCommandOptionEnum.counterSlot]:
+				[CounterCommandOptionEnum.counterName]: withOrder(
+					{
+						...counterCommandOptions[CounterCommandOptionEnum.counterName],
+						autocomplete: true,
+						choices: undefined,
+					} as APIApplicationCommandOption,
+					1
+				),
+				[CounterCommandOptionEnum.counterSlot]: withOrder(
 					counterCommandOptions[CounterCommandOptionEnum.counterSlot],
-				[CounterCommandOptionEnum.counterPrepareSlot]:
+					2
+				),
+				[CounterCommandOptionEnum.counterPrepareSlot]: withOrder(
 					counterCommandOptions[CounterCommandOptionEnum.counterPrepareSlot],
+					3
+				),
 			},
 		},
 		[CounterSubCommandEnum.prepareMany]: {
@@ -108,15 +137,22 @@ export const counterCommandDefinition = {
 			description: "Prepares multiple expendable abilities in a counter's slots.",
 			type: ApplicationCommandType.ChatInput,
 			options: {
-				[CounterCommandOptionEnum.counterName]: {
-					...counterCommandOptions[CounterCommandOptionEnum.counterName],
-					autocomplete: true,
-					choices: undefined,
-				},
-				[CounterCommandOptionEnum.counterPrepareMany]:
+				[CounterCommandOptionEnum.counterName]: withOrder(
+					{
+						...counterCommandOptions[CounterCommandOptionEnum.counterName],
+						autocomplete: true,
+						choices: undefined,
+					} as APIApplicationCommandOption,
+					1
+				),
+				[CounterCommandOptionEnum.counterPrepareMany]: withOrder(
 					counterCommandOptions[CounterCommandOptionEnum.counterPrepareMany],
-				[CounterCommandOptionEnum.counterPrepareFresh]:
+					2
+				),
+				[CounterCommandOptionEnum.counterPrepareFresh]: withOrder(
 					counterCommandOptions[CounterCommandOptionEnum.counterPrepareFresh],
+					3
+				),
 			},
 		},
 		[CounterSubCommandEnum.create]: {
@@ -124,18 +160,30 @@ export const counterCommandDefinition = {
 			description: 'Creates a counter for the active character.',
 			type: ApplicationCommandType.ChatInput,
 			options: {
-				[CounterCommandOptionEnum.counterStyle]:
+				[CounterCommandOptionEnum.counterStyle]: withOrder(
 					counterCommandOptions[CounterCommandOptionEnum.counterStyle],
-				[CounterCommandOptionEnum.counterName]:
+					1
+				),
+				[CounterCommandOptionEnum.counterName]: withOrder(
 					counterCommandOptions[CounterCommandOptionEnum.counterName],
-				[CounterCommandOptionEnum.counterMax]:
+					2
+				),
+				[CounterCommandOptionEnum.counterMax]: withOrder(
 					counterCommandOptions[CounterCommandOptionEnum.counterMax],
-				[CounterCommandOptionEnum.counterCounterGroupName]:
+					3
+				),
+				[CounterCommandOptionEnum.counterCounterGroupName]: withOrder(
 					counterCommandOptions[CounterCommandOptionEnum.counterCounterGroupName],
-				[CounterCommandOptionEnum.counterRecoverable]:
+					4
+				),
+				[CounterCommandOptionEnum.counterRecoverable]: withOrder(
 					counterCommandOptions[CounterCommandOptionEnum.counterRecoverable],
-				[CounterCommandOptionEnum.counterRecoverTo]:
+					5
+				),
+				[CounterCommandOptionEnum.counterRecoverTo]: withOrder(
 					counterCommandOptions[CounterCommandOptionEnum.counterRecoverTo],
+					6
+				),
 			},
 		},
 		[CounterSubCommandEnum.set]: {
@@ -143,15 +191,22 @@ export const counterCommandDefinition = {
 			description: 'Sets the value of a counter for your active character.',
 			type: ApplicationCommandType.ChatInput,
 			options: {
-				[CounterCommandOptionEnum.counterName]: {
-					...counterCommandOptions[CounterCommandOptionEnum.counterName],
-					autocomplete: true,
-					choices: undefined,
-				},
-				[CounterCommandOptionEnum.counterSetOption]:
+				[CounterCommandOptionEnum.counterName]: withOrder(
+					{
+						...counterCommandOptions[CounterCommandOptionEnum.counterName],
+						autocomplete: true,
+						choices: undefined,
+					} as APIApplicationCommandOption,
+					1
+				),
+				[CounterCommandOptionEnum.counterSetOption]: withOrder(
 					counterCommandOptions[CounterCommandOptionEnum.counterSetOption],
-				[CounterCommandOptionEnum.counterSetValue]:
+					2
+				),
+				[CounterCommandOptionEnum.counterSetValue]: withOrder(
 					counterCommandOptions[CounterCommandOptionEnum.counterSetValue],
+					3
+				),
 			},
 		},
 		[CounterSubCommandEnum.remove]: {
@@ -159,11 +214,14 @@ export const counterCommandDefinition = {
 			description: 'Removes a counter for the active character.',
 			type: ApplicationCommandType.ChatInput,
 			options: {
-				[CounterCommandOptionEnum.counterName]: {
-					...counterCommandOptions[CounterCommandOptionEnum.counterName],
-					autocomplete: true,
-					choices: undefined,
-				},
+				[CounterCommandOptionEnum.counterName]: withOrder(
+					{
+						...counterCommandOptions[CounterCommandOptionEnum.counterName],
+						autocomplete: true,
+						choices: undefined,
+					} as APIApplicationCommandOption,
+					1
+				),
 			},
 		},
 	},

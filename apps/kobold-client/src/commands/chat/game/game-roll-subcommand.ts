@@ -25,20 +25,14 @@ import { Command, CommandDeferType } from '../../index.js';
 import { InitOptions } from '../init/init-command-options.js';
 import { GameOptions } from './game-command-options.js';
 import { RollOptions } from '../roll/roll-command-options.js';
+import { anyUsageContext } from '../../command-utils/definitions.js';
+import { GameCommand } from '@kobold/documentation';
+import { BaseCommandClass } from '../../command.js';
 
-export class GameRollSubCommand implements Command {
-	public name = L.en.commands.game.roll.name();
-	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
-		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.game.roll.name(),
-		description: L.en.commands.game.roll.description(),
-		dm_permission: true,
-		default_member_permissions: undefined,
-	};
-	public cooldown = new RateLimiter(1, 2000);
-	public deferType = CommandDeferType.NONE;
-	public requireClientPerms: PermissionsString[] = [];
-
+export class GameRollSubCommand extends BaseCommandClass(
+	GameCommand,
+	GameCommand.subCommandEnum.roll
+) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption,

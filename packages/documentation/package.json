@@ -6,22 +6,22 @@
 	"license": "MIT",
 	"private": true,
 	"type": "module",
-	"main": "./src/index.js",
-	"types": "./src/index.ts",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
 	"scripts": {
 		"build": "pnpm run compile",
 		"compile": "tsc -p tsconfig.build.json"
 	},
 	"dependencies": {
-		"discord-api-types": "^0.37.115",
+		"discord-api-types": "^0.37.120",
 		"lodash": "^4.17.21"
 	},
 	"devDependencies": {
-		"@types/lodash": "^4.14.202",
-		"@types/node": "^20.11.19",
-		"eslint": "^8.56.0",
+		"@types/lodash": "^4.17.20",
+		"@types/node": "^20.19.11",
+		"eslint": "^9.33.0",
 		"ts-node": "^10.9.2",
-		"typescript": "^5.3",
-		"vitest": "^0.34.4"
+		"typescript": "^5.9.2",
+		"vitest": "^0.34.6"
 	}
 }

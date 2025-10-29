@@ -1,12 +1,4 @@
-import {
-	ApplicationCommandType,
-	ButtonStyle,
-	ChatInputCommandInteraction,
-	ComponentType,
-	PermissionsString,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
-} from 'discord.js';
-import { RateLimiter } from 'discord.js-rate-limiter';
+import { ButtonStyle, ChatInputCommandInteraction, ComponentType } from 'discord.js';
 
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
@@ -14,21 +6,14 @@ import { Kobold } from '@kobold/db';
 import { CollectorUtils } from '../../../utils/collector-utils.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { Command, CommandDeferType } from '../../index.js';
+import { Command } from '../../index.js';
+import { InitCommand } from '@kobold/documentation';
+import { BaseCommandClass } from '../../command.js';
 
-export class InitEndSubCommand implements Command {
-	public name = L.en.commands.init.end.name();
-	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
-		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.init.end.name(),
-		description: L.en.commands.init.end.description(),
-		dm_permission: true,
-		default_member_permissions: undefined,
-	};
-	public cooldown = new RateLimiter(1, 2000);
-	public deferType = CommandDeferType.NONE;
-	public requireClientPerms: PermissionsString[] = [];
-
+export class InitEndSubCommand extends BaseCommandClass(
+	InitCommand,
+	InitCommand.subCommandEnum.end
+) {
 	public async execute(
 		intr: ChatInputCommandInteraction,
 		LL: TranslationFunctions,

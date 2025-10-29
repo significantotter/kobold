@@ -1,15 +1,15 @@
 import { ApplicationCommandOptionType } from 'discord-api-types/v10';
-import type { CommandOptions, SpecificCommandOptions } from '../helpers/commands.d.js';
+import type { CommandOptions, SpecificCommandOptions } from '../helpers/commands.d.ts';
 
 export enum GameCommandOptionEnum {
-	gameGiveOption = 'gameGiveOption',
-	gameGiveAmount = 'gameGiveAmount',
-	gameSheetStyle = 'gameSheetStyle',
-	gameManageOption = 'gameManageOption',
-	gameManageValue = 'gameManageValue',
-	gameRollType = 'gameRollType',
-	gameTargetCharacter = 'gameTargetCharacter',
-	gameDiceRollOrModifier = 'gameDiceRollOrModifier',
+	gameGiveOption = 'game-give-option',
+	gameGiveAmount = 'game-give-amount',
+	gameSheetStyle = 'game-sheet-style',
+	gameManageOption = 'game-manage-option',
+	gameManageValue = 'game-manage-value',
+	gameRollType = 'game-roll-type',
+	gameTargetCharacter = 'game-target-character',
+	gameDiceRollOrModifier = 'game-dice-roll-or-modifier',
 }
 
 export const gameCommandOptions: CommandOptions = {

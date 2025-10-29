@@ -1,5 +1,8 @@
-import type { CommandReference } from '../helpers/commands.d.js';
-import { characterCommandDefinition } from './character.command-definition.js';
+import type { CommandReference } from '../helpers/commands.d.ts';
+import {
+	characterCommandDefinition,
+	CharacterSubCommandEnum,
+} from './character.command-definition.js';
 import { characterCommandOptions } from './character.command-options.js';
 import { characterCommandDocumentation } from './character.documentation.js';
 
@@ -11,4 +14,5 @@ export const CharacterCommand = {
 	definition: characterCommandDefinition,
 	documentation: characterCommandDocumentation,
 	options: characterCommandOptions,
+	subCommandEnum: CharacterSubCommandEnum,
 } satisfies CommandReference;

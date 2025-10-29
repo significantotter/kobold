@@ -1,38 +1,26 @@
 import {
 	ApplicationCommandOptionChoiceData,
-	ApplicationCommandType,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
 	ChatInputCommandInteraction,
-	PermissionsString,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
-import { RateLimiter } from 'discord.js-rate-limiter';
 
-import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { InitiativeActorWithRelations, Kobold } from '@kobold/db';
 import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { Command, CommandDeferType } from '../../index.js';
+import { Command } from '../../index.js';
 import { InitOptions } from './init-command-options.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
 import { StringUtils } from '@kobold/base-utils';
+import { InitCommand } from '@kobold/documentation';
+import { BaseCommandClass } from '../../command.js';
 
-export class InitNoteSubCommand implements Command {
-	public name = L.en.commands.init.note.name();
-	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
-		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.init.note.name(),
-		description: L.en.commands.init.note.description(),
-		dm_permission: false,
-		default_member_permissions: undefined,
-	};
-	public cooldown = new RateLimiter(1, 2000);
-	public deferType = CommandDeferType.NONE;
-	public requireClientPerms: PermissionsString[] = [];
-
+export class InitNoteSubCommand extends BaseCommandClass(
+	InitCommand,
+	InitCommand.subCommandEnum.note
+) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption,

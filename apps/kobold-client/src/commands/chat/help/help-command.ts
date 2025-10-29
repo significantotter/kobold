@@ -1,17 +1,12 @@
-import {
-	ApplicationCommandOptionType,
-	ApplicationCommandType,
-	ChatInputCommandInteraction,
-	PermissionsString,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
-} from 'discord.js';
+import { ApplicationCommandOptionType, ChatInputCommandInteraction } from 'discord.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 
 import _ from 'lodash';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
-import { InjectedServices } from '../../command.js';
-import { Command, CommandDeferType } from '../../index.js';
+import { BaseCommandClass, InjectedServices } from '../../command.js';
+import { Command } from '../../index.js';
+import { HelpCommand as HelpCommandDocumentation } from '@kobold/documentation';
 
 function createCommandOperationHelpField(
 	command: string,
@@ -33,159 +28,7 @@ function createCommandOperationHelpField(
 	return { name: fieldName, value: fieldValue };
 }
 
-export class HelpCommand implements Command {
-	public name = L.en.commands.help.name();
-	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
-		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.help.name(),
-		description: L.en.commands.help.description(),
-		dm_permission: true,
-		default_member_permissions: undefined,
-		options: [
-			{
-				name: L.en.commands.help.faq.name(),
-				description: L.en.commands.help.faq.description(),
-				type: ApplicationCommandOptionType.Subcommand,
-			},
-			{
-				name: L.en.commands.help.about.name(),
-				description: L.en.commands.help.about.description(),
-				type: ApplicationCommandOptionType.Subcommand,
-			},
-			{
-				name: L.en.commands.help.commands.name(),
-				description: L.en.commands.help.commands.description(),
-				type: ApplicationCommandOptionType.Subcommand,
-			},
-			{
-				name: L.en.commands.help.character.name(),
-				description: L.en.commands.help.character.description(),
-				type: ApplicationCommandOptionType.Subcommand,
-				options: [],
-			},
-			{
-				name: L.en.commands.help.compendium.name(),
-				description: L.en.commands.help.compendium.description(),
-				type: ApplicationCommandOptionType.Subcommand,
-				options: [],
-			},
-			{
-				name: L.en.commands.help.init.name(),
-				description: L.en.commands.help.init.description(),
-				type: ApplicationCommandOptionType.Subcommand,
-				options: [],
-			},
-			{
-				name: L.en.commands.help.roll.name(),
-				description: L.en.commands.help.roll.description(),
-				type: ApplicationCommandOptionType.Subcommand,
-				options: [],
-			},
-			{
-				name: L.en.commands.help.modifier.name(),
-				description: L.en.commands.help.modifier.description(),
-				type: ApplicationCommandOptionType.Subcommand,
-				options: [],
-			},
-			{
-				name: L.en.commands.help.condition.name(),
-				description: L.en.commands.help.condition.description(),
-				type: ApplicationCommandOptionType.Subcommand,
-				options: [],
-			},
-			{
-				name: L.en.commands.help.counter.name(),
-				description: L.en.commands.help.counter.description(),
-				type: ApplicationCommandOptionType.Subcommand,
-				options: [],
-			},
-			{
-				name: L.en.commands.help.counterGroup.name(),
-				description: L.en.commands.help.counterGroup.description(),
-				type: ApplicationCommandOptionType.Subcommand,
-				options: [],
-			},
-			{
-				name: L.en.commands.help.game.name(),
-				description: L.en.commands.help.game.description(),
-				type: ApplicationCommandOptionType.Subcommand,
-				options: [],
-			},
-			{
-				name: L.en.commands.help.gameplay.name(),
-				description: L.en.commands.help.gameplay.description(),
-				type: ApplicationCommandOptionType.Subcommand,
-				options: [],
-			},
-			{
-				name: L.en.commands.help.attributesAndTags.name(),
-				description: L.en.commands.help.attributesAndTags.description(),
-				type: ApplicationCommandOptionType.Subcommand,
-				options: [],
-			},
-			{
-				name: L.en.commands.help.makingACustomAction.name(),
-				description: L.en.commands.help.makingACustomAction.description(),
-				type: ApplicationCommandOptionType.Subcommand,
-				options: [
-					{
-						name: 'example-choice',
-						description: 'Which custom action should we walk through?',
-						required: true,
-						type: ApplicationCommandOptionType.String,
-						choices: [
-							{
-								name: 'Produce Flame (simple attack roll cantrip)',
-								value: 'produceFlame',
-							},
-							{
-								name: 'Fireball (simple save with basic damage)',
-								value: 'fireball',
-							},
-							{
-								name: 'Phantom Pain (save with complex results)',
-								value: 'phantomPain',
-							},
-							{
-								name: 'Gunslinger: Paired Shots (mutliple strikes with deadly crits)',
-								value: 'gunslingerPairedShots',
-							},
-							{
-								name: 'Battle Medicine (Heal with a Skill Challenge roll)',
-								value: 'battleMedicine',
-							},
-						],
-					},
-				],
-			},
-			{
-				name: L.en.commands.help.rollMacro.name(),
-				description: L.en.commands.help.rollMacro.description(),
-				type: ApplicationCommandOptionType.Subcommand,
-				options: [],
-			},
-			{
-				name: L.en.commands.help.action.name(),
-				description: L.en.commands.help.action.description(),
-				type: ApplicationCommandOptionType.Subcommand,
-				options: [],
-			},
-			{
-				name: L.en.commands.help.actionStage.name(),
-				description: L.en.commands.help.actionStage.description(),
-				type: ApplicationCommandOptionType.Subcommand,
-				options: [],
-			},
-			{
-				name: L.en.commands.help.settings.name(),
-				description: L.en.commands.help.settings.description(),
-				type: ApplicationCommandOptionType.Subcommand,
-				options: [],
-			},
-		],
-	};
-	public deferType = CommandDeferType.PUBLIC;
-	public requireClientPerms: PermissionsString[] = [];
+export class HelpCommand extends BaseCommandClass(HelpCommandDocumentation) {
 	public async execute(
 		intr: ChatInputCommandInteraction,
 		LL: TranslationFunctions,

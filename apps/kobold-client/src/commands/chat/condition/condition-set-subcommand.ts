@@ -1,48 +1,34 @@
 import {
 	ApplicationCommandOptionChoiceData,
-	ApplicationCommandType,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
 	ChatInputCommandInteraction,
-	PermissionsString,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
-import { RateLimiter } from 'discord.js-rate-limiter';
 
-import { compileExpression } from 'filtrex';
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold, SheetAdjustmentTypeEnum } from '@kobold/db';
 import { KoboldError } from '../../../utils/KoboldError.js';
 import { Creature } from '../../../utils/creature.js';
-import { DiceUtils } from '../../../utils/dice-utils.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { SheetUtils } from '../../../utils/sheet/sheet-utils.js';
-import { Command, CommandDeferType } from '../../index.js';
+import { Command } from '../../index.js';
 import { ModifierOptions } from './../modifier/modifier-command-options.js';
 import _ from 'lodash';
 import { GameplayOptions } from '../gameplay/gameplay-command-options.js';
 import { ConditionOptions } from './condition-command-options.js';
 import { InputParseUtils } from '../../../utils/input-parse-utils.js';
 import { StringUtils } from '@kobold/base-utils';
+import { ConditionCommand } from '@kobold/documentation';
+import { BaseCommandClass } from '../../command.js';
 
-export class ConditionSetSubCommand implements Command {
-	public name = L.en.commands.condition.set.name();
-	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
-		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.condition.set.name(),
-		description: L.en.commands.condition.set.description(),
-		dm_permission: true,
-		default_member_permissions: undefined,
-	};
-	public cooldown = new RateLimiter(1, 2000);
-	public deferType = CommandDeferType.PUBLIC;
-	public requireClientPerms: PermissionsString[] = [];
-
+export class ConditionSetSubCommand extends BaseCommandClass(
+	ConditionCommand,
+	ConditionCommand.subCommandEnum.set
+) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption,

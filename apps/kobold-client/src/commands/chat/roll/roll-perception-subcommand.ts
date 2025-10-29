@@ -1,10 +1,4 @@
-import {
-	ApplicationCommandType,
-	ChatInputCommandInteraction,
-	PermissionsString,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
-} from 'discord.js';
-import { RateLimiter } from 'discord.js-rate-limiter';
+import { ChatInputCommandInteraction } from 'discord.js';
 
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
@@ -14,22 +8,15 @@ import { DiceUtils } from '../../../utils/dice-utils.js';
 import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { RollBuilder } from '../../../utils/roll-builder.js';
-import { Command, CommandDeferType } from '../../index.js';
+import { Command } from '../../index.js';
 import { RollOptions } from './roll-command-options.js';
+import { RollCommand } from '@kobold/documentation';
+import { BaseCommandClass } from '../../command.js';
 
-export class RollPerceptionSubCommand implements Command {
-	public name = L.en.commands.roll.perception.name();
-	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
-		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.roll.perception.name(),
-		description: L.en.commands.roll.perception.description(),
-		dm_permission: true,
-		default_member_permissions: undefined,
-	};
-	public cooldown = new RateLimiter(1, 2000);
-	public deferType = CommandDeferType.NONE;
-	public requireClientPerms: PermissionsString[] = [];
-
+export class RollPerceptionSubCommand extends BaseCommandClass(
+	RollCommand,
+	RollCommand.subCommandEnum.perception
+) {
 	public async execute(
 		intr: ChatInputCommandInteraction,
 		LL: TranslationFunctions,

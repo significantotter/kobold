@@ -1,5 +1,5 @@
-import type { CommandReference } from '../helpers/commands.d.js';
-import { actionCommandDefinition } from './action.command-definition.js';
+import type { CommandReference } from '../helpers/commands.d.ts';
+import { actionCommandDefinition, ActionSubCommandEnum } from './action.command-definition.js';
 import { actionCommandOptions } from './action.command-options.js';
 import { actionCommandDocumentation } from './action.documentation.js';
 
@@ -11,4 +11,5 @@ export const ActionCommand = {
 	definition: actionCommandDefinition,
 	documentation: actionCommandDocumentation,
 	options: actionCommandOptions,
+	subCommandEnum: ActionSubCommandEnum,
 } satisfies CommandReference;

@@ -1,5 +1,8 @@
-import type { CommandReference } from '../helpers/commands.d.js';
-import { compendiumCommandDefinition } from './compendium.command-definition.js';
+import type { CommandReference } from '../helpers/commands.d.ts';
+import {
+	compendiumCommandDefinition,
+	CompendiumSubCommandEnum,
+} from './compendium.command-definition.js';
 import { compendiumCommandOptions } from './compendium.command-options.js';
 import { compendiumCommandDocumentation } from './compendium.documentation.js';
 
@@ -11,4 +14,5 @@ export const CompendiumCommand = {
 	definition: compendiumCommandDefinition,
 	documentation: compendiumCommandDocumentation,
 	options: compendiumCommandOptions,
+	subCommandEnum: CompendiumSubCommandEnum,
 } satisfies CommandReference;

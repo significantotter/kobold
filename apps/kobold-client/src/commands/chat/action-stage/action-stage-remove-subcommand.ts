@@ -1,34 +1,24 @@
 import {
 	ApplicationCommandOptionChoiceData,
-	ApplicationCommandType,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
 	ChatInputCommandInteraction,
-	PermissionsString,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 
-import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold } from '@kobold/db';
 import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { Command, CommandDeferType } from '../../index.js';
+import { Command } from '../../index.js';
 import { ActionStageOptions } from './action-stage-command-options.js';
+import { ActionStageCommand } from '@kobold/documentation';
+import { BaseCommandClass } from '../../command.js';
 
-export class ActionStageRemoveSubCommand implements Command {
-	public name = L.en.commands.actionStage.remove.name();
-	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
-		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.actionStage.remove.name(),
-		description: L.en.commands.actionStage.remove.description(),
-		dm_permission: true,
-		default_member_permissions: undefined,
-	};
-	public deferType = CommandDeferType.NONE;
-	public requireClientPerms: PermissionsString[] = [];
-
+export class ActionStageRemoveSubCommand extends BaseCommandClass(
+	ActionStageCommand,
+	ActionStageCommand.subCommandEnum.remove
+) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption,

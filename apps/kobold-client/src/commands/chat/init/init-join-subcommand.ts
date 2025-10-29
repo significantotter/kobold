@@ -1,14 +1,10 @@
 import {
 	ApplicationCommandOptionChoiceData,
-	ApplicationCommandType,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
 	ChatInputCommandInteraction,
-	PermissionsString,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
-import { RateLimiter } from 'discord.js-rate-limiter';
 
 import _ from 'lodash';
 import L from '../../../i18n/i18n-node.js';
@@ -20,24 +16,17 @@ import { InitiativeBuilder, InitiativeBuilderUtils } from '../../../utils/initia
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { Command, CommandDeferType } from '../../index.js';
+import { Command } from '../../index.js';
 import { InitOptions } from './init-command-options.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
 import { RollOptions } from '../roll/roll-command-options.js';
+import { InitCommand } from '@kobold/documentation';
+import { BaseCommandClass } from '../../command.js';
 
-export class InitJoinSubCommand implements Command {
-	public name = L.en.commands.init.join.name();
-	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
-		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.init.join.name(),
-		description: L.en.commands.init.join.description(),
-		dm_permission: true,
-		default_member_permissions: undefined,
-	};
-	public cooldown = new RateLimiter(1, 2000);
-	public deferType = CommandDeferType.PUBLIC;
-	public requireClientPerms: PermissionsString[] = [];
-
+export class InitJoinSubCommand extends BaseCommandClass(
+	InitCommand,
+	InitCommand.subCommandEnum.join
+) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption,

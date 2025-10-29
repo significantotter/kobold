@@ -8,6 +8,9 @@ import {
 	zCounterGroup,
 	zNumericCounter,
 } from './counter.zod.js';
+import { zAction } from './action.zod.js';
+import { zModifier } from './modifier.zod.js';
+import { zRollMacro } from './roll-macro.zod.js';
 
 export enum AbilityEnum {
 	strength = 'strength',
@@ -252,3 +255,10 @@ export const zSheet = z
 		sourceData: z.object({}).default({}).describe('The source data the sheet was parsed from'),
 	})
 	.describe("A creature's sheet.");
+
+export const zPasteBinImport = z.object({
+	sheet: zSheet.optional(),
+	modifiers: zModifier.array().optional(),
+	actions: zAction.array().optional(),
+	rollMacros: zRollMacro.array().optional(),
+});

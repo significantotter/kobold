@@ -1,13 +1,10 @@
 import { AutocompleteInteraction, CacheType } from 'discord.js';
-import { sql } from 'drizzle-orm';
 import _ from 'lodash';
 import { CounterStyleEnum, InitiativeActor, Kobold } from '@kobold/db';
-import { Pf2eToolsCompendiumModel } from '@kobold/pf2etools';
 import { Creature } from '../creature.js';
 import { InitiativeBuilderUtils } from '../initiative-builder.js';
 import { FinderHelpers } from '../kobold-helpers/finder-helpers.js';
 import type { KoboldUtils } from './kobold-utils.js';
-import { DrizzleUtils } from '@kobold/pf2etools';
 import { NethysDb } from '@kobold/nethys';
 
 export class AutocompleteUtils {
@@ -66,20 +63,6 @@ export class AutocompleteUtils {
 			);
 	}
 
-	public async getPf2eToolsBestiaryCreatures(
-		intr: AutocompleteInteraction<CacheType>,
-		pf2eToolsCompendium: Pf2eToolsCompendiumModel,
-		matchText: string
-	) {
-		const targetBestiaryCreatures = await pf2eToolsCompendium.db.query.Creatures.findMany({
-			where: DrizzleUtils.ilike(pf2eToolsCompendium.creatures.table.search, `%${matchText}%`),
-			orderBy: sql`RANDOM()` as any,
-			limit: 49,
-		});
-		return targetBestiaryCreatures.map(npc => {
-			return { name: npc.search, value: npc.search };
-		});
-	}
 	public async getNethysBestiaryCreatures(nethysCompendium: NethysDb, matchText: string) {
 		const searchResults = await nethysCompendium.searchTerm(matchText, {
 			searchTermOnly: true,

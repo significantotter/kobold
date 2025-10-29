@@ -1,9 +1,4 @@
-import {
-	ApplicationCommandType,
-	ChatInputCommandInteraction,
-	PermissionsString,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
-} from 'discord.js';
+import { ChatInputCommandInteraction } from 'discord.js';
 import { Action, zAction } from '@kobold/db';
 
 import _ from 'lodash';
@@ -21,21 +16,15 @@ import {
 import { InteractionUtils } from '../../../utils/index.js';
 import { TextParseHelpers } from '../../../utils/kobold-helpers/text-parse-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { Command, CommandDeferType } from '../../index.js';
+import { Command } from '../../index.js';
 import { ActionOptions } from '../action/action-command-options.js';
+import { ActionCommand } from '@kobold/documentation';
+import { BaseCommandClass } from '../../command.js';
 
-export class ActionImportSubCommand implements Command {
-	public name = L.en.commands.action.import.name();
-	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
-		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.action.import.name(),
-		description: L.en.commands.action.import.description(),
-		dm_permission: true,
-		default_member_permissions: undefined,
-	};
-	public deferType = CommandDeferType.NONE;
-	public requireClientPerms: PermissionsString[] = [];
-
+export class ActionImportSubCommand extends BaseCommandClass(
+	ActionCommand,
+	ActionCommand.subCommandEnum.import
+) {
 	public async execute(
 		intr: ChatInputCommandInteraction,
 		LL: TranslationFunctions,

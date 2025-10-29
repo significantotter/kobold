@@ -8,18 +8,17 @@
 	"private": true,
 	"scripts": {},
 	"devDependencies": {
-		"nodemon": "^3.1.0",
-		"turbo": "^2.0.12",
-		"@types/eslint": "^9.6.0",
-		"eslint": "^9.0.0",
-		"eslint-config-prettier": "^9.1.0",
-		"eslint-plugin-svelte": "^2.36.0",
-		"prettier": "^3.1.1"
+		"@types/eslint": "^9.6.1",
+		"eslint": "^9.33.0",
+		"eslint-config-prettier": "^9.1.2",
+		"eslint-plugin-svelte": "^2.46.1",
+		"nodemon": "^3.1.10",
+		"prettier": "^3.6.2",
+		"turbo": "^2.5.6"
 	},
 	"pnpm": {
 		"overrides": {
 			"prettier": "^3.1.1",
-			"better-sqlite3": "^11",
 			"discord.js": "^14.16.3",
 			"dotenv": "^16.3.1",
 			"drizzle-orm": "^0.33.0",
@@ -36,5 +35,5 @@
 			"ts-node": "^10.9.2"
 		}
 	},
-	"packageManager": "pnpm@9.7.0+sha256.b35018fbfa8f583668b2649e407922a721355cd81f61beeb4ac1d4258e585559"
+	"packageManager": "pnpm@10.16.1"
 }

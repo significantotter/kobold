@@ -15,7 +15,7 @@ import { RollCommand } from './roll/index.js';
 import { SettingCommand } from './setting/index.js';
 export * from './action/index.js';
 export * from './helpers.js';
-export * from './helpers/commands.d.js';
+export type { CommandReference, CommandDefinition } from './helpers/commands.d.ts';
 export const commands = [
 	ActionCommand,
 	ActionStageCommand,
@@ -33,4 +33,20 @@ export const commands = [
 	RollMacroCommand,
 	SettingCommand,
 ];
-export { ActionCommand };
+export {
+	ActionCommand,
+	ActionStageCommand,
+	CharacterCommand,
+	CompendiumCommand,
+	ConditionCommand,
+	CounterCommand,
+	CounterGroupCommand,
+	GameCommand,
+	GameplayCommand,
+	HelpCommand,
+	InitCommand,
+	ModifierCommand,
+	RollCommand,
+	RollMacroCommand,
+	SettingCommand,
+};

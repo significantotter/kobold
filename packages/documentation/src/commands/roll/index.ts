@@ -1,5 +1,5 @@
-import type { CommandReference } from '../helpers/commands.d.js';
-import { rollCommandDefinition } from './roll.command-definition.js';
+import type { CommandReference } from '../helpers/commands.d.ts';
+import { rollCommandDefinition, RollSubCommandEnum } from './roll.command-definition.js';
 import { rollCommandOptions } from './roll.command-options.js';
 import { rollCommandDocumentation } from './roll.documentation.js';
 
@@ -11,4 +11,5 @@ export const RollCommand = {
 	definition: rollCommandDefinition,
 	documentation: rollCommandDocumentation,
 	options: rollCommandOptions,
+	subCommandEnum: RollSubCommandEnum,
 } satisfies CommandReference;

@@ -1,14 +1,10 @@
 import {
 	ApplicationCommandOptionChoiceData,
-	ApplicationCommandType,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
 	ChatInputCommandInteraction,
-	PermissionsString,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
-import { RateLimiter } from 'discord.js-rate-limiter';
 
 import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
@@ -19,25 +15,18 @@ import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { Command, CommandDeferType } from '../../index.js';
+import { Command } from '../../index.js';
 import { ModifierOptions } from './modifier-command-options.js';
 import _ from 'lodash';
 import { InputParseUtils } from '../../../utils/input-parse-utils.js';
 import { StringUtils } from '@kobold/base-utils';
+import { ModifierCommand } from '@kobold/documentation';
+import { BaseCommandClass } from '../../command.js';
 
-export class ModifierSetSubCommand implements Command {
-	public name = L.en.commands.modifier.set.name();
-	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
-		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.modifier.set.name(),
-		description: L.en.commands.modifier.set.description(),
-		dm_permission: true,
-		default_member_permissions: undefined,
-	};
-	public cooldown = new RateLimiter(1, 2000);
-	public deferType = CommandDeferType.PUBLIC;
-	public requireClientPerms: PermissionsString[] = [];
-
+export class ModifierSetSubCommand extends BaseCommandClass(
+	ModifierCommand,
+	ModifierCommand.subCommandEnum.set
+) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption,

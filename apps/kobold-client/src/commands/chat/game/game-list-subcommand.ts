@@ -1,9 +1,4 @@
-import {
-	ApplicationCommandType,
-	ChatInputCommandInteraction,
-	PermissionsString,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
-} from 'discord.js';
+import { ChatInputCommandInteraction } from 'discord.js';
 import { Kobold } from '@kobold/db';
 
 import _ from 'lodash';
@@ -12,20 +7,14 @@ import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { Command, CommandDeferType } from '../../index.js';
+import { Command } from '../../index.js';
+import { GameCommand } from '@kobold/documentation';
+import { BaseCommandClass } from '../../command.js';
 
-export class GameListSubCommand implements Command {
-	public name = L.en.commands.game.list.name();
-	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
-		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.game.list.name(),
-		description: L.en.commands.game.list.description(),
-		dm_permission: true,
-		default_member_permissions: undefined,
-	};
-	public deferType = CommandDeferType.PUBLIC;
-	public requireClientPerms: PermissionsString[] = [];
-
+export class GameListSubCommand extends BaseCommandClass(
+	GameCommand,
+	GameCommand.subCommandEnum.list
+) {
 	public async execute(
 		intr: ChatInputCommandInteraction,
 		LL: TranslationFunctions,

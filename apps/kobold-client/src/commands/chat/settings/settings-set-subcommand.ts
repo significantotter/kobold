@@ -1,18 +1,12 @@
 import {
 	ApplicationCommandOptionChoiceData,
-	ApplicationCommandType,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
 	ChatInputCommandInteraction,
-	PermissionsString,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
-
 import { SettingsOptions } from './settings-command-options.js';
-
 import _ from 'lodash';
-import L from '../../../i18n/i18n-node.js';
 import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import {
 	DefaultCompendiumEnum,
@@ -25,20 +19,14 @@ import {
 import { KoboldError } from '../../../utils/KoboldError.js';
 import { InteractionUtils } from '../../../utils/interaction-utils.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { Command, CommandDeferType } from '../../index.js';
+import { Command } from '../../index.js';
+import { BaseCommandClass } from '../../command.js';
+import { SettingCommand } from '@kobold/documentation';
 
-export class SettingsSetSubCommand implements Command {
-	public name = L.en.commands.settings.set.name();
-	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
-		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.settings.set.name(),
-		description: L.en.commands.settings.set.description(),
-		dm_permission: true,
-		default_member_permissions: undefined,
-	};
-	public deferType = CommandDeferType.PUBLIC;
-	public requireClientPerms: PermissionsString[] = [];
-
+export class SettingsSetSubCommand extends BaseCommandClass(
+	SettingCommand,
+	SettingCommand.subCommandEnum.set
+) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption,

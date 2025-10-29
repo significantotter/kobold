@@ -1,5 +1,5 @@
 import { ApplicationCommandOptionType } from 'discord-api-types/v10';
-import type { CommandOptions, SpecificCommandOptions } from '../helpers/commands.d.js';
+import type { CommandOptions, SpecificCommandOptions } from '../helpers/commands.d.ts';
 
 export enum CompendiumCommandOptionEnum {
 	search = 'search',
@@ -31,15 +31,3 @@ export const compendiumCommandOptions: CommandOptions = {
 		],
 	},
 } satisfies SpecificCommandOptions<CompendiumCommandOptionEnum>;
-
-/**
- * Command Definition:
- *
- * Command Options:
- *
- * L.en.commandOptions
- *
- * L.en.commands
- *
- *
- */

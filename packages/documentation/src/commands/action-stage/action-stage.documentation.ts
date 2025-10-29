@@ -1,4 +1,5 @@
-import { CommandDocumentation, CommandResponseTypeEnum } from '../helpers/commands.d.js';
+import type { CommandDocumentation } from '../helpers/commands.d.ts';
+import { CommandResponseTypeEnum } from '../helpers/enums.js';
 import {
 	actionStageCommandDefinition,
 	ActionStageSubCommandEnum,
@@ -70,8 +71,8 @@ export const actionStageCommandDocumentation: CommandDocumentation<
 				},
 			],
 		},
-		[ActionStageSubCommandEnum.addAdvacedDamage]: {
-			name: ActionStageSubCommandEnum.addAdvacedDamage,
+		[ActionStageSubCommandEnum.addAdvancedDamage]: {
+			name: ActionStageSubCommandEnum.addAdvancedDamage,
 			description:
 				'Adds an advanced damage roll to an action. This is a more complex damage roll.',
 			usage: null,
