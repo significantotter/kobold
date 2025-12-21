@@ -73,13 +73,13 @@ export default {
 	attack: {
 		name: 'attack',
 		options:
-			'[attack] [target-character] [*attack_modifier*] [*damage_modifier*] [*note*] [*secret*] [*overwrite-ac*]',
+			'[attack] [target-character] [*attack-modifier*] [*damage-modifier*] [*note*] [*secret*] [*overwrite-ac*]',
 		usage:
 			'**[attack]**: The name of the attack to roll.\n' +
 			'**[target-character]**: The target character. Select (None) for no target.\n' +
-			'**[*attack\\_modifier*] optional**: A dice expression to roll ("1d20 - 1d4 + 3"). Added to ' +
+			'**[*attack\\-modifier*] optional**: A dice expression to roll ("1d20 - 1d4 + 3"). Added to ' +
 			'the end of the attack roll. Alternatively, a simple modifier value ("5" or "-3").\n' +
-			'**[*damage\\_modifier*] optional**: A dice expression to roll ("1d20 - 1d4 + 3"). Added to ' +
+			'**[*damage\\-modifier*] optional**: A dice expression to roll ("1d20 - 1d4 + 3"). Added to ' +
 			'the end of the damage roll. Alternatively, a simple modifier value ("5" or "-3").\n' +
 			'**[*note*] optional**: A note to add to the end of the dice roll.\n' +
 			'**[*secret*] optional**: Choose to either leave the roll public (default), hide the roll entirely, ' +
@@ -97,13 +97,13 @@ export default {
 	action: {
 		name: 'action',
 		options:
-			'[action] [target-character] [*action_modifier*] [*damage_modifier*] [*note*] [*secret*] [*overwrite-dc*] [*overwrite-save-dice-roll*]',
+			'[action] [target-character] [*action-modifier*] [*damage-modifier*] [*note*] [*secret*] [*overwrite-dc*] [*overwrite-save-dice-roll*]',
 		usage:
 			'**[action]**: The name of the action to roll.\n' +
 			'**[target-character]**: The target character. Select (None) for no target.\n' +
-			'**[*attack\\_modifier*] optional**: A dice expression to roll ("1d20 - 1d4 + 3"). Added to ' +
+			'**[*attack\\-modifier*] optional**: A dice expression to roll ("1d20 - 1d4 + 3"). Added to ' +
 			'the end of the attack roll. Alternatively, a simple modifier value ("5" or "-3").\n' +
-			'**[*damage\\_modifier*] optional**: A dice expression to roll ("1d20 - 1d4 + 3"). Added to ' +
+			'**[*damage\\-modifier*] optional**: A dice expression to roll ("1d20 - 1d4 + 3"). Added to ' +
 			'the end of the damage roll. Alternatively, a simple modifier value ("5" or "-3").\n' +
 			'**[*note*] optional**: A note to add to the end of the dice roll.\n' +
 			'**[*secret*] optional**: Choose to either leave the roll public (default), hide the roll entirely, ' +

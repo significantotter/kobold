@@ -6,11 +6,9 @@ import {
 	ChatInputCommandInteraction,
 } from 'discord.js';
 
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { CounterStyleEnum, Kobold } from '@kobold/db';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Command } from '../../index.js';
-import { CounterOptions } from './counter-command-options.js';
 import { AutocompleteUtils } from '../../../utils/kobold-service-utils/autocomplete-utils.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
@@ -19,12 +17,14 @@ import { InputParseUtils } from '../../../utils/input-parse-utils.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { CounterHelpers } from './counter-helpers.js';
 import { CounterGroupHelpers } from '../counter-group/counter-group-helpers.js';
-import { CounterCommand } from '@kobold/documentation';
+import { CounterDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
+const commandOptions = CounterDefinition.options;
+const commandOptionsEnum = CounterDefinition.commandOptionsEnum;
 
 export class CounterPrepareManySubCommand extends BaseCommandClass(
-	CounterCommand,
-	CounterCommand.subCommandEnum.prepareMany
+	CounterDefinition,
+	CounterDefinition.subCommandEnum.prepareMany
 ) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
@@ -32,10 +32,11 @@ export class CounterPrepareManySubCommand extends BaseCommandClass(
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === CounterOptions.COUNTER_NAME_OPTION.name) {
+		if (option.name === commandOptions[commandOptionsEnum.counterName].name) {
 			const koboldUtils = new KoboldUtils(kobold);
 			const autocompleteUtils = new AutocompleteUtils(koboldUtils);
-			const match = intr.options.getString(CounterOptions.COUNTER_NAME_OPTION.name) ?? '';
+			const match =
+				intr.options.getString(commandOptions[commandOptionsEnum.counterName].name) ?? '';
 			return autocompleteUtils.getCounters(intr, match, {
 				styles: [CounterStyleEnum.prepared],
 			});
@@ -44,7 +45,7 @@ export class CounterPrepareManySubCommand extends BaseCommandClass(
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
+
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const koboldUtils = new KoboldUtils(kobold);
@@ -52,14 +53,14 @@ export class CounterPrepareManySubCommand extends BaseCommandClass(
 			activeCharacter: true,
 		});
 		const targetCounterName = intr.options
-			.getString(CounterOptions.COUNTER_NAME_OPTION.name, true)
+			.getString(commandOptions[commandOptionsEnum.counterName].name, true)
 			.trim();
 		const prepareFresh = intr.options.getBoolean(
-			CounterOptions.COUNTER_PREPARE_FRESH_OPTION.name,
+			commandOptions[commandOptionsEnum.counterPrepareFresh].name,
 			true
 		);
 		const targetSlot = intr.options
-			.getString(CounterOptions.COUNTER_PREPARE_MANY_OPTION.name, true)
+			.getString(commandOptions[commandOptionsEnum.counterPrepareMany].name, true)
 			.trim();
 		const preparedValues = targetSlot.split(',');
 		for (const value of preparedValues) {
@@ -77,7 +78,7 @@ export class CounterPrepareManySubCommand extends BaseCommandClass(
 
 		if (!counter) {
 			throw new KoboldError(
-				LL.commands.counter.interactions.notFound({
+				CounterDefinition.strings.notFound({
 					counterName: targetCounterName,
 				})
 			);
@@ -85,7 +86,7 @@ export class CounterPrepareManySubCommand extends BaseCommandClass(
 
 		if (counter.style !== CounterStyleEnum.prepared) {
 			throw new KoboldError(
-				LL.commands.counter.interactions.notPrepared({
+				CounterDefinition.strings.notPrepared({
 					counterName: targetCounterName,
 				})
 			);

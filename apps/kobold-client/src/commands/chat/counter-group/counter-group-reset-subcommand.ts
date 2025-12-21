@@ -6,22 +6,22 @@ import {
 	ChatInputCommandInteraction,
 } from 'discord.js';
 
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold } from '@kobold/db';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Command } from '../../index.js';
 import { CounterGroupHelpers } from './counter-group-helpers.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
-import { CounterGroupOptions } from './counter-group-command-options.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
 import { CounterUtils } from '../../../utils/counter-utils.js';
 import { BaseCommandClass } from '../../command.js';
-import { CounterGroupCommand } from '@kobold/documentation';
+import { CounterGroupDefinition } from '@kobold/documentation';
+const commandOptions = CounterGroupDefinition.options;
+const commandOptionsEnum = CounterGroupDefinition.commandOptionsEnum;
 
 export class CounterGroupResetSubCommand extends BaseCommandClass(
-	CounterGroupCommand,
-	CounterGroupCommand.subCommandEnum.reset
+	CounterGroupDefinition,
+	CounterGroupDefinition.subCommandEnum.reset
 ) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
@@ -29,7 +29,7 @@ export class CounterGroupResetSubCommand extends BaseCommandClass(
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === CounterGroupOptions.COUNTER_GROUP_NAME_OPTION.name) {
+		if (option.name === commandOptions[commandOptionsEnum.counterGroupName].name) {
 			const koboldUtils = new KoboldUtils(kobold);
 			const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
 				activeCharacter: true,
@@ -43,7 +43,6 @@ export class CounterGroupResetSubCommand extends BaseCommandClass(
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const koboldUtils = new KoboldUtils(kobold);
@@ -51,7 +50,7 @@ export class CounterGroupResetSubCommand extends BaseCommandClass(
 			activeCharacter: true,
 		});
 		const targetCounterGroupName = intr.options
-			.getString(CounterGroupOptions.COUNTER_GROUP_NAME_OPTION.name, true)
+			.getString(commandOptions[commandOptionsEnum.counterGroupName].name, true)
 			.trim();
 
 		const counterGroup = FinderHelpers.getCounterGroupByName(
@@ -61,7 +60,7 @@ export class CounterGroupResetSubCommand extends BaseCommandClass(
 
 		if (!counterGroup) {
 			throw new KoboldError(
-				LL.commands.counterGroup.interactions.notFound({
+				CounterGroupDefinition.strings.notFound({
 					groupName: targetCounterGroupName,
 				})
 			);
@@ -77,7 +76,7 @@ export class CounterGroupResetSubCommand extends BaseCommandClass(
 		);
 
 		const embed = new KoboldEmbed().setTitle(
-			LL.commands.counterGroup.reset.interactions.reset({
+			CounterGroupDefinition.strings.reset({
 				groupName: counterGroup.name,
 				characterName: activeCharacter.name,
 			})

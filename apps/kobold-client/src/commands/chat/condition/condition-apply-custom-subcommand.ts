@@ -6,7 +6,6 @@ import {
 	ChatInputCommandInteraction,
 } from 'discord.js';
 
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import {
 	Kobold,
 	Modifier,
@@ -21,16 +20,19 @@ import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js
 import { SheetUtils } from '../../../utils/sheet/sheet-utils.js';
 import { Command } from '../../index.js';
 import { Creature } from '../../../utils/creature.js';
-import { GameplayOptions } from '../gameplay/gameplay-command-options.js';
-import { ModifierOptions } from '../modifier/modifier-command-options.js';
-import { ConditionOptions } from './condition-command-options.js';
 import { InputParseUtils } from '../../../utils/input-parse-utils.js';
-import { ConditionCommand } from '@kobold/documentation';
+import { ConditionDefinition, GameplayDefinition, ModifierDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
+const commandOptions = ConditionDefinition.options;
+const commandOptionsEnum = ConditionDefinition.commandOptionsEnum;
+const gameplayCommandOptions = GameplayDefinition.options;
+const gameplayCommandOptionsEnum = GameplayDefinition.commandOptionsEnum;
+const modifierCommandOptions = ModifierDefinition.options;
+const modifierCommandOptionsEnum = ModifierDefinition.commandOptionsEnum;
 
 export class ConditionApplyCustomSubCommand extends BaseCommandClass(
-	ConditionCommand,
-	ConditionCommand.subCommandEnum.applyCustom
+	ConditionDefinition,
+	ConditionDefinition.subCommandEnum.applyCustom
 ) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
@@ -38,9 +40,14 @@ export class ConditionApplyCustomSubCommand extends BaseCommandClass(
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name) {
+		if (
+			option.name ===
+			gameplayCommandOptions[gameplayCommandOptionsEnum.gameplayTargetCharacter].name
+		) {
 			const match =
-				intr.options.getString(GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name) ?? '';
+				intr.options.getString(
+					gameplayCommandOptions[gameplayCommandOptionsEnum.gameplayTargetCharacter].name
+				) ?? '';
 			const { autocompleteUtils } = new KoboldUtils(kobold);
 			return await autocompleteUtils.getAllTargetOptions(intr, match);
 		}
@@ -48,13 +55,12 @@ export class ConditionApplyCustomSubCommand extends BaseCommandClass(
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const koboldUtils = new KoboldUtils(kobold);
 		const { gameUtils } = koboldUtils;
 		const targetCharacter = intr.options.getString(
-			GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name,
+			gameplayCommandOptions[gameplayCommandOptionsEnum.gameplayTargetCharacter].name,
 			true
 		);
 		const { targetSheetRecord } = await gameUtils.getCharacterOrInitActorTarget(
@@ -63,30 +69,36 @@ export class ConditionApplyCustomSubCommand extends BaseCommandClass(
 		);
 
 		let name = intr.options
-			.getString(ConditionOptions.CONDITION_NAME_OPTION.name, true)
+			.getString(commandOptions[commandOptionsEnum.name].name, true)
 			.trim()
 			.toLowerCase();
 		let conditionType = (
-			intr.options.getString(ModifierOptions.MODIFIER_TYPE_OPTION.name) ??
+			intr.options.getString(modifierCommandOptions[modifierCommandOptionsEnum.type].name) ??
 			SheetAdjustmentTypeEnum.untyped
 		)
 			.trim()
 			.toLowerCase();
 		const conditionSeverity =
-			intr.options.getString(ModifierOptions.MODIFIER_SEVERITY_VALUE_OPTION.name) ?? null;
+			intr.options.getString(
+				modifierCommandOptions[modifierCommandOptionsEnum.severity].name
+			) ?? null;
 
 		const rollAdjustment = intr.options.getString(
-			ModifierOptions.MODIFIER_ROLL_ADJUSTMENT.name
+			modifierCommandOptions[modifierCommandOptionsEnum.rollAdjustment].name
 		);
 		const rollTargetTagsUnparsed = intr.options.getString(
-			ModifierOptions.MODIFIER_ROLL_TARGET_TAGS_OPTION.name
+			modifierCommandOptions[modifierCommandOptionsEnum.targetTags].name
 		);
 		let rollTargetTags = rollTargetTagsUnparsed ? rollTargetTagsUnparsed.trim() : null;
 
-		let description = intr.options.getString(ModifierOptions.MODIFIER_DESCRIPTION_OPTION.name);
-		let note = intr.options.getString(ModifierOptions.MODIFIER_INITIATIVE_NOTE_OPTION.name);
+		let description = intr.options.getString(
+			modifierCommandOptions[modifierCommandOptionsEnum.description].name
+		);
+		let note = intr.options.getString(
+			modifierCommandOptions[modifierCommandOptionsEnum.initiativeNote].name
+		);
 		const conditionSheetValues = intr.options.getString(
-			ModifierOptions.MODIFIER_SHEET_VALUES_OPTION.name
+			modifierCommandOptions[modifierCommandOptionsEnum.sheetValues].name
 		);
 
 		if (!isSheetAdjustmentTypeEnum(conditionType)) {
@@ -124,9 +136,7 @@ export class ConditionApplyCustomSubCommand extends BaseCommandClass(
 		if (rollAdjustment && rollTargetTags) {
 			// the tags for the modifier have to be valid
 			if (!InputParseUtils.isValidRollTargetTags(rollTargetTags)) {
-				throw new KoboldError(
-					LL.commands.modifier.createModifier.interactions.invalidTags()
-				);
+				throw new KoboldError(ConditionDefinition.strings.invalidTags);
 			}
 			if (
 				!InputParseUtils.isValidDiceExpression(
@@ -134,9 +144,7 @@ export class ConditionApplyCustomSubCommand extends BaseCommandClass(
 					new Creature(targetSheetRecord, undefined, intr)
 				)
 			) {
-				throw new KoboldError(
-					LL.commands.modifier.createModifier.interactions.doesntEvaluateError()
-				);
+				throw new KoboldError(ConditionDefinition.strings.doesntEvaluateError);
 			}
 		}
 
@@ -152,7 +160,7 @@ export class ConditionApplyCustomSubCommand extends BaseCommandClass(
 		if (FinderHelpers.getConditionByName(targetSheetRecord, name)) {
 			await InteractionUtils.send(
 				intr,
-				LL.commands.condition.interactions.alreadyExists({
+				ConditionDefinition.strings.alreadyExists({
 					conditionName: name,
 					characterName: targetSheetRecord.sheet.staticInfo.name,
 				})
@@ -195,7 +203,7 @@ export class ConditionApplyCustomSubCommand extends BaseCommandClass(
 		//send a response
 		await InteractionUtils.send(
 			intr,
-			LL.commands.condition.interactions.created({
+			ConditionDefinition.strings.created({
 				conditionName: name,
 				characterName: targetSheetRecord.sheet.staticInfo.name,
 			})

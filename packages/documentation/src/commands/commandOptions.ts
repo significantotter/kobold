@@ -286,7 +286,7 @@ export default {
 		name: 'wg-url',
 		description: "The url of your wanderer's guide character.",
 	},
-	pbJsonId: {
+	pathbuilderJsonId: {
 		name: 'pathbuilder-json-id',
 		description: 'The most recent json export id for your PathBuilder character.',
 	},
@@ -811,11 +811,11 @@ export default {
 		description: 'Provide the dice roll to use for any saving throw in the action.',
 	},
 	attackRollModifier: {
-		name: 'attack_modifier',
+		name: 'attack-modifier',
 		description: 'A dice expression to modify your attack roll. (e.g. "+ 1 + 1d4")',
 	},
 	damageRollModifier: {
-		name: 'damage_modifier',
+		name: 'damage-modifier',
 		description: 'A dice expression to modify your damage roll. (e.g. "+ 1 + 1d4")',
 	},
 	otherRollModifier: {

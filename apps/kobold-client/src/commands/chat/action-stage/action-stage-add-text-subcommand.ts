@@ -5,20 +5,20 @@ import {
 	CacheType,
 	ChatInputCommandInteraction,
 } from 'discord.js';
+
 import { Kobold, RollTypeEnum } from '@kobold/db';
 
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { Command } from '../../index.js';
-import { ActionStageOptions } from './action-stage-command-options.js';
-import { ActionStageCommand } from '@kobold/documentation';
+import { ActionStageDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
+const commandOptions = ActionStageDefinition.options;
+const commandOptionsEnum = ActionStageDefinition.commandOptionsEnum;
 
 export class ActionStageAddTextSubCommand extends BaseCommandClass(
-	ActionStageCommand,
-	ActionStageCommand.subCommandEnum.addText
+	ActionStageDefinition,
+	ActionStageDefinition.subCommandEnum.addText
 ) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
@@ -26,10 +26,10 @@ export class ActionStageAddTextSubCommand extends BaseCommandClass(
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === ActionStageOptions.ACTION_TARGET_OPTION.name) {
+		if (option.name === commandOptions[commandOptionsEnum.actionTarget].name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
 			const match =
-				intr.options.getString(ActionStageOptions.ACTION_TARGET_OPTION.name) ?? '';
+				intr.options.getString(commandOptions[commandOptionsEnum.actionTarget].name) ?? '';
 
 			const { autocompleteUtils } = new KoboldUtils(kobold);
 			return await autocompleteUtils.getTargetActionForActiveCharacter(intr, match);
@@ -38,36 +38,35 @@ export class ActionStageAddTextSubCommand extends BaseCommandClass(
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const rollType = RollTypeEnum.text;
 		const rollName = intr.options.getString(
-			ActionStageOptions.ACTION_ROLL_NAME_OPTION.name,
+			commandOptions[commandOptionsEnum.rollName].name,
 			true
 		);
 		const targetAction = intr.options.getString(
-			ActionStageOptions.ACTION_TARGET_OPTION.name,
+			commandOptions[commandOptionsEnum.actionTarget].name,
 			true
 		);
 		const defaultText = intr.options.getString(
-			ActionStageOptions.ACTION_DEFAULT_TEXT_OPTION.name
+			commandOptions[commandOptionsEnum.defaultText].name
 		);
 		const successText = intr.options.getString(
-			ActionStageOptions.ACTION_SUCCESS_TEXT_OPTION.name
+			commandOptions[commandOptionsEnum.successText].name
 		);
 		const criticalSuccessText = intr.options.getString(
-			ActionStageOptions.ACTION_CRITICAL_SUCCESS_TEXT_OPTION.name
+			commandOptions[commandOptionsEnum.criticalSuccessText].name
 		);
 		const criticalFailureText = intr.options.getString(
-			ActionStageOptions.ACTION_CRITICAL_FAILURE_TEXT_OPTION.name
+			commandOptions[commandOptionsEnum.criticalFailureText].name
 		);
 		const failureText = intr.options.getString(
-			ActionStageOptions.ACTION_FAILURE_TEXT_OPTION.name
+			commandOptions[commandOptionsEnum.failureText].name
 		);
-		const extraTags = intr.options.getString(ActionStageOptions.ACTION_EXTRA_TAGS_OPTION.name);
+		const extraTags = intr.options.getString(commandOptions[commandOptionsEnum.extraTags].name);
 		let allowRollModifiers = intr.options.getBoolean(
-			ActionStageOptions.ACTION_ROLL_ALLOW_MODIFIERS.name
+			commandOptions[commandOptionsEnum.allowModifiers].name
 		);
 		if (allowRollModifiers === null) allowRollModifiers = true;
 
@@ -82,7 +81,7 @@ export class ActionStageAddTextSubCommand extends BaseCommandClass(
 			targetAction
 		);
 		if (!matchedActions || !matchedActions.length) {
-			await InteractionUtils.send(intr, LL.commands.actionStage.interactions.notFound());
+			await InteractionUtils.send(intr, ActionStageDefinition.strings.notFound);
 			return;
 		}
 		const action =
@@ -91,10 +90,7 @@ export class ActionStageAddTextSubCommand extends BaseCommandClass(
 			) || matchedActions[0];
 
 		if (action.rolls.find(roll => roll.name === rollName)) {
-			await InteractionUtils.send(
-				intr,
-				LL.commands.actionStage.interactions.rollAlreadyExists()
-			);
+			await InteractionUtils.send(intr, ActionStageDefinition.strings.rollAlreadyExists);
 			return;
 		}
 		if (
@@ -105,10 +101,7 @@ export class ActionStageAddTextSubCommand extends BaseCommandClass(
 				(failureText ?? '').length >
 			900
 		) {
-			await InteractionUtils.send(
-				intr,
-				LL.commands.actionStage.addText.interactions.tooMuchText()
-			);
+			await InteractionUtils.send(intr, ActionStageDefinition.strings.addText.tooMuchText);
 			return;
 		}
 
@@ -119,10 +112,7 @@ export class ActionStageAddTextSubCommand extends BaseCommandClass(
 			!criticalFailureText &&
 			!failureText
 		) {
-			await InteractionUtils.send(
-				intr,
-				LL.commands.actionStage.addText.interactions.requireText()
-			);
+			await InteractionUtils.send(intr, ActionStageDefinition.strings.addText.requireText);
 			return;
 		}
 
@@ -148,7 +138,7 @@ export class ActionStageAddTextSubCommand extends BaseCommandClass(
 		// send the response message
 		await InteractionUtils.send(
 			intr,
-			LL.commands.actionStage.interactions.rollAddSuccess({
+			ActionStageDefinition.strings.rollAddSuccess({
 				actionName: action.name,
 				rollName: rollName,
 				rollType: rollType,

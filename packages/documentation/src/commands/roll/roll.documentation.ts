@@ -1,5 +1,5 @@
 import { ActionCommandOptionEnum } from '../action/action.command-options.js';
-import type { CommandDocumentation } from '../helpers/commands.d.ts';
+import type { CommandDocumentation } from '../helpers/commands.types.js';
 import { CommandResponseTypeEnum } from '../helpers/enums.js';
 import { InitCommandOptionEnum } from '../init/init.command-options.js';
 import { rollCommandDefinition, RollSubCommandEnum } from './roll.command-definition.js';

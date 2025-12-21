@@ -1,5 +1,5 @@
 import { BaseInteraction, CacheType } from 'discord.js';
-import L from '../../i18n/i18n-node.js';
+import { utilStrings } from '@kobold/documentation';
 import {
 	Character,
 	CharacterWithRelations,
@@ -167,7 +167,7 @@ export class GameUtils {
 
 		if (!targetSheetRecord) {
 			throw new KoboldError(
-				L.en.commands.roll.interactions.targetNotFound({
+				utilStrings.roll.targetNotFound({
 					targetName,
 				})
 			);

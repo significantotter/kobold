@@ -1,26 +1,17 @@
 import { ChatInputCommandInteraction } from 'discord.js';
-import {
-	Action,
-	Kobold,
-	Modifier,
-	RollMacro,
-	Sheet,
-	zAction,
-	zModifier,
-	zRollMacro,
-	zSheet,
-} from '@kobold/db';
+
+import { Kobold, zAction, zModifier, zRollMacro, zSheet } from '@kobold/db';
 
 import _ from 'lodash';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { type Command } from '../../index.js';
-import { CharacterOptions } from './command-options.js';
 import { TextParseHelpers } from '../../../utils/kobold-helpers/text-parse-helpers.js';
 import { z } from 'zod';
 import { PasteBinCharacterFetcher } from './Fetchers/pastebin-character-fetcher.js';
-import { CharacterCommand } from '@kobold/documentation';
+import { CharacterDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
+const commandOptions = CharacterDefinition.options;
+const commandOptionsEnum = CharacterDefinition.commandOptionsEnum;
 
 export const zPasteBinImport = z.object({
 	sheet: zSheet.optional(),
@@ -30,15 +21,17 @@ export const zPasteBinImport = z.object({
 });
 
 export class CharacterImportPasteBinSubCommand extends BaseCommandClass(
-	CharacterCommand,
-	CharacterCommand.subCommandEnum.importPasteBin
+	CharacterDefinition,
+	CharacterDefinition.subCommandEnum.importPasteBin
 ) {
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
-		const url = intr.options.getString(CharacterOptions.IMPORT_PASTEBIN_OPTION.name, true);
+		const url = intr.options.getString(
+			commandOptions[commandOptionsEnum.pastebinUrl].name,
+			true
+		);
 
 		const importId = TextParseHelpers.parsePasteBinIdFromText(url);
 
@@ -52,7 +45,7 @@ export class CharacterImportPasteBinSubCommand extends BaseCommandClass(
 		//send success message
 		await InteractionUtils.send(
 			intr,
-			LL.commands.character.importPasteBin.interactions.success({
+			CharacterDefinition.strings.importPasteBin.success({
 				characterName: newCharacter.name,
 			})
 		);

@@ -1,27 +1,28 @@
 import { ChatInputCommandInteraction } from 'discord.js';
 
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold } from '@kobold/db';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Command } from '../../index.js';
 import { CounterHelpers } from './counter-helpers.js';
-import { CounterOptions } from './counter-command-options.js';
 import { CounterGroupHelpers } from '../counter-group/counter-group-helpers.js';
-import { CounterCommand } from '@kobold/documentation';
+import { CounterDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
+const commandOptions = CounterDefinition.options;
+const commandOptionsEnum = CounterDefinition.commandOptionsEnum;
 
 export class CounterListSubCommand extends BaseCommandClass(
-	CounterCommand,
-	CounterCommand.subCommandEnum.list
+	CounterDefinition,
+	CounterDefinition.subCommandEnum.list
 ) {
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		let hideGroups =
-			intr.options.getBoolean(CounterOptions.COUNTER_LIST_HIDE_GROUPS_OPTION.name) ?? false;
+			intr.options.getBoolean(
+				commandOptions[commandOptionsEnum.counterListHideGroups].name
+			) ?? false;
 		const koboldUtils = new KoboldUtils(kobold);
 		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
 			activeCharacter: true,

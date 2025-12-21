@@ -3,7 +3,7 @@ import {
 	ActionStageCommandOptionEnum,
 	actionStageCommandOptions,
 } from './action-stage.command-options.js';
-import type { CommandDefinition } from '../helpers/commands.d.ts';
+import type { CommandDefinition } from '../helpers/commands.types.js';
 import { anyUsageContext } from '../helpers/defaults.js';
 import { withOrder } from '../helpers/common.js';
 
@@ -61,8 +61,8 @@ export const actionStageCommandDefinition = {
 				'Adds a skill challenge roll to an action. This is any roll against your own DCs.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[ActionStageCommandOptionEnum.target]: withOrder(
-					actionStageCommandOptions[ActionStageCommandOptionEnum.target],
+				[ActionStageCommandOptionEnum.actionTarget]: withOrder(
+					actionStageCommandOptions[ActionStageCommandOptionEnum.actionTarget],
 					1
 				),
 				[ActionStageCommandOptionEnum.rollName]: withOrder(
@@ -89,8 +89,8 @@ export const actionStageCommandDefinition = {
 				'Adds a basic damage roll to an action. Automatically adjusts for crits or failures.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[ActionStageCommandOptionEnum.target]: withOrder(
-					actionStageCommandOptions[ActionStageCommandOptionEnum.target],
+				[ActionStageCommandOptionEnum.actionTarget]: withOrder(
+					actionStageCommandOptions[ActionStageCommandOptionEnum.actionTarget],
 					1
 				),
 				[ActionStageCommandOptionEnum.rollName]: withOrder(
@@ -121,8 +121,8 @@ export const actionStageCommandDefinition = {
 				'Adds an advanced damage roll to an action. Requires manual input for all successes and failures.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[ActionStageCommandOptionEnum.target]: withOrder(
-					actionStageCommandOptions[ActionStageCommandOptionEnum.target],
+				[ActionStageCommandOptionEnum.actionTarget]: withOrder(
+					actionStageCommandOptions[ActionStageCommandOptionEnum.actionTarget],
 					1
 				),
 				[ActionStageCommandOptionEnum.rollName]: withOrder(
@@ -165,8 +165,8 @@ export const actionStageCommandDefinition = {
 				'Adds a text block to an action. Can include dice rolls surrounded by "{{}}"',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[ActionStageCommandOptionEnum.target]: withOrder(
-					actionStageCommandOptions[ActionStageCommandOptionEnum.target],
+				[ActionStageCommandOptionEnum.actionTarget]: withOrder(
+					actionStageCommandOptions[ActionStageCommandOptionEnum.actionTarget],
 					1
 				),
 				[ActionStageCommandOptionEnum.rollName]: withOrder(
@@ -204,8 +204,8 @@ export const actionStageCommandDefinition = {
 			description: 'Adds a saving throw to an action',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[ActionStageCommandOptionEnum.target]: withOrder(
-					actionStageCommandOptions[ActionStageCommandOptionEnum.target],
+				[ActionStageCommandOptionEnum.actionTarget]: withOrder(
+					actionStageCommandOptions[ActionStageCommandOptionEnum.actionTarget],
 					1
 				),
 				[ActionStageCommandOptionEnum.rollName]: withOrder(
@@ -227,8 +227,8 @@ export const actionStageCommandDefinition = {
 			description: 'Sets a field on an action stage. "none" clears the field.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[ActionStageCommandOptionEnum.target]: withOrder(
-					actionStageCommandOptions[ActionStageCommandOptionEnum.target],
+				[ActionStageCommandOptionEnum.actionTarget]: withOrder(
+					actionStageCommandOptions[ActionStageCommandOptionEnum.actionTarget],
 					1
 				),
 				[ActionStageCommandOptionEnum.editOption]: withOrder(
@@ -250,8 +250,8 @@ export const actionStageCommandDefinition = {
 			description: 'Removes a roll, text, or save from an action',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[ActionStageCommandOptionEnum.target]: withOrder(
-					actionStageCommandOptions[ActionStageCommandOptionEnum.target],
+				[ActionStageCommandOptionEnum.actionTarget]: withOrder(
+					actionStageCommandOptions[ActionStageCommandOptionEnum.actionTarget],
 					1
 				),
 			},

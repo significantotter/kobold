@@ -3,7 +3,7 @@ import {
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
 } from 'discord-api-types/v10';
-import type { CommandDefinition } from '../helpers/commands.d.ts';
+import type { CommandDefinition } from '../helpers/commands.types.js';
 import {
 	RollMacroCommandOptionEnum,
 	rollMacroCommandOptions,

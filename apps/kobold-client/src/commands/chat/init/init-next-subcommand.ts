@@ -2,22 +2,20 @@ import { ChatInputCommandInteraction } from 'discord.js';
 import { InitiativeBuilder } from '../../../utils/initiative-builder.js';
 
 import _ from 'lodash';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold } from '@kobold/db';
 import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Command } from '../../index.js';
-import { InitCommand } from '@kobold/documentation';
+import { InitDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
 
 export class InitNextSubCommand extends BaseCommandClass(
-	InitCommand,
-	InitCommand.subCommandEnum.next
+	InitDefinition,
+	InitDefinition.subCommandEnum.next
 ) {
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const koboldUtils = new KoboldUtils(kobold);
@@ -30,7 +28,6 @@ export class InitNextSubCommand extends BaseCommandClass(
 		const initBuilder = new InitiativeBuilder({
 			initiative: currentInitiative,
 			userSettings,
-			LL,
 		});
 		const currentTurn = initBuilder.getCurrentTurnInfo();
 		const nextTurn = initBuilder.getNextTurnChanges();
@@ -59,7 +56,6 @@ export class InitNextSubCommand extends BaseCommandClass(
 				initBuilder,
 				currentTurn,
 				targetTurn: nextTurn,
-				LL,
 			});
 		}
 	}

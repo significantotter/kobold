@@ -6,20 +6,20 @@ import {
 	ChatInputCommandInteraction,
 } from 'discord.js';
 
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { InitiativeActorWithRelations, Kobold } from '@kobold/db';
 import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Command } from '../../index.js';
-import { InitOptions } from './init-command-options.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
 import { StringUtils } from '@kobold/base-utils';
-import { InitCommand } from '@kobold/documentation';
+import { InitDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
+const commandOptions = InitDefinition.options;
+const commandOptionsEnum = InitDefinition.commandOptionsEnum;
 
 export class InitNoteSubCommand extends BaseCommandClass(
-	InitCommand,
-	InitCommand.subCommandEnum.note
+	InitDefinition,
+	InitDefinition.subCommandEnum.note
 ) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
@@ -27,9 +27,10 @@ export class InitNoteSubCommand extends BaseCommandClass(
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === InitOptions.INIT_CHARACTER_OPTION.name) {
+		if (option.name === commandOptions[commandOptionsEnum.initCharacter].name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(InitOptions.INIT_CHARACTER_OPTION.name) ?? '';
+			const match =
+				intr.options.getString(commandOptions[commandOptionsEnum.initCharacter].name) ?? '';
 
 			const { autocompleteUtils } = new KoboldUtils(kobold);
 			return await autocompleteUtils.getInitTargetOptions(intr, match, false);
@@ -38,14 +39,13 @@ export class InitNoteSubCommand extends BaseCommandClass(
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const targetCharacterName = intr.options.getString(
-			InitOptions.INIT_CHARACTER_OPTION.name,
+			commandOptions[commandOptionsEnum.initCharacter].name,
 			true
 		);
-		let note = intr.options.getString(InitOptions.INIT_NOTE_OPTION.name, true);
+		let note = intr.options.getString(commandOptions[commandOptionsEnum.initNote].name, true);
 		if (
 			['-', 'none', 'clear', 'remove', 'x', '', '.', '""', "''", '``'].includes(
 				note.trim().toLowerCase()

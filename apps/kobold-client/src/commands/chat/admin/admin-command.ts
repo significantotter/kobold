@@ -11,8 +11,6 @@ import { RateLimiter } from 'discord.js-rate-limiter';
 import { filesize } from 'filesize';
 import os from 'os';
 import typescript from 'typescript';
-import L from '../../../i18n/i18n-node.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { InteractionUtils } from '../../../utils/interaction-utils.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { ShardUtils } from '../../../utils/shard-utils.js';
@@ -21,11 +19,11 @@ import { Config } from '@kobold/config';
 
 export class AdminCommand implements Command {
 	public commands: Command[] = [];
-	public name = L.en.commands.admin.name();
+	public name = 'admin';
 	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.admin.name(),
-		description: L.en.commands.admin.description(),
+		name: 'admin',
+		description: 'Admin commands for managing the bot.',
 		contexts: [InteractionContextType.Guild],
 		default_member_permissions: undefined,
 	};
@@ -36,7 +34,6 @@ export class AdminCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		services: InjectedServices
 	): Promise<void> {
 		if (!intr.isChatInputCommand()) return;

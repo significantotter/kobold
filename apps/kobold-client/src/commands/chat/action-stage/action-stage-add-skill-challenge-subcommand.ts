@@ -7,18 +7,17 @@ import {
 } from 'discord.js';
 import { Kobold, RollTypeEnum } from '@kobold/db';
 
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { Command } from '../../index.js';
-import { ActionStageOptions } from './action-stage-command-options.js';
-import { ActionStageCommand } from '@kobold/documentation';
+import { ActionStageDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
+const commandOptions = ActionStageDefinition.options;
+const commandOptionsEnum = ActionStageDefinition.commandOptionsEnum;
 
 export class ActionStageAddSkillChallengeSubCommand extends BaseCommandClass(
-	ActionStageCommand,
-	ActionStageCommand.subCommandEnum.addSkillChallenge
+	ActionStageDefinition,
+	ActionStageDefinition.subCommandEnum.addSkillChallenge
 ) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
@@ -26,16 +25,16 @@ export class ActionStageAddSkillChallengeSubCommand extends BaseCommandClass(
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === ActionStageOptions.ACTION_TARGET_OPTION.name) {
+		if (option.name === commandOptions[commandOptionsEnum.actionTarget].name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
 			const match =
-				intr.options.getString(ActionStageOptions.ACTION_TARGET_OPTION.name) ?? '';
+				intr.options.getString(commandOptions[commandOptionsEnum.actionTarget].name) ?? '';
 			const { autocompleteUtils } = new KoboldUtils(kobold);
 			return await autocompleteUtils.getTargetActionForActiveCharacter(intr, match);
-		} else if (option.name === ActionStageOptions.ACTION_ROLL_TARGET_DC_OPTION.name) {
+		} else if (option.name === commandOptions[commandOptionsEnum.abilityDc].name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
 			const match =
-				intr.options.getString(ActionStageOptions.ACTION_ROLL_TARGET_DC_OPTION.name) ?? '';
+				intr.options.getString(commandOptions[commandOptionsEnum.abilityDc].name) ?? '';
 			const { autocompleteUtils } = new KoboldUtils(kobold);
 			return await autocompleteUtils.getAllMatchingStatRollsForActiveCharacter(intr, match, [
 				'AC',
@@ -45,28 +44,27 @@ export class ActionStageAddSkillChallengeSubCommand extends BaseCommandClass(
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const targetAction = intr.options.getString(
-			ActionStageOptions.ACTION_TARGET_OPTION.name,
+			commandOptions[commandOptionsEnum.actionTarget].name,
 			true
 		);
 		const rollType = RollTypeEnum.skillChallenge;
 		const rollName = intr.options.getString(
-			ActionStageOptions.ACTION_ROLL_NAME_OPTION.name,
+			commandOptions[commandOptionsEnum.rollName].name,
 			true
 		);
 		const diceRoll = intr.options.getString(
-			ActionStageOptions.ACTION_DICE_ROLL_OPTION.name,
+			commandOptions[commandOptionsEnum.diceRoll].name,
 			true
 		);
 
 		const rollTargetDC = intr.options.getString(
-			ActionStageOptions.ACTION_ROLL_TARGET_DC_OPTION.name
+			commandOptions[commandOptionsEnum.abilityDc].name
 		);
 		let allowRollModifiers = intr.options.getBoolean(
-			ActionStageOptions.ACTION_ROLL_ALLOW_MODIFIERS.name
+			commandOptions[commandOptionsEnum.allowModifiers].name
 		);
 		if (allowRollModifiers === null) allowRollModifiers = true;
 
@@ -81,7 +79,7 @@ export class ActionStageAddSkillChallengeSubCommand extends BaseCommandClass(
 			targetAction
 		);
 		if (!matchedActions || !matchedActions.length) {
-			await InteractionUtils.send(intr, LL.commands.actionStage.interactions.notFound());
+			await InteractionUtils.send(intr, ActionStageDefinition.strings.notFound);
 			return;
 		}
 		const action =
@@ -90,10 +88,7 @@ export class ActionStageAddSkillChallengeSubCommand extends BaseCommandClass(
 			) || matchedActions[0];
 
 		if (action.rolls.find(roll => roll.name === rollName)) {
-			await InteractionUtils.send(
-				intr,
-				LL.commands.actionStage.interactions.rollAlreadyExists()
-			);
+			await InteractionUtils.send(intr, ActionStageDefinition.strings.rollAlreadyExists);
 			return;
 		}
 
@@ -115,7 +110,7 @@ export class ActionStageAddSkillChallengeSubCommand extends BaseCommandClass(
 		// send the response message
 		await InteractionUtils.send(
 			intr,
-			LL.commands.actionStage.interactions.rollAddSuccess({
+			ActionStageDefinition.strings.rollAddSuccess({
 				actionName: action.name,
 				rollName: rollName,
 				rollType: rollType,

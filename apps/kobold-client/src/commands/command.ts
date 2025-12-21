@@ -8,7 +8,6 @@ import {
 } from 'discord.js';
 import { RateLimiter } from 'discord.js-rate-limiter';
 import { Kobold } from '@kobold/db';
-import { TranslationFunctions } from './../i18n/i18n-types.js';
 import { NethysDb } from '@kobold/nethys';
 import { getMetadataForCommand } from './command-utils/definitions.js';
 import type { CommandReference } from '@kobold/documentation';
@@ -40,11 +39,7 @@ export interface Command {
 		option: AutocompleteFocusedOption,
 		services?: Partial<InjectedServices>
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined>;
-	execute(
-		intr: CommandInteraction,
-		LL: TranslationFunctions,
-		services?: Partial<InjectedServices>
-	): Promise<void>;
+	execute(intr: CommandInteraction, services?: Partial<InjectedServices>): Promise<void>;
 }
 
 export interface InjectedServices {
@@ -61,15 +56,19 @@ export enum CommandDeferType {
 export function BaseCommandClass<T extends CommandReference>(
 	commandReference: T,
 	subCommand: string | undefined = undefined
-): { new (): Command } {
-	const name = subCommand
-		? commandReference.definition.subCommands[subCommand]?.name ||
-			commandReference.definition.metadata.name
-		: commandReference.definition.metadata.name;
-	const metadata = getMetadataForCommand(commandReference.definition, subCommand);
-	const deferType = commandReference.definition.deferType || CommandDeferType.PUBLIC;
-	const requireClientPerms = commandReference.definition.requireClientPerms || [];
-	const restrictedGuilds = commandReference.definition.restrictedGuilds || [];
+): { new (commands?: Command[]): Command } {
+	const commandDefinition = commandReference.definition;
+	const subCommandDefinition = subCommand ? commandDefinition.subCommands[subCommand] : null;
+	const name = subCommandDefinition?.name || commandDefinition.metadata.name;
+	const metadata = getMetadataForCommand(commandDefinition, subCommand);
+	const deferType =
+		subCommandDefinition?.deferType || commandDefinition.deferType || CommandDeferType.NONE;
+	// The documentation package uses string[] for permissions, but we know they're valid PermissionsString values
+	const requireClientPerms = (subCommandDefinition?.requireClientPerms ||
+		commandDefinition.requireClientPerms ||
+		[]) as PermissionsString[];
+	const restrictedGuilds =
+		subCommandDefinition?.restrictedGuilds || commandDefinition.restrictedGuilds || [];
 
 	const commandClass = class implements Command {
 		commands: Command[] = [];

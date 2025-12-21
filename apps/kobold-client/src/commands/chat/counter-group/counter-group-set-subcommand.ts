@@ -7,24 +7,23 @@ import {
 } from 'discord.js';
 
 import _ from 'lodash';
-import L from '../../../i18n/i18n-node.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold } from '@kobold/db';
 import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Command } from '../../index.js';
-import { CounterGroupOptions } from './counter-group-command-options.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
 import { InputParseUtils } from '../../../utils/input-parse-utils.js';
 import { AutocompleteUtils } from '../../../utils/kobold-service-utils/autocomplete-utils.js';
 import { BaseCommandClass } from '../../command.js';
-import { CounterGroupCommand } from '@kobold/documentation';
+import { CounterGroupDefinition } from '@kobold/documentation';
+const commandOptions = CounterGroupDefinition.options;
+const commandOptionsEnum = CounterGroupDefinition.commandOptionsEnum;
 
 export class CounterGroupSetSubCommand extends BaseCommandClass(
-	CounterGroupCommand,
-	CounterGroupCommand.subCommandEnum.set
+	CounterGroupDefinition,
+	CounterGroupDefinition.subCommandEnum.set
 ) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
@@ -32,18 +31,18 @@ export class CounterGroupSetSubCommand extends BaseCommandClass(
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === CounterGroupOptions.COUNTER_GROUP_NAME_OPTION.name) {
+		if (option.name === commandOptions[commandOptionsEnum.counterGroupName].name) {
 			const koboldUtils = new KoboldUtils(kobold);
 			const autocompleteUtils = new AutocompleteUtils(koboldUtils);
 			const match =
-				intr.options.getString(CounterGroupOptions.COUNTER_GROUP_NAME_OPTION.name) ?? '';
+				intr.options.getString(commandOptions[commandOptionsEnum.counterGroupName].name) ??
+				'';
 			return autocompleteUtils.getCounterGroups(intr, match);
 		}
 	}
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const koboldUtils = new KoboldUtils(kobold);
@@ -51,15 +50,15 @@ export class CounterGroupSetSubCommand extends BaseCommandClass(
 			activeCharacter: true,
 		});
 		const targetCounterGroupName = intr.options.getString(
-			CounterGroupOptions.COUNTER_GROUP_NAME_OPTION.name,
+			commandOptions[commandOptionsEnum.counterGroupName].name,
 			true
 		);
 		const newGroupOption = intr.options.getString(
-			CounterGroupOptions.COUNTER_GROUP_SET_OPTION_OPTION.name,
+			commandOptions[commandOptionsEnum.counterGroupSetOption].name,
 			true
 		);
 		const newGroupValue = intr.options.getString(
-			CounterGroupOptions.COUNTER_GROUP_SET_VALUE_OPTION.name,
+			commandOptions[commandOptionsEnum.counterGroupSetValue].name,
 			true
 		);
 
@@ -69,28 +68,26 @@ export class CounterGroupSetSubCommand extends BaseCommandClass(
 		);
 		if (!targetCounterGroup) {
 			throw new KoboldError(
-				LL.commands.counterGroup.interactions.notFound({
+				CounterGroupDefinition.strings.notFound({
 					groupName: targetCounterGroupName,
 				})
 			);
 		}
 
-		if (newGroupOption === L.en.commandOptions.counterGroupSetOption.choices.name.value()) {
+		if (newGroupOption === CounterGroupDefinition.optionChoices.setOption.name) {
 			if (!InputParseUtils.isValidString(newGroupValue, { maxLength: 50 })) {
 				throw new KoboldError(
-					LL.commands.counterGroup.set.interactions.stringTooLong({
+					CounterGroupDefinition.strings.setStringTooLong({
 						propertyName: 'name',
 						numCharacters: 50,
 					})
 				);
 			}
 			targetCounterGroup.name = newGroupValue;
-		} else if (
-			newGroupOption === L.en.commandOptions.counterGroupSetOption.choices.description.value()
-		) {
+		} else if (newGroupOption === CounterGroupDefinition.optionChoices.setOption.description) {
 			if (!InputParseUtils.isValidString(newGroupValue, { maxLength: 300 })) {
 				throw new KoboldError(
-					LL.commands.counterGroup.set.interactions.stringTooLong({
+					CounterGroupDefinition.strings.setStringTooLong({
 						propertyName: 'description',
 						numCharacters: 300,
 					})
@@ -98,7 +95,7 @@ export class CounterGroupSetSubCommand extends BaseCommandClass(
 			}
 			targetCounterGroup.description = newGroupValue;
 		} else {
-			throw new KoboldError(LL.commands.counterGroup.set.interactions.invalidOptionError());
+			throw new KoboldError(CounterGroupDefinition.strings.setInvalidOption);
 		}
 
 		await kobold.sheetRecord.update(
@@ -110,7 +107,7 @@ export class CounterGroupSetSubCommand extends BaseCommandClass(
 
 		const updateEmbed = new KoboldEmbed();
 		updateEmbed.setTitle(
-			LL.commands.counterGroup.set.interactions.successEmbed.title({
+			CounterGroupDefinition.strings.setSuccess.title({
 				propertyName: newGroupOption,
 				groupName: targetCounterGroup.name,
 				newPropertyValue: newGroupValue,

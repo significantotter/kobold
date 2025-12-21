@@ -5,9 +5,7 @@ import {
 	CacheType,
 	ChatInputCommandInteraction,
 } from 'discord.js';
-import { SettingsOptions } from './settings-command-options.js';
 import _ from 'lodash';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import {
 	DefaultCompendiumEnum,
 	Kobold,
@@ -21,11 +19,13 @@ import { InteractionUtils } from '../../../utils/interaction-utils.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Command } from '../../index.js';
 import { BaseCommandClass } from '../../command.js';
-import { SettingCommand } from '@kobold/documentation';
+import { SettingDefinition } from '@kobold/documentation';
+const commandOptions = SettingDefinition.options;
+const commandOptionsEnum = SettingDefinition.commandOptionsEnum;
 
 export class SettingsSetSubCommand extends BaseCommandClass(
-	SettingCommand,
-	SettingCommand.subCommandEnum.set
+	SettingDefinition,
+	SettingDefinition.subCommandEnum.set
 ) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
@@ -34,8 +34,8 @@ export class SettingsSetSubCommand extends BaseCommandClass(
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (
-			option.name === SettingsOptions.SETTINGS_SET_VALUE.name &&
-			intr.options.getString(SettingsOptions.SETTINGS_SET_OPTION.name) ===
+			option.name === commandOptions[commandOptionsEnum.value].name &&
+			intr.options.getString(commandOptions[commandOptionsEnum.set].name) ===
 				'initiative-tracker-notifications'
 		) {
 			return ['never', 'every turn', 'every round', 'whenever hidden'].map(choice => ({
@@ -43,8 +43,8 @@ export class SettingsSetSubCommand extends BaseCommandClass(
 				value: choice,
 			}));
 		} else if (
-			option.name === SettingsOptions.SETTINGS_SET_VALUE.name &&
-			intr.options.getString(SettingsOptions.SETTINGS_SET_OPTION.name) ===
+			option.name === commandOptions[commandOptionsEnum.value].name &&
+			intr.options.getString(commandOptions[commandOptionsEnum.set].name) ===
 				'inline-rolls-display'
 		) {
 			return ['detailed', 'compact'].map(choice => ({
@@ -52,8 +52,8 @@ export class SettingsSetSubCommand extends BaseCommandClass(
 				value: choice,
 			}));
 		} else if (
-			option.name === SettingsOptions.SETTINGS_SET_VALUE.name &&
-			intr.options.getString(SettingsOptions.SETTINGS_SET_OPTION.name) ===
+			option.name === commandOptions[commandOptionsEnum.value].name &&
+			intr.options.getString(commandOptions[commandOptionsEnum.set].name) ===
 				'default-compendium'
 		) {
 			return [DefaultCompendiumEnum.nethys, DefaultCompendiumEnum.pf2etools].map(choice => ({
@@ -65,11 +65,10 @@ export class SettingsSetSubCommand extends BaseCommandClass(
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
-		const option = intr.options.getString(SettingsOptions.SETTINGS_SET_OPTION.name, true);
-		const value = intr.options.getString(SettingsOptions.SETTINGS_SET_VALUE.name, true);
+		const option = intr.options.getString(commandOptions[commandOptionsEnum.set].name, true);
+		const value = intr.options.getString(commandOptions[commandOptionsEnum.value].name, true);
 
 		const koboldUtils = new KoboldUtils(kobold);
 		const { userSettings } = await koboldUtils.fetchNonNullableDataForCommand(intr, {

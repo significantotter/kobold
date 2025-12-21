@@ -1,4 +1,4 @@
-import type { CommandDocumentation } from '../helpers/commands.d.ts';
+import type { CommandDocumentation } from '../helpers/commands.types.js';
 import { CommandResponseTypeEnum } from '../helpers/enums.js';
 import { RollCommandOptionEnum } from '../roll/roll.command-options.js';
 import { gameCommandDefinition, GameSubCommandEnum } from './game.command-definition.js';
@@ -8,9 +8,9 @@ export const gameCommandDocumentation: CommandDocumentation<typeof gameCommandDe
 	name: 'game',
 	description: 'Commands for interacting with players as the GM of a game.',
 	subCommands: {
-		[GameSubCommandEnum.manage]: {
-			name: GameSubCommandEnum.manage,
-			description: 'The different commands to manage a game.',
+		[GameSubCommandEnum.create]: {
+			name: GameSubCommandEnum.create,
+			description: 'Create a new game in this server.',
 			usage: null,
 			examples: [
 				{
@@ -18,55 +18,84 @@ export const gameCommandDocumentation: CommandDocumentation<typeof gameCommandDe
 					type: CommandResponseTypeEnum.success,
 					message: 'Yip! I created the game "Season of Ghosts" in this server.',
 					options: {
-						[GameCommandOptionEnum.gameManageOption]: 'create',
-						[GameCommandOptionEnum.gameManageValue]: 'Season of Ghosts',
+						[GameCommandOptionEnum.gameCreateName]: 'Season of Ghosts',
 					},
 				},
+			],
+		},
+		[GameSubCommandEnum.join]: {
+			name: GameSubCommandEnum.join,
+			description: 'Join your active character to a game.',
+			usage: null,
+			examples: [
+				{
+					title: 'Join a game',
+					type: CommandResponseTypeEnum.success,
+					message: 'Yip! Lilac Sootsnout joined the game "Season of Ghosts"!',
+					options: {
+						[GameCommandOptionEnum.gameTargetGame]: 'Season of Ghosts',
+					},
+				},
+			],
+		},
+		[GameSubCommandEnum.setActive]: {
+			name: GameSubCommandEnum.setActive,
+			description: 'Set a game as your active game in this server.',
+			usage: null,
+			examples: [
 				{
 					title: 'Set a game as active',
 					type: CommandResponseTypeEnum.success,
 					message:
 						'Yip! I set the game "Season of Ghosts" as your active game in this server.',
 					options: {
-						[GameCommandOptionEnum.gameManageOption]: 'set-active',
-						[GameCommandOptionEnum.gameManageValue]: 'Season of Ghosts',
+						[GameCommandOptionEnum.gameTargetGame]: 'Season of Ghosts',
 					},
 				},
-				{
-					title: 'Delete a game',
-					type: CommandResponseTypeEnum.success,
-					message: 'Yip! I deleted the game "Season of Ghosts" in this server.',
-					options: {
-						[GameCommandOptionEnum.gameManageOption]: 'delete',
-						[GameCommandOptionEnum.gameManageValue]: 'Season of Ghosts',
-					},
-				},
-				{
-					title: 'Kick a character',
-					type: CommandResponseTypeEnum.success,
-					message: 'Yip! I kicked Lilac Sootsnout out of the game "Season of Ghosts"!',
-					options: {
-						[GameCommandOptionEnum.gameManageOption]: 'kick',
-						[GameCommandOptionEnum.gameManageValue]:
-							'Season of Ghosts - Lilac Sootsnout',
-					},
-				},
-				{
-					title: 'Join a game',
-					type: CommandResponseTypeEnum.success,
-					message: 'Yip! Lilac Sootsnout joined the game "Season of Ghosts"!',
-					options: {
-						[GameCommandOptionEnum.gameManageOption]: 'join',
-						[GameCommandOptionEnum.gameManageValue]: 'Season of Ghosts',
-					},
-				},
+			],
+		},
+		[GameSubCommandEnum.leave]: {
+			name: GameSubCommandEnum.leave,
+			description: 'Remove your active character from a game.',
+			usage: null,
+			examples: [
 				{
 					title: 'Leave a game',
 					type: CommandResponseTypeEnum.success,
 					message: 'Yip! Lilac Sootsnout left the game "Season of Ghosts"!',
 					options: {
-						[GameCommandOptionEnum.gameManageOption]: 'leave',
-						[GameCommandOptionEnum.gameManageValue]: 'Season of Ghosts',
+						[GameCommandOptionEnum.gameTargetGame]: 'Season of Ghosts',
+					},
+				},
+			],
+		},
+		[GameSubCommandEnum.kick]: {
+			name: GameSubCommandEnum.kick,
+			description: 'Kick a character from your game. GM only.',
+			usage: null,
+			examples: [
+				{
+					title: 'Kick a character',
+					type: CommandResponseTypeEnum.success,
+					message: 'Yip! I kicked Lilac Sootsnout out of the game "Season of Ghosts"!',
+					options: {
+						[GameCommandOptionEnum.gameTargetGame]: 'Season of Ghosts',
+						[GameCommandOptionEnum.gameKickCharacter]: 'Lilac Sootsnout',
+					},
+				},
+			],
+		},
+		[GameSubCommandEnum.delete]: {
+			name: GameSubCommandEnum.delete,
+			description: 'Delete a game you created. GM only.',
+			usage: null,
+			examples: [
+				{
+					title: 'Delete a game',
+					type: CommandResponseTypeEnum.success,
+					message: 'Yip! I deleted the game "Season of Ghosts" in this server.',
+					options: {
+						[GameCommandOptionEnum.gameTargetGame]: 'Season of Ghosts',
 					},
 				},
 			],

@@ -1,11 +1,11 @@
 import { ApplicationCommandOptionType } from 'discord-api-types/v10';
-import type { CommandOptions, SpecificCommandOptions } from '../helpers/commands.d.ts';
+import type { CommandOptions, SpecificCommandOptions } from '../helpers/commands.types.js';
 
 export enum HelpCommandOptionEnum {
 	customActionExample = 'example-choice',
 }
 
-export const helpCommandOptions: CommandOptions = {
+export const helpCommandOptions = {
 	[HelpCommandOptionEnum.customActionExample]: {
 		name: 'example-choice',
 		description: 'Which custom action should we walk through?',

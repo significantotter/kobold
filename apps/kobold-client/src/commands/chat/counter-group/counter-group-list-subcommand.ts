@@ -1,21 +1,19 @@
 import { ChatInputCommandInteraction } from 'discord.js';
 
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold } from '@kobold/db';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Command } from '../../index.js';
 import { CounterGroupHelpers } from './counter-group-helpers.js';
-import { CounterGroupCommand } from '@kobold/documentation';
+import { CounterGroupDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
 
 export class CounterGroupListSubCommand extends BaseCommandClass(
-	CounterGroupCommand,
-	CounterGroupCommand.subCommandEnum.list
+	CounterGroupDefinition,
+	CounterGroupDefinition.subCommandEnum.list
 ) {
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const koboldUtils = new KoboldUtils(kobold);

@@ -7,17 +7,17 @@ import {
 } from 'discord.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold } from '@kobold/db';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { ModifierHelpers } from './../modifier/modifier-helpers.js';
-import { GameplayOptions } from '../gameplay/gameplay-command-options.js';
-import { ConditionCommand } from '@kobold/documentation';
+import { ConditionDefinition, GameplayDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
+const gameplayCommandOptions = GameplayDefinition.options;
+const gameplayCommandOptionsEnum = GameplayDefinition.commandOptionsEnum;
 
 export class ConditionListSubCommand extends BaseCommandClass(
-	ConditionCommand,
-	ConditionCommand.subCommandEnum.list
+	ConditionDefinition,
+	ConditionDefinition.subCommandEnum.list
 ) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
@@ -25,22 +25,26 @@ export class ConditionListSubCommand extends BaseCommandClass(
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name) {
+		if (
+			option.name ===
+			gameplayCommandOptions[gameplayCommandOptionsEnum.gameplayTargetCharacter].name
+		) {
 			const match =
-				intr.options.getString(GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name) ?? '';
+				intr.options.getString(
+					gameplayCommandOptions[gameplayCommandOptionsEnum.gameplayTargetCharacter].name
+				) ?? '';
 			const { autocompleteUtils } = new KoboldUtils(kobold);
 			return await autocompleteUtils.getAllTargetOptions(intr, match);
 		}
 	}
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const koboldUtils = new KoboldUtils(kobold);
 		const { gameUtils } = koboldUtils;
 		const targetCharacterName = intr.options.getString(
-			GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name,
+			gameplayCommandOptions[gameplayCommandOptionsEnum.gameplayTargetCharacter].name,
 			true
 		);
 		const { targetSheetRecord } = await gameUtils.getCharacterOrInitActorTarget(

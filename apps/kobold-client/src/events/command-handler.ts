@@ -17,7 +17,6 @@ import { Config } from '@kobold/config';
 import { KoboldEmbed } from '../utils/kobold-embed-utils.js';
 import { refs } from '../constants/common-text.js';
 import { KoboldError } from '../utils/KoboldError.js';
-import L from '../i18n/i18n-node.js';
 import { filterNotNullOrUndefined } from '../utils/type-guards.js';
 import { InjectedServices } from '../commands/command.js';
 
@@ -126,8 +125,7 @@ export class CommandHandler implements EventHandler {
 			let passesChecks = await CommandUtils.runChecks(command, intr);
 			if (passesChecks) {
 				// Execute the command
-				const LL = L.en;
-				await command.execute(intr, LL, this.injectedServices);
+				await command.execute(intr, this.injectedServices);
 			}
 		} catch (error) {
 			// Kobold Errors are expected error messages encountered through regular use of the bot

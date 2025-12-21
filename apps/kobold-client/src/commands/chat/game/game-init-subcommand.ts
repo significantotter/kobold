@@ -7,7 +7,6 @@ import {
 } from 'discord.js';
 
 import _ from 'lodash';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold } from '@kobold/db';
 import { Creature } from '../../../utils/creature.js';
 import { InteractionUtils } from '../../../utils/index.js';
@@ -16,16 +15,19 @@ import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Command } from '../../index.js';
-import { InitOptions } from '../init/init-command-options.js';
-import { GameOptions } from './game-command-options.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
-import { RollOptions } from '../roll/roll-command-options.js';
-import { GameCommand } from '@kobold/documentation';
+import { GameDefinition, InitDefinition, RollDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
+const commandOptions = GameDefinition.options;
+const commandOptionsEnum = GameDefinition.commandOptionsEnum;
+const initCommandOptions = InitDefinition.options;
+const initCommandOptionsEnum = InitDefinition.commandOptionsEnum;
+const rollCommandOptions = RollDefinition.options;
+const rollCommandOptionsEnum = RollDefinition.commandOptionsEnum;
 
 export class GameInitSubCommand extends BaseCommandClass(
-	GameCommand,
-	GameCommand.subCommandEnum.init
+	GameDefinition,
+	GameDefinition.subCommandEnum.init
 ) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
@@ -33,16 +35,21 @@ export class GameInitSubCommand extends BaseCommandClass(
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === GameOptions.GAME_TARGET_CHARACTER.name) {
+		if (option.name === commandOptions[commandOptionsEnum.gameTargetCharacter].name) {
 			const targetCharacter =
-				intr.options.getString(GameOptions.GAME_TARGET_CHARACTER.name) ?? '';
+				intr.options.getString(
+					commandOptions[commandOptionsEnum.gameTargetCharacter].name
+				) ?? '';
 
 			const { gameUtils } = new KoboldUtils(kobold);
 			const activeGame = await gameUtils.getActiveGame(intr.user.id, intr.guildId ?? '');
 			return gameUtils.autocompleteGameCharacter(targetCharacter, activeGame);
-		} else if (option.name === RollOptions.SKILL_CHOICE_OPTION.name) {
+		} else if (option.name === rollCommandOptions[rollCommandOptionsEnum.skillChoice].name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(RollOptions.SKILL_CHOICE_OPTION.name) ?? '';
+			const match =
+				intr.options.getString(
+					rollCommandOptions[rollCommandOptionsEnum.skillChoice].name
+				) ?? '';
 
 			const { gameUtils } = new KoboldUtils(kobold);
 			//get the active game
@@ -76,7 +83,6 @@ export class GameInitSubCommand extends BaseCommandClass(
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const koboldUtils: KoboldUtils = new KoboldUtils(kobold);
@@ -91,11 +97,17 @@ export class GameInitSubCommand extends BaseCommandClass(
 		);
 		koboldUtils.assertActiveGameNotNull(activeGame);
 
-		const initiativeValue = intr.options.getNumber(InitOptions.INIT_VALUE_OPTION.name);
-		const skillChoice = intr.options.getString(RollOptions.SKILL_CHOICE_OPTION.name);
-		const diceExpression = intr.options.getString(RollOptions.ROLL_EXPRESSION_OPTION.name);
+		const initiativeValue = intr.options.getNumber(
+			initCommandOptions[initCommandOptionsEnum.initValue].name
+		);
+		const skillChoice = intr.options.getString(
+			rollCommandOptions[rollCommandOptionsEnum.skillChoice].name
+		);
+		const diceExpression = intr.options.getString(
+			rollCommandOptions[rollCommandOptionsEnum.rollExpression].name
+		);
 		const targetCharacter = intr.options.getString(
-			GameOptions.GAME_TARGET_CHARACTER.name,
+			commandOptions[commandOptionsEnum.gameTargetCharacter].name,
 			true
 		);
 
@@ -113,7 +125,7 @@ export class GameInitSubCommand extends BaseCommandClass(
 			if (!intr.channel || !intr.channel.id) {
 				await InteractionUtils.send(
 					intr,
-					LL.commands.init.start.interactions.notServerChannelError()
+					InitDefinition.strings.start.notServerChannelError
 				);
 				return;
 			}
@@ -167,7 +179,7 @@ export class GameInitSubCommand extends BaseCommandClass(
 			embeds.push(embed);
 		}
 		if (embeds.length === 0) {
-			await InteractionUtils.send(intr, LL.commands.game.init.interactions.alreadyInInit());
+			await InteractionUtils.send(intr, GameDefinition.strings.init.alreadyInInit);
 		} else {
 			await InteractionUtils.send(intr, { embeds: embeds });
 		}

@@ -1,4 +1,4 @@
-import type { CommandDocumentation } from '../helpers/commands.d.ts';
+import type { CommandDocumentation } from '../helpers/commands.types.js';
 import { CommandResponseTypeEnum } from '../helpers/enums.js';
 import { actionCommandDefinition, ActionSubCommandEnum } from './action.command-definition.js';
 

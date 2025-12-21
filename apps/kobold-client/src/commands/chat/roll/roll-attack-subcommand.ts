@@ -6,8 +6,6 @@ import {
 	ChatInputCommandInteraction,
 } from 'discord.js';
 
-import L from '../../../i18n/i18n-node.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold, SheetRecord } from '@kobold/db';
 import { ActionRoller } from '../../../utils/action-roller.js';
 import { Creature } from '../../../utils/creature.js';
@@ -15,14 +13,16 @@ import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Command } from '../../index.js';
-import { InitOptions } from '../init/init-command-options.js';
-import { RollOptions } from './roll-command-options.js';
-import { RollCommand } from '@kobold/documentation';
+import { InitDefinition, RollDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
+const commandOptions = RollDefinition.options;
+const commandOptionsEnum = RollDefinition.commandOptionsEnum;
+const initCommandOptions = InitDefinition.options;
+const initCommandOptionsEnum = InitDefinition.commandOptionsEnum;
 
 export class RollAttackSubCommand extends BaseCommandClass(
-	RollCommand,
-	RollCommand.subCommandEnum.attack
+	RollDefinition,
+	RollDefinition.subCommandEnum.attack
 ) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
@@ -30,9 +30,10 @@ export class RollAttackSubCommand extends BaseCommandClass(
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === RollOptions.ATTACK_CHOICE_OPTION.name) {
+		if (option.name === commandOptions[commandOptionsEnum.attackChoice].name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(RollOptions.ATTACK_CHOICE_OPTION.name) ?? '';
+			const match =
+				intr.options.getString(commandOptions[commandOptionsEnum.attackChoice].name) ?? '';
 
 			//get the active character
 			const koboldUtils: KoboldUtils = new KoboldUtils(kobold);
@@ -54,9 +55,12 @@ export class RollAttackSubCommand extends BaseCommandClass(
 			//return the matched attacks
 			return matchedAttack;
 		}
-		if (option.name === InitOptions.INIT_CHARACTER_TARGET.name) {
+		if (option.name === initCommandOptions[initCommandOptionsEnum.initCharacterTarget].name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(InitOptions.INIT_CHARACTER_TARGET.name) ?? '';
+			const match =
+				intr.options.getString(
+					initCommandOptions[initCommandOptionsEnum.initCharacterTarget].name
+				) ?? '';
 			const koboldUtils: KoboldUtils = new KoboldUtils(kobold);
 
 			return await koboldUtils.autocompleteUtils.getAllTargetOptions(intr, match);
@@ -65,28 +69,36 @@ export class RollAttackSubCommand extends BaseCommandClass(
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
-		const attackChoice = intr.options.getString(RollOptions.ATTACK_CHOICE_OPTION.name, true);
+		const attackChoice = intr.options.getString(
+			commandOptions[commandOptionsEnum.attackChoice].name,
+			true
+		);
 		const targetSheetName = intr.options.getString(
-			InitOptions.INIT_CHARACTER_TARGET.name,
+			initCommandOptions[initCommandOptionsEnum.initCharacterTarget].name,
 			true
 		);
 		const attackModifierExpression =
-			intr.options.getString(RollOptions.ATTACK_ROLL_MODIFIER_OPTION.name) ?? '';
+			intr.options.getString(commandOptions[commandOptionsEnum.attackRollModifier].name) ??
+			'';
 		const damageModifierExpression =
-			intr.options.getString(RollOptions.DAMAGE_ROLL_MODIFIER_OPTION.name) ?? '';
+			intr.options.getString(commandOptions[commandOptionsEnum.damageRollModifier].name) ??
+			'';
 		const attackRollOverwrite =
-			intr.options.getString(RollOptions.ROLL_OVERWRITE_ATTACK_OPTION.name) ?? undefined;
+			intr.options.getString(commandOptions[commandOptionsEnum.rollOverwriteAttack].name) ??
+			undefined;
 		const damageRollOverwrite =
-			intr.options.getString(RollOptions.ROLL_OVERWRITE_DAMAGE_OPTION.name) ?? undefined;
-		const rollNote = intr.options.getString(RollOptions.ROLL_NOTE_OPTION.name) ?? '';
-		const targetAC = intr.options.getInteger(RollOptions.ROLL_TARGET_AC_OPTION.name);
-
+			intr.options.getString(commandOptions[commandOptionsEnum.rollOverwriteDamage].name) ??
+			undefined;
+		const rollNote =
+			intr.options.getString(commandOptions[commandOptionsEnum.rollNote].name) ?? '';
+		const targetAC = intr.options.getInteger(
+			commandOptions[commandOptionsEnum.rollTargetAc].name
+		);
 		const secretRoll =
-			intr.options.getString(RollOptions.ROLL_SECRET_OPTION.name) ??
-			L.en.commandOptions.rollSecret.choices.public.value();
+			intr.options.getString(commandOptions[commandOptionsEnum.rollSecret].name) ??
+			RollDefinition.optionChoices.rollSecret.public;
 
 		const koboldUtils: KoboldUtils = new KoboldUtils(kobold);
 		const { gameUtils, creatureUtils } = koboldUtils;

@@ -6,23 +6,24 @@ import {
 	CacheType,
 	ChatInputCommandInteraction,
 	ComponentType,
+	MessageFlags,
 } from 'discord.js';
 import { Kobold } from '@kobold/db';
 
 import _ from 'lodash';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { CollectorUtils } from '../../../utils/collector-utils.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Command } from '../../index.js';
-import { ActionOptions } from './action-command-options.js';
-import { ActionCommand } from '@kobold/documentation';
+import { ActionDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
+const commandOptions = ActionDefinition.options;
+const commandOptionsEnum = ActionDefinition.commandOptionsEnum;
 
 export class ActionRemoveSubCommand extends BaseCommandClass(
-	ActionCommand,
-	ActionCommand.subCommandEnum.remove
+	ActionDefinition,
+	ActionDefinition.subCommandEnum.remove
 ) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
@@ -30,9 +31,10 @@ export class ActionRemoveSubCommand extends BaseCommandClass(
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === ActionOptions.ACTION_TARGET_OPTION.name) {
+		if (option.name === commandOptions[commandOptionsEnum.targetAction].name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(ActionOptions.ACTION_TARGET_OPTION.name) ?? '';
+			const match =
+				intr.options.getString(commandOptions[commandOptionsEnum.targetAction].name) ?? '';
 
 			//get the active character
 			const { characterUtils } = new KoboldUtils(kobold);
@@ -56,10 +58,12 @@ export class ActionRemoveSubCommand extends BaseCommandClass(
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
-		const actionChoice = intr.options.getString(ActionOptions.ACTION_TARGET_OPTION.name, true);
+		const actionChoice = intr.options.getString(
+			commandOptions[commandOptionsEnum.targetAction].name,
+			true
+		);
 
 		const koboldUtils = new KoboldUtils(kobold);
 		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
@@ -74,7 +78,7 @@ export class ActionRemoveSubCommand extends BaseCommandClass(
 			// ask for confirmation
 
 			const prompt = await intr.reply({
-				content: LL.commands.action.remove.interactions.removeConfirmation.text({
+				content: ActionDefinition.strings.remove.confirmation.text({
 					actionName: targetAction.name,
 				}),
 				components: [
@@ -83,20 +87,20 @@ export class ActionRemoveSubCommand extends BaseCommandClass(
 						components: [
 							{
 								type: ComponentType.Button,
-								label: LL.commands.action.remove.interactions.removeConfirmation.removeButton(),
+								label: ActionDefinition.strings.remove.confirmation.removeButton,
 								customId: 'remove',
 								style: ButtonStyle.Danger,
 							},
 							{
 								type: ComponentType.Button,
-								label: LL.commands.action.remove.interactions.removeConfirmation.cancelButton(),
+								label: ActionDefinition.strings.remove.confirmation.cancelButton,
 								customId: 'cancel',
 								style: ButtonStyle.Primary,
 							},
 						],
 					},
 				],
-				ephemeral: true,
+				flags: [MessageFlags.Ephemeral],
 				fetchReply: true,
 			});
 			let timedOut = false;
@@ -121,8 +125,7 @@ export class ActionRemoveSubCommand extends BaseCommandClass(
 					onExpire: async () => {
 						timedOut = true;
 						await InteractionUtils.editReply(intr, {
-							content:
-								LL.commands.action.remove.interactions.removeConfirmation.expired(),
+							content: ActionDefinition.strings.remove.confirmation.expired,
 							components: [],
 						});
 					},
@@ -130,7 +133,7 @@ export class ActionRemoveSubCommand extends BaseCommandClass(
 			);
 			if (result) {
 				await InteractionUtils.editReply(intr, {
-					content: LL.sharedInteractions.choiceRegistered({
+					content: ActionDefinition.strings.shared.choiceRegistered({
 						choice: _.capitalize(result.value),
 					}),
 					components: [],
@@ -150,7 +153,7 @@ export class ActionRemoveSubCommand extends BaseCommandClass(
 
 				await InteractionUtils.send(
 					intr,
-					LL.commands.action.remove.interactions.success({
+					ActionDefinition.strings.remove.success({
 						actionName: targetAction.name,
 					})
 				);
@@ -158,12 +161,12 @@ export class ActionRemoveSubCommand extends BaseCommandClass(
 			}
 			// cancel
 			else {
-				await InteractionUtils.send(intr, LL.commands.action.remove.interactions.cancel());
+				await InteractionUtils.send(intr, ActionDefinition.strings.remove.cancel);
 				return;
 			}
 		} else {
 			// no matching action found
-			await InteractionUtils.send(intr, LL.commands.action.interactions.notFound());
+			await InteractionUtils.send(intr, ActionDefinition.strings.notFound);
 			return;
 		}
 	}

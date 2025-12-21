@@ -6,21 +6,21 @@ import {
 	ChatInputCommandInteraction,
 } from 'discord.js';
 
-import { GameplayOptions } from './gameplay-command-options.js';
 import _ from 'lodash';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold, SheetBaseCounterKeys } from '@kobold/db';
 import { KoboldError } from '../../../utils/KoboldError.js';
 import { Creature } from '../../../utils/creature.js';
 import { InteractionUtils } from '../../../utils/interaction-utils.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Command } from '../../index.js';
-import { GameplayCommand } from '@kobold/documentation';
+import { GameplayDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
+const commandOptions = GameplayDefinition.options;
+const commandOptionsEnum = GameplayDefinition.commandOptionsEnum;
 
 export class GameplaySetSubCommand extends BaseCommandClass(
-	GameplayCommand,
-	GameplayCommand.subCommandEnum.set
+	GameplayDefinition,
+	GameplayDefinition.subCommandEnum.set
 ) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
@@ -28,7 +28,7 @@ export class GameplaySetSubCommand extends BaseCommandClass(
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name) {
+		if (option.name === commandOptions[commandOptionsEnum.gameplayTargetCharacter].name) {
 			const { autocompleteUtils } = new KoboldUtils(kobold);
 			return await autocompleteUtils.getAllTargetOptions(intr, option.value);
 		}
@@ -36,18 +36,20 @@ export class GameplaySetSubCommand extends BaseCommandClass(
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: any }
 	): Promise<void> {
 		const targetCharacter = intr.options.getString(
-			GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name,
+			commandOptions[commandOptionsEnum.gameplayTargetCharacter].name,
 			true
 		);
 		const option = _.camelCase(
-			intr.options.getString(GameplayOptions.GAMEPLAY_SET_OPTION.name, true)
+			intr.options.getString(commandOptions[commandOptionsEnum.gameplaySetOption].name, true)
 		) as SheetBaseCounterKeys;
 
-		const value = intr.options.getString(GameplayOptions.GAMEPLAY_SET_VALUE.name, true);
+		const value = intr.options.getString(
+			commandOptions[commandOptionsEnum.gameplaySetValue].name,
+			true
+		);
 
 		const { gameUtils, gameplayUtils } = new KoboldUtils(kobold);
 

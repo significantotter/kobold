@@ -6,22 +6,22 @@ import {
 	ChatInputCommandInteraction,
 } from 'discord.js';
 
-import L from '../../../i18n/i18n-node.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold } from '@kobold/db';
 import { Creature } from '../../../utils/creature.js';
 import { InitiativeBuilderUtils } from '../../../utils/initiative-builder.js';
-import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
+import { EmbedUtils, KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Command } from '../../index.js';
-import { InitOptions } from './init-command-options.js';
-import { RollOptions } from '../roll/roll-command-options.js';
-import { InitCommand } from '@kobold/documentation';
+import { InitDefinition, RollDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
+const commandOptions = InitDefinition.options;
+const commandOptionsEnum = InitDefinition.commandOptionsEnum;
+const rollCommandOptions = RollDefinition.options;
+const rollCommandOptionsEnum = RollDefinition.commandOptionsEnum;
 
 export class InitStatBlockSubCommand extends BaseCommandClass(
-	InitCommand,
-	InitCommand.subCommandEnum.statBlock
+	InitDefinition,
+	InitDefinition.subCommandEnum.statBlock
 ) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
@@ -29,9 +29,11 @@ export class InitStatBlockSubCommand extends BaseCommandClass(
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === InitOptions.INIT_CHARACTER_OPTION.name) {
+		if (option.name === commandOptions[commandOptionsEnum.initCharacter].name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(InitOptions.INIT_CHARACTER_OPTION.name);
+			const match = intr.options.getString(
+				commandOptions[commandOptionsEnum.initCharacter].name
+			);
 
 			const { autocompleteUtils } = new KoboldUtils(kobold);
 			return await autocompleteUtils.getAllControllableInitiativeActors(intr, match);
@@ -40,16 +42,15 @@ export class InitStatBlockSubCommand extends BaseCommandClass(
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const targetCharacterName = intr.options.getString(
-			InitOptions.INIT_CHARACTER_OPTION.name,
+			commandOptions[commandOptionsEnum.initCharacter].name,
 			true
 		);
-		const secretMessage = intr.options.getString(RollOptions.ROLL_SECRET_OPTION.name);
-		const isSecretMessage =
-			secretMessage === L.en.commandOptions.statBlockSecret.choices.secret.value();
+		const secretMessage = intr.options.getString(
+			rollCommandOptions[rollCommandOptionsEnum.rollSecret].name
+		);
 
 		const koboldUtils = new KoboldUtils(kobold);
 		const { currentInitiative } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
@@ -67,6 +68,6 @@ export class InitStatBlockSubCommand extends BaseCommandClass(
 		const creature = new Creature(actor.sheetRecord, actor.name, intr);
 		sheetEmbed = creature.compileEmbed('Sheet');
 
-		await sheetEmbed.sendBatches(intr);
+		await EmbedUtils.dispatchEmbeds(intr, [sheetEmbed], secretMessage || undefined);
 	}
 }

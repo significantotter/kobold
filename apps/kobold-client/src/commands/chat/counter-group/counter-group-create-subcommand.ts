@@ -1,6 +1,5 @@
 import { ChatInputCommandInteraction } from 'discord.js';
-import { CounterGroupOptions } from './counter-group-command-options.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
+
 import { Kobold } from '@kobold/db';
 import { InteractionUtils } from '../../../utils/index.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
@@ -8,16 +7,17 @@ import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js
 import { Command } from '../../index.js';
 import { InputParseUtils } from '../../../utils/input-parse-utils.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
-import { CounterGroupCommand } from '@kobold/documentation';
+import { CounterGroupDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
+const commandOptions = CounterGroupDefinition.options;
+const commandOptionsEnum = CounterGroupDefinition.commandOptionsEnum;
 
 export class CounterGroupCreateSubCommand extends BaseCommandClass(
-	CounterGroupCommand,
-	CounterGroupCommand.subCommandEnum.create
+	CounterGroupDefinition,
+	CounterGroupDefinition.subCommandEnum.create
 ) {
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const koboldUtils = new KoboldUtils(kobold);
@@ -25,10 +25,10 @@ export class CounterGroupCreateSubCommand extends BaseCommandClass(
 			activeCharacter: true,
 		});
 		let name = intr.options
-			.getString(CounterGroupOptions.COUNTER_GROUP_NAME_OPTION.name, true)
+			.getString(commandOptions[commandOptionsEnum.counterGroupName].name, true)
 			.trim();
 		let description = intr.options.getString(
-			CounterGroupOptions.COUNTER_GROUP_DESCRIPTION_OPTION.name
+			commandOptions[commandOptionsEnum.counterGroupDescription].name
 		);
 
 		if (!InputParseUtils.isValidString(name, { maxLength: 50 })) {
@@ -37,7 +37,7 @@ export class CounterGroupCreateSubCommand extends BaseCommandClass(
 		const { counter } = FinderHelpers.getCounterByName(activeCharacter.sheetRecord.sheet, name);
 		if (counter) {
 			throw new KoboldError(
-				LL.commands.counterGroup.create.interactions.alreadyExists({
+				CounterGroupDefinition.strings.alreadyExists({
 					groupName: name,
 					characterName: activeCharacter.name,
 				})
@@ -54,7 +54,7 @@ export class CounterGroupCreateSubCommand extends BaseCommandClass(
 			)
 		) {
 			throw new KoboldError(
-				LL.commands.counterGroup.create.interactions.alreadyExists({
+				CounterGroupDefinition.strings.alreadyExists({
 					groupName: name,
 					characterName: activeCharacter.name,
 				})
@@ -82,7 +82,7 @@ export class CounterGroupCreateSubCommand extends BaseCommandClass(
 		//send a response
 		await InteractionUtils.send(
 			intr,
-			LL.commands.counterGroup.create.interactions.created({
+			CounterGroupDefinition.strings.created({
 				groupName: name,
 				characterName: activeCharacter.name,
 			})

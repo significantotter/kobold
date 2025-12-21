@@ -7,20 +7,20 @@ import {
 } from 'discord.js';
 
 import _ from 'lodash';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold } from '@kobold/db';
 import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Command } from '../../index.js';
-import { ModifierOptions } from './modifier-command-options.js';
-import { ModifierCommand } from '@kobold/documentation';
+import { ModifierDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
+const commandOptions = ModifierDefinition.options;
+const commandOptionsEnum = ModifierDefinition.commandOptionsEnum;
 
 export class ModifierToggleSubCommand extends BaseCommandClass(
-	ModifierCommand,
-	ModifierCommand.subCommandEnum.toggle
+	ModifierDefinition,
+	ModifierDefinition.subCommandEnum.toggle
 ) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
@@ -28,9 +28,10 @@ export class ModifierToggleSubCommand extends BaseCommandClass(
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === ModifierOptions.MODIFIER_NAME_OPTION.name) {
+		if (option.name === commandOptions[commandOptionsEnum.name].name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(ModifierOptions.MODIFIER_NAME_OPTION.name) ?? '';
+			const match =
+				intr.options.getString(commandOptions[commandOptionsEnum.name].name) ?? '';
 
 			//get the active character
 			const { characterUtils } = new KoboldUtils(kobold);
@@ -54,11 +55,10 @@ export class ModifierToggleSubCommand extends BaseCommandClass(
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		let name = intr.options
-			.getString(ModifierOptions.MODIFIER_NAME_OPTION.name, true)
+			.getString(commandOptions[commandOptionsEnum.name].name, true)
 			.trim()
 			.toLowerCase();
 
@@ -71,7 +71,7 @@ export class ModifierToggleSubCommand extends BaseCommandClass(
 
 		if (!modifier) {
 			// no matching modifier found
-			await InteractionUtils.send(intr, LL.commands.modifier.interactions.notFound());
+			await InteractionUtils.send(intr, ModifierDefinition.strings.notFound);
 			return;
 		}
 
@@ -87,15 +87,15 @@ export class ModifierToggleSubCommand extends BaseCommandClass(
 		);
 
 		const activeText = modifier.isActive
-			? LL.commands.modifier.toggle.interactions.active()
-			: LL.commands.modifier.toggle.interactions.inactive();
+			? ModifierDefinition.strings.toggle.active
+			: ModifierDefinition.strings.toggle.inactive;
 
 		const updateEmbed = new KoboldEmbed();
 		updateEmbed.setTitle(
-			LL.commands.modifier.toggle.interactions.success({
+			ModifierDefinition.strings.toggle.success({
 				characterName: activeCharacter.name,
 				modifierName: modifier.name,
-				activeSetting: activeText,
+				toggledTo: activeText,
 			})
 		);
 

@@ -1,31 +1,33 @@
 import { ChatInputCommandInteraction } from 'discord.js';
+
 import { Kobold } from '@kobold/db';
 
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Command } from '../../index.js';
-import { CharacterOptions } from './command-options.js';
 import { PathbuilderCharacterFetcher } from './Fetchers/pathbuilder-character-fetcher.js';
 import { WgCharacterFetcher } from './Fetchers/wg-character-fetcher.js';
 import { TextParseHelpers } from '../../../utils/kobold-helpers/text-parse-helpers.js';
 import { PasteBinCharacterFetcher } from './Fetchers/pastebin-character-fetcher.js';
-import { CharacterCommand } from '@kobold/documentation';
+import { CharacterDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
+const commandOptions = CharacterDefinition.options;
+const commandOptionsEnum = CharacterDefinition.commandOptionsEnum;
 
 export class CharacterUpdateSubCommand extends BaseCommandClass(
-	CharacterCommand,
-	CharacterCommand.subCommandEnum.update
+	CharacterDefinition,
+	CharacterDefinition.subCommandEnum.update
 ) {
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		//check if we have an active character
 		const koboldUtils = new KoboldUtils(kobold);
-		const useStamina = intr.options.getBoolean(CharacterOptions.IMPORT_USE_STAMINA_OPTION.name);
+		const useStamina = intr.options.getBoolean(
+			commandOptions[commandOptionsEnum.useStamina].name
+		);
 		let { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
 			activeCharacter: true,
 		});
@@ -36,7 +38,9 @@ export class CharacterUpdateSubCommand extends BaseCommandClass(
 		}
 
 		if (activeCharacter.importSource === 'pathbuilder') {
-			let jsonId = intr.options.getNumber(CharacterOptions.IMPORT_PATHBUILDER_OPTION.name);
+			let jsonId = intr.options.getNumber(
+				commandOptions[commandOptionsEnum.pathbuilderJsonId].name
+			);
 
 			let newSheetUpdateWarning = '';
 			if (!jsonId) {
@@ -65,13 +69,13 @@ export class CharacterUpdateSubCommand extends BaseCommandClass(
 
 			await InteractionUtils.send(
 				intr,
-				LL.commands.character.update.interactions.success({
+				CharacterDefinition.strings.update.success({
 					characterName: newCharacter.name,
 				}) + newSheetUpdateWarning
 			);
 			return;
 		} else if (activeCharacter.importSource === 'pastebin') {
-			const url = intr.options.getString(CharacterOptions.IMPORT_PASTEBIN_OPTION.name);
+			const url = intr.options.getString(commandOptions[commandOptionsEnum.pastebinUrl].name);
 
 			if (!url) {
 				throw new KoboldError(
@@ -92,7 +96,7 @@ export class CharacterUpdateSubCommand extends BaseCommandClass(
 			//send success message
 			await InteractionUtils.send(
 				intr,
-				LL.commands.character.importPasteBin.interactions.success({
+				CharacterDefinition.strings.importPasteBin.success({
 					characterName: newCharacter.name,
 				})
 			);
@@ -106,7 +110,7 @@ export class CharacterUpdateSubCommand extends BaseCommandClass(
 
 			await InteractionUtils.send(
 				intr,
-				LL.commands.character.update.interactions.success({
+				CharacterDefinition.strings.update.success({
 					characterName: newCharacter.name,
 				})
 			);

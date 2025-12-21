@@ -6,20 +6,20 @@ import {
 	ChatInputCommandInteraction,
 } from 'discord.js';
 
-import { GameplayOptions } from './gameplay-command-options.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold } from '@kobold/db';
 import { Creature } from '../../../utils/creature.js';
 import { InteractionUtils } from '../../../utils/interaction-utils.js';
 import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Command } from '../../index.js';
-import { GameplayCommand } from '@kobold/documentation';
+import { GameplayDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
+const commandOptions = GameplayDefinition.options;
+const commandOptionsEnum = GameplayDefinition.commandOptionsEnum;
 
 export class GameplayDamageSubCommand extends BaseCommandClass(
-	GameplayCommand,
-	GameplayCommand.subCommandEnum.damage
+	GameplayDefinition,
+	GameplayDefinition.subCommandEnum.damage
 ) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
@@ -27,9 +27,11 @@ export class GameplayDamageSubCommand extends BaseCommandClass(
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name) {
+		if (option.name === commandOptions[commandOptionsEnum.gameplayTargetCharacter].name) {
 			const match =
-				intr.options.getString(GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name) ?? '';
+				intr.options.getString(
+					commandOptions[commandOptionsEnum.gameplayTargetCharacter].name
+				) ?? '';
 			const { autocompleteUtils } = new KoboldUtils(kobold);
 			return await autocompleteUtils.getAllTargetOptions(intr, match);
 		}
@@ -37,15 +39,19 @@ export class GameplayDamageSubCommand extends BaseCommandClass(
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const targetCharacter = intr.options.getString(
-			GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name,
+			commandOptions[commandOptionsEnum.gameplayTargetCharacter].name,
 			true
 		);
-		const amount = intr.options.getNumber(GameplayOptions.GAMEPLAY_DAMAGE_AMOUNT.name, true);
-		const type = intr.options.getString(GameplayOptions.GAMEPLAY_DAMAGE_TYPE.name);
+		const amount = intr.options.getNumber(
+			commandOptions[commandOptionsEnum.gameplayDamageAmount].name,
+			true
+		);
+		const type = intr.options.getString(
+			commandOptions[commandOptionsEnum.gameplayDamageType].name
+		);
 
 		const { gameUtils, creatureUtils } = new KoboldUtils(kobold);
 

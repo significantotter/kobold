@@ -1,5 +1,5 @@
 import { ApplicationCommandOptionType } from 'discord-api-types/v10';
-import type { CommandOptions, SpecificCommandOptions } from '../helpers/commands.d.ts';
+import type { CommandOptions, SpecificCommandOptions } from '../helpers/commands.types.js';
 
 export enum GameplayCommandOptionEnum {
 	gameplaySetOption = 'gameplay-set-option',
@@ -11,7 +11,7 @@ export enum GameplayCommandOptionEnum {
 	gameplayTrackerMode = 'gameplay-tracker-mode',
 }
 
-export const gameplayCommandOptions: CommandOptions = {
+export const gameplayCommandOptions = {
 	[GameplayCommandOptionEnum.gameplaySetOption]: {
 		name: GameplayCommandOptionEnum.gameplaySetOption,
 		description: "What option to update on the target character's sheet",

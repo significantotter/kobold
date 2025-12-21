@@ -6,25 +6,26 @@ import {
 	CacheType,
 	ChatInputCommandInteraction,
 	ComponentType,
+	MessageFlags,
 } from 'discord.js';
 
 import _ from 'lodash';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold } from '@kobold/db';
 import { CollectorUtils } from '../../../utils/collector-utils.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Command } from '../../index.js';
-import { CounterOptions } from './counter-command-options.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
 import { AutocompleteUtils } from '../../../utils/kobold-service-utils/autocomplete-utils.js';
-import { CounterCommand } from '@kobold/documentation';
+import { CounterDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
+const commandOptions = CounterDefinition.options;
+const commandOptionsEnum = CounterDefinition.commandOptionsEnum;
 
 export class CounterRemoveSubCommand extends BaseCommandClass(
-	CounterCommand,
-	CounterCommand.subCommandEnum.remove
+	CounterDefinition,
+	CounterDefinition.subCommandEnum.remove
 ) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
@@ -32,35 +33,38 @@ export class CounterRemoveSubCommand extends BaseCommandClass(
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === CounterOptions.COUNTER_NAME_OPTION.name) {
+		if (option.name === commandOptions[commandOptionsEnum.counterName].name) {
 			const koboldUtils = new KoboldUtils(kobold);
 			const autocompleteUtils = new AutocompleteUtils(koboldUtils);
-			const match = intr.options.getString(CounterOptions.COUNTER_NAME_OPTION.name) ?? '';
+			const match =
+				intr.options.getString(commandOptions[commandOptionsEnum.counterName].name) ?? '';
 			return autocompleteUtils.getCounters(intr, match);
 		}
 	}
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
+
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const koboldUtils = new KoboldUtils(kobold);
 		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
 			activeCharacter: true,
 		});
-		const name = intr.options.getString(CounterOptions.COUNTER_NAME_OPTION.name, true).trim();
+		const name = intr.options
+			.getString(commandOptions[commandOptionsEnum.counterName].name, true)
+			.trim();
 
 		const { counter, group } = FinderHelpers.getCounterByName(
 			activeCharacter.sheetRecord.sheet,
 			name
 		);
 		if (!counter) {
-			throw new KoboldError(LL.commands.counter.interactions.notFound({ counterName: name }));
+			throw new KoboldError(CounterDefinition.strings.notFound({ counterName: name }));
 		}
 
 		const prompt = await intr.reply({
-			content: LL.commands.counter.remove.interactions.removeConfirmation.text({
+			content: CounterDefinition.strings.removeConfirmation.text({
 				counterName: counter.name,
 			}),
 			components: [
@@ -69,20 +73,20 @@ export class CounterRemoveSubCommand extends BaseCommandClass(
 					components: [
 						{
 							type: ComponentType.Button,
-							label: LL.commands.counter.remove.interactions.removeConfirmation.removeButton(),
+							label: CounterDefinition.strings.removeConfirmation.confirmButton,
 							customId: 'remove',
 							style: ButtonStyle.Danger,
 						},
 						{
 							type: ComponentType.Button,
-							label: LL.commands.counter.remove.interactions.removeConfirmation.cancelButton(),
+							label: CounterDefinition.strings.removeConfirmation.cancelButton,
 							customId: 'cancel',
 							style: ButtonStyle.Primary,
 						},
 					],
 				},
 			],
-			ephemeral: true,
+			flags: [MessageFlags.Ephemeral],
 			fetchReply: true,
 		});
 		let timedOut = false;
@@ -107,8 +111,7 @@ export class CounterRemoveSubCommand extends BaseCommandClass(
 				onExpire: async () => {
 					timedOut = true;
 					await InteractionUtils.editReply(intr, {
-						content:
-							LL.commands.counter.remove.interactions.removeConfirmation.expired(),
+						content: CounterDefinition.strings.removeConfirmation.expired,
 						components: [],
 					});
 				},
@@ -116,7 +119,7 @@ export class CounterRemoveSubCommand extends BaseCommandClass(
 		);
 		if (result) {
 			await InteractionUtils.editReply(intr, {
-				content: LL.sharedInteractions.choiceRegistered({
+				content: CounterDefinition.strings.shared.choiceRegistered({
 					choice: _.capitalize(result.value),
 				}),
 				components: [],
@@ -143,7 +146,7 @@ export class CounterRemoveSubCommand extends BaseCommandClass(
 			);
 			await InteractionUtils.send(
 				intr,
-				LL.commands.counter.remove.interactions.success({
+				CounterDefinition.strings.removed({
 					counterName: counter.name,
 				})
 			);

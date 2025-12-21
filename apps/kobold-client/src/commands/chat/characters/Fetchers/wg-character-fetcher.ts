@@ -1,5 +1,4 @@
 import { Config } from '@kobold/config';
-import L from '../../../../i18n/i18n-node.js';
 import { SheetRecord, Character, CharacterWithRelations, NewSheetRecord } from '@kobold/db';
 import { WanderersGuide } from '../../../../services/wanderers-guide/index.js';
 import { WG } from '../../../../services/wanderers-guide/wanderers-guide.js';
@@ -7,6 +6,8 @@ import { KoboldError } from '../../../../utils/KoboldError.js';
 import { Creature } from '../../../../utils/creature.js';
 import { CharacterFetcher } from './character-fetcher.js';
 import axios from 'axios';
+import { MessageFlags } from 'discord.js';
+import { CharacterDefinition as CharacterCommand } from '@kobold/documentation';
 
 export class WgCharacterFetcher extends CharacterFetcher<
 	{
@@ -192,21 +193,21 @@ export class WgCharacterFetcher extends CharacterFetcher<
 				: this.intr.reply.bind(this.intr);
 		if (expired) {
 			respond({
-				content: L.en.commands.character.interactions.expiredToken(),
-				ephemeral: true,
+				content: CharacterCommand.strings.expiredToken,
+				flags: [MessageFlags.Ephemeral],
 			});
 		} else {
 			respond({
-				content: L.en.commands.character.interactions.authenticationRequest({
+				content: CharacterCommand.strings.authenticationRequest({
 					action: 'fetch',
 				}),
-				ephemeral: true,
+				flags: [MessageFlags.Ephemeral],
 			});
 		}
 		throw new KoboldError(
-			L.en.commands.character.interactions.authenticationLink({
+			CharacterCommand.strings.authenticationLink({
 				wgBaseUrl: Config.wanderersGuide.oauthBaseUrl,
-				charId: charId,
+				charId: String(charId),
 			}),
 			undefined,
 			true
@@ -238,7 +239,7 @@ export class WgCharacterFetcher extends CharacterFetcher<
 					this.kobold.wgAuthToken.delete({ charId: args.charId }).catch(() => {});
 					this.requestAccessToken(args.charId, true);
 				} else if (axios.isAxiosError(err) && err?.response?.status === 429) {
-					throw new KoboldError(L.en.commands.character.interactions.tooManyWGRequests());
+					throw new KoboldError(CharacterCommand.strings.tooManyWGRequests);
 				} else {
 					//otherwise, something else went wrong that we want to be a real error
 					console.error(err);

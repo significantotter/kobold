@@ -6,11 +6,10 @@ import {
 	ChatInputCommandInteraction,
 } from 'discord.js';
 
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { CommandUtils } from '../../../utils/index.js';
 import { BaseCommandClass, InjectedServices } from '../../command.js';
 import { Command } from '../../index.js';
-import { ActionCommand as ActionCommandDocumentation } from '@kobold/documentation';
+import { ActionDefinition as ActionCommandDocumentation } from '@kobold/documentation';
 
 export class ActionCommand extends BaseCommandClass(ActionCommandDocumentation) {
 	public async autocomplete(
@@ -30,7 +29,6 @@ export class ActionCommand extends BaseCommandClass(ActionCommandDocumentation) 
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		services: InjectedServices
 	): Promise<void> {
 		if (!intr.isChatInputCommand()) return;
@@ -41,7 +39,7 @@ export class ActionCommand extends BaseCommandClass(ActionCommandDocumentation) 
 
 		let passesChecks = await CommandUtils.runChecks(command, intr);
 		if (passesChecks) {
-			await command.execute(intr, LL, services);
+			await command.execute(intr, services);
 		}
 	}
 }

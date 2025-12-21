@@ -1,8 +1,7 @@
 import { ChatInputCommandInteraction } from 'discord.js';
 import _ from 'lodash';
 import { getEmoji } from '../constants/emoji.js';
-import L from '../i18n/i18n-node.js';
-import { TranslationFunctions } from '../i18n/i18n-types.js';
+import { utilStrings } from '@kobold/documentation';
 import {
 	Action,
 	ActionCostEnum,
@@ -1160,7 +1159,7 @@ export class ActionRoller {
 		);
 		const builtRoll = actionRoller.buildRoll(
 			rollNote ?? '',
-			L.en.commands.roll.attack.interactions.rollEmbed.rollDescription({
+			utilStrings.roll.attackRollDescription({
 				attackName: targetAttack.name,
 			}),
 			{
@@ -1187,10 +1186,8 @@ export class ActionRoller {
 			targetNameOverwrite?: string;
 			sourceNameOverwrite?: string;
 			userSettings?: UserSettings;
-			LL?: TranslationFunctions;
 		}
 	): Promise<{ error: boolean; message: string | KoboldEmbed; actionRoller?: ActionRoller }> {
-		const LL = options.LL ?? L.en;
 		const targetRoll = creature.rolls[rollChoice] ?? creature.attackRolls[rollChoice];
 
 		const targetAction = creature.keyedActions[rollChoice];
@@ -1199,7 +1196,7 @@ export class ActionRoller {
 		if (!targetRoll) {
 			return {
 				error: true,
-				message: LL.commands.init.roll.interactions.invalidRoll(),
+				message: utilStrings.initiative.invalidRoll,
 			};
 		}
 
@@ -1212,7 +1209,6 @@ export class ActionRoller {
 				attributeName: targetRoll.name,
 				rollNote: options.rollNote ?? '',
 				modifierExpression: options.modifierExpression,
-				LL,
 			});
 
 			return { error: false, message: response.compileEmbed() };

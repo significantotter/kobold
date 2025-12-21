@@ -1,4 +1,4 @@
-import type { CommandDocumentation } from '../helpers/commands.d.ts';
+import type { CommandDocumentation } from '../helpers/commands.types.js';
 import { CommandResponseTypeEnum } from '../helpers/enums.js';
 import {
 	actionStageCommandDefinition,
@@ -44,7 +44,7 @@ export const actionStageCommandDocumentation: CommandDocumentation<
 					message:
 						'Yip! I added a skill challenge roll to the action {actionName:Battle Medicine (DC 15)}.',
 					options: {
-						target: 'Battle Medicine (DC 15)',
+						[ActionStageCommandOptionEnum.actionTarget]: 'Battle Medicine (DC 15)',
 						[ActionStageCommandOptionEnum.rollName]: 'Medicine Check',
 						[ActionStageCommandOptionEnum.diceRoll]: '1d20 + [medicine]',
 						[ActionStageCommandOptionEnum.defendingStat]: 15,
@@ -63,10 +63,10 @@ export const actionStageCommandDocumentation: CommandDocumentation<
 					message:
 						'Yip! I added a basic damage roll to the action {actionName:Elemental Blast (1a)}.',
 					options: {
-						target: 'Elemental Blast (1a)',
-						['roll-name']: 'Elemental Blast',
-						['damage-type']: 'Fire',
-						['basic-damage-dice-roll']: '1d6 + 3',
+						[ActionStageCommandOptionEnum.actionTarget]: 'Elemental Blast (1a)',
+						[ActionStageCommandOptionEnum.rollName]: 'Elemental Blast',
+						[ActionStageCommandOptionEnum.damageType]: 'Fire',
+						[ActionStageCommandOptionEnum.basicDamageDiceRoll]: '1d6 + 3',
 					},
 				},
 			],
@@ -83,11 +83,11 @@ export const actionStageCommandDocumentation: CommandDocumentation<
 					message:
 						'Yip! I added an advanced damage roll to the action {actionName:Shortbow Strike}.',
 					options: {
-						target: 'Shortbow Strike',
-						['roll-name']: 'Shortbow Strike',
-						['damage-type']: 'Piercing',
-						['critical-success-dice-roll']: '(1d6)*2 + 1d10',
-						['success-dice-roll']: '1d6',
+						[ActionStageCommandOptionEnum.actionTarget]: 'Shortbow Strike',
+						[ActionStageCommandOptionEnum.rollName]: 'Shortbow Strike',
+						[ActionStageCommandOptionEnum.damageType]: 'Piercing',
+						[ActionStageCommandOptionEnum.criticalSuccessDiceRoll]: '(1d6)*2 + 1d10',
+						[ActionStageCommandOptionEnum.successDiceRoll]: '1d6',
 					},
 				},
 			],
@@ -102,10 +102,10 @@ export const actionStageCommandDocumentation: CommandDocumentation<
 					type: CommandResponseTypeEnum.success,
 					message: 'Yip! I added a save roll to the action {actionName:Gale Blast}.',
 					options: {
-						target: 'Gale Blast',
-						['roll-name']: 'Gale Blast',
-						['save-roll-type']: 'Reflex',
-						['ability-dc']: '[arcaneDc]',
+						[ActionStageCommandOptionEnum.actionTarget]: 'Gale Blast',
+						[ActionStageCommandOptionEnum.rollName]: 'Gale Blast',
+						[ActionStageCommandOptionEnum.saveRollType]: 'Reflex',
+						[ActionStageCommandOptionEnum.abilityDc]: '[arcaneDc]',
 					},
 				},
 			],
@@ -120,17 +120,20 @@ export const actionStageCommandDocumentation: CommandDocumentation<
 					type: CommandResponseTypeEnum.success,
 					message: 'Yip! I added text to the action {actionName:Gale Blast}.',
 					options: {
-						target: 'Gale Blast',
-						['roll-name']: 'Gale Blast',
-						['default-text']:
+						[ActionStageCommandOptionEnum.actionTarget]: 'Gale Blast',
+						[ActionStageCommandOptionEnum.rollName]: 'Gale Blast',
+						[ActionStageCommandOptionEnum.defaultText]:
 							'The creature takes full damage and is pushed 5 feet away from you.',
-						['critical-success-text']: 'The creature is unaffected.',
-						['success-text']: 'The creature takes half damage.',
-						['failure-text']:
+						[ActionStageCommandOptionEnum.criticalSuccessText]:
+							'The creature is unaffected.',
+						[ActionStageCommandOptionEnum.successText]:
+							'The creature takes half damage.',
+						[ActionStageCommandOptionEnum.failureText]:
 							'The creature takes full damage and is pushed 5 feet away from you.',
-						['critical-failure-text']:
+						[ActionStageCommandOptionEnum.criticalFailureText]:
 							'The creature takes double damage and is pushed 10 feet away from you.',
-						['extra-tags']: 'Air, Cantrip, Concentrate, Manipulate ',
+						[ActionStageCommandOptionEnum.extraTags]:
+							'Air, Cantrip, Concentrate, Manipulate ',
 					},
 				},
 			],
@@ -146,7 +149,7 @@ export const actionStageCommandDocumentation: CommandDocumentation<
 					message:
 						'Yip! I removed the attack roll from the action {actionName:Elemental Blast (1a)}.',
 					options: {
-						['target']: 'Elemental Blast (1a)',
+						[ActionStageCommandOptionEnum.actionTarget]: 'Elemental Blast (1a)',
 					},
 				},
 			],
@@ -162,9 +165,9 @@ export const actionStageCommandDocumentation: CommandDocumentation<
 					message:
 						'Yip! I set the roll name for the action {actionName:Elemental Blast (1a)}.',
 					options: {
-						['target']: 'Elemental Blast (1a)',
-						['edit-option']: 'rollName',
-						['edit-value']: 'Elemental Blast (2a)',
+						[ActionStageCommandOptionEnum.actionTarget]: 'Elemental Blast (1a)',
+						[ActionStageCommandOptionEnum.editOption]: 'rollName',
+						[ActionStageCommandOptionEnum.editValue]: 'Elemental Blast (2a)',
 					},
 				},
 			],

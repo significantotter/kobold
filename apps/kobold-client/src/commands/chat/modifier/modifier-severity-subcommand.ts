@@ -6,20 +6,20 @@ import {
 	ChatInputCommandInteraction,
 } from 'discord.js';
 
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold } from '@kobold/db';
 import { InteractionUtils } from '../../../utils/index.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Command } from '../../index.js';
-import { ModifierOptions } from './modifier-command-options.js';
 import { InputParseUtils } from '../../../utils/input-parse-utils.js';
-import { ModifierCommand } from '@kobold/documentation';
+import { ModifierDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
+const commandOptions = ModifierDefinition.options;
+const commandOptionsEnum = ModifierDefinition.commandOptionsEnum;
 
 export class ModifierSeveritySubCommand extends BaseCommandClass(
-	ModifierCommand,
-	ModifierCommand.subCommandEnum.severity
+	ModifierDefinition,
+	ModifierDefinition.subCommandEnum.severity
 ) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
@@ -27,9 +27,10 @@ export class ModifierSeveritySubCommand extends BaseCommandClass(
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === ModifierOptions.MODIFIER_NAME_OPTION.name) {
+		if (option.name === commandOptions[commandOptionsEnum.name].name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(ModifierOptions.MODIFIER_NAME_OPTION.name) ?? '';
+			const match =
+				intr.options.getString(commandOptions[commandOptionsEnum.name].name) ?? '';
 
 			//get the active character
 			const { characterUtils } = new KoboldUtils(kobold);
@@ -53,14 +54,13 @@ export class ModifierSeveritySubCommand extends BaseCommandClass(
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const modifierName = intr.options
-			.getString(ModifierOptions.MODIFIER_NAME_OPTION.name, true)
+			.getString(commandOptions[commandOptionsEnum.name].name, true)
 			.trim();
 		const newSeverity = intr.options
-			.getString(ModifierOptions.MODIFIER_SEVERITY_VALUE_OPTION.name, true)
+			.getString(commandOptions[commandOptionsEnum.severity].name, true)
 			.toLocaleLowerCase()
 			.trim();
 
@@ -76,7 +76,7 @@ export class ModifierSeveritySubCommand extends BaseCommandClass(
 		);
 		if (!targetModifier) {
 			// no matching modifier found
-			await InteractionUtils.send(intr, LL.commands.modifier.interactions.notFound());
+			await InteractionUtils.send(intr, ModifierDefinition.strings.notFound);
 			return;
 		}
 		targetModifier.severity = InputParseUtils.parseAsNullableNumber(newSeverity);

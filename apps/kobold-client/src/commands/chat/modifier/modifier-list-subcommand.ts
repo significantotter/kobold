@@ -1,21 +1,20 @@
 import { ChatInputCommandInteraction } from 'discord.js';
+
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold } from '@kobold/db';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Command } from '../../index.js';
 import { ModifierHelpers } from './modifier-helpers.js';
-import { ModifierCommand } from '@kobold/documentation';
+import { ModifierDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
 
 export class ModifierListSubCommand extends BaseCommandClass(
-	ModifierCommand,
-	ModifierCommand.subCommandEnum.list
+	ModifierDefinition,
+	ModifierDefinition.subCommandEnum.list
 ) {
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const koboldUtils = new KoboldUtils(kobold);
@@ -29,7 +28,7 @@ export class ModifierListSubCommand extends BaseCommandClass(
 			value = ModifierHelpers.detailModifier(modifier);
 
 			fields.push({
-				name: LL.commands.modifier.interactions.detailHeader({
+				name: ModifierDefinition.strings.detailHeader({
 					modifierName: modifier.name,
 					modifierIsActive: modifier.isActive ? ' (active)' : '',
 				}),

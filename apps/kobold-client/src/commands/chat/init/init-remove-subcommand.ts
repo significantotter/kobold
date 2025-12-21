@@ -7,7 +7,6 @@ import {
 } from 'discord.js';
 
 import _ from 'lodash';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold } from '@kobold/db';
 import { InteractionUtils } from '../../../utils/index.js';
 import {
@@ -18,14 +17,15 @@ import {
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Command } from '../../index.js';
-import { InitOptions } from './init-command-options.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
-import { InitCommand } from '@kobold/documentation';
+import { InitDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
+const commandOptions = InitDefinition.options;
+const commandOptionsEnum = InitDefinition.commandOptionsEnum;
 
 export class InitRemoveSubCommand extends BaseCommandClass(
-	InitCommand,
-	InitCommand.subCommandEnum.remove
+	InitDefinition,
+	InitDefinition.subCommandEnum.remove
 ) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
@@ -33,9 +33,10 @@ export class InitRemoveSubCommand extends BaseCommandClass(
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === InitOptions.INIT_CHARACTER_OPTION.name) {
+		if (option.name === commandOptions[commandOptionsEnum.initCharacter].name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(InitOptions.INIT_CHARACTER_OPTION.name) ?? '';
+			const match =
+				intr.options.getString(commandOptions[commandOptionsEnum.initCharacter].name) ?? '';
 
 			const { autocompleteUtils } = new KoboldUtils(kobold);
 			return autocompleteUtils.getAllControllableInitiativeActors(intr, match);
@@ -44,11 +45,10 @@ export class InitRemoveSubCommand extends BaseCommandClass(
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const targetActorName = intr.options
-			.getString(InitOptions.INIT_CHARACTER_OPTION.name, true)
+			.getString(commandOptions[commandOptionsEnum.initCharacter].name, true)
 			.trim();
 
 		const koboldUtils = new KoboldUtils(kobold);
@@ -77,7 +77,7 @@ export class InitRemoveSubCommand extends BaseCommandClass(
 
 		const deletedEmbed = new KoboldEmbed();
 		deletedEmbed.setTitle(
-			LL.commands.init.remove.interactions.deletedEmbed.title({
+			InitDefinition.strings.remove.deletedEmbed.title({
 				actorName: actor.name,
 			})
 		);
@@ -97,7 +97,6 @@ export class InitRemoveSubCommand extends BaseCommandClass(
 			const initBuilder = new InitiativeBuilder({
 				initiative: currentInitiative,
 				userSettings,
-				LL,
 			});
 			let currentTurn = initBuilder.getCurrentTurnInfo();
 			let updatedTurn: TurnData;
@@ -126,7 +125,7 @@ export class InitRemoveSubCommand extends BaseCommandClass(
 				groups: updatedInitiative.actorGroups,
 			});
 
-			const currentTurnEmbed = await KoboldEmbed.turnFromInitiativeBuilder(initBuilder, LL);
+			const currentTurnEmbed = await KoboldEmbed.turnFromInitiativeBuilder(initBuilder);
 			const activeGroup = initBuilder.activeGroup;
 
 			if (updatedInitiative.currentRound === 0) {
@@ -143,14 +142,12 @@ export class InitRemoveSubCommand extends BaseCommandClass(
 					currentTurn,
 					targetTurn: updatedTurn,
 					initBuilder,
-					LL,
 				});
 			}
 		} else {
 			const initBuilder = new InitiativeBuilder({
 				initiative: currentInitiative,
 				userSettings,
-				LL,
 			});
 			initBuilder.removeActor(actor);
 			if (currentInitiative.currentRound === 0) {

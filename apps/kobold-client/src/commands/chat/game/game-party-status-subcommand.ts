@@ -8,19 +8,19 @@ import {
 import { Kobold, SheetRecordTrackerModeEnum } from '@kobold/db';
 
 import _ from 'lodash';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Command } from '../../index.js';
-import { GameOptions } from './game-command-options.js';
 import { Creature } from '../../../utils/creature.js';
-import { GameCommand } from '@kobold/documentation';
+import { GameDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
+const commandOptions = GameDefinition.options;
+const commandOptionsEnum = GameDefinition.commandOptionsEnum;
 
 export class GamePartyStatusSubCommand extends BaseCommandClass(
-	GameCommand,
-	GameCommand.subCommandEnum.partyStatus
+	GameDefinition,
+	GameDefinition.subCommandEnum.partyStatus
 ) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
@@ -28,9 +28,11 @@ export class GamePartyStatusSubCommand extends BaseCommandClass(
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === GameOptions.GAME_TARGET_CHARACTER.name) {
+		if (option.name === commandOptions[commandOptionsEnum.gameTargetCharacter].name) {
 			const targetCharacter =
-				intr.options.getString(GameOptions.GAME_TARGET_CHARACTER.name) ?? '';
+				intr.options.getString(
+					commandOptions[commandOptionsEnum.gameTargetCharacter].name
+				) ?? '';
 
 			const { gameUtils } = new KoboldUtils(kobold);
 			const activeGame = await gameUtils.getActiveGame(intr.user.id, intr.guildId ?? '');
@@ -40,14 +42,13 @@ export class GamePartyStatusSubCommand extends BaseCommandClass(
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const sheetStyle =
-			intr.options.getString(GameOptions.GAME_SHEET_STYLE.name) ??
+			intr.options.getString(commandOptions[commandOptionsEnum.gameSheetStyle].name) ??
 			SheetRecordTrackerModeEnum.counters_only;
 		const targetCharacterName = intr.options.getString(
-			GameOptions.GAME_TARGET_CHARACTER.name,
+			commandOptions[commandOptionsEnum.gameTargetCharacter].name,
 			true
 		);
 		const koboldUtils = new KoboldUtils(kobold);

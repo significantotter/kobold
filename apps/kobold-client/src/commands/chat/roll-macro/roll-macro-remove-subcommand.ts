@@ -6,23 +6,24 @@ import {
 	CacheType,
 	ChatInputCommandInteraction,
 	ComponentType,
+	MessageFlags,
 } from 'discord.js';
 
 import _ from 'lodash';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold } from '@kobold/db';
 import { CollectorUtils } from '../../../utils/collector-utils.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Command } from '../../index.js';
-import { RollMacroOptions } from './roll-macro-command-options.js';
-import { RollMacroCommand } from '@kobold/documentation';
+import { RollMacroDefinition, sharedStrings } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
+const commandOptions = RollMacroDefinition.options;
+const commandOptionsEnum = RollMacroDefinition.commandOptionsEnum;
 
 export class RollMacroRemoveSubCommand extends BaseCommandClass(
-	RollMacroCommand,
-	RollMacroCommand.subCommandEnum.remove
+	RollMacroDefinition,
+	RollMacroDefinition.subCommandEnum.remove
 ) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
@@ -30,9 +31,10 @@ export class RollMacroRemoveSubCommand extends BaseCommandClass(
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === RollMacroOptions.MACRO_NAME_OPTION.name) {
+		if (option.name === commandOptions[commandOptionsEnum.name].name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(RollMacroOptions.MACRO_NAME_OPTION.name) ?? '';
+			const match =
+				intr.options.getString(commandOptions[commandOptionsEnum.name].name) ?? '';
 
 			return await new KoboldUtils(
 				kobold
@@ -42,7 +44,6 @@ export class RollMacroRemoveSubCommand extends BaseCommandClass(
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const koboldUtils = new KoboldUtils(kobold);
@@ -52,7 +53,7 @@ export class RollMacroRemoveSubCommand extends BaseCommandClass(
 		});
 
 		const rollMacroChoice = intr.options.getString(
-			RollMacroOptions.MACRO_NAME_OPTION.name,
+			commandOptions[commandOptionsEnum.name].name,
 			true
 		);
 
@@ -64,7 +65,7 @@ export class RollMacroRemoveSubCommand extends BaseCommandClass(
 			// ask for confirmation
 
 			const prompt = await intr.reply({
-				content: LL.commands.rollMacro.remove.interactions.removeConfirmation.text({
+				content: RollMacroDefinition.strings.remove.removeConfirmationText({
 					macroName: targetRollMacro.name,
 				}),
 				components: [
@@ -73,20 +74,20 @@ export class RollMacroRemoveSubCommand extends BaseCommandClass(
 						components: [
 							{
 								type: ComponentType.Button,
-								label: LL.commands.rollMacro.remove.interactions.removeConfirmation.removeButton(),
+								label: RollMacroDefinition.strings.remove.removeButton,
 								customId: 'remove',
 								style: ButtonStyle.Danger,
 							},
 							{
 								type: ComponentType.Button,
-								label: LL.commands.rollMacro.remove.interactions.removeConfirmation.cancelButton(),
+								label: RollMacroDefinition.strings.remove.cancelButton,
 								customId: 'cancel',
 								style: ButtonStyle.Primary,
 							},
 						],
 					},
 				],
-				ephemeral: true,
+				flags: [MessageFlags.Ephemeral],
 				fetchReply: true,
 			});
 			let timedOut = false;
@@ -111,8 +112,7 @@ export class RollMacroRemoveSubCommand extends BaseCommandClass(
 					onExpire: async () => {
 						timedOut = true;
 						await InteractionUtils.editReply(intr, {
-							content:
-								LL.commands.rollMacro.remove.interactions.removeConfirmation.expired(),
+							content: RollMacroDefinition.strings.remove.expired,
 							components: [],
 						});
 					},
@@ -120,7 +120,7 @@ export class RollMacroRemoveSubCommand extends BaseCommandClass(
 			);
 			if (result) {
 				await InteractionUtils.editReply(intr, {
-					content: LL.sharedInteractions.choiceRegistered({
+					content: sharedStrings.choiceRegistered({
 						choice: _.capitalize(result.value),
 					}),
 					components: [],
@@ -140,7 +140,7 @@ export class RollMacroRemoveSubCommand extends BaseCommandClass(
 
 				await InteractionUtils.send(
 					intr,
-					LL.commands.rollMacro.remove.interactions.success({
+					RollMacroDefinition.strings.remove.success({
 						macroName: targetRollMacro.name,
 					})
 				);
@@ -148,15 +148,12 @@ export class RollMacroRemoveSubCommand extends BaseCommandClass(
 			}
 			// cancel
 			else {
-				await InteractionUtils.send(
-					intr,
-					LL.commands.rollMacro.remove.interactions.cancel()
-				);
+				await InteractionUtils.send(intr, RollMacroDefinition.strings.remove.cancel);
 				return;
 			}
 		} else {
 			// no matching rollMacro found
-			await InteractionUtils.send(intr, LL.commands.rollMacro.interactions.notFound());
+			await InteractionUtils.send(intr, RollMacroDefinition.strings.notFound);
 			return;
 		}
 	}

@@ -1,21 +1,20 @@
-import { ButtonStyle, ChatInputCommandInteraction, ComponentType } from 'discord.js';
+import { ButtonStyle, ChatInputCommandInteraction, ComponentType, MessageFlags } from 'discord.js';
+
 import { Kobold } from '@kobold/db';
 
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { CollectorUtils } from '../../../utils/collector-utils.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Command } from '../../index.js';
-import { CharacterCommand } from '@kobold/documentation';
+import { CharacterDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
 
 export class CharacterRemoveSubCommand extends BaseCommandClass(
-	CharacterCommand,
-	CharacterCommand.subCommandEnum.remove
+	CharacterDefinition,
+	CharacterDefinition.subCommandEnum.remove
 ) {
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const koboldUtils = new KoboldUtils(kobold);
@@ -24,7 +23,7 @@ export class CharacterRemoveSubCommand extends BaseCommandClass(
 		});
 
 		const prompt = await intr.reply({
-			content: LL.commands.character.remove.interactions.removeConfirmation.text({
+			content: CharacterDefinition.strings.remove.confirmation.text({
 				characterName: activeCharacter.name,
 			}),
 			components: [
@@ -33,20 +32,20 @@ export class CharacterRemoveSubCommand extends BaseCommandClass(
 					components: [
 						{
 							type: ComponentType.Button,
-							label: LL.commands.character.remove.interactions.removeConfirmation.removeButton(),
+							label: CharacterDefinition.strings.remove.confirmation.removeButton,
 							customId: 'remove',
 							style: ButtonStyle.Danger,
 						},
 						{
 							type: ComponentType.Button,
-							label: LL.commands.character.remove.interactions.removeConfirmation.cancelButton(),
+							label: CharacterDefinition.strings.remove.confirmation.cancelButton,
 							customId: 'cancel',
 							style: ButtonStyle.Primary,
 						},
 					],
 				},
 			],
-			ephemeral: true,
+			flags: [MessageFlags.Ephemeral],
 			fetchReply: true,
 		});
 		let timedOut = false;
@@ -71,8 +70,7 @@ export class CharacterRemoveSubCommand extends BaseCommandClass(
 				onExpire: async () => {
 					timedOut = true;
 					await InteractionUtils.editReply(intr, {
-						content:
-							LL.commands.character.remove.interactions.removeConfirmation.expired(),
+						content: CharacterDefinition.strings.remove.confirmation.expired,
 						components: [],
 					});
 				},
@@ -80,7 +78,7 @@ export class CharacterRemoveSubCommand extends BaseCommandClass(
 		);
 		if (result && result.value === 'remove') {
 			await InteractionUtils.editReply(intr, {
-				content: LL.sharedInteractions.choiceRegistered({
+				content: CharacterDefinition.strings.shared.choiceRegistered({
 					choice: 'Remove',
 				}),
 				components: [],
@@ -99,7 +97,7 @@ export class CharacterRemoveSubCommand extends BaseCommandClass(
 			//send success message
 
 			await InteractionUtils.send(intr, {
-				content: LL.commands.character.remove.interactions.success({
+				content: CharacterDefinition.strings.remove.success({
 					characterName: activeCharacter.name,
 				}),
 				components: [],
@@ -108,14 +106,14 @@ export class CharacterRemoveSubCommand extends BaseCommandClass(
 			return;
 		} else {
 			await InteractionUtils.editReply(intr, {
-				content: LL.sharedInteractions.choiceRegistered({
+				content: CharacterDefinition.strings.shared.choiceRegistered({
 					choice: 'Cancel',
 				}),
 				components: [],
 			});
 			// cancel
 			await InteractionUtils.send(intr, {
-				content: LL.commands.character.remove.interactions.cancelled({
+				content: CharacterDefinition.strings.remove.cancelled({
 					characterName: activeCharacter.name,
 				}),
 				components: [],

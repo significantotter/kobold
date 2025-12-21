@@ -1,27 +1,27 @@
 import { ChatInputCommandInteraction } from 'discord.js';
 
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold, SheetRecordTrackerModeEnum } from '@kobold/db';
 import { Creature } from '../../../utils/creature.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Command } from '../../index.js';
-import { GameOptions } from '../game/game-command-options.js';
-import { CharacterCommand } from '@kobold/documentation';
+import { CharacterDefinition, GameDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
+const gameCommandOptions = GameDefinition.options;
+const gameCommandOptionsEnum = GameDefinition.commandOptionsEnum;
 
 export class CharacterSheetSubCommand extends BaseCommandClass(
-	CharacterCommand,
-	CharacterCommand.subCommandEnum.sheet
+	CharacterDefinition,
+	CharacterDefinition.subCommandEnum.sheet
 ) {
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const koboldUtils = new KoboldUtils(kobold);
 		const sheetStyle =
-			intr.options.getString(GameOptions.GAME_SHEET_STYLE.name) ??
-			SheetRecordTrackerModeEnum.full_sheet;
+			intr.options.getString(
+				gameCommandOptions[gameCommandOptionsEnum.gameSheetStyle].name
+			) ?? SheetRecordTrackerModeEnum.full_sheet;
 		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
 			activeCharacter: true,
 		});

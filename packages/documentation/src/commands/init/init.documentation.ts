@@ -1,4 +1,4 @@
-import type { CommandDocumentation } from '../helpers/commands.d.ts';
+import type { CommandDocumentation } from '../helpers/commands.types.js';
 import { CommandResponseTypeEnum } from '../helpers/enums.js';
 import { RollCommandOptionEnum } from '../roll/roll.command-options.js';
 import { initCommandDefinition, InitSubCommandEnum } from './init.command-definition.js';

@@ -5,11 +5,10 @@ import {
 	CacheType,
 	ChatInputCommandInteraction,
 } from 'discord.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { CommandUtils } from '../../../utils/index.js';
 import { BaseCommandClass, InjectedServices } from '../../command.js';
 import { Command } from '../../index.js';
-import { ActionStageCommand as ActionStageCommandDocumentation } from '@kobold/documentation';
+import { ActionStageDefinition as ActionStageCommandDocumentation } from '@kobold/documentation';
 
 export class ActionStageCommand extends BaseCommandClass(ActionStageCommandDocumentation) {
 	public async autocomplete(
@@ -29,7 +28,6 @@ export class ActionStageCommand extends BaseCommandClass(ActionStageCommandDocum
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		services: InjectedServices
 	): Promise<void> {
 		if (!intr.isChatInputCommand()) return;
@@ -40,7 +38,7 @@ export class ActionStageCommand extends BaseCommandClass(ActionStageCommandDocum
 
 		let passesChecks = await CommandUtils.runChecks(command, intr);
 		if (passesChecks) {
-			await command.execute(intr, LL, services);
+			await command.execute(intr, services);
 		}
 	}
 }

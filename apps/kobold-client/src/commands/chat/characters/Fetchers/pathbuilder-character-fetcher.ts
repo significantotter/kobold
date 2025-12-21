@@ -1,5 +1,4 @@
 import { refs } from '../../../../constants/common-text.js';
-import L from '../../../../i18n/i18n-node.js';
 import { CharacterWithRelations, Kobold, NewSheetRecord } from '@kobold/db';
 import { PathBuilder } from '../../../../services/pathbuilder/index.js';
 import { KoboldError } from '../../../../utils/KoboldError.js';
@@ -7,6 +6,7 @@ import { Creature } from '../../../../utils/creature.js';
 import { CharacterFetcher } from './character-fetcher.js';
 import type { PathBuilder as PB } from '../../../../services/pathbuilder/pathbuilder.js';
 import { CommandInteraction, CacheType } from 'discord.js';
+import { CharacterDefinition as CharacterCommand } from '@kobold/documentation';
 
 export class PathbuilderCharacterFetcher extends CharacterFetcher<
 	PB.Character,
@@ -26,7 +26,7 @@ export class PathbuilderCharacterFetcher extends CharacterFetcher<
 
 		if (!pathBuilderChar.success) {
 			throw new KoboldError(
-				L.en.commands.character.importPathbuilder.interactions.failedRequest({
+				CharacterCommand.strings.importPathbuilder.failedRequest({
 					supportServerUrl: refs.links.support,
 				})
 			);

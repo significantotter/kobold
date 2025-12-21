@@ -1,35 +1,35 @@
 import { ChatInputCommandInteraction } from 'discord.js';
+
 import { Kobold } from '@kobold/db';
 
 import _ from 'lodash';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { Command } from '../../index.js';
-import { CharacterOptions } from './command-options.js';
 import { PathbuilderCharacterFetcher } from './Fetchers/pathbuilder-character-fetcher.js';
 import { BaseCommandClass } from '../../command.js';
-import { CharacterCommand } from '@kobold/documentation';
+import { CharacterDefinition } from '@kobold/documentation';
+const commandOptions = CharacterDefinition.options;
+const commandOptionsEnum = CharacterDefinition.commandOptionsEnum;
 
 export class CharacterImportPathbuilderSubCommand extends BaseCommandClass(
-	CharacterCommand,
-	CharacterCommand.subCommandEnum.importPathbuilder
+	CharacterDefinition,
+	CharacterDefinition.subCommandEnum.importPathbuilder
 ) {
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const jsonId = intr.options.getNumber(
-			CharacterOptions.IMPORT_PATHBUILDER_OPTION.name,
+			commandOptions[commandOptionsEnum.pathbuilderJsonId].name,
 			true
 		);
 		const useStamina =
-			intr.options.getBoolean(CharacterOptions.IMPORT_USE_STAMINA_OPTION.name) ?? false;
+			intr.options.getBoolean(commandOptions[commandOptionsEnum.useStamina].name) ?? false;
 		if (!_.isInteger(jsonId) || jsonId < 1) {
 			await InteractionUtils.send(
 				intr,
-				LL.commands.character.importPathbuilder.interactions.invalidUrl({
-					id: jsonId,
+				CharacterDefinition.strings.importPathbuilder.invalidUrl({
+					id: String(jsonId),
 				})
 			);
 			return;
@@ -41,7 +41,7 @@ export class CharacterImportPathbuilderSubCommand extends BaseCommandClass(
 
 		await InteractionUtils.send(
 			intr,
-			LL.commands.character.importPathbuilder.interactions.success({
+			CharacterDefinition.strings.importPathbuilder.success({
 				characterName: newCharacter.name,
 			})
 		);

@@ -1,8 +1,9 @@
 import { ApplicationCommandOptionType, ApplicationCommandType } from 'discord-api-types/v10';
-import type { CommandDefinition } from '../helpers/commands.d.ts';
+import type { CommandDefinition } from '../helpers/commands.types.js';
 import { ActionCommandOptionEnum, actionCommandOptions } from './action.command-options.js';
 import { anyUsageContext } from '../helpers/defaults.js';
 import { withOrder } from '../helpers/common.js';
+import { CommandDeferType } from '../helpers.js';
 
 const OptionEnum = ActionCommandOptionEnum;
 
@@ -29,12 +30,14 @@ export const actionCommandDefinition = {
 			name: ActionSubCommandEnum.list,
 			description: "Lists all of your character's actions.",
 			type: ApplicationCommandOptionType.Subcommand,
+			deferType: CommandDeferType.NONE,
 			options: {},
 		},
 		[ActionSubCommandEnum.detail]: {
 			name: ActionSubCommandEnum.detail,
 			description: 'Describes a specific action.',
 			type: ApplicationCommandOptionType.Subcommand,
+			deferType: CommandDeferType.NONE,
 			options: {
 				[OptionEnum.targetAction]: withOrder(
 					actionCommandOptions[OptionEnum.targetAction],
@@ -68,6 +71,7 @@ export const actionCommandDefinition = {
 			name: ActionSubCommandEnum.remove,
 			description: 'Removes an action',
 			type: ApplicationCommandOptionType.Subcommand,
+			deferType: CommandDeferType.NONE,
 			options: {
 				[OptionEnum.targetAction]: withOrder(
 					{
@@ -83,6 +87,7 @@ export const actionCommandDefinition = {
 			name: ActionSubCommandEnum.set,
 			description: 'Sets a field on an action. "none" clears the field.',
 			type: ApplicationCommandOptionType.Subcommand,
+			deferType: CommandDeferType.NONE,
 			options: {
 				[OptionEnum.targetAction]: withOrder(
 					actionCommandOptions[OptionEnum.targetAction],
@@ -96,6 +101,7 @@ export const actionCommandDefinition = {
 			name: ActionSubCommandEnum.import,
 			description: 'Imports a list of action data to a character from PasteBin.',
 			type: ApplicationCommandOptionType.Subcommand,
+			deferType: CommandDeferType.NONE,
 			options: {
 				[OptionEnum.url]: withOrder(actionCommandOptions[OptionEnum.url], 1),
 				[OptionEnum.importMode]: withOrder(actionCommandOptions[OptionEnum.importMode], 2),
@@ -105,6 +111,7 @@ export const actionCommandDefinition = {
 			name: ActionSubCommandEnum.export,
 			description: 'Exports actions to a PasteBin url.',
 			type: ApplicationCommandOptionType.Subcommand,
+			deferType: CommandDeferType.NONE,
 			options: {},
 		},
 	},

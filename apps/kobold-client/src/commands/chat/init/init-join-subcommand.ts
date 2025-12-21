@@ -7,8 +7,6 @@ import {
 } from 'discord.js';
 
 import _ from 'lodash';
-import L from '../../../i18n/i18n-node.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold } from '@kobold/db';
 import { Creature } from '../../../utils/creature.js';
 import { InteractionUtils } from '../../../utils/index.js';
@@ -16,16 +14,17 @@ import { InitiativeBuilder, InitiativeBuilderUtils } from '../../../utils/initia
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { Command } from '../../index.js';
-import { InitOptions } from './init-command-options.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
-import { RollOptions } from '../roll/roll-command-options.js';
-import { InitCommand } from '@kobold/documentation';
+import { InitDefinition, RollDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
+const commandOptions = InitDefinition.options;
+const commandOptionsEnum = InitDefinition.commandOptionsEnum;
+const rollCommandOptions = RollDefinition.options;
+const rollCommandOptionsEnum = RollDefinition.commandOptionsEnum;
 
 export class InitJoinSubCommand extends BaseCommandClass(
-	InitCommand,
-	InitCommand.subCommandEnum.join
+	InitDefinition,
+	InitDefinition.subCommandEnum.join
 ) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
@@ -33,10 +32,13 @@ export class InitJoinSubCommand extends BaseCommandClass(
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === RollOptions.SKILL_CHOICE_OPTION.name) {
+		if (option.name === rollCommandOptions[rollCommandOptionsEnum.skillChoice].name) {
 			const { characterUtils } = new KoboldUtils(kobold);
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(RollOptions.SKILL_CHOICE_OPTION.name) ?? '';
+			const match =
+				intr.options.getString(
+					rollCommandOptions[rollCommandOptionsEnum.skillChoice].name
+				) ?? '';
 
 			//get the active character
 			const activeCharacter = await characterUtils.getActiveCharacter(intr);
@@ -56,7 +58,6 @@ export class InitJoinSubCommand extends BaseCommandClass(
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const koboldUtils: KoboldUtils = new KoboldUtils(kobold);
@@ -74,16 +75,23 @@ export class InitJoinSubCommand extends BaseCommandClass(
 		) {
 			await InteractionUtils.send(
 				intr,
-				L.en.commands.init.join.interactions.characterAlreadyInInit({
+				InitDefinition.strings.join.characterAlreadyInInit({
 					characterName: activeCharacter.name,
 				})
 			);
 			return;
 		}
-		const initiativeValue = intr.options.getNumber(InitOptions.INIT_VALUE_OPTION.name);
-		const skillChoice = intr.options.getString(RollOptions.SKILL_CHOICE_OPTION.name);
-		const diceExpression = intr.options.getString(RollOptions.ROLL_EXPRESSION_OPTION.name);
-		const hideStats = intr.options.getBoolean(InitOptions.INIT_HIDE_STATS_OPTION.name) ?? false;
+		const initiativeValue = intr.options.getNumber(
+			commandOptions[commandOptionsEnum.initValue].name
+		);
+		const skillChoice = intr.options.getString(
+			rollCommandOptions[rollCommandOptionsEnum.skillChoice].name
+		);
+		const diceExpression = intr.options.getString(
+			rollCommandOptions[rollCommandOptionsEnum.rollExpression].name
+		);
+		const hideStats =
+			intr.options.getBoolean(commandOptions[commandOptionsEnum.initHideStats].name) ?? false;
 
 		const rollResult = await InitiativeBuilderUtils.rollNewInitiative({
 			character: activeCharacter,
@@ -126,7 +134,7 @@ export class InitJoinSubCommand extends BaseCommandClass(
 		if (currentInitiative.currentRound === 0) {
 			await InitiativeBuilderUtils.sendNewRoundMessage(intr, initBuilder);
 		} else {
-			const embed = await KoboldEmbed.roundFromInitiativeBuilder(initBuilder, LL);
+			const embed = await KoboldEmbed.roundFromInitiativeBuilder(initBuilder);
 			await InteractionUtils.send(intr, { embeds: [embed] });
 		}
 	}

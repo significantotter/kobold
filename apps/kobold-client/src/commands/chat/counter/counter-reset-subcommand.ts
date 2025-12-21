@@ -6,23 +6,23 @@ import {
 	ChatInputCommandInteraction,
 } from 'discord.js';
 
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold } from '@kobold/db';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Command } from '../../index.js';
-import { CounterOptions } from './counter-command-options.js';
 import { AutocompleteUtils } from '../../../utils/kobold-service-utils/autocomplete-utils.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { CounterGroupHelpers } from '../counter-group/counter-group-helpers.js';
 import { CounterHelpers } from './counter-helpers.js';
-import { CounterCommand } from '@kobold/documentation';
+import { CounterDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
+const commandOptions = CounterDefinition.options;
+const commandOptionsEnum = CounterDefinition.commandOptionsEnum;
 
 export class CounterResetSubCommand extends BaseCommandClass(
-	CounterCommand,
-	CounterCommand.subCommandEnum.reset
+	CounterDefinition,
+	CounterDefinition.subCommandEnum.reset
 ) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
@@ -30,17 +30,18 @@ export class CounterResetSubCommand extends BaseCommandClass(
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === CounterOptions.COUNTER_NAME_OPTION.name) {
+		if (option.name === commandOptions[commandOptionsEnum.counterName].name) {
 			const koboldUtils = new KoboldUtils(kobold);
 			const autocompleteUtils = new AutocompleteUtils(koboldUtils);
-			const match = intr.options.getString(CounterOptions.COUNTER_NAME_OPTION.name) ?? '';
+			const match =
+				intr.options.getString(commandOptions[commandOptionsEnum.counterName].name) ?? '';
 			return autocompleteUtils.getCounters(intr, match);
 		}
 	}
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
+
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const koboldUtils = new KoboldUtils(kobold);
@@ -48,7 +49,7 @@ export class CounterResetSubCommand extends BaseCommandClass(
 			activeCharacter: true,
 		});
 		const targetCounterName = intr.options
-			.getString(CounterOptions.COUNTER_NAME_OPTION.name, true)
+			.getString(commandOptions[commandOptionsEnum.counterName].name, true)
 			.trim();
 
 		const { counter, group } = FinderHelpers.getCounterByName(
@@ -58,7 +59,7 @@ export class CounterResetSubCommand extends BaseCommandClass(
 
 		if (!counter) {
 			throw new KoboldError(
-				LL.commands.counter.interactions.notFound({
+				CounterDefinition.strings.notFound({
 					counterName: targetCounterName,
 				})
 			);
@@ -88,7 +89,7 @@ export class CounterResetSubCommand extends BaseCommandClass(
 		);
 
 		const embed = new KoboldEmbed().setTitle(
-			LL.commands.counter.reset.interactions.reset({
+			CounterDefinition.strings.reset({
 				counterName: counter.name,
 				characterName: activeCharacter.name,
 			})

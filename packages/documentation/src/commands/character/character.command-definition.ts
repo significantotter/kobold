@@ -1,10 +1,9 @@
 import { ApplicationCommandOptionType, ApplicationCommandType } from 'discord-api-types/v10';
-import type { CommandDefinition } from '../helpers/commands.d.ts';
+import type { CommandDefinition } from '../helpers/commands.types.js';
 import {
 	CharacterCommandOptionEnum,
 	characterCommandOptions,
 } from './character.command-options.js';
-import { GameCommandOptionEnum, gameCommandOptions } from '../game/game.command-options.js';
 import { anyUsageContext } from '../helpers/defaults.js';
 import { withOrder } from '../helpers/common.js';
 
@@ -45,8 +44,8 @@ export const characterCommandDefinition = {
 			description: 'Imports character data from Pathbuilder.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[CharacterCommandOptionEnum.pbJsonId]: withOrder(
-					characterCommandOptions[CharacterCommandOptionEnum.pbJsonId],
+				[CharacterCommandOptionEnum.pathbuilderJsonId]: withOrder(
+					characterCommandOptions[CharacterCommandOptionEnum.pathbuilderJsonId],
 					1
 				),
 				[CharacterCommandOptionEnum.useStamina]: withOrder(
@@ -109,8 +108,8 @@ export const characterCommandDefinition = {
 			description: 'Displays the character sheet.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[GameCommandOptionEnum.gameSheetStyle]: withOrder(
-					gameCommandOptions[GameCommandOptionEnum.gameSheetStyle],
+				[CharacterCommandOptionEnum.sheetStyle]: withOrder(
+					characterCommandOptions[CharacterCommandOptionEnum.sheetStyle],
 					1
 				),
 			},
@@ -120,9 +119,9 @@ export const characterCommandDefinition = {
 			description: 'Updates character data.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[CharacterCommandOptionEnum.pbJsonId]: withOrder(
+				[CharacterCommandOptionEnum.pathbuilderJsonId]: withOrder(
 					{
-						...characterCommandOptions[CharacterCommandOptionEnum.pbJsonId],
+						...characterCommandOptions[CharacterCommandOptionEnum.pathbuilderJsonId],
 						required: false,
 					},
 					1

@@ -3,7 +3,7 @@ import {
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
 } from 'discord-api-types/v10';
-import type { CommandDefinition } from '../helpers/commands.d.ts';
+import type { CommandDefinition } from '../helpers/commands.types.js';
 import { ModifierCommandOptionEnum, modifierCommandOptions } from './modifier.command-options.js';
 import { anyUsageContext } from '../helpers/defaults.js';
 import { withOrder } from '../helpers/common.js';

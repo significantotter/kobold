@@ -5,22 +5,23 @@ import {
 	CacheType,
 	ChatInputCommandInteraction,
 } from 'discord.js';
+
 import { InitiativeBuilder, InitiativeBuilderUtils } from '../../../utils/initiative-builder.js';
 
 import _ from 'lodash';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold } from '@kobold/db';
 import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Command } from '../../index.js';
-import { InitOptions } from './init-command-options.js';
-import { InitCommand } from '@kobold/documentation';
+import { InitDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
+const commandOptions = InitDefinition.options;
+const commandOptionsEnum = InitDefinition.commandOptionsEnum;
 
 export class InitSetSubCommand extends BaseCommandClass(
-	InitCommand,
-	InitCommand.subCommandEnum.set
+	InitDefinition,
+	InitDefinition.subCommandEnum.set
 ) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
@@ -28,9 +29,10 @@ export class InitSetSubCommand extends BaseCommandClass(
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === InitOptions.INIT_CHARACTER_OPTION.name) {
+		if (option.name === commandOptions[commandOptionsEnum.initCharacter].name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(InitOptions.INIT_CHARACTER_OPTION.name) ?? '';
+			const match =
+				intr.options.getString(commandOptions[commandOptionsEnum.initCharacter].name) ?? '';
 
 			const { autocompleteUtils } = new KoboldUtils(kobold);
 			return await autocompleteUtils.getInitTargetOptions(intr, match);
@@ -39,27 +41,23 @@ export class InitSetSubCommand extends BaseCommandClass(
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const targetCharacterName = intr.options
-			.getString(InitOptions.INIT_CHARACTER_OPTION.name, true)
+			.getString(commandOptions[commandOptionsEnum.initCharacter].name, true)
 			.trim();
 		const fieldToChange = intr.options
-			.getString(InitOptions.ACTOR_SET_OPTION.name, true)
+			.getString(commandOptions[commandOptionsEnum.initSetOption].name, true)
 			.trim();
 		const newFieldValue = intr.options
-			.getString(InitOptions.ACTOR_SET_VALUE_OPTION.name, true)
+			.getString(commandOptions[commandOptionsEnum.initSetValue].name, true)
 			.trim();
 
 		if (
 			!fieldToChange ||
 			!['initiative', 'name', 'player-is-gm', 'hide-stats'].includes(fieldToChange)
 		) {
-			await InteractionUtils.send(
-				intr,
-				LL.commands.init.set.interactions.invalidOptionError()
-			);
+			await InteractionUtils.send(intr, InitDefinition.strings.set.invalidOptionError);
 			return;
 		}
 		const koboldUtils = new KoboldUtils(kobold);
@@ -84,10 +82,7 @@ export class InitSetSubCommand extends BaseCommandClass(
 		if (fieldToChange === 'name') {
 			//a name can't be an empty string
 			if (newFieldValue === '') {
-				await InteractionUtils.send(
-					intr,
-					LL.commands.init.set.interactions.emptyNameError()
-				);
+				await InteractionUtils.send(intr, InitDefinition.strings.set.emptyNameError);
 				return;
 				//a name can't already be in the initiative
 			} else if (
@@ -95,20 +90,14 @@ export class InitSetSubCommand extends BaseCommandClass(
 					actor => actor.name.toLowerCase() === newFieldValue.toLowerCase()
 				)
 			) {
-				await InteractionUtils.send(
-					intr,
-					LL.commands.init.set.interactions.nameExistsError()
-				);
+				await InteractionUtils.send(intr, InitDefinition.strings.set.nameExistsError);
 				return;
 			}
 		}
 
 		if (fieldToChange === 'initiative') {
 			if (isNaN(Number(newFieldValue))) {
-				await InteractionUtils.send(
-					intr,
-					LL.commands.init.set.interactions.initNotNumberError()
-				);
+				await InteractionUtils.send(intr, InitDefinition.strings.set.initNotNumberError);
 				return;
 			}
 			finalValue = Number(newFieldValue);
@@ -175,7 +164,7 @@ export class InitSetSubCommand extends BaseCommandClass(
 
 		const updateEmbed = new KoboldEmbed();
 		updateEmbed.setTitle(
-			LL.commands.init.set.interactions.successEmbed.title({
+			InitDefinition.strings.set.successEmbed.title({
 				actorName: actor.name,
 				fieldToChange,
 				newFieldValue,
@@ -186,7 +175,6 @@ export class InitSetSubCommand extends BaseCommandClass(
 
 		const initBuilder = new InitiativeBuilder({
 			initiative: currentInitiative,
-			LL,
 		});
 		if (currentInitiative.currentRound === 0) {
 			await InitiativeBuilderUtils.sendNewRoundMessage(intr, initBuilder);

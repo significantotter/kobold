@@ -1,5 +1,5 @@
 import { ApplicationCommandOptionType } from 'discord-api-types/v10';
-import type { CommandOptions, SpecificCommandOptions } from '../helpers/commands.d.ts';
+import type { CommandOptions, SpecificCommandOptions } from '../helpers/commands.types.js';
 
 export enum InitCommandOptionEnum {
 	initValue = 'value',
@@ -15,9 +15,43 @@ export enum InitCommandOptionEnum {
 	initRollChoice = 'roll',
 	initSetOption = 'option',
 	initSetValue = 'set-value',
+	skillChoice = 'skill',
+	rollExpression = 'dice',
+	rollModifier = 'modifier',
+	damageRollModifier = 'damage-modifier',
+	rollSecret = 'secret',
+	rollTargetAc = 'overwrite-ac',
 }
 
-export const initCommandOptions: CommandOptions = {
+/**
+ * Choice values for options with predefined choices.
+ * This is the source of truth - command options derive choices from here.
+ * Access via InitCommand.optionChoices.rollSecret.public etc.
+ */
+export const initOptionChoices = {
+	/** Choices for the rollSecret option */
+	rollSecret: {
+		public: 'public',
+		secret: 'secret',
+		secretAndNotify: 'secret-and-notify',
+		sendToGm: 'send-to-gm',
+	},
+	/** Choices for the template option */
+	template: {
+		normal: 'normal',
+		elite: 'elite',
+		weak: 'weak',
+	},
+	/** Choices for the initSetOption option */
+	setOption: {
+		initiative: 'initiative',
+		name: 'name',
+		playerIsGm: 'player-is-gm',
+		hideStats: 'hide-stats',
+	},
+} as const;
+
+export const initCommandOptions = {
 	[InitCommandOptionEnum.initValue]: {
 		name: 'value',
 		description: 'A value to set your initiative to. Overwrites any other init options.',
@@ -26,7 +60,7 @@ export const initCommandOptions: CommandOptions = {
 	},
 	[InitCommandOptionEnum.initNote]: {
 		name: 'note',
-		description: 'A note displayed in the initiative tracker. "-" or "none" to remove.',
+		description: 'A note displayed in the initiative tracker or about the roll.',
 		required: false,
 		type: ApplicationCommandOptionType.String,
 	},
@@ -35,20 +69,10 @@ export const initCommandOptions: CommandOptions = {
 		description: 'Optionally apply a template to the added creature.',
 		required: false,
 		type: ApplicationCommandOptionType.String,
-		choices: [
-			{
-				name: 'normal',
-				value: 'normal',
-			},
-			{
-				name: 'elite',
-				value: 'elite',
-			},
-			{
-				name: 'weak',
-				value: 'weak',
-			},
-		],
+		choices: Object.values(initOptionChoices.template).map(value => ({
+			name: value,
+			value: value,
+		})),
 	},
 	[InitCommandOptionEnum.initActor]: {
 		name: 'name',
@@ -109,29 +133,55 @@ export const initCommandOptions: CommandOptions = {
 		description: 'The character option to alter (only within this initiative).',
 		required: true,
 		type: ApplicationCommandOptionType.String,
-		choices: [
-			{
-				name: 'initiative',
-				value: 'initiative',
-			},
-			{
-				name: 'name',
-				value: 'name',
-			},
-			{
-				name: 'player-is-gm',
-				value: 'player-is-gm',
-			},
-			{
-				name: 'hide-stats',
-				value: 'hide-stats',
-			},
-		],
+		choices: Object.values(initOptionChoices.setOption).map(value => ({
+			name: value,
+			value: value,
+		})),
 	},
 	[InitCommandOptionEnum.initSetValue]: {
 		name: 'value',
 		description: 'The value to set the option to.',
 		required: true,
 		type: ApplicationCommandOptionType.String,
+	},
+	[InitCommandOptionEnum.skillChoice]: {
+		name: 'skill',
+		description: 'The skill to roll.',
+		required: true,
+		autocomplete: true,
+		type: ApplicationCommandOptionType.String,
+	},
+	[InitCommandOptionEnum.rollExpression]: {
+		name: 'dice',
+		description: 'The dice expression to roll. Similar to Roll20 dice rolls.',
+		required: true,
+		type: ApplicationCommandOptionType.String,
+	},
+	[InitCommandOptionEnum.rollModifier]: {
+		name: 'modifier',
+		description: 'A dice expression to modify your roll. (e.g. "+ 1 + 1d4")',
+		required: false,
+		type: ApplicationCommandOptionType.String,
+	},
+	[InitCommandOptionEnum.damageRollModifier]: {
+		name: 'damage-modifier',
+		description: 'A dice expression to modify your damage roll. (e.g. "+ 1 + 1d4")',
+		required: false,
+		type: ApplicationCommandOptionType.String,
+	},
+	[InitCommandOptionEnum.rollSecret]: {
+		name: 'secret',
+		description: 'Whether to send the roll in a hidden, temporary message.',
+		type: ApplicationCommandOptionType.String,
+		choices: Object.values(initOptionChoices.rollSecret).map(value => ({
+			name: value,
+			value: value,
+		})),
+	},
+	[InitCommandOptionEnum.rollTargetAc]: {
+		name: 'overwrite-ac',
+		description: 'Provide a custom AC to roll the attack against.',
+		required: false,
+		type: ApplicationCommandOptionType.Integer,
 	},
 } satisfies SpecificCommandOptions<InitCommandOptionEnum>;

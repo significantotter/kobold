@@ -1,22 +1,18 @@
-import { ButtonStyle, ChatInputCommandInteraction, ComponentType } from 'discord.js';
+import { ButtonStyle, ChatInputCommandInteraction, ComponentType, MessageFlags } from 'discord.js';
 
-import L from '../../../i18n/i18n-node.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold } from '@kobold/db';
 import { CollectorUtils } from '../../../utils/collector-utils.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { Command } from '../../index.js';
-import { InitCommand } from '@kobold/documentation';
+import { InitDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
 
 export class InitEndSubCommand extends BaseCommandClass(
-	InitCommand,
-	InitCommand.subCommandEnum.end
+	InitDefinition,
+	InitDefinition.subCommandEnum.end
 ) {
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const koboldUtils = new KoboldUtils(kobold);
@@ -25,27 +21,27 @@ export class InitEndSubCommand extends BaseCommandClass(
 		});
 
 		const prompt = await intr.reply({
-			content: LL.commands.init.end.interactions.confirmation.text(),
+			content: InitDefinition.strings.end.confirmation.text,
 			components: [
 				{
 					type: ComponentType.ActionRow,
 					components: [
 						{
 							type: ComponentType.Button,
-							label: LL.commands.init.end.interactions.confirmation.confirmButton(),
+							label: InitDefinition.strings.end.confirmation.confirmButton,
 							customId: 'end',
 							style: ButtonStyle.Danger,
 						},
 						{
 							type: ComponentType.Button,
-							label: LL.commands.init.end.interactions.confirmation.cancelButton(),
+							label: InitDefinition.strings.end.confirmation.cancelButton,
 							customId: 'cancel',
 							style: ButtonStyle.Primary,
 						},
 					],
 				},
 			],
-			ephemeral: true,
+			flags: [MessageFlags.Ephemeral],
 			fetchReply: true,
 		});
 		let timedOut = false;
@@ -70,7 +66,7 @@ export class InitEndSubCommand extends BaseCommandClass(
 				onExpire: async () => {
 					timedOut = true;
 					await InteractionUtils.editReply(intr, {
-						content: LL.commands.init.end.interactions.confirmation.expired(),
+						content: InitDefinition.strings.end.confirmation.expired,
 						components: [],
 					});
 				},
@@ -78,27 +74,27 @@ export class InitEndSubCommand extends BaseCommandClass(
 		);
 		if (result && result.value === 'cancel') {
 			await InteractionUtils.editReply(intr, {
-				content: LL.sharedInteractions.choiceRegistered({
+				content: InitDefinition.strings.shared.choiceRegistered({
 					choice: 'Cancel',
 				}),
 				components: [],
 			});
-			await InteractionUtils.send(intr, L.en.commands.init.end.interactions.cancel());
+			await InteractionUtils.send(intr, InitDefinition.strings.end.cancel);
 			return;
 		} else if (result && result.value === 'end') {
 			await InteractionUtils.editReply(intr, {
-				content: LL.sharedInteractions.choiceRegistered({
+				content: InitDefinition.strings.shared.choiceRegistered({
 					choice: 'End',
 				}),
 				components: [],
 			});
 			try {
 				await kobold.initiative.delete({ id: currentInitiative.id });
-				await InteractionUtils.send(intr, L.en.commands.init.end.interactions.success());
+				await InteractionUtils.send(intr, InitDefinition.strings.end.success);
 				await kobold.sheetRecord.deleteOrphaned();
 				return;
 			} catch (err) {
-				await InteractionUtils.send(intr, L.en.commands.init.end.interactions.error());
+				await InteractionUtils.send(intr, InitDefinition.strings.end.error);
 				console.error(err);
 			}
 		} else {

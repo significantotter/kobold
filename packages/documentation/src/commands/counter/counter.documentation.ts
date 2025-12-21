@@ -1,4 +1,4 @@
-import type { CommandDocumentation } from '../helpers/commands.d.ts';
+import type { CommandDocumentation } from '../helpers/commands.types.js';
 import { CommandResponseTypeEnum } from '../helpers/enums.js';
 import { counterCommandDefinition, CounterSubCommandEnum } from './counter.command-definition.js';
 import { CounterCommandOptionEnum } from './counter.command-options.js';
@@ -227,7 +227,7 @@ export const counterCommandDocumentation: CommandDocumentation<typeof counterCom
 						[CounterCommandOptionEnum.counterStyle]: 'prepared',
 						[CounterCommandOptionEnum.counterName]: 'Rank 3',
 						[CounterCommandOptionEnum.counterMax]: '1',
-						[CounterCommandOptionEnum.counterCounterGroupName]: 'Spells',
+						[CounterCommandOptionEnum.counterGroupName]: 'Spells',
 						[CounterCommandOptionEnum.counterRecoverable]: 'True',
 					},
 					message: 'Yip! I created the counter Rank 3 for Ashara Keenclaw.',

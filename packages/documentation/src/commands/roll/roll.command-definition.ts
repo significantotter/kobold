@@ -1,10 +1,9 @@
 import { ApplicationCommandOptionType, ApplicationCommandType } from 'discord-api-types/v10';
-import type { CommandDefinition } from '../helpers/commands.d.ts';
-import { ActionCommandOptionEnum, actionCommandOptions } from '../action/action.command-options.js';
-import { InitCommandOptionEnum, initCommandOptions } from '../init/init.command-options.js';
+import type { CommandDefinition } from '../helpers/commands.types.js';
 import { RollCommandOptionEnum, rollCommandOptions } from './roll.command-options.js';
 import { anyUsageContext } from '../helpers/defaults.js';
 import { withOrder } from '../helpers/common.js';
+import { CommandDeferType } from '../helpers.js';
 
 export enum RollSubCommandEnum {
 	action = 'action',
@@ -28,18 +27,19 @@ export const rollCommandDefinition = {
 			name: RollSubCommandEnum.action,
 			description: 'rolls an action for your active character',
 			type: ApplicationCommandOptionType.Subcommand,
+			deferType: CommandDeferType.NONE,
 			contexts: anyUsageContext,
 			options: {
-				[ActionCommandOptionEnum.targetAction]: withOrder(
+				[RollCommandOptionEnum.targetAction]: withOrder(
 					{
-						...actionCommandOptions[ActionCommandOptionEnum.targetAction],
+						...rollCommandOptions[RollCommandOptionEnum.targetAction],
 						required: true,
 					},
 					1
 				),
-				[InitCommandOptionEnum.initCharacterTarget]: withOrder(
+				[RollCommandOptionEnum.initCharacterTarget]: withOrder(
 					{
-						...initCommandOptions[InitCommandOptionEnum.initCharacterTarget],
+						...rollCommandOptions[RollCommandOptionEnum.initCharacterTarget],
 						required: true,
 					},
 					2
@@ -102,6 +102,7 @@ export const rollCommandDefinition = {
 			name: RollSubCommandEnum.attack,
 			description: 'rolls an attack for your active character',
 			type: ApplicationCommandOptionType.Subcommand,
+			deferType: CommandDeferType.NONE,
 			contexts: anyUsageContext,
 			options: {
 				[RollCommandOptionEnum.attackChoice]: withOrder(
@@ -111,9 +112,9 @@ export const rollCommandDefinition = {
 					},
 					1
 				),
-				[InitCommandOptionEnum.initCharacterTarget]: withOrder(
+				[RollCommandOptionEnum.initCharacterTarget]: withOrder(
 					{
-						...initCommandOptions[InitCommandOptionEnum.initCharacterTarget],
+						...rollCommandOptions[RollCommandOptionEnum.initCharacterTarget],
 						required: true,
 					},
 					2
@@ -164,6 +165,7 @@ export const rollCommandDefinition = {
 			name: RollSubCommandEnum.dice,
 			description: 'rolls some dice',
 			type: ApplicationCommandOptionType.Subcommand,
+			deferType: CommandDeferType.NONE,
 			contexts: anyUsageContext,
 			options: {
 				[RollCommandOptionEnum.rollExpression]: withOrder(
@@ -190,6 +192,7 @@ export const rollCommandDefinition = {
 			name: RollSubCommandEnum.perception,
 			description: 'rolls perception for your active character',
 			type: ApplicationCommandOptionType.Subcommand,
+			deferType: CommandDeferType.NONE,
 			contexts: anyUsageContext,
 			options: {
 				[RollCommandOptionEnum.rollModifier]: withOrder(
@@ -216,6 +219,7 @@ export const rollCommandDefinition = {
 			name: RollSubCommandEnum.save,
 			description: 'rolls a saving throw for your active character',
 			type: ApplicationCommandOptionType.Subcommand,
+			deferType: CommandDeferType.NONE,
 			contexts: anyUsageContext,
 			options: {
 				[RollCommandOptionEnum.saveChoice]: withOrder(
@@ -252,6 +256,7 @@ export const rollCommandDefinition = {
 			name: RollSubCommandEnum.skill,
 			description: 'rolls a skill for your active character',
 			type: ApplicationCommandOptionType.Subcommand,
+			deferType: CommandDeferType.NONE,
 			contexts: anyUsageContext,
 			options: {
 				[RollCommandOptionEnum.skillChoice]: withOrder(

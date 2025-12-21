@@ -1,12 +1,12 @@
 import { ApplicationCommandOptionType } from 'discord-api-types/v10';
-import type { CommandOptions, SpecificCommandOptions } from '../helpers/commands.d.ts';
+import type { CommandOptions, SpecificCommandOptions } from '../helpers/commands.types.js';
 
 export enum SettingCommandOptionEnum {
 	set = 'set',
 	value = 'value',
 }
 
-export const settingCommandOptions: CommandOptions = {
+export const settingCommandOptions = {
 	[SettingCommandOptionEnum.set]: {
 		name: 'option',
 		description: 'The option to update.',

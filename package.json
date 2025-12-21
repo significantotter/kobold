@@ -6,7 +6,9 @@
 	"license": "MIT",
 	"type": "module",
 	"private": true,
-	"scripts": {},
+	"scripts": {
+		"test": "pnpm test -r"
+	},
 	"devDependencies": {
 		"@types/eslint": "^9.6.1",
 		"eslint": "^9.33.0",

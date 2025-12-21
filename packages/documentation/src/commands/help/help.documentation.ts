@@ -1,4 +1,4 @@
-import type { CommandDocumentation } from '../helpers/commands.d.ts';
+import type { CommandDocumentation } from '../helpers/commands.types.js';
 import { helpCommandDefinition, HelpSubCommandEnum } from './help.command-definition.js';
 
 export const helpCommandDocumentation: CommandDocumentation<typeof helpCommandDefinition> = {

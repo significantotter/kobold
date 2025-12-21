@@ -1,14 +1,15 @@
 import { ApplicationCommandOptionType } from 'discord-api-types/v10';
-import type { CommandOptions, SpecificCommandOptions } from '../helpers/commands.d.ts';
+import type { CommandOptions, SpecificCommandOptions } from '../helpers/commands.types.js';
 
 export enum CharacterCommandOptionEnum {
 	setDefaultScope = 'default-for',
 	wgUrl = 'wg-url',
-	pbJsonId = 'pb-json-id',
+	pathbuilderJsonId = 'pb-json-id',
 	pastebinUrl = 'pastebin-url',
 	useStamina = 'use-stamina',
 	name = 'name',
 	id = 'id',
+	sheetStyle = 'game-sheet-style',
 }
 
 export enum CharacterSetDefaultScopeOptionsEnum {
@@ -16,7 +17,7 @@ export enum CharacterSetDefaultScopeOptionsEnum {
 	server = 'server',
 }
 
-export const characterCommandOptions: CommandOptions = {
+export const characterCommandOptions = {
 	[CharacterCommandOptionEnum.setDefaultScope]: {
 		name: 'default-for',
 		description: 'Set the default scope for the character.',
@@ -39,7 +40,7 @@ export const characterCommandOptions: CommandOptions = {
 		required: true,
 		type: ApplicationCommandOptionType.String,
 	},
-	[CharacterCommandOptionEnum.pbJsonId]: {
+	[CharacterCommandOptionEnum.pathbuilderJsonId]: {
 		name: 'pb-json-id',
 		description: 'The JSON ID for importing character data from Pathbuilder.',
 		required: true,
@@ -69,5 +70,25 @@ export const characterCommandOptions: CommandOptions = {
 		description: 'The ID of the character.',
 		required: false,
 		type: ApplicationCommandOptionType.Integer,
+	},
+	[CharacterCommandOptionEnum.sheetStyle]: {
+		name: CharacterCommandOptionEnum.sheetStyle,
+		description: 'Whether to show only counters like hp, basic stats, or a full sheet.',
+		required: false,
+		type: ApplicationCommandOptionType.String,
+		choices: [
+			{
+				name: 'countersOnly',
+				value: 'countersOnly',
+			},
+			{
+				name: 'basicStats',
+				value: 'basicStats',
+			},
+			{
+				name: 'fullSheet',
+				value: 'fullSheet',
+			},
+		],
 	},
 } satisfies SpecificCommandOptions<CharacterCommandOptionEnum>;

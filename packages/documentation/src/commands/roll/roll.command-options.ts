@@ -1,5 +1,5 @@
 import { ApplicationCommandOptionType } from 'discord-api-types/v10';
-import type { CommandOptions, SpecificCommandOptions } from '../helpers/commands.d.ts';
+import type { CommandOptions, SpecificCommandOptions } from '../helpers/commands.types.js';
 
 export enum RollCommandOptionEnum {
 	rollExpression = 'dice',
@@ -11,16 +11,18 @@ export enum RollCommandOptionEnum {
 	saveChoice = 'save',
 	attackChoice = 'attack',
 	rollModifier = 'modifier',
-	attackRollModifier = 'attack_modifier',
-	damageRollModifier = 'damage_modifier',
+	attackRollModifier = 'attack-modifier',
+	damageRollModifier = 'damage-modifier',
 	heightenLevel = 'heighten',
 	rollTargetDc = 'overwrite-dc',
 	rollTargetAc = 'overwrite-ac',
 	rollSaveDiceRoll = 'overwrite-save-dice-roll',
 	rollNote = 'note',
+	targetAction = 'action',
+	initCharacterTarget = 'target-character',
 }
 
-export const rollCommandOptions: CommandOptions = {
+export const rollCommandOptions = {
 	[RollCommandOptionEnum.rollExpression]: {
 		name: 'dice',
 		description: 'The dice expression to roll. Similar to Roll20 dice rolls.',
@@ -96,13 +98,13 @@ export const rollCommandOptions: CommandOptions = {
 		type: ApplicationCommandOptionType.String,
 	},
 	[RollCommandOptionEnum.attackRollModifier]: {
-		name: 'attack_modifier',
+		name: 'attack-modifier',
 		description: 'A dice expression to modify your attack roll. (e.g. "+ 1 + 1d4")',
 		required: false,
 		type: ApplicationCommandOptionType.String,
 	},
 	[RollCommandOptionEnum.damageRollModifier]: {
-		name: 'damage_modifier',
+		name: 'damage-modifier',
 		description: 'A dice expression to modify your damage roll. (e.g. "+ 1 + 1d4")',
 		required: false,
 		type: ApplicationCommandOptionType.String,
@@ -135,6 +137,20 @@ export const rollCommandOptions: CommandOptions = {
 		name: 'overwrite-save-dice-roll',
 		description: 'Provide the dice roll to use for any saving throw in the action.',
 		required: false,
+		type: ApplicationCommandOptionType.String,
+	},
+	[RollCommandOptionEnum.targetAction]: {
+		name: 'action',
+		description: 'The action to use.',
+		required: true,
+		autocomplete: true,
+		type: ApplicationCommandOptionType.String,
+	},
+	[RollCommandOptionEnum.initCharacterTarget]: {
+		name: 'target-character',
+		description: 'The character being targeted.',
+		required: false,
+		autocomplete: true,
 		type: ApplicationCommandOptionType.String,
 	},
 } satisfies SpecificCommandOptions<RollCommandOptionEnum>;

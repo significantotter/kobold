@@ -6,23 +6,24 @@ import {
 	CacheType,
 	ChatInputCommandInteraction,
 	ComponentType,
+	MessageFlags,
 } from 'discord.js';
 
 import _ from 'lodash';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold } from '@kobold/db';
 import { CollectorUtils } from '../../../utils/collector-utils.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Command } from '../../index.js';
-import { ModifierOptions } from './modifier-command-options.js';
-import { ModifierCommand } from '@kobold/documentation';
+import { ModifierDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
+const commandOptions = ModifierDefinition.options;
+const commandOptionsEnum = ModifierDefinition.commandOptionsEnum;
 
 export class ModifierRemoveSubCommand extends BaseCommandClass(
-	ModifierCommand,
-	ModifierCommand.subCommandEnum.remove
+	ModifierDefinition,
+	ModifierDefinition.subCommandEnum.remove
 ) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
@@ -30,9 +31,10 @@ export class ModifierRemoveSubCommand extends BaseCommandClass(
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === ModifierOptions.MODIFIER_NAME_OPTION.name) {
+		if (option.name === commandOptions[commandOptionsEnum.name].name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(ModifierOptions.MODIFIER_NAME_OPTION.name) ?? '';
+			const match =
+				intr.options.getString(commandOptions[commandOptionsEnum.name].name) ?? '';
 
 			//get the active character
 			const { characterUtils } = new KoboldUtils(kobold);
@@ -56,11 +58,10 @@ export class ModifierRemoveSubCommand extends BaseCommandClass(
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const modifierChoice = intr.options.getString(
-			ModifierOptions.MODIFIER_NAME_OPTION.name,
+			commandOptions[commandOptionsEnum.name].name,
 			true
 		);
 		//get the active character
@@ -76,7 +77,7 @@ export class ModifierRemoveSubCommand extends BaseCommandClass(
 			// ask for confirmation
 
 			const prompt = await intr.reply({
-				content: LL.commands.modifier.remove.interactions.removeConfirmation.text({
+				content: ModifierDefinition.strings.remove.confirmation.text({
 					modifierName: targetModifier.name,
 				}),
 				components: [
@@ -85,20 +86,20 @@ export class ModifierRemoveSubCommand extends BaseCommandClass(
 						components: [
 							{
 								type: ComponentType.Button,
-								label: LL.commands.modifier.remove.interactions.removeConfirmation.removeButton(),
+								label: ModifierDefinition.strings.remove.confirmation.removeButton,
 								customId: 'remove',
 								style: ButtonStyle.Danger,
 							},
 							{
 								type: ComponentType.Button,
-								label: LL.commands.modifier.remove.interactions.removeConfirmation.cancelButton(),
+								label: ModifierDefinition.strings.remove.confirmation.cancelButton,
 								customId: 'cancel',
 								style: ButtonStyle.Primary,
 							},
 						],
 					},
 				],
-				ephemeral: true,
+				flags: [MessageFlags.Ephemeral],
 				fetchReply: true,
 			});
 			let timedOut = false;
@@ -123,8 +124,7 @@ export class ModifierRemoveSubCommand extends BaseCommandClass(
 					onExpire: async () => {
 						timedOut = true;
 						await InteractionUtils.editReply(intr, {
-							content:
-								LL.commands.modifier.remove.interactions.removeConfirmation.expired(),
+							content: ModifierDefinition.strings.remove.confirmation.expired,
 							components: [],
 						});
 					},
@@ -132,7 +132,7 @@ export class ModifierRemoveSubCommand extends BaseCommandClass(
 			);
 			if (result) {
 				await InteractionUtils.editReply(intr, {
-					content: LL.sharedInteractions.choiceRegistered({
+					content: ModifierDefinition.strings.shared.choiceRegistered({
 						choice: _.capitalize(result.value),
 					}),
 					components: [],
@@ -154,7 +154,7 @@ export class ModifierRemoveSubCommand extends BaseCommandClass(
 
 				await InteractionUtils.send(
 					intr,
-					LL.commands.modifier.remove.interactions.success({
+					ModifierDefinition.strings.remove.success({
 						modifierName: targetModifier.name,
 					})
 				);
@@ -162,15 +162,12 @@ export class ModifierRemoveSubCommand extends BaseCommandClass(
 			}
 			// cancel
 			else {
-				await InteractionUtils.send(
-					intr,
-					LL.commands.modifier.remove.interactions.cancel()
-				);
+				await InteractionUtils.send(intr, ModifierDefinition.strings.remove.cancel);
 				return;
 			}
 		} else {
 			// no matching modifier found
-			await InteractionUtils.send(intr, LL.commands.modifier.interactions.notFound());
+			await InteractionUtils.send(intr, ModifierDefinition.strings.notFound);
 			return;
 		}
 	}

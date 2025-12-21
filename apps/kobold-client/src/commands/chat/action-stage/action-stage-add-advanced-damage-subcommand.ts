@@ -7,18 +7,17 @@ import {
 } from 'discord.js';
 import { Kobold, RollTypeEnum } from '@kobold/db';
 
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { Command } from '../../index.js';
-import { ActionStageOptions } from './action-stage-command-options.js';
-import { ActionStageCommand } from '@kobold/documentation';
+import { ActionStageDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
+const commandOptions = ActionStageDefinition.options;
+const commandOptionsEnum = ActionStageDefinition.commandOptionsEnum;
 
 export class ActionStageAddAdvancedDamageSubCommand extends BaseCommandClass(
-	ActionStageCommand,
-	ActionStageCommand.subCommandEnum.addAdvancedDamage
+	ActionStageDefinition,
+	ActionStageDefinition.subCommandEnum.addAdvancedDamage
 ) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
@@ -26,10 +25,10 @@ export class ActionStageAddAdvancedDamageSubCommand extends BaseCommandClass(
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === ActionStageOptions.ACTION_TARGET_OPTION.name) {
+		if (option.name === commandOptions[commandOptionsEnum.actionTarget].name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
 			const match =
-				intr.options.getString(ActionStageOptions.ACTION_TARGET_OPTION.name) ?? '';
+				intr.options.getString(commandOptions[commandOptionsEnum.actionTarget].name) ?? '';
 
 			const { autocompleteUtils } = new KoboldUtils(kobold);
 			return await autocompleteUtils.getTargetActionForActiveCharacter(intr, match);
@@ -38,36 +37,37 @@ export class ActionStageAddAdvancedDamageSubCommand extends BaseCommandClass(
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const targetAction = intr.options.getString(
-			ActionStageOptions.ACTION_TARGET_OPTION.name,
+			commandOptions[commandOptionsEnum.actionTarget].name,
 			true
 		);
 		const rollType = RollTypeEnum.advancedDamage;
 		const rollName = intr.options.getString(
-			ActionStageOptions.ACTION_ROLL_NAME_OPTION.name,
+			commandOptions[commandOptionsEnum.rollName].name,
 			true
 		);
-		const damageType = intr.options.getString(ActionStageOptions.ACTION_STAGE_DAMAGE_TYPE.name);
+		const damageType = intr.options.getString(
+			commandOptions[commandOptionsEnum.damageType].name
+		);
 		const healInsteadOfDamage =
-			intr.options.getBoolean(ActionStageOptions.ACTION_ROLL_HEAL_INSTEAD_OF_DAMAGE.name) ??
+			intr.options.getBoolean(commandOptions[commandOptionsEnum.healInsteadOfDamage].name) ??
 			false;
 		const successDiceRoll = intr.options.getString(
-			ActionStageOptions.ACTION_SUCCESS_DICE_ROLL_OPTION.name
+			commandOptions[commandOptionsEnum.successDiceRoll].name
 		);
 		const criticalSuccessDiceRoll = intr.options.getString(
-			ActionStageOptions.ACTION_CRITICAL_SUCCESS_DICE_ROLL_OPTION.name
+			commandOptions[commandOptionsEnum.criticalSuccessDiceRoll].name
 		);
 		const criticalFailureDiceRoll = intr.options.getString(
-			ActionStageOptions.ACTION_CRITICAL_FAILURE_DICE_ROLL_OPTION.name
+			commandOptions[commandOptionsEnum.criticalFailureDiceRoll].name
 		);
 		const failureDiceRoll = intr.options.getString(
-			ActionStageOptions.ACTION_FAILURE_DICE_ROLL_OPTION.name
+			commandOptions[commandOptionsEnum.failureDiceRoll].name
 		);
 		let allowRollModifiers = intr.options.getBoolean(
-			ActionStageOptions.ACTION_ROLL_ALLOW_MODIFIERS.name
+			commandOptions[commandOptionsEnum.allowModifiers].name
 		);
 		if (allowRollModifiers === null) allowRollModifiers = true;
 
@@ -82,7 +82,7 @@ export class ActionStageAddAdvancedDamageSubCommand extends BaseCommandClass(
 			targetAction
 		);
 		if (!matchedActions || !matchedActions.length) {
-			await InteractionUtils.send(intr, LL.commands.actionStage.interactions.notFound());
+			await InteractionUtils.send(intr, ActionStageDefinition.strings.notFound);
 			return;
 		}
 		const action =
@@ -91,10 +91,7 @@ export class ActionStageAddAdvancedDamageSubCommand extends BaseCommandClass(
 			) || matchedActions[0];
 
 		if (action.rolls.find(roll => roll.name === rollName)) {
-			await InteractionUtils.send(
-				intr,
-				LL.commands.actionStage.interactions.rollAlreadyExists()
-			);
+			await InteractionUtils.send(intr, ActionStageDefinition.strings.rollAlreadyExists);
 			return;
 		}
 
@@ -104,10 +101,7 @@ export class ActionStageAddAdvancedDamageSubCommand extends BaseCommandClass(
 			!criticalFailureDiceRoll &&
 			!failureDiceRoll
 		) {
-			await InteractionUtils.send(
-				intr,
-				LL.commands.actionStage.interactions.rollAlreadyExists()
-			);
+			await InteractionUtils.send(intr, ActionStageDefinition.strings.rollAlreadyExists);
 			return;
 		}
 
@@ -133,7 +127,7 @@ export class ActionStageAddAdvancedDamageSubCommand extends BaseCommandClass(
 		// send the response message
 		await InteractionUtils.send(
 			intr,
-			LL.commands.actionStage.interactions.rollAddSuccess({
+			ActionStageDefinition.strings.rollAddSuccess({
 				actionName: action.name,
 				rollName: rollName,
 				rollType: rollType,

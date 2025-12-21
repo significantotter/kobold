@@ -1,13 +1,16 @@
 import { ApplicationCommandOptionType, ApplicationCommandType } from 'discord-api-types/v10';
-import type { CommandDefinition } from '../helpers/commands.d.ts';
+import type { CommandDefinition } from '../helpers/commands.types.js';
 import { GameCommandOptionEnum, gameCommandOptions } from './game.command-options.js';
-import { RollCommandOptionEnum, rollCommandOptions } from '../roll/roll.command-options.js';
-import { InitCommandOptionEnum, initCommandOptions } from '../init/init.command-options.js';
 import { anyUsageContext } from '../helpers/defaults.js';
 import { withOrder } from '../helpers/common.js';
 
 export enum GameSubCommandEnum {
-	manage = 'manage',
+	create = 'create',
+	join = 'join',
+	setActive = 'set-active',
+	leave = 'leave',
+	kick = 'kick',
+	delete = 'delete',
 	init = 'init',
 	partyStatus = 'party-status',
 	give = 'give',
@@ -24,19 +27,73 @@ export const gameCommandDefinition = {
 		default_member_permissions: undefined,
 	},
 	subCommands: {
-		[GameSubCommandEnum.manage]: {
-			name: GameSubCommandEnum.manage,
-			description:
-				"Manage a a GM'd group of characters. Choose to create, delete, set-active, join, kick, or leave",
+		[GameSubCommandEnum.create]: {
+			name: GameSubCommandEnum.create,
+			description: 'Create a new game in this server.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[GameCommandOptionEnum.gameManageOption]: withOrder(
-					gameCommandOptions[GameCommandOptionEnum.gameManageOption],
+				[GameCommandOptionEnum.gameCreateName]: withOrder(
+					gameCommandOptions[GameCommandOptionEnum.gameCreateName],
 					1
 				),
-				[GameCommandOptionEnum.gameManageValue]: withOrder(
-					gameCommandOptions[GameCommandOptionEnum.gameManageValue],
+			},
+		},
+		[GameSubCommandEnum.join]: {
+			name: GameSubCommandEnum.join,
+			description: 'Join your active character to a game.',
+			type: ApplicationCommandOptionType.Subcommand,
+			options: {
+				[GameCommandOptionEnum.gameTargetGame]: withOrder(
+					gameCommandOptions[GameCommandOptionEnum.gameTargetGame],
+					1
+				),
+			},
+		},
+		[GameSubCommandEnum.setActive]: {
+			name: GameSubCommandEnum.setActive,
+			description: 'Set a game as your active game in this server.',
+			type: ApplicationCommandOptionType.Subcommand,
+			options: {
+				[GameCommandOptionEnum.gameTargetGame]: withOrder(
+					gameCommandOptions[GameCommandOptionEnum.gameTargetGame],
+					1
+				),
+			},
+		},
+		[GameSubCommandEnum.leave]: {
+			name: GameSubCommandEnum.leave,
+			description: 'Remove your active character from a game.',
+			type: ApplicationCommandOptionType.Subcommand,
+			options: {
+				[GameCommandOptionEnum.gameTargetGame]: withOrder(
+					gameCommandOptions[GameCommandOptionEnum.gameTargetGame],
+					1
+				),
+			},
+		},
+		[GameSubCommandEnum.kick]: {
+			name: GameSubCommandEnum.kick,
+			description: 'Kick a character from your game. GM only.',
+			type: ApplicationCommandOptionType.Subcommand,
+			options: {
+				[GameCommandOptionEnum.gameTargetGame]: withOrder(
+					gameCommandOptions[GameCommandOptionEnum.gameTargetGame],
+					1
+				),
+				[GameCommandOptionEnum.gameKickCharacter]: withOrder(
+					gameCommandOptions[GameCommandOptionEnum.gameKickCharacter],
 					2
+				),
+			},
+		},
+		[GameSubCommandEnum.delete]: {
+			name: GameSubCommandEnum.delete,
+			description: 'Delete a game you created. GM only.',
+			type: ApplicationCommandOptionType.Subcommand,
+			options: {
+				[GameCommandOptionEnum.gameTargetGame]: withOrder(
+					gameCommandOptions[GameCommandOptionEnum.gameTargetGame],
+					1
 				),
 			},
 		},
@@ -50,24 +107,24 @@ export const gameCommandDefinition = {
 					gameCommandOptions[GameCommandOptionEnum.gameTargetCharacter],
 					1
 				),
-				[RollCommandOptionEnum.skillChoice]: withOrder(
+				[GameCommandOptionEnum.skillChoice]: withOrder(
 					{
-						...rollCommandOptions[RollCommandOptionEnum.skillChoice],
+						...gameCommandOptions[GameCommandOptionEnum.skillChoice],
 						description: 'The skill to use for initiative instead of perception.',
 						required: false,
 					},
 					2
 				),
-				[RollCommandOptionEnum.rollExpression]: withOrder(
+				[GameCommandOptionEnum.rollExpression]: withOrder(
 					{
-						...rollCommandOptions[RollCommandOptionEnum.rollExpression],
+						...gameCommandOptions[GameCommandOptionEnum.rollExpression],
 						required: false,
 					},
 					3
 				),
-				[InitCommandOptionEnum.initValue]: withOrder(
+				[GameCommandOptionEnum.initValue]: withOrder(
 					{
-						...initCommandOptions[InitCommandOptionEnum.initValue],
+						...gameCommandOptions[GameCommandOptionEnum.initValue],
 						required: false,
 					},
 					4
@@ -125,12 +182,12 @@ export const gameCommandDefinition = {
 					gameCommandOptions[GameCommandOptionEnum.gameDiceRollOrModifier],
 					3
 				),
-				[InitCommandOptionEnum.initCharacterTarget]: withOrder(
-					initCommandOptions[InitCommandOptionEnum.initCharacterTarget],
+				[GameCommandOptionEnum.initCharacterTarget]: withOrder(
+					gameCommandOptions[GameCommandOptionEnum.initCharacterTarget],
 					4
 				),
-				[RollCommandOptionEnum.rollSecret]: withOrder(
-					rollCommandOptions[RollCommandOptionEnum.rollSecret],
+				[GameCommandOptionEnum.rollSecret]: withOrder(
+					gameCommandOptions[GameCommandOptionEnum.rollSecret],
 					5
 				),
 			},

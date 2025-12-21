@@ -1,5 +1,5 @@
 import { APIApplicationCommandOption, ApplicationCommandType } from 'discord-api-types/v10';
-import type { CommandDefinition } from '../helpers/commands.d.ts';
+import type { CommandDefinition } from '../helpers/commands.types.js';
 import { CounterCommandOptionEnum, counterCommandOptions } from './counter.command-options.js';
 import { anyUsageContext } from '../helpers/defaults.js';
 import { withOrder } from '../helpers/common.js';
@@ -172,8 +172,8 @@ export const counterCommandDefinition = {
 					counterCommandOptions[CounterCommandOptionEnum.counterMax],
 					3
 				),
-				[CounterCommandOptionEnum.counterCounterGroupName]: withOrder(
-					counterCommandOptions[CounterCommandOptionEnum.counterCounterGroupName],
+				[CounterCommandOptionEnum.counterGroupName]: withOrder(
+					counterCommandOptions[CounterCommandOptionEnum.counterGroupName],
 					4
 				),
 				[CounterCommandOptionEnum.counterRecoverable]: withOrder(

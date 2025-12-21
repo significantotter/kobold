@@ -1,5 +1,5 @@
 import { ChatInputCommandInteraction, TextBasedChannel } from 'discord.js';
-import L from '../../i18n/i18n-node.js';
+import { utilStrings } from '@kobold/documentation';
 import { CharacterWithRelations, InitiativeWithRelations, Kobold, Sheet } from '@kobold/db';
 import { KoboldError } from '../KoboldError.js';
 import { InitiativeBuilderUtils } from '../initiative-builder.js';
@@ -16,14 +16,14 @@ export class InitiativeUtils {
 	): Promise<InitiativeWithRelations | null> {
 		let errorMessage = null;
 		if (!channel || !channel.id) {
-			throw new KoboldError(L.en.utils.initiative.initOutsideServerChannelError());
+			throw new KoboldError(utilStrings.initiative.initOutsideServerChannelError);
 		}
 		const channelId = channel.id;
 
 		let currentInit: InitiativeWithRelations;
 		const currentInitOptions = await this.kobold.initiative.readMany({ channelId: channelId });
 		if (currentInitOptions.length === 0) {
-			throw new KoboldError(L.en.utils.initiative.noActiveInitError());
+			throw new KoboldError(utilStrings.initiative.noActiveInitError);
 		} else {
 			currentInit = currentInitOptions[0];
 		}

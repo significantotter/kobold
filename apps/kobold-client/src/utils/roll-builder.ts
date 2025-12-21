@@ -1,7 +1,6 @@
 import { APIEmbedField } from 'discord.js';
 import _ from 'lodash';
-import L from '../i18n/i18n-node.js';
-import { TranslationFunctions } from '../i18n/i18n-types.js';
+import { utilStrings } from '@kobold/documentation';
 import {
 	Attribute,
 	CharacterWithRelations,
@@ -34,7 +33,6 @@ export class RollBuilder {
 	public rollResults: ResultField[];
 	protected footer: string;
 	protected title: string;
-	protected LL: TranslationFunctions;
 
 	constructor({
 		actorName,
@@ -45,7 +43,6 @@ export class RollBuilder {
 		rollNote,
 		title,
 		userSettings,
-		LL,
 	}: {
 		actorName?: string;
 		character?: CharacterWithRelations | null;
@@ -55,12 +52,10 @@ export class RollBuilder {
 		rollNote?: string;
 		title?: string;
 		userSettings?: UserSettings;
-		LL?: TranslationFunctions;
 	}) {
 		this.rollResults = [];
 		this.rollNote = rollNote ?? null;
 		this.rollDescription = rollDescription ?? null;
-		this.LL = LL || L.en;
 		this.footer = '';
 		this.creature = creature || null;
 		if (character && !this.creature) {
@@ -469,7 +464,6 @@ export class RollBuilder {
 		description,
 		tags,
 		userSettings,
-		LL,
 	}: {
 		userName?: string;
 		actorName?: string;
@@ -480,10 +474,7 @@ export class RollBuilder {
 		description?: string;
 		tags?: string[];
 		userSettings?: UserSettings;
-		LL?: TranslationFunctions;
 	}): RollBuilder {
-		LL = LL || L.en;
-
 		const roll = creature.rolls[attributeName.toLowerCase()];
 		if (!roll)
 			throw new KoboldError(
@@ -496,8 +487,8 @@ export class RollBuilder {
 			rollNote,
 			rollDescription:
 				description ||
-				LL.utils.dice.rolledAction({
-					actionName: _.startCase(roll.name),
+				utilStrings.roll.attackRollDescription({
+					attackName: _.startCase(roll.name),
 				}),
 			userSettings,
 		});

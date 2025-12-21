@@ -1,6 +1,5 @@
 import { ChatInputCommandInteraction } from 'discord.js';
-import { ModifierOptions } from './modifier-command-options.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
+
 import {
 	Kobold,
 	Modifier,
@@ -16,16 +15,17 @@ import { SheetUtils } from '../../../utils/sheet/sheet-utils.js';
 import { Command } from '../../index.js';
 import { Creature } from '../../../utils/creature.js';
 import { InputParseUtils } from '../../../utils/input-parse-utils.js';
-import { ModifierCommand } from '@kobold/documentation';
+import { ModifierDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
+const commandOptions = ModifierDefinition.options;
+const commandOptionsEnum = ModifierDefinition.commandOptionsEnum;
 
 export class ModifierCreateModifierSubCommand extends BaseCommandClass(
-	ModifierCommand,
-	ModifierCommand.subCommandEnum.createModifier
+	ModifierDefinition,
+	ModifierDefinition.subCommandEnum.createModifier
 ) {
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const koboldUtils = new KoboldUtils(kobold);
@@ -33,30 +33,32 @@ export class ModifierCreateModifierSubCommand extends BaseCommandClass(
 			activeCharacter: true,
 		});
 		let name = intr.options
-			.getString(ModifierOptions.MODIFIER_NAME_OPTION.name, true)
+			.getString(commandOptions[commandOptionsEnum.name].name, true)
 			.trim()
 			.toLowerCase();
 		let modifierType = (
-			intr.options.getString(ModifierOptions.MODIFIER_TYPE_OPTION.name) ??
+			intr.options.getString(commandOptions[commandOptionsEnum.type].name) ??
 			SheetAdjustmentTypeEnum.untyped
 		)
 			.trim()
 			.toLowerCase();
 		const modifierSeverity =
-			intr.options.getString(ModifierOptions.MODIFIER_SEVERITY_VALUE_OPTION.name) ?? null;
+			intr.options.getString(commandOptions[commandOptionsEnum.severity].name) ?? null;
 
 		const rollAdjustment = intr.options.getString(
-			ModifierOptions.MODIFIER_ROLL_ADJUSTMENT.name
+			commandOptions[commandOptionsEnum.rollAdjustment].name
 		);
 		let rollTargetTagsUnparsed = intr.options.getString(
-			ModifierOptions.MODIFIER_ROLL_TARGET_TAGS_OPTION.name
+			commandOptions[commandOptionsEnum.targetTags].name
 		);
 		let rollTargetTags = rollTargetTagsUnparsed ? rollTargetTagsUnparsed.trim() : null;
 
-		let description = intr.options.getString(ModifierOptions.MODIFIER_DESCRIPTION_OPTION.name);
-		let note = intr.options.getString(ModifierOptions.MODIFIER_INITIATIVE_NOTE_OPTION.name);
+		let description = intr.options.getString(
+			commandOptions[commandOptionsEnum.description].name
+		);
+		let note = intr.options.getString(commandOptions[commandOptionsEnum.initiativeNote].name);
 		const modifierSheetValues = intr.options.getString(
-			ModifierOptions.MODIFIER_SHEET_VALUES_OPTION.name
+			commandOptions[commandOptionsEnum.sheetValues].name
 		);
 
 		if (!isSheetAdjustmentTypeEnum(modifierType)) {
@@ -94,9 +96,7 @@ export class ModifierCreateModifierSubCommand extends BaseCommandClass(
 		if (rollAdjustment && rollTargetTags) {
 			// the tags for the modifier have to be valid
 			if (!InputParseUtils.isValidRollTargetTags(rollTargetTags)) {
-				throw new KoboldError(
-					LL.commands.modifier.createModifier.interactions.invalidTags()
-				);
+				throw new KoboldError(ModifierDefinition.strings.createModifier.invalidTags);
 			}
 			if (
 				!InputParseUtils.isValidDiceExpression(
@@ -104,9 +104,7 @@ export class ModifierCreateModifierSubCommand extends BaseCommandClass(
 					new Creature(activeCharacter.sheetRecord, undefined, intr)
 				)
 			) {
-				throw new KoboldError(
-					LL.commands.modifier.createModifier.interactions.doesntEvaluateError()
-				);
+				throw new KoboldError(ModifierDefinition.strings.createModifier.doesntEvaluateError);
 			}
 		}
 
@@ -122,7 +120,7 @@ export class ModifierCreateModifierSubCommand extends BaseCommandClass(
 		if (FinderHelpers.getModifierByName(activeCharacter.sheetRecord, name)) {
 			await InteractionUtils.send(
 				intr,
-				LL.commands.modifier.createModifier.interactions.alreadyExists({
+				ModifierDefinition.strings.createModifier.alreadyExists({
 					modifierName: name,
 					characterName: activeCharacter.name,
 				})
@@ -161,7 +159,7 @@ export class ModifierCreateModifierSubCommand extends BaseCommandClass(
 		//send a response
 		await InteractionUtils.send(
 			intr,
-			LL.commands.modifier.createModifier.interactions.created({
+			ModifierDefinition.strings.createModifier.created({
 				modifierName: name,
 				characterName: activeCharacter.name,
 			})

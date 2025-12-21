@@ -8,22 +8,22 @@ import {
 	EmbedData,
 } from 'discord.js';
 import { getEmoji } from '../../../constants/emoji.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { Command } from '../../index.js';
-import { CompendiumOptions } from './compendium-command-options.js';
 
 import _ from 'lodash';
 import { ActionCostEnum, Kobold } from '@kobold/db';
 import { KoboldError } from '../../../utils/KoboldError.js';
 import { StringUtils } from '@kobold/base-utils';
 import { NethysDb, NethysEmoji, NethysParser } from '@kobold/nethys';
-import { CompendiumCommand } from '@kobold/documentation';
+import { CompendiumDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
+const commandOptions = CompendiumDefinition.options;
+const commandOptionsEnum = CompendiumDefinition.commandOptionsEnum;
 
 export class CompendiumSearchSubCommand extends BaseCommandClass(
-	CompendiumCommand,
-	CompendiumCommand.subCommandEnum.search
+	CompendiumDefinition,
+	CompendiumDefinition.subCommandEnum.search
 ) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
@@ -37,9 +37,9 @@ export class CompendiumSearchSubCommand extends BaseCommandClass(
 		}
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === CompendiumOptions.COMPENDIUM_SEARCH_OPTION.name) {
+		if (option.name === commandOptions[commandOptionsEnum.search].name) {
 			const search =
-				intr.options.getString(CompendiumOptions.COMPENDIUM_SEARCH_OPTION.name, true) ?? '';
+				intr.options.getString(commandOptions[commandOptionsEnum.search].name, true) ?? '';
 			let searchResults: { name: string; value: string }[] = [];
 
 			searchResults = (
@@ -60,7 +60,6 @@ export class CompendiumSearchSubCommand extends BaseCommandClass(
 	}
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{
 			kobold,
 			nethysCompendium,
@@ -70,7 +69,7 @@ export class CompendiumSearchSubCommand extends BaseCommandClass(
 		}
 	): Promise<void> {
 		const search = intr.options
-			.getString(CompendiumOptions.COMPENDIUM_SEARCH_OPTION.name, true)
+			.getString(commandOptions[commandOptionsEnum.search].name, true)
 			.trim();
 
 		let result: APIEmbed | EmbedData | undefined = undefined;

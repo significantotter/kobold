@@ -1,5 +1,5 @@
 import { ApplicationCommandOptionType } from 'discord-api-types/v10';
-import type { CommandOptions } from '../helpers/commands.d.ts';
+import type { CommandOptions } from '../helpers/commands.types.js';
 
 export enum ActionCommandOptionEnum {
 	name = 'name',
@@ -16,37 +16,37 @@ export enum ActionCommandOptionEnum {
 	importMode = 'mode',
 }
 
-export enum ActionTypeChoicesEnum {
-	attack = 'attack',
-	spell = 'spell',
-	other = 'other',
-}
+export const ActionTypeChoices = {
+	attack: 'attack',
+	spell: 'spell',
+	other: 'other',
+} as const;
 
-export enum ActionCostChoicesEnum {
-	reaction = 'reaction',
-	free = 'free-action',
-	one = 'one-action',
-	two = 'two-actions',
-	three = 'three-actions',
-	variable = 'variable-actions',
-}
+export const ActionCostChoices = {
+	reaction: 'reaction',
+	free: 'free-action',
+	one: 'one-action',
+	two: 'two-actions',
+	three: 'three-actions',
+	variable: 'variable-actions',
+} as const;
 
-export enum ActionSetOptionChoicesEnum {
-	name = 'name',
-	description = 'description',
-	type = 'type',
-	actionCost = 'action-cost',
-	baseLevel = 'base-level',
-	tags = 'tags',
-	autoHeighten = 'auto-heighten',
-}
+export const ActionSetOptionChoices = {
+	name: 'name',
+	description: 'description',
+	type: 'type',
+	actionCost: 'action-cost',
+	baseLevel: 'base-level',
+	tags: 'tags',
+	autoHeighten: 'auto-heighten',
+} as const;
 
-export enum ActionImportModeChoicesEnum {
-	overwriteAll = 'overwrite-all',
-	overwriteOnConflict = 'overwrite-on-conflict',
-	renameOnConflict = 'rename-on-conflict',
-	ignoreOnConflict = 'ignore-on-conflict',
-}
+export const ActionImportModeChoices = {
+	overwriteAll: 'overwrite-all',
+	overwriteOnConflict: 'overwrite-on-conflict',
+	renameOnConflict: 'rename-on-conflict',
+	ignoreOnConflict: 'ignore-on-conflict',
+} as const;
 
 export const actionCommandOptions = {
 	[ActionCommandOptionEnum.name]: {
@@ -65,52 +65,20 @@ export const actionCommandOptions = {
 		name: ActionCommandOptionEnum.type,
 		description: 'The type of action.',
 		required: true,
-		choices: [
-			{
-				name: ActionTypeChoicesEnum.attack,
-				value: ActionTypeChoicesEnum.attack,
-			},
-			{
-				name: ActionTypeChoicesEnum.spell,
-				value: ActionTypeChoicesEnum.spell,
-			},
-			{
-				name: ActionTypeChoicesEnum.other,
-				value: ActionTypeChoicesEnum.other,
-			},
-		],
+		choices: Object.values(ActionTypeChoices).map(value => ({
+			name: value,
+			value: value,
+		})),
 		type: ApplicationCommandOptionType.String,
 	},
 	[ActionCommandOptionEnum.actionCost]: {
 		name: ActionCommandOptionEnum.actionCost,
 		description: 'The number of actions used.',
 		required: true,
-		choices: [
-			{
-				name: ActionCostChoicesEnum.reaction,
-				value: ActionCostChoicesEnum.reaction,
-			},
-			{
-				name: ActionCostChoicesEnum.free,
-				value: ActionCostChoicesEnum.free,
-			},
-			{
-				name: ActionCostChoicesEnum.one,
-				value: ActionCostChoicesEnum.one,
-			},
-			{
-				name: ActionCostChoicesEnum.two,
-				value: ActionCostChoicesEnum.two,
-			},
-			{
-				name: ActionCostChoicesEnum.three,
-				value: ActionCostChoicesEnum.three,
-			},
-			{
-				name: ActionCostChoicesEnum.variable,
-				value: ActionCostChoicesEnum.variable,
-			},
-		],
+		choices: Object.values(ActionCostChoices).map(value => ({
+			name: value,
+			value: value,
+		})),
 		type: ApplicationCommandOptionType.String,
 	},
 	[ActionCommandOptionEnum.baseLevel]: {
@@ -138,36 +106,10 @@ export const actionCommandOptions = {
 		description: 'The field to set to a new value.',
 		required: true,
 		type: ApplicationCommandOptionType.String,
-		choices: [
-			{
-				name: ActionSetOptionChoicesEnum.name,
-				value: ActionSetOptionChoicesEnum.name,
-			},
-			{
-				name: ActionSetOptionChoicesEnum.description,
-				value: ActionSetOptionChoicesEnum.description,
-			},
-			{
-				name: ActionSetOptionChoicesEnum.type,
-				value: ActionSetOptionChoicesEnum.type,
-			},
-			{
-				name: ActionSetOptionChoicesEnum.actionCost,
-				value: ActionSetOptionChoicesEnum.actionCost,
-			},
-			{
-				name: ActionSetOptionChoicesEnum.baseLevel,
-				value: ActionSetOptionChoicesEnum.baseLevel,
-			},
-			{
-				name: ActionSetOptionChoicesEnum.tags,
-				value: ActionSetOptionChoicesEnum.tags,
-			},
-			{
-				name: ActionSetOptionChoicesEnum.autoHeighten,
-				value: ActionSetOptionChoicesEnum.autoHeighten,
-			},
-		],
+		choices: Object.values(ActionSetOptionChoices).map(value => ({
+			name: value,
+			value: value,
+		})),
 	},
 	[ActionCommandOptionEnum.setValue]: {
 		name: ActionCommandOptionEnum.setValue,
@@ -192,23 +134,24 @@ export const actionCommandOptions = {
 		description: 'The import mode to use.',
 		required: true,
 		type: ApplicationCommandOptionType.String,
-		choices: [
-			{
-				name: ActionImportModeChoicesEnum.overwriteAll,
-				value: ActionImportModeChoicesEnum.overwriteAll,
-			},
-			{
-				name: ActionImportModeChoicesEnum.overwriteOnConflict,
-				value: ActionImportModeChoicesEnum.overwriteOnConflict,
-			},
-			{
-				name: ActionImportModeChoicesEnum.renameOnConflict,
-				value: ActionImportModeChoicesEnum.renameOnConflict,
-			},
-			{
-				name: ActionImportModeChoicesEnum.ignoreOnConflict,
-				value: ActionImportModeChoicesEnum.ignoreOnConflict,
-			},
-		],
+		choices: Object.values(ActionImportModeChoices).map(value => ({
+			name: value,
+			value: value,
+		})),
 	},
 } satisfies CommandOptions;
+
+/**
+ * Choice values for action command options.
+ * Uses existing enums as source of truth.
+ */
+export const actionOptionChoices = {
+	/** Import mode choices */
+	importMode: ActionImportModeChoices,
+	/** Action type choices */
+	actionType: ActionTypeChoices,
+	/** Action cost choices */
+	actionCost: ActionCostChoices,
+	/** Set option choices */
+	setOption: ActionSetOptionChoices,
+} as const;

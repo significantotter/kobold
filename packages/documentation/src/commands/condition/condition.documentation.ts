@@ -1,5 +1,5 @@
 import { GameplayCommandOptionEnum } from '../gameplay/index.js';
-import type { CommandDocumentation } from '../helpers/commands.d.ts';
+import type { CommandDocumentation } from '../helpers/commands.types.js';
 import { CommandResponseTypeEnum } from '../helpers/enums.js';
 import { ModifierCommandOptionEnum } from '../modifier/index.js';
 import {

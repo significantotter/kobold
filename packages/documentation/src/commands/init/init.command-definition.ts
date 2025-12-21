@@ -1,9 +1,9 @@
 import { ApplicationCommandOptionType, ApplicationCommandType } from 'discord-api-types/v10';
-import type { CommandDefinition } from '../helpers/commands.d.ts';
-import { RollCommandOptionEnum, rollCommandOptions } from '../roll/roll.command-options.js';
+import type { CommandDefinition } from '../helpers/commands.types.js';
 import { InitCommandOptionEnum, initCommandOptions } from './init.command-options.js';
 import { anyUsageContext } from '../helpers/defaults.js';
 import { withOrder } from '../helpers/common.js';
+import { CommandDeferType } from '../helpers.js';
 
 export enum InitSubCommandEnum {
 	start = 'start',
@@ -67,17 +67,17 @@ export const initCommandDefinition = {
 				'Joins initiative with your active character. Defaults to rolling perception.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[RollCommandOptionEnum.skillChoice]: withOrder(
+				[InitCommandOptionEnum.skillChoice]: withOrder(
 					{
-						...rollCommandOptions[RollCommandOptionEnum.skillChoice],
+						...initCommandOptions[InitCommandOptionEnum.skillChoice],
 						description:
 							'The name of the skill ("perception") to use to join initiative.',
 					},
 					1
 				),
-				[RollCommandOptionEnum.rollExpression]: withOrder(
+				[InitCommandOptionEnum.rollExpression]: withOrder(
 					{
-						...rollCommandOptions[RollCommandOptionEnum.rollExpression],
+						...initCommandOptions[InitCommandOptionEnum.rollExpression],
 						description: 'The dice expression ("1d20+5") to use to join initiative.',
 					},
 					2
@@ -110,9 +110,9 @@ export const initCommandDefinition = {
 					{ ...initCommandOptions[InitCommandOptionEnum.initActor], required: false },
 					2
 				),
-				[RollCommandOptionEnum.rollExpression]: withOrder(
+				[InitCommandOptionEnum.rollExpression]: withOrder(
 					{
-						...rollCommandOptions[RollCommandOptionEnum.rollExpression],
+						...initCommandOptions[InitCommandOptionEnum.rollExpression],
 						required: false,
 						description: 'The dice expression ("1d20+5") to use to join initiative.',
 					},
@@ -202,8 +202,8 @@ export const initCommandDefinition = {
 					},
 					1
 				),
-				[RollCommandOptionEnum.rollSecret]: withOrder(
-					rollCommandOptions[RollCommandOptionEnum.rollSecret],
+				[InitCommandOptionEnum.rollSecret]: withOrder(
+					initCommandOptions[InitCommandOptionEnum.rollSecret],
 					2
 				),
 			},
@@ -234,24 +234,24 @@ export const initCommandDefinition = {
 					},
 					3
 				),
-				[RollCommandOptionEnum.rollModifier]: withOrder(
-					rollCommandOptions[RollCommandOptionEnum.rollModifier],
+				[InitCommandOptionEnum.rollModifier]: withOrder(
+					initCommandOptions[InitCommandOptionEnum.rollModifier],
 					4
 				),
-				[RollCommandOptionEnum.damageRollModifier]: withOrder(
-					rollCommandOptions[RollCommandOptionEnum.damageRollModifier],
+				[InitCommandOptionEnum.damageRollModifier]: withOrder(
+					initCommandOptions[InitCommandOptionEnum.damageRollModifier],
 					5
 				),
-				[RollCommandOptionEnum.rollSecret]: withOrder(
-					rollCommandOptions[RollCommandOptionEnum.rollSecret],
+				[InitCommandOptionEnum.rollSecret]: withOrder(
+					initCommandOptions[InitCommandOptionEnum.rollSecret],
 					6
 				),
-				[RollCommandOptionEnum.rollTargetAc]: withOrder(
-					rollCommandOptions[RollCommandOptionEnum.rollTargetAc],
+				[InitCommandOptionEnum.rollTargetAc]: withOrder(
+					initCommandOptions[InitCommandOptionEnum.rollTargetAc],
 					7
 				),
-				[RollCommandOptionEnum.rollNote]: withOrder(
-					rollCommandOptions[RollCommandOptionEnum.rollNote],
+				[InitCommandOptionEnum.initNote]: withOrder(
+					initCommandOptions[InitCommandOptionEnum.initNote],
 					8
 				),
 			},

@@ -10,8 +10,6 @@ import { DiceUtils } from '../../../utils/dice-utils.js';
 import { RollBuilder } from '../../../utils/roll-builder.js';
 
 import _ from 'lodash';
-import L from '../../../i18n/i18n-node.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Action, Kobold, SheetAdjustmentTypeEnum } from '@kobold/db';
 import { Creature } from '../../../utils/creature.js';
 import { InteractionUtils } from '../../../utils/index.js';
@@ -21,19 +19,21 @@ import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js
 import { NpcUtils } from '../../../utils/kobold-service-utils/npc-utils.js';
 import { SheetProperties } from '../../../utils/sheet/sheet-properties.js';
 import { Command } from '../../index.js';
-import { InitOptions } from './init-command-options.js';
 import { SheetUtils } from '../../../utils/sheet/sheet-utils.js';
 import { getEmoji } from '../../../constants/emoji.js';
 import { StringUtils } from '@kobold/base-utils';
 import { NethysDb } from '@kobold/nethys';
 import { NethysSheetImporter } from '../../../utils/sheet/sheet-import-nethys.js';
-import { RollOptions } from '../roll/roll-command-options.js';
-import { InitCommand } from '@kobold/documentation';
+import { InitDefinition, RollDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
+const commandOptions = InitDefinition.options;
+const commandOptionsEnum = InitDefinition.commandOptionsEnum;
+const rollCommandOptions = RollDefinition.options;
+const rollCommandOptionsEnum = RollDefinition.commandOptionsEnum;
 
 export class InitAddSubCommand extends BaseCommandClass(
-	InitCommand,
-	InitCommand.subCommandEnum.add
+	InitDefinition,
+	InitDefinition.subCommandEnum.add
 ) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
@@ -47,8 +47,10 @@ export class InitAddSubCommand extends BaseCommandClass(
 		}
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return [];
-		if (option.name === InitOptions.INIT_CREATURE_OPTION.name) {
-			const match = intr.options.getString(InitOptions.INIT_CREATURE_OPTION.name);
+		if (option.name === commandOptions[commandOptionsEnum.initCreature].name) {
+			const match = intr.options.getString(
+				commandOptions[commandOptionsEnum.initCreature].name
+			);
 			const { autocompleteUtils } = new KoboldUtils(kobold);
 			let searchResults: { name: string; value: string }[] = [];
 
@@ -73,7 +75,6 @@ export class InitAddSubCommand extends BaseCommandClass(
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{
 			kobold,
 			nethysCompendium,
@@ -89,13 +90,25 @@ export class InitAddSubCommand extends BaseCommandClass(
 				userSettings: true,
 			});
 
-		let actorName = intr.options.getString(InitOptions.ACTOR_NAME_OPTION.name);
-		const targetCreature = intr.options.getString(InitOptions.INIT_CREATURE_OPTION.name, true);
-		const customStatsString = intr.options.getString(InitOptions.INIT_CUSTOM_STATS_OPTION.name);
-		const initiativeValue = intr.options.getNumber(InitOptions.INIT_VALUE_OPTION.name);
-		const diceExpression = intr.options.getString(RollOptions.ROLL_EXPRESSION_OPTION.name);
-		const hideStats = intr.options.getBoolean(InitOptions.INIT_HIDE_STATS_OPTION.name) ?? true;
-		const template = (intr.options.getString(InitOptions.INIT_ADD_TEMPLATE_OPTION.name) ?? '')
+		let actorName = intr.options.getString(commandOptions[commandOptionsEnum.initActor].name);
+		const targetCreature = intr.options.getString(
+			commandOptions[commandOptionsEnum.initCreature].name,
+			true
+		);
+		const customStatsString = intr.options.getString(
+			commandOptions[commandOptionsEnum.initCustomStats].name
+		);
+		const initiativeValue = intr.options.getNumber(
+			commandOptions[commandOptionsEnum.initValue].name
+		);
+		const diceExpression = intr.options.getString(
+			rollCommandOptions[rollCommandOptionsEnum.rollExpression].name
+		);
+		const hideStats =
+			intr.options.getBoolean(commandOptions[commandOptionsEnum.initHideStats].name) ?? true;
+		const template = (
+			intr.options.getString(commandOptions[commandOptionsEnum.template].name) ?? ''
+		)
 			.trim()
 			.toLocaleLowerCase();
 
@@ -186,23 +199,22 @@ export class InitAddSubCommand extends BaseCommandClass(
 			rollResultMessage = new KoboldEmbed()
 				.setSheetRecord(sheetRecord)
 				.setTitle(
-					L.en.commands.init.add.interactions.joinedEmbed.joinedTitle({
+					InitDefinition.strings.add.joinedEmbed.joinedTitle({
 						actorName: finalName,
 					})
 				)
 				.setDescription(
-					L.en.commands.init.add.interactions.joinedEmbed.description({
+					InitDefinition.strings.add.joinedEmbed.description({
 						finalInitiative,
 					})
 				);
 		} else {
 			const creature = new Creature(sheetRecord, undefined, intr);
 			const rollBuilder = new RollBuilder({
-				title: L.en.commands.init.add.interactions.joinedEmbed.rolledTitle({
+				title: InitDefinition.strings.add.joinedEmbed.rolledTitle({
 					actorName: finalName,
 				}),
 				userSettings,
-				LL,
 			});
 			rollBuilder.addRoll({
 				rollExpression: DiceUtils.buildDiceExpression(

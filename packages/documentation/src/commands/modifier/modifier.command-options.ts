@@ -1,5 +1,5 @@
 import { ApplicationCommandOptionType } from 'discord-api-types/v10';
-import type { CommandOptions, SpecificCommandOptions } from '../helpers/commands.d.ts';
+import type { CommandOptions, SpecificCommandOptions } from '../helpers/commands.types.js';
 
 export enum ModifierCommandOptionEnum {
 	custom = 'custom',
@@ -17,26 +17,69 @@ export enum ModifierCommandOptionEnum {
 	importUrl = 'url',
 }
 
-export const modifierCommandOptions: CommandOptions = {
+/**
+ * Modifier set option choices
+ */
+export const ModifierSetOptionChoices = {
+	name: 'name',
+	description: 'description',
+	type: 'type',
+	rollAdjustment: 'roll-adjustment',
+	rollTargetTags: 'roll-target-tags',
+	sheetValues: 'sheet-values',
+	severity: 'severity',
+	initiativeNote: 'initiative-note',
+} as const;
+
+/**
+ * Modifier import mode choices
+ */
+export const ModifierImportModeChoices = {
+	overwriteAll: 'overwrite-all',
+	overwriteOnConflict: 'overwrite-on-conflict',
+	renameOnConflict: 'rename-on-conflict',
+	ignoreOnConflict: 'ignore-on-conflict',
+} as const;
+
+/**
+ * Modifier type choices
+ */
+export const ModifierTypeChoices = {
+	status: 'status',
+	item: 'item',
+	circumstance: 'circumstance',
+	untyped: 'untyped',
+} as const;
+
+/**
+ * Modifier custom filter choices
+ */
+export const ModifierCustomChoices = {
+	custom: 'custom',
+	default: 'default',
+	both: 'both',
+} as const;
+
+/**
+ * Option choice values for modifier command - source of truth for option value comparisons
+ */
+export const modifierOptionChoices = {
+	setOption: ModifierSetOptionChoices,
+	importMode: ModifierImportModeChoices,
+	type: ModifierTypeChoices,
+	custom: ModifierCustomChoices,
+} as const;
+
+export const modifierCommandOptions = {
 	[ModifierCommandOptionEnum.custom]: {
 		name: 'custom',
 		description: 'Whether to view custom created modifiers, default modifiers, or both.',
 		required: true,
 		type: ApplicationCommandOptionType.String,
-		choices: [
-			{
-				name: 'custom',
-				value: 'custom',
-			},
-			{
-				name: 'default',
-				value: 'default',
-			},
-			{
-				name: 'both',
-				value: 'both',
-			},
-		],
+		choices: Object.values(ModifierCustomChoices).map(value => ({
+			name: value,
+			value: value,
+		})),
 	},
 	[ModifierCommandOptionEnum.severity]: {
 		name: 'severity',
@@ -61,24 +104,10 @@ export const modifierCommandOptions: CommandOptions = {
 		description: 'The optional type (status, item, or circumstance) of the modifier.',
 		required: false,
 		type: ApplicationCommandOptionType.String,
-		choices: [
-			{
-				name: 'status',
-				value: 'status',
-			},
-			{
-				name: 'item',
-				value: 'item',
-			},
-			{
-				name: 'circumstance',
-				value: 'circumstance',
-			},
-			{
-				name: 'untyped',
-				value: 'untyped',
-			},
-		],
+		choices: Object.values(ModifierTypeChoices).map(value => ({
+			name: value,
+			value: value,
+		})),
 	},
 	[ModifierCommandOptionEnum.description]: {
 		name: 'description',
@@ -110,40 +139,10 @@ export const modifierCommandOptions: CommandOptions = {
 		description: 'The modifier option to alter.',
 		required: true,
 		type: ApplicationCommandOptionType.String,
-		choices: [
-			{
-				name: 'name',
-				value: 'name',
-			},
-			{
-				name: 'description',
-				value: 'description',
-			},
-			{
-				name: 'type',
-				value: 'type',
-			},
-			{
-				name: 'roll-adjustment',
-				value: 'roll-adjustment',
-			},
-			{
-				name: 'roll-target-tags',
-				value: 'roll-target-tags',
-			},
-			{
-				name: 'sheet-values',
-				value: 'sheet-values',
-			},
-			{
-				name: 'severity',
-				value: 'severity',
-			},
-			{
-				name: 'initiative-note',
-				value: 'initiative-note',
-			},
-		],
+		choices: Object.values(ModifierSetOptionChoices).map(value => ({
+			name: value,
+			value: value,
+		})),
 	},
 	[ModifierCommandOptionEnum.setValue]: {
 		name: 'value',
@@ -156,24 +155,10 @@ export const modifierCommandOptions: CommandOptions = {
 		description: 'What to do when importing data.',
 		required: true,
 		type: ApplicationCommandOptionType.String,
-		choices: [
-			{
-				name: 'overwrite-all',
-				value: 'overwrite-all',
-			},
-			{
-				name: 'overwrite-on-conflict',
-				value: 'overwrite-on-conflict',
-			},
-			{
-				name: 'rename-on-conflict',
-				value: 'rename-on-conflict',
-			},
-			{
-				name: 'ignore-on-conflict',
-				value: 'ignore-on-conflict',
-			},
-		],
+		choices: Object.values(ModifierImportModeChoices).map(value => ({
+			name: value,
+			value: value,
+		})),
 	},
 	[ModifierCommandOptionEnum.importUrl]: {
 		name: 'url',

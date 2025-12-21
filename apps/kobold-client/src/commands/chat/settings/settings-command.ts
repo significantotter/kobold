@@ -5,12 +5,11 @@ import {
 	CacheType,
 	ChatInputCommandInteraction,
 } from 'discord.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 
 import { CommandUtils } from '../../../utils/index.js';
 import { BaseCommandClass, InjectedServices } from '../../command.js';
 import { Command } from '../../index.js';
-import { SettingCommand as SettingCommandDocumentation } from '@kobold/documentation';
+import { SettingDefinition as SettingCommandDocumentation } from '@kobold/documentation';
 
 export class SettingsCommand extends BaseCommandClass(SettingCommandDocumentation) {
 	public async autocomplete(
@@ -33,7 +32,6 @@ export class SettingsCommand extends BaseCommandClass(SettingCommandDocumentatio
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		services: InjectedServices
 	): Promise<void> {
 		if (!intr.isChatInputCommand()) return;
@@ -47,7 +45,7 @@ export class SettingsCommand extends BaseCommandClass(SettingCommandDocumentatio
 
 		let passesChecks = await CommandUtils.runChecks(command, intr);
 		if (passesChecks) {
-			await command.execute(intr, LL, services);
+			await command.execute(intr, services);
 		}
 	}
 }

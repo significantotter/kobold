@@ -8,9 +8,6 @@ import {
 	Message,
 } from 'discord.js';
 
-import { GameplayOptions } from './gameplay-command-options.js';
-
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import {
 	CharacterWithRelations,
 	Kobold,
@@ -22,13 +19,14 @@ import { Creature } from '../../../utils/creature.js';
 import { InteractionUtils } from '../../../utils/interaction-utils.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Command } from '../../index.js';
-import { CharacterOptions } from '../characters/command-options.js';
-import { GameplayCommand } from '@kobold/documentation';
+import { GameplayDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
+const commandOptions = GameplayDefinition.options;
+const commandOptionsEnum = GameplayDefinition.commandOptionsEnum;
 
 export class GameplayTrackerSubCommand extends BaseCommandClass(
-	GameplayCommand,
-	GameplayCommand.subCommandEnum.tracker
+	GameplayDefinition,
+	GameplayDefinition.subCommandEnum.tracker
 ) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
@@ -36,9 +34,11 @@ export class GameplayTrackerSubCommand extends BaseCommandClass(
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === CharacterOptions.SET_ACTIVE_NAME_OPTION.name) {
+		if (option.name === commandOptions[commandOptionsEnum.gameplayTargetCharacter].name) {
 			const match =
-				intr.options.getString(CharacterOptions.SET_ACTIVE_NAME_OPTION.name) ?? '';
+				intr.options.getString(
+					commandOptions[commandOptionsEnum.gameplayTargetCharacter].name
+				) ?? '';
 
 			//get the character matches
 			const { characterUtils } = new KoboldUtils(kobold);
@@ -54,17 +54,16 @@ export class GameplayTrackerSubCommand extends BaseCommandClass(
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const targetCharacterName = intr.options.getString(
-			CharacterOptions.SET_ACTIVE_NAME_OPTION.name
+			commandOptions[commandOptionsEnum.gameplayTargetCharacter].name
 		);
 		const trackerMode =
-			intr.options.getString(GameplayOptions.GAMEPLAY_TRACKER_MODE.name) ??
+			intr.options.getString(commandOptions[commandOptionsEnum.gameplayTrackerMode].name) ??
 			SheetRecordTrackerModeEnum.basic_stats;
 		const gameplayTargetChannel = intr.options.getChannel(
-			GameplayOptions.GAMEPLAY_TARGET_CHANNEL.name,
+			commandOptions[commandOptionsEnum.gameplayTargetChannel].name,
 			false,
 			[ChannelType.GuildText]
 		);
@@ -92,7 +91,7 @@ export class GameplayTrackerSubCommand extends BaseCommandClass(
 		} else {
 			targetCharacter = await characterUtils.getActiveCharacter(intr);
 			if (!targetCharacter) {
-				throw new KoboldError(LL.commands.character.interactions.noActiveCharacter());
+				throw new KoboldError(GameplayDefinition.strings.shared.errors.noActiveCharacter);
 			}
 		}
 		const targetSheetRecord = targetCharacter.sheetRecord;

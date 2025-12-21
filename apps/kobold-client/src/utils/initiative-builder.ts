@@ -1,7 +1,6 @@
 import { CommandInteraction, Message } from 'discord.js';
 import _ from 'lodash';
-import L from '../i18n/i18n-node.js';
-import { TranslationFunctions } from '../i18n/i18n-types.js';
+import { utilStrings } from '@kobold/documentation';
 import {
 	CharacterWithRelations,
 	DefaultCompendiumEnum,
@@ -32,22 +31,18 @@ export class InitiativeBuilder {
 	public actorsByGroup: { [key: number]: InitiativeActorWithRelations[] };
 	public groups: InitiativeActorGroup[];
 	public userSettings: UserSettings;
-	protected LL: TranslationFunctions;
 
 	constructor({
 		initiative,
 		actors,
 		groups,
 		userSettings,
-		LL,
 	}: {
 		initiative: InitiativeWithRelations;
 		actors?: InitiativeActorWithRelations[];
 		groups?: InitiativeActorGroup[];
 		userSettings?: UserSettings;
-		LL?: TranslationFunctions;
 	}) {
-		this.LL = LL || L.en;
 		this.init = initiative;
 		if (initiative && !actors) actors = initiative.actors;
 		if (initiative && !groups) groups = initiative.actorGroups;
@@ -121,7 +116,7 @@ export class InitiativeBuilder {
 		let group: InitiativeActorGroup | null = null;
 		// get group options that match the given name, were created by you, or you're the gm of
 		const result = StringUtils.nameMatchGeneric<InitiativeActorGroup>(this.groups, groupName);
-		if (!result) throw new KoboldError(this.LL.utils.initiative.characterNameNotFoundError());
+		if (!result) throw new KoboldError(utilStrings.initiative.characterNameNotFoundError);
 
 		return {
 			currentRound: this.init.currentRound || 1,
@@ -135,10 +130,10 @@ export class InitiativeBuilder {
 	 */
 	getPreviousTurnChanges(): TurnData {
 		if (!this.groups.length) {
-			throw new KoboldError(this.LL.utils.initiative.prevTurnInitEmptyError());
+			throw new KoboldError(utilStrings.initiative.prevTurnInitEmptyError);
 		}
 		if (!this.init.currentTurnGroupId) {
-			throw new KoboldError(this.LL.utils.initiative.prevTurnInitNotStartedError());
+			throw new KoboldError(utilStrings.initiative.prevTurnInitNotStartedError);
 		} else {
 			const currentTurnIndex = _.findIndex(
 				this.groups,
@@ -146,7 +141,7 @@ export class InitiativeBuilder {
 			);
 			if (!this.groups[currentTurnIndex - 1]) {
 				if (this.init.currentRound === 1) {
-					throw new KoboldError(this.LL.utils.initiative.prevTurnNotPossibleError());
+					throw new KoboldError(utilStrings.initiative.prevTurnNotPossibleError);
 				}
 				//move to the previous round!
 				return {
@@ -174,7 +169,7 @@ export class InitiativeBuilder {
 	 */
 	getNextTurnChanges(): TurnData {
 		if (!this.groups.length) {
-			throw new KoboldError(this.LL.utils.initiative.nextTurnInitEmptyError());
+			throw new KoboldError(utilStrings.initiative.nextTurnInitEmptyError);
 		}
 		if (!this.init.currentTurnGroupId) {
 			return {
@@ -476,15 +471,13 @@ export class InitiativeBuilderUtils {
 				attributeName: skillChoice,
 				modifierExpression: diceExpression,
 				tags: ['initiative'],
-				LL: L.en,
 			});
 			finalInitiative = rollBuilderResponse.getRollTotalArray()[0] ?? 0;
 		} else if (diceExpression) {
 			rollBuilderResponse = new RollBuilder({
 				character: character,
-				rollDescription: L.en.commands.init.join.interactions.joinedEmbed.rollDescription(),
+				rollDescription: utilStrings.initiative.joinedEmbed.rollDescription,
 				userSettings,
-				LL: L.en,
 			});
 			rollBuilderResponse.addRoll({
 				rollTitle: 'Initiative',
@@ -535,18 +528,18 @@ export class InitiativeBuilderUtils {
 		if (_.isNumber(finalInitiative)) {
 			rollResultMessage = new KoboldEmbed()
 				.setTitle(
-					L.en.commands.init.join.interactions.joinedEmbed.title({
+					utilStrings.initiative.joinedEmbed.title({
 						characterName: name,
 					})
 				)
 				.setDescription(
-					L.en.commands.init.join.interactions.joinedEmbed.setDescription({
+					utilStrings.initiative.joinedEmbed.setDescription({
 						initValue: finalInitiative,
 					})
 				);
 		} else {
 			rollResultMessage = finalInitiative.compileEmbed().setTitle(
-				L.en.commands.init.join.interactions.joinedEmbed.title({
+				utilStrings.initiative.joinedEmbed.title({
 					characterName: name,
 				})
 			);
@@ -597,24 +590,22 @@ export class InitiativeBuilderUtils {
 			actorOptions,
 			characterName
 		);
-		if (!result) throw new KoboldError(L.en.utils.initiative.characterNameNotFoundError());
+		if (!result) throw new KoboldError(utilStrings.initiative.characterNameNotFoundError);
 		return result;
 	}
 
 	public static getNameMatchGroupFromInitiative(
 		initiative: InitiativeWithRelations,
 		userId: string,
-		groupName: string,
-		LL: TranslationFunctions
+		groupName: string
 	): InitiativeActorGroup {
-		LL = LL || L.en;
 		// get group options that match the given name, were created by you, or you're the gm of
 		const groupOptions = InitiativeBuilderUtils.getControllableInitiativeGroups(
 			initiative,
 			userId
 		);
 		const result = StringUtils.nameMatchGeneric<InitiativeActorGroup>(groupOptions, groupName);
-		if (!result) throw new KoboldError(LL.utils.initiative.characterNameNotFoundError());
+		if (!result) throw new KoboldError(utilStrings.initiative.characterNameNotFoundError);
 
 		return result;
 	}
