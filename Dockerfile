@@ -39,7 +39,7 @@ RUN --mount=type=cache,id=pnpm,target=~/.pnpm-store  apk add --no-cache --virtua
 COPY --from=pruner /app/out/full/ .
 
 RUN turbo build --filter=kobold-client
-RUN --mount=type=cache,id=pnpm,target=~/.pnpm-store pnpm prune --prod --no-optional
+RUN --mount=type=cache,id=pnpm,target=~/.pnpm-store CI=true pnpm prune --prod --no-optional
 RUN rm -rf ./**/*/src
 
 # Final image
