@@ -86,7 +86,7 @@ export class ConditionRemoveSubCommand extends BaseCommandClass(
 		if (targetCondition) {
 			// ask for confirmation
 
-			const prompt = await intr.reply({
+			const response = await intr.reply({
 				content: ConditionDefinition.strings.remove.confirmation.text({
 					conditionName: targetCondition.name,
 				}),
@@ -110,8 +110,9 @@ export class ConditionRemoveSubCommand extends BaseCommandClass(
 					},
 				],
 				flags: [MessageFlags.Ephemeral],
-				fetchReply: true,
+				withResponse: true,
 			});
+			const prompt = response.resource!.message!;
 			let timedOut = false;
 			let result = await CollectorUtils.collectByButton(
 				prompt,

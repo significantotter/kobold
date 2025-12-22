@@ -64,7 +64,7 @@ export class RollMacroRemoveSubCommand extends BaseCommandClass(
 		if (targetRollMacro) {
 			// ask for confirmation
 
-			const prompt = await intr.reply({
+			const response = await intr.reply({
 				content: RollMacroDefinition.strings.remove.removeConfirmationText({
 					macroName: targetRollMacro.name,
 				}),
@@ -88,8 +88,9 @@ export class RollMacroRemoveSubCommand extends BaseCommandClass(
 					},
 				],
 				flags: [MessageFlags.Ephemeral],
-				fetchReply: true,
+				withResponse: true,
 			});
+			const prompt = response.resource!.message!;
 			let timedOut = false;
 			let result = await CollectorUtils.collectByButton(
 				prompt,

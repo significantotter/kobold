@@ -218,7 +218,6 @@ describe('CharacterFetcher', () => {
 						}),
 					]),
 					flags: [MessageFlags.Ephemeral],
-					fetchReply: true,
 				})
 			);
 		});

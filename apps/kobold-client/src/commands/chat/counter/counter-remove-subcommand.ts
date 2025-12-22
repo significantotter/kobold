@@ -63,7 +63,7 @@ export class CounterRemoveSubCommand extends BaseCommandClass(
 			throw new KoboldError(CounterDefinition.strings.notFound({ counterName: name }));
 		}
 
-		const prompt = await intr.reply({
+		const response = await intr.reply({
 			content: CounterDefinition.strings.removeConfirmation.text({
 				counterName: counter.name,
 			}),
@@ -87,8 +87,9 @@ export class CounterRemoveSubCommand extends BaseCommandClass(
 				},
 			],
 			flags: [MessageFlags.Ephemeral],
-			fetchReply: true,
+			withResponse: true,
 		});
+		const prompt = response.resource!.message!;
 		let timedOut = false;
 		let result = await CollectorUtils.collectByButton(
 			prompt,

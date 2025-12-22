@@ -157,15 +157,16 @@ export function createMockChatInputInteraction(
 	(interaction as any).options = mockOptionsResolver;
 
 	// Mock reply methods
-	const mockReply = vi.fn(async () => {
-		id: faker.string.numeric(18);
-	});
-	const mockEditReply = vi.fn(async () => {
-		id: faker.string.numeric(18);
-	});
-	const mockFollowUp = vi.fn(async () => {
-		id: faker.string.numeric(18);
-	});
+	// When withResponse: true is used, reply returns { resource: { message: { id } } }
+	const mockReply = vi.fn(async () => ({
+		resource: { message: { id: faker.string.numeric(18) } },
+	}));
+	const mockEditReply = vi.fn(async () => ({
+		id: faker.string.numeric(18),
+	}));
+	const mockFollowUp = vi.fn(async () => ({
+		id: faker.string.numeric(18),
+	}));
 	const mockDeferReply = vi.fn(async () => {
 		(interaction as any).deferred = true;
 		return { id: faker.string.numeric(18) };

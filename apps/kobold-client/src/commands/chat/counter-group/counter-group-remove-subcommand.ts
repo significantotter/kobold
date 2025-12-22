@@ -62,7 +62,7 @@ export class CounterGroupRemoveSubCommand extends BaseCommandClass(
 			throw new KoboldError(CounterGroupDefinition.strings.notFound({ groupName: name }));
 		}
 
-		const prompt = await intr.reply({
+		const response = await intr.reply({
 			content: CounterGroupDefinition.strings.removeConfirmation.text({
 				groupName: targetCounterGroup.name,
 			}),
@@ -86,8 +86,9 @@ export class CounterGroupRemoveSubCommand extends BaseCommandClass(
 				},
 			],
 			flags: [MessageFlags.Ephemeral],
-			fetchReply: true,
+			withResponse: true,
 		});
+		const prompt = response.resource!.message!;
 		let timedOut = false;
 		let result = await CollectorUtils.collectByButton(
 			prompt,
