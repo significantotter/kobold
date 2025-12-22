@@ -1,8 +1,7 @@
 /**
- * Integration tests for CharacterSetDefaultSubCommand
+ * Unit tests for CharacterSetDefaultSubCommand
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { vitestKobold } from '@kobold/db/test-utils';
 import { CharacterCommand } from './character-command.js';
 import { CharacterSetDefaultSubCommand } from './character-set-default.subcommand.js';
 import {
@@ -13,17 +12,21 @@ import {
 	TEST_GUILD_ID,
 	TEST_CHANNEL_ID,
 	CommandTestHarness,
+	getMockKobold,
+	resetMockKobold,
 } from '../../../test-utils/index.js';
 
 vi.mock('../../../utils/kobold-service-utils/kobold-utils.js');
 
-describe('CharacterSetDefaultSubCommand Integration', () => {
+describe('CharacterSetDefaultSubCommand', () => {
+	const kobold = getMockKobold();
+
 	let harness: CommandTestHarness;
 
 	beforeEach(() => {
+		resetMockKobold(kobold);
 		harness = createTestHarness([new CharacterCommand([new CharacterSetDefaultSubCommand()])]);
 	});
-
 
 	describe('set default for channel', () => {
 		it('should set default character for channel', async () => {
@@ -34,8 +37,8 @@ describe('CharacterSetDefaultSubCommand Integration', () => {
 			setupCharacterUtilsMocks([mockCharacter]);
 
 			// Mock database operations to avoid foreign key violations
-			vi.spyOn(vitestKobold.channelDefaultCharacter, 'deleteIfExists').mockResolvedValue();
-			vi.spyOn(vitestKobold.channelDefaultCharacter, 'create').mockResolvedValue({
+			kobold.channelDefaultCharacter.deleteIfExists.mockResolvedValue(undefined);
+			kobold.channelDefaultCharacter.create.mockResolvedValue({
 				userId: TEST_USER_ID,
 				channelId: TEST_CHANNEL_ID,
 				characterId: mockCharacter.id,
@@ -91,8 +94,8 @@ describe('CharacterSetDefaultSubCommand Integration', () => {
 			setupCharacterUtilsMocks([mockCharacter]);
 
 			// Mock database operations to avoid foreign key violations
-			vi.spyOn(vitestKobold.guildDefaultCharacter, 'deleteIfExists').mockResolvedValue();
-			vi.spyOn(vitestKobold.guildDefaultCharacter, 'create').mockResolvedValue({
+			kobold.guildDefaultCharacter.deleteIfExists.mockResolvedValue(undefined);
+			kobold.guildDefaultCharacter.create.mockResolvedValue({
 				userId: TEST_USER_ID,
 				guildId: TEST_GUILD_ID,
 				characterId: mockCharacter.id,

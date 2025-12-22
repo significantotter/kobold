@@ -1,8 +1,7 @@
 /**
- * Integration tests for CounterRemoveSubCommand
+ * Unit tests for CounterRemoveSubCommand
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { vitestKobold } from '@kobold/db/test-utils';
 import { CounterStyleEnum } from '@kobold/db';
 import { CounterDefinition as CounterCommandDoc } from '@kobold/documentation';
 import { CounterCommand } from './counter-command.js';
@@ -20,7 +19,8 @@ import {
 	CommandTestHarness,
 	createMockNumericCounter,
 	createMockCounterGroup,
-} from '../../../test-utils/index.js';
+	getMockKobold,
+	resetMockKobold,} from '../../../test-utils/index.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { CollectorUtils } from '../../../utils/collector-utils.js';
 import type { Counter, CounterGroup, NumericCounter } from '@kobold/db';
@@ -29,10 +29,13 @@ vi.mock('../../../utils/kobold-service-utils/kobold-utils.js');
 vi.mock('../../../utils/kobold-helpers/finder-helpers.js');
 vi.mock('../../../utils/collector-utils.js');
 
-describe('CounterRemoveSubCommand Integration', () => {
+describe('CounterRemoveSubCommand', () => {
+	const kobold = getMockKobold();
+
 	let harness: CommandTestHarness;
 
 	beforeEach(() => {
+		resetMockKobold(kobold);
 		harness = createTestHarness([new CounterCommand([new CounterRemoveSubCommand()])]);
 	});
 
@@ -50,7 +53,7 @@ describe('CounterRemoveSubCommand Integration', () => {
 				intr: {} as any,
 				value: 'remove',
 			});
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -79,7 +82,7 @@ describe('CounterRemoveSubCommand Integration', () => {
 				intr: {} as any,
 				value: 'cancel',
 			});
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -115,7 +118,7 @@ describe('CounterRemoveSubCommand Integration', () => {
 				intr: {} as any,
 				value: 'remove',
 			});
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({

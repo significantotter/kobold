@@ -1,8 +1,7 @@
 /**
- * Integration tests for InitNextSubCommand
+ * Unit tests for InitNextSubCommand
  */
 import { describe, it, expect, beforeEach, vi, MockInstance } from 'vitest';
-import { vitestKobold } from '@kobold/db/test-utils';
 import { InitCommand } from './init-command.js';
 import { InitNextSubCommand } from './init-next-subcommand.js';
 import { createMockInitiativeWithActors, resetInitTestIds } from './init-test-utils.js';
@@ -14,33 +13,34 @@ import {
 	TEST_GUILD_ID,
 	TEST_CHANNEL_ID,
 	CommandTestHarness,
-} from '../../../test-utils/index.js';
+	getMockKobold,
+	resetMockKobold,} from '../../../test-utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
 
 vi.mock('../../../utils/kobold-service-utils/kobold-utils.js');
 
-describe('InitNextSubCommand Integration', () => {
+describe('InitNextSubCommand', () => {
+	const kobold = getMockKobold();
+
 	let harness: CommandTestHarness;
-	let initUpdateSpy: MockInstance;
 
 	beforeEach(() => {
+		resetMockKobold(kobold);
 		resetInitTestIds();
 		harness = createTestHarness([new InitCommand([new InitNextSubCommand()])]);
-		initUpdateSpy = vi.spyOn(vitestKobold.initiative, 'update');
 	});
-
 
 	it('should advance to the next turn', async () => {
 		// Arrange
 		const existingInit = createMockInitiativeWithActors(2, { currentRound: 1 });
 		existingInit.currentTurnGroupId = existingInit.actorGroups[0].id;
-		const { fetchDataMock } = setupKoboldUtilsMocks();
-		fetchDataMock.mockResolvedValue({
+		const { fetchNonNullableDataMock } = setupKoboldUtilsMocks();
+		fetchNonNullableDataMock.mockResolvedValue({
 			currentInitiative: existingInit,
 			userSettings: {},
 		});
-		initUpdateSpy.mockResolvedValue({
+		kobold.initiative.update.mockResolvedValue({
 			...existingInit,
 			currentTurnGroupId: existingInit.actorGroups[1].id,
 		});
@@ -57,13 +57,13 @@ describe('InitNextSubCommand Integration', () => {
 
 		// Assert
 		expect(result.didRespond()).toBe(true);
-		expect(initUpdateSpy).toHaveBeenCalled();
+		expect(kobold.initiative.update).toHaveBeenCalled();
 	});
 
 	it('should error when no initiative exists', async () => {
 		// Arrange
-		const { fetchDataMock } = setupKoboldUtilsMocks();
-		fetchDataMock.mockRejectedValue(
+		const { fetchNonNullableDataMock } = setupKoboldUtilsMocks();
+		fetchNonNullableDataMock.mockRejectedValue(
 			new KoboldError('Yip! You must be in an initiative to use this command.')
 		);
 

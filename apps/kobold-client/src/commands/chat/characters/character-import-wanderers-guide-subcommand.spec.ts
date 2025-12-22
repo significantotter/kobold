@@ -10,6 +10,7 @@ import {
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	CommandTestHarness,
+	type MockCharacterFetcher,
 } from '../../../test-utils/index.js';
 import { WgCharacterFetcher } from './Fetchers/wg-character-fetcher.js';
 import { TextParseHelpers } from '../../../utils/kobold-helpers/text-parse-helpers.js';
@@ -26,20 +27,17 @@ describe('CharacterImportWanderersGuideSubCommand Integration', () => {
 		]);
 	});
 
-
 	describe('successful import', () => {
 		it('should import a character from wanderers guide url', async () => {
 			// Arrange
 			const newCharacter = createMockCharacter({
 				characterOverrides: { name: 'WG Character' },
 			});
-			const createMock = vi.fn().mockResolvedValue(newCharacter);
-			vi.mocked(WgCharacterFetcher).mockImplementation(
-				() =>
-					({
-						create: createMock,
-					}) as any
-			);
+			const createMock = vi.fn(async () => newCharacter);
+			vi.mocked(WgCharacterFetcher).mockImplementation(function (this: MockCharacterFetcher) {
+				this.create = createMock;
+				return this;
+			} as unknown as () => WgCharacterFetcher);
 			vi.mocked(TextParseHelpers.parseCharacterIdFromText).mockReturnValue(12345);
 
 			// Act
@@ -63,13 +61,11 @@ describe('CharacterImportWanderersGuideSubCommand Integration', () => {
 			const newCharacter = createMockCharacter({
 				characterOverrides: { name: 'WG Character Direct' },
 			});
-			const createMock = vi.fn().mockResolvedValue(newCharacter);
-			vi.mocked(WgCharacterFetcher).mockImplementation(
-				() =>
-					({
-						create: createMock,
-					}) as any
-			);
+			const createMock = vi.fn(async () => newCharacter);
+			vi.mocked(WgCharacterFetcher).mockImplementation(function (this: MockCharacterFetcher) {
+				this.create = createMock;
+				return this;
+			} as unknown as () => WgCharacterFetcher);
 			vi.mocked(TextParseHelpers.parseCharacterIdFromText).mockReturnValue(67890);
 
 			// Act
@@ -125,13 +121,11 @@ describe('CharacterImportWanderersGuideSubCommand Integration', () => {
 		it('should handle url with extra whitespace', async () => {
 			// Arrange
 			const newCharacter = createMockCharacter();
-			const createMock = vi.fn().mockResolvedValue(newCharacter);
-			vi.mocked(WgCharacterFetcher).mockImplementation(
-				() =>
-					({
-						create: createMock,
-					}) as any
-			);
+			const createMock = vi.fn(async () => newCharacter);
+			vi.mocked(WgCharacterFetcher).mockImplementation(function (this: MockCharacterFetcher) {
+				this.create = createMock;
+				return this;
+			} as unknown as () => WgCharacterFetcher);
 			vi.mocked(TextParseHelpers.parseCharacterIdFromText).mockReturnValue(12345);
 
 			// Act

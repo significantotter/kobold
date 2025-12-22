@@ -10,6 +10,8 @@ import {
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	CommandTestHarness,
+	type MockCreature,
+	type MockKoboldUtils,
 } from '../../../test-utils/index.js';
 import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
 import { ActionRoller } from '../../../utils/action-roller.js';
@@ -31,25 +33,41 @@ describe('RollAttackSubCommand Integration', () => {
 		harness = createTestHarness([new RollCommand([new RollAttackSubCommand()])]);
 		mockCharacter = createMockCharacter();
 
-		// Mock Creature
-		vi.mocked(Creature).mockImplementation(
-			() =>
-				({
-					sheet: {
-						staticInfo: { name: 'Test Character' },
-					},
-					attacks: [
-						{ name: 'Longsword', toHit: 12, damage: '1d8+4' },
-						{ name: 'Shortbow', toHit: 10, damage: '1d6+2' },
-					],
-					_sheet: {},
-				}) as any
-		);
+		// Mock Creature constructor
+		vi.mocked(Creature).mockImplementation(function (this: MockCreature) {
+			(this as MockCreature & { _sheet: unknown })._sheet = {};
+			return this;
+		} as unknown as () => Creature);
+
+		// Mock Creature getters using vi.spyOn
+		vi.spyOn(Creature.prototype, 'sheet', 'get').mockReturnValue({
+			staticInfo: { name: 'Test Character' },
+		} as any);
+		vi.spyOn(Creature.prototype, 'attacks', 'get').mockReturnValue([
+			{
+				name: 'Longsword',
+				toHit: 12,
+				damage: [{ dice: '1d8+4', type: 'slashing' }],
+				effects: [],
+				range: null,
+				traits: [],
+				notes: null,
+			},
+			{
+				name: 'Shortbow',
+				toHit: 10,
+				damage: [{ dice: '1d6+2', type: 'piercing' }],
+				effects: [],
+				range: '60 feet',
+				traits: [],
+				notes: null,
+			},
+		]);
 
 		// Mock ActionRoller.fromCreatureAttack
 		const mockCompileEmbed = vi.fn(() => ({
 			data: { description: 'Attack roll result' },
-			addFields: vi.fn(),
+			addFields: vi.fn(() => {}),
 		}));
 		vi.mocked(ActionRoller.fromCreatureAttack).mockReturnValue({
 			builtRoll: {
@@ -64,31 +82,30 @@ describe('RollAttackSubCommand Integration', () => {
 		vi.mocked(EmbedUtils.dispatchEmbeds).mockResolvedValue(undefined);
 
 		// Mock KoboldUtils - must include all needed utilities
-		vi.mocked(KoboldUtils).mockImplementation(
-			() =>
-				({
-					gameUtils: {
-						getCharacterOrInitActorTarget: vi.fn().mockResolvedValue({
-							targetSheetRecord: { sheet: {} },
-							hideStats: false,
-						}),
-					},
-					creatureUtils: {
-						saveSheet: vi.fn().mockResolvedValue(undefined),
-					},
-					fetchDataForCommand: vi.fn().mockResolvedValue({
-						activeCharacter: mockCharacter,
-						userSettings: {},
-					}),
-					fetchNonNullableDataForCommand: vi.fn().mockResolvedValue({
-						activeCharacter: mockCharacter,
-						userSettings: {},
-					}),
-					assertActiveCharacterNotNull: vi.fn(),
-				}) as any
-		);
+		vi.mocked(KoboldUtils).mockImplementation(function (this: MockKoboldUtils) {
+			(this as MockKoboldUtils & { gameUtils: unknown }).gameUtils = {
+				getCharacterOrInitActorTarget: vi.fn(async () => ({
+					targetSheetRecord: { sheet: {} },
+					hideStats: false,
+				})),
+			};
+			(this as MockKoboldUtils & { creatureUtils: unknown }).creatureUtils = {
+				saveSheet: vi.fn(async () => undefined),
+			};
+			(
+				this as MockKoboldUtils & { fetchDataForCommand: ReturnType<typeof vi.fn> }
+			).fetchDataForCommand = vi.fn(async () => ({
+				activeCharacter: mockCharacter,
+				userSettings: {},
+			}));
+			this.fetchNonNullableDataForCommand = vi.fn(async () => ({
+				activeCharacter: mockCharacter,
+				userSettings: {},
+			}));
+			this.assertActiveCharacterNotNull = vi.fn(() => {});
+			return this;
+		} as unknown as () => KoboldUtils);
 	});
-
 
 	describe('successful attack rolls', () => {
 		it('should roll an attack against a target', async () => {
@@ -226,29 +243,29 @@ describe('RollAttackSubCommand Integration', () => {
 
 		it('should handle attack with no target', async () => {
 			// Override for this test - no target
-			vi.mocked(KoboldUtils).mockImplementation(
-				() =>
-					({
-						gameUtils: {
-							getCharacterOrInitActorTarget: vi.fn().mockResolvedValue({
-								targetSheetRecord: null,
-								hideStats: false,
-							}),
-						},
-						creatureUtils: {
-							saveSheet: vi.fn().mockResolvedValue(undefined),
-						},
-						fetchDataForCommand: vi.fn().mockResolvedValue({
-							activeCharacter: mockCharacter,
-							userSettings: {},
-						}),
-						fetchNonNullableDataForCommand: vi.fn().mockResolvedValue({
-							activeCharacter: mockCharacter,
-							userSettings: {},
-						}),
-						assertActiveCharacterNotNull: vi.fn(),
-					}) as any
-			);
+			vi.mocked(KoboldUtils).mockImplementation(function (this: MockKoboldUtils) {
+				(this as MockKoboldUtils & { gameUtils: unknown }).gameUtils = {
+					getCharacterOrInitActorTarget: vi.fn(async () => ({
+						targetSheetRecord: null,
+						hideStats: false,
+					})),
+				};
+				(this as MockKoboldUtils & { creatureUtils: unknown }).creatureUtils = {
+					saveSheet: vi.fn(async () => undefined),
+				};
+				(
+					this as MockKoboldUtils & { fetchDataForCommand: ReturnType<typeof vi.fn> }
+				).fetchDataForCommand = vi.fn(async () => ({
+					activeCharacter: mockCharacter,
+					userSettings: {},
+				}));
+				this.fetchNonNullableDataForCommand = vi.fn(async () => ({
+					activeCharacter: mockCharacter,
+					userSettings: {},
+				}));
+				this.assertActiveCharacterNotNull = vi.fn(() => {});
+				return this;
+			} as unknown as () => KoboldUtils);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -270,20 +287,20 @@ describe('RollAttackSubCommand Integration', () => {
 	describe('autocomplete', () => {
 		it('should return matching attacks for autocomplete', async () => {
 			// Arrange - setup autocomplete specific mocks
-			vi.mocked(KoboldUtils).mockImplementation(
-				() =>
-					({
-						characterUtils: {
-							getActiveCharacter: vi.fn().mockResolvedValue(mockCharacter),
-						},
-						fetchDataForCommand: vi.fn().mockResolvedValue({
-							activeCharacter: mockCharacter,
-						}),
-						fetchNonNullableDataForCommand: vi.fn().mockResolvedValue({
-							activeCharacter: mockCharacter,
-						}),
-					}) as any
-			);
+			vi.mocked(KoboldUtils).mockImplementation(function (this: MockKoboldUtils) {
+				(this as MockKoboldUtils & { characterUtils: unknown }).characterUtils = {
+					getActiveCharacter: vi.fn(async () => mockCharacter),
+				};
+				(
+					this as MockKoboldUtils & { fetchDataForCommand: ReturnType<typeof vi.fn> }
+				).fetchDataForCommand = vi.fn(async () => ({
+					activeCharacter: mockCharacter,
+				}));
+				this.fetchNonNullableDataForCommand = vi.fn(async () => ({
+					activeCharacter: mockCharacter,
+				}));
+				return this;
+			} as unknown as () => KoboldUtils);
 
 			vi.spyOn(FinderHelpers, 'matchAllAttacks').mockReturnValue([
 				{ name: 'Longsword', toHit: 12 },
@@ -305,20 +322,20 @@ describe('RollAttackSubCommand Integration', () => {
 
 		it('should return empty array when no character is active', async () => {
 			// Arrange
-			vi.mocked(KoboldUtils).mockImplementation(
-				() =>
-					({
-						characterUtils: {
-							getActiveCharacter: vi.fn().mockResolvedValue(null),
-						},
-						fetchDataForCommand: vi.fn().mockResolvedValue({
-							activeCharacter: null,
-						}),
-						fetchNonNullableDataForCommand: vi.fn().mockResolvedValue({
-							activeCharacter: null,
-						}),
-					}) as any
-			);
+			vi.mocked(KoboldUtils).mockImplementation(function (this: MockKoboldUtils) {
+				(this as MockKoboldUtils & { characterUtils: unknown }).characterUtils = {
+					getActiveCharacter: vi.fn(async () => null),
+				};
+				(
+					this as MockKoboldUtils & { fetchDataForCommand: ReturnType<typeof vi.fn> }
+				).fetchDataForCommand = vi.fn(async () => ({
+					activeCharacter: null,
+				}));
+				this.fetchNonNullableDataForCommand = vi.fn(async () => ({
+					activeCharacter: null,
+				}));
+				return this;
+			} as unknown as () => KoboldUtils);
 
 			// Act
 			const result = await harness.executeAutocomplete({

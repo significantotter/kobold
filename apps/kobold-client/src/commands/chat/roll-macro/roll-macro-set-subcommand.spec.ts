@@ -1,8 +1,7 @@
 /**
- * Integration tests for RollMacroSetSubCommand
+ * Unit tests for RollMacroSetSubCommand
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { vitestKobold } from '@kobold/db/test-utils';
 import { RollMacroCommand } from './roll-macro-command.js';
 import { RollMacroSetSubCommand } from './roll-macro-set-subcommand.js';
 import {
@@ -13,6 +12,10 @@ import {
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	CommandTestHarness,
+	getMockKobold,
+	resetMockKobold,
+	type MockRollBuilder,
+	type MockKoboldUtils,
 } from '../../../test-utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
@@ -22,22 +25,24 @@ vi.mock('../../../utils/kobold-service-utils/kobold-utils.js');
 vi.mock('../../../utils/kobold-helpers/finder-helpers.js');
 vi.mock('../../../utils/roll-builder.js');
 
-describe('RollMacroSetSubCommand Integration', () => {
+describe('RollMacroSetSubCommand', () => {
+	const kobold = getMockKobold();
+
 	let harness: CommandTestHarness;
 
 	beforeEach(() => {
+		resetMockKobold(kobold);
 		harness = createTestHarness([new RollMacroCommand([new RollMacroSetSubCommand()])]);
 
 		// Default RollBuilder mock - returns valid roll
-		vi.mocked(RollBuilder).mockImplementation(
-			() =>
-				({
-					addRoll: vi.fn(),
-					rollResults: [{ results: { errors: [] } }],
-				}) as any
-		);
+		vi.mocked(RollBuilder).mockImplementation(function (this: MockRollBuilder) {
+			this.addRoll = vi.fn(() => {});
+			(this as MockRollBuilder & { rollResults: unknown[] }).rollResults = [
+				{ results: { errors: [] } },
+			];
+			return this;
+		} as unknown as () => RollBuilder);
 	});
-
 
 	describe('setting roll macro values', () => {
 		it('should update an existing roll macro', async () => {
@@ -48,7 +53,7 @@ describe('RollMacroSetSubCommand Integration', () => {
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getRollMacroByName').mockReturnValue(existingMacro);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -75,7 +80,7 @@ describe('RollMacroSetSubCommand Integration', () => {
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getRollMacroByName').mockReturnValue(existingMacro);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -102,7 +107,7 @@ describe('RollMacroSetSubCommand Integration', () => {
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getRollMacroByName').mockReturnValue(existingMacro);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -130,7 +135,7 @@ describe('RollMacroSetSubCommand Integration', () => {
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getRollMacroByName').mockReturnValue(undefined);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -159,16 +164,16 @@ describe('RollMacroSetSubCommand Integration', () => {
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getRollMacroByName').mockReturnValue(existingMacro);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Mock RollBuilder to return an error
-			vi.mocked(RollBuilder).mockImplementation(
-				() =>
-					({
-						addRoll: vi.fn(),
-						rollResults: [{ results: { errors: ['Invalid expression'] } }],
-					}) as any
-			);
+			vi.mocked(RollBuilder).mockImplementation(function (this: MockRollBuilder) {
+				this.addRoll = vi.fn(() => {});
+				(this as MockRollBuilder & { rollResults: unknown[] }).rollResults = [
+					{ results: { errors: ['Invalid expression'] } },
+				];
+				return this;
+			} as unknown as () => RollBuilder);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -200,20 +205,18 @@ describe('RollMacroSetSubCommand Integration', () => {
 				{ name: 'power-attack', macro: '4' },
 			];
 
-			vi.mocked(KoboldUtils).mockImplementation(
-				() =>
-					({
-						autocompleteUtils: {
-							getAllMatchingRollsMacrosForCharacter: vi.fn().mockResolvedValue([
-								{ name: 'sneak-attack', value: 'sneak-attack' },
-								{ name: 'sneak-damage', value: 'sneak-damage' },
-							]),
-						},
-						fetchNonNullableDataForCommand: vi.fn().mockResolvedValue({
-							activeCharacter: mockCharacter,
-						}),
-					}) as any
-			);
+			vi.mocked(KoboldUtils).mockImplementation(function (this: MockKoboldUtils) {
+				(this as MockKoboldUtils & { autocompleteUtils: unknown }).autocompleteUtils = {
+					getAllMatchingRollsMacrosForCharacter: vi.fn(async () => [
+						{ name: 'sneak-attack', value: 'sneak-attack' },
+						{ name: 'sneak-damage', value: 'sneak-damage' },
+					]),
+				};
+				this.fetchNonNullableDataForCommand = vi.fn(async () => ({
+					activeCharacter: mockCharacter,
+				}));
+				return this;
+			} as unknown as () => KoboldUtils);
 
 			// Act
 			const result = await harness.executeAutocomplete({
@@ -230,17 +233,15 @@ describe('RollMacroSetSubCommand Integration', () => {
 
 		it('should return empty array when no character is active', async () => {
 			// Arrange
-			vi.mocked(KoboldUtils).mockImplementation(
-				() =>
-					({
-						autocompleteUtils: {
-							getAllMatchingRollsMacrosForCharacter: vi.fn().mockResolvedValue([]),
-						},
-						fetchNonNullableDataForCommand: vi.fn().mockResolvedValue({
-							activeCharacter: null,
-						}),
-					}) as any
-			);
+			vi.mocked(KoboldUtils).mockImplementation(function (this: MockKoboldUtils) {
+				(this as MockKoboldUtils & { autocompleteUtils: unknown }).autocompleteUtils = {
+					getAllMatchingRollsMacrosForCharacter: vi.fn(async () => []),
+				};
+				this.fetchNonNullableDataForCommand = vi.fn(async () => ({
+					activeCharacter: null,
+				}));
+				return this;
+			} as unknown as () => KoboldUtils);
 
 			// Act
 			const result = await harness.executeAutocomplete({

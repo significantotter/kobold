@@ -1,8 +1,7 @@
 /**
- * Integration tests for InitAddSubCommand
+ * Unit tests for InitAddSubCommand
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { vitestKobold } from '@kobold/db/test-utils';
 import { InitDefinition } from '@kobold/documentation';
 import { InitCommand } from './init-command.js';
 import { InitAddSubCommand } from './init-add-subcommand.js';
@@ -23,24 +22,28 @@ import {
 	TEST_GUILD_ID,
 	TEST_CHANNEL_ID,
 	CommandTestHarness,
+	getMockKobold,
+	resetMockKobold,
 } from '../../../test-utils/index.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
 
 vi.mock('../../../utils/kobold-service-utils/kobold-utils.js');
 
-describe('InitAddSubCommand Integration', () => {
+describe('InitAddSubCommand', () => {
+	const kobold = getMockKobold();
+
 	let harness: CommandTestHarness;
 
 	beforeEach(() => {
+		resetMockKobold(kobold);
 		resetInitTestIds();
 		harness = createTestHarness([new InitCommand([new InitAddSubCommand()])]);
 	});
 
-
 	it('should error when no initiative exists', async () => {
 		// Arrange
-		const { fetchDataMock } = setupKoboldUtilsMocks();
-		fetchDataMock.mockRejectedValue(
+		const { fetchNonNullableDataMock } = setupKoboldUtilsMocks();
+		fetchNonNullableDataMock.mockRejectedValue(
 			new KoboldError('Yip! You must be in an initiative to use this command.')
 		);
 
@@ -64,15 +67,15 @@ describe('InitAddSubCommand Integration', () => {
 	it('should add a custom NPC to initiative', async () => {
 		// Arrange
 		const existingInit = createMockInitiative();
-		const { fetchDataMock } = setupKoboldUtilsMocks();
-		fetchDataMock.mockResolvedValue({
+		const { fetchNonNullableDataMock } = setupKoboldUtilsMocks();
+		fetchNonNullableDataMock.mockResolvedValue({
 			currentInitiative: existingInit,
 			userSettings: {},
 		});
 
-		const initActorCreateSpy = vi.spyOn(vitestKobold.initiativeActor, 'create');
-		const initGroupCreateSpy = vi.spyOn(vitestKobold.initiativeActorGroup, 'create');
-		const sheetRecordCreateSpy = vi.spyOn(vitestKobold.sheetRecord, 'create');
+		const initActorCreateSpy = kobold.initiativeActor.create;
+		const initGroupCreateSpy = kobold.initiativeActorGroup.create;
+		const sheetRecordCreateSpy = kobold.sheetRecord.create;
 
 		const mockGroup = createMockActorGroup({
 			initiativeId: existingInit.id,
@@ -91,7 +94,7 @@ describe('InitAddSubCommand Integration', () => {
 		});
 
 		initGroupCreateSpy.mockResolvedValue(mockGroup);
-		sheetRecordCreateSpy.mockResolvedValue(mockSheetRecord);
+		kobold.sheetRecord.create.mockResolvedValue(mockSheetRecord);
 		initActorCreateSpy.mockResolvedValue(mockActor);
 
 		// Act

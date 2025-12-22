@@ -6,6 +6,7 @@
 .DS_Store
 /**/i18n-types.ts
 **/*.csv
+.vitest-reports/
 
 /trace
 

@@ -1,8 +1,7 @@
 /**
- * Integration tests for CounterGroupSetSubCommand
+ * Unit tests for CounterGroupSetSubCommand
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { vitestKobold } from '@kobold/db/test-utils';
 import { CounterStyleEnum } from '@kobold/db';
 import { CounterGroupDefinition } from '@kobold/documentation';
 import { CounterGroupCommand } from './counter-group-command.js';
@@ -21,17 +20,21 @@ import {
 	CommandTestHarness,
 	createMockNumericCounter,
 	createMockCounterGroup,
-} from '../../../test-utils/index.js';
+	getMockKobold,
+	resetMockKobold,} from '../../../test-utils/index.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import type { CounterGroup, NumericCounter } from '@kobold/db';
 
 vi.mock('../../../utils/kobold-service-utils/kobold-utils.js');
 vi.mock('../../../utils/kobold-helpers/finder-helpers.js');
 
-describe('CounterGroupSetSubCommand Integration', () => {
+describe('CounterGroupSetSubCommand', () => {
+	const kobold = getMockKobold();
+
 	let harness: CommandTestHarness;
 
 	beforeEach(() => {
+		resetMockKobold(kobold);
 		harness = createTestHarness([new CounterGroupCommand([new CounterGroupSetSubCommand()])]);
 	});
 
@@ -41,7 +44,7 @@ describe('CounterGroupSetSubCommand Integration', () => {
 			const group = createMockCounterGroup({ name: 'Spell Slots' });
 			setupKoboldUtilsMocks();
 			vi.mocked(FinderHelpers.getCounterGroupByName).mockReturnValue(group);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -95,7 +98,7 @@ describe('CounterGroupSetSubCommand Integration', () => {
 			const group = createMockCounterGroup({ name: 'Spell Slots', description: null });
 			setupKoboldUtilsMocks();
 			vi.mocked(FinderHelpers.getCounterGroupByName).mockReturnValue(group);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({

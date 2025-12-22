@@ -1,8 +1,7 @@
 /**
- * Integration tests for ConditionApplyCustomSubCommand
+ * Unit tests for ConditionApplyCustomSubCommand
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { vitestKobold } from '@kobold/db/test-utils';
 import { SheetAdjustmentTypeEnum } from '@kobold/db';
 import { ConditionCommand } from './condition-command.js';
 import { ConditionApplyCustomSubCommand } from './condition-apply-custom-subcommand.js';
@@ -16,17 +15,21 @@ import {
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	CommandTestHarness,
-} from '../../../test-utils/index.js';
+	getMockKobold,
+	resetMockKobold,} from '../../../test-utils/index.js';
 import { InputParseUtils } from '../../../utils/input-parse-utils.js';
 import { SheetUtils } from '../../../utils/sheet/sheet-utils.js';
 
 vi.mock('../../../utils/kobold-service-utils/kobold-utils.js');
 vi.mock('../../../utils/kobold-helpers/finder-helpers.js');
 
-describe('ConditionApplyCustomSubCommand Integration', () => {
+describe('ConditionApplyCustomSubCommand', () => {
+	const kobold = getMockKobold();
+
 	let harness: CommandTestHarness;
 
 	beforeEach(() => {
+		resetMockKobold(kobold);
 		harness = createTestHarness([new ConditionCommand([new ConditionApplyCustomSubCommand()])]);
 		// Mock validation functions to pass - these involve complex dice parsing
 		vi.spyOn(InputParseUtils, 'isValidRollTargetTags').mockReturnValue(true);
@@ -35,13 +38,12 @@ describe('ConditionApplyCustomSubCommand Integration', () => {
 		vi.spyOn(SheetUtils, 'adjustSheetWithModifiers').mockReturnValue({} as any);
 	});
 
-
 	describe('successful condition creation', () => {
 		it('should create a condition with roll adjustment', async () => {
 			// Arrange
 			setupConditionMocks({ conditions: [], targetName: 'Test Character' });
 			setupConditionFinderHelpersMocks(undefined); // No existing condition
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -68,7 +70,7 @@ describe('ConditionApplyCustomSubCommand Integration', () => {
 			// Arrange
 			setupConditionMocks({ conditions: [], targetName: 'Test Character' });
 			setupConditionFinderHelpersMocks(undefined);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -93,7 +95,7 @@ describe('ConditionApplyCustomSubCommand Integration', () => {
 			// Arrange
 			setupConditionMocks({ conditions: [], targetName: 'Test Character' });
 			setupConditionFinderHelpersMocks(undefined);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -121,7 +123,7 @@ describe('ConditionApplyCustomSubCommand Integration', () => {
 			// Arrange
 			setupConditionMocks({ conditions: [], targetName: 'Test Character' });
 			setupConditionFinderHelpersMocks(undefined);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -151,7 +153,7 @@ describe('ConditionApplyCustomSubCommand Integration', () => {
 				targetName: 'Test Character',
 			});
 			setupConditionFinderHelpersMocks(existingCondition);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -176,7 +178,7 @@ describe('ConditionApplyCustomSubCommand Integration', () => {
 			// Arrange
 			setupConditionMocks({ conditions: [], targetName: 'Test Character' });
 			setupConditionFinderHelpersMocks(undefined);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -201,7 +203,7 @@ describe('ConditionApplyCustomSubCommand Integration', () => {
 			// Arrange
 			setupConditionMocks({ conditions: [], targetName: 'Test Character' });
 			setupConditionFinderHelpersMocks(undefined);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -226,7 +228,7 @@ describe('ConditionApplyCustomSubCommand Integration', () => {
 			// Arrange
 			setupConditionMocks({ conditions: [], targetName: 'Test Character' });
 			setupConditionFinderHelpersMocks(undefined);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({

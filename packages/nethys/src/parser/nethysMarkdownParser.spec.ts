@@ -359,14 +359,14 @@ Kangaroos are marsupials distinguished by long faces, large ears, powerful back 
 **Wis** +1
 **Cha** +1
 **Powerful Leaper** The kangaroo doesn't need to Stride while attempting a [Long Jump](<https://2e.aonprd.com/Actions.aspx?ID=37>), nor does it automatically fail if it doesn't.
-***
+
 **AC** 15
 **Fort** +7
 **Ref** +6
 **Will** +3
 **HP** 18
 **Defensive Shove** [reaction] **Trigger** The kangaroo takes damage from an adjacent creature; **Effect** The kangaroo attempts to [Shove](<https://2e.aonprd.com/Actions.aspx?ID=38>) the creature that damaged it.
-***
+
 **Speed** 35 feet
 **Melee** [one-action] claw +7, **Damage** 1d4+3 slashing
 **Melee** [one-action] foot +7, **Damage** 1d6+3 slashing plus [Push](<https://2e.aonprd.com/MonsterAbilities.aspx?ID=25>)

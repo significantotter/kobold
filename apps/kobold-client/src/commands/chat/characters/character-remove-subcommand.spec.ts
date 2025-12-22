@@ -1,8 +1,7 @@
 /**
- * Integration tests for CharacterRemoveSubCommand
+ * Unit tests for CharacterRemoveSubCommand
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { vitestKobold } from '@kobold/db/test-utils';
 import { CharacterCommand } from './character-command.js';
 import { CharacterRemoveSubCommand } from './character-remove-subcommand.js';
 import {
@@ -12,19 +11,23 @@ import {
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	CommandTestHarness,
+	getMockKobold,
+	resetMockKobold,
 } from '../../../test-utils/index.js';
 import { CollectorUtils } from '../../../utils/collector-utils.js';
 
 vi.mock('../../../utils/kobold-service-utils/kobold-utils.js');
 vi.mock('../../../utils/collector-utils.js');
 
-describe('CharacterRemoveSubCommand Integration', () => {
+describe('CharacterRemoveSubCommand', () => {
+	const kobold = getMockKobold();
+
 	let harness: CommandTestHarness;
 
 	beforeEach(() => {
+		resetMockKobold(kobold);
 		harness = createTestHarness([new CharacterCommand([new CharacterRemoveSubCommand()])]);
 	});
-
 
 	describe('character removal flow', () => {
 		it('should prompt for confirmation before removing', async () => {
@@ -53,8 +56,8 @@ describe('CharacterRemoveSubCommand Integration', () => {
 		it('should remove character when user confirms', async () => {
 			// Arrange
 			const { mockCharacter } = setupKoboldUtilsMocks();
-			const deleteMock = vi.spyOn(vitestKobold.character, 'delete').mockResolvedValue();
-			vi.spyOn(vitestKobold.character, 'read').mockResolvedValue(null);
+			const deleteMock = kobold.character.delete.mockResolvedValue(undefined);
+			kobold.character.read.mockResolvedValue(null);
 
 			// Mock button collector to simulate user confirming removal
 			vi.mocked(CollectorUtils.collectByButton).mockResolvedValue({
@@ -79,7 +82,7 @@ describe('CharacterRemoveSubCommand Integration', () => {
 		it('should not delete when user cancels', async () => {
 			// Arrange
 			setupKoboldUtilsMocks();
-			const deleteMock = vi.spyOn(vitestKobold.character, 'delete').mockResolvedValue();
+			const deleteMock = kobold.character.delete.mockResolvedValue(undefined);
 
 			// Mock button collector to simulate user cancelling
 			vi.mocked(CollectorUtils.collectByButton).mockResolvedValue({
@@ -104,7 +107,7 @@ describe('CharacterRemoveSubCommand Integration', () => {
 		it('should handle confirmation timeout', async () => {
 			// Arrange
 			setupKoboldUtilsMocks();
-			const deleteMock = vi.spyOn(vitestKobold.character, 'delete').mockResolvedValue();
+			const deleteMock = kobold.character.delete.mockResolvedValue(undefined);
 
 			// Mock button collector to simulate timeout (returns undefined)
 			vi.mocked(CollectorUtils.collectByButton).mockResolvedValue(undefined);
@@ -130,11 +133,11 @@ describe('CharacterRemoveSubCommand Integration', () => {
 				characterOverrides: { name: 'New Active', id: 123456 },
 			});
 
-			vi.spyOn(vitestKobold.character, 'delete').mockResolvedValue();
-			vi.spyOn(vitestKobold.character, 'read').mockResolvedValue(newCharacter as any);
-			const setIsActiveMock = vi
-				.spyOn(vitestKobold.character, 'setIsActive')
-				.mockResolvedValue(newCharacter as any);
+			kobold.character.delete.mockResolvedValue(undefined);
+			kobold.character.read.mockResolvedValue(newCharacter as any);
+			const setIsActiveMock = kobold.character.setIsActive.mockResolvedValue(
+				newCharacter as any
+			);
 
 			// Mock button collector to simulate user confirming removal
 			vi.mocked(CollectorUtils.collectByButton).mockResolvedValue({

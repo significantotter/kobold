@@ -1,8 +1,7 @@
 /**
- * Integration tests for ConditionRemoveSubCommand
+ * Unit tests for ConditionRemoveSubCommand
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { vitestKobold } from '@kobold/db/test-utils';
 import { SheetAdjustmentTypeEnum } from '@kobold/db';
 import { ConditionCommand } from './condition-command.js';
 import { ConditionRemoveSubCommand } from './condition-remove-subcommand.js';
@@ -16,20 +15,23 @@ import {
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	CommandTestHarness,
-} from '../../../test-utils/index.js';
+	getMockKobold,
+	resetMockKobold,} from '../../../test-utils/index.js';
 import { CollectorUtils } from '../../../utils/collector-utils.js';
 
 vi.mock('../../../utils/kobold-service-utils/kobold-utils.js');
 vi.mock('../../../utils/kobold-helpers/finder-helpers.js');
 vi.mock('../../../utils/collector-utils.js');
 
-describe('ConditionRemoveSubCommand Integration', () => {
+describe('ConditionRemoveSubCommand', () => {
+	const kobold = getMockKobold();
+
 	let harness: CommandTestHarness;
 
 	beforeEach(() => {
+		resetMockKobold(kobold);
 		harness = createTestHarness([new ConditionCommand([new ConditionRemoveSubCommand()])]);
 	});
-
 
 	describe('condition removal flow', () => {
 		it('should remove condition when user confirms', async () => {
@@ -44,7 +46,7 @@ describe('ConditionRemoveSubCommand Integration', () => {
 				targetName: 'Test Character',
 			});
 			setupConditionFinderHelpersMocks(existingCondition);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Mock button collector to simulate user confirming removal
 			vi.mocked(CollectorUtils.collectByButton).mockResolvedValue({
@@ -81,7 +83,7 @@ describe('ConditionRemoveSubCommand Integration', () => {
 				targetName: 'Test Character',
 			});
 			setupConditionFinderHelpersMocks(existingCondition);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Mock button collector to simulate user cancelling
 			vi.mocked(CollectorUtils.collectByButton).mockResolvedValue({

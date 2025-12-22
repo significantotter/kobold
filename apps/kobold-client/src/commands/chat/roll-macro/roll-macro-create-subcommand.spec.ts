@@ -1,8 +1,7 @@
 /**
- * Integration tests for RollMacroCreateSubCommand
+ * Unit tests for RollMacroCreateSubCommand
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { vitestKobold } from '@kobold/db/test-utils';
 import { RollMacroCommand } from './roll-macro-command.js';
 import { RollMacroCreateSubCommand } from './roll-macro-create-subcommand.js';
 import {
@@ -13,6 +12,9 @@ import {
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	CommandTestHarness,
+	getMockKobold,
+	resetMockKobold,
+	type MockRollBuilder,
 } from '../../../test-utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
@@ -22,22 +24,24 @@ vi.mock('../../../utils/kobold-service-utils/kobold-utils.js');
 vi.mock('../../../utils/kobold-helpers/finder-helpers.js');
 vi.mock('../../../utils/roll-builder.js');
 
-describe('RollMacroCreateSubCommand Integration', () => {
+describe('RollMacroCreateSubCommand', () => {
+	const kobold = getMockKobold();
+
 	let harness: CommandTestHarness;
 
 	beforeEach(() => {
+		resetMockKobold(kobold);
 		harness = createTestHarness([new RollMacroCommand([new RollMacroCreateSubCommand()])]);
 
 		// Default RollBuilder mock - returns valid roll
-		vi.mocked(RollBuilder).mockImplementation(
-			() =>
-				({
-					addRoll: vi.fn(),
-					rollResults: [{ results: { errors: [] } }],
-				}) as any
-		);
+		vi.mocked(RollBuilder).mockImplementation(function (this: MockRollBuilder) {
+			this.addRoll = vi.fn(() => {});
+			(this as MockRollBuilder & { rollResults: unknown[] }).rollResults = [
+				{ results: { errors: [] } },
+			];
+			return this;
+		} as unknown as () => RollBuilder);
 	});
-
 
 	describe('successful roll macro creation', () => {
 		it('should create a simple roll macro', async () => {
@@ -47,7 +51,7 @@ describe('RollMacroCreateSubCommand Integration', () => {
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getRollMacroByName').mockReturnValue(undefined);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -75,7 +79,7 @@ describe('RollMacroCreateSubCommand Integration', () => {
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getRollMacroByName').mockReturnValue(undefined);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -101,7 +105,7 @@ describe('RollMacroCreateSubCommand Integration', () => {
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getRollMacroByName').mockReturnValue(undefined);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -130,7 +134,7 @@ describe('RollMacroCreateSubCommand Integration', () => {
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getRollMacroByName').mockReturnValue(existingMacro);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -158,16 +162,16 @@ describe('RollMacroCreateSubCommand Integration', () => {
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getRollMacroByName').mockReturnValue(undefined);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Mock RollBuilder to return an error
-			vi.mocked(RollBuilder).mockImplementation(
-				() =>
-					({
-						addRoll: vi.fn(),
-						rollResults: [{ error: true, results: { errors: ['Invalid expression'] } }],
-					}) as any
-			);
+			vi.mocked(RollBuilder).mockImplementation(function (this: MockRollBuilder) {
+				this.addRoll = vi.fn(() => {});
+				(this as MockRollBuilder & { rollResults: unknown[] }).rollResults = [
+					{ error: true, results: { errors: ['Invalid expression'] } },
+				];
+				return this;
+			} as unknown as () => RollBuilder);
 
 			// Act
 			const result = await harness.executeCommand({

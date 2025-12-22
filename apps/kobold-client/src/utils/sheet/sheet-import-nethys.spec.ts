@@ -185,7 +185,7 @@ describe('sheet-import-nethys', () => {
 			creatureFamilyEntry: forestDragonFamilyEntry,
 		});
 	});
-	test('applyDetails()', () => {
+	describe('applyDetails()', () => {
 		test('Should apply the details of the creature onto the sheet', async () => {
 			importer.applyDetails();
 			const sheetInfo = importer.sheet.info;

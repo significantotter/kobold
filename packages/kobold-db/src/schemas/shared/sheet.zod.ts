@@ -204,6 +204,7 @@ export const zSheetBaseCounters = zRecordOf(
 		max: null,
 		recoverTo: -1,
 		recoverable: true,
+		text: '',
 	}))
 ).describe('The non-configurable base counters for a sheet.');
 
@@ -252,7 +253,10 @@ export const zSheet = z
 			.default([])
 			.describe("The creature's lore/additional skills."),
 		attacks: z.array(zSheetAttack).describe("The creature's attacks."),
-		sourceData: z.object({}).default({}).describe('The source data the sheet was parsed from'),
+		sourceData: z
+			.record(z.string(), z.any())
+			.default({})
+			.describe('The source data the sheet was parsed from'),
 	})
 	.describe("A creature's sheet.");
 

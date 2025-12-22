@@ -1,8 +1,7 @@
 /**
- * Integration tests for GameSetActiveSubCommand
+ * Unit tests for GameSetActiveSubCommand
  */
 import { describe, it, expect, beforeEach, vi, MockInstance } from 'vitest';
-import { vitestKobold } from '@kobold/db/test-utils';
 import { GameDefinition } from '@kobold/documentation';
 import { GameCommand } from './game-command.js';
 import { GameSetActiveSubCommand } from './game-set-active-subcommand.js';
@@ -15,29 +14,26 @@ import {
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	CommandTestHarness,
-} from '../../../test-utils/index.js';
+	getMockKobold,
+	resetMockKobold,} from '../../../test-utils/index.js';
 import { createMockGame } from './game-test-utils.js';
 
-describe('GameSetActiveSubCommand Integration', () => {
+describe('GameSetActiveSubCommand', () => {
+	const kobold = getMockKobold();
+
 	let harness: CommandTestHarness;
-	let gameReadManySpy: MockInstance;
-	let gameUpdateSpy: MockInstance;
-	let gameUpdateManySpy: MockInstance;
 
 	beforeEach(() => {
+		resetMockKobold(kobold);
 		harness = createTestHarness([new GameCommand([new GameSetActiveSubCommand()])]);
-		gameReadManySpy = vi.spyOn(vitestKobold.game, 'readMany');
-		gameUpdateSpy = vi.spyOn(vitestKobold.game, 'update');
-		gameUpdateManySpy = vi.spyOn(vitestKobold.game, 'updateMany');
 	});
-
 
 	it('should set a game as active', async () => {
 		// Arrange
 		const targetGame = createMockGame({ id: 5, name: 'Target Game', isActive: false });
-		gameReadManySpy.mockResolvedValue([targetGame]);
-		gameUpdateManySpy.mockResolvedValue([]);
-		gameUpdateSpy.mockResolvedValue({ ...targetGame, isActive: true });
+		kobold.game.readMany.mockResolvedValue([targetGame]);
+		kobold.game.updateMany.mockResolvedValue([]);
+		kobold.game.update.mockResolvedValue({ ...targetGame, isActive: true });
 
 		// Act
 		const result = await harness.executeCommand({
@@ -55,12 +51,12 @@ describe('GameSetActiveSubCommand Integration', () => {
 		expect(result.getResponseContent()).toContain(
 			strings.setActive.success({ gameName: 'Target Game' })
 		);
-		expect(gameUpdateSpy).toHaveBeenCalledWith({ id: 5 }, { isActive: true });
+		expect(kobold.game.update).toHaveBeenCalledWith({ id: 5 }, { isActive: true });
 	});
 
 	it('should error when game not found', async () => {
 		// Arrange
-		gameReadManySpy.mockResolvedValue([]);
+		kobold.game.readMany.mockResolvedValue([]);
 
 		// Act
 		const result = await harness.executeCommand({
@@ -81,9 +77,9 @@ describe('GameSetActiveSubCommand Integration', () => {
 	it('should deactivate other games when setting one active', async () => {
 		// Arrange
 		const targetGame = createMockGame({ id: 5, name: 'Target Game', isActive: false });
-		gameReadManySpy.mockResolvedValue([targetGame]);
-		gameUpdateManySpy.mockResolvedValue([]);
-		gameUpdateSpy.mockResolvedValue({ ...targetGame, isActive: true });
+		kobold.game.readMany.mockResolvedValue([targetGame]);
+		kobold.game.updateMany.mockResolvedValue([]);
+		kobold.game.update.mockResolvedValue({ ...targetGame, isActive: true });
 
 		// Act
 		await harness.executeCommand({
@@ -97,7 +93,7 @@ describe('GameSetActiveSubCommand Integration', () => {
 		});
 
 		// Assert
-		expect(gameUpdateManySpy).toHaveBeenCalledWith(
+		expect(kobold.game.updateMany).toHaveBeenCalledWith(
 			{ guildId: TEST_GUILD_ID, gmUserId: TEST_USER_ID },
 			{ isActive: false }
 		);

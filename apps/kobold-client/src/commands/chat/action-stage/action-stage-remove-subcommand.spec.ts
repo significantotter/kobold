@@ -1,8 +1,7 @@
 /**
- * Integration tests for ActionStageRemoveSubCommand
+ * Unit tests for ActionStageRemoveSubCommand
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { vitestKobold } from '@kobold/db/test-utils';
 import { ActionStageCommand } from './action-stage-command.js';
 import { ActionStageRemoveSubCommand } from './action-stage-remove-subcommand.js';
 import {
@@ -16,18 +15,21 @@ import {
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	CommandTestHarness,
-} from '../../../test-utils/index.js';
+	getMockKobold,
+	resetMockKobold,} from '../../../test-utils/index.js';
 
 vi.mock('../../../utils/kobold-service-utils/kobold-utils.js');
 vi.mock('../../../utils/kobold-helpers/finder-helpers.js');
 
-describe('ActionStageRemoveSubCommand Integration', () => {
+describe('ActionStageRemoveSubCommand', () => {
+	const kobold = getMockKobold();
+
 	let harness: CommandTestHarness;
 
 	beforeEach(() => {
+		resetMockKobold(kobold);
 		harness = createTestHarness([new ActionStageCommand([new ActionStageRemoveSubCommand()])]);
 	});
-
 
 	describe('execute', () => {
 		it('should remove a roll from an action', async () => {
@@ -40,7 +42,7 @@ describe('ActionStageRemoveSubCommand Integration', () => {
 				],
 			});
 			setupKoboldUtilsMocks({ actions: [action] });
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({

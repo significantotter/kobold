@@ -1,8 +1,7 @@
 /**
- * Integration tests for RollMacroRemoveSubCommand
+ * Unit tests for RollMacroRemoveSubCommand
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { vitestKobold } from '@kobold/db/test-utils';
 import { RollMacroCommand } from './roll-macro-command.js';
 import { RollMacroRemoveSubCommand } from './roll-macro-remove-subcommand.js';
 import {
@@ -14,6 +13,9 @@ import {
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	CommandTestHarness,
+	getMockKobold,
+	resetMockKobold,
+	type MockKoboldUtils,
 } from '../../../test-utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
@@ -23,13 +25,15 @@ vi.mock('../../../utils/kobold-service-utils/kobold-utils.js');
 vi.mock('../../../utils/kobold-helpers/finder-helpers.js');
 vi.mock('../../../utils/collector-utils.js');
 
-describe('RollMacroRemoveSubCommand Integration', () => {
+describe('RollMacroRemoveSubCommand', () => {
+	const kobold = getMockKobold();
+
 	let harness: CommandTestHarness;
 
 	beforeEach(() => {
+		resetMockKobold(kobold);
 		harness = createTestHarness([new RollMacroCommand([new RollMacroRemoveSubCommand()])]);
 	});
-
 
 	describe('removing roll macros', () => {
 		it('should remove a roll macro when confirmed', async () => {
@@ -40,7 +44,7 @@ describe('RollMacroRemoveSubCommand Integration', () => {
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getRollMacroByName').mockReturnValue(existingMacro);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Mock the button collector to return 'remove'
 			vi.mocked(CollectorUtils.collectByButton).mockResolvedValue({
@@ -71,7 +75,7 @@ describe('RollMacroRemoveSubCommand Integration', () => {
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getRollMacroByName').mockReturnValue(existingMacro);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Mock the button collector to return 'cancel'
 			vi.mocked(CollectorUtils.collectByButton).mockResolvedValue({
@@ -101,7 +105,7 @@ describe('RollMacroRemoveSubCommand Integration', () => {
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getRollMacroByName').mockReturnValue(undefined);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -132,20 +136,18 @@ describe('RollMacroRemoveSubCommand Integration', () => {
 				{ name: 'power-attack', macro: '4' },
 			];
 
-			vi.mocked(KoboldUtils).mockImplementation(
-				() =>
-					({
-						autocompleteUtils: {
-							getAllMatchingRollsMacrosForCharacter: vi.fn().mockResolvedValue([
-								{ name: 'sneak-attack', value: 'sneak-attack' },
-								{ name: 'sneak-damage', value: 'sneak-damage' },
-							]),
-						},
-						fetchNonNullableDataForCommand: vi.fn().mockResolvedValue({
-							activeCharacter: mockCharacter,
-						}),
-					}) as any
-			);
+			vi.mocked(KoboldUtils).mockImplementation(function (this: MockKoboldUtils) {
+				(this as MockKoboldUtils & { autocompleteUtils: unknown }).autocompleteUtils = {
+					getAllMatchingRollsMacrosForCharacter: vi.fn(async () => [
+						{ name: 'sneak-attack', value: 'sneak-attack' },
+						{ name: 'sneak-damage', value: 'sneak-damage' },
+					]),
+				};
+				this.fetchNonNullableDataForCommand = vi.fn(async () => ({
+					activeCharacter: mockCharacter,
+				}));
+				return this;
+			} as unknown as () => KoboldUtils);
 
 			// Act
 			const result = await harness.executeAutocomplete({

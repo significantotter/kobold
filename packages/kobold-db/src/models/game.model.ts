@@ -37,7 +37,7 @@ export class GameModel extends Model<Database['game']> {
 			.returningAll()
 			.returning(eb => [charactersForGame(eb)])
 			.execute();
-		return result[0];
+		return result[0] as unknown as GameWithRelations;
 	}
 
 	/**
@@ -76,7 +76,7 @@ export class GameModel extends Model<Database['game']> {
 				return and(ands);
 			});
 
-		return await query.execute();
+		return (await query.execute()) as unknown as GameWithRelations[];
 	}
 
 	public async read({ id }: { id: GameId }): Promise<GameWithRelations | null> {
@@ -88,7 +88,7 @@ export class GameModel extends Model<Database['game']> {
 			.execute();
 
 		if (!game.length) return null;
-		else return game[0];
+		else return game[0] as unknown as GameWithRelations;
 	}
 
 	public async update({ id }: { id: GameId }, args: GameUpdate): Promise<GameWithRelations> {
@@ -99,7 +99,7 @@ export class GameModel extends Model<Database['game']> {
 			.returningAll()
 			.returning(eb => [charactersForGame(eb)])
 			.executeTakeFirstOrThrow();
-		return result;
+		return result as unknown as GameWithRelations;
 	}
 
 	public async updateMany(
@@ -133,7 +133,7 @@ export class GameModel extends Model<Database['game']> {
 			.returningAll()
 			.returning(eb => [charactersForGame(eb, { guildId })])
 			.execute();
-		return result;
+		return result as unknown as GameWithRelations[];
 	}
 
 	public async delete({ id }: { id: GameId }): Promise<void> {

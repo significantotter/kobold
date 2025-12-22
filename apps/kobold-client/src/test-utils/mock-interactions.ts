@@ -100,8 +100,8 @@ export function createMockChatInputInteraction(
 		member: {
 			user: {
 				id: userId,
-				global_name: faker.internet.userName(),
-				username: faker.internet.userName(),
+				global_name: faker.internet.username(),
+				username: faker.internet.username(),
 				discriminator: '0001',
 				avatar: faker.string.alphanumeric(32),
 			},
@@ -157,10 +157,16 @@ export function createMockChatInputInteraction(
 	(interaction as any).options = mockOptionsResolver;
 
 	// Mock reply methods
-	const mockReply = vi.fn().mockResolvedValue({ id: faker.string.numeric(18) });
-	const mockEditReply = vi.fn().mockResolvedValue({ id: faker.string.numeric(18) });
-	const mockFollowUp = vi.fn().mockResolvedValue({ id: faker.string.numeric(18) });
-	const mockDeferReply = vi.fn().mockImplementation(async () => {
+	const mockReply = vi.fn(async () => {
+		id: faker.string.numeric(18);
+	});
+	const mockEditReply = vi.fn(async () => {
+		id: faker.string.numeric(18);
+	});
+	const mockFollowUp = vi.fn(async () => {
+		id: faker.string.numeric(18);
+	});
+	const mockDeferReply = vi.fn(async () => {
 		(interaction as any).deferred = true;
 		return { id: faker.string.numeric(18) };
 	});
@@ -245,8 +251,8 @@ export function createMockAutocompleteInteraction(
 		member: {
 			user: {
 				id: userId,
-				global_name: faker.internet.userName(),
-				username: faker.internet.userName(),
+				global_name: faker.internet.username(),
+				username: faker.internet.username(),
 				discriminator: '0001',
 				avatar: faker.string.alphanumeric(32),
 			},
@@ -281,7 +287,7 @@ export function createMockAutocompleteInteraction(
 	(interaction as any).options = mockOptionsResolver;
 
 	// Mock respond method
-	const mockRespond = vi.fn().mockResolvedValue(undefined);
+	const mockRespond = vi.fn(async () => undefined);
 	(interaction as any).respond = mockRespond;
 
 	return interaction as AutocompleteInteraction<CacheType> & { respond: Mock };

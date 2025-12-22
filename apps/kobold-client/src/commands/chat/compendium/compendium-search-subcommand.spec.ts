@@ -9,24 +9,32 @@ import {
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	CommandTestHarness,
+	type MockKoboldEmbed,
+	type MockNethysParser,
 } from '../../../test-utils/index.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { NethysDb, NethysParser } from '@kobold/nethys';
 import type { CompendiumEntry } from '@kobold/nethys';
+
+// Mock type that relaxes the complex generic signatures for testing
+type MockNethysDb = {
+	searchTerm: ReturnType<typeof vi.fn>;
+	search: ReturnType<typeof vi.fn>;
+};
 
 // Mock the modules
 vi.mock('@kobold/nethys', async importOriginal => {
 	const actual = await importOriginal<typeof import('@kobold/nethys')>();
 	return {
 		...actual,
-		NethysParser: vi.fn(),
+		NethysParser: vi.fn(() => ({})),
 	};
 });
 vi.mock('../../../utils/kobold-embed-utils.js');
 
 describe('CompendiumSearchSubCommand Integration', () => {
 	let harness: CommandTestHarness;
-	let mockNethysDb: Partial<NethysDb>;
+	let mockNethysDb: MockNethysDb;
 	let sendBatchesMock: ReturnType<typeof vi.fn>;
 	let parseCompendiumEntryMock: ReturnType<typeof vi.fn>;
 
@@ -73,34 +81,29 @@ describe('CompendiumSearchSubCommand Integration', () => {
 			searchTerm: vi
 				.fn()
 				.mockResolvedValue([{ search: 'Fireball' }, { search: 'Fire Shield' }]),
-			search: vi.fn().mockResolvedValue([sampleCompendiumRow]),
+			search: vi.fn(async () => [sampleCompendiumRow]),
 		};
 
 		// Setup KoboldEmbed mock
-		sendBatchesMock = vi.fn().mockResolvedValue(undefined);
-		vi.mocked(KoboldEmbed).mockImplementation(
-			() =>
-				({
-					sendBatches: sendBatchesMock,
-				}) as unknown as KoboldEmbed
-		);
+		sendBatchesMock = vi.fn(async () => undefined);
+		vi.mocked(KoboldEmbed).mockImplementation(function (this: MockKoboldEmbed) {
+			this.sendBatches = sendBatchesMock;
+			return this;
+		} as unknown as () => KoboldEmbed);
 
 		// Setup NethysParser mock
 		parseCompendiumEntryMock = vi
 			.fn()
 			.mockResolvedValue('**Fireball** - A powerful fire spell');
-		vi.mocked(NethysParser).mockImplementation(
-			() =>
-				({
-					parseCompendiumEntry: parseCompendiumEntryMock,
-				}) as unknown as NethysParser
-		);
+		vi.mocked(NethysParser).mockImplementation(function (this: MockNethysParser) {
+			this.parseCompendiumEntry = parseCompendiumEntryMock;
+			return this;
+		} as unknown as () => NethysParser);
 
 		harness = createTestHarness([new CompendiumCommand([new CompendiumSearchSubCommand()])], {
-			nethysCompendium: mockNethysDb as NethysDb,
+			nethysCompendium: mockNethysDb as unknown as NethysDb,
 		});
 	});
-
 
 	describe('successful search execution', () => {
 		it('should search the compendium and display results', async () => {
@@ -144,7 +147,7 @@ describe('CompendiumSearchSubCommand Integration', () => {
 				{ ...sampleCompendiumRow, name: 'Fireball', search: 'Fireball' },
 				{ ...sampleCompendiumRow, name: 'Fireball Storm', search: 'Fireball Storm' },
 			];
-			mockNethysDb.search = vi.fn().mockResolvedValue(multipleResults);
+			mockNethysDb.search = vi.fn(async () => multipleResults);
 
 			// Act
 			await harness.executeCommand({
@@ -204,7 +207,7 @@ describe('CompendiumSearchSubCommand Integration', () => {
 	describe('error handling', () => {
 		it('should handle no results found gracefully', async () => {
 			// Arrange - when search returns empty array, the sort will fail trying to access [0]
-			mockNethysDb.search = vi.fn().mockResolvedValue([]);
+			mockNethysDb.search = vi.fn(async () => []);
 
 			// Act - The command will throw an error when accessing bestResult[0].data
 			// The harness catches this and logs it, but may not respond successfully
@@ -304,7 +307,7 @@ describe('CompendiumSearchSubCommand Integration', () => {
 
 		it('should return empty array for empty search', async () => {
 			// Arrange
-			mockNethysDb.searchTerm = vi.fn().mockResolvedValue([]);
+			mockNethysDb.searchTerm = vi.fn(async () => []);
 
 			// Act
 			const result = await harness.executeAutocomplete({
@@ -325,7 +328,7 @@ describe('CompendiumSearchSubCommand Integration', () => {
 			const manyResults = Array.from({ length: 100 }, (_, i) => ({
 				search: `Fire Spell ${i}`,
 			}));
-			mockNethysDb.searchTerm = vi.fn().mockResolvedValue(manyResults);
+			mockNethysDb.searchTerm = vi.fn(async () => manyResults);
 
 			// Act
 			const result = await harness.executeAutocomplete({
@@ -402,7 +405,7 @@ describe('CompendiumSearchSubCommand Integration', () => {
 					markdown: '',
 				},
 			};
-			mockNethysDb.search = vi.fn().mockResolvedValue([resultWithMinimalData]);
+			mockNethysDb.search = vi.fn(async () => [resultWithMinimalData]);
 			parseCompendiumEntryMock.mockResolvedValue('');
 
 			// Act

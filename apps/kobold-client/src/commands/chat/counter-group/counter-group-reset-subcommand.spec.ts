@@ -1,8 +1,7 @@
 /**
- * Integration tests for CounterGroupResetSubCommand
+ * Unit tests for CounterGroupResetSubCommand
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { vitestKobold } from '@kobold/db/test-utils';
 import { CounterStyleEnum } from '@kobold/db';
 import { CounterGroupDefinition } from '@kobold/documentation';
 import { CounterGroupCommand } from './counter-group-command.js';
@@ -20,17 +19,21 @@ import {
 	CommandTestHarness,
 	createMockNumericCounter,
 	createMockCounterGroup,
-} from '../../../test-utils/index.js';
+	getMockKobold,
+	resetMockKobold,} from '../../../test-utils/index.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import type { CounterGroup, NumericCounter } from '@kobold/db';
 
 vi.mock('../../../utils/kobold-service-utils/kobold-utils.js');
 vi.mock('../../../utils/kobold-helpers/finder-helpers.js');
 
-describe('CounterGroupResetSubCommand Integration', () => {
+describe('CounterGroupResetSubCommand', () => {
+	const kobold = getMockKobold();
+
 	let harness: CommandTestHarness;
 
 	beforeEach(() => {
+		resetMockKobold(kobold);
 		harness = createTestHarness([new CounterGroupCommand([new CounterGroupResetSubCommand()])]);
 	});
 
@@ -60,7 +63,7 @@ describe('CounterGroupResetSubCommand Integration', () => {
 
 			setupKoboldUtilsMocks();
 			vi.mocked(FinderHelpers.getCounterGroupByName).mockReturnValue(group);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -81,7 +84,7 @@ describe('CounterGroupResetSubCommand Integration', () => {
 			const group = createMockCounterGroup({ name: 'Spell Slots' });
 			setupKoboldUtilsMocks();
 			vi.mocked(FinderHelpers.getCounterGroupByName).mockReturnValue(group);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -146,7 +149,7 @@ describe('CounterGroupResetSubCommand Integration', () => {
 				characterOverrides: { name: 'Testy McTestface' },
 			});
 			vi.mocked(FinderHelpers.getCounterGroupByName).mockReturnValue(group);
-			setupSheetRecordUpdateMock(vitestKobold);
+			setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({

@@ -55,8 +55,9 @@ export const zWgCharacterApiResponseSchema = z.object({
 	createdAt: z.string(),
 	updatedAt: z.string(),
 });
-const _wgCharacterApiResponseSchemaTypeCheck: WG.CharacterApiResponse =
-	zWgCharacterApiResponseSchema._type;
+const _wgCharacterApiResponseSchemaTypeCheck: WG.CharacterApiResponse = null as unknown as z.infer<
+	typeof zWgCharacterApiResponseSchema
+>;
 
 export const zWgSrcStructSchema = z.object({
 	charID: z.number(),
@@ -80,7 +81,7 @@ export const zWgSpellSlotSchema = z.object({
 	srcStruct: zWgSrcStructSchema,
 });
 
-export const zWgSpellSlotsMapSchema = z.record(z.any());
+export const zWgSpellSlotsMapSchema = z.record(z.string(), z.any());
 
 export const zWgSpellSchema = z.object({
 	SpellBookSpellID: z.number(),
@@ -129,7 +130,7 @@ export const zWgFocusSpellSchema = z.object({
 	SpellID: z.string(),
 });
 
-export const zWgFocusSpellsMapSchema = z.record(z.any());
+export const zWgFocusSpellsMapSchema = z.record(z.string(), z.any());
 
 export const zWgCharacterSpellApiResponseSchema = z.object({
 	spell_slots_map: zWgSpellSlotsMapSchema,
@@ -279,7 +280,7 @@ export const zWgConditionEntrySchema = z.object({
 	ParentID: z.number(),
 });
 
-export const zWgCharacterConditionsApiResponseSchema = z.record(z.any());
+export const zWgCharacterConditionsApiResponseSchema = z.record(z.string(), z.any());
 
 export const zWgCharacterMetadataApiResponseItemSchema = z.object({
 	charID: z.number(),
@@ -345,7 +346,7 @@ export const zWgClassApiResponseSchema = z.object({
 	class_features: z.array(zWgClassFeatureSchema),
 });
 
-export const zWgClassApiMapResponseSchema = z.record(z.any());
+export const zWgClassApiMapResponseSchema = z.record(z.string(), z.any());
 
 export const zWgAncestryHeritageSchema = z.object({
 	id: z.number(),
@@ -428,7 +429,7 @@ export const zWgAncestryApiResponseSchema = z.object({
 	physical_feature_two: zWgAncestryFeatureSchema,
 });
 
-export const zWgAncestryApiMapResponseSchema = z.record(z.any());
+export const zWgAncestryApiMapResponseSchema = z.record(z.string(), z.any());
 
 export const zWgVHeritageApiResponseSchema = z.object({
 	heritage: zWgAncestryHeritageSchema,

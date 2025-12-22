@@ -10,6 +10,7 @@ import {
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	CommandTestHarness,
+	type MockCharacterFetcher,
 } from '../../../test-utils/index.js';
 import { PasteBinCharacterFetcher } from './Fetchers/pastebin-character-fetcher.js';
 import { TextParseHelpers } from '../../../utils/kobold-helpers/text-parse-helpers.js';
@@ -26,20 +27,19 @@ describe('CharacterImportPasteBinSubCommand Integration', () => {
 		]);
 	});
 
-
 	describe('successful import', () => {
 		it('should import a character from pastebin url', async () => {
 			// Arrange
 			const newCharacter = createMockCharacter({
 				characterOverrides: { name: 'Pastebin Character' },
 			});
-			const createMock = vi.fn().mockResolvedValue(newCharacter);
-			vi.mocked(PasteBinCharacterFetcher).mockImplementation(
-				() =>
-					({
-						create: createMock,
-					}) as any
-			);
+			const createMock = vi.fn(async () => newCharacter);
+			vi.mocked(PasteBinCharacterFetcher).mockImplementation(function (
+				this: MockCharacterFetcher
+			) {
+				this.create = createMock;
+				return this;
+			} as unknown as () => PasteBinCharacterFetcher);
 			vi.mocked(TextParseHelpers.parsePasteBinIdFromText).mockReturnValue('abc123');
 
 			// Act
@@ -61,13 +61,13 @@ describe('CharacterImportPasteBinSubCommand Integration', () => {
 			const newCharacter = createMockCharacter({
 				characterOverrides: { name: 'Raw Pastebin Character' },
 			});
-			const createMock = vi.fn().mockResolvedValue(newCharacter);
-			vi.mocked(PasteBinCharacterFetcher).mockImplementation(
-				() =>
-					({
-						create: createMock,
-					}) as any
-			);
+			const createMock = vi.fn(async () => newCharacter);
+			vi.mocked(PasteBinCharacterFetcher).mockImplementation(function (
+				this: MockCharacterFetcher
+			) {
+				this.create = createMock;
+				return this;
+			} as unknown as () => PasteBinCharacterFetcher);
 			vi.mocked(TextParseHelpers.parsePasteBinIdFromText).mockReturnValue('xyz789');
 
 			// Act

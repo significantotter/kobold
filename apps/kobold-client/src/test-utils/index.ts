@@ -38,6 +38,8 @@ export {
 	setupSheetRecordUpdateMock,
 	setupCharacterUtilsMocks,
 	setupListDataMocks,
+	// Creature mocks
+	setupCreatureMocks,
 	// Condition-related mocks
 	createMockCondition,
 	setupGameUtilsMocks,
@@ -67,6 +69,7 @@ export {
 	type ConditionFinderHelpersMockSetup,
 	type ConditionMockOptions,
 	type ConditionMockSetup,
+	type CreatureMockOptions,
 } from './mock-kobold-utils.js';
 
 // Test setup helpers
@@ -76,6 +79,25 @@ export {
 	TEST_GUILD_ID,
 	TEST_CHANNEL_ID,
 	getDefaultTestServices,
+	getUnitTestServices,
+	getIntegrationTestServices,
+	getMockKobold,
 	createTestHarness,
 	getStandardMockModules,
 } from './test-setup.js';
+
+// Mock Kobold (no database connection required)
+export { mockKobold, createMockKobold, resetMockKobold, type MockKobold } from './mock-kobold.js';
+
+// Mock type interfaces for proper typing in test mockImplementation patterns
+export type {
+	MockKoboldEmbed,
+	MockRollBuilder,
+	MockCreature,
+	MockKoboldUtils,
+	MockActionRoller,
+	MockNethysParser,
+	MockPasteBin,
+	MockPathBuilder,
+	MockCharacterFetcher,
+} from './mock-types.js';

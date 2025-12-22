@@ -1,8 +1,7 @@
 /**
- * Integration tests for InitJoinSubCommand
+ * Unit tests for InitJoinSubCommand
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { vitestKobold } from '@kobold/db/test-utils';
 import { InitCommand } from './init-command.js';
 import { InitJoinSubCommand } from './init-join-subcommand.js';
 import { createMockInitiative, resetInitTestIds } from './init-test-utils.js';
@@ -14,25 +13,28 @@ import {
 	TEST_GUILD_ID,
 	TEST_CHANNEL_ID,
 	CommandTestHarness,
-} from '../../../test-utils/index.js';
+	getMockKobold,
+	resetMockKobold,} from '../../../test-utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
 
 vi.mock('../../../utils/kobold-service-utils/kobold-utils.js');
 
-describe('InitJoinSubCommand Integration', () => {
+describe('InitJoinSubCommand', () => {
+	const kobold = getMockKobold();
+
 	let harness: CommandTestHarness;
 
 	beforeEach(() => {
+		resetMockKobold(kobold);
 		resetInitTestIds();
 		harness = createTestHarness([new InitCommand([new InitJoinSubCommand()])]);
 	});
 
-
 	it('should error when no active character', async () => {
 		// Arrange - no active character throws KoboldError
-		const { fetchDataMock } = setupKoboldUtilsMocks();
-		fetchDataMock.mockRejectedValue(
+		const { fetchNonNullableDataMock } = setupKoboldUtilsMocks();
+		fetchNonNullableDataMock.mockRejectedValue(
 			new KoboldError("Yip! You don't have any characters! Use /import to import one.")
 		);
 
@@ -53,8 +55,8 @@ describe('InitJoinSubCommand Integration', () => {
 
 	it('should error when no initiative exists', async () => {
 		// Arrange
-		const { fetchDataMock } = setupKoboldUtilsMocks();
-		fetchDataMock.mockRejectedValue(
+		const { fetchNonNullableDataMock } = setupKoboldUtilsMocks();
+		fetchNonNullableDataMock.mockRejectedValue(
 			new KoboldError('Yip! You must be in an initiative to use this command.')
 		);
 

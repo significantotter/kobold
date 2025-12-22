@@ -11,6 +11,7 @@ import {
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	CommandTestHarness,
+	type MockCharacterFetcher,
 } from '../../../test-utils/index.js';
 import { PathbuilderCharacterFetcher } from './Fetchers/pathbuilder-character-fetcher.js';
 import { WgCharacterFetcher } from './Fetchers/wg-character-fetcher.js';
@@ -28,7 +29,6 @@ describe('CharacterUpdateSubCommand Integration', () => {
 		harness = createTestHarness([new CharacterCommand([new CharacterUpdateSubCommand()])]);
 	});
 
-
 	describe('updating pathbuilder character', () => {
 		it('should update a pathbuilder character with existing json id', async () => {
 			// Arrange
@@ -43,13 +43,13 @@ describe('CharacterUpdateSubCommand Integration', () => {
 			const updatedCharacter = createMockCharacter({
 				characterOverrides: { name: 'Updated Character' },
 			});
-			const updateMock = vi.fn().mockResolvedValue(updatedCharacter);
-			vi.mocked(PathbuilderCharacterFetcher).mockImplementation(
-				() =>
-					({
-						update: updateMock,
-					}) as any
-			);
+			const updateMock = vi.fn(async () => updatedCharacter);
+			vi.mocked(PathbuilderCharacterFetcher).mockImplementation(function (
+				this: MockCharacterFetcher
+			) {
+				this.update = updateMock;
+				return this;
+			} as unknown as () => PathbuilderCharacterFetcher);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -78,13 +78,13 @@ describe('CharacterUpdateSubCommand Integration', () => {
 			const updatedCharacter = createMockCharacter({
 				characterOverrides: { name: 'Updated Character' },
 			});
-			const updateMock = vi.fn().mockResolvedValue(updatedCharacter);
-			vi.mocked(PathbuilderCharacterFetcher).mockImplementation(
-				() =>
-					({
-						update: updateMock,
-					}) as any
-			);
+			const updateMock = vi.fn(async () => updatedCharacter);
+			vi.mocked(PathbuilderCharacterFetcher).mockImplementation(function (
+				this: MockCharacterFetcher
+			) {
+				this.update = updateMock;
+				return this;
+			} as unknown as () => PathbuilderCharacterFetcher);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -111,13 +111,13 @@ describe('CharacterUpdateSubCommand Integration', () => {
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 
 			const updatedCharacter = createMockCharacter();
-			const updateMock = vi.fn().mockResolvedValue(updatedCharacter);
-			vi.mocked(PathbuilderCharacterFetcher).mockImplementation(
-				() =>
-					({
-						update: updateMock,
-					}) as any
-			);
+			const updateMock = vi.fn(async () => updatedCharacter);
+			vi.mocked(PathbuilderCharacterFetcher).mockImplementation(function (
+				this: MockCharacterFetcher
+			) {
+				this.update = updateMock;
+				return this;
+			} as unknown as () => PathbuilderCharacterFetcher);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -154,13 +154,11 @@ describe('CharacterUpdateSubCommand Integration', () => {
 			const updatedCharacter = createMockCharacter({
 				characterOverrides: { name: 'Updated WG Character' },
 			});
-			const updateMock = vi.fn().mockResolvedValue(updatedCharacter);
-			vi.mocked(WgCharacterFetcher).mockImplementation(
-				() =>
-					({
-						update: updateMock,
-					}) as any
-			);
+			const updateMock = vi.fn(async () => updatedCharacter);
+			vi.mocked(WgCharacterFetcher).mockImplementation(function (this: MockCharacterFetcher) {
+				this.update = updateMock;
+				return this;
+			} as unknown as () => WgCharacterFetcher);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -190,13 +188,13 @@ describe('CharacterUpdateSubCommand Integration', () => {
 			const updatedCharacter = createMockCharacter({
 				characterOverrides: { name: 'Updated Pastebin Character' },
 			});
-			const updateMock = vi.fn().mockResolvedValue(updatedCharacter);
-			vi.mocked(PasteBinCharacterFetcher).mockImplementation(
-				() =>
-					({
-						update: updateMock,
-					}) as any
-			);
+			const updateMock = vi.fn(async () => updatedCharacter);
+			vi.mocked(PasteBinCharacterFetcher).mockImplementation(function (
+				this: MockCharacterFetcher
+			) {
+				this.update = updateMock;
+				return this;
+			} as unknown as () => PasteBinCharacterFetcher);
 
 			// Act
 			const result = await harness.executeCommand({

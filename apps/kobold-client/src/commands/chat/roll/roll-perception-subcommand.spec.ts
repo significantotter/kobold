@@ -11,6 +11,8 @@ import {
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	CommandTestHarness,
+	type MockRollBuilder,
+	type MockCreature,
 } from '../../../test-utils/index.js';
 import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
 import { RollBuilder } from '../../../utils/roll-builder.js';
@@ -29,37 +31,37 @@ describe('RollPerceptionSubCommand Integration', () => {
 	beforeEach(() => {
 		harness = createTestHarness([new RollCommand([new RollPerceptionSubCommand()])]);
 
-		// Mock Creature
-		vi.mocked(Creature).mockImplementation(
-			() =>
-				({
-					sheet: {
-						staticInfo: { name: 'Test Character' },
-					},
-					statBonuses: {
-						perception: 15,
-					},
-				}) as any
-		);
+		// Mock Creature constructor
+		vi.mocked(Creature).mockImplementation(function (this: MockCreature) {
+			return this;
+		} as unknown as () => Creature);
+
+		// Mock Creature getters using vi.spyOn
+		vi.spyOn(Creature.prototype, 'sheet', 'get').mockReturnValue({
+			staticInfo: { name: 'Test Character' },
+		} as any);
+		vi.spyOn(Creature.prototype, 'statBonuses', 'get').mockReturnValue({
+			perception: 15,
+		} as any);
 
 		// Mock DiceUtils.buildDiceExpression
 		vi.mocked(DiceUtils.buildDiceExpression).mockReturnValue('1d20+15');
 
 		// Mock RollBuilder
-		const mockAddRoll = vi.fn();
+		const mockAddRoll = vi.fn(() => {});
 		const mockCompileEmbed = vi.fn(() => ({ data: { description: 'Perception roll result' } }));
-		vi.mocked(RollBuilder).mockImplementation(
-			() =>
-				({
-					addRoll: mockAddRoll,
-					compileEmbed: mockCompileEmbed,
-				}) as any
-		);
+		vi.mocked(RollBuilder).mockImplementation(function (this: MockRollBuilder) {
+			this.addRoll = mockAddRoll;
+			this.compileEmbed = mockCompileEmbed;
+			(this as MockRollBuilder & { rollResults: unknown[] }).rollResults = [
+				{ results: { errors: [] } },
+			];
+			return this;
+		} as unknown as () => RollBuilder);
 
 		// Mock EmbedUtils.dispatchEmbeds
 		vi.mocked(EmbedUtils.dispatchEmbeds).mockResolvedValue(undefined);
 	});
-
 
 	describe('successful perception rolls', () => {
 		it('should roll a basic perception check', async () => {

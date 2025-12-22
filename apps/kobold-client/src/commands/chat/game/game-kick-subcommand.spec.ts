@@ -1,8 +1,7 @@
 /**
- * Integration tests for GameKickSubCommand
+ * Unit tests for GameKickSubCommand
  */
 import { describe, it, expect, beforeEach, vi, MockInstance } from 'vitest';
-import { vitestKobold } from '@kobold/db/test-utils';
 import { GameDefinition } from '@kobold/documentation';
 import { GameCommand } from './game-command.js';
 import { GameKickSubCommand } from './game-kick-subcommand.js';
@@ -16,20 +15,19 @@ import {
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	CommandTestHarness,
-} from '../../../test-utils/index.js';
+	getMockKobold,
+	resetMockKobold,} from '../../../test-utils/index.js';
 import { createMockGame } from './game-test-utils.js';
 
-describe('GameKickSubCommand Integration', () => {
+describe('GameKickSubCommand', () => {
+	const kobold = getMockKobold();
+
 	let harness: CommandTestHarness;
-	let gameReadManySpy: MockInstance;
-	let characterUpdateSpy: MockInstance;
 
 	beforeEach(() => {
+		resetMockKobold(kobold);
 		harness = createTestHarness([new GameCommand([new GameKickSubCommand()])]);
-		gameReadManySpy = vi.spyOn(vitestKobold.game, 'readMany');
-		characterUpdateSpy = vi.spyOn(vitestKobold.character, 'update');
 	});
-
 
 	it('should kick a character from a game', async () => {
 		// Arrange
@@ -41,8 +39,8 @@ describe('GameKickSubCommand Integration', () => {
 			name: 'Strict Game',
 			characters: [kickedCharacter],
 		});
-		gameReadManySpy.mockResolvedValue([targetGame]);
-		characterUpdateSpy.mockResolvedValue(kickedCharacter);
+		kobold.game.readMany.mockResolvedValue([targetGame]);
+		kobold.character.update.mockResolvedValue(kickedCharacter);
 
 		// Act
 		const result = await harness.executeCommand({
@@ -64,12 +62,12 @@ describe('GameKickSubCommand Integration', () => {
 				gameName: 'Strict Game',
 			})
 		);
-		expect(characterUpdateSpy).toHaveBeenCalledWith({ id: 20 }, { gameId: null });
+		expect(kobold.character.update).toHaveBeenCalledWith({ id: 20 }, { gameId: null });
 	});
 
 	it('should error when game not found for kick', async () => {
 		// Arrange
-		gameReadManySpy.mockResolvedValue([]);
+		kobold.game.readMany.mockResolvedValue([]);
 
 		// Act
 		const result = await harness.executeCommand({
@@ -94,7 +92,7 @@ describe('GameKickSubCommand Integration', () => {
 			name: 'Empty Kick Game',
 			characters: [],
 		});
-		gameReadManySpy.mockResolvedValue([targetGame]);
+		kobold.game.readMany.mockResolvedValue([targetGame]);
 
 		// Act
 		const result = await harness.executeCommand({

@@ -1,8 +1,7 @@
 /**
- * Integration tests for CounterValueSubCommand
+ * Unit tests for CounterValueSubCommand
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { vitestKobold } from '@kobold/db/test-utils';
 import { CounterStyleEnum } from '@kobold/db';
 import { CounterDefinition as CounterCommandDef } from '@kobold/documentation';
 import { CounterCommand } from './counter-command.js';
@@ -19,6 +18,9 @@ import {
 	createMockNumericCounter,
 	createMockDotsCounter,
 	createMockPreparedCounter,
+	getMockKobold,
+	resetMockKobold,
+	type MockKoboldEmbed,
 } from '../../../test-utils/index.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
@@ -37,23 +39,28 @@ vi.mock('../../../utils/kobold-helpers/finder-helpers.js');
 // Use documentation references for option names
 const opts = CounterCommandDef.commandOptionsEnum;
 
-describe('CounterValueSubCommand Integration', () => {
+describe('CounterValueSubCommand', () => {
+	const kobold = getMockKobold();
+
 	let harness: CommandTestHarness;
 	let sendBatchesMock: ReturnType<typeof vi.fn>;
 
 	beforeEach(() => {
+		resetMockKobold(kobold);
 		harness = createTestHarness([new CounterCommand([new CounterValueSubCommand()])]);
 
 		// Setup KoboldEmbed mock
-		sendBatchesMock = vi.fn().mockResolvedValue(undefined);
-		vi.mocked(KoboldEmbed).mockImplementation(
-			() =>
-				({
-					setTitle: vi.fn().mockReturnThis(),
-					setFields: vi.fn().mockReturnThis(),
-					sendBatches: sendBatchesMock,
-				}) as unknown as KoboldEmbed
-		);
+		sendBatchesMock = vi.fn(async () => undefined);
+		vi.mocked(KoboldEmbed).mockImplementation(function (this: MockKoboldEmbed) {
+			this.setTitle = vi.fn(function (this: MockKoboldEmbed) {
+				return this;
+			});
+			this.setFields = vi.fn(function (this: MockKoboldEmbed) {
+				return this;
+			});
+			this.sendBatches = sendBatchesMock;
+			return this;
+		} as unknown as () => KoboldEmbed);
 	});
 
 	describe('setting counter value', () => {
@@ -70,7 +77,7 @@ describe('CounterValueSubCommand Integration', () => {
 				counter,
 				group: null,
 			});
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			await harness.executeCommand({
@@ -100,7 +107,7 @@ describe('CounterValueSubCommand Integration', () => {
 				counter,
 				group: null,
 			});
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			await harness.executeCommand({
@@ -129,7 +136,7 @@ describe('CounterValueSubCommand Integration', () => {
 				counter,
 				group: null,
 			});
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			await harness.executeCommand({
@@ -158,7 +165,7 @@ describe('CounterValueSubCommand Integration', () => {
 				counter,
 				group: null,
 			});
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			await harness.executeCommand({
@@ -187,7 +194,7 @@ describe('CounterValueSubCommand Integration', () => {
 				counter,
 				group: null,
 			});
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			await harness.executeCommand({
@@ -216,7 +223,7 @@ describe('CounterValueSubCommand Integration', () => {
 				counter,
 				group: null,
 			});
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			await harness.executeCommand({

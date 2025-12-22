@@ -5,7 +5,8 @@
  * used across command integration tests.
  */
 import { vi, type MockInstance } from 'vitest';
-import { generateMock } from '@anatine/zod-mock';
+import { fake } from 'zod-schema-faker/v4';
+
 import {
 	CharacterWithRelations,
 	zCharacterWithRelations,
@@ -43,7 +44,7 @@ import { FinderHelpers } from '../utils/kobold-helpers/finder-helpers.js';
 type DeepPartial<T> = T extends object
 	? {
 			[P in keyof T]?: DeepPartial<T[P]>;
-		}
+	  }
 	: T;
 
 /**
@@ -78,8 +79,12 @@ export interface MockCharacterOptions {
 export function createMockCharacter(options: MockCharacterOptions = {}): CharacterWithRelations {
 	const { actions = [], characterOverrides = {} } = options;
 
-	const mockCharacter = generateMock(zCharacterWithRelations);
+	const mockCharacter = fake(zCharacterWithRelations);
 	mockCharacter.sheetRecord.actions = actions;
+	// Explicitly set tracker fields to null to avoid triggering Discord API calls in tests
+	mockCharacter.sheetRecord.trackerGuildId = null;
+	mockCharacter.sheetRecord.trackerChannelId = null;
+	mockCharacter.sheetRecord.trackerMessageId = null;
 
 	return { ...mockCharacter, ...characterOverrides };
 }
@@ -187,8 +192,10 @@ export function createMockAction(overrides: Partial<Action> = {}): Action {
  * Result from setting up KoboldUtils mocks
  */
 export interface KoboldUtilsMockSetup {
-	/** Mock for fetchNonNullableDataForCommand */
+	/** Mock for fetchDataForCommand (nullable data) */
 	fetchDataMock: MockInstance;
+	/** Mock for fetchNonNullableDataForCommand */
+	fetchNonNullableDataMock: MockInstance;
 	/** Mock for characterUtils.getActiveCharacter */
 	getActiveCharacterMock: MockInstance;
 	/** The mock character being used */
@@ -211,22 +218,36 @@ export interface KoboldUtilsMockSetup {
 export function setupKoboldUtilsMocks(options: MockCharacterOptions = {}): KoboldUtilsMockSetup {
 	const mockCharacter = createMockCharacter(options);
 
-	const fetchDataMock = vi
-		.spyOn(KoboldUtils.prototype, 'fetchNonNullableDataForCommand')
-		.mockResolvedValue({
-			activeCharacter: mockCharacter,
-		} as MockReturnValue);
+	const fetchDataMock = vi.fn(
+		async () =>
+			({
+				activeCharacter: mockCharacter,
+			} as MockReturnValue)
+	);
 
-	// Also mock fetchDataForCommand for commands that use it
-	vi.spyOn(KoboldUtils.prototype, 'fetchDataForCommand').mockResolvedValue({
-		activeCharacter: mockCharacter,
-		userSettings: undefined,
+	const fetchNonNullableDataMock = vi.fn(
+		async () =>
+			({
+				activeCharacter: mockCharacter,
+				userSettings: undefined,
+			} as MockReturnValue)
+	);
+
+	const getActiveCharacterMock = vi.fn(async () => mockCharacter);
+
+	vi.mocked(KoboldUtils).mockImplementation(function (this: any) {
+		this.fetchNonNullableDataForCommand = fetchNonNullableDataMock;
+		this.fetchDataForCommand = fetchDataMock;
+		this.assertActiveCharacterNotNull = vi.fn(() => {});
+		this.characterUtils = {
+			getActiveCharacter: getActiveCharacterMock,
+		};
+		return this;
 	} as MockReturnValue);
-
-	const getActiveCharacterMock = vi.fn().mockResolvedValue(mockCharacter);
 
 	return {
 		fetchDataMock,
+		fetchNonNullableDataMock,
 		getActiveCharacterMock,
 		mockCharacter,
 	};
@@ -255,22 +276,26 @@ export function setupAutocompleteKoboldMocks(
 		.fn()
 		.mockResolvedValue(noActiveCharacter ? null : mockCharacter);
 
-	const fetchDataMock = vi.fn().mockResolvedValue({
+	const fetchDataMock = vi.fn(async () => ({
 		activeCharacter: noActiveCharacter ? undefined : mockCharacter,
-	});
+	}));
 
-	vi.mocked(KoboldUtils).mockImplementation(
-		() =>
-			({
-				fetchNonNullableDataForCommand: fetchDataMock,
-				characterUtils: {
-					getActiveCharacter: getActiveCharacterMock,
-				},
-			}) as MockReturnValue
-	);
+	const fetchNonNullableDataMock = vi.fn(async () => ({
+		activeCharacter: mockCharacter,
+	}));
+
+	vi.mocked(KoboldUtils).mockImplementation(function (this: any) {
+		this.fetchNonNullableDataForCommand = fetchNonNullableDataMock;
+		this.fetchDataForCommand = fetchDataMock;
+		this.characterUtils = {
+			getActiveCharacter: getActiveCharacterMock,
+		};
+		return this;
+	} as MockReturnValue);
 
 	return {
 		fetchDataMock,
+		fetchNonNullableDataMock,
 		getActiveCharacterMock,
 		mockCharacter,
 	};
@@ -337,7 +362,7 @@ export function setupSheetRecordUpdateMock(vitestKobold: {
 }): SheetRecordUpdateMockSetup {
 	const updateMock = vi
 		.spyOn(vitestKobold.sheetRecord, 'update')
-		.mockResolvedValue(generateMock(zSheetRecord));
+		.mockResolvedValue(fake(zSheetRecord));
 
 	return { updateMock };
 }
@@ -371,16 +396,14 @@ export interface CharacterUtilsMockSetup {
 export function setupCharacterUtilsMocks(
 	characters: CharacterWithRelations[] = []
 ): CharacterUtilsMockSetup {
-	const findOwnedCharacterMock = vi.fn().mockResolvedValue(characters);
+	const findOwnedCharacterMock = vi.fn(async () => characters);
 
-	vi.mocked(KoboldUtils).mockImplementation(
-		() =>
-			({
-				characterUtils: {
-					findOwnedCharacterByName: findOwnedCharacterMock,
-				},
-			}) as MockReturnValue
-	);
+	vi.mocked(KoboldUtils).mockImplementation(function (this: any) {
+		this.characterUtils = {
+			findOwnedCharacterByName: findOwnedCharacterMock,
+		};
+		return this;
+	} as MockReturnValue);
 
 	return {
 		findOwnedCharacterMock,
@@ -402,7 +425,7 @@ export interface ListDataMockSetup {
  * Sets up KoboldUtils mocks for commands that use fetchDataForCommand
  * with ownedCharacters (like character list).
  *
- * Uses vi.spyOn on prototype for consistency with other mock setup functions.
+ * Uses vi.mocked(KoboldUtils).mockImplementation() for consistency with other mock setup functions.
  *
  * @param characters - Characters to return as ownedCharacters
  *
@@ -415,8 +438,16 @@ export interface ListDataMockSetup {
  * ```
  */
 export function setupListDataMocks(characters: CharacterWithRelations[] = []): ListDataMockSetup {
-	const fetchDataMock = vi.spyOn(KoboldUtils.prototype, 'fetchDataForCommand').mockResolvedValue({
-		ownedCharacters: characters,
+	const fetchDataMock = vi.fn(
+		async () =>
+			({
+				ownedCharacters: characters,
+			} as MockReturnValue)
+	);
+
+	vi.mocked(KoboldUtils).mockImplementation(function (this: any) {
+		this.fetchDataForCommand = fetchDataMock;
+		return this;
 	} as MockReturnValue);
 
 	return {
@@ -486,13 +517,13 @@ export interface GameUtilsMockSetup {
  */
 export function setupGameUtilsMocks(options: GameUtilsMockOptions = {}): GameUtilsMockSetup {
 	const {
-		targetSheetRecord = generateMock(zSheetRecord),
+		targetSheetRecord = fake(zSheetRecord),
 		targetName = 'Test Character',
 		hideStats = false,
 		targetNotFound = false,
 	} = options;
 
-	const getCharacterOrInitActorTargetMock = vi.fn().mockImplementation(async () => {
+	const getCharacterOrInitActorTargetMock = vi.fn(async () => {
 		if (targetNotFound) {
 			throw new Error('Target not found');
 		}
@@ -503,14 +534,12 @@ export function setupGameUtilsMocks(options: GameUtilsMockOptions = {}): GameUti
 		};
 	});
 
-	vi.mocked(KoboldUtils).mockImplementation(
-		() =>
-			({
-				gameUtils: {
-					getCharacterOrInitActorTarget: getCharacterOrInitActorTargetMock,
-				},
-			}) as MockReturnValue
-	);
+	vi.mocked(KoboldUtils).mockImplementation(function (this: any) {
+		this.gameUtils = {
+			getCharacterOrInitActorTarget: getCharacterOrInitActorTargetMock,
+		};
+		return this;
+	} as MockReturnValue);
 
 	return {
 		getCharacterOrInitActorTargetMock,
@@ -576,7 +605,7 @@ export function setupConditionMocks(options: ConditionMockOptions = {}): Conditi
 	const { conditions = [], ...gameUtilsOptions } = options;
 
 	// Create or update the sheet record with conditions
-	const baseSheetRecord = gameUtilsOptions.targetSheetRecord ?? generateMock(zSheetRecord);
+	const baseSheetRecord = gameUtilsOptions.targetSheetRecord ?? fake(zSheetRecord);
 	const sheetRecordWithConditions: SheetRecord = {
 		...baseSheetRecord,
 		conditions,
@@ -607,13 +636,13 @@ export function setupConditionAutocompleteMocks(
 ): ConditionMockSetup & { autocompleteUtilsMock: MockInstance } {
 	const { conditions = [], noActiveCharacter = false, ...gameUtilsOptions } = options;
 
-	const baseSheetRecord = gameUtilsOptions.targetSheetRecord ?? generateMock(zSheetRecord);
+	const baseSheetRecord = gameUtilsOptions.targetSheetRecord ?? fake(zSheetRecord);
 	const sheetRecordWithConditions: SheetRecord = {
 		...baseSheetRecord,
 		conditions,
 	};
 
-	const getCharacterOrInitActorTargetMock = vi.fn().mockImplementation(async () => {
+	const getCharacterOrInitActorTargetMock = vi.fn(async () => {
 		if (noActiveCharacter) {
 			throw new Error('Target not found');
 		}
@@ -624,26 +653,24 @@ export function setupConditionAutocompleteMocks(
 		};
 	});
 
-	const getAllTargetOptionsMock = vi
-		.fn()
-		.mockResolvedValue([{ name: 'Test Character', value: 'Test Character' }]);
+	const getAllTargetOptionsMock = vi.fn(async () => [
+		{ name: 'Test Character', value: 'Test Character' },
+	]);
 
-	const getConditionsOnTargetMock = vi.fn().mockImplementation(async () => {
+	const getConditionsOnTargetMock = vi.fn(async () => {
 		return conditions.map(c => ({ name: c.name, value: c.name }));
 	});
 
-	vi.mocked(KoboldUtils).mockImplementation(
-		() =>
-			({
-				gameUtils: {
-					getCharacterOrInitActorTarget: getCharacterOrInitActorTargetMock,
-				},
-				autocompleteUtils: {
-					getAllTargetOptions: getAllTargetOptionsMock,
-					getConditionsOnTarget: getConditionsOnTargetMock,
-				},
-			}) as MockReturnValue
-	);
+	vi.mocked(KoboldUtils).mockImplementation(function (this: any) {
+		this.gameUtils = {
+			getCharacterOrInitActorTarget: getCharacterOrInitActorTargetMock,
+		};
+		this.autocompleteUtils = {
+			getAllTargetOptions: getAllTargetOptionsMock,
+			getConditionsOnTarget: getConditionsOnTargetMock,
+		};
+		return this;
+	} as MockReturnValue);
 
 	return {
 		getCharacterOrInitActorTargetMock,
@@ -899,4 +926,76 @@ export function createMockPreparedCounter(
 		text: '',
 		...overrides,
 	};
+}
+
+/**
+ * Options for mocking Creature getters
+ */
+export interface CreatureMockOptions {
+	sheet?: {
+		staticInfo?: { name?: string };
+		stats?: { perception?: { value?: number } };
+	};
+	skillRolls?: Record<string, { name: string; bonus?: number; roll?: string }>;
+	savingThrowRolls?: Record<string, { name: string; bonus?: number; roll?: string }>;
+	statBonuses?: Record<string, number>;
+	attacks?: any[];
+	rolls?: Record<string, any>;
+}
+
+/**
+ * Sets up Creature getter mocks using vi.spyOn.
+ * Use this for tests that import and mock Creature via vi.mock().
+ *
+ * Creature properties like sheet, skillRolls, savingThrowRolls, etc. are getters,
+ * so simple property assignment doesn't work with vitest's auto-mocking.
+ * This function uses vi.spyOn with 'get' accessor to properly mock them.
+ *
+ * @example
+ * ```typescript
+ * vi.mock('../../../utils/creature.js');
+ *
+ * beforeEach(() => {
+ *   vi.mocked(Creature).mockImplementation(function (this: any) {
+ *     return this;
+ *   } as any);
+ *
+ *   setupCreatureMocks({
+ *     sheet: { staticInfo: { name: 'Test Character' } },
+ *     skillRolls: { acrobatics: { name: 'Acrobatics', bonus: 10 } },
+ *   });
+ * });
+ * ```
+ */
+export function setupCreatureMocks(Creature: any, options: CreatureMockOptions = {}): void {
+	const {
+		sheet = { staticInfo: { name: 'Test Character' } },
+		skillRolls = {},
+		savingThrowRolls = {},
+		statBonuses = {},
+		attacks = [],
+		rolls = {},
+	} = options;
+
+	vi.spyOn(Creature.prototype, 'sheet', 'get').mockReturnValue(sheet as any);
+
+	if (Object.keys(skillRolls).length > 0) {
+		vi.spyOn(Creature.prototype, 'skillRolls', 'get').mockReturnValue(skillRolls);
+	}
+
+	if (Object.keys(savingThrowRolls).length > 0) {
+		vi.spyOn(Creature.prototype, 'savingThrowRolls', 'get').mockReturnValue(savingThrowRolls);
+	}
+
+	if (Object.keys(statBonuses).length > 0) {
+		vi.spyOn(Creature.prototype, 'statBonuses', 'get').mockReturnValue(statBonuses as any);
+	}
+
+	if (attacks.length > 0) {
+		vi.spyOn(Creature.prototype, 'attacks', 'get').mockReturnValue(attacks);
+	}
+
+	if (Object.keys(rolls).length > 0) {
+		vi.spyOn(Creature.prototype, 'rolls', 'get').mockReturnValue(rolls);
+	}
 }

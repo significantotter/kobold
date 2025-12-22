@@ -12,6 +12,7 @@ import {
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	CommandTestHarness,
+	type MockCreature,
 } from '../../../test-utils/index.js';
 import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
 import { RollBuilder } from '../../../utils/roll-builder.js';
@@ -30,20 +31,20 @@ describe('RollSkillSubCommand Integration', () => {
 	beforeEach(() => {
 		harness = createTestHarness([new RollCommand([new RollSkillSubCommand()])]);
 
-		// Mock Creature
-		vi.mocked(Creature).mockImplementation(
-			() =>
-				({
-					sheet: {
-						staticInfo: { name: 'Test Character' },
-					},
-					skillRolls: {
-						acrobatics: { name: 'Acrobatics', bonus: 10, roll: '1d20+10' },
-						athletics: { name: 'Athletics', bonus: 8, roll: '1d20+8' },
-						stealth: { name: 'Stealth', bonus: 12, roll: '1d20+12' },
-					},
-				}) as any
-		);
+		// Mock Creature constructor
+		vi.mocked(Creature).mockImplementation(function (this: MockCreature) {
+			return this;
+		} as unknown as () => Creature);
+
+		// Mock Creature getters using vi.spyOn - this works with mock resets
+		vi.spyOn(Creature.prototype, 'sheet', 'get').mockReturnValue({
+			staticInfo: { name: 'Test Character' },
+		} as any);
+		vi.spyOn(Creature.prototype, 'skillRolls', 'get').mockReturnValue({
+			acrobatics: { name: 'Acrobatics', bonus: 10, type: 'skill', tags: [] },
+			athletics: { name: 'Athletics', bonus: 8, type: 'skill', tags: [] },
+			stealth: { name: 'Stealth', bonus: 12, type: 'skill', tags: [] },
+		});
 
 		// Mock RollBuilder.fromSimpleCreatureRoll
 		vi.mocked(RollBuilder.fromSimpleCreatureRoll).mockResolvedValue({
@@ -53,7 +54,6 @@ describe('RollSkillSubCommand Integration', () => {
 		// Mock EmbedUtils.dispatchEmbeds
 		vi.mocked(EmbedUtils.dispatchEmbeds).mockResolvedValue(undefined);
 	});
-
 
 	describe('successful skill rolls', () => {
 		it('should roll a skill check', async () => {

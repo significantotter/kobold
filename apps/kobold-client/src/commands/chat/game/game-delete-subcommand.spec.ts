@@ -1,8 +1,7 @@
 /**
- * Integration tests for GameDeleteSubCommand
+ * Unit tests for GameDeleteSubCommand
  */
 import { describe, it, expect, beforeEach, vi, MockInstance } from 'vitest';
-import { vitestKobold } from '@kobold/db/test-utils';
 import { GameDefinition } from '@kobold/documentation';
 import { GameCommand } from './game-command.js';
 import { GameDeleteSubCommand } from './game-delete-subcommand.js';
@@ -15,26 +14,25 @@ import {
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	CommandTestHarness,
-} from '../../../test-utils/index.js';
+	getMockKobold,
+	resetMockKobold,} from '../../../test-utils/index.js';
 import { createMockGame } from './game-test-utils.js';
 
-describe('GameDeleteSubCommand Integration', () => {
+describe('GameDeleteSubCommand', () => {
+	const kobold = getMockKobold();
+
 	let harness: CommandTestHarness;
-	let gameReadManySpy: MockInstance;
-	let gameDeleteSpy: MockInstance;
 
 	beforeEach(() => {
+		resetMockKobold(kobold);
 		harness = createTestHarness([new GameCommand([new GameDeleteSubCommand()])]);
-		gameReadManySpy = vi.spyOn(vitestKobold.game, 'readMany');
-		gameDeleteSpy = vi.spyOn(vitestKobold.game, 'delete');
 	});
-
 
 	it('should delete a game', async () => {
 		// Arrange
 		const targetGame = createMockGame({ id: 3, name: 'Doomed Game' });
-		gameReadManySpy.mockResolvedValue([targetGame]);
-		gameDeleteSpy.mockResolvedValue(targetGame);
+		kobold.game.readMany.mockResolvedValue([targetGame]);
+		kobold.game.delete.mockResolvedValue(targetGame);
 
 		// Act
 		const result = await harness.executeCommand({
@@ -52,12 +50,12 @@ describe('GameDeleteSubCommand Integration', () => {
 		expect(result.getResponseContent()).toContain(
 			strings.delete.success({ gameName: 'Doomed Game' })
 		);
-		expect(gameDeleteSpy).toHaveBeenCalledWith({ id: 3 });
+		expect(kobold.game.delete).toHaveBeenCalledWith({ id: 3 });
 	});
 
 	it('should error when deleting nonexistent game', async () => {
 		// Arrange
-		gameReadManySpy.mockResolvedValue([]);
+		kobold.game.readMany.mockResolvedValue([]);
 
 		// Act
 		const result = await harness.executeCommand({

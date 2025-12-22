@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 import _ from 'lodash';
-dotenv.config({ path: './../../.env' });
+dotenv.config({ path: './../../.env', quiet: true });
 
 const env = process.env;
 

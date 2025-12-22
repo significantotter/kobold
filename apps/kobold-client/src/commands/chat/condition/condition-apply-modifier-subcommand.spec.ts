@@ -1,22 +1,21 @@
 /**
- * Integration tests for ConditionApplyModifierSubCommand
+ * Unit tests for ConditionApplyModifierSubCommand
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { vitestKobold } from '@kobold/db/test-utils';
 import { SheetAdjustmentTypeEnum } from '@kobold/db';
 import { ConditionCommand } from './condition-command.js';
 import { ConditionApplyModifierSubCommand } from './condition-apply-modifier-subcommand.js';
 import {
-	createTestHarness,
 	createMockCharacter,
 	createMockCondition,
-	setupConditionMocks,
-	setupConditionFinderHelpersMocks,
 	setupConditionAutocompleteMocks,
-	setupSheetRecordUpdateMock,
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	CommandTestHarness,
+	getMockKobold,
+	resetMockKobold,
+	createTestHarness,
+	type MockKoboldUtils,
 } from '../../../test-utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
@@ -24,15 +23,16 @@ import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 vi.mock('../../../utils/kobold-service-utils/kobold-utils.js');
 vi.mock('../../../utils/kobold-helpers/finder-helpers.js');
 
-describe('ConditionApplyModifierSubCommand Integration', () => {
+describe('ConditionApplyModifierSubCommand', () => {
+	const kobold = getMockKobold();
 	let harness: CommandTestHarness;
 
 	beforeEach(() => {
+		resetMockKobold(kobold);
 		harness = createTestHarness([
 			new ConditionCommand([new ConditionApplyModifierSubCommand()]),
 		]);
 	});
-
 
 	describe('successful modifier application', () => {
 		it('should apply a modifier from source character as condition on target', async () => {
@@ -49,34 +49,33 @@ describe('ConditionApplyModifierSubCommand Integration', () => {
 			});
 			sourceCharacter.sheetRecord.modifiers = [sourceModifier];
 
-			// Setup target character without the condition
-			setupConditionMocks({ conditions: [], targetName: 'Fighter' });
-			setupConditionFinderHelpersMocks(undefined); // Condition doesn't exist on target
+			const targetSheetRecord = {
+				id: 'target-id',
+				conditions: [] as any[],
+				modifiers: [],
+				sheet: { staticInfo: { name: 'Fighter' }, info: {} },
+			} as any;
 
-			// Setup source character retrieval
-			vi.mocked(KoboldUtils).mockImplementation(
-				() =>
-					({
-						gameUtils: {
-							getCharacterOrInitActorTarget: vi.fn().mockResolvedValue({
-								targetSheetRecord: {
-									id: 'target-id',
-									conditions: [],
-									sheet: { staticInfo: { name: 'Fighter' } },
-								},
-								targetName: 'Fighter',
-								hideStats: false,
-							}),
-						},
-						characterUtils: {
-							findOwnedCharacterByName: vi.fn().mockResolvedValue([sourceCharacter]),
-						},
-					}) as any
-			);
+			// Setup KoboldUtils mock with both gameUtils and characterUtils
+			vi.mocked(KoboldUtils).mockImplementation(function (this: MockKoboldUtils) {
+				(this as MockKoboldUtils & { gameUtils: unknown }).gameUtils = {
+					getCharacterOrInitActorTarget: vi.fn(async () => ({
+						targetSheetRecord,
+						targetName: 'Fighter',
+						hideStats: false,
+					})),
+				};
+				(this as MockKoboldUtils & { characterUtils: unknown }).characterUtils = {
+					findOwnedCharacterByName: vi.fn(async () => [sourceCharacter]),
+				};
+				return this;
+			} as unknown as () => KoboldUtils);
 
 			vi.spyOn(FinderHelpers, 'getModifierByName').mockReturnValue(sourceModifier);
 			vi.spyOn(FinderHelpers, 'getConditionByName').mockReturnValue(undefined);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+
+			// Setup the sheetRecord.update mock directly on mockKobold
+			kobold.sheetRecord.update.mockResolvedValue(targetSheetRecord);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -92,7 +91,7 @@ describe('ConditionApplyModifierSubCommand Integration', () => {
 
 			// Assert
 			expect(result.didRespond()).toBe(true);
-			expect(updateMock).toHaveBeenCalled();
+			expect(kobold.sheetRecord.update).toHaveBeenCalled();
 		});
 
 		it('should apply modifier with custom severity', async () => {
@@ -107,29 +106,31 @@ describe('ConditionApplyModifierSubCommand Integration', () => {
 			});
 			sourceCharacter.sheetRecord.modifiers = [sourceModifier];
 
-			vi.mocked(KoboldUtils).mockImplementation(
-				() =>
-					({
-						gameUtils: {
-							getCharacterOrInitActorTarget: vi.fn().mockResolvedValue({
-								targetSheetRecord: {
-									id: 'target-id',
-									conditions: [],
-									sheet: { staticInfo: { name: 'Fighter' } },
-								},
-								targetName: 'Fighter',
-								hideStats: false,
-							}),
-						},
-						characterUtils: {
-							findOwnedCharacterByName: vi.fn().mockResolvedValue([sourceCharacter]),
-						},
-					}) as any
-			);
+			const targetSheetRecord = {
+				id: 'target-id',
+				conditions: [] as any[],
+				modifiers: [],
+				sheet: { staticInfo: { name: 'Fighter' }, info: {} },
+			} as any;
+
+			vi.mocked(KoboldUtils).mockImplementation(function (this: MockKoboldUtils) {
+				(this as MockKoboldUtils & { gameUtils: unknown }).gameUtils = {
+					getCharacterOrInitActorTarget: vi.fn(async () => ({
+						targetSheetRecord,
+						targetName: 'Fighter',
+						hideStats: false,
+					})),
+				};
+				(this as MockKoboldUtils & { characterUtils: unknown }).characterUtils = {
+					findOwnedCharacterByName: vi.fn(async () => [sourceCharacter]),
+				};
+				return this;
+			} as unknown as () => KoboldUtils);
 
 			vi.spyOn(FinderHelpers, 'getModifierByName').mockReturnValue(sourceModifier);
 			vi.spyOn(FinderHelpers, 'getConditionByName').mockReturnValue(undefined);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+
+			kobold.sheetRecord.update.mockResolvedValue(targetSheetRecord);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -146,7 +147,7 @@ describe('ConditionApplyModifierSubCommand Integration', () => {
 
 			// Assert
 			expect(result.didRespond()).toBe(true);
-			expect(updateMock).toHaveBeenCalled();
+			expect(kobold.sheetRecord.update).toHaveBeenCalled();
 		});
 	});
 
@@ -166,29 +167,29 @@ describe('ConditionApplyModifierSubCommand Integration', () => {
 			});
 			sourceCharacter.sheetRecord.modifiers = [sourceModifier];
 
-			vi.mocked(KoboldUtils).mockImplementation(
-				() =>
-					({
-						gameUtils: {
-							getCharacterOrInitActorTarget: vi.fn().mockResolvedValue({
-								targetSheetRecord: {
-									id: 'target-id',
-									conditions: [existingCondition],
-									sheet: { staticInfo: { name: 'Fighter' } },
-								},
-								targetName: 'Fighter',
-								hideStats: false,
-							}),
-						},
-						characterUtils: {
-							findOwnedCharacterByName: vi.fn().mockResolvedValue([sourceCharacter]),
-						},
-					}) as any
-			);
+			const targetSheetRecord = {
+				id: 'target-id',
+				conditions: [existingCondition],
+				modifiers: [],
+				sheet: { staticInfo: { name: 'Fighter' }, info: {} },
+			} as any;
+
+			vi.mocked(KoboldUtils).mockImplementation(function (this: MockKoboldUtils) {
+				(this as MockKoboldUtils & { gameUtils: unknown }).gameUtils = {
+					getCharacterOrInitActorTarget: vi.fn(async () => ({
+						targetSheetRecord,
+						targetName: 'Fighter',
+						hideStats: false,
+					})),
+				};
+				(this as MockKoboldUtils & { characterUtils: unknown }).characterUtils = {
+					findOwnedCharacterByName: vi.fn(async () => [sourceCharacter]),
+				};
+				return this;
+			} as unknown as () => KoboldUtils);
 
 			vi.spyOn(FinderHelpers, 'getModifierByName').mockReturnValue(sourceModifier);
 			vi.spyOn(FinderHelpers, 'getConditionByName').mockReturnValue(existingCondition);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -204,7 +205,7 @@ describe('ConditionApplyModifierSubCommand Integration', () => {
 
 			// Assert
 			expect(result.didRespond()).toBe(true);
-			expect(updateMock).not.toHaveBeenCalled();
+			expect(kobold.sheetRecord.update).not.toHaveBeenCalled();
 		});
 	});
 

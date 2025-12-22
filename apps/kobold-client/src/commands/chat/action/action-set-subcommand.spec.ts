@@ -1,8 +1,7 @@
 /**
- * Integration tests for ActionSetSubCommand
+ * Unit tests for ActionSetSubCommand
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { vitestKobold } from '@kobold/db/test-utils';
 import { ActionTypeEnum, ActionCostEnum } from '@kobold/db';
 import { ActionCommand } from './action-command.js';
 import { ActionSetSubCommand } from './action-set-subcommand.js';
@@ -16,18 +15,21 @@ import {
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	CommandTestHarness,
-} from '../../../test-utils/index.js';
+	getMockKobold,
+	resetMockKobold,} from '../../../test-utils/index.js';
 
 vi.mock('../../../utils/kobold-service-utils/kobold-utils.js');
 vi.mock('../../../utils/kobold-helpers/finder-helpers.js');
 
-describe('ActionSetSubCommand Integration', () => {
+describe('ActionSetSubCommand', () => {
+	const kobold = getMockKobold();
+
 	let harness: CommandTestHarness;
 
 	beforeEach(() => {
+		resetMockKobold(kobold);
 		harness = createTestHarness([new ActionCommand([new ActionSetSubCommand()])]);
 	});
-
 
 	describe('setting string fields', () => {
 		it('should set action name', async () => {
@@ -35,7 +37,7 @@ describe('ActionSetSubCommand Integration', () => {
 			const action = createMockAction({ name: 'Old Name', description: 'A test action' });
 
 			setupKoboldUtilsMocks({ actions: [action] });
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -60,7 +62,7 @@ describe('ActionSetSubCommand Integration', () => {
 			const action = createMockAction({ name: 'Strike', description: 'Old description' });
 
 			setupKoboldUtilsMocks({ actions: [action] });
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -91,7 +93,7 @@ describe('ActionSetSubCommand Integration', () => {
 			});
 
 			setupKoboldUtilsMocks({ actions: [action] });
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -116,7 +118,7 @@ describe('ActionSetSubCommand Integration', () => {
 			const action = createMockAction({ name: 'Quick Strike', description: 'A fast attack' });
 
 			setupKoboldUtilsMocks({ actions: [action] });
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -149,7 +151,7 @@ describe('ActionSetSubCommand Integration', () => {
 			});
 
 			setupKoboldUtilsMocks({ actions: [action] });
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -180,7 +182,7 @@ describe('ActionSetSubCommand Integration', () => {
 			});
 
 			setupKoboldUtilsMocks({ actions: [action] });
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -213,7 +215,7 @@ describe('ActionSetSubCommand Integration', () => {
 			});
 
 			setupKoboldUtilsMocks({ actions: [action] });
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -244,7 +246,7 @@ describe('ActionSetSubCommand Integration', () => {
 			});
 
 			setupKoboldUtilsMocks({ actions: [action] });
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({

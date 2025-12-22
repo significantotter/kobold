@@ -15,6 +15,7 @@ import {
 	createMockCounterGroup,
 	createMockDotsCounter,
 	createMockPreparedCounter,
+	type MockKoboldEmbed,
 } from '../../../test-utils/index.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import type { Counter } from '@kobold/db';
@@ -30,16 +31,20 @@ describe('CounterListSubCommand Integration', () => {
 		harness = createTestHarness([new CounterCommand([new CounterListSubCommand()])]);
 
 		// Setup KoboldEmbed mock
-		sendBatchesMock = vi.fn().mockResolvedValue(undefined);
-		vi.mocked(KoboldEmbed).mockImplementation(
-			() =>
-				({
-					setCharacter: vi.fn().mockReturnThis(),
-					setTitle: vi.fn().mockReturnThis(),
-					setFields: vi.fn().mockReturnThis(),
-					sendBatches: sendBatchesMock,
-				}) as unknown as KoboldEmbed
-		);
+		sendBatchesMock = vi.fn(async () => undefined);
+		vi.mocked(KoboldEmbed).mockImplementation(function (this: MockKoboldEmbed) {
+			this.setCharacter = vi.fn(function (this: MockKoboldEmbed) {
+				return this;
+			});
+			this.setTitle = vi.fn(function (this: MockKoboldEmbed) {
+				return this;
+			});
+			this.setFields = vi.fn(function (this: MockKoboldEmbed) {
+				return this;
+			});
+			this.sendBatches = sendBatchesMock;
+			return this;
+		} as unknown as () => KoboldEmbed);
 	});
 
 	describe('listing counters', () => {

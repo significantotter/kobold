@@ -1,7 +1,7 @@
-import { generateMock } from '@anatine/zod-mock';
+
 import { zInitiativeActorInitializer } from '../index.js';
 import _ from 'lodash';
-import { truncateDbForTests, ResourceFactories, vitestKobold } from '../test-utils.js';
+import { truncateDbForTests, ResourceFactories, vitestKobold, fake } from '../test-utils.js';
 
 describe('InitiativeActorModel', () => {
 	afterEach(async () => {
@@ -16,7 +16,7 @@ describe('InitiativeActorModel', () => {
 			});
 			const sheetRecord = await ResourceFactories.sheetRecord();
 			const character = await ResourceFactories.character({ sheetRecordId: sheetRecord.id });
-			const fakeInitiativeActorMock = generateMock(zInitiativeActorInitializer);
+			const fakeInitiativeActorMock = fake(zInitiativeActorInitializer);
 
 			fakeInitiativeActorMock.gameId = game.id;
 			fakeInitiativeActorMock.initiativeId = initiative.id;

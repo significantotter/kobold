@@ -1,8 +1,7 @@
 /**
- * Integration tests for CounterGroupRemoveSubCommand
+ * Unit tests for CounterGroupRemoveSubCommand
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { vitestKobold } from '@kobold/db/test-utils';
 import { CounterStyleEnum } from '@kobold/db';
 import { CounterGroupDefinition } from '@kobold/documentation';
 import { CounterGroupCommand } from './counter-group-command.js';
@@ -20,17 +19,21 @@ import {
 	CommandTestHarness,
 	createMockNumericCounter,
 	createMockCounterGroup,
-} from '../../../test-utils/index.js';
+	getMockKobold,
+	resetMockKobold,} from '../../../test-utils/index.js';
 import { CollectorUtils } from '../../../utils/collector-utils.js';
 import type { CounterGroup, NumericCounter } from '@kobold/db';
 
 vi.mock('../../../utils/kobold-service-utils/kobold-utils.js');
 vi.mock('../../../utils/collector-utils.js');
 
-describe('CounterGroupRemoveSubCommand Integration', () => {
+describe('CounterGroupRemoveSubCommand', () => {
+	const kobold = getMockKobold();
+
 	let harness: CommandTestHarness;
 
 	beforeEach(() => {
+		resetMockKobold(kobold);
 		harness = createTestHarness([
 			new CounterGroupCommand([new CounterGroupRemoveSubCommand()]),
 		]);
@@ -48,7 +51,7 @@ describe('CounterGroupRemoveSubCommand Integration', () => {
 				intr: {} as any,
 				value: 'remove',
 			});
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -82,7 +85,7 @@ describe('CounterGroupRemoveSubCommand Integration', () => {
 				intr: {} as any,
 				value: 'cancel',
 			});
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -109,7 +112,7 @@ describe('CounterGroupRemoveSubCommand Integration', () => {
 				intr: {} as any,
 				value: 'remove',
 			});
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -189,7 +192,7 @@ describe('CounterGroupRemoveSubCommand Integration', () => {
 				intr: {} as any,
 				value: 'remove',
 			});
-			setupSheetRecordUpdateMock(vitestKobold);
+			setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({

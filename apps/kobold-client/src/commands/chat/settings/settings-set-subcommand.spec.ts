@@ -1,8 +1,7 @@
 /**
- * Integration tests for SettingsSetSubCommand
+ * Unit tests for SettingsSetSubCommand
  */
 import { describe, it, expect, beforeEach, vi, MockInstance } from 'vitest';
-import { vitestKobold } from '@kobold/db/test-utils';
 import {
 	InitStatsNotificationEnum,
 	InlineRollsDisplayEnum,
@@ -16,12 +15,17 @@ import {
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	CommandTestHarness,
+	getMockKobold,
+	resetMockKobold,
+	type MockKoboldUtils,
 } from '../../../test-utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 
 vi.mock('../../../utils/kobold-service-utils/kobold-utils.js');
 
-describe('SettingsSetSubCommand Integration', () => {
+describe('SettingsSetSubCommand', () => {
+	const kobold = getMockKobold();
+
 	let harness: CommandTestHarness;
 	let upsertMock: MockInstance;
 
@@ -34,24 +38,20 @@ describe('SettingsSetSubCommand Integration', () => {
 	};
 
 	beforeEach(() => {
+		resetMockKobold(kobold);
 		harness = createTestHarness([new SettingsCommand([new SettingsSetSubCommand()])]);
 
-		// Setup upsert mock on vitestKobold (which is the actual kobold used by createTestHarness)
-		upsertMock = vi
-			.spyOn(vitestKobold.userSettings, 'upsert')
-			.mockResolvedValue(mockUserSettings);
+		// Setup upsert mock on kobold
+		upsertMock = kobold.userSettings.upsert.mockResolvedValue(mockUserSettings);
 
 		// Setup KoboldUtils mock
-		vi.mocked(KoboldUtils).mockImplementation(
-			() =>
-				({
-					fetchNonNullableDataForCommand: vi.fn().mockResolvedValue({
-						userSettings: mockUserSettings,
-					}),
-				}) as any
-		);
+		vi.mocked(KoboldUtils).mockImplementation(function (this: MockKoboldUtils) {
+			this.fetchNonNullableDataForCommand = vi.fn(async () => ({
+				userSettings: mockUserSettings,
+			}));
+			return this;
+		} as unknown as () => KoboldUtils);
 	});
-
 
 	describe('setting initiative-tracker-notifications', () => {
 		it('should set initiative-tracker-notifications to never', async () => {

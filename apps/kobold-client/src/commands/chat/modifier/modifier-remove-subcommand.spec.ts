@@ -1,8 +1,7 @@
 /**
- * Integration tests for ModifierRemoveSubCommand
+ * Unit tests for ModifierRemoveSubCommand
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { vitestKobold } from '@kobold/db/test-utils';
 import { SheetAdjustmentTypeEnum } from '@kobold/db';
 import { ModifierCommand } from './modifier-command.js';
 import { ModifierRemoveSubCommand } from './modifier-remove-subcommand.js';
@@ -15,7 +14,8 @@ import {
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	CommandTestHarness,
-} from '../../../test-utils/index.js';
+	getMockKobold,
+	resetMockKobold,} from '../../../test-utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { CollectorUtils } from '../../../utils/collector-utils.js';
@@ -24,13 +24,15 @@ vi.mock('../../../utils/kobold-service-utils/kobold-utils.js');
 vi.mock('../../../utils/kobold-helpers/finder-helpers.js');
 vi.mock('../../../utils/collector-utils.js');
 
-describe('ModifierRemoveSubCommand Integration', () => {
+describe('ModifierRemoveSubCommand', () => {
+	const kobold = getMockKobold();
+
 	let harness: CommandTestHarness;
 
 	beforeEach(() => {
+		resetMockKobold(kobold);
 		harness = createTestHarness([new ModifierCommand([new ModifierRemoveSubCommand()])]);
 	});
-
 
 	describe('successful modifier removal', () => {
 		it('should remove a modifier when confirmed', async () => {
@@ -51,7 +53,7 @@ describe('ModifierRemoveSubCommand Integration', () => {
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getModifierByName').mockReturnValue(testModifier);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Mock confirmation - user clicks remove
 			vi.mocked(CollectorUtils.collectByButton).mockResolvedValue({
@@ -93,7 +95,7 @@ describe('ModifierRemoveSubCommand Integration', () => {
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getModifierByName').mockReturnValue(testModifier);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Mock confirmation - user clicks cancel
 			vi.mocked(CollectorUtils.collectByButton).mockResolvedValue({
@@ -135,7 +137,7 @@ describe('ModifierRemoveSubCommand Integration', () => {
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getModifierByName').mockReturnValue(testModifier);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Mock confirmation - timeout (returns undefined)
 			vi.mocked(CollectorUtils.collectByButton).mockResolvedValue(undefined);
@@ -165,7 +167,7 @@ describe('ModifierRemoveSubCommand Integration', () => {
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getModifierByName').mockReturnValue(undefined);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({

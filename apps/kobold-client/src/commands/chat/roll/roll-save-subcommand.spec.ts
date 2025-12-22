@@ -12,6 +12,7 @@ import {
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	CommandTestHarness,
+	type MockCreature,
 } from '../../../test-utils/index.js';
 import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
 import { RollBuilder } from '../../../utils/roll-builder.js';
@@ -30,20 +31,20 @@ describe('RollSaveSubCommand Integration', () => {
 	beforeEach(() => {
 		harness = createTestHarness([new RollCommand([new RollSaveSubCommand()])]);
 
-		// Mock Creature
-		vi.mocked(Creature).mockImplementation(
-			() =>
-				({
-					sheet: {
-						staticInfo: { name: 'Test Character' },
-					},
-					savingThrowRolls: {
-						fortitude: { name: 'Fortitude', bonus: 12, roll: '1d20+12' },
-						reflex: { name: 'Reflex', bonus: 10, roll: '1d20+10' },
-						will: { name: 'Will', bonus: 8, roll: '1d20+8' },
-					},
-				}) as any
-		);
+		// Mock Creature constructor
+		vi.mocked(Creature).mockImplementation(function (this: MockCreature) {
+			return this;
+		} as unknown as () => Creature);
+
+		// Mock Creature getters using vi.spyOn
+		vi.spyOn(Creature.prototype, 'sheet', 'get').mockReturnValue({
+			staticInfo: { name: 'Test Character' },
+		} as any);
+		vi.spyOn(Creature.prototype, 'savingThrowRolls', 'get').mockReturnValue({
+			fortitude: { name: 'Fortitude', type: 'save', bonus: 12, tags: [] },
+			reflex: { name: 'Reflex', type: 'save', bonus: 10, tags: [] },
+			will: { name: 'Will', type: 'save', bonus: 8, tags: [] },
+		});
 
 		// Mock RollBuilder.fromSimpleCreatureRoll
 		vi.mocked(RollBuilder.fromSimpleCreatureRoll).mockResolvedValue({
@@ -53,7 +54,6 @@ describe('RollSaveSubCommand Integration', () => {
 		// Mock EmbedUtils.dispatchEmbeds
 		vi.mocked(EmbedUtils.dispatchEmbeds).mockResolvedValue(undefined);
 	});
-
 
 	describe('successful save rolls', () => {
 		it('should roll a fortitude save', async () => {

@@ -1,8 +1,7 @@
 /**
- * Integration tests for ModifierImportSubCommand
+ * Unit tests for ModifierImportSubCommand
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { vitestKobold } from '@kobold/db/test-utils';
 import { SheetAdjustmentTypeEnum } from '@kobold/db';
 import { ModifierCommand } from './modifier-command.js';
 import { ModifierImportSubCommand } from './modifier-import-subcommand.js';
@@ -14,6 +13,9 @@ import {
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	CommandTestHarness,
+	getMockKobold,
+	resetMockKobold,
+	type MockPasteBin,
 } from '../../../test-utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { PasteBin } from '../../../services/pastebin/index.js';
@@ -23,15 +25,17 @@ vi.mock('../../../utils/kobold-service-utils/kobold-utils.js');
 vi.mock('../../../services/pastebin/index.js');
 vi.mock('../../../utils/kobold-helpers/text-parse-helpers.js');
 
-describe('ModifierImportSubCommand Integration', () => {
+describe('ModifierImportSubCommand', () => {
+	const kobold = getMockKobold();
+
 	let harness: CommandTestHarness;
 
 	beforeEach(() => {
+		resetMockKobold(kobold);
 		harness = createTestHarness([new ModifierCommand([new ModifierImportSubCommand()])]);
 		// Mock pastebin ID parser to return a valid ID
 		vi.mocked(TextParseHelpers.parsePasteBinIdFromText).mockReturnValue('abc123');
 	});
-
 
 	describe('successful modifier import', () => {
 		it('should import modifiers with overwrite-all mode', async () => {
@@ -68,14 +72,12 @@ describe('ModifierImportSubCommand Integration', () => {
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 
 			// Mock pastebin response - return the array directly so _.isArray check passes
-			vi.mocked(PasteBin).mockImplementation(
-				() =>
-					({
-						get: vi.fn().mockResolvedValue(importedModifiers),
-					}) as any
-			);
+			vi.mocked(PasteBin).mockImplementation(function (this: MockPasteBin) {
+				this.get = vi.fn(async () => importedModifiers);
+				return this;
+			} as unknown as () => PasteBin);
 
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -127,14 +129,12 @@ describe('ModifierImportSubCommand Integration', () => {
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 
-			vi.mocked(PasteBin).mockImplementation(
-				() =>
-					({
-						get: vi.fn().mockResolvedValue(importedModifiers),
-					}) as any
-			);
+			vi.mocked(PasteBin).mockImplementation(function (this: MockPasteBin) {
+				this.get = vi.fn(async () => importedModifiers);
+				return this;
+			} as unknown as () => PasteBin);
 
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -186,14 +186,12 @@ describe('ModifierImportSubCommand Integration', () => {
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 
-			vi.mocked(PasteBin).mockImplementation(
-				() =>
-					({
-						get: vi.fn().mockResolvedValue(importedModifiers),
-					}) as any
-			);
+			vi.mocked(PasteBin).mockImplementation(function (this: MockPasteBin) {
+				this.get = vi.fn(async () => importedModifiers);
+				return this;
+			} as unknown as () => PasteBin);
 
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -256,14 +254,12 @@ describe('ModifierImportSubCommand Integration', () => {
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 
-			vi.mocked(PasteBin).mockImplementation(
-				() =>
-					({
-						get: vi.fn().mockResolvedValue(importedModifiers),
-					}) as any
-			);
+			vi.mocked(PasteBin).mockImplementation(function (this: MockPasteBin) {
+				this.get = vi.fn(async () => importedModifiers);
+				return this;
+			} as unknown as () => PasteBin);
 
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -292,7 +288,7 @@ describe('ModifierImportSubCommand Integration', () => {
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			// Mock the parser to return null for invalid URL
 			vi.mocked(TextParseHelpers.parsePasteBinIdFromText).mockReturnValue(null);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -315,20 +311,20 @@ describe('ModifierImportSubCommand Integration', () => {
 		});
 
 		it('should error on invalid JSON from pastebin', async () => {
+			vi.spyOn(console, 'warn').mockImplementation(() => {});
+
 			// Arrange
 			const mockCharacter = createMockCharacter();
 			mockCharacter.sheetRecord.modifiers = [];
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 
-			vi.mocked(PasteBin).mockImplementation(
-				() =>
-					({
-						get: vi.fn().mockResolvedValue('not valid json'),
-					}) as any
-			);
+			vi.mocked(PasteBin).mockImplementation(function (this: MockPasteBin) {
+				this.get = vi.fn(async () => 'not valid json');
+				return this;
+			} as unknown as () => PasteBin);
 
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -362,14 +358,12 @@ describe('ModifierImportSubCommand Integration', () => {
 				},
 			];
 
-			vi.mocked(PasteBin).mockImplementation(
-				() =>
-					({
-						get: vi.fn().mockResolvedValue(JSON.stringify(invalidModifiers)),
-					}) as any
-			);
+			vi.mocked(PasteBin).mockImplementation(function (this: MockPasteBin) {
+				this.get = vi.fn(async () => JSON.stringify(invalidModifiers));
+				return this;
+			} as unknown as () => PasteBin);
 
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({

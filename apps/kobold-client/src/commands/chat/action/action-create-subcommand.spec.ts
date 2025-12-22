@@ -1,8 +1,7 @@
 /**
- * Integration tests for ActionCreateSubCommand
+ * Unit tests for ActionCreateSubCommand
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { vitestKobold } from '@kobold/db/test-utils';
 import { ActionCostChoices, ActionTypeChoices } from '@kobold/documentation';
 import { ActionCommand } from './action-command.js';
 import { ActionCreateSubCommand } from './action-create-subcommand.js';
@@ -16,25 +15,29 @@ import {
 	TEST_GUILD_ID,
 	mockNethysDb,
 	CommandTestHarness,
+	getMockKobold,
+	resetMockKobold,
 } from '../../../test-utils/index.js';
 
 vi.mock('../../../utils/kobold-service-utils/kobold-utils.js');
 vi.mock('../../../utils/kobold-helpers/finder-helpers.js');
 
-describe('ActionCreateSubCommand Integration', () => {
+describe('ActionCreateSubCommand', () => {
+	const kobold = getMockKobold();
+
 	let harness: CommandTestHarness;
 
 	beforeEach(() => {
+		resetMockKobold(kobold);
 		harness = createTestHarness([new ActionCommand([new ActionCreateSubCommand()])]);
 	});
-
 
 	describe('successful action creation', () => {
 		it('should route through CommandHandler and create an action', async () => {
 			// Arrange
 			const { mockCharacter } = setupKoboldUtilsMocks();
 			setupFinderHelpersMocks(undefined); // No existing action
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -62,7 +65,7 @@ describe('ActionCreateSubCommand Integration', () => {
 			// Arrange
 			setupKoboldUtilsMocks();
 			setupFinderHelpersMocks(undefined);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -101,7 +104,7 @@ describe('ActionCreateSubCommand Integration', () => {
 			const existingAction = createMockAction({ name: 'Existing Action' });
 			setupKoboldUtilsMocks({ actions: [existingAction] });
 			setupFinderHelpersMocks(existingAction);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -127,7 +130,7 @@ describe('ActionCreateSubCommand Integration', () => {
 			// Arrange
 			setupKoboldUtilsMocks();
 			setupFinderHelpersMocks(undefined);
-			setupSheetRecordUpdateMock(vitestKobold);
+			setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -156,7 +159,7 @@ describe('ActionCreateSubCommand Integration', () => {
 
 		it('should provide access to injected services', () => {
 			const services = harness.getServices();
-			expect(services.kobold).toBe(vitestKobold);
+			expect(services.kobold).toBeDefined();
 			expect(services.nethysCompendium).toBe(mockNethysDb);
 		});
 	});

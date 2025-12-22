@@ -11,6 +11,7 @@ import {
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	CommandTestHarness,
+	type MockCreature,
 } from '../../../test-utils/index.js';
 import { Creature } from '../../../utils/creature.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
@@ -26,19 +27,18 @@ describe('CharacterSheetSubCommand Integration', () => {
 		harness = createTestHarness([new CharacterCommand([new CharacterSheetSubCommand()])]);
 
 		// Mock Creature and its compileEmbed method
-		sendBatchesMock = vi.fn().mockResolvedValue(undefined);
+		sendBatchesMock = vi.fn(async () => undefined);
 		const mockEmbed = {
 			sendBatches: sendBatchesMock,
 		} as unknown as KoboldEmbed;
 
-		vi.mocked(Creature).mockImplementation(
-			() =>
-				({
-					compileEmbed: vi.fn().mockReturnValue(mockEmbed),
-				}) as any
-		);
+		vi.mocked(Creature).mockImplementation(function (this: MockCreature) {
+			this.compendiumEntry = vi.fn(() => mockEmbed);
+			(this as MockCreature & { compileEmbed: ReturnType<typeof vi.fn> }).compileEmbed =
+				vi.fn(() => mockEmbed);
+			return this;
+		} as unknown as () => Creature);
 	});
-
 
 	describe('displaying character sheet', () => {
 		it('should display full sheet by default', async () => {
@@ -94,16 +94,17 @@ describe('CharacterSheetSubCommand Integration', () => {
 				vi.clearAllMocks();
 
 				// Re-setup mock for each iteration
-				sendBatchesMock = vi.fn().mockResolvedValue(undefined);
+				sendBatchesMock = vi.fn(async () => undefined);
 				const mockEmbed = {
 					sendBatches: sendBatchesMock,
 				} as unknown as KoboldEmbed;
-				vi.mocked(Creature).mockImplementation(
-					() =>
-						({
-							compileEmbed: vi.fn().mockReturnValue(mockEmbed),
-						}) as any
-				);
+				vi.mocked(Creature).mockImplementation(function (this: MockCreature) {
+					this.compendiumEntry = vi.fn(() => mockEmbed);
+					(
+						this as MockCreature & { compileEmbed: ReturnType<typeof vi.fn> }
+					).compileEmbed = vi.fn(() => mockEmbed);
+					return this;
+				} as unknown as () => Creature);
 				setupKoboldUtilsMocks();
 
 				// Act

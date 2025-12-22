@@ -47,7 +47,7 @@ export const zPathBuilderAbilitiesSchema = z.object({
 		ancestryFlaws: z.array(abilityUppercaseSchema),
 		backgroundBoosts: z.array(abilityUppercaseSchema),
 		classBoosts: z.array(abilityUppercaseSchema),
-		mapLevelledBoosts: z.record(z.array(abilityUppercaseSchema)),
+		mapLevelledBoosts: z.record(z.string(), z.array(abilityUppercaseSchema)),
 	}),
 });
 
@@ -218,7 +218,7 @@ export const zPathBuilderCharacterSchema = z.object({
 	attributes: zPathBuilderAttributesSchema,
 	abilities: zPathBuilderAbilitiesSchema,
 	proficiencies: zPathBuilderProficienciesSchema,
-	mods: z.record(z.record(z.number())),
+	mods: z.record(z.string(), z.record(z.string(), z.number())),
 	feats: z
 		.array(
 			z.tuple([

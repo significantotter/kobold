@@ -38,8 +38,8 @@ describe('GameRollSubCommand Integration', () => {
 			const char1 = createMockCharacter({ characterOverrides: { name: 'Roller' } });
 			const mockGame = createMockGame({ characters: [char1] });
 
-			const { fetchDataMock } = setupKoboldUtilsMocks();
-			fetchDataMock.mockResolvedValue({
+			const { fetchNonNullableDataMock } = setupKoboldUtilsMocks();
+			fetchNonNullableDataMock.mockResolvedValue({
 				activeGame: mockGame,
 				userSettings: {},
 			});
@@ -66,8 +66,8 @@ describe('GameRollSubCommand Integration', () => {
 			const char1 = createMockCharacter({ characterOverrides: { name: 'Fighter' } });
 			const mockGame = createMockGame({ characters: [char1] });
 
-			const { fetchDataMock } = setupKoboldUtilsMocks();
-			fetchDataMock.mockResolvedValue({
+			const { fetchNonNullableDataMock } = setupKoboldUtilsMocks();
+			fetchNonNullableDataMock.mockResolvedValue({
 				activeGame: mockGame,
 				userSettings: {},
 			});
@@ -97,8 +97,8 @@ describe('GameRollSubCommand Integration', () => {
 			const char2 = createMockCharacter({ characterOverrides: { name: 'Wizard', id: 2 } });
 			const mockGame = createMockGame({ characters: [char1, char2] });
 
-			const { fetchDataMock } = setupKoboldUtilsMocks();
-			fetchDataMock.mockResolvedValue({
+			const { fetchNonNullableDataMock } = setupKoboldUtilsMocks();
+			fetchNonNullableDataMock.mockResolvedValue({
 				activeGame: mockGame,
 				userSettings: {},
 			});
@@ -126,8 +126,8 @@ describe('GameRollSubCommand Integration', () => {
 			const char2 = createMockCharacter({ characterOverrides: { name: 'Wizard', id: 2 } });
 			const mockGame = createMockGame({ characters: [char1, char2] });
 
-			const { fetchDataMock } = setupKoboldUtilsMocks();
-			fetchDataMock.mockResolvedValue({
+			const { fetchNonNullableDataMock } = setupKoboldUtilsMocks();
+			fetchNonNullableDataMock.mockResolvedValue({
 				activeGame: mockGame,
 				userSettings: {},
 			});
@@ -155,8 +155,8 @@ describe('GameRollSubCommand Integration', () => {
 			// Arrange
 			const mockGame = createMockGame({ name: 'Empty Game', characters: [] });
 
-			const { fetchDataMock } = setupKoboldUtilsMocks();
-			fetchDataMock.mockResolvedValue({
+			const { fetchNonNullableDataMock } = setupKoboldUtilsMocks();
+			fetchNonNullableDataMock.mockResolvedValue({
 				activeGame: mockGame,
 				userSettings: {},
 			});
@@ -183,8 +183,8 @@ describe('GameRollSubCommand Integration', () => {
 	describe('Active Game Requirement', () => {
 		it('should respond with error when no active game', async () => {
 			// Arrange
-			const { fetchDataMock } = setupKoboldUtilsMocks();
-			fetchDataMock.mockRejectedValue(new Error('No active game'));
+			const { fetchNonNullableDataMock } = setupKoboldUtilsMocks();
+			fetchNonNullableDataMock.mockRejectedValue(new Error('No active game'));
 
 			// Act
 			const result = await harness.executeCommand({
@@ -210,8 +210,8 @@ describe('GameRollSubCommand Integration', () => {
 			const char1 = createMockCharacter({ characterOverrides: { name: 'Sneaky' } });
 			const mockGame = createMockGame({ characters: [char1] });
 
-			const { fetchDataMock } = setupKoboldUtilsMocks();
-			fetchDataMock.mockResolvedValue({
+			const { fetchNonNullableDataMock } = setupKoboldUtilsMocks();
+			fetchNonNullableDataMock.mockResolvedValue({
 				activeGame: mockGame,
 				userSettings: {},
 			});
@@ -239,8 +239,8 @@ describe('GameRollSubCommand Integration', () => {
 			const char1 = createMockCharacter({ characterOverrides: { name: 'GMSpy' } });
 			const mockGame = createMockGame({ characters: [char1] });
 
-			const { fetchDataMock } = setupKoboldUtilsMocks();
-			fetchDataMock.mockResolvedValue({
+			const { fetchNonNullableDataMock } = setupKoboldUtilsMocks();
+			fetchNonNullableDataMock.mockResolvedValue({
 				activeGame: mockGame,
 				userSettings: {},
 			});
@@ -272,8 +272,8 @@ describe('GameRollSubCommand Integration', () => {
 			);
 			const mockGame = createMockGame({ characters });
 
-			const { fetchDataMock } = setupKoboldUtilsMocks();
-			fetchDataMock.mockResolvedValue({
+			const { fetchNonNullableDataMock } = setupKoboldUtilsMocks();
+			fetchNonNullableDataMock.mockResolvedValue({
 				activeGame: mockGame,
 				userSettings: {},
 			});

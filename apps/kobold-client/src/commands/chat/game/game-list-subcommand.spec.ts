@@ -1,10 +1,9 @@
 /**
- * Integration tests for GameListSubCommand
+ * Unit tests for GameListSubCommand
  *
  * This command lists all games run by the user in the current guild.
  */
 import { describe, it, expect, beforeEach, vi, MockInstance } from 'vitest';
-import { vitestKobold } from '@kobold/db/test-utils';
 import { GameDefinition } from '@kobold/documentation';
 import { GameCommand } from './game-command.js';
 import { GameListSubCommand } from './game-list-subcommand.js';
@@ -18,23 +17,24 @@ import {
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	CommandTestHarness,
-} from '../../../test-utils/index.js';
+	getMockKobold,
+	resetMockKobold,} from '../../../test-utils/index.js';
 import { createMockGame, createMockParty } from './game-test-utils.js';
 
-describe('GameListSubCommand Integration', () => {
+describe('GameListSubCommand', () => {
+	const kobold = getMockKobold();
+
 	let harness: CommandTestHarness;
-	let gameReadManySpy: MockInstance;
 
 	beforeEach(() => {
+		resetMockKobold(kobold);
 		harness = createTestHarness([new GameCommand([new GameListSubCommand()])]);
-		gameReadManySpy = vi.spyOn(vitestKobold.game, 'readMany');
 	});
-
 
 	describe('listing games', () => {
 		it('should show message when user has no games', async () => {
 			// Arrange
-			gameReadManySpy.mockResolvedValue([]);
+			kobold.game.readMany.mockResolvedValue([]);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -53,7 +53,7 @@ describe('GameListSubCommand Integration', () => {
 		it('should list a single game', async () => {
 			// Arrange
 			const game = createMockGame({ name: 'My Campaign' });
-			gameReadManySpy.mockResolvedValue([game]);
+			kobold.game.readMany.mockResolvedValue([game]);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -77,7 +77,7 @@ describe('GameListSubCommand Integration', () => {
 				createMockGame({ id: 2, name: 'Campaign B' }),
 				createMockGame({ id: 3, name: 'Campaign C' }),
 			];
-			gameReadManySpy.mockResolvedValue(games);
+			kobold.game.readMany.mockResolvedValue(games);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -102,7 +102,7 @@ describe('GameListSubCommand Integration', () => {
 				createMockGame({ id: 1, name: 'Active Game', isActive: true }),
 				createMockGame({ id: 2, name: 'Inactive Game', isActive: false }),
 			];
-			gameReadManySpy.mockResolvedValue(games);
+			kobold.game.readMany.mockResolvedValue(games);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -125,7 +125,7 @@ describe('GameListSubCommand Integration', () => {
 			const char1 = createMockCharacter({ characterOverrides: { name: 'Aragorn' } });
 			const char2 = createMockCharacter({ characterOverrides: { name: 'Legolas' } });
 			const game = createMockGame({ name: 'Fellowship', characters: [char1, char2] });
-			gameReadManySpy.mockResolvedValue([game]);
+			kobold.game.readMany.mockResolvedValue([game]);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -146,7 +146,7 @@ describe('GameListSubCommand Integration', () => {
 		it('should show "No characters added" for empty game', async () => {
 			// Arrange
 			const game = createMockGame({ name: 'Empty Game', characters: [] });
-			gameReadManySpy.mockResolvedValue([game]);
+			kobold.game.readMany.mockResolvedValue([game]);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -165,7 +165,7 @@ describe('GameListSubCommand Integration', () => {
 
 		it('should query games with correct user ID', async () => {
 			// Arrange
-			gameReadManySpy.mockResolvedValue([]);
+			kobold.game.readMany.mockResolvedValue([]);
 
 			// Act
 			await harness.executeCommand({
@@ -178,8 +178,8 @@ describe('GameListSubCommand Integration', () => {
 
 			// Assert - verify the user ID is passed correctly
 			// Note: guild.id may be undefined in mock interactions
-			expect(gameReadManySpy).toHaveBeenCalled();
-			const callArgs = gameReadManySpy.mock.calls[0][0] as any;
+			expect(kobold.game.readMany).toHaveBeenCalled();
+			const callArgs = kobold.game.readMany.mock.calls[0][0] as any;
 			expect(callArgs.gmUserId).toBe(TEST_USER_ID);
 		});
 	});

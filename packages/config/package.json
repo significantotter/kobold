@@ -17,15 +17,15 @@
 		"compile": "tsc -p tsconfig.build.json"
 	},
 	"dependencies": {
-		"dotenv": "^16.6.1",
+		"dotenv": "^17.2.3",
 		"lodash": "^4.17.21"
 	},
 	"devDependencies": {
-		"@types/lodash": "^4.17.20",
-		"@types/node": "^20.19.11",
-		"eslint": "^9.33.0",
+		"@types/lodash": "^4.17.21",
+		"@types/node": "^25.0.3",
+		"eslint": "^9.39.2",
 		"ts-node": "^10.9.2",
-		"typescript": "^5.9.2",
-		"vitest": "^0.34.6"
+		"typescript": "^5.9.3",
+		"vitest": "^4.0.16"
 	}
 }

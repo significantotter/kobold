@@ -1,8 +1,7 @@
 /**
- * Integration tests for ActionStageAddTextSubCommand
+ * Unit tests for ActionStageAddTextSubCommand
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { vitestKobold } from '@kobold/db/test-utils';
 import { RollTypeEnum } from '@kobold/db';
 import { ActionStageCommand } from './action-stage-command.js';
 import { ActionStageAddTextSubCommand } from './action-stage-add-text-subcommand.js';
@@ -17,18 +16,21 @@ import {
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	CommandTestHarness,
-} from '../../../test-utils/index.js';
+	getMockKobold,
+	resetMockKobold,} from '../../../test-utils/index.js';
 
 vi.mock('../../../utils/kobold-service-utils/kobold-utils.js');
 vi.mock('../../../utils/kobold-helpers/finder-helpers.js');
 
-describe('ActionStageAddTextSubCommand Integration', () => {
+describe('ActionStageAddTextSubCommand', () => {
+	const kobold = getMockKobold();
+
 	let harness: CommandTestHarness;
 
 	beforeEach(() => {
+		resetMockKobold(kobold);
 		harness = createTestHarness([new ActionStageCommand([new ActionStageAddTextSubCommand()])]);
 	});
-
 
 	describe('execute', () => {
 		it('should add a text stage to an action with default text', async () => {
@@ -36,7 +38,7 @@ describe('ActionStageAddTextSubCommand Integration', () => {
 			const action = createMockAction({ name: 'Cast Spell', rolls: [] });
 			setupKoboldUtilsMocks({ actions: [action] });
 			setupFinderHelpersMocks(action, [action]);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -61,7 +63,7 @@ describe('ActionStageAddTextSubCommand Integration', () => {
 			const action = createMockAction({ name: 'Cast Spell', rolls: [] });
 			setupKoboldUtilsMocks({ actions: [action] });
 			setupFinderHelpersMocks(action, [action]);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -89,7 +91,7 @@ describe('ActionStageAddTextSubCommand Integration', () => {
 			const action = createMockAction({ name: 'Cast Spell', rolls: [] });
 			setupKoboldUtilsMocks({ actions: [action] });
 			setupFinderHelpersMocks(action, [action]);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({

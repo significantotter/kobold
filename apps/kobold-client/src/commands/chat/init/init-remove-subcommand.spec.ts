@@ -1,8 +1,7 @@
 /**
- * Integration tests for InitRemoveSubCommand
+ * Unit tests for InitRemoveSubCommand
  */
 import { describe, it, expect, beforeEach, vi, MockInstance } from 'vitest';
-import { vitestKobold } from '@kobold/db/test-utils';
 import { InitDefinition } from '@kobold/documentation';
 import { InitCommand } from './init-command.js';
 import { InitRemoveSubCommand } from './init-remove-subcommand.js';
@@ -17,35 +16,37 @@ import {
 	TEST_GUILD_ID,
 	TEST_CHANNEL_ID,
 	CommandTestHarness,
+	getMockKobold,
+	resetMockKobold,
 } from '../../../test-utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
 
 vi.mock('../../../utils/kobold-service-utils/kobold-utils.js');
 
-describe('InitRemoveSubCommand Integration', () => {
+describe('InitRemoveSubCommand', () => {
+	const kobold = getMockKobold();
+
 	let harness: CommandTestHarness;
-	let initActorDeleteSpy: MockInstance;
-	let initGroupDeleteSpy: MockInstance;
 
 	beforeEach(() => {
+		resetMockKobold(kobold);
 		resetInitTestIds();
 		harness = createTestHarness([new InitCommand([new InitRemoveSubCommand()])]);
-		initActorDeleteSpy = vi.spyOn(vitestKobold.initiativeActor, 'delete');
-		initGroupDeleteSpy = vi.spyOn(vitestKobold.initiativeActorGroup, 'delete');
 	});
 
-
 	it('should remove an actor from initiative', async () => {
+		vi.spyOn(console, 'warn').mockImplementation(() => {});
+
 		// Arrange
 		const existingInit = createMockInitiativeWithActors(2, { currentRound: 1 });
-		const { fetchDataMock } = setupKoboldUtilsMocks();
-		fetchDataMock.mockResolvedValue({
+		const { fetchNonNullableDataMock } = setupKoboldUtilsMocks();
+		fetchNonNullableDataMock.mockResolvedValue({
 			currentInitiative: existingInit,
 			userSettings: {},
 		});
-		initActorDeleteSpy.mockResolvedValue(existingInit.actors[0]);
-		initGroupDeleteSpy.mockResolvedValue(existingInit.actorGroups[0]);
+		kobold.initiativeActor.delete.mockResolvedValue(existingInit.actors[0]);
+		kobold.initiativeActorGroup.delete.mockResolvedValue(existingInit.actorGroups[0]);
 
 		// Act
 		const result = await harness.executeCommand({
@@ -61,13 +62,13 @@ describe('InitRemoveSubCommand Integration', () => {
 
 		// Assert
 		expect(result.didRespond()).toBe(true);
-		expect(initActorDeleteSpy).toHaveBeenCalled();
+		expect(kobold.initiativeActor.delete).toHaveBeenCalled();
 	});
 
 	it('should error when no initiative exists', async () => {
 		// Arrange
-		const { fetchDataMock } = setupKoboldUtilsMocks();
-		fetchDataMock.mockRejectedValue(
+		const { fetchNonNullableDataMock } = setupKoboldUtilsMocks();
+		fetchNonNullableDataMock.mockRejectedValue(
 			new KoboldError('Yip! You must be in an initiative to use this command.')
 		);
 

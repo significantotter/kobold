@@ -16,6 +16,7 @@ import {
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	CommandTestHarness,
+	type MockPasteBin,
 } from '../../../test-utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { PasteBin } from '../../../services/pastebin/index.js';
@@ -29,7 +30,6 @@ describe('ModifierExportSubCommand Integration', () => {
 	beforeEach(() => {
 		harness = createTestHarness([new ModifierCommand([new ModifierExportSubCommand()])]);
 	});
-
 
 	describe('successful modifier export', () => {
 		it('should export modifiers to pastebin', async () => {
@@ -66,12 +66,12 @@ describe('ModifierExportSubCommand Integration', () => {
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 
 			// Mock pastebin response
-			vi.mocked(PasteBin).mockImplementation(
-				() =>
-					({
-						post: vi.fn().mockResolvedValue('https://pastebin.com/abc123'),
-					}) as any
-			);
+			vi.mocked(PasteBin).mockImplementation(function (this: MockPasteBin) {
+				(this as MockPasteBin & { post: ReturnType<typeof vi.fn> }).post = vi.fn(
+					async () => 'https://pastebin.com/abc123'
+				);
+				return this;
+			} as unknown as () => PasteBin);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -96,12 +96,12 @@ describe('ModifierExportSubCommand Integration', () => {
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 
 			// Mock pastebin response
-			vi.mocked(PasteBin).mockImplementation(
-				() =>
-					({
-						post: vi.fn().mockResolvedValue('https://pastebin.com/xyz789'),
-					}) as any
-			);
+			vi.mocked(PasteBin).mockImplementation(function (this: MockPasteBin) {
+				(this as MockPasteBin & { post: ReturnType<typeof vi.fn> }).post = vi.fn(
+					async () => 'https://pastebin.com/xyz789'
+				);
+				return this;
+			} as unknown as () => PasteBin);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -147,12 +147,12 @@ describe('ModifierExportSubCommand Integration', () => {
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 
 			// Mock pastebin response
-			vi.mocked(PasteBin).mockImplementation(
-				() =>
-					({
-						post: vi.fn().mockResolvedValue('https://pastebin.com/def456'),
-					}) as any
-			);
+			vi.mocked(PasteBin).mockImplementation(function (this: MockPasteBin) {
+				(this as MockPasteBin & { post: ReturnType<typeof vi.fn> }).post = vi.fn(
+					async () => 'https://pastebin.com/def456'
+				);
+				return this;
+			} as unknown as () => PasteBin);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -190,12 +190,14 @@ describe('ModifierExportSubCommand Integration', () => {
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 
 			// Mock pastebin error
-			vi.mocked(PasteBin).mockImplementation(
-				() =>
-					({
-						post: vi.fn().mockRejectedValue(new Error('Pastebin API error')),
-					}) as any
-			);
+			vi.mocked(PasteBin).mockImplementation(function (this: MockPasteBin) {
+				(this as MockPasteBin & { post: ReturnType<typeof vi.fn> }).post = vi.fn(
+					async () => {
+						throw new Error('Pastebin API error');
+					}
+				);
+				return this;
+			} as unknown as () => PasteBin);
 
 			// Act - the error is caught by the command handler and a response is sent
 			const result = await harness.executeCommand({

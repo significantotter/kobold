@@ -1,8 +1,7 @@
 /**
- * Integration tests for CharacterSetActiveSubCommand
+ * Unit tests for CharacterSetActiveSubCommand
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { vitestKobold } from '@kobold/db/test-utils';
 import { CharacterCommand } from './character-command.js';
 import { CharacterSetActiveSubCommand } from './character-set-active-subcommand.js';
 import {
@@ -12,17 +11,21 @@ import {
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	CommandTestHarness,
+	getMockKobold,
+	resetMockKobold,
 } from '../../../test-utils/index.js';
 
 vi.mock('../../../utils/kobold-service-utils/kobold-utils.js');
 
-describe('CharacterSetActiveSubCommand Integration', () => {
+describe('CharacterSetActiveSubCommand', () => {
+	const kobold = getMockKobold();
+
 	let harness: CommandTestHarness;
 
 	beforeEach(() => {
+		resetMockKobold(kobold);
 		harness = createTestHarness([new CharacterCommand([new CharacterSetActiveSubCommand()])]);
 	});
-
 
 	describe('setting active character', () => {
 		it('should set a character as active when it exists', async () => {
@@ -33,9 +36,9 @@ describe('CharacterSetActiveSubCommand Integration', () => {
 
 			setupCharacterUtilsMocks([targetCharacter]);
 
-			const setIsActiveMock = vi
-				.spyOn(vitestKobold.character, 'setIsActive')
-				.mockResolvedValue(targetCharacter as any);
+			const setIsActiveMock = kobold.character.setIsActive.mockResolvedValue(
+				targetCharacter as any
+			);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -58,7 +61,7 @@ describe('CharacterSetActiveSubCommand Integration', () => {
 			// Arrange
 			setupCharacterUtilsMocks([]);
 
-			const setIsActiveMock = vi.spyOn(vitestKobold.character, 'setIsActive');
+			const setIsActiveMock = kobold.character.setIsActive;
 
 			// Act
 			const result = await harness.executeCommand({

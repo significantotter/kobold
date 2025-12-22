@@ -1,8 +1,7 @@
 /**
- * Integration tests for InitSetSubCommand
+ * Unit tests for InitSetSubCommand
  */
 import { describe, it, expect, beforeEach, vi, MockInstance } from 'vitest';
-import { vitestKobold } from '@kobold/db/test-utils';
 import { InitDefinition } from '@kobold/documentation';
 import { InitCommand } from './init-command.js';
 import { InitSetSubCommand } from './init-set-subcommand.js';
@@ -18,32 +17,33 @@ import {
 	TEST_GUILD_ID,
 	TEST_CHANNEL_ID,
 	CommandTestHarness,
-} from '../../../test-utils/index.js';
+	getMockKobold,
+	resetMockKobold,} from '../../../test-utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
 
 vi.mock('../../../utils/kobold-service-utils/kobold-utils.js');
 
-describe('InitSetSubCommand Integration', () => {
+describe('InitSetSubCommand', () => {
+	const kobold = getMockKobold();
+
 	let harness: CommandTestHarness;
-	let initGroupUpdateSpy: MockInstance;
 
 	beforeEach(() => {
+		resetMockKobold(kobold);
 		resetInitTestIds();
 		harness = createTestHarness([new InitCommand([new InitSetSubCommand()])]);
-		initGroupUpdateSpy = vi.spyOn(vitestKobold.initiativeActorGroup, 'update');
 	});
-
 
 	it('should set initiative value for an actor', async () => {
 		// Arrange
 		const existingInit = createMockInitiativeWithActors(2);
-		const { fetchDataMock } = setupKoboldUtilsMocks();
-		fetchDataMock.mockResolvedValue({
+		const { fetchNonNullableDataMock } = setupKoboldUtilsMocks();
+		fetchNonNullableDataMock.mockResolvedValue({
 			currentInitiative: existingInit,
 			userSettings: {},
 		});
-		initGroupUpdateSpy.mockResolvedValue({
+		kobold.initiativeActorGroup.update.mockResolvedValue({
 			...existingInit.actorGroups[0],
 			initiativeResult: 25,
 		});
@@ -64,14 +64,14 @@ describe('InitSetSubCommand Integration', () => {
 
 		// Assert
 		expect(result.didRespond()).toBe(true);
-		expect(initGroupUpdateSpy).toHaveBeenCalled();
+		expect(kobold.initiativeActorGroup.update).toHaveBeenCalled();
 	});
 
 	it('should error with invalid set option', async () => {
 		// Arrange
 		const existingInit = createMockInitiativeWithActors(2);
-		const { fetchDataMock } = setupKoboldUtilsMocks();
-		fetchDataMock.mockResolvedValue({
+		const { fetchNonNullableDataMock } = setupKoboldUtilsMocks();
+		fetchNonNullableDataMock.mockResolvedValue({
 			currentInitiative: existingInit,
 			userSettings: {},
 		});
@@ -97,8 +97,8 @@ describe('InitSetSubCommand Integration', () => {
 
 	it('should error when no initiative exists', async () => {
 		// Arrange
-		const { fetchDataMock } = setupKoboldUtilsMocks();
-		fetchDataMock.mockRejectedValue(
+		const { fetchNonNullableDataMock } = setupKoboldUtilsMocks();
+		fetchNonNullableDataMock.mockRejectedValue(
 			new KoboldError('Yip! You must be in an initiative to use this command.')
 		);
 

@@ -31,14 +31,16 @@ const removeSchemaInference: PreRenderHook = (
 ) => {
 	for (const fileName in outputAcc) {
 		const file = outputAcc[fileName];
-		for (const declaration of file.declarations) {
-			if (declaration.declarationType === 'generic') {
-				declaration.lines = declaration.lines.map((line: string) =>
-					line
-						.replaceAll(/: z\.Schema<.*>/g, '')
-						.replaceAll(/ as any/g, '')
-						.replaceAll(/z\.object\(/g, 'z.strictObject(')
-				);
+		if (file.fileType === 'typescript') {
+			for (const declaration of file.declarations) {
+				if (declaration.declarationType === 'generic') {
+					declaration.lines = declaration.lines.map((line: string) =>
+						line
+							.replaceAll(/: z\.Schema<.*>/g, '')
+							.replaceAll(/ as any/g, '')
+							.replaceAll(/z\.object\(/g, 'z.strictObject(')
+					);
+				}
 			}
 		}
 	}
@@ -79,7 +81,14 @@ await kanel.processDatabase({
 		}),
 		makeKyselyHook({
 			databaseFilename: 'Database',
-			getKyselyItemMetadata: (d, selectorName, canInitialize, canMutate) => {
+			includeSchemaNameInTableName: false,
+			getKyselyItemMetadata: (
+				d,
+				selectorName,
+				canInitialize,
+				canMutate,
+				_instantiatedConfig
+			) => {
 				//this hack allows me to use the camelCase names in the PublicSchema.ts file
 				const camelName = _.camelCase(d.name);
 				d.name = camelName;
@@ -129,15 +138,12 @@ await kanel.processDatabase({
 		};
 	},
 
-	generateIdentifierType: (c, d, config) => {
+	generateIdentifierType: (c, d, _config) => {
 		const tableName = toPascalCase(d.name);
 		const name = toPascalCase(c.name);
 		const fullName = tableName + name;
-		const innerType = kanel.resolveType(c, d, {
-			...config,
-			// @ts-ignore
-			generateIdentifierType: undefined,
-		});
+		// Pass false to not retain inner identifier type (equivalent to setting generateIdentifierType: undefined in old API)
+		const innerType = kanel.resolveType(c, d, false);
 		return {
 			declarationType: 'typeDeclaration',
 			name: fullName,

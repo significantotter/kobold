@@ -1,32 +1,674 @@
 {
-  "$ref": "#/definitions/pastebin-import",
-  "definitions": {
-    "pastebin-import": {
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "sheet": {
+      "description": "A creature's sheet.",
       "type": "object",
       "properties": {
-        "sheet": {
+        "staticInfo": {
+          "description": "Sheet information not modifiable in Kobold.",
           "type": "object",
           "properties": {
-            "staticInfo": {
+            "name": {
+              "description": "The creature's name.",
+              "type": "string"
+            },
+            "level": {
+              "description": "The creature's level.",
+              "default": null,
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "keyAbility": {
+              "description": "The creature's key ability.",
+              "anyOf": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "strength",
+                    "dexterity",
+                    "constitution",
+                    "intelligence",
+                    "wisdom",
+                    "charisma"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "usesStamina": {
+              "description": "Whether the creature follows alternate stamina rules.",
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "name",
+            "level",
+            "keyAbility",
+            "usesStamina"
+          ],
+          "additionalProperties": false
+        },
+        "info": {
+          "description": "A sheet's nullable/mutable string information.",
+          "type": "object",
+          "properties": {
+            "url": {
+              "default": null,
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "description": {
+              "default": null,
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "gender": {
+              "default": null,
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "age": {
+              "default": null,
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "alignment": {
+              "default": null,
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "deity": {
+              "default": null,
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "imageURL": {
+              "default": null,
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "size": {
+              "default": null,
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "class": {
+              "default": null,
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "ancestry": {
+              "default": null,
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "heritage": {
+              "default": null,
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "background": {
+              "default": null,
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "url",
+            "description",
+            "gender",
+            "age",
+            "alignment",
+            "deity",
+            "imageURL",
+            "size",
+            "class",
+            "ancestry",
+            "heritage",
+            "background"
+          ],
+          "additionalProperties": false
+        },
+        "infoLists": {
+          "description": "Sheet information as arrays of strings.",
+          "type": "object",
+          "properties": {
+            "traits": {
+              "default": [],
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "languages": {
+              "default": [],
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "senses": {
+              "default": [],
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "immunities": {
+              "default": [],
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "traits",
+            "languages",
+            "senses",
+            "immunities"
+          ],
+          "additionalProperties": false
+        },
+        "weaknessesResistances": {
+          "description": "Weakness or resistance typed information.",
+          "type": "object",
+          "properties": {
+            "resistances": {
+              "default": [],
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "amount": {
+                    "description": "the amount of weakness/resistance for this type of damage",
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  },
+                  "type": {
+                    "description": "the damage type",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "amount",
+                  "type"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "weaknesses": {
+              "default": [],
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "amount": {
+                    "description": "the amount of weakness/resistance for this type of damage",
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  },
+                  "type": {
+                    "description": "the damage type",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "amount",
+                  "type"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "resistances",
+            "weaknesses"
+          ],
+          "additionalProperties": false
+        },
+        "intProperties": {
+          "description": "The creature's nullable integer properties.",
+          "type": "object",
+          "properties": {
+            "ac": {
+              "default": null,
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "strength": {
+              "default": null,
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "dexterity": {
+              "default": null,
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "constitution": {
+              "default": null,
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "intelligence": {
+              "default": null,
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "wisdom": {
+              "default": null,
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "charisma": {
+              "default": null,
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "walkSpeed": {
+              "default": null,
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "flySpeed": {
+              "default": null,
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "swimSpeed": {
+              "default": null,
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "climbSpeed": {
+              "default": null,
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "burrowSpeed": {
+              "default": null,
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "dimensionalSpeed": {
+              "default": null,
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "heavyProficiency": {
+              "default": null,
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "mediumProficiency": {
+              "default": null,
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "lightProficiency": {
+              "default": null,
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "unarmoredProficiency": {
+              "default": null,
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "martialProficiency": {
+              "default": null,
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "simpleProficiency": {
+              "default": null,
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "unarmedProficiency": {
+              "default": null,
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "advancedProficiency": {
+              "default": null,
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "ac",
+            "strength",
+            "dexterity",
+            "constitution",
+            "intelligence",
+            "wisdom",
+            "charisma",
+            "walkSpeed",
+            "flySpeed",
+            "swimSpeed",
+            "climbSpeed",
+            "burrowSpeed",
+            "dimensionalSpeed",
+            "heavyProficiency",
+            "mediumProficiency",
+            "lightProficiency",
+            "unarmoredProficiency",
+            "martialProficiency",
+            "simpleProficiency",
+            "unarmedProficiency",
+            "advancedProficiency"
+          ],
+          "additionalProperties": false
+        },
+        "stats": {
+          "description": "All stats, each potentially having a roll, a dc, a proficiency, and an ability.",
+          "type": "object",
+          "properties": {
+            "arcane": {
               "type": "object",
               "properties": {
                 "name": {
-                  "type": "string",
-                  "description": "The creature's name."
+                  "description": "The stat's name.",
+                  "type": "string"
                 },
-                "level": {
+                "proficiency": {
+                  "default": null,
                   "anyOf": [
                     {
-                      "type": "integer"
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
                     },
                     {
                       "type": "null"
                     }
-                  ],
-                  "default": null,
-                  "description": "The creature's level."
+                  ]
                 },
-                "keyAbility": {
+                "dc": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "bonus": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "ability": {
+                  "default": null,
                   "anyOf": [
                     {
                       "type": "string",
@@ -42,662 +684,2633 @@
                     {
                       "type": "null"
                     }
-                  ],
-                  "description": "The creature's key ability."
+                  ]
                 },
-                "usesStamina": {
-                  "type": "boolean",
-                  "default": false,
-                  "description": "Whether the creature follows alternate stamina rules."
+                "note": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 }
               },
               "required": [
                 "name",
-                "keyAbility"
+                "proficiency",
+                "dc",
+                "bonus",
+                "ability",
+                "note"
               ],
-              "additionalProperties": false,
-              "description": "Sheet information not modifiable in Kobold"
+              "additionalProperties": false
             },
-            "info": {
+            "divine": {
               "type": "object",
               "properties": {
-                "url": {
-                  "type": [
-                    "string",
-                    "null"
-                  ],
-                  "default": null
+                "name": {
+                  "description": "The stat's name.",
+                  "type": "string"
                 },
-                "description": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/info/properties/url"
-                },
-                "gender": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/info/properties/url"
-                },
-                "age": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/info/properties/url"
-                },
-                "alignment": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/info/properties/url"
-                },
-                "deity": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/info/properties/url"
-                },
-                "imageURL": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/info/properties/url"
-                },
-                "size": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/info/properties/url"
-                },
-                "class": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/info/properties/url"
-                },
-                "ancestry": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/info/properties/url"
-                },
-                "heritage": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/info/properties/url"
-                },
-                "background": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/info/properties/url"
-                }
-              },
-              "additionalProperties": false,
-              "description": "Textual sheet information"
-            },
-            "infoLists": {
-              "type": "object",
-              "properties": {
-                "traits": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  },
-                  "default": []
-                },
-                "languages": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/infoLists/properties/traits"
-                },
-                "senses": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/infoLists/properties/traits"
-                },
-                "immunities": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/infoLists/properties/traits"
-                }
-              },
-              "additionalProperties": false,
-              "description": "Sheet information as arrays of strings."
-            },
-            "weaknessesResistances": {
-              "type": "object",
-              "properties": {
-                "resistances": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "amount": {
-                        "type": "integer",
-                        "description": "the amount of weakness/resistance for this type of damage"
-                      },
-                      "type": {
-                        "type": "string",
-                        "description": "the damage type"
-                      }
+                "proficiency": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
                     },
-                    "required": [
-                      "amount",
-                      "type"
-                    ],
-                    "additionalProperties": false
-                  },
-                  "default": []
-                },
-                "weaknesses": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/weaknessesResistances/properties/resistances"
-                }
-              },
-              "additionalProperties": false,
-              "description": "Weakness or resistance typed information."
-            },
-            "intProperties": {
-              "type": "object",
-              "properties": {
-                "ac": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/staticInfo/properties/level",
-                  "default": null
-                },
-                "strength": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/intProperties/properties/ac"
-                },
-                "dexterity": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/intProperties/properties/ac"
-                },
-                "constitution": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/intProperties/properties/ac"
-                },
-                "intelligence": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/intProperties/properties/ac"
-                },
-                "wisdom": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/intProperties/properties/ac"
-                },
-                "charisma": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/intProperties/properties/ac"
-                },
-                "walkSpeed": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/intProperties/properties/ac"
-                },
-                "flySpeed": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/intProperties/properties/ac"
-                },
-                "swimSpeed": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/intProperties/properties/ac"
-                },
-                "climbSpeed": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/intProperties/properties/ac"
-                },
-                "burrowSpeed": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/intProperties/properties/ac"
-                },
-                "dimensionalSpeed": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/intProperties/properties/ac"
-                },
-                "heavyProficiency": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/intProperties/properties/ac"
-                },
-                "mediumProficiency": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/intProperties/properties/ac"
-                },
-                "lightProficiency": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/intProperties/properties/ac"
-                },
-                "unarmoredProficiency": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/intProperties/properties/ac"
-                },
-                "martialProficiency": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/intProperties/properties/ac"
-                },
-                "simpleProficiency": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/intProperties/properties/ac"
-                },
-                "unarmedProficiency": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/intProperties/properties/ac"
-                },
-                "advancedProficiency": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/intProperties/properties/ac"
-                }
-              },
-              "additionalProperties": false,
-              "description": "All nullable integer properties of a sheet."
-            },
-            "stats": {
-              "type": "object",
-              "properties": {
-                "arcane": {
-                  "type": "object",
-                  "properties": {
-                    "name": {
-                      "type": "string",
-                      "description": "The stat's name."
-                    },
-                    "proficiency": {
-                      "$ref": "#/definitions/pastebin-import/properties/sheet/properties/intProperties/properties/ac"
-                    },
-                    "dc": {
-                      "$ref": "#/definitions/pastebin-import/properties/sheet/properties/intProperties/properties/ac"
-                    },
-                    "bonus": {
-                      "$ref": "#/definitions/pastebin-import/properties/sheet/properties/intProperties/properties/ac"
-                    },
-                    "ability": {
-                      "anyOf": [
-                        {
-                          "$ref": "#/definitions/pastebin-import/properties/sheet/properties/staticInfo/properties/keyAbility/anyOf/0"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ],
-                      "default": null
-                    },
-                    "note": {
-                      "type": [
-                        "string",
-                        "null"
-                      ],
-                      "default": null
+                    {
+                      "type": "null"
                     }
-                  },
-                  "required": [
-                    "name"
-                  ],
-                  "additionalProperties": false
+                  ]
                 },
-                "divine": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/stats/properties/arcane"
+                "dc": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 },
-                "occult": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/stats/properties/arcane"
+                "bonus": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 },
-                "primal": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/stats/properties/arcane"
+                "ability": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "strength",
+                        "dexterity",
+                        "constitution",
+                        "intelligence",
+                        "wisdom",
+                        "charisma"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 },
-                "class": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/stats/properties/arcane"
-                },
-                "perception": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/stats/properties/arcane"
-                },
-                "fortitude": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/stats/properties/arcane"
-                },
-                "reflex": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/stats/properties/arcane"
-                },
-                "will": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/stats/properties/arcane"
-                },
-                "acrobatics": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/stats/properties/arcane"
-                },
-                "arcana": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/stats/properties/arcane"
-                },
-                "athletics": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/stats/properties/arcane"
-                },
-                "crafting": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/stats/properties/arcane"
-                },
-                "deception": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/stats/properties/arcane"
-                },
-                "diplomacy": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/stats/properties/arcane"
-                },
-                "intimidation": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/stats/properties/arcane"
-                },
-                "medicine": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/stats/properties/arcane"
-                },
-                "nature": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/stats/properties/arcane"
-                },
-                "occultism": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/stats/properties/arcane"
-                },
-                "performance": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/stats/properties/arcane"
-                },
-                "religion": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/stats/properties/arcane"
-                },
-                "society": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/stats/properties/arcane"
-                },
-                "stealth": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/stats/properties/arcane"
-                },
-                "survival": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/stats/properties/arcane"
-                },
-                "thievery": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/stats/properties/arcane"
+                "note": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 }
               },
               "required": [
-                "arcane",
-                "divine",
-                "occult",
-                "primal",
-                "class",
-                "perception",
-                "fortitude",
-                "reflex",
-                "will",
-                "acrobatics",
-                "arcana",
-                "athletics",
-                "crafting",
-                "deception",
-                "diplomacy",
-                "intimidation",
-                "medicine",
-                "nature",
-                "occultism",
-                "performance",
-                "religion",
-                "society",
-                "stealth",
-                "survival",
-                "thievery"
+                "name",
+                "proficiency",
+                "dc",
+                "bonus",
+                "ability",
+                "note"
               ],
-              "additionalProperties": false,
-              "description": "All stats, each potentially having a roll, a dc, a proficiency, and an ability."
+              "additionalProperties": false
             },
-            "baseCounters": {
+            "occult": {
               "type": "object",
               "properties": {
-                "heroPoints": {
-                  "type": "object",
-                  "properties": {
-                    "style": {
+                "name": {
+                  "description": "The stat's name.",
+                  "type": "string"
+                },
+                "proficiency": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "dc": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "bonus": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "ability": {
+                  "default": null,
+                  "anyOf": [
+                    {
                       "type": "string",
                       "enum": [
-                        "default",
-                        "dots"
+                        "strength",
+                        "dexterity",
+                        "constitution",
+                        "intelligence",
+                        "wisdom",
+                        "charisma"
                       ]
                     },
-                    "name": {
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "note": {
+                  "default": null,
+                  "anyOf": [
+                    {
                       "type": "string"
                     },
-                    "current": {
-                      "type": "integer"
-                    },
-                    "max": {
-                      "$ref": "#/definitions/pastebin-import/properties/sheet/properties/intProperties/properties/ac"
-                    },
-                    "recoverable": {
-                      "type": "boolean",
-                      "default": false
+                    {
+                      "type": "null"
                     }
-                  },
-                  "required": [
-                    "style",
-                    "name",
-                    "current"
-                  ],
-                  "additionalProperties": false,
-                  "default": {
-                    "style": "default",
-                    "name": "",
-                    "current": 0,
-                    "max": null,
-                    "recoverable": true
-                  }
-                },
-                "focusPoints": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/baseCounters/properties/heroPoints"
-                },
-                "hp": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/baseCounters/properties/heroPoints"
-                },
-                "tempHp": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/baseCounters/properties/heroPoints"
-                },
-                "stamina": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/baseCounters/properties/heroPoints"
-                },
-                "resolve": {
-                  "$ref": "#/definitions/pastebin-import/properties/sheet/properties/baseCounters/properties/heroPoints"
+                  ]
                 }
               },
-              "additionalProperties": false,
-              "description": "All incrementable counters on a sheet"
+              "required": [
+                "name",
+                "proficiency",
+                "dc",
+                "bonus",
+                "ability",
+                "note"
+              ],
+              "additionalProperties": false
             },
-            "additionalSkills": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/pastebin-import/properties/sheet/properties/stats/properties/arcane"
-              },
-              "default": [],
-              "description": "The creature's lore/additional skills."
-            },
-            "attacks": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "type": "string",
-                    "description": "The attack name."
-                  },
-                  "toHit": {
-                    "$ref": "#/definitions/pastebin-import/properties/sheet/properties/staticInfo/properties/level",
-                    "default": null,
-                    "description": "The attack toHit."
-                  },
-                  "damage": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "dice": {
-                          "type": "string",
-                          "description": "The attack damage dice."
-                        },
-                        "type": {
-                          "type": [
-                            "string",
-                            "null"
-                          ],
-                          "description": "The attack damage type."
-                        }
-                      },
-                      "required": [
-                        "dice",
-                        "type"
-                      ],
-                      "additionalProperties": false,
-                      "description": "A damage roll"
-                    },
-                    "default": [],
-                    "description": "The attack damage."
-                  },
-                  "effects": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    },
-                    "default": [],
-                    "description": "Any abilities or rider effects to an attack"
-                  },
-                  "range": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "default": null,
-                    "description": "The attack range."
-                  },
-                  "traits": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    },
-                    "default": [],
-                    "description": "The attack traits."
-                  },
-                  "notes": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "default": null,
-                    "description": "The attack notes."
-                  }
-                },
-                "required": [
-                  "name"
-                ],
-                "additionalProperties": false
-              },
-              "description": "The creature's attacks."
-            },
-            "sourceData": {
+            "primal": {
               "type": "object",
-              "properties": {},
-              "additionalProperties": false,
-              "default": {},
-              "description": "The source data the sheet was parsed from"
+              "properties": {
+                "name": {
+                  "description": "The stat's name.",
+                  "type": "string"
+                },
+                "proficiency": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "dc": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "bonus": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "ability": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "strength",
+                        "dexterity",
+                        "constitution",
+                        "intelligence",
+                        "wisdom",
+                        "charisma"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "note": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "name",
+                "proficiency",
+                "dc",
+                "bonus",
+                "ability",
+                "note"
+              ],
+              "additionalProperties": false
+            },
+            "class": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "description": "The stat's name.",
+                  "type": "string"
+                },
+                "proficiency": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "dc": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "bonus": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "ability": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "strength",
+                        "dexterity",
+                        "constitution",
+                        "intelligence",
+                        "wisdom",
+                        "charisma"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "note": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "name",
+                "proficiency",
+                "dc",
+                "bonus",
+                "ability",
+                "note"
+              ],
+              "additionalProperties": false
+            },
+            "perception": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "description": "The stat's name.",
+                  "type": "string"
+                },
+                "proficiency": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "dc": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "bonus": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "ability": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "strength",
+                        "dexterity",
+                        "constitution",
+                        "intelligence",
+                        "wisdom",
+                        "charisma"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "note": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "name",
+                "proficiency",
+                "dc",
+                "bonus",
+                "ability",
+                "note"
+              ],
+              "additionalProperties": false
+            },
+            "fortitude": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "description": "The stat's name.",
+                  "type": "string"
+                },
+                "proficiency": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "dc": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "bonus": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "ability": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "strength",
+                        "dexterity",
+                        "constitution",
+                        "intelligence",
+                        "wisdom",
+                        "charisma"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "note": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "name",
+                "proficiency",
+                "dc",
+                "bonus",
+                "ability",
+                "note"
+              ],
+              "additionalProperties": false
+            },
+            "reflex": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "description": "The stat's name.",
+                  "type": "string"
+                },
+                "proficiency": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "dc": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "bonus": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "ability": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "strength",
+                        "dexterity",
+                        "constitution",
+                        "intelligence",
+                        "wisdom",
+                        "charisma"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "note": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "name",
+                "proficiency",
+                "dc",
+                "bonus",
+                "ability",
+                "note"
+              ],
+              "additionalProperties": false
+            },
+            "will": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "description": "The stat's name.",
+                  "type": "string"
+                },
+                "proficiency": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "dc": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "bonus": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "ability": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "strength",
+                        "dexterity",
+                        "constitution",
+                        "intelligence",
+                        "wisdom",
+                        "charisma"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "note": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "name",
+                "proficiency",
+                "dc",
+                "bonus",
+                "ability",
+                "note"
+              ],
+              "additionalProperties": false
+            },
+            "acrobatics": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "description": "The stat's name.",
+                  "type": "string"
+                },
+                "proficiency": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "dc": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "bonus": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "ability": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "strength",
+                        "dexterity",
+                        "constitution",
+                        "intelligence",
+                        "wisdom",
+                        "charisma"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "note": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "name",
+                "proficiency",
+                "dc",
+                "bonus",
+                "ability",
+                "note"
+              ],
+              "additionalProperties": false
+            },
+            "arcana": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "description": "The stat's name.",
+                  "type": "string"
+                },
+                "proficiency": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "dc": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "bonus": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "ability": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "strength",
+                        "dexterity",
+                        "constitution",
+                        "intelligence",
+                        "wisdom",
+                        "charisma"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "note": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "name",
+                "proficiency",
+                "dc",
+                "bonus",
+                "ability",
+                "note"
+              ],
+              "additionalProperties": false
+            },
+            "athletics": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "description": "The stat's name.",
+                  "type": "string"
+                },
+                "proficiency": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "dc": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "bonus": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "ability": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "strength",
+                        "dexterity",
+                        "constitution",
+                        "intelligence",
+                        "wisdom",
+                        "charisma"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "note": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "name",
+                "proficiency",
+                "dc",
+                "bonus",
+                "ability",
+                "note"
+              ],
+              "additionalProperties": false
+            },
+            "crafting": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "description": "The stat's name.",
+                  "type": "string"
+                },
+                "proficiency": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "dc": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "bonus": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "ability": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "strength",
+                        "dexterity",
+                        "constitution",
+                        "intelligence",
+                        "wisdom",
+                        "charisma"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "note": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "name",
+                "proficiency",
+                "dc",
+                "bonus",
+                "ability",
+                "note"
+              ],
+              "additionalProperties": false
+            },
+            "deception": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "description": "The stat's name.",
+                  "type": "string"
+                },
+                "proficiency": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "dc": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "bonus": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "ability": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "strength",
+                        "dexterity",
+                        "constitution",
+                        "intelligence",
+                        "wisdom",
+                        "charisma"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "note": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "name",
+                "proficiency",
+                "dc",
+                "bonus",
+                "ability",
+                "note"
+              ],
+              "additionalProperties": false
+            },
+            "diplomacy": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "description": "The stat's name.",
+                  "type": "string"
+                },
+                "proficiency": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "dc": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "bonus": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "ability": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "strength",
+                        "dexterity",
+                        "constitution",
+                        "intelligence",
+                        "wisdom",
+                        "charisma"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "note": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "name",
+                "proficiency",
+                "dc",
+                "bonus",
+                "ability",
+                "note"
+              ],
+              "additionalProperties": false
+            },
+            "intimidation": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "description": "The stat's name.",
+                  "type": "string"
+                },
+                "proficiency": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "dc": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "bonus": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "ability": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "strength",
+                        "dexterity",
+                        "constitution",
+                        "intelligence",
+                        "wisdom",
+                        "charisma"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "note": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "name",
+                "proficiency",
+                "dc",
+                "bonus",
+                "ability",
+                "note"
+              ],
+              "additionalProperties": false
+            },
+            "medicine": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "description": "The stat's name.",
+                  "type": "string"
+                },
+                "proficiency": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "dc": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "bonus": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "ability": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "strength",
+                        "dexterity",
+                        "constitution",
+                        "intelligence",
+                        "wisdom",
+                        "charisma"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "note": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "name",
+                "proficiency",
+                "dc",
+                "bonus",
+                "ability",
+                "note"
+              ],
+              "additionalProperties": false
+            },
+            "nature": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "description": "The stat's name.",
+                  "type": "string"
+                },
+                "proficiency": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "dc": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "bonus": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "ability": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "strength",
+                        "dexterity",
+                        "constitution",
+                        "intelligence",
+                        "wisdom",
+                        "charisma"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "note": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "name",
+                "proficiency",
+                "dc",
+                "bonus",
+                "ability",
+                "note"
+              ],
+              "additionalProperties": false
+            },
+            "occultism": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "description": "The stat's name.",
+                  "type": "string"
+                },
+                "proficiency": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "dc": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "bonus": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "ability": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "strength",
+                        "dexterity",
+                        "constitution",
+                        "intelligence",
+                        "wisdom",
+                        "charisma"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "note": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "name",
+                "proficiency",
+                "dc",
+                "bonus",
+                "ability",
+                "note"
+              ],
+              "additionalProperties": false
+            },
+            "performance": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "description": "The stat's name.",
+                  "type": "string"
+                },
+                "proficiency": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "dc": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "bonus": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "ability": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "strength",
+                        "dexterity",
+                        "constitution",
+                        "intelligence",
+                        "wisdom",
+                        "charisma"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "note": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "name",
+                "proficiency",
+                "dc",
+                "bonus",
+                "ability",
+                "note"
+              ],
+              "additionalProperties": false
+            },
+            "religion": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "description": "The stat's name.",
+                  "type": "string"
+                },
+                "proficiency": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "dc": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "bonus": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "ability": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "strength",
+                        "dexterity",
+                        "constitution",
+                        "intelligence",
+                        "wisdom",
+                        "charisma"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "note": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "name",
+                "proficiency",
+                "dc",
+                "bonus",
+                "ability",
+                "note"
+              ],
+              "additionalProperties": false
+            },
+            "society": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "description": "The stat's name.",
+                  "type": "string"
+                },
+                "proficiency": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "dc": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "bonus": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "ability": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "strength",
+                        "dexterity",
+                        "constitution",
+                        "intelligence",
+                        "wisdom",
+                        "charisma"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "note": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "name",
+                "proficiency",
+                "dc",
+                "bonus",
+                "ability",
+                "note"
+              ],
+              "additionalProperties": false
+            },
+            "stealth": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "description": "The stat's name.",
+                  "type": "string"
+                },
+                "proficiency": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "dc": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "bonus": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "ability": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "strength",
+                        "dexterity",
+                        "constitution",
+                        "intelligence",
+                        "wisdom",
+                        "charisma"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "note": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "name",
+                "proficiency",
+                "dc",
+                "bonus",
+                "ability",
+                "note"
+              ],
+              "additionalProperties": false
+            },
+            "survival": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "description": "The stat's name.",
+                  "type": "string"
+                },
+                "proficiency": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "dc": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "bonus": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "ability": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "strength",
+                        "dexterity",
+                        "constitution",
+                        "intelligence",
+                        "wisdom",
+                        "charisma"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "note": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "name",
+                "proficiency",
+                "dc",
+                "bonus",
+                "ability",
+                "note"
+              ],
+              "additionalProperties": false
+            },
+            "thievery": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "description": "The stat's name.",
+                  "type": "string"
+                },
+                "proficiency": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "dc": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "bonus": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "ability": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "strength",
+                        "dexterity",
+                        "constitution",
+                        "intelligence",
+                        "wisdom",
+                        "charisma"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "note": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "name",
+                "proficiency",
+                "dc",
+                "bonus",
+                "ability",
+                "note"
+              ],
+              "additionalProperties": false
             }
           },
           "required": [
-            "staticInfo",
-            "info",
-            "infoLists",
-            "weaknessesResistances",
-            "intProperties",
-            "stats",
-            "baseCounters",
-            "attacks"
+            "arcane",
+            "divine",
+            "occult",
+            "primal",
+            "class",
+            "perception",
+            "fortitude",
+            "reflex",
+            "will",
+            "acrobatics",
+            "arcana",
+            "athletics",
+            "crafting",
+            "deception",
+            "diplomacy",
+            "intimidation",
+            "medicine",
+            "nature",
+            "occultism",
+            "performance",
+            "religion",
+            "society",
+            "stealth",
+            "survival",
+            "thievery"
           ],
-          "additionalProperties": false,
-          "description": "A creature's sheet."
+          "additionalProperties": false
         },
-        "modifiers": {
-          "type": "array",
-          "items": {
-            "anyOf": [
-              {
-                "type": "object",
-                "properties": {
-                  "modifierType": {
-                    "type": "string",
-                    "const": "sheet"
-                  },
-                  "name": {
-                    "type": "string"
-                  },
-                  "isActive": {
-                    "type": "boolean",
-                    "default": false
-                  },
-                  "description": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "default": null
-                  },
-                  "type": {
-                    "type": "string",
-                    "enum": [
-                      "untyped",
-                      "status",
-                      "circumstance",
-                      "item"
-                    ],
-                    "default": "untyped"
-                  },
-                  "sheetAdjustments": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "property": {
-                          "type": "string"
-                        },
-                        "propertyType": {
-                          "type": "string",
-                          "enum": [
-                            "info",
-                            "infoList",
-                            "intProperty",
-                            "baseCounter",
-                            "weaknessResistance",
-                            "stat",
-                            "attack",
-                            "extraSkill",
-                            ""
-                          ]
-                        },
-                        "operation": {
-                          "type": "string",
-                          "enum": [
-                            "+",
-                            "-",
-                            "="
-                          ]
-                        },
-                        "value": {
-                          "type": "string"
-                        },
-                        "type": {
-                          "type": "string",
-                          "enum": [
-                            "untyped",
-                            "status",
-                            "circumstance",
-                            "item"
-                          ],
-                          "default": "untyped"
-                        }
-                      },
-                      "required": [
-                        "property",
-                        "propertyType",
-                        "operation",
-                        "value"
-                      ],
-                      "additionalProperties": false
-                    },
-                    "default": []
-                  }
-                },
-                "required": [
-                  "modifierType",
-                  "name"
-                ],
-                "additionalProperties": false,
-                "description": "A sheet modifier. The sheetAdjustments are applied to the sheet."
+        "baseCounters": {
+          "description": "The non-configurable base counters for a sheet.",
+          "type": "object",
+          "properties": {
+            "heroPoints": {
+              "default": {
+                "style": "default",
+                "name": "",
+                "description": null,
+                "current": 0,
+                "max": null,
+                "recoverTo": -1,
+                "recoverable": true,
+                "text": ""
               },
-              {
-                "type": "object",
-                "properties": {
-                  "modifierType": {
-                    "type": "string",
-                    "const": "roll"
-                  },
-                  "name": {
-                    "type": "string"
-                  },
-                  "isActive": {
-                    "type": "boolean",
-                    "default": false
-                  },
-                  "description": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "default": null
-                  },
-                  "type": {
-                    "type": "string",
-                    "enum": [
-                      "untyped",
-                      "status",
-                      "circumstance",
-                      "item"
-                    ],
-                    "default": "untyped"
-                  },
-                  "value": {
-                    "type": "string"
-                  },
-                  "targetTags": {
-                    "type": [
-                      "string",
-                      "null"
-                    ]
-                  }
+              "type": "object",
+              "properties": {
+                "style": {
+                  "type": "string",
+                  "enum": [
+                    "default"
+                  ]
                 },
-                "required": [
-                  "modifierType",
-                  "name",
-                  "targetTags"
-                ],
-                "additionalProperties": false,
-                "description": "A roll modifier. The dice expression in value is assigned the type \"type\" and appled to rolls that match the targetTags expression"
-              }
-            ],
-            "description": "A modifier is a bonus or penalty that can be applied to a roll or sheet property."
-          }
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "current": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "max": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "recoverTo": {
+                  "default": 0,
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "recoverable": {
+                  "default": false,
+                  "type": "boolean"
+                },
+                "text": {
+                  "default": "",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "style",
+                "name",
+                "description",
+                "current",
+                "max",
+                "recoverTo",
+                "recoverable",
+                "text"
+              ],
+              "additionalProperties": false
+            },
+            "focusPoints": {
+              "default": {
+                "style": "default",
+                "name": "",
+                "description": null,
+                "current": 0,
+                "max": null,
+                "recoverTo": -1,
+                "recoverable": true,
+                "text": ""
+              },
+              "type": "object",
+              "properties": {
+                "style": {
+                  "type": "string",
+                  "enum": [
+                    "default"
+                  ]
+                },
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "current": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "max": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "recoverTo": {
+                  "default": 0,
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "recoverable": {
+                  "default": false,
+                  "type": "boolean"
+                },
+                "text": {
+                  "default": "",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "style",
+                "name",
+                "description",
+                "current",
+                "max",
+                "recoverTo",
+                "recoverable",
+                "text"
+              ],
+              "additionalProperties": false
+            },
+            "hp": {
+              "default": {
+                "style": "default",
+                "name": "",
+                "description": null,
+                "current": 0,
+                "max": null,
+                "recoverTo": -1,
+                "recoverable": true,
+                "text": ""
+              },
+              "type": "object",
+              "properties": {
+                "style": {
+                  "type": "string",
+                  "enum": [
+                    "default"
+                  ]
+                },
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "current": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "max": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "recoverTo": {
+                  "default": 0,
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "recoverable": {
+                  "default": false,
+                  "type": "boolean"
+                },
+                "text": {
+                  "default": "",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "style",
+                "name",
+                "description",
+                "current",
+                "max",
+                "recoverTo",
+                "recoverable",
+                "text"
+              ],
+              "additionalProperties": false
+            },
+            "tempHp": {
+              "default": {
+                "style": "default",
+                "name": "",
+                "description": null,
+                "current": 0,
+                "max": null,
+                "recoverTo": -1,
+                "recoverable": true,
+                "text": ""
+              },
+              "type": "object",
+              "properties": {
+                "style": {
+                  "type": "string",
+                  "enum": [
+                    "default"
+                  ]
+                },
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "current": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "max": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "recoverTo": {
+                  "default": 0,
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "recoverable": {
+                  "default": false,
+                  "type": "boolean"
+                },
+                "text": {
+                  "default": "",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "style",
+                "name",
+                "description",
+                "current",
+                "max",
+                "recoverTo",
+                "recoverable",
+                "text"
+              ],
+              "additionalProperties": false
+            },
+            "stamina": {
+              "default": {
+                "style": "default",
+                "name": "",
+                "description": null,
+                "current": 0,
+                "max": null,
+                "recoverTo": -1,
+                "recoverable": true,
+                "text": ""
+              },
+              "type": "object",
+              "properties": {
+                "style": {
+                  "type": "string",
+                  "enum": [
+                    "default"
+                  ]
+                },
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "current": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "max": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "recoverTo": {
+                  "default": 0,
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "recoverable": {
+                  "default": false,
+                  "type": "boolean"
+                },
+                "text": {
+                  "default": "",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "style",
+                "name",
+                "description",
+                "current",
+                "max",
+                "recoverTo",
+                "recoverable",
+                "text"
+              ],
+              "additionalProperties": false
+            },
+            "resolve": {
+              "default": {
+                "style": "default",
+                "name": "",
+                "description": null,
+                "current": 0,
+                "max": null,
+                "recoverTo": -1,
+                "recoverable": true,
+                "text": ""
+              },
+              "type": "object",
+              "properties": {
+                "style": {
+                  "type": "string",
+                  "enum": [
+                    "default"
+                  ]
+                },
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "current": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "max": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "recoverTo": {
+                  "default": 0,
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "recoverable": {
+                  "default": false,
+                  "type": "boolean"
+                },
+                "text": {
+                  "default": "",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "style",
+                "name",
+                "description",
+                "current",
+                "max",
+                "recoverTo",
+                "recoverable",
+                "text"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "heroPoints",
+            "focusPoints",
+            "hp",
+            "tempHp",
+            "stamina",
+            "resolve"
+          ],
+          "additionalProperties": false
         },
-        "actions": {
+        "counterGroups": {
+          "description": "The configurable counters for a sheet that aren't in a group.",
           "type": "array",
           "items": {
             "type": "object",
@@ -706,314 +3319,1245 @@
                 "type": "string"
               },
               "description": {
-                "type": [
-                  "string",
-                  "null"
-                ],
-                "default": null
-              },
-              "type": {
-                "type": "string",
-                "enum": [
-                  "attack",
-                  "spell",
-                  "other"
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
                 ]
               },
-              "actionCost": {
-                "type": "string",
-                "enum": [
-                  "oneAction",
-                  "twoActions",
-                  "threeActions",
-                  "freeAction",
-                  "variableActions",
-                  "reaction",
-                  "none"
-                ]
-              },
-              "baseLevel": {
-                "$ref": "#/definitions/pastebin-import/properties/sheet/properties/intProperties/properties/ac"
-              },
-              "autoHeighten": {
-                "type": "boolean",
-                "default": false
-              },
-              "tags": {
+              "counters": {
                 "type": "array",
                 "items": {
-                  "type": "string"
-                },
-                "default": []
-              },
-              "rolls": {
-                "type": "array",
-                "items": {
-                  "anyOf": [
+                  "oneOf": [
                     {
                       "type": "object",
                       "properties": {
+                        "style": {
+                          "type": "string",
+                          "enum": [
+                            "prepared"
+                          ]
+                        },
                         "name": {
                           "type": "string"
                         },
-                        "allowRollModifiers": {
-                          "type": "boolean",
-                          "default": false
-                        },
-                        "type": {
-                          "type": "string",
-                          "enum": [
-                            "attack",
-                            "skill-challenge"
+                        "description": {
+                          "default": null,
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
                           ]
                         },
-                        "targetDC": {
-                          "type": [
-                            "string",
-                            "null"
-                          ],
-                          "default": null
-                        },
-                        "roll": {
-                          "type": "string",
-                          "default": ""
-                        }
-                      },
-                      "required": [
-                        "name",
-                        "type"
-                      ],
-                      "additionalProperties": false
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "name": {
-                          "$ref": "#/definitions/pastebin-import/properties/actions/items/properties/rolls/items/anyOf/0/properties/name"
-                        },
-                        "allowRollModifiers": {
-                          "$ref": "#/definitions/pastebin-import/properties/actions/items/properties/rolls/items/anyOf/0/properties/allowRollModifiers"
-                        },
-                        "type": {
-                          "type": "string",
-                          "const": "damage"
-                        },
-                        "damageType": {
-                          "type": [
-                            "string",
-                            "null"
-                          ],
-                          "default": null
-                        },
-                        "healInsteadOfDamage": {
-                          "type": "boolean",
-                          "default": false
-                        },
-                        "roll": {
-                          "type": [
-                            "string",
-                            "null"
-                          ],
-                          "default": null
-                        }
-                      },
-                      "required": [
-                        "name",
-                        "type"
-                      ],
-                      "additionalProperties": false
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "name": {
-                          "$ref": "#/definitions/pastebin-import/properties/actions/items/properties/rolls/items/anyOf/0/properties/name"
-                        },
-                        "allowRollModifiers": {
-                          "$ref": "#/definitions/pastebin-import/properties/actions/items/properties/rolls/items/anyOf/0/properties/allowRollModifiers"
-                        },
-                        "type": {
-                          "type": "string",
-                          "const": "advanced-damage"
-                        },
-                        "damageType": {
-                          "type": [
-                            "string",
-                            "null"
-                          ],
-                          "default": null
-                        },
-                        "healInsteadOfDamage": {
-                          "type": "boolean",
-                          "default": false
-                        },
-                        "criticalSuccessRoll": {
-                          "type": [
-                            "string",
-                            "null"
-                          ],
-                          "default": null
-                        },
-                        "criticalFailureRoll": {
-                          "type": [
-                            "string",
-                            "null"
-                          ],
-                          "default": null
-                        },
-                        "successRoll": {
-                          "type": [
-                            "string",
-                            "null"
-                          ],
-                          "default": null
-                        },
-                        "failureRoll": {
-                          "type": [
-                            "string",
-                            "null"
-                          ],
-                          "default": null
-                        }
-                      },
-                      "required": [
-                        "name",
-                        "type"
-                      ],
-                      "additionalProperties": false
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "name": {
-                          "$ref": "#/definitions/pastebin-import/properties/actions/items/properties/rolls/items/anyOf/0/properties/name"
-                        },
-                        "allowRollModifiers": {
-                          "$ref": "#/definitions/pastebin-import/properties/actions/items/properties/rolls/items/anyOf/0/properties/allowRollModifiers"
-                        },
-                        "type": {
-                          "type": "string",
-                          "const": "save"
-                        },
-                        "saveRollType": {
-                          "type": [
-                            "string",
-                            "null"
-                          ],
-                          "default": null
-                        },
-                        "saveTargetDC": {
-                          "type": [
-                            "string",
-                            "null"
-                          ],
-                          "default": null
-                        }
-                      },
-                      "required": [
-                        "name",
-                        "type"
-                      ],
-                      "additionalProperties": false
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "name": {
-                          "$ref": "#/definitions/pastebin-import/properties/actions/items/properties/rolls/items/anyOf/0/properties/name"
-                        },
-                        "allowRollModifiers": {
-                          "$ref": "#/definitions/pastebin-import/properties/actions/items/properties/rolls/items/anyOf/0/properties/allowRollModifiers"
-                        },
-                        "type": {
-                          "type": "string",
-                          "const": "text"
-                        },
-                        "defaultText": {
-                          "type": [
-                            "string",
-                            "null"
-                          ],
-                          "default": null
-                        },
-                        "criticalSuccessText": {
-                          "type": [
-                            "string",
-                            "null"
-                          ],
-                          "default": null
-                        },
-                        "criticalFailureText": {
-                          "type": [
-                            "string",
-                            "null"
-                          ],
-                          "default": null
-                        },
-                        "successText": {
-                          "type": [
-                            "string",
-                            "null"
-                          ],
-                          "default": null
-                        },
-                        "failureText": {
-                          "type": [
-                            "string",
-                            "null"
-                          ],
-                          "default": null
-                        },
-                        "extraTags": {
+                        "prepared": {
                           "type": "array",
                           "items": {
-                            "type": "string"
-                          },
-                          "default": []
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "active": {
+                          "type": "array",
+                          "items": {
+                            "type": "boolean"
+                          }
+                        },
+                        "max": {
+                          "default": null,
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "recoverable": {
+                          "default": false,
+                          "type": "boolean"
+                        },
+                        "text": {
+                          "default": "",
+                          "type": "string"
                         }
                       },
                       "required": [
+                        "style",
                         "name",
-                        "type"
+                        "description",
+                        "prepared",
+                        "active",
+                        "max",
+                        "recoverable",
+                        "text"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "style": {
+                          "type": "string",
+                          "enum": [
+                            "default"
+                          ]
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "description": {
+                          "default": null,
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "current": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "max": {
+                          "default": null,
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "recoverTo": {
+                          "default": 0,
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "recoverable": {
+                          "default": false,
+                          "type": "boolean"
+                        },
+                        "text": {
+                          "default": "",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "style",
+                        "name",
+                        "description",
+                        "current",
+                        "max",
+                        "recoverTo",
+                        "recoverable",
+                        "text"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "style": {
+                          "type": "string",
+                          "enum": [
+                            "dots"
+                          ]
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "description": {
+                          "default": null,
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "current": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "max": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 20
+                        },
+                        "recoverTo": {
+                          "default": 0,
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "recoverable": {
+                          "default": false,
+                          "type": "boolean"
+                        },
+                        "text": {
+                          "default": "",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "style",
+                        "name",
+                        "description",
+                        "current",
+                        "max",
+                        "recoverTo",
+                        "recoverable",
+                        "text"
                       ],
                       "additionalProperties": false
                     }
                   ]
-                },
-                "default": []
+                }
               }
             },
             "required": [
               "name",
-              "type",
-              "actionCost"
+              "description",
+              "counters"
             ],
-            "additionalProperties": false,
-            "description": "A custom sheet action"
+            "additionalProperties": false
           }
         },
-        "rollMacros": {
+        "countersOutsideGroups": {
+          "description": "The configurable counter groups for a sheet.",
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "style": {
+                    "type": "string",
+                    "enum": [
+                      "prepared"
+                    ]
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "default": null,
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "prepared": {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "active": {
+                    "type": "array",
+                    "items": {
+                      "type": "boolean"
+                    }
+                  },
+                  "max": {
+                    "default": null,
+                    "anyOf": [
+                      {
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "recoverable": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "text": {
+                    "default": "",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "style",
+                  "name",
+                  "description",
+                  "prepared",
+                  "active",
+                  "max",
+                  "recoverable",
+                  "text"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "style": {
+                    "type": "string",
+                    "enum": [
+                      "default"
+                    ]
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "default": null,
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "current": {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  },
+                  "max": {
+                    "default": null,
+                    "anyOf": [
+                      {
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "recoverTo": {
+                    "default": 0,
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  },
+                  "recoverable": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "text": {
+                    "default": "",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "style",
+                  "name",
+                  "description",
+                  "current",
+                  "max",
+                  "recoverTo",
+                  "recoverable",
+                  "text"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "style": {
+                    "type": "string",
+                    "enum": [
+                      "dots"
+                    ]
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "default": null,
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "current": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "max": {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 20
+                  },
+                  "recoverTo": {
+                    "default": 0,
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  },
+                  "recoverable": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "text": {
+                    "default": "",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "style",
+                  "name",
+                  "description",
+                  "current",
+                  "max",
+                  "recoverTo",
+                  "recoverable",
+                  "text"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          }
+        },
+        "additionalSkills": {
+          "description": "The creature's lore/additional skills.",
+          "default": [],
           "type": "array",
           "items": {
             "type": "object",
             "properties": {
               "name": {
+                "description": "The stat's name.",
                 "type": "string"
               },
-              "macro": {
-                "type": "string"
+              "proficiency": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "dc": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "bonus": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "ability": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "strength",
+                      "dexterity",
+                      "constitution",
+                      "intelligence",
+                      "wisdom",
+                      "charisma"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "note": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
               "name",
-              "macro"
+              "proficiency",
+              "dc",
+              "bonus",
+              "ability",
+              "note"
             ],
             "additionalProperties": false
           }
+        },
+        "attacks": {
+          "description": "The creature's attacks.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "description": "The attack name.",
+                "type": "string"
+              },
+              "toHit": {
+                "description": "The attack toHit.",
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "damage": {
+                "description": "The attack damage.",
+                "default": [],
+                "type": "array",
+                "items": {
+                  "description": "A damage roll",
+                  "type": "object",
+                  "properties": {
+                    "dice": {
+                      "description": "The attack damage dice.",
+                      "type": "string"
+                    },
+                    "type": {
+                      "description": "The attack damage type.",
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "dice",
+                    "type"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "effects": {
+                "description": "Any abilities or rider effects to an attack",
+                "default": [],
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "range": {
+                "description": "The attack range.",
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "traits": {
+                "description": "The attack traits.",
+                "default": [],
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "notes": {
+                "description": "The attack notes.",
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "name",
+              "toHit",
+              "damage",
+              "effects",
+              "range",
+              "traits",
+              "notes"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "sourceData": {
+          "description": "The source data the sheet was parsed from",
+          "default": {},
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {}
         }
       },
+      "required": [
+        "staticInfo",
+        "info",
+        "infoLists",
+        "weaknessesResistances",
+        "intProperties",
+        "stats",
+        "baseCounters",
+        "counterGroups",
+        "countersOutsideGroups",
+        "additionalSkills",
+        "attacks",
+        "sourceData"
+      ],
       "additionalProperties": false
+    },
+    "modifiers": {
+      "type": "array",
+      "items": {
+        "description": "A modifier is a bonus or penalty that can be applied to rolls or sheet properties.",
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "isActive": {
+            "default": false,
+            "type": "boolean"
+          },
+          "description": {
+            "default": null,
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "type": {
+            "default": "untyped",
+            "type": "string",
+            "enum": [
+              "untyped",
+              "status",
+              "circumstance",
+              "item"
+            ]
+          },
+          "severity": {
+            "default": null,
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sheetAdjustments": {
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "property": {
+                  "type": "string"
+                },
+                "propertyType": {
+                  "type": "string",
+                  "enum": [
+                    "info",
+                    "infoList",
+                    "intProperty",
+                    "baseCounter",
+                    "weaknessResistance",
+                    "stat",
+                    "attack",
+                    "extraSkill",
+                    "statGroup",
+                    ""
+                  ]
+                },
+                "operation": {
+                  "type": "string",
+                  "enum": [
+                    "+",
+                    "-",
+                    "="
+                  ]
+                },
+                "value": {
+                  "type": "string"
+                },
+                "type": {
+                  "default": "untyped",
+                  "type": "string",
+                  "enum": [
+                    "untyped",
+                    "status",
+                    "circumstance",
+                    "item"
+                  ]
+                }
+              },
+              "required": [
+                "property",
+                "propertyType",
+                "operation",
+                "value",
+                "type"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "rollAdjustment": {
+            "default": null,
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "rollTargetTags": {
+            "default": null,
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "note": {
+            "default": null,
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "isActive",
+          "description",
+          "type",
+          "severity",
+          "sheetAdjustments",
+          "rollAdjustment",
+          "rollTargetTags",
+          "note"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "actions": {
+      "type": "array",
+      "items": {
+        "description": "A custom sheet action",
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "default": null,
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "attack",
+              "spell",
+              "other"
+            ]
+          },
+          "actionCost": {
+            "type": "string",
+            "enum": [
+              "oneAction",
+              "twoActions",
+              "threeActions",
+              "freeAction",
+              "variableActions",
+              "reaction",
+              "none"
+            ]
+          },
+          "baseLevel": {
+            "default": null,
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "autoHeighten": {
+            "default": false,
+            "type": "boolean"
+          },
+          "tags": {
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "rolls": {
+            "default": [],
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "allowRollModifiers": {
+                      "default": false,
+                      "type": "boolean"
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "attack",
+                        "skill-challenge"
+                      ]
+                    },
+                    "targetDC": {
+                      "default": null,
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "roll": {
+                      "default": "",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "allowRollModifiers",
+                    "type",
+                    "targetDC",
+                    "roll"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "allowRollModifiers": {
+                      "default": false,
+                      "type": "boolean"
+                    },
+                    "type": {
+                      "type": "string",
+                      "const": "damage"
+                    },
+                    "damageType": {
+                      "default": null,
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "healInsteadOfDamage": {
+                      "default": false,
+                      "type": "boolean"
+                    },
+                    "roll": {
+                      "default": null,
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "allowRollModifiers",
+                    "type",
+                    "damageType",
+                    "healInsteadOfDamage",
+                    "roll"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "allowRollModifiers": {
+                      "default": false,
+                      "type": "boolean"
+                    },
+                    "type": {
+                      "type": "string",
+                      "const": "advanced-damage"
+                    },
+                    "damageType": {
+                      "default": null,
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "healInsteadOfDamage": {
+                      "default": false,
+                      "type": "boolean"
+                    },
+                    "criticalSuccessRoll": {
+                      "default": null,
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "criticalFailureRoll": {
+                      "default": null,
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "successRoll": {
+                      "default": null,
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "failureRoll": {
+                      "default": null,
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "allowRollModifiers",
+                    "type",
+                    "damageType",
+                    "healInsteadOfDamage",
+                    "criticalSuccessRoll",
+                    "criticalFailureRoll",
+                    "successRoll",
+                    "failureRoll"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "allowRollModifiers": {
+                      "default": false,
+                      "type": "boolean"
+                    },
+                    "type": {
+                      "type": "string",
+                      "const": "save"
+                    },
+                    "saveRollType": {
+                      "default": null,
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "saveTargetDC": {
+                      "default": null,
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "allowRollModifiers",
+                    "type",
+                    "saveRollType",
+                    "saveTargetDC"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "allowRollModifiers": {
+                      "default": false,
+                      "type": "boolean"
+                    },
+                    "type": {
+                      "type": "string",
+                      "const": "text"
+                    },
+                    "defaultText": {
+                      "default": null,
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "criticalSuccessText": {
+                      "default": null,
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "criticalFailureText": {
+                      "default": null,
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "successText": {
+                      "default": null,
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "failureText": {
+                      "default": null,
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "extraTags": {
+                      "default": [],
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "allowRollModifiers",
+                    "type",
+                    "defaultText",
+                    "criticalSuccessText",
+                    "criticalFailureText",
+                    "successText",
+                    "failureText",
+                    "extraTags"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            }
+          }
+        },
+        "required": [
+          "name",
+          "description",
+          "type",
+          "actionCost",
+          "baseLevel",
+          "autoHeighten",
+          "tags",
+          "rolls"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "rollMacros": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "macro": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "macro"
+        ],
+        "additionalProperties": false
+      }
     }
   },
-  "$schema": "http://json-schema.org/draft-07/schema#"
+  "additionalProperties": false,
+  "id": "pastebin-import"
 }

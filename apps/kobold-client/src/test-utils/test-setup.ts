@@ -1,13 +1,21 @@
 /**
- * Base test setup utilities for command integration tests.
+ * Base test setup utilities for command tests.
  *
  * These helpers provide common setup patterns and reduce boilerplate
  * in test files.
+ *
+ * ## Unit Tests vs Integration Tests
+ *
+ * - **Unit tests**: Use `createUnitTestHarness` with `mockKobold` - no database connection required
+ * - **Integration tests**: Use `createTestHarness` with `vitestKobold` - requires database connection
+ *
+ * Most chat command tests should be unit tests since they mock the return values anyway.
  */
-import { vitestKobold } from '@kobold/db/test-utils';
 import { NethysDb } from '@kobold/nethys';
+import type { Kobold } from '@kobold/db';
 import { Command, InjectedServices } from '../commands/command.js';
 import { CommandTestHarness } from './command-test-harness.js';
+import { mockKobold, resetMockKobold, type MockKobold } from './mock-kobold.js';
 
 /** Default mock for NethysDb - most tests don't need a real compendium */
 export const mockNethysDb = {} as NethysDb;
@@ -22,15 +30,49 @@ export const TEST_GUILD_ID = '987654321098765432';
 export const TEST_CHANNEL_ID = '123456789012345679';
 
 /**
- * Default services for command tests.
- * Uses vitestKobold from @kobold/db/test-utils and a mock NethysDb.
+ * Get the mock Kobold instance for unit testing.
+ * Use this when you need to configure mock returns on the kobold model methods.
+ *
+ * @example
+ * ```typescript
+ * const kobold = getMockKobold();
+ * kobold.game.create.mockResolvedValue(newGame);
+ * kobold.game.readMany.mockResolvedValue([]);
+ * ```
  */
-export function getDefaultTestServices(): InjectedServices {
+export function getMockKobold(): MockKobold {
+	return mockKobold;
+}
+
+/**
+ * Default services for unit tests.
+ * Uses mockKobold (no database connection) and a mock NethysDb.
+ */
+export function getUnitTestServices(): InjectedServices {
+	return {
+		kobold: mockKobold as unknown as Kobold,
+		nethysCompendium: mockNethysDb,
+	};
+}
+
+/**
+ * Default services for integration tests.
+ * Uses vitestKobold from @kobold/db/test-utils (requires database connection) and a mock NethysDb.
+ *
+ * @deprecated For most tests, use getUnitTestServices() instead.
+ * Only use this for tests that truly need database integration.
+ */
+export async function getIntegrationTestServices(): Promise<InjectedServices> {
+	// Lazy import to avoid database connection in unit tests
+	const { vitestKobold } = await import('@kobold/db/test-utils');
 	return {
 		kobold: vitestKobold,
 		nethysCompendium: mockNethysDb,
 	};
 }
+
+// Legacy alias for backwards compatibility
+export const getDefaultTestServices = getUnitTestServices;
 
 /**
  * Creates a CommandTestHarness with default services.

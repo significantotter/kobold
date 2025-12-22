@@ -1,8 +1,7 @@
 /**
- * Integration tests for ConditionSetSubCommand
+ * Unit tests for ConditionSetSubCommand
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { vitestKobold } from '@kobold/db/test-utils';
 import { SheetAdjustmentTypeEnum } from '@kobold/db';
 import { ConditionCommand } from './condition-command.js';
 import { ConditionSetSubCommand } from './condition-set-subcommand.js';
@@ -16,6 +15,9 @@ import {
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	CommandTestHarness,
+	getMockKobold,
+	resetMockKobold,
+	type MockCreature,
 } from '../../../test-utils/index.js';
 import { InputParseUtils } from '../../../utils/input-parse-utils.js';
 
@@ -23,7 +25,9 @@ vi.mock('../../../utils/kobold-service-utils/kobold-utils.js');
 vi.mock('../../../utils/kobold-helpers/finder-helpers.js');
 // Mock Creature to avoid complex sheetRecord validation during tests
 vi.mock('../../../utils/creature.js', () => ({
-	Creature: vi.fn().mockImplementation(() => ({})),
+	Creature: vi.fn(function (this: unknown) {
+		return this;
+	}),
 }));
 vi.mock('../../../utils/input-parse-utils.js', () => ({
 	InputParseUtils: {
@@ -45,10 +49,13 @@ vi.mock('../../../utils/input-parse-utils.js', () => ({
 	},
 }));
 
-describe('ConditionSetSubCommand Integration', () => {
+describe('ConditionSetSubCommand', () => {
+	const kobold = getMockKobold();
+
 	let harness: CommandTestHarness;
 
 	beforeEach(() => {
+		resetMockKobold(kobold);
 		harness = createTestHarness([new ConditionCommand([new ConditionSetSubCommand()])]);
 
 		// Re-apply InputParseUtils mocks in beforeEach to ensure they're properly set
@@ -72,7 +79,6 @@ describe('ConditionSetSubCommand Integration', () => {
 		vi.mocked(InputParseUtils.isValidNumber).mockReturnValue(true);
 	});
 
-
 	describe('setting string fields', () => {
 		it('should set condition name', async () => {
 			// Arrange
@@ -85,7 +91,7 @@ describe('ConditionSetSubCommand Integration', () => {
 				targetName: 'Test Character',
 			});
 			setupConditionFinderHelpersMocks(existingCondition);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -117,7 +123,7 @@ describe('ConditionSetSubCommand Integration', () => {
 				targetName: 'Test Character',
 			});
 			setupConditionFinderHelpersMocks(existingCondition);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -149,7 +155,7 @@ describe('ConditionSetSubCommand Integration', () => {
 				targetName: 'Test Character',
 			});
 			setupConditionFinderHelpersMocks(existingCondition);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -183,7 +189,7 @@ describe('ConditionSetSubCommand Integration', () => {
 				targetName: 'Test Character',
 			});
 			setupConditionFinderHelpersMocks(existingCondition);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -217,7 +223,7 @@ describe('ConditionSetSubCommand Integration', () => {
 				targetName: 'Test Character',
 			});
 			setupConditionFinderHelpersMocks(existingCondition);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -252,7 +258,7 @@ describe('ConditionSetSubCommand Integration', () => {
 				targetName: 'Test Character',
 			});
 			setupConditionFinderHelpersMocks(existingCondition);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -285,7 +291,7 @@ describe('ConditionSetSubCommand Integration', () => {
 				targetName: 'Test Character',
 			});
 			setupConditionFinderHelpersMocks(existingCondition);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -312,7 +318,7 @@ describe('ConditionSetSubCommand Integration', () => {
 			// Arrange
 			setupConditionMocks({ conditions: [], targetName: 'Test Character' });
 			setupConditionFinderHelpersMocks(undefined); // Condition not found
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({

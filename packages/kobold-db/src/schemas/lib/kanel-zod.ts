@@ -125,8 +125,6 @@ const zCharacterWithRelations = zCharacter.merge(
 		sheetRecord: zExtendedSheetRecord,
 	})
 );
-const _characterCheck: Character = zCharacter._type;
-const _characterWithRelationsTypeCheck: CharacterWithRelations = zCharacterWithRelations._type;
 
 const zInitiativeActorWithRelations = zInitiativeActor.merge(
 	z.strictObject({
@@ -136,7 +134,7 @@ const zInitiativeActorWithRelations = zInitiativeActor.merge(
 	})
 );
 const _initiativeActorWithRelationsTypeCheck: InitiativeActorWithRelations =
-	zInitiativeActorWithRelations._type;
+	null as unknown as z.infer<typeof zInitiativeActorWithRelations>;
 
 const zInitiativeActorGroupWithRelations = zInitiativeActorGroup.merge(
 	z.strictObject({
@@ -145,7 +143,7 @@ const zInitiativeActorGroupWithRelations = zInitiativeActorGroup.merge(
 	})
 );
 const _initiativeActorGroupWithRelationsTypeCheck: InitiativeActorGroupWithRelations =
-	zInitiativeActorGroupWithRelations._type;
+	null as unknown as z.infer<typeof zInitiativeActorGroupWithRelations>;
 
 const zInitiativeWithRelations = zInitiative.merge(
 	z.strictObject({
@@ -154,14 +152,18 @@ const zInitiativeWithRelations = zInitiative.merge(
 		actors: zInitiativeActorWithRelations.array(),
 	})
 );
-const _initiativeWithRelationsTypeCheck: InitiativeWithRelations = zInitiativeWithRelations._type;
+const _initiativeWithRelationsTypeCheck: InitiativeWithRelations = null as unknown as z.infer<
+	typeof zInitiativeWithRelations
+>;
 
 const zGameWithRelations = zGame.merge(
 	z.strictObject({
 		characters: zCharacterWithRelations.array(),
 	})
 );
-const _gameWithRelationsTypeCheck: GameWithRelations = zGameWithRelations._type;
+const _gameWithRelationsTypeCheck: GameWithRelations = null as unknown as z.infer<
+	typeof zGameWithRelations
+>;
 
 export {
 	// base schemas

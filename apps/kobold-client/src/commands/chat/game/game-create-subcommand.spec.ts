@@ -1,8 +1,7 @@
 /**
- * Integration tests for GameCreateSubCommand
+ * Unit tests for GameCreateSubCommand
  */
-import { describe, it, expect, beforeEach, vi, MockInstance } from 'vitest';
-import { vitestKobold } from '@kobold/db/test-utils';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { GameDefinition } from '@kobold/documentation';
 import { GameCommand } from './game-command.js';
 import { GameCreateSubCommand } from './game-create-subcommand.js';
@@ -15,29 +14,26 @@ import {
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	CommandTestHarness,
+	getMockKobold,
+	resetMockKobold,
 } from '../../../test-utils/index.js';
 import { createMockGame } from './game-test-utils.js';
 
-describe('GameCreateSubCommand Integration', () => {
+describe('GameCreateSubCommand', () => {
 	let harness: CommandTestHarness;
-	let gameCreateSpy: MockInstance;
-	let gameReadManySpy: MockInstance;
-	let gameUpdateManySpy: MockInstance;
+	const kobold = getMockKobold();
 
 	beforeEach(() => {
+		resetMockKobold(kobold);
 		harness = createTestHarness([new GameCommand([new GameCreateSubCommand()])]);
-		gameCreateSpy = vi.spyOn(vitestKobold.game, 'create');
-		gameReadManySpy = vi.spyOn(vitestKobold.game, 'readMany');
-		gameUpdateManySpy = vi.spyOn(vitestKobold.game, 'updateMany');
 	});
-
 
 	it('should create a new game', async () => {
 		// Arrange
-		gameReadManySpy.mockResolvedValue([]);
-		gameUpdateManySpy.mockResolvedValue([]);
+		kobold.game.readMany.mockResolvedValue([]);
+		kobold.game.updateMany.mockResolvedValue([]);
 		const newGame = createMockGame({ name: 'New Campaign', isActive: true });
-		gameCreateSpy.mockResolvedValue(newGame);
+		kobold.game.create.mockResolvedValue(newGame);
 
 		// Act
 		const result = await harness.executeCommand({
@@ -55,7 +51,7 @@ describe('GameCreateSubCommand Integration', () => {
 		expect(result.getResponseContent()).toContain(
 			strings.create.success({ gameName: 'New Campaign' })
 		);
-		expect(gameCreateSpy).toHaveBeenCalledWith(
+		expect(kobold.game.create).toHaveBeenCalledWith(
 			expect.objectContaining({
 				name: 'New Campaign',
 				gmUserId: TEST_USER_ID,
@@ -68,7 +64,7 @@ describe('GameCreateSubCommand Integration', () => {
 	it('should error when game name already exists', async () => {
 		// Arrange
 		const existingGame = createMockGame({ name: 'Existing Game' });
-		gameReadManySpy.mockResolvedValue([existingGame]);
+		kobold.game.readMany.mockResolvedValue([existingGame]);
 
 		// Act
 		const result = await harness.executeCommand({
@@ -84,12 +80,12 @@ describe('GameCreateSubCommand Integration', () => {
 		// Assert
 		expect(result.didRespond()).toBe(true);
 		expect(result.getResponseContent()).toContain(strings.create.gameAlreadyExists);
-		expect(gameCreateSpy).not.toHaveBeenCalled();
+		expect(kobold.game.create).not.toHaveBeenCalled();
 	});
 
 	it('should error when game name is too short', async () => {
 		// Arrange
-		gameReadManySpy.mockResolvedValue([]);
+		kobold.game.readMany.mockResolvedValue([]);
 
 		// Act
 		const result = await harness.executeCommand({
@@ -109,10 +105,10 @@ describe('GameCreateSubCommand Integration', () => {
 
 	it('should deactivate existing games when creating a new one', async () => {
 		// Arrange
-		gameReadManySpy.mockResolvedValue([]);
-		gameUpdateManySpy.mockResolvedValue([]);
+		kobold.game.readMany.mockResolvedValue([]);
+		kobold.game.updateMany.mockResolvedValue([]);
 		const newGame = createMockGame({ name: 'New Game', isActive: true });
-		gameCreateSpy.mockResolvedValue(newGame);
+		kobold.game.create.mockResolvedValue(newGame);
 
 		// Act
 		await harness.executeCommand({
@@ -126,7 +122,7 @@ describe('GameCreateSubCommand Integration', () => {
 		});
 
 		// Assert
-		expect(gameUpdateManySpy).toHaveBeenCalledWith(
+		expect(kobold.game.updateMany).toHaveBeenCalledWith(
 			{ gmUserId: TEST_USER_ID, guildId: TEST_GUILD_ID },
 			{ isActive: false }
 		);

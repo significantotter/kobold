@@ -13,6 +13,7 @@ import {
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	CommandTestHarness,
+	type MockPasteBin,
 } from '../../../test-utils/index.js';
 
 vi.mock('../../../utils/kobold-service-utils/kobold-utils.js');
@@ -25,7 +26,6 @@ describe('ActionExportSubCommand Integration', () => {
 		harness = createTestHarness([new ActionCommand([new ActionExportSubCommand()])]);
 	});
 
-
 	describe('successful action export', () => {
 		it('should export actions to PasteBin and return link', async () => {
 			// Arrange
@@ -35,12 +35,12 @@ describe('ActionExportSubCommand Integration', () => {
 			});
 
 			setupKoboldUtilsMocks({ actions: [action] });
-			vi.mocked(PasteBin).mockImplementation(
-				() =>
-					({
-						post: vi.fn().mockResolvedValue('https://pastebin.com/abc123'),
-					}) as any
-			);
+			vi.mocked(PasteBin).mockImplementation(function (this: MockPasteBin) {
+				(this as MockPasteBin & { post: ReturnType<typeof vi.fn> }).post = vi.fn(
+					async () => 'https://pastebin.com/abc123'
+				);
+				return this;
+			} as unknown as () => PasteBin);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -58,12 +58,12 @@ describe('ActionExportSubCommand Integration', () => {
 		it('should export empty actions array', async () => {
 			// Arrange
 			setupKoboldUtilsMocks({ actions: [] });
-			vi.mocked(PasteBin).mockImplementation(
-				() =>
-					({
-						post: vi.fn().mockResolvedValue('https://pastebin.com/empty123'),
-					}) as any
-			);
+			vi.mocked(PasteBin).mockImplementation(function (this: MockPasteBin) {
+				(this as MockPasteBin & { post: ReturnType<typeof vi.fn> }).post = vi.fn(
+					async () => 'https://pastebin.com/empty123'
+				);
+				return this;
+			} as unknown as () => PasteBin);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -93,12 +93,12 @@ describe('ActionExportSubCommand Integration', () => {
 			];
 
 			setupKoboldUtilsMocks({ actions });
-			vi.mocked(PasteBin).mockImplementation(
-				() =>
-					({
-						post: vi.fn().mockResolvedValue('https://pastebin.com/multi123'),
-					}) as any
-			);
+			vi.mocked(PasteBin).mockImplementation(function (this: MockPasteBin) {
+				(this as MockPasteBin & { post: ReturnType<typeof vi.fn> }).post = vi.fn(
+					async () => 'https://pastebin.com/multi123'
+				);
+				return this;
+			} as unknown as () => PasteBin);
 
 			// Act
 			const result = await harness.executeCommand({

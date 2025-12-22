@@ -10,6 +10,7 @@ import {
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	CommandTestHarness,
+	type MockRollBuilder,
 } from '../../../test-utils/index.js';
 import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
 import { RollBuilder } from '../../../utils/roll-builder.js';
@@ -25,18 +26,18 @@ describe('RollDiceSubCommand Integration', () => {
 		harness = createTestHarness([new RollCommand([new RollDiceSubCommand()])]);
 
 		// Mock RollBuilder to return a mock embed
-		vi.mocked(RollBuilder).mockImplementation(
-			() =>
-				({
-					addRoll: vi.fn(),
-					compileEmbed: vi.fn(() => ({ data: { description: 'Roll result' } })),
-				}) as any
-		);
+		vi.mocked(RollBuilder).mockImplementation(function (this: MockRollBuilder) {
+			this.addRoll = vi.fn(() => {});
+			(this as MockRollBuilder & { rollResults: unknown[] }).rollResults = [
+				{ results: { errors: [] } },
+			];
+			this.compileEmbed = vi.fn(() => ({ data: { description: 'Roll result' } }));
+			return this;
+		} as unknown as () => RollBuilder);
 
 		// Mock EmbedUtils.dispatchEmbeds
 		vi.mocked(EmbedUtils.dispatchEmbeds).mockResolvedValue(undefined);
 	});
-
 
 	describe('successful dice rolls', () => {
 		it('should roll a simple dice expression', async () => {

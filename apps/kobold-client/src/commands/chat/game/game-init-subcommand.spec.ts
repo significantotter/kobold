@@ -1,10 +1,9 @@
 /**
- * Integration tests for GameInitSubCommand
+ * Unit tests for GameInitSubCommand
  *
  * This command adds game characters to the current initiative.
  */
 import { describe, it, expect, beforeEach, vi, MockInstance } from 'vitest';
-import { vitestKobold } from '@kobold/db/test-utils';
 import { GameDefinition, InitDefinition } from '@kobold/documentation';
 import { GameCommand } from './game-command.js';
 import { GameInitSubCommand } from './game-init-subcommand.js';
@@ -19,21 +18,22 @@ import {
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	CommandTestHarness,
-} from '../../../test-utils/index.js';
+	getMockKobold,
+	resetMockKobold,} from '../../../test-utils/index.js';
 import { createMockGame, createMockInitiative } from './game-test-utils.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 
 vi.mock('../../../utils/kobold-service-utils/kobold-utils.js');
 
-describe('GameInitSubCommand Integration', () => {
+describe('GameInitSubCommand', () => {
+	const kobold = getMockKobold();
+
 	let harness: CommandTestHarness;
-	let initiativeCreateSpy: MockInstance;
 
 	beforeEach(() => {
+		resetMockKobold(kobold);
 		harness = createTestHarness([new GameCommand([new GameInitSubCommand()])]);
-		initiativeCreateSpy = vi.spyOn(vitestKobold.initiative, 'create');
 	});
-
 
 	describe('Adding Characters to Initiative', () => {
 		it('should respond when adding all game characters', async () => {
@@ -49,7 +49,7 @@ describe('GameInitSubCommand Integration', () => {
 				currentInitiative: null,
 				userSettings: {},
 			});
-			initiativeCreateSpy.mockResolvedValue(mockInitiative);
+			kobold.initiative.create.mockResolvedValue(mockInitiative);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -79,7 +79,7 @@ describe('GameInitSubCommand Integration', () => {
 				currentInitiative: null,
 				userSettings: {},
 			});
-			initiativeCreateSpy.mockResolvedValue(mockInitiative);
+			kobold.initiative.create.mockResolvedValue(mockInitiative);
 
 			// Act
 			const result = await harness.executeCommand({

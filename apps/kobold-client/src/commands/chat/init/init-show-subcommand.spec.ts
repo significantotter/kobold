@@ -31,8 +31,8 @@ describe('InitShowSubCommand Integration', () => {
 	it('should show initiative when it exists', async () => {
 		// Arrange
 		const existingInit = createMockInitiativeWithActors(2, { currentRound: 1 });
-		const { fetchDataMock } = setupKoboldUtilsMocks();
-		fetchDataMock.mockResolvedValue({
+		const { fetchNonNullableDataMock } = setupKoboldUtilsMocks();
+		fetchNonNullableDataMock.mockResolvedValue({
 			currentInitiative: existingInit,
 			userSettings: {},
 		});
@@ -53,8 +53,8 @@ describe('InitShowSubCommand Integration', () => {
 
 	it('should error when no initiative exists', async () => {
 		// Arrange
-		const { fetchDataMock } = setupKoboldUtilsMocks();
-		fetchDataMock.mockRejectedValue(
+		const { fetchNonNullableDataMock } = setupKoboldUtilsMocks();
+		fetchNonNullableDataMock.mockRejectedValue(
 			new KoboldError('Yip! You must be in an initiative to use this command.')
 		);
 

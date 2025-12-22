@@ -1,7 +1,6 @@
-import { generateMock } from '@anatine/zod-mock';
 import { zSheetRecordInitializer } from '../index.js';
 import _ from 'lodash';
-import { truncateDbForTests, vitestKobold, ResourceFactories } from '../test-utils.js';
+import { truncateDbForTests, vitestKobold, ResourceFactories, fake } from '../test-utils.js';
 
 describe('SheetRecordModel', () => {
 	afterEach(async () => {
@@ -9,7 +8,7 @@ describe('SheetRecordModel', () => {
 	});
 	describe('create, read', () => {
 		it('creates a new sheetRecord, reads it, and returns the sheetRecord plus relations', async () => {
-			const fakeSheetRecordMock = generateMock(zSheetRecordInitializer);
+			const fakeSheetRecordMock = fake(zSheetRecordInitializer);
 
 			const created = await vitestKobold.sheetRecord.create(fakeSheetRecordMock);
 			const read = await vitestKobold.sheetRecord.read({ id: created.id });

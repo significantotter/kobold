@@ -10,6 +10,7 @@ import {
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	CommandTestHarness,
+	type MockCharacterFetcher,
 } from '../../../test-utils/index.js';
 import { PathbuilderCharacterFetcher } from './Fetchers/pathbuilder-character-fetcher.js';
 
@@ -24,20 +25,19 @@ describe('CharacterImportPathbuilderSubCommand Integration', () => {
 		]);
 	});
 
-
 	describe('successful import', () => {
 		it('should import a character from pathbuilder json id', async () => {
 			// Arrange
 			const newCharacter = createMockCharacter({
 				characterOverrides: { name: 'Imported Fighter' },
 			});
-			const createMock = vi.fn().mockResolvedValue(newCharacter);
-			vi.mocked(PathbuilderCharacterFetcher).mockImplementation(
-				() =>
-					({
-						create: createMock,
-					}) as any
-			);
+			const createMock = vi.fn(async () => newCharacter);
+			vi.mocked(PathbuilderCharacterFetcher).mockImplementation(function (
+				this: MockCharacterFetcher
+			) {
+				this.create = createMock;
+				return this;
+			} as unknown as () => PathbuilderCharacterFetcher);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -59,13 +59,13 @@ describe('CharacterImportPathbuilderSubCommand Integration', () => {
 			const newCharacter = createMockCharacter({
 				characterOverrides: { name: 'Stamina Character' },
 			});
-			const createMock = vi.fn().mockResolvedValue(newCharacter);
-			vi.mocked(PathbuilderCharacterFetcher).mockImplementation(
-				() =>
-					({
-						create: createMock,
-					}) as any
-			);
+			const createMock = vi.fn(async () => newCharacter);
+			vi.mocked(PathbuilderCharacterFetcher).mockImplementation(function (
+				this: MockCharacterFetcher
+			) {
+				this.create = createMock;
+				return this;
+			} as unknown as () => PathbuilderCharacterFetcher);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -88,13 +88,13 @@ describe('CharacterImportPathbuilderSubCommand Integration', () => {
 		it('should default useStamina to false', async () => {
 			// Arrange
 			const newCharacter = createMockCharacter();
-			const createMock = vi.fn().mockResolvedValue(newCharacter);
-			vi.mocked(PathbuilderCharacterFetcher).mockImplementation(
-				() =>
-					({
-						create: createMock,
-					}) as any
-			);
+			const createMock = vi.fn(async () => newCharacter);
+			vi.mocked(PathbuilderCharacterFetcher).mockImplementation(function (
+				this: MockCharacterFetcher
+			) {
+				this.create = createMock;
+				return this;
+			} as unknown as () => PathbuilderCharacterFetcher);
 
 			// Act
 			const result = await harness.executeCommand({

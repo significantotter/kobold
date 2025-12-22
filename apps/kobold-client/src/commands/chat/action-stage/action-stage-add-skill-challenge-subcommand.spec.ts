@@ -1,8 +1,7 @@
 /**
- * Integration tests for ActionStageAddSkillChallengeSubCommand
+ * Unit tests for ActionStageAddSkillChallengeSubCommand
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { vitestKobold } from '@kobold/db/test-utils';
 import { RollTypeEnum } from '@kobold/db';
 import { ActionStageCommand } from './action-stage-command.js';
 import { ActionStageAddSkillChallengeSubCommand } from './action-stage-add-skill-challenge-subcommand.js';
@@ -17,20 +16,23 @@ import {
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	CommandTestHarness,
-} from '../../../test-utils/index.js';
+	getMockKobold,
+	resetMockKobold,} from '../../../test-utils/index.js';
 
 vi.mock('../../../utils/kobold-service-utils/kobold-utils.js');
 vi.mock('../../../utils/kobold-helpers/finder-helpers.js');
 
-describe('ActionStageAddSkillChallengeSubCommand Integration', () => {
+describe('ActionStageAddSkillChallengeSubCommand', () => {
+	const kobold = getMockKobold();
+
 	let harness: CommandTestHarness;
 
 	beforeEach(() => {
+		resetMockKobold(kobold);
 		harness = createTestHarness([
 			new ActionStageCommand([new ActionStageAddSkillChallengeSubCommand()]),
 		]);
 	});
-
 
 	describe('execute', () => {
 		it('should add a skill challenge roll to an action', async () => {
@@ -38,7 +40,7 @@ describe('ActionStageAddSkillChallengeSubCommand Integration', () => {
 			const action = createMockAction({ name: 'Demoralize', rolls: [] });
 			setupKoboldUtilsMocks({ actions: [action] });
 			setupFinderHelpersMocks(action, [action]);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -119,7 +121,7 @@ describe('ActionStageAddSkillChallengeSubCommand Integration', () => {
 			const action = createMockAction({ name: 'Demoralize', rolls: [] });
 			setupKoboldUtilsMocks({ actions: [action] });
 			setupFinderHelpersMocks(action, [action]);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({

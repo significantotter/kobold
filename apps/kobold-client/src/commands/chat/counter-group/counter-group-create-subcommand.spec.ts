@@ -1,8 +1,7 @@
 /**
- * Integration tests for CounterGroupCreateSubCommand
+ * Unit tests for CounterGroupCreateSubCommand
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { vitestKobold } from '@kobold/db/test-utils';
 import { CounterGroupDefinition } from '@kobold/documentation';
 import { CounterGroupCommand } from './counter-group-command.js';
 import { CounterGroupCreateSubCommand } from './counter-group-create-subcommand.js';
@@ -19,7 +18,8 @@ import {
 	TEST_GUILD_ID,
 	CommandTestHarness,
 	createMockCounterGroup,
-} from '../../../test-utils/index.js';
+	getMockKobold,
+	resetMockKobold,} from '../../../test-utils/index.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import type { CounterGroup } from '@kobold/db';
@@ -27,10 +27,13 @@ import type { CounterGroup } from '@kobold/db';
 vi.mock('../../../utils/kobold-service-utils/kobold-utils.js');
 vi.mock('../../../utils/kobold-helpers/finder-helpers.js');
 
-describe('CounterGroupCreateSubCommand Integration', () => {
+describe('CounterGroupCreateSubCommand', () => {
+	const kobold = getMockKobold();
+
 	let harness: CommandTestHarness;
 
 	beforeEach(() => {
+		resetMockKobold(kobold);
 		harness = createTestHarness([
 			new CounterGroupCommand([new CounterGroupCreateSubCommand()]),
 		]);
@@ -44,7 +47,7 @@ describe('CounterGroupCreateSubCommand Integration', () => {
 				counter: null,
 				group: null,
 			});
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -81,7 +84,7 @@ describe('CounterGroupCreateSubCommand Integration', () => {
 				counter: null,
 				group: null,
 			});
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -117,7 +120,7 @@ describe('CounterGroupCreateSubCommand Integration', () => {
 				counter: null,
 				group: null,
 			});
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -293,7 +296,7 @@ describe('CounterGroupCreateSubCommand Integration', () => {
 				counter: null,
 				group: null,
 			});
-			setupSheetRecordUpdateMock(vitestKobold);
+			setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -320,7 +323,7 @@ describe('CounterGroupCreateSubCommand Integration', () => {
 				counter: null,
 				group: null,
 			});
-			setupSheetRecordUpdateMock(vitestKobold);
+			setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({

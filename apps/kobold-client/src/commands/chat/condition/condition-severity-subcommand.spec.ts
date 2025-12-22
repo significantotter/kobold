@@ -1,8 +1,7 @@
 /**
- * Integration tests for ConditionSeveritySubCommand
+ * Unit tests for ConditionSeveritySubCommand
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { vitestKobold } from '@kobold/db/test-utils';
 import { SheetAdjustmentTypeEnum } from '@kobold/db';
 import { ConditionCommand } from './condition-command.js';
 import { ConditionSeveritySubCommand } from './condition-severity-subcommand.js';
@@ -16,18 +15,21 @@ import {
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	CommandTestHarness,
-} from '../../../test-utils/index.js';
+	getMockKobold,
+	resetMockKobold,} from '../../../test-utils/index.js';
 
 vi.mock('../../../utils/kobold-service-utils/kobold-utils.js');
 vi.mock('../../../utils/kobold-helpers/finder-helpers.js');
 
-describe('ConditionSeveritySubCommand Integration', () => {
+describe('ConditionSeveritySubCommand', () => {
+	const kobold = getMockKobold();
+
 	let harness: CommandTestHarness;
 
 	beforeEach(() => {
+		resetMockKobold(kobold);
 		harness = createTestHarness([new ConditionCommand([new ConditionSeveritySubCommand()])]);
 	});
-
 
 	describe('successful severity updates', () => {
 		it('should increase condition severity', async () => {
@@ -42,7 +44,7 @@ describe('ConditionSeveritySubCommand Integration', () => {
 				targetName: 'Test Character',
 			});
 			setupConditionFinderHelpersMocks(existingCondition);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -74,7 +76,7 @@ describe('ConditionSeveritySubCommand Integration', () => {
 				targetName: 'Test Character',
 			});
 			setupConditionFinderHelpersMocks(existingCondition);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -106,7 +108,7 @@ describe('ConditionSeveritySubCommand Integration', () => {
 				targetName: 'Test Character',
 			});
 			setupConditionFinderHelpersMocks(existingCondition);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -138,7 +140,7 @@ describe('ConditionSeveritySubCommand Integration', () => {
 				targetName: 'Test Character',
 			});
 			setupConditionFinderHelpersMocks(existingCondition);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act - empty string or null to remove severity
 			const result = await harness.executeCommand({
@@ -170,7 +172,7 @@ describe('ConditionSeveritySubCommand Integration', () => {
 				targetName: 'Test Character',
 			});
 			setupConditionFinderHelpersMocks(existingCondition);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -196,7 +198,7 @@ describe('ConditionSeveritySubCommand Integration', () => {
 			// Arrange
 			setupConditionMocks({ conditions: [], targetName: 'Test Character' });
 			setupConditionFinderHelpersMocks(undefined); // Condition not found
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -277,7 +279,7 @@ describe('ConditionSeveritySubCommand Integration', () => {
 				targetName: 'Test Character',
 			});
 			setupConditionFinderHelpersMocks(existingCondition);
-			setupSheetRecordUpdateMock(vitestKobold);
+			setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({

@@ -1,8 +1,7 @@
 /**
- * Integration tests for ModifierSetSubCommand
+ * Unit tests for ModifierSetSubCommand
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { vitestKobold } from '@kobold/db/test-utils';
 import { SheetAdjustmentTypeEnum } from '@kobold/db';
 import { ModifierCommand } from './modifier-command.js';
 import { ModifierSetSubCommand } from './modifier-set-subcommand.js';
@@ -15,6 +14,9 @@ import {
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	CommandTestHarness,
+	getMockKobold,
+	resetMockKobold,
+	type MockCreature,
 } from '../../../test-utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
@@ -24,7 +26,9 @@ vi.mock('../../../utils/kobold-service-utils/kobold-utils.js');
 vi.mock('../../../utils/kobold-helpers/finder-helpers.js');
 // Mock Creature to avoid complex sheetRecord validation during tests
 vi.mock('../../../utils/creature.js', () => ({
-	Creature: vi.fn().mockImplementation(() => ({})),
+	Creature: vi.fn(function (this: unknown) {
+		return this;
+	}),
 }));
 vi.mock('../../../utils/input-parse-utils.js', () => ({
 	InputParseUtils: {
@@ -46,10 +50,13 @@ vi.mock('../../../utils/input-parse-utils.js', () => ({
 	},
 }));
 
-describe('ModifierSetSubCommand Integration', () => {
+describe('ModifierSetSubCommand', () => {
+	const kobold = getMockKobold();
+
 	let harness: CommandTestHarness;
 
 	beforeEach(() => {
+		resetMockKobold(kobold);
 		harness = createTestHarness([new ModifierCommand([new ModifierSetSubCommand()])]);
 
 		// Re-apply InputParseUtils mocks in beforeEach to ensure they're properly set
@@ -73,7 +80,6 @@ describe('ModifierSetSubCommand Integration', () => {
 		vi.mocked(InputParseUtils.isValidNumber).mockReturnValue(true);
 	});
 
-
 	describe('successful modifier updates', () => {
 		it('should update modifier name', async () => {
 			// Arrange
@@ -95,7 +101,7 @@ describe('ModifierSetSubCommand Integration', () => {
 			vi.spyOn(FinderHelpers, 'getModifierByName')
 				.mockReturnValueOnce(testModifier) // First call finds the modifier
 				.mockReturnValueOnce(undefined); // Second call checks new name doesn't exist
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -133,7 +139,7 @@ describe('ModifierSetSubCommand Integration', () => {
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getModifierByName').mockReturnValue(testModifier);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -171,7 +177,7 @@ describe('ModifierSetSubCommand Integration', () => {
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getModifierByName').mockReturnValue(testModifier);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -209,7 +215,7 @@ describe('ModifierSetSubCommand Integration', () => {
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getModifierByName').mockReturnValue(testModifier);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -247,7 +253,7 @@ describe('ModifierSetSubCommand Integration', () => {
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getModifierByName').mockReturnValue(testModifier);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -285,7 +291,7 @@ describe('ModifierSetSubCommand Integration', () => {
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getModifierByName').mockReturnValue(testModifier);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -323,7 +329,7 @@ describe('ModifierSetSubCommand Integration', () => {
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getModifierByName').mockReturnValue(testModifier);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -352,7 +358,7 @@ describe('ModifierSetSubCommand Integration', () => {
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getModifierByName').mockReturnValue(undefined);
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -403,7 +409,7 @@ describe('ModifierSetSubCommand Integration', () => {
 			vi.spyOn(FinderHelpers, 'getModifierByName')
 				.mockReturnValueOnce(testModifier) // First call finds the modifier to rename
 				.mockReturnValueOnce(existingModifier); // Second call finds existing with new name
-			const { updateMock } = setupSheetRecordUpdateMock(vitestKobold);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act - the command throws a KoboldError which is caught by the harness
 			const result = await harness.executeCommand({
