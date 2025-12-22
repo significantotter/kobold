@@ -1,19 +1,13 @@
 import {
 	ApplicationCommandOptionChoiceData,
-	ApplicationCommandType,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
 	ChatInputCommandInteraction,
-	PermissionsString,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
-import { RateLimiter } from 'discord.js-rate-limiter';
 
 import _ from 'lodash';
 import { getEmoji } from '../../../constants/emoji.js';
-import L from '../../../i18n/i18n-node.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold, SheetRecord } from '@kobold/db';
 import { ActionRoller } from '../../../utils/action-roller.js';
 import { Creature } from '../../../utils/creature.js';
@@ -21,40 +15,39 @@ import { InteractionUtils } from '../../../utils/index.js';
 import { EmbedUtils, KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { RollBuilder } from '../../../utils/roll-builder.js';
-import { Command, CommandDeferType } from '../../index.js';
-import { InitOptions } from '../init/init-command-options.js';
-import { GameOptions } from './game-command-options.js';
-import { RollOptions } from '../roll/roll-command-options.js';
+import { Command } from '../../index.js';
+import { GameDefinition, InitDefinition, RollDefinition } from '@kobold/documentation';
+import { BaseCommandClass } from '../../command.js';
+const commandOptions = GameDefinition.options;
+const commandOptionsEnum = GameDefinition.commandOptionsEnum;
+const initCommandOptions = InitDefinition.options;
+const initCommandOptionsEnum = InitDefinition.commandOptionsEnum;
+const rollCommandOptions = RollDefinition.options;
+const rollCommandOptionsEnum = RollDefinition.commandOptionsEnum;
 
-export class GameRollSubCommand implements Command {
-	public name = L.en.commands.game.roll.name();
-	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
-		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.game.roll.name(),
-		description: L.en.commands.game.roll.description(),
-		dm_permission: true,
-		default_member_permissions: undefined,
-	};
-	public cooldown = new RateLimiter(1, 2000);
-	public deferType = CommandDeferType.NONE;
-	public requireClientPerms: PermissionsString[] = [];
-
+export class GameRollSubCommand extends BaseCommandClass(
+	GameDefinition,
+	GameDefinition.subCommandEnum.roll
+) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption,
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === GameOptions.GAME_TARGET_CHARACTER.name) {
+		if (option.name === commandOptions[commandOptionsEnum.gameTargetCharacter].name) {
 			const targetCharacter =
-				intr.options.getString(GameOptions.GAME_TARGET_CHARACTER.name) ?? '';
+				intr.options.getString(
+					commandOptions[commandOptionsEnum.gameTargetCharacter].name
+				) ?? '';
 
 			const { gameUtils } = new KoboldUtils(kobold);
 			const activeGame = await gameUtils.getActiveGame(intr.user.id, intr.guildId ?? '');
 			return gameUtils.autocompleteGameCharacter(targetCharacter, activeGame);
-		} else if (option.name === GameOptions.GAME_ROLL_TYPE.name) {
+		} else if (option.name === commandOptions[commandOptionsEnum.gameRollType].name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(GameOptions.GAME_ROLL_TYPE.name) ?? '';
+			const match =
+				intr.options.getString(commandOptions[commandOptionsEnum.gameRollType].name) ?? '';
 
 			const { gameUtils } = new KoboldUtils(kobold);
 			const activeGame = await gameUtils.getActiveGame(intr.user.id, intr.guildId ?? '');
@@ -86,9 +79,14 @@ export class GameRollSubCommand implements Command {
 			}
 			results = _.uniqBy(results, result => result.name);
 			return results;
-		} else if (option.name === InitOptions.INIT_CHARACTER_TARGET.name) {
+		} else if (
+			option.name === initCommandOptions[initCommandOptionsEnum.initCharacterTarget].name
+		) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(InitOptions.INIT_CHARACTER_TARGET.name) ?? '';
+			const match =
+				intr.options.getString(
+					initCommandOptions[initCommandOptionsEnum.initCharacterTarget].name
+				) ?? '';
 
 			const { autocompleteUtils } = new KoboldUtils(kobold);
 			return await autocompleteUtils.getAllTargetOptions(intr, match);
@@ -97,22 +95,28 @@ export class GameRollSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		if (!intr.isChatInputCommand()) return;
-		const rollType = intr.options.getString(GameOptions.GAME_ROLL_TYPE.name, true);
-		const diceExpression =
-			intr.options.getString(GameOptions.GAME_DICE_ROLL_OR_MODIFIER.name) ?? '';
-		const targetCharacterName = intr.options.getString(
-			GameOptions.GAME_TARGET_CHARACTER.name,
+		const rollType = intr.options.getString(
+			commandOptions[commandOptionsEnum.gameRollType].name,
 			true
 		);
-		const targetSheetName = intr.options.getString(InitOptions.INIT_CHARACTER_TARGET.name);
+		const diceExpression =
+			intr.options.getString(
+				commandOptions[commandOptionsEnum.gameDiceRollOrModifier].name
+			) ?? '';
+		const targetCharacterName = intr.options.getString(
+			commandOptions[commandOptionsEnum.gameTargetCharacter].name,
+			true
+		);
+		const targetSheetName = intr.options.getString(
+			initCommandOptions[initCommandOptionsEnum.initCharacterTarget].name
+		);
 
 		const secretRoll =
-			intr.options.getString(RollOptions.ROLL_SECRET_OPTION.name) ??
-			L.en.commandOptions.rollSecret.choices.public.value();
+			intr.options.getString(rollCommandOptions[rollCommandOptionsEnum.rollSecret].name) ??
+			GameDefinition.optionChoices.rollSecret.public;
 
 		const koboldUtils = new KoboldUtils(kobold);
 		const { gameUtils, creatureUtils } = koboldUtils;
@@ -242,7 +246,7 @@ export class GameRollSubCommand implements Command {
 				const rollBuilder = new RollBuilder({
 					creature: creature,
 					actorName: intr.user.username,
-					rollDescription: LL.commands.roll.dice.interactions.rolledDice(),
+					rollDescription: GameDefinition.strings.roll.rolledDice,
 					userSettings,
 				});
 				rollBuilder.addRoll({ rollExpression: diceExpression });

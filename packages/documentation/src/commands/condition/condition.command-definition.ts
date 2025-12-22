@@ -1,17 +1,11 @@
 import { ApplicationCommandOptionType, ApplicationCommandType } from 'discord-api-types/v10';
-import { CommandDefinition } from '../helpers/commands.d.js';
+import type { CommandDefinition } from '../helpers/commands.types.js';
 import {
 	ConditionCommandOptionEnum,
 	conditionCommandOptions,
 } from './condition.command-options.js';
-import {
-	GameplayCommandOptionEnum,
-	gameplayCommandOptions,
-} from '../gameplay/gameplay.command-options.js';
-import {
-	ModifierCommandOptionEnum,
-	modifierCommandOptions,
-} from '../modifier/modifier.command-options.js';
+import { anyUsageContext } from '../helpers/defaults.js';
+import { withOrder } from '../helpers/common.js';
 
 export enum ConditionSubCommandEnum {
 	applyCustom = 'apply-custom',
@@ -27,7 +21,7 @@ export const conditionCommandDefinition = {
 		name: 'condition',
 		description: 'Commands for applying conditions to characters or creatures.',
 		type: ApplicationCommandType.ChatInput,
-		dm_permission: true,
+		contexts: anyUsageContext,
 		default_member_permissions: undefined,
 	},
 	subCommands: {
@@ -36,24 +30,42 @@ export const conditionCommandDefinition = {
 			description: 'Applies a custom condition to a target',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[GameplayCommandOptionEnum.gameplayTargetCharacter]:
-					gameplayCommandOptions[GameplayCommandOptionEnum.gameplayTargetCharacter],
-				[ModifierCommandOptionEnum.name]:
-					modifierCommandOptions[ModifierCommandOptionEnum.name],
-				[ModifierCommandOptionEnum.severity]:
-					modifierCommandOptions[ModifierCommandOptionEnum.severity],
-				[ModifierCommandOptionEnum.sheetValues]:
-					modifierCommandOptions[ModifierCommandOptionEnum.sheetValues],
-				[ModifierCommandOptionEnum.rollAdjustment]:
-					modifierCommandOptions[ModifierCommandOptionEnum.rollAdjustment],
-				[ModifierCommandOptionEnum.targetTags]:
-					modifierCommandOptions[ModifierCommandOptionEnum.targetTags],
-				[ModifierCommandOptionEnum.type]:
-					modifierCommandOptions[ModifierCommandOptionEnum.type],
-				[ModifierCommandOptionEnum.description]:
-					modifierCommandOptions[ModifierCommandOptionEnum.description],
-				[ModifierCommandOptionEnum.initiativeNote]:
-					modifierCommandOptions[ModifierCommandOptionEnum.initiativeNote],
+				[ConditionCommandOptionEnum.targetCharacter]: withOrder(
+					conditionCommandOptions[ConditionCommandOptionEnum.targetCharacter],
+					1
+				),
+				[ConditionCommandOptionEnum.name]: withOrder(
+					conditionCommandOptions[ConditionCommandOptionEnum.name],
+					2
+				),
+				[ConditionCommandOptionEnum.severity]: withOrder(
+					conditionCommandOptions[ConditionCommandOptionEnum.severity],
+					3
+				),
+				[ConditionCommandOptionEnum.sheetValues]: withOrder(
+					conditionCommandOptions[ConditionCommandOptionEnum.sheetValues],
+					4
+				),
+				[ConditionCommandOptionEnum.rollAdjustment]: withOrder(
+					conditionCommandOptions[ConditionCommandOptionEnum.rollAdjustment],
+					5
+				),
+				[ConditionCommandOptionEnum.targetTags]: withOrder(
+					conditionCommandOptions[ConditionCommandOptionEnum.targetTags],
+					6
+				),
+				[ConditionCommandOptionEnum.type]: withOrder(
+					conditionCommandOptions[ConditionCommandOptionEnum.type],
+					7
+				),
+				[ConditionCommandOptionEnum.description]: withOrder(
+					conditionCommandOptions[ConditionCommandOptionEnum.description],
+					8
+				),
+				[ConditionCommandOptionEnum.initiativeNote]: withOrder(
+					conditionCommandOptions[ConditionCommandOptionEnum.initiativeNote],
+					9
+				),
 			},
 		},
 		[ConditionSubCommandEnum.applyModifier]: {
@@ -61,12 +73,17 @@ export const conditionCommandDefinition = {
 			description: 'Applies your existing modifier to a target as a condition',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[GameplayCommandOptionEnum.gameplayTargetCharacter]:
-					gameplayCommandOptions[GameplayCommandOptionEnum.gameplayTargetCharacter],
-				[ModifierCommandOptionEnum.name]: {
-					...modifierCommandOptions[ModifierCommandOptionEnum.name],
-					required: false,
-				},
+				[ConditionCommandOptionEnum.targetCharacter]: withOrder(
+					conditionCommandOptions[ConditionCommandOptionEnum.targetCharacter],
+					1
+				),
+				[ConditionCommandOptionEnum.name]: withOrder(
+					{
+						...conditionCommandOptions[ConditionCommandOptionEnum.name],
+						required: false,
+					},
+					2
+				),
 			},
 		},
 		[ConditionSubCommandEnum.list]: {
@@ -74,8 +91,10 @@ export const conditionCommandDefinition = {
 			description: "Lists all of a character's conditions",
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[GameplayCommandOptionEnum.gameplayTargetCharacter]:
-					gameplayCommandOptions[GameplayCommandOptionEnum.gameplayTargetCharacter],
+				[ConditionCommandOptionEnum.targetCharacter]: withOrder(
+					conditionCommandOptions[ConditionCommandOptionEnum.targetCharacter],
+					1
+				),
 			},
 		},
 		[ConditionSubCommandEnum.set]: {
@@ -83,14 +102,22 @@ export const conditionCommandDefinition = {
 			description: 'Sets a property of a condition on a target',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[GameplayCommandOptionEnum.gameplayTargetCharacter]:
-					gameplayCommandOptions[GameplayCommandOptionEnum.gameplayTargetCharacter],
-				[ConditionCommandOptionEnum.name]:
+				[ConditionCommandOptionEnum.targetCharacter]: withOrder(
+					conditionCommandOptions[ConditionCommandOptionEnum.targetCharacter],
+					1
+				),
+				[ConditionCommandOptionEnum.name]: withOrder(
 					conditionCommandOptions[ConditionCommandOptionEnum.name],
-				[ModifierCommandOptionEnum.setOption]:
-					modifierCommandOptions[ModifierCommandOptionEnum.setOption],
-				[ModifierCommandOptionEnum.setValue]:
-					modifierCommandOptions[ModifierCommandOptionEnum.setValue],
+					2
+				),
+				[ConditionCommandOptionEnum.setOption]: withOrder(
+					conditionCommandOptions[ConditionCommandOptionEnum.setOption],
+					3
+				),
+				[ConditionCommandOptionEnum.setValue]: withOrder(
+					conditionCommandOptions[ConditionCommandOptionEnum.setValue],
+					4
+				),
 			},
 		},
 		[ConditionSubCommandEnum.remove]: {
@@ -98,10 +125,14 @@ export const conditionCommandDefinition = {
 			description: 'Removes a condition from a target',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[GameplayCommandOptionEnum.gameplayTargetCharacter]:
-					gameplayCommandOptions[GameplayCommandOptionEnum.gameplayTargetCharacter],
-				[ConditionCommandOptionEnum.name]:
+				[ConditionCommandOptionEnum.targetCharacter]: withOrder(
+					conditionCommandOptions[ConditionCommandOptionEnum.targetCharacter],
+					1
+				),
+				[ConditionCommandOptionEnum.name]: withOrder(
 					conditionCommandOptions[ConditionCommandOptionEnum.name],
+					2
+				),
 			},
 		},
 		[ConditionSubCommandEnum.severity]: {
@@ -109,14 +140,21 @@ export const conditionCommandDefinition = {
 			description: 'Changes the severity of a condition on a target',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[GameplayCommandOptionEnum.gameplayTargetCharacter]:
-					gameplayCommandOptions[GameplayCommandOptionEnum.gameplayTargetCharacter],
-				[ConditionCommandOptionEnum.name]:
+				[ConditionCommandOptionEnum.targetCharacter]: withOrder(
+					conditionCommandOptions[ConditionCommandOptionEnum.targetCharacter],
+					1
+				),
+				[ConditionCommandOptionEnum.name]: withOrder(
 					conditionCommandOptions[ConditionCommandOptionEnum.name],
-				[ModifierCommandOptionEnum.severity]: {
-					...modifierCommandOptions[ModifierCommandOptionEnum.severity],
-					required: true,
-				},
+					2
+				),
+				[ConditionCommandOptionEnum.severity]: withOrder(
+					{
+						...conditionCommandOptions[ConditionCommandOptionEnum.severity],
+						required: true,
+					},
+					3
+				),
 			},
 		},
 	},

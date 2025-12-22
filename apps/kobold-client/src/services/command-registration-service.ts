@@ -14,8 +14,31 @@ import { Config } from '@kobold/config';
 export class CommandRegistrationService {
 	constructor(protected rest: REST) {}
 
+	private validateCommandMetadata(metadata: any): void {
+		const isValidName = (name: string) => /^[a-z0-9-]{1,32}$/.test(name);
+
+		if (!isValidName(metadata.name)) {
+			throw new Error(
+				`Invalid command name: '${metadata.name}'. Command names must be 1-32 characters long and consist of lowercase alphanumeric characters or hyphens.`
+			);
+		}
+
+		if (metadata.options && typeof metadata.options === 'object') {
+			for (const option of Object.values(metadata.options) as { name: string }[]) {
+				if (!isValidName(option.name)) {
+					throw new Error(
+						`Invalid option name: '${option.name}'. Option names must be 1-32 characters long and consist of lowercase alphanumeric characters or hyphens.`
+					);
+				}
+			}
+		}
+	}
+
+	private logCommandPayload(action: string, payload: any): void {
+		Logger.error(`${action} payload:`, JSON.stringify(payload, null, 2));
+	}
+
 	public async process(commands: Command[], args: string[]): Promise<void> {
-		let localCmds = commands.map(command => command.metadata);
 		let remoteCmds = (await this.rest.get(
 			Routes.applicationCommands(Config.client.id)
 		)) as RESTGetAPIApplicationCommandsResult;
@@ -57,20 +80,28 @@ export class CommandRegistrationService {
 					);
 					//insert new guilds
 					for (let localCmd of localCmdsOnly) {
-						if (localCmd.restrictedGuilds?.length) {
-							for (const guildId of localCmd.restrictedGuilds) {
-								await this.rest.post(
-									Routes.applicationGuildCommands(Config.client.id, guildId),
-									{ body: localCmd.metadata }
-								);
+						try {
+							this.validateCommandMetadata(localCmd.metadata);
+
+							if (localCmd.restrictedGuilds?.length) {
+								for (const guildId of localCmd.restrictedGuilds) {
+									await this.rest.post(
+										Routes.applicationGuildCommands(Config.client.id, guildId),
+										{ body: localCmd.metadata }
+									);
+								}
+							} else if (localCmd.restrictedGuilds !== undefined) {
+								//if we just define empty restricted guilds, we don't allow it to show up in any guilds
+								continue;
+							} else {
+								await this.rest.post(Routes.applicationCommands(Config.client.id), {
+									body: localCmd.metadata,
+								});
 							}
-						} else if (localCmd.restrictedGuilds !== undefined) {
-							//if we just define empty restricted guilds, we don't allow it to show up in any guilds
-							continue;
-						} else {
-							await this.rest.post(Routes.applicationCommands(Config.client.id), {
-								body: localCmd.metadata,
-							});
+						} catch (err) {
+							Logger.error('Error when trying to register ', localCmd.metadata.name);
+							this.logCommandPayload('Command causing error:', localCmd.metadata);
+							throw err;
 						}
 					}
 					Logger.info(`Commands created.`);
@@ -82,11 +113,14 @@ export class CommandRegistrationService {
 					);
 					for (let localCmd of localCmdsOnRemoteMetadata) {
 						try {
+							this.validateCommandMetadata(localCmd);
+
 							await this.rest.post(Routes.applicationCommands(Config.client.id), {
 								body: localCmd,
 							});
 						} catch (err) {
-							Logger.info('Error when trying to register ', localCmd.name);
+							Logger.error('Error when trying to update ', localCmd.name);
+							this.logCommandPayload('Command causing error:', localCmd);
 							throw err;
 						}
 					}

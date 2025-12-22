@@ -98,7 +98,7 @@ export class InitiativeModel extends Model<Database['initiative']> {
 				actorGroupsForInitiative(eb),
 			])
 			.execute();
-		return buildRelationFromQuery(result)[0];
+		return buildRelationFromQuery(result as unknown as InitiativeGraphQueryOutput[])[0];
 	}
 
 	/**
@@ -119,7 +119,7 @@ export class InitiativeModel extends Model<Database['initiative']> {
 			])
 			.where('initiative.channelId', '=', channelId)
 			.execute();
-		return buildRelationFromQuery(result);
+		return buildRelationFromQuery(result as unknown as InitiativeGraphQueryOutput[]);
 	}
 
 	public async read({ id }: { id: InitiativeId }): Promise<InitiativeWithRelations | null> {
@@ -133,7 +133,7 @@ export class InitiativeModel extends Model<Database['initiative']> {
 			])
 			.where('initiative.id', '=', id)
 			.execute();
-		return buildRelationFromQuery(result)[0] ?? null;
+		return buildRelationFromQuery(result as unknown as InitiativeGraphQueryOutput[])[0] ?? null;
 	}
 
 	public async update(
@@ -151,7 +151,7 @@ export class InitiativeModel extends Model<Database['initiative']> {
 				actorGroupsForInitiative(eb),
 			])
 			.executeTakeFirstOrThrow();
-		return buildRelationFromQuery([result])[0];
+		return buildRelationFromQuery([result] as unknown as InitiativeGraphQueryOutput[])[0];
 	}
 
 	public async delete({ id }: { id: InitiativeId }): Promise<void> {

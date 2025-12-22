@@ -2,8 +2,7 @@ import { Dice, DiceResult } from 'dice-typescript';
 import { APIEmbedField } from 'discord.js';
 import _ from 'lodash';
 import { attributeShorthands, staticAttributes } from '../constants/attributes.js';
-import L from '../i18n/i18n-node.js';
-import { TranslationFunctions } from '../i18n/i18n-types.js';
+import { utilStrings } from '@kobold/documentation';
 import { Attribute, Modifier, RollMacro } from '@kobold/db';
 import type { Creature } from './creature.js';
 import { WritableDeep } from 'type-fest';
@@ -247,7 +246,7 @@ export class DiceUtils {
 			);
 
 			const modifierMultiplierText =
-				modifierMultiplier ?? 1 !== 1 ? `x${modifierMultiplier ?? 1}` : '';
+				(modifierMultiplier ?? 1) !== 1 ? `x${modifierMultiplier ?? 1}` : '';
 			displayExpression += ` + "${modifier.name}" ${modifier.rollAdjustment}${modifierMultiplierText}`;
 			if (modifierMultiplier && modifierMultiplier !== 1) {
 				parsedExpression += ` +((${parsedModifier})*(${modifierMultiplier ?? 1}))`;
@@ -344,7 +343,7 @@ export class DiceUtils {
 				throw err;
 			} else {
 				throw new DiceRollError(
-					L.en.utils.dice.diceRollError({
+					utilStrings.dice.diceRollError({
 						rollExpression: rollExpression,
 					}),
 					rollExpression

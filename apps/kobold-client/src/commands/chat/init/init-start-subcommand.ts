@@ -1,12 +1,4 @@
-import {
-	ApplicationCommandType,
-	ChatInputCommandInteraction,
-	PermissionsString,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
-} from 'discord.js';
-import { RateLimiter } from 'discord.js-rate-limiter';
-import L from '../../../i18n/i18n-node.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
+import { ChatInputCommandInteraction } from 'discord.js';
 
 import { Kobold } from '@kobold/db';
 import { KoboldError } from '../../../utils/KoboldError.js';
@@ -14,32 +6,20 @@ import { InteractionUtils } from '../../../utils/index.js';
 import { InitiativeBuilder } from '../../../utils/initiative-builder.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { Command, CommandDeferType } from '../../index.js';
+import { InitDefinition } from '@kobold/documentation';
+import { BaseCommandClass } from '../../command.js';
 
-export class InitStartSubCommand implements Command {
-	public name = L.en.commands.init.start.name();
-	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
-		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.init.start.name(),
-		description: L.en.commands.init.show.description(),
-		dm_permission: true,
-		default_member_permissions: undefined,
-	};
-	public cooldown = new RateLimiter(1, 2000);
-	public deferType = CommandDeferType.PUBLIC;
-	public requireClientPerms: PermissionsString[] = [];
-
+export class InitStartSubCommand extends BaseCommandClass(
+	InitDefinition,
+	InitDefinition.subCommandEnum.start
+) {
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const startingUser = intr.user.id;
 		if (!intr.channel || !intr.channel.id) {
-			await InteractionUtils.send(
-				intr,
-				LL.commands.init.start.interactions.notServerChannelError()
-			);
+			await InteractionUtils.send(intr, InitDefinition.strings.start.notServerChannelError);
 			return;
 		}
 		const koboldUtils = new KoboldUtils(kobold);
@@ -47,7 +27,7 @@ export class InitStartSubCommand implements Command {
 			currentInitiative: true,
 		});
 		if (currentInitiative) {
-			throw new KoboldError(LL.commands.init.start.interactions.initExistsError());
+			throw new KoboldError(InitDefinition.strings.start.initExistsError);
 		}
 
 		try {
@@ -62,12 +42,11 @@ export class InitStartSubCommand implements Command {
 				initiative: init,
 				actors: init.actors,
 				groups: init.actorGroups,
-				LL,
 			});
-			const embed = await KoboldEmbed.roundFromInitiativeBuilder(initBuilder, LL);
+			const embed = await KoboldEmbed.roundFromInitiativeBuilder(initBuilder);
 			const message = await InteractionUtils.send(intr, embed);
 
-			const updatedEmbed = await KoboldEmbed.roundFromInitiativeBuilder(initBuilder, LL);
+			const updatedEmbed = await KoboldEmbed.roundFromInitiativeBuilder(initBuilder);
 			message
 				? await message.edit({ embeds: [updatedEmbed] })
 				: InteractionUtils.send(intr, updatedEmbed);
@@ -75,7 +54,7 @@ export class InitStartSubCommand implements Command {
 			if (err instanceof KoboldError) throw err;
 			else {
 				console.warn(err);
-				throw new KoboldError(LL.commands.init.start.interactions.otherError());
+				throw new KoboldError(InitDefinition.strings.start.otherError);
 			}
 		}
 	}

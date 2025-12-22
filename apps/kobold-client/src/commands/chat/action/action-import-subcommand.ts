@@ -1,15 +1,8 @@
-import {
-	ApplicationCommandType,
-	ChatInputCommandInteraction,
-	PermissionsString,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
-} from 'discord.js';
+import { ChatInputCommandInteraction } from 'discord.js';
 import { Action, zAction } from '@kobold/db';
 
 import _ from 'lodash';
 import { z } from 'zod';
-import L from '../../../i18n/i18n-node.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold } from '@kobold/db';
 import { PasteBin } from '../../../services/pastebin/index.js';
 import {
@@ -21,24 +14,18 @@ import {
 import { InteractionUtils } from '../../../utils/index.js';
 import { TextParseHelpers } from '../../../utils/kobold-helpers/text-parse-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { Command, CommandDeferType } from '../../index.js';
-import { ActionOptions } from '../action/action-command-options.js';
+import { Command } from '../../index.js';
+import { ActionDefinition } from '@kobold/documentation';
+import { BaseCommandClass } from '../../command.js';
+const commandOptions = ActionDefinition.options;
+const commandOptionsEnum = ActionDefinition.commandOptionsEnum;
 
-export class ActionImportSubCommand implements Command {
-	public name = L.en.commands.action.import.name();
-	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
-		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.action.import.name(),
-		description: L.en.commands.action.import.description(),
-		dm_permission: true,
-		default_member_permissions: undefined,
-	};
-	public deferType = CommandDeferType.NONE;
-	public requireClientPerms: PermissionsString[] = [];
-
+export class ActionImportSubCommand extends BaseCommandClass(
+	ActionDefinition,
+	ActionDefinition.subCommandEnum.import
+) {
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const koboldUtils = new KoboldUtils(kobold);
@@ -47,17 +34,17 @@ export class ActionImportSubCommand implements Command {
 		});
 
 		let importMode = intr.options
-			.getString(ActionOptions.ACTION_IMPORT_MODE_OPTION.name, true)
+			.getString(commandOptions[commandOptionsEnum.importMode].name, true)
 			.trim()
 			.toLowerCase();
 		let importUrl = intr.options
-			.getString(ActionOptions.ACTION_IMPORT_URL_OPTION.name, true)
+			.getString(commandOptions[commandOptionsEnum.url].name, true)
 			.trim();
 
 		const importId = TextParseHelpers.parsePasteBinIdFromText(importUrl);
 
 		if (!importId) {
-			await InteractionUtils.send(intr, LL.commands.action.import.interactions.badUrl());
+			await InteractionUtils.send(intr, ActionDefinition.strings.import.badUrl);
 			return;
 		}
 
@@ -77,34 +64,25 @@ export class ActionImportSubCommand implements Command {
 			invalidJson = true;
 		}
 		if (invalidJson) {
-			await InteractionUtils.send(
-				intr,
-				LL.commands.action.import.interactions.failedParsing()
-			);
+			await InteractionUtils.send(intr, ActionDefinition.strings.import.failedParsing);
 			return;
 		}
 		const currentActions = activeCharacter.sheetRecord.actions;
 
 		let finalActions: Action[] = [];
 
-		if (importMode === L.en.commandOptions.actionImportMode.choices.fullyReplace.value()) {
+		const importModes = ActionDefinition.optionChoices.importMode;
+		if (importMode === importModes.overwriteAll) {
 			finalActions = replaceAll(currentActions, newActions);
-		} else if (importMode === L.en.commandOptions.actionImportMode.choices.overwrite.value()) {
+		} else if (importMode === importModes.overwriteOnConflict) {
 			finalActions = overwriteOnConflict(currentActions, newActions);
-		} else if (
-			importMode === L.en.commandOptions.actionImportMode.choices.renameOnConflict.value()
-		) {
+		} else if (importMode === importModes.renameOnConflict) {
 			finalActions = renameOnConflict(currentActions, newActions);
-		} else if (
-			importMode === L.en.commandOptions.actionImportMode.choices.ignoreOnConflict.value()
-		) {
+		} else if (importMode === importModes.ignoreOnConflict) {
 			finalActions = ignoreOnConflict(currentActions, newActions);
 		} else {
 			console.error('failed to match an import option');
-			await InteractionUtils.send(
-				intr,
-				LL.commands.action.import.interactions.failedParsing()
-			);
+			await InteractionUtils.send(intr, ActionDefinition.strings.import.failedParsing);
 			return;
 		}
 
@@ -115,7 +93,7 @@ export class ActionImportSubCommand implements Command {
 
 		await InteractionUtils.send(
 			intr,
-			LL.commands.action.import.interactions.imported({
+			ActionDefinition.strings.import.imported({
 				characterName: activeCharacter.name,
 			})
 		);

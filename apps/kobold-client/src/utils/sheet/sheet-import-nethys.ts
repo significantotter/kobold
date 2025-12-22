@@ -46,7 +46,7 @@ export class NethysSheetImporter {
 
 		this.challengeAdjustment =
 			0 + (options?.template === 'elite' ? 1 : 0) - (options?.template === 'weak' ? 1 : 0);
-		this.sheet.staticInfo.level = (bestiaryEntry.level ?? 0) + this.challengeAdjustment ?? 0;
+		this.sheet.staticInfo.level = (bestiaryEntry.level ?? 0) + (this.challengeAdjustment ?? 0);
 
 		this.hpAdjustment = 0;
 		if (this.challengeAdjustment > 0) {
@@ -72,17 +72,17 @@ export class NethysSheetImporter {
 		}
 		this.hpAdjustment *= Math.abs(this.challengeAdjustment) ?? 0;
 
-		this.rollAdjustment = 2 * this.challengeAdjustment ?? 0;
+		this.rollAdjustment = 2 * (this.challengeAdjustment ?? 0);
 	}
 
 	protected applySpellcastingStats() {
-		const spellEntries = Array.from(
+		const spellEntries: RegExpMatchArray[] = Array.from(
 			this.bestiaryEntry.text.matchAll(
 				/(arcane|divine|primal|occult) ?[A-Za-z]* spells ?(dc [0-9]*)?,? ?(attack [+-]?[0-9]*)?/gi
 			)
 		);
 		for (const spellEntry of spellEntries) {
-			const spellcastingTradition = spellEntry?.[1].toLowerCase() as
+			const spellcastingTradition = spellEntry?.[1]?.toLowerCase() as
 				| 'arcane'
 				| 'divine'
 				| 'occult'
@@ -90,13 +90,13 @@ export class NethysSheetImporter {
 			let spellcastingDc: string | undefined;
 			let spellcastingAttack: string | undefined;
 			if (spellEntry?.[2]?.toLowerCase()?.includes('dc'))
-				spellcastingDc = spellEntry?.[2].replaceAll(/[^\d+-]/g, '');
+				spellcastingDc = spellEntry?.[2]?.replaceAll(/[^\d+-]/g, '');
 			if (spellEntry?.[2]?.toLowerCase()?.includes('attack'))
-				spellcastingAttack = spellEntry?.[2].replaceAll(/[^\d+-]/g, '');
+				spellcastingAttack = spellEntry?.[2]?.replaceAll(/[^\d+-]/g, '');
 			if (spellEntry?.[3]?.toLowerCase()?.includes('dc'))
-				spellcastingDc = spellEntry?.[2].replaceAll(/[^\d+-]/g, '');
+				spellcastingDc = spellEntry?.[2]?.replaceAll(/[^\d+-]/g, '');
 			if (spellEntry?.[3]?.toLowerCase()?.includes('attack'))
-				spellcastingAttack = spellEntry?.[2].replaceAll(/[^\d+-]/g, '');
+				spellcastingAttack = spellEntry?.[2]?.replaceAll(/[^\d+-]/g, '');
 			let dc = spellcastingDc == null ? null : parseInt(spellcastingDc) + this.rollAdjustment;
 			let attack =
 				spellcastingAttack == null
@@ -112,7 +112,10 @@ export class NethysSheetImporter {
 	}
 
 	protected applySkills() {
-		for (const [skillName, skillBonus] of Object.entries(this.bestiaryEntry.skill_mod)) {
+		for (const [skillName, skillBonus] of Object.entries(this.bestiaryEntry.skill_mod) as [
+			string,
+			number
+		][]) {
 			let lowerSkillName = skillName.toLowerCase();
 			const bonus = skillBonus + this.rollAdjustment;
 			let dc = 10 + skillBonus;
@@ -145,12 +148,12 @@ export class NethysSheetImporter {
 	}
 	protected applyLores() {
 		const lores: ProficiencyStat[] = [];
-		const loreEntries = Array.from(
+		const loreEntries: RegExpMatchArray[] = Array.from(
 			this.bestiaryEntry.text.matchAll(/([a-zA-Z][a-zA-Z ]* Lore) ([+-]?[0-9]+)/gi)
 		);
 		for (const loreEntry of loreEntries) {
-			const loreName = loreEntry[1].split(' ').map(_.capitalize).join(' ');
-			const loreBonus = parseInt(loreEntry[2]);
+			const loreName = loreEntry[1]!.split(' ').map(_.capitalize).join(' ');
+			const loreBonus = parseInt(loreEntry[2]!);
 			if (isNaN(loreBonus)) continue;
 			const existingSkill = this.sheet.additionalSkills.find(
 				skill => skill.name === loreName
@@ -229,16 +232,16 @@ export class NethysSheetImporter {
 
 		this.sheet.infoLists.immunities = this.bestiaryEntry.immunity ?? [];
 
-		this.sheet.weaknessesResistances.weaknesses = Object.entries(
-			this.bestiaryEntry.weakness
+		this.sheet.weaknessesResistances.weaknesses = (
+			Object.entries(this.bestiaryEntry.weakness) as [string, number][]
 		).map(([type, amount]) => {
 			return {
 				type,
 				amount,
 			};
 		});
-		this.sheet.weaknessesResistances.resistances = Object.entries(
-			this.bestiaryEntry.resistance
+		this.sheet.weaknessesResistances.resistances = (
+			Object.entries(this.bestiaryEntry.resistance) as [string, number][]
 		).map(([type, amount]) => {
 			return {
 				type,
@@ -249,7 +252,12 @@ export class NethysSheetImporter {
 
 	protected applyDetails() {
 		this.sheet.info.description = this.bestiaryEntry.summary ?? null;
-		this.sheet.info.url = `${Config.nethys.baseUrl}${this.bestiaryEntry.url}`;
+		// Remove leading slash from URL if baseUrl ends with slash to avoid double slashes
+		const urlPath =
+			this.bestiaryEntry.url.startsWith('/') && Config.nethys.baseUrl.endsWith('/')
+				? this.bestiaryEntry.url.slice(1)
+				: this.bestiaryEntry.url;
+		this.sheet.info.url = `${Config.nethys.baseUrl}${urlPath}`;
 		this.sheet.info.alignment = this.bestiaryEntry.alignment ?? null;
 		const imageOptions = [...(this.bestiaryEntry.image ?? [])];
 		if (this.options.creatureFamilyEntry) {
@@ -258,14 +266,20 @@ export class NethysSheetImporter {
 		}
 		const urlSuffix =
 			this.bestiaryEntry.image?.[0] ?? this.options.creatureFamilyEntry?.image?.[0];
-		this.sheet.info.imageURL = urlSuffix ? `${Config.nethys.baseUrl}${urlSuffix}` : null;
+		// Remove leading slash from image URL if baseUrl ends with slash to avoid double slashes
+		const imagePath =
+			urlSuffix && urlSuffix.startsWith('/') && Config.nethys.baseUrl.endsWith('/')
+				? urlSuffix.slice(1)
+				: urlSuffix;
+		this.sheet.info.imageURL = imagePath ? `${Config.nethys.baseUrl}${imagePath}` : null;
 
 		this.sheet.info.size = this.bestiaryEntry.size[0] ?? null;
 
 		this.sheet.infoLists.traits = this.bestiaryEntry.trait ?? [];
 		this.sheet.infoLists.senses =
-			this.bestiaryEntry.sense?.split(/,/).map(sense => sense.trim().replaceAll('  ', ' ')) ??
-			[];
+			this.bestiaryEntry.sense
+				?.split(/,/)
+				.map((sense: string) => sense.trim().replaceAll('  ', ' ')) ?? [];
 		this.sheet.infoLists.languages = this.bestiaryEntry.language ?? [];
 	}
 
@@ -321,14 +335,14 @@ export class NethysSheetImporter {
 		//Ex:
 		// **Primal Innate Spells** DC 34\r\n- **Cantrips (4th)**\r\n[Know Direction](/Spells.aspx?ID=169)\r\n- **4th**\r\n[Entangle](/Spells.aspx?ID=103), [Tree Shape](/Spells.aspx?ID=342) (see forest shape)\r\n- **Constant (1st)**\r\n[Pass Without Trace](/Spells.aspx?ID=215) (forest terrain only)\r\n\r\n
 		const spellTraditionRegex = /\*\*([a-zA-Z]+ Spells)\*\*(.*?)(?=\r\n\r\n)/gi;
-		const spellTraditionMatches = Array.from(
+		const spellTraditionMatches: RegExpMatchArray[] = Array.from(
 			this.bestiaryEntry.markdown.matchAll(spellTraditionRegex)
 		);
 		for (const spellTraditionMatch of spellTraditionMatches) {
 			const parsedSpellTradition = await this.nethysParser.parseNethysMarkdown(
-				spellTraditionMatch[2]
+				spellTraditionMatch[2]!
 			);
-			const spellTraditionName = spellTraditionMatch[1];
+			const spellTraditionName = spellTraditionMatch[1]!;
 			const rolls: Roll[] = [];
 			rolls.push({
 				name: 'Details',
@@ -394,9 +408,11 @@ export class NethysSheetImporter {
 
 	protected async applyAttacks() {
 		const attackRegex = /\*\*(?:melee|ranged)\*\*.*?(?=(?:\\r\\n|\\n)*\*\*(?! |damage\*\*))/gis;
-		const attackMatches = Array.from(this.bestiaryEntry.markdown.matchAll(attackRegex));
+		const attackMatches: RegExpMatchArray[] = Array.from(
+			this.bestiaryEntry.markdown.matchAll(attackRegex)
+		);
 		for (const attackMatch of attackMatches) {
-			const parsedMatch = await this.nethysParser.parseNethysMarkdown(attackMatch[0]);
+			const parsedMatch = await this.nethysParser.parseNethysMarkdown(attackMatch[0]!);
 			const parsedMatchWithoutLinks = this.nethysParser.stripMarkdownLinks(parsedMatch);
 			const nameBonusClause = /[\_\*]?([\w \(\)]+)[\_\*]? ([+-][0-9]+)/gi;
 			const traitsClause = /\(([^<>\(\)]+)\)/gi;
@@ -432,7 +448,7 @@ export class NethysSheetImporter {
 					if (i === 0) {
 						damage = damageResult.dice
 							? damageResult.dice +
-								`${this.rollAdjustment >= 0 ? '+' : ''}${this.rollAdjustment}`
+							  `${this.rollAdjustment >= 0 ? '+' : ''}${this.rollAdjustment}`
 							: null;
 					}
 					rolls.push({

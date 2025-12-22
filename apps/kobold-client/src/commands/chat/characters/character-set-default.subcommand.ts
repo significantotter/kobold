@@ -1,45 +1,35 @@
 import {
 	ApplicationCommandOptionChoiceData,
-	ApplicationCommandType,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
 	ChatInputCommandInteraction,
-	PermissionsString,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 import { Kobold } from '@kobold/db';
 
-import L from '../../../i18n/i18n-node.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { Command, CommandDeferType } from '../../index.js';
-import { CharacterOptions } from './command-options.js';
+import { Command } from '../../index.js';
+import { CharacterDefinition as CharacterCommand } from '@kobold/documentation';
+import { BaseCommandClass } from '../../command.js';
+const commandOptions = CharacterCommand.options;
+const commandOptionsEnum = CharacterCommand.commandOptionsEnum;
 
-export class CharacterSetDefaultSubCommand implements Command {
-	public name = L.en.commands.character.setDefault.name();
-	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
-		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.character.setDefault.name(),
-		description: L.en.commands.character.setDefault.description(),
-		dm_permission: true,
-		default_member_permissions: undefined,
-	};
-	public deferType = CommandDeferType.PUBLIC;
-	public requireClientPerms: PermissionsString[] = [];
-
+export class CharacterSetDefaultSubCommand extends BaseCommandClass(
+	CharacterCommand,
+	CharacterCommand.subCommandEnum.setDefault
+) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption,
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === CharacterOptions.SET_ACTIVE_NAME_OPTION.name) {
+		if (option.name === commandOptions[commandOptionsEnum.name].name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
 			const match =
-				intr.options.getString(CharacterOptions.SET_ACTIVE_NAME_OPTION.name) ?? '';
+				intr.options.getString(commandOptions[commandOptionsEnum.name].name) ?? '';
 
 			const { characterUtils } = new KoboldUtils(kobold);
 			const matchedCharacters = await characterUtils.findOwnedCharacterByName(
@@ -52,9 +42,9 @@ export class CharacterSetDefaultSubCommand implements Command {
 				value: character.name,
 			}));
 
-			if (match == '' || L.en.commands.character.setDefault.noneOption().includes(match)) {
+			if (match == '' || CharacterCommand.strings.setDefault.noneOption.includes(match)) {
 				options.push({
-					name: L.en.commands.character.setDefault.noneOption().toString(),
+					name: CharacterCommand.strings.setDefault.noneOption,
 					value: '__NONE__',
 				});
 			}
@@ -66,14 +56,13 @@ export class CharacterSetDefaultSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const defaultScope = intr.options.getString(
-			CharacterOptions.CHARACTER_SET_DEFAULT_SCOPE.name,
+			commandOptions[commandOptionsEnum.setDefaultScope].name,
 			true
 		);
-		const charName = intr.options.getString(CharacterOptions.SET_ACTIVE_NAME_OPTION.name, true);
+		const charName = intr.options.getString(commandOptions[commandOptionsEnum.name].name, true);
 		const currentGuildId = intr.guildId;
 		const currentChannelId = intr.channelId;
 
@@ -85,7 +74,7 @@ export class CharacterSetDefaultSubCommand implements Command {
 		)[0];
 
 		if (targetCharacter) {
-			if (defaultScope === L.en.commandOptions.setDefaultScope.choices.channel.value()) {
+			if (defaultScope === CharacterCommand.optionChoices.setDefaultScope.channel) {
 				if (!currentChannelId) {
 					throw new KoboldError(
 						'Yip! You must be in a server to set a channel default character.'
@@ -104,9 +93,7 @@ export class CharacterSetDefaultSubCommand implements Command {
 					channelId: currentChannelId,
 					characterId: targetCharacter.id,
 				});
-			} else if (
-				defaultScope === L.en.commandOptions.setDefaultScope.choices.server.value()
-			) {
+			} else if (defaultScope === CharacterCommand.optionChoices.setDefaultScope.server) {
 				if (!currentGuildId) {
 					throw new KoboldError(
 						'Yip! You must be in a server to set a server default character.'
@@ -128,7 +115,7 @@ export class CharacterSetDefaultSubCommand implements Command {
 			//send success message
 			await InteractionUtils.send(
 				intr,
-				LL.commands.character.setDefault.interactions.success({
+				CharacterCommand.strings.setDefault.success({
 					characterName: targetCharacter.name,
 					scope: defaultScope,
 				})
@@ -136,7 +123,7 @@ export class CharacterSetDefaultSubCommand implements Command {
 		} else {
 			if ('__NONE__'.includes(charName)) {
 				//unset the server default character.
-				if (defaultScope === L.en.commandOptions.setDefaultScope.choices.channel.value()) {
+				if (defaultScope === CharacterCommand.optionChoices.setDefaultScope.channel) {
 					if (!currentChannelId) {
 						throw new KoboldError(
 							'Yip! You must be in a server to set a channel default character.'
@@ -159,9 +146,7 @@ export class CharacterSetDefaultSubCommand implements Command {
 							return;
 						} else throw err;
 					}
-				} else if (
-					defaultScope === L.en.commandOptions.setDefaultScope.choices.server.value()
-				) {
+				} else if (defaultScope === CharacterCommand.optionChoices.setDefaultScope.server) {
 					if (!currentGuildId) {
 						throw new KoboldError(
 							'Yip! You must be in a server to set a server default character.'
@@ -188,15 +173,12 @@ export class CharacterSetDefaultSubCommand implements Command {
 				}
 				await InteractionUtils.send(
 					intr,
-					LL.commands.character.setDefault.interactions.removed({
+					CharacterCommand.strings.setDefault.removed({
 						scope: defaultScope,
 					})
 				);
 			} else {
-				await InteractionUtils.send(
-					intr,
-					LL.commands.character.setDefault.interactions.notFound()
-				);
+				await InteractionUtils.send(intr, CharacterCommand.strings.setDefault.notFound);
 			}
 		}
 	}

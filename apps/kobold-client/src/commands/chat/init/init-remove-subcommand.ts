@@ -1,18 +1,12 @@
 import {
 	ApplicationCommandOptionChoiceData,
-	ApplicationCommandType,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
 	ChatInputCommandInteraction,
-	PermissionsString,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
-import { RateLimiter } from 'discord.js-rate-limiter';
 
 import _ from 'lodash';
-import L from '../../../i18n/i18n-node.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold } from '@kobold/db';
 import { InteractionUtils } from '../../../utils/index.js';
 import {
@@ -22,32 +16,27 @@ import {
 } from '../../../utils/initiative-builder.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { Command, CommandDeferType } from '../../index.js';
-import { InitOptions } from './init-command-options.js';
+import { Command } from '../../index.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
+import { InitDefinition } from '@kobold/documentation';
+import { BaseCommandClass } from '../../command.js';
+const commandOptions = InitDefinition.options;
+const commandOptionsEnum = InitDefinition.commandOptionsEnum;
 
-export class InitRemoveSubCommand implements Command {
-	public name = L.en.commands.init.remove.name();
-	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
-		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.init.remove.name(),
-		description: L.en.commands.init.remove.description(),
-		dm_permission: true,
-		default_member_permissions: undefined,
-	};
-	public cooldown = new RateLimiter(1, 2000);
-	public deferType = CommandDeferType.PUBLIC;
-	public requireClientPerms: PermissionsString[] = [];
-
+export class InitRemoveSubCommand extends BaseCommandClass(
+	InitDefinition,
+	InitDefinition.subCommandEnum.remove
+) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption,
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === InitOptions.INIT_CHARACTER_OPTION.name) {
+		if (option.name === commandOptions[commandOptionsEnum.initCharacter].name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(InitOptions.INIT_CHARACTER_OPTION.name) ?? '';
+			const match =
+				intr.options.getString(commandOptions[commandOptionsEnum.initCharacter].name) ?? '';
 
 			const { autocompleteUtils } = new KoboldUtils(kobold);
 			return autocompleteUtils.getAllControllableInitiativeActors(intr, match);
@@ -56,11 +45,10 @@ export class InitRemoveSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const targetActorName = intr.options
-			.getString(InitOptions.INIT_CHARACTER_OPTION.name, true)
+			.getString(commandOptions[commandOptionsEnum.initCharacter].name, true)
 			.trim();
 
 		const koboldUtils = new KoboldUtils(kobold);
@@ -89,7 +77,7 @@ export class InitRemoveSubCommand implements Command {
 
 		const deletedEmbed = new KoboldEmbed();
 		deletedEmbed.setTitle(
-			LL.commands.init.remove.interactions.deletedEmbed.title({
+			InitDefinition.strings.remove.deletedEmbed.title({
 				actorName: actor.name,
 			})
 		);
@@ -109,7 +97,6 @@ export class InitRemoveSubCommand implements Command {
 			const initBuilder = new InitiativeBuilder({
 				initiative: currentInitiative,
 				userSettings,
-				LL,
 			});
 			let currentTurn = initBuilder.getCurrentTurnInfo();
 			let updatedTurn: TurnData;
@@ -138,7 +125,7 @@ export class InitRemoveSubCommand implements Command {
 				groups: updatedInitiative.actorGroups,
 			});
 
-			const currentTurnEmbed = await KoboldEmbed.turnFromInitiativeBuilder(initBuilder, LL);
+			const currentTurnEmbed = await KoboldEmbed.turnFromInitiativeBuilder(initBuilder);
 			const activeGroup = initBuilder.activeGroup;
 
 			if (updatedInitiative.currentRound === 0) {
@@ -155,14 +142,12 @@ export class InitRemoveSubCommand implements Command {
 					currentTurn,
 					targetTurn: updatedTurn,
 					initBuilder,
-					LL,
 				});
 			}
 		} else {
 			const initBuilder = new InitiativeBuilder({
 				initiative: currentInitiative,
 				userSettings,
-				LL,
 			});
 			initBuilder.removeActor(actor);
 			if (currentInitiative.currentRound === 0) {

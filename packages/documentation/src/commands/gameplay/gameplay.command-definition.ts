@@ -1,6 +1,8 @@
 import { ApplicationCommandOptionType, ApplicationCommandType } from 'discord-api-types/v10';
-import { CommandDefinition } from '../helpers/commands.d.js';
+import type { CommandDefinition } from '../helpers/commands.types.js';
 import { GameplayCommandOptionEnum, gameplayCommandOptions } from './gameplay.command-options.js';
+import { anyUsageContext } from '../helpers/defaults.js';
+import { withOrder } from '../helpers/common.js';
 
 export enum GameplaySubCommandEnum {
 	damage = 'damage',
@@ -14,7 +16,7 @@ export const gameplayCommandDefinition = {
 		name: 'gameplay',
 		description: 'Commands for interacting with the gameplay stats of a character or npc.',
 		type: ApplicationCommandType.ChatInput,
-		dm_permission: true,
+		contexts: anyUsageContext,
 		default_member_permissions: undefined,
 	},
 	subCommands: {
@@ -24,14 +26,23 @@ export const gameplayCommandDefinition = {
 				'Applies damage to a character, effecting tempHp, stamina (if enabled), and hp.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[GameplayCommandOptionEnum.gameplayTargetCharacter]: {
-					...gameplayCommandOptions[GameplayCommandOptionEnum.gameplayTargetCharacter],
-					required: true,
-				},
-				[GameplayCommandOptionEnum.gameplayDamageAmount]:
+				[GameplayCommandOptionEnum.gameplayTargetCharacter]: withOrder(
+					{
+						...gameplayCommandOptions[
+							GameplayCommandOptionEnum.gameplayTargetCharacter
+						],
+						required: true,
+					},
+					1
+				),
+				[GameplayCommandOptionEnum.gameplayDamageAmount]: withOrder(
 					gameplayCommandOptions[GameplayCommandOptionEnum.gameplayDamageAmount],
-				[GameplayCommandOptionEnum.gameplayDamageType]:
+					2
+				),
+				[GameplayCommandOptionEnum.gameplayDamageType]: withOrder(
 					gameplayCommandOptions[GameplayCommandOptionEnum.gameplayDamageType],
+					3
+				),
 			},
 		},
 		[GameplaySubCommandEnum.set]: {
@@ -39,12 +50,18 @@ export const gameplayCommandDefinition = {
 			description: "Sets a character's gameplay stat (such as hp) to a value",
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[GameplayCommandOptionEnum.gameplaySetOption]:
+				[GameplayCommandOptionEnum.gameplaySetOption]: withOrder(
 					gameplayCommandOptions[GameplayCommandOptionEnum.gameplaySetOption],
-				[GameplayCommandOptionEnum.gameplaySetValue]:
+					1
+				),
+				[GameplayCommandOptionEnum.gameplaySetValue]: withOrder(
 					gameplayCommandOptions[GameplayCommandOptionEnum.gameplaySetValue],
-				[GameplayCommandOptionEnum.gameplayTargetCharacter]:
+					2
+				),
+				[GameplayCommandOptionEnum.gameplayTargetCharacter]: withOrder(
 					gameplayCommandOptions[GameplayCommandOptionEnum.gameplayTargetCharacter],
+					3
+				),
 			},
 		},
 		[GameplaySubCommandEnum.recover]: {
@@ -53,8 +70,10 @@ export const gameplayCommandDefinition = {
 				"Resets all of a character/npc's 'recoverable' stats (hp, stamina, resolve) to their maximum values.",
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[GameplayCommandOptionEnum.gameplayTargetCharacter]:
+				[GameplayCommandOptionEnum.gameplayTargetCharacter]: withOrder(
 					gameplayCommandOptions[GameplayCommandOptionEnum.gameplayTargetCharacter],
+					1
+				),
 			},
 		},
 		[GameplaySubCommandEnum.tracker]: {
@@ -63,12 +82,18 @@ export const gameplayCommandDefinition = {
 				'Sets up a tracker to follow the changing statistics of one of your characters.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[GameplayCommandOptionEnum.gameplayTargetCharacter]:
+				[GameplayCommandOptionEnum.gameplayTargetCharacter]: withOrder(
 					gameplayCommandOptions[GameplayCommandOptionEnum.gameplayTargetCharacter],
-				[GameplayCommandOptionEnum.gameplayTargetChannel]:
+					1
+				),
+				[GameplayCommandOptionEnum.gameplayTargetChannel]: withOrder(
 					gameplayCommandOptions[GameplayCommandOptionEnum.gameplayTargetChannel],
-				[GameplayCommandOptionEnum.gameplayTrackerMode]:
+					2
+				),
+				[GameplayCommandOptionEnum.gameplayTrackerMode]: withOrder(
 					gameplayCommandOptions[GameplayCommandOptionEnum.gameplayTrackerMode],
+					3
+				),
 			},
 		},
 	},

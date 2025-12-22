@@ -1,48 +1,37 @@
 import {
 	ApplicationCommandOptionChoiceData,
-	ApplicationCommandType,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	ButtonStyle,
 	CacheType,
 	ChatInputCommandInteraction,
 	ComponentType,
-	PermissionsString,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
+	MessageFlags,
 } from 'discord.js';
-import { RateLimiter } from 'discord.js-rate-limiter';
 
 import _ from 'lodash';
-import L from '../../../i18n/i18n-node.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold } from '@kobold/db';
 import { CollectorUtils } from '../../../utils/collector-utils.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { Command, CommandDeferType } from '../../index.js';
-import { CounterGroupOptions } from './counter-group-command-options.js';
+import { Command } from '../../index.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
+import { CounterGroupDefinition } from '@kobold/documentation';
+import { BaseCommandClass } from '../../command.js';
+const commandOptions = CounterGroupDefinition.options;
+const commandOptionsEnum = CounterGroupDefinition.commandOptionsEnum;
 
-export class CounterGroupRemoveSubCommand implements Command {
-	public name = L.en.commands.counterGroup.remove.name();
-	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
-		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.counterGroup.remove.name(),
-		description: L.en.commands.counterGroup.remove.description(),
-		dm_permission: true,
-		default_member_permissions: undefined,
-	};
-	public cooldown = new RateLimiter(1, 2000);
-	public deferType = CommandDeferType.NONE;
-	public requireClientPerms: PermissionsString[] = [];
-
+export class CounterGroupRemoveSubCommand extends BaseCommandClass(
+	CounterGroupDefinition,
+	CounterGroupDefinition.subCommandEnum.remove
+) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption,
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === CounterGroupOptions.COUNTER_GROUP_NAME_OPTION.name) {
+		if (option.name === commandOptions[commandOptionsEnum.counterGroupName].name) {
 			const koboldUtils = new KoboldUtils(kobold);
 			const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
 				activeCharacter: true,
@@ -56,7 +45,6 @@ export class CounterGroupRemoveSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const koboldUtils = new KoboldUtils(kobold);
@@ -64,20 +52,18 @@ export class CounterGroupRemoveSubCommand implements Command {
 			activeCharacter: true,
 		});
 		const name = intr.options
-			.getString(CounterGroupOptions.COUNTER_GROUP_NAME_OPTION.name, true)
+			.getString(commandOptions[commandOptionsEnum.counterGroupName].name, true)
 			.trim();
 
 		const targetCounterGroup = activeCharacter.sheetRecord.sheet.counterGroups.find(
 			group => group.name.toLowerCase() === name.toLowerCase()
 		);
 		if (!targetCounterGroup) {
-			throw new KoboldError(
-				LL.commands.counterGroup.interactions.notFound({ groupName: name })
-			);
+			throw new KoboldError(CounterGroupDefinition.strings.notFound({ groupName: name }));
 		}
 
 		const prompt = await intr.reply({
-			content: LL.commands.counterGroup.remove.interactions.removeConfirmation.text({
+			content: CounterGroupDefinition.strings.removeConfirmation.text({
 				groupName: targetCounterGroup.name,
 			}),
 			components: [
@@ -86,20 +72,20 @@ export class CounterGroupRemoveSubCommand implements Command {
 					components: [
 						{
 							type: ComponentType.Button,
-							label: LL.commands.counterGroup.remove.interactions.removeConfirmation.removeButton(),
+							label: CounterGroupDefinition.strings.removeConfirmation.confirmButton,
 							customId: 'remove',
 							style: ButtonStyle.Danger,
 						},
 						{
 							type: ComponentType.Button,
-							label: LL.commands.counterGroup.remove.interactions.removeConfirmation.cancelButton(),
+							label: CounterGroupDefinition.strings.removeConfirmation.cancelButton,
 							customId: 'cancel',
 							style: ButtonStyle.Primary,
 						},
 					],
 				},
 			],
-			ephemeral: true,
+			flags: [MessageFlags.Ephemeral],
 			fetchReply: true,
 		});
 		let timedOut = false;
@@ -124,8 +110,7 @@ export class CounterGroupRemoveSubCommand implements Command {
 				onExpire: async () => {
 					timedOut = true;
 					await InteractionUtils.editReply(intr, {
-						content:
-							LL.commands.counterGroup.remove.interactions.removeConfirmation.expired(),
+						content: CounterGroupDefinition.strings.removeConfirmation.expired,
 						components: [],
 					});
 				},
@@ -133,7 +118,7 @@ export class CounterGroupRemoveSubCommand implements Command {
 		);
 		if (result) {
 			await InteractionUtils.editReply(intr, {
-				content: LL.sharedInteractions.choiceRegistered({
+				content: CounterGroupDefinition.strings.shared.choiceRegistered({
 					choice: _.capitalize(result.value),
 				}),
 				components: [],
@@ -156,7 +141,7 @@ export class CounterGroupRemoveSubCommand implements Command {
 			);
 			await InteractionUtils.send(
 				intr,
-				LL.commands.counterGroup.remove.interactions.success({
+				CounterGroupDefinition.strings.removed({
 					groupName: targetCounterGroup.name,
 				})
 			);

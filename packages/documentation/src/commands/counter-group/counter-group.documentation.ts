@@ -1,4 +1,5 @@
-import { CommandDocumentation, CommandResponseTypeEnum } from '../helpers/commands.d.js';
+import type { CommandDocumentation } from '../helpers/commands.types.js';
+import { CommandResponseTypeEnum } from '../helpers/enums.js';
 import {
 	counterGroupCommandDefinition,
 	CounterGroupSubCommandEnum,
@@ -144,15 +145,3 @@ export const counterGroupCommandDocumentation: CommandDocumentation<
 		},
 	},
 };
-
-/**
- * Command Definition:
- *
- *
- * Command Options::
- *
- *
- * Commands:
- *
- *
- */

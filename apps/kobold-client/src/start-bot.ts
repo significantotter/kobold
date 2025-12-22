@@ -20,7 +20,6 @@ import { Reaction } from './reactions/index.js';
 import { CommandRegistrationService, JobService, Logger } from './services/index.js';
 import { Job } from './services/job-service.js';
 import { Kobold, getDialect } from '@kobold/db';
-import { Pf2eToolsCompendiumModel, CompendiumDb } from '@kobold/pf2etools';
 import { Trigger } from './triggers/index.js';
 import { NethysDb } from '@kobold/nethys';
 
@@ -32,7 +31,6 @@ async function start(): Promise<void> {
 	const PostgresDialect = getDialect(Config.database.url);
 	const nethysCompendium = new NethysDb(Config.database.url);
 	const kobold = new Kobold(PostgresDialect);
-	const pf2eToolsCompendium = new Pf2eToolsCompendiumModel(CompendiumDb);
 
 	// Client
 	let client = new CustomClient({
@@ -75,7 +73,6 @@ async function start(): Promise<void> {
 	let guildJoinHandler = new GuildJoinHandler();
 	let guildLeaveHandler = new GuildLeaveHandler();
 	let commandHandler = new CommandHandler(commands, {
-		pf2eToolsCompendium,
 		nethysCompendium,
 		kobold,
 	});

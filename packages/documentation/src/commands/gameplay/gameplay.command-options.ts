@@ -1,17 +1,17 @@
 import { ApplicationCommandOptionType } from 'discord-api-types/v10';
-import type { CommandOptions, SpecificCommandOptions } from '../helpers/commands.d.js';
+import type { CommandOptions, SpecificCommandOptions } from '../helpers/commands.types.js';
 
 export enum GameplayCommandOptionEnum {
-	gameplaySetOption = 'gameplaySetOption',
-	gameplayDamageAmount = 'gameplayDamageAmount',
-	gameplayDamageType = 'gameplayDamageType',
-	gameplaySetValue = 'gameplaySetValue',
-	gameplayTargetCharacter = 'gameplayTargetCharacter',
-	gameplayTargetChannel = 'gameplayTargetChannel',
-	gameplayTrackerMode = 'gameplayTrackerMode',
+	gameplaySetOption = 'gameplay-set-option',
+	gameplayDamageAmount = 'gameplay-damage-amount',
+	gameplayDamageType = 'gameplay-damage-type',
+	gameplaySetValue = 'gameplay-set-value',
+	gameplayTargetCharacter = 'gameplay-target-character',
+	gameplayTargetChannel = 'gameplay-target-channel',
+	gameplayTrackerMode = 'gameplay-tracker-mode',
 }
 
-export const gameplayCommandOptions: CommandOptions = {
+export const gameplayCommandOptions = {
 	[GameplayCommandOptionEnum.gameplaySetOption]: {
 		name: GameplayCommandOptionEnum.gameplaySetOption,
 		description: "What option to update on the target character's sheet",

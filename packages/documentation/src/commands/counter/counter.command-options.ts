@@ -1,10 +1,10 @@
 import { ApplicationCommandOptionType } from 'discord-api-types/v10';
-import type { CommandOptions, SpecificCommandOptions } from '../helpers/commands.d.js';
+import type { CommandOptions, SpecificCommandOptions } from '../helpers/commands.types.js';
 
 export enum CounterCommandOptionEnum {
 	counterName = 'name',
 	counterText = 'text',
-	counterCounterGroupName = 'group-name',
+	counterGroupName = 'group-name',
 	counterDescription = 'description',
 	counterStyle = 'style',
 	counterMax = 'max',
@@ -21,7 +21,30 @@ export enum CounterCommandOptionEnum {
 	counterValue = 'counter-value',
 }
 
-export const counterCommandOptions: CommandOptions = {
+/**
+ * Choice values for options with predefined choices.
+ * Access via CounterCommand.optionChoices.setOption.name etc.
+ */
+export const counterOptionChoices = {
+	/** Choices for the counterSetOption option */
+	setOption: {
+		name: 'name',
+		description: 'description',
+		style: 'style',
+		max: 'max',
+		text: 'text',
+		recoverTo: 'recoverTo',
+		recoverable: 'recoverable',
+	},
+} as const;
+
+/** @deprecated Use counterOptionChoices.setOption instead */
+export const CounterSetOptionChoices = counterOptionChoices.setOption;
+
+export type CounterSetOptionChoice =
+	(typeof counterOptionChoices.setOption)[keyof typeof counterOptionChoices.setOption];
+
+export const counterCommandOptions = {
 	[CounterCommandOptionEnum.counterName]: {
 		name: CounterCommandOptionEnum.counterName,
 		description: 'The name of the counter.',
@@ -34,8 +57,8 @@ export const counterCommandOptions: CommandOptions = {
 		required: false,
 		type: ApplicationCommandOptionType.String,
 	},
-	[CounterCommandOptionEnum.counterCounterGroupName]: {
-		name: CounterCommandOptionEnum.counterCounterGroupName,
+	[CounterCommandOptionEnum.counterGroupName]: {
+		name: CounterCommandOptionEnum.counterGroupName,
 		description: 'The name of the counter group.',
 		required: false,
 		type: ApplicationCommandOptionType.String,
@@ -95,36 +118,10 @@ export const counterCommandOptions: CommandOptions = {
 		description: 'The field to set to a new value.',
 		required: true,
 		type: ApplicationCommandOptionType.String,
-		choices: [
-			{
-				name: 'name',
-				value: 'name',
-			},
-			{
-				name: 'description',
-				value: 'description',
-			},
-			{
-				name: 'style',
-				value: 'style',
-			},
-			{
-				name: 'max',
-				value: 'max',
-			},
-			{
-				name: 'text',
-				value: 'text',
-			},
-			{
-				name: 'recoverTo',
-				value: 'recoverTo',
-			},
-			{
-				name: 'recoverable',
-				value: 'recoverable',
-			},
-		],
+		choices: Object.values(counterOptionChoices.setOption).map(value => ({
+			name: value,
+			value: value,
+		})),
 	},
 	[CounterCommandOptionEnum.counterSetValue]: {
 		name: CounterCommandOptionEnum.counterSetValue,

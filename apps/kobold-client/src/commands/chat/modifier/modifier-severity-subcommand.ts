@@ -1,48 +1,36 @@
 import {
 	ApplicationCommandOptionChoiceData,
-	ApplicationCommandType,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
 	ChatInputCommandInteraction,
-	PermissionsString,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
-import { RateLimiter } from 'discord.js-rate-limiter';
 
-import L from '../../../i18n/i18n-node.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold } from '@kobold/db';
 import { InteractionUtils } from '../../../utils/index.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { Command, CommandDeferType } from '../../index.js';
-import { ModifierOptions } from './modifier-command-options.js';
-import { ModifierHelpers } from './modifier-helpers.js';
+import { Command } from '../../index.js';
 import { InputParseUtils } from '../../../utils/input-parse-utils.js';
+import { ModifierDefinition } from '@kobold/documentation';
+import { BaseCommandClass } from '../../command.js';
+const commandOptions = ModifierDefinition.options;
+const commandOptionsEnum = ModifierDefinition.commandOptionsEnum;
 
-export class ModifierSeveritySubCommand implements Command {
-	public name = L.en.commands.modifier.severity.name();
-	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
-		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.modifier.severity.name(),
-		description: L.en.commands.modifier.severity.description(),
-		dm_permission: true,
-		default_member_permissions: undefined,
-	};
-	public cooldown = new RateLimiter(1, 2000);
-	public deferType = CommandDeferType.PUBLIC;
-	public requireClientPerms: PermissionsString[] = [];
-
+export class ModifierSeveritySubCommand extends BaseCommandClass(
+	ModifierDefinition,
+	ModifierDefinition.subCommandEnum.severity
+) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption,
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === ModifierOptions.MODIFIER_NAME_OPTION.name) {
+		if (option.name === commandOptions[commandOptionsEnum.name].name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(ModifierOptions.MODIFIER_NAME_OPTION.name) ?? '';
+			const match =
+				intr.options.getString(commandOptions[commandOptionsEnum.name].name) ?? '';
 
 			//get the active character
 			const { characterUtils } = new KoboldUtils(kobold);
@@ -66,14 +54,13 @@ export class ModifierSeveritySubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const modifierName = intr.options
-			.getString(ModifierOptions.MODIFIER_NAME_OPTION.name, true)
+			.getString(commandOptions[commandOptionsEnum.name].name, true)
 			.trim();
 		const newSeverity = intr.options
-			.getString(ModifierOptions.MODIFIER_SEVERITY_VALUE_OPTION.name, true)
+			.getString(commandOptions[commandOptionsEnum.severity].name, true)
 			.toLocaleLowerCase()
 			.trim();
 
@@ -89,7 +76,7 @@ export class ModifierSeveritySubCommand implements Command {
 		);
 		if (!targetModifier) {
 			// no matching modifier found
-			await InteractionUtils.send(intr, LL.commands.modifier.interactions.notFound());
+			await InteractionUtils.send(intr, ModifierDefinition.strings.notFound);
 			return;
 		}
 		targetModifier.severity = InputParseUtils.parseAsNullableNumber(newSeverity);

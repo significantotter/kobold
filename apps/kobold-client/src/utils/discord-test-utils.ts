@@ -7,6 +7,7 @@ import {
 	ClientOptions,
 	CommandInteractionOptionResolver,
 	GuildMemberFlags,
+	Locale,
 	PermissionsBitField,
 } from 'discord.js';
 import _ from 'lodash';
@@ -29,7 +30,8 @@ export class MockChatInputCommandInteraction extends ChatInputCommandInteraction
 			id: 'interactionId',
 			application_id: 'applicationId',
 			type: 2, // Type 2 is APPLICATION_COMMAND
-			locale: 'en-US',
+			locale: Locale.EnglishUS,
+			attachment_size_limit: 8388608,
 			entitlements: [],
 			channel: {
 				id: 'channelId',

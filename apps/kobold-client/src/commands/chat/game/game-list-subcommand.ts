@@ -1,34 +1,20 @@
-import {
-	ApplicationCommandType,
-	ChatInputCommandInteraction,
-	PermissionsString,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
-} from 'discord.js';
+import { ChatInputCommandInteraction } from 'discord.js';
 import { Kobold } from '@kobold/db';
 
 import _ from 'lodash';
-import L from '../../../i18n/i18n-node.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { Command, CommandDeferType } from '../../index.js';
+import { Command } from '../../index.js';
+import { GameDefinition } from '@kobold/documentation';
+import { BaseCommandClass } from '../../command.js';
 
-export class GameListSubCommand implements Command {
-	public name = L.en.commands.game.list.name();
-	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
-		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.game.list.name(),
-		description: L.en.commands.game.list.description(),
-		dm_permission: true,
-		default_member_permissions: undefined,
-	};
-	public deferType = CommandDeferType.PUBLIC;
-	public requireClientPerms: PermissionsString[] = [];
-
+export class GameListSubCommand extends BaseCommandClass(
+	GameDefinition,
+	GameDefinition.subCommandEnum.list
+) {
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const koboldUtils = new KoboldUtils(kobold);
@@ -39,12 +25,12 @@ export class GameListSubCommand implements Command {
 		});
 
 		if (allGames.length === 0) {
-			InteractionUtils.send(intr, L.en.commands.game.interactions.noGames());
+			InteractionUtils.send(intr, GameDefinition.strings.noGames);
 			return;
 		}
 
 		const gameListEmbed = new KoboldEmbed().setTitle(
-			LL.commands.game.list.interactions.gameListEmbed.title()
+			GameDefinition.strings.list.gameListEmbed.title
 		);
 		gameListEmbed.addFields(
 			allGames.map(game => ({
@@ -52,8 +38,7 @@ export class GameListSubCommand implements Command {
 				value:
 					_.uniqBy(game.characters, 'id')
 						.map(character => character.name)
-						.join('\n') ||
-					LL.commands.game.list.interactions.gameListEmbed.noCharacters(),
+						.join('\n') || GameDefinition.strings.list.gameListEmbed.noCharacters,
 			}))
 		);
 		await gameListEmbed.sendBatches(intr);

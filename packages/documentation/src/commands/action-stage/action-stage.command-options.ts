@@ -1,16 +1,14 @@
 import { ApplicationCommandOptionType } from 'discord-api-types/v10';
-import type { CommandOptions, SpecificCommandOptions } from '../helpers/commands.d.js';
+import type { SpecificCommandOptions } from '../helpers/commands.types.js';
 
 export enum ActionStageCommandOptionEnum {
 	actionTarget = 'action-target',
 	allowModifiers = 'allow-modifiers',
 	healInsteadOfDamage = 'heal-instead-of-damage',
-	target = 'target',
 	defendingStat = 'defending-stat',
 	editOption = 'edit-option',
 	editValue = 'edit-value',
 	moveOption = 'move-option',
-	targetDc = 'target-dc',
 	abilityDc = 'ability-dc',
 	saveRollType = 'save-roll-type',
 	rollType = 'roll-type',
@@ -41,7 +39,7 @@ export enum ActionStageMoveOptionChoicesEnum {
 	bottom = 'bottom',
 }
 
-export const actionStageCommandOptions: CommandOptions = {
+export const actionStageCommandOptions = {
 	[ActionStageCommandOptionEnum.actionTarget]: {
 		name: 'action',
 		description: 'The target action.',
@@ -60,6 +58,7 @@ export const actionStageCommandOptions: CommandOptions = {
 		description: "Whether you're targeting AC, a save, or a skill DC. Or a flat number.",
 		required: true,
 		autocomplete: true,
+		choices: undefined,
 		type: ApplicationCommandOptionType.String,
 	},
 	[ActionStageCommandOptionEnum.healInsteadOfDamage]: {
@@ -67,13 +66,6 @@ export const actionStageCommandOptions: CommandOptions = {
 		description: 'Heal instead of dealing damage.',
 		required: false,
 		type: ApplicationCommandOptionType.Boolean,
-	},
-	[ActionStageCommandOptionEnum.target]: {
-		name: 'target',
-		description: 'The target of the roll.',
-		required: true,
-		autocomplete: true,
-		type: ApplicationCommandOptionType.String,
 	},
 	[ActionStageCommandOptionEnum.editOption]: {
 		name: 'edit-option',
@@ -102,12 +94,6 @@ export const actionStageCommandOptions: CommandOptions = {
 				value: ActionStageMoveOptionChoicesEnum.bottom,
 			},
 		],
-		type: ApplicationCommandOptionType.String,
-	},
-	[ActionStageCommandOptionEnum.targetDc]: {
-		name: 'target-dc',
-		description: 'The target DC for the roll.',
-		required: true,
 		type: ApplicationCommandOptionType.String,
 	},
 	[ActionStageCommandOptionEnum.abilityDc]: {
@@ -229,3 +215,58 @@ export const actionStageCommandOptions: CommandOptions = {
 		type: ApplicationCommandOptionType.String,
 	},
 } satisfies SpecificCommandOptions<ActionStageCommandOptionEnum>;
+
+/**
+ * Choice values for action stage set options.
+ * This is the source of truth for valid update options.
+ */
+export const actionStageOptionChoices = {
+	/** Choices for the stageUpdateOption - used in set subcommand */
+	stageUpdateOption: {
+		name: { name: 'name', value: 'name' },
+		damageType: { name: 'damage-type', value: 'damageType' },
+		allowRollModifiers: { name: 'allow-roll-modifier', value: 'allowRollModifiers' },
+		attackTargetDC: { name: 'attack-target-dc', value: 'targetDC' },
+		attackRoll: { name: 'attack-roll', value: 'roll' },
+		basicDamageRoll: { name: 'basic-damage-roll', value: 'roll' },
+		advancedDamageCritSuccessRoll: {
+			name: 'advanced-damage-crit-success-roll',
+			value: 'criticalSuccessRoll',
+		},
+		advancedDamageSuccessRoll: {
+			name: 'advanced-damage-success-roll',
+			value: 'successRoll',
+		},
+		advancedDamageFailureRoll: {
+			name: 'advanced-damage-failure-roll',
+			value: 'failureRoll',
+		},
+		advancedDamageCritFailureRoll: {
+			name: 'advanced-damage-crit-failure-roll',
+			value: 'criticalFailureRoll',
+		},
+		saveRollType: {
+			name: 'save-roll-type',
+			value: 'saveRollType',
+		},
+		saveTargetDC: { name: 'save-target-dc', value: 'saveTargetDC' },
+		defaultText: { name: 'text-default', value: 'defaultText' },
+		successText: { name: 'text-success', value: 'successText' },
+		failureText: { name: 'text-failure', value: 'failureText' },
+		criticalSuccessText: { name: 'text-critical-success', value: 'criticalSuccessText' },
+		criticalFailureText: { name: 'text-critical-failure', value: 'criticalFailureText' },
+		textExtraTags: { name: 'text-extra-tags', value: 'textExtraTags' },
+		healInsteadOfDamage: { name: 'heal-instead-of-damage', value: 'healInsteadOfDamage' },
+	},
+	/** Choices for the move option */
+	moveOption: {
+		top: 'top',
+		bottom: 'bottom',
+	},
+	/** Choices for the roll type option */
+	rollType: {
+		attack: 'attack',
+		damage: 'damage',
+		other: 'other',
+	},
+} as const;

@@ -1,4 +1,3 @@
-export type { NpcData, NpcFluff } from './shared/npc-data.js';
 export type { Sheet } from './shared/sheet.zod.js';
 
 import type { Action } from './shared/action.zod.js';

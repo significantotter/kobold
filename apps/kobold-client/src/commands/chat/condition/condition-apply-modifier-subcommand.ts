@@ -1,55 +1,51 @@
 import {
 	ApplicationCommandOptionChoiceData,
-	ApplicationCommandType,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
 	ChatInputCommandInteraction,
-	PermissionsString,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
-import { RateLimiter } from 'discord.js-rate-limiter';
 
-import L from '../../../i18n/i18n-node.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold } from '@kobold/db';
 import { KoboldError } from '../../../utils/KoboldError.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { Command, CommandDeferType } from '../../index.js';
-import { GameplayOptions } from '../gameplay/gameplay-command-options.js';
-import { ModifierHelpers } from '../modifier/modifier-helpers.js';
-import { ModifierOptions } from '../modifier/modifier-command-options.js';
+import { Command } from '../../index.js';
 import { InputParseUtils } from '../../../utils/input-parse-utils.js';
+import { ConditionDefinition, GameplayDefinition, ModifierDefinition } from '@kobold/documentation';
+import { BaseCommandClass } from '../../command.js';
+const gameplayCommandOptions = GameplayDefinition.options;
+const gameplayCommandOptionsEnum = GameplayDefinition.commandOptionsEnum;
+const modifierCommandOptions = ModifierDefinition.options;
+const modifierCommandOptionsEnum = ModifierDefinition.commandOptionsEnum;
 
-export class ConditionApplyModifierSubCommand implements Command {
-	public name = L.en.commands.condition.applyModifier.name();
-	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
-		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.condition.applyModifier.name(),
-		description: L.en.commands.condition.applyModifier.description(),
-		dm_permission: true,
-		default_member_permissions: undefined,
-	};
-	public cooldown = new RateLimiter(1, 2000);
-	public deferType = CommandDeferType.PUBLIC;
-	public requireClientPerms: PermissionsString[] = [];
-
+export class ConditionApplyModifierSubCommand extends BaseCommandClass(
+	ConditionDefinition,
+	ConditionDefinition.subCommandEnum.applyModifier
+) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption,
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name) {
+		if (
+			option.name ===
+			gameplayCommandOptions[gameplayCommandOptionsEnum.gameplayTargetCharacter].name
+		) {
 			const match =
-				intr.options.getString(GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name) ?? '';
+				intr.options.getString(
+					gameplayCommandOptions[gameplayCommandOptionsEnum.gameplayTargetCharacter].name
+				) ?? '';
 			const { autocompleteUtils } = new KoboldUtils(kobold);
 			return await autocompleteUtils.getAllTargetOptions(intr, match);
 		}
-		if (option.name === ModifierOptions.MODIFIER_NAME_OPTION.name) {
-			const match = intr.options.getString(ModifierOptions.MODIFIER_NAME_OPTION.name) ?? '';
+		if (option.name === modifierCommandOptions[modifierCommandOptionsEnum.name].name) {
+			const match =
+				intr.options.getString(
+					modifierCommandOptions[modifierCommandOptionsEnum.name].name
+				) ?? '';
 
 			//get the active character
 			const allCharacters = await kobold.character.readMany({ userId: intr.user.id });
@@ -79,13 +75,12 @@ export class ConditionApplyModifierSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const koboldUtils = new KoboldUtils(kobold);
 		const { gameUtils, characterUtils } = koboldUtils;
 		const targetCharacter = intr.options.getString(
-			GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name,
+			gameplayCommandOptions[gameplayCommandOptionsEnum.gameplayTargetCharacter].name,
 			true
 		);
 		const { targetSheetRecord } = await gameUtils.getCharacterOrInitActorTarget(
@@ -94,7 +89,7 @@ export class ConditionApplyModifierSubCommand implements Command {
 		);
 
 		const targetModifierName = intr.options.getString(
-			ModifierOptions.MODIFIER_NAME_OPTION.name,
+			modifierCommandOptions[modifierCommandOptionsEnum.name].name,
 			true
 		);
 		const [sourceCharacterName, conditionName] = targetModifierName
@@ -116,7 +111,9 @@ export class ConditionApplyModifierSubCommand implements Command {
 		}
 
 		const modifierSeverity =
-			intr.options.getString(ModifierOptions.MODIFIER_SEVERITY_VALUE_OPTION.name) ?? null;
+			intr.options.getString(
+				modifierCommandOptions[modifierCommandOptionsEnum.severity].name
+			) ?? null;
 
 		const modifierSeverityValidated = InputParseUtils.parseAsNullableNumber(modifierSeverity);
 		modifier.severity = modifierSeverityValidated;
@@ -127,7 +124,7 @@ export class ConditionApplyModifierSubCommand implements Command {
 		if (FinderHelpers.getConditionByName(targetSheetRecord, conditionName)) {
 			await InteractionUtils.send(
 				intr,
-				LL.commands.condition.interactions.alreadyExists({
+				ConditionDefinition.strings.alreadyExists({
 					conditionName: conditionName,
 					characterName: targetSheetRecord.sheet.staticInfo.name,
 				})
@@ -145,7 +142,7 @@ export class ConditionApplyModifierSubCommand implements Command {
 		//send a response
 		await InteractionUtils.send(
 			intr,
-			LL.commands.condition.interactions.created({
+			ConditionDefinition.strings.created({
 				conditionName: conditionName,
 				characterName: targetSheetRecord.sheet.staticInfo.name,
 			})

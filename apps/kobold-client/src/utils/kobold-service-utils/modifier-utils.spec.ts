@@ -131,6 +131,8 @@ describe('ModifierUtils', () => {
 			expect(result).toBe(true);
 		});
 		test('characters not usable by filtrex or in attributes return false', () => {
+			vi.spyOn(console, 'warn').mockImplementation(() => {});
+
 			const valid = ModifierUtils.isModifierValidForTags(
 				{
 					name: 'test',

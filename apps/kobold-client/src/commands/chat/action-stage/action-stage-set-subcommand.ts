@@ -1,46 +1,34 @@
 import {
 	ApplicationCommandOptionChoiceData,
-	ApplicationCommandType,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
 	ChatInputCommandInteraction,
-	PermissionsString,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 import { Kobold } from '@kobold/db';
 
-import L from '../../../i18n/i18n-node.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { Command, CommandDeferType } from '../../index.js';
-import { ActionStageOptions } from './action-stage-command-options.js';
 import _ from 'lodash';
-import { LocalizedString } from 'typesafe-i18n';
+import { BaseCommandClass } from '../../command.js';
+import { ActionStageDefinition } from '@kobold/documentation';
+const commandOptions = ActionStageDefinition.options;
+const commandOptionsEnum = ActionStageDefinition.commandOptionsEnum;
 
-export class ActionStageSetSubCommand implements Command {
-	public name = L.en.commands.actionStage.set.name();
-	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
-		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.actionStage.set.name(),
-		description: L.en.commands.actionStage.set.description(),
-		dm_permission: true,
-		default_member_permissions: undefined,
-	};
-	public deferType = CommandDeferType.NONE;
-	public requireClientPerms: PermissionsString[] = [];
-
+export class ActionStageSetSubCommand extends BaseCommandClass(
+	ActionStageDefinition,
+	ActionStageDefinition.subCommandEnum.set
+) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption,
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === ActionStageOptions.ACTION_ROLL_TARGET_OPTION.name) {
+		if (option.name === commandOptions[commandOptionsEnum.actionTarget].name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
 			const match =
-				intr.options.getString(ActionStageOptions.ACTION_ROLL_TARGET_OPTION.name) ?? '';
+				intr.options.getString(commandOptions[commandOptionsEnum.actionTarget].name) ?? '';
 
 			//get the active character
 			const { characterUtils } = new KoboldUtils(kobold);
@@ -67,22 +55,22 @@ export class ActionStageSetSubCommand implements Command {
 			//return the matched rolls
 			return matchedActionRolls;
 		}
-		if (option.name === ActionStageOptions.ACTION_STAGE_EDIT_OPTION.name) {
+		if (option.name === commandOptions[commandOptionsEnum.editOption].name) {
 			const allChoices = Object.entries(
-				L.en.commandOptions.actionStageStageUpdateOption.choices
-			).map(([name, value]: [string, any]) => ({
-				name: value.name(),
-				value: value.value(),
+				ActionStageDefinition.optionChoices.stageUpdateOption
+			).map(([, value]) => ({
+				name: value.name,
+				value: value.value,
 			}));
 
 			const actionRollTarget = intr.options.getString(
-				ActionStageOptions.ACTION_ROLL_TARGET_OPTION.name
+				commandOptions[commandOptionsEnum.actionTarget].name
 			);
 			if (!actionRollTarget) return allChoices;
 			const [actionName, action] = actionRollTarget.split(' -- ').map(term => term.trim());
 
 			const match =
-				intr.options.getString(ActionStageOptions.ACTION_STAGE_EDIT_OPTION.name) ?? '';
+				intr.options.getString(commandOptions[commandOptionsEnum.editOption].name) ?? '';
 
 			const koboldUtils = new KoboldUtils(kobold);
 			const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
@@ -104,7 +92,7 @@ export class ActionStageSetSubCommand implements Command {
 			}
 			const roll = matchedAction.rolls[rollIndex];
 
-			let validUpdateOptions: (keyof typeof L.en.commandOptions.actionStageStageUpdateOption.choices)[] =
+			let validUpdateOptions: (keyof typeof ActionStageDefinition.optionChoices.stageUpdateOption)[] =
 				[];
 			if (roll.type === 'attack' || roll.type === 'skill-challenge') {
 				validUpdateOptions = ['name', 'attackTargetDC', 'attackRoll', 'allowRollModifiers'];
@@ -144,11 +132,11 @@ export class ActionStageSetSubCommand implements Command {
 				return allChoices;
 			}
 			return Object.entries(
-				_.pick(L.en.commandOptions.actionStageStageUpdateOption.choices, validUpdateOptions)
+				_.pick(ActionStageDefinition.optionChoices.stageUpdateOption, validUpdateOptions)
 			)
 				.map(([, value]) => ({
-					name: value.name(),
-					value: value.value(),
+					name: value.name,
+					value: value.value,
 				}))
 				.filter(choice =>
 					choice.name.toLocaleLowerCase().includes(match.toLocaleLowerCase())
@@ -158,20 +146,19 @@ export class ActionStageSetSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const actionRollTarget = intr.options.getString(
-			ActionStageOptions.ACTION_ROLL_TARGET_OPTION.name,
+			commandOptions[commandOptionsEnum.actionTarget].name,
 			true
 		);
 		const fieldToUpdate = intr.options.getString(
-			ActionStageOptions.ACTION_STAGE_EDIT_OPTION.name,
+			commandOptions[commandOptionsEnum.editOption].name,
 			true
 		);
-		const moveTo = intr.options.getString(ActionStageOptions.ACTION_STAGE_MOVE_OPTION.name);
+		const moveTo = intr.options.getString(commandOptions[commandOptionsEnum.moveOption].name);
 		const newValue = intr.options.getString(
-			ActionStageOptions.ACTION_STAGE_EDIT_VALUE.name,
+			commandOptions[commandOptionsEnum.editValue].name,
 			true
 		);
 		const [actionName, action] = actionRollTarget.split(' -- ').map(term => term.trim());
@@ -186,14 +173,14 @@ export class ActionStageSetSubCommand implements Command {
 			action => action.name.toLocaleLowerCase() === actionName.toLocaleLowerCase()
 		);
 		if (!matchedAction) {
-			await InteractionUtils.send(intr, LL.commands.actionStage.interactions.notFound());
+			await InteractionUtils.send(intr, ActionStageDefinition.strings.notFound);
 			return;
 		}
 		const rollIndex = matchedAction.rolls.findIndex(
 			roll => roll.name.toLocaleLowerCase() === action.toLocaleLowerCase()
 		);
 		if (rollIndex === -1) {
-			await InteractionUtils.send(intr, LL.commands.actionStage.interactions.rollNotFound());
+			await InteractionUtils.send(intr, ActionStageDefinition.strings.rollNotFound);
 			return;
 		}
 		const roll = matchedAction.rolls[rollIndex];
@@ -261,7 +248,7 @@ export class ActionStageSetSubCommand implements Command {
 		if (invalid) {
 			await InteractionUtils.send(
 				intr,
-				LL.commands.actionStage.set.interactions.invalidField({
+				ActionStageDefinition.strings.set.invalidField({
 					stageType: roll.type,
 				})
 			);
@@ -309,10 +296,7 @@ export class ActionStageSetSubCommand implements Command {
 			finalValue = newValue.split(',').map(tag => tag.trim());
 		} else {
 			// invalid field
-			await InteractionUtils.send(
-				intr,
-				LL.commands.actionStage.set.interactions.unknownField()
-			);
+			await InteractionUtils.send(intr, ActionStageDefinition.strings.set.unknownField);
 			return;
 		}
 		// TODO improve the typing in this file to avoid this explicit any
@@ -334,7 +318,7 @@ export class ActionStageSetSubCommand implements Command {
 		//send a confirmation message
 		await InteractionUtils.send(
 			intr,
-			LL.commands.actionStage.set.interactions.success({
+			ActionStageDefinition.strings.set.success({
 				actionStageOption: fieldToUpdate,
 				newValue: newValue,
 				actionStageName: currentActionName,

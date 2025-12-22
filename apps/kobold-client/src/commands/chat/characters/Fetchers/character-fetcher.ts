@@ -1,4 +1,10 @@
-import { CommandInteraction, CacheType, ComponentType, ButtonStyle } from 'discord.js';
+import {
+	CommandInteraction,
+	CacheType,
+	ComponentType,
+	ButtonStyle,
+	MessageFlags,
+} from 'discord.js';
 import { NewSheetRecord, Character, CharacterWithRelations } from '@kobold/db';
 import { Kobold } from '@kobold/db';
 import { KoboldError } from '../../../../utils/KoboldError.js';
@@ -6,7 +12,7 @@ import { CollectorUtils } from '../../../../utils/collector-utils.js';
 import { Creature } from '../../../../utils/creature.js';
 import { InteractionUtils } from '../../../../utils/interaction-utils.js';
 import { KoboldUtils } from '../../../../utils/kobold-service-utils/kobold-utils.js';
-import L from '../../../../i18n/i18n-node.js';
+import { CharacterDefinition as CharacterCommand } from '@kobold/documentation';
 
 export abstract class CharacterFetcher<SourceData, FetchArgs> {
 	public abstract importSource: string;
@@ -82,7 +88,7 @@ export abstract class CharacterFetcher<SourceData, FetchArgs> {
 					],
 				},
 			],
-			ephemeral: true,
+			flags: [MessageFlags.Ephemeral],
 			fetchReply: true,
 		});
 		let timedOut = false;
@@ -107,8 +113,7 @@ export abstract class CharacterFetcher<SourceData, FetchArgs> {
 				onExpire: async () => {
 					timedOut = true;
 					await InteractionUtils.editReply(this.intr, {
-						content:
-							L.en.commands.character.remove.interactions.removeConfirmation.expired(),
+						content: CharacterCommand.strings.remove.confirmation.expired,
 						components: [],
 					});
 				},
@@ -116,20 +121,20 @@ export abstract class CharacterFetcher<SourceData, FetchArgs> {
 		);
 		if (result && result.value !== 'update') {
 			await InteractionUtils.editReply(this.intr, {
-				content: L.en.sharedInteractions.choiceRegistered({
+				content: CharacterCommand.strings.shared.choiceRegistered({
 					choice: 'Cancel',
 				}),
 				components: [],
 			});
 			// cancel
 			throw new KoboldError(
-				L.en.commands.character.update.interactions.canceled({
+				CharacterCommand.strings.update.canceled({
 					characterName: oldName,
 				})
 			);
 		} else {
 			await InteractionUtils.editReply(this.intr, {
-				content: L.en.sharedInteractions.choiceRegistered({
+				content: CharacterCommand.strings.shared.choiceRegistered({
 					choice: 'Update',
 				}),
 				components: [],

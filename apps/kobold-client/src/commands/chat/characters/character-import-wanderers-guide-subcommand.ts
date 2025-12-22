@@ -1,42 +1,31 @@
-import {
-	ApplicationCommandType,
-	ChatInputCommandInteraction,
-	PermissionsString,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
-} from 'discord.js';
+import { ChatInputCommandInteraction } from 'discord.js';
 
-import L from '../../../i18n/i18n-node.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold } from '@kobold/db';
 import { InteractionUtils } from '../../../utils/index.js';
 import { TextParseHelpers } from '../../../utils/kobold-helpers/text-parse-helpers.js';
-import { Command, CommandDeferType } from '../../index.js';
-import { CharacterOptions } from './command-options.js';
+import { Command } from '../../index.js';
 import { WgCharacterFetcher } from './Fetchers/wg-character-fetcher.js';
+import { CharacterDefinition } from '@kobold/documentation';
+import { BaseCommandClass } from '../../command.js';
+const commandOptions = CharacterDefinition.options;
+const commandOptionsEnum = CharacterDefinition.commandOptionsEnum;
 
-export class CharacterImportWanderersGuideSubCommand implements Command {
-	public name = L.en.commands.character.importWanderersGuide.name();
-	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
-		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.character.importWanderersGuide.name(),
-		description: L.en.commands.character.importWanderersGuide.description(),
-		dm_permission: true,
-		default_member_permissions: undefined,
-	};
-	public deferType = CommandDeferType.PUBLIC;
-	public requireClientPerms: PermissionsString[] = [];
-
+export class CharacterImportWanderersGuideSubCommand extends BaseCommandClass(
+	CharacterDefinition,
+	CharacterDefinition.subCommandEnum.importWanderersGuide
+) {
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
-		const url = intr.options.getString(CharacterOptions.IMPORT_OPTION.name, true).trim();
+		const url = intr.options
+			.getString(commandOptions[commandOptionsEnum.wgUrl].name, true)
+			.trim();
 		let charId = TextParseHelpers.parseCharacterIdFromText(url);
 		if (charId === null) {
 			await InteractionUtils.send(
 				intr,
-				LL.commands.character.importWanderersGuide.interactions.invalidUrl({
+				CharacterDefinition.strings.importWanderersGuide.invalidUrl({
 					url,
 				})
 			);
@@ -49,7 +38,7 @@ export class CharacterImportWanderersGuideSubCommand implements Command {
 
 		await InteractionUtils.send(
 			intr,
-			LL.commands.character.importWanderersGuide.interactions.success({
+			CharacterDefinition.strings.importWanderersGuide.success({
 				characterName: newCharacter.name,
 			})
 		);

@@ -1,35 +1,20 @@
-import {
-	ApplicationCommandType,
-	ChatInputCommandInteraction,
-	PermissionsString,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
-} from 'discord.js';
-import { RateLimiter } from 'discord.js-rate-limiter';
+import { ChatInputCommandInteraction } from 'discord.js';
+
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 
-import L from '../../../i18n/i18n-node.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold } from '@kobold/db';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { Command, CommandDeferType } from '../../index.js';
+import { Command } from '../../index.js';
 import { ModifierHelpers } from './modifier-helpers.js';
+import { ModifierDefinition } from '@kobold/documentation';
+import { BaseCommandClass } from '../../command.js';
 
-export class ModifierListSubCommand implements Command {
-	public name = L.en.commands.modifier.list.name();
-	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
-		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.modifier.list.name(),
-		description: L.en.commands.modifier.list.description(),
-		dm_permission: true,
-		default_member_permissions: undefined,
-	};
-	public cooldown = new RateLimiter(1, 2000);
-	public deferType = CommandDeferType.PUBLIC;
-	public requireClientPerms: PermissionsString[] = [];
-
+export class ModifierListSubCommand extends BaseCommandClass(
+	ModifierDefinition,
+	ModifierDefinition.subCommandEnum.list
+) {
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const koboldUtils = new KoboldUtils(kobold);
@@ -43,7 +28,7 @@ export class ModifierListSubCommand implements Command {
 			value = ModifierHelpers.detailModifier(modifier);
 
 			fields.push({
-				name: LL.commands.modifier.interactions.detailHeader({
+				name: ModifierDefinition.strings.detailHeader({
 					modifierName: modifier.name,
 					modifierIsActive: modifier.isActive ? ' (active)' : '',
 				}),

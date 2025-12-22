@@ -1,60 +1,57 @@
 import {
 	ApplicationCommandOptionChoiceData,
-	ApplicationCommandType,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	ButtonStyle,
 	CacheType,
 	ChatInputCommandInteraction,
 	ComponentType,
-	PermissionsString,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
+	MessageFlags,
 } from 'discord.js';
-import { RateLimiter } from 'discord.js-rate-limiter';
 
 import _ from 'lodash';
-import L from '../../../i18n/i18n-node.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold } from '@kobold/db';
 import { CollectorUtils } from '../../../utils/collector-utils.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { Command, CommandDeferType } from '../../index.js';
-import { GameplayOptions } from '../gameplay/gameplay-command-options.js';
-import { ConditionOptions } from './condition-command-options.js';
+import { Command } from '../../index.js';
+import { ConditionDefinition, GameplayDefinition } from '@kobold/documentation';
+import { BaseCommandClass } from '../../command.js';
+const commandOptions = ConditionDefinition.options;
+const commandOptionsEnum = ConditionDefinition.commandOptionsEnum;
+const gameplayCommandOptions = GameplayDefinition.options;
+const gameplayCommandOptionsEnum = GameplayDefinition.commandOptionsEnum;
 
-export class ConditionRemoveSubCommand implements Command {
-	public name = L.en.commands.condition.remove.name();
-	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
-		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.condition.remove.name(),
-		description: L.en.commands.condition.remove.description(),
-		dm_permission: true,
-		default_member_permissions: undefined,
-	};
-	public cooldown = new RateLimiter(1, 2000);
-	public deferType = CommandDeferType.NONE;
-	public requireClientPerms: PermissionsString[] = [];
-
+export class ConditionRemoveSubCommand extends BaseCommandClass(
+	ConditionDefinition,
+	ConditionDefinition.subCommandEnum.remove
+) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption,
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name) {
+		if (
+			option.name ===
+			gameplayCommandOptions[gameplayCommandOptionsEnum.gameplayTargetCharacter].name
+		) {
 			const match =
-				intr.options.getString(GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name) ?? '';
+				intr.options.getString(
+					gameplayCommandOptions[gameplayCommandOptionsEnum.gameplayTargetCharacter].name
+				) ?? '';
 			const { autocompleteUtils } = new KoboldUtils(kobold);
 			return await autocompleteUtils.getAllTargetOptions(intr, match);
 		}
-		if (option.name === ConditionOptions.CONDITION_NAME_OPTION.name) {
+		if (option.name === commandOptions[commandOptionsEnum.name].name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(ConditionOptions.CONDITION_NAME_OPTION.name) ?? '';
+			const match =
+				intr.options.getString(commandOptions[commandOptionsEnum.name].name) ?? '';
 			const targetCharacterName =
-				intr.options.getString(GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name) ?? '';
-
+				intr.options.getString(
+					gameplayCommandOptions[gameplayCommandOptionsEnum.gameplayTargetCharacter].name
+				) ?? '';
 			const { autocompleteUtils } = new KoboldUtils(kobold);
 			try {
 				return autocompleteUtils.getConditionsOnTarget(intr, targetCharacterName, match);
@@ -67,15 +64,14 @@ export class ConditionRemoveSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const conditionChoice = intr.options.getString(
-			ConditionOptions.CONDITION_NAME_OPTION.name,
+			commandOptions[commandOptionsEnum.name].name,
 			true
 		);
 		const targetCharacterName = intr.options.getString(
-			GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name,
+			gameplayCommandOptions[gameplayCommandOptionsEnum.gameplayTargetCharacter].name,
 			true
 		);
 		const { gameUtils } = new KoboldUtils(kobold);
@@ -91,7 +87,7 @@ export class ConditionRemoveSubCommand implements Command {
 			// ask for confirmation
 
 			const prompt = await intr.reply({
-				content: LL.commands.condition.interactions.removeConfirmation.text({
+				content: ConditionDefinition.strings.remove.confirmation.text({
 					conditionName: targetCondition.name,
 				}),
 				components: [
@@ -100,20 +96,20 @@ export class ConditionRemoveSubCommand implements Command {
 						components: [
 							{
 								type: ComponentType.Button,
-								label: LL.commands.condition.interactions.removeConfirmation.removeButton(),
+								label: ConditionDefinition.strings.remove.confirmation.removeButton,
 								customId: 'remove',
 								style: ButtonStyle.Danger,
 							},
 							{
 								type: ComponentType.Button,
-								label: LL.commands.condition.interactions.removeConfirmation.cancelButton(),
+								label: ConditionDefinition.strings.remove.confirmation.cancelButton,
 								customId: 'cancel',
 								style: ButtonStyle.Primary,
 							},
 						],
 					},
 				],
-				ephemeral: true,
+				flags: [MessageFlags.Ephemeral],
 				fetchReply: true,
 			});
 			let timedOut = false;
@@ -138,8 +134,7 @@ export class ConditionRemoveSubCommand implements Command {
 					onExpire: async () => {
 						timedOut = true;
 						await InteractionUtils.editReply(intr, {
-							content:
-								LL.commands.condition.interactions.removeConfirmation.expired(),
+							content: ConditionDefinition.strings.remove.confirmation.expired,
 							components: [],
 						});
 					},
@@ -147,7 +142,7 @@ export class ConditionRemoveSubCommand implements Command {
 			);
 			if (result) {
 				await InteractionUtils.editReply(intr, {
-					content: LL.sharedInteractions.choiceRegistered({
+					content: ConditionDefinition.strings.shared.choiceRegistered({
 						choice: _.capitalize(result.value),
 					}),
 					components: [],
@@ -169,7 +164,7 @@ export class ConditionRemoveSubCommand implements Command {
 
 				await InteractionUtils.send(
 					intr,
-					LL.commands.condition.interactions.success({
+					ConditionDefinition.strings.success({
 						conditionName: targetCondition.name,
 					})
 				);
@@ -177,12 +172,12 @@ export class ConditionRemoveSubCommand implements Command {
 			}
 			// cancel
 			else {
-				await InteractionUtils.send(intr, LL.commands.condition.interactions.cancel());
+				await InteractionUtils.send(intr, ConditionDefinition.strings.cancel);
 				return;
 			}
 		} else {
 			// no matching condition found
-			await InteractionUtils.send(intr, LL.commands.condition.interactions.notFound());
+			await InteractionUtils.send(intr, ConditionDefinition.strings.notFound);
 			return;
 		}
 	}

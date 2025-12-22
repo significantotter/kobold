@@ -5,10 +5,10 @@ import {
 	CommandInteraction,
 	EmbedBuilder,
 	EmbedData,
+	MessageFlags,
 } from 'discord.js';
 import _ from 'lodash';
-import L from '../i18n/i18n-node.js';
-import { TranslationFunctions } from '../i18n/i18n-types.js';
+import { utilStrings } from '@kobold/documentation';
 import {
 	Action,
 	CharacterWithRelations,
@@ -44,12 +44,11 @@ export class KoboldEmbed extends EmbedBuilder {
 	public static async sendInitiative(
 		intr: ChatInputCommandInteraction,
 		initiativeBuilder: InitiativeBuilder,
-		LL?: TranslationFunctions,
 		options: {
 			dmIfHiddenCreatures?: boolean;
 		} = { dmIfHiddenCreatures: false }
 	) {
-		const embed = await KoboldEmbed.roundFromInitiativeBuilder(initiativeBuilder, LL, {
+		const embed = await KoboldEmbed.roundFromInitiativeBuilder(initiativeBuilder, {
 			showHiddenCreatureStats: false,
 		});
 		if (
@@ -59,7 +58,7 @@ export class KoboldEmbed extends EmbedBuilder {
 		) {
 			const embedWithHiddenStats = await KoboldEmbed.roundFromInitiativeBuilder(
 				initiativeBuilder,
-				LL,
+
 				{
 					showHiddenCreatureStats: true,
 				}
@@ -79,15 +78,13 @@ export class KoboldEmbed extends EmbedBuilder {
 		initBuilder,
 		currentTurn,
 		targetTurn,
-		LL,
 	}: {
 		intr: ChatInputCommandInteraction;
 		initBuilder: InitiativeBuilder;
 		currentTurn: TurnData;
 		targetTurn: TurnData;
-		LL: TranslationFunctions;
 	}) {
-		const embedWithHiddenStats = await KoboldEmbed.roundFromInitiativeBuilder(initBuilder, LL, {
+		const embedWithHiddenStats = await KoboldEmbed.roundFromInitiativeBuilder(initBuilder, {
 			showHiddenCreatureStats: true,
 		});
 		const initStatsNotificationSetting = initBuilder.userSettings.initStatsNotification;
@@ -115,25 +112,21 @@ export class KoboldEmbed extends EmbedBuilder {
 		}
 	}
 
-	public static turnFromInitiativeBuilder(
-		initiativeBuilder: InitiativeBuilder,
-		LL?: TranslationFunctions
-	) {
-		LL = LL || L.en;
+	public static turnFromInitiativeBuilder(initiativeBuilder: InitiativeBuilder) {
 		const result = new KoboldEmbed();
 		const groupTurn = initiativeBuilder.activeGroup;
 		if (!groupTurn) {
-			result.setTitle(LL.utils.koboldEmbed.cantDetermineTurnError());
+			result.setTitle(utilStrings.koboldEmbed.cantDetermineTurnError);
 			return result;
 		}
 		result.setTitle(
-			LL.utils.koboldEmbed.turnTitle({
+			utilStrings.koboldEmbed.turnTitle({
 				groupName: groupTurn.name,
 			})
 		);
 		result.addFields([
 			{
-				name: LL.utils.koboldEmbed.roundTitle({
+				name: utilStrings.koboldEmbed.roundTitle({
 					currentRound: initiativeBuilder.init?.currentRound || 0,
 				}),
 				value: initiativeBuilder.getAllGroupsTurnText(),
@@ -150,14 +143,12 @@ export class KoboldEmbed extends EmbedBuilder {
 	}
 	public static roundFromInitiativeBuilder(
 		initiativeBuilder: InitiativeBuilder,
-		LL?: TranslationFunctions,
 		options: {
 			showHiddenCreatureStats?: boolean;
 		} = { showHiddenCreatureStats: false }
 	) {
-		LL = LL || L.en;
 		const result = new KoboldEmbed().setTitle(
-			LL.utils.koboldEmbed.roundTitle({
+			utilStrings.koboldEmbed.roundTitle({
 				currentRound: initiativeBuilder.init?.currentRound || 0,
 			})
 		);
@@ -450,23 +441,20 @@ export class EmbedUtils {
 	public static async dispatchEmbeds(
 		intr: ChatInputCommandInteraction,
 		embeds: KoboldEmbed[],
-		secretStatus: string,
+		secretStatus: string = 'public',
 		gmUserId?: string
 	) {
 		const isEphemeral =
-			secretStatus === L.en.commandOptions.rollSecret.choices.secret.value() ||
-			secretStatus === L.en.commandOptions.rollSecret.choices.secretAndNotify.value() ||
-			secretStatus === L.en.commandOptions.rollSecret.choices.sendToGm.value();
+			secretStatus === utilStrings.rollSecretValues.secret ||
+			secretStatus === utilStrings.rollSecretValues.secretAndNotify ||
+			secretStatus === utilStrings.rollSecretValues.sendToGm;
 		const notifyRoll =
-			secretStatus === L.en.commandOptions.rollSecret.choices.secretAndNotify.value() ||
-			secretStatus === L.en.commandOptions.rollSecret.choices.sendToGm.value();
-		const sendToGm = secretStatus === L.en.commandOptions.rollSecret.choices.sendToGm.value();
+			secretStatus === utilStrings.rollSecretValues.secretAndNotify ||
+			secretStatus === utilStrings.rollSecretValues.sendToGm;
+		const sendToGm = secretStatus === utilStrings.rollSecretValues.sendToGm;
 
 		if (notifyRoll) {
-			await InteractionUtils.send(
-				intr,
-				L.en.commands.roll.interactions.secretRollNotification()
-			);
+			await InteractionUtils.send(intr, utilStrings.roll.secretRollNotification);
 		}
 		const finalEmbeds = KoboldEmbed.prepareEmbeds(embeds);
 		if (sendToGm && gmUserId) {
@@ -477,9 +465,15 @@ export class EmbedUtils {
 			);
 		} else {
 			if (intr.replied) {
-				intr.followUp({ embeds: finalEmbeds, ephemeral: isEphemeral });
+				intr.followUp({
+					embeds: finalEmbeds,
+					flags: isEphemeral ? [MessageFlags.Ephemeral] : undefined,
+				});
 			} else {
-				intr.reply({ embeds: finalEmbeds, ephemeral: isEphemeral });
+				intr.reply({
+					embeds: finalEmbeds,
+					flags: isEphemeral ? [MessageFlags.Ephemeral] : undefined,
+				});
 			}
 		}
 	}
@@ -515,7 +509,7 @@ export class EmbedUtils {
 			for (const roll of action.rolls) {
 				if (roll.type === 'save' || roll.type === 'attack') {
 					saveType = ` ${
-						roll.type === 'save' ? roll.saveTargetDC ?? 'ac' : roll.targetDC ?? 'ac'
+						roll.type === 'save' ? (roll.saveTargetDC ?? 'ac') : (roll.targetDC ?? 'ac')
 					}`;
 					// add the word DC if we aren't checking vs the AC
 					if (

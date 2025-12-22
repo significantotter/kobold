@@ -1,4 +1,4 @@
-import L from '../i18n/i18n-node.js';
+import { utilStrings } from '@kobold/documentation';
 import { Attribute, CharacterWithRelations } from '@kobold/db';
 import { Creature } from './creature.js';
 import { DiceUtils } from './dice-utils.js';
@@ -173,7 +173,7 @@ describe('RollBuilder', function () {
 		const result = rollBuilder.compileEmbed();
 		const errorRollField = (result.data.fields ?? []).find(field => field.name === 'error');
 		expect(errorRollField?.value ?? '').toContain(
-			L.en.utils.dice.diceRollError({ rollExpression: 'dd6++1' })
+			utilStrings.dice.diceRollError({ rollExpression: 'dd6++1' })
 		);
 	});
 	test('records errors if the dice expression is not allowed', function () {
@@ -183,7 +183,7 @@ describe('RollBuilder', function () {
 		const result = rollBuilder.compileEmbed();
 		const errorRollField = (result.data.fields ?? []).find(field => field.name === 'error');
 		expect(errorRollField?.value ?? '').toContain(
-			L.en.utils.dice
+			utilStrings.dice
 				.diceRollError({
 					rollExpression: '',
 				})

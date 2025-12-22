@@ -1,0 +1,106 @@
+import {
+	ApplicationCommandOptionChoiceData,
+	AutocompleteFocusedOption,
+	AutocompleteInteraction,
+	CacheType,
+	ChatInputCommandInteraction,
+} from 'discord.js';
+
+import { Kobold } from '@kobold/db';
+import { KoboldError } from '../../../utils/KoboldError.js';
+import { InteractionUtils } from '../../../utils/interaction-utils.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { GameDefinition } from '@kobold/documentation';
+import { BaseCommandClass } from '../../command.js';
+
+const commandOptions = GameDefinition.options;
+const commandOptionsEnum = GameDefinition.commandOptionsEnum;
+
+export class GameLeaveSubCommand extends BaseCommandClass(
+	GameDefinition,
+	GameDefinition.subCommandEnum.leave
+) {
+	public async autocomplete(
+		intr: AutocompleteInteraction<CacheType>,
+		option: AutocompleteFocusedOption,
+		{ kobold }: { kobold: Kobold }
+	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
+		if (!intr.isAutocomplete()) return;
+		if (option.name === commandOptions[commandOptionsEnum.gameTargetGame].name) {
+			const value = (option.value as string).trim().toLowerCase();
+
+			const { gameUtils } = new KoboldUtils(kobold);
+
+			// Get games where user has a character
+			const targetGames = await gameUtils.getWhereUserHasCharacter(
+				intr.user.id,
+				intr.guildId
+			);
+
+			return targetGames
+				.map(game => ({
+					name: game.name,
+					value: game.name,
+				}))
+				.filter(field => value === '' || field.name.toLowerCase().includes(value));
+		}
+	}
+
+	public async execute(
+		intr: ChatInputCommandInteraction,
+		{ kobold }: { kobold: Kobold }
+	): Promise<void> {
+		const gameName = intr.options.getString(
+			commandOptions[commandOptionsEnum.gameTargetGame].name,
+			true
+		);
+
+		if (!intr.guildId) {
+			throw new KoboldError('You can only leave games in a server!');
+		}
+
+		const koboldUtils = new KoboldUtils(kobold);
+
+		const targetGames = await kobold.game.readMany({
+			guildId: intr.guildId,
+			name: gameName,
+		});
+		const targetGame = targetGames.length ? targetGames[0] : null;
+
+		if (!targetGame) {
+			await InteractionUtils.send(intr, GameDefinition.strings.notFound({ gameName }));
+			return;
+		}
+
+		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+			activeCharacter: true,
+		});
+
+		// Check if character is actually in the game
+		const characterInGame = (targetGame.characters || []).some(
+			char => char.id === activeCharacter.id
+		);
+
+		if (!characterInGame) {
+			await InteractionUtils.send(
+				intr,
+				GameDefinition.strings.leave.notInGame({
+					characterName: activeCharacter.name,
+					gameName: targetGame.name,
+				})
+			);
+			return;
+		}
+
+		// Remove character from game
+		await kobold.character.update({ id: activeCharacter.id }, { gameId: null });
+
+		await InteractionUtils.send(
+			intr,
+			GameDefinition.strings.leave.success({
+				characterName: activeCharacter.name,
+				gameName: targetGame.name,
+			})
+		);
+	}
+}

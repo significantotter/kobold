@@ -1,4 +1,4 @@
-import { generateMock } from '@anatine/zod-mock';
+
 import {
 	Character,
 	SheetRecord,
@@ -6,7 +6,7 @@ import {
 	zCharacterInitializer,
 	zSheetRecordInitializer,
 } from '../index.js';
-import { truncateDbForTests, ResourceFactories, vitestKobold } from '../test-utils.js';
+import { truncateDbForTests, ResourceFactories, vitestKobold, fake } from '../test-utils.js';
 
 describe('ChannelDefaultCharacterModel', () => {
 	afterEach(async () => {
@@ -15,7 +15,7 @@ describe('ChannelDefaultCharacterModel', () => {
 	describe('create(), read()', () => {
 		it('creates a new channel default character, reads it', async () => {
 			const fakeCharacter = await ResourceFactories.character();
-			const fakeChannelDefaultCharacter = generateMock(zChannelDefaultCharacterInitializer);
+			const fakeChannelDefaultCharacter = fake(zChannelDefaultCharacterInitializer);
 			fakeChannelDefaultCharacter.characterId = fakeCharacter.id;
 			const created = await vitestKobold.channelDefaultCharacter.create(
 				fakeChannelDefaultCharacter
@@ -34,7 +34,7 @@ describe('ChannelDefaultCharacterModel', () => {
 			});
 			const fakeCharacter2 = await ResourceFactories.character();
 
-			const fakeChannelDefaultCharacter2 = generateMock(zChannelDefaultCharacterInitializer);
+			const fakeChannelDefaultCharacter2 = fake(zChannelDefaultCharacterInitializer);
 			fakeChannelDefaultCharacter2.characterId = fakeCharacter2.id;
 			fakeChannelDefaultCharacter2.channelId = fakeChannelDefaultCharacter.channelId;
 			fakeChannelDefaultCharacter2.userId = fakeChannelDefaultCharacter.userId;
@@ -51,7 +51,7 @@ describe('ChannelDefaultCharacterModel', () => {
 			expect(read).toEqual(fakeChannelDefaultCharacter);
 		});
 		it('fails to read a channel default character that does not exist', async () => {
-			const fakeChannelDefaultCharacter = generateMock(zChannelDefaultCharacterInitializer);
+			const fakeChannelDefaultCharacter = fake(zChannelDefaultCharacterInitializer);
 			const read = await vitestKobold.channelDefaultCharacter.read({
 				userId: fakeChannelDefaultCharacter.userId,
 				channelId: fakeChannelDefaultCharacter.channelId,
@@ -79,7 +79,7 @@ describe('ChannelDefaultCharacterModel', () => {
 		});
 		it('fails to update a channel default character that does not exist', async () => {
 			const fakeCharacter = await ResourceFactories.character();
-			const fakeChannelDefaultCharacter = generateMock(zChannelDefaultCharacterInitializer);
+			const fakeChannelDefaultCharacter = fake(zChannelDefaultCharacterInitializer);
 			const updated = vitestKobold.channelDefaultCharacter.update(
 				{
 					userId: fakeChannelDefaultCharacter.userId,
@@ -106,7 +106,7 @@ describe('ChannelDefaultCharacterModel', () => {
 			expect(read).toEqual(null);
 		});
 		it('fails to delete a channel default character that does not exist', async () => {
-			const fakeChannelDefaultCharacter = generateMock(zChannelDefaultCharacterInitializer);
+			const fakeChannelDefaultCharacter = fake(zChannelDefaultCharacterInitializer);
 			expect(
 				vitestKobold.channelDefaultCharacter.delete({
 					userId: fakeChannelDefaultCharacter.userId,
@@ -129,7 +129,7 @@ describe('ChannelDefaultCharacterModel', () => {
 			expect(read).toEqual(null);
 		});
 		it('fails silently when deleting a channel default character that does not exist', async () => {
-			const fakeChannelDefaultCharacter = generateMock(zChannelDefaultCharacterInitializer);
+			const fakeChannelDefaultCharacter = fake(zChannelDefaultCharacterInitializer);
 			expect(
 				vitestKobold.channelDefaultCharacter.deleteIfExists({
 					userId: fakeChannelDefaultCharacter.userId,

@@ -1,44 +1,33 @@
 import {
 	ApplicationCommandOptionChoiceData,
-	ApplicationCommandType,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
 	ChatInputCommandInteraction,
-	PermissionsString,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 
-import L from '../../../i18n/i18n-node.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold } from '@kobold/db';
 import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { Command, CommandDeferType } from '../../index.js';
-import { ActionStageOptions } from './action-stage-command-options.js';
+import { ActionStageDefinition } from '@kobold/documentation';
+import { BaseCommandClass } from '../../command.js';
+const commandOptions = ActionStageDefinition.options;
+const commandOptionsEnum = ActionStageDefinition.commandOptionsEnum;
 
-export class ActionStageRemoveSubCommand implements Command {
-	public name = L.en.commands.actionStage.remove.name();
-	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
-		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.actionStage.remove.name(),
-		description: L.en.commands.actionStage.remove.description(),
-		dm_permission: true,
-		default_member_permissions: undefined,
-	};
-	public deferType = CommandDeferType.NONE;
-	public requireClientPerms: PermissionsString[] = [];
-
+export class ActionStageRemoveSubCommand extends BaseCommandClass(
+	ActionStageDefinition,
+	ActionStageDefinition.subCommandEnum.remove
+) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption,
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === ActionStageOptions.ACTION_ROLL_TARGET_OPTION.name) {
+		if (option.name === commandOptions[commandOptionsEnum.actionTarget].name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
 			const match =
-				intr.options.getString(ActionStageOptions.ACTION_ROLL_TARGET_OPTION.name) ?? '';
+				intr.options.getString(commandOptions[commandOptionsEnum.actionTarget].name) ?? '';
 
 			//get the active character
 			const { characterUtils } = new KoboldUtils(kobold);
@@ -69,11 +58,10 @@ export class ActionStageRemoveSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const actionRollTarget = intr.options.getString(
-			ActionStageOptions.ACTION_ROLL_TARGET_OPTION.name,
+			commandOptions[commandOptionsEnum.actionTarget].name,
 			true
 		);
 		const [actionName, action] = actionRollTarget.split(' -- ').map(term => term.trim());
@@ -88,14 +76,14 @@ export class ActionStageRemoveSubCommand implements Command {
 			action => action.name.toLocaleLowerCase() === actionName.toLocaleLowerCase()
 		);
 		if (!matchedAction) {
-			await InteractionUtils.send(intr, LL.commands.actionStage.interactions.notFound());
+			await InteractionUtils.send(intr, ActionStageDefinition.strings.notFound);
 			return;
 		}
 		const rollIndex = matchedAction.rolls.findIndex(
 			roll => roll.name.toLocaleLowerCase() === action.toLocaleLowerCase()
 		);
 		if (rollIndex === -1) {
-			await InteractionUtils.send(intr, LL.commands.actionStage.interactions.rollNotFound());
+			await InteractionUtils.send(intr, ActionStageDefinition.strings.rollNotFound);
 			return;
 		}
 		const rollName = matchedAction.rolls[rollIndex].name;
@@ -110,7 +98,7 @@ export class ActionStageRemoveSubCommand implements Command {
 		//send a confirmation message
 		await InteractionUtils.send(
 			intr,
-			LL.commands.actionStage.remove.interactions.success({
+			ActionStageDefinition.strings.remove.success({
 				actionStageName: rollName,
 				actionName: matchedAction.name,
 			})

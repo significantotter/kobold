@@ -42,7 +42,7 @@ export default {
 			'**[target-character]**: The target character. Select (None) for no target.\n' +
 			'**[*modifier*] optional**: A dice expression to modify a roll ("1d20 - 1d4 + 3"). The attack roll/save if ' +
 			'the roll is an attack or action.\n' +
-			'**[*damage_modifier*] optional**: A dice expression to modify a damage roll if the roll is ' +
+			'**[*damage-modifier*] optional**: A dice expression to modify a damage roll if the roll is ' +
 			'an attack or action ("1d20 - 1d4 + 3").\n' +
 			'**[*secret*] optional**: Choose to either leave the roll public (default), hide the roll entirely, or ' +
 			'hide the roll, but publicly notify the channel that a roll has been made.\n' +

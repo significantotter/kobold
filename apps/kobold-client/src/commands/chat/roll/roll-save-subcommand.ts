@@ -1,49 +1,38 @@
 import {
 	ApplicationCommandOptionChoiceData,
-	ApplicationCommandType,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
 	ChatInputCommandInteraction,
-	PermissionsString,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
-import { RateLimiter } from 'discord.js-rate-limiter';
 
-import L from '../../../i18n/i18n-node.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold } from '@kobold/db';
 import { Creature } from '../../../utils/creature.js';
 import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { RollBuilder } from '../../../utils/roll-builder.js';
-import { Command, CommandDeferType } from '../../index.js';
+import { Command } from '../../index.js';
 import { StringUtils } from '@kobold/base-utils';
-import { RollOptions } from './roll-command-options.js';
+import { RollDefinition } from '@kobold/documentation';
+import { BaseCommandClass } from '../../command.js';
+const commandOptions = RollDefinition.options;
+const commandOptionsEnum = RollDefinition.commandOptionsEnum;
 
-export class RollSaveSubCommand implements Command {
-	public name = L.en.commands.roll.save.name();
-	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
-		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.roll.save.name(),
-		description: L.en.commands.roll.save.description(),
-		dm_permission: true,
-		default_member_permissions: undefined,
-	};
-	public cooldown = new RateLimiter(1, 2000);
-	public deferType = CommandDeferType.NONE;
-	public requireClientPerms: PermissionsString[] = [];
-
+export class RollSaveSubCommand extends BaseCommandClass(
+	RollDefinition,
+	RollDefinition.subCommandEnum.save
+) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption,
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === RollOptions.SAVE_CHOICE_OPTION.name) {
+		if (option.name === commandOptions[commandOptionsEnum.saveChoice].name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(RollOptions.SAVE_CHOICE_OPTION.name) ?? '';
+			const match =
+				intr.options.getString(commandOptions[commandOptionsEnum.saveChoice].name) ?? '';
 
 			//get the active character
 			const koboldUtils: KoboldUtils = new KoboldUtils(kobold);
@@ -69,18 +58,21 @@ export class RollSaveSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		if (!intr.isChatInputCommand()) return;
-		const saveChoice = intr.options.getString(RollOptions.SAVE_CHOICE_OPTION.name, true);
+		const saveChoice = intr.options.getString(
+			commandOptions[commandOptionsEnum.saveChoice].name,
+			true
+		);
 		const modifierExpression =
-			intr.options.getString(RollOptions.ROLL_MODIFIER_OPTION.name) ?? '';
-		const rollNote = intr.options.getString(RollOptions.ROLL_NOTE_OPTION.name) ?? '';
+			intr.options.getString(commandOptions[commandOptionsEnum.rollModifier].name) ?? '';
+		const rollNote =
+			intr.options.getString(commandOptions[commandOptionsEnum.rollNote].name) ?? '';
 
 		const secretRoll =
-			intr.options.getString(RollOptions.ROLL_SECRET_OPTION.name) ??
-			L.en.commandOptions.rollSecret.choices.public.value();
+			intr.options.getString(commandOptions[commandOptionsEnum.rollSecret].name) ??
+			RollDefinition.optionChoices.rollSecret.public;
 
 		const koboldUtils: KoboldUtils = new KoboldUtils(kobold);
 		const { activeCharacter, userSettings } = await koboldUtils.fetchDataForCommand(intr, {
@@ -103,7 +95,6 @@ export class RollSaveSubCommand implements Command {
 			rollNote,
 			modifierExpression,
 			userSettings,
-			LL,
 		});
 
 		const embed = rollResult.compileEmbed();

@@ -1,44 +1,35 @@
 import {
 	ApplicationCommandOptionChoiceData,
-	ApplicationCommandType,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
 	ChatInputCommandInteraction,
-	PermissionsString,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
+
 import { Kobold } from '@kobold/db';
 
-import L from '../../../i18n/i18n-node.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { Command, CommandDeferType } from '../../index.js';
-import { CharacterOptions } from './command-options.js';
+import { Command } from '../../index.js';
+import { CharacterDefinition } from '@kobold/documentation';
+import { BaseCommandClass } from '../../command.js';
+const commandOptions = CharacterDefinition.options;
+const commandOptionsEnum = CharacterDefinition.commandOptionsEnum;
 
-export class CharacterSetActiveSubCommand implements Command {
-	public name = L.en.commands.character.setActive.name();
-	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
-		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.character.setActive.name(),
-		description: L.en.commands.character.setActive.description(),
-		dm_permission: true,
-		default_member_permissions: undefined,
-	};
-	public deferType = CommandDeferType.PUBLIC;
-	public requireClientPerms: PermissionsString[] = [];
-
+export class CharacterSetActiveSubCommand extends BaseCommandClass(
+	CharacterDefinition,
+	CharacterDefinition.subCommandEnum.setActive
+) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption,
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === CharacterOptions.SET_ACTIVE_NAME_OPTION.name) {
+		if (option.name === commandOptions[commandOptionsEnum.name].name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
 			const match =
-				intr.options.getString(CharacterOptions.SET_ACTIVE_NAME_OPTION.name) ?? '';
+				intr.options.getString(commandOptions[commandOptionsEnum.name].name) ?? '';
 
 			const { characterUtils } = new KoboldUtils(kobold);
 			//get the character matches
@@ -54,10 +45,9 @@ export class CharacterSetActiveSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
-		const charName = intr.options.getString(CharacterOptions.SET_ACTIVE_NAME_OPTION.name, true);
+		const charName = intr.options.getString(commandOptions[commandOptionsEnum.name].name, true);
 
 		const { characterUtils } = new KoboldUtils(kobold);
 
@@ -72,15 +62,12 @@ export class CharacterSetActiveSubCommand implements Command {
 			//send success message
 			await InteractionUtils.send(
 				intr,
-				LL.commands.character.setActive.interactions.success({
+				CharacterDefinition.strings.setActive.success({
 					characterName: targetCharacter.name,
 				})
 			);
 		} else {
-			await InteractionUtils.send(
-				intr,
-				LL.commands.character.setActive.interactions.notFound()
-			);
+			await InteractionUtils.send(intr, CharacterDefinition.strings.setActive.notFound);
 		}
 	}
 }

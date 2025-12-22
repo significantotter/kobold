@@ -339,14 +339,18 @@ export class Creature {
 				if (attackRolls.length) {
 					attackRollText = attackRolls
 						.map(roll => {
-							return `${roll.roll}${roll.targetDC == 'AC' || null ? '' : ` vs DC ${roll.targetDC}`}`;
+							return `${roll.roll}${
+								roll.targetDC == 'AC' || null ? '' : ` vs DC ${roll.targetDC}`
+							}`;
 						})
 						.join(', ');
 				}
 				if (saveRolls.length) {
 					saveRollText = saveRolls
 						.map(roll => {
-							return `${roll.saveRollType} vs DC ${this.getDC(roll.saveTargetDC ?? '')}`;
+							return `${roll.saveRollType} vs DC ${this.getDC(
+								roll.saveTargetDC ?? ''
+							)}`;
 						})
 						.join(', ');
 				}
@@ -373,7 +377,9 @@ export class Creature {
 				action.actionCost && action.actionCost !== 'none'
 					? `${getEmoji(this.intr, action.actionCost)}`
 					: '';
-			const actionText = `*${action.name}* ${actionCost}: ${actionRollsText.length ? actionRollsText : action.description}`;
+			const actionText = `*${action.name}* ${actionCost}: ${
+				actionRollsText.length ? actionRollsText : action.description
+			}`;
 			actionLines.push(actionText);
 		}
 		const actionText = actionLines.join('\n');

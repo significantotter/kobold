@@ -1,19 +1,11 @@
 import {
 	ApplicationCommandOptionChoiceData,
-	ApplicationCommandType,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
 	ChatInputCommandInteraction,
-	PermissionsString,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
-
-import { SettingsOptions } from './settings-command-options.js';
-
 import _ from 'lodash';
-import L from '../../../i18n/i18n-node.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import {
 	DefaultCompendiumEnum,
 	Kobold,
@@ -25,20 +17,16 @@ import {
 import { KoboldError } from '../../../utils/KoboldError.js';
 import { InteractionUtils } from '../../../utils/interaction-utils.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { Command, CommandDeferType } from '../../index.js';
+import { Command } from '../../index.js';
+import { BaseCommandClass } from '../../command.js';
+import { SettingDefinition } from '@kobold/documentation';
+const commandOptions = SettingDefinition.options;
+const commandOptionsEnum = SettingDefinition.commandOptionsEnum;
 
-export class SettingsSetSubCommand implements Command {
-	public name = L.en.commands.settings.set.name();
-	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
-		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.settings.set.name(),
-		description: L.en.commands.settings.set.description(),
-		dm_permission: true,
-		default_member_permissions: undefined,
-	};
-	public deferType = CommandDeferType.PUBLIC;
-	public requireClientPerms: PermissionsString[] = [];
-
+export class SettingsSetSubCommand extends BaseCommandClass(
+	SettingDefinition,
+	SettingDefinition.subCommandEnum.set
+) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption,
@@ -46,8 +34,8 @@ export class SettingsSetSubCommand implements Command {
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
 		if (
-			option.name === SettingsOptions.SETTINGS_SET_VALUE.name &&
-			intr.options.getString(SettingsOptions.SETTINGS_SET_OPTION.name) ===
+			option.name === commandOptions[commandOptionsEnum.value].name &&
+			intr.options.getString(commandOptions[commandOptionsEnum.set].name) ===
 				'initiative-tracker-notifications'
 		) {
 			return ['never', 'every turn', 'every round', 'whenever hidden'].map(choice => ({
@@ -55,8 +43,8 @@ export class SettingsSetSubCommand implements Command {
 				value: choice,
 			}));
 		} else if (
-			option.name === SettingsOptions.SETTINGS_SET_VALUE.name &&
-			intr.options.getString(SettingsOptions.SETTINGS_SET_OPTION.name) ===
+			option.name === commandOptions[commandOptionsEnum.value].name &&
+			intr.options.getString(commandOptions[commandOptionsEnum.set].name) ===
 				'inline-rolls-display'
 		) {
 			return ['detailed', 'compact'].map(choice => ({
@@ -64,8 +52,8 @@ export class SettingsSetSubCommand implements Command {
 				value: choice,
 			}));
 		} else if (
-			option.name === SettingsOptions.SETTINGS_SET_VALUE.name &&
-			intr.options.getString(SettingsOptions.SETTINGS_SET_OPTION.name) ===
+			option.name === commandOptions[commandOptionsEnum.value].name &&
+			intr.options.getString(commandOptions[commandOptionsEnum.set].name) ===
 				'default-compendium'
 		) {
 			return [DefaultCompendiumEnum.nethys, DefaultCompendiumEnum.pf2etools].map(choice => ({
@@ -77,11 +65,10 @@ export class SettingsSetSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
-		const option = intr.options.getString(SettingsOptions.SETTINGS_SET_OPTION.name, true);
-		const value = intr.options.getString(SettingsOptions.SETTINGS_SET_VALUE.name, true);
+		const option = intr.options.getString(commandOptions[commandOptionsEnum.set].name, true);
+		const value = intr.options.getString(commandOptions[commandOptionsEnum.value].name, true);
 
 		const koboldUtils = new KoboldUtils(kobold);
 		const { userSettings } = await koboldUtils.fetchNonNullableDataForCommand(intr, {

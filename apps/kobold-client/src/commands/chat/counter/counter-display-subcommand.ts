@@ -1,55 +1,45 @@
 import {
 	ApplicationCommandOptionChoiceData,
-	ApplicationCommandType,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
 	ChatInputCommandInteraction,
-	PermissionsString,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 
-import L from '../../../i18n/i18n-node.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold } from '@kobold/db';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { Command, CommandDeferType } from '../../index.js';
+import { Command } from '../../index.js';
 import { CounterHelpers } from './counter-helpers.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
-import { CounterOptions } from './counter-command-options.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
 import { AutocompleteUtils } from '../../../utils/kobold-service-utils/autocomplete-utils.js';
+import { CounterDefinition } from '@kobold/documentation';
+import { BaseCommandClass } from '../../command.js';
+const commandOptions = CounterDefinition.options;
+const commandOptionsEnum = CounterDefinition.commandOptionsEnum;
 
-export class CounterDisplaySubCommand implements Command {
-	public name = L.en.commands.counter.display.name();
-	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
-		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.counter.display.name(),
-		description: L.en.commands.counter.display.description(),
-		dm_permission: true,
-		default_member_permissions: undefined,
-	};
-	public deferType = CommandDeferType.NONE;
-	public requireClientPerms: PermissionsString[] = [];
-
+export class CounterDisplaySubCommand extends BaseCommandClass(
+	CounterDefinition,
+	CounterDefinition.subCommandEnum.display
+) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption,
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === CounterOptions.COUNTER_NAME_OPTION.name) {
+		if (option.name === commandOptions[commandOptionsEnum.counterName].name) {
 			const koboldUtils = new KoboldUtils(kobold);
 			const autocompleteUtils = new AutocompleteUtils(koboldUtils);
-			const match = intr.options.getString(CounterOptions.COUNTER_NAME_OPTION.name) ?? '';
+			const match =
+				intr.options.getString(commandOptions[commandOptionsEnum.counterName].name) ?? '';
 			return autocompleteUtils.getCounters(intr, match);
 		}
 	}
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const koboldUtils = new KoboldUtils(kobold);
@@ -57,7 +47,7 @@ export class CounterDisplaySubCommand implements Command {
 			activeCharacter: true,
 		});
 		const targetCounterName = intr.options
-			.getString(CounterOptions.COUNTER_NAME_OPTION.name, true)
+			.getString(commandOptions[commandOptionsEnum.counterName].name, true)
 			.trim();
 
 		const { counter, group } = FinderHelpers.getCounterByName(
@@ -67,7 +57,7 @@ export class CounterDisplaySubCommand implements Command {
 
 		if (!counter) {
 			throw new KoboldError(
-				LL.commands.counter.interactions.notFound({
+				CounterDefinition.strings.notFound({
 					counterName: targetCounterName,
 				})
 			);

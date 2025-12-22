@@ -1,17 +1,10 @@
 import {
 	ApplicationCommandOptionChoiceData,
-	ApplicationCommandType,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
 	ChatInputCommandInteraction,
-	PermissionsString,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
-import { RateLimiter } from 'discord.js-rate-limiter';
-
-import L from '../../../i18n/i18n-node.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold, SheetAdjustmentTypeEnum } from '@kobold/db';
 import { KoboldError } from '../../../utils/KoboldError.js';
 import { Creature } from '../../../utils/creature.js';
@@ -19,34 +12,29 @@ import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { Command, CommandDeferType } from '../../index.js';
-import { ModifierOptions } from './modifier-command-options.js';
+import { Command } from '../../index.js';
 import _ from 'lodash';
 import { InputParseUtils } from '../../../utils/input-parse-utils.js';
 import { StringUtils } from '@kobold/base-utils';
+import { ModifierDefinition } from '@kobold/documentation';
+import { BaseCommandClass } from '../../command.js';
+const commandOptions = ModifierDefinition.options;
+const commandOptionsEnum = ModifierDefinition.commandOptionsEnum;
 
-export class ModifierSetSubCommand implements Command {
-	public name = L.en.commands.modifier.set.name();
-	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
-		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.modifier.set.name(),
-		description: L.en.commands.modifier.set.description(),
-		dm_permission: true,
-		default_member_permissions: undefined,
-	};
-	public cooldown = new RateLimiter(1, 2000);
-	public deferType = CommandDeferType.PUBLIC;
-	public requireClientPerms: PermissionsString[] = [];
-
+export class ModifierSetSubCommand extends BaseCommandClass(
+	ModifierDefinition,
+	ModifierDefinition.subCommandEnum.set
+) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption,
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === ModifierOptions.MODIFIER_NAME_OPTION.name) {
+		if (option.name === commandOptions[commandOptionsEnum.name].name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(ModifierOptions.MODIFIER_NAME_OPTION.name) ?? '';
+			const match =
+				intr.options.getString(commandOptions[commandOptionsEnum.name].name) ?? '';
 
 			//get the active character
 			const { characterUtils } = new KoboldUtils(kobold);
@@ -70,18 +58,17 @@ export class ModifierSetSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const modifierName = intr.options
-			.getString(ModifierOptions.MODIFIER_NAME_OPTION.name, true)
+			.getString(commandOptions[commandOptionsEnum.name].name, true)
 			.trim();
 		let fieldToChange = intr.options
-			.getString(ModifierOptions.MODIFIER_SET_OPTION.name, true)
+			.getString(commandOptions[commandOptionsEnum.setOption].name, true)
 			.toLocaleLowerCase()
 			.trim();
 		const newFieldValue = intr.options
-			.getString(ModifierOptions.MODIFIER_SET_VALUE_OPTION.name, true)
+			.getString(commandOptions[commandOptionsEnum.setValue].name, true)
 			.trim();
 
 		//check if we have an active character
@@ -96,14 +83,14 @@ export class ModifierSetSubCommand implements Command {
 		);
 		if (!targetModifier) {
 			// no matching modifier found
-			await InteractionUtils.send(intr, LL.commands.modifier.interactions.notFound());
+			await InteractionUtils.send(intr, ModifierDefinition.strings.notFound);
 			return;
 		}
 
-		// validate the updates
-		if (fieldToChange === L.en.commandOptions.modifierSetOption.choices.name.value()) {
+		const setOpts = ModifierDefinition.optionChoices.setOption;
+		if (fieldToChange === setOpts.name) {
 			if (FinderHelpers.getModifierByName(activeCharacter.sheetRecord, newFieldValue)) {
-				throw new KoboldError(LL.commands.modifier.set.interactions.nameExistsError());
+				throw new KoboldError(ModifierDefinition.strings.set.nameExistsError);
 			} else {
 				targetModifier.name = InputParseUtils.parseAsString(newFieldValue, {
 					inputName: fieldToChange,
@@ -111,9 +98,7 @@ export class ModifierSetSubCommand implements Command {
 					maxLength: 20,
 				});
 			}
-		} else if (
-			fieldToChange === L.en.commandOptions.modifierSetOption.choices.rollAdjustment.value()
-		) {
+		} else if (fieldToChange === setOpts.rollAdjustment) {
 			try {
 				// we must be able to evaluate the modifier as a roll for this character
 				InputParseUtils.isValidDiceExpression(
@@ -124,20 +109,16 @@ export class ModifierSetSubCommand implements Command {
 			} catch (err) {
 				await InteractionUtils.send(
 					intr,
-					LL.commands.modifier.createModifier.interactions.doesntEvaluateError()
+					ModifierDefinition.strings.createModifier.doesntEvaluateError
 				);
 				return;
 			}
-		} else if (
-			fieldToChange === L.en.commandOptions.modifierSetOption.choices.rollTargetTags.value()
-		) {
+		} else if (fieldToChange === setOpts.rollTargetTags) {
 			fieldToChange = 'rollTargetTags';
 			// parse the target tags
 			if (!InputParseUtils.isValidRollTargetTags(newFieldValue)) {
 				// the tags are in an invalid format
-				throw new KoboldError(
-					LL.commands.modifier.createModifier.interactions.invalidTags.toString()
-				);
+				throw new KoboldError(ModifierDefinition.strings.createModifier.invalidTags);
 			}
 			targetModifier.rollTargetTags = newFieldValue;
 		} else if (fieldToChange === 'type') {
@@ -175,10 +156,7 @@ export class ModifierSetSubCommand implements Command {
 			);
 		} else {
 			// if a field wasn't provided, or the field isn't present in our options, send an error
-			await InteractionUtils.send(
-				intr,
-				LL.commands.modifier.set.interactions.invalidOptionError()
-			);
+			await InteractionUtils.send(intr, ModifierDefinition.strings.set.invalidOptionError);
 			return;
 		}
 		// just in case the update is for the name
@@ -193,7 +171,7 @@ export class ModifierSetSubCommand implements Command {
 
 		const updateEmbed = new KoboldEmbed();
 		updateEmbed.setTitle(
-			LL.commands.modifier.set.interactions.successEmbed.title({
+			ModifierDefinition.strings.set.successEmbed.title({
 				characterName: activeCharacter.name,
 				modifierName: nameBeforeUpdate,
 				fieldToChange,

@@ -1,18 +1,13 @@
 import {
 	ApplicationCommandOptionChoiceData,
-	ApplicationCommandType,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
 	ChatInputCommandInteraction,
-	PermissionsString,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
-import { RateLimiter } from 'discord.js-rate-limiter';
 
 import _ from 'lodash';
-import L from '../../../i18n/i18n-node.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
+
 import {
 	Counter,
 	CounterStyleEnum,
@@ -25,43 +20,37 @@ import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { Command, CommandDeferType } from '../../index.js';
-import { CounterOptions } from './counter-command-options.js';
+import { Command } from '../../index.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
 import { InputParseUtils } from '../../../utils/input-parse-utils.js';
 import { AutocompleteUtils } from '../../../utils/kobold-service-utils/autocomplete-utils.js';
 import { CounterHelpers } from './counter-helpers.js';
 import { CounterGroupHelpers } from '../counter-group/counter-group-helpers.js';
+import { CounterDefinition } from '@kobold/documentation';
+import { BaseCommandClass } from '../../command.js';
+const commandOptions = CounterDefinition.options;
+const commandOptionsEnum = CounterDefinition.commandOptionsEnum;
 
-export class CounterSetSubCommand implements Command {
-	public name = L.en.commands.counter.set.name();
-	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
-		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.counter.set.name(),
-		description: L.en.commands.counter.set.description(),
-		dm_permission: true,
-		default_member_permissions: undefined,
-	};
-	public cooldown = new RateLimiter(1, 2000);
-	public deferType = CommandDeferType.PUBLIC;
-	public requireClientPerms: PermissionsString[] = [];
-
+export class CounterSetSubCommand extends BaseCommandClass(
+	CounterDefinition,
+	CounterDefinition.subCommandEnum.set
+) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption,
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === CounterOptions.COUNTER_NAME_OPTION.name) {
+		if (option.name === commandOptions[commandOptionsEnum.counterName].name) {
 			const koboldUtils = new KoboldUtils(kobold);
 			const autocompleteUtils = new AutocompleteUtils(koboldUtils);
-			const match = intr.options.getString(CounterOptions.COUNTER_NAME_OPTION.name) ?? '';
+			const match =
+				intr.options.getString(commandOptions[commandOptionsEnum.counterName].name) ?? '';
 			return autocompleteUtils.getCounters(intr, match);
 		}
 	}
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const koboldUtils = new KoboldUtils(kobold);
@@ -69,13 +58,13 @@ export class CounterSetSubCommand implements Command {
 			activeCharacter: true,
 		});
 		const targetCounterName = intr.options
-			.getString(CounterOptions.COUNTER_NAME_OPTION.name, true)
+			.getString(commandOptions[commandOptionsEnum.counterName].name, true)
 			.trim();
 		const newCounterOption = intr.options
-			.getString(CounterOptions.COUNTER_SET_OPTION_OPTION.name, true)
+			.getString(commandOptions[commandOptionsEnum.counterSetOption].name, true)
 			.trim();
 		const newCounterValue = intr.options
-			.getString(CounterOptions.COUNTER_SET_VALUE_OPTION.name, true)
+			.getString(commandOptions[commandOptionsEnum.counterSetValue].name, true)
 			.trim();
 
 		let { counter: targetCounter, group } = FinderHelpers.getCounterByName(
@@ -84,20 +73,20 @@ export class CounterSetSubCommand implements Command {
 		);
 		if (!targetCounter) {
 			throw new KoboldError(
-				LL.commands.counter.interactions.notFound({
+				CounterDefinition.strings.notFound({
 					counterName: targetCounterName,
 				})
 			);
 		}
 
-		if (newCounterOption === L.en.commandOptions.counterSetOption.choices.name.value()) {
+		if (newCounterOption === CounterDefinition.optionChoices.setOption.name) {
 			const { counter } = FinderHelpers.getCounterByName(
 				activeCharacter.sheetRecord.sheet,
 				newCounterValue
 			);
 			if (counter) {
 				throw new KoboldError(
-					LL.commands.counter.create.interactions.alreadyExists({
+					CounterDefinition.strings.alreadyExists({
 						counterName: newCounterValue,
 						characterName: activeCharacter.name,
 					})
@@ -106,46 +95,44 @@ export class CounterSetSubCommand implements Command {
 
 			if (!InputParseUtils.isValidString(newCounterValue, { maxLength: 50 })) {
 				throw new KoboldError(
-					LL.commands.counter.set.interactions.stringTooLong({
+					CounterDefinition.strings.setStringTooLong({
 						propertyName: 'name',
 						numCharacters: 50,
 					})
 				);
 			}
 			targetCounter.name = newCounterValue;
-		} else if (
-			newCounterOption === L.en.commandOptions.counterSetOption.choices.description.value()
-		) {
+		} else if (newCounterOption === CounterDefinition.optionChoices.setOption.description) {
 			if (!InputParseUtils.isValidString(newCounterValue, { maxLength: 300 })) {
 				throw new KoboldError(
-					LL.commands.counter.set.interactions.stringTooLong({
+					CounterDefinition.strings.setStringTooLong({
 						propertyName: 'description',
 						numCharacters: 300,
 					})
 				);
 			}
 			targetCounter.description = newCounterValue;
-		} else if (newCounterOption === L.en.commandOptions.counterSetOption.choices.text.value()) {
+		} else if (newCounterOption === CounterDefinition.optionChoices.setOption.text) {
 			if (!InputParseUtils.isValidString(newCounterValue, { maxLength: 500 })) {
 				throw new KoboldError(
-					LL.commands.counter.set.interactions.stringTooLong({
+					CounterDefinition.strings.setStringTooLong({
 						propertyName: 'text',
 						numCharacters: 500,
 					})
 				);
 			}
 			targetCounter.text = newCounterValue;
-		} else if (newCounterOption === L.en.commandOptions.counterSetOption.choices.max.value()) {
+		} else if (newCounterOption === CounterDefinition.optionChoices.setOption.max) {
 			const totalMax =
 				targetCounter.style === 'prepared' || targetCounter.style === 'dots'
 					? 20
 					: Infinity;
 			const newMax = Math.trunc(InputParseUtils.parseAsNullableNumber(newCounterValue) ?? -1);
 			if (newMax > totalMax || (newMax === -1 && targetCounter.style !== 'default')) {
-				throw new KoboldError(LL.commands.counter.interactions.maxTooLarge());
+				throw new KoboldError(CounterDefinition.strings.maxTooLarge);
 			}
 			if (newMax < -1) {
-				throw new KoboldError(LL.commands.counter.interactions.maxTooSmall());
+				throw new KoboldError(CounterDefinition.strings.maxTooSmall);
 			}
 			targetCounter.max = newMax === -1 ? Infinity : newMax;
 
@@ -159,32 +146,26 @@ export class CounterSetSubCommand implements Command {
 					targetCounter.prepared.push(null);
 				}
 			}
-		} else if (
-			newCounterOption === L.en.commandOptions.counterSetOption.choices.recoverTo.value()
-		) {
+		} else if (newCounterOption === CounterDefinition.optionChoices.setOption.recoverTo) {
 			const newResetTo = Math.trunc(
 				InputParseUtils.parseAsNullableNumber(newCounterValue) ?? -1
 			);
 			if (targetCounter.style === 'prepared') {
 				throw new KoboldError(
-					LL.commands.counter.interactions.invalidForStyle({
-						parameter: L.en.commandOptions.counterSetOption.choices.recoverTo.value(),
+					CounterDefinition.strings.invalidForStyle({
+						parameter: CounterDefinition.optionChoices.setOption.recoverTo,
 						style: targetCounter.style,
 					})
 				);
 			}
 			if (newResetTo < -2) {
-				throw new KoboldError(LL.commands.counter.interactions.recoverToInvalid());
+				throw new KoboldError(CounterDefinition.strings.recoverToInvalid);
 			}
 			targetCounter.recoverTo = newResetTo;
-		} else if (
-			newCounterOption === L.en.commandOptions.counterSetOption.choices.recoverable.value()
-		) {
+		} else if (newCounterOption === CounterDefinition.optionChoices.setOption.recoverable) {
 			const newRecoverable = InputParseUtils.parseAsBoolean(newCounterValue);
 			targetCounter.recoverable = newRecoverable;
-		} else if (
-			newCounterOption === L.en.commandOptions.counterSetOption.choices.style.value()
-		) {
+		} else if (newCounterOption === CounterDefinition.optionChoices.setOption.style) {
 			//numeric
 			if (
 				targetCounter.style === CounterStyleEnum.default ||
@@ -226,7 +207,7 @@ export class CounterSetSubCommand implements Command {
 				// otherwise no change with prepared -> prepared
 			}
 		} else {
-			throw new KoboldError(LL.commands.counter.set.interactions.invalidOptionError());
+			throw new KoboldError(CounterDefinition.strings.setInvalidOption);
 		}
 
 		await kobold.sheetRecord.update(
@@ -238,7 +219,7 @@ export class CounterSetSubCommand implements Command {
 
 		const updateEmbed = new KoboldEmbed();
 		updateEmbed.setTitle(
-			LL.commands.counter.set.interactions.successEmbed.title({
+			CounterDefinition.strings.setSuccess.title({
 				propertyName: newCounterOption,
 				groupName: targetCounter.name,
 				newPropertyValue: newCounterValue,

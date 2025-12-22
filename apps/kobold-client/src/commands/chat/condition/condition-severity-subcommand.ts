@@ -1,59 +1,55 @@
 import {
 	ApplicationCommandOptionChoiceData,
-	ApplicationCommandType,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
 	ChatInputCommandInteraction,
-	PermissionsString,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
-import { RateLimiter } from 'discord.js-rate-limiter';
 
-import L from '../../../i18n/i18n-node.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold } from '@kobold/db';
 import { InteractionUtils } from '../../../utils/index.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { Command, CommandDeferType } from '../../index.js';
-import { ModifierOptions } from '../modifier/modifier-command-options.js';
-import { ModifierHelpers } from '../modifier/modifier-helpers.js';
-import { GameplayOptions } from '../gameplay/gameplay-command-options.js';
-import { ConditionOptions } from './condition-command-options.js';
+import { Command } from '../../index.js';
 import { InputParseUtils } from '../../../utils/input-parse-utils.js';
+import { ConditionDefinition, GameplayDefinition, ModifierDefinition } from '@kobold/documentation';
+import { BaseCommandClass } from '../../command.js';
+const commandOptions = ConditionDefinition.options;
+const commandOptionsEnum = ConditionDefinition.commandOptionsEnum;
+const gameplayCommandOptions = GameplayDefinition.options;
+const gameplayCommandOptionsEnum = GameplayDefinition.commandOptionsEnum;
+const modifierCommandOptions = ModifierDefinition.options;
+const modifierCommandOptionsEnum = ModifierDefinition.commandOptionsEnum;
 
-export class ConditionSeveritySubCommand implements Command {
-	public name = L.en.commands.condition.severity.name();
-	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
-		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.condition.severity.name(),
-		description: L.en.commands.condition.severity.description(),
-		dm_permission: true,
-		default_member_permissions: undefined,
-	};
-	public cooldown = new RateLimiter(1, 2000);
-	public deferType = CommandDeferType.PUBLIC;
-	public requireClientPerms: PermissionsString[] = [];
-
+export class ConditionSeveritySubCommand extends BaseCommandClass(
+	ConditionDefinition,
+	ConditionDefinition.subCommandEnum.severity
+) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption,
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name) {
+		if (
+			option.name ===
+			gameplayCommandOptions[gameplayCommandOptionsEnum.gameplayTargetCharacter].name
+		) {
 			const match =
-				intr.options.getString(GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name) ?? '';
+				intr.options.getString(
+					gameplayCommandOptions[gameplayCommandOptionsEnum.gameplayTargetCharacter].name
+				) ?? '';
 			const { autocompleteUtils } = new KoboldUtils(kobold);
 			return await autocompleteUtils.getAllTargetOptions(intr, match);
 		}
-		if (option.name === ConditionOptions.CONDITION_NAME_OPTION.name) {
+		if (option.name === commandOptions[commandOptionsEnum.name].name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(ConditionOptions.CONDITION_NAME_OPTION.name) ?? '';
+			const match =
+				intr.options.getString(commandOptions[commandOptionsEnum.name].name) ?? '';
 			const targetCharacterName =
-				intr.options.getString(GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name) ?? '';
-
+				intr.options.getString(
+					gameplayCommandOptions[gameplayCommandOptionsEnum.gameplayTargetCharacter].name
+				) ?? '';
 			const { autocompleteUtils } = new KoboldUtils(kobold);
 			try {
 				return autocompleteUtils.getConditionsOnTarget(intr, targetCharacterName, match);
@@ -66,18 +62,17 @@ export class ConditionSeveritySubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const conditionName = intr.options
-			.getString(ConditionOptions.CONDITION_NAME_OPTION.name, true)
+			.getString(commandOptions[commandOptionsEnum.name].name, true)
 			.trim();
 		const newSeverity = intr.options
-			.getString(ModifierOptions.MODIFIER_SEVERITY_VALUE_OPTION.name, true)
+			.getString(modifierCommandOptions[modifierCommandOptionsEnum.severity].name, true)
 			.toLocaleLowerCase()
 			.trim();
 		const targetCharacterName = intr.options.getString(
-			GameplayOptions.GAMEPLAY_TARGET_CHARACTER.name,
+			gameplayCommandOptions[gameplayCommandOptionsEnum.gameplayTargetCharacter].name,
 			true
 		);
 		const { gameUtils } = new KoboldUtils(kobold);
@@ -94,7 +89,7 @@ export class ConditionSeveritySubCommand implements Command {
 		);
 		if (!targetCondition) {
 			// no matching modifier found
-			await InteractionUtils.send(intr, LL.commands.condition.interactions.notFound());
+			await InteractionUtils.send(intr, ConditionDefinition.strings.notFound);
 			return;
 		}
 		targetCondition.severity = InputParseUtils.parseAsNullableNumber(newSeverity);
@@ -109,12 +104,12 @@ export class ConditionSeveritySubCommand implements Command {
 		if (targetCondition.severity === null) {
 			await InteractionUtils.send(
 				intr,
-				`Yip! I removed the severity value from the modifier "${conditionName}".`
+				ConditionDefinition.strings.severity.removed({ conditionName })
 			);
 		} else {
 			await InteractionUtils.send(
 				intr,
-				`Yip! I updated the severity of the modifier "${conditionName}" to ${newSeverity}.`
+				ConditionDefinition.strings.severity.updated({ conditionName, newSeverity })
 			);
 		}
 	}

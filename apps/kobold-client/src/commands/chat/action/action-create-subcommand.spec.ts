@@ -1,62 +1,166 @@
-import { generateMock } from '@anatine/zod-mock';
-import type { ChatInputCommandInteraction } from 'discord.js';
-import L from '../../../i18n/i18n-node.js';
-import { zAction, zCharacterWithRelations, zSheetRecord } from '@kobold/db';
-import { vitestKobold } from '@kobold/db/test-utils';
-import { InteractionUtils } from '../../../utils/index.js';
-import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
-import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+/**
+ * Unit tests for ActionCreateSubCommand
+ */
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { ActionCostChoices, ActionTypeChoices } from '@kobold/documentation';
+import { ActionCommand } from './action-command.js';
 import { ActionCreateSubCommand } from './action-create-subcommand.js';
-import { MockChatInputCommandInteraction } from '../../../utils/discord-test-utils.js';
+import {
+	createTestHarness,
+	createMockAction,
+	setupKoboldUtilsMocks,
+	setupFinderHelpersMocks,
+	setupSheetRecordUpdateMock,
+	TEST_USER_ID,
+	TEST_GUILD_ID,
+	mockNethysDb,
+	CommandTestHarness,
+	getMockKobold,
+	resetMockKobold,
+} from '../../../test-utils/index.js';
 
-vitest.mock('../../../utils/kobold-service-utils/kobold-utils');
-vitest.mock('../../../utils/index');
-vitest.mock('../../../utils/kobold-helpers/finder-helpers');
+vi.mock('../../../utils/kobold-service-utils/kobold-utils.js');
+vi.mock('../../../utils/kobold-helpers/finder-helpers.js');
 
 describe('ActionCreateSubCommand', () => {
-	let command: ActionCreateSubCommand;
-	let mockInteraction: ChatInputCommandInteraction;
+	const kobold = getMockKobold();
+
+	let harness: CommandTestHarness;
 
 	beforeEach(() => {
-		mockInteraction = new MockChatInputCommandInteraction();
-		command = new ActionCreateSubCommand();
+		resetMockKobold(kobold);
+		harness = createTestHarness([new ActionCommand([new ActionCreateSubCommand()])]);
 	});
 
-	it('should create a new action if the name does not already exist', async () => {
-		// Arrange
-		vitest.spyOn(FinderHelpers, 'getActionByName').mockReturnValue(undefined);
-		vitest.spyOn(KoboldUtils.prototype, 'fetchNonNullableDataForCommand').mockResolvedValue({
-			activeCharacter: generateMock(zCharacterWithRelations),
+	describe('successful action creation', () => {
+		it('should route through CommandHandler and create an action', async () => {
+			// Arrange
+			const { mockCharacter } = setupKoboldUtilsMocks();
+			setupFinderHelpersMocks(undefined); // No existing action
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+
+			// Act
+			const result = await harness.executeCommand({
+				commandName: 'action',
+				subcommand: 'create',
+				options: {
+					name: 'Fireball',
+					'action-type': ActionTypeChoices.spell,
+					actions: ActionCostChoices.two,
+					description: 'A fiery blast',
+					'base-level': 3,
+					'auto-heighten': false,
+					tags: 'fire,evocation',
+				},
+				userId: TEST_USER_ID,
+				guildId: TEST_GUILD_ID,
+			});
+
+			// Assert
+			expect(result.didRespond()).toBe(true);
+			expect(updateMock).toHaveBeenCalled();
 		});
-		vitest
-			.spyOn(vitestKobold.sheetRecord, 'update')
-			.mockResolvedValue(generateMock(zSheetRecord));
 
-		// Act
-		await command.execute(mockInteraction, L.en, { kobold: vitestKobold });
+		it('should create action with minimal required options', async () => {
+			// Arrange
+			setupKoboldUtilsMocks();
+			setupFinderHelpersMocks(undefined);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
-		// Assert
-		expect(KoboldUtils.prototype.fetchNonNullableDataForCommand).toHaveBeenCalled();
-		expect(FinderHelpers.getActionByName).toHaveBeenCalled();
-		expect(vitestKobold.sheetRecord.update).toHaveBeenCalled();
-		expect(InteractionUtils.send).toHaveBeenCalled();
+			// Act
+			const result = await harness.executeCommand({
+				commandName: 'action',
+				subcommand: 'create',
+				options: {
+					name: 'Strike',
+					'action-type': ActionTypeChoices.attack,
+					actions: ActionCostChoices.one,
+				},
+				userId: TEST_USER_ID,
+				guildId: TEST_GUILD_ID,
+			});
+
+			// Assert
+			expect(result.didRespond()).toBe(true);
+			expect(updateMock).toHaveBeenCalledWith(
+				expect.anything(),
+				expect.objectContaining({
+					actions: expect.arrayContaining([
+						expect.objectContaining({
+							name: 'Strike',
+							type: ActionTypeChoices.attack,
+							actionCost: ActionCostChoices.one,
+							description: '',
+						}),
+					]),
+				})
+			);
+		});
 	});
 
-	it('should not create a new action if the name already exists', async () => {
-		// Arrange
-		vitest.spyOn(FinderHelpers, 'getActionByName').mockReturnValue(generateMock(zAction));
-		vitest.spyOn(KoboldUtils.prototype, 'fetchNonNullableDataForCommand').mockResolvedValue({
-			activeCharacter: generateMock(zCharacterWithRelations),
+	describe('error handling', () => {
+		it('should not create action if name already exists', async () => {
+			// Arrange
+			const existingAction = createMockAction({ name: 'Existing Action' });
+			setupKoboldUtilsMocks({ actions: [existingAction] });
+			setupFinderHelpersMocks(existingAction);
+			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+
+			// Act
+			const result = await harness.executeCommand({
+				commandName: 'action',
+				subcommand: 'create',
+				options: {
+					name: 'Existing Action',
+					'action-type': ActionTypeChoices.attack,
+					actions: ActionCostChoices.one,
+				},
+				userId: TEST_USER_ID,
+				guildId: TEST_GUILD_ID,
+			});
+
+			// Assert
+			expect(result.didRespond()).toBe(true);
+			expect(updateMock).not.toHaveBeenCalled();
 		});
-		vitest.spyOn(vitestKobold.sheetRecord, 'update');
+	});
 
-		// Act
-		await command.execute(mockInteraction, L.en, { kobold: vitestKobold });
+	describe('command routing verification', () => {
+		it('should properly route to create subcommand via CommandHandler', async () => {
+			// Arrange
+			setupKoboldUtilsMocks();
+			setupFinderHelpersMocks(undefined);
+			setupSheetRecordUpdateMock(kobold);
 
-		// Assert
-		expect(KoboldUtils.prototype.fetchNonNullableDataForCommand).toHaveBeenCalled();
-		expect(FinderHelpers.getActionByName).toHaveBeenCalled();
-		expect(vitestKobold.sheetRecord.update).not.toHaveBeenCalled();
-		expect(InteractionUtils.send).toHaveBeenCalled();
+			// Act
+			const result = await harness.executeCommand({
+				commandName: 'action',
+				subcommand: 'create',
+				options: {
+					name: 'Routing Test',
+					'action-type': ActionTypeChoices.other,
+					actions: ActionCostChoices.free,
+				},
+				userId: TEST_USER_ID,
+				guildId: TEST_GUILD_ID,
+			});
+
+			// Assert
+			expect(result.didRespond()).toBe(true);
+			expect(harness.getCommands()).toHaveLength(1);
+			expect(harness.getCommands()[0].name).toBe('action');
+		});
+
+		it('should return registered commands through getCommands()', () => {
+			const commands = harness.getCommands();
+			expect(commands).toHaveLength(1);
+			expect(commands[0]).toBeInstanceOf(ActionCommand);
+		});
+
+		it('should provide access to injected services', () => {
+			const services = harness.getServices();
+			expect(services.kobold).toBeDefined();
+			expect(services.nethysCompendium).toBe(mockNethysDb);
+		});
 	});
 });

@@ -7,7 +7,6 @@
 // import { CommandInteraction } from 'discord.js';
 // import { KoboldEmbed } from './kobold-embed-utils.js';
 // import { InteractionUtils } from './interaction-utils.js';
-// import L from '../i18n/i18n-node.js';
 // import { KoboldError } from './KoboldError.js';
 
 // function setupInitiativeActorsAndGroupsForTests(initiative: InitiativeWithRelations) {
@@ -481,8 +480,7 @@ describe.skip('initiative-utils', function () {
 	// 			const result = InitiativeUtils.getNameMatchActorFromInitiative(
 	// 				'testUserId',
 	// 				initiative,
-	// 				'another',
-	// 				L.en
+	// 				'another'
 	// 			);
 	// 			expect(result).toBe(actors[1]);
 	// 		});
@@ -495,8 +493,7 @@ describe.skip('initiative-utils', function () {
 	// 				InitiativeUtils.getNameMatchActorFromInitiative(
 	// 					'testUserId',
 	// 					initiative,
-	// 					'notFound',
-	// 					L.en
+	// 					'notFound'
 	// 				)
 	// 			).toThrow(KoboldError);
 	// 		});
@@ -515,8 +512,7 @@ describe.skip('initiative-utils', function () {
 	// 			const result = InitiativeUtils.getNameMatchGroupFromInitiative(
 	// 				initiative,
 	// 				'testUserId',
-	// 				'another',
-	// 				L.en
+	// 				'another'
 	// 			);
 	// 			expect(result).toBe(secondGroup);
 	// 		});
@@ -534,8 +530,7 @@ describe.skip('initiative-utils', function () {
 	// 				InitiativeUtils.getNameMatchGroupFromInitiative(
 	// 					initiative,
 	// 					'testUserId',
-	// 					'notFound',
-	// 					L.en
+	// 					'notFound'
 	// 				)
 	// 			).toBeTruthy();
 	// 		});

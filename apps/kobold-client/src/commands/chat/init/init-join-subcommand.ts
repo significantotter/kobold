@@ -1,18 +1,12 @@
 import {
 	ApplicationCommandOptionChoiceData,
-	ApplicationCommandType,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
 	ChatInputCommandInteraction,
-	PermissionsString,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
-import { RateLimiter } from 'discord.js-rate-limiter';
 
 import _ from 'lodash';
-import L from '../../../i18n/i18n-node.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold } from '@kobold/db';
 import { Creature } from '../../../utils/creature.js';
 import { InteractionUtils } from '../../../utils/index.js';
@@ -20,34 +14,31 @@ import { InitiativeBuilder, InitiativeBuilderUtils } from '../../../utils/initia
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { Command, CommandDeferType } from '../../index.js';
-import { InitOptions } from './init-command-options.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
-import { RollOptions } from '../roll/roll-command-options.js';
+import { InitDefinition, RollDefinition } from '@kobold/documentation';
+import { BaseCommandClass } from '../../command.js';
+const commandOptions = InitDefinition.options;
+const commandOptionsEnum = InitDefinition.commandOptionsEnum;
+const rollCommandOptions = RollDefinition.options;
+const rollCommandOptionsEnum = RollDefinition.commandOptionsEnum;
 
-export class InitJoinSubCommand implements Command {
-	public name = L.en.commands.init.join.name();
-	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
-		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.init.join.name(),
-		description: L.en.commands.init.join.description(),
-		dm_permission: true,
-		default_member_permissions: undefined,
-	};
-	public cooldown = new RateLimiter(1, 2000);
-	public deferType = CommandDeferType.PUBLIC;
-	public requireClientPerms: PermissionsString[] = [];
-
+export class InitJoinSubCommand extends BaseCommandClass(
+	InitDefinition,
+	InitDefinition.subCommandEnum.join
+) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption,
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === RollOptions.SKILL_CHOICE_OPTION.name) {
+		if (option.name === rollCommandOptions[rollCommandOptionsEnum.skillChoice].name) {
 			const { characterUtils } = new KoboldUtils(kobold);
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(RollOptions.SKILL_CHOICE_OPTION.name) ?? '';
+			const match =
+				intr.options.getString(
+					rollCommandOptions[rollCommandOptionsEnum.skillChoice].name
+				) ?? '';
 
 			//get the active character
 			const activeCharacter = await characterUtils.getActiveCharacter(intr);
@@ -67,7 +58,6 @@ export class InitJoinSubCommand implements Command {
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const koboldUtils: KoboldUtils = new KoboldUtils(kobold);
@@ -85,16 +75,23 @@ export class InitJoinSubCommand implements Command {
 		) {
 			await InteractionUtils.send(
 				intr,
-				L.en.commands.init.join.interactions.characterAlreadyInInit({
+				InitDefinition.strings.join.characterAlreadyInInit({
 					characterName: activeCharacter.name,
 				})
 			);
 			return;
 		}
-		const initiativeValue = intr.options.getNumber(InitOptions.INIT_VALUE_OPTION.name);
-		const skillChoice = intr.options.getString(RollOptions.SKILL_CHOICE_OPTION.name);
-		const diceExpression = intr.options.getString(RollOptions.ROLL_EXPRESSION_OPTION.name);
-		const hideStats = intr.options.getBoolean(InitOptions.INIT_HIDE_STATS_OPTION.name) ?? false;
+		const initiativeValue = intr.options.getNumber(
+			commandOptions[commandOptionsEnum.initValue].name
+		);
+		const skillChoice = intr.options.getString(
+			rollCommandOptions[rollCommandOptionsEnum.skillChoice].name
+		);
+		const diceExpression = intr.options.getString(
+			rollCommandOptions[rollCommandOptionsEnum.rollExpression].name
+		);
+		const hideStats =
+			intr.options.getBoolean(commandOptions[commandOptionsEnum.initHideStats].name) ?? false;
 
 		const rollResult = await InitiativeBuilderUtils.rollNewInitiative({
 			character: activeCharacter,
@@ -137,7 +134,7 @@ export class InitJoinSubCommand implements Command {
 		if (currentInitiative.currentRound === 0) {
 			await InitiativeBuilderUtils.sendNewRoundMessage(intr, initBuilder);
 		} else {
-			const embed = await KoboldEmbed.roundFromInitiativeBuilder(initBuilder, LL);
+			const embed = await KoboldEmbed.roundFromInitiativeBuilder(initBuilder);
 			await InteractionUtils.send(intr, { embeds: [embed] });
 		}
 	}

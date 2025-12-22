@@ -1,7 +1,6 @@
 import { SheetAdjustment, SheetAdjustmentTypeEnum, getDefaultSheet } from '@kobold/db';
 import { KoboldError } from './KoboldError.js';
 import { SheetUtils } from './sheet/sheet-utils.js';
-import L from '../i18n/i18n-node.js';
 import { compileExpression } from 'filtrex';
 import { Creature } from './creature.js';
 import { DiceUtils } from './dice-utils.js';

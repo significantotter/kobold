@@ -1,46 +1,38 @@
 import {
 	ApplicationCommandOptionChoiceData,
-	ApplicationCommandType,
 	AutocompleteFocusedOption,
 	AutocompleteInteraction,
 	CacheType,
 	ChatInputCommandInteraction,
-	PermissionsString,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
+
 import { ActionCostEnum, Kobold, isActionTypeEnum } from '@kobold/db';
 
-import L from '../../../i18n/i18n-node.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { Command, CommandDeferType } from '../../index.js';
-import { ActionOptions } from './action-command-options.js';
+import { Command } from '../../index.js';
 import { InputParseUtils } from '../../../utils/input-parse-utils.js';
+import { ActionDefinition } from '@kobold/documentation';
+import { BaseCommandClass } from '../../command.js';
+const commandOptions = ActionDefinition.options;
+const commandOptionsEnum = ActionDefinition.commandOptionsEnum;
 
-export class ActionSetSubCommand implements Command {
-	public name = L.en.commands.action.set.name();
-	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
-		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.action.set.name(),
-		description: L.en.commands.action.set.description(),
-		dm_permission: true,
-		default_member_permissions: undefined,
-	};
-	public deferType = CommandDeferType.NONE;
-	public requireClientPerms: PermissionsString[] = [];
-
+export class ActionSetSubCommand extends BaseCommandClass(
+	ActionDefinition,
+	ActionDefinition.subCommandEnum.set
+) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption,
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === ActionOptions.ACTION_TARGET_OPTION.name) {
+		if (option.name === commandOptions[commandOptionsEnum.targetAction].name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
-			const match = intr.options.getString(ActionOptions.ACTION_TARGET_OPTION.name) ?? '';
+			const match =
+				intr.options.getString(commandOptions[commandOptionsEnum.targetAction].name) ?? '';
 
 			//get the active character
 			const { characterUtils } = new KoboldUtils(kobold);
@@ -63,12 +55,20 @@ export class ActionSetSubCommand implements Command {
 	}
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
-		const actionTarget = intr.options.getString(ActionOptions.ACTION_TARGET_OPTION.name, true);
-		const fieldToUpdate = intr.options.getString(ActionOptions.ACTION_EDIT_OPTION.name, true);
-		const newValue = intr.options.getString(ActionOptions.ACTION_EDIT_VALUE.name, true);
+		const actionTarget = intr.options.getString(
+			commandOptions[commandOptionsEnum.targetAction].name,
+			true
+		);
+		const fieldToUpdate = intr.options.getString(
+			commandOptions[commandOptionsEnum.setOption].name,
+			true
+		);
+		const newValue = intr.options.getString(
+			commandOptions[commandOptionsEnum.setValue].name,
+			true
+		);
 
 		const koboldUtils = new KoboldUtils(kobold);
 		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
@@ -80,7 +80,7 @@ export class ActionSetSubCommand implements Command {
 			action => action.name.toLocaleLowerCase() === actionTarget.toLocaleLowerCase()
 		);
 		if (!matchedAction) {
-			await InteractionUtils.send(intr, LL.commands.action.interactions.notFound());
+			await InteractionUtils.send(intr, ActionDefinition.strings.notFound);
 			return;
 		}
 		// just in case we need to set the name of the action, save it here
@@ -114,7 +114,7 @@ export class ActionSetSubCommand implements Command {
 			if (isActionTypeEnum(enumValue)) {
 				matchedAction.type = enumValue;
 			} else {
-				throw new KoboldError(LL.commands.action.set.interactions.invalidActionType());
+				throw new KoboldError(ActionDefinition.strings.set.invalidActionType);
 			}
 		} else if (fieldToUpdate === 'actionCost') {
 			const actionInputMap: Record<string, ActionCostEnum | undefined> = {
@@ -137,14 +137,14 @@ export class ActionSetSubCommand implements Command {
 			if (finalValue) {
 				matchedAction.actionCost = finalValue;
 			} else {
-				throw new KoboldError(LL.commands.action.set.interactions.invalidActionCost());
+				throw new KoboldError(ActionDefinition.strings.set.invalidActionCost);
 			}
 		}
 		// integer values
 		else if (['baseLevel'].includes(fieldToUpdate)) {
 			const parsedValue = parseInt(newValue.trim());
 			if (isNaN(parsedValue) || parsedValue < 1) {
-				throw new KoboldError(LL.commands.action.set.interactions.invalidInteger());
+				throw new KoboldError(ActionDefinition.strings.set.invalidInteger);
 			} else {
 				matchedAction.baseLevel = parsedValue;
 			}
@@ -162,7 +162,7 @@ export class ActionSetSubCommand implements Command {
 			matchedAction.autoHeighten = autoHeighten;
 		} else {
 			// invalid field
-			throw new KoboldError(LL.commands.action.set.interactions.unknownField());
+			throw new KoboldError(ActionDefinition.strings.set.unknownField);
 		}
 
 		await kobold.sheetRecord.update(
@@ -173,7 +173,7 @@ export class ActionSetSubCommand implements Command {
 		//send a confirmation message
 		await InteractionUtils.send(
 			intr,
-			LL.commands.action.set.interactions.success({
+			ActionDefinition.strings.set.success({
 				actionOption: fieldToUpdate,
 				newValue: newValue,
 				actionName: currentActionName,

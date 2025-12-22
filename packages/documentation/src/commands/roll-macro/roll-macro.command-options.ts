@@ -1,12 +1,12 @@
 import { ApplicationCommandOptionType } from 'discord-api-types/v10';
-import type { CommandOptions, SpecificCommandOptions } from '../helpers/commands.d.js';
+import type { CommandOptions, SpecificCommandOptions } from '../helpers/commands.types.js';
 
 export enum RollMacroCommandOptionEnum {
 	name = 'name',
 	value = 'value',
 }
 
-export const rollMacroCommandOptions: CommandOptions = {
+export const rollMacroCommandOptions = {
 	[RollMacroCommandOptionEnum.name]: {
 		name: 'name',
 		description: 'The name of the roll macro.',

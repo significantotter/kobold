@@ -10,6 +10,6 @@ export default defineConfig({
 		// and we're truncating the db after each test
 		// so when we truncate, other active workers request the resource being truncated
 		// deadlocking other workers
-		singleThread: true,
+		fileParallelism: false,
 	},
 });

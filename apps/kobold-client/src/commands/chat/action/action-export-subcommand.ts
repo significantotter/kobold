@@ -1,34 +1,20 @@
-import {
-	ApplicationCommandType,
-	ChatInputCommandInteraction,
-	PermissionsString,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
-} from 'discord.js';
+import { ChatInputCommandInteraction } from 'discord.js';
 
 import { Config } from '@kobold/config';
-import L from '../../../i18n/i18n-node.js';
-import { TranslationFunctions } from '../../../i18n/i18n-types.js';
 import { Kobold } from '@kobold/db';
 import { PasteBin } from '../../../services/pastebin/index.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { Command, CommandDeferType } from '../../index.js';
+import { Command } from '../../index.js';
+import { ActionDefinition } from '@kobold/documentation';
+import { BaseCommandClass } from '../../command.js';
 
-export class ActionExportSubCommand implements Command {
-	public name = L.en.commands.action.export.name();
-	public metadata: RESTPostAPIChatInputApplicationCommandsJSONBody = {
-		type: ApplicationCommandType.ChatInput,
-		name: L.en.commands.action.export.name(),
-		description: L.en.commands.action.export.description(),
-		dm_permission: true,
-		default_member_permissions: undefined,
-	};
-	public deferType = CommandDeferType.NONE;
-	public requireClientPerms: PermissionsString[] = [];
-
+export class ActionExportSubCommand extends BaseCommandClass(
+	ActionDefinition,
+	ActionDefinition.subCommandEnum.export
+) {
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		LL: TranslationFunctions,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const koboldUtils = new KoboldUtils(kobold);
@@ -45,7 +31,7 @@ export class ActionExportSubCommand implements Command {
 
 		await InteractionUtils.send(
 			intr,
-			LL.commands.action.export.interactions.success({
+			ActionDefinition.strings.export.success({
 				characterName: activeCharacter.name,
 				pasteBinLink: pastebinPost,
 			})

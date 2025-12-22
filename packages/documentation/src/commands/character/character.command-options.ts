@@ -1,14 +1,15 @@
 import { ApplicationCommandOptionType } from 'discord-api-types/v10';
-import type { CommandOptions, SpecificCommandOptions } from '../helpers/commands.d.js';
+import type { CommandOptions, SpecificCommandOptions } from '../helpers/commands.types.js';
 
 export enum CharacterCommandOptionEnum {
 	setDefaultScope = 'default-for',
 	wgUrl = 'wg-url',
-	pbJsonId = 'pb-json-id',
+	pathbuilderJsonId = 'pb-json-id',
 	pastebinUrl = 'pastebin-url',
 	useStamina = 'use-stamina',
 	name = 'name',
 	id = 'id',
+	sheetStyle = 'game-sheet-style',
 }
 
 export enum CharacterSetDefaultScopeOptionsEnum {
@@ -16,7 +17,7 @@ export enum CharacterSetDefaultScopeOptionsEnum {
 	server = 'server',
 }
 
-export const characterCommandOptions: CommandOptions = {
+export const characterCommandOptions = {
 	[CharacterCommandOptionEnum.setDefaultScope]: {
 		name: 'default-for',
 		description: 'Set the default scope for the character.',
@@ -39,7 +40,7 @@ export const characterCommandOptions: CommandOptions = {
 		required: true,
 		type: ApplicationCommandOptionType.String,
 	},
-	[CharacterCommandOptionEnum.pbJsonId]: {
+	[CharacterCommandOptionEnum.pathbuilderJsonId]: {
 		name: 'pb-json-id',
 		description: 'The JSON ID for importing character data from Pathbuilder.',
 		required: true,
@@ -70,71 +71,24 @@ export const characterCommandOptions: CommandOptions = {
 		required: false,
 		type: ApplicationCommandOptionType.Integer,
 	},
-} satisfies SpecificCommandOptions<CharacterCommandOptionEnum>;
-
-/**
- * Command Definition:
- * 
- *
- * Command Options:
-	public static readonly CHARACTER_SET_DEFAULT_SCOPE: APIApplicationCommandBasicOption = {
-		name: L.en.commandOptions.setDefaultScope.name(),
-		description: L.en.commandOptions.setDefaultScope.description(),
-		required: true,
+	[CharacterCommandOptionEnum.sheetStyle]: {
+		name: CharacterCommandOptionEnum.sheetStyle,
+		description: 'Whether to show only counters like hp, basic stats, or a full sheet.',
+		required: false,
 		type: ApplicationCommandOptionType.String,
 		choices: [
 			{
-				name: L.en.commandOptions.setDefaultScope.choices.channel.name(),
-				value: L.en.commandOptions.setDefaultScope.choices.channel.value(),
+				name: 'countersOnly',
+				value: 'countersOnly',
 			},
 			{
-				name: L.en.commandOptions.setDefaultScope.choices.server.name(),
-				value: L.en.commandOptions.setDefaultScope.choices.server.value(),
+				name: 'basicStats',
+				value: 'basicStats',
+			},
+			{
+				name: 'fullSheet',
+				value: 'fullSheet',
 			},
 		],
-	};
-	public static readonly IMPORT_OPTION: APIApplicationCommandBasicOption = {
-		name: L.en.commandOptions.wgUrl.name(),
-		description: L.en.commandOptions.wgUrl.description(),
-		required: true,
-		type: ApplicationCommandOptionType.String,
-	};
-	public static readonly IMPORT_PATHBUILDER_OPTION: APIApplicationCommandBasicOption = {
-		name: L.en.commandOptions.pbJsonId.name(),
-		description: L.en.commandOptions.pbJsonId.description(),
-		required: true,
-		type: ApplicationCommandOptionType.Number,
-	};
-	public static readonly IMPORT_PASTEBIN_OPTION: APIApplicationCommandBasicOption = {
-		name: L.en.commandOptions.pastebinUrl.name(),
-		description: L.en.commandOptions.pastebinUrl.description(),
-		required: true,
-		type: ApplicationCommandOptionType.String,
-	};
-	public static readonly IMPORT_USE_STAMINA_OPTION: APIApplicationCommandBasicOption = {
-		name: L.en.commandOptions.useStamina.name(),
-		description: L.en.commandOptions.useStamina.description(),
-		required: false,
-		type: ApplicationCommandOptionType.Boolean,
-	};
-	public static readonly SET_ACTIVE_NAME_OPTION: APIApplicationCommandBasicOption = {
-		name: L.en.commandOptions.name.name(),
-		description: L.en.commandOptions.name.description(),
-		required: true,
-		autocomplete: true,
-		type: ApplicationCommandOptionType.String,
-	};
-	public static readonly SET_ACTIVE_ID_OPTION: APIApplicationCommandBasicOption = {
-		name: L.en.commandOptions.id.name(),
-		description: L.en.commandOptions.id.description(),
-		required: false,
-		type: ApplicationCommandOptionType.Integer,
-	};
- 
- *
- * L.en.commandOptions
- *
- * L.en.commands
- *
- *
- */
+	},
+} satisfies SpecificCommandOptions<CharacterCommandOptionEnum>;

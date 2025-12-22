@@ -64,7 +64,9 @@ export class InitiativeActorGroupModel extends Model<Database['initiativeActorGr
 			.returningAll()
 			.returning(eb => [actorsForGroup(eb), initiativeForActorGroup(eb)])
 			.execute();
-		return transformQueryOutputToRelations(result)[0];
+		return transformQueryOutputToRelations(
+			result as unknown as InitiativeActorGroupGraphQueryOutput[]
+		)[0];
 	}
 
 	public async read({
@@ -78,7 +80,11 @@ export class InitiativeActorGroupModel extends Model<Database['initiativeActorGr
 			.select(eb => [actorsForGroup(eb), initiativeForActorGroup(eb)])
 			.where('initiativeActorGroup.id', '=', id)
 			.execute();
-		return transformQueryOutputToRelations(result)[0] ?? null;
+		return (
+			transformQueryOutputToRelations(
+				result as unknown as InitiativeActorGroupGraphQueryOutput[]
+			)[0] ?? null
+		);
 	}
 
 	public async update(
@@ -92,7 +98,9 @@ export class InitiativeActorGroupModel extends Model<Database['initiativeActorGr
 			.returningAll()
 			.returning(eb => [actorsForGroup(eb), initiativeForActorGroup(eb)])
 			.executeTakeFirstOrThrow();
-		return transformQueryOutputToRelations([result])[0];
+		return transformQueryOutputToRelations([
+			result,
+		] as unknown as InitiativeActorGroupGraphQueryOutput[])[0];
 	}
 
 	public async delete({ id }: { id: InitiativeActorGroupId }): Promise<void> {

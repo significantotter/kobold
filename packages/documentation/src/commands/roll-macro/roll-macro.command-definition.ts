@@ -1,9 +1,15 @@
-import { ApplicationCommandOptionType, ApplicationCommandType } from 'discord-api-types/v10';
-import { CommandDefinition } from '../helpers/commands.d.js';
+import {
+	APIApplicationCommandOption,
+	ApplicationCommandOptionType,
+	ApplicationCommandType,
+} from 'discord-api-types/v10';
+import type { CommandDefinition } from '../helpers/commands.types.js';
 import {
 	RollMacroCommandOptionEnum,
 	rollMacroCommandOptions,
 } from './roll-macro.command-options.js';
+import { anyUsageContext } from '../helpers/defaults.js';
+import { withOrder } from '../helpers/common.js';
 
 export enum rollMacroSubCommandEnum {
 	list = 'list',
@@ -17,7 +23,7 @@ export const rollMacroCommandDefinition = {
 		name: 'roll-macro',
 		description: 'Short roll that can be referenced and used by other rolls. Case insensitive.',
 		type: ApplicationCommandType.ChatInput,
-		dm_permission: true,
+		contexts: anyUsageContext,
 		default_member_permissions: undefined,
 	},
 	subCommands: {
@@ -31,10 +37,14 @@ export const rollMacroCommandDefinition = {
 			description: 'Creates a roll macro for the active character.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[RollMacroCommandOptionEnum.name]:
+				[RollMacroCommandOptionEnum.name]: withOrder(
 					rollMacroCommandOptions[RollMacroCommandOptionEnum.name],
-				[RollMacroCommandOptionEnum.value]:
+					1
+				),
+				[RollMacroCommandOptionEnum.value]: withOrder(
 					rollMacroCommandOptions[RollMacroCommandOptionEnum.value],
+					2
+				),
 			},
 		},
 		[rollMacroSubCommandEnum.set]: {
@@ -42,13 +52,18 @@ export const rollMacroCommandDefinition = {
 			description: 'Sets the value of a roll macro for your active character.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[RollMacroCommandOptionEnum.name]: {
-					...rollMacroCommandOptions[RollMacroCommandOptionEnum.name],
-					autocomplete: true,
-					choices: undefined,
-				},
-				[RollMacroCommandOptionEnum.value]:
+				[RollMacroCommandOptionEnum.name]: withOrder(
+					{
+						...rollMacroCommandOptions[RollMacroCommandOptionEnum.name],
+						autocomplete: true,
+						choices: undefined,
+					} as APIApplicationCommandOption,
+					1
+				),
+				[RollMacroCommandOptionEnum.value]: withOrder(
 					rollMacroCommandOptions[RollMacroCommandOptionEnum.value],
+					2
+				),
 			},
 		},
 		[rollMacroSubCommandEnum.remove]: {
@@ -56,11 +71,14 @@ export const rollMacroCommandDefinition = {
 			description: 'Removes a roll macro for the active character.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[RollMacroCommandOptionEnum.name]: {
-					...rollMacroCommandOptions[RollMacroCommandOptionEnum.name],
-					autocomplete: true,
-					choices: undefined,
-				},
+				[RollMacroCommandOptionEnum.name]: withOrder(
+					{
+						...rollMacroCommandOptions[RollMacroCommandOptionEnum.name],
+						autocomplete: true,
+						choices: undefined,
+					} as APIApplicationCommandOption,
+					1
+				),
 			},
 		},
 	},

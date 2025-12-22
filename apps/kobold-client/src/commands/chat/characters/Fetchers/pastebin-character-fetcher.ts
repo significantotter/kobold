@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { fromZodError } from 'zod-validation-error';
 import {
 	Action,
 	CharacterWithRelations,
@@ -61,7 +60,7 @@ export class PasteBinCharacterFetcher extends CharacterFetcher<
 				`Yip! I wasn't able to parse the character data at the url ${args.url}. ` +
 					`This is likely an issue with the tool that exports the data. ` +
 					`Please report the following error data to the creator of the tool:\n\n` +
-					fromZodError(parseResult.error)
+					z.prettifyError(parseResult.error)
 			);
 		}
 		return {

@@ -1,9 +1,15 @@
-import { ApplicationCommandOptionType, ApplicationCommandType } from 'discord-api-types/v10';
-import { CommandDefinition } from '../helpers/commands.d.js';
+import {
+	APIApplicationCommandOption,
+	ApplicationCommandOptionType,
+	ApplicationCommandType,
+} from 'discord-api-types/v10';
+import type { CommandDefinition } from '../helpers/commands.types.js';
 import {
 	CounterGroupCommandOptionEnum,
 	counterGroupCommandOptions,
 } from './counter-group.command-options.js';
+import { anyUsageContext } from '../helpers/defaults.js';
+import { withOrder } from '../helpers/common.js';
 
 export enum CounterGroupSubCommandEnum {
 	list = 'list',
@@ -19,7 +25,7 @@ export const counterGroupCommandDefinition = {
 		name: 'counter-group',
 		description: 'Groups of related counters.',
 		type: ApplicationCommandType.ChatInput,
-		dm_permission: true,
+		contexts: anyUsageContext,
 		default_member_permissions: undefined,
 	},
 	subCommands: {
@@ -34,11 +40,16 @@ export const counterGroupCommandDefinition = {
 			description: 'Displays a counter group for your active character.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[CounterGroupCommandOptionEnum.counterGroupName]: {
-					...counterGroupCommandOptions[CounterGroupCommandOptionEnum.counterGroupName],
-					autocomplete: true,
-					choices: undefined,
-				},
+				[CounterGroupCommandOptionEnum.counterGroupName]: withOrder(
+					{
+						...counterGroupCommandOptions[
+							CounterGroupCommandOptionEnum.counterGroupName
+						],
+						autocomplete: true,
+						choices: undefined,
+					} as APIApplicationCommandOption,
+					1
+				),
 			},
 		},
 		[CounterGroupSubCommandEnum.reset]: {
@@ -46,11 +57,16 @@ export const counterGroupCommandDefinition = {
 			description: "Resets all counters within a character's counter group.",
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[CounterGroupCommandOptionEnum.counterGroupName]: {
-					...counterGroupCommandOptions[CounterGroupCommandOptionEnum.counterGroupName],
-					autocomplete: true,
-					choices: undefined,
-				},
+				[CounterGroupCommandOptionEnum.counterGroupName]: withOrder(
+					{
+						...counterGroupCommandOptions[
+							CounterGroupCommandOptionEnum.counterGroupName
+						],
+						autocomplete: true,
+						choices: undefined,
+					} as APIApplicationCommandOption,
+					1
+				),
 			},
 		},
 		[CounterGroupSubCommandEnum.create]: {
@@ -58,12 +74,16 @@ export const counterGroupCommandDefinition = {
 			description: 'Creates a counter group for the active character.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[CounterGroupCommandOptionEnum.counterGroupName]:
+				[CounterGroupCommandOptionEnum.counterGroupName]: withOrder(
 					counterGroupCommandOptions[CounterGroupCommandOptionEnum.counterGroupName],
-				[CounterGroupCommandOptionEnum.counterGroupDescription]:
+					1
+				),
+				[CounterGroupCommandOptionEnum.counterGroupDescription]: withOrder(
 					counterGroupCommandOptions[
 						CounterGroupCommandOptionEnum.counterGroupDescription
 					],
+					2
+				),
 			},
 		},
 		[CounterGroupSubCommandEnum.set]: {
@@ -71,15 +91,24 @@ export const counterGroupCommandDefinition = {
 			description: 'Sets the value of a counter group for your active character.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[CounterGroupCommandOptionEnum.counterGroupName]: {
-					...counterGroupCommandOptions[CounterGroupCommandOptionEnum.counterGroupName],
-					autocomplete: true,
-					choices: undefined,
-				},
-				[CounterGroupCommandOptionEnum.counterGroupSetOption]:
+				[CounterGroupCommandOptionEnum.counterGroupName]: withOrder(
+					{
+						...counterGroupCommandOptions[
+							CounterGroupCommandOptionEnum.counterGroupName
+						],
+						autocomplete: true,
+						choices: undefined,
+					} as APIApplicationCommandOption,
+					1
+				),
+				[CounterGroupCommandOptionEnum.counterGroupSetOption]: withOrder(
 					counterGroupCommandOptions[CounterGroupCommandOptionEnum.counterGroupSetOption],
-				[CounterGroupCommandOptionEnum.counterGroupSetValue]:
+					2
+				),
+				[CounterGroupCommandOptionEnum.counterGroupSetValue]: withOrder(
 					counterGroupCommandOptions[CounterGroupCommandOptionEnum.counterGroupSetValue],
+					3
+				),
 			},
 		},
 		[CounterGroupSubCommandEnum.remove]: {
@@ -87,11 +116,16 @@ export const counterGroupCommandDefinition = {
 			description: 'Removes a counter group for the active character.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[CounterGroupCommandOptionEnum.counterGroupName]: {
-					...counterGroupCommandOptions[CounterGroupCommandOptionEnum.counterGroupName],
-					autocomplete: true,
-					choices: undefined,
-				},
+				[CounterGroupCommandOptionEnum.counterGroupName]: withOrder(
+					{
+						...counterGroupCommandOptions[
+							CounterGroupCommandOptionEnum.counterGroupName
+						],
+						autocomplete: true,
+						choices: undefined,
+					} as APIApplicationCommandOption,
+					1
+				),
 			},
 		},
 	},

@@ -1,7 +1,6 @@
-import { generateMock } from '@anatine/zod-mock';
 import { Initiative, zInitiativeInitializer } from '../index.js';
 import _ from 'lodash';
-import { truncateDbForTests, vitestKobold, ResourceFactories } from '../test-utils.js';
+import { truncateDbForTests, vitestKobold, ResourceFactories, fake } from '../test-utils.js';
 
 describe('InitiativeModel', () => {
 	afterEach(async () => {
@@ -9,7 +8,7 @@ describe('InitiativeModel', () => {
 	});
 	describe('create, read', () => {
 		it('creates a new initiative, reads it, and returns the initiative plus relations', async () => {
-			const fakeInitiativeMock = generateMock(zInitiativeInitializer);
+			const fakeInitiativeMock = fake(zInitiativeInitializer);
 
 			const created = await vitestKobold.initiative.create(fakeInitiativeMock);
 			const read = await vitestKobold.initiative.read({ id: created.id });
