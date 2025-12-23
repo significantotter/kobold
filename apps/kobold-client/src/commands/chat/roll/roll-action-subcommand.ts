@@ -14,14 +14,10 @@ import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Command } from '../../index.js';
-import { ActionDefinition, InitDefinition, RollDefinition } from '@kobold/documentation';
+import { RollDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
 const commandOptions = RollDefinition.options;
 const commandOptionsEnum = RollDefinition.commandOptionsEnum;
-const actionCommandOptions = ActionDefinition.options;
-const actionCommandOptionsEnum = ActionDefinition.commandOptionsEnum;
-const initCommandOptions = InitDefinition.options;
-const initCommandOptionsEnum = InitDefinition.commandOptionsEnum;
 
 export class RollActionSubCommand extends BaseCommandClass(
 	RollDefinition,
@@ -33,12 +29,10 @@ export class RollActionSubCommand extends BaseCommandClass(
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === actionCommandOptions[actionCommandOptionsEnum.targetAction].name) {
+		if (option.name === commandOptions[commandOptionsEnum.targetAction].name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
 			const match =
-				intr.options.getString(
-					actionCommandOptions[actionCommandOptionsEnum.targetAction].name
-				) ?? '';
+				intr.options.getString(commandOptions[commandOptionsEnum.targetAction].name) ?? '';
 
 			const { characterUtils } = new KoboldUtils(kobold);
 
@@ -59,11 +53,11 @@ export class RollActionSubCommand extends BaseCommandClass(
 			//return the matched actions
 			return matchedActions;
 		}
-		if (option.name === initCommandOptions[initCommandOptionsEnum.initCharacterTarget].name) {
+		if (option.name === commandOptions[commandOptionsEnum.initCharacterTarget].name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
 			const match =
 				intr.options.getString(
-					initCommandOptions[initCommandOptionsEnum.initCharacterTarget].name
+					commandOptions[commandOptionsEnum.initCharacterTarget].name
 				) ?? '';
 
 			const { autocompleteUtils } = new KoboldUtils(kobold);
@@ -77,11 +71,11 @@ export class RollActionSubCommand extends BaseCommandClass(
 		{ kobold }: { kobold: any }
 	): Promise<void> {
 		const targetActionName = intr.options.getString(
-			actionCommandOptions[actionCommandOptionsEnum.targetAction].name,
+			commandOptions[commandOptionsEnum.targetAction].name,
 			true
 		);
 		const targetSheetName = intr.options.getString(
-			initCommandOptions[initCommandOptionsEnum.initCharacterTarget].name,
+			commandOptions[commandOptionsEnum.initCharacterTarget].name,
 			true
 		);
 		const attackModifierExpression =

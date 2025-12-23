@@ -19,8 +19,6 @@ import { InitDefinition, RollDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
 const commandOptions = InitDefinition.options;
 const commandOptionsEnum = InitDefinition.commandOptionsEnum;
-const rollCommandOptions = RollDefinition.options;
-const rollCommandOptionsEnum = RollDefinition.commandOptionsEnum;
 
 export class InitJoinSubCommand extends BaseCommandClass(
 	InitDefinition,
@@ -32,13 +30,11 @@ export class InitJoinSubCommand extends BaseCommandClass(
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === rollCommandOptions[rollCommandOptionsEnum.skillChoice].name) {
+		if (option.name === commandOptions[commandOptionsEnum.skillChoice].name) {
 			const { characterUtils } = new KoboldUtils(kobold);
 			//we don't need to autocomplete if we're just dealing with whitespace
 			const match =
-				intr.options.getString(
-					rollCommandOptions[rollCommandOptionsEnum.skillChoice].name
-				) ?? '';
+				intr.options.getString(commandOptions[commandOptionsEnum.skillChoice].name) ?? '';
 
 			//get the active character
 			const activeCharacter = await characterUtils.getActiveCharacter(intr);
@@ -85,10 +81,10 @@ export class InitJoinSubCommand extends BaseCommandClass(
 			commandOptions[commandOptionsEnum.initValue].name
 		);
 		const skillChoice = intr.options.getString(
-			rollCommandOptions[rollCommandOptionsEnum.skillChoice].name
+			commandOptions[commandOptionsEnum.skillChoice].name
 		);
 		const diceExpression = intr.options.getString(
-			rollCommandOptions[rollCommandOptionsEnum.rollExpression].name
+			commandOptions[commandOptionsEnum.rollExpression].name
 		);
 		const hideStats =
 			intr.options.getBoolean(commandOptions[commandOptionsEnum.initHideStats].name) ?? false;
@@ -102,7 +98,7 @@ export class InitJoinSubCommand extends BaseCommandClass(
 		});
 		const initiativeResult = _.isNumber(rollResult)
 			? rollResult
-			: (rollResult.getRollTotalArray()[0] ?? 0);
+			: rollResult.getRollTotalArray()[0] ?? 0;
 
 		const actorName = InitiativeBuilderUtils.getUniqueInitActorName(
 			currentInitiative,

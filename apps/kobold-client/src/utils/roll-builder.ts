@@ -1,13 +1,8 @@
 import { APIEmbedField } from 'discord.js';
 import _ from 'lodash';
-import { utilStrings } from '@kobold/documentation';
 import {
 	Attribute,
 	CharacterWithRelations,
-	DefaultCompendiumEnum,
-	InitStatsNotificationEnum,
-	InlineRollsDisplayEnum,
-	RollCompactModeEnum,
 	UserSettings,
 } from '@kobold/db';
 import { KoboldError } from './KoboldError.js';
@@ -483,13 +478,11 @@ export class RollBuilder {
 
 		const rollBuilder = new RollBuilder({
 			actorName: actorName ?? creature.name ?? userName,
-			creature: creature,
+			creature,
 			rollNote,
 			rollDescription:
 				description ||
-				utilStrings.roll.attackRollDescription({
-					attackName: _.startCase(roll.name),
-				}),
+				('rolled ' + _.startCase(roll.name)),
 			userSettings,
 		});
 		rollBuilder.addRoll({

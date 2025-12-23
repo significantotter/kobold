@@ -3,7 +3,6 @@ import type { CommandDefinition } from '../helpers/commands.types.js';
 import { InitCommandOptionEnum, initCommandOptions } from './init.command-options.js';
 import { anyUsageContext } from '../helpers/defaults.js';
 import { withOrder } from '../helpers/common.js';
-import { CommandDeferType } from '../helpers.js';
 
 export enum InitSubCommandEnum {
 	start = 'start',
@@ -253,6 +252,18 @@ export const initCommandDefinition = {
 				[InitCommandOptionEnum.initNote]: withOrder(
 					initCommandOptions[InitCommandOptionEnum.initNote],
 					8
+				),
+				[InitCommandOptionEnum.rollOverwriteAttack]: withOrder(
+					initCommandOptions[InitCommandOptionEnum.rollOverwriteAttack],
+					9
+				),
+				[InitCommandOptionEnum.rollOverwriteSave]: withOrder(
+					initCommandOptions[InitCommandOptionEnum.rollOverwriteSave],
+					10
+				),
+				[InitCommandOptionEnum.rollOverwriteDamage]: withOrder(
+					initCommandOptions[InitCommandOptionEnum.rollOverwriteDamage],
+					11
 				),
 			},
 		},

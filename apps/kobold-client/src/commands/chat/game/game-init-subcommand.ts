@@ -16,14 +16,10 @@ import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Command } from '../../index.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
-import { GameDefinition, InitDefinition, RollDefinition } from '@kobold/documentation';
+import { GameDefinition, utilStrings } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
 const commandOptions = GameDefinition.options;
 const commandOptionsEnum = GameDefinition.commandOptionsEnum;
-const initCommandOptions = InitDefinition.options;
-const initCommandOptionsEnum = InitDefinition.commandOptionsEnum;
-const rollCommandOptions = RollDefinition.options;
-const rollCommandOptionsEnum = RollDefinition.commandOptionsEnum;
 
 export class GameInitSubCommand extends BaseCommandClass(
 	GameDefinition,
@@ -44,12 +40,10 @@ export class GameInitSubCommand extends BaseCommandClass(
 			const { gameUtils } = new KoboldUtils(kobold);
 			const activeGame = await gameUtils.getActiveGame(intr.user.id, intr.guildId ?? '');
 			return gameUtils.autocompleteGameCharacter(targetCharacter, activeGame);
-		} else if (option.name === rollCommandOptions[rollCommandOptionsEnum.skillChoice].name) {
+		} else if (option.name === commandOptions[commandOptionsEnum.skillChoice].name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
 			const match =
-				intr.options.getString(
-					rollCommandOptions[rollCommandOptionsEnum.skillChoice].name
-				) ?? '';
+				intr.options.getString(commandOptions[commandOptionsEnum.skillChoice].name) ?? '';
 
 			const { gameUtils } = new KoboldUtils(kobold);
 			//get the active game
@@ -98,13 +92,13 @@ export class GameInitSubCommand extends BaseCommandClass(
 		koboldUtils.assertActiveGameNotNull(activeGame);
 
 		const initiativeValue = intr.options.getNumber(
-			initCommandOptions[initCommandOptionsEnum.initValue].name
+			commandOptions[commandOptionsEnum.initValue].name
 		);
 		const skillChoice = intr.options.getString(
-			rollCommandOptions[rollCommandOptionsEnum.skillChoice].name
+			commandOptions[commandOptionsEnum.skillChoice].name
 		);
 		const diceExpression = intr.options.getString(
-			rollCommandOptions[rollCommandOptionsEnum.rollExpression].name
+			commandOptions[commandOptionsEnum.rollExpression].name
 		);
 		const targetCharacter = intr.options.getString(
 			commandOptions[commandOptionsEnum.gameTargetCharacter].name,
@@ -125,7 +119,7 @@ export class GameInitSubCommand extends BaseCommandClass(
 			if (!intr.channel || !intr.channel.id) {
 				await InteractionUtils.send(
 					intr,
-					InitDefinition.strings.start.notServerChannelError
+					utilStrings.initiative.initOutsideServerChannelError
 				);
 				return;
 			}
@@ -159,7 +153,7 @@ export class GameInitSubCommand extends BaseCommandClass(
 			});
 			const initiativeResult = _.isNumber(rollResult)
 				? rollResult
-				: (rollResult.getRollTotalArray()[0] ?? 0);
+				: rollResult.getRollTotalArray()[0] ?? 0;
 
 			const actorName = InitiativeBuilderUtils.getUniqueInitActorName(
 				currentInitiative,

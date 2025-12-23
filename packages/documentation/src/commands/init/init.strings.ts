@@ -11,7 +11,6 @@ export const initStrings = {
 
 	// ─── START SUBCOMMAND ────────────────────────────────────────────────
 	start: {
-		notServerChannelError: 'Yip! You can only start initiative in a normal server channel.',
 		initExistsError:
 			"Yip! There's already an initiative in this channel. End it before you start a new one!",
 		otherError: 'Yip! Something went wrong when starting your initiative!',

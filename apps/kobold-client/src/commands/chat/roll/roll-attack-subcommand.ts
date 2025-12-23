@@ -13,12 +13,10 @@ import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Command } from '../../index.js';
-import { InitDefinition, RollDefinition } from '@kobold/documentation';
+import { RollDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
 const commandOptions = RollDefinition.options;
 const commandOptionsEnum = RollDefinition.commandOptionsEnum;
-const initCommandOptions = InitDefinition.options;
-const initCommandOptionsEnum = InitDefinition.commandOptionsEnum;
 
 export class RollAttackSubCommand extends BaseCommandClass(
 	RollDefinition,
@@ -55,11 +53,11 @@ export class RollAttackSubCommand extends BaseCommandClass(
 			//return the matched attacks
 			return matchedAttack;
 		}
-		if (option.name === initCommandOptions[initCommandOptionsEnum.initCharacterTarget].name) {
+		if (option.name === commandOptions[commandOptionsEnum.initCharacterTarget].name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
 			const match =
 				intr.options.getString(
-					initCommandOptions[initCommandOptionsEnum.initCharacterTarget].name
+					commandOptions[commandOptionsEnum.initCharacterTarget].name
 				) ?? '';
 			const koboldUtils: KoboldUtils = new KoboldUtils(kobold);
 
@@ -76,7 +74,7 @@ export class RollAttackSubCommand extends BaseCommandClass(
 			true
 		);
 		const targetSheetName = intr.options.getString(
-			initCommandOptions[initCommandOptionsEnum.initCharacterTarget].name,
+			commandOptions[commandOptionsEnum.initCharacterTarget].name,
 			true
 		);
 		const attackModifierExpression =

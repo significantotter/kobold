@@ -17,12 +17,10 @@ import { EmbedUtils, KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { RollBuilder } from '../../../utils/roll-builder.js';
 import { Command } from '../../index.js';
-import { InitDefinition, RollDefinition } from '@kobold/documentation';
+import { InitDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
 const commandOptions = InitDefinition.options;
 const commandOptionsEnum = InitDefinition.commandOptionsEnum;
-const rollCommandOptions = RollDefinition.options;
-const rollCommandOptionsEnum = RollDefinition.commandOptionsEnum;
 
 export class InitRollSubCommand extends BaseCommandClass(
 	InitDefinition,
@@ -46,16 +44,17 @@ export class InitRollSubCommand extends BaseCommandClass(
 				intr.options.getString(commandOptions[commandOptionsEnum.initRollChoice].name) ??
 				'';
 			const targetCharacterName =
-				intr.options.getString(
-					commandOptions[commandOptionsEnum.initCharacterTarget].name
-				) ?? '';
+				intr.options.getString(commandOptions[commandOptionsEnum.initCharacter].name) ?? '';
+			console.log(targetCharacterName);
 
 			const { autocompleteUtils } = new KoboldUtils(kobold);
-			return await autocompleteUtils.getMatchingRollsForInitiativeSheet(
+			const res = await autocompleteUtils.getMatchingRollsForInitiativeSheet(
 				intr,
 				match,
 				targetCharacterName
 			);
+			console.log(res);
+			return res;
 		} else if (option.name === commandOptions[commandOptionsEnum.initCharacterTarget].name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
 			const match =
@@ -86,34 +85,29 @@ export class InitRollSubCommand extends BaseCommandClass(
 		);
 
 		const attackRollOverwrite =
-			intr.options.getString(
-				rollCommandOptions[rollCommandOptionsEnum.rollOverwriteAttack].name
-			) ?? undefined;
+			intr.options.getString(commandOptions[commandOptionsEnum.rollOverwriteAttack].name) ??
+			undefined;
 		const saveRollOverwrite =
-			intr.options.getString(
-				rollCommandOptions[rollCommandOptionsEnum.rollOverwriteSave].name
-			) ?? undefined;
+			intr.options.getString(commandOptions[commandOptionsEnum.rollOverwriteSave].name) ??
+			undefined;
 		const damageRollOverwrite =
-			intr.options.getString(
-				rollCommandOptions[rollCommandOptionsEnum.rollOverwriteDamage].name
-			) ?? undefined;
+			intr.options.getString(commandOptions[commandOptionsEnum.rollOverwriteDamage].name) ??
+			undefined;
 		const modifierExpression =
-			intr.options.getString(rollCommandOptions[rollCommandOptionsEnum.rollModifier].name) ??
-			'';
+			intr.options.getString(commandOptions[commandOptionsEnum.rollModifier].name) ?? '';
 		const damageModifierExpression =
-			intr.options.getString(
-				rollCommandOptions[rollCommandOptionsEnum.damageRollModifier].name
-			) ?? '';
+			intr.options.getString(commandOptions[commandOptionsEnum.damageRollModifier].name) ??
+			'';
 		const targetAC =
-			intr.options.getInteger(rollCommandOptions[rollCommandOptionsEnum.rollTargetDc].name) ??
+			intr.options.getInteger(commandOptions[commandOptionsEnum.rollTargetAc].name) ??
 			undefined;
 
 		const secretRoll =
-			intr.options.getString(rollCommandOptions[rollCommandOptionsEnum.rollSecret].name) ??
+			intr.options.getString(commandOptions[commandOptionsEnum.rollSecret].name) ??
 			InitDefinition.optionChoices.rollSecret.public;
 
 		const rollNote =
-			intr.options.getString(rollCommandOptions[rollCommandOptionsEnum.rollNote].name) ?? '';
+			intr.options.getString(commandOptions[commandOptionsEnum.initNote].name) ?? '';
 
 		const { gameUtils, creatureUtils } = new KoboldUtils(kobold);
 
@@ -130,6 +124,7 @@ export class InitRollSubCommand extends BaseCommandClass(
 			targetCharacterName,
 			true
 		);
+		console.log(actor.name, targetSheetName, targetCharacterName);
 
 		let targetSheetRecord: SheetRecord | null = null;
 		let targetCreature: Creature | null = null;
