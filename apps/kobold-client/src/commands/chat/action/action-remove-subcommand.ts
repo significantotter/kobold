@@ -77,7 +77,7 @@ export class ActionRemoveSubCommand extends BaseCommandClass(
 		if (targetAction) {
 			// ask for confirmation
 
-			const prompt = await intr.reply({
+			const response = await intr.reply({
 				content: ActionDefinition.strings.remove.confirmation.text({
 					actionName: targetAction.name,
 				}),
@@ -101,8 +101,9 @@ export class ActionRemoveSubCommand extends BaseCommandClass(
 					},
 				],
 				flags: [MessageFlags.Ephemeral],
-				fetchReply: true,
+				withResponse: true,
 			});
+			const prompt = response.resource!.message!;
 			let timedOut = false;
 			let result = await CollectorUtils.collectByButton(
 				prompt,

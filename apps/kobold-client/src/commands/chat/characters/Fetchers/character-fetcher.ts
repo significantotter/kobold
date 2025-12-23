@@ -59,15 +59,15 @@ export abstract class CharacterFetcher<SourceData, FetchArgs> {
 	}
 	public async confirmUpdateName(oldName: string, newName: string) {
 		// confirm the update
-		const prompt = await this.intr.followUp({
+		const response = await this.intr.followUp({
 			content:
 				`**WARNING:** The character name on the target sheet ${newName} does not ` +
 				`match your active character's name ${oldName}. If this sheet is not the one you want to update, ` +
 				`please re-export the correct character and try again.` +
 				(this.importSource === 'pathbuilder'
 					? '\n\n**NOTE:** If you are using Pathbuilder, you must re-export your character and use the new json id to ' +
-						'update your character sheet with new changes. Otherwise, I will just reload the data from the last ' +
-						'time you exported ANY character.'
+					  'update your character sheet with new changes. Otherwise, I will just reload the data from the last ' +
+					  'time you exported ANY character.'
 					: ''),
 			components: [
 				{
@@ -89,8 +89,8 @@ export abstract class CharacterFetcher<SourceData, FetchArgs> {
 				},
 			],
 			flags: [MessageFlags.Ephemeral],
-			fetchReply: true,
 		});
+		const prompt = response;
 		let timedOut = false;
 		const result = await CollectorUtils.collectByButton(
 			prompt,

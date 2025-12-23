@@ -28,8 +28,6 @@ import { InitDefinition, RollDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
 const commandOptions = InitDefinition.options;
 const commandOptionsEnum = InitDefinition.commandOptionsEnum;
-const rollCommandOptions = RollDefinition.options;
-const rollCommandOptionsEnum = RollDefinition.commandOptionsEnum;
 
 export class InitAddSubCommand extends BaseCommandClass(
 	InitDefinition,
@@ -102,7 +100,7 @@ export class InitAddSubCommand extends BaseCommandClass(
 			commandOptions[commandOptionsEnum.initValue].name
 		);
 		const diceExpression = intr.options.getString(
-			rollCommandOptions[rollCommandOptionsEnum.rollExpression].name
+			commandOptions[commandOptionsEnum.rollExpression].name
 		);
 		const hideStats =
 			intr.options.getBoolean(commandOptions[commandOptionsEnum.initHideStats].name) ?? true;

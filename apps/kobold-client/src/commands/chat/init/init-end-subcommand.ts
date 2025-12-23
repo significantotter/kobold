@@ -20,7 +20,7 @@ export class InitEndSubCommand extends BaseCommandClass(
 			currentInitiative: true,
 		});
 
-		const prompt = await intr.reply({
+		const response = await intr.reply({
 			content: InitDefinition.strings.end.confirmation.text,
 			components: [
 				{
@@ -42,8 +42,9 @@ export class InitEndSubCommand extends BaseCommandClass(
 				},
 			],
 			flags: [MessageFlags.Ephemeral],
-			fetchReply: true,
+			withResponse: true,
 		});
+		const prompt = response.resource!.message!;
 		let timedOut = false;
 		let result = await CollectorUtils.collectByButton(
 			prompt,

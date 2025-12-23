@@ -25,10 +25,6 @@ import { ConditionDefinition, GameplayDefinition, ModifierDefinition } from '@ko
 import { BaseCommandClass } from '../../command.js';
 const commandOptions = ConditionDefinition.options;
 const commandOptionsEnum = ConditionDefinition.commandOptionsEnum;
-const gameplayCommandOptions = GameplayDefinition.options;
-const gameplayCommandOptionsEnum = GameplayDefinition.commandOptionsEnum;
-const modifierCommandOptions = ModifierDefinition.options;
-const modifierCommandOptionsEnum = ModifierDefinition.commandOptionsEnum;
 
 export class ConditionApplyCustomSubCommand extends BaseCommandClass(
 	ConditionDefinition,
@@ -40,14 +36,10 @@ export class ConditionApplyCustomSubCommand extends BaseCommandClass(
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (
-			option.name ===
-			gameplayCommandOptions[gameplayCommandOptionsEnum.gameplayTargetCharacter].name
-		) {
+		if (option.name === commandOptions[commandOptionsEnum.targetCharacter].name) {
 			const match =
-				intr.options.getString(
-					gameplayCommandOptions[gameplayCommandOptionsEnum.gameplayTargetCharacter].name
-				) ?? '';
+				intr.options.getString(commandOptions[commandOptionsEnum.targetCharacter].name) ??
+				'';
 			const { autocompleteUtils } = new KoboldUtils(kobold);
 			return await autocompleteUtils.getAllTargetOptions(intr, match);
 		}
@@ -60,7 +52,7 @@ export class ConditionApplyCustomSubCommand extends BaseCommandClass(
 		const koboldUtils = new KoboldUtils(kobold);
 		const { gameUtils } = koboldUtils;
 		const targetCharacter = intr.options.getString(
-			gameplayCommandOptions[gameplayCommandOptionsEnum.gameplayTargetCharacter].name,
+			commandOptions[commandOptionsEnum.targetCharacter].name,
 			true
 		);
 		const { targetSheetRecord } = await gameUtils.getCharacterOrInitActorTarget(
@@ -73,32 +65,28 @@ export class ConditionApplyCustomSubCommand extends BaseCommandClass(
 			.trim()
 			.toLowerCase();
 		let conditionType = (
-			intr.options.getString(modifierCommandOptions[modifierCommandOptionsEnum.type].name) ??
+			intr.options.getString(commandOptions[commandOptionsEnum.type].name) ??
 			SheetAdjustmentTypeEnum.untyped
 		)
 			.trim()
 			.toLowerCase();
 		const conditionSeverity =
-			intr.options.getString(
-				modifierCommandOptions[modifierCommandOptionsEnum.severity].name
-			) ?? null;
+			intr.options.getString(commandOptions[commandOptionsEnum.severity].name) ?? null;
 
 		const rollAdjustment = intr.options.getString(
-			modifierCommandOptions[modifierCommandOptionsEnum.rollAdjustment].name
+			commandOptions[commandOptionsEnum.rollAdjustment].name
 		);
 		const rollTargetTagsUnparsed = intr.options.getString(
-			modifierCommandOptions[modifierCommandOptionsEnum.targetTags].name
+			commandOptions[commandOptionsEnum.targetTags].name
 		);
 		let rollTargetTags = rollTargetTagsUnparsed ? rollTargetTagsUnparsed.trim() : null;
 
 		let description = intr.options.getString(
-			modifierCommandOptions[modifierCommandOptionsEnum.description].name
+			commandOptions[commandOptionsEnum.description].name
 		);
-		let note = intr.options.getString(
-			modifierCommandOptions[modifierCommandOptionsEnum.initiativeNote].name
-		);
+		let note = intr.options.getString(commandOptions[commandOptionsEnum.initiativeNote].name);
 		const conditionSheetValues = intr.options.getString(
-			modifierCommandOptions[modifierCommandOptionsEnum.sheetValues].name
+			commandOptions[commandOptionsEnum.sheetValues].name
 		);
 
 		if (!isSheetAdjustmentTypeEnum(conditionType)) {

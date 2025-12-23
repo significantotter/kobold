@@ -36,19 +36,20 @@ export class InteractionUtils {
 				typeof content === 'string'
 					? { content }
 					: content instanceof EmbedBuilder
-						? { embeds: [content] }
-						: content;
+					? { embeds: [content] }
+					: content;
 			if (intr.deferred || intr.replied) {
 				return await intr.followUp({
 					...options,
 					flags: [MessageFlags.Ephemeral],
 				});
 			} else {
-				return await intr.reply({
+				const response = await intr.reply({
 					...options,
 					flags: [MessageFlags.Ephemeral],
-					fetchReply: true,
+					withResponse: true,
 				});
+				return response.resource?.message ?? undefined;
 			}
 		} catch (error) {
 			if (
@@ -112,19 +113,20 @@ export class InteractionUtils {
 				typeof content === 'string'
 					? { content }
 					: content instanceof EmbedBuilder
-						? { embeds: [content] }
-						: content;
+					? { embeds: [content] }
+					: content;
 			if (intr.deferred || intr.replied) {
 				return await intr.followUp({
 					...options,
 					flags: hidden ? [MessageFlags.Ephemeral] : undefined,
 				});
 			} else {
-				return await intr.reply({
+				const response = await intr.reply({
 					...options,
 					flags: hidden ? [MessageFlags.Ephemeral] : undefined,
-					fetchReply: true,
+					withResponse: true,
 				});
+				return response.resource?.message ?? undefined;
 			}
 		} catch (error) {
 			if (
@@ -167,8 +169,8 @@ export class InteractionUtils {
 				typeof content === 'string'
 					? { content }
 					: content instanceof EmbedBuilder
-						? { embeds: [content] }
-						: content;
+					? { embeds: [content] }
+					: content;
 			return await intr.editReply(options);
 		} catch (error) {
 			if (
@@ -192,12 +194,13 @@ export class InteractionUtils {
 				typeof content === 'string'
 					? { content }
 					: content instanceof EmbedBuilder
-						? { embeds: [content] }
-						: content;
-			return await intr.update({
+					? { embeds: [content] }
+					: content;
+			const response = await intr.update({
 				...options,
-				fetchReply: true,
+				withResponse: true,
 			});
+			return response.resource?.message ?? undefined;
 		} catch (error) {
 			if (
 				error instanceof DiscordAPIError &&

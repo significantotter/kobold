@@ -81,6 +81,7 @@ export const gameCommandOptions = {
 		name: GameCommandOptionEnum.gameTargetCharacter,
 		description: 'Rolls for a single character instead of all characters.',
 		required: true,
+		autocomplete: true,
 		type: ApplicationCommandOptionType.String,
 	},
 	[GameCommandOptionEnum.gameDiceRollOrModifier]: {

@@ -15,7 +15,8 @@ export default {
 			'marked as the GM, and can change names, add, and remove any character ' +
 			'present in the initiative, not just their own.',
 		interactions: {
-			notServerChannelError: 'Yip! You can only start initiative in a normal server channel.',
+			initOutsideServerChannelError:
+				'Yip! You can only start initiative in a normal server channel.',
 			initExistsError:
 				"Yip! There's already an initiative in this " +
 				'channel. End it before you start a new one!',

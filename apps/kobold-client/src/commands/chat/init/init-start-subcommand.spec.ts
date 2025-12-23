@@ -26,7 +26,6 @@ describe('InitStartSubCommand Integration', () => {
 		harness = createTestHarness([new InitCommand([new InitStartSubCommand()])]);
 	});
 
-
 	it('should error when initiative already exists in channel', async () => {
 		// Arrange
 		const existingInit = createMockInitiative();
@@ -48,6 +47,8 @@ describe('InitStartSubCommand Integration', () => {
 
 		// Assert
 		expect(result.didRespond()).toBe(true);
-		expect(result.getResponseContent()).toContain('You can only start initiative in');
+		expect(result.getResponseContent()).toContain(
+			'You can only send initiative commands in a regular server channel'
+		);
 	});
 });

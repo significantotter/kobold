@@ -66,6 +66,7 @@ export const gameplayCommandOptions = {
 		name: GameplayCommandOptionEnum.gameplayTargetCharacter,
 		description: 'What character to update. Defaults to your active character.',
 		required: true,
+		autocomplete: true,
 		type: ApplicationCommandOptionType.String,
 	},
 	[GameplayCommandOptionEnum.gameplayTargetChannel]: {

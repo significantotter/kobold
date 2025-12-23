@@ -16,8 +16,6 @@ import { InitDefinition, RollDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
 const commandOptions = InitDefinition.options;
 const commandOptionsEnum = InitDefinition.commandOptionsEnum;
-const rollCommandOptions = RollDefinition.options;
-const rollCommandOptionsEnum = RollDefinition.commandOptionsEnum;
 
 export class InitStatBlockSubCommand extends BaseCommandClass(
 	InitDefinition,
@@ -49,7 +47,7 @@ export class InitStatBlockSubCommand extends BaseCommandClass(
 			true
 		);
 		const secretMessage = intr.options.getString(
-			rollCommandOptions[rollCommandOptionsEnum.rollSecret].name
+			commandOptions[commandOptionsEnum.rollSecret].name
 		);
 
 		const koboldUtils = new KoboldUtils(kobold);

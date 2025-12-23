@@ -6,7 +6,7 @@ import { InteractionUtils } from '../../../utils/index.js';
 import { InitiativeBuilder } from '../../../utils/initiative-builder.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { InitDefinition } from '@kobold/documentation';
+import { InitDefinition, utilStrings } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
 
 export class InitStartSubCommand extends BaseCommandClass(
@@ -19,7 +19,7 @@ export class InitStartSubCommand extends BaseCommandClass(
 	): Promise<void> {
 		const startingUser = intr.user.id;
 		if (!intr.channel || !intr.channel.id) {
-			await InteractionUtils.send(intr, InitDefinition.strings.start.notServerChannelError);
+			await InteractionUtils.send(intr, utilStrings.initiative.initOutsideServerChannelError);
 			return;
 		}
 		const koboldUtils = new KoboldUtils(kobold);

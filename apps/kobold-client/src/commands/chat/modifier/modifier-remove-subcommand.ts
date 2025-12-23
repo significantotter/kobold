@@ -76,7 +76,7 @@ export class ModifierRemoveSubCommand extends BaseCommandClass(
 		if (targetModifier) {
 			// ask for confirmation
 
-			const prompt = await intr.reply({
+			const response = await intr.reply({
 				content: ModifierDefinition.strings.remove.confirmation.text({
 					modifierName: targetModifier.name,
 				}),
@@ -100,8 +100,9 @@ export class ModifierRemoveSubCommand extends BaseCommandClass(
 					},
 				],
 				flags: [MessageFlags.Ephemeral],
-				fetchReply: true,
+				withResponse: true,
 			});
+			const prompt = response.resource!.message!;
 			let timedOut = false;
 			let result = await CollectorUtils.collectByButton(
 				prompt,

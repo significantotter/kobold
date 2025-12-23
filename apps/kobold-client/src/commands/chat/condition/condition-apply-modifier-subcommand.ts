@@ -13,12 +13,10 @@ import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Command } from '../../index.js';
 import { InputParseUtils } from '../../../utils/input-parse-utils.js';
-import { ConditionDefinition, GameplayDefinition, ModifierDefinition } from '@kobold/documentation';
+import { ConditionDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
-const gameplayCommandOptions = GameplayDefinition.options;
-const gameplayCommandOptionsEnum = GameplayDefinition.commandOptionsEnum;
-const modifierCommandOptions = ModifierDefinition.options;
-const modifierCommandOptionsEnum = ModifierDefinition.commandOptionsEnum;
+const commandOptions = ConditionDefinition.options;
+const commandOptionsEnum = ConditionDefinition.commandOptionsEnum;
 
 export class ConditionApplyModifierSubCommand extends BaseCommandClass(
 	ConditionDefinition,
@@ -30,22 +28,16 @@ export class ConditionApplyModifierSubCommand extends BaseCommandClass(
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (
-			option.name ===
-			gameplayCommandOptions[gameplayCommandOptionsEnum.gameplayTargetCharacter].name
-		) {
+		if (option.name === commandOptions[commandOptionsEnum.targetCharacter].name) {
 			const match =
-				intr.options.getString(
-					gameplayCommandOptions[gameplayCommandOptionsEnum.gameplayTargetCharacter].name
-				) ?? '';
+				intr.options.getString(commandOptions[commandOptionsEnum.targetCharacter].name) ??
+				'';
 			const { autocompleteUtils } = new KoboldUtils(kobold);
 			return await autocompleteUtils.getAllTargetOptions(intr, match);
 		}
-		if (option.name === modifierCommandOptions[modifierCommandOptionsEnum.name].name) {
+		if (option.name === commandOptions[commandOptionsEnum.name].name) {
 			const match =
-				intr.options.getString(
-					modifierCommandOptions[modifierCommandOptionsEnum.name].name
-				) ?? '';
+				intr.options.getString(commandOptions[commandOptionsEnum.name].name) ?? '';
 
 			//get the active character
 			const allCharacters = await kobold.character.readMany({ userId: intr.user.id });
@@ -80,7 +72,7 @@ export class ConditionApplyModifierSubCommand extends BaseCommandClass(
 		const koboldUtils = new KoboldUtils(kobold);
 		const { gameUtils, characterUtils } = koboldUtils;
 		const targetCharacter = intr.options.getString(
-			gameplayCommandOptions[gameplayCommandOptionsEnum.gameplayTargetCharacter].name,
+			commandOptions[commandOptionsEnum.targetCharacter].name,
 			true
 		);
 		const { targetSheetRecord } = await gameUtils.getCharacterOrInitActorTarget(
@@ -89,7 +81,7 @@ export class ConditionApplyModifierSubCommand extends BaseCommandClass(
 		);
 
 		const targetModifierName = intr.options.getString(
-			modifierCommandOptions[modifierCommandOptionsEnum.name].name,
+			commandOptions[commandOptionsEnum.name].name,
 			true
 		);
 		const [sourceCharacterName, conditionName] = targetModifierName
@@ -111,9 +103,7 @@ export class ConditionApplyModifierSubCommand extends BaseCommandClass(
 		}
 
 		const modifierSeverity =
-			intr.options.getString(
-				modifierCommandOptions[modifierCommandOptionsEnum.severity].name
-			) ?? null;
+			intr.options.getString(commandOptions[commandOptionsEnum.severity].name) ?? null;
 
 		const modifierSeverityValidated = InputParseUtils.parseAsNullableNumber(modifierSeverity);
 		modifier.severity = modifierSeverityValidated;

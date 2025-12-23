@@ -16,14 +16,10 @@ import { EmbedUtils, KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { RollBuilder } from '../../../utils/roll-builder.js';
 import { Command } from '../../index.js';
-import { GameDefinition, InitDefinition, RollDefinition } from '@kobold/documentation';
+import { GameDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
 const commandOptions = GameDefinition.options;
 const commandOptionsEnum = GameDefinition.commandOptionsEnum;
-const initCommandOptions = InitDefinition.options;
-const initCommandOptionsEnum = InitDefinition.commandOptionsEnum;
-const rollCommandOptions = RollDefinition.options;
-const rollCommandOptionsEnum = RollDefinition.commandOptionsEnum;
 
 export class GameRollSubCommand extends BaseCommandClass(
 	GameDefinition,
@@ -79,13 +75,11 @@ export class GameRollSubCommand extends BaseCommandClass(
 			}
 			results = _.uniqBy(results, result => result.name);
 			return results;
-		} else if (
-			option.name === initCommandOptions[initCommandOptionsEnum.initCharacterTarget].name
-		) {
+		} else if (option.name === commandOptions[commandOptionsEnum.initCharacterTarget].name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
 			const match =
 				intr.options.getString(
-					initCommandOptions[initCommandOptionsEnum.initCharacterTarget].name
+					commandOptions[commandOptionsEnum.initCharacterTarget].name
 				) ?? '';
 
 			const { autocompleteUtils } = new KoboldUtils(kobold);
@@ -111,11 +105,11 @@ export class GameRollSubCommand extends BaseCommandClass(
 			true
 		);
 		const targetSheetName = intr.options.getString(
-			initCommandOptions[initCommandOptionsEnum.initCharacterTarget].name
+			commandOptions[commandOptionsEnum.initCharacterTarget].name
 		);
 
 		const secretRoll =
-			intr.options.getString(rollCommandOptions[rollCommandOptionsEnum.rollSecret].name) ??
+			intr.options.getString(commandOptions[commandOptionsEnum.rollSecret].name) ??
 			GameDefinition.optionChoices.rollSecret.public;
 
 		const koboldUtils = new KoboldUtils(kobold);

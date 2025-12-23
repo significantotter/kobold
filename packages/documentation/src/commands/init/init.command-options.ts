@@ -21,6 +21,9 @@ export enum InitCommandOptionEnum {
 	damageRollModifier = 'damage-modifier',
 	rollSecret = 'secret',
 	rollTargetAc = 'overwrite-ac',
+	rollOverwriteAttack = 'overwrite-attack',
+	rollOverwriteSave = 'overwrite-save',
+	rollOverwriteDamage = 'overwrite-damage',
 }
 
 /**
@@ -183,5 +186,23 @@ export const initCommandOptions = {
 		description: 'Provide a custom AC to roll the attack against.',
 		required: false,
 		type: ApplicationCommandOptionType.Integer,
+	},
+	[InitCommandOptionEnum.rollOverwriteAttack]: {
+		name: 'overwrite-attack-roll',
+		description: 'An alternate attack roll replacing all attack rolls',
+		required: false,
+		type: ApplicationCommandOptionType.String,
+	},
+	[InitCommandOptionEnum.rollOverwriteSave]: {
+		name: 'overwrite-save-roll',
+		description: 'An alternate save roll replacing all save rolls',
+		required: false,
+		type: ApplicationCommandOptionType.String,
+	},
+	[InitCommandOptionEnum.rollOverwriteDamage]: {
+		name: 'overwrite-damage-roll',
+		description: 'An alternate damage roll replacing the FIRST damage roll.',
+		required: false,
+		type: ApplicationCommandOptionType.String,
 	},
 } satisfies SpecificCommandOptions<InitCommandOptionEnum>;

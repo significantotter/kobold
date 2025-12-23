@@ -17,14 +17,10 @@ import { Command } from '../../index.js';
 import _ from 'lodash';
 import { InputParseUtils } from '../../../utils/input-parse-utils.js';
 import { StringUtils } from '@kobold/base-utils';
-import { ConditionDefinition, GameplayDefinition, ModifierDefinition } from '@kobold/documentation';
+import { ConditionDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
 const commandOptions = ConditionDefinition.options;
 const commandOptionsEnum = ConditionDefinition.commandOptionsEnum;
-const gameplayCommandOptions = GameplayDefinition.options;
-const gameplayCommandOptionsEnum = GameplayDefinition.commandOptionsEnum;
-const modifierCommandOptions = ModifierDefinition.options;
-const modifierCommandOptionsEnum = ModifierDefinition.commandOptionsEnum;
 
 export class ConditionSetSubCommand extends BaseCommandClass(
 	ConditionDefinition,
@@ -36,14 +32,10 @@ export class ConditionSetSubCommand extends BaseCommandClass(
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (
-			option.name ===
-			gameplayCommandOptions[gameplayCommandOptionsEnum.gameplayTargetCharacter].name
-		) {
+		if (option.name === commandOptions[commandOptionsEnum.targetCharacter].name) {
 			const match =
-				intr.options.getString(
-					gameplayCommandOptions[gameplayCommandOptionsEnum.gameplayTargetCharacter].name
-				) ?? '';
+				intr.options.getString(commandOptions[commandOptionsEnum.targetCharacter].name) ??
+				'';
 			const { autocompleteUtils } = new KoboldUtils(kobold);
 			return await autocompleteUtils.getAllTargetOptions(intr, match);
 		}
@@ -52,9 +44,8 @@ export class ConditionSetSubCommand extends BaseCommandClass(
 			const match =
 				intr.options.getString(commandOptions[commandOptionsEnum.name].name) ?? '';
 			const targetCharacterName =
-				intr.options.getString(
-					gameplayCommandOptions[gameplayCommandOptionsEnum.gameplayTargetCharacter].name
-				) ?? '';
+				intr.options.getString(commandOptions[commandOptionsEnum.targetCharacter].name) ??
+				'';
 			const { autocompleteUtils } = new KoboldUtils(kobold);
 			try {
 				return autocompleteUtils.getConditionsOnTarget(intr, targetCharacterName, match);
@@ -70,20 +61,17 @@ export class ConditionSetSubCommand extends BaseCommandClass(
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const targetCharacterName = intr.options
-			.getString(
-				gameplayCommandOptions[gameplayCommandOptionsEnum.gameplayTargetCharacter].name,
-				true
-			)
+			.getString(commandOptions[commandOptionsEnum.targetCharacter].name, true)
 			.trim();
 		const conditionName = intr.options
 			.getString(commandOptions[commandOptionsEnum.name].name, true)
 			.trim();
 		let fieldToChange = intr.options
-			.getString(modifierCommandOptions[modifierCommandOptionsEnum.setOption].name, true)
+			.getString(commandOptions[commandOptionsEnum.setOption].name, true)
 			.toLocaleLowerCase()
 			.trim();
 		const newFieldValue = intr.options
-			.getString(modifierCommandOptions[modifierCommandOptionsEnum.setValue].name, true)
+			.getString(commandOptions[commandOptionsEnum.setValue].name, true)
 			.trim();
 
 		//check if we have an active character
