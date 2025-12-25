@@ -54,8 +54,8 @@ export class ActionStageAddBasicDamageSubCommand extends BaseCommandClass(
 		const healInsteadOfDamage =
 			intr.options.getBoolean(commandOptions[commandOptionsEnum.healInsteadOfDamage].name) ??
 			false;
-		const basicDamageDiceRoll = intr.options.getString(
-			commandOptions[commandOptionsEnum.basicDamageDiceRoll].name,
+		const diceRoll = intr.options.getString(
+			commandOptions[commandOptionsEnum.diceRoll].name,
 			true
 		);
 		let allowRollModifiers = intr.options.getBoolean(
@@ -92,7 +92,7 @@ export class ActionStageAddBasicDamageSubCommand extends BaseCommandClass(
 			name: rollName,
 			type: rollType,
 			healInsteadOfDamage,
-			roll: basicDamageDiceRoll,
+			roll: diceRoll,
 			damageType: damageType,
 			allowRollModifiers,
 		});

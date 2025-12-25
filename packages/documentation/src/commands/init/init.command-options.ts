@@ -157,7 +157,7 @@ export const initCommandOptions = {
 	[InitCommandOptionEnum.rollExpression]: {
 		name: 'dice',
 		description: 'The dice expression to roll. Similar to Roll20 dice rolls.',
-		required: true,
+		required: false,
 		type: ApplicationCommandOptionType.String,
 	},
 	[InitCommandOptionEnum.rollModifier]: {

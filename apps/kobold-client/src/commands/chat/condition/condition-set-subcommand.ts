@@ -39,10 +39,10 @@ export class ConditionSetSubCommand extends BaseCommandClass(
 			const { autocompleteUtils } = new KoboldUtils(kobold);
 			return await autocompleteUtils.getAllTargetOptions(intr, match);
 		}
-		if (option.name === commandOptions[commandOptionsEnum.name].name) {
+		if (option.name === commandOptions[commandOptionsEnum.conditionName].name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
 			const match =
-				intr.options.getString(commandOptions[commandOptionsEnum.name].name) ?? '';
+				intr.options.getString(commandOptions[commandOptionsEnum.conditionName].name) ?? '';
 			const targetCharacterName =
 				intr.options.getString(commandOptions[commandOptionsEnum.targetCharacter].name) ??
 				'';
@@ -64,7 +64,7 @@ export class ConditionSetSubCommand extends BaseCommandClass(
 			.getString(commandOptions[commandOptionsEnum.targetCharacter].name, true)
 			.trim();
 		const conditionName = intr.options
-			.getString(commandOptions[commandOptionsEnum.name].name, true)
+			.getString(commandOptions[commandOptionsEnum.conditionName].name, true)
 			.trim();
 		let fieldToChange = intr.options
 			.getString(commandOptions[commandOptionsEnum.setOption].name, true)

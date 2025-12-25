@@ -1,10 +1,10 @@
 /**
- * Unit tests for ModifierCreateModifierSubCommand
+ * Unit tests for ModifierCreateSubCommand
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { SheetAdjustmentTypeEnum } from '@kobold/db';
 import { ModifierCommand } from './modifier-command.js';
-import { ModifierCreateModifierSubCommand } from './modifier-create-modifier-subcommand.js';
+import { ModifierCreateSubCommand } from './modifier-create-subcommand.js';
 import {
 	createTestHarness,
 	createMockCharacter,
@@ -14,7 +14,8 @@ import {
 	TEST_GUILD_ID,
 	CommandTestHarness,
 	getMockKobold,
-	resetMockKobold,} from '../../../test-utils/index.js';
+	resetMockKobold,
+} from '../../../test-utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { InputParseUtils } from '../../../utils/input-parse-utils.js';
@@ -47,16 +48,14 @@ vi.mock('../../../utils/input-parse-utils.js', () => ({
 	},
 }));
 
-describe('ModifierCreateModifierSubCommand', () => {
+describe('ModifierCreateSubCommand', () => {
 	const kobold = getMockKobold();
 
 	let harness: CommandTestHarness;
 
 	beforeEach(() => {
 		resetMockKobold(kobold);
-		harness = createTestHarness([
-			new ModifierCommand([new ModifierCreateModifierSubCommand()]),
-		]);
+		harness = createTestHarness([new ModifierCommand([new ModifierCreateSubCommand()])]);
 	});
 
 	describe('successful modifier creation', () => {
@@ -72,7 +71,7 @@ describe('ModifierCreateModifierSubCommand', () => {
 			// Act
 			const result = await harness.executeCommand({
 				commandName: 'modifier',
-				subcommand: 'create-modifier',
+				subcommand: 'create',
 				options: {
 					name: 'Inspire Courage',
 					type: SheetAdjustmentTypeEnum.status,
@@ -100,7 +99,7 @@ describe('ModifierCreateModifierSubCommand', () => {
 			// Act
 			const result = await harness.executeCommand({
 				commandName: 'modifier',
-				subcommand: 'create-modifier',
+				subcommand: 'create',
 				options: {
 					name: 'Strength Boost',
 					type: SheetAdjustmentTypeEnum.status,
@@ -127,7 +126,7 @@ describe('ModifierCreateModifierSubCommand', () => {
 			// Act
 			const result = await harness.executeCommand({
 				commandName: 'modifier',
-				subcommand: 'create-modifier',
+				subcommand: 'create',
 				options: {
 					name: 'Frightened',
 					type: SheetAdjustmentTypeEnum.status,
@@ -155,7 +154,7 @@ describe('ModifierCreateModifierSubCommand', () => {
 			// Act
 			const result = await harness.executeCommand({
 				commandName: 'modifier',
-				subcommand: 'create-modifier',
+				subcommand: 'create',
 				options: {
 					name: 'Bard Song',
 					type: SheetAdjustmentTypeEnum.status,
@@ -198,7 +197,7 @@ describe('ModifierCreateModifierSubCommand', () => {
 			// Act
 			const result = await harness.executeCommand({
 				commandName: 'modifier',
-				subcommand: 'create-modifier',
+				subcommand: 'create',
 				options: {
 					name: 'Existing Modifier',
 					type: SheetAdjustmentTypeEnum.status,
@@ -226,7 +225,7 @@ describe('ModifierCreateModifierSubCommand', () => {
 			// Act
 			const result = await harness.executeCommand({
 				commandName: 'modifier',
-				subcommand: 'create-modifier',
+				subcommand: 'create',
 				options: {
 					name: 'Invalid Modifier',
 					type: SheetAdjustmentTypeEnum.status,
@@ -253,7 +252,7 @@ describe('ModifierCreateModifierSubCommand', () => {
 			// Act
 			const result = await harness.executeCommand({
 				commandName: 'modifier',
-				subcommand: 'create-modifier',
+				subcommand: 'create',
 				options: {
 					name: 'Invalid Modifier',
 					type: SheetAdjustmentTypeEnum.status,
@@ -280,7 +279,7 @@ describe('ModifierCreateModifierSubCommand', () => {
 			// Act
 			const result = await harness.executeCommand({
 				commandName: 'modifier',
-				subcommand: 'create-modifier',
+				subcommand: 'create',
 				options: {
 					name: 'Empty Modifier',
 					type: SheetAdjustmentTypeEnum.status,

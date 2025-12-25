@@ -138,8 +138,8 @@ export const modifierCommandDocumentation: CommandDocumentation<typeof modifierC
 					},
 				],
 			},
-			[ModifierSubCommandEnum.createModifier]: {
-				name: ModifierSubCommandEnum.createModifier,
+			[ModifierSubCommandEnum.create]: {
+				name: ModifierSubCommandEnum.create,
 				description: 'Creates a modifier for the active character.',
 				usage: null,
 				examples: [

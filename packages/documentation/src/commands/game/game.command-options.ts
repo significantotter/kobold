@@ -23,6 +23,7 @@ export const gameCommandOptions = {
 		name: GameCommandOptionEnum.gameGiveOption,
 		description: 'The type of resource to give of (eg. hp, hero points, etc).',
 		required: true,
+		autocomplete: true,
 		type: ApplicationCommandOptionType.String,
 	},
 	[GameCommandOptionEnum.gameGiveAmount]: {

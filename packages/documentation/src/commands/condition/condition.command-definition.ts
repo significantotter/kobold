@@ -77,11 +77,8 @@ export const conditionCommandDefinition = {
 					conditionCommandOptions[ConditionCommandOptionEnum.targetCharacter],
 					1
 				),
-				[ConditionCommandOptionEnum.name]: withOrder(
-					{
-						...conditionCommandOptions[ConditionCommandOptionEnum.name],
-						required: false,
-					},
+				[ConditionCommandOptionEnum.modifierName]: withOrder(
+					conditionCommandOptions[ConditionCommandOptionEnum.modifierName],
 					2
 				),
 			},
@@ -106,8 +103,8 @@ export const conditionCommandDefinition = {
 					conditionCommandOptions[ConditionCommandOptionEnum.targetCharacter],
 					1
 				),
-				[ConditionCommandOptionEnum.name]: withOrder(
-					conditionCommandOptions[ConditionCommandOptionEnum.name],
+				[ConditionCommandOptionEnum.conditionName]: withOrder(
+					conditionCommandOptions[ConditionCommandOptionEnum.conditionName],
 					2
 				),
 				[ConditionCommandOptionEnum.setOption]: withOrder(
@@ -129,8 +126,8 @@ export const conditionCommandDefinition = {
 					conditionCommandOptions[ConditionCommandOptionEnum.targetCharacter],
 					1
 				),
-				[ConditionCommandOptionEnum.name]: withOrder(
-					conditionCommandOptions[ConditionCommandOptionEnum.name],
+				[ConditionCommandOptionEnum.conditionName]: withOrder(
+					conditionCommandOptions[ConditionCommandOptionEnum.conditionName],
 					2
 				),
 			},
@@ -144,8 +141,8 @@ export const conditionCommandDefinition = {
 					conditionCommandOptions[ConditionCommandOptionEnum.targetCharacter],
 					1
 				),
-				[ConditionCommandOptionEnum.name]: withOrder(
-					conditionCommandOptions[ConditionCommandOptionEnum.name],
+				[ConditionCommandOptionEnum.conditionName]: withOrder(
+					conditionCommandOptions[ConditionCommandOptionEnum.conditionName],
 					2
 				),
 				[ConditionCommandOptionEnum.severity]: withOrder(

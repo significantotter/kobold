@@ -1,9 +1,13 @@
 import { ApplicationCommandOptionType } from 'discord-api-types/v10';
-import type { CommandOptions, SpecificCommandOptions } from '../helpers/commands.types.js';
+import type { SpecificCommandOptions } from '../helpers/commands.types.js';
 
 export enum ConditionCommandOptionEnum {
+	// Inputtable name
 	name = 'name',
-	targetCharacter = 'gameplay-target-character',
+	// Autocompletable name
+	conditionName = 'condition-name',
+	modifierName = 'modifier-name',
+	targetCharacter = 'target-character',
 	severity = 'severity',
 	sheetValues = 'sheet-values',
 	rollAdjustment = 'roll-adjustment',
@@ -18,7 +22,21 @@ export enum ConditionCommandOptionEnum {
 export const conditionCommandOptions = {
 	[ConditionCommandOptionEnum.name]: {
 		name: 'name',
-		description: 'The name of the condition or modifier.',
+		description: 'The name of the condition.',
+		autocomplete: false,
+		required: true,
+		type: ApplicationCommandOptionType.String,
+	},
+	[ConditionCommandOptionEnum.conditionName]: {
+		name: 'condition-name',
+		description: 'The name of the condition.',
+		autocomplete: true,
+		required: true,
+		type: ApplicationCommandOptionType.String,
+	},
+	[ConditionCommandOptionEnum.modifierName]: {
+		name: 'modifier-name',
+		description: 'The name of the modifier.',
 		autocomplete: true,
 		required: true,
 		type: ApplicationCommandOptionType.String,
@@ -27,6 +45,7 @@ export const conditionCommandOptions = {
 		name: ConditionCommandOptionEnum.targetCharacter,
 		description: 'What character to update. Defaults to your active character.',
 		required: true,
+		autocomplete: true,
 		type: ApplicationCommandOptionType.String,
 	},
 	[ConditionCommandOptionEnum.severity]: {

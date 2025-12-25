@@ -66,7 +66,7 @@ export const actionStageCommandDocumentation: CommandDocumentation<
 						[ActionStageCommandOptionEnum.actionTarget]: 'Elemental Blast (1a)',
 						[ActionStageCommandOptionEnum.rollName]: 'Elemental Blast',
 						[ActionStageCommandOptionEnum.damageType]: 'Fire',
-						[ActionStageCommandOptionEnum.basicDamageDiceRoll]: '1d6 + 3',
+						[ActionStageCommandOptionEnum.diceRoll]: '1d6 + 3',
 					},
 				},
 			],

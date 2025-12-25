@@ -15,7 +15,6 @@ export enum ActionStageCommandOptionEnum {
 	rollName = 'roll-name',
 	diceRoll = 'dice-roll',
 	damageType = 'damage-type',
-	basicDamageDiceRoll = 'basic-damage-dice-roll',
 	successDiceRoll = 'success-dice-roll',
 	criticalSuccessDiceRoll = 'critical-success-dice-roll',
 	criticalFailureDiceRoll = 'critical-failure-dice-roll',
@@ -138,19 +137,13 @@ export const actionStageCommandOptions = {
 	},
 	[ActionStageCommandOptionEnum.diceRoll]: {
 		name: 'dice-roll',
-		description: 'The dice roll for the action.',
+		description: 'The dice rolled for the stage.',
 		required: true,
 		type: ApplicationCommandOptionType.String,
 	},
 	[ActionStageCommandOptionEnum.damageType]: {
 		name: 'damage-type',
 		description: 'The type of damage.',
-		required: true,
-		type: ApplicationCommandOptionType.String,
-	},
-	[ActionStageCommandOptionEnum.basicDamageDiceRoll]: {
-		name: 'basic-damage-dice-roll',
-		description: 'The basic damage dice roll.',
 		required: true,
 		type: ApplicationCommandOptionType.String,
 	},

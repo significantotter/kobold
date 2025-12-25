@@ -35,9 +35,9 @@ export class ConditionApplyModifierSubCommand extends BaseCommandClass(
 			const { autocompleteUtils } = new KoboldUtils(kobold);
 			return await autocompleteUtils.getAllTargetOptions(intr, match);
 		}
-		if (option.name === commandOptions[commandOptionsEnum.name].name) {
+		if (option.name === commandOptions[commandOptionsEnum.modifierName].name) {
 			const match =
-				intr.options.getString(commandOptions[commandOptionsEnum.name].name) ?? '';
+				intr.options.getString(commandOptions[commandOptionsEnum.modifierName].name) ?? '';
 
 			//get the active character
 			const allCharacters = await kobold.character.readMany({ userId: intr.user.id });
@@ -81,7 +81,7 @@ export class ConditionApplyModifierSubCommand extends BaseCommandClass(
 		);
 
 		const targetModifierName = intr.options.getString(
-			commandOptions[commandOptionsEnum.name].name,
+			commandOptions[commandOptionsEnum.modifierName].name,
 			true
 		);
 		const [sourceCharacterName, conditionName] = targetModifierName
