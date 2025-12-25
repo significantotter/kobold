@@ -97,8 +97,8 @@ export const actionStageCommandDefinition = {
 					actionStageCommandOptions[ActionStageCommandOptionEnum.rollName],
 					2
 				),
-				[ActionStageCommandOptionEnum.basicDamageDiceRoll]: withOrder(
-					actionStageCommandOptions[ActionStageCommandOptionEnum.basicDamageDiceRoll],
+				[ActionStageCommandOptionEnum.diceRoll]: withOrder(
+					actionStageCommandOptions[ActionStageCommandOptionEnum.diceRoll],
 					3
 				),
 				[ActionStageCommandOptionEnum.damageType]: withOrder(

@@ -1,6 +1,6 @@
 import { CommandExport } from '../../command.js';
 import { ModifierCommand } from './modifier-command.js';
-import { ModifierCreateModifierSubCommand } from './modifier-create-modifier-subcommand.js';
+import { ModifierCreateSubCommand } from './modifier-create-subcommand.js';
 import { ModifierDetailSubCommand } from './modifier-detail-subcommand.js';
 import { ModifierExportSubCommand } from './modifier-export-subcommand.js';
 import { ModifierImportSubCommand } from './modifier-import-subcommand.js';
@@ -13,7 +13,7 @@ import { ModifierSetSubCommand } from './modifier-set-subcommand.js';
 export const ModifierCommandExport: CommandExport = {
 	command: ModifierCommand,
 	subCommands: [
-		ModifierCreateModifierSubCommand,
+		ModifierCreateSubCommand,
 		ModifierDetailSubCommand,
 		ModifierExportSubCommand,
 		ModifierImportSubCommand,

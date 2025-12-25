@@ -1,7 +1,5 @@
-import { GameplayCommandOptionEnum } from '../gameplay/index.js';
 import type { CommandDocumentation } from '../helpers/commands.types.js';
 import { CommandResponseTypeEnum } from '../helpers/enums.js';
-import { ModifierCommandOptionEnum } from '../modifier/index.js';
 import {
 	conditionCommandDefinition,
 	ConditionSubCommandEnum,
@@ -24,13 +22,13 @@ export const conditionCommandDocumentation: CommandDocumentation<
 					type: CommandResponseTypeEnum.success,
 					message: 'Yip! I applied the condition Blinded to Kobold Cavern Mage..',
 					options: {
-						[GameplayCommandOptionEnum.gameplayTargetCharacter]: 'Kobold Cavern Mage',
-						[ModifierCommandOptionEnum.name]: 'Blinded',
-						[ModifierCommandOptionEnum.sheetValues]: 'perception - 4',
-						[ModifierCommandOptionEnum.type]: '',
-						[ModifierCommandOptionEnum.description]:
+						[ConditionCommandOptionEnum.targetCharacter]: 'Kobold Cavern Mage',
+						[ConditionCommandOptionEnum.name]: 'Blinded',
+						[ConditionCommandOptionEnum.sheetValues]: 'perception - 4',
+						[ConditionCommandOptionEnum.type]: '',
+						[ConditionCommandOptionEnum.description]:
 							"All normal terrain is difficult terrain to you. You can't detect anything using vision. You automatically critically fail sight Perception checks, you take a –4 status penalty to Perception checks. You are immune to visual effects.",
-						[ModifierCommandOptionEnum.initiativeNote]:
+						[ConditionCommandOptionEnum.initiativeNote]:
 							'Immune to visual. All terrain difficult.',
 					},
 				},
@@ -39,13 +37,13 @@ export const conditionCommandDocumentation: CommandDocumentation<
 					type: CommandResponseTypeEnum.success,
 					message: 'Yip! I applied the condition Frightened to Kobold Cavern Mage.',
 					options: {
-						[GameplayCommandOptionEnum.gameplayTargetCharacter]: 'Kobold Cavern Mage',
-						[ModifierCommandOptionEnum.name]: 'Frightened',
-						[ModifierCommandOptionEnum.sheetValues]: '-[severity] to checks and DCs',
-						[ModifierCommandOptionEnum.type]: 'status',
-						[ModifierCommandOptionEnum.rollAdjustment]: '-[severity]',
-						[ModifierCommandOptionEnum.targetTags]: 'attack and not damage',
-						[ModifierCommandOptionEnum.severity]: 1,
+						[ConditionCommandOptionEnum.targetCharacter]: 'Kobold Cavern Mage',
+						[ConditionCommandOptionEnum.name]: 'Frightened',
+						[ConditionCommandOptionEnum.sheetValues]: '-[severity] to checks and DCs',
+						[ConditionCommandOptionEnum.type]: 'status',
+						[ConditionCommandOptionEnum.rollAdjustment]: '-[severity]',
+						[ConditionCommandOptionEnum.targetTags]: 'attack and not damage',
+						[ConditionCommandOptionEnum.severity]: 1,
 					},
 				},
 			],
@@ -60,8 +58,8 @@ export const conditionCommandDocumentation: CommandDocumentation<
 					type: CommandResponseTypeEnum.success,
 					message: 'Yip! I applied the condition Off Guard to Kobold Cavern Mage.',
 					options: {
-						[GameplayCommandOptionEnum.gameplayTargetCharacter]: 'Kobold Cavern Mage',
-						[ModifierCommandOptionEnum.name]: 'Lilac Sootsnout - Off Guard',
+						[ConditionCommandOptionEnum.targetCharacter]: 'Kobold Cavern Mage',
+						[ConditionCommandOptionEnum.modifierName]: 'Lilac Sootsnout - Off Guard',
 					},
 				},
 			],
@@ -75,7 +73,7 @@ export const conditionCommandDocumentation: CommandDocumentation<
 					title: 'Success',
 					type: CommandResponseTypeEnum.success,
 					options: {
-						[GameplayCommandOptionEnum.gameplayTargetCharacter]: 'Kobold Cavern Mage',
+						[ConditionCommandOptionEnum.targetCharacter]: 'Kobold Cavern Mage',
 					},
 					embeds: [
 						{
@@ -112,10 +110,10 @@ export const conditionCommandDocumentation: CommandDocumentation<
 					message:
 						"Yip! Kobold Cavern Mage had their condition Blinded's sheet-values set to perceptionBonus - 4.",
 					options: {
-						[GameplayCommandOptionEnum.gameplayTargetCharacter]: 'Kobold Cavern Mage',
-						[ConditionCommandOptionEnum.name]: 'Blinded',
-						[ModifierCommandOptionEnum.setOption]: 'sheet-values',
-						[ModifierCommandOptionEnum.setValue]: 'perceptionBonus - 4',
+						[ConditionCommandOptionEnum.targetCharacter]: 'Kobold Cavern Mage',
+						[ConditionCommandOptionEnum.conditionName]: 'Blinded',
+						[ConditionCommandOptionEnum.setOption]: 'sheet-values',
+						[ConditionCommandOptionEnum.setValue]: 'perceptionBonus - 4',
 					},
 				},
 			],
@@ -130,8 +128,8 @@ export const conditionCommandDocumentation: CommandDocumentation<
 					type: CommandResponseTypeEnum.success,
 					message: 'Yip! I removed the condition Blinded from Kobold Cavern Mage.',
 					options: {
-						[GameplayCommandOptionEnum.gameplayTargetCharacter]: 'Kobold Cavern Mage',
-						[ConditionCommandOptionEnum.name]: 'Blinded',
+						[ConditionCommandOptionEnum.targetCharacter]: 'Kobold Cavern Mage',
+						[ConditionCommandOptionEnum.conditionName]: 'Blinded',
 					},
 				},
 			],
@@ -147,9 +145,9 @@ export const conditionCommandDocumentation: CommandDocumentation<
 					message:
 						'Yip! I changed the severity of Frightened to 2 for Kobold Cavern Mage.',
 					options: {
-						[GameplayCommandOptionEnum.gameplayTargetCharacter]: 'Kobold Cavern Mage',
-						[ConditionCommandOptionEnum.name]: 'Frightened',
-						[ModifierCommandOptionEnum.severity]: 2,
+						[ConditionCommandOptionEnum.targetCharacter]: 'Kobold Cavern Mage',
+						[ConditionCommandOptionEnum.conditionName]: 'Frightened',
+						[ConditionCommandOptionEnum.severity]: 2,
 					},
 				},
 			],

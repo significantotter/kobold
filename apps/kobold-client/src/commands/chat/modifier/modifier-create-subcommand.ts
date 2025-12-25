@@ -20,9 +20,9 @@ import { BaseCommandClass } from '../../command.js';
 const commandOptions = ModifierDefinition.options;
 const commandOptionsEnum = ModifierDefinition.commandOptionsEnum;
 
-export class ModifierCreateModifierSubCommand extends BaseCommandClass(
+export class ModifierCreateSubCommand extends BaseCommandClass(
 	ModifierDefinition,
-	ModifierDefinition.subCommandEnum.createModifier
+	ModifierDefinition.subCommandEnum.create
 ) {
 	public async execute(
 		intr: ChatInputCommandInteraction,
@@ -104,7 +104,9 @@ export class ModifierCreateModifierSubCommand extends BaseCommandClass(
 					new Creature(activeCharacter.sheetRecord, undefined, intr)
 				)
 			) {
-				throw new KoboldError(ModifierDefinition.strings.createModifier.doesntEvaluateError);
+				throw new KoboldError(
+					ModifierDefinition.strings.createModifier.doesntEvaluateError
+				);
 			}
 		}
 

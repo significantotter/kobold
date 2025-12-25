@@ -13,7 +13,7 @@ export enum ModifierSubCommandEnum {
 	detail = 'detail',
 	export = 'export',
 	import = 'import',
-	createModifier = 'create-modifier',
+	create = 'create',
 	toggle = 'toggle',
 	severity = 'severity',
 	set = 'set',
@@ -70,8 +70,8 @@ export const modifierCommandDefinition = {
 				),
 			},
 		},
-		[ModifierSubCommandEnum.createModifier]: {
-			name: ModifierSubCommandEnum.createModifier,
+		[ModifierSubCommandEnum.create]: {
+			name: ModifierSubCommandEnum.create,
 			description: 'Creates a modifier for the active character.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
