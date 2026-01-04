@@ -145,11 +145,10 @@ export const initCommandDefinition = {
 			options: {
 				[InitCommandOptionEnum.initCharacter]: withOrder(
 					initCommandOptions[InitCommandOptionEnum.initCharacter],
-
 					1
 				),
 				[InitCommandOptionEnum.initNote]: withOrder(
-					initCommandOptions[InitCommandOptionEnum.initNote],
+					{ ...initCommandOptions[InitCommandOptionEnum.initNote], required: true },
 					2
 				),
 			},
