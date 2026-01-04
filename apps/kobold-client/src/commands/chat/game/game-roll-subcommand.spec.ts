@@ -31,7 +31,6 @@ describe('GameRollSubCommand Integration', () => {
 		harness = createTestHarness([new GameCommand([new GameRollSubCommand()])]);
 	});
 
-
 	describe('Dice Rolling', () => {
 		it('should respond when rolling dice for party characters', async () => {
 			// Arrange
@@ -49,9 +48,9 @@ describe('GameRollSubCommand Integration', () => {
 				commandName: 'game',
 				subcommand: 'roll',
 				options: {
-					[opts.gameRollType]: 'Dice',
-					[opts.gameTargetCharacter]: 'All Players',
-					[opts.gameDiceRollOrModifier]: '1d20',
+					[opts.rollType]: 'Dice',
+					[opts.targetCharacter]: 'All Players',
+					[opts.diceRollOrModifier]: '1d20',
 				},
 				userId: TEST_USER_ID,
 				guildId: TEST_GUILD_ID,
@@ -77,9 +76,9 @@ describe('GameRollSubCommand Integration', () => {
 				commandName: 'game',
 				subcommand: 'roll',
 				options: {
-					[opts.gameRollType]: 'Dice',
-					[opts.gameTargetCharacter]: 'All Players',
-					[opts.gameDiceRollOrModifier]: '2d6+5',
+					[opts.rollType]: 'Dice',
+					[opts.targetCharacter]: 'All Players',
+					[opts.diceRollOrModifier]: '2d6+5',
 				},
 				userId: TEST_USER_ID,
 				guildId: TEST_GUILD_ID,
@@ -108,9 +107,9 @@ describe('GameRollSubCommand Integration', () => {
 				commandName: 'game',
 				subcommand: 'roll',
 				options: {
-					[opts.gameRollType]: 'Dice',
-					[opts.gameTargetCharacter]: 'All Players',
-					[opts.gameDiceRollOrModifier]: '1d20',
+					[opts.rollType]: 'Dice',
+					[opts.targetCharacter]: 'All Players',
+					[opts.diceRollOrModifier]: '1d20',
 				},
 				userId: TEST_USER_ID,
 				guildId: TEST_GUILD_ID,
@@ -137,9 +136,9 @@ describe('GameRollSubCommand Integration', () => {
 				commandName: 'game',
 				subcommand: 'roll',
 				options: {
-					[opts.gameRollType]: 'Dice',
-					[opts.gameTargetCharacter]: 'Fighter',
-					[opts.gameDiceRollOrModifier]: '1d20',
+					[opts.rollType]: 'Dice',
+					[opts.targetCharacter]: 'Fighter',
+					[opts.diceRollOrModifier]: '1d20',
 				},
 				userId: TEST_USER_ID,
 				guildId: TEST_GUILD_ID,
@@ -166,9 +165,9 @@ describe('GameRollSubCommand Integration', () => {
 				commandName: 'game',
 				subcommand: 'roll',
 				options: {
-					[opts.gameRollType]: 'Dice',
-					[opts.gameTargetCharacter]: 'All Players',
-					[opts.gameDiceRollOrModifier]: '1d20',
+					[opts.rollType]: 'Dice',
+					[opts.targetCharacter]: 'All Players',
+					[opts.diceRollOrModifier]: '1d20',
 				},
 				userId: TEST_USER_ID,
 				guildId: TEST_GUILD_ID,
@@ -191,9 +190,9 @@ describe('GameRollSubCommand Integration', () => {
 				commandName: 'game',
 				subcommand: 'roll',
 				options: {
-					[opts.gameRollType]: 'Dice',
-					[opts.gameTargetCharacter]: 'All Players',
-					[opts.gameDiceRollOrModifier]: '1d20',
+					[opts.rollType]: 'Dice',
+					[opts.targetCharacter]: 'All Players',
+					[opts.diceRollOrModifier]: '1d20',
 				},
 				userId: TEST_USER_ID,
 				guildId: TEST_GUILD_ID,
@@ -221,9 +220,9 @@ describe('GameRollSubCommand Integration', () => {
 				commandName: 'game',
 				subcommand: 'roll',
 				options: {
-					[opts.gameRollType]: 'Dice',
-					[opts.gameTargetCharacter]: 'All Players',
-					[opts.gameDiceRollOrModifier]: '1d20',
+					[opts.rollType]: 'Dice',
+					[opts.targetCharacter]: 'All Players',
+					[opts.diceRollOrModifier]: '1d20',
 					'roll-secret': optionChoices.rollSecret.secret,
 				},
 				userId: TEST_USER_ID,
@@ -250,9 +249,9 @@ describe('GameRollSubCommand Integration', () => {
 				commandName: 'game',
 				subcommand: 'roll',
 				options: {
-					[opts.gameRollType]: 'Dice',
-					[opts.gameTargetCharacter]: 'All Players',
-					[opts.gameDiceRollOrModifier]: '1d20',
+					[opts.rollType]: 'Dice',
+					[opts.targetCharacter]: 'All Players',
+					[opts.diceRollOrModifier]: '1d20',
 					'roll-secret': optionChoices.rollSecret.sendToGm,
 				},
 				userId: TEST_USER_ID,
@@ -283,9 +282,9 @@ describe('GameRollSubCommand Integration', () => {
 				commandName: 'game',
 				subcommand: 'roll',
 				options: {
-					[opts.gameRollType]: 'Dice',
-					[opts.gameTargetCharacter]: 'All Players',
-					[opts.gameDiceRollOrModifier]: '1d20+10',
+					[opts.rollType]: 'Dice',
+					[opts.targetCharacter]: 'All Players',
+					[opts.diceRollOrModifier]: '1d20+10',
 				},
 				userId: TEST_USER_ID,
 				guildId: TEST_GUILD_ID,

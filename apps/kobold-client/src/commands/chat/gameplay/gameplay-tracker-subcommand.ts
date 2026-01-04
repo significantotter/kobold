@@ -34,11 +34,10 @@ export class GameplayTrackerSubCommand extends BaseCommandClass(
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === commandOptions[commandOptionsEnum.gameplayTargetCharacter].name) {
+		if (option.name === commandOptions[commandOptionsEnum.targetCharacter].name) {
 			const match =
-				intr.options.getString(
-					commandOptions[commandOptionsEnum.gameplayTargetCharacter].name
-				) ?? '';
+				intr.options.getString(commandOptions[commandOptionsEnum.targetCharacter].name) ??
+				'';
 
 			//get the character matches
 			const { characterUtils } = new KoboldUtils(kobold);
@@ -57,13 +56,13 @@ export class GameplayTrackerSubCommand extends BaseCommandClass(
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const targetCharacterName = intr.options.getString(
-			commandOptions[commandOptionsEnum.gameplayTargetCharacter].name
+			commandOptions[commandOptionsEnum.targetCharacter].name
 		);
 		const trackerMode =
-			intr.options.getString(commandOptions[commandOptionsEnum.gameplayTrackerMode].name) ??
+			intr.options.getString(commandOptions[commandOptionsEnum.trackerMode].name) ??
 			SheetRecordTrackerModeEnum.basic_stats;
 		const gameplayTargetChannel = intr.options.getChannel(
-			commandOptions[commandOptionsEnum.gameplayTargetChannel].name,
+			commandOptions[commandOptionsEnum.targetChannel].name,
 			false,
 			[ChannelType.GuildText]
 		);

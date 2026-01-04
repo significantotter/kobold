@@ -31,7 +31,6 @@ describe('GameGiveSubCommand Integration', () => {
 		harness = createTestHarness([new GameCommand([new GameGiveSubCommand()])]);
 	});
 
-
 	describe('Give Operations', () => {
 		it('should respond when giving temporary hit points', async () => {
 			// Arrange
@@ -45,8 +44,8 @@ describe('GameGiveSubCommand Integration', () => {
 				commandName: 'game',
 				subcommand: 'give',
 				options: {
-					[opts.gameGiveOption]: 'tempHp',
-					[opts.gameGiveAmount]: '10',
+					[opts.giveOption]: 'tempHp',
+					[opts.giveAmount]: '10',
 				},
 				userId: TEST_USER_ID,
 				guildId: TEST_GUILD_ID,
@@ -68,8 +67,8 @@ describe('GameGiveSubCommand Integration', () => {
 				commandName: 'game',
 				subcommand: 'give',
 				options: {
-					[opts.gameGiveOption]: 'hp',
-					[opts.gameGiveAmount]: '20',
+					[opts.giveOption]: 'hp',
+					[opts.giveAmount]: '20',
 				},
 				userId: TEST_USER_ID,
 				guildId: TEST_GUILD_ID,
@@ -91,8 +90,8 @@ describe('GameGiveSubCommand Integration', () => {
 				commandName: 'game',
 				subcommand: 'give',
 				options: {
-					[opts.gameGiveOption]: 'stamina',
-					[opts.gameGiveAmount]: '15',
+					[opts.giveOption]: 'stamina',
+					[opts.giveAmount]: '15',
 				},
 				userId: TEST_USER_ID,
 				guildId: TEST_GUILD_ID,
@@ -114,8 +113,8 @@ describe('GameGiveSubCommand Integration', () => {
 				commandName: 'game',
 				subcommand: 'give',
 				options: {
-					[opts.gameGiveOption]: 'resolve',
-					[opts.gameGiveAmount]: '5',
+					[opts.giveOption]: 'resolve',
+					[opts.giveAmount]: '5',
 				},
 				userId: TEST_USER_ID,
 				guildId: TEST_GUILD_ID,
@@ -137,8 +136,8 @@ describe('GameGiveSubCommand Integration', () => {
 				commandName: 'game',
 				subcommand: 'give',
 				options: {
-					[opts.gameGiveOption]: 'hp',
-					[opts.gameGiveAmount]: '10',
+					[opts.giveOption]: 'hp',
+					[opts.giveAmount]: '10',
 				},
 				userId: TEST_USER_ID,
 				guildId: TEST_GUILD_ID,
@@ -166,8 +165,8 @@ describe('GameGiveSubCommand Integration', () => {
 				commandName: 'game',
 				subcommand: 'give',
 				options: {
-					[opts.gameGiveOption]: 'tempHp',
-					[opts.gameGiveAmount]: '25',
+					[opts.giveOption]: 'tempHp',
+					[opts.giveAmount]: '25',
 				},
 				userId: TEST_USER_ID,
 				guildId: TEST_GUILD_ID,

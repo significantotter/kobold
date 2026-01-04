@@ -144,10 +144,8 @@ export const initCommandDefinition = {
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
 				[InitCommandOptionEnum.initCharacter]: withOrder(
-					{
-						...initCommandOptions[InitCommandOptionEnum.initCharacter],
-						required: false,
-					},
+					initCommandOptions[InitCommandOptionEnum.initCharacter],
+
 					1
 				),
 				[InitCommandOptionEnum.initNote]: withOrder(

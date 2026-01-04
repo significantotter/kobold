@@ -29,7 +29,6 @@ describe('GameplaySetSubCommand Integration', () => {
 		harness = createTestHarness([new GameplayCommand([new GameplaySetSubCommand()])]);
 	});
 
-
 	describe('Setting HP', () => {
 		it('should respond when setting hp', async () => {
 			// Arrange
@@ -42,9 +41,9 @@ describe('GameplaySetSubCommand Integration', () => {
 				commandName: 'gameplay',
 				subcommand: 'set',
 				options: {
-					[opts.gameplayTargetCharacter]: 'Fighter',
-					[opts.gameplaySetOption]: 'hp',
-					[opts.gameplaySetValue]: 50,
+					[opts.targetCharacter]: 'Fighter',
+					[opts.setOption]: 'hp',
+					[opts.setValue]: 50,
 				},
 				userId: TEST_USER_ID,
 				guildId: TEST_GUILD_ID,
@@ -65,9 +64,9 @@ describe('GameplaySetSubCommand Integration', () => {
 				commandName: 'gameplay',
 				subcommand: 'set',
 				options: {
-					[opts.gameplayTargetCharacter]: 'Warrior',
-					[opts.gameplaySetOption]: 'hp',
-					[opts.gameplaySetValue]: 0,
+					[opts.targetCharacter]: 'Warrior',
+					[opts.setOption]: 'hp',
+					[opts.setValue]: 0,
 				},
 				userId: TEST_USER_ID,
 				guildId: TEST_GUILD_ID,
@@ -92,9 +91,9 @@ describe('GameplaySetSubCommand Integration', () => {
 				commandName: 'gameplay',
 				subcommand: 'set',
 				options: {
-					[opts.gameplayTargetCharacter]: 'Barbarian',
-					[opts.gameplaySetOption]: 'temp-hp',
-					[opts.gameplaySetValue]: 15,
+					[opts.targetCharacter]: 'Barbarian',
+					[opts.setOption]: 'temp-hp',
+					[opts.setValue]: 15,
 				},
 				userId: TEST_USER_ID,
 				guildId: TEST_GUILD_ID,
@@ -117,9 +116,9 @@ describe('GameplaySetSubCommand Integration', () => {
 				commandName: 'gameplay',
 				subcommand: 'set',
 				options: {
-					[opts.gameplayTargetCharacter]: 'Champion',
-					[opts.gameplaySetOption]: 'stamina',
-					[opts.gameplaySetValue]: 10,
+					[opts.targetCharacter]: 'Champion',
+					[opts.setOption]: 'stamina',
+					[opts.setValue]: 10,
 				},
 				userId: TEST_USER_ID,
 				guildId: TEST_GUILD_ID,
@@ -142,9 +141,9 @@ describe('GameplaySetSubCommand Integration', () => {
 				commandName: 'gameplay',
 				subcommand: 'set',
 				options: {
-					[opts.gameplayTargetCharacter]: 'Paladin',
-					[opts.gameplaySetOption]: 'resolve',
-					[opts.gameplaySetValue]: 3,
+					[opts.targetCharacter]: 'Paladin',
+					[opts.setOption]: 'resolve',
+					[opts.setValue]: 3,
 				},
 				userId: TEST_USER_ID,
 				guildId: TEST_GUILD_ID,
@@ -167,9 +166,9 @@ describe('GameplaySetSubCommand Integration', () => {
 				commandName: 'gameplay',
 				subcommand: 'set',
 				options: {
-					[opts.gameplayTargetCharacter]: 'Rogue',
-					[opts.gameplaySetOption]: 'hero-points',
-					[opts.gameplaySetValue]: 2,
+					[opts.targetCharacter]: 'Rogue',
+					[opts.setOption]: 'hero-points',
+					[opts.setValue]: 2,
 				},
 				userId: TEST_USER_ID,
 				guildId: TEST_GUILD_ID,
@@ -192,9 +191,9 @@ describe('GameplaySetSubCommand Integration', () => {
 				commandName: 'gameplay',
 				subcommand: 'set',
 				options: {
-					[opts.gameplayTargetCharacter]: 'Monk',
-					[opts.gameplaySetOption]: 'focus-points',
-					[opts.gameplaySetValue]: 1,
+					[opts.targetCharacter]: 'Monk',
+					[opts.setOption]: 'focus-points',
+					[opts.setValue]: 1,
 				},
 				userId: TEST_USER_ID,
 				guildId: TEST_GUILD_ID,
@@ -216,9 +215,9 @@ describe('GameplaySetSubCommand Integration', () => {
 				commandName: 'gameplay',
 				subcommand: 'set',
 				options: {
-					[opts.gameplayTargetCharacter]: 'GhostCharacter',
-					[opts.gameplaySetOption]: 'hp',
-					[opts.gameplaySetValue]: 50,
+					[opts.targetCharacter]: 'GhostCharacter',
+					[opts.setOption]: 'hp',
+					[opts.setValue]: 50,
 				},
 				userId: TEST_USER_ID,
 				guildId: TEST_GUILD_ID,

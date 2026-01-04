@@ -29,7 +29,6 @@ describe('GameplayDamageSubCommand Integration', () => {
 		harness = createTestHarness([new GameplayCommand([new GameplayDamageSubCommand()])]);
 	});
 
-
 	describe('Damage Application', () => {
 		it('should respond when applying damage', async () => {
 			// Arrange
@@ -42,8 +41,8 @@ describe('GameplayDamageSubCommand Integration', () => {
 				commandName: 'gameplay',
 				subcommand: 'damage',
 				options: {
-					[opts.gameplayTargetCharacter]: 'Fighter',
-					[opts.gameplayDamageAmount]: 10,
+					[opts.targetCharacter]: 'Fighter',
+					[opts.damageAmount]: 10,
 				},
 				userId: TEST_USER_ID,
 				guildId: TEST_GUILD_ID,
@@ -64,9 +63,9 @@ describe('GameplayDamageSubCommand Integration', () => {
 				commandName: 'gameplay',
 				subcommand: 'damage',
 				options: {
-					[opts.gameplayTargetCharacter]: 'Wizard',
-					[opts.gameplayDamageAmount]: 15,
-					[opts.gameplayDamageType]: 'fire',
+					[opts.targetCharacter]: 'Wizard',
+					[opts.damageAmount]: 15,
+					[opts.damageType]: 'fire',
 				},
 				userId: TEST_USER_ID,
 				guildId: TEST_GUILD_ID,
@@ -89,8 +88,8 @@ describe('GameplayDamageSubCommand Integration', () => {
 				commandName: 'gameplay',
 				subcommand: 'damage',
 				options: {
-					[opts.gameplayTargetCharacter]: 'Barbarian',
-					[opts.gameplayDamageAmount]: 100,
+					[opts.targetCharacter]: 'Barbarian',
+					[opts.damageAmount]: 100,
 				},
 				userId: TEST_USER_ID,
 				guildId: TEST_GUILD_ID,
@@ -113,8 +112,8 @@ describe('GameplayDamageSubCommand Integration', () => {
 				commandName: 'gameplay',
 				subcommand: 'damage',
 				options: {
-					[opts.gameplayTargetCharacter]: 'Cleric',
-					[opts.gameplayDamageAmount]: -20,
+					[opts.targetCharacter]: 'Cleric',
+					[opts.damageAmount]: -20,
 				},
 				userId: TEST_USER_ID,
 				guildId: TEST_GUILD_ID,
@@ -137,9 +136,9 @@ describe('GameplayDamageSubCommand Integration', () => {
 				commandName: 'gameplay',
 				subcommand: 'damage',
 				options: {
-					[opts.gameplayTargetCharacter]: 'Target',
-					[opts.gameplayDamageAmount]: 8,
-					[opts.gameplayDamageType]: 'slashing',
+					[opts.targetCharacter]: 'Target',
+					[opts.damageAmount]: 8,
+					[opts.damageType]: 'slashing',
 				},
 				userId: TEST_USER_ID,
 				guildId: TEST_GUILD_ID,
@@ -160,9 +159,9 @@ describe('GameplayDamageSubCommand Integration', () => {
 				commandName: 'gameplay',
 				subcommand: 'damage',
 				options: {
-					[opts.gameplayTargetCharacter]: 'Target',
-					[opts.gameplayDamageAmount]: 12,
-					[opts.gameplayDamageType]: 'cold',
+					[opts.targetCharacter]: 'Target',
+					[opts.damageAmount]: 12,
+					[opts.damageType]: 'cold',
 				},
 				userId: TEST_USER_ID,
 				guildId: TEST_GUILD_ID,
@@ -184,8 +183,8 @@ describe('GameplayDamageSubCommand Integration', () => {
 				commandName: 'gameplay',
 				subcommand: 'damage',
 				options: {
-					[opts.gameplayTargetCharacter]: 'NonexistentTarget',
-					[opts.gameplayDamageAmount]: 10,
+					[opts.targetCharacter]: 'NonexistentTarget',
+					[opts.damageAmount]: 10,
 				},
 				userId: TEST_USER_ID,
 				guildId: TEST_GUILD_ID,

@@ -15,7 +15,8 @@ import {
 	TEST_GUILD_ID,
 	CommandTestHarness,
 	getMockKobold,
-	resetMockKobold,} from '../../../test-utils/index.js';
+	resetMockKobold,
+} from '../../../test-utils/index.js';
 import { createMockGame } from './game-test-utils.js';
 
 describe('GameDeleteSubCommand', () => {
@@ -39,7 +40,7 @@ describe('GameDeleteSubCommand', () => {
 			commandName: 'game',
 			subcommand: 'delete',
 			options: {
-				[opts.gameTargetGame]: 'Doomed Game',
+				[opts.targetGame]: 'Doomed Game',
 			},
 			userId: TEST_USER_ID,
 			guildId: TEST_GUILD_ID,
@@ -62,7 +63,7 @@ describe('GameDeleteSubCommand', () => {
 			commandName: 'game',
 			subcommand: 'delete',
 			options: {
-				[opts.gameTargetGame]: 'Ghost Game',
+				[opts.targetGame]: 'Ghost Game',
 			},
 			userId: TEST_USER_ID,
 			guildId: TEST_GUILD_ID,

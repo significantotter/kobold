@@ -27,11 +27,10 @@ export class GameplayDamageSubCommand extends BaseCommandClass(
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === commandOptions[commandOptionsEnum.gameplayTargetCharacter].name) {
+		if (option.name === commandOptions[commandOptionsEnum.targetCharacter].name) {
 			const match =
-				intr.options.getString(
-					commandOptions[commandOptionsEnum.gameplayTargetCharacter].name
-				) ?? '';
+				intr.options.getString(commandOptions[commandOptionsEnum.targetCharacter].name) ??
+				'';
 			const { autocompleteUtils } = new KoboldUtils(kobold);
 			return await autocompleteUtils.getAllTargetOptions(intr, match);
 		}
@@ -42,16 +41,14 @@ export class GameplayDamageSubCommand extends BaseCommandClass(
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const targetCharacter = intr.options.getString(
-			commandOptions[commandOptionsEnum.gameplayTargetCharacter].name,
+			commandOptions[commandOptionsEnum.targetCharacter].name,
 			true
 		);
 		const amount = intr.options.getNumber(
-			commandOptions[commandOptionsEnum.gameplayDamageAmount].name,
+			commandOptions[commandOptionsEnum.damageAmount].name,
 			true
 		);
-		const type = intr.options.getString(
-			commandOptions[commandOptionsEnum.gameplayDamageType].name
-		);
+		const type = intr.options.getString(commandOptions[commandOptionsEnum.damageType].name);
 
 		const { gameUtils, creatureUtils } = new KoboldUtils(kobold);
 

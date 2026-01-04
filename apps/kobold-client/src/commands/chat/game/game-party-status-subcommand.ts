@@ -28,11 +28,10 @@ export class GamePartyStatusSubCommand extends BaseCommandClass(
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === commandOptions[commandOptionsEnum.gameTargetCharacter].name) {
+		if (option.name === commandOptions[commandOptionsEnum.targetCharacter].name) {
 			const targetCharacter =
-				intr.options.getString(
-					commandOptions[commandOptionsEnum.gameTargetCharacter].name
-				) ?? '';
+				intr.options.getString(commandOptions[commandOptionsEnum.targetCharacter].name) ??
+				'';
 
 			const { gameUtils } = new KoboldUtils(kobold);
 			const activeGame = await gameUtils.getActiveGame(intr.user.id, intr.guildId ?? '');
@@ -45,10 +44,10 @@ export class GamePartyStatusSubCommand extends BaseCommandClass(
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const sheetStyle =
-			intr.options.getString(commandOptions[commandOptionsEnum.gameSheetStyle].name) ??
+			intr.options.getString(commandOptions[commandOptionsEnum.sheetStyle].name) ??
 			SheetRecordTrackerModeEnum.counters_only;
 		const targetCharacterName = intr.options.getString(
-			commandOptions[commandOptionsEnum.gameTargetCharacter].name,
+			commandOptions[commandOptionsEnum.targetCharacter].name,
 			true
 		);
 		const koboldUtils = new KoboldUtils(kobold);

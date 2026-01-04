@@ -17,7 +17,8 @@ import {
 	TEST_GUILD_ID,
 	CommandTestHarness,
 	getMockKobold,
-	resetMockKobold,} from '../../../test-utils/index.js';
+	resetMockKobold,
+} from '../../../test-utils/index.js';
 import { createMockGame } from './game-test-utils.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 
@@ -54,7 +55,7 @@ describe('GameLeaveSubCommand', () => {
 			commandName: 'game',
 			subcommand: 'leave',
 			options: {
-				[opts.gameTargetGame]: 'Adventure',
+				[opts.targetGame]: 'Adventure',
 			},
 			userId: TEST_USER_ID,
 			guildId: TEST_GUILD_ID,
@@ -77,7 +78,7 @@ describe('GameLeaveSubCommand', () => {
 			commandName: 'game',
 			subcommand: 'leave',
 			options: {
-				[opts.gameTargetGame]: 'Nowhere Game',
+				[opts.targetGame]: 'Nowhere Game',
 			},
 			userId: TEST_USER_ID,
 			guildId: TEST_GUILD_ID,
@@ -110,7 +111,7 @@ describe('GameLeaveSubCommand', () => {
 			commandName: 'game',
 			subcommand: 'leave',
 			options: {
-				[opts.gameTargetGame]: 'Adventure',
+				[opts.targetGame]: 'Adventure',
 			},
 			userId: TEST_USER_ID,
 			guildId: TEST_GUILD_ID,

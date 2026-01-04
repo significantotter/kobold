@@ -26,21 +26,19 @@ export const gameplayCommandDefinition = {
 				'Applies damage to a character, effecting tempHp, stamina (if enabled), and hp.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[GameplayCommandOptionEnum.gameplayTargetCharacter]: withOrder(
+				[GameplayCommandOptionEnum.targetCharacter]: withOrder(
 					{
-						...gameplayCommandOptions[
-							GameplayCommandOptionEnum.gameplayTargetCharacter
-						],
+						...gameplayCommandOptions[GameplayCommandOptionEnum.targetCharacter],
 						required: true,
 					},
 					1
 				),
-				[GameplayCommandOptionEnum.gameplayDamageAmount]: withOrder(
-					gameplayCommandOptions[GameplayCommandOptionEnum.gameplayDamageAmount],
+				[GameplayCommandOptionEnum.damageAmount]: withOrder(
+					gameplayCommandOptions[GameplayCommandOptionEnum.damageAmount],
 					2
 				),
-				[GameplayCommandOptionEnum.gameplayDamageType]: withOrder(
-					gameplayCommandOptions[GameplayCommandOptionEnum.gameplayDamageType],
+				[GameplayCommandOptionEnum.damageType]: withOrder(
+					gameplayCommandOptions[GameplayCommandOptionEnum.damageType],
 					3
 				),
 			},
@@ -50,16 +48,16 @@ export const gameplayCommandDefinition = {
 			description: "Sets a character's gameplay stat (such as hp) to a value",
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[GameplayCommandOptionEnum.gameplaySetOption]: withOrder(
-					gameplayCommandOptions[GameplayCommandOptionEnum.gameplaySetOption],
+				[GameplayCommandOptionEnum.setOption]: withOrder(
+					gameplayCommandOptions[GameplayCommandOptionEnum.setOption],
 					1
 				),
-				[GameplayCommandOptionEnum.gameplaySetValue]: withOrder(
-					gameplayCommandOptions[GameplayCommandOptionEnum.gameplaySetValue],
+				[GameplayCommandOptionEnum.setValue]: withOrder(
+					gameplayCommandOptions[GameplayCommandOptionEnum.setValue],
 					2
 				),
-				[GameplayCommandOptionEnum.gameplayTargetCharacter]: withOrder(
-					gameplayCommandOptions[GameplayCommandOptionEnum.gameplayTargetCharacter],
+				[GameplayCommandOptionEnum.targetCharacter]: withOrder(
+					gameplayCommandOptions[GameplayCommandOptionEnum.targetCharacter],
 					3
 				),
 			},
@@ -70,8 +68,8 @@ export const gameplayCommandDefinition = {
 				"Resets all of a character/npc's 'recoverable' stats (hp, stamina, resolve) to their maximum values.",
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[GameplayCommandOptionEnum.gameplayTargetCharacter]: withOrder(
-					gameplayCommandOptions[GameplayCommandOptionEnum.gameplayTargetCharacter],
+				[GameplayCommandOptionEnum.targetCharacter]: withOrder(
+					gameplayCommandOptions[GameplayCommandOptionEnum.targetCharacter],
 					1
 				),
 			},
@@ -82,16 +80,16 @@ export const gameplayCommandDefinition = {
 				'Sets up a tracker to follow the changing statistics of one of your characters.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[GameplayCommandOptionEnum.gameplayTargetCharacter]: withOrder(
-					gameplayCommandOptions[GameplayCommandOptionEnum.gameplayTargetCharacter],
+				[GameplayCommandOptionEnum.targetCharacter]: withOrder(
+					gameplayCommandOptions[GameplayCommandOptionEnum.targetCharacter],
 					1
 				),
-				[GameplayCommandOptionEnum.gameplayTargetChannel]: withOrder(
-					gameplayCommandOptions[GameplayCommandOptionEnum.gameplayTargetChannel],
+				[GameplayCommandOptionEnum.targetChannel]: withOrder(
+					gameplayCommandOptions[GameplayCommandOptionEnum.targetChannel],
 					2
 				),
-				[GameplayCommandOptionEnum.gameplayTrackerMode]: withOrder(
-					gameplayCommandOptions[GameplayCommandOptionEnum.gameplayTrackerMode],
+				[GameplayCommandOptionEnum.trackerMode]: withOrder(
+					gameplayCommandOptions[GameplayCommandOptionEnum.trackerMode],
 					3
 				),
 			},

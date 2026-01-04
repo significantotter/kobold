@@ -150,7 +150,7 @@ export const initCommandOptions = {
 	[InitCommandOptionEnum.skillChoice]: {
 		name: 'skill',
 		description: 'The skill to roll.',
-		required: true,
+		required: false,
 		autocomplete: true,
 		type: ApplicationCommandOptionType.String,
 	},

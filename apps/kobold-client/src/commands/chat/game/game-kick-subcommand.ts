@@ -28,7 +28,7 @@ export class GameKickSubCommand extends BaseCommandClass(
 
 		const value = (option.value as string).trim().toLowerCase();
 
-		if (option.name === commandOptions[commandOptionsEnum.gameTargetGame].name) {
+		if (option.name === commandOptions[commandOptionsEnum.targetGame].name) {
 			if (!intr.guildId) return [];
 
 			// Get games the user owns in this guild
@@ -45,12 +45,11 @@ export class GameKickSubCommand extends BaseCommandClass(
 				.filter(field => value === '' || field.name.toLowerCase().includes(value));
 		}
 
-		if (option.name === commandOptions[commandOptionsEnum.gameKickCharacter].name) {
+		if (option.name === commandOptions[commandOptionsEnum.targetCharacter].name) {
 			if (!intr.guildId) return [];
 
 			const selectedGameName =
-				intr.options.getString(commandOptions[commandOptionsEnum.gameTargetGame].name) ??
-				'';
+				intr.options.getString(commandOptions[commandOptionsEnum.targetGame].name) ?? '';
 
 			// Get the selected game
 			const targetGames = await kobold.game.readMany({
@@ -78,11 +77,11 @@ export class GameKickSubCommand extends BaseCommandClass(
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const gameName = intr.options.getString(
-			commandOptions[commandOptionsEnum.gameTargetGame].name,
+			commandOptions[commandOptionsEnum.targetGame].name,
 			true
 		);
 		const characterName = intr.options.getString(
-			commandOptions[commandOptionsEnum.gameKickCharacter].name,
+			commandOptions[commandOptionsEnum.targetCharacter].name,
 			true
 		);
 

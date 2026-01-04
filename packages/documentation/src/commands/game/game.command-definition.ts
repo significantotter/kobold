@@ -32,8 +32,8 @@ export const gameCommandDefinition = {
 			description: 'Create a new game in this server.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[GameCommandOptionEnum.gameCreateName]: withOrder(
-					gameCommandOptions[GameCommandOptionEnum.gameCreateName],
+				[GameCommandOptionEnum.createName]: withOrder(
+					gameCommandOptions[GameCommandOptionEnum.createName],
 					1
 				),
 			},
@@ -43,8 +43,8 @@ export const gameCommandDefinition = {
 			description: 'Join your active character to a game.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[GameCommandOptionEnum.gameTargetGame]: withOrder(
-					gameCommandOptions[GameCommandOptionEnum.gameTargetGame],
+				[GameCommandOptionEnum.targetGame]: withOrder(
+					gameCommandOptions[GameCommandOptionEnum.targetGame],
 					1
 				),
 			},
@@ -54,8 +54,8 @@ export const gameCommandDefinition = {
 			description: 'Set a game as your active game in this server.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[GameCommandOptionEnum.gameTargetGame]: withOrder(
-					gameCommandOptions[GameCommandOptionEnum.gameTargetGame],
+				[GameCommandOptionEnum.targetGame]: withOrder(
+					gameCommandOptions[GameCommandOptionEnum.targetGame],
 					1
 				),
 			},
@@ -65,8 +65,8 @@ export const gameCommandDefinition = {
 			description: 'Remove your active character from a game.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[GameCommandOptionEnum.gameTargetGame]: withOrder(
-					gameCommandOptions[GameCommandOptionEnum.gameTargetGame],
+				[GameCommandOptionEnum.targetGame]: withOrder(
+					gameCommandOptions[GameCommandOptionEnum.targetGame],
 					1
 				),
 			},
@@ -76,12 +76,12 @@ export const gameCommandDefinition = {
 			description: 'Kick a character from your game. GM only.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[GameCommandOptionEnum.gameTargetGame]: withOrder(
-					gameCommandOptions[GameCommandOptionEnum.gameTargetGame],
+				[GameCommandOptionEnum.targetGame]: withOrder(
+					gameCommandOptions[GameCommandOptionEnum.targetGame],
 					1
 				),
-				[GameCommandOptionEnum.gameKickCharacter]: withOrder(
-					gameCommandOptions[GameCommandOptionEnum.gameKickCharacter],
+				[GameCommandOptionEnum.targetCharacter]: withOrder(
+					gameCommandOptions[GameCommandOptionEnum.targetCharacter],
 					2
 				),
 			},
@@ -91,8 +91,8 @@ export const gameCommandDefinition = {
 			description: 'Delete a game you created. GM only.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[GameCommandOptionEnum.gameTargetGame]: withOrder(
-					gameCommandOptions[GameCommandOptionEnum.gameTargetGame],
+				[GameCommandOptionEnum.targetGame]: withOrder(
+					gameCommandOptions[GameCommandOptionEnum.targetGame],
 					1
 				),
 			},
@@ -103,8 +103,8 @@ export const gameCommandDefinition = {
 				'Starts initiative and adds joins with all characters in the game. GM only.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[GameCommandOptionEnum.gameTargetCharacter]: withOrder(
-					gameCommandOptions[GameCommandOptionEnum.gameTargetCharacter],
+				[GameCommandOptionEnum.targetCharacter]: withOrder(
+					gameCommandOptions[GameCommandOptionEnum.targetCharacter],
 					1
 				),
 				[GameCommandOptionEnum.skillChoice]: withOrder(
@@ -136,12 +136,12 @@ export const gameCommandDefinition = {
 			description: 'Displays the status of all party members.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[GameCommandOptionEnum.gameTargetCharacter]: withOrder(
-					gameCommandOptions[GameCommandOptionEnum.gameTargetCharacter],
+				[GameCommandOptionEnum.targetCharacter]: withOrder(
+					gameCommandOptions[GameCommandOptionEnum.targetCharacter],
 					1
 				),
-				[GameCommandOptionEnum.gameSheetStyle]: withOrder(
-					gameCommandOptions[GameCommandOptionEnum.gameSheetStyle],
+				[GameCommandOptionEnum.sheetStyle]: withOrder(
+					gameCommandOptions[GameCommandOptionEnum.sheetStyle],
 					2
 				),
 			},
@@ -151,16 +151,16 @@ export const gameCommandDefinition = {
 			description: 'Gives certain resources to players in the game.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[GameCommandOptionEnum.gameTargetCharacter]: withOrder(
-					gameCommandOptions[GameCommandOptionEnum.gameTargetCharacter],
+				[GameCommandOptionEnum.targetCharacter]: withOrder(
+					gameCommandOptions[GameCommandOptionEnum.targetCharacter],
 					1
 				),
-				[GameCommandOptionEnum.gameGiveOption]: withOrder(
-					gameCommandOptions[GameCommandOptionEnum.gameGiveOption],
+				[GameCommandOptionEnum.giveOption]: withOrder(
+					gameCommandOptions[GameCommandOptionEnum.giveOption],
 					2
 				),
-				[GameCommandOptionEnum.gameGiveAmount]: withOrder(
-					gameCommandOptions[GameCommandOptionEnum.gameGiveAmount],
+				[GameCommandOptionEnum.giveAmount]: withOrder(
+					gameCommandOptions[GameCommandOptionEnum.giveAmount],
 					3
 				),
 			},
@@ -170,16 +170,16 @@ export const gameCommandDefinition = {
 			description: 'Rolls dice for all characters in a game (or optionally one). GM only.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
-				[GameCommandOptionEnum.gameTargetCharacter]: withOrder(
-					gameCommandOptions[GameCommandOptionEnum.gameTargetCharacter],
+				[GameCommandOptionEnum.targetCharacter]: withOrder(
+					gameCommandOptions[GameCommandOptionEnum.targetCharacter],
 					1
 				),
-				[GameCommandOptionEnum.gameRollType]: withOrder(
-					gameCommandOptions[GameCommandOptionEnum.gameRollType],
+				[GameCommandOptionEnum.rollType]: withOrder(
+					gameCommandOptions[GameCommandOptionEnum.rollType],
 					2
 				),
-				[GameCommandOptionEnum.gameDiceRollOrModifier]: withOrder(
-					gameCommandOptions[GameCommandOptionEnum.gameDiceRollOrModifier],
+				[GameCommandOptionEnum.diceRollOrModifier]: withOrder(
+					gameCommandOptions[GameCommandOptionEnum.diceRollOrModifier],
 					3
 				),
 				[GameCommandOptionEnum.initCharacterTarget]: withOrder(

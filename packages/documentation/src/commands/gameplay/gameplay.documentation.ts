@@ -22,10 +22,9 @@ export const gameplayCommandDocumentation: CommandDocumentation<typeof gameplayC
 						type: CommandResponseTypeEnum.success,
 						message: 'Anatase Lightclaw took 5 damage!',
 						options: {
-							[GameplayCommandOptionEnum.gameplayTargetCharacter]:
-								'Anatase Lightclaw',
-							[GameplayCommandOptionEnum.gameplayDamageAmount]: 5,
-							[GameplayCommandOptionEnum.gameplayDamageType]: 'fire',
+							[GameplayCommandOptionEnum.targetCharacter]: 'Anatase Lightclaw',
+							[GameplayCommandOptionEnum.damageAmount]: 5,
+							[GameplayCommandOptionEnum.damageType]: 'fire',
 						},
 					},
 				],
@@ -40,10 +39,9 @@ export const gameplayCommandDocumentation: CommandDocumentation<typeof gameplayC
 						type: CommandResponseTypeEnum.success,
 						message: 'Stat set successfully.',
 						options: {
-							[GameplayCommandOptionEnum.gameplaySetOption]: 'hp',
-							[GameplayCommandOptionEnum.gameplaySetValue]: 22,
-							[GameplayCommandOptionEnum.gameplayTargetCharacter]:
-								'Anatase Lightclaw',
+							[GameplayCommandOptionEnum.setOption]: 'hp',
+							[GameplayCommandOptionEnum.setValue]: 22,
+							[GameplayCommandOptionEnum.targetCharacter]: 'Anatase Lightclaw',
 						},
 					},
 				],
@@ -59,8 +57,7 @@ export const gameplayCommandDocumentation: CommandDocumentation<typeof gameplayC
 						type: CommandResponseTypeEnum.success,
 						message: 'Yip! Anatase Lightclaw recovered! HP increased from 22 to 42',
 						options: {
-							[GameplayCommandOptionEnum.gameplayTargetCharacter]:
-								'Anatase Lightclaw',
+							[GameplayCommandOptionEnum.targetCharacter]: 'Anatase Lightclaw',
 						},
 					},
 				],
@@ -77,10 +74,9 @@ export const gameplayCommandDocumentation: CommandDocumentation<typeof gameplayC
 						message:
 							'Anatase Lightclaw Tracker\n\nLevel 3 Spellscale Kobold Monk\n\nHP: `42/42`\n\nHero Points: `1/3`,',
 						options: {
-							[GameplayCommandOptionEnum.gameplayTargetCharacter]:
-								'Anatase Lightclaw',
-							[GameplayCommandOptionEnum.gameplayTargetChannel]: '#trackers',
-							[GameplayCommandOptionEnum.gameplayTrackerMode]: 'full-sheet',
+							[GameplayCommandOptionEnum.targetCharacter]: 'Anatase Lightclaw',
+							[GameplayCommandOptionEnum.targetChannel]: '#trackers',
+							[GameplayCommandOptionEnum.trackerMode]: 'full-sheet',
 						},
 					},
 				],

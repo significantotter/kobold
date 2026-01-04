@@ -19,7 +19,8 @@ import {
 	TEST_GUILD_ID,
 	CommandTestHarness,
 	getMockKobold,
-	resetMockKobold,} from '../../../test-utils/index.js';
+	resetMockKobold,
+} from '../../../test-utils/index.js';
 import { createMockGame, createMockInitiative } from './game-test-utils.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 
@@ -56,7 +57,7 @@ describe('GameInitSubCommand', () => {
 				commandName: 'game',
 				subcommand: 'init',
 				options: {
-					[opts.gameTargetCharacter]: 'All Players',
+					[opts.targetCharacter]: 'All Players',
 				},
 				userId: TEST_USER_ID,
 				guildId: TEST_GUILD_ID,
@@ -86,7 +87,7 @@ describe('GameInitSubCommand', () => {
 				commandName: 'game',
 				subcommand: 'init',
 				options: {
-					[opts.gameTargetCharacter]: 'Fighter',
+					[opts.targetCharacter]: 'Fighter',
 				},
 				userId: TEST_USER_ID,
 				guildId: TEST_GUILD_ID,
@@ -114,7 +115,7 @@ describe('GameInitSubCommand', () => {
 				commandName: 'game',
 				subcommand: 'init',
 				options: {
-					[opts.gameTargetCharacter]: 'All Players',
+					[opts.targetCharacter]: 'All Players',
 				},
 				userId: TEST_USER_ID,
 				guildId: TEST_GUILD_ID,
@@ -146,7 +147,7 @@ describe('GameInitSubCommand', () => {
 				commandName: 'game',
 				subcommand: 'init',
 				options: {
-					[opts.gameTargetCharacter]: 'All Players',
+					[opts.targetCharacter]: 'All Players',
 				},
 				userId: TEST_USER_ID,
 				guildId: TEST_GUILD_ID,
@@ -168,7 +169,7 @@ describe('GameInitSubCommand', () => {
 				commandName: 'game',
 				subcommand: 'init',
 				options: {
-					[opts.gameTargetCharacter]: 'All Players',
+					[opts.targetCharacter]: 'All Players',
 				},
 				userId: TEST_USER_ID,
 				guildId: TEST_GUILD_ID,

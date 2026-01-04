@@ -9,7 +9,7 @@ export enum CharacterCommandOptionEnum {
 	useStamina = 'use-stamina',
 	name = 'name',
 	id = 'id',
-	sheetStyle = 'game-sheet-style',
+	sheetStyle = 'sheet-style',
 }
 
 export enum CharacterSetDefaultScopeOptionsEnum {

@@ -2,18 +2,18 @@ import { ApplicationCommandOptionType } from 'discord-api-types/v10';
 import type { CommandOptions, SpecificCommandOptions } from '../helpers/commands.types.js';
 
 export enum GameplayCommandOptionEnum {
-	gameplaySetOption = 'gameplay-set-option',
-	gameplayDamageAmount = 'gameplay-damage-amount',
-	gameplayDamageType = 'gameplay-damage-type',
-	gameplaySetValue = 'gameplay-set-value',
-	gameplayTargetCharacter = 'gameplay-target-character',
-	gameplayTargetChannel = 'gameplay-target-channel',
-	gameplayTrackerMode = 'gameplay-tracker-mode',
+	setOption = 'set-option',
+	damageAmount = 'damage-amount',
+	damageType = 'damage-type',
+	setValue = 'set-value',
+	targetCharacter = 'target-character',
+	targetChannel = 'target-channel',
+	trackerMode = 'tracker-mode',
 }
 
 export const gameplayCommandOptions = {
-	[GameplayCommandOptionEnum.gameplaySetOption]: {
-		name: GameplayCommandOptionEnum.gameplaySetOption,
+	[GameplayCommandOptionEnum.setOption]: {
+		name: GameplayCommandOptionEnum.setOption,
 		description: "What option to update on the target character's sheet",
 		required: true,
 		type: ApplicationCommandOptionType.String,
@@ -44,39 +44,39 @@ export const gameplayCommandOptions = {
 			},
 		],
 	},
-	[GameplayCommandOptionEnum.gameplayDamageAmount]: {
-		name: GameplayCommandOptionEnum.gameplayDamageAmount,
+	[GameplayCommandOptionEnum.damageAmount]: {
+		name: GameplayCommandOptionEnum.damageAmount,
 		description: 'The amount of damage to apply. A negative number heals the target.',
 		required: true,
 		type: ApplicationCommandOptionType.Number,
 	},
-	[GameplayCommandOptionEnum.gameplayDamageType]: {
-		name: GameplayCommandOptionEnum.gameplayDamageType,
+	[GameplayCommandOptionEnum.damageType]: {
+		name: GameplayCommandOptionEnum.damageType,
 		description: 'The type of damage to apply.',
 		required: false,
 		type: ApplicationCommandOptionType.String,
 	},
-	[GameplayCommandOptionEnum.gameplaySetValue]: {
-		name: GameplayCommandOptionEnum.gameplaySetValue,
+	[GameplayCommandOptionEnum.setValue]: {
+		name: GameplayCommandOptionEnum.setValue,
 		description: "The value to update to on the target character's sheet",
 		required: true,
 		type: ApplicationCommandOptionType.String,
 	},
-	[GameplayCommandOptionEnum.gameplayTargetCharacter]: {
-		name: GameplayCommandOptionEnum.gameplayTargetCharacter,
+	[GameplayCommandOptionEnum.targetCharacter]: {
+		name: GameplayCommandOptionEnum.targetCharacter,
 		description: 'What character to update. Defaults to your active character.',
 		required: true,
 		autocomplete: true,
 		type: ApplicationCommandOptionType.String,
 	},
-	[GameplayCommandOptionEnum.gameplayTargetChannel]: {
-		name: GameplayCommandOptionEnum.gameplayTargetChannel,
+	[GameplayCommandOptionEnum.targetChannel]: {
+		name: GameplayCommandOptionEnum.targetChannel,
 		description: 'What channel to send the tracker to. Defaults to your current channel.',
 		required: false,
 		type: ApplicationCommandOptionType.Channel,
 	},
-	[GameplayCommandOptionEnum.gameplayTrackerMode]: {
-		name: GameplayCommandOptionEnum.gameplayTrackerMode,
+	[GameplayCommandOptionEnum.trackerMode]: {
+		name: GameplayCommandOptionEnum.trackerMode,
 		description: 'How much information to track for the character.',
 		required: false,
 		type: ApplicationCommandOptionType.String,

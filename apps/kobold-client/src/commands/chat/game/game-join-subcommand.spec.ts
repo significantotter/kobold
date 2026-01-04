@@ -17,7 +17,8 @@ import {
 	TEST_GUILD_ID,
 	CommandTestHarness,
 	getMockKobold,
-	resetMockKobold,} from '../../../test-utils/index.js';
+	resetMockKobold,
+} from '../../../test-utils/index.js';
 import { createMockGame } from './game-test-utils.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 
@@ -50,7 +51,7 @@ describe('GameJoinSubCommand', () => {
 			commandName: 'game',
 			subcommand: 'join',
 			options: {
-				[opts.gameTargetGame]: 'Adventure',
+				[opts.targetGame]: 'Adventure',
 			},
 			userId: TEST_USER_ID,
 			guildId: TEST_GUILD_ID,
@@ -73,7 +74,7 @@ describe('GameJoinSubCommand', () => {
 			commandName: 'game',
 			subcommand: 'join',
 			options: {
-				[opts.gameTargetGame]: 'Missing Game',
+				[opts.targetGame]: 'Missing Game',
 			},
 			userId: TEST_USER_ID,
 			guildId: TEST_GUILD_ID,
@@ -106,7 +107,7 @@ describe('GameJoinSubCommand', () => {
 			commandName: 'game',
 			subcommand: 'join',
 			options: {
-				[opts.gameTargetGame]: 'Adventure',
+				[opts.targetGame]: 'Adventure',
 			},
 			userId: TEST_USER_ID,
 			guildId: TEST_GUILD_ID,
