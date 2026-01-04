@@ -31,19 +31,18 @@ export class GameRollSubCommand extends BaseCommandClass(
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === commandOptions[commandOptionsEnum.gameTargetCharacter].name) {
+		if (option.name === commandOptions[commandOptionsEnum.targetCharacter].name) {
 			const targetCharacter =
-				intr.options.getString(
-					commandOptions[commandOptionsEnum.gameTargetCharacter].name
-				) ?? '';
+				intr.options.getString(commandOptions[commandOptionsEnum.targetCharacter].name) ??
+				'';
 
 			const { gameUtils } = new KoboldUtils(kobold);
 			const activeGame = await gameUtils.getActiveGame(intr.user.id, intr.guildId ?? '');
 			return gameUtils.autocompleteGameCharacter(targetCharacter, activeGame);
-		} else if (option.name === commandOptions[commandOptionsEnum.gameRollType].name) {
+		} else if (option.name === commandOptions[commandOptionsEnum.rollType].name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
 			const match =
-				intr.options.getString(commandOptions[commandOptionsEnum.gameRollType].name) ?? '';
+				intr.options.getString(commandOptions[commandOptionsEnum.rollType].name) ?? '';
 
 			const { gameUtils } = new KoboldUtils(kobold);
 			const activeGame = await gameUtils.getActiveGame(intr.user.id, intr.guildId ?? '');
@@ -93,15 +92,14 @@ export class GameRollSubCommand extends BaseCommandClass(
 	): Promise<void> {
 		if (!intr.isChatInputCommand()) return;
 		const rollType = intr.options.getString(
-			commandOptions[commandOptionsEnum.gameRollType].name,
+			commandOptions[commandOptionsEnum.rollType].name,
 			true
 		);
 		const diceExpression =
-			intr.options.getString(
-				commandOptions[commandOptionsEnum.gameDiceRollOrModifier].name
-			) ?? '';
+			intr.options.getString(commandOptions[commandOptionsEnum.diceRollOrModifier].name) ??
+			'';
 		const targetCharacterName = intr.options.getString(
-			commandOptions[commandOptionsEnum.gameTargetCharacter].name,
+			commandOptions[commandOptionsEnum.targetCharacter].name,
 			true
 		);
 		const targetSheetName = intr.options.getString(

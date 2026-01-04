@@ -40,7 +40,7 @@ describe('GameCreateSubCommand', () => {
 			commandName: 'game',
 			subcommand: 'create',
 			options: {
-				[opts.gameCreateName]: 'New Campaign',
+				[opts.createName]: 'New Campaign',
 			},
 			userId: TEST_USER_ID,
 			guildId: TEST_GUILD_ID,
@@ -71,7 +71,7 @@ describe('GameCreateSubCommand', () => {
 			commandName: 'game',
 			subcommand: 'create',
 			options: {
-				[opts.gameCreateName]: 'Existing Game',
+				[opts.createName]: 'Existing Game',
 			},
 			userId: TEST_USER_ID,
 			guildId: TEST_GUILD_ID,
@@ -92,7 +92,7 @@ describe('GameCreateSubCommand', () => {
 			commandName: 'game',
 			subcommand: 'create',
 			options: {
-				[opts.gameCreateName]: 'A',
+				[opts.createName]: 'A',
 			},
 			userId: TEST_USER_ID,
 			guildId: TEST_GUILD_ID,
@@ -115,7 +115,7 @@ describe('GameCreateSubCommand', () => {
 			commandName: 'game',
 			subcommand: 'create',
 			options: {
-				[opts.gameCreateName]: 'New Game',
+				[opts.createName]: 'New Game',
 			},
 			userId: TEST_USER_ID,
 			guildId: TEST_GUILD_ID,

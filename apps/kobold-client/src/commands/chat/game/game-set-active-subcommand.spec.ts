@@ -15,7 +15,8 @@ import {
 	TEST_GUILD_ID,
 	CommandTestHarness,
 	getMockKobold,
-	resetMockKobold,} from '../../../test-utils/index.js';
+	resetMockKobold,
+} from '../../../test-utils/index.js';
 import { createMockGame } from './game-test-utils.js';
 
 describe('GameSetActiveSubCommand', () => {
@@ -40,7 +41,7 @@ describe('GameSetActiveSubCommand', () => {
 			commandName: 'game',
 			subcommand: 'set-active',
 			options: {
-				[opts.gameTargetGame]: 'Target Game',
+				[opts.targetGame]: 'Target Game',
 			},
 			userId: TEST_USER_ID,
 			guildId: TEST_GUILD_ID,
@@ -63,7 +64,7 @@ describe('GameSetActiveSubCommand', () => {
 			commandName: 'game',
 			subcommand: 'set-active',
 			options: {
-				[opts.gameTargetGame]: 'Nonexistent Game',
+				[opts.targetGame]: 'Nonexistent Game',
 			},
 			userId: TEST_USER_ID,
 			guildId: TEST_GUILD_ID,
@@ -86,7 +87,7 @@ describe('GameSetActiveSubCommand', () => {
 			commandName: 'game',
 			subcommand: 'set-active',
 			options: {
-				[opts.gameTargetGame]: 'Target Game',
+				[opts.targetGame]: 'Target Game',
 			},
 			userId: TEST_USER_ID,
 			guildId: TEST_GUILD_ID,

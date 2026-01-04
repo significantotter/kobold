@@ -29,7 +29,6 @@ describe('GameplayRecoverSubCommand Integration', () => {
 		harness = createTestHarness([new GameplayCommand([new GameplayRecoverSubCommand()])]);
 	});
 
-
 	describe('Stat Recovery', () => {
 		it('should respond when recovering stats', async () => {
 			// Arrange
@@ -42,7 +41,7 @@ describe('GameplayRecoverSubCommand Integration', () => {
 				commandName: 'gameplay',
 				subcommand: 'recover',
 				options: {
-					[opts.gameplayTargetCharacter]: 'Warrior',
+					[opts.targetCharacter]: 'Warrior',
 				},
 				userId: TEST_USER_ID,
 				guildId: TEST_GUILD_ID,
@@ -65,7 +64,7 @@ describe('GameplayRecoverSubCommand Integration', () => {
 				commandName: 'gameplay',
 				subcommand: 'recover',
 				options: {
-					[opts.gameplayTargetCharacter]: 'FullHealth',
+					[opts.targetCharacter]: 'FullHealth',
 				},
 				userId: TEST_USER_ID,
 				guildId: TEST_GUILD_ID,
@@ -111,7 +110,7 @@ describe('GameplayRecoverSubCommand Integration', () => {
 				commandName: 'gameplay',
 				subcommand: 'recover',
 				options: {
-					[opts.gameplayTargetCharacter]: 'NamedTarget',
+					[opts.targetCharacter]: 'NamedTarget',
 				},
 				userId: TEST_USER_ID,
 				guildId: TEST_GUILD_ID,
@@ -133,7 +132,7 @@ describe('GameplayRecoverSubCommand Integration', () => {
 				commandName: 'gameplay',
 				subcommand: 'recover',
 				options: {
-					[opts.gameplayTargetCharacter]: 'MissingCharacter',
+					[opts.targetCharacter]: 'MissingCharacter',
 				},
 				userId: TEST_USER_ID,
 				guildId: TEST_GUILD_ID,

@@ -28,11 +28,10 @@ export class GameGiveSubCommand extends BaseCommandClass(
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === commandOptions[commandOptionsEnum.gameTargetCharacter].name) {
+		if (option.name === commandOptions[commandOptionsEnum.targetCharacter].name) {
 			const targetCharacter =
-				intr.options.getString(
-					commandOptions[commandOptionsEnum.gameTargetCharacter].name
-				) ?? '';
+				intr.options.getString(commandOptions[commandOptionsEnum.targetCharacter].name) ??
+				'';
 
 			const { gameUtils } = new KoboldUtils(kobold);
 			const activeGame = await gameUtils.getActiveGame(intr.user.id, intr.guildId ?? '');
@@ -45,15 +44,15 @@ export class GameGiveSubCommand extends BaseCommandClass(
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const targetCharacterName = intr.options.getString(
-			commandOptions[commandOptionsEnum.gameTargetCharacter].name,
+			commandOptions[commandOptionsEnum.targetCharacter].name,
 			true
 		);
 		const option = _.camelCase(
-			intr.options.getString(commandOptions[commandOptionsEnum.gameGiveOption].name, true)
+			intr.options.getString(commandOptions[commandOptionsEnum.giveOption].name, true)
 		) as SheetBaseCounterKeys;
 
 		const unparsedValue = intr.options.getString(
-			commandOptions[commandOptionsEnum.gameGiveAmount].name,
+			commandOptions[commandOptionsEnum.giveAmount].name,
 			true
 		);
 		const value = `+${unparsedValue.trim()}`.replaceAll('++', '+').replaceAll('+-', '-');
@@ -102,7 +101,9 @@ export class GameGiveSubCommand extends BaseCommandClass(
 			let optionText = _.kebabCase(option).replaceAll('-', ' ');
 			if (optionText.charAt(optionText.length - 1) === 's')
 				optionText = optionText.slice(0, -1) + '(s)';
-			let message = `Yip! I gave ${updatedValue! - initialValue!} ${optionText} to ${character.name}! New total: ${updatedValue}`;
+			let message = `Yip! I gave ${updatedValue! - initialValue!} ${optionText} to ${
+				character.name
+			}! New total: ${updatedValue}`;
 			let maxValue = creature.sheet.baseCounters[option].max;
 			if (maxValue) message += `/${maxValue}`;
 

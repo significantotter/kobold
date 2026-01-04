@@ -30,7 +30,6 @@ describe('GameplayTrackerSubCommand Integration', () => {
 		harness = createTestHarness([new GameplayCommand([new GameplayTrackerSubCommand()])]);
 	});
 
-
 	describe('Tracker Creation', () => {
 		it('should respond when creating a basic tracker', async () => {
 			// Arrange
@@ -45,7 +44,7 @@ describe('GameplayTrackerSubCommand Integration', () => {
 				commandName: 'gameplay',
 				subcommand: 'tracker',
 				options: {
-					[opts.gameplayTargetCharacter]: 'TrackerChar',
+					[opts.targetCharacter]: 'TrackerChar',
 				},
 				userId: TEST_USER_ID,
 				guildId: TEST_GUILD_ID,
@@ -91,8 +90,8 @@ describe('GameplayTrackerSubCommand Integration', () => {
 				commandName: 'gameplay',
 				subcommand: 'tracker',
 				options: {
-					[opts.gameplayTargetCharacter]: 'CountersChar',
-					[opts.gameplayTrackerMode]: 'counters_only',
+					[opts.targetCharacter]: 'CountersChar',
+					[opts.trackerMode]: 'counters_only',
 				},
 				userId: TEST_USER_ID,
 				guildId: TEST_GUILD_ID,
@@ -115,8 +114,8 @@ describe('GameplayTrackerSubCommand Integration', () => {
 				commandName: 'gameplay',
 				subcommand: 'tracker',
 				options: {
-					[opts.gameplayTargetCharacter]: 'BasicChar',
-					[opts.gameplayTrackerMode]: 'basic_stats',
+					[opts.targetCharacter]: 'BasicChar',
+					[opts.trackerMode]: 'basic_stats',
 				},
 				userId: TEST_USER_ID,
 				guildId: TEST_GUILD_ID,
@@ -139,8 +138,8 @@ describe('GameplayTrackerSubCommand Integration', () => {
 				commandName: 'gameplay',
 				subcommand: 'tracker',
 				options: {
-					[opts.gameplayTargetCharacter]: 'FullSheetChar',
-					[opts.gameplayTrackerMode]: 'full_sheet',
+					[opts.targetCharacter]: 'FullSheetChar',
+					[opts.trackerMode]: 'full_sheet',
 				},
 				userId: TEST_USER_ID,
 				guildId: TEST_GUILD_ID,
@@ -165,8 +164,8 @@ describe('GameplayTrackerSubCommand Integration', () => {
 				commandName: 'gameplay',
 				subcommand: 'tracker',
 				options: {
-					[opts.gameplayTargetCharacter]: 'ChannelChar',
-					[opts.gameplayTargetChannel]: TEST_CHANNEL_ID,
+					[opts.targetCharacter]: 'ChannelChar',
+					[opts.targetChannel]: TEST_CHANNEL_ID,
 				},
 				userId: TEST_USER_ID,
 				guildId: TEST_GUILD_ID,
@@ -189,9 +188,9 @@ describe('GameplayTrackerSubCommand Integration', () => {
 				commandName: 'gameplay',
 				subcommand: 'tracker',
 				options: {
-					[opts.gameplayTargetCharacter]: 'ModeChannelChar',
-					[opts.gameplayTrackerMode]: 'basic_stats',
-					[opts.gameplayTargetChannel]: TEST_CHANNEL_ID,
+					[opts.targetCharacter]: 'ModeChannelChar',
+					[opts.trackerMode]: 'basic_stats',
+					[opts.targetChannel]: TEST_CHANNEL_ID,
 				},
 				userId: TEST_USER_ID,
 				guildId: TEST_GUILD_ID,
@@ -221,7 +220,7 @@ describe('GameplayTrackerSubCommand Integration', () => {
 				commandName: 'gameplay',
 				subcommand: 'tracker',
 				options: {
-					[opts.gameplayTargetCharacter]: 'ExistingTrackerChar',
+					[opts.targetCharacter]: 'ExistingTrackerChar',
 				},
 				userId: TEST_USER_ID,
 				guildId: TEST_GUILD_ID,
@@ -243,7 +242,7 @@ describe('GameplayTrackerSubCommand Integration', () => {
 				commandName: 'gameplay',
 				subcommand: 'tracker',
 				options: {
-					[opts.gameplayTargetCharacter]: 'MissingCharacter',
+					[opts.targetCharacter]: 'MissingCharacter',
 				},
 				userId: TEST_USER_ID,
 				guildId: TEST_GUILD_ID,

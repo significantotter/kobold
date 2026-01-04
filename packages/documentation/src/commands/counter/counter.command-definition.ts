@@ -43,11 +43,9 @@ export const counterCommandDefinition = {
 			type: ApplicationCommandType.ChatInput,
 			options: {
 				[CounterCommandOptionEnum.counterName]: withOrder(
-					{
-						...counterCommandOptions[CounterCommandOptionEnum.counterName],
-						autocomplete: true,
-						choices: undefined,
-					} as APIApplicationCommandOption,
+					counterCommandOptions[
+						CounterCommandOptionEnum.counterName
+					] as APIApplicationCommandOption,
 					1
 				),
 			},
@@ -58,11 +56,9 @@ export const counterCommandDefinition = {
 			type: ApplicationCommandType.ChatInput,
 			options: {
 				[CounterCommandOptionEnum.counterName]: withOrder(
-					{
-						...counterCommandOptions[CounterCommandOptionEnum.counterName],
-						autocomplete: true,
-						choices: undefined,
-					} as APIApplicationCommandOption,
+					counterCommandOptions[
+						CounterCommandOptionEnum.counterName
+					] as APIApplicationCommandOption,
 					1
 				),
 			},
@@ -73,11 +69,9 @@ export const counterCommandDefinition = {
 			type: ApplicationCommandType.ChatInput,
 			options: {
 				[CounterCommandOptionEnum.counterName]: withOrder(
-					{
-						...counterCommandOptions[CounterCommandOptionEnum.counterName],
-						autocomplete: true,
-						choices: undefined,
-					} as APIApplicationCommandOption,
+					counterCommandOptions[
+						CounterCommandOptionEnum.counterName
+					] as APIApplicationCommandOption,
 					1
 				),
 				[CounterCommandOptionEnum.counterSlot]: withOrder(
@@ -96,11 +90,9 @@ export const counterCommandDefinition = {
 			type: ApplicationCommandType.ChatInput,
 			options: {
 				[CounterCommandOptionEnum.counterName]: withOrder(
-					{
-						...counterCommandOptions[CounterCommandOptionEnum.counterName],
-						autocomplete: true,
-						choices: undefined,
-					} as APIApplicationCommandOption,
+					counterCommandOptions[
+						CounterCommandOptionEnum.counterName
+					] as APIApplicationCommandOption,
 					1
 				),
 				[CounterCommandOptionEnum.counterValue]: withOrder(
@@ -115,11 +107,9 @@ export const counterCommandDefinition = {
 			type: ApplicationCommandType.ChatInput,
 			options: {
 				[CounterCommandOptionEnum.counterName]: withOrder(
-					{
-						...counterCommandOptions[CounterCommandOptionEnum.counterName],
-						autocomplete: true,
-						choices: undefined,
-					} as APIApplicationCommandOption,
+					counterCommandOptions[
+						CounterCommandOptionEnum.counterName
+					] as APIApplicationCommandOption,
 					1
 				),
 				[CounterCommandOptionEnum.counterSlot]: withOrder(
@@ -138,11 +128,9 @@ export const counterCommandDefinition = {
 			type: ApplicationCommandType.ChatInput,
 			options: {
 				[CounterCommandOptionEnum.counterName]: withOrder(
-					{
-						...counterCommandOptions[CounterCommandOptionEnum.counterName],
-						autocomplete: true,
-						choices: undefined,
-					} as APIApplicationCommandOption,
+					counterCommandOptions[
+						CounterCommandOptionEnum.counterName
+					] as APIApplicationCommandOption,
 					1
 				),
 				[CounterCommandOptionEnum.counterPrepareMany]: withOrder(
@@ -165,7 +153,10 @@ export const counterCommandDefinition = {
 					1
 				),
 				[CounterCommandOptionEnum.counterName]: withOrder(
-					counterCommandOptions[CounterCommandOptionEnum.counterName],
+					{
+						...counterCommandOptions[CounterCommandOptionEnum.counterName],
+						autocomplete: false,
+					},
 					2
 				),
 				[CounterCommandOptionEnum.counterMax]: withOrder(
@@ -192,11 +183,9 @@ export const counterCommandDefinition = {
 			type: ApplicationCommandType.ChatInput,
 			options: {
 				[CounterCommandOptionEnum.counterName]: withOrder(
-					{
-						...counterCommandOptions[CounterCommandOptionEnum.counterName],
-						autocomplete: true,
-						choices: undefined,
-					} as APIApplicationCommandOption,
+					counterCommandOptions[
+						CounterCommandOptionEnum.counterName
+					] as APIApplicationCommandOption,
 					1
 				),
 				[CounterCommandOptionEnum.counterSetOption]: withOrder(
@@ -215,11 +204,9 @@ export const counterCommandDefinition = {
 			type: ApplicationCommandType.ChatInput,
 			options: {
 				[CounterCommandOptionEnum.counterName]: withOrder(
-					{
-						...counterCommandOptions[CounterCommandOptionEnum.counterName],
-						autocomplete: true,
-						choices: undefined,
-					} as APIApplicationCommandOption,
+					counterCommandOptions[
+						CounterCommandOptionEnum.counterName
+					] as APIApplicationCommandOption,
 					1
 				),
 			},

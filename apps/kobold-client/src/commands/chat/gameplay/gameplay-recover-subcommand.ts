@@ -26,7 +26,7 @@ export class GameplayRecoverSubCommand extends BaseCommandClass(
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === commandOptions[commandOptionsEnum.gameplayTargetCharacter].name) {
+		if (option.name === commandOptions[commandOptionsEnum.targetCharacter].name) {
 			const { autocompleteUtils } = new KoboldUtils(kobold);
 			return await autocompleteUtils.getAllTargetOptions(intr, option.value);
 		}
@@ -37,7 +37,7 @@ export class GameplayRecoverSubCommand extends BaseCommandClass(
 		{ kobold }: { kobold: any }
 	): Promise<void> {
 		const targetCharacter = intr.options.getString(
-			commandOptions[commandOptionsEnum.gameplayTargetCharacter].name,
+			commandOptions[commandOptionsEnum.targetCharacter].name,
 			true
 		);
 

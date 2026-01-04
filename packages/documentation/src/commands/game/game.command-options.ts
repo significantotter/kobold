@@ -2,15 +2,14 @@ import { ApplicationCommandOptionType } from 'discord-api-types/v10';
 import type { CommandOptions, SpecificCommandOptions } from '../helpers/commands.types.js';
 
 export enum GameCommandOptionEnum {
-	gameGiveOption = 'game-give-option',
-	gameGiveAmount = 'game-give-amount',
-	gameSheetStyle = 'game-sheet-style',
-	gameCreateName = 'game-name',
-	gameTargetGame = 'game-target-game',
-	gameKickCharacter = 'character',
-	gameRollType = 'game-roll-type',
-	gameTargetCharacter = 'game-target-character',
-	gameDiceRollOrModifier = 'game-dice-roll-or-modifier',
+	giveOption = 'give-option',
+	giveAmount = 'give-amount',
+	sheetStyle = 'sheet-style',
+	createName = 'name',
+	targetGame = 'target-game',
+	targetCharacter = 'character',
+	rollType = 'roll-type',
+	diceRollOrModifier = 'dice-roll-or-modifier',
 	skillChoice = 'skill',
 	rollExpression = 'dice',
 	rollSecret = 'secret',
@@ -19,74 +18,67 @@ export enum GameCommandOptionEnum {
 }
 
 export const gameCommandOptions = {
-	[GameCommandOptionEnum.gameGiveOption]: {
-		name: GameCommandOptionEnum.gameGiveOption,
+	[GameCommandOptionEnum.giveOption]: {
+		name: GameCommandOptionEnum.giveOption,
 		description: 'The type of resource to give of (eg. hp, hero points, etc).',
 		required: true,
 		autocomplete: true,
 		type: ApplicationCommandOptionType.String,
 	},
-	[GameCommandOptionEnum.gameGiveAmount]: {
-		name: GameCommandOptionEnum.gameGiveAmount,
+	[GameCommandOptionEnum.giveAmount]: {
+		name: GameCommandOptionEnum.giveAmount,
 		description: 'The amount to give. Put "-" before to take the amount away',
 		required: true,
 		type: ApplicationCommandOptionType.String,
 	},
-	[GameCommandOptionEnum.gameSheetStyle]: {
-		name: GameCommandOptionEnum.gameSheetStyle,
+	[GameCommandOptionEnum.sheetStyle]: {
+		name: GameCommandOptionEnum.sheetStyle,
 		description: 'Whether to show only counters like hp, basic stats, or a full sheet.',
 		required: false,
 		type: ApplicationCommandOptionType.String,
 		choices: [
 			{
-				name: 'countersOnly',
-				value: 'countersOnly',
+				name: 'counters_only',
+				value: 'counters_only',
 			},
 			{
-				name: 'basicStats',
-				value: 'basicStats',
+				name: 'basic_stats',
+				value: 'basic_stats',
 			},
 			{
-				name: 'fullSheet',
-				value: 'fullSheet',
+				name: 'full_sheet',
+				value: 'full_sheet',
 			},
 		],
 	},
-	[GameCommandOptionEnum.gameCreateName]: {
-		name: GameCommandOptionEnum.gameCreateName,
+	[GameCommandOptionEnum.createName]: {
+		name: GameCommandOptionEnum.createName,
 		description: 'The name for the new game.',
 		required: true,
 		type: ApplicationCommandOptionType.String,
 	},
-	[GameCommandOptionEnum.gameTargetGame]: {
-		name: GameCommandOptionEnum.gameTargetGame,
+	[GameCommandOptionEnum.targetGame]: {
+		name: GameCommandOptionEnum.targetGame,
 		description: 'The game to target.',
 		required: true,
 		autocomplete: true,
 		type: ApplicationCommandOptionType.String,
 	},
-	[GameCommandOptionEnum.gameKickCharacter]: {
-		name: GameCommandOptionEnum.gameKickCharacter,
-		description: 'The character to kick from the game.',
-		required: true,
-		autocomplete: true,
-		type: ApplicationCommandOptionType.String,
-	},
-	[GameCommandOptionEnum.gameRollType]: {
-		name: GameCommandOptionEnum.gameRollType,
+	[GameCommandOptionEnum.rollType]: {
+		name: GameCommandOptionEnum.rollType,
 		description: 'The type of roll for the characters to make',
 		required: true,
 		type: ApplicationCommandOptionType.String,
 	},
-	[GameCommandOptionEnum.gameTargetCharacter]: {
-		name: GameCommandOptionEnum.gameTargetCharacter,
+	[GameCommandOptionEnum.targetCharacter]: {
+		name: GameCommandOptionEnum.targetCharacter,
 		description: 'Rolls for a single character instead of all characters.',
 		required: true,
 		autocomplete: true,
 		type: ApplicationCommandOptionType.String,
 	},
-	[GameCommandOptionEnum.gameDiceRollOrModifier]: {
-		name: GameCommandOptionEnum.gameDiceRollOrModifier,
+	[GameCommandOptionEnum.diceRollOrModifier]: {
+		name: GameCommandOptionEnum.diceRollOrModifier,
 		description: 'The dice roll if doing a custom roll, or a modifier to add to the roll.',
 		required: false,
 		type: ApplicationCommandOptionType.String,

@@ -18,7 +18,7 @@ export class GameCreateSubCommand extends BaseCommandClass(
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const gameName = intr.options.getString(
-			commandOptions[commandOptionsEnum.gameCreateName].name,
+			commandOptions[commandOptionsEnum.createName].name,
 			true
 		);
 

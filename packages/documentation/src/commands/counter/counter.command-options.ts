@@ -48,6 +48,8 @@ export const counterCommandOptions = {
 	[CounterCommandOptionEnum.counterName]: {
 		name: CounterCommandOptionEnum.counterName,
 		description: 'The name of the counter.',
+		autocomplete: true,
+		choices: undefined,
 		required: true,
 		type: ApplicationCommandOptionType.String,
 	},

@@ -18,7 +18,7 @@ export const gameCommandDocumentation: CommandDocumentation<typeof gameCommandDe
 					type: CommandResponseTypeEnum.success,
 					message: 'Yip! I created the game "Season of Ghosts" in this server.',
 					options: {
-						[GameCommandOptionEnum.gameCreateName]: 'Season of Ghosts',
+						[GameCommandOptionEnum.createName]: 'Season of Ghosts',
 					},
 				},
 			],
@@ -33,7 +33,7 @@ export const gameCommandDocumentation: CommandDocumentation<typeof gameCommandDe
 					type: CommandResponseTypeEnum.success,
 					message: 'Yip! Lilac Sootsnout joined the game "Season of Ghosts"!',
 					options: {
-						[GameCommandOptionEnum.gameTargetGame]: 'Season of Ghosts',
+						[GameCommandOptionEnum.targetGame]: 'Season of Ghosts',
 					},
 				},
 			],
@@ -49,7 +49,7 @@ export const gameCommandDocumentation: CommandDocumentation<typeof gameCommandDe
 					message:
 						'Yip! I set the game "Season of Ghosts" as your active game in this server.',
 					options: {
-						[GameCommandOptionEnum.gameTargetGame]: 'Season of Ghosts',
+						[GameCommandOptionEnum.targetGame]: 'Season of Ghosts',
 					},
 				},
 			],
@@ -64,7 +64,7 @@ export const gameCommandDocumentation: CommandDocumentation<typeof gameCommandDe
 					type: CommandResponseTypeEnum.success,
 					message: 'Yip! Lilac Sootsnout left the game "Season of Ghosts"!',
 					options: {
-						[GameCommandOptionEnum.gameTargetGame]: 'Season of Ghosts',
+						[GameCommandOptionEnum.targetGame]: 'Season of Ghosts',
 					},
 				},
 			],
@@ -79,8 +79,8 @@ export const gameCommandDocumentation: CommandDocumentation<typeof gameCommandDe
 					type: CommandResponseTypeEnum.success,
 					message: 'Yip! I kicked Lilac Sootsnout out of the game "Season of Ghosts"!',
 					options: {
-						[GameCommandOptionEnum.gameTargetGame]: 'Season of Ghosts',
-						[GameCommandOptionEnum.gameKickCharacter]: 'Lilac Sootsnout',
+						[GameCommandOptionEnum.targetGame]: 'Season of Ghosts',
+						[GameCommandOptionEnum.targetCharacter]: 'Lilac Sootsnout',
 					},
 				},
 			],
@@ -95,7 +95,7 @@ export const gameCommandDocumentation: CommandDocumentation<typeof gameCommandDe
 					type: CommandResponseTypeEnum.success,
 					message: 'Yip! I deleted the game "Season of Ghosts" in this server.',
 					options: {
-						[GameCommandOptionEnum.gameTargetGame]: 'Season of Ghosts',
+						[GameCommandOptionEnum.targetGame]: 'Season of Ghosts',
 					},
 				},
 			],
@@ -110,7 +110,7 @@ export const gameCommandDocumentation: CommandDocumentation<typeof gameCommandDe
 					title: 'Success',
 					type: CommandResponseTypeEnum.success,
 					options: {
-						[GameCommandOptionEnum.gameTargetCharacter]: 'Lilac Sootsnout',
+						[GameCommandOptionEnum.targetCharacter]: 'Lilac Sootsnout',
 						[RollCommandOptionEnum.skillChoice]: 'Society',
 					},
 					embeds: [
@@ -138,7 +138,7 @@ export const gameCommandDocumentation: CommandDocumentation<typeof gameCommandDe
 				{
 					title: 'Success',
 					type: CommandResponseTypeEnum.success,
-					options: { [GameCommandOptionEnum.gameTargetCharacter]: 'All Players' },
+					options: { [GameCommandOptionEnum.targetCharacter]: 'All Players' },
 					message: 'Yip! All the characters in your game were already in the initiative!',
 				},
 			],
@@ -152,7 +152,7 @@ export const gameCommandDocumentation: CommandDocumentation<typeof gameCommandDe
 					title: 'Success',
 					type: CommandResponseTypeEnum.success,
 					options: {
-						[GameCommandOptionEnum.gameTargetCharacter]: 'All Players',
+						[GameCommandOptionEnum.targetCharacter]: 'All Players',
 					},
 					embeds: [
 						{
@@ -181,9 +181,9 @@ export const gameCommandDocumentation: CommandDocumentation<typeof gameCommandDe
 					title: 'Success',
 					type: CommandResponseTypeEnum.success,
 					options: {
-						[GameCommandOptionEnum.gameTargetCharacter]: 'Lilac Sootsnout',
-						[GameCommandOptionEnum.gameGiveOption]: 'hero points',
-						[GameCommandOptionEnum.gameGiveAmount]: '1',
+						[GameCommandOptionEnum.targetCharacter]: 'Lilac Sootsnout',
+						[GameCommandOptionEnum.giveOption]: 'hero points',
+						[GameCommandOptionEnum.giveAmount]: '1',
 					},
 					message: 'Yip! I gave 1 hero point(s) to Lilac Sootsnout! New total: 2/3',
 				},
@@ -198,8 +198,8 @@ export const gameCommandDocumentation: CommandDocumentation<typeof gameCommandDe
 					title: 'Success',
 					type: CommandResponseTypeEnum.success,
 					options: {
-						[GameCommandOptionEnum.gameTargetCharacter]: 'All Players',
-						[GameCommandOptionEnum.gameRollType]: 'reflex',
+						[GameCommandOptionEnum.targetCharacter]: 'All Players',
+						[GameCommandOptionEnum.rollType]: 'reflex',
 					},
 					embeds: [
 						{

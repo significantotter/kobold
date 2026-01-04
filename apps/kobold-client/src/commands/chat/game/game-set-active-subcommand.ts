@@ -25,7 +25,7 @@ export class GameSetActiveSubCommand extends BaseCommandClass(
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === commandOptions[commandOptionsEnum.gameTargetGame].name) {
+		if (option.name === commandOptions[commandOptionsEnum.targetGame].name) {
 			if (!intr.guildId) return [];
 
 			const value = (option.value as string).trim().toLowerCase();
@@ -50,7 +50,7 @@ export class GameSetActiveSubCommand extends BaseCommandClass(
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const gameName = intr.options.getString(
-			commandOptions[commandOptionsEnum.gameTargetGame].name,
+			commandOptions[commandOptionsEnum.targetGame].name,
 			true
 		);
 

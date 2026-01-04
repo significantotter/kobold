@@ -31,11 +31,10 @@ export class GameInitSubCommand extends BaseCommandClass(
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
-		if (option.name === commandOptions[commandOptionsEnum.gameTargetCharacter].name) {
+		if (option.name === commandOptions[commandOptionsEnum.targetCharacter].name) {
 			const targetCharacter =
-				intr.options.getString(
-					commandOptions[commandOptionsEnum.gameTargetCharacter].name
-				) ?? '';
+				intr.options.getString(commandOptions[commandOptionsEnum.targetCharacter].name) ??
+				'';
 
 			const { gameUtils } = new KoboldUtils(kobold);
 			const activeGame = await gameUtils.getActiveGame(intr.user.id, intr.guildId ?? '');
@@ -101,7 +100,7 @@ export class GameInitSubCommand extends BaseCommandClass(
 			commandOptions[commandOptionsEnum.rollExpression].name
 		);
 		const targetCharacter = intr.options.getString(
-			commandOptions[commandOptionsEnum.gameTargetCharacter].name,
+			commandOptions[commandOptionsEnum.targetCharacter].name,
 			true
 		);
 

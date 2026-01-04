@@ -16,7 +16,8 @@ import {
 	TEST_GUILD_ID,
 	CommandTestHarness,
 	getMockKobold,
-	resetMockKobold,} from '../../../test-utils/index.js';
+	resetMockKobold,
+} from '../../../test-utils/index.js';
 import { createMockGame } from './game-test-utils.js';
 
 describe('GameKickSubCommand', () => {
@@ -47,8 +48,8 @@ describe('GameKickSubCommand', () => {
 			commandName: 'game',
 			subcommand: 'kick',
 			options: {
-				[opts.gameTargetGame]: 'Strict Game',
-				[opts.gameKickCharacter]: 'Troublemaker',
+				[opts.targetGame]: 'Strict Game',
+				[opts.targetCharacter]: 'Troublemaker',
 			},
 			userId: TEST_USER_ID,
 			guildId: TEST_GUILD_ID,
@@ -74,8 +75,8 @@ describe('GameKickSubCommand', () => {
 			commandName: 'game',
 			subcommand: 'kick',
 			options: {
-				[opts.gameTargetGame]: 'No Game',
-				[opts.gameKickCharacter]: 'Someone',
+				[opts.targetGame]: 'No Game',
+				[opts.targetCharacter]: 'Someone',
 			},
 			userId: TEST_USER_ID,
 			guildId: TEST_GUILD_ID,
@@ -99,8 +100,8 @@ describe('GameKickSubCommand', () => {
 			commandName: 'game',
 			subcommand: 'kick',
 			options: {
-				[opts.gameTargetGame]: 'Empty Kick Game',
-				[opts.gameKickCharacter]: 'Ghost',
+				[opts.targetGame]: 'Empty Kick Game',
+				[opts.targetCharacter]: 'Ghost',
 			},
 			userId: TEST_USER_ID,
 			guildId: TEST_GUILD_ID,
