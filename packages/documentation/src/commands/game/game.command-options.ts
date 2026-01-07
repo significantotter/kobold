@@ -17,12 +17,24 @@ export enum GameCommandOptionEnum {
 	initCharacterTarget = 'target-character',
 }
 
+export enum GameGiveOptionEnum {
+	heroPoints = 'heroPoints',
+	focusPoints = 'focusPoints',
+	hp = 'hp',
+	tempHp = 'tempHp',
+	stamina = 'stamina',
+	resolve = 'resolve',
+}
+
 export const gameCommandOptions = {
 	[GameCommandOptionEnum.giveOption]: {
 		name: GameCommandOptionEnum.giveOption,
 		description: 'The type of resource to give of (eg. hp, hero points, etc).',
 		required: true,
-		autocomplete: true,
+		choices: Object.values(GameGiveOptionEnum).map(value => ({
+			name: value,
+			value: value,
+		})),
 		type: ApplicationCommandOptionType.String,
 	},
 	[GameCommandOptionEnum.giveAmount]: {

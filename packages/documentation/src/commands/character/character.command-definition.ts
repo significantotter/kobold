@@ -6,6 +6,7 @@ import {
 } from './character.command-options.js';
 import { anyUsageContext } from '../helpers/defaults.js';
 import { withOrder } from '../helpers/common.js';
+import { CommandDeferType } from '../helpers.js';
 
 export enum CharacterSubCommandEnum {
 	importWanderersGuide = 'import-wanderers-guide',

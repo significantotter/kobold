@@ -6,7 +6,6 @@ import {
 	isStatSubGroupEnum,
 	isSheetBaseCounterKeys,
 	SheetIntegerKeys,
-	SheetStatKeys,
 	SheetBaseCounterKeys,
 } from '@kobold/db';
 import type { Creature } from './creature.js';

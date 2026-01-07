@@ -23,6 +23,7 @@ export class CharacterUpdateSubCommand extends BaseCommandClass(
 		intr: ChatInputCommandInteraction,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
+		await InteractionUtils.deferReply(intr);
 		//check if we have an active character
 		const koboldUtils = new KoboldUtils(kobold);
 		const useStamina = intr.options.getBoolean(
