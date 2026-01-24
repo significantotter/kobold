@@ -14,6 +14,7 @@ export enum ActionCommandOptionEnum {
 	tags = 'tags',
 	url = 'url',
 	importMode = 'mode',
+	assignTo = 'assign-to',
 }
 
 export const ActionTypeChoices = {
@@ -138,6 +139,13 @@ export const actionCommandOptions = {
 			name: value,
 			value: value,
 		})),
+	},
+	[ActionCommandOptionEnum.assignTo]: {
+		name: ActionCommandOptionEnum.assignTo,
+		description: 'The character or minion to assign the action to, or "none" to unassign.',
+		required: true,
+		autocomplete: true,
+		type: ApplicationCommandOptionType.String,
 	},
 } satisfies CommandOptions;
 
