@@ -8,6 +8,7 @@ import { CommandDeferType } from '../helpers.js';
 const OptionEnum = ActionCommandOptionEnum;
 
 export enum ActionSubCommandEnum {
+	assign = 'assign',
 	list = 'list',
 	detail = 'detail',
 	create = 'create',
@@ -26,6 +27,19 @@ export const actionCommandDefinition = {
 		default_member_permissions: undefined,
 	},
 	subCommands: {
+		[ActionSubCommandEnum.assign]: {
+			name: ActionSubCommandEnum.assign,
+			description: 'Assigns an action to a character or a minion, or unassigns the action.',
+			type: ApplicationCommandOptionType.Subcommand,
+			deferType: CommandDeferType.NONE,
+			options: {
+				[OptionEnum.targetAction]: withOrder(
+					actionCommandOptions[OptionEnum.targetAction],
+					1
+				),
+				[OptionEnum.assignTo]: withOrder(actionCommandOptions[OptionEnum.assignTo], 2),
+			},
+		},
 		[ActionSubCommandEnum.list]: {
 			name: ActionSubCommandEnum.list,
 			description: "Lists all of your character's actions.",
