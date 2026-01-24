@@ -230,12 +230,6 @@ export const zSheetWeaknessesResistances = zRecordOf(
 	z.array(zWeakOrResist).default([])
 ).describe('Weakness or resistance typed information.');
 
-export enum SheetRecordTrackerModeEnum {
-	counters_only = 'counters_only',
-	basic_stats = 'basic_stats',
-	full_sheet = 'full_sheet',
-}
-
 export type Sheet = z.infer<typeof zSheet>;
 export const zSheet = z
 	.strictObject({

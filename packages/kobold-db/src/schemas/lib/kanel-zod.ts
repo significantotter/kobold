@@ -41,16 +41,9 @@ import {
 	zWgAuthTokenInitializer,
 	zWgAuthTokenMutator,
 } from '../kanel/WgAuthToken.js';
-import {
-	SheetRecordTrackerModeEnum,
-	zAction,
-	zModifier,
-	zRollMacro,
-	zSheet,
-} from '../shared/index.js';
+import { zAction, zModifier, zRollMacro, zSheet } from '../shared/index.js';
 import { z } from 'zod';
 import {
-	CharacterWithRelations,
 	GameWithRelations,
 	InitiativeActorGroupWithRelations,
 	InitiativeActorWithRelations,
@@ -62,6 +55,7 @@ import {
 	InlineRollsDisplayEnum,
 	RollCompactModeEnum,
 } from './enum-helpers.js';
+import { sharedStrings } from '@kobold/documentation';
 
 const zUserSettingsWithEnums = zUserSettings.merge(
 	z.strictObject({
@@ -93,8 +87,8 @@ const zExtendedSheetRecord = zSheetRecord.extend({
 	actions: z.array(zAction),
 	rollMacros: z.array(zRollMacro),
 	trackerMode: z
-		.nativeEnum(SheetRecordTrackerModeEnum)
-		.default(SheetRecordTrackerModeEnum.counters_only),
+		.enum(sharedStrings.options.sheetStyles)
+		.default(sharedStrings.options.sheetStyles.countersOnly),
 });
 const zExtendedSheetRecordInitializer = zSheetRecordInitializer.extend({
 	sheet: zSheet,
@@ -103,8 +97,8 @@ const zExtendedSheetRecordInitializer = zSheetRecordInitializer.extend({
 	actions: z.array(zAction),
 	rollMacros: z.array(zRollMacro),
 	trackerMode: z
-		.nativeEnum(SheetRecordTrackerModeEnum)
-		.default(SheetRecordTrackerModeEnum.counters_only),
+		.enum(sharedStrings.options.sheetStyles)
+		.default(sharedStrings.options.sheetStyles.countersOnly),
 });
 const zExtendedSheetRecordMutator = zSheetRecordMutator.extend({
 	sheet: zSheet.optional(),
@@ -113,8 +107,8 @@ const zExtendedSheetRecordMutator = zSheetRecordMutator.extend({
 	actions: z.array(zAction).optional(),
 	rollMacros: z.array(zRollMacro).optional(),
 	trackerMode: z
-		.nativeEnum(SheetRecordTrackerModeEnum)
-		.default(SheetRecordTrackerModeEnum.counters_only),
+		.enum(sharedStrings.options.sheetStyles)
+		.default(sharedStrings.options.sheetStyles.countersOnly),
 });
 
 // relations:
@@ -205,6 +199,4 @@ export {
 	zInitiativeActorGroupWithRelations,
 	zInitiativeWithRelations,
 	zGameWithRelations,
-	// enums
-	SheetRecordTrackerModeEnum,
 };

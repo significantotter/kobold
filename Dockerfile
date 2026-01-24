@@ -17,7 +17,7 @@ ARG PROJECT
 WORKDIR /app
 COPY . .
 RUN pnpm install --frozen-lockfile
-RUN pnpm turbo prune kobold-client --docker
+RUN pnpm turbo prune @kobold/client --docker
 
 # Build the project
 FROM base AS builder
@@ -40,7 +40,7 @@ RUN --mount=type=cache,id=pnpm,target=/root/.pnpm-store apk add --no-cache --vir
 # Copy source code of isolated subworkspace
 COPY --from=pruner /app/out/full/ .
 
-RUN pnpm exec turbo build --filter=kobold-client
+RUN pnpm exec turbo build --filter=@kobold/client
 RUN rm -rf ./**/*/src
 
 # Final image
@@ -54,7 +54,7 @@ WORKDIR /app
 
 COPY --from=builder --chown=nodejs:nodejs /app .
 
-WORKDIR /app/apps/kobold-client
+WORKDIR /app/apps/client
 
 ENV NODE_ENV=production NODE_OPTIONS=--max-old-space-size=4096
 CMD ["node", "./dist/start-manager.js"]

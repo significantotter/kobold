@@ -12,21 +12,11 @@ import {
 	SheetInfoKeys,
 	SheetInfoListKeys,
 	SheetIntegerKeys,
-	SheetRecordTrackerModeEnum,
 	SheetStatKeys,
 	SheetWeaknessesResistancesKeys,
 	StatSubGroupEnum,
 } from '../shared/sheet.zod.js';
 import { CounterStyleEnum } from '../shared/counter.zod.js';
-
-// Zod Enum Helpers
-const sheetRecordTrackerModeValueMap = _.keyBy(
-	Object.values(SheetRecordTrackerModeEnum),
-	_.identity
-);
-export function isSheetRecordTrackerModeEnum(value: any): value is SheetRecordTrackerModeEnum {
-	return sheetRecordTrackerModeValueMap[value] !== undefined;
-}
 
 const actionTypeValueMap = _.keyBy(Object.values(ActionTypeEnum), _.identity);
 export function isActionTypeEnum(value: any): value is ActionTypeEnum {

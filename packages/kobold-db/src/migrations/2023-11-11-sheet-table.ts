@@ -39,7 +39,7 @@ export async function up(db: Kysely<any>): Promise<void> {
 		)
 	);
 	await db.executeQuery(
-		sql`COMMENT ON COLUMN "sheet_record"."tracker_mode" IS '@type(SheetRecordTrackerModeEnum, ''./../kanel-types'', true, false, true)'`.compile(
+		sql`COMMENT ON COLUMN "sheet_record"."tracker_mode" IS '@type(SheetModeValues, ''./../kanel-types'', true, false, true)'`.compile(
 			db
 		)
 	);

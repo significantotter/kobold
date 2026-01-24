@@ -8,6 +8,14 @@ export const sharedStrings = {
 	/** Generic choice confirmation */
 	choiceRegistered: msg((p: { choice: string }) => `You chose ${p.choice}.`),
 
+	options: {
+		// Warning: The DB schema and enum helpers depend on the values of this object! Do not change them without updating those as well.
+		sheetStyles: {
+			countersOnly: 'counters_only',
+			basicStats: 'basic_stats',
+			fullSheet: 'full_sheet',
+		},
+	},
 	/** Common error messages */
 	errors: {
 		noActiveCharacter: 'Yip! You need to set an active character first.',

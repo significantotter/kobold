@@ -1,5 +1,6 @@
 import { ApplicationCommandOptionType } from 'discord-api-types/v10';
 import type { CommandOptions, SpecificCommandOptions } from '../helpers/commands.types.js';
+import { sharedStrings } from '../../lib/strings/shared-strings.js';
 
 export enum GameplayCommandOptionEnum {
 	setOption = 'set-option',
@@ -80,19 +81,9 @@ export const gameplayCommandOptions = {
 		description: 'How much information to track for the character.',
 		required: false,
 		type: ApplicationCommandOptionType.String,
-		choices: [
-			{
-				name: 'counters-only',
-				value: 'counters_only',
-			},
-			{
-				name: 'basic-stats',
-				value: 'basic_stats',
-			},
-			{
-				name: 'full-sheet',
-				value: 'full_sheet',
-			},
-		],
+		choices: Object.values(sharedStrings.options.sheetStyles).map(style => ({
+			name: style,
+			value: style,
+		})),
 	},
 } satisfies SpecificCommandOptions<GameplayCommandOptionEnum>;
