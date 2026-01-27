@@ -1,5 +1,6 @@
 import { ApplicationCommandOptionType } from 'discord-api-types/v10';
-import type { CommandOptions, SpecificCommandOptions } from '../helpers/commands.types.js';
+import type { SpecificCommandOptions } from '../helpers/commands.types.js';
+import { sharedStrings } from '../../lib/strings/shared-strings.js';
 
 export enum CharacterCommandOptionEnum {
 	setDefaultScope = 'default-for',
@@ -23,16 +24,10 @@ export const characterCommandOptions = {
 		description: 'Set the default scope for the character.',
 		required: true,
 		type: ApplicationCommandOptionType.String,
-		choices: [
-			{
-				name: CharacterSetDefaultScopeOptionsEnum.channel,
-				value: CharacterSetDefaultScopeOptionsEnum.channel,
-			},
-			{
-				name: CharacterSetDefaultScopeOptionsEnum.server,
-				value: CharacterSetDefaultScopeOptionsEnum.server,
-			},
-		],
+		choices: Object.values(CharacterSetDefaultScopeOptionsEnum).map(scope => ({
+			name: scope,
+			value: scope,
+		})),
 	},
 	[CharacterCommandOptionEnum.wgUrl]: {
 		name: 'wg-url',
@@ -76,19 +71,9 @@ export const characterCommandOptions = {
 		description: 'Whether to show only counters like hp, basic stats, or a full sheet.',
 		required: false,
 		type: ApplicationCommandOptionType.String,
-		choices: [
-			{
-				name: 'countersOnly',
-				value: 'countersOnly',
-			},
-			{
-				name: 'basicStats',
-				value: 'basicStats',
-			},
-			{
-				name: 'fullSheet',
-				value: 'fullSheet',
-			},
-		],
+		choices: Object.values(sharedStrings.options.sheetStyles).map(style => ({
+			name: style,
+			value: style,
+		})),
 	},
 } satisfies SpecificCommandOptions<CharacterCommandOptionEnum>;

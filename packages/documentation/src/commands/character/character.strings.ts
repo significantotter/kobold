@@ -4,6 +4,7 @@
 
 import { msg } from '../../lib/strings/string-types.js';
 import { sharedStrings } from '../../lib/strings/shared-strings.js';
+import { CharacterSetDefaultScopeOptionsEnum } from './character.command-options.js';
 
 /**
  * Set default scope choices
@@ -160,7 +161,8 @@ export const characterStrings = {
  * Option choice values for character command
  */
 export const characterOptionChoices = {
-	setDefaultScope: CharacterSetDefaultScopeChoices,
+	setDefaultScope: CharacterSetDefaultScopeOptionsEnum,
+	sheetStyle: sharedStrings.options.sheetStyles,
 } as const;
 
 export type CharacterStrings = typeof characterStrings;

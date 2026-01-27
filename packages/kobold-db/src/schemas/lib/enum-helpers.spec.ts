@@ -10,7 +10,6 @@ import {
 	SheetInfoKeys,
 	SheetInfoListKeys,
 	SheetIntegerKeys,
-	SheetRecordTrackerModeEnum,
 	SheetStatKeys,
 	SheetWeaknessesResistancesKeys,
 	StatSubGroupEnum,
@@ -36,7 +35,6 @@ import {
 	isStatSubGroupEnum,
 	isInitStatsNotificationEnum,
 	InitStatsNotificationEnum,
-	isSheetRecordTrackerModeEnum,
 	DefaultCompendiumEnum,
 	isDefaultCompendiumEnum,
 } from './enum-helpers.js';
@@ -112,20 +110,6 @@ describe('Enum Helpers', () => {
 
 		it('should return false for invalid SheetAdjustmentOperationEnum values', () => {
 			expect(isSheetAdjustmentOperationEnum('invalid_value')).toBe(false);
-		});
-	});
-
-	describe('isSheetRecordTrackerModeEnum', () => {
-		it('should return true for valid SheetRecordTrackerModeEnum values', () => {
-			expect(isSheetRecordTrackerModeEnum(SheetRecordTrackerModeEnum.counters_only)).toBe(
-				true
-			);
-			expect(isSheetRecordTrackerModeEnum(SheetRecordTrackerModeEnum.basic_stats)).toBe(true);
-			expect(isSheetRecordTrackerModeEnum(SheetRecordTrackerModeEnum.full_sheet)).toBe(true);
-		});
-
-		it('should return false for invalid SheetRecordTrackerModeEnum values', () => {
-			expect(isSheetRecordTrackerModeEnum('invalid_value')).toBe(false);
 		});
 	});
 
