@@ -11,7 +11,6 @@ import { MathUtils, ShardUtils } from './utils/index.js';
 import { filterNotNullOrUndefined } from './utils/type-guards.js';
 import { migrateToLatest } from '@kobold/db';
 import { spawn } from 'child_process';
-import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
 async function start(): Promise<void> {
