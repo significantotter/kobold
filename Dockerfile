@@ -19,7 +19,11 @@ RUN pnpm deploy --filter=@kobold/client --prod /prod/client
 # Final image
 FROM base AS runner
 
-COPY --from=pruner /prod/client /prod/client
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nodejs
+USER nodejs
+
+COPY --from=build --chown=nodejs:nodejs /prod/client /prod/client
 WORKDIR /prod/client
 EXPOSE 8001
 
