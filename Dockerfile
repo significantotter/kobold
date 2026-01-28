@@ -23,7 +23,7 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nodejs
 USER nodejs
 
-COPY --from=build --chown=nodejs:nodejs /prod/client /prod/client
+COPY --from=pruner --chown=nodejs:nodejs /prod/client /prod/client
 WORKDIR /prod/client
 EXPOSE 8001
 
