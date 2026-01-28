@@ -10,7 +10,6 @@ import {
 import { RateLimiter } from 'discord.js-rate-limiter';
 import { filesize } from 'filesize';
 import os from 'os';
-import typescript from 'typescript';
 import { InteractionUtils } from '../../../utils/interaction-utils.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { ShardUtils } from '../../../utils/shard-utils.js';
@@ -71,7 +70,6 @@ export class AdminCommand implements Command {
 					name: `Versions`,
 					value: [
 						`**Node.js**: ${process.version}`,
-						`**TypeScript**: v${typescript.version}`,
 						`**ECMAScript**:"ESNext"`,
 						`**discord.js**: v${version}`,
 					].join('\n'),
