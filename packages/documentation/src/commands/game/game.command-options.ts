@@ -80,6 +80,7 @@ export const gameCommandOptions = {
 		name: GameCommandOptionEnum.rollType,
 		description: 'The type of roll for the characters to make',
 		required: true,
+		autocomplete: true,
 		type: ApplicationCommandOptionType.String,
 	},
 	[GameCommandOptionEnum.targetCharacter]: {

@@ -135,6 +135,7 @@ export const counterCommandOptions = {
 		name: CounterCommandOptionEnum.counterSlot,
 		description: 'The slot to use for the counter.',
 		required: true,
+		autocomplete: true,
 		type: ApplicationCommandOptionType.String,
 	},
 	[CounterCommandOptionEnum.counterPrepareSlot]: {
