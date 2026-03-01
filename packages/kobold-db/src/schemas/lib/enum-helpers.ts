@@ -4,7 +4,7 @@ import {
 	AdjustablePropertyEnum,
 	SheetAdjustmentOperationEnum,
 	SheetAdjustmentTypeEnum,
-} from '../shared/modifier.zod.js';
+} from '../shared/sheet-adjustment.zod.js';
 import { RollTypeEnum } from '../shared/roll.zod.js';
 import {
 	AbilityEnum,

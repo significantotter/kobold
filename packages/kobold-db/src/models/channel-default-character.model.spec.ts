@@ -2,9 +2,9 @@
 import {
 	Character,
 	SheetRecord,
-	zChannelDefaultCharacterInitializer,
-	zCharacterInitializer,
-	zSheetRecordInitializer,
+	zNewChannelDefaultCharacter,
+	zNewCharacter,
+	zNewSheetRecord,
 } from '../index.js';
 import { truncateDbForTests, ResourceFactories, vitestKobold, fake } from '../test-utils.js';
 
@@ -15,7 +15,7 @@ describe('ChannelDefaultCharacterModel', () => {
 	describe('create(), read()', () => {
 		it('creates a new channel default character, reads it', async () => {
 			const fakeCharacter = await ResourceFactories.character();
-			const fakeChannelDefaultCharacter = fake(zChannelDefaultCharacterInitializer);
+			const fakeChannelDefaultCharacter = fake(zNewChannelDefaultCharacter);
 			fakeChannelDefaultCharacter.characterId = fakeCharacter.id;
 			const created = await vitestKobold.channelDefaultCharacter.create(
 				fakeChannelDefaultCharacter
@@ -34,7 +34,7 @@ describe('ChannelDefaultCharacterModel', () => {
 			});
 			const fakeCharacter2 = await ResourceFactories.character();
 
-			const fakeChannelDefaultCharacter2 = fake(zChannelDefaultCharacterInitializer);
+			const fakeChannelDefaultCharacter2 = fake(zNewChannelDefaultCharacter);
 			fakeChannelDefaultCharacter2.characterId = fakeCharacter2.id;
 			fakeChannelDefaultCharacter2.channelId = fakeChannelDefaultCharacter.channelId;
 			fakeChannelDefaultCharacter2.userId = fakeChannelDefaultCharacter.userId;
@@ -51,7 +51,7 @@ describe('ChannelDefaultCharacterModel', () => {
 			expect(read).toEqual(fakeChannelDefaultCharacter);
 		});
 		it('fails to read a channel default character that does not exist', async () => {
-			const fakeChannelDefaultCharacter = fake(zChannelDefaultCharacterInitializer);
+			const fakeChannelDefaultCharacter = fake(zNewChannelDefaultCharacter);
 			const read = await vitestKobold.channelDefaultCharacter.read({
 				userId: fakeChannelDefaultCharacter.userId,
 				channelId: fakeChannelDefaultCharacter.channelId,
@@ -79,7 +79,7 @@ describe('ChannelDefaultCharacterModel', () => {
 		});
 		it('fails to update a channel default character that does not exist', async () => {
 			const fakeCharacter = await ResourceFactories.character();
-			const fakeChannelDefaultCharacter = fake(zChannelDefaultCharacterInitializer);
+			const fakeChannelDefaultCharacter = fake(zNewChannelDefaultCharacter);
 			const updated = vitestKobold.channelDefaultCharacter.update(
 				{
 					userId: fakeChannelDefaultCharacter.userId,
@@ -106,7 +106,7 @@ describe('ChannelDefaultCharacterModel', () => {
 			expect(read).toEqual(null);
 		});
 		it('fails to delete a channel default character that does not exist', async () => {
-			const fakeChannelDefaultCharacter = fake(zChannelDefaultCharacterInitializer);
+			const fakeChannelDefaultCharacter = fake(zNewChannelDefaultCharacter);
 			expect(
 				vitestKobold.channelDefaultCharacter.delete({
 					userId: fakeChannelDefaultCharacter.userId,
@@ -129,7 +129,7 @@ describe('ChannelDefaultCharacterModel', () => {
 			expect(read).toEqual(null);
 		});
 		it('fails silently when deleting a channel default character that does not exist', async () => {
-			const fakeChannelDefaultCharacter = fake(zChannelDefaultCharacterInitializer);
+			const fakeChannelDefaultCharacter = fake(zNewChannelDefaultCharacter);
 			expect(
 				vitestKobold.channelDefaultCharacter.deleteIfExists({
 					userId: fakeChannelDefaultCharacter.userId,

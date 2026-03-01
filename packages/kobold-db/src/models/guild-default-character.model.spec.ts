@@ -1,5 +1,5 @@
 
-import { zGuildDefaultCharacterInitializer } from '../index.js';
+import { zNewGuildDefaultCharacter } from '../index.js';
 import { truncateDbForTests, ResourceFactories, vitestKobold, fake } from '../test-utils.js';
 
 describe('GuildDefaultCharacterModel', () => {
@@ -9,7 +9,7 @@ describe('GuildDefaultCharacterModel', () => {
 	describe('create(), read()', () => {
 		it('creates a new guild default character, reads it', async () => {
 			const fakeCharacter = await ResourceFactories.character();
-			const fakeGuildDefaultCharacter = fake(zGuildDefaultCharacterInitializer);
+			const fakeGuildDefaultCharacter = fake(zNewGuildDefaultCharacter);
 			fakeGuildDefaultCharacter.characterId = fakeCharacter.id;
 			const created =
 				await vitestKobold.guildDefaultCharacter.create(fakeGuildDefaultCharacter);
@@ -27,7 +27,7 @@ describe('GuildDefaultCharacterModel', () => {
 			});
 			const fakeCharacter2 = await ResourceFactories.character();
 
-			const fakeGuildDefaultCharacter2 = fake(zGuildDefaultCharacterInitializer);
+			const fakeGuildDefaultCharacter2 = fake(zNewGuildDefaultCharacter);
 			fakeGuildDefaultCharacter2.characterId = fakeCharacter2.id;
 			fakeGuildDefaultCharacter2.guildId = fakeGuildDefaultCharacter.guildId;
 			fakeGuildDefaultCharacter2.userId = fakeGuildDefaultCharacter.userId;
@@ -44,7 +44,7 @@ describe('GuildDefaultCharacterModel', () => {
 			expect(read).toEqual(fakeGuildDefaultCharacter);
 		});
 		it('fails to read a guild default character that does not exist', async () => {
-			const fakeGuildDefaultCharacter = fake(zGuildDefaultCharacterInitializer);
+			const fakeGuildDefaultCharacter = fake(zNewGuildDefaultCharacter);
 			const read = await vitestKobold.guildDefaultCharacter.read({
 				userId: fakeGuildDefaultCharacter.userId,
 				guildId: fakeGuildDefaultCharacter.guildId,
@@ -72,7 +72,7 @@ describe('GuildDefaultCharacterModel', () => {
 		});
 		it('fails to update a guild default character that does not exist', async () => {
 			const fakeCharacter = await ResourceFactories.character();
-			const fakeGuildDefaultCharacter = fake(zGuildDefaultCharacterInitializer);
+			const fakeGuildDefaultCharacter = fake(zNewGuildDefaultCharacter);
 			const updated = vitestKobold.guildDefaultCharacter.update(
 				{
 					userId: fakeGuildDefaultCharacter.userId,
@@ -99,7 +99,7 @@ describe('GuildDefaultCharacterModel', () => {
 			expect(read).toEqual(null);
 		});
 		it('fails to delete a guild default character that does not exist', async () => {
-			const fakeGuildDefaultCharacter = fake(zGuildDefaultCharacterInitializer);
+			const fakeGuildDefaultCharacter = fake(zNewGuildDefaultCharacter);
 			expect(
 				vitestKobold.guildDefaultCharacter.delete({
 					userId: fakeGuildDefaultCharacter.userId,
@@ -122,7 +122,7 @@ describe('GuildDefaultCharacterModel', () => {
 			expect(read).toEqual(null);
 		});
 		it('fails silently when deleting a guild default character that does not exist', async () => {
-			const fakeGuildDefaultCharacter = fake(zGuildDefaultCharacterInitializer);
+			const fakeGuildDefaultCharacter = fake(zNewGuildDefaultCharacter);
 			expect(
 				vitestKobold.guildDefaultCharacter.deleteIfExists({
 					userId: fakeGuildDefaultCharacter.userId,

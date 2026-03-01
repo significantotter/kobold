@@ -3,7 +3,7 @@ import {
 	channelDefaultCharacterForCharacter,
 	gameForCharacter,
 	guildDefaultCharacterForCharacter,
-	sheetRecordForCharacter,
+	sheetRelationsForCharacter,
 } from '../lib/shared-relation-builders.js';
 import {
 	CharacterId,
@@ -11,7 +11,6 @@ import {
 	CharacterWithRelations,
 	Database,
 	NewCharacter,
-	Sheet,
 } from '../schemas/index.js';
 import { Model } from './model.js';
 
@@ -28,8 +27,8 @@ export class CharacterModel extends Model<Database['character']> {
 			.returning(eb => [
 				guildDefaultCharacterForCharacter(eb),
 				channelDefaultCharacterForCharacter(eb),
-				sheetRecordForCharacter(eb),
 				gameForCharacter(eb),
+				...sheetRelationsForCharacter(eb),
 			])
 			.execute();
 		return result[0];
@@ -50,8 +49,8 @@ export class CharacterModel extends Model<Database['character']> {
 			.select(eb => [
 				guildDefaultCharacterForCharacter(eb, { guildId }),
 				channelDefaultCharacterForCharacter(eb, { channelId }),
-				sheetRecordForCharacter(eb),
 				gameForCharacter(eb),
+				...sheetRelationsForCharacter(eb),
 			])
 			.where('character.userId', '=', userId)
 			.execute();
@@ -85,8 +84,8 @@ export class CharacterModel extends Model<Database['character']> {
 			.select(eb => [
 				guildDefaultCharacterForCharacter(eb, { guildId }),
 				channelDefaultCharacterForCharacter(eb, { channelId }),
-				sheetRecordForCharacter(eb),
 				gameForCharacter(eb),
+				...sheetRelationsForCharacter(eb),
 			]);
 		if (userId !== undefined) query = query.where('character.userId', '=', userId);
 		if (name !== undefined) query = query.where('character.name', 'ilike', `%${name}%`);
@@ -114,8 +113,8 @@ export class CharacterModel extends Model<Database['character']> {
 			.select(eb => [
 				guildDefaultCharacterForCharacter(eb),
 				channelDefaultCharacterForCharacter(eb),
-				sheetRecordForCharacter(eb),
 				gameForCharacter(eb),
+				...sheetRelationsForCharacter(eb),
 			]);
 		if ('id' in params) query = query.where('character.id', '=', params.id);
 		else {
@@ -154,8 +153,8 @@ export class CharacterModel extends Model<Database['character']> {
 			.returning(eb => [
 				guildDefaultCharacterForCharacter(eb),
 				channelDefaultCharacterForCharacter(eb),
-				sheetRecordForCharacter(eb),
 				gameForCharacter(eb),
+				...sheetRelationsForCharacter(eb),
 			])
 			.execute();
 		return result[0];
@@ -173,8 +172,8 @@ export class CharacterModel extends Model<Database['character']> {
 			.returning(eb => [
 				guildDefaultCharacterForCharacter(eb),
 				channelDefaultCharacterForCharacter(eb),
-				sheetRecordForCharacter(eb),
 				gameForCharacter(eb),
+				...sheetRelationsForCharacter(eb),
 			])
 			.executeTakeFirstOrThrow();
 		return result;

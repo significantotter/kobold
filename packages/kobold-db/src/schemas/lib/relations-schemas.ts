@@ -1,4 +1,5 @@
 import {
+	Action,
 	ChannelDefaultCharacter,
 	Character,
 	Game,
@@ -6,6 +7,9 @@ import {
 	Initiative,
 	InitiativeActor,
 	InitiativeActorGroup,
+	Minion,
+	Modifier,
+	RollMacro,
 	SheetRecord,
 } from '../db-types.js';
 
@@ -14,6 +18,9 @@ export type CharacterWithRelations = Character & {
 	guildDefaultCharacters: GuildDefaultCharacter[];
 	sheetRecord: SheetRecord;
 	game?: Game | null;
+	actions: Action[];
+	modifiers: Modifier[];
+	rollMacros: RollMacro[];
 };
 
 export type InitiativeActorWithRelations = InitiativeActor & {
@@ -21,6 +28,16 @@ export type InitiativeActorWithRelations = InitiativeActor & {
 	actorGroup: InitiativeActorGroup;
 	sheetRecord: SheetRecord;
 	game?: Game | null;
+	actions: Action[];
+	modifiers: Modifier[];
+	rollMacros: RollMacro[];
+};
+
+export type MinionWithRelations = Minion & {
+	sheetRecord?: SheetRecord | null;
+	actions: Action[];
+	modifiers: Modifier[];
+	rollMacros: RollMacro[];
 };
 
 export type InitiativeActorGroupWithRelations = InitiativeActorGroup & {

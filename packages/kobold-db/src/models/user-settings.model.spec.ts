@@ -1,9 +1,4 @@
-import {
-	InlineRollsDisplayEnum,
-	RollCompactModeEnum,
-	UserSettings,
-	zUserSettingsInitializer,
-} from '../index.js';
+import { InlineRollsDisplayEnum, RollCompactModeEnum, zNewUserSettings } from '../index.js';
 import _ from 'lodash';
 import { truncateDbForTests, vitestKobold, ResourceFactories, fake } from '../test-utils.js';
 
@@ -13,7 +8,7 @@ describe('UserSettingsModel', () => {
 	});
 	describe('create, read', () => {
 		it('creates a new userSettings, reads it, and returns the userSettings plus relations', async () => {
-			const fakeUserSettingsMock = fake(zUserSettingsInitializer);
+			const fakeUserSettingsMock = fake(zNewUserSettings);
 
 			const created = await vitestKobold.userSettings.create(fakeUserSettingsMock);
 			const read = await vitestKobold.userSettings.read({ userId: created.userId });

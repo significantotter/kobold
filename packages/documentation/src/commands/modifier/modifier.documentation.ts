@@ -9,7 +9,7 @@ import { ModifierCommandOptionEnum } from './modifier.command-options.js';
 export const modifierCommandDocumentation: CommandDocumentation<typeof modifierCommandDefinition> =
 	{
 		name: 'modifier',
-		description: '',
+		description: 'Toggleable values to modify specified dice rolls.',
 		subCommands: {
 			[ModifierSubCommandEnum.list]: {
 				name: ModifierSubCommandEnum.list,

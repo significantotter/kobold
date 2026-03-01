@@ -1,6 +1,193 @@
 import { ExpressionBuilder } from 'kysely';
 import { jsonArrayFrom, jsonObjectFrom } from 'kysely/helpers/postgres';
-import { Database, Game, SheetRecord } from '../schemas/index.js';
+import { Action, Database, Game, Modifier, RollMacro, SheetRecord } from '../schemas/index.js';
+
+// ============================================================================
+// Sheet Record Relations for Character
+// ============================================================================
+
+export function sheetRecordForCharacter(eb: ExpressionBuilder<Database, 'character'>) {
+	return jsonObjectFrom(
+		eb
+			.selectFrom('sheetRecord')
+			.selectAll('sheetRecord')
+			.whereRef('sheetRecord.id', '=', 'character.sheetRecordId')
+	)
+		.$castTo<SheetRecord>()
+		.as('sheetRecord');
+}
+
+export function actionsForCharacter(eb: ExpressionBuilder<Database, 'character'>) {
+	return jsonArrayFrom(
+		eb
+			.selectFrom('action')
+			.selectAll('action')
+			.whereRef('action.sheetRecordId', '=', 'character.sheetRecordId')
+	)
+		.$castTo<Action[]>()
+		.as('actions');
+}
+
+export function modifiersForCharacter(eb: ExpressionBuilder<Database, 'character'>) {
+	return jsonArrayFrom(
+		eb
+			.selectFrom('modifier')
+			.selectAll('modifier')
+			.whereRef('modifier.sheetRecordId', '=', 'character.sheetRecordId')
+	)
+		.$castTo<Modifier[]>()
+		.as('modifiers');
+}
+
+export function rollMacrosForCharacter(eb: ExpressionBuilder<Database, 'character'>) {
+	return jsonArrayFrom(
+		eb
+			.selectFrom('rollMacro')
+			.selectAll('rollMacro')
+			.whereRef('rollMacro.sheetRecordId', '=', 'character.sheetRecordId')
+	)
+		.$castTo<RollMacro[]>()
+		.as('rollMacros');
+}
+
+/**
+ * Returns all sheet-related relations for a character.
+ * Use with spread: `.select(eb => [...sheetRelationsForCharacter(eb)])`
+ */
+export function sheetRelationsForCharacter(eb: ExpressionBuilder<Database, 'character'>) {
+	return [
+		sheetRecordForCharacter(eb),
+		actionsForCharacter(eb),
+		modifiersForCharacter(eb),
+		rollMacrosForCharacter(eb),
+	] as const;
+}
+
+// ============================================================================
+// Sheet Record Relations for Initiative Actor
+// ============================================================================
+
+export function sheetRecordForActor(eb: ExpressionBuilder<Database, 'initiativeActor'>) {
+	return jsonObjectFrom(
+		eb
+			.selectFrom('sheetRecord')
+			.selectAll('sheetRecord')
+			.whereRef('sheetRecord.id', '=', 'initiativeActor.sheetRecordId')
+	)
+		.$castTo<SheetRecord>()
+		.as('sheetRecord');
+}
+
+export function actionsForActor(eb: ExpressionBuilder<Database, 'initiativeActor'>) {
+	return jsonArrayFrom(
+		eb
+			.selectFrom('action')
+			.selectAll('action')
+			.whereRef('action.sheetRecordId', '=', 'initiativeActor.sheetRecordId')
+	)
+		.$castTo<Action[]>()
+		.as('actions');
+}
+
+export function modifiersForActor(eb: ExpressionBuilder<Database, 'initiativeActor'>) {
+	return jsonArrayFrom(
+		eb
+			.selectFrom('modifier')
+			.selectAll('modifier')
+			.whereRef('modifier.sheetRecordId', '=', 'initiativeActor.sheetRecordId')
+	)
+		.$castTo<Modifier[]>()
+		.as('modifiers');
+}
+
+export function rollMacrosForActor(eb: ExpressionBuilder<Database, 'initiativeActor'>) {
+	return jsonArrayFrom(
+		eb
+			.selectFrom('rollMacro')
+			.selectAll('rollMacro')
+			.whereRef('rollMacro.sheetRecordId', '=', 'initiativeActor.sheetRecordId')
+	)
+		.$castTo<RollMacro[]>()
+		.as('rollMacros');
+}
+
+/**
+ * Returns all sheet-related relations for an initiative actor.
+ * Use with spread: `.select(eb => [...sheetRelationsForActor(eb)])`
+ */
+export function sheetRelationsForActor(eb: ExpressionBuilder<Database, 'initiativeActor'>) {
+	return [
+		sheetRecordForActor(eb),
+		actionsForActor(eb),
+		modifiersForActor(eb),
+		rollMacrosForActor(eb),
+	] as const;
+}
+
+// ============================================================================
+// Sheet Record Relations for Minion
+// ============================================================================
+
+export function sheetRecordForMinion(eb: ExpressionBuilder<Database, 'minion'>) {
+	return jsonObjectFrom(
+		eb
+			.selectFrom('sheetRecord')
+			.selectAll('sheetRecord')
+			.whereRef('sheetRecord.id', '=', 'minion.sheetRecordId')
+	)
+		.$castTo<SheetRecord>()
+		.as('sheetRecord');
+}
+
+export function actionsForMinion(eb: ExpressionBuilder<Database, 'minion'>) {
+	return jsonArrayFrom(
+		eb
+			.selectFrom('action')
+			.selectAll('action')
+			.whereRef('action.sheetRecordId', '=', 'minion.sheetRecordId')
+	)
+		.$castTo<Action[]>()
+		.as('actions');
+}
+
+export function modifiersForMinion(eb: ExpressionBuilder<Database, 'minion'>) {
+	return jsonArrayFrom(
+		eb
+			.selectFrom('modifier')
+			.selectAll('modifier')
+			.whereRef('modifier.sheetRecordId', '=', 'minion.sheetRecordId')
+	)
+		.$castTo<Modifier[]>()
+		.as('modifiers');
+}
+
+export function rollMacrosForMinion(eb: ExpressionBuilder<Database, 'minion'>) {
+	return jsonArrayFrom(
+		eb
+			.selectFrom('rollMacro')
+			.selectAll('rollMacro')
+			.whereRef('rollMacro.sheetRecordId', '=', 'minion.sheetRecordId')
+	)
+		.$castTo<RollMacro[]>()
+		.as('rollMacros');
+}
+
+/**
+ * Returns all sheet-related relations for a minion.
+ * Use with spread: `.select(eb => [...sheetRelationsForMinion(eb)])`
+ */
+export function sheetRelationsForMinion(eb: ExpressionBuilder<Database, 'minion'>) {
+	return [
+		sheetRecordForMinion(eb),
+		actionsForMinion(eb),
+		modifiersForMinion(eb),
+		rollMacrosForMinion(eb),
+	] as const;
+}
+
+// ============================================================================
+// Other Character Relations
+// ============================================================================
 
 export function channelDefaultCharacterForCharacter(
 	eb: ExpressionBuilder<Database, 'character'>,
@@ -52,26 +239,4 @@ export function gameForCharacter(eb: ExpressionBuilder<Database, 'character'>) {
 	)
 		.$castTo<Game>()
 		.as('game');
-}
-
-export function sheetRecordForActor(eb: ExpressionBuilder<Database, 'initiativeActor'>) {
-	return jsonObjectFrom(
-		eb
-			.selectFrom('sheetRecord')
-			.selectAll('sheetRecord')
-			.whereRef('sheetRecord.id', '=', 'initiativeActor.sheetRecordId')
-	)
-		.$castTo<SheetRecord>()
-		.as('sheetRecord');
-}
-
-export function sheetRecordForCharacter(eb: ExpressionBuilder<Database, 'character'>) {
-	return jsonObjectFrom(
-		eb
-			.selectFrom('sheetRecord')
-			.selectAll('sheetRecord')
-			.whereRef('sheetRecord.id', '=', 'character.sheetRecordId')
-	)
-		.$castTo<SheetRecord>()
-		.as('sheetRecord');
 }

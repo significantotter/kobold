@@ -1,5 +1,5 @@
 
-import { zInitiativeActorInitializer } from '../index.js';
+import { zNewInitiativeActor } from '../index.js';
 import _ from 'lodash';
 import { truncateDbForTests, ResourceFactories, vitestKobold, fake } from '../test-utils.js';
 
@@ -16,7 +16,7 @@ describe('InitiativeActorModel', () => {
 			});
 			const sheetRecord = await ResourceFactories.sheetRecord();
 			const character = await ResourceFactories.character({ sheetRecordId: sheetRecord.id });
-			const fakeInitiativeActorMock = fake(zInitiativeActorInitializer);
+			const fakeInitiativeActorMock = fake(zNewInitiativeActor);
 
 			fakeInitiativeActorMock.gameId = game.id;
 			fakeInitiativeActorMock.initiativeId = initiative.id;

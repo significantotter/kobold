@@ -1,4 +1,4 @@
-import { zWgAuthTokenInitializer } from '../index.js';
+import { zNewWgAuthToken } from '../index.js';
 import _ from 'lodash';
 import { truncateDbForTests, vitestKobold, ResourceFactories, fake } from '../test-utils.js';
 
@@ -8,7 +8,7 @@ describe('WgAuthTokenModel', () => {
 	});
 	describe('create, read', () => {
 		it('creates a new wgAuthToken, reads it, and returns the wgAuthToken plus relations', async () => {
-			const fakeWgAuthTokenMock = fake(zWgAuthTokenInitializer);
+			const fakeWgAuthTokenMock = fake(zNewWgAuthToken);
 
 			const created = await vitestKobold.wgAuthToken.create(fakeWgAuthTokenMock);
 			const read = await vitestKobold.wgAuthToken.read({ id: created.id });

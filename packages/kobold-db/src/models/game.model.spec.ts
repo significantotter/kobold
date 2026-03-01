@@ -1,4 +1,4 @@
-import { zGameInitializer } from '../index.js';
+import { zNewGame } from '../index.js';
 import _ from 'lodash';
 import { truncateDbForTests, vitestKobold, ResourceFactories, fake } from '../test-utils.js';
 
@@ -8,7 +8,7 @@ describe('GameModel', () => {
 	});
 	describe('create, read', () => {
 		it('creates a new game, reads it, and returns the game plus relations', async () => {
-			const fakeGameMock = fake(zGameInitializer);
+			const fakeGameMock = fake(zNewGame);
 
 			const created = await vitestKobold.game.create(fakeGameMock);
 			const read = await vitestKobold.game.read({ id: created.id });

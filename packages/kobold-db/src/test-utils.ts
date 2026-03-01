@@ -19,16 +19,16 @@ import {
 	SheetRecord,
 	UserSettings,
 	WgAuthToken,
-	zChannelDefaultCharacterInitializer,
-	zCharacterInitializer,
-	zGameInitializer,
-	zGuildDefaultCharacterInitializer,
-	zInitiativeActorGroupInitializer,
-	zInitiativeActorInitializer,
-	zInitiativeInitializer,
-	zSheetRecordInitializer,
-	zUserSettingsInitializer,
-	zWgAuthTokenInitializer,
+	zNewChannelDefaultCharacter,
+	zNewCharacter,
+	zNewGame,
+	zNewGuildDefaultCharacter,
+	zNewInitiativeActorGroup,
+	zNewInitiativeActor,
+	zNewInitiative,
+	zNewSheetRecord,
+	zNewUserSettings,
+	zNewWgAuthToken,
 } from './index.js';
 import { format } from 'date-fns';
 
@@ -56,7 +56,7 @@ export const vitestKobold: Kobold = new Kobold(postgresDialect);
 
 export class ResourceFactories {
 	public static async sheetRecord(partialSheetRecord?: Partial<SheetRecord>) {
-		const fakeSheetRecordMock = fake(zSheetRecordInitializer);
+		const fakeSheetRecordMock = fake(zNewSheetRecord);
 		delete fakeSheetRecordMock.id;
 		return await vitestKobold.sheetRecord.create({
 			...fakeSheetRecordMock,
@@ -67,7 +67,7 @@ export class ResourceFactories {
 		const sheetRecordId =
 			partialCharacter?.sheetRecordId ?? (await ResourceFactories.sheetRecord()).id;
 		const gameId = partialCharacter?.gameId ?? (await ResourceFactories.game()).id;
-		const fakeCharacterMock = fake(zCharacterInitializer);
+		const fakeCharacterMock = fake(zNewCharacter);
 		delete fakeCharacterMock.id;
 		delete fakeCharacterMock.createdAt;
 		delete fakeCharacterMock.lastUpdatedAt;
@@ -83,7 +83,7 @@ export class ResourceFactories {
 	) {
 		const characterId =
 			partialChannelDefaultCharacter?.characterId ?? (await ResourceFactories.character()).id;
-		const fakeChannelDefaultCharacterMock = fake(zChannelDefaultCharacterInitializer);
+		const fakeChannelDefaultCharacterMock = fake(zNewChannelDefaultCharacter);
 		return await vitestKobold.channelDefaultCharacter.create({
 			...fakeChannelDefaultCharacterMock,
 			...partialChannelDefaultCharacter,
@@ -95,7 +95,7 @@ export class ResourceFactories {
 	) {
 		const characterId =
 			partialGuildDefaultCharacter?.characterId ?? (await ResourceFactories.character()).id;
-		const fakeGuildDefaultCharacterMock = fake(zGuildDefaultCharacterInitializer);
+		const fakeGuildDefaultCharacterMock = fake(zNewGuildDefaultCharacter);
 		return await vitestKobold.guildDefaultCharacter.create({
 			...fakeGuildDefaultCharacterMock,
 			...partialGuildDefaultCharacter,
@@ -103,7 +103,7 @@ export class ResourceFactories {
 		});
 	}
 	public static async game(partialGame?: Partial<Game>) {
-		const fakeGameMock = fake(zGameInitializer);
+		const fakeGameMock = fake(zNewGame);
 		delete fakeGameMock.id;
 		delete fakeGameMock.createdAt;
 		delete fakeGameMock.lastUpdatedAt;
@@ -114,7 +114,7 @@ export class ResourceFactories {
 	}
 
 	public static async initiative(partialInitiative?: Partial<Initiative>) {
-		const fakeInitiativeMock = fake(zInitiativeInitializer);
+		const fakeInitiativeMock = fake(zNewInitiative);
 		const currentTurnGroupId = partialInitiative?.currentTurnGroupId ?? null;
 		delete fakeInitiativeMock.id;
 		return await vitestKobold.initiative.create({
@@ -134,7 +134,7 @@ export class ResourceFactories {
 		const characterId = partialInitiativeActor?.characterId ?? null;
 		const sheetRecordId =
 			partialInitiativeActor?.sheetRecordId ?? (await ResourceFactories.sheetRecord()).id;
-		const fakeInitiativeActorMock = fake(zInitiativeActorInitializer);
+		const fakeInitiativeActorMock = fake(zNewInitiativeActor);
 		delete fakeInitiativeActorMock.id;
 		return await vitestKobold.initiativeActor.create({
 			...fakeInitiativeActorMock,
@@ -152,7 +152,7 @@ export class ResourceFactories {
 	) {
 		const initiativeId =
 			partialInitiativeActorGroup?.initiativeId ?? (await ResourceFactories.initiative()).id;
-		const fakeInitiativeActorGroupMock = fake(zInitiativeActorGroupInitializer);
+		const fakeInitiativeActorGroupMock = fake(zNewInitiativeActorGroup);
 		delete fakeInitiativeActorGroupMock.id;
 		return await vitestKobold.initiativeActorGroup.create({
 			...fakeInitiativeActorGroupMock,
@@ -161,14 +161,14 @@ export class ResourceFactories {
 		});
 	}
 	public static async userSettings(partialUserSettings?: Partial<UserSettings>) {
-		const fakeUserSettingsMock = fake(zUserSettingsInitializer);
+		const fakeUserSettingsMock = fake(zNewUserSettings);
 		return await vitestKobold.userSettings.create({
 			...fakeUserSettingsMock,
 			...partialUserSettings,
 		});
 	}
 	public static async wgAuthToken(partialWgAuthToken?: Partial<WgAuthToken>) {
-		const fakeWgAuthTokenMock = fake(zWgAuthTokenInitializer);
+		const fakeWgAuthTokenMock = fake(zNewWgAuthToken);
 		return await vitestKobold.wgAuthToken.create({
 			...fakeWgAuthTokenMock,
 			...partialWgAuthToken,

@@ -38,18 +38,3 @@ export const zSheetAdjustment = z.strictObject({
 	value: z.string(),
 	type: z.nativeEnum(SheetAdjustmentTypeEnum).default(SheetAdjustmentTypeEnum.untyped),
 });
-
-export type Modifier = z.infer<typeof zModifier>;
-export const zModifier = z
-	.strictObject({
-		name: z.string(),
-		isActive: z.boolean().default(false),
-		description: z.string().nullable().default(null),
-		type: z.nativeEnum(SheetAdjustmentTypeEnum).default(SheetAdjustmentTypeEnum.untyped),
-		severity: z.number().nullable().default(null),
-		sheetAdjustments: z.array(zSheetAdjustment).default([]),
-		rollAdjustment: z.coerce.string().nullable().default(null),
-		rollTargetTags: z.string().nullable().default(null),
-		note: z.string().nullable().default(null),
-	})
-	.describe('A modifier is a bonus or penalty that can be applied to rolls or sheet properties.');

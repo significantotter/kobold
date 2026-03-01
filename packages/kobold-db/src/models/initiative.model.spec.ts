@@ -1,4 +1,4 @@
-import { Initiative, zInitiativeInitializer } from '../index.js';
+import { Initiative, zNewInitiative } from '../index.js';
 import _ from 'lodash';
 import { truncateDbForTests, vitestKobold, ResourceFactories, fake } from '../test-utils.js';
 
@@ -8,7 +8,7 @@ describe('InitiativeModel', () => {
 	});
 	describe('create, read', () => {
 		it('creates a new initiative, reads it, and returns the initiative plus relations', async () => {
-			const fakeInitiativeMock = fake(zInitiativeInitializer);
+			const fakeInitiativeMock = fake(zNewInitiative);
 
 			const created = await vitestKobold.initiative.create(fakeInitiativeMock);
 			const read = await vitestKobold.initiative.read({ id: created.id });

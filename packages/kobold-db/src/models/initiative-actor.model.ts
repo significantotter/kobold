@@ -3,6 +3,7 @@ import { jsonObjectFrom } from 'kysely/helpers/postgres';
 import {
 	channelDefaultCharacterForCharacter,
 	guildDefaultCharacterForCharacter,
+	sheetRelationsForActor,
 } from '../lib/shared-relation-builders.js';
 import {
 	Database,
@@ -13,7 +14,6 @@ import {
 	InitiativeActorUpdate,
 	InitiativeActorWithRelations,
 	NewInitiativeActor,
-	SheetRecord,
 } from '../schemas/index.js';
 import { Model } from './model.js';
 
@@ -52,18 +52,7 @@ export function characterForActor(eb: ExpressionBuilder<Database, 'initiativeAct
 	).as('character');
 }
 
-function sheetRecordForActor(eb: ExpressionBuilder<Database, 'initiativeActor'>) {
-	return jsonObjectFrom(
-		eb
-			.selectFrom('sheetRecord')
-			.selectAll('sheetRecord')
-			.whereRef('sheetRecord.id', '=', 'initiativeActor.sheetRecordId')
-	)
-		.$castTo<SheetRecord>()
-		.as('sheetRecord');
-}
-
-function GameForActor(eb: ExpressionBuilder<Database, 'initiativeActor'>) {
+function gameForActor(eb: ExpressionBuilder<Database, 'initiativeActor'>) {
 	return jsonObjectFrom(
 		eb.selectFrom('game').selectAll('game').whereRef('game.id', '=', 'initiativeActor.gameId')
 	)
@@ -85,8 +74,8 @@ export class InitiativeActorModel extends Model<Database['initiativeActor']> {
 				actorGroupForActor(eb),
 				initiativeForActor(eb),
 				characterForActor(eb),
-				sheetRecordForActor(eb),
-				GameForActor(eb),
+				gameForActor(eb),
+				...sheetRelationsForActor(eb),
 			])
 			.execute();
 		return result[0];
@@ -104,8 +93,8 @@ export class InitiativeActorModel extends Model<Database['initiativeActor']> {
 				actorGroupForActor(eb),
 				initiativeForActor(eb),
 				characterForActor(eb),
-				sheetRecordForActor(eb),
-				GameForActor(eb),
+				gameForActor(eb),
+				...sheetRelationsForActor(eb),
 			])
 			.where('initiativeActor.id', '=', id)
 			.execute();
@@ -125,8 +114,8 @@ export class InitiativeActorModel extends Model<Database['initiativeActor']> {
 				actorGroupForActor(eb),
 				initiativeForActor(eb),
 				characterForActor(eb),
-				sheetRecordForActor(eb),
-				GameForActor(eb),
+				gameForActor(eb),
+				...sheetRelationsForActor(eb),
 			]);
 		if (id !== undefined) query = query.where('initiativeActor.id', '=', id);
 		if (characterId !== undefined)

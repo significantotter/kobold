@@ -1,7 +1,13 @@
 import { ExpressionBuilder, Kysely } from 'kysely';
 import { jsonArrayFrom, jsonObjectFrom } from 'kysely/helpers/postgres';
-import { sheetRecordForActor } from '../lib/shared-relation-builders.js';
 import {
+	actionsForActor,
+	modifiersForActor,
+	rollMacrosForActor,
+	sheetRecordForActor,
+} from '../lib/shared-relation-builders.js';
+import {
+	Action,
 	Database,
 	Initiative,
 	InitiativeActor,
@@ -9,14 +15,21 @@ import {
 	InitiativeId,
 	InitiativeUpdate,
 	InitiativeWithRelations,
+	Modifier,
 	NewInitiative,
+	RollMacro,
 	SheetRecord,
 } from '../schemas/index.js';
 import { Model } from './model.js';
 
 type InitiativeGraphQueryOutput = Initiative & {
 	currentTurnGroup: InitiativeActorGroup | null;
-	actors: (InitiativeActor & { sheetRecord: SheetRecord })[];
+	actors: (InitiativeActor & {
+		sheetRecord: SheetRecord;
+		actions: Action[];
+		modifiers: Modifier[];
+		rollMacros: RollMacro[];
+	})[];
 	actorGroups: InitiativeActorGroup[];
 };
 
@@ -25,7 +38,12 @@ export function actorsForInitiative(eb: ExpressionBuilder<Database, 'initiative'
 		eb
 			.selectFrom('initiativeActor')
 			.selectAll('initiativeActor')
-			.select(eb => [sheetRecordForActor(eb)])
+			.select(eb => [
+				sheetRecordForActor(eb),
+				actionsForActor(eb),
+				modifiersForActor(eb),
+				rollMacrosForActor(eb),
+			])
 			.whereRef('initiative.id', '=', 'initiativeActor.initiativeId')
 	).as('actors');
 }

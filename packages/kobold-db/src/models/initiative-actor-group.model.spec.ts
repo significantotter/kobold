@@ -1,5 +1,5 @@
 
-import { zInitiativeActorGroupInitializer } from '../index.js';
+import { zNewInitiativeActorGroup } from '../index.js';
 import _ from 'lodash';
 import { truncateDbForTests, ResourceFactories, vitestKobold, fake } from '../test-utils.js';
 
@@ -10,7 +10,7 @@ describe('InitiativeActorGroupModel', () => {
 	describe('create, read', () => {
 		it('creates a new initiativeActorGroup, reads it, and returns the initiativeActorGroup plus relations', async () => {
 			const initiative = await ResourceFactories.initiative();
-			const fakeInitiativeActorGroupMock = fake(zInitiativeActorGroupInitializer);
+			const fakeInitiativeActorGroupMock = fake(zNewInitiativeActorGroup);
 			fakeInitiativeActorGroupMock.initiativeId = initiative.id;
 
 			const created = await vitestKobold.initiativeActorGroup.create(

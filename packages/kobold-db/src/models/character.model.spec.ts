@@ -1,5 +1,5 @@
 
-import { zCharacterInitializer } from '../index.js';
+import { zNewCharacter } from '../index.js';
 import { truncateDbForTests, ResourceFactories, vitestKobold, fake } from '../test-utils.js';
 import _ from 'lodash';
 
@@ -11,7 +11,7 @@ describe('CharacterModel', () => {
 		it('creates a new character, reads it, and returns the character plus relations', async () => {
 			const fakeSheetRecord = await ResourceFactories.sheetRecord();
 			const fakeGame = await ResourceFactories.game();
-			const fakeCharacterMock = fake(zCharacterInitializer);
+			const fakeCharacterMock = fake(zNewCharacter);
 			fakeCharacterMock.sheetRecordId = fakeSheetRecord.id;
 			fakeCharacterMock.gameId = fakeGame.id;
 			const fakeCharacterMockWithRelations = {
@@ -28,7 +28,7 @@ describe('CharacterModel', () => {
 		});
 		it('creates a new character with no relations', async () => {
 			const fakeSheetRecord = await ResourceFactories.sheetRecord();
-			let fakeCharacterMock = fake(zCharacterInitializer);
+			let fakeCharacterMock = fake(zNewCharacter);
 			fakeCharacterMock.sheetRecordId = fakeSheetRecord.id;
 			delete fakeCharacterMock.gameId;
 
@@ -47,7 +47,7 @@ describe('CharacterModel', () => {
 		});
 
 		it('fails to create a new character if an invalid sheetRecordId is already used', async () => {
-			const fakeCharacterMock = fake(zCharacterInitializer);
+			const fakeCharacterMock = fake(zNewCharacter);
 			fakeCharacterMock.sheetRecordId = -1;
 			await expect(vitestKobold.character.create(fakeCharacterMock)).rejects.toThrow();
 		});

@@ -11,7 +11,7 @@ import {
 	UserSettingsModel,
 	WgAuthTokenModel,
 } from './models/index.js';
-import Database from './schemas/kanel/Database.js';
+import type { Database } from './index.js';
 
 export class Kobold {
 	public db: Kysely<Database>;
