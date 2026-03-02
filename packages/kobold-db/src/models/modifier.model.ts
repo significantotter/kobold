@@ -20,8 +20,6 @@ export class ModifierModel extends Model<Database['modifier']> {
 			.insertInto('modifier')
 			.values({
 				...args,
-				rollTargetTags:
-					args.rollTargetTags !== undefined ? sqlJSON(args.rollTargetTags) : undefined,
 				sheetAdjustments:
 					args.sheetAdjustments !== undefined
 						? sqlJSON(args.sheetAdjustments)
@@ -59,8 +57,6 @@ export class ModifierModel extends Model<Database['modifier']> {
 			.updateTable('modifier')
 			.set({
 				...args,
-				rollTargetTags:
-					args.rollTargetTags !== undefined ? sqlJSON(args.rollTargetTags) : undefined,
 				sheetAdjustments:
 					args.sheetAdjustments !== undefined
 						? sqlJSON(args.sheetAdjustments)

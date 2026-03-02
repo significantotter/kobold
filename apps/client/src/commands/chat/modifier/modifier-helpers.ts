@@ -1,7 +1,7 @@
-import { Modifier } from '@kobold/db';
+import { Condition } from '@kobold/db';
 
 export class ModifierHelpers {
-	public static detailModifier(modifier: Modifier) {
+	public static detailModifier(modifier: Condition) {
 		const modifierTextLines = [];
 		if (modifier.description) modifierTextLines.push(`${modifier.description}`);
 		modifierTextLines.push(`Type: \`${modifier.type || 'untyped'}\``);

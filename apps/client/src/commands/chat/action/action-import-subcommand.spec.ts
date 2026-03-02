@@ -12,7 +12,7 @@ import {
 	createTestHarness,
 	createMockAction,
 	setupKoboldUtilsMocks,
-	setupSheetRecordUpdateMock,
+	setupActionModelMock,
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	CommandTestHarness,
@@ -48,7 +48,7 @@ describe('ActionImportSubCommand', () => {
 				this.get = vi.fn(async () => JSON.stringify(importedActions));
 				return this;
 			} as unknown as () => PasteBin);
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { updateMock } = setupActionModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -89,7 +89,7 @@ describe('ActionImportSubCommand', () => {
 				this.get = vi.fn(async () => JSON.stringify(importedActions));
 				return this;
 			} as unknown as () => PasteBin);
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { updateMock } = setupActionModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -127,7 +127,7 @@ describe('ActionImportSubCommand', () => {
 				this.get = vi.fn(async () => JSON.stringify(importedActions));
 				return this;
 			} as unknown as () => PasteBin);
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { updateMock } = setupActionModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -162,7 +162,7 @@ describe('ActionImportSubCommand', () => {
 				this.get = vi.fn(async () => JSON.stringify(importedActions));
 				return this;
 			} as unknown as () => PasteBin);
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { updateMock } = setupActionModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({

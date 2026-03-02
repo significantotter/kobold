@@ -9,7 +9,7 @@ import {
 	createTestHarness,
 	createMockCharacter,
 	setupKoboldUtilsMocks,
-	setupSheetRecordUpdateMock,
+	setupModifierModelMock,
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	CommandTestHarness,
@@ -42,6 +42,8 @@ describe('ModifierImportSubCommand', () => {
 			// Arrange
 			const existingModifiers = [
 				{
+					id: 1,
+					sheetRecordId: 1,
 					name: 'existing modifier',
 					isActive: true,
 					description: null,
@@ -67,7 +69,7 @@ describe('ModifierImportSubCommand', () => {
 				},
 			];
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.modifiers = existingModifiers;
+			mockCharacter.modifiers = existingModifiers;
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 
@@ -77,7 +79,7 @@ describe('ModifierImportSubCommand', () => {
 				return this;
 			} as unknown as () => PasteBin);
 
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { createMock } = setupModifierModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -93,13 +95,15 @@ describe('ModifierImportSubCommand', () => {
 
 			// Assert
 			expect(result.didRespond()).toBe(true);
-			expect(updateMock).toHaveBeenCalled();
+			expect(createMock).toHaveBeenCalled();
 		});
 
 		it('should import modifiers with overwrite-on-conflict mode', async () => {
 			// Arrange
 			const existingModifiers = [
 				{
+					id: 1,
+					sheetRecordId: 1,
 					name: 'shared modifier',
 					isActive: true,
 					description: 'Original version',
@@ -125,7 +129,7 @@ describe('ModifierImportSubCommand', () => {
 				},
 			];
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.modifiers = existingModifiers;
+			mockCharacter.modifiers = existingModifiers;
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 
@@ -134,7 +138,7 @@ describe('ModifierImportSubCommand', () => {
 				return this;
 			} as unknown as () => PasteBin);
 
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { createMock } = setupModifierModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -150,13 +154,15 @@ describe('ModifierImportSubCommand', () => {
 
 			// Assert
 			expect(result.didRespond()).toBe(true);
-			expect(updateMock).toHaveBeenCalled();
+			expect(createMock).toHaveBeenCalled();
 		});
 
 		it('should import modifiers with rename-on-conflict mode', async () => {
 			// Arrange
 			const existingModifiers = [
 				{
+					id: 1,
+					sheetRecordId: 1,
 					name: 'duplicate modifier',
 					isActive: true,
 					description: null,
@@ -182,7 +188,7 @@ describe('ModifierImportSubCommand', () => {
 				},
 			];
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.modifiers = existingModifiers;
+			mockCharacter.modifiers = existingModifiers;
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 
@@ -191,7 +197,7 @@ describe('ModifierImportSubCommand', () => {
 				return this;
 			} as unknown as () => PasteBin);
 
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { createMock } = setupModifierModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -207,13 +213,15 @@ describe('ModifierImportSubCommand', () => {
 
 			// Assert
 			expect(result.didRespond()).toBe(true);
-			expect(updateMock).toHaveBeenCalled();
+			expect(createMock).toHaveBeenCalled();
 		});
 
 		it('should import modifiers with ignore-on-conflict mode', async () => {
 			// Arrange
 			const existingModifiers = [
 				{
+					id: 1,
+					sheetRecordId: 1,
 					name: 'existing modifier',
 					isActive: true,
 					description: null,
@@ -250,7 +258,7 @@ describe('ModifierImportSubCommand', () => {
 				},
 			];
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.modifiers = existingModifiers;
+			mockCharacter.modifiers = existingModifiers;
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 
@@ -259,7 +267,7 @@ describe('ModifierImportSubCommand', () => {
 				return this;
 			} as unknown as () => PasteBin);
 
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { createMock } = setupModifierModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -275,7 +283,7 @@ describe('ModifierImportSubCommand', () => {
 
 			// Assert
 			expect(result.didRespond()).toBe(true);
-			expect(updateMock).toHaveBeenCalled();
+			expect(createMock).toHaveBeenCalled();
 		});
 	});
 
@@ -283,12 +291,12 @@ describe('ModifierImportSubCommand', () => {
 		it('should error on invalid pastebin URL', async () => {
 			// Arrange
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.modifiers = [];
+			mockCharacter.modifiers = [];
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			// Mock the parser to return null for invalid URL
 			vi.mocked(TextParseHelpers.parsePasteBinIdFromText).mockReturnValue(null);
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { createMock } = setupModifierModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -304,7 +312,7 @@ describe('ModifierImportSubCommand', () => {
 
 			// Assert
 			expect(result.didRespond()).toBe(true);
-			expect(updateMock).not.toHaveBeenCalled();
+			expect(createMock).not.toHaveBeenCalled();
 
 			// Reset mock for other tests
 			vi.mocked(TextParseHelpers.parsePasteBinIdFromText).mockReturnValue('abc123');
@@ -315,7 +323,7 @@ describe('ModifierImportSubCommand', () => {
 
 			// Arrange
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.modifiers = [];
+			mockCharacter.modifiers = [];
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 
@@ -324,7 +332,7 @@ describe('ModifierImportSubCommand', () => {
 				return this;
 			} as unknown as () => PasteBin);
 
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { createMock } = setupModifierModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -340,13 +348,13 @@ describe('ModifierImportSubCommand', () => {
 
 			// Assert
 			expect(result.didRespond()).toBe(true);
-			expect(updateMock).not.toHaveBeenCalled();
+			expect(createMock).not.toHaveBeenCalled();
 		});
 
 		it('should error on invalid modifier schema from pastebin', async () => {
 			// Arrange
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.modifiers = [];
+			mockCharacter.modifiers = [];
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 
@@ -363,7 +371,7 @@ describe('ModifierImportSubCommand', () => {
 				return this;
 			} as unknown as () => PasteBin);
 
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { createMock } = setupModifierModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -379,7 +387,7 @@ describe('ModifierImportSubCommand', () => {
 
 			// Assert
 			expect(result.didRespond()).toBe(true);
-			expect(updateMock).not.toHaveBeenCalled();
+			expect(createMock).not.toHaveBeenCalled();
 		});
 	});
 });

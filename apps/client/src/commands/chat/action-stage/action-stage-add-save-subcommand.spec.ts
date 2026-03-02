@@ -11,7 +11,7 @@ import {
 	setupKoboldUtilsMocks,
 	setupAutocompleteKoboldMocks,
 	setupFinderHelpersMocks,
-	setupSheetRecordUpdateMock,
+	setupActionModelMock,
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	CommandTestHarness,
@@ -37,7 +37,7 @@ describe('ActionStageAddSaveSubCommand', () => {
 			const action = createMockAction({ name: 'Fireball', rolls: [] });
 			setupKoboldUtilsMocks({ actions: [action] });
 			setupFinderHelpersMocks(action, [action]);
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { updateMock } = setupActionModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({

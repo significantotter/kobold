@@ -5,7 +5,7 @@ import {
 	CacheType,
 	ChatInputCommandInteraction,
 } from 'discord.js';
-import { Kobold } from '@kobold/db';
+import { Kobold, Roll } from '@kobold/db';
 
 import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
@@ -40,7 +40,7 @@ export class ActionStageSetSubCommand extends BaseCommandClass(
 			//find a roll on the character matching the autocomplete string
 
 			const matchedActionRolls: ApplicationCommandOptionChoiceData[] = [];
-			for (const action of activeCharacter.sheetRecord.actions || []) {
+			for (const action of activeCharacter.actions || []) {
 				for (const roll of action.rolls) {
 					const rollMatchText = `${action.name.toLocaleLowerCase()} -- ${roll.name.toLocaleLowerCase()}`;
 					if (rollMatchText.includes(match.toLocaleLowerCase())) {
@@ -78,7 +78,7 @@ export class ActionStageSetSubCommand extends BaseCommandClass(
 			});
 
 			//find a roll on the character matching the autocomplete string
-			const matchedAction = activeCharacter.sheetRecord.actions.find(
+			const matchedAction = activeCharacter.actions.find(
 				action => action.name.toLocaleLowerCase() === actionName.toLocaleLowerCase()
 			);
 			if (!matchedAction) {
@@ -169,7 +169,7 @@ export class ActionStageSetSubCommand extends BaseCommandClass(
 		});
 
 		//find a roll on the character matching the autocomplete string
-		const matchedAction = activeCharacter.sheetRecord.actions.find(
+		const matchedAction = activeCharacter.actions.find(
 			action => action.name.toLocaleLowerCase() === actionName.toLocaleLowerCase()
 		);
 		if (!matchedAction) {
@@ -299,21 +299,24 @@ export class ActionStageSetSubCommand extends BaseCommandClass(
 			await InteractionUtils.send(intr, ActionStageDefinition.strings.set.unknownField);
 			return;
 		}
-		// TODO improve the typing in this file to avoid this explicit any
-		(roll as any)[fieldToUpdate] = finalValue;
+		// Create updated roll
+		const updatedRoll = { ...roll, [fieldToUpdate]: finalValue };
 
+		// Create updated rolls array with the modified roll
+		let updatedRolls = matchedAction.rolls.map((r, idx) =>
+			idx === rollIndex ? updatedRoll : r
+		);
+
+		// Handle reordering if requested
 		if (moveTo === 'top') {
-			const roll = matchedAction.rolls.splice(rollIndex, 1)[0];
-			matchedAction.rolls = [roll, ...matchedAction.rolls];
+			const movedRoll = updatedRolls.splice(rollIndex, 1)[0];
+			updatedRolls = [movedRoll, ...updatedRolls];
 		} else if (moveTo === 'bottom') {
-			const roll = matchedAction.rolls.splice(rollIndex, 1)[0];
-			matchedAction.rolls = [...matchedAction.rolls, roll];
+			const movedRoll = updatedRolls.splice(rollIndex, 1)[0];
+			updatedRolls = [...updatedRolls, movedRoll];
 		}
 
-		await kobold.sheetRecord.update(
-			{ id: activeCharacter.sheetRecordId },
-			{ actions: activeCharacter.sheetRecord.actions }
-		);
+		await kobold.action.update({ id: matchedAction.id }, { rolls: updatedRolls });
 
 		//send a confirmation message
 		await InteractionUtils.send(

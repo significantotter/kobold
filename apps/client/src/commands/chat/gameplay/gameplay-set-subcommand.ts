@@ -53,10 +53,10 @@ export class GameplaySetSubCommand extends BaseCommandClass(
 
 		const { gameUtils, gameplayUtils } = new KoboldUtils(kobold);
 
-		const { targetSheetRecord, hideStats, targetName } =
+		const { targetSheetRecord, targetEntity, hideStats, targetName } =
 			await gameUtils.getCharacterOrInitActorTarget(intr, targetCharacter);
 
-		const creature = new Creature(targetSheetRecord, targetName, intr);
+		const creature = Creature.fromSheetRecord(targetEntity, targetName, intr);
 
 		const { initialValue, updatedValue } = await gameplayUtils.setGameplayStats(
 			intr,

@@ -1,41 +1,41 @@
 import _ from 'lodash';
-import { Action, Counter, Modifier, RollMacro, Sheet, SheetRecord } from '@kobold/db';
+import { Action, Condition, Counter, Modifier, RollMacro, Sheet, SheetRecord } from '@kobold/db';
 import { Creature, roll, rollable } from '../creature.js';
 
 export class FinderHelpers {
 	/**
-	 * Fetches a sheetRecord's roll macro by the roll macro's name
+	 * Fetches a roll macro by the roll macro's name from an array of roll macros
+	 * @param rollMacros the array of roll macros to search
 	 * @param name the name of the roll macro
 	 * @returns the roll macro
 	 */
-	public static getRollMacroByName(
-		sheetRecord: SheetRecord,
-		name: string
-	): RollMacro | undefined {
-		return sheetRecord.rollMacros.find(
+	public static getRollMacroByName(rollMacros: RollMacro[], name: string): RollMacro | undefined {
+		return rollMacros.find(
 			rollMacro =>
 				rollMacro.name.toLocaleLowerCase().trim() === name.toLocaleLowerCase().trim()
 		);
 	}
 
 	/**
-	 * Fetches a sheetRecord's action by the action name
+	 * Fetches an action by the action name from an array of actions
+	 * @param actions the array of actions to search
 	 * @param name the name of the action
 	 * @returns the action
 	 */
-	public static getActionByName(sheetRecord: SheetRecord, name: string): Action | undefined {
-		return sheetRecord.actions.find(
+	public static getActionByName(actions: Action[], name: string): Action | undefined {
+		return actions.find(
 			action => action.name.toLocaleLowerCase().trim() === name.toLocaleLowerCase().trim()
 		);
 	}
 
 	/**
-	 * Fetches a sheetRecord's modifier by the modifier name
+	 * Fetches a modifier by the modifier name from an array of modifiers
+	 * @param modifiers the array of modifiers to search
 	 * @param name the name of the modifier
 	 * @returns the modifier
 	 */
-	public static getModifierByName(sheetRecord: SheetRecord, name: string): Modifier | undefined {
-		return sheetRecord.modifiers.find(
+	public static getModifierByName(modifiers: Modifier[], name: string): Modifier | undefined {
+		return modifiers.find(
 			modifier => modifier.name.toLocaleLowerCase().trim() === name.toLocaleLowerCase().trim()
 		);
 	}
@@ -89,13 +89,17 @@ export class FinderHelpers {
 	}
 
 	/**
-	 * Fetches a sheetRecord's modifier by the modifier name
-	 * @param name the name of the modifier
-	 * @returns the modifier
+	 * Fetches a sheetRecord's condition by the condition name
+	 * @param name the name of the condition
+	 * @returns the condition
 	 */
-	public static getConditionByName(sheetRecord: SheetRecord, name: string): Modifier | undefined {
+	public static getConditionByName(
+		sheetRecord: SheetRecord,
+		name: string
+	): Condition | undefined {
 		return sheetRecord.conditions.find(
-			modifier => modifier.name.toLocaleLowerCase().trim() === name.toLocaleLowerCase().trim()
+			condition =>
+				condition.name.toLocaleLowerCase().trim() === name.toLocaleLowerCase().trim()
 		);
 	}
 
@@ -138,17 +142,14 @@ export class FinderHelpers {
 	}
 
 	/**
-	 * Given a string, finds all roll macros containing that string on a given sheetRecord record
-	 * @param targetSheetRecord the sheetRecord record to check for matching roll macros
+	 * Given a string, finds all roll macros containing that string from an array of roll macros
+	 * @param rollMacros the array of roll macros to search
 	 * @param rollMacroText the text to match to roll macros
 	 * @returns all roll macros that contain the given roll macroText
 	 */
-	public static matchAllRollMacros(
-		targetSheetRecord: SheetRecord,
-		rollMacroText: string
-	): RollMacro[] {
+	public static matchAllRollMacros(rollMacros: RollMacro[], rollMacroText: string): RollMacro[] {
 		const matchedRollMacros = [];
-		for (const rollMacro of targetSheetRecord.rollMacros || []) {
+		for (const rollMacro of rollMacros || []) {
 			if (rollMacro.name.toLowerCase().includes(rollMacroText.toLowerCase())) {
 				matchedRollMacros.push(rollMacro);
 			}
@@ -157,17 +158,14 @@ export class FinderHelpers {
 	}
 
 	/**
-	 * Given a string, finds all modifiers containing that string on a given sheet record
-	 * @param targetSheetRecord the sheet record to check for matching modifiers
+	 * Given a string, finds all modifiers containing that string from an array of modifiers
+	 * @param modifiers the array of modifiers to search
 	 * @param modifierText the text to match to modifiers
 	 * @returns all modifiers that contain the given modifierText
 	 */
-	public static matchAllModifiers(
-		targetSheetRecord: SheetRecord,
-		modifierText: string
-	): Modifier[] {
+	public static matchAllModifiers(modifiers: Modifier[], modifierText: string): Modifier[] {
 		const matchedModifiers = [];
-		for (const modifier of targetSheetRecord.modifiers || []) {
+		for (const modifier of modifiers || []) {
 			if (modifier.name.toLowerCase().includes(modifierText.toLowerCase())) {
 				matchedModifiers.push(modifier);
 			}
@@ -184,7 +182,7 @@ export class FinderHelpers {
 	public static matchAllConditions(
 		targetSheetRecord: SheetRecord,
 		conditionText: string
-	): Modifier[] {
+	): Condition[] {
 		const matchedConditions = [];
 		for (const condition of targetSheetRecord.conditions || []) {
 			if (condition.name.toLowerCase().includes(conditionText.toLowerCase())) {
@@ -195,14 +193,14 @@ export class FinderHelpers {
 	}
 
 	/**
-	 * Given a string, finds all actions containing that string on a given sheet record record
-	 * @param targetSheetRecord the sheet record record to check for matching actions
+	 * Given a string, finds all actions containing that string from an array of actions
+	 * @param actions the array of actions to search
 	 * @param actionText the text to match to actions
 	 * @returns all actions that contain the given actionText
 	 */
-	public static matchAllActions(targetSheetRecord: SheetRecord, actionText: string): Action[] {
+	public static matchAllActions(actions: Action[], actionText: string): Action[] {
 		const matchedActions = [];
-		for (const action of targetSheetRecord.actions || []) {
+		for (const action of actions || []) {
 			if (action.name.toLowerCase().includes(actionText.toLowerCase())) {
 				matchedActions.push(action);
 			}

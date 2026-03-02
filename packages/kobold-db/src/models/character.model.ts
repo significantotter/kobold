@@ -13,6 +13,7 @@ import {
 	NewCharacter,
 } from '../schemas/index.js';
 import { Model } from './model.js';
+import { ImportSourceEnum } from '../schemas/lib/database-enums.js';
 
 export class CharacterModel extends Model<Database['character']> {
 	constructor(db: Kysely<Database>) {
@@ -97,7 +98,7 @@ export class CharacterModel extends Model<Database['character']> {
 		params: {
 			name?: string;
 			charId?: number;
-			importSource?: string;
+			importSource?: ImportSourceEnum;
 		} & (
 			| {
 					id: CharacterId;

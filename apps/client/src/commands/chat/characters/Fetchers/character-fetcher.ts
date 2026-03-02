@@ -5,7 +5,15 @@ import {
 	ButtonStyle,
 	MessageFlags,
 } from 'discord.js';
-import { NewSheetRecord, Character, CharacterWithRelations } from '@kobold/db';
+import {
+	NewSheetRecord,
+	Character,
+	CharacterWithRelations,
+	NewAction,
+	NewModifier,
+	NewRollMacro,
+	ImportSourceEnum,
+} from '@kobold/db';
 import { Kobold } from '@kobold/db';
 import { KoboldError } from '../../../../utils/KoboldError.js';
 import { CollectorUtils } from '../../../../utils/collector-utils.js';
@@ -14,8 +22,19 @@ import { InteractionUtils } from '../../../../utils/interaction-utils.js';
 import { KoboldUtils } from '../../../../utils/kobold-service-utils/kobold-utils.js';
 import { CharacterDefinition as CharacterCommand } from '@kobold/documentation';
 
+/**
+ * Data returned from converting source data into sheet records and related entities.
+ * Actions, modifiers, and rollMacros are now separate entities and need to be created separately.
+ */
+export type SheetConversionResult = {
+	sheetRecord: NewSheetRecord;
+	actions: Omit<NewAction, 'sheetRecordId'>[];
+	modifiers: Omit<NewModifier, 'sheetRecordId'>[];
+	rollMacros: Omit<NewRollMacro, 'sheetRecordId'>[];
+};
+
 export abstract class CharacterFetcher<SourceData, FetchArgs> {
-	public abstract importSource: string;
+	public abstract importSource: ImportSourceEnum;
 	constructor(
 		public intr: CommandInteraction<CacheType>,
 		public kobold: Kobold,
@@ -24,29 +43,49 @@ export abstract class CharacterFetcher<SourceData, FetchArgs> {
 	public abstract fetchSourceData(args: FetchArgs): Promise<SourceData>;
 	public fetchDuplicateCharacter(
 		args: FetchArgs,
-		newSheetRecord: NewSheetRecord
+		conversionResult: SheetConversionResult
 	): Promise<Character | null> {
 		return this.kobold.character.read({
-			name: newSheetRecord.sheet.staticInfo.name,
+			name: conversionResult.sheetRecord.sheet.staticInfo.name,
 			userId: this.userId,
 		});
 	}
 	public abstract convertSheetRecord(
 		sourceData: SourceData,
 		activeCharacter?: CharacterWithRelations
-	): NewSheetRecord;
+	): SheetConversionResult;
 	public abstract getCharId(args: FetchArgs): number;
 
 	public async create(args: FetchArgs): Promise<Character> {
 		const sourceData = await this.fetchSourceData(args);
-		const sheetRecord = this.convertSheetRecord(sourceData);
-		const existingCharacter = await this.fetchDuplicateCharacter(args, sheetRecord);
+		const conversionResult = this.convertSheetRecord(sourceData);
+		const existingCharacter = await this.fetchDuplicateCharacter(args, conversionResult);
 		if (existingCharacter) {
 			throw new KoboldError(
 				`Yip! You already have a character with the name "${existingCharacter.name}"!`
 			);
 		}
-		const createdSheetRecord = await this.kobold.sheetRecord.create(sheetRecord);
+		const createdSheetRecord = await this.kobold.sheetRecord.create(
+			conversionResult.sheetRecord
+		);
+
+		// Create the related entities with the sheetRecordId
+		for (const action of conversionResult.actions) {
+			await this.kobold.action.create({ ...action, sheetRecordId: createdSheetRecord.id });
+		}
+		for (const modifier of conversionResult.modifiers) {
+			await this.kobold.modifier.create({
+				...modifier,
+				sheetRecordId: createdSheetRecord.id,
+			});
+		}
+		for (const rollMacro of conversionResult.rollMacros) {
+			await this.kobold.rollMacro.create({
+				...rollMacro,
+				sheetRecordId: createdSheetRecord.id,
+			});
+		}
+
 		const createdCharacter = await this.kobold.character.create({
 			name: createdSheetRecord.sheet.staticInfo.name,
 			userId: this.userId,
@@ -64,10 +103,10 @@ export abstract class CharacterFetcher<SourceData, FetchArgs> {
 				`**WARNING:** The character name on the target sheet ${newName} does not ` +
 				`match your active character's name ${oldName}. If this sheet is not the one you want to update, ` +
 				`please re-export the correct character and try again.` +
-				(this.importSource === 'pathbuilder'
+				(this.importSource === ImportSourceEnum.pathbuilder
 					? '\n\n**NOTE:** If you are using Pathbuilder, you must re-export your character and use the new json id to ' +
-					  'update your character sheet with new changes. Otherwise, I will just reload the data from the last ' +
-					  'time you exported ANY character.'
+						'update your character sheet with new changes. Otherwise, I will just reload the data from the last ' +
+						'time you exported ANY character.'
 					: ''),
 			components: [
 				{
@@ -147,22 +186,48 @@ export abstract class CharacterFetcher<SourceData, FetchArgs> {
 		koboldUtils.assertActiveCharacterNotNull(activeCharacter);
 
 		const sourceData = await this.fetchSourceData(args);
-		const sheetRecord = this.convertSheetRecord(sourceData, activeCharacter);
+		const conversionResult = this.convertSheetRecord(sourceData, activeCharacter);
 
-		if (activeCharacter.name !== sheetRecord.sheet.staticInfo.name) {
+		if (activeCharacter.name !== conversionResult.sheetRecord.sheet.staticInfo.name) {
 			// throws an error if they don't confirm
-			await this.confirmUpdateName(activeCharacter.name, sheetRecord.sheet.staticInfo.name);
+			await this.confirmUpdateName(
+				activeCharacter.name,
+				conversionResult.sheetRecord.sheet.staticInfo.name
+			);
 		}
 
-		sheetRecord.sheet = Creature.preserveSheetTrackerValues(
-			sheetRecord.sheet,
+		conversionResult.sheetRecord.sheet = Creature.preserveSheetTrackerValues(
+			conversionResult.sheetRecord.sheet,
 			activeCharacter.sheetRecord.sheet
 		);
 
 		const updatedSheetRecord = await this.kobold.sheetRecord.update(
 			{ id: activeCharacter.sheetRecordId },
-			sheetRecord
+			conversionResult.sheetRecord
 		);
+
+		// Delete existing related entities and recreate them
+		// This handles updates where actions/modifiers/rollMacros may have changed
+		await this.kobold.action.deleteBySheetRecordId({ sheetRecordId: updatedSheetRecord.id });
+		await this.kobold.modifier.deleteBySheetRecordId({ sheetRecordId: updatedSheetRecord.id });
+		await this.kobold.rollMacro.deleteBySheetRecordId({ sheetRecordId: updatedSheetRecord.id });
+
+		for (const action of conversionResult.actions) {
+			await this.kobold.action.create({ ...action, sheetRecordId: updatedSheetRecord.id });
+		}
+		for (const modifier of conversionResult.modifiers) {
+			await this.kobold.modifier.create({
+				...modifier,
+				sheetRecordId: updatedSheetRecord.id,
+			});
+		}
+		for (const rollMacro of conversionResult.rollMacros) {
+			await this.kobold.rollMacro.create({
+				...rollMacro,
+				sheetRecordId: updatedSheetRecord.id,
+			});
+		}
+
 		return await this.kobold.character.update(
 			{ id: activeCharacter.id },
 			{ name: updatedSheetRecord.sheet.staticInfo.name, charId: this.getCharId(args) }

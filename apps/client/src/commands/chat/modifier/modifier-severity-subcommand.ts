@@ -41,7 +41,7 @@ export class ModifierSeveritySubCommand extends BaseCommandClass(
 			}
 			//find a save on the character matching the autocomplete string
 			const matchedModifiers = FinderHelpers.matchAllModifiers(
-				activeCharacter.sheetRecord,
+				activeCharacter.modifiers,
 				match
 			).map(modifier => ({
 				name: modifier.name,
@@ -71,7 +71,7 @@ export class ModifierSeveritySubCommand extends BaseCommandClass(
 		});
 
 		const targetModifier = FinderHelpers.getModifierByName(
-			activeCharacter.sheetRecord,
+			activeCharacter.modifiers,
 			modifierName
 		);
 		if (!targetModifier) {
@@ -79,16 +79,11 @@ export class ModifierSeveritySubCommand extends BaseCommandClass(
 			await InteractionUtils.send(intr, ModifierDefinition.strings.notFound);
 			return;
 		}
-		targetModifier.severity = InputParseUtils.parseAsNullableNumber(newSeverity);
+		const newSeverityValue = InputParseUtils.parseAsNullableNumber(newSeverity);
 
-		await kobold.sheetRecord.update(
-			{ id: activeCharacter.sheetRecordId },
-			{
-				modifiers: activeCharacter.sheetRecord.modifiers,
-			}
-		);
+		await kobold.modifier.update({ id: targetModifier.id }, { severity: newSeverityValue });
 
-		if (targetModifier.severity === null) {
+		if (newSeverityValue === null) {
 			await InteractionUtils.send(
 				intr,
 				`Yip! I removed the severity value from the modifier "${modifierName}".`

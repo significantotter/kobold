@@ -11,7 +11,7 @@ import {
 	createDamageRoll,
 	setupKoboldUtilsMocks,
 	setupAutocompleteKoboldMocks,
-	setupSheetRecordUpdateMock,
+	setupActionModelMock,
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	CommandTestHarness,
@@ -42,7 +42,7 @@ describe('ActionStageRemoveSubCommand', () => {
 				],
 			});
 			setupKoboldUtilsMocks({ actions: [action] });
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { updateMock } = setupActionModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({

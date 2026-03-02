@@ -45,7 +45,7 @@ export class ModifierRemoveSubCommand extends BaseCommandClass(
 			}
 			//find a save on the character matching the autocomplete string
 			const matchedModifiers = FinderHelpers.matchAllModifiers(
-				activeCharacter.sheetRecord,
+				activeCharacter.modifiers,
 				match
 			).map(modifier => ({
 				name: modifier.name,
@@ -70,7 +70,7 @@ export class ModifierRemoveSubCommand extends BaseCommandClass(
 			activeCharacter: true,
 		});
 		const targetModifier = FinderHelpers.getModifierByName(
-			activeCharacter.sheetRecord,
+			activeCharacter.modifiers,
 			modifierChoice
 		);
 		if (targetModifier) {
@@ -141,17 +141,7 @@ export class ModifierRemoveSubCommand extends BaseCommandClass(
 			}
 			// remove the modifier
 			if (result && result.value === 'remove') {
-				const modifiersWithoutRemoved = _.filter(
-					activeCharacter.sheetRecord.modifiers,
-					modifier =>
-						modifier.name.toLocaleLowerCase() !== modifierChoice.toLocaleLowerCase()
-				);
-				await kobold.sheetRecord.update(
-					{ id: activeCharacter.sheetRecordId },
-					{
-						modifiers: modifiersWithoutRemoved,
-					}
-				);
+				await kobold.modifier.delete({ id: targetModifier.id });
 
 				await InteractionUtils.send(
 					intr,

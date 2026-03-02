@@ -63,7 +63,7 @@ export class InitStatBlockSubCommand extends BaseCommandClass(
 		);
 
 		let sheetEmbed: KoboldEmbed;
-		const creature = new Creature(actor.sheetRecord, actor.name, intr);
+		const creature = Creature.fromSheetRecord(actor, actor.name, intr);
 		sheetEmbed = creature.compileEmbed('Sheet');
 
 		await EmbedUtils.dispatchEmbeds(intr, [sheetEmbed], secretMessage || undefined);

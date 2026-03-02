@@ -26,7 +26,7 @@ export class CharacterSheetSubCommand extends BaseCommandClass(
 			activeCharacter: true,
 		});
 
-		const creature = new Creature(activeCharacter.sheetRecord, undefined, intr);
+		const creature = Creature.fromSheetRecord(activeCharacter, undefined, intr);
 		const embed = creature.compileEmbed('Sheet', sheetStyle);
 
 		await embed.sendBatches(intr);

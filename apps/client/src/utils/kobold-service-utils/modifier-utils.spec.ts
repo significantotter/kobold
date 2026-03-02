@@ -2,7 +2,7 @@ import {
 	AbilityEnum,
 	AdjustablePropertyEnum,
 	Attribute,
-	Modifier,
+	Condition,
 	SheetAdjustmentOperationEnum,
 	SheetAdjustmentTypeEnum,
 } from '@kobold/db';
@@ -11,7 +11,7 @@ import { ModifierUtils } from './modifier-utils.js';
 describe('ModifierUtils', () => {
 	describe('applyRollModifierSeverity', () => {
 		it('should replace sheet modifier severity placeholder with actual severity value', () => {
-			const modifier: Modifier = {
+			const modifier: Condition = {
 				name: 'foo',
 				description: '',
 				isActive: true,
@@ -31,7 +31,7 @@ describe('ModifierUtils', () => {
 				rollTargetTags: null,
 			};
 
-			const expectedModifier: Modifier = {
+			const expectedModifier: Condition = {
 				...modifier,
 				sheetAdjustments: [
 					{
@@ -45,7 +45,7 @@ describe('ModifierUtils', () => {
 			expect(result).toEqual(expectedModifier);
 		});
 		it('should replace roll modifier severity placeholder with actual severity value', () => {
-			const modifier: Modifier = {
+			const modifier: Condition = {
 				name: 'test',
 				type: SheetAdjustmentTypeEnum.status,
 				severity: 3,
@@ -57,7 +57,7 @@ describe('ModifierUtils', () => {
 				description: null,
 			};
 
-			const expectedModifier: Modifier = {
+			const expectedModifier: Condition = {
 				...modifier,
 				rollAdjustment: '1+3',
 			};
@@ -163,7 +163,7 @@ describe('ModifierUtils', () => {
 
 	describe('parseBonusesForTagsFromModifiers', () => {
 		test('properly parses bonuses, penalties, and untyped modifiers', () => {
-			let modifiers: Modifier[] = [
+			let modifiers: Condition[] = [
 				{
 					name: 'statusBonus',
 					isActive: true,

@@ -21,7 +21,7 @@ export class ModifierListSubCommand extends BaseCommandClass(
 		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
 			activeCharacter: true,
 		});
-		const modifiers = activeCharacter.sheetRecord.modifiers;
+		const modifiers = activeCharacter.modifiers;
 		const fields = [];
 		for (const modifier of modifiers.sort((a, b) => (a.name || '').localeCompare(b.name))) {
 			let value: string;

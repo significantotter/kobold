@@ -3,19 +3,19 @@ import {
 	Action,
 	CharacterWithRelations,
 	Modifier,
-	NewSheetRecord,
 	RollMacro,
 	Sheet,
 	zAction,
 	zModifier,
 	zRollMacro,
 	zSheet,
+	ImportSourceEnum,
 } from '@kobold/db';
 import { PasteBin } from '../../../../services/pastebin/index.js';
 import { KoboldError } from '../../../../utils/KoboldError.js';
 import { Creature } from '../../../../utils/creature.js';
 import { SheetProperties } from '../../../../utils/sheet/sheet-properties.js';
-import { CharacterFetcher } from './character-fetcher.js';
+import { CharacterFetcher, SheetConversionResult } from './character-fetcher.js';
 
 export const zPasteBinImport = z.object({
 	sheet: zSheet.optional(),
@@ -32,7 +32,7 @@ export class PasteBinCharacterFetcher extends CharacterFetcher<
 	},
 	{ url: string }
 > {
-	public importSource = 'pastebin';
+	public importSource = ImportSourceEnum.pastebin;
 	public async fetchSourceData(args: { url: string }): Promise<{
 		sheet: Sheet;
 		modifiers: Modifier[];
@@ -78,8 +78,8 @@ export class PasteBinCharacterFetcher extends CharacterFetcher<
 			rollMacros: RollMacro[];
 		},
 		activeCharacter?: CharacterWithRelations
-	): NewSheetRecord {
-		const finalActions = activeCharacter?.sheetRecord?.actions ?? [];
+	): SheetConversionResult {
+		const finalActions: Action[] = activeCharacter?.actions ?? [];
 		for (const action of sourceData.actions) {
 			const existingAction = finalActions.findIndex(a => a.name === action.name);
 			if (existingAction > -1) {
@@ -88,7 +88,7 @@ export class PasteBinCharacterFetcher extends CharacterFetcher<
 				finalActions.push(action);
 			}
 		}
-		const finalModifiers = activeCharacter?.sheetRecord?.modifiers ?? [];
+		const finalModifiers: Modifier[] = activeCharacter?.modifiers ?? [];
 		for (const modifier of sourceData.modifiers) {
 			const existingModifier = finalModifiers.findIndex(a => a.name === modifier.name);
 			if (existingModifier > -1) {
@@ -97,7 +97,7 @@ export class PasteBinCharacterFetcher extends CharacterFetcher<
 				finalModifiers.push(modifier);
 			}
 		}
-		const finalRollMacros = activeCharacter?.sheetRecord?.rollMacros ?? [];
+		const finalRollMacros: RollMacro[] = activeCharacter?.rollMacros ?? [];
 		for (const rollMacro of sourceData.rollMacros) {
 			const existingRollMacro = finalRollMacros.findIndex(a => a.name === rollMacro.name);
 			if (existingRollMacro > -1) {
@@ -115,11 +115,35 @@ export class PasteBinCharacterFetcher extends CharacterFetcher<
 			);
 		}
 		return {
-			sheet: sourceData.sheet,
-			actions: finalActions,
-			modifiers: finalModifiers,
-			rollMacros: finalRollMacros,
-		} satisfies NewSheetRecord;
+			sheetRecord: {
+				sheet: updatedSheet,
+			},
+			actions: finalActions.map(action => ({
+				name: action.name,
+				description: action.description,
+				type: action.type,
+				actionCost: action.actionCost,
+				baseLevel: action.baseLevel,
+				autoHeighten: action.autoHeighten,
+				rolls: action.rolls,
+				tags: action.tags,
+			})),
+			modifiers: finalModifiers.map(modifier => ({
+				name: modifier.name,
+				description: modifier.description,
+				type: modifier.type,
+				isActive: modifier.isActive,
+				note: modifier.note,
+				rollAdjustment: modifier.rollAdjustment,
+				rollTargetTags: modifier.rollTargetTags,
+				severity: modifier.severity,
+				sheetAdjustments: modifier.sheetAdjustments,
+			})),
+			rollMacros: finalRollMacros.map(macro => ({
+				name: macro.name,
+				macro: macro.macro,
+			})),
+		};
 	}
 	public getCharId(args: { url: string }): number {
 		return -1;

@@ -16,6 +16,7 @@ import {
 import { PathbuilderCharacterFetcher } from './Fetchers/pathbuilder-character-fetcher.js';
 import { WgCharacterFetcher } from './Fetchers/wg-character-fetcher.js';
 import { PasteBinCharacterFetcher } from './Fetchers/pastebin-character-fetcher.js';
+import { ImportSourceEnum } from '@kobold/db';
 
 vi.mock('../../../utils/kobold-service-utils/kobold-utils.js');
 vi.mock('./Fetchers/pathbuilder-character-fetcher.js');
@@ -34,7 +35,7 @@ describe('CharacterUpdateSubCommand Integration', () => {
 			// Arrange
 			const mockCharacter = createMockCharacter({
 				characterOverrides: {
-					importSource: 'pathbuilder',
+					importSource: ImportSourceEnum.pathbuilder,
 					charId: 12345,
 				},
 			});
@@ -69,7 +70,7 @@ describe('CharacterUpdateSubCommand Integration', () => {
 			// Arrange
 			const mockCharacter = createMockCharacter({
 				characterOverrides: {
-					importSource: 'pathbuilder',
+					importSource: ImportSourceEnum.pathbuilder,
 					charId: 12345,
 				},
 			});
@@ -104,7 +105,7 @@ describe('CharacterUpdateSubCommand Integration', () => {
 			// Arrange
 			const mockCharacter = createMockCharacter({
 				characterOverrides: {
-					importSource: 'pathbuilder',
+					importSource: ImportSourceEnum.pathbuilder,
 					charId: 12345,
 				},
 			});
@@ -145,7 +146,7 @@ describe('CharacterUpdateSubCommand Integration', () => {
 			// Arrange
 			const mockCharacter = createMockCharacter({
 				characterOverrides: {
-					importSource: 'wanderers-guide',
+					importSource: ImportSourceEnum.wanderers_guide,
 					charId: 54321,
 				},
 			});
@@ -180,7 +181,7 @@ describe('CharacterUpdateSubCommand Integration', () => {
 			// Arrange
 			const mockCharacter = createMockCharacter({
 				characterOverrides: {
-					importSource: 'pastebin',
+					importSource: ImportSourceEnum.pastebin,
 				},
 			});
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
@@ -216,7 +217,7 @@ describe('CharacterUpdateSubCommand Integration', () => {
 			// Arrange
 			const mockCharacter = createMockCharacter({
 				characterOverrides: {
-					importSource: 'wanderers-guide',
+					importSource: ImportSourceEnum.wanderers_guide,
 					charId: 54321,
 				},
 			});

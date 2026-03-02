@@ -6,7 +6,7 @@ import {
 	ChatInputCommandInteraction,
 } from 'discord.js';
 
-import { Kobold } from '@kobold/db';
+import { Kobold, Roll } from '@kobold/db';
 import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { ActionStageDefinition } from '@kobold/documentation';
@@ -39,7 +39,7 @@ export class ActionStageRemoveSubCommand extends BaseCommandClass(
 			//find a roll on the character matching the autocomplete string
 
 			const matchedActionRolls: ApplicationCommandOptionChoiceData[] = [];
-			for (const action of activeCharacter.sheetRecord.actions || []) {
+			for (const action of activeCharacter.actions || []) {
 				for (const roll of action.rolls) {
 					const rollMatchText = `${action.name.toLocaleLowerCase()} -- ${roll.name.toLocaleLowerCase()}`;
 					if (rollMatchText.includes(match.toLocaleLowerCase())) {
@@ -72,7 +72,7 @@ export class ActionStageRemoveSubCommand extends BaseCommandClass(
 		});
 
 		//find a roll on the character matching the autocomplete string
-		const matchedAction = activeCharacter.sheetRecord.actions?.find(
+		const matchedAction = activeCharacter.actions?.find(
 			action => action.name.toLocaleLowerCase() === actionName.toLocaleLowerCase()
 		);
 		if (!matchedAction) {
@@ -87,13 +87,10 @@ export class ActionStageRemoveSubCommand extends BaseCommandClass(
 			return;
 		}
 		const rollName = matchedAction.rolls[rollIndex].name;
-		matchedAction.rolls.splice(rollIndex, 1);
+		const updatedRolls = matchedAction.rolls.filter((_, index) => index !== rollIndex);
 
-		//save the actions
-		await kobold.sheetRecord.update(
-			{ id: activeCharacter.sheetRecordId },
-			{ actions: activeCharacter.sheetRecord.actions }
-		);
+		//save the action
+		await kobold.action.update({ id: matchedAction.id }, { rolls: updatedRolls });
 
 		//send a confirmation message
 		await InteractionUtils.send(

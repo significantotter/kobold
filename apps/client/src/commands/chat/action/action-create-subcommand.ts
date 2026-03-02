@@ -43,7 +43,7 @@ export class ActionCreateSubCommand extends BaseCommandClass(
 		const tags = intr.options.getString(commandOptions[commandOptionsEnum.tags].name);
 
 		// make sure the name does't already exist in the character's actions
-		if (FinderHelpers.getActionByName(activeCharacter.sheetRecord, name)) {
+		if (FinderHelpers.getActionByName(activeCharacter.actions, name)) {
 			await InteractionUtils.send(
 				intr,
 				ActionDefinition.strings.create.alreadyExists({
@@ -62,24 +62,17 @@ export class ActionCreateSubCommand extends BaseCommandClass(
 			);
 		}
 
-		await kobold.sheetRecord.update(
-			{ id: activeCharacter.sheetRecordId },
-			{
-				actions: [
-					...activeCharacter.sheetRecord.actions,
-					{
-						name,
-						description,
-						type: type as ActionTypeEnum,
-						actionCost: actionCost as ActionCostEnum,
-						baseLevel,
-						autoHeighten,
-						rolls: [],
-						tags: tags ? tags.split(',').map(tag => tag.trim()) : [],
-					},
-				],
-			}
-		);
+		await kobold.action.create({
+			sheetRecordId: activeCharacter.sheetRecordId,
+			name,
+			description,
+			type: type as ActionTypeEnum,
+			actionCost: actionCost as ActionCostEnum,
+			baseLevel,
+			autoHeighten,
+			rolls: [],
+			tags: tags ? tags.split(',').map(tag => tag.trim()) : [],
+		});
 
 		//send a response
 		await InteractionUtils.send(

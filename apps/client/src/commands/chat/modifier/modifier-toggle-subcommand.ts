@@ -42,7 +42,7 @@ export class ModifierToggleSubCommand extends BaseCommandClass(
 			}
 			//find a save on the character matching the autocomplete string
 			const matchedModifiers = FinderHelpers.matchAllModifiers(
-				activeCharacter.sheetRecord,
+				activeCharacter.modifiers,
 				match
 			).map(modifier => ({
 				name: modifier.name,
@@ -67,7 +67,7 @@ export class ModifierToggleSubCommand extends BaseCommandClass(
 			activeCharacter: true,
 		});
 
-		const modifier = FinderHelpers.getModifierByName(activeCharacter.sheetRecord, name);
+		const modifier = FinderHelpers.getModifierByName(activeCharacter.modifiers, name);
 
 		if (!modifier) {
 			// no matching modifier found
@@ -75,18 +75,11 @@ export class ModifierToggleSubCommand extends BaseCommandClass(
 			return;
 		}
 
-		let targetIndex = _.indexOf(activeCharacter.sheetRecord.modifiers, modifier);
+		const newIsActive = !modifier.isActive;
 
-		activeCharacter.sheetRecord.modifiers[targetIndex].isActive = !modifier.isActive;
+		await kobold.modifier.update({ id: modifier.id }, { isActive: newIsActive });
 
-		await kobold.sheetRecord.update(
-			{ id: activeCharacter.sheetRecordId },
-			{
-				modifiers: activeCharacter.sheetRecord.modifiers,
-			}
-		);
-
-		const activeText = modifier.isActive
+		const activeText = newIsActive
 			? ModifierDefinition.strings.toggle.active
 			: ModifierDefinition.strings.toggle.inactive;
 

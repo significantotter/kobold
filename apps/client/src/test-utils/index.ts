@@ -36,6 +36,9 @@ export {
 	setupAutocompleteKoboldMocks,
 	setupFinderHelpersMocks,
 	setupSheetRecordUpdateMock,
+	setupModifierModelMock,
+	setupRollMacroModelMock,
+	setupActionModelMock,
 	setupCharacterUtilsMocks,
 	setupListDataMocks,
 	// Creature mocks
@@ -62,6 +65,8 @@ export {
 	type KoboldUtilsMockSetup,
 	type FinderHelpersMockSetup,
 	type SheetRecordUpdateMockSetup,
+	type ModifierModelMockSetup,
+	type RollMacroModelMockSetup,
 	type CharacterUtilsMockSetup,
 	type ListDataMockSetup,
 	type GameUtilsMockOptions,

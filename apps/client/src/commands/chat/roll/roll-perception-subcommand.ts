@@ -37,7 +37,7 @@ export class RollPerceptionSubCommand extends BaseCommandClass(
 		});
 		koboldUtils.assertActiveCharacterNotNull(activeCharacter);
 
-		const creature = new Creature(activeCharacter.sheetRecord, undefined, intr);
+		const creature = Creature.fromSheetRecord(activeCharacter, undefined, intr);
 
 		const rollBuilder = new RollBuilder({
 			character: activeCharacter,

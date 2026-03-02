@@ -8,7 +8,7 @@ import { Creature } from '../../../../utils/creature.js';
 import { KoboldError } from '../../../../utils/KoboldError.js';
 import { getMockKobold, resetMockKobold } from '../../../../test-utils/index.js';
 import { CollectorUtils } from '../../../../utils/collector-utils.js';
-import type { Kobold } from '@kobold/db';
+import { type Kobold, ImportSourceEnum } from '@kobold/db';
 
 vi.mock('../../../../utils/creature.js');
 vi.mock('../../../../utils/collector-utils.js');
@@ -26,13 +26,13 @@ const createMockInteraction = () =>
 		reply: vi.fn(),
 		deferred: false,
 		replied: false,
-	} as unknown as CommandInteraction<CacheType>);
+	}) as unknown as CommandInteraction<CacheType>;
 
 /**
  * Concrete implementation of CharacterFetcher for testing
  */
 class TestCharacterFetcher extends CharacterFetcher<{ testData: string }, { testArg: string }> {
-	public importSource = 'test';
+	public importSource = ImportSourceEnum.pastebin;
 	public mockFetchSourceData = vi.fn();
 	public mockConvertSheetRecord = vi.fn();
 	public mockGetCharId = vi.fn();

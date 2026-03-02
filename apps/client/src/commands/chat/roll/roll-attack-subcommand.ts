@@ -8,7 +8,7 @@ import {
 
 import { Kobold, SheetRecord } from '@kobold/db';
 import { ActionRoller } from '../../../utils/action-roller.js';
-import { Creature } from '../../../utils/creature.js';
+import { Creature, EntityWithSheetData } from '../../../utils/creature.js';
 import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
@@ -44,7 +44,7 @@ export class RollAttackSubCommand extends BaseCommandClass(
 			}
 			//find a attack on the character matching the autocomplete string
 			const matchedAttack = FinderHelpers.matchAllAttacks(
-				new Creature(activeCharacter.sheetRecord, undefined, intr),
+				Creature.fromSheetRecord(activeCharacter, undefined, intr),
 				match
 			).map(attack => ({
 				name: attack.name,
@@ -106,9 +106,10 @@ export class RollAttackSubCommand extends BaseCommandClass(
 		});
 		koboldUtils.assertActiveCharacterNotNull(activeCharacter);
 
-		const creature = new Creature(activeCharacter.sheetRecord, undefined, intr);
+		const creature = Creature.fromSheetRecord(activeCharacter, undefined, intr);
 
 		let targetSheetRecord: SheetRecord | null = null;
+		let targetEntity: EntityWithSheetData | null = null;
 		let targetCreature: Creature | null = null;
 		let hideStats = false;
 
@@ -119,8 +120,9 @@ export class RollAttackSubCommand extends BaseCommandClass(
 		) {
 			const results = await gameUtils.getCharacterOrInitActorTarget(intr, targetSheetName);
 			targetSheetRecord = results.targetSheetRecord;
+			targetEntity = results.targetEntity;
 			hideStats = results.hideStats;
-			targetCreature = new Creature(targetSheetRecord, targetSheetName, intr);
+			targetCreature = Creature.fromSheetRecord(targetEntity, targetSheetName, intr);
 		}
 
 		const { builtRoll, actionRoller } = ActionRoller.fromCreatureAttack({

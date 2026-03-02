@@ -1,3 +1,5 @@
+import { Condition } from '../index.js';
+
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export type Database = {
@@ -475,36 +477,39 @@ export type Database = {
 			};
 			modifier: {
 				Row: {
-					description: string;
+					description: string | null;
 					id: number;
 					is_active: boolean;
 					name: string;
+					note: string | null;
 					roll_adjustment: string | null;
-					roll_target_tags: Json;
+					roll_target_tags: string | null;
 					severity: number | null;
 					sheet_adjustments: Json;
 					sheet_record_id: number | null;
 					type: string;
 				};
 				Insert: {
-					description?: string;
+					description?: string | null;
 					id?: number;
 					is_active?: boolean;
 					name: string;
+					note?: string | null;
 					roll_adjustment?: string | null;
-					roll_target_tags?: Json;
+					roll_target_tags?: string | null;
 					severity?: number | null;
 					sheet_adjustments?: Json;
 					sheet_record_id?: number | null;
 					type: string;
 				};
 				Update: {
-					description?: string;
+					description?: string | null;
 					id?: number;
 					is_active?: boolean;
 					name?: string;
+					note?: string | null;
 					roll_adjustment?: string | null;
-					roll_target_tags?: Json;
+					roll_target_tags?: string | null;
 					severity?: number | null;
 					sheet_adjustments?: Json;
 					sheet_record_id?: number | null;
@@ -635,7 +640,7 @@ export type Database = {
 			};
 			sheet_record: {
 				Row: {
-					conditions: Json;
+					conditions: Condition[];
 					id: number;
 					sheet: Json;
 					tracker_channel_id: string | null;
@@ -644,7 +649,7 @@ export type Database = {
 					tracker_mode: string | null;
 				};
 				Insert: {
-					conditions?: Json;
+					conditions?: Condition[];
 					id?: number;
 					sheet: Json;
 					tracker_channel_id?: string | null;
@@ -653,7 +658,7 @@ export type Database = {
 					tracker_mode?: string | null;
 				};
 				Update: {
-					conditions?: Json;
+					conditions?: Condition[];
 					id?: number;
 					sheet?: Json;
 					tracker_channel_id?: string | null;

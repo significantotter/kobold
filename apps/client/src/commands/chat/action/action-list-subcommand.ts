@@ -20,7 +20,7 @@ export class ActionListSubCommand extends BaseCommandClass(
 			activeCharacter: true,
 		});
 
-		const actions = activeCharacter.sheetRecord.actions;
+		const actions = activeCharacter.actions;
 		const fields = [];
 		for (const action of actions.sort((a, b) => (a.name || '').localeCompare(b.name))) {
 			let description = action.description || '\u200B';

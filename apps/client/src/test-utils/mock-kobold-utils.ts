@@ -11,6 +11,9 @@ import {
 	CharacterWithRelations,
 	zCharacterWithRelations,
 	zSheetRecord,
+	zModifier,
+	zRollMacro,
+	zAction,
 	Action,
 	ActionTypeEnum,
 	ActionCostEnum,
@@ -22,6 +25,7 @@ import {
 	type SaveRoll,
 	type TextRoll,
 	type Modifier,
+	type RollMacro,
 	type SheetRecord,
 	SheetAdjustmentTypeEnum,
 	UserSettings,
@@ -44,7 +48,7 @@ import { FinderHelpers } from '../utils/kobold-helpers/finder-helpers.js';
 type DeepPartial<T> = T extends object
 	? {
 			[P in keyof T]?: DeepPartial<T[P]>;
-	  }
+		}
 	: T;
 
 /**
@@ -80,7 +84,7 @@ export function createMockCharacter(options: MockCharacterOptions = {}): Charact
 	const { actions = [], characterOverrides = {} } = options;
 
 	const mockCharacter = fake(zCharacterWithRelations);
-	mockCharacter.sheetRecord.actions = actions;
+	mockCharacter.actions = actions;
 	// Explicitly set tracker fields to null to avoid triggering Discord API calls in tests
 	mockCharacter.sheetRecord.trackerGuildId = null;
 	mockCharacter.sheetRecord.trackerChannelId = null;
@@ -176,6 +180,8 @@ export function createTextRoll(overrides: Partial<TextRoll> = {}): TextRoll {
  */
 export function createMockAction(overrides: Partial<Action> = {}): Action {
 	return {
+		id: 1,
+		sheetRecordId: 1,
 		name: 'Test Action',
 		description: 'A test action description',
 		type: ActionTypeEnum.attack,
@@ -222,7 +228,7 @@ export function setupKoboldUtilsMocks(options: MockCharacterOptions = {}): Kobol
 		async () =>
 			({
 				activeCharacter: mockCharacter,
-			} as MockReturnValue)
+			}) as MockReturnValue
 	);
 
 	const fetchNonNullableDataMock = vi.fn(
@@ -230,7 +236,7 @@ export function setupKoboldUtilsMocks(options: MockCharacterOptions = {}): Kobol
 			({
 				activeCharacter: mockCharacter,
 				userSettings: undefined,
-			} as MockReturnValue)
+			}) as MockReturnValue
 	);
 
 	const getActiveCharacterMock = vi.fn(async () => mockCharacter);
@@ -368,6 +374,145 @@ export function setupSheetRecordUpdateMock(vitestKobold: {
 }
 
 /**
+ * Result from setting up modifier model mocks for modifier commands
+ */
+export interface ModifierModelMockSetup {
+	/** Mock for modifier.create */
+	createMock: MockInstance;
+	/** Mock for modifier.update */
+	updateMock: MockInstance;
+	/** Mock for modifier.delete */
+	deleteMock: MockInstance;
+	/** Mock for modifier.deleteBySheetRecordId */
+	deleteBySheetRecordIdMock: MockInstance;
+}
+
+/**
+ * Sets up modifier model mocks for testing modifier CRUD operations.
+ *
+ * @param vitestKobold - The vitestKobold instance from mock-kobold
+ * @returns The mocks for further assertions
+ *
+ * @example
+ * ```typescript
+ * const { createMock } = setupModifierModelMock(kobold);
+ * // ... execute command ...
+ * expect(createMock).toHaveBeenCalled();
+ * ```
+ */
+export function setupModifierModelMock(vitestKobold: {
+	modifier: {
+		create: (...args: any[]) => any;
+		update: (...args: any[]) => any;
+		delete: (...args: any[]) => any;
+		deleteBySheetRecordId: (...args: any[]) => any;
+	};
+}): ModifierModelMockSetup {
+	const createMock = vi.spyOn(vitestKobold.modifier, 'create').mockResolvedValue(fake(zModifier));
+	const updateMock = vi.spyOn(vitestKobold.modifier, 'update').mockResolvedValue(fake(zModifier));
+	const deleteMock = vi.spyOn(vitestKobold.modifier, 'delete').mockResolvedValue(undefined);
+	const deleteBySheetRecordIdMock = vi
+		.spyOn(vitestKobold.modifier, 'deleteBySheetRecordId')
+		.mockResolvedValue(undefined);
+
+	return { createMock, updateMock, deleteMock, deleteBySheetRecordIdMock };
+}
+
+/**
+ * Result from setting up rollMacro model mocks for roll macro commands
+ */
+export interface RollMacroModelMockSetup {
+	/** Mock for rollMacro.create */
+	createMock: MockInstance;
+	/** Mock for rollMacro.update */
+	updateMock: MockInstance;
+	/** Mock for rollMacro.delete */
+	deleteMock: MockInstance;
+	/** Mock for rollMacro.deleteBySheetRecordId */
+	deleteBySheetRecordIdMock: MockInstance;
+}
+
+/**
+ * Sets up rollMacro model mocks for testing roll macro CRUD operations.
+ *
+ * @param vitestKobold - The vitestKobold instance from mock-kobold
+ * @returns The mocks for further assertions
+ *
+ * @example
+ * ```typescript
+ * const { createMock } = setupRollMacroModelMock(kobold);
+ * // ... execute command ...
+ * expect(createMock).toHaveBeenCalled();
+ * ```
+ */
+export function setupRollMacroModelMock(vitestKobold: {
+	rollMacro: {
+		create: (...args: any[]) => any;
+		update: (...args: any[]) => any;
+		delete: (...args: any[]) => any;
+		deleteBySheetRecordId: (...args: any[]) => any;
+	};
+}): RollMacroModelMockSetup {
+	const createMock = vi
+		.spyOn(vitestKobold.rollMacro, 'create')
+		.mockResolvedValue(fake(zRollMacro));
+	const updateMock = vi
+		.spyOn(vitestKobold.rollMacro, 'update')
+		.mockResolvedValue(fake(zRollMacro));
+	const deleteMock = vi.spyOn(vitestKobold.rollMacro, 'delete').mockResolvedValue(undefined);
+	const deleteBySheetRecordIdMock = vi
+		.spyOn(vitestKobold.rollMacro, 'deleteBySheetRecordId')
+		.mockResolvedValue(undefined);
+
+	return { createMock, updateMock, deleteMock, deleteBySheetRecordIdMock };
+}
+
+/**
+ * Result from setting up action model mocks for action commands
+ */
+export interface ActionModelMockSetup {
+	/** Mock for action.create */
+	createMock: MockInstance;
+	/** Mock for action.update */
+	updateMock: MockInstance;
+	/** Mock for action.delete */
+	deleteMock: MockInstance;
+	/** Mock for action.deleteBySheetRecordId */
+	deleteBySheetRecordIdMock: MockInstance;
+}
+
+/**
+ * Sets up action model mocks for testing action CRUD operations.
+ *
+ * @param vitestKobold - The vitestKobold instance from mock-kobold
+ * @returns The mocks for further assertions
+ *
+ * @example
+ * ```typescript
+ * const { createMock } = setupActionModelMock(kobold);
+ * // ... execute command ...
+ * expect(createMock).toHaveBeenCalled();
+ * ```
+ */
+export function setupActionModelMock(vitestKobold: {
+	action: {
+		create: (...args: any[]) => any;
+		update: (...args: any[]) => any;
+		delete: (...args: any[]) => any;
+		deleteBySheetRecordId: (...args: any[]) => any;
+	};
+}): ActionModelMockSetup {
+	const createMock = vi.spyOn(vitestKobold.action, 'create').mockResolvedValue(fake(zAction));
+	const updateMock = vi.spyOn(vitestKobold.action, 'update').mockResolvedValue(fake(zAction));
+	const deleteMock = vi.spyOn(vitestKobold.action, 'delete').mockResolvedValue(undefined);
+	const deleteBySheetRecordIdMock = vi
+		.spyOn(vitestKobold.action, 'deleteBySheetRecordId')
+		.mockResolvedValue(undefined);
+
+	return { createMock, updateMock, deleteMock, deleteBySheetRecordIdMock };
+}
+
+/**
  * Result from setting up character utils mocks for character commands
  */
 export interface CharacterUtilsMockSetup {
@@ -442,7 +587,7 @@ export function setupListDataMocks(characters: CharacterWithRelations[] = []): L
 		async () =>
 			({
 				ownedCharacters: characters,
-			} as MockReturnValue)
+			}) as MockReturnValue
 	);
 
 	vi.mocked(KoboldUtils).mockImplementation(function (this: any) {
@@ -461,6 +606,8 @@ export function setupListDataMocks(characters: CharacterWithRelations[] = []): L
  */
 export function createMockCondition(overrides: Partial<Modifier> = {}): Modifier {
 	return {
+		id: 1,
+		sheetRecordId: 1,
 		name: 'Test Condition',
 		isActive: true,
 		description: 'A test condition description',
@@ -715,6 +862,7 @@ export function createMockInitiative(
 
 /**
  * Creates a mock sheet record for an actor.
+ * Note: actions, modifiers, and rollMacros are now separate entities and not part of SheetRecord.
  */
 export function createMockSheetRecord(overrides: Partial<SheetRecord> = {}): SheetRecord {
 	const id = nextSheetRecordId++;
@@ -728,9 +876,6 @@ export function createMockSheetRecord(overrides: Partial<SheetRecord> = {}): She
 			},
 		},
 		conditions: [],
-		modifiers: [],
-		actions: [],
-		rollMacros: [],
 		trackerMode: null,
 		trackerMessageId: null,
 		trackerChannelId: null,
@@ -788,6 +933,9 @@ export function createMockInitiativeActor(
 		referenceNpcName: null,
 		createdAt: new Date(),
 		lastUpdatedAt: new Date(),
+		actions: [],
+		modifiers: [],
+		rollMacros: [],
 		...overrides,
 	};
 }

@@ -5,7 +5,7 @@ import {
 	CacheType,
 	ChatInputCommandInteraction,
 } from 'discord.js';
-import { Kobold, RollTypeEnum } from '@kobold/db';
+import { Kobold, Roll, RollTypeEnum } from '@kobold/db';
 
 import { InteractionUtils } from '../../../utils/index.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
@@ -77,10 +77,7 @@ export class ActionStageAddAdvancedDamageSubCommand extends BaseCommandClass(
 		});
 
 		// find the action
-		const matchedActions = FinderHelpers.matchAllActions(
-			activeCharacter.sheetRecord,
-			targetAction
-		);
+		const matchedActions = FinderHelpers.matchAllActions(activeCharacter.actions, targetAction);
 		if (!matchedActions || !matchedActions.length) {
 			await InteractionUtils.send(intr, ActionStageDefinition.strings.notFound);
 			return;
@@ -106,7 +103,7 @@ export class ActionStageAddAdvancedDamageSubCommand extends BaseCommandClass(
 		}
 
 		// create the roll
-		action.rolls.push({
+		const newRoll: Roll = {
 			name: rollName,
 			type: rollType,
 			damageType,
@@ -116,13 +113,11 @@ export class ActionStageAddAdvancedDamageSubCommand extends BaseCommandClass(
 			criticalFailureRoll: criticalFailureDiceRoll,
 			failureRoll: failureDiceRoll,
 			allowRollModifiers,
-		});
+		};
+		const updatedRolls: Roll[] = [...action.rolls, newRoll];
 
-		// save the sheet record
-		await kobold.sheetRecord.update(
-			{ id: activeCharacter.sheetRecordId },
-			{ actions: activeCharacter.sheetRecord.actions }
-		);
+		// save the action
+		await kobold.action.update({ id: action.id }, { rolls: updatedRolls });
 
 		// send the response message
 		await InteractionUtils.send(

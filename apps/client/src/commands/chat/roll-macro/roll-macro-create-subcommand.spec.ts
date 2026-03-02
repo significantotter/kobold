@@ -8,7 +8,7 @@ import {
 	createTestHarness,
 	createMockCharacter,
 	setupKoboldUtilsMocks,
-	setupSheetRecordUpdateMock,
+	setupRollMacroModelMock,
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	CommandTestHarness,
@@ -47,11 +47,11 @@ describe('RollMacroCreateSubCommand', () => {
 		it('should create a simple roll macro', async () => {
 			// Arrange
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.rollMacros = [];
+			mockCharacter.rollMacros = [];
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getRollMacroByName').mockReturnValue(undefined);
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { createMock } = setupRollMacroModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -67,7 +67,7 @@ describe('RollMacroCreateSubCommand', () => {
 
 			// Assert
 			expect(result.didRespond()).toBe(true);
-			expect(updateMock).toHaveBeenCalled();
+			expect(createMock).toHaveBeenCalled();
 			const response = result.getResponseContent();
 			expect(response).toContain('sneak-attack');
 		});
@@ -75,11 +75,11 @@ describe('RollMacroCreateSubCommand', () => {
 		it('should create a roll macro with attribute reference', async () => {
 			// Arrange
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.rollMacros = [];
+			mockCharacter.rollMacros = [];
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getRollMacroByName').mockReturnValue(undefined);
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { createMock } = setupRollMacroModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -95,17 +95,17 @@ describe('RollMacroCreateSubCommand', () => {
 
 			// Assert
 			expect(result.didRespond()).toBe(true);
-			expect(updateMock).toHaveBeenCalled();
+			expect(createMock).toHaveBeenCalled();
 		});
 
 		it('should create a roll macro with static value', async () => {
 			// Arrange
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.rollMacros = [];
+			mockCharacter.rollMacros = [];
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getRollMacroByName').mockReturnValue(undefined);
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { createMock } = setupRollMacroModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -121,20 +121,20 @@ describe('RollMacroCreateSubCommand', () => {
 
 			// Assert
 			expect(result.didRespond()).toBe(true);
-			expect(updateMock).toHaveBeenCalled();
+			expect(createMock).toHaveBeenCalled();
 		});
 	});
 
 	describe('error handling', () => {
 		it('should error when roll macro with same name already exists', async () => {
 			// Arrange
-			const existingMacro = { name: 'existing-macro', macro: '1d6' };
+			const existingMacro = { id: 1, name: 'existing-macro', macro: '1d6', sheetRecordId: 1 };
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.rollMacros = [existingMacro];
+			mockCharacter.rollMacros = [existingMacro];
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getRollMacroByName').mockReturnValue(existingMacro);
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { createMock } = setupRollMacroModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -150,7 +150,7 @@ describe('RollMacroCreateSubCommand', () => {
 
 			// Assert
 			expect(result.didRespond()).toBe(true);
-			expect(updateMock).not.toHaveBeenCalled();
+			expect(createMock).not.toHaveBeenCalled();
 			const response = result.getResponseContent();
 			expect(response).toContain('already exists');
 		});
@@ -158,11 +158,11 @@ describe('RollMacroCreateSubCommand', () => {
 		it('should error when macro expression is invalid', async () => {
 			// Arrange
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.rollMacros = [];
+			mockCharacter.rollMacros = [];
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getRollMacroByName').mockReturnValue(undefined);
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { createMock } = setupRollMacroModelMock(kobold);
 
 			// Mock RollBuilder to return an error
 			vi.mocked(RollBuilder).mockImplementation(function (this: MockRollBuilder) {
@@ -187,7 +187,7 @@ describe('RollMacroCreateSubCommand', () => {
 
 			// Assert
 			expect(result.didRespond()).toBe(true);
-			expect(updateMock).not.toHaveBeenCalled();
+			expect(createMock).not.toHaveBeenCalled();
 			const response = result.getResponseContent();
 			expect(response).toContain('error');
 		});

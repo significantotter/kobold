@@ -1,5 +1,5 @@
 import { compileExpression } from 'filtrex';
-import { Attribute, Kobold, Modifier } from '@kobold/db';
+import { Attribute, Condition, Kobold, Modifier } from '@kobold/db';
 import type { Creature } from '../creature.js';
 import { DiceUtils } from '../dice-utils.js';
 import type { KoboldUtils } from './kobold-utils.js';
@@ -12,14 +12,14 @@ export class ModifierUtils {
 	constructor(koboldUtils: KoboldUtils) {
 		this.kobold = koboldUtils.kobold;
 	}
-	public static getSeverityAppliedModifier(modifier: Modifier): Modifier {
+	public static getSeverityAppliedModifier(modifier: Condition): Condition {
 		//if we just shift into text first, we can replace all blocks like "-[ severity]" into something like "-0"
 		return JSON.parse(
 			JSON.stringify(modifier).replaceAll(severityRegex, (modifier.severity ?? 0).toString())
 		);
 	}
 	public static isModifierValidForTags(
-		modifier: Modifier,
+		modifier: Condition,
 		attributes: Attribute[],
 		tags: string[]
 	): boolean {
@@ -87,15 +87,15 @@ export class ModifierUtils {
 	}
 
 	public static parseBonusesForTagsFromModifiers(
-		modifiers: Modifier[],
+		modifiers: Condition[],
 		attributes: Attribute[],
 		tags: string[],
 		creature?: Creature
 	) {
 		const sanitizedTags = tags.map(tag => (tag ?? '').toLocaleLowerCase().trim());
-		let bonuses: { [k: string]: Modifier } = {};
-		let penalties: { [k: string]: Modifier } = {};
-		const untyped: Modifier[] = [];
+		let bonuses: { [k: string]: Condition } = {};
+		let penalties: { [k: string]: Condition } = {};
+		const untyped: Condition[] = [];
 		// for each modifier, check if it targets any tags for this roll
 		for (const modifierIter of modifiers) {
 			// if this modifier isn't active, move to the next one
@@ -110,7 +110,7 @@ export class ModifierUtils {
 			// check if any tags match between the modifier and the provided tags
 			if (modifierValidForTags) {
 				// if the modifier has a severity, replace any severity text in the modifier with the actual severity
-				let modifier: Modifier;
+				let modifier: Condition;
 				if (modifierIter.severity !== null) {
 					modifier = this.getSeverityAppliedModifier(modifierIter);
 				} else {

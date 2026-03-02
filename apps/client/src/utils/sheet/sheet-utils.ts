@@ -1,11 +1,10 @@
 import _ from 'lodash';
 import {
-	Modifier,
+	Condition,
 	Sheet,
 	SheetAdjustment,
 	SheetAdjustmentOperationEnum,
 	SheetAdjustmentTypeEnum,
-	getDefaultSheet,
 } from '@kobold/db';
 import { KoboldError } from '../KoboldError.js';
 import { SheetAdjuster } from './sheet-adjuster.js';
@@ -14,9 +13,9 @@ import { SheetProperties } from './sheet-properties.js';
 import { ModifierUtils } from '../kobold-service-utils/modifier-utils.js';
 
 export class SheetUtils {
-	public static adjustSheetWithModifiers(sheet: Sheet, modifiers: Modifier[]) {
-		const activeSheetModifiers: Modifier[] = modifiers
-			.filter((modifier): modifier is Modifier => modifier.sheetAdjustments.length > 0)
+	public static adjustSheetWithModifiers(sheet: Sheet, modifiers: Condition[]) {
+		const activeSheetModifiers: Condition[] = modifiers
+			.filter((modifier): modifier is Condition => modifier.sheetAdjustments.length > 0)
 			.filter(modifier => modifier.isActive);
 
 		const severityAppliedActiveModifiers = activeSheetModifiers.map(

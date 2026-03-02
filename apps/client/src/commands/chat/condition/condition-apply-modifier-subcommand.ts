@@ -6,7 +6,7 @@ import {
 	ChatInputCommandInteraction,
 } from 'discord.js';
 
-import { Kobold } from '@kobold/db';
+import { Condition, Kobold } from '@kobold/db';
 import { KoboldError } from '../../../utils/KoboldError.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
@@ -48,7 +48,7 @@ export class ConditionApplyModifierSubCommand extends BaseCommandClass(
 			//find a save on the character matching the autocomplete string
 			const allModifiers = allCharacters
 				.map(character =>
-					character.sheetRecord.modifiers.map(modifier => ({
+					character.modifiers.map(modifier => ({
 						name: `${character.name} - ${modifier.name}`,
 						value: `${character.name} - ${modifier.name}`,
 					}))
@@ -91,10 +91,7 @@ export class ConditionApplyModifierSubCommand extends BaseCommandClass(
 		const sourceCharacter = (
 			await characterUtils.findOwnedCharacterByName(sourceCharacterName, intr.user.id)
 		)[0];
-		const modifier = FinderHelpers.getModifierByName(
-			sourceCharacter.sheetRecord,
-			conditionName
-		);
+		const modifier = FinderHelpers.getModifierByName(sourceCharacter.modifiers, conditionName);
 		if (!modifier) {
 			throw new KoboldError(
 				`Yip! I couldn't find the modifier ${conditionName} on ${sourceCharacterName}!`
@@ -122,10 +119,14 @@ export class ConditionApplyModifierSubCommand extends BaseCommandClass(
 			return;
 		}
 
+		const newCondition: Condition = {
+			...{ ...modifier, id: undefined, sheetRecordId: undefined },
+		};
+
 		await kobold.sheetRecord.update(
 			{ id: targetSheetRecord.id },
 			{
-				conditions: [...targetSheetRecord.conditions, modifier],
+				conditions: [...targetSheetRecord.conditions, newCondition],
 			}
 		);
 

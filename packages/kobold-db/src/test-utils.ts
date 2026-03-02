@@ -29,6 +29,12 @@ import {
 	zNewSheetRecord,
 	zNewUserSettings,
 	zNewWgAuthToken,
+	DefaultCompendiumEnum,
+	InitStatsNotificationEnum,
+	InlineRollsDisplayEnum,
+	RollCompactModeEnum,
+	TrackerModeEnum,
+	ImportSourceEnum,
 } from './index.js';
 import { format } from 'date-fns';
 
@@ -61,6 +67,9 @@ export class ResourceFactories {
 		return await vitestKobold.sheetRecord.create({
 			...fakeSheetRecordMock,
 			...partialSheetRecord,
+			trackerMode: (partialSheetRecord?.trackerMode ??
+				fakeSheetRecordMock.trackerMode ??
+				'counters_only') as TrackerModeEnum,
 		});
 	}
 	public static async character(partialCharacter?: Partial<Character>) {
@@ -76,6 +85,7 @@ export class ResourceFactories {
 			...partialCharacter,
 			sheetRecordId,
 			gameId,
+			importSource: (partialCharacter?.importSource ?? 'pathbuilder') as ImportSourceEnum,
 		});
 	}
 	public static async channelDefaultCharacter(
@@ -165,6 +175,13 @@ export class ResourceFactories {
 		return await vitestKobold.userSettings.create({
 			...fakeUserSettingsMock,
 			...partialUserSettings,
+			defaultCompendium:
+				partialUserSettings?.defaultCompendium ?? DefaultCompendiumEnum.nethys,
+			initStatsNotification:
+				partialUserSettings?.initStatsNotification ?? InitStatsNotificationEnum.every_round,
+			inlineRollsDisplay:
+				partialUserSettings?.inlineRollsDisplay ?? InlineRollsDisplayEnum.detailed,
+			rollCompactMode: partialUserSettings?.rollCompactMode ?? RollCompactModeEnum.normal,
 		});
 	}
 	public static async wgAuthToken(partialWgAuthToken?: Partial<WgAuthToken>) {

@@ -3,7 +3,7 @@ import {
 	isSheetStatKeys,
 	AbilityEnum,
 	ProficiencyStat,
-	Action,
+	NewAction,
 	ActionTypeEnum,
 	ActionCostEnum,
 	RollTypeEnum,
@@ -27,7 +27,7 @@ export class NethysSheetImporter {
 	hpAdjustment: number;
 	challengeAdjustment: number;
 	nethysParser: NethysParser;
-	actions: Action[] = [];
+	actions: NewAction[] = [];
 	constructor(
 		private bestiaryEntry: BestiaryEntry,
 		private options: {

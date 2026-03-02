@@ -24,12 +24,13 @@ describe('ModifierListSubCommand Integration', () => {
 		harness = createTestHarness([new ModifierCommand([new ModifierListSubCommand()])]);
 	});
 
-
 	describe('successful modifier listing', () => {
 		it('should list all modifiers on a character', async () => {
 			// Arrange
 			const modifiers = [
 				{
+					id: 1,
+					sheetRecordId: 1,
 					name: 'inspire courage',
 					isActive: true,
 					description: 'Bard inspiration',
@@ -41,6 +42,8 @@ describe('ModifierListSubCommand Integration', () => {
 					note: null,
 				},
 				{
+					id: 2,
+					sheetRecordId: 1,
 					name: 'frightened',
 					isActive: true,
 					description: 'Fear condition',
@@ -53,7 +56,7 @@ describe('ModifierListSubCommand Integration', () => {
 				},
 			];
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.modifiers = modifiers;
+			mockCharacter.modifiers = modifiers;
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 
@@ -73,7 +76,7 @@ describe('ModifierListSubCommand Integration', () => {
 		it('should handle a character with no modifiers', async () => {
 			// Arrange
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.modifiers = [];
+			mockCharacter.modifiers = [];
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 
@@ -94,6 +97,8 @@ describe('ModifierListSubCommand Integration', () => {
 			// Arrange
 			const modifiers = [
 				{
+					id: 1,
+					sheetRecordId: 1,
 					name: 'active modifier',
 					isActive: true,
 					description: 'Currently active',
@@ -105,6 +110,8 @@ describe('ModifierListSubCommand Integration', () => {
 					note: null,
 				},
 				{
+					id: 2,
+					sheetRecordId: 1,
 					name: 'inactive modifier',
 					isActive: false,
 					description: 'Currently inactive',
@@ -117,7 +124,7 @@ describe('ModifierListSubCommand Integration', () => {
 				},
 			];
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.modifiers = modifiers;
+			mockCharacter.modifiers = modifiers;
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 
@@ -138,6 +145,8 @@ describe('ModifierListSubCommand Integration', () => {
 			// Arrange
 			const modifiers = [
 				{
+					id: 1,
+					sheetRecordId: 1,
 					name: 'status modifier',
 					isActive: true,
 					description: null,
@@ -149,6 +158,8 @@ describe('ModifierListSubCommand Integration', () => {
 					note: null,
 				},
 				{
+					id: 2,
+					sheetRecordId: 1,
 					name: 'circumstance modifier',
 					isActive: true,
 					description: null,
@@ -160,6 +171,8 @@ describe('ModifierListSubCommand Integration', () => {
 					note: null,
 				},
 				{
+					id: 3,
+					sheetRecordId: 1,
 					name: 'untyped modifier',
 					isActive: true,
 					description: null,
@@ -172,7 +185,7 @@ describe('ModifierListSubCommand Integration', () => {
 				},
 			];
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.modifiers = modifiers;
+			mockCharacter.modifiers = modifiers;
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 
@@ -193,6 +206,8 @@ describe('ModifierListSubCommand Integration', () => {
 			// Arrange
 			const modifiers = [
 				{
+					id: 1,
+					sheetRecordId: 1,
 					name: 'zebra modifier',
 					isActive: true,
 					description: null,
@@ -204,6 +219,8 @@ describe('ModifierListSubCommand Integration', () => {
 					note: null,
 				},
 				{
+					id: 2,
+					sheetRecordId: 1,
 					name: 'apple modifier',
 					isActive: true,
 					description: null,
@@ -216,7 +233,7 @@ describe('ModifierListSubCommand Integration', () => {
 				},
 			];
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.modifiers = modifiers;
+			mockCharacter.modifiers = modifiers;
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 

@@ -36,6 +36,8 @@ describe('ModifierExportSubCommand Integration', () => {
 			// Arrange
 			const modifiers = [
 				{
+					id: 1,
+					sheetRecordId: 1,
 					name: 'inspire courage',
 					isActive: true,
 					description: 'Bard inspiration',
@@ -47,6 +49,8 @@ describe('ModifierExportSubCommand Integration', () => {
 					note: null,
 				},
 				{
+					id: 2,
+					sheetRecordId: 1,
 					name: 'frightened',
 					isActive: false,
 					description: 'Fear condition',
@@ -61,7 +65,7 @@ describe('ModifierExportSubCommand Integration', () => {
 			const mockCharacter = createMockCharacter({
 				characterOverrides: { name: 'Test Character' },
 			});
-			mockCharacter.sheetRecord.modifiers = modifiers;
+			mockCharacter.modifiers = modifiers;
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 
@@ -91,7 +95,7 @@ describe('ModifierExportSubCommand Integration', () => {
 			const mockCharacter = createMockCharacter({
 				characterOverrides: { name: 'Empty Character' },
 			});
-			mockCharacter.sheetRecord.modifiers = [];
+			mockCharacter.modifiers = [];
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 
@@ -120,6 +124,8 @@ describe('ModifierExportSubCommand Integration', () => {
 			// Arrange
 			const modifiers = [
 				{
+					id: 1,
+					sheetRecordId: 1,
 					name: 'strength boost',
 					isActive: true,
 					description: 'Enhanced strength',
@@ -142,7 +148,7 @@ describe('ModifierExportSubCommand Integration', () => {
 			const mockCharacter = createMockCharacter({
 				characterOverrides: { name: 'Strong Character' },
 			});
-			mockCharacter.sheetRecord.modifiers = modifiers;
+			mockCharacter.modifiers = modifiers;
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 
@@ -173,6 +179,8 @@ describe('ModifierExportSubCommand Integration', () => {
 			// Arrange
 			const modifiers = [
 				{
+					id: 1,
+					sheetRecordId: 1,
 					name: 'test modifier',
 					isActive: true,
 					description: null,
@@ -185,7 +193,7 @@ describe('ModifierExportSubCommand Integration', () => {
 				},
 			];
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.modifiers = modifiers;
+			mockCharacter.modifiers = modifiers;
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 

@@ -100,48 +100,39 @@ export function isCounterStyleEnum(value: any): value is CounterStyleEnum {
 	return counterStyleValueMap[value] !== undefined;
 }
 
-/** User Settings Enums */
+/** User Settings Enums - Re-exported from database-enums.ts */
+export {
+	TrackerModeEnum,
+	ImportSourceEnum,
+	InitStatsNotificationEnum,
+	RollCompactModeEnum,
+	InlineRollsDisplayEnum,
+	DefaultCompendiumEnum,
+} from './database-enums.js';
 
-export enum InitStatsNotificationEnum {
-	never = 'never',
-	every_turn = 'every_turn',
-	every_round = 'every_round',
-	whenever_hidden = 'whenever_hidden',
-}
-export const initStatsNotificationValueMap = _.keyBy(
-	Object.values(InitStatsNotificationEnum),
-	_.identity
-);
+import {
+	InitStatsNotificationEnum,
+	RollCompactModeEnum,
+	InlineRollsDisplayEnum,
+	DefaultCompendiumEnum,
+} from './database-enums.js';
+
+const initStatsNotificationValueMap = _.keyBy(Object.values(InitStatsNotificationEnum), _.identity);
 export function isInitStatsNotificationEnum(value: any): value is InitStatsNotificationEnum {
 	return initStatsNotificationValueMap[value] !== undefined;
 }
 
-export enum RollCompactModeEnum {
-	normal = 'normal',
-	compact = 'compact',
-}
-export const rollCompactModeValueMap = _.keyBy(Object.values(RollCompactModeEnum), _.identity);
+const rollCompactModeValueMap = _.keyBy(Object.values(RollCompactModeEnum), _.identity);
 export function isRollCompactModeEnum(value: any): value is RollCompactModeEnum {
 	return rollCompactModeValueMap[value] !== undefined;
 }
 
-export enum DefaultCompendiumEnum {
-	nethys = 'nethys',
-	pf2etools = 'pf2etools',
-}
-export const defaultCompendiumValueMap = _.keyBy(Object.values(DefaultCompendiumEnum), _.identity);
+const defaultCompendiumValueMap = _.keyBy(Object.values(DefaultCompendiumEnum), _.identity);
 export function isDefaultCompendiumEnum(value: any): value is DefaultCompendiumEnum {
 	return defaultCompendiumValueMap[value] !== undefined;
 }
 
-export enum InlineRollsDisplayEnum {
-	detailed = 'detailed',
-	compact = 'compact',
-}
-export const inlineRollsDisplayValueMap = _.keyBy(
-	Object.values(InlineRollsDisplayEnum),
-	_.identity
-);
+const inlineRollsDisplayValueMap = _.keyBy(Object.values(InlineRollsDisplayEnum), _.identity);
 export function isInlineRollsDisplayEnum(value: any): value is InlineRollsDisplayEnum {
 	return inlineRollsDisplayValueMap[value] !== undefined;
 }

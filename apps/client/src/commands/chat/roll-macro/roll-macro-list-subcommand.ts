@@ -20,7 +20,7 @@ export class RollMacroListSubCommand extends BaseCommandClass(
 			activeCharacter: true,
 		});
 
-		const rollMacros = activeCharacter.sheetRecord.rollMacros;
+		const rollMacros = activeCharacter.rollMacros;
 		const fields = [];
 		for (const rollMacro of rollMacros.sort((a, b) => (a.name || '').localeCompare(b.name))) {
 			fields.push({

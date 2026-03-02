@@ -1,7 +1,7 @@
 import {
 	AbilityEnum,
 	AdjustablePropertyEnum,
-	Modifier,
+	Condition,
 	Sheet,
 	SheetAdjustment,
 	SheetAdjustmentOperationEnum,
@@ -39,7 +39,7 @@ describe('SheetUtils', () => {
 	describe('adjustSheetWithModifiers', () => {
 		it('should adjust the sheet with active sheet modifiers', () => {
 			const sheet: Sheet = sheetWithTestProperties();
-			const modifiers: Modifier[] = [
+			const modifiers: Condition[] = [
 				{
 					name: 'foo',
 					description: '',
@@ -105,7 +105,7 @@ describe('SheetUtils', () => {
 
 		it('should not adjust the sheet with inactive sheet modifiers', () => {
 			const sheet: Sheet = sheetWithTestProperties();
-			const modifiers: Modifier[] = [
+			const modifiers: Condition[] = [
 				{
 					name: 'foo',
 					description: '',

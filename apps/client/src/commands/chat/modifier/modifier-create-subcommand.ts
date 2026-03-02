@@ -3,6 +3,7 @@ import { ChatInputCommandInteraction } from 'discord.js';
 import {
 	Kobold,
 	Modifier,
+	NewModifier,
 	SheetAdjustment,
 	SheetAdjustmentTypeEnum,
 	isSheetAdjustmentTypeEnum,
@@ -101,7 +102,7 @@ export class ModifierCreateSubCommand extends BaseCommandClass(
 			if (
 				!InputParseUtils.isValidDiceExpression(
 					rollAdjustment,
-					new Creature(activeCharacter.sheetRecord, undefined, intr)
+					Creature.fromSheetRecord(activeCharacter, undefined, intr)
 				)
 			) {
 				throw new KoboldError(
@@ -119,7 +120,7 @@ export class ModifierCreateSubCommand extends BaseCommandClass(
 			);
 		}
 		// make sure the name does't already exist in the character's modifiers
-		if (FinderHelpers.getModifierByName(activeCharacter.sheetRecord, name)) {
+		if (FinderHelpers.getModifierByName(activeCharacter.modifiers, name)) {
 			await InteractionUtils.send(
 				intr,
 				ModifierDefinition.strings.createModifier.alreadyExists({
@@ -130,33 +131,30 @@ export class ModifierCreateSubCommand extends BaseCommandClass(
 			return;
 		}
 
-		const newModifier: Modifier = {
+		const newModifier: Omit<Modifier, 'id'> = {
 			name,
 			isActive: true,
-			description: InputParseUtils.parseAsNullableString(description, {
-				inputName: 'description',
-				maxLength: 300,
-			}),
+			description:
+				InputParseUtils.parseAsNullableString(description, {
+					inputName: 'description',
+					maxLength: 300,
+				}) ?? '',
 			type: modifierType,
 			severity: InputParseUtils.parseAsNullableNumber(modifierSeverity),
 			sheetAdjustments: parsedSheetAdjustments,
-			rollTargetTags,
+			rollTargetTags: rollTargetTags ?? null,
 			rollAdjustment,
 			note: InputParseUtils.parseAsNullableString(note, {
 				inputName: 'initiative-note',
 				maxLength: 40,
 			}),
+			sheetRecordId: activeCharacter.sheetRecordId,
 		};
 
 		// make sure that the adjustments are valid and can be applied to a sheet
 		SheetUtils.adjustSheetWithModifiers(activeCharacter.sheetRecord.sheet, [newModifier]);
 
-		await kobold.sheetRecord.update(
-			{ id: activeCharacter.sheetRecordId },
-			{
-				modifiers: [...activeCharacter.sheetRecord.modifiers, newModifier],
-			}
-		);
+		await kobold.modifier.create(newModifier);
 
 		//send a response
 		await InteractionUtils.send(

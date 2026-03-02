@@ -10,12 +10,13 @@ import {
 	createMockCharacter,
 	setupKoboldUtilsMocks,
 	setupAutocompleteKoboldMocks,
-	setupSheetRecordUpdateMock,
+	setupModifierModelMock,
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	CommandTestHarness,
 	getMockKobold,
-	resetMockKobold,} from '../../../test-utils/index.js';
+	resetMockKobold,
+} from '../../../test-utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { CollectorUtils } from '../../../utils/collector-utils.js';
@@ -38,6 +39,8 @@ describe('ModifierRemoveSubCommand', () => {
 		it('should remove a modifier when confirmed', async () => {
 			// Arrange
 			const testModifier = {
+				id: 1,
+				sheetRecordId: 1,
 				name: 'inspire courage',
 				isActive: true,
 				description: 'Bard inspiration',
@@ -49,11 +52,11 @@ describe('ModifierRemoveSubCommand', () => {
 				note: null,
 			};
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.modifiers = [testModifier];
+			mockCharacter.modifiers = [testModifier];
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getModifierByName').mockReturnValue(testModifier);
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { deleteMock } = setupModifierModelMock(kobold);
 
 			// Mock confirmation - user clicks remove
 			vi.mocked(CollectorUtils.collectByButton).mockResolvedValue({
@@ -74,12 +77,14 @@ describe('ModifierRemoveSubCommand', () => {
 
 			// Assert
 			expect(result.didRespond()).toBe(true);
-			expect(updateMock).toHaveBeenCalled();
+			expect(deleteMock).toHaveBeenCalled();
 		});
 
 		it('should not remove modifier when cancelled', async () => {
 			// Arrange
 			const testModifier = {
+				id: 1,
+				sheetRecordId: 1,
 				name: 'inspire courage',
 				isActive: true,
 				description: 'Bard inspiration',
@@ -91,11 +96,11 @@ describe('ModifierRemoveSubCommand', () => {
 				note: null,
 			};
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.modifiers = [testModifier];
+			mockCharacter.modifiers = [testModifier];
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getModifierByName').mockReturnValue(testModifier);
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { deleteMock } = setupModifierModelMock(kobold);
 
 			// Mock confirmation - user clicks cancel
 			vi.mocked(CollectorUtils.collectByButton).mockResolvedValue({
@@ -116,12 +121,14 @@ describe('ModifierRemoveSubCommand', () => {
 
 			// Assert
 			expect(result.didRespond()).toBe(true);
-			expect(updateMock).not.toHaveBeenCalled();
+			expect(deleteMock).not.toHaveBeenCalled();
 		});
 
 		it('should handle confirmation timeout', async () => {
 			// Arrange
 			const testModifier = {
+				id: 1,
+				sheetRecordId: 1,
 				name: 'inspire courage',
 				isActive: true,
 				description: null,
@@ -133,11 +140,11 @@ describe('ModifierRemoveSubCommand', () => {
 				note: null,
 			};
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.modifiers = [testModifier];
+			mockCharacter.modifiers = [testModifier];
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getModifierByName').mockReturnValue(testModifier);
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { deleteMock } = setupModifierModelMock(kobold);
 
 			// Mock confirmation - timeout (returns undefined)
 			vi.mocked(CollectorUtils.collectByButton).mockResolvedValue(undefined);
@@ -155,7 +162,7 @@ describe('ModifierRemoveSubCommand', () => {
 
 			// Assert
 			expect(result.didRespond()).toBe(true);
-			expect(updateMock).not.toHaveBeenCalled();
+			expect(deleteMock).not.toHaveBeenCalled();
 		});
 	});
 
@@ -163,11 +170,11 @@ describe('ModifierRemoveSubCommand', () => {
 		it('should error when modifier is not found', async () => {
 			// Arrange
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.modifiers = [];
+			mockCharacter.modifiers = [];
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getModifierByName').mockReturnValue(undefined);
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { deleteMock } = setupModifierModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -182,7 +189,7 @@ describe('ModifierRemoveSubCommand', () => {
 
 			// Assert
 			expect(result.didRespond()).toBe(true);
-			expect(updateMock).not.toHaveBeenCalled();
+			expect(deleteMock).not.toHaveBeenCalled();
 		});
 	});
 
@@ -190,6 +197,8 @@ describe('ModifierRemoveSubCommand', () => {
 		it('should return matching modifiers for name autocomplete', async () => {
 			// Arrange
 			const testModifier = {
+				id: 1,
+				sheetRecordId: 1,
 				name: 'inspire courage',
 				isActive: true,
 				description: null,
@@ -201,7 +210,7 @@ describe('ModifierRemoveSubCommand', () => {
 				note: null,
 			};
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.modifiers = [testModifier];
+			mockCharacter.modifiers = [testModifier];
 
 			setupAutocompleteKoboldMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'matchAllModifiers').mockReturnValue([testModifier]);

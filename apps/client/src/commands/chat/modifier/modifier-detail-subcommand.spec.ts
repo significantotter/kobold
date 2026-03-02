@@ -31,11 +31,12 @@ describe('ModifierDetailSubCommand Integration', () => {
 		harness = createTestHarness([new ModifierCommand([new ModifierDetailSubCommand()])]);
 	});
 
-
 	describe('successful modifier detail retrieval', () => {
 		it('should display details for a modifier with roll adjustment', async () => {
 			// Arrange
 			const testModifier = {
+				id: 1,
+				sheetRecordId: 1,
 				name: 'inspire courage',
 				isActive: true,
 				description: 'A rousing battle song',
@@ -43,11 +44,11 @@ describe('ModifierDetailSubCommand Integration', () => {
 				severity: null,
 				sheetAdjustments: [],
 				rollAdjustment: '+1',
-				rollTargetTags: 'attack OR damage',
+				rollTargetTags: 'attack or damage',
 				note: 'Song Active',
 			};
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.modifiers = [testModifier];
+			mockCharacter.modifiers = [testModifier];
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getModifierByName').mockReturnValue(testModifier);
@@ -70,6 +71,8 @@ describe('ModifierDetailSubCommand Integration', () => {
 		it('should display details for a modifier with sheet adjustments', async () => {
 			// Arrange
 			const testModifier = {
+				id: 1,
+				sheetRecordId: 1,
 				name: 'strength boost',
 				isActive: true,
 				description: 'Enhanced strength',
@@ -89,7 +92,7 @@ describe('ModifierDetailSubCommand Integration', () => {
 				note: null,
 			};
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.modifiers = [testModifier];
+			mockCharacter.modifiers = [testModifier];
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getModifierByName').mockReturnValue(testModifier);
@@ -112,6 +115,8 @@ describe('ModifierDetailSubCommand Integration', () => {
 		it('should display details for a modifier with severity', async () => {
 			// Arrange
 			const testModifier = {
+				id: 1,
+				sheetRecordId: 1,
 				name: 'frightened',
 				isActive: true,
 				description: 'You are terrified',
@@ -119,11 +124,11 @@ describe('ModifierDetailSubCommand Integration', () => {
 				severity: 2,
 				sheetAdjustments: [],
 				rollAdjustment: '-2',
-				rollTargetTags: 'attack OR skill',
+				rollTargetTags: 'attack or skill',
 				note: 'Frightened 2',
 			};
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.modifiers = [testModifier];
+			mockCharacter.modifiers = [testModifier];
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getModifierByName').mockReturnValue(testModifier);
@@ -146,6 +151,8 @@ describe('ModifierDetailSubCommand Integration', () => {
 		it('should display details for an inactive modifier', async () => {
 			// Arrange
 			const testModifier = {
+				id: 1,
+				sheetRecordId: 1,
 				name: 'inactive modifier',
 				isActive: false,
 				description: 'Currently disabled',
@@ -157,7 +164,7 @@ describe('ModifierDetailSubCommand Integration', () => {
 				note: null,
 			};
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.modifiers = [testModifier];
+			mockCharacter.modifiers = [testModifier];
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getModifierByName').mockReturnValue(testModifier);
@@ -182,7 +189,7 @@ describe('ModifierDetailSubCommand Integration', () => {
 		it('should error when modifier is not found', async () => {
 			// Arrange
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.modifiers = [];
+			mockCharacter.modifiers = [];
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getModifierByName').mockReturnValue(undefined);
@@ -207,6 +214,8 @@ describe('ModifierDetailSubCommand Integration', () => {
 		it('should return matching modifiers for name autocomplete', async () => {
 			// Arrange
 			const testModifier = {
+				id: 1,
+				sheetRecordId: 1,
 				name: 'inspire courage',
 				isActive: true,
 				description: null,
@@ -218,7 +227,7 @@ describe('ModifierDetailSubCommand Integration', () => {
 				note: null,
 			};
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.modifiers = [testModifier];
+			mockCharacter.modifiers = [testModifier];
 
 			setupAutocompleteKoboldMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'matchAllModifiers').mockReturnValue([testModifier]);

@@ -1,10 +1,10 @@
 import { Config } from '@kobold/config';
-import { SheetRecord, Character, CharacterWithRelations, NewSheetRecord } from '@kobold/db';
+import { SheetRecord, Character, CharacterWithRelations, ImportSourceEnum } from '@kobold/db';
 import { WanderersGuide } from '../../../../services/wanderers-guide/index.js';
 import { WG } from '../../../../services/wanderers-guide/wanderers-guide.js';
 import { KoboldError } from '../../../../utils/KoboldError.js';
 import { Creature } from '../../../../utils/creature.js';
-import { CharacterFetcher } from './character-fetcher.js';
+import { CharacterFetcher, SheetConversionResult } from './character-fetcher.js';
 import axios from 'axios';
 import { MessageFlags } from 'discord.js';
 import { CharacterDefinition as CharacterCommand } from '@kobold/documentation';
@@ -16,11 +16,11 @@ export class WgCharacterFetcher extends CharacterFetcher<
 	},
 	{ charId: number }
 > {
-	public importSource = 'wg';
+	public importSource = ImportSourceEnum.wg;
 
 	public async fetchDuplicateCharacter(
 		args: { charId: number },
-		newSheetRecord: SheetRecord
+		conversionResult: SheetConversionResult
 	): Promise<Character | null> {
 		// we can't use a character that shares a charId OR shares a name
 		const results = await Promise.all([
@@ -29,7 +29,7 @@ export class WgCharacterFetcher extends CharacterFetcher<
 				userId: this.userId,
 			}),
 			this.kobold.character.read({
-				name: newSheetRecord.sheet.staticInfo.name,
+				name: conversionResult.sheetRecord.sheet.staticInfo.name,
 				userId: this.userId,
 			}),
 		]);
@@ -257,18 +257,42 @@ export class WgCharacterFetcher extends CharacterFetcher<
 			calculatedStats: WG.CharacterCalculatedStatsApiResponse;
 		},
 		activeCharacter?: CharacterWithRelations
-	): NewSheetRecord {
+	): SheetConversionResult {
 		const creature = Creature.fromWandererersGuide(
 			sourceData.calculatedStats,
 			sourceData.characterData,
-			activeCharacter?.sheetRecord
+			activeCharacter
 		);
 		return {
-			sheet: creature._sheet,
-			actions: creature.actions,
-			modifiers: creature.modifiers,
-			rollMacros: creature.rollMacros,
-		} satisfies NewSheetRecord;
+			sheetRecord: {
+				sheet: creature._sheet,
+			},
+			actions: creature.actions.map(action => ({
+				name: action.name,
+				description: action.description,
+				type: action.type,
+				actionCost: action.actionCost,
+				baseLevel: action.baseLevel,
+				autoHeighten: action.autoHeighten,
+				rolls: action.rolls,
+				tags: action.tags,
+			})),
+			modifiers: creature.modifiers.map(modifier => ({
+				name: modifier.name,
+				description: modifier.description,
+				type: modifier.type,
+				isActive: modifier.isActive,
+				note: modifier.note,
+				rollAdjustment: modifier.rollAdjustment,
+				rollTargetTags: modifier.rollTargetTags,
+				severity: modifier.severity,
+				sheetAdjustments: modifier.sheetAdjustments,
+			})),
+			rollMacros: creature.rollMacros.map(macro => ({
+				name: macro.name,
+				macro: macro.macro,
+			})),
+		};
 	}
 	public getCharId(args: { charId: number }): number {
 		return args.charId;

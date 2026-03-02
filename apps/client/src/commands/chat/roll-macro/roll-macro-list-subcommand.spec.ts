@@ -49,10 +49,10 @@ describe('RollMacroListSubCommand Integration', () => {
 			// Arrange
 			const { mockCharacter } = setupKoboldUtilsMocks();
 			mockCharacter.name = 'Test Fighter';
-			mockCharacter.sheetRecord.rollMacros = [
-				{ name: 'sneak-attack', macro: '2d6' },
-				{ name: 'power-attack', macro: '4' },
-				{ name: 'str-bonus', macro: '[str]' },
+			mockCharacter.rollMacros = [
+				{ id: 1, name: 'sneak-attack', macro: '2d6', sheetRecordId: 1 },
+				{ id: 2, name: 'power-attack', macro: '4', sheetRecordId: 1 },
+				{ id: 3, name: 'str-bonus', macro: '[str]', sheetRecordId: 1 },
 			];
 
 			// Act
@@ -72,7 +72,7 @@ describe('RollMacroListSubCommand Integration', () => {
 			// Arrange
 			const { mockCharacter } = setupKoboldUtilsMocks();
 			mockCharacter.name = 'Test Fighter';
-			mockCharacter.sheetRecord.rollMacros = [];
+			mockCharacter.rollMacros = [];
 
 			// Act
 			await harness.executeCommand({
@@ -91,10 +91,10 @@ describe('RollMacroListSubCommand Integration', () => {
 			// Arrange
 			const { mockCharacter } = setupKoboldUtilsMocks();
 			mockCharacter.name = 'Test Fighter';
-			mockCharacter.sheetRecord.rollMacros = [
-				{ name: 'zephyr', macro: '1d4' },
-				{ name: 'alpha', macro: '1d6' },
-				{ name: 'middle', macro: '1d8' },
+			mockCharacter.rollMacros = [
+				{ id: 1, name: 'zephyr', macro: '1d4', sheetRecordId: 1 },
+				{ id: 2, name: 'alpha', macro: '1d6', sheetRecordId: 1 },
+				{ id: 3, name: 'middle', macro: '1d8', sheetRecordId: 1 },
 			];
 
 			// Act
@@ -114,7 +114,9 @@ describe('RollMacroListSubCommand Integration', () => {
 			// Arrange
 			const { mockCharacter } = setupKoboldUtilsMocks();
 			mockCharacter.name = 'Sir Galahad';
-			mockCharacter.sheetRecord.rollMacros = [{ name: 'test-macro', macro: '1d6' }];
+			mockCharacter.rollMacros = [
+				{ id: 1, name: 'test-macro', macro: '1d6', sheetRecordId: 1 },
+			];
 
 			// Act
 			await harness.executeCommand({

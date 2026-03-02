@@ -4,12 +4,14 @@ import {
 	Character,
 	CharacterWithRelations,
 	GameWithRelations,
+	InitiativeActorWithRelations,
 	Kobold,
 	SheetRecord,
 } from '@kobold/db';
 import { KoboldError } from '../KoboldError.js';
 import type { KoboldUtils } from './kobold-utils.js';
 import _ from 'lodash';
+import { EntityWithSheetData } from '../creature.js';
 
 export class GameUtils {
 	kobold: Kobold;
@@ -145,6 +147,7 @@ export class GameUtils {
 		targetName: string
 	): Promise<{
 		targetSheetRecord: SheetRecord;
+		targetEntity: EntityWithSheetData;
 		hideStats: boolean;
 		targetName: string;
 	}> {
@@ -162,17 +165,18 @@ export class GameUtils {
 
 		const targetSheetRecord =
 			matchedInitActor?.sheetRecord ?? matchedCharacter?.sheetRecord ?? null;
+		const targetEntity = matchedInitActor ?? matchedCharacter ?? null;
 		const hideStats = matchedInitActor?.hideStats ?? false;
 		const actualTargetName = matchedInitActor?.name ?? matchedCharacter?.name;
 
-		if (!targetSheetRecord) {
+		if (!targetSheetRecord || !targetEntity) {
 			throw new KoboldError(
 				utilStrings.roll.targetNotFound({
 					targetName,
 				})
 			);
 		}
-		return { targetSheetRecord, hideStats, targetName: actualTargetName! };
+		return { targetSheetRecord, targetEntity, hideStats, targetName: actualTargetName! };
 	}
 
 	public async getWhereUserHasCharacter(userId: string, guildId: string | null) {

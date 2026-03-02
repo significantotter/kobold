@@ -54,7 +54,7 @@ export class GameRollSubCommand extends BaseCommandClass(
 
 			let results: { name: string; value: string }[] = [];
 			for (const character of activeGame?.characters || []) {
-				const creature = new Creature(character.sheetRecord, undefined, intr);
+				const creature = Creature.fromSheetRecord(character, undefined, intr);
 
 				const allRolls = [
 					..._.keys(creature.attackRolls),
@@ -122,8 +122,8 @@ export class GameRollSubCommand extends BaseCommandClass(
 
 		const embeds: KoboldEmbed[] = [];
 
-		let targetSheetRecord: SheetRecord | null = null;
 		let targetCreature: Creature | null = null;
+		let targetSheetRecord: SheetRecord | null = null;
 		let targetName: string | null = targetSheetName;
 		let hideStats = false;
 
@@ -133,10 +133,10 @@ export class GameRollSubCommand extends BaseCommandClass(
 			targetSheetName.trim().toLocaleLowerCase() != '(none)'
 		) {
 			const results = await gameUtils.getCharacterOrInitActorTarget(intr, targetSheetName);
-			targetSheetRecord = results.targetSheetRecord;
 			hideStats = results.hideStats;
+			targetSheetRecord = results.targetSheetRecord;
 			targetName = results.targetName;
-			targetCreature = new Creature(targetSheetRecord, undefined, intr);
+			targetCreature = Creature.fromSheetRecord(results.targetEntity, undefined, intr);
 		}
 
 		if (activeGame.characters.length === 0) {
@@ -157,7 +157,7 @@ export class GameRollSubCommand extends BaseCommandClass(
 				continue;
 			}
 
-			const creature = new Creature(character.sheetRecord, undefined, intr);
+			const creature = Creature.fromSheetRecord(character, undefined, intr);
 			const rollOptions = {
 				...creature.rolls,
 				...creature.attackRolls,

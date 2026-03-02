@@ -1,4 +1,5 @@
 export * from './attribute.zod.js';
+export * from './condition.zod.js';
 export * from './counter.zod.js';
 export * from './sheet-adjustment.zod.js';
 export * from './roll.zod.js';

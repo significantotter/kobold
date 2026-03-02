@@ -44,7 +44,7 @@ export class InitJoinSubCommand extends BaseCommandClass(
 			}
 			//find a skill on the character matching the autocomplete string
 			const matchedSkills = FinderHelpers.matchAllSkills(
-				new Creature(activeCharacter.sheetRecord, undefined, intr),
+				Creature.fromSheetRecord(activeCharacter, undefined, intr),
 				match
 			).map(skill => ({ name: skill.name, value: skill.name }));
 			//return the matched skills
@@ -98,7 +98,7 @@ export class InitJoinSubCommand extends BaseCommandClass(
 		});
 		const initiativeResult = _.isNumber(rollResult)
 			? rollResult
-			: rollResult.getRollTotalArray()[0] ?? 0;
+			: (rollResult.getRollTotalArray()[0] ?? 0);
 
 		const actorName = InitiativeBuilderUtils.getUniqueInitActorName(
 			currentInitiative,

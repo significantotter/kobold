@@ -22,7 +22,7 @@ export class ActionExportSubCommand extends BaseCommandClass(
 			activeCharacter: true,
 		});
 
-		const actions = activeCharacter.sheetRecord.actions;
+		const actions = activeCharacter.actions;
 
 		const pastebinPost = await new PasteBin({ apiKey: Config.pastebin.apiKey }).post({
 			code: JSON.stringify(actions),

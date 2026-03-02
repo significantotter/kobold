@@ -47,20 +47,27 @@ describe('ConditionApplyModifierSubCommand', () => {
 			const sourceCharacter = createMockCharacter({
 				characterOverrides: { name: 'Bard' },
 			});
-			sourceCharacter.sheetRecord.modifiers = [sourceModifier];
+			sourceCharacter.modifiers = [sourceModifier];
 
 			const targetSheetRecord = {
-				id: 'target-id',
+				id: 1,
 				conditions: [] as any[],
-				modifiers: [],
 				sheet: { staticInfo: { name: 'Fighter' }, info: {} },
 			} as any;
+
+			const targetEntity = {
+				sheetRecord: targetSheetRecord,
+				actions: [],
+				modifiers: [],
+				rollMacros: [],
+			};
 
 			// Setup KoboldUtils mock with both gameUtils and characterUtils
 			vi.mocked(KoboldUtils).mockImplementation(function (this: MockKoboldUtils) {
 				(this as MockKoboldUtils & { gameUtils: unknown }).gameUtils = {
 					getCharacterOrInitActorTarget: vi.fn(async () => ({
 						targetSheetRecord,
+						targetEntity,
 						targetName: 'Fighter',
 						hideStats: false,
 					})),
@@ -104,19 +111,26 @@ describe('ConditionApplyModifierSubCommand', () => {
 			const sourceCharacter = createMockCharacter({
 				characterOverrides: { name: 'Cleric' },
 			});
-			sourceCharacter.sheetRecord.modifiers = [sourceModifier];
+			sourceCharacter.modifiers = [sourceModifier];
 
 			const targetSheetRecord = {
-				id: 'target-id',
+				id: 1,
 				conditions: [] as any[],
-				modifiers: [],
 				sheet: { staticInfo: { name: 'Fighter' }, info: {} },
 			} as any;
+
+			const targetEntity = {
+				sheetRecord: targetSheetRecord,
+				actions: [],
+				modifiers: [],
+				rollMacros: [],
+			};
 
 			vi.mocked(KoboldUtils).mockImplementation(function (this: MockKoboldUtils) {
 				(this as MockKoboldUtils & { gameUtils: unknown }).gameUtils = {
 					getCharacterOrInitActorTarget: vi.fn(async () => ({
 						targetSheetRecord,
+						targetEntity,
 						targetName: 'Fighter',
 						hideStats: false,
 					})),
@@ -165,19 +179,26 @@ describe('ConditionApplyModifierSubCommand', () => {
 			const sourceCharacter = createMockCharacter({
 				characterOverrides: { name: 'Cleric' },
 			});
-			sourceCharacter.sheetRecord.modifiers = [sourceModifier];
+			sourceCharacter.modifiers = [sourceModifier];
 
 			const targetSheetRecord = {
-				id: 'target-id',
+				id: 1,
 				conditions: [existingCondition],
-				modifiers: [],
 				sheet: { staticInfo: { name: 'Fighter' }, info: {} },
 			} as any;
+
+			const targetEntity = {
+				sheetRecord: targetSheetRecord,
+				actions: [],
+				modifiers: [],
+				rollMacros: [],
+			};
 
 			vi.mocked(KoboldUtils).mockImplementation(function (this: MockKoboldUtils) {
 				(this as MockKoboldUtils & { gameUtils: unknown }).gameUtils = {
 					getCharacterOrInitActorTarget: vi.fn(async () => ({
 						targetSheetRecord,
+						targetEntity,
 						targetName: 'Fighter',
 						hideStats: false,
 					})),

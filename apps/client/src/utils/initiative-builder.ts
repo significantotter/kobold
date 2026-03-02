@@ -255,7 +255,7 @@ export class InitiativeBuilder {
 		// prepare our roll builder for if we need to parse inline rolls in notes
 		const rollBuilder = new RollBuilder({
 			actorName: actor.name,
-			creature: new Creature(actor.sheetRecord, actor.name),
+			creature: Creature.fromSheetRecord(actor, actor.name),
 			userSettings: {
 				initStatsNotification: InitStatsNotificationEnum.never,
 				rollCompactMode: RollCompactModeEnum.compact,
@@ -266,7 +266,7 @@ export class InitiativeBuilder {
 		});
 
 		// find any notes on the actor's sheet from active modifiers or conditions
-		const sheetNotes = [...actor.sheetRecord.modifiers, ...actor.sheetRecord.conditions]
+		const sheetNotes = [...actor.modifiers, ...actor.sheetRecord.conditions]
 			.filter(modifier => modifier.isActive)
 			.map(modifier => {
 				if (modifier?.note?.includes('{{') && modifier?.note?.includes('}}')) {
@@ -467,7 +467,7 @@ export class InitiativeBuilderUtils {
 			finalInitiative = initiativeValue;
 		} else if (skillChoice) {
 			rollBuilderResponse = await RollBuilder.fromSimpleCreatureRoll({
-				creature: new Creature(character.sheetRecord),
+				creature: Creature.fromSheetRecord(character),
 				attributeName: skillChoice,
 				modifierExpression: diceExpression,
 				tags: ['initiative'],
@@ -487,7 +487,7 @@ export class InitiativeBuilderUtils {
 			finalInitiative = rollBuilderResponse.getRollTotalArray()[0] ?? 0;
 		} else {
 			rollBuilderResponse = await RollBuilder.fromSimpleCreatureRoll({
-				creature: new Creature(character.sheetRecord),
+				creature: Creature.fromSheetRecord(character),
 				attributeName: 'perception',
 				modifierExpression: diceExpression,
 				tags: ['initiative'],

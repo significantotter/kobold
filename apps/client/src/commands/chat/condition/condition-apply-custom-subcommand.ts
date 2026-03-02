@@ -7,6 +7,7 @@ import {
 } from 'discord.js';
 
 import {
+	Condition,
 	Kobold,
 	Modifier,
 	SheetAdjustment,
@@ -55,7 +56,7 @@ export class ConditionApplyCustomSubCommand extends BaseCommandClass(
 			commandOptions[commandOptionsEnum.targetCharacter].name,
 			true
 		);
-		const { targetSheetRecord } = await gameUtils.getCharacterOrInitActorTarget(
+		const { targetSheetRecord, targetEntity } = await gameUtils.getCharacterOrInitActorTarget(
 			intr,
 			targetCharacter
 		);
@@ -129,7 +130,7 @@ export class ConditionApplyCustomSubCommand extends BaseCommandClass(
 			if (
 				!InputParseUtils.isValidDiceExpression(
 					rollAdjustment,
-					new Creature(targetSheetRecord, undefined, intr)
+					Creature.fromSheetRecord(targetEntity, undefined, intr)
 				)
 			) {
 				throw new KoboldError(ConditionDefinition.strings.doesntEvaluateError);
@@ -156,7 +157,7 @@ export class ConditionApplyCustomSubCommand extends BaseCommandClass(
 			return;
 		}
 
-		const newCondition: Modifier = {
+		const newCondition: Condition = {
 			name: InputParseUtils.parseAsString(name, {
 				inputName: 'name',
 				minLength: 3,

@@ -1,9 +1,9 @@
 import { refs } from '../../../../constants/common-text.js';
-import { CharacterWithRelations, Kobold, NewSheetRecord } from '@kobold/db';
+import { CharacterWithRelations, Kobold, ImportSourceEnum } from '@kobold/db';
 import { PathBuilder } from '../../../../services/pathbuilder/index.js';
 import { KoboldError } from '../../../../utils/KoboldError.js';
 import { Creature } from '../../../../utils/creature.js';
-import { CharacterFetcher } from './character-fetcher.js';
+import { CharacterFetcher, SheetConversionResult } from './character-fetcher.js';
 import type { PathBuilder as PB } from '../../../../services/pathbuilder/pathbuilder.js';
 import { CommandInteraction, CacheType } from 'discord.js';
 import { CharacterDefinition as CharacterCommand } from '@kobold/documentation';
@@ -20,7 +20,7 @@ export class PathbuilderCharacterFetcher extends CharacterFetcher<
 	) {
 		super(intr, kobold, userId);
 	}
-	public importSource = 'pathbuilder';
+	public importSource = ImportSourceEnum.pathbuilder;
 	public async fetchSourceData(args: { jsonId: number }): Promise<PB.Character> {
 		const pathBuilderChar = await new PathBuilder().get({ characterJsonId: args.jsonId });
 
@@ -36,16 +36,40 @@ export class PathbuilderCharacterFetcher extends CharacterFetcher<
 	public convertSheetRecord(
 		sourceData: PB.Character,
 		activeCharacter?: CharacterWithRelations
-	): NewSheetRecord {
-		const creature = Creature.fromPathBuilder(sourceData, activeCharacter?.sheetRecord, {
+	): SheetConversionResult {
+		const creature = Creature.fromPathBuilder(sourceData, activeCharacter, {
 			useStamina: this.options.useStamina,
 		});
 		return {
-			sheet: creature._sheet,
-			actions: creature.actions,
-			modifiers: creature.modifiers,
-			rollMacros: creature.rollMacros,
-		} satisfies NewSheetRecord;
+			sheetRecord: {
+				sheet: creature._sheet,
+			},
+			actions: creature.actions.map(action => ({
+				name: action.name,
+				description: action.description,
+				type: action.type,
+				actionCost: action.actionCost,
+				baseLevel: action.baseLevel,
+				autoHeighten: action.autoHeighten,
+				rolls: action.rolls,
+				tags: action.tags,
+			})),
+			modifiers: creature.modifiers.map(modifier => ({
+				name: modifier.name,
+				description: modifier.description,
+				type: modifier.type,
+				isActive: modifier.isActive,
+				note: modifier.note,
+				rollAdjustment: modifier.rollAdjustment,
+				rollTargetTags: modifier.rollTargetTags,
+				severity: modifier.severity,
+				sheetAdjustments: modifier.sheetAdjustments,
+			})),
+			rollMacros: creature.rollMacros.map(macro => ({
+				name: macro.name,
+				macro: macro.macro,
+			})),
+		};
 	}
 	public getCharId(args: { jsonId: number }): number {
 		return args.jsonId;

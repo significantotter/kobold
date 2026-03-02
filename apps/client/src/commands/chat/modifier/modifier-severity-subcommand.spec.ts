@@ -10,12 +10,13 @@ import {
 	createMockCharacter,
 	setupKoboldUtilsMocks,
 	setupAutocompleteKoboldMocks,
-	setupSheetRecordUpdateMock,
+	setupModifierModelMock,
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	CommandTestHarness,
 	getMockKobold,
-	resetMockKobold,} from '../../../test-utils/index.js';
+	resetMockKobold,
+} from '../../../test-utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 
@@ -36,6 +37,8 @@ describe('ModifierSeveritySubCommand', () => {
 		it('should set severity on a modifier', async () => {
 			// Arrange
 			const testModifier = {
+				id: 1,
+				sheetRecordId: 1,
 				name: 'frightened',
 				isActive: true,
 				description: 'Fear condition',
@@ -47,11 +50,11 @@ describe('ModifierSeveritySubCommand', () => {
 				note: null,
 			};
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.modifiers = [testModifier];
+			mockCharacter.modifiers = [testModifier];
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getModifierByName').mockReturnValue(testModifier);
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { updateMock } = setupModifierModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -73,6 +76,8 @@ describe('ModifierSeveritySubCommand', () => {
 		it('should update existing severity value', async () => {
 			// Arrange
 			const testModifier = {
+				id: 1,
+				sheetRecordId: 1,
 				name: 'frightened',
 				isActive: true,
 				description: 'Fear condition',
@@ -84,11 +89,11 @@ describe('ModifierSeveritySubCommand', () => {
 				note: 'Frightened 2',
 			};
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.modifiers = [testModifier];
+			mockCharacter.modifiers = [testModifier];
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getModifierByName').mockReturnValue(testModifier);
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { updateMock } = setupModifierModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -110,6 +115,8 @@ describe('ModifierSeveritySubCommand', () => {
 		it('should clear severity when set to null', async () => {
 			// Arrange
 			const testModifier = {
+				id: 1,
+				sheetRecordId: 1,
 				name: 'frightened',
 				isActive: true,
 				description: 'Fear condition',
@@ -121,11 +128,11 @@ describe('ModifierSeveritySubCommand', () => {
 				note: null,
 			};
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.modifiers = [testModifier];
+			mockCharacter.modifiers = [testModifier];
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getModifierByName').mockReturnValue(testModifier);
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { updateMock } = setupModifierModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -147,6 +154,8 @@ describe('ModifierSeveritySubCommand', () => {
 		it('should set severity to zero', async () => {
 			// Arrange
 			const testModifier = {
+				id: 1,
+				sheetRecordId: 1,
 				name: 'frightened',
 				isActive: true,
 				description: null,
@@ -158,11 +167,11 @@ describe('ModifierSeveritySubCommand', () => {
 				note: null,
 			};
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.modifiers = [testModifier];
+			mockCharacter.modifiers = [testModifier];
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getModifierByName').mockReturnValue(testModifier);
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { updateMock } = setupModifierModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -186,11 +195,11 @@ describe('ModifierSeveritySubCommand', () => {
 		it('should error when modifier is not found', async () => {
 			// Arrange
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.modifiers = [];
+			mockCharacter.modifiers = [];
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getModifierByName').mockReturnValue(undefined);
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { updateMock } = setupModifierModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -214,6 +223,8 @@ describe('ModifierSeveritySubCommand', () => {
 		it('should return matching modifiers for name autocomplete', async () => {
 			// Arrange
 			const testModifier = {
+				id: 1,
+				sheetRecordId: 1,
 				name: 'frightened',
 				isActive: true,
 				description: null,
@@ -225,7 +236,7 @@ describe('ModifierSeveritySubCommand', () => {
 				note: null,
 			};
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.modifiers = [testModifier];
+			mockCharacter.modifiers = [testModifier];
 
 			setupAutocompleteKoboldMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'matchAllModifiers').mockReturnValue([testModifier]);

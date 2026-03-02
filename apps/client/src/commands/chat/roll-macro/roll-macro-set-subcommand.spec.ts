@@ -8,7 +8,7 @@ import {
 	createTestHarness,
 	createMockCharacter,
 	setupKoboldUtilsMocks,
-	setupSheetRecordUpdateMock,
+	setupRollMacroModelMock,
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	CommandTestHarness,
@@ -47,13 +47,13 @@ describe('RollMacroSetSubCommand', () => {
 	describe('setting roll macro values', () => {
 		it('should update an existing roll macro', async () => {
 			// Arrange
-			const existingMacro = { name: 'sneak-attack', macro: '2d6' };
+			const existingMacro = { id: 1, name: 'sneak-attack', macro: '2d6', sheetRecordId: 1 };
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.rollMacros = [existingMacro];
+			mockCharacter.rollMacros = [existingMacro];
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getRollMacroByName').mockReturnValue(existingMacro);
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { updateMock } = setupRollMacroModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -74,13 +74,13 @@ describe('RollMacroSetSubCommand', () => {
 
 		it('should update roll macro to use attribute references', async () => {
 			// Arrange
-			const existingMacro = { name: 'bonus', macro: '5' };
+			const existingMacro = { id: 1, name: 'bonus', macro: '5', sheetRecordId: 1 };
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.rollMacros = [existingMacro];
+			mockCharacter.rollMacros = [existingMacro];
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getRollMacroByName').mockReturnValue(existingMacro);
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { updateMock } = setupRollMacroModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -101,13 +101,13 @@ describe('RollMacroSetSubCommand', () => {
 
 		it('should update roll macro to a static value', async () => {
 			// Arrange
-			const existingMacro = { name: 'flat-bonus', macro: '1d4' };
+			const existingMacro = { id: 1, name: 'flat-bonus', macro: '1d4', sheetRecordId: 1 };
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.rollMacros = [existingMacro];
+			mockCharacter.rollMacros = [existingMacro];
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getRollMacroByName').mockReturnValue(existingMacro);
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { updateMock } = setupRollMacroModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -131,11 +131,11 @@ describe('RollMacroSetSubCommand', () => {
 		it('should error when roll macro not found', async () => {
 			// Arrange
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.rollMacros = [];
+			mockCharacter.rollMacros = [];
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getRollMacroByName').mockReturnValue(undefined);
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { updateMock } = setupRollMacroModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -158,13 +158,13 @@ describe('RollMacroSetSubCommand', () => {
 
 		it('should error when new value is invalid', async () => {
 			// Arrange
-			const existingMacro = { name: 'test-macro', macro: '1d6' };
+			const existingMacro = { id: 1, name: 'test-macro', macro: '1d6', sheetRecordId: 1 };
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.rollMacros = [existingMacro];
+			mockCharacter.rollMacros = [existingMacro];
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getRollMacroByName').mockReturnValue(existingMacro);
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { updateMock } = setupRollMacroModelMock(kobold);
 
 			// Mock RollBuilder to return an error
 			vi.mocked(RollBuilder).mockImplementation(function (this: MockRollBuilder) {
@@ -199,10 +199,10 @@ describe('RollMacroSetSubCommand', () => {
 		it('should return matching roll macros for autocomplete', async () => {
 			// Arrange
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.rollMacros = [
-				{ name: 'sneak-attack', macro: '2d6' },
-				{ name: 'sneak-damage', macro: '3d6' },
-				{ name: 'power-attack', macro: '4' },
+			mockCharacter.rollMacros = [
+				{ id: 1, name: 'sneak-attack', macro: '2d6', sheetRecordId: 1 },
+				{ id: 2, name: 'sneak-damage', macro: '3d6', sheetRecordId: 1 },
+				{ id: 3, name: 'power-attack', macro: '4', sheetRecordId: 1 },
 			];
 
 			vi.mocked(KoboldUtils).mockImplementation(function (this: MockKoboldUtils) {

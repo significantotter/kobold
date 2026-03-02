@@ -83,11 +83,11 @@ export class AutocompleteUtils {
 			//no choices if we don't have a character to match against
 			return [];
 		}
-		const creature = new Creature(activeCharacter.sheetRecord);
+		const creature = Creature.fromSheetRecord(activeCharacter);
 
-		//find a save on the character matching the autocomplete string
+		//find an action on the character matching the autocomplete string
 		const matchedActions = FinderHelpers.matchAllActions(
-			activeCharacter.sheetRecord,
+			activeCharacter.actions,
 			matchText
 		).map(action => ({
 			name: action.name,
@@ -110,7 +110,7 @@ export class AutocompleteUtils {
 			return [];
 		}
 
-		const creature = new Creature(character.sheetRecord);
+		const creature = Creature.fromSheetRecord(character);
 
 		// add skills
 		const matchedSkills = FinderHelpers.matchAllSkills(creature, matchText).map(
@@ -136,7 +136,7 @@ export class AutocompleteUtils {
 			choices.add(_.capitalize(attack));
 		}
 
-		const matchedActions = FinderHelpers.matchAllActions(character.sheetRecord, matchText).map(
+		const matchedActions = FinderHelpers.matchAllActions(character.actions, matchText).map(
 			action => action.name
 		);
 		for (const action of matchedActions) {
@@ -168,7 +168,7 @@ export class AutocompleteUtils {
 
 		//find a save on the character matching the autocomplete string
 		const matchedRollMacros = FinderHelpers.matchAllRollMacros(
-			activeCharacter.sheetRecord,
+			activeCharacter.rollMacros,
 			matchText
 		).map(modifier => ({
 			name: modifier.name,
@@ -261,7 +261,7 @@ export class AutocompleteUtils {
 			false
 		);
 
-		const creature = new Creature(actor.sheetRecord);
+		const creature = Creature.fromSheetRecord(actor);
 
 		const allRolls = _.uniq([
 			..._.keys(creature.attackRolls),
@@ -305,7 +305,7 @@ export class AutocompleteUtils {
 		const characters = await this.kobold.character.readMany({ userId: intr.user.id });
 		const modifiersWithCharacterName: string[] = [];
 		for (const character of characters) {
-			const modifiers = character.sheetRecord.modifiers;
+			const modifiers = character.modifiers;
 			for (const modifier of modifiers) {
 				modifiersWithCharacterName.push(`${character.name} - ${modifier.name}`);
 			}

@@ -37,6 +37,21 @@ interface MockInitiativeModel extends MockModel {
 	readActive: MockFn;
 }
 
+/** Type for mock Modifier model with additional methods */
+interface MockModifierModel extends MockModel {
+	deleteBySheetRecordId: MockFn;
+}
+
+/** Type for mock RollMacro model with additional methods */
+interface MockRollMacroModel extends MockModel {
+	deleteBySheetRecordId: MockFn;
+}
+
+/** Type for mock Action model with additional methods */
+interface MockActionModel extends MockModel {
+	deleteBySheetRecordId: MockFn;
+}
+
 /**
  * Creates a mock model with all common CRUD methods stubbed.
  * Each method is a vi.fn() that can be configured with mockResolvedValue.
@@ -78,6 +93,36 @@ function createMockInitiativeModel(): MockInitiativeModel {
 }
 
 /**
+ * Creates a mock Modifier model with additional modifier-specific methods.
+ */
+function createMockModifierModel(): MockModifierModel {
+	return {
+		...createMockModel(),
+		deleteBySheetRecordId: vi.fn(),
+	};
+}
+
+/**
+ * Creates a mock RollMacro model with additional roll-macro-specific methods.
+ */
+function createMockRollMacroModel(): MockRollMacroModel {
+	return {
+		...createMockModel(),
+		deleteBySheetRecordId: vi.fn(),
+	};
+}
+
+/**
+ * Creates a mock Action model with additional action-specific methods.
+ */
+function createMockActionModel(): MockActionModel {
+	return {
+		...createMockModel(),
+		deleteBySheetRecordId: vi.fn(),
+	};
+}
+
+/**
  * Creates a complete mock Kobold instance.
  * All model methods are stubbed and ready for mocking.
  *
@@ -90,6 +135,7 @@ function createMockInitiativeModel(): MockInitiativeModel {
 export function createMockKobold() {
 	return {
 		db: {} as any,
+		action: createMockActionModel(),
 		channelDefaultCharacter: createMockModel(),
 		character: createMockCharacterModel(),
 		game: createMockModel(),
@@ -97,6 +143,8 @@ export function createMockKobold() {
 		initiative: createMockInitiativeModel(),
 		initiativeActor: createMockModel(),
 		initiativeActorGroup: createMockModel(),
+		modifier: createMockModifierModel(),
+		rollMacro: createMockRollMacroModel(),
 		sheetRecord: createMockModel(),
 		userSettings: createMockModel(),
 		wgAuthToken: createMockModel(),
@@ -109,6 +157,7 @@ export function createMockKobold() {
  */
 export type MockKobold = {
 	db: any;
+	action: MockActionModel;
 	channelDefaultCharacter: MockModel;
 	character: MockCharacterModel;
 	game: MockModel;
@@ -116,6 +165,8 @@ export type MockKobold = {
 	initiative: MockInitiativeModel;
 	initiativeActor: MockModel;
 	initiativeActorGroup: MockModel;
+	modifier: MockModifierModel;
+	rollMacro: MockRollMacroModel;
 	sheetRecord: MockModel;
 	userSettings: MockModel;
 	wgAuthToken: MockModel;

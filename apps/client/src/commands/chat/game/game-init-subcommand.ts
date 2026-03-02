@@ -54,7 +54,7 @@ export class GameInitSubCommand extends BaseCommandClass(
 			const choices: Set<string> = new Set();
 			for (const character of game.characters || []) {
 				const matchedSkills = FinderHelpers.matchAllSkills(
-					new Creature(character.sheetRecord),
+					Creature.fromSheetRecord(character),
 					match
 				).map(skill => skill.name);
 				for (const skill of matchedSkills) {
@@ -152,7 +152,7 @@ export class GameInitSubCommand extends BaseCommandClass(
 			});
 			const initiativeResult = _.isNumber(rollResult)
 				? rollResult
-				: rollResult.getRollTotalArray()[0] ?? 0;
+				: (rollResult.getRollTotalArray()[0] ?? 0);
 
 			const actorName = InitiativeBuilderUtils.getUniqueInitActorName(
 				currentInitiative,

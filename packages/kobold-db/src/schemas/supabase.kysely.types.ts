@@ -1,11 +1,21 @@
 import type { Database as SupabaseDatabase } from './supabase.types.js';
 import { MergeDeep } from 'type-fest';
 import type { KyselifyDatabase } from 'kysely-supabase';
-import type { Roll, SheetAdjustment, Sheet } from './shared/index.js';
-import { zModifier } from './supabase.zod.js';
-import z from 'zod';
-// avoiding a circular dependency by defining this type here instead of in db-types.ts where it would normally go
-type Modifier = z.infer<typeof zModifier>;
+import type {
+	Roll,
+	SheetAdjustment,
+	Sheet,
+	Condition,
+	SheetAdjustmentTypeEnum,
+} from './shared/index.js';
+import type {
+	InitStatsNotificationEnum,
+	RollCompactModeEnum,
+	InlineRollsDisplayEnum,
+	DefaultCompendiumEnum,
+	TrackerModeEnum,
+	ImportSourceEnum,
+} from './lib/database-enums.js';
 
 /**
  * Type utility to convert a snake_case string to camelCase
@@ -59,12 +69,98 @@ type SnakeCaseDatabase = KyselifyDatabase<
 							tags: string[];
 						};
 						Insert: {
-							rolls?: Roll[];
+							rolls: Roll[];
+							description: string;
+							type: string | null;
 							tags?: string[];
 						};
 						Update: {
 							rolls?: Roll[];
 							tags?: string[];
+						};
+					};
+					character: {
+						Row: {
+							import_source: ImportSourceEnum;
+							created_at: Date;
+							last_updated_at: Date;
+						};
+						Insert: {
+							import_source: ImportSourceEnum;
+							created_at?: Date;
+							last_updated_at?: Date;
+						};
+						Update: {
+							import_source?: ImportSourceEnum;
+							created_at?: Date;
+							last_updated_at?: Date;
+						};
+					};
+					game: {
+						Row: {
+							created_at: Date;
+							last_updated_at: Date;
+						};
+						Insert: {
+							created_at?: Date;
+							last_updated_at?: Date;
+						};
+						Update: {
+							created_at?: Date;
+							last_updated_at?: Date;
+						};
+					};
+					initiative: {
+						Row: {
+							created_at: Date;
+							last_updated_at: Date;
+						};
+						Insert: {
+							created_at?: Date;
+							last_updated_at?: Date;
+						};
+						Update: {
+							created_at?: Date;
+							last_updated_at?: Date;
+						};
+					};
+					initiative_actor: {
+						Row: {
+							created_at: Date;
+							last_updated_at: Date;
+						};
+						Insert: {
+							created_at?: Date;
+							last_updated_at?: Date;
+						};
+						Update: {
+							created_at?: Date;
+							last_updated_at?: Date;
+						};
+					};
+					initiative_actor_group: {
+						Row: {
+							created_at: Date;
+							last_updated_at: Date;
+						};
+						Insert: {
+							created_at?: Date;
+							last_updated_at?: Date;
+						};
+						Update: {
+							created_at?: Date;
+							last_updated_at?: Date;
+						};
+					};
+					wg_auth_token: {
+						Row: {
+							expires_at: Date;
+						};
+						Insert: {
+							expires_at: Date;
+						};
+						Update: {
+							expires_at?: Date;
 						};
 					};
 					minion: {
@@ -80,30 +176,53 @@ type SnakeCaseDatabase = KyselifyDatabase<
 					};
 					modifier: {
 						Row: {
-							roll_target_tags: string[];
+							type: SheetAdjustmentTypeEnum;
 							sheet_adjustments: SheetAdjustment[];
 						};
 						Insert: {
-							roll_target_tags?: string[];
+							type: SheetAdjustmentTypeEnum;
 							sheet_adjustments?: SheetAdjustment[];
 						};
 						Update: {
-							roll_target_tags?: string[];
+							type?: SheetAdjustmentTypeEnum;
 							sheet_adjustments?: SheetAdjustment[];
 						};
 					};
 					sheet_record: {
 						Row: {
-							conditions: Modifier[];
+							conditions: Condition[];
 							sheet: Sheet;
+							tracker_mode: TrackerModeEnum | null;
 						};
 						Insert: {
-							conditions?: Modifier[];
+							conditions?: Condition[];
 							sheet: Sheet;
+							tracker_mode?: TrackerModeEnum | null;
 						};
 						Update: {
-							conditions?: Modifier[];
+							conditions?: Condition[];
 							sheet?: Sheet;
+							tracker_mode?: TrackerModeEnum | null;
+						};
+					};
+					user_settings: {
+						Row: {
+							default_compendium: DefaultCompendiumEnum;
+							init_stats_notification: InitStatsNotificationEnum;
+							inline_rolls_display: InlineRollsDisplayEnum;
+							roll_compact_mode: RollCompactModeEnum;
+						};
+						Insert: {
+							default_compendium?: DefaultCompendiumEnum;
+							init_stats_notification?: InitStatsNotificationEnum;
+							inline_rolls_display?: InlineRollsDisplayEnum;
+							roll_compact_mode?: RollCompactModeEnum;
+						};
+						Update: {
+							default_compendium?: DefaultCompendiumEnum;
+							init_stats_notification?: InitStatsNotificationEnum;
+							inline_rolls_display?: InlineRollsDisplayEnum;
+							roll_compact_mode?: RollCompactModeEnum;
 						};
 					};
 				};

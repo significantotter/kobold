@@ -20,7 +20,7 @@ export class ActionModel extends Model<Database['action']> {
 			.insertInto('action')
 			.values({
 				...args,
-				rolls: args.rolls !== undefined ? sqlJSON(args.rolls) : undefined,
+				rolls: sqlJSON(args.rolls),
 				tags: args.tags !== undefined ? sqlJSON(args.tags) : undefined,
 			})
 			.returningAll()

@@ -67,7 +67,7 @@ export class ActionImportSubCommand extends BaseCommandClass(
 			await InteractionUtils.send(intr, ActionDefinition.strings.import.failedParsing);
 			return;
 		}
-		const currentActions = activeCharacter.sheetRecord.actions;
+		const currentActions = activeCharacter.actions;
 
 		let finalActions: Action[] = [];
 
@@ -86,10 +86,23 @@ export class ActionImportSubCommand extends BaseCommandClass(
 			return;
 		}
 
-		await kobold.sheetRecord.update(
-			{ id: activeCharacter.sheetRecordId },
-			{ actions: finalActions }
-		);
+		// Delete all existing actions and create the final actions
+		await kobold.action.deleteBySheetRecordId({
+			sheetRecordId: activeCharacter.sheetRecordId,
+		});
+		for (const action of finalActions) {
+			await kobold.action.create({
+				sheetRecordId: activeCharacter.sheetRecordId,
+				name: action.name,
+				description: action.description,
+				type: action.type,
+				actionCost: action.actionCost,
+				baseLevel: action.baseLevel,
+				autoHeighten: action.autoHeighten,
+				rolls: action.rolls,
+				tags: action.tags,
+			});
+		}
 
 		await InteractionUtils.send(
 			intr,

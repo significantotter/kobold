@@ -30,7 +30,7 @@ export class RollMacroCreateSubCommand extends BaseCommandClass(
 		const macro = intr.options.getString(commandOptions[commandOptionsEnum.value].name, true);
 
 		// make sure the name does't already exist in the character's rollMacros
-		if (FinderHelpers.getRollMacroByName(activeCharacter.sheetRecord, name)) {
+		if (FinderHelpers.getRollMacroByName(activeCharacter.rollMacros, name)) {
 			await InteractionUtils.send(
 				intr,
 				RollMacroDefinition.strings.create.alreadyExists({
@@ -50,18 +50,11 @@ export class RollMacroCreateSubCommand extends BaseCommandClass(
 			return;
 		}
 
-		await kobold.sheetRecord.update(
-			{ id: activeCharacter.sheetRecord.id },
-			{
-				rollMacros: [
-					...activeCharacter.sheetRecord.rollMacros,
-					{
-						name,
-						macro,
-					},
-				],
-			}
-		);
+		await kobold.rollMacro.create({
+			name,
+			macro,
+			sheetRecordId: activeCharacter.sheetRecord.id,
+		});
 
 		//send a response
 		await InteractionUtils.send(

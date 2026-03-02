@@ -43,11 +43,12 @@ export async function up(db: Kysely<any>): Promise<void> {
 		)
 		.addColumn('name', 'text', col => col.notNull())
 		.addColumn('type', 'text', col => col.notNull())
+		.addColumn('note', 'text')
 		.addColumn('is_active', 'boolean', col => col.notNull().defaultTo(false))
 		.addColumn('severity', 'integer')
-		.addColumn('description', 'text', col => col.notNull().defaultTo(''))
+		.addColumn('description', 'text')
 		.addColumn('roll_adjustment', 'text')
-		.addColumn('roll_target_tags', 'jsonb', col => col.notNull().defaultTo(sql`'[]'::JSONB`))
+		.addColumn('roll_target_tags', 'text')
 		.addColumn('sheet_adjustments', 'jsonb', col => col.notNull().defaultTo(sql`'[]'::JSONB`))
 		.execute();
 
@@ -84,16 +85,17 @@ export async function up(db: Kysely<any>): Promise<void> {
 	// Migrate existing modifiers from sheet record table to modifier table.
 	await db.executeQuery(
 		sql`
-		INSERT INTO modifier (sheet_record_id, name, type, "is_active", severity, description, "roll_adjustment", "roll_target_tags", "sheet_adjustments")
+		INSERT INTO modifier (sheet_record_id, name, type, note, "is_active", severity, description, "roll_adjustment", "roll_target_tags", "sheet_adjustments")
 		SELECT
 			id as sheet_record_id,
 			modifier->>'name' as name,
 			modifier->>'type' as type,
+			modifier->>'note' as note,
 			COALESCE((modifier->>'isActive')::boolean, false) as "is_active",
 			(modifier->>'severity')::integer as severity,
 			COALESCE(modifier->>'description', '') as description,
 			modifier->>'rollAdjustment' as "roll_adjustment",
-			COALESCE(modifier->'rollTargetTags', '[]'::jsonb) as "roll_target_tags",
+			modifier->>'rollTargetTags' as "roll_target_tags",
 			COALESCE(modifier->'sheetAdjustments', '[]'::jsonb) as "sheet_adjustments"
 		FROM sheet_record,
 		jsonb_array_elements(modifiers) as modifier
@@ -161,6 +163,7 @@ export async function down(db: Kysely<any>): Promise<void> {
 			SELECT jsonb_agg(jsonb_build_object(
 				'name', name,
 				'type', type,
+				'note', note,
 				'isActive', "is_active",
 				'severity', severity,
 				'description', description,

@@ -21,7 +21,7 @@ export class ModifierExportSubCommand extends BaseCommandClass(
 		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
 			activeCharacter: true,
 		});
-		const modifiers = activeCharacter.sheetRecord.modifiers;
+		const modifiers = activeCharacter.modifiers;
 
 		const pastebinPost = await new PasteBin({ apiKey: Config.pastebin.apiKey }).post({
 			code: JSON.stringify(modifiers),

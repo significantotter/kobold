@@ -7,15 +7,17 @@ import {
 	InitiativeActorGroupModel,
 	InitiativeActorModel,
 	InitiativeModel,
+	ModifierModel,
 	SheetRecordModel,
 	UserSettingsModel,
 	WgAuthTokenModel,
 } from './models/index.js';
-import type { Database } from './index.js';
+import { ActionModel, Database, RollMacroModel } from './index.js';
 
 export class Kobold {
 	public db: Kysely<Database>;
 
+	public action: ActionModel;
 	public channelDefaultCharacter: ChannelDefaultCharacterModel;
 	public character: CharacterModel;
 	public game: GameModel;
@@ -23,6 +25,8 @@ export class Kobold {
 	public initiative: InitiativeModel;
 	public initiativeActor: InitiativeActorModel;
 	public initiativeActorGroup: InitiativeActorGroupModel;
+	public modifier: ModifierModel;
+	public rollMacro: RollMacroModel;
 	public sheetRecord: SheetRecordModel;
 	public userSettings: UserSettingsModel;
 	public wgAuthToken: WgAuthTokenModel;
@@ -32,6 +36,7 @@ export class Kobold {
 			dialect,
 			plugins: [new ParseJSONResultsPlugin(), new CamelCasePlugin()],
 		});
+		this.action = new ActionModel(this.db);
 		this.channelDefaultCharacter = new ChannelDefaultCharacterModel(this.db);
 		this.character = new CharacterModel(this.db);
 		this.game = new GameModel(this.db);
@@ -39,6 +44,8 @@ export class Kobold {
 		this.initiative = new InitiativeModel(this.db);
 		this.initiativeActor = new InitiativeActorModel(this.db);
 		this.initiativeActorGroup = new InitiativeActorGroupModel(this.db);
+		this.modifier = new ModifierModel(this.db);
+		this.rollMacro = new RollMacroModel(this.db);
 		this.sheetRecord = new SheetRecordModel(this.db);
 		this.userSettings = new UserSettingsModel(this.db);
 		this.wgAuthToken = new WgAuthTokenModel(this.db);
