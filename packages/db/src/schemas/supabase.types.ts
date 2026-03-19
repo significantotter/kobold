@@ -259,6 +259,7 @@ export type Database = {
 					initiative_actor_group_id: number;
 					initiative_id: number;
 					last_updated_at: string;
+					minion_id: number | null;
 					name: string;
 					note: string;
 					reference_npc_name: string | null;
@@ -274,6 +275,7 @@ export type Database = {
 					initiative_actor_group_id: number;
 					initiative_id: number;
 					last_updated_at?: string;
+					minion_id?: number | null;
 					name: string;
 					note?: string;
 					reference_npc_name?: string | null;
@@ -289,6 +291,7 @@ export type Database = {
 					initiative_actor_group_id?: number;
 					initiative_id?: number;
 					last_updated_at?: string;
+					minion_id?: number | null;
 					name?: string;
 					note?: string;
 					reference_npc_name?: string | null;
@@ -322,6 +325,13 @@ export type Database = {
 						columns: ['initiative_id'];
 						isOneToOne: false;
 						referencedRelation: 'initiative';
+						referencedColumns: ['id'];
+					},
+					{
+						foreignKeyName: 'initiative_actor_minion_id_fkey';
+						columns: ['minion_id'];
+						isOneToOne: false;
+						referencedRelation: 'minion';
 						referencedColumns: ['id'];
 					},
 					{
@@ -439,27 +449,27 @@ export type Database = {
 			};
 			minion: {
 				Row: {
+					auto_join_initiative: boolean;
 					character_id: number | null;
 					id: number;
 					name: string;
-					sheet: Json;
-					sheet_record_id: number | null;
+					sheet_record_id: number;
 					user_id: string;
 				};
 				Insert: {
+					auto_join_initiative?: boolean;
 					character_id?: number | null;
 					id?: number;
 					name: string;
-					sheet: Json;
-					sheet_record_id?: number | null;
+					sheet_record_id: number;
 					user_id: string;
 				};
 				Update: {
+					auto_join_initiative?: boolean;
 					character_id?: number | null;
 					id?: number;
 					name?: string;
-					sheet?: Json;
-					sheet_record_id?: number | null;
+					sheet_record_id?: number;
 					user_id?: string;
 				};
 				Relationships: [

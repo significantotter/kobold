@@ -55,16 +55,17 @@ export class InitiativeBuilder {
 		// Initially sort by initiative
 		let comparison = b.initiativeResult - a.initiativeResult;
 		if (comparison === 0) {
-			// On a tie, check if the group has a player in it. Groups
-			// without a player go first
-			const aHasPlayer = this.actorsByGroup[a.id]?.some(
-				actor => actor.characterId !== null && actor.characterId !== undefined
-			);
-			const bHasPlayer = this.actorsByGroup[b.id]?.some(
-				actor => actor.characterId !== null && actor.characterId !== undefined
-			);
-			if (aHasPlayer && !bHasPlayer) comparison = 1;
-			else if (!aHasPlayer && bHasPlayer) comparison = -1;
+			// On a tie, sort by type: NPC -> character -> minion
+			// Determine group type priority (lower = first)
+			const getGroupPriority = (group: InitiativeActorGroup): number => {
+				const actors = this.actorsByGroup[group.id] || [];
+				const hasCharacter = actors.some(actor => actor.characterId != null);
+				const hasMinion = actors.some(actor => actor.minionId != null);
+				if (hasMinion) return 2; // Minions last
+				if (hasCharacter) return 1; // Characters second
+				return 0; // NPCs first
+			};
+			comparison = getGroupPriority(a) - getGroupPriority(b);
 		}
 		// On an additional tie, sort by name
 		if (comparison === 0) comparison = a.name.localeCompare(b.name);
@@ -342,7 +343,24 @@ export class InitiativeBuilder {
 			turnText += this.getActorTurnText(actorsInGroup[0], isActiveGroup, options);
 		} else {
 			turnText += `${turnSymbol} ${actorGroup.initiativeResult}. ${actorGroup.name}\n`;
-			const sortedActors = actorsInGroup.sort((a, b) => a.name.localeCompare(b.name));
+			// Sort actors: characters first, then minions, then NPCs.
+			// Within each category, sort alphabetically by name.
+			const sortedActors = actorsInGroup.sort((a, b) => {
+				// Characters (characterId set) come first
+				const aIsCharacter = a.characterId != null;
+				const bIsCharacter = b.characterId != null;
+				if (aIsCharacter && !bIsCharacter) return -1;
+				if (!aIsCharacter && bIsCharacter) return 1;
+
+				// Minions (minionId set) come after characters but before NPCs
+				const aIsMinion = a.minionId != null;
+				const bIsMinion = b.minionId != null;
+				if (aIsMinion && !bIsMinion) return -1;
+				if (!aIsMinion && bIsMinion) return 1;
+
+				// Within same category, sort alphabetically
+				return a.name.localeCompare(b.name);
+			});
 			for (let i = 0; i < sortedActors.length; i++) {
 				turnText += `       ${i}. ${sortedActors[i].name}`;
 				turnText += this.getActorTurnText(sortedActors[i], isActiveGroup, options);
@@ -373,7 +391,9 @@ export class InitiativeBuilder {
 		} = { showHiddenCreatureStats: false }
 	): string {
 		let turnText = '';
-		const sheet = actor.sheetRecord.sheet;
+		// Use the adjusted sheet to include modifier effects on HP max, etc.
+		const creature = Creature.fromSheetRecord(actor);
+		const sheet = creature.sheet;
 		// use a second line for an actor with a too-long name
 		if (actor.name.length > 40) {
 			turnText += '\n';

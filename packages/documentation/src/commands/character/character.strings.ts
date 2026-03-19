@@ -96,6 +96,26 @@ export const characterStrings = {
 		},
 	},
 
+	// ─── MIGRATE ITEMS SUBCOMMAND ────────────────────────────────────────
+	migrateItems: {
+		success: msg(
+			(p: { actionsCount: number; modifiersCount: number; rollMacrosCount: number }) =>
+				`Yip! Migration complete! Migrated ${p.actionsCount} actions, ${p.modifiersCount} modifiers, and ${p.rollMacrosCount} roll macros to user scope.`
+		),
+		noItemsToMigrate:
+			'Yip! No character-specific items to migrate. All your actions, modifiers, and roll macros are already user-scoped!',
+		confirmation: {
+			text: msg(
+				(p: { actionsCount: number; modifiersCount: number; rollMacrosCount: number }) =>
+					`This will promote ${p.actionsCount} actions, ${p.modifiersCount} modifiers, and ${p.rollMacrosCount} roll macros from character-specific to user scope. User-scoped items will be available to all your characters and minions. Continue?`
+			),
+			migrateButton: 'MIGRATE',
+			cancelButton: 'CANCEL',
+			expired: 'Yip! Migration request expired.',
+		},
+		cancelled: 'Yip! Migration cancelled.',
+	},
+
 	// ─── REMOVE SUBCOMMAND ───────────────────────────────────────────────
 	remove: {
 		confirmation: {

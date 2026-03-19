@@ -100,6 +100,8 @@ describe('ActionCreateSubCommand', () => {
 			setupKoboldUtilsMocks({ actions: [existingAction] });
 			setupFinderHelpersMocks(existingAction);
 			const { createMock } = setupActionModelMock(kobold);
+			// Override readManyByUser to return existing action for duplicate check
+			kobold.action.readManyByUser.mockResolvedValue([existingAction]);
 
 			// Act
 			const result = await harness.executeCommand({

@@ -18,6 +18,7 @@ export enum ModifierSubCommandEnum {
 	severity = 'severity',
 	set = 'set',
 	remove = 'remove',
+	assign = 'assign',
 }
 
 export const modifierCommandDefinition = {
@@ -33,6 +34,12 @@ export const modifierCommandDefinition = {
 			name: ModifierSubCommandEnum.list,
 			description: 'Lists all modifiers available to your active character.',
 			type: ApplicationCommandOptionType.Subcommand,
+			options: {
+				[ModifierCommandOptionEnum.ownedBy]: withOrder(
+					modifierCommandOptions[ModifierCommandOptionEnum.ownedBy],
+					1
+				),
+			},
 		},
 		[ModifierSubCommandEnum.detail]: {
 			name: ModifierSubCommandEnum.detail,
@@ -106,6 +113,10 @@ export const modifierCommandDefinition = {
 				[ModifierCommandOptionEnum.initiativeNote]: withOrder(
 					modifierCommandOptions[ModifierCommandOptionEnum.initiativeNote],
 					8
+				),
+				[ModifierCommandOptionEnum.createFor]: withOrder(
+					modifierCommandOptions[ModifierCommandOptionEnum.createFor],
+					9
 				),
 			},
 		},
@@ -182,6 +193,26 @@ export const modifierCommandDefinition = {
 						choices: undefined,
 					} as APIApplicationCommandOption,
 					1
+				),
+			},
+		},
+		[ModifierSubCommandEnum.assign]: {
+			name: ModifierSubCommandEnum.assign,
+			description:
+				'Assigns a modifier to a character or a minion, or unassigns the modifier.',
+			type: ApplicationCommandOptionType.Subcommand,
+			options: {
+				[ModifierCommandOptionEnum.targetModifier]: withOrder(
+					modifierCommandOptions[ModifierCommandOptionEnum.targetModifier],
+					1
+				),
+				[ModifierCommandOptionEnum.assignTo]: withOrder(
+					modifierCommandOptions[ModifierCommandOptionEnum.assignTo],
+					2
+				),
+				[ModifierCommandOptionEnum.copy]: withOrder(
+					modifierCommandOptions[ModifierCommandOptionEnum.copy],
+					3
 				),
 			},
 		},

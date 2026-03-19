@@ -15,6 +15,11 @@ export enum ModifierCommandOptionEnum {
 	setValue = 'value',
 	importMode = 'import-mode',
 	importUrl = 'url',
+	createFor = 'create-for',
+	ownedBy = 'owned-by',
+	assignTo = 'assign-to',
+	copy = 'copy',
+	targetModifier = 'modifier',
 }
 
 /**
@@ -164,6 +169,40 @@ export const modifierCommandOptions = {
 		name: 'url',
 		description: 'The pastebin url with the modifier code to import.',
 		required: true,
+		type: ApplicationCommandOptionType.String,
+	},
+	[ModifierCommandOptionEnum.createFor]: {
+		name: ModifierCommandOptionEnum.createFor,
+		description: 'Create for a specific character/minion, or "Me" for user-wide (default: Me)',
+		required: false,
+		autocomplete: true,
+		type: ApplicationCommandOptionType.String,
+	},
+	[ModifierCommandOptionEnum.ownedBy]: {
+		name: ModifierCommandOptionEnum.ownedBy,
+		description: 'Filter modifiers by owner (default: Everyone)',
+		required: false,
+		autocomplete: true,
+		type: ApplicationCommandOptionType.String,
+	},
+	[ModifierCommandOptionEnum.assignTo]: {
+		name: ModifierCommandOptionEnum.assignTo,
+		description: 'The character or minion to assign the modifier to, or "Me" for user-wide.',
+		required: true,
+		autocomplete: true,
+		type: ApplicationCommandOptionType.String,
+	},
+	[ModifierCommandOptionEnum.copy]: {
+		name: ModifierCommandOptionEnum.copy,
+		description: 'Create a copy instead of moving the modifier (default: false)',
+		required: false,
+		type: ApplicationCommandOptionType.Boolean,
+	},
+	[ModifierCommandOptionEnum.targetModifier]: {
+		name: ModifierCommandOptionEnum.targetModifier,
+		description: 'The target modifier.',
+		required: true,
+		autocomplete: true,
 		type: ApplicationCommandOptionType.String,
 	},
 } satisfies SpecificCommandOptions<ModifierCommandOptionEnum>;

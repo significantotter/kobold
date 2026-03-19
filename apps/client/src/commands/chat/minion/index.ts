@@ -1,6 +1,8 @@
 import { CommandExport } from '../../command.js';
 import { MinionCommand } from './minion-command.js';
+import { MinionAssignSubCommand } from './minion-assign-subcommand.js';
 import { MinionCreateSubCommand } from './minion-create-subcommand.js';
+import { MinionJoinSubCommand } from './minion-join-subcommand.js';
 import { MinionListSubCommand } from './minion-list-subcommand.js';
 import { MinionRemoveSubCommand } from './minion-remove-subcommand.js';
 import { MinionRollSubCommand } from './minion-roll-subcommand.js';
@@ -11,7 +13,9 @@ import { MinionUpdateSubCommand } from './minion-update-subcommand.js';
 export const MinionCommandExport: CommandExport = {
 	command: MinionCommand,
 	subCommands: [
+		MinionAssignSubCommand,
 		MinionCreateSubCommand,
+		MinionJoinSubCommand,
 		MinionListSubCommand,
 		MinionRemoveSubCommand,
 		MinionRollSubCommand,

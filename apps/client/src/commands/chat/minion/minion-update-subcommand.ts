@@ -64,6 +64,9 @@ export class MinionUpdateSubCommand extends BaseCommandClass(
 			.getString(commandOptions[commandOptionsEnum.minion].name, true)
 			.trim();
 		const statsInput = intr.options.getString(commandOptions[commandOptionsEnum.stats].name);
+		const autoJoinInitiative = intr.options.getBoolean(
+			commandOptions[commandOptionsEnum.autoJoinInitiative].name
+		);
 
 		// Find the minion
 		const minions = await kobold.minion.readMany({
@@ -79,48 +82,68 @@ export class MinionUpdateSubCommand extends BaseCommandClass(
 			);
 		}
 
-		// If no stats provided, nothing to update
-		if (!statsInput) {
-			throw new KoboldError('Yip! You must provide stats to update the minion with!');
+		// If nothing to update, error
+		if (!statsInput && autoJoinInitiative === null) {
+			throw new KoboldError(
+				'Yip! You must provide stats or auto-join-initiative to update the minion!'
+			);
 		}
 
 		// Get the current sheet and apply the stat adjustments
-		let sheet = targetMinion.sheet;
+		let sheet = targetMinion.sheetRecord.sheet;
 
-		const adjustments = SheetUtils.stringToSheetAdjustments(
-			statsInput,
-			SheetAdjustmentTypeEnum.untyped
-		);
-		const adjustedSheet = SheetUtils.adjustSheetWithSheetAdjustments(sheet, adjustments);
+		if (statsInput) {
+			const adjustments = SheetUtils.stringToSheetAdjustments(
+				statsInput,
+				SheetAdjustmentTypeEnum.untyped
+			);
+			const adjustedSheet = SheetUtils.adjustSheetWithSheetAdjustments(sheet, adjustments);
 
-		const creature = new Creature(
-			{
-				sheet: adjustedSheet,
-				actions: targetMinion.actions ?? [],
-				rollMacros: targetMinion.rollMacros ?? [],
-				modifiers: targetMinion.modifiers ?? [],
-				conditions: [],
-			},
-			undefined,
-			intr
-		);
-		creature.recover();
-		sheet = creature._sheet;
+			const creature = new Creature(
+				{
+					sheet: adjustedSheet,
+					actions: targetMinion.actions ?? [],
+					rollMacros: targetMinion.rollMacros ?? [],
+					modifiers: targetMinion.modifiers ?? [],
+					conditions: targetMinion.sheetRecord.conditions ?? [],
+				},
+				undefined,
+				intr
+			);
+			creature.recover();
+			sheet = creature._sheet;
 
-		// Keep the minion's original name
-		sheet = _.merge(sheet, { staticInfo: { name: targetMinion.name } });
+			// Keep the minion's original name
+			sheet = _.merge(sheet, { staticInfo: { name: targetMinion.name } });
+		}
 
-		// Update the minion's sheet
-		await kobold.minion.update({ id: targetMinion.id }, { sheet });
+		// Build update object
+		const updateData: { autoJoinInitiative?: boolean } = {};
+		if (autoJoinInitiative !== null) {
+			updateData.autoJoinInitiative = autoJoinInitiative;
+		}
 
-		// Update the sheetRecord if it exists
-		if (targetMinion.sheetRecordId) {
+		// Update the minion metadata
+		if (Object.keys(updateData).length > 0) {
+			await kobold.minion.update({ id: targetMinion.id }, updateData);
+		}
+
+		// Update the sheetRecord if sheet was changed
+		if (statsInput) {
 			await kobold.sheetRecord.update({ id: targetMinion.sheetRecordId }, { sheet });
+		}
+
+		const updates: string[] = [];
+		if (statsInput) {
+			updates.push('stats');
+		}
+		if (autoJoinInitiative !== null) {
+			updates.push(`auto-join-initiative: ${autoJoinInitiative}`);
 		}
 
 		await InteractionUtils.send(
 			intr,
-			`Yip! I've updated the minion "${targetMinion.name}" with the new stats!`
+			`Yip! I've updated the minion "${targetMinion.name}" (${updates.join(', ')})!`
 		);
 	}
 }

@@ -187,6 +187,20 @@ export async function up(db: Kysely<any>): Promise<void> {
 
 	// Remove the roll_macros column from the sheet record table
 	await db.schema.alterTable('sheet_record').dropColumn('roll_macros').execute();
+
+	// Add minion_id column to initiative_actor table
+	// This allows minions to be tracked as initiative actors alongside characters
+	await db.schema
+		.alterTable('initiative_actor')
+		.addColumn('minion_id', 'integer', col => col.references('minion.id').onDelete('set null'))
+		.execute();
+
+	// Add index for efficient minion lookups
+	await db.schema
+		.createIndex('idx_initiative_actor_minion_id')
+		.on('initiative_actor')
+		.column('minion_id')
+		.execute();
 }
 
 export async function down(db: Kysely<any>): Promise<void> {
@@ -274,4 +288,8 @@ export async function down(db: Kysely<any>): Promise<void> {
 
 	// Remove the minion table
 	await db.schema.dropTable('minion').execute();
+
+	// Remove the minion_id column from initiative_actor table and its index
+	await db.schema.dropIndex('idx_initiative_actor_minion_id').execute();
+	await db.schema.alterTable('initiative_actor').dropColumn('minion_id').execute();
 }

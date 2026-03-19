@@ -14,6 +14,15 @@ export enum MinionCommandOptionEnum {
 	rollExpression = 'dice',
 	rollSecret = 'secret',
 	exportFormat = 'export-format',
+	// Join command options
+	initValue = 'init-value',
+	separateTurn = 'separate-turn',
+	hideStats = 'hide-stats',
+	// Update command options
+	autoJoinInitiative = 'auto-join-initiative',
+	// Create from bestiary option
+	creature = 'creature',
+	template = 'template',
 }
 
 export const minionCommandOptions = {
@@ -135,5 +144,50 @@ export const minionCommandOptions = {
 		description: 'Export the sheet in a format that can be re-imported',
 		type: ApplicationCommandOptionType.Boolean,
 		required: false,
+	},
+	[MinionCommandOptionEnum.initValue]: {
+		name: MinionCommandOptionEnum.initValue,
+		description:
+			'A value to set the minion initiative to. Only used when separate-turn is true.',
+		required: false,
+		type: ApplicationCommandOptionType.Number,
+	},
+	[MinionCommandOptionEnum.separateTurn]: {
+		name: MinionCommandOptionEnum.separateTurn,
+		description:
+			'If true, minion gets its own initiative turn instead of acting with its character.',
+		required: false,
+		type: ApplicationCommandOptionType.Boolean,
+	},
+	[MinionCommandOptionEnum.hideStats]: {
+		name: MinionCommandOptionEnum.hideStats,
+		description: 'Whether to hide the minion stats in the initiative tracker.',
+		required: false,
+		type: ApplicationCommandOptionType.Boolean,
+	},
+	[MinionCommandOptionEnum.autoJoinInitiative]: {
+		name: MinionCommandOptionEnum.autoJoinInitiative,
+		description:
+			'If true, minion auto-joins initiative when its character joins. Default: true.',
+		required: false,
+		type: ApplicationCommandOptionType.Boolean,
+	},
+	[MinionCommandOptionEnum.creature]: {
+		name: MinionCommandOptionEnum.creature,
+		description: 'A creature from the bestiary to use as a base for the minion.',
+		required: false,
+		autocomplete: true,
+		type: ApplicationCommandOptionType.String,
+	},
+	[MinionCommandOptionEnum.template]: {
+		name: MinionCommandOptionEnum.template,
+		description: 'A creature template to apply (e.g., "elite", "weak").',
+		required: false,
+		type: ApplicationCommandOptionType.String,
+		choices: [
+			{ name: 'None', value: '' },
+			{ name: 'Elite', value: 'elite' },
+			{ name: 'Weak', value: 'weak' },
+		],
 	},
 } satisfies SpecificCommandOptions<MinionCommandOptionEnum>;

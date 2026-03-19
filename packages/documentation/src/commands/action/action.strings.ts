@@ -18,9 +18,45 @@ export const actionStrings = {
 			(p: { actionName: string; characterName: string }) =>
 				`Yip! I created the action ${p.actionName} for ${p.characterName}.`
 		),
+		createdUserWide: msg(
+			(p: { actionName: string }) =>
+				`Yip! I created the action ${p.actionName} for all your characters.`
+		),
 		alreadyExists: msg(
 			(p: { actionName: string; characterName: string }) =>
 				`Yip! An action named ${p.actionName} already exists for ${p.characterName}.`
+		),
+		alreadyExistsUserWide: msg(
+			(p: { actionName: string }) =>
+				`Yip! A user-wide action named ${p.actionName} already exists.`
+		),
+	},
+
+	// ─── ASSIGN SUBCOMMAND ───────────────────────────────────────────────
+	assign: {
+		success: msg(
+			(p: { actionName: string; targetName: string }) =>
+				`Yip! I assigned the action ${p.actionName} to ${p.targetName}.`
+		),
+		successUserWide: msg(
+			(p: { actionName: string }) =>
+				`Yip! I made the action ${p.actionName} available to all your characters.`
+		),
+		copied: msg(
+			(p: { actionName: string; targetName: string }) =>
+				`Yip! I copied the action ${p.actionName} to ${p.targetName}.`
+		),
+		copiedUserWide: msg(
+			(p: { actionName: string }) =>
+				`Yip! I copied the action ${p.actionName} for all your characters.`
+		),
+		alreadyExists: msg(
+			(p: { actionName: string; targetName: string }) =>
+				`Yip! An action named ${p.actionName} already exists for ${p.targetName}.`
+		),
+		alreadyExistsUserWide: msg(
+			(p: { actionName: string }) =>
+				`Yip! A user-wide action named ${p.actionName} already exists.`
 		),
 	},
 

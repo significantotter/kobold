@@ -146,16 +146,40 @@ export class MinionRemoveSubCommand extends BaseCommandClass(
 
 		// Remove the minion
 		if (result && result.value === 'remove') {
-			// Delete the associated sheetRecord if it exists
-			if (targetMinion.sheetRecordId) {
-				await kobold.sheetRecord.delete({ id: targetMinion.sheetRecordId });
+			// Find and remove any initiative actors for this minion
+			const initiativeActors = await kobold.initiativeActor.readManyByMinionId({
+				minionId: targetMinion.id,
+			});
+
+			for (const actor of initiativeActors) {
+				// Check if this actor is the only one in its group
+				const actorsInGroup = await kobold.initiativeActor.readManyByGroupId({
+					groupId: actor.initiativeActorGroupId,
+				});
+
+				// Delete the actor
+				await kobold.initiativeActor.delete({ id: actor.id });
+
+				// If the group is now empty, delete the group
+				if (actorsInGroup.length === 1) {
+					await kobold.initiativeActorGroup.delete({
+						id: actor.initiativeActorGroupId,
+					});
+				}
 			}
+
+			// Delete the associated sheetRecord (this cascades to actions, modifiers, rollMacros)
+			await kobold.sheetRecord.delete({ id: targetMinion.sheetRecordId });
 
 			await kobold.minion.delete({ id: targetMinion.id });
 
+			const removedFromInit =
+				initiativeActors.length > 0
+					? ` They were also removed from ${initiativeActors.length} initiative(s).`
+					: '';
 			await InteractionUtils.send(
 				intr,
-				`Yip! I've removed the minion "${targetMinion.name}" from ${activeCharacter.name}!`
+				`Yip! I've removed the minion "${targetMinion.name}" from ${activeCharacter.name}!${removedFromInit}`
 			);
 			return;
 		}

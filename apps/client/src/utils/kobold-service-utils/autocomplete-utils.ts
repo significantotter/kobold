@@ -1,11 +1,87 @@
 import { AutocompleteInteraction, CacheType } from 'discord.js';
 import _ from 'lodash';
-import { CounterStyleEnum, InitiativeActor, Kobold } from '@kobold/db';
+import {
+	CharacterWithRelations,
+	CounterStyleEnum,
+	InitiativeActor,
+	Kobold,
+	MinionWithRelations,
+} from '@kobold/db';
 import { Creature } from '../creature.js';
 import { InitiativeBuilderUtils } from '../initiative-builder.js';
 import { FinderHelpers } from '../kobold-helpers/finder-helpers.js';
 import type { KoboldUtils } from './kobold-utils.js';
 import { NethysDb } from '@kobold/nethys';
+
+/** Special values for create-for and assign-to autocomplete options */
+export const CreateForTargets = {
+	USER: 'user',
+	CHARACTER_PREFIX: 'character:',
+	MINION_PREFIX: 'minion:',
+} as const;
+
+/** Special values for owned-by filter in list commands */
+export const OwnedByFilters = {
+	EVERYONE: 'everyone',
+	USER: 'user',
+	CHARACTER_PREFIX: 'character:',
+	MINION_PREFIX: 'minion:',
+} as const;
+
+/**
+ * Parses the create-for or assign-to value and returns the sheetRecordId
+ * or null for user-wide scope
+ */
+export function parseCreateForValue(
+	value: string | null,
+	characters: CharacterWithRelations[],
+	minions: MinionWithRelations[]
+): number | null {
+	if (!value || value === CreateForTargets.USER) {
+		return null; // User-wide scope
+	}
+
+	if (value.startsWith(CreateForTargets.CHARACTER_PREFIX)) {
+		const sheetRecordId = parseInt(value.slice(CreateForTargets.CHARACTER_PREFIX.length), 10);
+		const character = characters.find(c => c.sheetRecordId === sheetRecordId);
+		return character?.sheetRecordId ?? null;
+	}
+
+	if (value.startsWith(CreateForTargets.MINION_PREFIX)) {
+		const sheetRecordId = parseInt(value.slice(CreateForTargets.MINION_PREFIX.length), 10);
+		const minion = minions.find(m => m.sheetRecordId === sheetRecordId);
+		return minion?.sheetRecordId ?? null;
+	}
+
+	return null;
+}
+
+/**
+ * Parses the owned-by filter value and returns the filter parameters
+ */
+export function parseOwnedByFilter(
+	value: string | null
+): 'all' | 'user' | { sheetRecordId: number } {
+	if (!value || value === OwnedByFilters.EVERYONE) {
+		return 'all';
+	}
+
+	if (value === OwnedByFilters.USER) {
+		return 'user';
+	}
+
+	if (value.startsWith(OwnedByFilters.CHARACTER_PREFIX)) {
+		const sheetRecordId = parseInt(value.slice(OwnedByFilters.CHARACTER_PREFIX.length), 10);
+		return { sheetRecordId };
+	}
+
+	if (value.startsWith(OwnedByFilters.MINION_PREFIX)) {
+		const sheetRecordId = parseInt(value.slice(OwnedByFilters.MINION_PREFIX.length), 10);
+		return { sheetRecordId };
+	}
+
+	return 'all';
+}
 
 export class AutocompleteUtils {
 	public kobold: Kobold;
@@ -279,12 +355,13 @@ export class AutocompleteUtils {
 	}
 
 	public async getAllTargetOptions(intr: AutocompleteInteraction<CacheType>, matchText: string) {
-		const { characterOptions, actorOptions } =
+		const { characterOptions, actorOptions, minionOptions } =
 			await this.koboldUtils.gameUtils.getAllTargetableOptions(intr);
 
 		const allOptions = [
 			{ name: '(None)', value: '__NONE__' },
 			...actorOptions.map(c => ({ name: c.name, value: c.name })),
+			...minionOptions.map(m => ({ name: m.name, value: m.name })),
 			...characterOptions.map(c => ({ name: c.name, value: c.name })),
 		];
 
@@ -338,5 +415,123 @@ export class AutocompleteUtils {
 		}));
 		//return the matched saves
 		return matchedConditions;
+	}
+
+	/**
+	 * Autocomplete for the "create-for" option in create commands.
+	 * Returns "Me (All Characters)" as default, plus all user's characters and minions.
+	 */
+	public async getCreateForOptions(
+		intr: AutocompleteInteraction<CacheType>,
+		matchText: string
+	): Promise<{ name: string; value: string }[]> {
+		const choices: { name: string; value: string }[] = [
+			{ name: '👤 Me (All Characters)', value: CreateForTargets.USER },
+		];
+
+		// Add user's characters
+		const characters = await this.kobold.character.readMany({ userId: intr.user.id });
+		for (const char of characters) {
+			choices.push({
+				name: `🎭 ${char.name}`,
+				value: `${CreateForTargets.CHARACTER_PREFIX}${char.sheetRecordId}`,
+			});
+		}
+
+		// Add user's minions
+		const charIds = characters.map(c => c.id);
+		if (charIds.length > 0) {
+			const minions = await this.kobold.minion.readManyByCharacterIds({
+				characterIds: charIds,
+			});
+			for (const minion of minions) {
+				const parentChar = characters.find(c => c.id === minion.characterId);
+				choices.push({
+					name: `🐕 ${minion.name}${parentChar ? ` (${parentChar.name}'s minion)` : ''}`,
+					value: `${CreateForTargets.MINION_PREFIX}${minion.sheetRecordId}`,
+				});
+			}
+		}
+
+		// Filter by typed value
+		const filtered = choices.filter(c =>
+			c.name.toLowerCase().includes(matchText.toLowerCase())
+		);
+
+		return filtered.slice(0, 25);
+	}
+
+	/**
+	 * Autocomplete for the "owned-by" option in list commands.
+	 * Returns "Everyone", "Me (All Characters)", and all user's characters and minions.
+	 */
+	public async getOwnedByOptions(
+		intr: AutocompleteInteraction<CacheType>,
+		matchText: string
+	): Promise<{ name: string; value: string }[]> {
+		const choices: { name: string; value: string }[] = [
+			{ name: '🌐 Everyone', value: OwnedByFilters.EVERYONE },
+			{ name: '👤 Me (All Characters)', value: OwnedByFilters.USER },
+		];
+
+		// Add user's characters
+		const characters = await this.kobold.character.readMany({ userId: intr.user.id });
+		for (const char of characters) {
+			choices.push({
+				name: `🎭 ${char.name}`,
+				value: `${OwnedByFilters.CHARACTER_PREFIX}${char.sheetRecordId}`,
+			});
+		}
+
+		// Add user's minions
+		const charIds = characters.map(c => c.id);
+		if (charIds.length > 0) {
+			const minions = await this.kobold.minion.readManyByCharacterIds({
+				characterIds: charIds,
+			});
+			for (const minion of minions) {
+				const parentChar = characters.find(c => c.id === minion.characterId);
+				choices.push({
+					name: `🐕 ${minion.name}${parentChar ? ` (${parentChar.name}'s minion)` : ''}`,
+					value: `${OwnedByFilters.MINION_PREFIX}${minion.sheetRecordId}`,
+				});
+			}
+		}
+
+		// Filter by typed value
+		const filtered = choices.filter(c =>
+			c.name.toLowerCase().includes(matchText.toLowerCase())
+		);
+
+		return filtered.slice(0, 25);
+	}
+
+	/**
+	 * Autocomplete for the "assign-to" option in assign commands.
+	 * Same as createFor but without the default selection.
+	 */
+	public async getAssignToOptions(
+		intr: AutocompleteInteraction<CacheType>,
+		matchText: string
+	): Promise<{ name: string; value: string }[]> {
+		return this.getCreateForOptions(intr, matchText);
+	}
+
+	/**
+	 * Get all user's characters and minions for data retrieval
+	 */
+	public async getUserCharactersAndMinions(
+		intr: AutocompleteInteraction<CacheType> | { user: { id: string } }
+	): Promise<{
+		characters: CharacterWithRelations[];
+		minions: MinionWithRelations[];
+	}> {
+		const characters = await this.kobold.character.readMany({ userId: intr.user.id });
+		const charIds = characters.map(c => c.id);
+		const minions =
+			charIds.length > 0
+				? await this.kobold.minion.readManyByCharacterIds({ characterIds: charIds })
+				: [];
+		return { characters, minions };
 	}
 }

@@ -163,17 +163,6 @@ type SnakeCaseDatabase = KyselifyDatabase<
 							expires_at?: Date;
 						};
 					};
-					minion: {
-						Row: {
-							sheet: Sheet;
-						};
-						Insert: {
-							sheet: Sheet;
-						};
-						Update: {
-							sheet?: Sheet;
-						};
-					};
 					modifier: {
 						Row: {
 							type: SheetAdjustmentTypeEnum;

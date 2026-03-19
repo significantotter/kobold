@@ -28,9 +28,45 @@ export const modifierStrings = {
 			(p: { modifierName: string; characterName: string }) =>
 				`Yip! A modifier named ${p.modifierName} already exists for ${p.characterName}.`
 		),
+		alreadyExistsUserWide: msg(
+			(p: { modifierName: string }) =>
+				`Yip! A user-wide modifier named ${p.modifierName} already exists.`
+		),
 		created: msg(
 			(p: { modifierName: string; characterName: string }) =>
 				`Yip! I created the modifier ${p.modifierName} for ${p.characterName}.`
+		),
+		createdUserWide: msg(
+			(p: { modifierName: string }) =>
+				`Yip! I created the modifier ${p.modifierName} for all your characters.`
+		),
+	},
+
+	// ─── ASSIGN SUBCOMMAND ───────────────────────────────────────────────
+	assign: {
+		success: msg(
+			(p: { modifierName: string; targetName: string }) =>
+				`Yip! I assigned the modifier ${p.modifierName} to ${p.targetName}.`
+		),
+		successUserWide: msg(
+			(p: { modifierName: string }) =>
+				`Yip! I made the modifier ${p.modifierName} available to all your characters.`
+		),
+		copied: msg(
+			(p: { modifierName: string; targetName: string }) =>
+				`Yip! I copied the modifier ${p.modifierName} to ${p.targetName}.`
+		),
+		copiedUserWide: msg(
+			(p: { modifierName: string }) =>
+				`Yip! I copied the modifier ${p.modifierName} for all your characters.`
+		),
+		alreadyExists: msg(
+			(p: { modifierName: string; targetName: string }) =>
+				`Yip! A modifier named ${p.modifierName} already exists for ${p.targetName}.`
+		),
+		alreadyExistsUserWide: msg(
+			(p: { modifierName: string }) =>
+				`Yip! A user-wide modifier named ${p.modifierName} already exists.`
 		),
 	},
 

@@ -13,6 +13,7 @@ export enum CharacterSubCommandEnum {
 	importPathbuilder = 'import-pathbuilder',
 	importPasteBin = 'import-pastebin',
 	list = 'list',
+	migrateItems = 'migrate-items',
 	remove = 'remove',
 	setActive = 'set-active',
 	setDefault = 'set-default',
@@ -69,6 +70,13 @@ export const characterCommandDefinition = {
 		[CharacterSubCommandEnum.list]: {
 			name: CharacterSubCommandEnum.list,
 			description: 'Lists all characters.',
+			type: ApplicationCommandOptionType.Subcommand,
+			options: {},
+		},
+		[CharacterSubCommandEnum.migrateItems]: {
+			name: CharacterSubCommandEnum.migrateItems,
+			description:
+				'Migrate character-specific actions, modifiers, and roll macros to user scope.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {},
 		},

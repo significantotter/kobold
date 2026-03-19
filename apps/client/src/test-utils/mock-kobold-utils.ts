@@ -244,12 +244,21 @@ export function setupKoboldUtilsMocks(options: MockCharacterOptions = {}): Kobol
 
 	const getActiveCharacterMock = vi.fn(async () => mockCharacter);
 
-	vi.mocked(KoboldUtils).mockImplementation(function (this: any) {
+	const getUserCharactersAndMinionsMock = vi.fn(async () => ({
+		characters: [mockCharacter],
+		minions: [],
+	}));
+
+	vi.mocked(KoboldUtils).mockImplementation(function (this: any, kobold: any) {
+		this.kobold = kobold;
 		this.fetchNonNullableDataForCommand = fetchNonNullableDataMock;
 		this.fetchDataForCommand = fetchDataMock;
 		this.assertActiveCharacterNotNull = vi.fn(() => {});
 		this.characterUtils = {
 			getActiveCharacter: getActiveCharacterMock,
+		};
+		this.autocompleteUtils = {
+			getUserCharactersAndMinions: getUserCharactersAndMinionsMock,
 		};
 		return this;
 	} as MockReturnValue);
@@ -409,6 +418,8 @@ export function setupModifierModelMock(vitestKobold: {
 		update: (...args: any[]) => any;
 		delete: (...args: any[]) => any;
 		deleteBySheetRecordId: (...args: any[]) => any;
+		readManyByUser: (...args: any[]) => any;
+		readManyUserWide: (...args: any[]) => any;
 	};
 }): ModifierModelMockSetup {
 	const createMock = vi.spyOn(vitestKobold.modifier, 'create').mockResolvedValue(fake(zModifier));
@@ -417,6 +428,9 @@ export function setupModifierModelMock(vitestKobold: {
 	const deleteBySheetRecordIdMock = vi
 		.spyOn(vitestKobold.modifier, 'deleteBySheetRecordId')
 		.mockResolvedValue(undefined);
+	// Default to empty array so tests don't fail on "already exists" check
+	vi.spyOn(vitestKobold.modifier, 'readManyByUser').mockResolvedValue([]);
+	vi.spyOn(vitestKobold.modifier, 'readManyUserWide').mockResolvedValue([]);
 
 	return { createMock, updateMock, deleteMock, deleteBySheetRecordIdMock };
 }
@@ -454,6 +468,8 @@ export function setupRollMacroModelMock(vitestKobold: {
 		update: (...args: any[]) => any;
 		delete: (...args: any[]) => any;
 		deleteBySheetRecordId: (...args: any[]) => any;
+		readManyByUser: (...args: any[]) => any;
+		readManyUserWide: (...args: any[]) => any;
 	};
 }): RollMacroModelMockSetup {
 	const createMock = vi
@@ -466,6 +482,9 @@ export function setupRollMacroModelMock(vitestKobold: {
 	const deleteBySheetRecordIdMock = vi
 		.spyOn(vitestKobold.rollMacro, 'deleteBySheetRecordId')
 		.mockResolvedValue(undefined);
+	// Default to empty array so tests don't fail on "already exists" check
+	vi.spyOn(vitestKobold.rollMacro, 'readManyByUser').mockResolvedValue([]);
+	vi.spyOn(vitestKobold.rollMacro, 'readManyUserWide').mockResolvedValue([]);
 
 	return { createMock, updateMock, deleteMock, deleteBySheetRecordIdMock };
 }
@@ -503,6 +522,8 @@ export function setupActionModelMock(vitestKobold: {
 		update: (...args: any[]) => any;
 		delete: (...args: any[]) => any;
 		deleteBySheetRecordId: (...args: any[]) => any;
+		readManyByUser: (...args: any[]) => any;
+		readManyUserWide: (...args: any[]) => any;
 	};
 }): ActionModelMockSetup {
 	const createMock = vi.spyOn(vitestKobold.action, 'create').mockResolvedValue(fake(zAction));
@@ -511,6 +532,9 @@ export function setupActionModelMock(vitestKobold: {
 	const deleteBySheetRecordIdMock = vi
 		.spyOn(vitestKobold.action, 'deleteBySheetRecordId')
 		.mockResolvedValue(undefined);
+	// Default to empty array so tests don't fail on "already exists" check
+	vi.spyOn(vitestKobold.action, 'readManyByUser').mockResolvedValue([]);
+	vi.spyOn(vitestKobold.action, 'readManyUserWide').mockResolvedValue([]);
 
 	return { createMock, updateMock, deleteMock, deleteBySheetRecordIdMock };
 }
@@ -934,6 +958,7 @@ export function createMockInitiativeActor(
 		initiativeActorGroupId: group.id,
 		actorGroup: group,
 		characterId: null,
+		minionId: null,
 		gameId: null,
 		userId,
 		hideStats: false,

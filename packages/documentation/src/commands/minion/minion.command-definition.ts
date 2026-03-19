@@ -7,12 +7,13 @@ import { withOrder } from '../helpers/common.js';
 export enum MinionSubCommandEnum {
 	update = 'update',
 	create = 'create',
-	// assign = 'assign',
+	assign = 'assign',
 	sheet = 'sheet',
 	list = 'list',
 	remove = 'remove',
 	roll = 'roll',
 	set = 'set',
+	join = 'join',
 }
 
 export const minionCommandDefinition = {
@@ -34,8 +35,15 @@ export const minionCommandDefinition = {
 					1
 				),
 				[MinionCommandOptionEnum.stats]: withOrder(
-					minionCommandOptions[MinionCommandOptionEnum.stats],
+					{
+						...minionCommandOptions[MinionCommandOptionEnum.stats],
+						required: false,
+					},
 					2
+				),
+				[MinionCommandOptionEnum.autoJoinInitiative]: withOrder(
+					minionCommandOptions[MinionCommandOptionEnum.autoJoinInitiative],
+					3
 				),
 			},
 		},
@@ -45,30 +53,50 @@ export const minionCommandDefinition = {
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
 				[MinionCommandOptionEnum.name]: withOrder(
-					minionCommandOptions[MinionCommandOptionEnum.name],
+					{
+						...minionCommandOptions[MinionCommandOptionEnum.name],
+						required: false,
+						description:
+							'The name of the minion. If not provided, uses the creature name.',
+					},
 					1
 				),
+				[MinionCommandOptionEnum.creature]: withOrder(
+					minionCommandOptions[MinionCommandOptionEnum.creature],
+					2
+				),
+				[MinionCommandOptionEnum.template]: withOrder(
+					minionCommandOptions[MinionCommandOptionEnum.template],
+					3
+				),
 				[MinionCommandOptionEnum.stats]: withOrder(
-					minionCommandOptions[MinionCommandOptionEnum.stats],
+					{
+						...minionCommandOptions[MinionCommandOptionEnum.stats],
+						required: false,
+					},
+					4
+				),
+				[MinionCommandOptionEnum.autoJoinInitiative]: withOrder(
+					minionCommandOptions[MinionCommandOptionEnum.autoJoinInitiative],
+					5
+				),
+			},
+		},
+		[MinionSubCommandEnum.assign]: {
+			name: MinionSubCommandEnum.assign,
+			description: 'Assign a minion to a different character',
+			type: ApplicationCommandOptionType.Subcommand,
+			options: {
+				[MinionCommandOptionEnum.minion]: withOrder(
+					minionCommandOptions[MinionCommandOptionEnum.minion],
+					1
+				),
+				[MinionCommandOptionEnum.targetCharacter]: withOrder(
+					minionCommandOptions[MinionCommandOptionEnum.targetCharacter],
 					2
 				),
 			},
 		},
-		// [MinionSubCommandEnum.assign]: {
-		// 	name: MinionSubCommandEnum.assign,
-		// 	description: 'Assign a minion to a character',
-		// 	type: ApplicationCommandOptionType.Subcommand,
-		// 	options: {
-		// 		[MinionCommandOptionEnum.minion]: withOrder(
-		// 			minionCommandOptions[MinionCommandOptionEnum.minion],
-		// 			1
-		// 		),
-		// 		[MinionCommandOptionEnum.targetCharacter]: withOrder(
-		// 			minionCommandOptions[MinionCommandOptionEnum.targetCharacter],
-		// 			2
-		// 		),
-		// 	},
-		// },
 		[MinionSubCommandEnum.sheet]: {
 			name: MinionSubCommandEnum.sheet,
 			description: "Display a minion's sheet",
@@ -144,6 +172,43 @@ export const minionCommandDefinition = {
 				[MinionCommandOptionEnum.value]: withOrder(
 					minionCommandOptions[MinionCommandOptionEnum.value],
 					3
+				),
+			},
+		},
+		[MinionSubCommandEnum.join]: {
+			name: MinionSubCommandEnum.join,
+			description: "Add a minion to the current channel's initiative",
+			type: ApplicationCommandOptionType.Subcommand,
+			options: {
+				[MinionCommandOptionEnum.minion]: withOrder(
+					minionCommandOptions[MinionCommandOptionEnum.minion],
+					1
+				),
+				[MinionCommandOptionEnum.separateTurn]: withOrder(
+					minionCommandOptions[MinionCommandOptionEnum.separateTurn],
+					2
+				),
+				[MinionCommandOptionEnum.skillChoice]: withOrder(
+					{
+						...minionCommandOptions[MinionCommandOptionEnum.skillChoice],
+						required: false,
+					},
+					3
+				),
+				[MinionCommandOptionEnum.rollExpression]: withOrder(
+					{
+						...minionCommandOptions[MinionCommandOptionEnum.rollExpression],
+						required: false,
+					},
+					4
+				),
+				[MinionCommandOptionEnum.initValue]: withOrder(
+					minionCommandOptions[MinionCommandOptionEnum.initValue],
+					5
+				),
+				[MinionCommandOptionEnum.hideStats]: withOrder(
+					minionCommandOptions[MinionCommandOptionEnum.hideStats],
+					6
 				),
 			},
 		},

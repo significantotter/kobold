@@ -106,6 +106,21 @@ export const characterCommandDocumentation: CommandDocumentation<
 				},
 			],
 		},
+		[CharacterSubCommandEnum.migrateItems]: {
+			name: CharacterSubCommandEnum.migrateItems,
+			description:
+				'Migrate character-specific actions, modifiers, and roll macros to user scope.',
+			usage: null,
+			examples: [
+				{
+					title: 'Success',
+					type: CommandResponseTypeEnum.success,
+					message:
+						'Yip! Migration complete! Migrated {actionsCount:5} actions, {modifiersCount:3} modifiers, and {rollMacrosCount:2} roll macros to user scope.',
+					options: {},
+				},
+			],
+		},
 		[CharacterSubCommandEnum.remove]: {
 			name: CharacterSubCommandEnum.remove,
 			description: 'Removes a character.',

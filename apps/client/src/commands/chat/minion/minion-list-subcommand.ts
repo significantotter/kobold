@@ -34,7 +34,7 @@ export class MinionListSubCommand extends BaseCommandClass(
 		}
 
 		const minionFields = minions.map((minion: MinionWithRelations) => {
-			const sheet = minion.sheet;
+			const sheet = minion.sheetRecord.sheet;
 			const hp = sheet.baseCounters?.hp;
 			const ac = sheet.intProperties?.ac;
 			const level = sheet.staticInfo?.level;
@@ -49,6 +49,8 @@ export class MinionListSubCommand extends BaseCommandClass(
 			if (ac !== undefined && ac !== null) {
 				stats.push(`AC: ${ac}`);
 			}
+			// Show auto-join status
+			stats.push(minion.autoJoinInitiative ? 'Auto-join: Yes' : 'Auto-join: No');
 
 			return {
 				name: minion.name,

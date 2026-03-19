@@ -1,6 +1,14 @@
 import { ExpressionBuilder } from 'kysely';
 import { jsonArrayFrom, jsonObjectFrom } from 'kysely/helpers/postgres';
-import { Action, Database, Game, Modifier, RollMacro, SheetRecord } from '../schemas/index.js';
+import {
+	Action,
+	Database,
+	Game,
+	Minion,
+	Modifier,
+	RollMacro,
+	SheetRecord,
+} from '../schemas/index.js';
 
 // ============================================================================
 // Sheet Record Relations for Character
@@ -17,34 +25,73 @@ export function sheetRecordForCharacter(eb: ExpressionBuilder<Database, 'charact
 		.as('sheetRecord');
 }
 
+/**
+ * Fetches actions for a character including:
+ * - Character-specific actions (sheetRecordId matches character's sheetRecordId)
+ * - User-wide actions (sheetRecordId is null) where userId matches character's userId
+ */
 export function actionsForCharacter(eb: ExpressionBuilder<Database, 'character'>) {
 	return jsonArrayFrom(
 		eb
 			.selectFrom('action')
 			.selectAll('action')
-			.whereRef('action.sheetRecordId', '=', 'character.sheetRecordId')
+			.where(eb2 =>
+				eb2.or([
+					eb2.and([
+						eb2('action.sheetRecordId', 'is', null),
+						eb2.eb('action.userId', '=', eb2.ref('character.userId')),
+					]),
+					eb2.eb('action.sheetRecordId', '=', eb2.ref('character.sheetRecordId')),
+				])
+			)
 	)
 		.$castTo<Action[]>()
 		.as('actions');
 }
 
+/**
+ * Fetches modifiers for a character including:
+ * - Character-specific modifiers (sheetRecordId matches character's sheetRecordId)
+ * - User-wide modifiers (sheetRecordId is null) where userId matches character's userId
+ */
 export function modifiersForCharacter(eb: ExpressionBuilder<Database, 'character'>) {
 	return jsonArrayFrom(
 		eb
 			.selectFrom('modifier')
 			.selectAll('modifier')
-			.whereRef('modifier.sheetRecordId', '=', 'character.sheetRecordId')
+			.where(eb2 =>
+				eb2.or([
+					eb2.and([
+						eb2('modifier.sheetRecordId', 'is', null),
+						eb2.eb('modifier.userId', '=', eb2.ref('character.userId')),
+					]),
+					eb2.eb('modifier.sheetRecordId', '=', eb2.ref('character.sheetRecordId')),
+				])
+			)
 	)
 		.$castTo<Modifier[]>()
 		.as('modifiers');
 }
 
+/**
+ * Fetches roll macros for a character including:
+ * - Character-specific roll macros (sheetRecordId matches character's sheetRecordId)
+ * - User-wide roll macros (sheetRecordId is null) where userId matches character's userId
+ */
 export function rollMacrosForCharacter(eb: ExpressionBuilder<Database, 'character'>) {
 	return jsonArrayFrom(
 		eb
 			.selectFrom('rollMacro')
 			.selectAll('rollMacro')
-			.whereRef('rollMacro.sheetRecordId', '=', 'character.sheetRecordId')
+			.where(eb2 =>
+				eb2.or([
+					eb2.and([
+						eb2('rollMacro.sheetRecordId', 'is', null),
+						eb2.eb('rollMacro.userId', '=', eb2.ref('character.userId')),
+					]),
+					eb2.eb('rollMacro.sheetRecordId', '=', eb2.ref('character.sheetRecordId')),
+				])
+			)
 	)
 		.$castTo<RollMacro[]>()
 		.as('rollMacros');
@@ -78,37 +125,91 @@ export function sheetRecordForActor(eb: ExpressionBuilder<Database, 'initiativeA
 		.as('sheetRecord');
 }
 
+/**
+ * Fetches actions for an initiative actor including:
+ * - Actor-specific actions (sheetRecordId matches actor's sheetRecordId)
+ * - User-wide actions (sheetRecordId is null) where userId matches actor's userId
+ */
 export function actionsForActor(eb: ExpressionBuilder<Database, 'initiativeActor'>) {
 	return jsonArrayFrom(
 		eb
 			.selectFrom('action')
 			.selectAll('action')
-			.whereRef('action.sheetRecordId', '=', 'initiativeActor.sheetRecordId')
+			.where(eb2 =>
+				eb2.or([
+					eb2.and([
+						eb2('action.sheetRecordId', 'is', null),
+						eb2.eb('action.userId', '=', eb2.ref('initiativeActor.userId')),
+					]),
+					eb2.eb('action.sheetRecordId', '=', eb2.ref('initiativeActor.sheetRecordId')),
+				])
+			)
 	)
 		.$castTo<Action[]>()
 		.as('actions');
 }
 
+/**
+ * Fetches modifiers for an initiative actor including:
+ * - Actor-specific modifiers (sheetRecordId matches actor's sheetRecordId)
+ * - User-wide modifiers (sheetRecordId is null) where userId matches actor's userId
+ */
 export function modifiersForActor(eb: ExpressionBuilder<Database, 'initiativeActor'>) {
 	return jsonArrayFrom(
 		eb
 			.selectFrom('modifier')
 			.selectAll('modifier')
-			.whereRef('modifier.sheetRecordId', '=', 'initiativeActor.sheetRecordId')
+			.where(eb2 =>
+				eb2.or([
+					eb2.and([
+						eb2('modifier.sheetRecordId', 'is', null),
+						eb2.eb('modifier.userId', '=', eb2.ref('initiativeActor.userId')),
+					]),
+					eb2.eb('modifier.sheetRecordId', '=', eb2.ref('initiativeActor.sheetRecordId')),
+				])
+			)
 	)
 		.$castTo<Modifier[]>()
 		.as('modifiers');
 }
 
+/**
+ * Fetches roll macros for an initiative actor including:
+ * - Actor-specific roll macros (sheetRecordId matches actor's sheetRecordId)
+ * - User-wide roll macros (sheetRecordId is null) where userId matches actor's userId
+ */
 export function rollMacrosForActor(eb: ExpressionBuilder<Database, 'initiativeActor'>) {
 	return jsonArrayFrom(
 		eb
 			.selectFrom('rollMacro')
 			.selectAll('rollMacro')
-			.whereRef('rollMacro.sheetRecordId', '=', 'initiativeActor.sheetRecordId')
+			.where(eb2 =>
+				eb2.or([
+					eb2.and([
+						eb2('rollMacro.sheetRecordId', 'is', null),
+						eb2.eb('rollMacro.userId', '=', eb2.ref('initiativeActor.userId')),
+					]),
+					eb2.eb(
+						'rollMacro.sheetRecordId',
+						'=',
+						eb2.ref('initiativeActor.sheetRecordId')
+					),
+				])
+			)
 	)
 		.$castTo<RollMacro[]>()
 		.as('rollMacros');
+}
+
+export function minionForActor(eb: ExpressionBuilder<Database, 'initiativeActor'>) {
+	return jsonObjectFrom(
+		eb
+			.selectFrom('minion')
+			.selectAll('minion')
+			.whereRef('minion.id', '=', 'initiativeActor.minionId')
+	)
+		.$castTo<Minion | null>()
+		.as('minion');
 }
 
 /**
@@ -121,6 +222,7 @@ export function sheetRelationsForActor(eb: ExpressionBuilder<Database, 'initiati
 		actionsForActor(eb),
 		modifiersForActor(eb),
 		rollMacrosForActor(eb),
+		minionForActor(eb),
 	] as const;
 }
 
@@ -139,34 +241,73 @@ export function sheetRecordForMinion(eb: ExpressionBuilder<Database, 'minion'>) 
 		.as('sheetRecord');
 }
 
+/**
+ * Fetches actions for a minion including:
+ * - Minion-specific actions (sheetRecordId matches minion's sheetRecordId)
+ * - User-wide actions (sheetRecordId is null) where userId matches minion's userId
+ */
 export function actionsForMinion(eb: ExpressionBuilder<Database, 'minion'>) {
 	return jsonArrayFrom(
 		eb
 			.selectFrom('action')
 			.selectAll('action')
-			.whereRef('action.sheetRecordId', '=', 'minion.sheetRecordId')
+			.where(eb2 =>
+				eb2.or([
+					eb2.and([
+						eb2('action.sheetRecordId', 'is', null),
+						eb2.eb('action.userId', '=', eb2.ref('minion.userId')),
+					]),
+					eb2.eb('action.sheetRecordId', '=', eb2.ref('minion.sheetRecordId')),
+				])
+			)
 	)
 		.$castTo<Action[]>()
 		.as('actions');
 }
 
+/**
+ * Fetches modifiers for a minion including:
+ * - Minion-specific modifiers (sheetRecordId matches minion's sheetRecordId)
+ * - User-wide modifiers (sheetRecordId is null) where userId matches minion's userId
+ */
 export function modifiersForMinion(eb: ExpressionBuilder<Database, 'minion'>) {
 	return jsonArrayFrom(
 		eb
 			.selectFrom('modifier')
 			.selectAll('modifier')
-			.whereRef('modifier.sheetRecordId', '=', 'minion.sheetRecordId')
+			.where(eb2 =>
+				eb2.or([
+					eb2.and([
+						eb2('modifier.sheetRecordId', 'is', null),
+						eb2.eb('modifier.userId', '=', eb2.ref('minion.userId')),
+					]),
+					eb2.eb('modifier.sheetRecordId', '=', eb2.ref('minion.sheetRecordId')),
+				])
+			)
 	)
 		.$castTo<Modifier[]>()
 		.as('modifiers');
 }
 
+/**
+ * Fetches roll macros for a minion including:
+ * - Minion-specific roll macros (sheetRecordId matches minion's sheetRecordId)
+ * - User-wide roll macros (sheetRecordId is null) where userId matches minion's userId
+ */
 export function rollMacrosForMinion(eb: ExpressionBuilder<Database, 'minion'>) {
 	return jsonArrayFrom(
 		eb
 			.selectFrom('rollMacro')
 			.selectAll('rollMacro')
-			.whereRef('rollMacro.sheetRecordId', '=', 'minion.sheetRecordId')
+			.where(eb2 =>
+				eb2.or([
+					eb2.and([
+						eb2('rollMacro.sheetRecordId', 'is', null),
+						eb2.eb('rollMacro.userId', '=', eb2.ref('minion.userId')),
+					]),
+					eb2.eb('rollMacro.sheetRecordId', '=', eb2.ref('minion.sheetRecordId')),
+				])
+			)
 	)
 		.$castTo<RollMacro[]>()
 		.as('rollMacros');

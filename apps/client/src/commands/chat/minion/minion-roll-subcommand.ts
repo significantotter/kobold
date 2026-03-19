@@ -71,11 +71,11 @@ export class MinionRollSubCommand extends BaseCommandClass(
 
 			const creature = new Creature(
 				{
-					sheet: targetMinion.sheet,
+					sheet: targetMinion.sheetRecord.sheet,
 					actions: targetMinion.actions ?? [],
 					rollMacros: targetMinion.rollMacros ?? [],
 					modifiers: targetMinion.modifiers ?? [],
-					conditions: [],
+					conditions: targetMinion.sheetRecord.conditions ?? [],
 				},
 				targetMinion.name,
 				intr
@@ -150,11 +150,11 @@ export class MinionRollSubCommand extends BaseCommandClass(
 
 		const creature = new Creature(
 			{
-				sheet: targetMinion.sheet,
+				sheet: targetMinion.sheetRecord.sheet,
 				actions: targetMinion.actions ?? [],
 				rollMacros: targetMinion.rollMacros ?? [],
 				modifiers: targetMinion.modifiers ?? [],
-				conditions: [],
+				conditions: targetMinion.sheetRecord.conditions ?? [],
 			},
 			targetMinion.name,
 			intr

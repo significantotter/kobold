@@ -17,6 +17,9 @@ export enum ActionCommandOptionEnum {
 	assignTo = 'assign-to',
 	exportJson = 'export-json',
 	json = 'json',
+	createFor = 'create-for',
+	ownedBy = 'owned-by',
+	copy = 'copy',
 }
 
 export const ActionTypeChoices = {
@@ -160,6 +163,26 @@ export const actionCommandOptions = {
 		description: 'Raw JSON data to import (alternative to pastebin url)',
 		required: false,
 		type: ApplicationCommandOptionType.String,
+	},
+	[ActionCommandOptionEnum.createFor]: {
+		name: ActionCommandOptionEnum.createFor,
+		description: 'Create for a specific character/minion, or "Me" for user-wide (default: Me)',
+		required: false,
+		autocomplete: true,
+		type: ApplicationCommandOptionType.String,
+	},
+	[ActionCommandOptionEnum.ownedBy]: {
+		name: ActionCommandOptionEnum.ownedBy,
+		description: 'Filter actions by owner (default: Everyone)',
+		required: false,
+		autocomplete: true,
+		type: ApplicationCommandOptionType.String,
+	},
+	[ActionCommandOptionEnum.copy]: {
+		name: ActionCommandOptionEnum.copy,
+		description: 'Create a copy instead of moving the action (default: false)',
+		required: false,
+		type: ApplicationCommandOptionType.Boolean,
 	},
 } satisfies CommandOptions;
 

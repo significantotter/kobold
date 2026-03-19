@@ -254,6 +254,7 @@ export const zInitiativeActor = z.object({
 	initiativeActorGroupId: z.number(),
 	initiativeId: z.number(),
 	lastUpdatedAt: z.string(),
+	minionId: z.number().nullable(),
 	name: z.string(),
 	note: z.string(),
 	referenceNpcName: z.string().nullable(),
@@ -270,6 +271,7 @@ export const zNewInitiativeActor = z.object({
 	initiativeActorGroupId: z.number(),
 	initiativeId: z.number(),
 	lastUpdatedAt: z.string().optional(),
+	minionId: z.number().optional().nullable(),
 	name: z.string(),
 	note: z.string().optional(),
 	referenceNpcName: z.string().optional().nullable(),
@@ -286,6 +288,7 @@ export const zInitiativeActorUpdate = z.object({
 	initiativeActorGroupId: z.number().optional(),
 	initiativeId: z.number().optional(),
 	lastUpdatedAt: z.string().optional(),
+	minionId: z.number().optional().nullable(),
 	name: z.string().optional(),
 	note: z.string().optional(),
 	referenceNpcName: z.string().optional().nullable(),
@@ -322,6 +325,13 @@ export const zInitiativeActorRelationships = z.tuple([
 		columns: z.tuple([z.literal('initiative_id')]),
 		isOneToOne: z.literal(false),
 		referencedRelation: z.literal('initiative'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+	z.object({
+		foreignKeyName: z.literal('initiative_actor_minion_id_minion_id_fk'),
+		columns: z.tuple([z.literal('minion_id')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('minion'),
 		referencedColumns: z.tuple([z.literal('id')]),
 	}),
 	z.object({
@@ -440,29 +450,29 @@ export const zKyselyMigrationLockUpdate = z.object({
 });
 
 export const zMinion = z.object({
+	autoJoinInitiative: z.boolean(),
 	characterId: z.number().nullable(),
 	id: z.number(),
 	name: z.string(),
-	sheet: jsonSchema,
-	sheetRecordId: z.number().nullable(),
+	sheetRecordId: z.number(),
 	userId: z.string(),
 });
 
 export const zNewMinion = z.object({
+	autoJoinInitiative: z.boolean().optional(),
 	characterId: z.number().optional().nullable(),
 	id: z.number().optional(),
 	name: z.string(),
-	sheet: jsonSchema,
-	sheetRecordId: z.number().optional().nullable(),
+	sheetRecordId: z.number(),
 	userId: z.string(),
 });
 
 export const zMinionUpdate = z.object({
+	autoJoinInitiative: z.boolean().optional(),
 	characterId: z.number().optional().nullable(),
 	id: z.number().optional(),
 	name: z.string().optional(),
-	sheet: jsonSchema.optional(),
-	sheetRecordId: z.number().optional().nullable(),
+	sheetRecordId: z.number().optional(),
 	userId: z.string().optional(),
 });
 

@@ -40,16 +40,27 @@ interface MockInitiativeModel extends MockModel {
 /** Type for mock Modifier model with additional methods */
 interface MockModifierModel extends MockModel {
 	deleteBySheetRecordId: MockFn;
+	readManyByUser: MockFn;
+	readManyUserWide: MockFn;
 }
 
 /** Type for mock RollMacro model with additional methods */
 interface MockRollMacroModel extends MockModel {
 	deleteBySheetRecordId: MockFn;
+	readManyByUser: MockFn;
+	readManyUserWide: MockFn;
 }
 
 /** Type for mock Action model with additional methods */
 interface MockActionModel extends MockModel {
 	deleteBySheetRecordId: MockFn;
+	readManyByUser: MockFn;
+	readManyUserWide: MockFn;
+}
+
+/** Type for mock Minion model with additional methods */
+interface MockMinionModel extends MockModel {
+	readManyByCharacterIds: MockFn;
 }
 
 /**
@@ -99,6 +110,8 @@ function createMockModifierModel(): MockModifierModel {
 	return {
 		...createMockModel(),
 		deleteBySheetRecordId: vi.fn(),
+		readManyByUser: vi.fn(),
+		readManyUserWide: vi.fn(),
 	};
 }
 
@@ -109,6 +122,8 @@ function createMockRollMacroModel(): MockRollMacroModel {
 	return {
 		...createMockModel(),
 		deleteBySheetRecordId: vi.fn(),
+		readManyByUser: vi.fn(),
+		readManyUserWide: vi.fn(),
 	};
 }
 
@@ -119,6 +134,18 @@ function createMockActionModel(): MockActionModel {
 	return {
 		...createMockModel(),
 		deleteBySheetRecordId: vi.fn(),
+		readManyByUser: vi.fn(),
+		readManyUserWide: vi.fn(),
+	};
+}
+
+/**
+ * Creates a mock Minion model with additional minion-specific methods.
+ */
+function createMockMinionModel(): MockMinionModel {
+	return {
+		...createMockModel(),
+		readManyByCharacterIds: vi.fn(),
 	};
 }
 
@@ -143,6 +170,7 @@ export function createMockKobold() {
 		initiative: createMockInitiativeModel(),
 		initiativeActor: createMockModel(),
 		initiativeActorGroup: createMockModel(),
+		minion: createMockMinionModel(),
 		modifier: createMockModifierModel(),
 		rollMacro: createMockRollMacroModel(),
 		sheetRecord: createMockModel(),
@@ -165,6 +193,7 @@ export type MockKobold = {
 	initiative: MockInitiativeModel;
 	initiativeActor: MockModel;
 	initiativeActorGroup: MockModel;
+	minion: MockMinionModel;
 	modifier: MockModifierModel;
 	rollMacro: MockRollMacroModel;
 	sheetRecord: MockModel;

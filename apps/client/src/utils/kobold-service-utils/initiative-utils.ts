@@ -1,6 +1,12 @@
 import { ChatInputCommandInteraction, TextBasedChannel } from 'discord.js';
 import { utilStrings } from '@kobold/documentation';
-import { CharacterWithRelations, InitiativeWithRelations, Kobold, Sheet } from '@kobold/db';
+import {
+	CharacterWithRelations,
+	InitiativeWithRelations,
+	Kobold,
+	MinionWithRelations,
+	Sheet,
+} from '@kobold/db';
 import { KoboldError } from '../KoboldError.js';
 import { InitiativeBuilderUtils } from '../initiative-builder.js';
 import type { KoboldUtils } from './kobold-utils.js';
@@ -112,6 +118,77 @@ export class InitiativeUtils {
 			userId,
 			hideStats: hideStats ?? false,
 			initiativeActorGroupId: actorGroup.id,
+		});
+		return actor;
+	}
+
+	/**
+	 * Creates an initiative actor from a minion.
+	 *
+	 * By default (separateTurn=false), the minion joins the parent character's
+	 * existing InitiativeActorGroup and acts on the same turn, appearing after
+	 * the character.
+	 *
+	 * With separateTurn=true, the minion gets its own InitiativeActorGroup with
+	 * its own initiative roll and acts independently.
+	 */
+	public async createActorFromMinion({
+		initiativeId,
+		minion,
+		characterActorGroupId,
+		initiativeResult,
+		separateTurn = false,
+		hideStats,
+		name,
+	}: {
+		initiativeId: number;
+		minion: MinionWithRelations;
+		/** Parent character's actor group ID. Required if separateTurn=false */
+		characterActorGroupId?: number;
+		/** Initiative roll result. Required if separateTurn=true */
+		initiativeResult?: number;
+		/** If true, create a separate initiative group for the minion */
+		separateTurn?: boolean;
+		hideStats?: boolean;
+		name?: string;
+	}) {
+		let actorGroupId: number;
+
+		if (separateTurn) {
+			// Create a new initiative group for the minion
+			if (initiativeResult === undefined) {
+				throw new KoboldError(
+					'Yip! Initiative result is required when minion has a separate turn.'
+				);
+			}
+			const actorGroup = await this.kobold.initiativeActorGroup.create({
+				initiativeId,
+				userId: minion.userId,
+				name: name ?? minion.name,
+				initiativeResult,
+			});
+			actorGroupId = actorGroup.id;
+		} else {
+			// Join the parent character's initiative group
+			if (characterActorGroupId === undefined) {
+				throw new KoboldError(
+					"Yip! Character's actor group ID is required when minion joins the same turn."
+				);
+			}
+			actorGroupId = characterActorGroupId;
+		}
+
+		// Minion now always has a sheetRecordId (required)
+		const sheetRecordId = minion.sheetRecordId;
+
+		const actor = await this.kobold.initiativeActor.create({
+			initiativeId,
+			name: name ?? minion.name,
+			minionId: minion.id,
+			sheetRecordId,
+			userId: minion.userId,
+			hideStats: hideStats ?? false,
+			initiativeActorGroupId: actorGroupId,
 		});
 		return actor;
 	}

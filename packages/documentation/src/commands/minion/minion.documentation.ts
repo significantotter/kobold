@@ -17,12 +17,12 @@ export const minionCommandDocumentation: CommandDocumentation<typeof minionComma
 			usage: null,
 			examples: [],
 		},
-		// [MinionSubCommandEnum.assign]: {
-		// 	name: MinionSubCommandEnum.assign,
-		// 	description: 'Assign a minion to a character',
-		// 	usage: null,
-		// 	examples: [],
-		// },
+		[MinionSubCommandEnum.assign]: {
+			name: MinionSubCommandEnum.assign,
+			description: 'Assign a minion to a different character',
+			usage: null,
+			examples: [],
+		},
 		[MinionSubCommandEnum.sheet]: {
 			name: MinionSubCommandEnum.sheet,
 			description: "Display a minion's sheet",
@@ -50,6 +50,12 @@ export const minionCommandDocumentation: CommandDocumentation<typeof minionComma
 		[MinionSubCommandEnum.set]: {
 			name: MinionSubCommandEnum.set,
 			description: 'Set a minion value',
+			usage: null,
+			examples: [],
+		},
+		[MinionSubCommandEnum.join]: {
+			name: MinionSubCommandEnum.join,
+			description: 'Add a minion to initiative',
 			usage: null,
 			examples: [],
 		},

@@ -1,5 +1,4 @@
 import { Kysely } from 'kysely';
-import { sqlJSON } from '../lib/kysely-json.js';
 import { sheetRelationsForMinion } from '../lib/shared-relation-builders.js';
 import {
 	CharacterId,
@@ -19,10 +18,7 @@ export class MinionModel extends Model<Database['minion']> {
 	public async create(args: NewMinion): Promise<MinionWithRelations> {
 		const result = await this.db
 			.insertInto('minion')
-			.values({
-				...args,
-				sheet: sqlJSON(args.sheet),
-			})
+			.values(args)
 			.returningAll()
 			.returning(eb => [...sheetRelationsForMinion(eb)])
 			.execute();
@@ -53,16 +49,38 @@ export class MinionModel extends Model<Database['minion']> {
 		return result;
 	}
 
+	public async readManyByCharacterIds({
+		characterIds,
+	}: {
+		characterIds: CharacterId[];
+	}): Promise<MinionWithRelations[]> {
+		if (characterIds.length === 0) return [];
+		const result = await this.db
+			.selectFrom('minion')
+			.selectAll()
+			.select(eb => [...sheetRelationsForMinion(eb)])
+			.where('minion.characterId', 'in', characterIds)
+			.execute();
+		return result;
+	}
+
+	public async readManyByUserId({ userId }: { userId: string }): Promise<MinionWithRelations[]> {
+		const result = await this.db
+			.selectFrom('minion')
+			.selectAll()
+			.select(eb => [...sheetRelationsForMinion(eb)])
+			.where('minion.userId', '=', userId)
+			.execute();
+		return result;
+	}
+
 	public async update(
 		{ id }: { id: MinionId },
 		args: MinionUpdate
 	): Promise<MinionWithRelations> {
 		const result = await this.db
 			.updateTable('minion')
-			.set({
-				...args,
-				sheet: args.sheet !== undefined ? sqlJSON(args.sheet) : undefined,
-			})
+			.set(args)
 			.where('minion.id', '=', id)
 			.returningAll()
 			.returning(eb => [...sheetRelationsForMinion(eb)])

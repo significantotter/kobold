@@ -86,11 +86,11 @@ export class MinionSetSubCommand extends BaseCommandClass(
 		// Create a Creature from the minion's data
 		const creature = new Creature(
 			{
-				sheet: targetMinion.sheet,
+				sheet: targetMinion.sheetRecord.sheet,
 				actions: targetMinion.actions ?? [],
 				rollMacros: targetMinion.rollMacros ?? [],
 				modifiers: targetMinion.modifiers ?? [],
-				conditions: [],
+				conditions: targetMinion.sheetRecord.conditions ?? [],
 			},
 			targetMinion.name,
 			intr
@@ -108,13 +108,8 @@ export class MinionSetSubCommand extends BaseCommandClass(
 		// Keep the minion's original name
 		const sheet = _.merge(creature._sheet, { staticInfo: { name: targetMinion.name } });
 
-		// Update the minion's sheet
-		await kobold.minion.update({ id: targetMinion.id }, { sheet });
-
-		// Update the sheetRecord if it exists
-		if (targetMinion.sheetRecordId) {
-			await kobold.sheetRecord.update({ id: targetMinion.sheetRecordId }, { sheet });
-		}
+		// Update the sheetRecord
+		await kobold.sheetRecord.update({ id: targetMinion.sheetRecordId }, { sheet });
 
 		// Build a user-friendly response
 		let message = `Yip! I updated ${targetMinion.name}'s ${option} from ${initialValue} to ${updatedValue}.`;

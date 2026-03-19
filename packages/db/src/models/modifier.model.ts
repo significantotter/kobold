@@ -52,6 +52,70 @@ export class ModifierModel extends Model<Database['modifier']> {
 		return result;
 	}
 
+	/**
+	 * Reads modifiers for a user with flexible filtering
+	 * @param params.userId - The user who owns the modifiers
+	 * @param params.filter - 'all' for all user modifiers, 'user' for user-wide only (null sheetRecordId),
+	 *                        or { sheetRecordId } for specific character/minion
+	 */
+	public async readManyByUser({
+		userId,
+		filter = 'all',
+	}: {
+		userId: string;
+		filter?: 'all' | 'user' | { sheetRecordId: SheetRecordId };
+	}): Promise<Modifier[]> {
+		let query = this.db
+			.selectFrom('modifier')
+			.selectAll()
+			.where('modifier.userId', '=', userId);
+
+		if (filter === 'user') {
+			query = query.where('modifier.sheetRecordId', 'is', null);
+		} else if (typeof filter === 'object' && 'sheetRecordId' in filter) {
+			query = query.where('modifier.sheetRecordId', '=', filter.sheetRecordId);
+		}
+		// 'all' - no additional filter needed
+
+		return query.execute();
+	}
+
+	/**
+	 * Reads modifiers for a user that are either user-wide (null sheetRecordId)
+	 * or belong to a specific sheet record. Used when rolling for a character.
+	 */
+	public async readManyForCharacter({
+		userId,
+		sheetRecordId,
+	}: {
+		userId: string;
+		sheetRecordId: SheetRecordId;
+	}): Promise<Modifier[]> {
+		return this.db
+			.selectFrom('modifier')
+			.selectAll()
+			.where('modifier.userId', '=', userId)
+			.where(eb =>
+				eb.or([
+					eb('modifier.sheetRecordId', 'is', null),
+					eb('modifier.sheetRecordId', '=', sheetRecordId),
+				])
+			)
+			.execute();
+	}
+
+	/**
+	 * Reads all user-wide modifiers (sheetRecordId is null)
+	 */
+	public async readManyUserWide({ userId }: { userId: string }): Promise<Modifier[]> {
+		return this.db
+			.selectFrom('modifier')
+			.selectAll()
+			.where('modifier.userId', '=', userId)
+			.where('modifier.sheetRecordId', 'is', null)
+			.execute();
+	}
+
 	public async update({ id }: { id: ModifierId }, args: ModifierUpdate): Promise<Modifier> {
 		const result = await this.db
 			.updateTable('modifier')

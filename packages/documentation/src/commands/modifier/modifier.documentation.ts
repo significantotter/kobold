@@ -209,5 +209,29 @@ export const modifierCommandDocumentation: CommandDocumentation<typeof modifierC
 					},
 				],
 			},
+			[ModifierSubCommandEnum.assign]: {
+				name: ModifierSubCommandEnum.assign,
+				description:
+					'Assigns a modifier to a character or minion, or promotes it to user-scope.',
+				usage: null,
+				examples: [
+					{
+						title: 'Assigned to Character',
+						type: CommandResponseTypeEnum.success,
+						options: {
+							modifier: 'Inspire Courage',
+							'assign-to': 'Lilac Sootsnout',
+						},
+						message:
+							'Yip! I assigned the modifier "Inspire Courage" to Lilac Sootsnout.',
+					},
+					{
+						title: 'Promoted to User',
+						type: CommandResponseTypeEnum.success,
+						options: { modifier: 'Inspire Courage', 'assign-to': 'User' },
+						message: 'Yip! I promoted the modifier "Inspire Courage" to user-scope.',
+					},
+				],
+			},
 		},
 	};

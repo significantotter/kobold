@@ -134,7 +134,7 @@ export class MinionSheetSubCommand extends BaseCommandClass(
 
 		// If export format is requested, return the sheet as an adjustment string
 		if (exportFormat) {
-			const adjustmentString = sheetToAdjustmentString(targetMinion.sheet);
+			const adjustmentString = sheetToAdjustmentString(targetMinion.sheetRecord.sheet);
 			const response =
 				adjustmentString.length > 0
 					? `**${targetMinion.name}** stats:\n\`\`\`\n${adjustmentString}\n\`\`\``
@@ -146,11 +146,11 @@ export class MinionSheetSubCommand extends BaseCommandClass(
 		// Create a Creature from the minion's data
 		const creature = new Creature(
 			{
-				sheet: targetMinion.sheet,
+				sheet: targetMinion.sheetRecord.sheet,
 				actions: targetMinion.actions ?? [],
 				rollMacros: targetMinion.rollMacros ?? [],
 				modifiers: targetMinion.modifiers ?? [],
-				conditions: [],
+				conditions: targetMinion.sheetRecord.conditions ?? [],
 			},
 			targetMinion.name,
 			intr

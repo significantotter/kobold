@@ -32,12 +32,32 @@ export const actionCommandDocumentation: CommandDocumentation<typeof actionComma
 				},
 			],
 		},
-		// [ActionSubCommandEnum.assign]: {
-		// 	name: ActionSubCommandEnum.assign,
-		// 	description: 'Assigns an action to a character or a minion, or unassigns the action.',
-		// 	usage: null,
-		// 	examples: [],
-		// },
+		[ActionSubCommandEnum.assign]: {
+			name: ActionSubCommandEnum.assign,
+			description:
+				'Assigns an action to a character or minion, or promotes it to user-scope.',
+			usage: null,
+			examples: [
+				{
+					title: 'Assigned to Character',
+					type: CommandResponseTypeEnum.success,
+					message: 'Yip! I assigned the action Elemental Blast to Lilac Sootsnout.',
+					options: {
+						action: 'Elemental Blast',
+						'assign-to': 'Lilac Sootsnout',
+					},
+				},
+				{
+					title: 'Promoted to User',
+					type: CommandResponseTypeEnum.success,
+					message: 'Yip! I promoted the action Elemental Blast to user-scope.',
+					options: {
+						action: 'Elemental Blast',
+						'assign-to': 'User',
+					},
+				},
+			],
+		},
 		[ActionSubCommandEnum.remove]: {
 			name: ActionSubCommandEnum.remove,
 			description: 'Removes an action.',

@@ -3,6 +3,7 @@ import { Sheet } from '@kobold/db';
 export const staticAttributes = (sheet?: Sheet) => {
 	if (sheet && sheet.staticInfo.level !== null) {
 		return [
+			{ name: 'level', value: sheet.staticInfo.level ?? 0 },
 			{ name: 'untrained', value: (sheet.staticInfo.level ?? 0) + 0 },
 			{ name: 'trained', value: (sheet.staticInfo.level ?? 0) + 2 },
 			{ name: 'expert', value: (sheet.staticInfo.level ?? 0) + 4 },
@@ -11,6 +12,7 @@ export const staticAttributes = (sheet?: Sheet) => {
 		];
 	} else {
 		return [
+			{ name: 'level', value: 0 },
 			{ name: 'untrained', value: 0 },
 			{ name: 'trained', value: 2 },
 			{ name: 'expert', value: 4 },

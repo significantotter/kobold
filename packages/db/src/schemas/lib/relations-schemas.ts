@@ -48,13 +48,14 @@ export type InitiativeActorWithRelations = InitiativeActor & {
 	actorGroup: InitiativeActorGroup;
 	sheetRecord: SheetRecord;
 	game?: Game | null;
+	minion?: Minion | null;
 	actions: Action[];
 	modifiers: Modifier[];
 	rollMacros: RollMacro[];
 };
 
 export type MinionWithRelations = Minion & {
-	sheetRecord?: SheetRecord | null;
+	sheetRecord: SheetRecord;
 	actions: Action[];
 	modifiers: Modifier[];
 	rollMacros: RollMacro[];
@@ -95,6 +96,7 @@ export const zInitiativeActorWithRelations: z.ZodType<InitiativeActorWithRelatio
 		actorGroup: zInitiativeActorGroup,
 		sheetRecord: zSheetRecord,
 		game: zGame.nullable().optional(),
+		minion: zMinion.nullable().optional(),
 		actions: z.array(zAction),
 		modifiers: z.array(zModifier),
 		rollMacros: z.array(zRollMacro),
@@ -102,7 +104,7 @@ export const zInitiativeActorWithRelations: z.ZodType<InitiativeActorWithRelatio
 );
 
 export const zMinionWithRelations = zMinion.extend({
-	sheetRecord: zSheetRecord.nullable().optional(),
+	sheetRecord: zSheetRecord,
 	actions: z.array(zAction),
 	modifiers: z.array(zModifier),
 	rollMacros: z.array(zRollMacro),

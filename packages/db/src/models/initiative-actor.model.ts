@@ -131,4 +131,44 @@ export class InitiativeActorModel extends Model<Database['initiativeActor']> {
 			.execute();
 		if (Number(result[0].numDeletedRows) == 0) throw new Error('No rows deleted');
 	}
+
+	public async readManyByMinionId({
+		minionId,
+	}: {
+		minionId: number;
+	}): Promise<InitiativeActorWithRelations[]> {
+		const result = await this.db
+			.selectFrom('initiativeActor')
+			.selectAll()
+			.select(eb => [
+				actorGroupForActor(eb),
+				initiativeForActor(eb),
+				characterForActor(eb),
+				gameForActor(eb),
+				...sheetRelationsForActor(eb),
+			])
+			.where('initiativeActor.minionId', '=', minionId)
+			.execute();
+		return result;
+	}
+
+	public async readManyByGroupId({
+		groupId,
+	}: {
+		groupId: number;
+	}): Promise<InitiativeActorWithRelations[]> {
+		const result = await this.db
+			.selectFrom('initiativeActor')
+			.selectAll()
+			.select(eb => [
+				actorGroupForActor(eb),
+				initiativeForActor(eb),
+				characterForActor(eb),
+				gameForActor(eb),
+				...sheetRelationsForActor(eb),
+			])
+			.where('initiativeActor.initiativeActorGroupId', '=', groupId)
+			.execute();
+		return result;
+	}
 }

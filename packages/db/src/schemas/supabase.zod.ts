@@ -235,19 +235,11 @@ export const zModifierUpdate = zModifierUpdateRow.omit({ sheetAdjustments: true 
 });
 
 // ============================================================================
-// Minion - JSON fields: sheet (Sheet)
+// Minion - no JSON field overrides needed
 // ============================================================================
-export const zMinion = zMinionRow.omit({ sheet: true }).extend({
-	sheet: zSheet,
-});
-
-export const zNewMinion = zNewMinionRow.omit({ sheet: true }).extend({
-	sheet: zSheet,
-});
-
-export const zMinionUpdate = zMinionUpdateRow.omit({ sheet: true }).extend({
-	sheet: zSheet.optional(),
-});
+export const zMinion = zMinionRow;
+export const zNewMinion = zNewMinionRow;
+export const zMinionUpdate = zMinionUpdateRow;
 
 // ============================================================================
 // SheetRecord - JSON fields: sheet (Sheet), conditions (Modifier[]), trackerMode (enum)
