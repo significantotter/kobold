@@ -38,6 +38,7 @@ describe('ModifierExportSubCommand Integration', () => {
 				{
 					id: 1,
 					sheetRecordId: 1,
+					userId: TEST_USER_ID,
 					name: 'inspire courage',
 					isActive: true,
 					description: 'Bard inspiration',
@@ -51,6 +52,7 @@ describe('ModifierExportSubCommand Integration', () => {
 				{
 					id: 2,
 					sheetRecordId: 1,
+					userId: TEST_USER_ID,
 					name: 'frightened',
 					isActive: false,
 					description: 'Fear condition',
@@ -126,6 +128,7 @@ describe('ModifierExportSubCommand Integration', () => {
 				{
 					id: 1,
 					sheetRecordId: 1,
+					userId: TEST_USER_ID,
 					name: 'strength boost',
 					isActive: true,
 					description: 'Enhanced strength',
@@ -181,6 +184,7 @@ describe('ModifierExportSubCommand Integration', () => {
 				{
 					id: 1,
 					sheetRecordId: 1,
+					userId: TEST_USER_ID,
 					name: 'test modifier',
 					isActive: true,
 					description: null,

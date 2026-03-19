@@ -27,14 +27,24 @@ vi.mock('../../../utils/dice-utils.js');
 
 describe('RollPerceptionSubCommand Integration', () => {
 	let harness: CommandTestHarness;
+	let mockCreatureInstance: any;
 
 	beforeEach(() => {
 		harness = createTestHarness([new RollCommand([new RollPerceptionSubCommand()])]);
+
+		// Create mock creature instance
+		mockCreatureInstance = {
+			sheet: { staticInfo: { name: 'Test Character' } },
+			statBonuses: { perception: 15 },
+		};
 
 		// Mock Creature constructor
 		vi.mocked(Creature).mockImplementation(function (this: MockCreature) {
 			return this;
 		} as unknown as () => Creature);
+
+		// Mock Creature.fromSheetRecord static method
+		vi.mocked(Creature.fromSheetRecord).mockReturnValue(mockCreatureInstance);
 
 		// Mock Creature getters using vi.spyOn
 		vi.spyOn(Creature.prototype, 'sheet', 'get').mockReturnValue({

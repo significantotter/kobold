@@ -18,7 +18,7 @@ const createMockInteraction = () =>
 		userId: 'test-user-id',
 		followUp: vi.fn(),
 		editReply: vi.fn(),
-	} as unknown as CommandInteraction<CacheType>);
+	}) as unknown as CommandInteraction<CacheType>;
 
 describe('PasteBinCharacterFetcher', () => {
 	const mockKobold = getMockKobold();
@@ -61,7 +61,8 @@ describe('PasteBinCharacterFetcher', () => {
 
 		it('should use default sheet when sheet is not provided', async () => {
 			const mockData = {
-				modifiers: [{ name: 'Test Modifier' }],
+				// No sheet in this data - should use default
+				modifiers: [],
 				actions: [],
 				rollMacros: [],
 			};
@@ -73,9 +74,7 @@ describe('PasteBinCharacterFetcher', () => {
 			const result = await fetcher.fetchSourceData({ url: 'testPasteKey' });
 
 			expect(result.sheet).toEqual(SheetProperties.defaultSheet);
-			// The modifiers array gets normalized with default values
-			expect(result.modifiers).toHaveLength(1);
-			expect(result.modifiers[0].name).toBe('Test Modifier');
+			expect(result.modifiers).toHaveLength(0);
 		});
 
 		it('should throw KoboldError when PasteBin request fails', async () => {
@@ -103,25 +102,76 @@ describe('PasteBinCharacterFetcher', () => {
 		it('should convert PasteBin data to sheet record format', () => {
 			const sourceData = {
 				sheet: SheetProperties.defaultSheet,
-				modifiers: [{ name: 'Modifier 1', isActive: true }] as any[],
-				actions: [{ name: 'Action 1' }] as any[],
-				rollMacros: [{ name: 'Macro 1' }] as any[],
+				modifiers: [
+					{
+						name: 'Modifier 1',
+						description: 'A modifier',
+						type: 'untyped' as const,
+						isActive: true,
+						note: null,
+						rollAdjustment: null,
+						rollTargetTags: null,
+						severity: null,
+						sheetAdjustments: null,
+					},
+				] as any[],
+				actions: [
+					{
+						name: 'Action 1',
+						description: 'An action',
+						type: 'attack' as const,
+						actionCost: 'oneAction' as const,
+						baseLevel: 1,
+						autoHeighten: false,
+						rolls: [],
+						tags: [],
+					},
+				] as any[],
+				rollMacros: [
+					{
+						name: 'Macro 1',
+						macro: '1d20',
+					},
+				] as any[],
 			};
-			const activeCharacter = {
-				sheetRecord: {
-					actions: [],
-					modifiers: [],
-					rollMacros: [],
-				},
-			} as any;
 
-			const result = fetcher.convertSheetRecord(sourceData, activeCharacter);
+			const result = fetcher.convertSheetRecord(sourceData);
 
 			expect(result).toEqual({
-				sheet: sourceData.sheet,
-				actions: sourceData.actions,
-				modifiers: sourceData.modifiers,
-				rollMacros: sourceData.rollMacros,
+				sheetRecord: {
+					sheet: sourceData.sheet,
+				},
+				actions: [
+					{
+						name: 'Action 1',
+						description: 'An action',
+						type: 'attack',
+						actionCost: 'oneAction',
+						baseLevel: 1,
+						autoHeighten: false,
+						rolls: [],
+						tags: [],
+					},
+				],
+				modifiers: [
+					{
+						name: 'Modifier 1',
+						description: 'A modifier',
+						type: 'untyped',
+						isActive: true,
+						note: null,
+						rollAdjustment: null,
+						rollTargetTags: null,
+						severity: null,
+						sheetAdjustments: null,
+					},
+				],
+				rollMacros: [
+					{
+						name: 'Macro 1',
+						macro: '1d20',
+					},
+				],
 			});
 		});
 
@@ -136,7 +186,9 @@ describe('PasteBinCharacterFetcher', () => {
 			const result = fetcher.convertSheetRecord(sourceData);
 
 			expect(result).toEqual({
-				sheet: sourceData.sheet,
+				sheetRecord: {
+					sheet: sourceData.sheet,
+				},
 				actions: [],
 				modifiers: [],
 				rollMacros: [],

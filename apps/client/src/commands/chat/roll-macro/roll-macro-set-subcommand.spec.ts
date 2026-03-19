@@ -47,7 +47,13 @@ describe('RollMacroSetSubCommand', () => {
 	describe('setting roll macro values', () => {
 		it('should update an existing roll macro', async () => {
 			// Arrange
-			const existingMacro = { id: 1, name: 'sneak-attack', macro: '2d6', sheetRecordId: 1 };
+			const existingMacro = {
+				id: 1,
+				name: 'sneak-attack',
+				macro: '2d6',
+				sheetRecordId: 1,
+				userId: TEST_USER_ID,
+			};
 			const mockCharacter = createMockCharacter();
 			mockCharacter.rollMacros = [existingMacro];
 
@@ -74,7 +80,13 @@ describe('RollMacroSetSubCommand', () => {
 
 		it('should update roll macro to use attribute references', async () => {
 			// Arrange
-			const existingMacro = { id: 1, name: 'bonus', macro: '5', sheetRecordId: 1 };
+			const existingMacro = {
+				id: 1,
+				name: 'bonus',
+				macro: '5',
+				sheetRecordId: 1,
+				userId: TEST_USER_ID,
+			};
 			const mockCharacter = createMockCharacter();
 			mockCharacter.rollMacros = [existingMacro];
 
@@ -101,7 +113,13 @@ describe('RollMacroSetSubCommand', () => {
 
 		it('should update roll macro to a static value', async () => {
 			// Arrange
-			const existingMacro = { id: 1, name: 'flat-bonus', macro: '1d4', sheetRecordId: 1 };
+			const existingMacro = {
+				id: 1,
+				name: 'flat-bonus',
+				macro: '1d4',
+				sheetRecordId: 1,
+				userId: TEST_USER_ID,
+			};
 			const mockCharacter = createMockCharacter();
 			mockCharacter.rollMacros = [existingMacro];
 
@@ -158,7 +176,13 @@ describe('RollMacroSetSubCommand', () => {
 
 		it('should error when new value is invalid', async () => {
 			// Arrange
-			const existingMacro = { id: 1, name: 'test-macro', macro: '1d6', sheetRecordId: 1 };
+			const existingMacro = {
+				id: 1,
+				name: 'test-macro',
+				macro: '1d6',
+				sheetRecordId: 1,
+				userId: TEST_USER_ID,
+			};
 			const mockCharacter = createMockCharacter();
 			mockCharacter.rollMacros = [existingMacro];
 
@@ -200,9 +224,21 @@ describe('RollMacroSetSubCommand', () => {
 			// Arrange
 			const mockCharacter = createMockCharacter();
 			mockCharacter.rollMacros = [
-				{ id: 1, name: 'sneak-attack', macro: '2d6', sheetRecordId: 1 },
-				{ id: 2, name: 'sneak-damage', macro: '3d6', sheetRecordId: 1 },
-				{ id: 3, name: 'power-attack', macro: '4', sheetRecordId: 1 },
+				{
+					id: 1,
+					name: 'sneak-attack',
+					macro: '2d6',
+					sheetRecordId: 1,
+					userId: TEST_USER_ID,
+				},
+				{
+					id: 2,
+					name: 'sneak-damage',
+					macro: '3d6',
+					sheetRecordId: 1,
+					userId: TEST_USER_ID,
+				},
+				{ id: 3, name: 'power-attack', macro: '4', sheetRecordId: 1, userId: TEST_USER_ID },
 			];
 
 			vi.mocked(KoboldUtils).mockImplementation(function (this: MockKoboldUtils) {

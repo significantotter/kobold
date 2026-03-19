@@ -32,12 +32,12 @@ export const actionCommandDocumentation: CommandDocumentation<typeof actionComma
 				},
 			],
 		},
-		[ActionSubCommandEnum.assign]: {
-			name: ActionSubCommandEnum.assign,
-			description: 'Assigns an action to a character or a minion, or unassigns the action.',
-			usage: null,
-			examples: [],
-		},
+		// [ActionSubCommandEnum.assign]: {
+		// 	name: ActionSubCommandEnum.assign,
+		// 	description: 'Assigns an action to a character or a minion, or unassigns the action.',
+		// 	usage: null,
+		// 	examples: [],
+		// },
 		[ActionSubCommandEnum.remove]: {
 			name: ActionSubCommandEnum.remove,
 			description: 'Removes an action.',

@@ -45,7 +45,6 @@ export class InitRollSubCommand extends BaseCommandClass(
 				'';
 			const targetCharacterName =
 				intr.options.getString(commandOptions[commandOptionsEnum.initCharacter].name) ?? '';
-			console.log(targetCharacterName);
 
 			const { autocompleteUtils } = new KoboldUtils(kobold);
 			const res = await autocompleteUtils.getMatchingRollsForInitiativeSheet(
@@ -53,7 +52,6 @@ export class InitRollSubCommand extends BaseCommandClass(
 				match,
 				targetCharacterName
 			);
-			console.log(res);
 			return res;
 		} else if (option.name === commandOptions[commandOptionsEnum.initCharacterTarget].name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
@@ -124,7 +122,6 @@ export class InitRollSubCommand extends BaseCommandClass(
 			targetCharacterName,
 			true
 		);
-		console.log(actor.name, targetSheetName, targetCharacterName);
 
 		let targetCreature: Creature | null = null;
 		let targetSheetRecord: SheetRecord | null = null;

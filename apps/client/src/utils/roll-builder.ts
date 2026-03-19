@@ -197,13 +197,13 @@ export class RollBuilder {
 					'critical success': ' Critical Hit!',
 					success: ' Hit!',
 					failure: ' Miss.',
-					'critical failure': ' Miss.',
+					'critical failure': ' Critical Miss!',
 				};
 				const skillChallengeTitleAdditionText = {
 					'critical success': ' Critical Success!',
 					success: ' Success!',
 					failure: ' Failure.',
-					'critical failure': ' Failure.',
+					'critical failure': ' Critical Failure!',
 				};
 
 				let natTwenty = null;

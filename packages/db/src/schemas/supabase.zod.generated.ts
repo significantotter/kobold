@@ -32,6 +32,7 @@ export const zAction = z.object({
 	sheetRecordId: z.number().nullable(),
 	tags: jsonSchema,
 	type: z.string().nullable(),
+	userId: z.string(),
 });
 
 export const zNewAction = z.object({
@@ -45,6 +46,7 @@ export const zNewAction = z.object({
 	sheetRecordId: z.number().optional().nullable(),
 	tags: jsonSchema.optional(),
 	type: z.string().optional().nullable(),
+	userId: z.string(),
 });
 
 export const zActionUpdate = z.object({
@@ -58,6 +60,7 @@ export const zActionUpdate = z.object({
 	sheetRecordId: z.number().optional().nullable(),
 	tags: jsonSchema.optional(),
 	type: z.string().optional().nullable(),
+	userId: z.string().optional(),
 });
 
 export const zActionRelationships = z.tuple([
@@ -442,6 +445,7 @@ export const zMinion = z.object({
 	name: z.string(),
 	sheet: jsonSchema,
 	sheetRecordId: z.number().nullable(),
+	userId: z.string(),
 });
 
 export const zNewMinion = z.object({
@@ -450,6 +454,7 @@ export const zNewMinion = z.object({
 	name: z.string(),
 	sheet: jsonSchema,
 	sheetRecordId: z.number().optional().nullable(),
+	userId: z.string(),
 });
 
 export const zMinionUpdate = z.object({
@@ -458,6 +463,7 @@ export const zMinionUpdate = z.object({
 	name: z.string().optional(),
 	sheet: jsonSchema.optional(),
 	sheetRecordId: z.number().optional().nullable(),
+	userId: z.string().optional(),
 });
 
 export const zMinionRelationships = z.tuple([
@@ -489,6 +495,7 @@ export const zModifier = z.object({
 	sheetAdjustments: jsonSchema,
 	sheetRecordId: z.number().nullable(),
 	type: z.string(),
+	userId: z.string(),
 });
 
 export const zNewModifier = z.object({
@@ -503,6 +510,7 @@ export const zNewModifier = z.object({
 	sheetAdjustments: jsonSchema.optional(),
 	sheetRecordId: z.number().optional().nullable(),
 	type: z.string(),
+	userId: z.string(),
 });
 
 export const zModifierUpdate = z.object({
@@ -517,6 +525,7 @@ export const zModifierUpdate = z.object({
 	sheetAdjustments: jsonSchema.optional(),
 	sheetRecordId: z.number().optional().nullable(),
 	type: z.string().optional(),
+	userId: z.string().optional(),
 });
 
 export const zModifierRelationships = z.tuple([
@@ -618,6 +627,7 @@ export const zRollMacro = z.object({
 	macro: z.string(),
 	name: z.string(),
 	sheetRecordId: z.number().nullable(),
+	userId: z.string(),
 });
 
 export const zNewRollMacro = z.object({
@@ -625,6 +635,7 @@ export const zNewRollMacro = z.object({
 	macro: z.string(),
 	name: z.string(),
 	sheetRecordId: z.number().optional().nullable(),
+	userId: z.string(),
 });
 
 export const zRollMacroUpdate = z.object({
@@ -632,6 +643,7 @@ export const zRollMacroUpdate = z.object({
 	macro: z.string().optional(),
 	name: z.string().optional(),
 	sheetRecordId: z.number().optional().nullable(),
+	userId: z.string().optional(),
 });
 
 export const zRollMacroRelationships = z.tuple([

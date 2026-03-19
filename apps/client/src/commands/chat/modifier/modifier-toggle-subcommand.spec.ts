@@ -39,6 +39,7 @@ describe('ModifierToggleSubCommand', () => {
 			const testModifier = {
 				id: 1,
 				sheetRecordId: 1,
+				userId: TEST_USER_ID,
 				name: 'inspire courage',
 				isActive: true,
 				description: 'Bard inspiration',
@@ -77,6 +78,7 @@ describe('ModifierToggleSubCommand', () => {
 			const testModifier = {
 				id: 1,
 				sheetRecordId: 1,
+				userId: TEST_USER_ID,
 				name: 'flanking bonus',
 				isActive: false,
 				description: 'Flanking position bonus',
@@ -144,6 +146,7 @@ describe('ModifierToggleSubCommand', () => {
 			const testModifier = {
 				id: 1,
 				sheetRecordId: 1,
+				userId: TEST_USER_ID,
 				name: 'inspire courage',
 				isActive: true,
 				description: null,

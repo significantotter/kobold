@@ -15,6 +15,6 @@ export class HelpConditionSubCommand extends BaseCommandClass(
 		embed.setThumbnail(helpLinks.thumbnail);
 		embed.setTitle(helpContent.condition.title);
 		embed.setDescription(helpContent.condition.description);
-		await embed.sendBatches(intr, false);
+		await embed.sendBatches(intr);
 	}
 }

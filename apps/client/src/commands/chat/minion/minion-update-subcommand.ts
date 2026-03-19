@@ -6,20 +6,21 @@ import {
 	ChatInputCommandInteraction,
 } from 'discord.js';
 import _ from 'lodash';
-import { Kobold, MinionWithRelations, SheetBaseCounterKeys } from '@kobold/db';
+import { Kobold, MinionWithRelations, SheetAdjustmentTypeEnum } from '@kobold/db';
 import { MinionDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { KoboldError } from '../../../utils/KoboldError.js';
+import { SheetUtils } from '../../../utils/sheet/sheet-utils.js';
 import { Creature } from '../../../utils/creature.js';
 
 const commandOptions = MinionDefinition.options;
 const commandOptionsEnum = MinionDefinition.commandOptionsEnum;
 
-export class MinionSetSubCommand extends BaseCommandClass(
+export class MinionUpdateSubCommand extends BaseCommandClass(
 	MinionDefinition,
-	MinionDefinition.subCommandEnum.set
+	MinionDefinition.subCommandEnum.update
 ) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
@@ -62,12 +63,7 @@ export class MinionSetSubCommand extends BaseCommandClass(
 		const minionName = intr.options
 			.getString(commandOptions[commandOptionsEnum.minion].name, true)
 			.trim();
-		const option = _.camelCase(
-			intr.options.getString(commandOptions[commandOptionsEnum.attribute].name, true)
-		) as SheetBaseCounterKeys;
-		const value = intr.options
-			.getString(commandOptions[commandOptionsEnum.value].name, true)
-			.trim();
+		const statsInput = intr.options.getString(commandOptions[commandOptionsEnum.stats].name);
 
 		// Find the minion
 		const minions = await kobold.minion.readMany({
@@ -83,30 +79,36 @@ export class MinionSetSubCommand extends BaseCommandClass(
 			);
 		}
 
-		// Create a Creature from the minion's data
+		// If no stats provided, nothing to update
+		if (!statsInput) {
+			throw new KoboldError('Yip! You must provide stats to update the minion with!');
+		}
+
+		// Get the current sheet and apply the stat adjustments
+		let sheet = targetMinion.sheet;
+
+		const adjustments = SheetUtils.stringToSheetAdjustments(
+			statsInput,
+			SheetAdjustmentTypeEnum.untyped
+		);
+		const adjustedSheet = SheetUtils.adjustSheetWithSheetAdjustments(sheet, adjustments);
+
 		const creature = new Creature(
 			{
-				sheet: targetMinion.sheet,
+				sheet: adjustedSheet,
 				actions: targetMinion.actions ?? [],
 				rollMacros: targetMinion.rollMacros ?? [],
 				modifiers: targetMinion.modifiers ?? [],
 				conditions: [],
 			},
-			targetMinion.name,
+			undefined,
 			intr
 		);
-
-		// Update the gameplay stat
-		const { initialValue, updatedValue } = creature.updateValue(option, value);
-
-		if (initialValue == null || updatedValue == null) {
-			throw new KoboldError(
-				`Yip! Something went wrong! I couldn't update ${targetMinion.name}'s ${option} to ${value}.`
-			);
-		}
+		creature.recover();
+		sheet = creature._sheet;
 
 		// Keep the minion's original name
-		const sheet = _.merge(creature._sheet, { staticInfo: { name: targetMinion.name } });
+		sheet = _.merge(sheet, { staticInfo: { name: targetMinion.name } });
 
 		// Update the minion's sheet
 		await kobold.minion.update({ id: targetMinion.id }, { sheet });
@@ -116,12 +118,9 @@ export class MinionSetSubCommand extends BaseCommandClass(
 			await kobold.sheetRecord.update({ id: targetMinion.sheetRecordId }, { sheet });
 		}
 
-		// Build a user-friendly response
-		let message = `Yip! I updated ${targetMinion.name}'s ${option} from ${initialValue} to ${updatedValue}.`;
-		if (option === 'hp' && updatedValue == 0) {
-			message += " They're down!";
-		}
-
-		await InteractionUtils.send(intr, message);
+		await InteractionUtils.send(
+			intr,
+			`Yip! I've updated the minion "${targetMinion.name}" with the new stats!`
+		);
 	}
 }

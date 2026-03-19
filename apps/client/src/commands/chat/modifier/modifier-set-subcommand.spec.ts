@@ -89,6 +89,7 @@ describe('ModifierSetSubCommand', () => {
 			const testModifier = {
 				id: 1,
 				sheetRecordId: 1,
+				userId: TEST_USER_ID,
 				name: 'old name',
 				isActive: true,
 				description: 'Test description',
@@ -131,6 +132,7 @@ describe('ModifierSetSubCommand', () => {
 			const testModifier = {
 				id: 1,
 				sheetRecordId: 1,
+				userId: TEST_USER_ID,
 				name: 'test modifier',
 				isActive: true,
 				description: 'Old description',
@@ -171,6 +173,7 @@ describe('ModifierSetSubCommand', () => {
 			const testModifier = {
 				id: 1,
 				sheetRecordId: 1,
+				userId: TEST_USER_ID,
 				name: 'test modifier',
 				isActive: true,
 				description: null,
@@ -211,6 +214,7 @@ describe('ModifierSetSubCommand', () => {
 			const testModifier = {
 				id: 1,
 				sheetRecordId: 1,
+				userId: TEST_USER_ID,
 				name: 'test modifier',
 				isActive: true,
 				description: null,
@@ -251,6 +255,7 @@ describe('ModifierSetSubCommand', () => {
 			const testModifier = {
 				id: 1,
 				sheetRecordId: 1,
+				userId: TEST_USER_ID,
 				name: 'test modifier',
 				isActive: true,
 				description: null,
@@ -291,6 +296,7 @@ describe('ModifierSetSubCommand', () => {
 			const testModifier = {
 				id: 1,
 				sheetRecordId: 1,
+				userId: TEST_USER_ID,
 				name: 'test modifier',
 				isActive: true,
 				description: null,
@@ -331,6 +337,7 @@ describe('ModifierSetSubCommand', () => {
 			const testModifier = {
 				id: 1,
 				sheetRecordId: 1,
+				userId: TEST_USER_ID,
 				name: 'test modifier',
 				isActive: true,
 				description: null,
@@ -400,6 +407,7 @@ describe('ModifierSetSubCommand', () => {
 			const testModifier = {
 				id: 1,
 				sheetRecordId: 1,
+				userId: TEST_USER_ID,
 				name: 'modifier one',
 				isActive: true,
 				description: null,
@@ -413,6 +421,7 @@ describe('ModifierSetSubCommand', () => {
 			const existingModifier = {
 				id: 2,
 				sheetRecordId: 1,
+				userId: TEST_USER_ID,
 				name: 'modifier two',
 				isActive: true,
 				description: null,
@@ -457,6 +466,7 @@ describe('ModifierSetSubCommand', () => {
 			const testModifier = {
 				id: 1,
 				sheetRecordId: 1,
+				userId: TEST_USER_ID,
 				name: 'inspire courage',
 				isActive: true,
 				description: null,

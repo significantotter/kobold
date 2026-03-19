@@ -7,6 +7,7 @@ import {
 	InitiativeActorGroupModel,
 	InitiativeActorModel,
 	InitiativeModel,
+	MinionModel,
 	ModifierModel,
 	SheetRecordModel,
 	UserSettingsModel,
@@ -25,6 +26,7 @@ export class Kobold {
 	public initiative: InitiativeModel;
 	public initiativeActor: InitiativeActorModel;
 	public initiativeActorGroup: InitiativeActorGroupModel;
+	public minion: MinionModel;
 	public modifier: ModifierModel;
 	public rollMacro: RollMacroModel;
 	public sheetRecord: SheetRecordModel;
@@ -44,6 +46,7 @@ export class Kobold {
 		this.initiative = new InitiativeModel(this.db);
 		this.initiativeActor = new InitiativeActorModel(this.db);
 		this.initiativeActorGroup = new InitiativeActorGroupModel(this.db);
+		this.minion = new MinionModel(this.db);
 		this.modifier = new ModifierModel(this.db);
 		this.rollMacro = new RollMacroModel(this.db);
 		this.sheetRecord = new SheetRecordModel(this.db);

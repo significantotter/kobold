@@ -17,15 +17,15 @@ export const minionCommandDocumentation: CommandDocumentation<typeof minionComma
 			usage: null,
 			examples: [],
 		},
-		[MinionSubCommandEnum.assign]: {
-			name: MinionSubCommandEnum.assign,
-			description: 'Assign a minion to a character',
-			usage: null,
-			examples: [],
-		},
-		[MinionSubCommandEnum.display]: {
-			name: MinionSubCommandEnum.display,
-			description: 'Display a minion',
+		// [MinionSubCommandEnum.assign]: {
+		// 	name: MinionSubCommandEnum.assign,
+		// 	description: 'Assign a minion to a character',
+		// 	usage: null,
+		// 	examples: [],
+		// },
+		[MinionSubCommandEnum.sheet]: {
+			name: MinionSubCommandEnum.sheet,
+			description: "Display a minion's sheet",
 			usage: null,
 			examples: [],
 		},

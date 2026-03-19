@@ -13,6 +13,7 @@ export enum MinionCommandOptionEnum {
 	skillChoice = 'skill',
 	rollExpression = 'dice',
 	rollSecret = 'secret',
+	exportFormat = 'export-format',
 }
 
 export const minionCommandOptions = {
@@ -31,17 +32,41 @@ export const minionCommandOptions = {
 	},
 	[MinionCommandOptionEnum.stats]: {
 		name: MinionCommandOptionEnum.stats,
-		description: 'The minion statblock.',
+		description: 'Custom stats to set (e.g., "hp=10; ac=15; athletics=+5")',
 		type: ApplicationCommandOptionType.String,
-		required: false,
-		autocomplete: true,
+		required: true,
 	},
 	[MinionCommandOptionEnum.attribute]: {
 		name: MinionCommandOptionEnum.attribute,
-		description: 'The attribute to set (e.g., hp, ac, level)',
+		description: "What option to update on the minion's sheet",
 		type: ApplicationCommandOptionType.String,
 		required: true,
-		autocomplete: true,
+		choices: [
+			{
+				name: 'hp',
+				value: 'hp',
+			},
+			{
+				name: 'tempHp',
+				value: 'tempHp',
+			},
+			{
+				name: 'stamina',
+				value: 'stamina',
+			},
+			{
+				name: 'resolve',
+				value: 'resolve',
+			},
+			{
+				name: 'hero points',
+				value: 'hero-points',
+			},
+			{
+				name: 'focus points',
+				value: 'focus-points',
+			},
+		],
 	},
 	[MinionCommandOptionEnum.value]: {
 		name: MinionCommandOptionEnum.value,
@@ -104,5 +129,11 @@ export const minionCommandOptions = {
 				value: 'send-to-gm',
 			},
 		],
+	},
+	[MinionCommandOptionEnum.exportFormat]: {
+		name: MinionCommandOptionEnum.exportFormat,
+		description: 'Export the sheet in a format that can be re-imported',
+		type: ApplicationCommandOptionType.Boolean,
+		required: false,
 	},
 } satisfies SpecificCommandOptions<MinionCommandOptionEnum>;

@@ -64,6 +64,7 @@ export class ActionCreateSubCommand extends BaseCommandClass(
 
 		await kobold.action.create({
 			sheetRecordId: activeCharacter.sheetRecordId,
+			userId: intr.user.id,
 			name,
 			description,
 			type: type as ActionTypeEnum,

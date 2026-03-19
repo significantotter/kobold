@@ -10,6 +10,13 @@ import { CommandExport } from '../command.js';
 import _ from 'lodash';
 
 /**
+ * Subcommands that are documented but not yet implemented.
+ * These are excluded from tests until implementation is complete.
+ * Format: { commandName: ['subcommandName', ...] }
+ */
+const UNIMPLEMENTED_SUBCOMMANDS: Record<string, string[]> = {};
+
+/**
  * These tests validate that command implementations properly align with their
  * documentation definitions. This ensures:
  * 1. All documented commands have implementations
@@ -48,18 +55,28 @@ describe('Command Registration Validation', () => {
 			// Skip commands that don't have documentation (like admin commands)
 			if (!docCommand) continue;
 
+			// Get list of unimplemented subcommands for this command
+			const unimplemented = UNIMPLEMENTED_SUBCOMMANDS[commandName] ?? [];
+
 			describe(`${commandName} command`, () => {
 				it('has correct number of subcommands', () => {
 					const expectedSubCommands = Object.keys(docCommand.definition.subCommands);
+					// Subtract unimplemented subcommands from expected count
+					const expectedCount = expectedSubCommands.length - unimplemented.length;
 					expect(
 						commandExport.subCommands.length,
-						`${commandName} has ${commandExport.subCommands.length} subcommands but documentation defines ${expectedSubCommands.length}`
-					).toBe(expectedSubCommands.length);
+						`${commandName} has ${commandExport.subCommands.length} subcommands but documentation defines ${expectedCount} (excluding ${unimplemented.length} unimplemented)`
+					).toBe(expectedCount);
 				});
 
 				// Test each subcommand
 				const expectedSubCommands = Object.values(docCommand.definition.subCommands);
 				for (const subCommandDef of expectedSubCommands as any[]) {
+					// Skip unimplemented subcommands
+					if (unimplemented.includes(subCommandDef.name)) {
+						it.skip(`has implementation for subcommand "${subCommandDef.name}" (not yet implemented)`, () => {});
+						continue;
+					}
 					it(`has implementation for subcommand "${subCommandDef.name}"`, () => {
 						const subCommandImpl = commandExport.subCommands.find(SubCmd => {
 							const instance = new SubCmd();

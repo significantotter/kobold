@@ -15,6 +15,6 @@ export class HelpRollSubCommand extends BaseCommandClass(
 		embed.setThumbnail(helpLinks.thumbnail);
 		embed.setTitle(helpContent.roll.title);
 		embed.setDescription(helpContent.roll.description);
-		await embed.sendBatches(intr, false);
+		await embed.sendBatches(intr);
 	}
 }

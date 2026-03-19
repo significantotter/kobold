@@ -15,6 +15,6 @@ export class HelpCharacterSubCommand extends BaseCommandClass(
 		embed.setThumbnail(helpLinks.thumbnail);
 		embed.setTitle(helpContent.character.title);
 		embed.setDescription(helpContent.character.description);
-		await embed.sendBatches(intr, false);
+		await embed.sendBatches(intr);
 	}
 }

@@ -1085,6 +1085,7 @@ export class ActionRoller {
 		// Note: id and sheetRecordId are set to placeholder values since this action
 		// is only used temporarily and not saved to the database
 		const action: Action = {
+			userId: '-1',
 			id: -1,
 			sheetRecordId: null,
 			name: targetAttack.name,

@@ -9,6 +9,9 @@ import { Command } from '../../index.js';
 import { ActionDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
 
+const commandOptions = ActionDefinition.options;
+const commandOptionsEnum = ActionDefinition.commandOptionsEnum;
+
 export class ActionExportSubCommand extends BaseCommandClass(
 	ActionDefinition,
 	ActionDefinition.subCommandEnum.export
@@ -22,8 +25,34 @@ export class ActionExportSubCommand extends BaseCommandClass(
 			activeCharacter: true,
 		});
 
+		const exportJson =
+			intr.options.getBoolean(commandOptions[commandOptionsEnum.exportJson].name) ?? false;
 		const actions = activeCharacter.actions;
 
+		// Export as JSON in the response
+		if (exportJson) {
+			const jsonString = JSON.stringify(actions, null, 2);
+			// Discord has a 2000 character limit, so we may need to truncate
+			if (jsonString.length > 1900) {
+				// Send as a file attachment instead
+				const attachment = {
+					name: `${activeCharacter.name}-actions.json`,
+					attachment: Buffer.from(jsonString, 'utf-8'),
+				};
+				await InteractionUtils.send(intr, {
+					content: `**${activeCharacter.name}'s Actions** (as JSON file):`,
+					files: [attachment],
+				});
+			} else {
+				await InteractionUtils.send(
+					intr,
+					`**${activeCharacter.name}'s Actions:**\n\`\`\`json\n${jsonString}\n\`\`\``
+				);
+			}
+			return;
+		}
+
+		// Export to PasteBin
 		const pastebinPost = await new PasteBin({ apiKey: Config.pastebin.apiKey }).post({
 			code: JSON.stringify(actions),
 			name: `${activeCharacter.name}'s Actions`,

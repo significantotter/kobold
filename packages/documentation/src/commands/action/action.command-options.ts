@@ -15,6 +15,8 @@ export enum ActionCommandOptionEnum {
 	url = 'url',
 	importMode = 'mode',
 	assignTo = 'assign-to',
+	exportJson = 'export-json',
+	json = 'json',
 }
 
 export const ActionTypeChoices = {
@@ -126,8 +128,8 @@ export const actionCommandOptions = {
 	},
 	[ActionCommandOptionEnum.url]: {
 		name: ActionCommandOptionEnum.url,
-		description: 'The url to import from',
-		required: true,
+		description: 'The pastebin url to import from',
+		required: false,
 		type: ApplicationCommandOptionType.String,
 	},
 	[ActionCommandOptionEnum.importMode]: {
@@ -145,6 +147,18 @@ export const actionCommandOptions = {
 		description: 'The character or minion to assign the action to, or "none" to unassign.',
 		required: true,
 		autocomplete: true,
+		type: ApplicationCommandOptionType.String,
+	},
+	[ActionCommandOptionEnum.exportJson]: {
+		name: ActionCommandOptionEnum.exportJson,
+		description: 'Export as JSON in the response instead of uploading to PasteBin',
+		required: false,
+		type: ApplicationCommandOptionType.Boolean,
+	},
+	[ActionCommandOptionEnum.json]: {
+		name: ActionCommandOptionEnum.json,
+		description: 'Raw JSON data to import (alternative to pastebin url)',
+		required: false,
 		type: ApplicationCommandOptionType.String,
 	},
 } satisfies CommandOptions;

@@ -25,12 +25,13 @@ import { CharacterDefinition as CharacterCommand } from '@kobold/documentation';
 /**
  * Data returned from converting source data into sheet records and related entities.
  * Actions, modifiers, and rollMacros are now separate entities and need to be created separately.
+ * userId is added at creation time from the CharacterFetcher's userId property.
  */
 export type SheetConversionResult = {
 	sheetRecord: NewSheetRecord;
-	actions: Omit<NewAction, 'sheetRecordId'>[];
-	modifiers: Omit<NewModifier, 'sheetRecordId'>[];
-	rollMacros: Omit<NewRollMacro, 'sheetRecordId'>[];
+	actions: Omit<NewAction, 'sheetRecordId' | 'userId'>[];
+	modifiers: Omit<NewModifier, 'sheetRecordId' | 'userId'>[];
+	rollMacros: Omit<NewRollMacro, 'sheetRecordId' | 'userId'>[];
 };
 
 export abstract class CharacterFetcher<SourceData, FetchArgs> {
@@ -69,20 +70,26 @@ export abstract class CharacterFetcher<SourceData, FetchArgs> {
 			conversionResult.sheetRecord
 		);
 
-		// Create the related entities with the sheetRecordId
+		// Create the related entities with the sheetRecordId and userId
 		for (const action of conversionResult.actions) {
-			await this.kobold.action.create({ ...action, sheetRecordId: createdSheetRecord.id });
+			await this.kobold.action.create({
+				...action,
+				sheetRecordId: createdSheetRecord.id,
+				userId: this.userId,
+			});
 		}
 		for (const modifier of conversionResult.modifiers) {
 			await this.kobold.modifier.create({
 				...modifier,
 				sheetRecordId: createdSheetRecord.id,
+				userId: this.userId,
 			});
 		}
 		for (const rollMacro of conversionResult.rollMacros) {
 			await this.kobold.rollMacro.create({
 				...rollMacro,
 				sheetRecordId: createdSheetRecord.id,
+				userId: this.userId,
 			});
 		}
 
@@ -213,18 +220,24 @@ export abstract class CharacterFetcher<SourceData, FetchArgs> {
 		await this.kobold.rollMacro.deleteBySheetRecordId({ sheetRecordId: updatedSheetRecord.id });
 
 		for (const action of conversionResult.actions) {
-			await this.kobold.action.create({ ...action, sheetRecordId: updatedSheetRecord.id });
+			await this.kobold.action.create({
+				...action,
+				sheetRecordId: updatedSheetRecord.id,
+				userId: this.userId,
+			});
 		}
 		for (const modifier of conversionResult.modifiers) {
 			await this.kobold.modifier.create({
 				...modifier,
 				sheetRecordId: updatedSheetRecord.id,
+				userId: this.userId,
 			});
 		}
 		for (const rollMacro of conversionResult.rollMacros) {
 			await this.kobold.rollMacro.create({
 				...rollMacro,
 				sheetRecordId: updatedSheetRecord.id,
+				userId: this.userId,
 			});
 		}
 

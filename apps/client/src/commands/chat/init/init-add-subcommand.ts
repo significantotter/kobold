@@ -135,7 +135,7 @@ export class InitAddSubCommand extends BaseCommandClass(
 				emojiConverter: emojiData => getEmoji(intr, emojiData),
 			});
 			sheet = await nethysSheetImporter.buildSheet();
-			const newActions = await nethysSheetImporter.buildActions();
+			const newActions = await nethysSheetImporter.buildActions(intr.user.id);
 			actions.push(...newActions);
 			referenceNpcName = bestiaryCreature.name;
 			if (!actorName) {
@@ -201,6 +201,7 @@ export class InitAddSubCommand extends BaseCommandClass(
 				rolls: action.rolls,
 				tags: action.tags,
 				sheetRecordId: sheetRecord.id,
+				userId: intr.user.id,
 			});
 		}
 

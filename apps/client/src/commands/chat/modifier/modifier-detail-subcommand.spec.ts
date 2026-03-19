@@ -37,6 +37,7 @@ describe('ModifierDetailSubCommand Integration', () => {
 			const testModifier = {
 				id: 1,
 				sheetRecordId: 1,
+				userId: TEST_USER_ID,
 				name: 'inspire courage',
 				isActive: true,
 				description: 'A rousing battle song',
@@ -73,6 +74,7 @@ describe('ModifierDetailSubCommand Integration', () => {
 			const testModifier = {
 				id: 1,
 				sheetRecordId: 1,
+				userId: TEST_USER_ID,
 				name: 'strength boost',
 				isActive: true,
 				description: 'Enhanced strength',
@@ -117,6 +119,7 @@ describe('ModifierDetailSubCommand Integration', () => {
 			const testModifier = {
 				id: 1,
 				sheetRecordId: 1,
+				userId: TEST_USER_ID,
 				name: 'frightened',
 				isActive: true,
 				description: 'You are terrified',
@@ -153,6 +156,7 @@ describe('ModifierDetailSubCommand Integration', () => {
 			const testModifier = {
 				id: 1,
 				sheetRecordId: 1,
+				userId: TEST_USER_ID,
 				name: 'inactive modifier',
 				isActive: false,
 				description: 'Currently disabled',
@@ -216,6 +220,7 @@ describe('ModifierDetailSubCommand Integration', () => {
 			const testModifier = {
 				id: 1,
 				sheetRecordId: 1,
+				userId: TEST_USER_ID,
 				name: 'inspire courage',
 				isActive: true,
 				description: null,

@@ -9,6 +9,7 @@ import { GameDefinition } from './game/index.js';
 import { GameplayDefinition } from './gameplay/index.js';
 import { HelpDefinition } from './help/index.js';
 import { InitDefinition } from './init/index.js';
+import { MinionDefinition } from './minion/index.js';
 import { ModifierDefinition } from './modifier/index.js';
 import { RollMacroDefinition } from './roll-macro/index.js';
 import { RollDefinition } from './roll/index.js';
@@ -40,6 +41,7 @@ export const commands = [
 	GameplayDefinition,
 	HelpDefinition,
 	InitDefinition,
+	MinionDefinition,
 	ModifierDefinition,
 	RollDefinition,
 	RollMacroDefinition,
@@ -57,6 +59,7 @@ export {
 	GameplayDefinition,
 	HelpDefinition,
 	InitDefinition,
+	MinionDefinition,
 	ModifierDefinition,
 	RollDefinition,
 	RollMacroDefinition,

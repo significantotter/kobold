@@ -115,6 +115,7 @@ export class ModifierImportSubCommand extends BaseCommandClass(
 				rollAdjustment: modifier.rollAdjustment,
 				note: modifier.note,
 				sheetRecordId: activeCharacter.sheetRecordId,
+				userId: intr.user.id,
 			};
 			await kobold.modifier.create(newModifier);
 		}

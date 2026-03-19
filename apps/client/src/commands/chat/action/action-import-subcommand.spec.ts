@@ -48,7 +48,7 @@ describe('ActionImportSubCommand', () => {
 				this.get = vi.fn(async () => JSON.stringify(importedActions));
 				return this;
 			} as unknown as () => PasteBin);
-			const { updateMock } = setupActionModelMock(kobold);
+			const { createMock } = setupActionModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -64,7 +64,7 @@ describe('ActionImportSubCommand', () => {
 
 			// Assert
 			expect(result.didRespond()).toBe(true);
-			expect(updateMock).toHaveBeenCalled();
+			expect(createMock).toHaveBeenCalled();
 		});
 
 		it('should import actions with overwrite-on-conflict mode', async () => {
@@ -89,7 +89,7 @@ describe('ActionImportSubCommand', () => {
 				this.get = vi.fn(async () => JSON.stringify(importedActions));
 				return this;
 			} as unknown as () => PasteBin);
-			const { updateMock } = setupActionModelMock(kobold);
+			const { createMock } = setupActionModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -105,7 +105,7 @@ describe('ActionImportSubCommand', () => {
 
 			// Assert
 			expect(result.didRespond()).toBe(true);
-			expect(updateMock).toHaveBeenCalled();
+			expect(createMock).toHaveBeenCalled();
 		});
 
 		it('should import actions with rename-on-conflict mode', async () => {
@@ -127,7 +127,7 @@ describe('ActionImportSubCommand', () => {
 				this.get = vi.fn(async () => JSON.stringify(importedActions));
 				return this;
 			} as unknown as () => PasteBin);
-			const { updateMock } = setupActionModelMock(kobold);
+			const { createMock } = setupActionModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -143,7 +143,7 @@ describe('ActionImportSubCommand', () => {
 
 			// Assert
 			expect(result.didRespond()).toBe(true);
-			expect(updateMock).toHaveBeenCalled();
+			expect(createMock).toHaveBeenCalled();
 		});
 
 		it('should import actions with ignore-on-conflict mode', async () => {
@@ -162,7 +162,7 @@ describe('ActionImportSubCommand', () => {
 				this.get = vi.fn(async () => JSON.stringify(importedActions));
 				return this;
 			} as unknown as () => PasteBin);
-			const { updateMock } = setupActionModelMock(kobold);
+			const { createMock } = setupActionModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -178,7 +178,7 @@ describe('ActionImportSubCommand', () => {
 
 			// Assert
 			expect(result.didRespond()).toBe(true);
-			expect(updateMock).toHaveBeenCalled();
+			expect(createMock).toHaveBeenCalled();
 		});
 	});
 

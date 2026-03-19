@@ -39,6 +39,7 @@ describe('ModifierSeveritySubCommand', () => {
 			const testModifier = {
 				id: 1,
 				sheetRecordId: 1,
+				userId: TEST_USER_ID,
 				name: 'frightened',
 				isActive: true,
 				description: 'Fear condition',
@@ -78,6 +79,7 @@ describe('ModifierSeveritySubCommand', () => {
 			const testModifier = {
 				id: 1,
 				sheetRecordId: 1,
+				userId: TEST_USER_ID,
 				name: 'frightened',
 				isActive: true,
 				description: 'Fear condition',
@@ -117,6 +119,7 @@ describe('ModifierSeveritySubCommand', () => {
 			const testModifier = {
 				id: 1,
 				sheetRecordId: 1,
+				userId: TEST_USER_ID,
 				name: 'frightened',
 				isActive: true,
 				description: 'Fear condition',
@@ -156,6 +159,7 @@ describe('ModifierSeveritySubCommand', () => {
 			const testModifier = {
 				id: 1,
 				sheetRecordId: 1,
+				userId: TEST_USER_ID,
 				name: 'frightened',
 				isActive: true,
 				description: null,
@@ -225,6 +229,7 @@ describe('ModifierSeveritySubCommand', () => {
 			const testModifier = {
 				id: 1,
 				sheetRecordId: 1,
+				userId: TEST_USER_ID,
 				name: 'frightened',
 				isActive: true,
 				description: null,

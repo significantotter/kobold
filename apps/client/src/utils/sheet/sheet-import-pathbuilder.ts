@@ -12,6 +12,51 @@ import { PathBuilder } from '../../services/pathbuilder/pathbuilder.js';
 import { scoreToBonus, applyValuesToStatInPlace } from './sheet-import-utils.js';
 import { SheetProperties } from './sheet-properties.js';
 
+/**
+ * Gets the highest proficiency modifier for a given category (e.g., "martial", "simple")
+ * by checking both the base proficiencies and specificProficiencies arrays.
+ * Pathbuilder stores base proficiencies separately from class upgrades, which are in specificProficiencies.
+ */
+function getHighestProficiency(
+	baseProficiency: number | undefined,
+	category: string,
+	specificProficiencies: PathBuilder.SpecificProficiencies
+): number {
+	const categoryLower = category.toLowerCase();
+	let highestMod = baseProficiency ?? 0;
+
+	// Check if the category appears in specificProficiencies arrays
+	// specificProficiencies can contain strings like "martial" or objects with name properties
+	const containsCategory = (arr: any[]): boolean => {
+		if (!arr) return false;
+		return arr.some(item => {
+			if (typeof item === 'string') {
+				return item.toLowerCase() === categoryLower;
+			}
+			if (typeof item === 'object' && item !== null) {
+				const name = item.name || item.Name || item.category || item.Category;
+				if (typeof name === 'string') {
+					return name.toLowerCase() === categoryLower;
+				}
+			}
+			return false;
+		});
+	};
+
+	// Check each tier and use the highest applicable
+	if (containsCategory(specificProficiencies.legendary)) {
+		highestMod = Math.max(highestMod, 8);
+	} else if (containsCategory(specificProficiencies.master)) {
+		highestMod = Math.max(highestMod, 6);
+	} else if (containsCategory(specificProficiencies.expert)) {
+		highestMod = Math.max(highestMod, 4);
+	} else if (containsCategory(specificProficiencies.trained)) {
+		highestMod = Math.max(highestMod, 2);
+	}
+
+	return highestMod;
+}
+
 export function convertPathBuilderToSheet(
 	pathBuilderSheet: PathBuilder.Character,
 	options: {
@@ -258,15 +303,47 @@ export function convertPathBuilderToSheet(
 			ac: pathBuilderSheet.acTotal.acTotal,
 			walkSpeed: pathBuilderSheet.attributes.speed + pathBuilderSheet.attributes.speedBonus,
 
-			martialProficiency: pathBuilderSheet.proficiencies.martial ?? 0,
-			simpleProficiency: pathBuilderSheet.proficiencies.simple ?? 0,
-			unarmedProficiency: pathBuilderSheet.proficiencies.unarmed ?? 0,
-			advancedProficiency: pathBuilderSheet.proficiencies.advanced ?? 0,
+			martialProficiency: getHighestProficiency(
+				pathBuilderSheet.proficiencies.martial,
+				'martial',
+				pathBuilderSheet.specificProficiencies
+			),
+			simpleProficiency: getHighestProficiency(
+				pathBuilderSheet.proficiencies.simple,
+				'simple',
+				pathBuilderSheet.specificProficiencies
+			),
+			unarmedProficiency: getHighestProficiency(
+				pathBuilderSheet.proficiencies.unarmed,
+				'unarmed',
+				pathBuilderSheet.specificProficiencies
+			),
+			advancedProficiency: getHighestProficiency(
+				pathBuilderSheet.proficiencies.advanced,
+				'advanced',
+				pathBuilderSheet.specificProficiencies
+			),
 
-			heavyProficiency: pathBuilderSheet.proficiencies.heavy ?? 0,
-			mediumProficiency: pathBuilderSheet.proficiencies.medium ?? 0,
-			lightProficiency: pathBuilderSheet.proficiencies.light ?? 0,
-			unarmoredProficiency: pathBuilderSheet.proficiencies.unarmored ?? 0,
+			heavyProficiency: getHighestProficiency(
+				pathBuilderSheet.proficiencies.heavy,
+				'heavy',
+				pathBuilderSheet.specificProficiencies
+			),
+			mediumProficiency: getHighestProficiency(
+				pathBuilderSheet.proficiencies.medium,
+				'medium',
+				pathBuilderSheet.specificProficiencies
+			),
+			lightProficiency: getHighestProficiency(
+				pathBuilderSheet.proficiencies.light,
+				'light',
+				pathBuilderSheet.specificProficiencies
+			),
+			unarmoredProficiency: getHighestProficiency(
+				pathBuilderSheet.proficiencies.unarmored,
+				'unarmored',
+				pathBuilderSheet.specificProficiencies
+			),
 		},
 		baseCounters: {
 			hp: {

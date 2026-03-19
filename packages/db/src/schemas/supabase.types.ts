@@ -1,5 +1,3 @@
-import { Condition } from '../index.js';
-
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export type Database = {
@@ -47,6 +45,7 @@ export type Database = {
 					sheet_record_id: number | null;
 					tags: Json;
 					type: string | null;
+					user_id: string;
 				};
 				Insert: {
 					action_cost?: string | null;
@@ -59,6 +58,7 @@ export type Database = {
 					sheet_record_id?: number | null;
 					tags?: Json;
 					type?: string | null;
+					user_id: string;
 				};
 				Update: {
 					action_cost?: string | null;
@@ -71,6 +71,7 @@ export type Database = {
 					sheet_record_id?: number | null;
 					tags?: Json;
 					type?: string | null;
+					user_id?: string;
 				};
 				Relationships: [
 					{
@@ -443,6 +444,7 @@ export type Database = {
 					name: string;
 					sheet: Json;
 					sheet_record_id: number | null;
+					user_id: string;
 				};
 				Insert: {
 					character_id?: number | null;
@@ -450,6 +452,7 @@ export type Database = {
 					name: string;
 					sheet: Json;
 					sheet_record_id?: number | null;
+					user_id: string;
 				};
 				Update: {
 					character_id?: number | null;
@@ -457,6 +460,7 @@ export type Database = {
 					name?: string;
 					sheet?: Json;
 					sheet_record_id?: number | null;
+					user_id?: string;
 				};
 				Relationships: [
 					{
@@ -488,6 +492,7 @@ export type Database = {
 					sheet_adjustments: Json;
 					sheet_record_id: number | null;
 					type: string;
+					user_id: string;
 				};
 				Insert: {
 					description?: string | null;
@@ -501,6 +506,7 @@ export type Database = {
 					sheet_adjustments?: Json;
 					sheet_record_id?: number | null;
 					type: string;
+					user_id: string;
 				};
 				Update: {
 					description?: string | null;
@@ -514,6 +520,7 @@ export type Database = {
 					sheet_adjustments?: Json;
 					sheet_record_id?: number | null;
 					type?: string;
+					user_id?: string;
 				};
 				Relationships: [
 					{
@@ -615,18 +622,21 @@ export type Database = {
 					macro: string;
 					name: string;
 					sheet_record_id: number | null;
+					user_id: string;
 				};
 				Insert: {
 					id?: number;
 					macro: string;
 					name: string;
 					sheet_record_id?: number | null;
+					user_id: string;
 				};
 				Update: {
 					id?: number;
 					macro?: string;
 					name?: string;
 					sheet_record_id?: number | null;
+					user_id?: string;
 				};
 				Relationships: [
 					{
@@ -640,7 +650,7 @@ export type Database = {
 			};
 			sheet_record: {
 				Row: {
-					conditions: Condition[];
+					conditions: Json;
 					id: number;
 					sheet: Json;
 					tracker_channel_id: string | null;
@@ -649,7 +659,7 @@ export type Database = {
 					tracker_mode: string | null;
 				};
 				Insert: {
-					conditions?: Condition[];
+					conditions?: Json;
 					id?: number;
 					sheet: Json;
 					tracker_channel_id?: string | null;
@@ -658,7 +668,7 @@ export type Database = {
 					tracker_mode?: string | null;
 				};
 				Update: {
-					conditions?: Condition[];
+					conditions?: Json;
 					id?: number;
 					sheet?: Json;
 					tracker_channel_id?: string | null;

@@ -149,6 +149,7 @@ export class ModifierCreateSubCommand extends BaseCommandClass(
 				maxLength: 40,
 			}),
 			sheetRecordId: activeCharacter.sheetRecordId,
+			userId: intr.user.id,
 		};
 
 		// make sure that the adjustments are valid and can be applied to a sheet

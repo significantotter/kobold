@@ -128,7 +128,13 @@ describe('RollMacroCreateSubCommand', () => {
 	describe('error handling', () => {
 		it('should error when roll macro with same name already exists', async () => {
 			// Arrange
-			const existingMacro = { id: 1, name: 'existing-macro', macro: '1d6', sheetRecordId: 1 };
+			const existingMacro = {
+				id: 1,
+				name: 'existing-macro',
+				macro: '1d6',
+				sheetRecordId: 1,
+				userId: TEST_USER_ID,
+			};
 			const mockCharacter = createMockCharacter();
 			mockCharacter.rollMacros = [existingMacro];
 

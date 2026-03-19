@@ -4,6 +4,7 @@ import { Creature } from './creature.js';
 import { DiceUtils } from './dice-utils.js';
 import { RollBuilder } from './roll-builder.js';
 import { SheetProperties } from './sheet/sheet-properties.js';
+import { TEST_USER_ID } from '../test-utils/index.js';
 
 const mocks = {
 	get character(): CharacterWithRelations {
@@ -85,8 +86,8 @@ describe('Dice Utils', function () {
 	describe('expandRollWithMacros', () => {
 		it('should correctly expand macros', () => {
 			const rollMacros = [
-				{ id: 1, sheetRecordId: 1, name: 'macro1', macro: '2d6' },
-				{ id: 2, sheetRecordId: 1, name: 'macro2', macro: '1d8' },
+				{ id: 1, sheetRecordId: 1, userId: TEST_USER_ID, name: 'macro1', macro: '2d6' },
+				{ id: 2, sheetRecordId: 1, userId: TEST_USER_ID, name: 'macro2', macro: '1d8' },
 			];
 			const rollExpression = '[macro1] + [strength] + [macro2]';
 			const expected = '2d6 + [strength] + 1d8';
@@ -95,7 +96,9 @@ describe('Dice Utils', function () {
 		});
 
 		it('should stop after 10 recursive applications', () => {
-			const rollMacros = [{ id: 1, sheetRecordId: 1, name: 'macro', macro: '[macro]' }];
+			const rollMacros = [
+				{ id: 1, sheetRecordId: 1, userId: TEST_USER_ID, name: 'macro', macro: '[macro]' },
+			];
 			const rollExpression = '[macro]';
 			const expected = '[macro]';
 

@@ -16,12 +16,15 @@ import {
 	TEST_GUILD_ID,
 	CommandTestHarness,
 	getMockKobold,
-	resetMockKobold,} from '../../../test-utils/index.js';
+	resetMockKobold,
+} from '../../../test-utils/index.js';
 import { InputParseUtils } from '../../../utils/input-parse-utils.js';
 import { SheetUtils } from '../../../utils/sheet/sheet-utils.js';
+import { Creature } from '../../../utils/creature.js';
 
 vi.mock('../../../utils/kobold-service-utils/kobold-utils.js');
 vi.mock('../../../utils/kobold-helpers/finder-helpers.js');
+vi.mock('../../../utils/creature.js');
 
 describe('ConditionApplyCustomSubCommand', () => {
 	const kobold = getMockKobold();
@@ -36,6 +39,8 @@ describe('ConditionApplyCustomSubCommand', () => {
 		vi.spyOn(InputParseUtils, 'isValidDiceExpression').mockReturnValue(true);
 		// Mock sheet adjustment validation - uses complex sheet calculations
 		vi.spyOn(SheetUtils, 'adjustSheetWithModifiers').mockReturnValue({} as any);
+		// Mock Creature.fromSheetRecord for validation
+		vi.mocked(Creature.fromSheetRecord).mockReturnValue({} as any);
 	});
 
 	describe('successful condition creation', () => {

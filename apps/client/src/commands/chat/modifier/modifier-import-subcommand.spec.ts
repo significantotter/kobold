@@ -44,6 +44,7 @@ describe('ModifierImportSubCommand', () => {
 				{
 					id: 1,
 					sheetRecordId: 1,
+					userId: TEST_USER_ID,
 					name: 'existing modifier',
 					isActive: true,
 					description: null,
@@ -104,6 +105,7 @@ describe('ModifierImportSubCommand', () => {
 				{
 					id: 1,
 					sheetRecordId: 1,
+					userId: TEST_USER_ID,
 					name: 'shared modifier',
 					isActive: true,
 					description: 'Original version',
@@ -163,6 +165,7 @@ describe('ModifierImportSubCommand', () => {
 				{
 					id: 1,
 					sheetRecordId: 1,
+					userId: TEST_USER_ID,
 					name: 'duplicate modifier',
 					isActive: true,
 					description: null,
@@ -222,6 +225,7 @@ describe('ModifierImportSubCommand', () => {
 				{
 					id: 1,
 					sheetRecordId: 1,
+					userId: TEST_USER_ID,
 					name: 'existing modifier',
 					isActive: true,
 					description: null,

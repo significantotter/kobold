@@ -40,6 +40,6 @@ export class HelpCommandsSubCommand extends BaseCommandClass(
 		}
 
 		embed.addFields(fields);
-		await embed.sendBatches(intr, false);
+		await embed.sendBatches(intr);
 	}
 }

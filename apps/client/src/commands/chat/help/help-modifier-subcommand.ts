@@ -15,6 +15,6 @@ export class HelpModifierSubCommand extends BaseCommandClass(
 		embed.setThumbnail(helpLinks.thumbnail);
 		embed.setTitle(helpContent.modifier.title);
 		embed.setDescription(helpContent.modifier.description);
-		await embed.sendBatches(intr, false);
+		await embed.sendBatches(intr);
 	}
 }

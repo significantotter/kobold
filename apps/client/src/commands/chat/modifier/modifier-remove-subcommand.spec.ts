@@ -41,6 +41,7 @@ describe('ModifierRemoveSubCommand', () => {
 			const testModifier = {
 				id: 1,
 				sheetRecordId: 1,
+				userId: TEST_USER_ID,
 				name: 'inspire courage',
 				isActive: true,
 				description: 'Bard inspiration',
@@ -85,6 +86,7 @@ describe('ModifierRemoveSubCommand', () => {
 			const testModifier = {
 				id: 1,
 				sheetRecordId: 1,
+				userId: TEST_USER_ID,
 				name: 'inspire courage',
 				isActive: true,
 				description: 'Bard inspiration',
@@ -129,6 +131,7 @@ describe('ModifierRemoveSubCommand', () => {
 			const testModifier = {
 				id: 1,
 				sheetRecordId: 1,
+				userId: TEST_USER_ID,
 				name: 'inspire courage',
 				isActive: true,
 				description: null,
@@ -199,6 +202,7 @@ describe('ModifierRemoveSubCommand', () => {
 			const testModifier = {
 				id: 1,
 				sheetRecordId: 1,
+				userId: TEST_USER_ID,
 				name: 'inspire courage',
 				isActive: true,
 				description: null,

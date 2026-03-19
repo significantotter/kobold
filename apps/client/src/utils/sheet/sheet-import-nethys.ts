@@ -114,7 +114,7 @@ export class NethysSheetImporter {
 	protected applySkills() {
 		for (const [skillName, skillBonus] of Object.entries(this.bestiaryEntry.skill_mod) as [
 			string,
-			number
+			number,
 		][]) {
 			let lowerSkillName = skillName.toLowerCase();
 			const bonus = skillBonus + this.rollAdjustment;
@@ -330,7 +330,7 @@ export class NethysSheetImporter {
 		}
 	}
 
-	protected async applyCreatureSpells() {
+	protected async applyCreatureSpells(userId: string) {
 		// very similar to applying actions, but we plan to eventually add better spellcasting support
 		//Ex:
 		// **Primal Innate Spells** DC 34\r\n- **Cantrips (4th)**\r\n[Know Direction](/Spells.aspx?ID=169)\r\n- **4th**\r\n[Entangle](/Spells.aspx?ID=103), [Tree Shape](/Spells.aspx?ID=342) (see forest shape)\r\n- **Constant (1st)**\r\n[Pass Without Trace](/Spells.aspx?ID=215) (forest terrain only)\r\n\r\n
@@ -356,6 +356,7 @@ export class NethysSheetImporter {
 				allowRollModifiers: false,
 			});
 			this.actions.push({
+				userId,
 				type: ActionTypeEnum.other,
 				name: spellTraditionName,
 				description: '',
@@ -367,7 +368,7 @@ export class NethysSheetImporter {
 			});
 		}
 	}
-	protected async applyCreatureActions() {
+	protected async applyCreatureActions(userId: string) {
 		for (const ability of this.bestiaryEntry.creature_ability ?? []) {
 			const abilityRegex = new RegExp(
 				`(?<=\\*\\*\\[?${ability}\\]?(?:\\([^\\)]*\\))?\\*\\*).*?(?=<br ?\/>\\*\\*|(?:\\r\\n|\\n)(?:\\r\\n|\\n)|<\/ ?column>)`,
@@ -382,6 +383,7 @@ export class NethysSheetImporter {
 			const parsedWithoutActions = parsedAbility.replace(NethysActionsRegex, '').trim();
 
 			this.actions.push({
+				userId,
 				type: ActionTypeEnum.other,
 				name: ability,
 				description: '',
@@ -406,7 +408,7 @@ export class NethysSheetImporter {
 		}
 	}
 
-	protected async applyAttacks() {
+	protected async applyAttacks(userId: string) {
 		const attackRegex = /\*\*(?:melee|ranged)\*\*.*?(?=(?:\\r\\n|\\n)*\*\*(?! |damage\*\*))/gis;
 		const attackMatches: RegExpMatchArray[] = Array.from(
 			this.bestiaryEntry.markdown.matchAll(attackRegex)
@@ -448,7 +450,7 @@ export class NethysSheetImporter {
 					if (i === 0) {
 						damage = damageResult.dice
 							? damageResult.dice +
-							  `${this.rollAdjustment >= 0 ? '+' : ''}${this.rollAdjustment}`
+								`${this.rollAdjustment >= 0 ? '+' : ''}${this.rollAdjustment}`
 							: null;
 					}
 					rolls.push({
@@ -475,6 +477,7 @@ export class NethysSheetImporter {
 				}
 			}
 			this.actions.push({
+				userId,
 				type: ActionTypeEnum.attack,
 				name: attackName,
 				description: '',
@@ -496,9 +499,9 @@ export class NethysSheetImporter {
 		this.applySpellcastingStats();
 		return this.sheet;
 	}
-	public async buildActions() {
-		await this.applyAttacks();
-		await this.applyCreatureActions();
+	public async buildActions(userId: string) {
+		await this.applyAttacks(userId);
+		await this.applyCreatureActions(userId);
 		return this.actions;
 	}
 }

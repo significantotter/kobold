@@ -188,6 +188,7 @@ describe('ModifierCreateSubCommand', () => {
 				rollTargetTags: 'attack',
 				note: null,
 				sheetRecordId: 1,
+				userId: TEST_USER_ID,
 			};
 			const mockCharacter = createMockCharacter();
 			mockCharacter.modifiers = [existingModifier];

@@ -89,6 +89,8 @@ export function createMockCharacter(options: MockCharacterOptions = {}): Charact
 	mockCharacter.sheetRecord.trackerGuildId = null;
 	mockCharacter.sheetRecord.trackerChannelId = null;
 	mockCharacter.sheetRecord.trackerMessageId = null;
+	// Explicitly set game to null to avoid triggering GM-related behavior in tests
+	mockCharacter.game = null;
 
 	return { ...mockCharacter, ...characterOverrides };
 }
@@ -180,6 +182,7 @@ export function createTextRoll(overrides: Partial<TextRoll> = {}): TextRoll {
  */
 export function createMockAction(overrides: Partial<Action> = {}): Action {
 	return {
+		userId: '1',
 		id: 1,
 		sheetRecordId: 1,
 		name: 'Test Action',
@@ -606,6 +609,7 @@ export function setupListDataMocks(characters: CharacterWithRelations[] = []): L
  */
 export function createMockCondition(overrides: Partial<Modifier> = {}): Modifier {
 	return {
+		userId: '1',
 		id: 1,
 		sheetRecordId: 1,
 		name: 'Test Condition',
@@ -670,12 +674,16 @@ export function setupGameUtilsMocks(options: GameUtilsMockOptions = {}): GameUti
 		targetNotFound = false,
 	} = options;
 
+	// Create a mock entity with the sheet record
+	const targetEntity = { sheetRecord: targetSheetRecord, name: targetName };
+
 	const getCharacterOrInitActorTargetMock = vi.fn(async () => {
 		if (targetNotFound) {
 			throw new Error('Target not found');
 		}
 		return {
 			targetSheetRecord,
+			targetEntity,
 			targetName,
 			hideStats,
 		};

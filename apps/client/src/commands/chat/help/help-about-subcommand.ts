@@ -20,6 +20,6 @@ export class HelpAboutSubCommand extends BaseCommandClass(
 		if (helpContent.about.fields) {
 			embed.addFields(helpContent.about.fields);
 		}
-		await embed.sendBatches(intr, false);
+		await embed.sendBatches(intr);
 	}
 }

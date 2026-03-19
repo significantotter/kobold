@@ -7,8 +7,8 @@ import { withOrder } from '../helpers/common.js';
 export enum MinionSubCommandEnum {
 	update = 'update',
 	create = 'create',
-	assign = 'assign',
-	display = 'display',
+	// assign = 'assign',
+	sheet = 'sheet',
 	list = 'list',
 	remove = 'remove',
 	roll = 'roll',
@@ -54,29 +54,33 @@ export const minionCommandDefinition = {
 				),
 			},
 		},
-		[MinionSubCommandEnum.assign]: {
-			name: MinionSubCommandEnum.assign,
-			description: 'Assign a minion to a character',
+		// [MinionSubCommandEnum.assign]: {
+		// 	name: MinionSubCommandEnum.assign,
+		// 	description: 'Assign a minion to a character',
+		// 	type: ApplicationCommandOptionType.Subcommand,
+		// 	options: {
+		// 		[MinionCommandOptionEnum.minion]: withOrder(
+		// 			minionCommandOptions[MinionCommandOptionEnum.minion],
+		// 			1
+		// 		),
+		// 		[MinionCommandOptionEnum.targetCharacter]: withOrder(
+		// 			minionCommandOptions[MinionCommandOptionEnum.targetCharacter],
+		// 			2
+		// 		),
+		// 	},
+		// },
+		[MinionSubCommandEnum.sheet]: {
+			name: MinionSubCommandEnum.sheet,
+			description: "Display a minion's sheet",
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
 				[MinionCommandOptionEnum.minion]: withOrder(
 					minionCommandOptions[MinionCommandOptionEnum.minion],
 					1
 				),
-				[MinionCommandOptionEnum.targetCharacter]: withOrder(
-					minionCommandOptions[MinionCommandOptionEnum.targetCharacter],
+				[MinionCommandOptionEnum.exportFormat]: withOrder(
+					minionCommandOptions[MinionCommandOptionEnum.exportFormat],
 					2
-				),
-			},
-		},
-		[MinionSubCommandEnum.display]: {
-			name: MinionSubCommandEnum.display,
-			description: 'Display a minion',
-			type: ApplicationCommandOptionType.Subcommand,
-			options: {
-				[MinionCommandOptionEnum.minion]: withOrder(
-					minionCommandOptions[MinionCommandOptionEnum.minion],
-					1
 				),
 			},
 		},
@@ -110,12 +114,12 @@ export const minionCommandDefinition = {
 					minionCommandOptions[MinionCommandOptionEnum.rollType],
 					2
 				),
-				[MinionCommandOptionEnum.diceRollOrModifier]: withOrder(
-					minionCommandOptions[MinionCommandOptionEnum.diceRollOrModifier],
-					3
-				),
 				[MinionCommandOptionEnum.targetCharacter]: withOrder(
 					minionCommandOptions[MinionCommandOptionEnum.targetCharacter],
+					3
+				),
+				[MinionCommandOptionEnum.diceRollOrModifier]: withOrder(
+					minionCommandOptions[MinionCommandOptionEnum.diceRollOrModifier],
 					4
 				),
 				[MinionCommandOptionEnum.rollSecret]: withOrder(

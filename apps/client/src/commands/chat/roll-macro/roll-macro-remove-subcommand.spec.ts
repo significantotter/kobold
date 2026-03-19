@@ -38,7 +38,13 @@ describe('RollMacroRemoveSubCommand', () => {
 	describe('removing roll macros', () => {
 		it('should remove a roll macro when confirmed', async () => {
 			// Arrange
-			const existingMacro = { id: 1, name: 'sneak-attack', macro: '2d6', sheetRecordId: 1 };
+			const existingMacro = {
+				id: 1,
+				name: 'sneak-attack',
+				macro: '2d6',
+				sheetRecordId: 1,
+				userId: TEST_USER_ID,
+			};
 			const mockCharacter = createMockCharacter();
 			mockCharacter.rollMacros = [existingMacro];
 
@@ -69,7 +75,13 @@ describe('RollMacroRemoveSubCommand', () => {
 
 		it('should cancel removal when canceled', async () => {
 			// Arrange
-			const existingMacro = { id: 1, name: 'sneak-attack', macro: '2d6', sheetRecordId: 1 };
+			const existingMacro = {
+				id: 1,
+				name: 'sneak-attack',
+				macro: '2d6',
+				sheetRecordId: 1,
+				userId: TEST_USER_ID,
+			};
 			const mockCharacter = createMockCharacter();
 			mockCharacter.rollMacros = [existingMacro];
 
@@ -131,9 +143,21 @@ describe('RollMacroRemoveSubCommand', () => {
 			// Arrange
 			const mockCharacter = createMockCharacter();
 			mockCharacter.rollMacros = [
-				{ id: 1, name: 'sneak-attack', macro: '2d6', sheetRecordId: 1 },
-				{ id: 2, name: 'sneak-damage', macro: '3d6', sheetRecordId: 1 },
-				{ id: 3, name: 'power-attack', macro: '4', sheetRecordId: 1 },
+				{
+					id: 1,
+					name: 'sneak-attack',
+					macro: '2d6',
+					sheetRecordId: 1,
+					userId: TEST_USER_ID,
+				},
+				{
+					id: 2,
+					name: 'sneak-damage',
+					macro: '3d6',
+					sheetRecordId: 1,
+					userId: TEST_USER_ID,
+				},
+				{ id: 3, name: 'power-attack', macro: '4', sheetRecordId: 1, userId: TEST_USER_ID },
 			];
 
 			vi.mocked(KoboldUtils).mockImplementation(function (this: MockKoboldUtils) {

@@ -51,6 +51,7 @@ export class RollMacroCreateSubCommand extends BaseCommandClass(
 		}
 
 		await kobold.rollMacro.create({
+			userId: intr.user.id,
 			name,
 			macro,
 			sheetRecordId: activeCharacter.sheetRecord.id,

@@ -31,6 +31,7 @@ describe('ModifierListSubCommand Integration', () => {
 				{
 					id: 1,
 					sheetRecordId: 1,
+					userId: TEST_USER_ID,
 					name: 'inspire courage',
 					isActive: true,
 					description: 'Bard inspiration',
@@ -44,6 +45,7 @@ describe('ModifierListSubCommand Integration', () => {
 				{
 					id: 2,
 					sheetRecordId: 1,
+					userId: TEST_USER_ID,
 					name: 'frightened',
 					isActive: true,
 					description: 'Fear condition',
@@ -99,6 +101,7 @@ describe('ModifierListSubCommand Integration', () => {
 				{
 					id: 1,
 					sheetRecordId: 1,
+					userId: TEST_USER_ID,
 					name: 'active modifier',
 					isActive: true,
 					description: 'Currently active',
@@ -112,6 +115,7 @@ describe('ModifierListSubCommand Integration', () => {
 				{
 					id: 2,
 					sheetRecordId: 1,
+					userId: TEST_USER_ID,
 					name: 'inactive modifier',
 					isActive: false,
 					description: 'Currently inactive',
@@ -147,6 +151,7 @@ describe('ModifierListSubCommand Integration', () => {
 				{
 					id: 1,
 					sheetRecordId: 1,
+					userId: TEST_USER_ID,
 					name: 'status modifier',
 					isActive: true,
 					description: null,
@@ -160,6 +165,7 @@ describe('ModifierListSubCommand Integration', () => {
 				{
 					id: 2,
 					sheetRecordId: 1,
+					userId: TEST_USER_ID,
 					name: 'circumstance modifier',
 					isActive: true,
 					description: null,
@@ -173,6 +179,7 @@ describe('ModifierListSubCommand Integration', () => {
 				{
 					id: 3,
 					sheetRecordId: 1,
+					userId: TEST_USER_ID,
 					name: 'untyped modifier',
 					isActive: true,
 					description: null,
@@ -208,6 +215,7 @@ describe('ModifierListSubCommand Integration', () => {
 				{
 					id: 1,
 					sheetRecordId: 1,
+					userId: TEST_USER_ID,
 					name: 'zebra modifier',
 					isActive: true,
 					description: null,
@@ -221,6 +229,7 @@ describe('ModifierListSubCommand Integration', () => {
 				{
 					id: 2,
 					sheetRecordId: 1,
+					userId: TEST_USER_ID,
 					name: 'apple modifier',
 					isActive: true,
 					description: null,

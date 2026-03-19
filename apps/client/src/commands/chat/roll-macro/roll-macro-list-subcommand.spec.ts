@@ -50,9 +50,21 @@ describe('RollMacroListSubCommand Integration', () => {
 			const { mockCharacter } = setupKoboldUtilsMocks();
 			mockCharacter.name = 'Test Fighter';
 			mockCharacter.rollMacros = [
-				{ id: 1, name: 'sneak-attack', macro: '2d6', sheetRecordId: 1 },
-				{ id: 2, name: 'power-attack', macro: '4', sheetRecordId: 1 },
-				{ id: 3, name: 'str-bonus', macro: '[str]', sheetRecordId: 1 },
+				{
+					id: 1,
+					name: 'sneak-attack',
+					macro: '2d6',
+					sheetRecordId: 1,
+					userId: TEST_USER_ID,
+				},
+				{ id: 2, name: 'power-attack', macro: '4', sheetRecordId: 1, userId: TEST_USER_ID },
+				{
+					id: 3,
+					name: 'str-bonus',
+					macro: '[str]',
+					sheetRecordId: 1,
+					userId: TEST_USER_ID,
+				},
 			];
 
 			// Act
@@ -92,9 +104,9 @@ describe('RollMacroListSubCommand Integration', () => {
 			const { mockCharacter } = setupKoboldUtilsMocks();
 			mockCharacter.name = 'Test Fighter';
 			mockCharacter.rollMacros = [
-				{ id: 1, name: 'zephyr', macro: '1d4', sheetRecordId: 1 },
-				{ id: 2, name: 'alpha', macro: '1d6', sheetRecordId: 1 },
-				{ id: 3, name: 'middle', macro: '1d8', sheetRecordId: 1 },
+				{ id: 1, name: 'zephyr', macro: '1d4', sheetRecordId: 1, userId: TEST_USER_ID },
+				{ id: 2, name: 'alpha', macro: '1d6', sheetRecordId: 1, userId: TEST_USER_ID },
+				{ id: 3, name: 'middle', macro: '1d8', sheetRecordId: 1, userId: TEST_USER_ID },
 			];
 
 			// Act
@@ -115,7 +127,7 @@ describe('RollMacroListSubCommand Integration', () => {
 			const { mockCharacter } = setupKoboldUtilsMocks();
 			mockCharacter.name = 'Sir Galahad';
 			mockCharacter.rollMacros = [
-				{ id: 1, name: 'test-macro', macro: '1d6', sheetRecordId: 1 },
+				{ id: 1, name: 'test-macro', macro: '1d6', sheetRecordId: 1, userId: TEST_USER_ID },
 			];
 
 			// Act
