@@ -77,6 +77,10 @@ export class CharacterRemoveSubCommand extends BaseCommandClass(
 				},
 			}
 		);
+		if (result) {
+			// Acknowledge the button interaction to prevent "This interaction failed"
+			await InteractionUtils.deferUpdate(result.intr);
+		}
 		if (result && result.value === 'remove') {
 			await InteractionUtils.editReply(intr, {
 				content: CharacterDefinition.strings.shared.choiceRegistered({

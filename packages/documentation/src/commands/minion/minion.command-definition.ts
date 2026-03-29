@@ -13,7 +13,7 @@ export enum MinionSubCommandEnum {
 	remove = 'remove',
 	roll = 'roll',
 	set = 'set',
-	join = 'join',
+	init = 'init',
 }
 
 export const minionCommandDefinition = {
@@ -84,7 +84,7 @@ export const minionCommandDefinition = {
 		},
 		[MinionSubCommandEnum.assign]: {
 			name: MinionSubCommandEnum.assign,
-			description: 'Assign a minion to a different character',
+			description: 'Assign a minion to a character, or unassign it',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
 				[MinionCommandOptionEnum.minion]: withOrder(
@@ -92,8 +92,16 @@ export const minionCommandDefinition = {
 					1
 				),
 				[MinionCommandOptionEnum.targetCharacter]: withOrder(
-					minionCommandOptions[MinionCommandOptionEnum.targetCharacter],
+					{
+						...minionCommandOptions[MinionCommandOptionEnum.targetCharacter],
+						required: false,
+						description: 'The target character. Leave empty to unassign the minion.',
+					},
 					2
+				),
+				[MinionCommandOptionEnum.copy]: withOrder(
+					minionCommandOptions[MinionCommandOptionEnum.copy],
+					3
 				),
 			},
 		},
@@ -175,8 +183,8 @@ export const minionCommandDefinition = {
 				),
 			},
 		},
-		[MinionSubCommandEnum.join]: {
-			name: MinionSubCommandEnum.join,
+		[MinionSubCommandEnum.init]: {
+			name: MinionSubCommandEnum.init,
 			description: "Add a minion to the current channel's initiative",
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {

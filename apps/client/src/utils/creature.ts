@@ -1108,7 +1108,7 @@ export class Creature {
 				actions: entity.actions,
 				modifiers: entity.modifiers,
 				rollMacros: entity.rollMacros,
-				conditions: [],
+				conditions: entity.sheetRecord.conditions ?? [],
 			},
 			name,
 			intr

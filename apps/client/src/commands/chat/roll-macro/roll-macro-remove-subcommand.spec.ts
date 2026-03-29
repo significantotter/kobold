@@ -54,7 +54,7 @@ describe('RollMacroRemoveSubCommand', () => {
 
 			// Mock the button collector to return 'remove'
 			vi.mocked(CollectorUtils.collectByButton).mockResolvedValue({
-				intr: {} as any,
+				intr: { deferUpdate: vi.fn() } as any,
 				value: 'remove',
 			});
 
@@ -91,7 +91,7 @@ describe('RollMacroRemoveSubCommand', () => {
 
 			// Mock the button collector to return 'cancel'
 			vi.mocked(CollectorUtils.collectByButton).mockResolvedValue({
-				intr: {} as any,
+				intr: { deferUpdate: vi.fn() } as any,
 				value: 'cancel',
 			});
 

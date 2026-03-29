@@ -362,8 +362,11 @@ export class InitiativeBuilder {
 				return a.name.localeCompare(b.name);
 			});
 			for (let i = 0; i < sortedActors.length; i++) {
-				turnText += `       ${i}. ${sortedActors[i].name}`;
+				turnText += `    - ${sortedActors[i].name}`;
 				turnText += this.getActorTurnText(sortedActors[i], isActiveGroup, options);
+				if (i < sortedActors.length - 1) {
+					turnText += '\n';
+				}
 			}
 		}
 		return turnText;

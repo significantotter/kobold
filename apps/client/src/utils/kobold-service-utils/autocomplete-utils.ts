@@ -534,4 +534,52 @@ export class AutocompleteUtils {
 				: [];
 		return { characters, minions };
 	}
+
+	/**
+	 * Autocomplete for minions belonging to the active character OR unassigned.
+	 * Used by minion commands that operate on the active character's minions
+	 * but also allow operating on unassigned minions.
+	 */
+	public async getActiveCharacterMinionsWithUnassigned(
+		intr: AutocompleteInteraction<CacheType>,
+		matchText: string
+	): Promise<{ name: string; value: string }[]> {
+		const activeCharacter = await this.koboldUtils.characterUtils.getActiveCharacter(intr);
+		if (!activeCharacter) return [];
+
+		// Get all user's minions and filter to active character's minions + unassigned
+		const allMinions = await this.kobold.minion.readManyByUserId({
+			userId: intr.user.id,
+		});
+		const minions = allMinions.filter(
+			(m: MinionWithRelations) =>
+				m.characterId === activeCharacter.id || m.characterId === null
+		);
+
+		return minions
+			.filter((m: MinionWithRelations) =>
+				m.name.toLowerCase().includes((matchText ?? '').toLowerCase())
+			)
+			.map((m: MinionWithRelations) => ({
+				name: m.characterId === null ? `${m.name} (unassigned)` : m.name,
+				value: m.name,
+			}));
+	}
+
+	/**
+	 * Fetches minions belonging to the active character OR unassigned (raw data).
+	 * Use this when you need the minion objects, not just autocomplete results.
+	 */
+	public async fetchActiveCharacterMinionsWithUnassigned(
+		intr: AutocompleteInteraction<CacheType> | { user: { id: string } },
+		activeCharacterId: number
+	): Promise<MinionWithRelations[]> {
+		const allMinions = await this.kobold.minion.readManyByUserId({
+			userId: intr.user.id,
+		});
+		return allMinions.filter(
+			(m: MinionWithRelations) =>
+				m.characterId === activeCharacterId || m.characterId === null
+		);
+	}
 }

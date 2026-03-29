@@ -165,6 +165,10 @@ export abstract class CharacterFetcher<SourceData, FetchArgs> {
 				},
 			}
 		);
+		if (result) {
+			// Acknowledge the button interaction to prevent "This interaction failed"
+			await InteractionUtils.deferUpdate(result.intr);
+		}
 		if (result && result.value !== 'update') {
 			await InteractionUtils.editReply(this.intr, {
 				content: CharacterCommand.strings.shared.choiceRegistered({

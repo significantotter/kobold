@@ -61,7 +61,7 @@ describe('ModifierRemoveSubCommand', () => {
 
 			// Mock confirmation - user clicks remove
 			vi.mocked(CollectorUtils.collectByButton).mockResolvedValue({
-				intr: {} as any,
+				intr: { deferUpdate: vi.fn() } as any,
 				value: 'remove',
 			});
 
@@ -106,7 +106,7 @@ describe('ModifierRemoveSubCommand', () => {
 
 			// Mock confirmation - user clicks cancel
 			vi.mocked(CollectorUtils.collectByButton).mockResolvedValue({
-				intr: {} as any,
+				intr: { deferUpdate: vi.fn() } as any,
 				value: 'cancel',
 			});
 

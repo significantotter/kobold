@@ -130,6 +130,8 @@ export class ActionRemoveSubCommand extends BaseCommandClass(
 				}
 			);
 			if (result) {
+				// Acknowledge the button interaction to prevent "This interaction failed"
+				await InteractionUtils.deferUpdate(result.intr);
 				await InteractionUtils.editReply(intr, {
 					content: ActionDefinition.strings.shared.choiceRegistered({
 						choice: _.capitalize(result.value),

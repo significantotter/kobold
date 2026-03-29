@@ -20,7 +20,8 @@ import {
 	createMockNumericCounter,
 	createMockCounterGroup,
 	getMockKobold,
-	resetMockKobold,} from '../../../test-utils/index.js';
+	resetMockKobold,
+} from '../../../test-utils/index.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { CollectorUtils } from '../../../utils/collector-utils.js';
 import type { Counter, CounterGroup, NumericCounter } from '@kobold/db';
@@ -50,7 +51,7 @@ describe('CounterRemoveSubCommand', () => {
 				group: null,
 			});
 			vi.mocked(CollectorUtils.collectByButton).mockResolvedValue({
-				intr: {} as any,
+				intr: { deferUpdate: vi.fn() } as any,
 				value: 'remove',
 			});
 			const { updateMock } = setupSheetRecordUpdateMock(kobold);
@@ -79,7 +80,7 @@ describe('CounterRemoveSubCommand', () => {
 				group: null,
 			});
 			vi.mocked(CollectorUtils.collectByButton).mockResolvedValue({
-				intr: {} as any,
+				intr: { deferUpdate: vi.fn() } as any,
 				value: 'cancel',
 			});
 			const { updateMock } = setupSheetRecordUpdateMock(kobold);
@@ -115,7 +116,7 @@ describe('CounterRemoveSubCommand', () => {
 				group,
 			});
 			vi.mocked(CollectorUtils.collectByButton).mockResolvedValue({
-				intr: {} as any,
+				intr: { deferUpdate: vi.fn() } as any,
 				value: 'remove',
 			});
 			const { updateMock } = setupSheetRecordUpdateMock(kobold);

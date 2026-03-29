@@ -173,6 +173,8 @@ export class GameInitSubCommand extends BaseCommandClass(
 			});
 			const addedMinionNames: string[] = [];
 			for (const minion of minions) {
+				if (!minion.autoJoinInitiative) continue;
+
 				const minionActorName = InitiativeBuilderUtils.getUniqueInitActorName(
 					currentInitiative,
 					minion.name

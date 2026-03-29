@@ -23,6 +23,8 @@ export enum MinionCommandOptionEnum {
 	// Create from bestiary option
 	creature = 'creature',
 	template = 'template',
+	// Assign command option
+	copy = 'copy',
 }
 
 export const minionCommandOptions = {
@@ -189,5 +191,11 @@ export const minionCommandOptions = {
 			{ name: 'Elite', value: 'elite' },
 			{ name: 'Weak', value: 'weak' },
 		],
+	},
+	[MinionCommandOptionEnum.copy]: {
+		name: MinionCommandOptionEnum.copy,
+		description: 'If true, copy the minion instead of moving it.',
+		required: false,
+		type: ApplicationCommandOptionType.Boolean,
 	},
 } satisfies SpecificCommandOptions<MinionCommandOptionEnum>;

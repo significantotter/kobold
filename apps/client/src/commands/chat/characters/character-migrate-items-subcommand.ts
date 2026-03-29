@@ -111,6 +111,11 @@ export class CharacterMigrateItemsSubCommand extends BaseCommandClass(
 			}
 		);
 
+		if (result) {
+			// Acknowledge the button interaction to prevent "This interaction failed"
+			await InteractionUtils.deferUpdate(result.intr);
+		}
+
 		if (result && result.value === 'migrate') {
 			await InteractionUtils.editReply(intr, {
 				content: CharacterDefinition.strings.shared.choiceRegistered({

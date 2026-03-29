@@ -53,8 +53,8 @@ export const minionCommandDocumentation: CommandDocumentation<typeof minionComma
 			usage: null,
 			examples: [],
 		},
-		[MinionSubCommandEnum.join]: {
-			name: MinionSubCommandEnum.join,
+		[MinionSubCommandEnum.init]: {
+			name: MinionSubCommandEnum.init,
 			description: 'Add a minion to initiative',
 			usage: null,
 			examples: [],

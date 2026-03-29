@@ -22,9 +22,9 @@ import { RollBuilder } from '../../../utils/roll-builder.js';
 const commandOptions = MinionDefinition.options;
 const commandOptionsEnum = MinionDefinition.commandOptionsEnum;
 
-export class MinionJoinSubCommand extends BaseCommandClass(
+export class MinionInitSubCommand extends BaseCommandClass(
 	MinionDefinition,
-	MinionDefinition.subCommandEnum.join
+	MinionDefinition.subCommandEnum.init
 ) {
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
@@ -36,22 +36,12 @@ export class MinionJoinSubCommand extends BaseCommandClass(
 		const koboldUtils = new KoboldUtils(kobold);
 
 		if (option.name === commandOptions[commandOptionsEnum.minion].name) {
-			const match = intr.options.getString(commandOptions[commandOptionsEnum.minion].name);
-			const activeCharacter = await koboldUtils.characterUtils.getActiveCharacter(intr);
-			if (!activeCharacter) return [];
-
-			const minions = await kobold.minion.readMany({
-				characterId: activeCharacter.id,
-			});
-
-			return minions
-				.filter((m: MinionWithRelations) =>
-					m.name.toLowerCase().includes((match ?? '').toLowerCase())
-				)
-				.map((m: MinionWithRelations) => ({
-					name: m.name,
-					value: m.name,
-				}));
+			const match =
+				intr.options.getString(commandOptions[commandOptionsEnum.minion].name) ?? '';
+			return await koboldUtils.autocompleteUtils.getActiveCharacterMinionsWithUnassigned(
+				intr,
+				match
+			);
 		} else if (option.name === commandOptions[commandOptionsEnum.skillChoice].name) {
 			const match =
 				intr.options.getString(commandOptions[commandOptionsEnum.skillChoice].name) ?? '';
@@ -61,9 +51,11 @@ export class MinionJoinSubCommand extends BaseCommandClass(
 			const activeCharacter = await koboldUtils.characterUtils.getActiveCharacter(intr);
 			if (!activeCharacter) return [];
 
-			const minions = await kobold.minion.readMany({
-				characterId: activeCharacter.id,
-			});
+			const minions =
+				await koboldUtils.autocompleteUtils.fetchActiveCharacterMinionsWithUnassigned(
+					intr,
+					activeCharacter.id
+				);
 
 			const targetMinion = minions.find(
 				(m: MinionWithRelations) => m.name.toLowerCase() === minionName.toLowerCase()
@@ -122,17 +114,21 @@ export class MinionJoinSubCommand extends BaseCommandClass(
 		const hideStats =
 			intr.options.getBoolean(commandOptions[commandOptionsEnum.hideStats].name) ?? false;
 
-		// Find the minion
-		const minions = await kobold.minion.readMany({
-			characterId: activeCharacter.id,
+		// Find the minion (active character's minions + unassigned)
+		const allMinions = await kobold.minion.readManyByUserId({
+			userId: intr.user.id,
 		});
+		const minions = allMinions.filter(
+			(m: MinionWithRelations) =>
+				m.characterId === activeCharacter.id || m.characterId === null
+		);
 		const targetMinion = minions.find(
 			(m: MinionWithRelations) => m.name.toLowerCase() === minionName.toLowerCase()
 		);
 
 		if (!targetMinion) {
 			throw new KoboldError(
-				`Yip! I couldn't find a minion named "${minionName}" for ${activeCharacter.name}!`
+				`Yip! I couldn't find a minion named "${minionName}" for ${activeCharacter.name} or unassigned!`
 			);
 		}
 

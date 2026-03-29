@@ -207,7 +207,7 @@ describe('CharacterFetcher', () => {
 		it('should send confirmation prompt with buttons and handle cancel', async () => {
 			// Mock CollectorUtils to simulate cancel
 			vi.mocked(CollectorUtils.collectByButton).mockResolvedValue({
-				intr: mockIntr as any,
+				intr: { ...mockIntr, deferUpdate: vi.fn() } as any,
 				value: 'cancel',
 			});
 
@@ -230,7 +230,7 @@ describe('CharacterFetcher', () => {
 		it('should proceed when user confirms update', async () => {
 			// Mock CollectorUtils to simulate update confirmation
 			vi.mocked(CollectorUtils.collectByButton).mockResolvedValue({
-				intr: mockIntr as any,
+				intr: { ...mockIntr, deferUpdate: vi.fn() } as any,
 				value: 'update',
 			});
 
