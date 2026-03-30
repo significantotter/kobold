@@ -6,7 +6,7 @@ import {
 	ChatInputCommandInteraction,
 } from 'discord.js';
 import { Kobold, MinionWithRelations } from '@kobold/db';
-import { MinionDefinition } from '@kobold/documentation';
+import { MinionDefinition, sharedStrings } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
@@ -50,18 +50,10 @@ export class MinionAssignSubCommand extends BaseCommandClass(
 			const match = intr.options.getString(
 				commandOptions[commandOptionsEnum.targetCharacter].name
 			);
-
-			// Get all user's characters
-			const characters = await kobold.character.readMany({
-				userId: intr.user.id,
-			});
-
-			return characters
-				.filter(c => c.name.toLowerCase().includes((match ?? '').toLowerCase()))
-				.map(c => ({
-					name: c.name,
-					value: c.name,
-				}));
+			return koboldUtils.autocompleteUtils.getTargetCharacterOptionsWithGame(
+				intr,
+				match ?? ''
+			);
 		}
 	}
 
@@ -124,17 +116,55 @@ export class MinionAssignSubCommand extends BaseCommandClass(
 			return;
 		}
 
-		// Find the target character
-		const characters = await kobold.character.readMany({
-			userId: intr.user.id,
-		});
+		// Determine if this is a game character (from another player)
+		const isGameCharacter = targetCharacterName.startsWith('game:');
+		const actualCharacterName = isGameCharacter
+			? targetCharacterName.slice('game:'.length)
+			: targetCharacterName;
 
-		const targetCharacter = characters.find(
-			c => c.name.toLowerCase() === targetCharacterName.toLowerCase()
-		);
+		// Find the target character
+		let targetCharacter;
+		let isOtherPlayersCharacter = false;
+		let targetUserId = intr.user.id;
+
+		if (isGameCharacter && intr.guildId) {
+			// Look for character in the active game
+			const activeGame = await koboldUtils.gameUtils.getActiveGame(
+				intr.user.id,
+				intr.guildId,
+				intr.channelId ?? undefined
+			);
+			if (activeGame?.characters) {
+				targetCharacter = activeGame.characters.find(
+					c => c.name.toLowerCase() === actualCharacterName.toLowerCase()
+				);
+				if (targetCharacter && targetCharacter.userId !== intr.user.id) {
+					isOtherPlayersCharacter = true;
+					targetUserId = targetCharacter.userId;
+				}
+			}
+		} else {
+			// Look for character in user's own characters
+			const characters = await kobold.character.readMany({
+				userId: intr.user.id,
+			});
+			targetCharacter = characters.find(
+				c => c.name.toLowerCase() === actualCharacterName.toLowerCase()
+			);
+		}
 
 		if (!targetCharacter) {
 			throw new KoboldError(MinionDefinition.strings.assign.targetNotFound);
+		}
+
+		// Safeguard: require copy option when assigning to another player's character
+		if (isOtherPlayersCharacter && !copyOption) {
+			throw new KoboldError(
+				sharedStrings.errors.copyRequiredForOtherPlayer({
+					targetName: targetCharacter.name,
+					itemType: 'minion',
+				})
+			);
 		}
 
 		// Check if the target character already has a minion with this name
@@ -153,7 +183,7 @@ export class MinionAssignSubCommand extends BaseCommandClass(
 			);
 		}
 
-		if (copyOption) {
+		if (copyOption || isOtherPlayersCharacter) {
 			// Create a copy of the minion with all related data
 			// 1. Copy the sheetRecord
 			const newSheetRecord = await kobold.sheetRecord.create({
@@ -171,7 +201,7 @@ export class MinionAssignSubCommand extends BaseCommandClass(
 				await kobold.action.create({
 					...actionWithoutId,
 					sheetRecordId: newSheetRecord.id,
-					userId: intr.user.id,
+					userId: targetUserId,
 				});
 			}
 
@@ -185,7 +215,7 @@ export class MinionAssignSubCommand extends BaseCommandClass(
 				await kobold.modifier.create({
 					...modifierWithoutId,
 					sheetRecordId: newSheetRecord.id,
-					userId: intr.user.id,
+					userId: targetUserId,
 				});
 			}
 
@@ -199,14 +229,14 @@ export class MinionAssignSubCommand extends BaseCommandClass(
 				await kobold.rollMacro.create({
 					...rollMacroWithoutId,
 					sheetRecordId: newSheetRecord.id,
-					userId: intr.user.id,
+					userId: targetUserId,
 				});
 			}
 
 			// 5. Create the new minion
 			await kobold.minion.create({
 				name: matchedMinion.name,
-				userId: intr.user.id,
+				userId: targetUserId,
 				characterId: targetCharacter.id,
 				sheetRecordId: newSheetRecord.id,
 				autoJoinInitiative: matchedMinion.autoJoinInitiative,

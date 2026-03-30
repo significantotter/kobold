@@ -13,12 +13,9 @@ import { InteractionUtils } from '../../../utils/index.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Command } from '../../index.js';
-import { ModifierDefinition } from '@kobold/documentation';
+import { ModifierDefinition, sharedStrings } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
-import {
-	parseCreateForValue,
-	CreateForTargets,
-} from '../../../utils/kobold-service-utils/autocomplete-utils.js';
+import { parseAssignToValue } from '../../../utils/kobold-service-utils/autocomplete-utils.js';
 
 const commandOptions = ModifierDefinition.options;
 const commandOptionsEnum = ModifierDefinition.commandOptionsEnum;
@@ -59,7 +56,7 @@ export class ModifierAssignSubCommand extends BaseCommandClass(
 
 		if (option.name === commandOptions[commandOptionsEnum.assignTo].name) {
 			const match = intr.options.getString(commandOptions[commandOptionsEnum.assignTo].name);
-			return koboldUtils.autocompleteUtils.getAssignToOptions(intr, match ?? '');
+			return koboldUtils.autocompleteUtils.getAssignToOptionsWithGame(intr, match ?? '');
 		}
 	}
 
@@ -79,27 +76,32 @@ export class ModifierAssignSubCommand extends BaseCommandClass(
 		);
 		const copyOption = intr.options.getBoolean(commandOptions[commandOptionsEnum.copy].name);
 
-		// Get characters and minions for parsing
+		// Get characters and minions for parsing (user's own + game)
 		const { characters, minions } =
 			await koboldUtils.autocompleteUtils.getUserCharactersAndMinions(intr);
+		const { gameCharacters, gameMinions } =
+			await koboldUtils.autocompleteUtils.getGameCharactersAndMinions(intr);
+		const initActors = await koboldUtils.autocompleteUtils.getInitiativeActors(intr);
 
-		// Parse assign-to value
-		const newSheetRecordId = parseCreateForValue(assignToValue, characters, minions);
+		// Parse assign-to value with game character and initiative actor support
+		const assignToResult = parseAssignToValue(
+			assignToValue,
+			intr.user.id,
+			characters,
+			minions,
+			gameCharacters,
+			gameMinions,
+			initActors
+		);
 
-		// Determine target name for messages
-		let targetName: string;
-		if (newSheetRecordId === null) {
-			targetName = 'your user-wide modifiers';
-		} else {
-			const char = characters.find(c => c.sheetRecordId === newSheetRecordId);
-			const minion = minions.find(m => m.sheetRecordId === newSheetRecordId);
-			if (char) {
-				targetName = char.name;
-			} else if (minion) {
-				targetName = minion.name;
-			} else {
-				throw new KoboldError(`Yip! Could not find a character or minion with that ID.`);
-			}
+		// Safeguard: require copy option when assigning to another player's character
+		if (assignToResult.isOtherPlayersCharacter && !copyOption) {
+			throw new KoboldError(
+				sharedStrings.errors.copyRequiredForOtherPlayer({
+					targetName: assignToResult.targetName,
+					itemType: 'modifier',
+				})
+			);
 		}
 
 		// Find the modifier to assign
@@ -120,14 +122,14 @@ export class ModifierAssignSubCommand extends BaseCommandClass(
 
 		// Check if target already has a modifier with the same name
 		let existingModifiers: Modifier[];
-		if (newSheetRecordId === null) {
+		if (assignToResult.sheetRecordId === null) {
 			existingModifiers = await kobold.modifier.readManyUserWide({
-				userId: intr.user.id,
+				userId: assignToResult.targetUserId ?? intr.user.id,
 			});
 		} else {
 			existingModifiers = await kobold.modifier.readManyForCharacter({
-				userId: intr.user.id,
-				sheetRecordId: newSheetRecordId,
+				userId: assignToResult.targetUserId ?? intr.user.id,
+				sheetRecordId: assignToResult.sheetRecordId,
 			});
 		}
 
@@ -135,39 +137,39 @@ export class ModifierAssignSubCommand extends BaseCommandClass(
 			throw new KoboldError(
 				ModifierDefinition.strings.assign.alreadyExists({
 					modifierName: matchedModifier.name,
-					targetName,
+					targetName: assignToResult.targetName,
 				})
 			);
 		}
 
-		if (copyOption) {
+		if (copyOption || assignToResult.isOtherPlayersCharacter) {
 			// Create a copy instead of moving
 			const { id, ...modifierWithoutId } = matchedModifier;
 			await kobold.modifier.create({
 				...modifierWithoutId,
-				sheetRecordId: newSheetRecordId,
-				userId: intr.user.id,
+				sheetRecordId: assignToResult.sheetRecordId,
+				userId: assignToResult.targetUserId ?? intr.user.id,
 			});
 
 			await InteractionUtils.send(
 				intr,
 				ModifierDefinition.strings.assign.copied({
 					modifierName: matchedModifier.name,
-					targetName,
+					targetName: assignToResult.targetName,
 				})
 			);
 		} else {
 			// Move the modifier
 			await kobold.modifier.update(
 				{ id: matchedModifier.id },
-				{ sheetRecordId: newSheetRecordId }
+				{ sheetRecordId: assignToResult.sheetRecordId }
 			);
 
 			await InteractionUtils.send(
 				intr,
 				ModifierDefinition.strings.assign.success({
 					modifierName: matchedModifier.name,
-					targetName,
+					targetName: assignToResult.targetName,
 				})
 			);
 		}
