@@ -150,15 +150,15 @@ describe('KoboldEmbedUtils', () => {
 				expect(result[1].value.length).toBe(700);
 			});
 
-			it('should split field value at periods', () => {
+			it('should split extremely long lines at spaces', () => {
 				const field = {
 					name: 'Test',
-					value: 'a'.repeat(900) + '.' + 'b'.repeat(900),
+					value: 'a'.repeat(500) + ' ' + 'b'.repeat(500) + ' ' + 'c'.repeat(500),
 				};
 				const result = new KoboldEmbed().splitField(field);
 				expect(result.length).toBe(2);
-				expect(result[0].value.length).toBe(900);
-				expect(result[1].value.length).toBe(900);
+				expect(result[0].value.length).toBe(1001); // 500 + ' ' + 500
+				expect(result[1].value.length).toBe(500);
 			});
 
 			it('should split field value at spaces', () => {

@@ -196,35 +196,19 @@ export class KoboldEmbed extends EmbedBuilder {
 				};
 			}
 			if (newField.value.length + field.name.length + line.length > 1024) {
-				const splitSentences = line.split('.');
-				for (const sentence of splitSentences) {
-					if (
-						newField.value.length + field.name.length > 800 &&
-						newField.value.length + field.name.length + sentence.length > 1024
-					) {
-						// just start a new field
+				// Line itself is too long - split by words only (not sentences/periods
+				// since that breaks formatting like `. status` bullet points)
+				const splitWords = line.split(' ');
+				for (const word of splitWords) {
+					if (newField.value.length + field.name.length + word.length + 1 > 1024) {
+						newField.value = newField.value.trim();
 						splitFields.push(newField);
 						newField = {
 							name: '\u200b',
-							value: '',
+							value: word,
 						};
-					}
-					if (newField.value.length + field.name.length + sentence.length > 1024) {
-						const splitWords = sentence.split(' ');
-						for (const word of splitWords) {
-							if (newField.value.length + field.name.length + word.length > 1024) {
-								newField.value = newField.value.trim();
-								splitFields.push(newField);
-								newField = {
-									name: '\u200b',
-									value: word,
-								};
-							} else {
-								newField.value += newField.value ? ` ${word}` : word;
-							}
-						}
 					} else {
-						newField.value += newField.value.length ? `.${sentence}` : sentence;
+						newField.value += newField.value ? ` ${word}` : word;
 					}
 				}
 			} else {
