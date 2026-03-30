@@ -134,8 +134,9 @@ export class KoboldEmbed extends EmbedBuilder {
 			},
 		]);
 
-		if (initiativeBuilder.actorsByGroup[groupTurn.id].length === 1) {
-			const actor = initiativeBuilder.actorsByGroup[groupTurn.id][0];
+		const groupActors = initiativeBuilder.actorsByGroup[groupTurn.id];
+		if (groupActors?.length === 1) {
+			const actor = groupActors[0];
 			if (actor.characterId) {
 				result.setSheetRecord(actor.sheetRecord);
 			}
