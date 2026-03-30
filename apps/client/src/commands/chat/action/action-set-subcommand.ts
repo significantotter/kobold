@@ -6,7 +6,7 @@ import {
 	ChatInputCommandInteraction,
 } from 'discord.js';
 
-import { ActionCostEnum, Kobold, isActionTypeEnum } from '@kobold/db';
+import { ActionCostEnum, ActionUpdate, Kobold, isActionTypeEnum } from '@kobold/db';
 
 import { KoboldError } from '../../../utils/KoboldError.js';
 import { InteractionUtils } from '../../../utils/index.js';
@@ -43,7 +43,7 @@ export class ActionSetSubCommand extends BaseCommandClass(
 			}
 			//find an action on the character matching the autocomplete string
 			const matchedActions = FinderHelpers.matchAllActions(
-				activeCharacter.sheetRecord,
+				activeCharacter.actions,
 				match
 			).map(action => ({
 				name: action.name,
@@ -76,7 +76,7 @@ export class ActionSetSubCommand extends BaseCommandClass(
 		});
 
 		//find a roll on the character matching the autocomplete string
-		const matchedAction = activeCharacter.sheetRecord.actions.find(
+		const matchedAction = activeCharacter.actions.find(
 			action => action.name.toLocaleLowerCase() === actionTarget.toLocaleLowerCase()
 		);
 		if (!matchedAction) {
@@ -85,6 +85,9 @@ export class ActionSetSubCommand extends BaseCommandClass(
 		}
 		// just in case we need to set the name of the action, save it here
 		const currentActionName = matchedAction.name;
+
+		// build the update object based on which field is being updated
+		const updateData: ActionUpdate = {};
 
 		// validate the strings into different types based on which field is being updated
 
@@ -106,13 +109,13 @@ export class ActionSetSubCommand extends BaseCommandClass(
 					`Yip! The counter group description must be less than 300 characters!`
 				);
 			}
-			matchedAction[fieldToUpdate as 'name' | 'description'] = newValue.trim();
+			updateData[fieldToUpdate as 'name' | 'description'] = newValue.trim();
 		}
 		// enum values
 		else if (fieldToUpdate === 'type') {
 			const enumValue = newValue.toLocaleLowerCase().trim();
 			if (isActionTypeEnum(enumValue)) {
-				matchedAction.type = enumValue;
+				updateData.type = enumValue;
 			} else {
 				throw new KoboldError(ActionDefinition.strings.set.invalidActionType);
 			}
@@ -135,7 +138,7 @@ export class ActionSetSubCommand extends BaseCommandClass(
 			let finalValue: ActionCostEnum | undefined = actionInputMap[condensedActionCost];
 
 			if (finalValue) {
-				matchedAction.actionCost = finalValue;
+				updateData.actionCost = finalValue;
 			} else {
 				throw new KoboldError(ActionDefinition.strings.set.invalidActionCost);
 			}
@@ -146,12 +149,12 @@ export class ActionSetSubCommand extends BaseCommandClass(
 			if (isNaN(parsedValue) || parsedValue < 1) {
 				throw new KoboldError(ActionDefinition.strings.set.invalidInteger);
 			} else {
-				matchedAction.baseLevel = parsedValue;
+				updateData.baseLevel = parsedValue;
 			}
 		}
 		// string array values
 		else if (['tags'].includes(fieldToUpdate)) {
-			matchedAction.tags = newValue.split(',').map(tag => tag.trim());
+			updateData.tags = newValue.split(',').map(tag => tag.trim());
 		}
 
 		// boolean values
@@ -159,16 +162,13 @@ export class ActionSetSubCommand extends BaseCommandClass(
 			const autoHeighten = ['true', 'yes', '1', 'ok', 'okay'].includes(
 				newValue.toLocaleLowerCase().trim()
 			);
-			matchedAction.autoHeighten = autoHeighten;
+			updateData.autoHeighten = autoHeighten;
 		} else {
 			// invalid field
 			throw new KoboldError(ActionDefinition.strings.set.unknownField);
 		}
 
-		await kobold.sheetRecord.update(
-			{ id: activeCharacter.sheetRecordId },
-			{ actions: activeCharacter.sheetRecord.actions }
-		);
+		await kobold.action.update({ id: matchedAction.id }, updateData);
 
 		//send a confirmation message
 		await InteractionUtils.send(

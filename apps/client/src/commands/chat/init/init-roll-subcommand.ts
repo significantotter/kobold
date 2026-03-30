@@ -45,7 +45,6 @@ export class InitRollSubCommand extends BaseCommandClass(
 				'';
 			const targetCharacterName =
 				intr.options.getString(commandOptions[commandOptionsEnum.initCharacter].name) ?? '';
-			console.log(targetCharacterName);
 
 			const { autocompleteUtils } = new KoboldUtils(kobold);
 			const res = await autocompleteUtils.getMatchingRollsForInitiativeSheet(
@@ -53,7 +52,6 @@ export class InitRollSubCommand extends BaseCommandClass(
 				match,
 				targetCharacterName
 			);
-			console.log(res);
 			return res;
 		} else if (option.name === commandOptions[commandOptionsEnum.initCharacterTarget].name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
@@ -124,10 +122,9 @@ export class InitRollSubCommand extends BaseCommandClass(
 			targetCharacterName,
 			true
 		);
-		console.log(actor.name, targetSheetName, targetCharacterName);
 
-		let targetSheetRecord: SheetRecord | null = null;
 		let targetCreature: Creature | null = null;
+		let targetSheetRecord: SheetRecord | null = null;
 		let hideStats = false;
 
 		if (
@@ -136,12 +133,12 @@ export class InitRollSubCommand extends BaseCommandClass(
 			targetSheetName.trim().toLocaleLowerCase() != '(none)'
 		) {
 			const results = await gameUtils.getCharacterOrInitActorTarget(intr, targetSheetName);
-			targetSheetRecord = results.targetSheetRecord;
 			hideStats = results.hideStats;
-			targetCreature = new Creature(targetSheetRecord, targetSheetName, intr);
+			targetSheetRecord = results.targetSheetRecord;
+			targetCreature = Creature.fromSheetRecord(results.targetEntity, targetSheetName, intr);
 		}
 
-		const creature = new Creature(actor.sheetRecord, actor.name, intr);
+		const creature = Creature.fromSheetRecord(actor, actor.name, intr);
 
 		const targetRoll = creature.attackRolls[rollChoice] ?? creature.rolls[rollChoice];
 

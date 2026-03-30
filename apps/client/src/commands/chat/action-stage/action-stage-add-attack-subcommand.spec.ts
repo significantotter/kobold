@@ -12,7 +12,7 @@ import {
 	setupKoboldUtilsMocks,
 	setupAutocompleteKoboldMocks,
 	setupFinderHelpersMocks,
-	setupSheetRecordUpdateMock,
+	setupActionModelMock,
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	CommandTestHarness,
@@ -40,7 +40,7 @@ describe('ActionStageAddAttackSubCommand', () => {
 			const action = createMockAction({ name: 'Strike', rolls: [] });
 			setupKoboldUtilsMocks({ actions: [action] });
 			setupFinderHelpersMocks(action, [action]);
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { updateMock } = setupActionModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -116,7 +116,7 @@ describe('ActionStageAddAttackSubCommand', () => {
 			const action = createMockAction({ name: 'Strike', rolls: [] });
 			setupKoboldUtilsMocks({ actions: [action] });
 			setupFinderHelpersMocks(action, [action]);
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { updateMock } = setupActionModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({

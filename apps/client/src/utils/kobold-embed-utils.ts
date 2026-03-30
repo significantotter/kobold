@@ -21,6 +21,7 @@ import { KoboldError } from './KoboldError.js';
 import type { ActionRoller } from './action-roller.js';
 import type { InitiativeBuilder, TurnData } from './initiative-builder.js';
 import { InteractionUtils } from './interaction-utils.js';
+import { DiscordLimits } from '../constants/discord-limits.js';
 
 export class KoboldEmbed extends EmbedBuilder {
 	public constructor(data?: APIEmbed | EmbedData) {
@@ -166,8 +167,9 @@ export class KoboldEmbed extends EmbedBuilder {
 
 	public isOverSized() {
 		return (
-			this.determineEmbedFieldTextLength() + this.determineEmbedMetaTextLength() > 6000 ||
-			(this.data?.fields ?? []).length > 24
+			this.determineEmbedFieldTextLength() + this.determineEmbedMetaTextLength() >
+				DiscordLimits.EMBED_COMBINED_LENGTH ||
+			(this.data?.fields ?? []).length >= DiscordLimits.FIELDS_PER_EMBED
 		);
 	}
 
@@ -226,7 +228,7 @@ export class KoboldEmbed extends EmbedBuilder {
 					}
 				}
 			} else {
-				newField.value += newField ? `\n${line}` : line;
+				newField.value += newField.value.length > 0 ? `\n${line}` : line;
 			}
 		}
 
@@ -240,7 +242,7 @@ export class KoboldEmbed extends EmbedBuilder {
 		if (!this.data.fields) return;
 		for (let i = 0; i < this.data.fields.length; i++) {
 			const field = this.data.fields[i];
-			if (field.name.length + field.value.length > 1024) {
+			if (field.value.length > DiscordLimits.EMBED_FIELD_VALUE_LENGTH) {
 				const splitFields = this.splitField(field);
 				this.data.fields.splice(i, 1, ...splitFields);
 			}
@@ -261,10 +263,10 @@ export class KoboldEmbed extends EmbedBuilder {
 		let length = cloneOfThis.determineEmbedMetaTextLength();
 		let fieldLength = cloneOfThis.determineEmbedFieldTextLength();
 
-		if (length + fieldLength < 6000) {
+		if (length + fieldLength < DiscordLimits.EMBED_COMBINED_LENGTH) {
 			//we're within normal embed size, so we can just return ourselves.
 			return [cloneOfThis];
-		} else if (length > 6000) {
+		} else if (length > DiscordLimits.EMBED_COMBINED_LENGTH) {
 			throw new KoboldError(
 				`Yip! That command would have returned a message that was way too long!`
 			);
@@ -284,11 +286,12 @@ export class KoboldEmbed extends EmbedBuilder {
 			if (extraEmbeds.length > 0) {
 				const mostRecentExtraEmbed = extraEmbeds[0];
 				canAddFieldToEmbed =
-					(mostRecentExtraEmbed.data.fields ?? []).length < 24 &&
+					(mostRecentExtraEmbed.data.fields ?? []).length <
+						DiscordLimits.FIELDS_PER_EMBED &&
 					mostRecentExtraEmbed.determineEmbedFieldTextLength() +
 						splicedField.name.length +
 						splicedField.value.length <
-						6000;
+						DiscordLimits.EMBED_COMBINED_LENGTH;
 			}
 			if (canAddFieldToEmbed) {
 				// if it can, then add it to the most recent extra embed
@@ -322,13 +325,12 @@ export class KoboldEmbed extends EmbedBuilder {
 		const splitEmbeds = this.splitEmbedIfTooLong();
 		return _.chunk(splitEmbeds, 1);
 	}
-	public static prepareEmbeds(embeds: KoboldEmbed[]) {
+	public static async prepareEmbeds(embeds: KoboldEmbed[]) {
 		const finalEmbeds: KoboldEmbed[] = [];
 		for (const embed of embeds) {
 			if (!embed) continue;
-			embed.splitDescriptionToFields();
+			await embed.splitDescriptionToFields();
 			embed.splitFieldsThatAreTooLong();
-			embed.splitEmbedIfTooLong();
 			const splitEmbeds = embed.splitEmbedIfTooLong();
 			finalEmbeds.push(...splitEmbeds);
 		}
@@ -368,7 +370,7 @@ export class KoboldEmbed extends EmbedBuilder {
 					if ((splitLineSegment?.match(/(?<!`)`{1}(?!`)/g) ?? []).length % 2 === 1)
 						currentChunkContinuesQuote = !currentChunkContinuesQuote;
 					if (currentChunkContinuesCodeBlock) splitLineSegment += '```';
-					if (currentChunkContinuesQuote) splitLineSegment = '`';
+					if (currentChunkContinuesQuote) splitLineSegment += '`';
 					descriptionChunks.push([splitLineSegment]);
 				}
 			} else {
@@ -425,14 +427,24 @@ export class KoboldEmbed extends EmbedBuilder {
 			this.data.fields = fields;
 		}
 	}
-	public async sendBatches(intr: CommandInteraction, isEphemeral = false) {
+	public async sendBatches(
+		intr: CommandInteraction,
+		{
+			isEphemeral = false,
+			contentOutsideEmbed,
+		}: { isEphemeral?: boolean; contentOutsideEmbed?: string } = {}
+	) {
 		this.fixDiscordFormattingInQuotes();
-		this.splitDescriptionToFields();
+		await this.splitDescriptionToFields();
 		this.splitFieldsThatAreTooLong();
 		const splitEmbeds = this.splitEmbedIfTooLong();
-		for (const embed of splitEmbeds) {
-			embed.data.fields;
-			await InteractionUtils.send(intr, embed, isEphemeral);
+		for (let i = 0; i < splitEmbeds.length; i++) {
+			const embed = splitEmbeds[i];
+			await InteractionUtils.send(
+				intr,
+				{ content: i === 0 ? contentOutsideEmbed : undefined, embeds: [embed] },
+				isEphemeral
+			);
 		}
 	}
 }
@@ -456,7 +468,7 @@ export class EmbedUtils {
 		if (notifyRoll) {
 			await InteractionUtils.send(intr, utilStrings.roll.secretRollNotification);
 		}
-		const finalEmbeds = KoboldEmbed.prepareEmbeds(embeds);
+		const finalEmbeds = await KoboldEmbed.prepareEmbeds(embeds);
 		if (sendToGm && gmUserId) {
 			await intr.client.users.send(gmUserId, { embeds: finalEmbeds });
 		} else if (sendToGm && !gmUserId) {
@@ -465,12 +477,12 @@ export class EmbedUtils {
 			);
 		} else {
 			if (intr.replied) {
-				intr.followUp({
+				await intr.followUp({
 					embeds: finalEmbeds,
 					flags: isEphemeral ? [MessageFlags.Ephemeral] : undefined,
 				});
 			} else {
-				intr.reply({
+				await intr.reply({
 					embeds: finalEmbeds,
 					flags: isEphemeral ? [MessageFlags.Ephemeral] : undefined,
 				});

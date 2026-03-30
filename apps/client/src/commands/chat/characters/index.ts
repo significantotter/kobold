@@ -4,6 +4,7 @@ import { CharacterImportPasteBinSubCommand } from './character-import-pastebin-s
 import { CharacterImportPathbuilderSubCommand } from './character-import-pathbuilder-subcommand.js';
 import { CharacterImportWanderersGuideSubCommand } from './character-import-wanderers-guide-subcommand.js';
 import { CharacterListSubCommand } from './character-list-subcommand.js';
+import { CharacterMigrateItemsSubCommand } from './character-migrate-items-subcommand.js';
 import { CharacterRemoveSubCommand } from './character-remove-subcommand.js';
 import { CharacterSetActiveSubCommand } from './character-set-active-subcommand.js';
 import { CharacterSetDefaultSubCommand } from './character-set-default.subcommand.js';
@@ -17,6 +18,7 @@ export const CharactersCommandExport: CommandExport = {
 		CharacterImportWanderersGuideSubCommand,
 		CharacterImportPasteBinSubCommand,
 		CharacterListSubCommand,
+		CharacterMigrateItemsSubCommand,
 		CharacterRemoveSubCommand,
 		CharacterSetActiveSubCommand,
 		CharacterSetDefaultSubCommand,

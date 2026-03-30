@@ -45,7 +45,7 @@ export class ActionRemoveSubCommand extends BaseCommandClass(
 			}
 			//find an action on the character matching the autocomplete string
 			const matchedActions = FinderHelpers.matchAllActions(
-				activeCharacter.sheetRecord,
+				activeCharacter.actions,
 				match
 			).map(action => ({
 				name: action.name,
@@ -70,10 +70,7 @@ export class ActionRemoveSubCommand extends BaseCommandClass(
 			activeCharacter: true,
 		});
 
-		const targetAction = FinderHelpers.getActionByName(
-			activeCharacter.sheetRecord,
-			actionChoice
-		);
+		const targetAction = FinderHelpers.getActionByName(activeCharacter.actions, actionChoice);
 		if (targetAction) {
 			// ask for confirmation
 
@@ -133,6 +130,8 @@ export class ActionRemoveSubCommand extends BaseCommandClass(
 				}
 			);
 			if (result) {
+				// Acknowledge the button interaction to prevent "This interaction failed"
+				await InteractionUtils.deferUpdate(result.intr);
 				await InteractionUtils.editReply(intr, {
 					content: ActionDefinition.strings.shared.choiceRegistered({
 						choice: _.capitalize(result.value),
@@ -142,15 +141,7 @@ export class ActionRemoveSubCommand extends BaseCommandClass(
 			}
 			// remove the action
 			if (result && result.value === 'remove') {
-				const actionsWithoutRemoved = _.filter(
-					activeCharacter.sheetRecord.actions,
-					action => action.name.toLocaleLowerCase() !== actionChoice.toLocaleLowerCase()
-				);
-
-				await kobold.sheetRecord.update(
-					{ id: activeCharacter.sheetRecordId },
-					{ actions: actionsWithoutRemoved }
-				);
+				await kobold.action.delete({ id: targetAction.id });
 
 				await InteractionUtils.send(
 					intr,

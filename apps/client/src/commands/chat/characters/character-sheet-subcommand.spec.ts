@@ -22,6 +22,7 @@ vi.mock('../../../utils/creature.js');
 describe('CharacterSheetSubCommand Integration', () => {
 	let harness: CommandTestHarness;
 	let sendBatchesMock: ReturnType<typeof vi.fn>;
+	let mockCreatureInstance: any;
 
 	beforeEach(() => {
 		harness = createTestHarness([new CharacterCommand([new CharacterSheetSubCommand()])]);
@@ -32,12 +33,21 @@ describe('CharacterSheetSubCommand Integration', () => {
 			sendBatches: sendBatchesMock,
 		} as unknown as KoboldEmbed;
 
+		// Create mock creature instance
+		mockCreatureInstance = {
+			compendiumEntry: vi.fn(() => mockEmbed),
+			compileEmbed: vi.fn(() => mockEmbed),
+		};
+
 		vi.mocked(Creature).mockImplementation(function (this: MockCreature) {
 			this.compendiumEntry = vi.fn(() => mockEmbed);
 			(this as MockCreature & { compileEmbed: ReturnType<typeof vi.fn> }).compileEmbed =
 				vi.fn(() => mockEmbed);
 			return this;
 		} as unknown as () => Creature);
+
+		// Mock Creature.fromSheetRecord static method
+		vi.mocked(Creature.fromSheetRecord).mockReturnValue(mockCreatureInstance);
 	});
 
 	describe('displaying character sheet', () => {
@@ -55,8 +65,8 @@ describe('CharacterSheetSubCommand Integration', () => {
 			});
 
 			// Assert
-			expect(Creature).toHaveBeenCalledWith(
-				mockCharacter.sheetRecord,
+			expect(Creature.fromSheetRecord).toHaveBeenCalledWith(
+				mockCharacter,
 				undefined,
 				expect.anything()
 			);
@@ -82,8 +92,6 @@ describe('CharacterSheetSubCommand Integration', () => {
 
 		it('should handle various sheet styles', async () => {
 			// Arrange
-			setupKoboldUtilsMocks();
-
 			const sheetStyles = [
 				sharedStrings.options.sheetStyles.fullSheet,
 				sharedStrings.options.sheetStyles.countersOnly,
@@ -98,6 +106,13 @@ describe('CharacterSheetSubCommand Integration', () => {
 				const mockEmbed = {
 					sendBatches: sendBatchesMock,
 				} as unknown as KoboldEmbed;
+
+				// Re-create mock creature instance
+				mockCreatureInstance = {
+					compendiumEntry: vi.fn(() => mockEmbed),
+					compileEmbed: vi.fn(() => mockEmbed),
+				};
+
 				vi.mocked(Creature).mockImplementation(function (this: MockCreature) {
 					this.compendiumEntry = vi.fn(() => mockEmbed);
 					(
@@ -105,6 +120,10 @@ describe('CharacterSheetSubCommand Integration', () => {
 					).compileEmbed = vi.fn(() => mockEmbed);
 					return this;
 				} as unknown as () => Creature);
+
+				// Re-mock Creature.fromSheetRecord
+				vi.mocked(Creature.fromSheetRecord).mockReturnValue(mockCreatureInstance);
+
 				setupKoboldUtilsMocks();
 
 				// Act

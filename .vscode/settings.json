@@ -27,6 +27,7 @@
 		"filesize",
 		"gameplay",
 		"kanel",
+		"Kyselify",
 		"kysely",
 		"luxon",
 		"millis",
@@ -47,6 +48,7 @@
 		"respawned",
 		"restjson",
 		"spellcasting",
+		"Supabase",
 		"tailwindcss",
 		"varchar",
 		"vite"

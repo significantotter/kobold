@@ -59,7 +59,7 @@ export class RollMacroSetSubCommand extends BaseCommandClass(
 		let updateValue: string | string[] | number;
 
 		const targetRollMacro = FinderHelpers.getRollMacroByName(
-			activeCharacter.sheetRecord,
+			activeCharacter.rollMacros,
 			rollMacroName
 		);
 
@@ -78,15 +78,7 @@ export class RollMacroSetSubCommand extends BaseCommandClass(
 			return;
 		}
 
-		// still references the deep values in characterRollMacros
-		let targetIndex = _.indexOf(activeCharacter.sheetRecord.rollMacros, targetRollMacro);
-
-		activeCharacter.sheetRecord.rollMacros[targetIndex].macro = macro;
-
-		kobold.sheetRecord.update(
-			{ id: activeCharacter.sheetRecord.id },
-			{ rollMacros: activeCharacter.sheetRecord.rollMacros }
-		);
+		await kobold.rollMacro.update({ id: targetRollMacro.id }, { macro });
 
 		const updateEmbed = new KoboldEmbed();
 		updateEmbed.setTitle(

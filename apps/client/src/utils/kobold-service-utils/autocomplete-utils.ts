@@ -1,11 +1,208 @@
-import { AutocompleteInteraction, CacheType } from 'discord.js';
+import { AutocompleteInteraction, CacheType, TextBasedChannel } from 'discord.js';
 import _ from 'lodash';
-import { CounterStyleEnum, InitiativeActor, Kobold } from '@kobold/db';
+import {
+	CharacterWithRelations,
+	CounterStyleEnum,
+	GameWithRelations,
+	InitiativeActor,
+	InitiativeActorWithRelations,
+	Kobold,
+	MinionWithRelations,
+} from '@kobold/db';
 import { Creature } from '../creature.js';
 import { InitiativeBuilderUtils } from '../initiative-builder.js';
 import { FinderHelpers } from '../kobold-helpers/finder-helpers.js';
 import type { KoboldUtils } from './kobold-utils.js';
 import { NethysDb } from '@kobold/nethys';
+
+/** Special values for create-for and assign-to autocomplete options */
+export const CreateForTargets = {
+	USER: 'user',
+	CHARACTER_PREFIX: 'character:',
+	MINION_PREFIX: 'minion:',
+	GAME_CHARACTER_PREFIX: 'game-character:',
+	GAME_MINION_PREFIX: 'game-minion:',
+	INIT_ACTOR_PREFIX: 'init-actor:',
+} as const;
+
+/** Special values for owned-by filter in list commands */
+export const OwnedByFilters = {
+	EVERYONE: 'everyone',
+	USER: 'user',
+	CHARACTER_PREFIX: 'character:',
+	MINION_PREFIX: 'minion:',
+} as const;
+
+/**
+ * Parses the create-for or assign-to value and returns the sheetRecordId
+ * or null for user-wide scope
+ */
+export function parseCreateForValue(
+	value: string | null,
+	characters: CharacterWithRelations[],
+	minions: MinionWithRelations[]
+): number | null {
+	if (!value || value === CreateForTargets.USER) {
+		return null; // User-wide scope
+	}
+
+	if (value.startsWith(CreateForTargets.CHARACTER_PREFIX)) {
+		const sheetRecordId = parseInt(value.slice(CreateForTargets.CHARACTER_PREFIX.length), 10);
+		const character = characters.find(c => c.sheetRecordId === sheetRecordId);
+		return character?.sheetRecordId ?? null;
+	}
+
+	if (value.startsWith(CreateForTargets.MINION_PREFIX)) {
+		const sheetRecordId = parseInt(value.slice(CreateForTargets.MINION_PREFIX.length), 10);
+		const minion = minions.find(m => m.sheetRecordId === sheetRecordId);
+		return minion?.sheetRecordId ?? null;
+	}
+
+	return null;
+}
+
+/** Result of parsing an assign-to value */
+export interface AssignToResult {
+	/** The sheetRecordId of the target (null for user-wide) */
+	sheetRecordId: number | null;
+	/** The display name of the target */
+	targetName: string;
+	/** Whether the target is another player's character (in the active game) */
+	isOtherPlayersCharacter: boolean;
+	/** The userId who owns this target (for copying to their ownership) */
+	targetUserId: string | null;
+}
+
+/**
+ * Parses the assign-to value and returns detailed assignment information.
+ * Handles both user's own characters/minions and game characters (other players).
+ */
+export function parseAssignToValue(
+	value: string | null,
+	userId: string,
+	characters: CharacterWithRelations[],
+	minions: MinionWithRelations[],
+	gameCharacters: CharacterWithRelations[] = [],
+	gameMinions: MinionWithRelations[] = [],
+	initActors: InitiativeActorWithRelations[] = []
+): AssignToResult {
+	if (!value || value === CreateForTargets.USER) {
+		return {
+			sheetRecordId: null,
+			targetName: 'your user-wide scope',
+			isOtherPlayersCharacter: false,
+			targetUserId: userId,
+		};
+	}
+
+	// User's own character
+	if (value.startsWith(CreateForTargets.CHARACTER_PREFIX)) {
+		const sheetRecordId = parseInt(value.slice(CreateForTargets.CHARACTER_PREFIX.length), 10);
+		const character = characters.find(c => c.sheetRecordId === sheetRecordId);
+		if (character) {
+			return {
+				sheetRecordId: character.sheetRecordId,
+				targetName: character.name,
+				isOtherPlayersCharacter: false,
+				targetUserId: userId,
+			};
+		}
+	}
+
+	// User's own minion
+	if (value.startsWith(CreateForTargets.MINION_PREFIX)) {
+		const sheetRecordId = parseInt(value.slice(CreateForTargets.MINION_PREFIX.length), 10);
+		const minion = minions.find(m => m.sheetRecordId === sheetRecordId);
+		if (minion) {
+			return {
+				sheetRecordId: minion.sheetRecordId,
+				targetName: minion.name,
+				isOtherPlayersCharacter: false,
+				targetUserId: userId,
+			};
+		}
+	}
+
+	// Game character (another player's character)
+	if (value.startsWith(CreateForTargets.GAME_CHARACTER_PREFIX)) {
+		const sheetRecordId = parseInt(
+			value.slice(CreateForTargets.GAME_CHARACTER_PREFIX.length),
+			10
+		);
+		const character = gameCharacters.find(c => c.sheetRecordId === sheetRecordId);
+		if (character) {
+			return {
+				sheetRecordId: character.sheetRecordId,
+				targetName: character.name,
+				isOtherPlayersCharacter: character.userId !== userId,
+				targetUserId: character.userId,
+			};
+		}
+	}
+
+	// Game minion (another player's minion)
+	if (value.startsWith(CreateForTargets.GAME_MINION_PREFIX)) {
+		const sheetRecordId = parseInt(value.slice(CreateForTargets.GAME_MINION_PREFIX.length), 10);
+		const minion = gameMinions.find(m => m.sheetRecordId === sheetRecordId);
+		if (minion) {
+			const parentChar = gameCharacters.find(c => c.id === minion.characterId);
+			return {
+				sheetRecordId: minion.sheetRecordId,
+				targetName: minion.name,
+				isOtherPlayersCharacter: parentChar ? parentChar.userId !== userId : false,
+				targetUserId: parentChar?.userId ?? null,
+			};
+		}
+	}
+
+	// Initiative actor (monster in current initiative)
+	if (value.startsWith(CreateForTargets.INIT_ACTOR_PREFIX)) {
+		const sheetRecordId = parseInt(value.slice(CreateForTargets.INIT_ACTOR_PREFIX.length), 10);
+		const actor = initActors.find(a => a.sheetRecordId === sheetRecordId);
+		if (actor) {
+			return {
+				sheetRecordId: actor.sheetRecordId,
+				targetName: actor.name,
+				isOtherPlayersCharacter: actor.userId !== userId,
+				targetUserId: actor.userId,
+			};
+		}
+	}
+
+	return {
+		sheetRecordId: null,
+		targetName: 'your user-wide scope',
+		isOtherPlayersCharacter: false,
+		targetUserId: userId,
+	};
+}
+
+/**
+ * Parses the owned-by filter value and returns the filter parameters
+ */
+export function parseOwnedByFilter(
+	value: string | null
+): 'all' | 'user' | { sheetRecordId: number } {
+	if (!value || value === OwnedByFilters.EVERYONE) {
+		return 'all';
+	}
+
+	if (value === OwnedByFilters.USER) {
+		return 'user';
+	}
+
+	if (value.startsWith(OwnedByFilters.CHARACTER_PREFIX)) {
+		const sheetRecordId = parseInt(value.slice(OwnedByFilters.CHARACTER_PREFIX.length), 10);
+		return { sheetRecordId };
+	}
+
+	if (value.startsWith(OwnedByFilters.MINION_PREFIX)) {
+		const sheetRecordId = parseInt(value.slice(OwnedByFilters.MINION_PREFIX.length), 10);
+		return { sheetRecordId };
+	}
+
+	return 'all';
+}
 
 export class AutocompleteUtils {
 	public kobold: Kobold;
@@ -83,11 +280,11 @@ export class AutocompleteUtils {
 			//no choices if we don't have a character to match against
 			return [];
 		}
-		const creature = new Creature(activeCharacter.sheetRecord);
+		const creature = Creature.fromSheetRecord(activeCharacter);
 
-		//find a save on the character matching the autocomplete string
+		//find an action on the character matching the autocomplete string
 		const matchedActions = FinderHelpers.matchAllActions(
-			activeCharacter.sheetRecord,
+			activeCharacter.actions,
 			matchText
 		).map(action => ({
 			name: action.name,
@@ -110,7 +307,7 @@ export class AutocompleteUtils {
 			return [];
 		}
 
-		const creature = new Creature(character.sheetRecord);
+		const creature = Creature.fromSheetRecord(character);
 
 		// add skills
 		const matchedSkills = FinderHelpers.matchAllSkills(creature, matchText).map(
@@ -136,7 +333,7 @@ export class AutocompleteUtils {
 			choices.add(_.capitalize(attack));
 		}
 
-		const matchedActions = FinderHelpers.matchAllActions(character.sheetRecord, matchText).map(
+		const matchedActions = FinderHelpers.matchAllActions(character.actions, matchText).map(
 			action => action.name
 		);
 		for (const action of matchedActions) {
@@ -168,7 +365,7 @@ export class AutocompleteUtils {
 
 		//find a save on the character matching the autocomplete string
 		const matchedRollMacros = FinderHelpers.matchAllRollMacros(
-			activeCharacter.sheetRecord,
+			activeCharacter.rollMacros,
 			matchText
 		).map(modifier => ({
 			name: modifier.name,
@@ -261,7 +458,7 @@ export class AutocompleteUtils {
 			false
 		);
 
-		const creature = new Creature(actor.sheetRecord);
+		const creature = Creature.fromSheetRecord(actor);
 
 		const allRolls = _.uniq([
 			..._.keys(creature.attackRolls),
@@ -279,12 +476,13 @@ export class AutocompleteUtils {
 	}
 
 	public async getAllTargetOptions(intr: AutocompleteInteraction<CacheType>, matchText: string) {
-		const { characterOptions, actorOptions } =
+		const { characterOptions, actorOptions, minionOptions } =
 			await this.koboldUtils.gameUtils.getAllTargetableOptions(intr);
 
 		const allOptions = [
 			{ name: '(None)', value: '__NONE__' },
 			...actorOptions.map(c => ({ name: c.name, value: c.name })),
+			...minionOptions.map(m => ({ name: m.name, value: m.name })),
 			...characterOptions.map(c => ({ name: c.name, value: c.name })),
 		];
 
@@ -305,7 +503,7 @@ export class AutocompleteUtils {
 		const characters = await this.kobold.character.readMany({ userId: intr.user.id });
 		const modifiersWithCharacterName: string[] = [];
 		for (const character of characters) {
-			const modifiers = character.sheetRecord.modifiers;
+			const modifiers = character.modifiers;
 			for (const modifier of modifiers) {
 				modifiersWithCharacterName.push(`${character.name} - ${modifier.name}`);
 			}
@@ -338,5 +536,382 @@ export class AutocompleteUtils {
 		}));
 		//return the matched saves
 		return matchedConditions;
+	}
+
+	/**
+	 * Autocomplete for the "create-for" option in create commands.
+	 * Returns "Me (All Characters)" as default, plus all user's characters and minions.
+	 */
+	public async getCreateForOptions(
+		intr: AutocompleteInteraction<CacheType>,
+		matchText: string
+	): Promise<{ name: string; value: string }[]> {
+		const choices: { name: string; value: string }[] = [
+			{ name: '👤 Me (All Characters)', value: CreateForTargets.USER },
+		];
+
+		// Add user's characters
+		const characters = await this.kobold.character.readMany({ userId: intr.user.id });
+		for (const char of characters) {
+			choices.push({
+				name: `🎭 ${char.name}`,
+				value: `${CreateForTargets.CHARACTER_PREFIX}${char.sheetRecordId}`,
+			});
+		}
+
+		// Add user's minions
+		const charIds = characters.map(c => c.id);
+		if (charIds.length > 0) {
+			const minions = await this.kobold.minion.readManyByCharacterIds({
+				characterIds: charIds,
+			});
+			for (const minion of minions) {
+				const parentChar = characters.find(c => c.id === minion.characterId);
+				choices.push({
+					name: `🐕 ${minion.name}${parentChar ? ` (${parentChar.name}'s minion)` : ''}`,
+					value: `${CreateForTargets.MINION_PREFIX}${minion.sheetRecordId}`,
+				});
+			}
+		}
+
+		// Filter by typed value
+		const filtered = choices.filter(c =>
+			c.name.toLowerCase().includes(matchText.toLowerCase())
+		);
+
+		return filtered.slice(0, 25);
+	}
+
+	/**
+	 * Autocomplete for the "owned-by" option in list commands.
+	 * Returns "Everyone", "Me (All Characters)", and all user's characters and minions.
+	 */
+	public async getOwnedByOptions(
+		intr: AutocompleteInteraction<CacheType>,
+		matchText: string
+	): Promise<{ name: string; value: string }[]> {
+		const choices: { name: string; value: string }[] = [
+			{ name: '🌐 Everyone', value: OwnedByFilters.EVERYONE },
+			{ name: '👤 Me (All Characters)', value: OwnedByFilters.USER },
+		];
+
+		// Add user's characters
+		const characters = await this.kobold.character.readMany({ userId: intr.user.id });
+		for (const char of characters) {
+			choices.push({
+				name: `🎭 ${char.name}`,
+				value: `${OwnedByFilters.CHARACTER_PREFIX}${char.sheetRecordId}`,
+			});
+		}
+
+		// Add user's minions
+		const charIds = characters.map(c => c.id);
+		if (charIds.length > 0) {
+			const minions = await this.kobold.minion.readManyByCharacterIds({
+				characterIds: charIds,
+			});
+			for (const minion of minions) {
+				const parentChar = characters.find(c => c.id === minion.characterId);
+				choices.push({
+					name: `🐕 ${minion.name}${parentChar ? ` (${parentChar.name}'s minion)` : ''}`,
+					value: `${OwnedByFilters.MINION_PREFIX}${minion.sheetRecordId}`,
+				});
+			}
+		}
+
+		// Filter by typed value
+		const filtered = choices.filter(c =>
+			c.name.toLowerCase().includes(matchText.toLowerCase())
+		);
+
+		return filtered.slice(0, 25);
+	}
+
+	/**
+	 * Autocomplete for the "assign-to" option in assign commands.
+	 * Same as createFor but without the default selection.
+	 */
+	public async getAssignToOptions(
+		intr: AutocompleteInteraction<CacheType>,
+		matchText: string
+	): Promise<{ name: string; value: string }[]> {
+		return this.getCreateForOptions(intr, matchText);
+	}
+
+	/**
+	 * Autocomplete for the "assign-to" option that includes characters from the active game.
+	 * Allows assigning to user's own characters/minions OR other players' characters in the game.
+	 */
+	public async getAssignToOptionsWithGame(
+		intr: AutocompleteInteraction<CacheType>,
+		matchText: string
+	): Promise<{ name: string; value: string }[]> {
+		const choices: { name: string; value: string }[] = [
+			{ name: '👤 Me (All Characters)', value: CreateForTargets.USER },
+		];
+
+		// Add user's own characters
+		const characters = await this.kobold.character.readMany({ userId: intr.user.id });
+		for (const char of characters) {
+			choices.push({
+				name: `🎭 ${char.name}`,
+				value: `${CreateForTargets.CHARACTER_PREFIX}${char.sheetRecordId}`,
+			});
+		}
+
+		// Add user's own minions
+		const charIds = characters.map(c => c.id);
+		if (charIds.length > 0) {
+			const minions = await this.kobold.minion.readManyByCharacterIds({
+				characterIds: charIds,
+			});
+			for (const minion of minions) {
+				const parentChar = characters.find(c => c.id === minion.characterId);
+				choices.push({
+					name: `🐕 ${minion.name}${parentChar ? ` (${parentChar.name}'s minion)` : ''}`,
+					value: `${CreateForTargets.MINION_PREFIX}${minion.sheetRecordId}`,
+				});
+			}
+		}
+
+		// Add game characters (other players' characters) if in an active game
+		if (intr.guildId) {
+			const activeGame = await this.koboldUtils.gameUtils.getActiveGame(
+				intr.user.id,
+				intr.guildId,
+				intr.channelId
+			);
+			if (activeGame?.characters) {
+				const userCharacterIds = new Set(characters.map(c => c.id));
+				for (const gameChar of activeGame.characters) {
+					// Skip user's own characters (already added above)
+					if (userCharacterIds.has(gameChar.id)) continue;
+
+					choices.push({
+						name: `🤝 ${gameChar.name} (game character)`,
+						value: `${CreateForTargets.GAME_CHARACTER_PREFIX}${gameChar.sheetRecordId}`,
+					});
+
+					// Add minions for this game character
+					const minionCharIds = [gameChar.id];
+					const gameMinions = await this.kobold.minion.readManyByCharacterIds({
+						characterIds: minionCharIds,
+					});
+					for (const minion of gameMinions) {
+						choices.push({
+							name: `🤝🐕 ${minion.name} (${gameChar.name}'s minion)`,
+							value: `${CreateForTargets.GAME_MINION_PREFIX}${minion.sheetRecordId}`,
+						});
+					}
+				}
+			}
+		}
+
+		// Add initiative actors (monsters) that aren't characters or minions
+		const currentInit = await this.koboldUtils.initiativeUtils.getInitiativeForChannelOrNull(
+			intr.channel
+		);
+		if (currentInit) {
+			// Get all sheetRecordIds we've already added (characters and minions)
+			const addedSheetRecordIds = new Set(
+				choices
+					.filter(c => c.value !== CreateForTargets.USER)
+					.map(c => {
+						const parts = c.value.split(':');
+						return parseInt(parts[parts.length - 1], 10);
+					})
+			);
+
+			for (const actor of currentInit.actors) {
+				// Only include actors that aren't characters or minions (monsters/NPCs)
+				if (actor.characterId === null && actor.minionId === null) {
+					// Skip if we somehow already added this sheetRecordId
+					if (addedSheetRecordIds.has(actor.sheetRecordId)) continue;
+
+					choices.push({
+						name: `⚔️ ${actor.name} (in initiative)`,
+						value: `${CreateForTargets.INIT_ACTOR_PREFIX}${actor.sheetRecordId}`,
+					});
+				}
+			}
+		}
+
+		// Filter by typed value
+		const filtered = choices.filter(c =>
+			c.name.toLowerCase().includes(matchText.toLowerCase())
+		);
+
+		return filtered.slice(0, 25);
+	}
+
+	/**
+	 * Autocomplete for target character selection that includes game characters.
+	 * Used by minion assign to show user's own characters plus game characters.
+	 * Returns character names (with game: prefix for other players' characters).
+	 */
+	public async getTargetCharacterOptionsWithGame(
+		intr: AutocompleteInteraction<CacheType>,
+		matchText: string
+	): Promise<{ name: string; value: string }[]> {
+		const choices: { name: string; value: string }[] = [];
+
+		// Get all user's characters
+		const characters = await this.kobold.character.readMany({ userId: intr.user.id });
+		for (const char of characters) {
+			choices.push({
+				name: char.name,
+				value: char.name,
+			});
+		}
+
+		// Add game characters (other players' characters) if in an active game
+		if (intr.guildId) {
+			const activeGame = await this.koboldUtils.gameUtils.getActiveGame(
+				intr.user.id,
+				intr.guildId,
+				intr.channelId
+			);
+			if (activeGame?.characters) {
+				const userCharacterIds = new Set(characters.map(c => c.id));
+				for (const gameChar of activeGame.characters) {
+					// Skip user's own characters (already added above)
+					if (userCharacterIds.has(gameChar.id)) continue;
+
+					choices.push({
+						name: `🤝 ${gameChar.name} (game character)`,
+						value: `game:${gameChar.name}`,
+					});
+				}
+			}
+		}
+
+		// Filter by typed value
+		const filtered = choices.filter(c =>
+			c.name.toLowerCase().includes(matchText.toLowerCase())
+		);
+
+		return filtered.slice(0, 25);
+	}
+
+	/**
+	 * Get all user's characters and minions for data retrieval
+	 */
+	public async getUserCharactersAndMinions(
+		intr: AutocompleteInteraction<CacheType> | { user: { id: string } }
+	): Promise<{
+		characters: CharacterWithRelations[];
+		minions: MinionWithRelations[];
+	}> {
+		const characters = await this.kobold.character.readMany({ userId: intr.user.id });
+		const charIds = characters.map(c => c.id);
+		const minions =
+			charIds.length > 0
+				? await this.kobold.minion.readManyByCharacterIds({ characterIds: charIds })
+				: [];
+		return { characters, minions };
+	}
+
+	/**
+	 * Get all characters and minions from the active game for data retrieval.
+	 * Includes both user's own characters and other players' characters in the game.
+	 */
+	public async getGameCharactersAndMinions(
+		intr:
+			| AutocompleteInteraction<CacheType>
+			| { user: { id: string }; guildId: string | null; channelId: string | null }
+	): Promise<{
+		gameCharacters: CharacterWithRelations[];
+		gameMinions: MinionWithRelations[];
+	}> {
+		if (!intr.guildId) {
+			return { gameCharacters: [], gameMinions: [] };
+		}
+
+		const activeGame = await this.koboldUtils.gameUtils.getActiveGame(
+			intr.user.id,
+			intr.guildId,
+			intr.channelId ?? undefined
+		);
+
+		if (!activeGame?.characters) {
+			return { gameCharacters: [], gameMinions: [] };
+		}
+
+		const gameCharacters = activeGame.characters;
+		const gameCharIds = gameCharacters.map(c => c.id);
+		const gameMinions =
+			gameCharIds.length > 0
+				? await this.kobold.minion.readManyByCharacterIds({ characterIds: gameCharIds })
+				: [];
+
+		return { gameCharacters, gameMinions };
+	}
+
+	/**
+	 * Get initiative actors (monsters/NPCs) that are not characters or minions.
+	 * These are typically creatures added to initiative by the GM.
+	 */
+	public async getInitiativeActors(
+		intr: AutocompleteInteraction<CacheType> | { channel: TextBasedChannel | null }
+	): Promise<InitiativeActorWithRelations[]> {
+		const currentInit = await this.koboldUtils.initiativeUtils.getInitiativeForChannelOrNull(
+			intr.channel
+		);
+		if (!currentInit) {
+			return [];
+		}
+
+		// Return only actors that aren't tied to a character or minion
+		return currentInit.actors.filter(
+			actor => actor.characterId === null && actor.minionId === null
+		);
+	}
+
+	/**
+	 * Autocomplete for minions belonging to the active character OR unassigned.
+	 * Used by minion commands that operate on the active character's minions
+	 * but also allow operating on unassigned minions.
+	 */
+	public async getActiveCharacterMinionsWithUnassigned(
+		intr: AutocompleteInteraction<CacheType>,
+		matchText: string
+	): Promise<{ name: string; value: string }[]> {
+		const activeCharacter = await this.koboldUtils.characterUtils.getActiveCharacter(intr);
+		if (!activeCharacter) return [];
+
+		// Get all user's minions and filter to active character's minions + unassigned
+		const allMinions = await this.kobold.minion.readManyByUserId({
+			userId: intr.user.id,
+		});
+		const minions = allMinions.filter(
+			(m: MinionWithRelations) =>
+				m.characterId === activeCharacter.id || m.characterId === null
+		);
+
+		return minions
+			.filter((m: MinionWithRelations) =>
+				m.name.toLowerCase().includes((matchText ?? '').toLowerCase())
+			)
+			.map((m: MinionWithRelations) => ({
+				name: m.characterId === null ? `${m.name} (unassigned)` : m.name,
+				value: m.name,
+			}));
+	}
+
+	/**
+	 * Fetches minions belonging to the active character OR unassigned (raw data).
+	 * Use this when you need the minion objects, not just autocomplete results.
+	 */
+	public async fetchActiveCharacterMinionsWithUnassigned(
+		intr: AutocompleteInteraction<CacheType> | { user: { id: string } },
+		activeCharacterId: number
+	): Promise<MinionWithRelations[]> {
+		const allMinions = await this.kobold.minion.readManyByUserId({
+			userId: intr.user.id,
+		});
+		return allMinions.filter(
+			(m: MinionWithRelations) =>
+				m.characterId === activeCharacterId || m.characterId === null
+		);
 	}
 }

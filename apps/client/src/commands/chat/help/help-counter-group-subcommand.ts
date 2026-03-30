@@ -15,6 +15,6 @@ export class HelpCounterGroupSubCommand extends BaseCommandClass(
 		embed.setThumbnail(helpLinks.thumbnail);
 		embed.setTitle(helpContent.counterGroup.title);
 		embed.setDescription(helpContent.counterGroup.description);
-		await embed.sendBatches(intr, false);
+		await embed.sendBatches(intr);
 	}
 }

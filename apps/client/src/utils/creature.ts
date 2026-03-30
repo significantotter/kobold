@@ -4,8 +4,13 @@ import type {
 	Action,
 	AttackOrSkillRoll,
 	Attribute,
+	CharacterWithRelations,
+	Condition,
 	DamageRoll,
+	InitiativeActorWithRelations,
+	MinionWithRelations,
 	Modifier,
+	NewAction,
 	Roll,
 	RollMacro,
 	SaveRoll,
@@ -13,6 +18,30 @@ import type {
 	SheetRecord,
 	TextRoll,
 } from '@kobold/db';
+
+/**
+ * Common type for entities that have sheet data and related collections.
+ * Used by the Creature class to accept different entity types.
+ */
+export type EntityWithSheetData = {
+	sheetRecord: SheetRecord;
+	actions: Action[];
+	modifiers: Modifier[];
+	rollMacros: RollMacro[];
+};
+
+/**
+ * Optional partial data for updating a creature from an existing entity.
+ * Can accept CharacterWithRelations, InitiativeActorWithRelations, etc.
+ */
+export type PartialEntityWithSheetData =
+	| {
+			sheetRecord?: SheetRecord | null;
+			actions?: Action[];
+			modifiers?: Modifier[];
+			rollMacros?: RollMacro[];
+	  }
+	| EntityWithSheetData;
 import {
 	AbilityEnum,
 	Counter,
@@ -73,7 +102,7 @@ export class Creature {
 	public actions: Action[];
 	public rollMacros: RollMacro[];
 	public modifiers: Modifier[];
-	public conditions: Modifier[];
+	public conditions: Condition[];
 	public _sheet: Sheet;
 	constructor(
 		{
@@ -87,7 +116,7 @@ export class Creature {
 			actions: Action[];
 			rollMacros: RollMacro[];
 			modifiers: Modifier[];
-			conditions: Modifier[];
+			conditions: Condition[];
 		},
 		public _name?: string,
 		public intr?: Interaction
@@ -1064,45 +1093,62 @@ export class Creature {
 		return sheet;
 	}
 
-	public static fromSheetRecord(sheetRecord: SheetRecord): Creature {
-		let sheet = { ...sheetRecord.sheet };
-		return new Creature(sheetRecord);
+	/**
+	 * Creates a Creature from an entity that has sheet data and related collections.
+	 * Use this for CharacterWithRelations, InitiativeActorWithRelations, MinionWithRelations.
+	 */
+	public static fromSheetRecord(
+		entity: EntityWithSheetData,
+		name?: string,
+		intr?: Interaction
+	): Creature {
+		return new Creature(
+			{
+				sheet: entity.sheetRecord.sheet,
+				actions: entity.actions,
+				modifiers: entity.modifiers,
+				rollMacros: entity.rollMacros,
+				conditions: entity.sheetRecord.conditions ?? [],
+			},
+			name,
+			intr
+		);
 	}
 
 	public static fromWandererersGuide(
 		calculatedStats: WG.CharacterCalculatedStatsApiResponse,
 		characterData: WG.CharacterApiResponse,
-		updateFrom?: SheetRecord
+		updateFrom?: PartialEntityWithSheetData
 	): Creature {
 		let sheet = convertWanderersGuideCharToSheet(calculatedStats, characterData);
-		sheet = Creature.preserveSheetTrackerValues(sheet, updateFrom?.sheet);
+		sheet = Creature.preserveSheetTrackerValues(sheet, updateFrom?.sheetRecord?.sheet);
 		return new Creature({
 			sheet,
 			actions: updateFrom?.actions ?? [],
 			modifiers: updateFrom?.modifiers ?? [],
 			rollMacros: updateFrom?.rollMacros ?? [],
-			conditions: updateFrom?.conditions ?? [],
+			conditions: [],
 		});
 	}
 
 	public static fromPathBuilder(
 		pathBuilderSheet: PathBuilder.Character,
-		updateFrom?: SheetRecord,
+		updateFrom?: PartialEntityWithSheetData,
 		options: {
 			useStamina: boolean;
 		} = { useStamina: false }
 	): Creature {
 		let sheet = convertPathBuilderToSheet(pathBuilderSheet, options);
-		if (updateFrom) {
-			sheet.info.imageURL = updateFrom.sheet.info.imageURL ?? sheet.info.imageURL;
+		if (updateFrom?.sheetRecord) {
+			sheet.info.imageURL = updateFrom.sheetRecord.sheet.info.imageURL ?? sheet.info.imageURL;
 		}
-		sheet = Creature.preserveSheetTrackerValues(sheet, updateFrom?.sheet);
+		sheet = Creature.preserveSheetTrackerValues(sheet, updateFrom?.sheetRecord?.sheet);
 		return new Creature({
 			sheet,
 			actions: updateFrom?.actions ?? [],
 			modifiers: updateFrom?.modifiers ?? [],
 			rollMacros: updateFrom?.rollMacros ?? [],
-			conditions: updateFrom?.conditions ?? [],
+			conditions: [],
 		});
 	}
 
@@ -1111,11 +1157,11 @@ export class Creature {
 	/**
 	 * Gets a list of the applicable modifiers for any set of tags
 	 * @param tags the tags to check against a character's modifiers
-	 * @returns modifier[]
+	 * @returns Condition[]
 	 */
-	public getModifiersFromTags(tags: string[], extraAttributes?: Attribute[]): Modifier[] {
+	public getModifiersFromTags(tags: string[], extraAttributes?: Attribute[]): Condition[] {
 		const { untyped, bonuses, penalties } = ModifierUtils.parseBonusesForTagsFromModifiers(
-			this.modifiers.concat(this.conditions).filter(modifier => modifier.rollTargetTags),
+			[...this.modifiers, ...this.conditions].filter(modifier => modifier.rollTargetTags),
 			[...(this.attributes as Attribute[]), ...(extraAttributes || [])],
 			tags,
 			this

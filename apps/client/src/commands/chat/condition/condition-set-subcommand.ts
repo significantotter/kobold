@@ -76,10 +76,8 @@ export class ConditionSetSubCommand extends BaseCommandClass(
 
 		//check if we have an active character
 		const { gameUtils } = new KoboldUtils(kobold);
-		const { targetSheetRecord, targetName } = await gameUtils.getCharacterOrInitActorTarget(
-			intr,
-			targetCharacterName
-		);
+		const { targetSheetRecord, targetEntity, targetName } =
+			await gameUtils.getCharacterOrInitActorTarget(intr, targetCharacterName);
 
 		const targetCondition = FinderHelpers.getConditionByName(targetSheetRecord, conditionName);
 		if (!targetCondition) {
@@ -90,7 +88,7 @@ export class ConditionSetSubCommand extends BaseCommandClass(
 
 		// validate the updates
 		if (fieldToChange === ConditionDefinition.optionChoices.setOption.name) {
-			if (FinderHelpers.getModifierByName(targetSheetRecord, newFieldValue)) {
+			if (FinderHelpers.getModifierByName(targetEntity.modifiers, newFieldValue)) {
 				throw new KoboldError(ConditionDefinition.strings.set.nameExistsError);
 			} else {
 				targetCondition.name = InputParseUtils.parseAsString(newFieldValue, {
@@ -104,7 +102,7 @@ export class ConditionSetSubCommand extends BaseCommandClass(
 				// we must be able to evaluate the condition as a roll for this character
 				InputParseUtils.isValidDiceExpression(
 					newFieldValue,
-					new Creature(targetSheetRecord, undefined, intr)
+					Creature.fromSheetRecord(targetEntity, undefined, intr)
 				);
 				targetCondition.rollAdjustment = newFieldValue;
 			} catch (err) {

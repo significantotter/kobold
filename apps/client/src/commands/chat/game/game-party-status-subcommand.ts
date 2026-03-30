@@ -5,7 +5,7 @@ import {
 	CacheType,
 	ChatInputCommandInteraction,
 } from 'discord.js';
-import { Kobold } from '@kobold/db';
+import { Kobold, MinionWithRelations } from '@kobold/db';
 
 import _ from 'lodash';
 import { InteractionUtils } from '../../../utils/index.js';
@@ -63,6 +63,12 @@ export class GamePartyStatusSubCommand extends BaseCommandClass(
 			return;
 		}
 
+		// Get all minions for the characters in the game
+		const characterIds = activeGame.characters.map(c => c.id);
+		const allMinions = await kobold.minion.readManyByCharacterIds({
+			characterIds,
+		});
+
 		const embeds: KoboldEmbed[] = [];
 		for (const character of _.uniqBy(activeGame.characters, 'id')) {
 			if (
@@ -74,8 +80,27 @@ export class GamePartyStatusSubCommand extends BaseCommandClass(
 				continue;
 			}
 
-			const creature = new Creature(character.sheetRecord, undefined, intr);
+			const creature = Creature.fromSheetRecord(character, undefined, intr);
 			embeds.push(creature.compileEmbed('Sheet', sheetStyle));
+
+			// Add minion statblocks after the character
+			const characterMinions = allMinions.filter(
+				(m: MinionWithRelations) => m.characterId === character.id
+			);
+			for (const minion of characterMinions) {
+				const minionCreature = new Creature(
+					{
+						sheet: minion.sheetRecord.sheet,
+						actions: minion.actions ?? [],
+						rollMacros: minion.rollMacros ?? [],
+						modifiers: minion.modifiers ?? [],
+						conditions: minion.sheetRecord.conditions ?? [],
+					},
+					`${minion.name} (${character.name}'s minion)`,
+					intr
+				);
+				embeds.push(minionCreature.compileEmbed('Sheet', sheetStyle));
+			}
 		}
 		await InteractionUtils.send(intr, { embeds });
 	}

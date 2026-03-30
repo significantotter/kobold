@@ -82,7 +82,7 @@ export class GameGiveSubCommand extends BaseCommandClass(
 				continue;
 			}
 
-			const creature = new Creature(character.sheetRecord, undefined, intr);
+			const creature = Creature.fromSheetRecord(character, undefined, intr);
 
 			const { initialValue, updatedValue } = await gameplayUtils.setGameplayStats(
 				intr,

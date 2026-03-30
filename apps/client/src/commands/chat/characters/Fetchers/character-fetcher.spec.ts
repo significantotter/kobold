@@ -8,7 +8,7 @@ import { Creature } from '../../../../utils/creature.js';
 import { KoboldError } from '../../../../utils/KoboldError.js';
 import { getMockKobold, resetMockKobold } from '../../../../test-utils/index.js';
 import { CollectorUtils } from '../../../../utils/collector-utils.js';
-import type { Kobold } from '@kobold/db';
+import { type Kobold, ImportSourceEnum } from '@kobold/db';
 
 vi.mock('../../../../utils/creature.js');
 vi.mock('../../../../utils/collector-utils.js');
@@ -26,13 +26,13 @@ const createMockInteraction = () =>
 		reply: vi.fn(),
 		deferred: false,
 		replied: false,
-	} as unknown as CommandInteraction<CacheType>);
+	}) as unknown as CommandInteraction<CacheType>;
 
 /**
  * Concrete implementation of CharacterFetcher for testing
  */
 class TestCharacterFetcher extends CharacterFetcher<{ testData: string }, { testArg: string }> {
-	public importSource = 'test';
+	public importSource = ImportSourceEnum.pastebin;
 	public mockFetchSourceData = vi.fn();
 	public mockConvertSheetRecord = vi.fn();
 	public mockGetCharId = vi.fn();
@@ -71,7 +71,7 @@ describe('CharacterFetcher', () => {
 			(mockKobold.character.read as Mock).mockResolvedValue(null);
 
 			const result = await fetcher.fetchDuplicateCharacter({ testArg: 'test' }, {
-				sheet: { staticInfo: { name: 'Test Character' } },
+				sheetRecord: { sheet: { staticInfo: { name: 'Test Character' } } },
 			} as any);
 
 			expect(mockKobold.character.read).toHaveBeenCalledWith({
@@ -86,7 +86,7 @@ describe('CharacterFetcher', () => {
 			(mockKobold.character.read as Mock).mockResolvedValue(existingCharacter);
 
 			const result = await fetcher.fetchDuplicateCharacter({ testArg: 'test' }, {
-				sheet: { staticInfo: { name: 'Test Character' } },
+				sheetRecord: { sheet: { staticInfo: { name: 'Test Character' } } },
 			} as any);
 
 			expect(result).toEqual(existingCharacter);
@@ -96,17 +96,20 @@ describe('CharacterFetcher', () => {
 	describe('create', () => {
 		it('should create a new character successfully', async () => {
 			const sourceData = { testData: 'test' };
-			const sheetRecord = {
-				sheet: { staticInfo: { name: 'New Character' } },
+			const conversionResult = {
+				sheetRecord: { sheet: { staticInfo: { name: 'New Character' } } },
 				actions: [],
 				modifiers: [],
 				rollMacros: [],
 			};
-			const createdSheetRecord = { id: 'sheet-1', ...sheetRecord };
+			const createdSheetRecord = {
+				id: 'sheet-1',
+				sheet: { staticInfo: { name: 'New Character' } },
+			};
 			const createdCharacter = { id: 'char-1', name: 'New Character' };
 
 			fetcher.mockFetchSourceData.mockResolvedValue(sourceData);
-			fetcher.mockConvertSheetRecord.mockReturnValue(sheetRecord);
+			fetcher.mockConvertSheetRecord.mockReturnValue(conversionResult);
 			fetcher.mockGetCharId.mockReturnValue(123);
 			(mockKobold.character.read as Mock).mockResolvedValue(null);
 			(mockKobold.sheetRecord.create as Mock).mockResolvedValue(createdSheetRecord);
@@ -117,12 +120,14 @@ describe('CharacterFetcher', () => {
 
 			expect(fetcher.mockFetchSourceData).toHaveBeenCalledWith({ testArg: 'test' });
 			expect(fetcher.mockConvertSheetRecord).toHaveBeenCalledWith(sourceData);
-			expect(mockKobold.sheetRecord.create).toHaveBeenCalledWith(sheetRecord);
+			expect(mockKobold.sheetRecord.create).toHaveBeenCalledWith(
+				conversionResult.sheetRecord
+			);
 			expect(mockKobold.character.create).toHaveBeenCalledWith({
 				name: 'New Character',
 				userId: 'test-user-id',
 				sheetRecordId: 'sheet-1',
-				importSource: 'test',
+				importSource: 'pastebin',
 				charId: 123,
 			});
 			expect(mockKobold.character.setIsActive).toHaveBeenCalledWith({
@@ -134,13 +139,13 @@ describe('CharacterFetcher', () => {
 
 		it('should throw KoboldError when duplicate character exists', async () => {
 			const sourceData = { testData: 'test' };
-			const sheetRecord = {
-				sheet: { staticInfo: { name: 'Existing Character' } },
+			const conversionResult = {
+				sheetRecord: { sheet: { staticInfo: { name: 'Existing Character' } } },
 			};
 			const existingCharacter = { id: 'existing-id', name: 'Existing Character' };
 
 			fetcher.mockFetchSourceData.mockResolvedValue(sourceData);
-			fetcher.mockConvertSheetRecord.mockReturnValue(sheetRecord);
+			fetcher.mockConvertSheetRecord.mockReturnValue(conversionResult);
 			(mockKobold.character.read as Mock).mockResolvedValue(existingCharacter);
 
 			await expect(fetcher.create({ testArg: 'test' })).rejects.toThrow(KoboldError);
@@ -202,7 +207,7 @@ describe('CharacterFetcher', () => {
 		it('should send confirmation prompt with buttons and handle cancel', async () => {
 			// Mock CollectorUtils to simulate cancel
 			vi.mocked(CollectorUtils.collectByButton).mockResolvedValue({
-				intr: mockIntr as any,
+				intr: { ...mockIntr, deferUpdate: vi.fn() } as any,
 				value: 'cancel',
 			});
 
@@ -225,7 +230,7 @@ describe('CharacterFetcher', () => {
 		it('should proceed when user confirms update', async () => {
 			// Mock CollectorUtils to simulate update confirmation
 			vi.mocked(CollectorUtils.collectByButton).mockResolvedValue({
-				intr: mockIntr as any,
+				intr: { ...mockIntr, deferUpdate: vi.fn() } as any,
 				value: 'update',
 			});
 

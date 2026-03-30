@@ -52,10 +52,10 @@ export class GameplayDamageSubCommand extends BaseCommandClass(
 
 		const { gameUtils, creatureUtils } = new KoboldUtils(kobold);
 
-		const { targetSheetRecord, hideStats, targetName } =
+		const { targetSheetRecord, targetEntity, hideStats, targetName } =
 			await gameUtils.getCharacterOrInitActorTarget(intr, targetCharacter);
 
-		const creature = new Creature(targetSheetRecord, targetName, intr);
+		const creature = Creature.fromSheetRecord(targetEntity, targetName, intr);
 
 		let message = '';
 		if (amount >= 0) {

@@ -25,9 +25,14 @@ vi.mock('../../../utils/kobold-service-utils/kobold-utils.js');
 vi.mock('../../../utils/kobold-helpers/finder-helpers.js');
 // Mock Creature to avoid complex sheetRecord validation during tests
 vi.mock('../../../utils/creature.js', () => ({
-	Creature: vi.fn(function (this: unknown) {
-		return this;
-	}),
+	Creature: Object.assign(
+		vi.fn(function (this: unknown) {
+			return this;
+		}),
+		{
+			fromSheetRecord: vi.fn(() => ({})),
+		}
+	),
 }));
 vi.mock('../../../utils/input-parse-utils.js', () => ({
 	InputParseUtils: {

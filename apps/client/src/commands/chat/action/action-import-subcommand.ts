@@ -37,22 +37,42 @@ export class ActionImportSubCommand extends BaseCommandClass(
 			.getString(commandOptions[commandOptionsEnum.importMode].name, true)
 			.trim()
 			.toLowerCase();
-		let importUrl = intr.options
-			.getString(commandOptions[commandOptionsEnum.url].name, true)
-			.trim();
+		let importUrl = intr.options.getString(commandOptions[commandOptionsEnum.url].name)?.trim();
+		let rawJson = intr.options.getString(commandOptions[commandOptionsEnum.json].name)?.trim();
 
-		const importId = TextParseHelpers.parsePasteBinIdFromText(importUrl);
-
-		if (!importId) {
-			await InteractionUtils.send(intr, ActionDefinition.strings.import.badUrl);
+		// Must provide either URL or JSON
+		if (!importUrl && !rawJson) {
+			await InteractionUtils.send(
+				intr,
+				'Yip! You must provide either a pastebin URL or raw JSON data to import.'
+			);
 			return;
 		}
 
 		let newActions: Action[] = [];
-
 		let invalidJson = false;
+
 		try {
-			const actionsText = await new PasteBin({}).get({ paste_key: importId });
+			let actionsText: string | Action[];
+
+			if (rawJson) {
+				// Use raw JSON directly
+				actionsText = rawJson;
+			} else if (importUrl) {
+				// Fetch from PasteBin
+				const importId = TextParseHelpers.parsePasteBinIdFromText(importUrl);
+
+				if (!importId) {
+					await InteractionUtils.send(intr, ActionDefinition.strings.import.badUrl);
+					return;
+				}
+
+				actionsText = await new PasteBin({}).get({ paste_key: importId });
+			} else {
+				await InteractionUtils.send(intr, ActionDefinition.strings.import.badUrl);
+				return;
+			}
+
 			if (_.isArray(actionsText)) {
 				newActions = actionsText;
 			} else {
@@ -63,11 +83,12 @@ export class ActionImportSubCommand extends BaseCommandClass(
 			console.warn(err);
 			invalidJson = true;
 		}
+
 		if (invalidJson) {
 			await InteractionUtils.send(intr, ActionDefinition.strings.import.failedParsing);
 			return;
 		}
-		const currentActions = activeCharacter.sheetRecord.actions;
+		const currentActions = activeCharacter.actions;
 
 		let finalActions: Action[] = [];
 
@@ -86,10 +107,24 @@ export class ActionImportSubCommand extends BaseCommandClass(
 			return;
 		}
 
-		await kobold.sheetRecord.update(
-			{ id: activeCharacter.sheetRecordId },
-			{ actions: finalActions }
-		);
+		// Delete all existing actions and create the final actions
+		await kobold.action.deleteBySheetRecordId({
+			sheetRecordId: activeCharacter.sheetRecordId,
+		});
+		for (const action of finalActions) {
+			await kobold.action.create({
+				userId: intr.user.id,
+				sheetRecordId: activeCharacter.sheetRecordId,
+				name: action.name,
+				description: action.description,
+				type: action.type,
+				actionCost: action.actionCost,
+				baseLevel: action.baseLevel,
+				autoHeighten: action.autoHeighten,
+				rolls: action.rolls,
+				tags: action.tags,
+			});
+		}
 
 		await InteractionUtils.send(
 			intr,

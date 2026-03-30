@@ -31,6 +31,6 @@ export class HelpMakingACustomActionSubCommand extends BaseCommandClass(
 			embed.setDescription('Select an example action to see a step-by-step walkthrough.');
 		}
 
-		await embed.sendBatches(intr, false);
+		await embed.sendBatches(intr);
 	}
 }

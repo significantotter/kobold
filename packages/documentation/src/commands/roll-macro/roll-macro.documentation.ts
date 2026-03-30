@@ -92,5 +92,32 @@ export const rollMacroCommandDocumentation: CommandDocumentation<
 				},
 			],
 		},
+		[rollMacroSubCommandEnum.assign]: {
+			name: rollMacroSubCommandEnum.assign,
+			description:
+				'Assigns a roll macro to a character or minion, or promotes it to user-scope.',
+			usage: null,
+			examples: [
+				{
+					title: 'Assigned to Character',
+					type: CommandResponseTypeEnum.success,
+					options: {
+						macro: 'ShortbowCritDamage',
+						'assign-to': 'Ashara Keenclaw',
+					},
+					message:
+						'Yip! I assigned the roll macro ShortbowCritDamage to Ashara Keenclaw.',
+				},
+				{
+					title: 'Promoted to User',
+					type: CommandResponseTypeEnum.success,
+					options: {
+						macro: 'ShortbowCritDamage',
+						'assign-to': 'User',
+					},
+					message: 'Yip! I promoted the roll macro ShortbowCritDamage to user-scope.',
+				},
+			],
+		},
 	},
 };

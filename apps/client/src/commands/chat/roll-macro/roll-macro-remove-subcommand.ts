@@ -58,7 +58,7 @@ export class RollMacroRemoveSubCommand extends BaseCommandClass(
 		);
 
 		const targetRollMacro = FinderHelpers.getRollMacroByName(
-			activeCharacter.sheetRecord,
+			activeCharacter.rollMacros,
 			rollMacroChoice
 		);
 		if (targetRollMacro) {
@@ -120,6 +120,8 @@ export class RollMacroRemoveSubCommand extends BaseCommandClass(
 				}
 			);
 			if (result) {
+				// Acknowledge the button interaction to prevent "This interaction failed"
+				await InteractionUtils.deferUpdate(result.intr);
 				await InteractionUtils.editReply(intr, {
 					content: sharedStrings.choiceRegistered({
 						choice: _.capitalize(result.value),
@@ -129,15 +131,7 @@ export class RollMacroRemoveSubCommand extends BaseCommandClass(
 			}
 			// remove the rollMacro
 			if (result && result.value === 'remove') {
-				const rollMacrosWithoutRemoved = _.filter(
-					activeCharacter.sheetRecord.rollMacros,
-					rollMacro =>
-						rollMacro.name.toLocaleLowerCase() !== rollMacroChoice.toLocaleLowerCase()
-				);
-				await kobold.sheetRecord.update(
-					{ id: activeCharacter.sheetRecord.id },
-					{ rollMacros: rollMacrosWithoutRemoved }
-				);
+				await kobold.rollMacro.delete({ id: targetRollMacro.id });
 
 				await InteractionUtils.send(
 					intr,

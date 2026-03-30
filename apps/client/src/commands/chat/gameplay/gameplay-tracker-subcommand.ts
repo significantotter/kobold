@@ -8,7 +8,7 @@ import {
 	Message,
 } from 'discord.js';
 
-import { CharacterWithRelations, Kobold } from '@kobold/db';
+import { CharacterWithRelations, Kobold, TrackerModeEnum } from '@kobold/db';
 import { KoboldError } from '../../../utils/KoboldError.js';
 import { Creature } from '../../../utils/creature.js';
 import { InteractionUtils } from '../../../utils/interaction-utils.js';
@@ -56,9 +56,7 @@ export class GameplayTrackerSubCommand extends BaseCommandClass(
 		);
 		const trackerMode = (intr.options.getString(
 			commandOptions[commandOptionsEnum.trackerMode].name
-		) ?? sharedStrings.options.sheetStyles.basicStats) as ValueOf<
-			typeof sharedStrings.options.sheetStyles
-		>;
+		) ?? sharedStrings.options.sheetStyles.basicStats) as TrackerModeEnum;
 		const gameplayTargetChannel = intr.options.getChannel(
 			commandOptions[commandOptionsEnum.targetChannel].name,
 			false,
@@ -123,7 +121,7 @@ export class GameplayTrackerSubCommand extends BaseCommandClass(
 			}
 		}
 
-		const creature = new Creature(targetSheetRecord, undefined, intr);
+		const creature = Creature.fromSheetRecord(targetCharacter, undefined, intr);
 
 		const trackerDisplay = creature.compileEmbed('Tracker', trackerMode);
 

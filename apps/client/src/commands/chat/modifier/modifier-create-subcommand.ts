@@ -1,8 +1,15 @@
-import { ChatInputCommandInteraction } from 'discord.js';
+import {
+	ApplicationCommandOptionChoiceData,
+	AutocompleteFocusedOption,
+	AutocompleteInteraction,
+	CacheType,
+	ChatInputCommandInteraction,
+} from 'discord.js';
 
 import {
 	Kobold,
 	Modifier,
+	NewModifier,
 	SheetAdjustment,
 	SheetAdjustmentTypeEnum,
 	isSheetAdjustmentTypeEnum,
@@ -17,6 +24,11 @@ import { Creature } from '../../../utils/creature.js';
 import { InputParseUtils } from '../../../utils/input-parse-utils.js';
 import { ModifierDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
+import {
+	parseCreateForValue,
+	CreateForTargets,
+} from '../../../utils/kobold-service-utils/autocomplete-utils.js';
+
 const commandOptions = ModifierDefinition.options;
 const commandOptionsEnum = ModifierDefinition.commandOptionsEnum;
 
@@ -24,14 +36,73 @@ export class ModifierCreateSubCommand extends BaseCommandClass(
 	ModifierDefinition,
 	ModifierDefinition.subCommandEnum.create
 ) {
+	public async autocomplete(
+		intr: AutocompleteInteraction<CacheType>,
+		option: AutocompleteFocusedOption,
+		{ kobold }: { kobold: Kobold }
+	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
+		if (!intr.isAutocomplete()) return;
+
+		const koboldUtils = new KoboldUtils(kobold);
+
+		if (option.name === commandOptions[commandOptionsEnum.createFor].name) {
+			const match = intr.options.getString(commandOptions[commandOptionsEnum.createFor].name);
+			return koboldUtils.autocompleteUtils.getCreateForOptions(intr, match ?? '');
+		}
+	}
+
 	public async execute(
 		intr: ChatInputCommandInteraction,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const koboldUtils = new KoboldUtils(kobold);
-		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
-			activeCharacter: true,
-		});
+
+		// Get characters and minions for create-for parsing
+		const { characters, minions } =
+			await koboldUtils.autocompleteUtils.getUserCharactersAndMinions(intr);
+
+		// Parse create-for value
+		const createForValue = intr.options.getString(
+			commandOptions[commandOptionsEnum.createFor].name
+		);
+		const sheetRecordId = parseCreateForValue(createForValue, characters, minions);
+
+		// Determine target name and validation character based on create-for value
+		let targetName: string = 'User';
+		let validationCharacter:
+			| Awaited<
+					ReturnType<typeof koboldUtils.fetchNonNullableDataForCommand>
+			  >['activeCharacter']
+			| null = null;
+
+		if (sheetRecordId === null) {
+			// User-wide modifier
+			targetName = 'User';
+			// We need a character for validation - use active character if available
+			try {
+				const data = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+					activeCharacter: true,
+				});
+				validationCharacter = data.activeCharacter;
+			} catch {
+				// No active character - that's okay for user-wide
+			}
+		} else {
+			// Specific character or minion
+			// Look up the name
+			const char = characters.find(c => c.sheetRecordId === sheetRecordId);
+			const minion = minions.find(m => m.sheetRecordId === sheetRecordId);
+			if (char) {
+				targetName = char.name;
+				// Use this character for validation
+				validationCharacter = char;
+			} else if (minion) {
+				targetName = minion.name;
+			} else {
+				throw new KoboldError(`Yip! Could not find a character or minion with that ID.`);
+			}
+		}
+
 		let name = intr.options
 			.getString(commandOptions[commandOptionsEnum.name].name, true)
 			.trim()
@@ -98,72 +169,102 @@ export class ModifierCreateSubCommand extends BaseCommandClass(
 			if (!InputParseUtils.isValidRollTargetTags(rollTargetTags)) {
 				throw new KoboldError(ModifierDefinition.strings.createModifier.invalidTags);
 			}
-			if (
-				!InputParseUtils.isValidDiceExpression(
-					rollAdjustment,
-					new Creature(activeCharacter.sheetRecord, undefined, intr)
-				)
-			) {
-				throw new KoboldError(
-					ModifierDefinition.strings.createModifier.doesntEvaluateError
-				);
+			// Only validate dice expression if we have a validation character
+			if (validationCharacter) {
+				if (
+					!InputParseUtils.isValidDiceExpression(
+						rollAdjustment,
+						Creature.fromSheetRecord(validationCharacter, undefined, intr)
+					)
+				) {
+					throw new KoboldError(
+						ModifierDefinition.strings.createModifier.doesntEvaluateError
+					);
+				}
 			}
 		}
 
 		let parsedSheetAdjustments: SheetAdjustment[] = [];
-		if (modifierSheetValues) {
+		if (modifierSheetValues && validationCharacter) {
 			parsedSheetAdjustments = InputParseUtils.parseAsSheetAdjustments(
 				modifierSheetValues,
 				modifierType,
-				activeCharacter.sheetRecord.sheet
+				validationCharacter.sheetRecord.sheet
 			);
-		}
-		// make sure the name does't already exist in the character's modifiers
-		if (FinderHelpers.getModifierByName(activeCharacter.sheetRecord, name)) {
-			await InteractionUtils.send(
-				intr,
-				ModifierDefinition.strings.createModifier.alreadyExists({
-					modifierName: name,
-					characterName: activeCharacter.name,
-				})
+		} else if (modifierSheetValues && !validationCharacter) {
+			// Parse without sheet validation for user-wide modifiers
+			parsedSheetAdjustments = InputParseUtils.parseAsSheetAdjustments(
+				modifierSheetValues,
+				modifierType,
+				null as any // Skip sheet validation
 			);
-			return;
 		}
 
-		const newModifier: Modifier = {
+		// Check for name conflicts - for user-wide, check all user modifiers
+		// For character-specific, check that character's modifiers
+		if (sheetRecordId === null) {
+			const existingModifiers = await kobold.modifier.readManyUserWide({
+				userId: intr.user.id,
+			});
+			if (FinderHelpers.getModifierByName(existingModifiers, name)) {
+				await InteractionUtils.send(
+					intr,
+					ModifierDefinition.strings.createModifier.alreadyExists({
+						modifierName: name,
+						characterName: 'your user-wide modifiers',
+					})
+				);
+				return;
+			}
+		} else if (validationCharacter) {
+			if (FinderHelpers.getModifierByName(validationCharacter.modifiers, name)) {
+				await InteractionUtils.send(
+					intr,
+					ModifierDefinition.strings.createModifier.alreadyExists({
+						modifierName: name,
+						characterName: targetName,
+					})
+				);
+				return;
+			}
+		}
+
+		const newModifier: Omit<Modifier, 'id'> = {
 			name,
 			isActive: true,
-			description: InputParseUtils.parseAsNullableString(description, {
-				inputName: 'description',
-				maxLength: 300,
-			}),
+			description:
+				InputParseUtils.parseAsNullableString(description, {
+					inputName: 'description',
+					maxLength: 300,
+				}) ?? '',
 			type: modifierType,
 			severity: InputParseUtils.parseAsNullableNumber(modifierSeverity),
 			sheetAdjustments: parsedSheetAdjustments,
-			rollTargetTags,
+			rollTargetTags: rollTargetTags ?? null,
 			rollAdjustment,
 			note: InputParseUtils.parseAsNullableString(note, {
 				inputName: 'initiative-note',
 				maxLength: 40,
 			}),
+			sheetRecordId,
+			userId: intr.user.id,
 		};
 
 		// make sure that the adjustments are valid and can be applied to a sheet
-		SheetUtils.adjustSheetWithModifiers(activeCharacter.sheetRecord.sheet, [newModifier]);
+		if (validationCharacter) {
+			SheetUtils.adjustSheetWithModifiers(validationCharacter.sheetRecord.sheet, [
+				newModifier,
+			]);
+		}
 
-		await kobold.sheetRecord.update(
-			{ id: activeCharacter.sheetRecordId },
-			{
-				modifiers: [...activeCharacter.sheetRecord.modifiers, newModifier],
-			}
-		);
+		await kobold.modifier.create(newModifier);
 
 		//send a response
 		await InteractionUtils.send(
 			intr,
 			ModifierDefinition.strings.createModifier.created({
 				modifierName: name,
-				characterName: activeCharacter.name,
+				characterName: targetName,
 			})
 		);
 		return;

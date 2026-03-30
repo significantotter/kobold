@@ -17,6 +17,6 @@ export class HelpFaqSubCommand extends BaseCommandClass(
 		if (helpContent.faq.fields) {
 			embed.addFields(helpContent.faq.fields);
 		}
-		await embed.sendBatches(intr, false);
+		await embed.sendBatches(intr);
 	}
 }

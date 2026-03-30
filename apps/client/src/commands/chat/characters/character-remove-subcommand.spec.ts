@@ -36,7 +36,7 @@ describe('CharacterRemoveSubCommand', () => {
 
 			// Mock button collector to simulate user cancelling
 			vi.mocked(CollectorUtils.collectByButton).mockResolvedValue({
-				intr: { user: { id: TEST_USER_ID } } as any,
+				intr: { user: { id: TEST_USER_ID }, deferUpdate: vi.fn() } as any,
 				value: 'cancel',
 			});
 
@@ -61,7 +61,7 @@ describe('CharacterRemoveSubCommand', () => {
 
 			// Mock button collector to simulate user confirming removal
 			vi.mocked(CollectorUtils.collectByButton).mockResolvedValue({
-				intr: { user: { id: TEST_USER_ID } } as any,
+				intr: { user: { id: TEST_USER_ID }, deferUpdate: vi.fn() } as any,
 				value: 'remove',
 			});
 
@@ -86,7 +86,7 @@ describe('CharacterRemoveSubCommand', () => {
 
 			// Mock button collector to simulate user cancelling
 			vi.mocked(CollectorUtils.collectByButton).mockResolvedValue({
-				intr: { user: { id: TEST_USER_ID } } as any,
+				intr: { user: { id: TEST_USER_ID }, deferUpdate: vi.fn() } as any,
 				value: 'cancel',
 			});
 
@@ -141,7 +141,7 @@ describe('CharacterRemoveSubCommand', () => {
 
 			// Mock button collector to simulate user confirming removal
 			vi.mocked(CollectorUtils.collectByButton).mockResolvedValue({
-				intr: { user: { id: TEST_USER_ID } } as any,
+				intr: { user: { id: TEST_USER_ID }, deferUpdate: vi.fn() } as any,
 				value: 'remove',
 			});
 

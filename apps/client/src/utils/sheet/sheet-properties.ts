@@ -165,28 +165,74 @@ export class SheetIntegerProperties {
 	public static aliases = SheetIntegerProperties._aliases;
 }
 
+export type CounterAliasVariant = 'max' | 'current';
+export type CounterReadAlias = { key: SheetBaseCounterKeys; variant: CounterAliasVariant };
+
 export class SheetBaseCounterProperties {
 	constructor(protected sheetBaseCounters: SheetBaseCounters) {}
 	public static properties: Record<
 		SheetBaseCounterKeys,
-		{ aliases: string[]; type: string; tags: [] }
+		{
+			aliases: string[]; // Base aliases (for adjustment - always targets max)
+			maxAliases: string[]; // Explicit max value aliases
+			currentAliases: string[]; // Current value aliases (read-only)
+			type: string;
+			tags: [];
+		}
 	> = {
-		heroPoints: { aliases: ['maxheropoints'], type: 'resource', tags: [] },
-		focusPoints: { aliases: ['fp', 'maxfp', 'maxfocuspoints'], type: 'resource', tags: [] },
+		heroPoints: {
+			aliases: ['heropoints'],
+			maxAliases: ['maxheropoints'],
+			currentAliases: ['currentheropoints'],
+			type: 'resource',
+			tags: [],
+		},
+		focusPoints: {
+			aliases: ['fp', 'focuspoints'],
+			maxAliases: ['maxfp', 'maxfocuspoints'],
+			currentAliases: ['currentfp', 'currentfocuspoints'],
+			type: 'resource',
+			tags: [],
+		},
 		hp: {
-			aliases: ['health', 'hitpoints', 'maxhp', 'maxhealth', 'maxhitpoints'],
+			aliases: ['hp', 'health', 'hitpoints'],
+			maxAliases: ['maxhp', 'maxhealth', 'maxhitpoints'],
+			currentAliases: ['currenthp', 'currenthealth', 'currenthitpoints'],
 			type: 'health',
 			tags: [],
 		},
-		tempHp: { aliases: ['temphealth', 'temphitpoints'], type: 'health', tags: [] },
-		stamina: { aliases: ['stam', 'maxstam', 'maxstamina'], type: 'health', tags: [] },
-		resolve: { aliases: ['maxresolve'], type: 'health', tags: [] },
+		tempHp: {
+			aliases: ['temphp', 'temphealth', 'temphitpoints'],
+			maxAliases: ['maxtemphp', 'maxtemphealth', 'maxtemphitpoints'],
+			currentAliases: ['currenttemphp', 'currenttemphealth', 'currenttemphitpoints'],
+			type: 'health',
+			tags: [],
+		},
+		stamina: {
+			aliases: ['stam', 'stamina'],
+			maxAliases: ['maxstam', 'maxstamina'],
+			currentAliases: ['currentstam', 'currentstamina'],
+			type: 'health',
+			tags: [],
+		},
+		resolve: {
+			aliases: ['resolve'],
+			maxAliases: ['maxresolve'],
+			currentAliases: ['currentresolve'],
+			type: 'health',
+			tags: [],
+		},
 	};
 
+	/**
+	 * Aliases for adjustments (modifiers). Maps to base counter key.
+	 * All adjustments target the max value only.
+	 */
 	public static get _aliases(): { [k: string]: undefined | SheetBaseCounterKeys } {
 		const aliases: { [k: string]: undefined | SheetBaseCounterKeys } = {};
 		for (const [key, value] of Object.entries(SheetBaseCounterProperties.properties)) {
-			for (const alias of value.aliases) {
+			// Include base aliases and max aliases for adjustment purposes
+			for (const alias of [...value.aliases, ...value.maxAliases]) {
 				aliases[alias] = key as SheetBaseCounterKeys;
 			}
 			aliases[standardizePropKey(key)] = key as SheetBaseCounterKeys;
@@ -194,6 +240,37 @@ export class SheetBaseCounterProperties {
 		return aliases;
 	}
 	public static aliases = SheetBaseCounterProperties._aliases;
+
+	/**
+	 * Aliases for reading values. Maps to { key, variant } to distinguish max vs current.
+	 * Used by attribute parsing to get either max or current value.
+	 */
+	public static get _readAliases(): { [k: string]: undefined | CounterReadAlias } {
+		const readAliases: { [k: string]: undefined | CounterReadAlias } = {};
+		for (const [key, value] of Object.entries(SheetBaseCounterProperties.properties)) {
+			const counterKey = key as SheetBaseCounterKeys;
+
+			// Base aliases default to max (for backwards compatibility with [hp] meaning maxHp)
+			for (const alias of value.aliases) {
+				readAliases[alias] = { key: counterKey, variant: 'max' };
+			}
+
+			// Max aliases explicitly return max
+			for (const alias of value.maxAliases) {
+				readAliases[alias] = { key: counterKey, variant: 'max' };
+			}
+
+			// Current aliases return current
+			for (const alias of value.currentAliases) {
+				readAliases[alias] = { key: counterKey, variant: 'current' };
+			}
+
+			// Key itself defaults to max
+			readAliases[standardizePropKey(key)] = { key: counterKey, variant: 'max' };
+		}
+		return readAliases;
+	}
+	public static readAliases = SheetBaseCounterProperties._readAliases;
 }
 
 export enum StatGroupEnum {
@@ -1061,6 +1138,7 @@ export class SheetProperties {
 	public static adjustableAliases = _.omit(this.aliases, ['name', 'level', 'usesstamina']) as {
 		[k: string]: string | undefined;
 	};
+	public static counterReadAliases = SheetBaseCounterProperties.readAliases;
 	public static adjustableProperties = _.omit(this.properties, [
 		'name',
 		'level',

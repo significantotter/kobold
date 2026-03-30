@@ -4,12 +4,15 @@ import {
 	Character,
 	CharacterWithRelations,
 	GameWithRelations,
+	InitiativeActorWithRelations,
 	Kobold,
+	MinionWithRelations,
 	SheetRecord,
 } from '@kobold/db';
 import { KoboldError } from '../KoboldError.js';
 import type { KoboldUtils } from './kobold-utils.js';
 import _ from 'lodash';
+import { EntityWithSheetData } from '../creature.js';
 
 export class GameUtils {
 	kobold: Kobold;
@@ -133,10 +136,25 @@ export class GameUtils {
 		}
 		const actorOptions = currentInit?.actors ?? [];
 
+		// Fetch minions for all characters in the target games
+		// Both GMs and players can target any player's minions in the game
+		const gameCharacterIds = targetGames
+			.flatMap(game => game.characters)
+			.filter(c => !!c)
+			.map(c => c.id);
+
+		let minionOptions: MinionWithRelations[] = [];
+		if (gameCharacterIds.length > 0) {
+			minionOptions = await this.kobold.minion.readManyByCharacterIds({
+				characterIds: gameCharacterIds,
+			});
+		}
+
 		//return the matched actors, removing any duplicates
 		return {
 			characterOptions,
 			actorOptions,
+			minionOptions,
 		};
 	}
 
@@ -145,10 +163,12 @@ export class GameUtils {
 		targetName: string
 	): Promise<{
 		targetSheetRecord: SheetRecord;
+		targetEntity: EntityWithSheetData;
 		hideStats: boolean;
 		targetName: string;
 	}> {
-		const { characterOptions, actorOptions } = await this.getAllTargetableOptions(intr);
+		const { characterOptions, actorOptions, minionOptions } =
+			await this.getAllTargetableOptions(intr);
 
 		// find a match from the game characters or active character
 		let matchedCharacter = characterOptions.find(
@@ -160,19 +180,41 @@ export class GameUtils {
 			actor => actor.name.trim().toLowerCase() === targetName.trim().toLowerCase()
 		);
 
-		const targetSheetRecord =
-			matchedInitActor?.sheetRecord ?? matchedCharacter?.sheetRecord ?? null;
-		const hideStats = matchedInitActor?.hideStats ?? false;
-		const actualTargetName = matchedInitActor?.name ?? matchedCharacter?.name;
+		// find a match in minions
+		let matchedMinion = minionOptions.find(
+			minion => minion.name.trim().toLowerCase() === targetName.trim().toLowerCase()
+		);
 
-		if (!targetSheetRecord) {
+		// Determine the target (priority: init actor > minion > character)
+		let targetSheetRecord: SheetRecord | null = null;
+		let targetEntity: EntityWithSheetData | null = null;
+		let hideStats = false;
+		let actualTargetName: string | undefined;
+
+		if (matchedInitActor) {
+			targetSheetRecord = matchedInitActor.sheetRecord;
+			targetEntity = matchedInitActor;
+			hideStats = matchedInitActor.hideStats;
+			actualTargetName = matchedInitActor.name;
+		} else if (matchedMinion) {
+			// Minion's sheetRecord is now required
+			targetSheetRecord = matchedMinion.sheetRecord;
+			targetEntity = matchedMinion;
+			actualTargetName = matchedMinion.name;
+		} else if (matchedCharacter) {
+			targetSheetRecord = matchedCharacter.sheetRecord;
+			targetEntity = matchedCharacter;
+			actualTargetName = matchedCharacter.name;
+		}
+
+		if (!targetSheetRecord || !targetEntity) {
 			throw new KoboldError(
 				utilStrings.roll.targetNotFound({
 					targetName,
 				})
 			);
 		}
-		return { targetSheetRecord, hideStats, targetName: actualTargetName! };
+		return { targetSheetRecord, targetEntity, hideStats, targetName: actualTargetName! };
 	}
 
 	public async getWhereUserHasCharacter(userId: string, guildId: string | null) {

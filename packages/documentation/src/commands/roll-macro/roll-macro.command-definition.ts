@@ -16,6 +16,7 @@ export enum rollMacroSubCommandEnum {
 	create = 'create',
 	set = 'set',
 	remove = 'remove',
+	assign = 'assign',
 }
 
 export const rollMacroCommandDefinition = {
@@ -31,6 +32,12 @@ export const rollMacroCommandDefinition = {
 			name: rollMacroSubCommandEnum.list,
 			description: 'Lists all roll macros available to your active character.',
 			type: ApplicationCommandOptionType.Subcommand,
+			options: {
+				[RollMacroCommandOptionEnum.ownedBy]: withOrder(
+					rollMacroCommandOptions[RollMacroCommandOptionEnum.ownedBy],
+					1
+				),
+			},
 		},
 		[rollMacroSubCommandEnum.create]: {
 			name: rollMacroSubCommandEnum.create,
@@ -44,6 +51,10 @@ export const rollMacroCommandDefinition = {
 				[RollMacroCommandOptionEnum.value]: withOrder(
 					rollMacroCommandOptions[RollMacroCommandOptionEnum.value],
 					2
+				),
+				[RollMacroCommandOptionEnum.createFor]: withOrder(
+					rollMacroCommandOptions[RollMacroCommandOptionEnum.createFor],
+					3
 				),
 			},
 		},
@@ -78,6 +89,26 @@ export const rollMacroCommandDefinition = {
 						choices: undefined,
 					} as APIApplicationCommandOption,
 					1
+				),
+			},
+		},
+		[rollMacroSubCommandEnum.assign]: {
+			name: rollMacroSubCommandEnum.assign,
+			description:
+				'Assigns a roll macro to a character or a minion, or unassigns the roll macro.',
+			type: ApplicationCommandOptionType.Subcommand,
+			options: {
+				[RollMacroCommandOptionEnum.targetMacro]: withOrder(
+					rollMacroCommandOptions[RollMacroCommandOptionEnum.targetMacro],
+					1
+				),
+				[RollMacroCommandOptionEnum.assignTo]: withOrder(
+					rollMacroCommandOptions[RollMacroCommandOptionEnum.assignTo],
+					2
+				),
+				[RollMacroCommandOptionEnum.copy]: withOrder(
+					rollMacroCommandOptions[RollMacroCommandOptionEnum.copy],
+					3
 				),
 			},
 		},

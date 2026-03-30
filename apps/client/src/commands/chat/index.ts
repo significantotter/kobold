@@ -8,6 +8,7 @@ import { GameCommandExport } from './game/index.js';
 import { GameplayCommandExport } from './gameplay/index.js';
 import { HelpCommandExport } from './help/index.js';
 import { InitCommandExport } from './init/index.js';
+import { MinionCommandExport } from './minion/index.js';
 import { ModifierCommandExport } from './modifier/index.js';
 import { RollMacroCommandExport } from './roll-macro/index.js';
 import { RollCommandExport } from './roll/index.js';
@@ -28,6 +29,7 @@ export const ChatCommandExports: CommandExport[] = [
 	GameplayCommandExport,
 	HelpCommandExport,
 	InitCommandExport,
+	MinionCommandExport,
 	ModifierCommandExport,
 	RollCommandExport,
 	RollMacroCommandExport,

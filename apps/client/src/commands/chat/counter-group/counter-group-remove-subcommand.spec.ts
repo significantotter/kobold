@@ -20,7 +20,8 @@ import {
 	createMockNumericCounter,
 	createMockCounterGroup,
 	getMockKobold,
-	resetMockKobold,} from '../../../test-utils/index.js';
+	resetMockKobold,
+} from '../../../test-utils/index.js';
 import { CollectorUtils } from '../../../utils/collector-utils.js';
 import type { CounterGroup, NumericCounter } from '@kobold/db';
 
@@ -48,7 +49,7 @@ describe('CounterGroupRemoveSubCommand', () => {
 			fetchDataMock.mockResolvedValue({ activeCharacter: mockCharacter });
 
 			vi.mocked(CollectorUtils.collectByButton).mockResolvedValue({
-				intr: {} as any,
+				intr: { deferUpdate: vi.fn() } as any,
 				value: 'remove',
 			});
 			const { updateMock } = setupSheetRecordUpdateMock(kobold);
@@ -82,7 +83,7 @@ describe('CounterGroupRemoveSubCommand', () => {
 			fetchDataMock.mockResolvedValue({ activeCharacter: mockCharacter });
 
 			vi.mocked(CollectorUtils.collectByButton).mockResolvedValue({
-				intr: {} as any,
+				intr: { deferUpdate: vi.fn() } as any,
 				value: 'cancel',
 			});
 			const { updateMock } = setupSheetRecordUpdateMock(kobold);
@@ -109,7 +110,7 @@ describe('CounterGroupRemoveSubCommand', () => {
 			fetchDataMock.mockResolvedValue({ activeCharacter: mockCharacter });
 
 			vi.mocked(CollectorUtils.collectByButton).mockResolvedValue({
-				intr: {} as any,
+				intr: { deferUpdate: vi.fn() } as any,
 				value: 'remove',
 			});
 			const { updateMock } = setupSheetRecordUpdateMock(kobold);
@@ -160,7 +161,7 @@ describe('CounterGroupRemoveSubCommand', () => {
 			fetchDataMock.mockResolvedValue({ activeCharacter: mockCharacter });
 
 			vi.mocked(CollectorUtils.collectByButton).mockResolvedValue({
-				intr: {} as any,
+				intr: { deferUpdate: vi.fn() } as any,
 				value: 'cancel',
 			});
 
@@ -189,7 +190,7 @@ describe('CounterGroupRemoveSubCommand', () => {
 			fetchDataMock.mockResolvedValue({ activeCharacter: mockCharacter });
 
 			vi.mocked(CollectorUtils.collectByButton).mockResolvedValue({
-				intr: {} as any,
+				intr: { deferUpdate: vi.fn() } as any,
 				value: 'remove',
 			});
 			setupSheetRecordUpdateMock(kobold);

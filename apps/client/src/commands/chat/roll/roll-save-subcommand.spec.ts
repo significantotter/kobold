@@ -27,14 +27,28 @@ vi.mock('../../../utils/creature.js');
 
 describe('RollSaveSubCommand Integration', () => {
 	let harness: CommandTestHarness;
+	let mockCreatureInstance: any;
 
 	beforeEach(() => {
 		harness = createTestHarness([new RollCommand([new RollSaveSubCommand()])]);
+
+		// Create mock creature instance
+		mockCreatureInstance = {
+			sheet: { staticInfo: { name: 'Test Character' } },
+			savingThrowRolls: {
+				fortitude: { name: 'Fortitude', type: 'save', bonus: 12, tags: [] },
+				reflex: { name: 'Reflex', type: 'save', bonus: 10, tags: [] },
+				will: { name: 'Will', type: 'save', bonus: 8, tags: [] },
+			},
+		};
 
 		// Mock Creature constructor
 		vi.mocked(Creature).mockImplementation(function (this: MockCreature) {
 			return this;
 		} as unknown as () => Creature);
+
+		// Mock Creature.fromSheetRecord static method
+		vi.mocked(Creature.fromSheetRecord).mockReturnValue(mockCreatureInstance);
 
 		// Mock Creature getters using vi.spyOn
 		vi.spyOn(Creature.prototype, 'sheet', 'get').mockReturnValue({

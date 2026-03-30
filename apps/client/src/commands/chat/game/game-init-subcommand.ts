@@ -54,7 +54,7 @@ export class GameInitSubCommand extends BaseCommandClass(
 			const choices: Set<string> = new Set();
 			for (const character of game.characters || []) {
 				const matchedSkills = FinderHelpers.matchAllSkills(
-					new Creature(character.sheetRecord),
+					Creature.fromSheetRecord(character),
 					match
 				).map(skill => skill.name);
 				for (const skill of matchedSkills) {
@@ -152,14 +152,14 @@ export class GameInitSubCommand extends BaseCommandClass(
 			});
 			const initiativeResult = _.isNumber(rollResult)
 				? rollResult
-				: rollResult.getRollTotalArray()[0] ?? 0;
+				: (rollResult.getRollTotalArray()[0] ?? 0);
 
 			const actorName = InitiativeBuilderUtils.getUniqueInitActorName(
 				currentInitiative,
 				character.name
 			);
 
-			await koboldUtils.initiativeUtils.createActorFromCharacter({
+			const characterActor = await koboldUtils.initiativeUtils.createActorFromCharacter({
 				initiativeId: currentInitiative.id,
 				character,
 				name: actorName,
@@ -167,7 +167,38 @@ export class GameInitSubCommand extends BaseCommandClass(
 				hideStats: false,
 			});
 
+			// Add character's minions to the same turn
+			const minions = await kobold.minion.readMany({
+				characterId: character.id,
+			});
+			const addedMinionNames: string[] = [];
+			for (const minion of minions) {
+				if (!minion.autoJoinInitiative) continue;
+
+				const minionActorName = InitiativeBuilderUtils.getUniqueInitActorName(
+					currentInitiative,
+					minion.name
+				);
+				await koboldUtils.initiativeUtils.createActorFromMinion({
+					initiativeId: currentInitiative.id,
+					minion,
+					characterActorGroupId: characterActor.initiativeActorGroupId,
+					separateTurn: false,
+					hideStats: false,
+					name: minionActorName,
+				});
+				addedMinionNames.push(minionActorName);
+			}
+
 			const embed = InitiativeBuilderUtils.initiativeJoinEmbed(rollResult, actorName);
+
+			// Add minion info to the embed if any minions were added
+			if (addedMinionNames.length > 0) {
+				embed.addFields({
+					name: 'Minions',
+					value: addedMinionNames.join(', '),
+				});
+			}
 
 			embeds.push(embed);
 		}

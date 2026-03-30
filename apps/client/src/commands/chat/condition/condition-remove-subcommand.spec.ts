@@ -16,7 +16,8 @@ import {
 	TEST_GUILD_ID,
 	CommandTestHarness,
 	getMockKobold,
-	resetMockKobold,} from '../../../test-utils/index.js';
+	resetMockKobold,
+} from '../../../test-utils/index.js';
 import { CollectorUtils } from '../../../utils/collector-utils.js';
 
 vi.mock('../../../utils/kobold-service-utils/kobold-utils.js');
@@ -50,7 +51,7 @@ describe('ConditionRemoveSubCommand', () => {
 
 			// Mock button collector to simulate user confirming removal
 			vi.mocked(CollectorUtils.collectByButton).mockResolvedValue({
-				intr: { user: { id: TEST_USER_ID } } as any,
+				intr: { user: { id: TEST_USER_ID }, deferUpdate: vi.fn() } as any,
 				value: 'remove',
 			});
 
@@ -87,7 +88,7 @@ describe('ConditionRemoveSubCommand', () => {
 
 			// Mock button collector to simulate user cancelling
 			vi.mocked(CollectorUtils.collectByButton).mockResolvedValue({
-				intr: { user: { id: TEST_USER_ID } } as any,
+				intr: { user: { id: TEST_USER_ID }, deferUpdate: vi.fn() } as any,
 				value: 'cancel',
 			});
 

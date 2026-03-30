@@ -43,9 +43,9 @@ export class GameplayRecoverSubCommand extends BaseCommandClass(
 
 		const { gameUtils, gameplayUtils } = new KoboldUtils(kobold);
 
-		const { targetSheetRecord, hideStats, targetName } =
+		const { targetSheetRecord, targetEntity, hideStats, targetName } =
 			await gameUtils.getCharacterOrInitActorTarget(intr, targetCharacter);
-		const targetCreature = new Creature(targetSheetRecord, targetName, intr);
+		const targetCreature = Creature.fromSheetRecord(targetEntity, targetName, intr);
 
 		const recoverValues = await gameplayUtils.recoverGameplayStats(
 			intr,

@@ -1,9 +1,10 @@
 import { utilStrings } from '@kobold/documentation';
-import { Attribute, CharacterWithRelations } from '@kobold/db';
+import { Attribute, CharacterWithRelations, ImportSourceEnum } from '@kobold/db';
 import { Creature } from './creature.js';
 import { DiceUtils } from './dice-utils.js';
 import { RollBuilder } from './roll-builder.js';
 import { SheetProperties } from './sheet/sheet-properties.js';
+import { TEST_USER_ID } from '../test-utils/index.js';
 
 const mocks = {
 	get character(): CharacterWithRelations {
@@ -11,27 +12,27 @@ const mocks = {
 			name: 'Character Name',
 			id: 1,
 			gameId: null,
-			createdAt: new Date(),
-			lastUpdatedAt: new Date(),
+			createdAt: new Date('2024-01-01T00:00:00.000Z'),
+			lastUpdatedAt: new Date('2024-01-01T00:00:00.000Z'),
 			userId: 'user1',
 			sheetRecordId: 1,
 			charId: 100,
 			isActiveCharacter: true,
-			importSource: 'Import Source',
+			importSource: ImportSourceEnum.pathbuilder,
 			channelDefaultCharacters: [],
 			guildDefaultCharacters: [],
 			sheetRecord: {
 				id: 1,
 				sheet: SheetProperties.defaultSheet,
-				modifiers: [],
 				conditions: [],
-				actions: [],
-				rollMacros: [],
 				trackerMode: null,
 				trackerMessageId: null,
 				trackerChannelId: null,
 				trackerGuildId: null,
 			},
+			actions: [],
+			modifiers: [],
+			rollMacros: [],
 		};
 	},
 };
@@ -85,8 +86,8 @@ describe('Dice Utils', function () {
 	describe('expandRollWithMacros', () => {
 		it('should correctly expand macros', () => {
 			const rollMacros = [
-				{ name: 'macro1', macro: '2d6' },
-				{ name: 'macro2', macro: '1d8' },
+				{ id: 1, sheetRecordId: 1, userId: TEST_USER_ID, name: 'macro1', macro: '2d6' },
+				{ id: 2, sheetRecordId: 1, userId: TEST_USER_ID, name: 'macro2', macro: '1d8' },
 			];
 			const rollExpression = '[macro1] + [strength] + [macro2]';
 			const expected = '2d6 + [strength] + 1d8';
@@ -95,7 +96,9 @@ describe('Dice Utils', function () {
 		});
 
 		it('should stop after 10 recursive applications', () => {
-			const rollMacros = [{ name: 'macro', macro: '[macro]' }];
+			const rollMacros = [
+				{ id: 1, sheetRecordId: 1, userId: TEST_USER_ID, name: 'macro', macro: '[macro]' },
+			];
 			const rollExpression = '[macro]';
 			const expected = '[macro]';
 
@@ -194,7 +197,7 @@ describe('RollBuilder', function () {
 		const character = mocks.character;
 		character.sheetRecord.sheet.intProperties.strength = 6;
 		expect(
-			DiceUtils.parseAttribute('[strength]', new Creature(character.sheetRecord))
+			DiceUtils.parseAttribute('[strength]', Creature.fromSheetRecord(character))
 		).toStrictEqual([6, ['strength']]);
 	});
 	test('fails to parse an invalid attribute', function () {
@@ -204,14 +207,14 @@ describe('RollBuilder', function () {
 		const character = mocks.character;
 		character.sheetRecord.sheet.intProperties.strength = 6;
 		expect(
-			DiceUtils.parseAttribute('[str]', new Creature(character.sheetRecord))
+			DiceUtils.parseAttribute('[str]', Creature.fromSheetRecord(character))
 		).toStrictEqual([6, ['strength']]);
 	});
 	test('parses all attributes in a dice expression', function () {
 		const character = mocks.character;
 		character.sheetRecord.sheet.intProperties.strength = 2;
 		expect(
-			DiceUtils.parseAttributes('[str]d20 + [str]', new Creature(character.sheetRecord))
+			DiceUtils.parseAttributes('[str]d20 + [str]', Creature.fromSheetRecord(character))
 		).toStrictEqual(['2d20 + 2', ['strength']]);
 	});
 	test('rolls dice using parsed character attributes', function () {

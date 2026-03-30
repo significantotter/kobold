@@ -19,7 +19,15 @@ export class CreatureUtils {
 	}
 
 	public async updateSheetTracker(intr: ChatInputCommandInteraction, target: SheetRecord) {
-		const creature = new Creature(target);
+		// For tracker display, we don't need actions/modifiers/rollMacros since
+		// the tracker mode is typically 'counters_only' which only shows basic stats
+		const creature = new Creature({
+			sheet: target.sheet,
+			actions: [],
+			modifiers: [],
+			rollMacros: [],
+			conditions: target.conditions,
+		});
 		const embed = await creature.compileEmbed('Tracker', target.trackerMode ?? 'counters_only');
 		const tracker = { content: embed.data.description, embeds: [] };
 		try {

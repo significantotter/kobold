@@ -21,7 +21,7 @@ const createMockInteraction = () =>
 		reply: vi.fn(),
 		deferred: false,
 		replied: false,
-	} as unknown as CommandInteraction<CacheType>);
+	}) as unknown as CommandInteraction<CacheType>;
 
 const createMockCharacterData = () => ({
 	id: 123,
@@ -85,7 +85,7 @@ describe('WgCharacterFetcher', () => {
 			(mockKobold.character.read as Mock).mockResolvedValue(null);
 
 			const result = await fetcher.fetchDuplicateCharacter({ charId: 123 }, {
-				sheet: { staticInfo: { name: 'Test Character' } },
+				sheetRecord: { sheet: { staticInfo: { name: 'Test Character' } } },
 			} as any);
 
 			expect(result).toBeNull();
@@ -98,7 +98,7 @@ describe('WgCharacterFetcher', () => {
 				.mockResolvedValueOnce(null); // by name
 
 			const result = await fetcher.fetchDuplicateCharacter({ charId: 123 }, {
-				sheet: { staticInfo: { name: 'Different Name' } },
+				sheetRecord: { sheet: { staticInfo: { name: 'Different Name' } } },
 			} as any);
 
 			expect(result).toEqual(existingCharacter);
@@ -111,7 +111,7 @@ describe('WgCharacterFetcher', () => {
 				.mockResolvedValueOnce(existingCharacter); // by name
 
 			const result = await fetcher.fetchDuplicateCharacter({ charId: 456 }, {
-				sheet: { staticInfo: { name: 'Test Character' } },
+				sheetRecord: { sheet: { staticInfo: { name: 'Test Character' } } },
 			} as any);
 
 			expect(result).toEqual(existingCharacter);
@@ -138,9 +138,32 @@ describe('WgCharacterFetcher', () => {
 			const mockCharData = createMockCharacterData();
 			const mockCalcStats = createMockCalculatedStats();
 			const mockSheet = { staticInfo: { name: 'Test' } };
-			const mockActions = [{ name: 'Strike' }];
-			const mockModifiers = [{ name: 'Bonus' }];
-			const mockRollMacros = [{ name: 'Attack' }];
+			const mockActions = [
+				{
+					name: 'Strike',
+					description: 'A melee attack',
+					type: 'attack',
+					actionCost: 'oneAction',
+					baseLevel: 1,
+					autoHeighten: false,
+					rolls: [],
+					tags: [],
+				},
+			];
+			const mockModifiers = [
+				{
+					name: 'Bonus',
+					description: 'A bonus',
+					type: 'untyped',
+					isActive: true,
+					note: null,
+					rollAdjustment: null,
+					rollTargetTags: null,
+					severity: null,
+					sheetAdjustments: null,
+				},
+			];
+			const mockRollMacros = [{ name: 'Attack', macro: '1d20+10' }];
 
 			vi.mocked(Creature.fromWandererersGuide).mockReturnValue({
 				_sheet: mockSheet,
@@ -160,23 +183,48 @@ describe('WgCharacterFetcher', () => {
 				undefined
 			);
 			expect(result).toEqual({
-				sheet: mockSheet,
-				actions: mockActions,
-				modifiers: mockModifiers,
-				rollMacros: mockRollMacros,
+				sheetRecord: {
+					sheet: mockSheet,
+				},
+				actions: [
+					{
+						name: 'Strike',
+						description: 'A melee attack',
+						type: 'attack',
+						actionCost: 'oneAction',
+						baseLevel: 1,
+						autoHeighten: false,
+						rolls: [],
+						tags: [],
+					},
+				],
+				modifiers: [
+					{
+						name: 'Bonus',
+						description: 'A bonus',
+						type: 'untyped',
+						isActive: true,
+						note: null,
+						rollAdjustment: null,
+						rollTargetTags: null,
+						severity: null,
+						sheetAdjustments: null,
+					},
+				],
+				rollMacros: [{ name: 'Attack', macro: '1d20+10' }],
 			});
 		});
 
-		it('should pass activeCharacter sheetRecord when provided', () => {
+		it('should pass activeCharacter when provided', () => {
 			const mockCharData = createMockCharacterData();
 			const mockCalcStats = createMockCalculatedStats();
 			const activeCharacter = {
 				sheetRecord: {
 					sheet: { staticInfo: { name: 'Existing' } },
-					actions: [],
-					modifiers: [],
-					rollMacros: [],
 				},
+				actions: [],
+				modifiers: [],
+				rollMacros: [],
 			} as any;
 
 			vi.mocked(Creature.fromWandererersGuide).mockReturnValue({
@@ -197,7 +245,7 @@ describe('WgCharacterFetcher', () => {
 			expect(Creature.fromWandererersGuide).toHaveBeenCalledWith(
 				mockCalcStats,
 				mockCharData,
-				activeCharacter.sheetRecord
+				activeCharacter
 			);
 		});
 	});

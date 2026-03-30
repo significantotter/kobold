@@ -15,6 +15,6 @@ export class HelpSettingsSubCommand extends BaseCommandClass(
 		embed.setThumbnail(helpLinks.thumbnail);
 		embed.setTitle(helpContent.settings.title);
 		embed.setDescription(helpContent.settings.description);
-		await embed.sendBatches(intr, false);
+		await embed.sendBatches(intr);
 	}
 }

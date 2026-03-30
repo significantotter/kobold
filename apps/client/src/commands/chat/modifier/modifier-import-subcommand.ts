@@ -1,7 +1,7 @@
 import { ChatInputCommandInteraction } from 'discord.js';
 import { compileExpression } from 'filtrex';
 import _ from 'lodash';
-import { Kobold, Modifier, zModifier } from '@kobold/db';
+import { Kobold, NewModifier, zCondition } from '@kobold/db';
 import { PasteBin } from '../../../services/pastebin/index.js';
 import {
 	ignoreOnConflict,
@@ -45,7 +45,7 @@ export class ModifierImportSubCommand extends BaseCommandClass(
 			return;
 		}
 
-		let newModifiers: Modifier[] = [];
+		let newModifiers: NewModifier[] = [];
 
 		let invalidJson = false;
 		try {
@@ -55,14 +55,18 @@ export class ModifierImportSubCommand extends BaseCommandClass(
 			} else {
 				newModifiers = JSON.parse(modifiersText);
 			}
-			const valid = zModifier.array().safeParse(newModifiers);
+			const valid = zCondition.array().safeParse(newModifiers);
 			if (!valid.success) {
 				invalidJson = true;
 			} else {
 				for (const modifier of newModifiers) {
 					if (modifier.rollTargetTags) {
 						// throws an error on an invalid expression
-						compileExpression(modifier.rollTargetTags ?? '');
+						compileExpression(
+							Array.isArray(modifier.rollTargetTags)
+								? modifier.rollTargetTags.join(' ')
+								: (modifier.rollTargetTags ?? '')
+						);
 					}
 				}
 			}
@@ -74,9 +78,9 @@ export class ModifierImportSubCommand extends BaseCommandClass(
 			await InteractionUtils.send(intr, ModifierDefinition.strings.import.failedParsing);
 			return;
 		}
-		const currentModifiers = activeCharacter.sheetRecord.modifiers;
+		const currentModifiers = activeCharacter.modifiers;
 
-		let finalModifiers: Modifier[] = [];
+		let finalModifiers: NewModifier[] = [];
 
 		const importModes = ModifierDefinition.optionChoices.importMode;
 		if (importMode === importModes.overwriteAll) {
@@ -93,14 +97,28 @@ export class ModifierImportSubCommand extends BaseCommandClass(
 			return;
 		}
 
-		await kobold.sheetRecord.update(
-			{
-				id: activeCharacter.sheetRecordId,
-			},
-			{
-				modifiers: finalModifiers,
-			}
-		);
+		// Delete all existing modifiers for this character
+		await kobold.modifier.deleteBySheetRecordId({
+			sheetRecordId: activeCharacter.sheetRecordId,
+		});
+
+		// Create all the final modifiers
+		for (const modifier of finalModifiers) {
+			const newModifier: NewModifier = {
+				name: modifier.name,
+				isActive: modifier.isActive,
+				description: modifier.description ?? '',
+				type: modifier.type,
+				severity: modifier.severity,
+				sheetAdjustments: modifier.sheetAdjustments,
+				rollTargetTags: modifier.rollTargetTags,
+				rollAdjustment: modifier.rollAdjustment,
+				note: modifier.note,
+				sheetRecordId: activeCharacter.sheetRecordId,
+				userId: intr.user.id,
+			};
+			await kobold.modifier.create(newModifier);
+		}
 
 		await InteractionUtils.send(
 			intr,

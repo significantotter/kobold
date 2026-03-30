@@ -18,6 +18,6 @@ export class HelpAttributesAndTagsSubCommand extends BaseCommandClass(
 		if (helpContent.attributesAndTags.fields) {
 			embed.setFields(helpContent.attributesAndTags.fields);
 		}
-		await embed.sendBatches(intr, false);
+		await embed.sendBatches(intr);
 	}
 }

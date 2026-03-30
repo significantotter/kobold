@@ -55,11 +55,21 @@ describe('RollActionSubCommand Integration', () => {
 			}),
 		];
 
+		// Create mock creature instance
+		const mockCreatureInstance = {
+			actions: mockActions,
+			_sheet: {},
+			sheet: { staticInfo: { name: 'Test Character' } },
+		} as any;
+
 		vi.mocked(Creature).mockImplementation(function (this: MockCreature) {
 			(this as MockCreature & { actions: unknown[]; _sheet: unknown }).actions = mockActions;
 			(this as MockCreature & { actions: unknown[]; _sheet: unknown })._sheet = {};
 			return this;
 		} as unknown as () => Creature);
+
+		// Mock Creature.fromSheetRecord static method
+		vi.mocked(Creature.fromSheetRecord).mockReturnValue(mockCreatureInstance);
 
 		// Mock Creature getter for sheet
 		vi.spyOn(Creature.prototype, 'sheet', 'get').mockReturnValue({

@@ -9,7 +9,7 @@ import {
 	createMockCharacter,
 	setupKoboldUtilsMocks,
 	setupAutocompleteKoboldMocks,
-	setupSheetRecordUpdateMock,
+	setupRollMacroModelMock,
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	CommandTestHarness,
@@ -38,17 +38,23 @@ describe('RollMacroRemoveSubCommand', () => {
 	describe('removing roll macros', () => {
 		it('should remove a roll macro when confirmed', async () => {
 			// Arrange
-			const existingMacro = { name: 'sneak-attack', macro: '2d6' };
+			const existingMacro = {
+				id: 1,
+				name: 'sneak-attack',
+				macro: '2d6',
+				sheetRecordId: 1,
+				userId: TEST_USER_ID,
+			};
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.rollMacros = [existingMacro];
+			mockCharacter.rollMacros = [existingMacro];
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getRollMacroByName').mockReturnValue(existingMacro);
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { deleteMock } = setupRollMacroModelMock(kobold);
 
 			// Mock the button collector to return 'remove'
 			vi.mocked(CollectorUtils.collectByButton).mockResolvedValue({
-				intr: {} as any,
+				intr: { deferUpdate: vi.fn() } as any,
 				value: 'remove',
 			});
 
@@ -64,22 +70,28 @@ describe('RollMacroRemoveSubCommand', () => {
 			});
 
 			// Assert
-			expect(updateMock).toHaveBeenCalled();
+			expect(deleteMock).toHaveBeenCalled();
 		});
 
 		it('should cancel removal when canceled', async () => {
 			// Arrange
-			const existingMacro = { name: 'sneak-attack', macro: '2d6' };
+			const existingMacro = {
+				id: 1,
+				name: 'sneak-attack',
+				macro: '2d6',
+				sheetRecordId: 1,
+				userId: TEST_USER_ID,
+			};
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.rollMacros = [existingMacro];
+			mockCharacter.rollMacros = [existingMacro];
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getRollMacroByName').mockReturnValue(existingMacro);
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { deleteMock } = setupRollMacroModelMock(kobold);
 
 			// Mock the button collector to return 'cancel'
 			vi.mocked(CollectorUtils.collectByButton).mockResolvedValue({
-				intr: {} as any,
+				intr: { deferUpdate: vi.fn() } as any,
 				value: 'cancel',
 			});
 
@@ -95,17 +107,17 @@ describe('RollMacroRemoveSubCommand', () => {
 			});
 
 			// Assert
-			expect(updateMock).not.toHaveBeenCalled();
+			expect(deleteMock).not.toHaveBeenCalled();
 		});
 
 		it('should error when roll macro not found', async () => {
 			// Arrange
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.rollMacros = [];
+			mockCharacter.rollMacros = [];
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getRollMacroByName').mockReturnValue(undefined);
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { deleteMock } = setupRollMacroModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -120,7 +132,7 @@ describe('RollMacroRemoveSubCommand', () => {
 
 			// Assert
 			expect(result.didRespond()).toBe(true);
-			expect(updateMock).not.toHaveBeenCalled();
+			expect(deleteMock).not.toHaveBeenCalled();
 			const response = result.getResponseContent();
 			expect(response).toContain("couldn't find");
 		});
@@ -130,10 +142,22 @@ describe('RollMacroRemoveSubCommand', () => {
 		it('should return matching roll macros for autocomplete', async () => {
 			// Arrange
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.rollMacros = [
-				{ name: 'sneak-attack', macro: '2d6' },
-				{ name: 'sneak-damage', macro: '3d6' },
-				{ name: 'power-attack', macro: '4' },
+			mockCharacter.rollMacros = [
+				{
+					id: 1,
+					name: 'sneak-attack',
+					macro: '2d6',
+					sheetRecordId: 1,
+					userId: TEST_USER_ID,
+				},
+				{
+					id: 2,
+					name: 'sneak-damage',
+					macro: '3d6',
+					sheetRecordId: 1,
+					userId: TEST_USER_ID,
+				},
+				{ id: 3, name: 'power-attack', macro: '4', sheetRecordId: 1, userId: TEST_USER_ID },
 			];
 
 			vi.mocked(KoboldUtils).mockImplementation(function (this: MockKoboldUtils) {

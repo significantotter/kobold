@@ -12,7 +12,7 @@ import {
 	setupKoboldUtilsMocks,
 	setupAutocompleteKoboldMocks,
 	setupFinderHelpersMocks,
-	setupSheetRecordUpdateMock,
+	setupActionModelMock,
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	CommandTestHarness,
@@ -40,7 +40,7 @@ describe('ActionStageAddSkillChallengeSubCommand', () => {
 			const action = createMockAction({ name: 'Demoralize', rolls: [] });
 			setupKoboldUtilsMocks({ actions: [action] });
 			setupFinderHelpersMocks(action, [action]);
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { updateMock } = setupActionModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -121,7 +121,7 @@ describe('ActionStageAddSkillChallengeSubCommand', () => {
 			const action = createMockAction({ name: 'Demoralize', rolls: [] });
 			setupKoboldUtilsMocks({ actions: [action] });
 			setupFinderHelpersMocks(action, [action]);
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { updateMock } = setupActionModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({

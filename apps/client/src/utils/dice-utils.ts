@@ -3,7 +3,7 @@ import { APIEmbedField } from 'discord.js';
 import _ from 'lodash';
 import { attributeShorthands, staticAttributes } from '../constants/attributes.js';
 import { utilStrings } from '@kobold/documentation';
-import { Attribute, Modifier, RollMacro } from '@kobold/db';
+import { Attribute, Condition, RollMacro } from '@kobold/db';
 import type { Creature } from './creature.js';
 import { WritableDeep } from 'type-fest';
 
@@ -208,7 +208,7 @@ export class DiceUtils {
 		extraAttributes?: Attribute[];
 		modifierMultiplier?: number;
 	}) {
-		let modifiers: Modifier[] = [];
+		let modifiers: Condition[] = [];
 		let finalTags: string[] = [];
 
 		let expandedExpression = creature

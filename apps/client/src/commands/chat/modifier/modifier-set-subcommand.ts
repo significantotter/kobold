@@ -45,7 +45,7 @@ export class ModifierSetSubCommand extends BaseCommandClass(
 			}
 			//find a save on the character matching the autocomplete string
 			const matchedModifiers = FinderHelpers.matchAllModifiers(
-				activeCharacter.sheetRecord,
+				activeCharacter.modifiers,
 				match
 			).map(modifier => ({
 				name: modifier.name,
@@ -78,7 +78,7 @@ export class ModifierSetSubCommand extends BaseCommandClass(
 		});
 
 		const targetModifier = FinderHelpers.getModifierByName(
-			activeCharacter.sheetRecord,
+			activeCharacter.modifiers,
 			modifierName
 		);
 		if (!targetModifier) {
@@ -89,7 +89,7 @@ export class ModifierSetSubCommand extends BaseCommandClass(
 
 		const setOpts = ModifierDefinition.optionChoices.setOption;
 		if (fieldToChange === setOpts.name) {
-			if (FinderHelpers.getModifierByName(activeCharacter.sheetRecord, newFieldValue)) {
+			if (FinderHelpers.getModifierByName(activeCharacter.modifiers, newFieldValue)) {
 				throw new KoboldError(ModifierDefinition.strings.set.nameExistsError);
 			} else {
 				targetModifier.name = InputParseUtils.parseAsString(newFieldValue, {
@@ -103,7 +103,7 @@ export class ModifierSetSubCommand extends BaseCommandClass(
 				// we must be able to evaluate the modifier as a roll for this character
 				InputParseUtils.isValidDiceExpression(
 					newFieldValue,
-					new Creature(activeCharacter.sheetRecord, undefined, intr)
+					Creature.fromSheetRecord(activeCharacter, undefined, intr)
 				);
 				targetModifier.rollAdjustment = newFieldValue;
 			} catch (err) {
@@ -162,10 +162,17 @@ export class ModifierSetSubCommand extends BaseCommandClass(
 		// just in case the update is for the name
 		const nameBeforeUpdate = targetModifier.name;
 
-		await kobold.sheetRecord.update(
-			{ id: activeCharacter.sheetRecordId },
+		await kobold.modifier.update(
+			{ id: targetModifier.id },
 			{
-				modifiers: activeCharacter.sheetRecord.modifiers,
+				name: targetModifier.name,
+				rollAdjustment: targetModifier.rollAdjustment,
+				rollTargetTags: targetModifier.rollTargetTags,
+				type: targetModifier.type,
+				description: targetModifier.description,
+				note: targetModifier.note,
+				severity: targetModifier.severity,
+				sheetAdjustments: targetModifier.sheetAdjustments,
 			}
 		);
 

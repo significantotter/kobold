@@ -1,10 +1,6 @@
 import { APIEmbedField } from 'discord.js';
 import _ from 'lodash';
-import {
-	Attribute,
-	CharacterWithRelations,
-	UserSettings,
-} from '@kobold/db';
+import { Attribute, CharacterWithRelations, UserSettings } from '@kobold/db';
 import { KoboldError } from './KoboldError.js';
 import { Creature } from './creature.js';
 import {
@@ -54,7 +50,7 @@ export class RollBuilder {
 		this.footer = '';
 		this.creature = creature || null;
 		if (character && !this.creature) {
-			this.creature = new Creature(character.sheetRecord);
+			this.creature = Creature.fromSheetRecord(character);
 		}
 		this.targetCreature = targetCreature || null;
 		this.userSettings = userSettings ?? DefaultUtils.userSettings;
@@ -201,13 +197,13 @@ export class RollBuilder {
 					'critical success': ' Critical Hit!',
 					success: ' Hit!',
 					failure: ' Miss.',
-					'critical failure': ' Miss.',
+					'critical failure': ' Critical Miss!',
 				};
 				const skillChallengeTitleAdditionText = {
 					'critical success': ' Critical Success!',
 					success: ' Success!',
 					failure: ' Failure.',
-					'critical failure': ' Failure.',
+					'critical failure': ' Critical Failure!',
 				};
 
 				let natTwenty = null;
@@ -480,9 +476,7 @@ export class RollBuilder {
 			actorName: actorName ?? creature.name ?? userName,
 			creature,
 			rollNote,
-			rollDescription:
-				description ||
-				('rolled ' + _.startCase(roll.name)),
+			rollDescription: description || 'rolled ' + _.startCase(roll.name),
 			userSettings,
 		});
 		rollBuilder.addRoll({

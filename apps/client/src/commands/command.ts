@@ -68,7 +68,7 @@ export function BaseCommandClass<T extends CommandReference>(
 		commandDefinition.requireClientPerms ||
 		[]) as PermissionsString[];
 	const restrictedGuilds =
-		subCommandDefinition?.restrictedGuilds || commandDefinition.restrictedGuilds || [];
+		subCommandDefinition?.restrictedGuilds || commandDefinition.restrictedGuilds;
 
 	const commandClass = class implements Command {
 		commands: Command[] = [];

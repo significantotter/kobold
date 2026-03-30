@@ -15,6 +15,6 @@ export class HelpGameplaySubCommand extends BaseCommandClass(
 		embed.setThumbnail(helpLinks.thumbnail);
 		embed.setTitle(helpContent.gameplay.title);
 		embed.setDescription(helpContent.gameplay.description);
-		await embed.sendBatches(intr, false);
+		await embed.sendBatches(intr);
 	}
 }

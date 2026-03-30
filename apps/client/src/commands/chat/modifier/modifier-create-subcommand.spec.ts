@@ -9,7 +9,7 @@ import {
 	createTestHarness,
 	createMockCharacter,
 	setupKoboldUtilsMocks,
-	setupSheetRecordUpdateMock,
+	setupModifierModelMock,
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	CommandTestHarness,
@@ -62,11 +62,11 @@ describe('ModifierCreateSubCommand', () => {
 		it('should create a modifier with roll adjustment and target tags', async () => {
 			// Arrange
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.modifiers = [];
+			mockCharacter.modifiers = [];
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getModifierByName').mockReturnValue(undefined);
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { createMock } = setupModifierModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -84,17 +84,17 @@ describe('ModifierCreateSubCommand', () => {
 
 			// Assert
 			expect(result.didRespond()).toBe(true);
-			expect(updateMock).toHaveBeenCalled();
+			expect(createMock).toHaveBeenCalled();
 		});
 
 		it('should create a modifier with sheet values', async () => {
 			// Arrange
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.modifiers = [];
+			mockCharacter.modifiers = [];
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getModifierByName').mockReturnValue(undefined);
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { createMock } = setupModifierModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -111,17 +111,17 @@ describe('ModifierCreateSubCommand', () => {
 
 			// Assert
 			expect(result.didRespond()).toBe(true);
-			expect(updateMock).toHaveBeenCalled();
+			expect(createMock).toHaveBeenCalled();
 		});
 
 		it('should create a modifier with severity', async () => {
 			// Arrange
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.modifiers = [];
+			mockCharacter.modifiers = [];
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getModifierByName').mockReturnValue(undefined);
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { createMock } = setupModifierModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -139,17 +139,17 @@ describe('ModifierCreateSubCommand', () => {
 
 			// Assert
 			expect(result.didRespond()).toBe(true);
-			expect(updateMock).toHaveBeenCalled();
+			expect(createMock).toHaveBeenCalled();
 		});
 
 		it('should create a modifier with description and initiative note', async () => {
 			// Arrange
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.modifiers = [];
+			mockCharacter.modifiers = [];
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getModifierByName').mockReturnValue(undefined);
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { createMock } = setupModifierModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -169,7 +169,7 @@ describe('ModifierCreateSubCommand', () => {
 
 			// Assert
 			expect(result.didRespond()).toBe(true);
-			expect(updateMock).toHaveBeenCalled();
+			expect(createMock).toHaveBeenCalled();
 		});
 	});
 
@@ -177,22 +177,25 @@ describe('ModifierCreateSubCommand', () => {
 		it('should error when modifier with same name already exists', async () => {
 			// Arrange
 			const existingModifier = {
+				id: 1,
 				name: 'existing modifier',
 				isActive: true,
-				description: null,
+				description: '',
 				type: SheetAdjustmentTypeEnum.status,
 				severity: null,
 				sheetAdjustments: [],
 				rollAdjustment: '+1',
 				rollTargetTags: 'attack',
 				note: null,
+				sheetRecordId: 1,
+				userId: TEST_USER_ID,
 			};
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.modifiers = [existingModifier];
+			mockCharacter.modifiers = [existingModifier];
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getModifierByName').mockReturnValue(existingModifier);
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { createMock } = setupModifierModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -210,17 +213,17 @@ describe('ModifierCreateSubCommand', () => {
 
 			// Assert
 			expect(result.didRespond()).toBe(true);
-			expect(updateMock).not.toHaveBeenCalled();
+			expect(createMock).not.toHaveBeenCalled();
 		});
 
 		it('should error when roll adjustment is provided without target tags', async () => {
 			// Arrange
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.modifiers = [];
+			mockCharacter.modifiers = [];
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getModifierByName').mockReturnValue(undefined);
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { createMock } = setupModifierModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -237,17 +240,17 @@ describe('ModifierCreateSubCommand', () => {
 
 			// Assert
 			expect(result.didRespond()).toBe(true);
-			expect(updateMock).not.toHaveBeenCalled();
+			expect(createMock).not.toHaveBeenCalled();
 		});
 
 		it('should error when target tags are provided without roll adjustment', async () => {
 			// Arrange
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.modifiers = [];
+			mockCharacter.modifiers = [];
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getModifierByName').mockReturnValue(undefined);
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { createMock } = setupModifierModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -264,17 +267,17 @@ describe('ModifierCreateSubCommand', () => {
 
 			// Assert
 			expect(result.didRespond()).toBe(true);
-			expect(updateMock).not.toHaveBeenCalled();
+			expect(createMock).not.toHaveBeenCalled();
 		});
 
 		it('should error when neither roll adjustment nor sheet values provided', async () => {
 			// Arrange
 			const mockCharacter = createMockCharacter();
-			mockCharacter.sheetRecord.modifiers = [];
+			mockCharacter.modifiers = [];
 
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 			vi.spyOn(FinderHelpers, 'getModifierByName').mockReturnValue(undefined);
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { createMock } = setupModifierModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -290,7 +293,7 @@ describe('ModifierCreateSubCommand', () => {
 
 			// Assert
 			expect(result.didRespond()).toBe(true);
-			expect(updateMock).not.toHaveBeenCalled();
+			expect(createMock).not.toHaveBeenCalled();
 		});
 	});
 });

@@ -10,7 +10,7 @@ import { DiceUtils } from '../../../utils/dice-utils.js';
 import { RollBuilder } from '../../../utils/roll-builder.js';
 
 import _ from 'lodash';
-import { Action, Kobold, SheetAdjustmentTypeEnum } from '@kobold/db';
+import { NewAction, Kobold, SheetAdjustmentTypeEnum, Action } from '@kobold/db';
 import { Creature } from '../../../utils/creature.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { InitiativeBuilder, InitiativeBuilderUtils } from '../../../utils/initiative-builder.js';
@@ -111,7 +111,7 @@ export class InitAddSubCommand extends BaseCommandClass(
 			.toLocaleLowerCase();
 
 		let sheet = SheetProperties.defaultSheet;
-		const actions: Action[] = [];
+		const actions: NewAction[] = [];
 		let referenceNpcName: string | null = null;
 
 		if (targetCreature.toLowerCase().trim() != 'custom npc') {
@@ -135,7 +135,7 @@ export class InitAddSubCommand extends BaseCommandClass(
 				emojiConverter: emojiData => getEmoji(intr, emojiData),
 			});
 			sheet = await nethysSheetImporter.buildSheet();
-			const newActions = await nethysSheetImporter.buildActions();
+			const newActions = await nethysSheetImporter.buildActions(intr.user.id);
 			actions.push(...newActions);
 			referenceNpcName = bestiaryCreature.name;
 			if (!actorName) {
@@ -159,7 +159,7 @@ export class InitAddSubCommand extends BaseCommandClass(
 			const creature = new Creature(
 				{
 					sheet: adjustedSheet,
-					actions,
+					actions: actions as Action[],
 					rollMacros: [],
 					modifiers: [],
 					conditions: [],
@@ -187,7 +187,23 @@ export class InitAddSubCommand extends BaseCommandClass(
 			}
 		}
 
-		const sheetRecord = await kobold.sheetRecord.create({ sheet, actions });
+		const sheetRecord = await kobold.sheetRecord.create({ sheet });
+
+		// Create actions separately with the sheetRecordId
+		for (const action of actions) {
+			await kobold.action.create({
+				name: action.name,
+				description: action.description,
+				type: action.type,
+				actionCost: action.actionCost,
+				baseLevel: action.baseLevel,
+				autoHeighten: action.autoHeighten,
+				rolls: action.rolls,
+				tags: action.tags,
+				sheetRecordId: sheetRecord.id,
+				userId: intr.user.id,
+			});
+		}
 
 		let finalInitiative = 0;
 		let rollResultMessage: EmbedBuilder;
@@ -207,7 +223,17 @@ export class InitAddSubCommand extends BaseCommandClass(
 					})
 				);
 		} else {
-			const creature = new Creature(sheetRecord, undefined, intr);
+			const creature = new Creature(
+				{
+					sheet: sheetRecord.sheet,
+					actions: actions as Action[],
+					modifiers: [],
+					rollMacros: [],
+					conditions: [],
+				},
+				undefined,
+				intr
+			);
 			const rollBuilder = new RollBuilder({
 				title: InitDefinition.strings.add.joinedEmbed.rolledTitle({
 					actorName: finalName,

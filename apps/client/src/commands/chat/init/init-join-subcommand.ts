@@ -44,7 +44,7 @@ export class InitJoinSubCommand extends BaseCommandClass(
 			}
 			//find a skill on the character matching the autocomplete string
 			const matchedSkills = FinderHelpers.matchAllSkills(
-				new Creature(activeCharacter.sheetRecord, undefined, intr),
+				Creature.fromSheetRecord(activeCharacter, undefined, intr),
 				match
 			).map(skill => ({ name: skill.name, value: skill.name }));
 			//return the matched skills
@@ -98,14 +98,14 @@ export class InitJoinSubCommand extends BaseCommandClass(
 		});
 		const initiativeResult = _.isNumber(rollResult)
 			? rollResult
-			: rollResult.getRollTotalArray()[0] ?? 0;
+			: (rollResult.getRollTotalArray()[0] ?? 0);
 
 		const actorName = InitiativeBuilderUtils.getUniqueInitActorName(
 			currentInitiative,
 			activeCharacter.name
 		);
 
-		await koboldUtils.initiativeUtils.createActorFromCharacter({
+		const characterActor = await koboldUtils.initiativeUtils.createActorFromCharacter({
 			initiativeId: currentInitiative.id,
 			character: activeCharacter,
 			name: actorName,
@@ -113,7 +113,37 @@ export class InitJoinSubCommand extends BaseCommandClass(
 			hideStats,
 		});
 
+		// Add character's minions that have auto-join enabled to the same turn
+		const minions = await kobold.minion.readMany({
+			characterId: activeCharacter.id,
+		});
+		const autoJoinMinions = minions.filter(minion => minion.autoJoinInitiative);
+		const addedMinionNames: string[] = [];
+		for (const minion of autoJoinMinions) {
+			const minionActorName = InitiativeBuilderUtils.getUniqueInitActorName(
+				currentInitiative,
+				minion.name
+			);
+			await koboldUtils.initiativeUtils.createActorFromMinion({
+				initiativeId: currentInitiative.id,
+				minion,
+				characterActorGroupId: characterActor.initiativeActorGroupId,
+				separateTurn: false,
+				hideStats,
+				name: minionActorName,
+			});
+			addedMinionNames.push(minionActorName);
+		}
+
 		const embed = InitiativeBuilderUtils.initiativeJoinEmbed(rollResult, actorName);
+
+		// Add minion info to the embed if any minions were added
+		if (addedMinionNames.length > 0) {
+			embed.addFields({
+				name: 'Minions',
+				value: addedMinionNames.join(', '),
+			});
+		}
 
 		const newInitiative = await initiativeUtils.getInitiativeForChannel(intr.channel);
 

@@ -43,7 +43,7 @@ export class ModifierDetailSubCommand extends BaseCommandClass(
 			}
 			//find a save on the character matching the autocomplete string
 			const matchedModifiers = FinderHelpers.matchAllModifiers(
-				activeCharacter.sheetRecord,
+				activeCharacter.modifiers,
 				match
 			).map(modifier => ({
 				name: modifier.name,
@@ -67,7 +67,7 @@ export class ModifierDetailSubCommand extends BaseCommandClass(
 		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
 			activeCharacter: true,
 		});
-		const modifier = FinderHelpers.getModifierByName(activeCharacter.sheetRecord, name);
+		const modifier = FinderHelpers.getModifierByName(activeCharacter.modifiers, name);
 
 		if (!modifier) {
 			// no matching modifier found

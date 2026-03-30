@@ -42,7 +42,7 @@ export class ActionDetailSubCommand extends BaseCommandClass(
 			}
 			//find an action on the character matching the autocomplete string
 			const matchedActions = FinderHelpers.matchAllActions(
-				activeCharacter.sheetRecord,
+				activeCharacter.actions,
 				match
 			).map(action => ({
 				name: action.name,
@@ -67,10 +67,7 @@ export class ActionDetailSubCommand extends BaseCommandClass(
 			activeCharacter: true,
 		});
 
-		const targetAction = FinderHelpers.getActionByName(
-			activeCharacter.sheetRecord,
-			actionChoice
-		);
+		const targetAction = FinderHelpers.getActionByName(activeCharacter.actions, actionChoice);
 		if (!targetAction) {
 			await InteractionUtils.send(intr, ActionDefinition.strings.notFound);
 			return;

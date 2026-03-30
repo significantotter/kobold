@@ -10,7 +10,7 @@ import {
 	createMockAction,
 	setupKoboldUtilsMocks,
 	setupFinderHelpersMocks,
-	setupSheetRecordUpdateMock,
+	setupActionModelMock,
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	mockNethysDb,
@@ -37,7 +37,7 @@ describe('ActionCreateSubCommand', () => {
 			// Arrange
 			const { mockCharacter } = setupKoboldUtilsMocks();
 			setupFinderHelpersMocks(undefined); // No existing action
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { createMock } = setupActionModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -58,14 +58,14 @@ describe('ActionCreateSubCommand', () => {
 
 			// Assert
 			expect(result.didRespond()).toBe(true);
-			expect(updateMock).toHaveBeenCalled();
+			expect(createMock).toHaveBeenCalled();
 		});
 
 		it('should create action with minimal required options', async () => {
 			// Arrange
 			setupKoboldUtilsMocks();
 			setupFinderHelpersMocks(undefined);
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { createMock } = setupActionModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -82,17 +82,12 @@ describe('ActionCreateSubCommand', () => {
 
 			// Assert
 			expect(result.didRespond()).toBe(true);
-			expect(updateMock).toHaveBeenCalledWith(
-				expect.anything(),
+			expect(createMock).toHaveBeenCalledWith(
 				expect.objectContaining({
-					actions: expect.arrayContaining([
-						expect.objectContaining({
-							name: 'Strike',
-							type: ActionTypeChoices.attack,
-							actionCost: ActionCostChoices.one,
-							description: '',
-						}),
-					]),
+					name: 'Strike',
+					type: ActionTypeChoices.attack,
+					actionCost: ActionCostChoices.one,
+					description: '',
 				})
 			);
 		});
@@ -104,7 +99,9 @@ describe('ActionCreateSubCommand', () => {
 			const existingAction = createMockAction({ name: 'Existing Action' });
 			setupKoboldUtilsMocks({ actions: [existingAction] });
 			setupFinderHelpersMocks(existingAction);
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { createMock } = setupActionModelMock(kobold);
+			// Override readManyByUser to return existing action for duplicate check
+			kobold.action.readManyByUser.mockResolvedValue([existingAction]);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -121,7 +118,7 @@ describe('ActionCreateSubCommand', () => {
 
 			// Assert
 			expect(result.didRespond()).toBe(true);
-			expect(updateMock).not.toHaveBeenCalled();
+			expect(createMock).not.toHaveBeenCalled();
 		});
 	});
 
@@ -130,7 +127,7 @@ describe('ActionCreateSubCommand', () => {
 			// Arrange
 			setupKoboldUtilsMocks();
 			setupFinderHelpersMocks(undefined);
-			setupSheetRecordUpdateMock(kobold);
+			setupActionModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({

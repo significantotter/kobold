@@ -63,6 +63,7 @@ export const counterCommandOptions = {
 		name: CounterCommandOptionEnum.counterGroupName,
 		description: 'The name of the counter group.',
 		required: false,
+		autocomplete: true,
 		type: ApplicationCommandOptionType.String,
 	},
 	[CounterCommandOptionEnum.counterDescription]: {

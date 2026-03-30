@@ -168,11 +168,11 @@ class TestNethysSheetImporter extends NethysSheetImporter {
 	public applySpellcastingStats() {
 		super.applySpellcastingStats();
 	}
-	public async applyAttacks() {
-		await super.applyAttacks();
+	public async applyAttacks(userId: string) {
+		await super.applyAttacks(userId);
 	}
-	public async applyCreatureActions() {
-		await super.applyCreatureActions();
+	public async applyCreatureActions(userId: string) {
+		await super.applyCreatureActions(userId);
 	}
 }
 
@@ -289,7 +289,7 @@ describe('sheet-import-nethys', () => {
 	});
 	test('applyAttacks()', () => {});
 	test('applyCreatureActions()', async () => {
-		await importer.applyCreatureActions();
+		await importer.applyCreatureActions('1');
 		const counteredByMetal = importer.actions.find(a => a.name === 'Countered by Metal');
 		const frightfulPresence = importer.actions.find(a => a.name === 'Frightful Presence');
 		const fedByWater = importer.actions.find(a => a.name === 'Fed by Water');

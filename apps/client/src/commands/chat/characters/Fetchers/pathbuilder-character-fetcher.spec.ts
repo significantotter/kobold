@@ -23,7 +23,7 @@ const createMockInteraction = () =>
 		userId: 'test-user-id',
 		followUp: vi.fn(),
 		editReply: vi.fn(),
-	} as unknown as CommandInteraction<CacheType>);
+	}) as unknown as CommandInteraction<CacheType>;
 
 describe('PathbuilderCharacterFetcher', () => {
 	const mockKobold = getMockKobold();
@@ -91,9 +91,32 @@ describe('PathbuilderCharacterFetcher', () => {
 		it('should convert PathBuilder data to sheet record format', () => {
 			const mockSourceData = createMockPathbuilderCharacter();
 			const mockSheet = { staticInfo: { name: mockSourceData.name } };
-			const mockActions = [{ name: 'Test Action' }];
-			const mockModifiers = [{ name: 'Test Modifier' }];
-			const mockRollMacros = [{ name: 'Test Macro' }];
+			const mockActions = [
+				{
+					name: 'Test Action',
+					description: 'A test action',
+					type: 'attack',
+					actionCost: 'oneAction',
+					baseLevel: 1,
+					autoHeighten: false,
+					rolls: [],
+					tags: [],
+				},
+			];
+			const mockModifiers = [
+				{
+					name: 'Test Modifier',
+					description: 'A test modifier',
+					type: 'untyped',
+					isActive: true,
+					note: null,
+					rollAdjustment: null,
+					rollTargetTags: null,
+					severity: null,
+					sheetAdjustments: null,
+				},
+			];
+			const mockRollMacros = [{ name: 'Test Macro', macro: '1d20' }];
 
 			vi.mocked(Creature.fromPathBuilder).mockReturnValue({
 				_sheet: mockSheet,
@@ -105,7 +128,9 @@ describe('PathbuilderCharacterFetcher', () => {
 			const result = fetcher.convertSheetRecord(mockSourceData);
 
 			expect(result).toEqual({
-				sheet: mockSheet,
+				sheetRecord: {
+					sheet: mockSheet,
+				},
 				actions: mockActions,
 				modifiers: mockModifiers,
 				rollMacros: mockRollMacros,
@@ -138,10 +163,13 @@ describe('PathbuilderCharacterFetcher', () => {
 			});
 		});
 
-		it('should pass active character sheet record when updating', () => {
+		it('should pass active character when updating', () => {
 			const mockSourceData = createMockPathbuilderCharacter();
 			const mockActiveCharacter = {
 				sheetRecord: { id: 'sheet-123' },
+				actions: [],
+				modifiers: [],
+				rollMacros: [],
 			} as any;
 
 			vi.mocked(Creature.fromPathBuilder).mockReturnValue({
@@ -155,7 +183,7 @@ describe('PathbuilderCharacterFetcher', () => {
 
 			expect(Creature.fromPathBuilder).toHaveBeenCalledWith(
 				mockSourceData,
-				mockActiveCharacter.sheetRecord,
+				mockActiveCharacter,
 				{ useStamina: false }
 			);
 		});

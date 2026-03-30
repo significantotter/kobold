@@ -12,7 +12,7 @@ import {
 	createTextRoll,
 	setupKoboldUtilsMocks,
 	setupAutocompleteKoboldMocks,
-	setupSheetRecordUpdateMock,
+	setupActionModelMock,
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	CommandTestHarness,
@@ -40,7 +40,7 @@ name: 'Strike',
 rolls: [createAttackRoll({ name: 'Attack', roll: '1d20+10' })],
 });
 			setupKoboldUtilsMocks({ actions: [action] });
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { updateMock } = setupActionModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -67,7 +67,7 @@ name: 'Strike',
 rolls: [createAttackRoll({ name: 'Attack', roll: '1d20+10' })],
 });
 			setupKoboldUtilsMocks({ actions: [action] });
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { updateMock } = setupActionModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -100,7 +100,7 @@ allowRollModifiers: true,
 ],
 });
 			setupKoboldUtilsMocks({ actions: [action] });
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { updateMock } = setupActionModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -133,7 +133,7 @@ damageType: 'slashing',
 ],
 });
 			setupKoboldUtilsMocks({ actions: [action] });
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { updateMock } = setupActionModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -165,7 +165,7 @@ defaultText: 'Old text',
 ],
 });
 			setupKoboldUtilsMocks({ actions: [action] });
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { updateMock } = setupActionModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -195,7 +195,7 @@ createDamageRoll({ name: 'Damage', roll: '2d6+4' }),
 ],
 });
 			setupKoboldUtilsMocks({ actions: [action] });
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { updateMock } = setupActionModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -226,7 +226,7 @@ createDamageRoll({ name: 'Damage', roll: '2d6+4' }),
 ],
 });
 			setupKoboldUtilsMocks({ actions: [action] });
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { updateMock } = setupActionModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -331,7 +331,7 @@ targetDC: 'AC',
 ],
 });
 			setupKoboldUtilsMocks({ actions: [action] });
-			const { updateMock } = setupSheetRecordUpdateMock(kobold);
+			const { updateMock } = setupActionModelMock(kobold);
 
 			// Act
 			const result = await harness.executeCommand({

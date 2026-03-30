@@ -26,6 +26,12 @@ export const sharedStrings = {
 				`Yip! ${p.propertyName} can't be longer than ${p.numCharacters} characters!`
 		),
 		nameExists: msg((p: { type: string }) => `Yip! A ${p.type} with that name already exists.`),
+		copyRequiredForOtherPlayer: msg(
+			(p: { targetName: string; itemType: string }) =>
+				`Yip! When assigning to another player's character, you must use the \`copy\` option. ` +
+				`This creates a copy for ${p.targetName} instead of moving your ${p.itemType}. ` +
+				`Set \`copy: True\` to confirm this action.`
+		),
 	},
 
 	/** Common confirmation dialog strings */

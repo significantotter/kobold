@@ -8,6 +8,7 @@ import { CommandDeferType } from '../helpers.js';
 const OptionEnum = ActionCommandOptionEnum;
 
 export enum ActionSubCommandEnum {
+	assign = 'assign',
 	list = 'list',
 	detail = 'detail',
 	create = 'create',
@@ -26,12 +27,28 @@ export const actionCommandDefinition = {
 		default_member_permissions: undefined,
 	},
 	subCommands: {
+		[ActionSubCommandEnum.assign]: {
+			name: ActionSubCommandEnum.assign,
+			description: 'Assigns an action to a character or a minion, or unassigns the action.',
+			type: ApplicationCommandOptionType.Subcommand,
+			deferType: CommandDeferType.NONE,
+			options: {
+				[OptionEnum.targetAction]: withOrder(
+					actionCommandOptions[OptionEnum.targetAction],
+					1
+				),
+				[OptionEnum.assignTo]: withOrder(actionCommandOptions[OptionEnum.assignTo], 2),
+				[OptionEnum.copy]: withOrder(actionCommandOptions[OptionEnum.copy], 3),
+			},
+		},
 		[ActionSubCommandEnum.list]: {
 			name: ActionSubCommandEnum.list,
 			description: "Lists all of your character's actions.",
 			type: ApplicationCommandOptionType.Subcommand,
 			deferType: CommandDeferType.NONE,
-			options: {},
+			options: {
+				[OptionEnum.ownedBy]: withOrder(actionCommandOptions[OptionEnum.ownedBy], 1),
+			},
 		},
 		[ActionSubCommandEnum.detail]: {
 			name: ActionSubCommandEnum.detail,
@@ -65,6 +82,7 @@ export const actionCommandDefinition = {
 					6
 				),
 				[OptionEnum.tags]: withOrder(actionCommandOptions[OptionEnum.tags], 7),
+				[OptionEnum.createFor]: withOrder(actionCommandOptions[OptionEnum.createFor], 8),
 			},
 		},
 		[ActionSubCommandEnum.remove]: {
@@ -99,20 +117,24 @@ export const actionCommandDefinition = {
 		},
 		[ActionSubCommandEnum.import]: {
 			name: ActionSubCommandEnum.import,
-			description: 'Imports a list of action data to a character from PasteBin.',
+			description: 'Imports a list of action data to a character from PasteBin or JSON.',
 			type: ApplicationCommandOptionType.Subcommand,
 			deferType: CommandDeferType.NONE,
 			options: {
-				[OptionEnum.url]: withOrder(actionCommandOptions[OptionEnum.url], 1),
-				[OptionEnum.importMode]: withOrder(actionCommandOptions[OptionEnum.importMode], 2),
+				[OptionEnum.importMode]: withOrder(actionCommandOptions[OptionEnum.importMode], 1),
+				[OptionEnum.url]: withOrder(actionCommandOptions[OptionEnum.url], 2),
+				[OptionEnum.json]: withOrder(actionCommandOptions[OptionEnum.json], 3),
+				[OptionEnum.createFor]: withOrder(actionCommandOptions[OptionEnum.createFor], 4),
 			},
 		},
 		[ActionSubCommandEnum.export]: {
 			name: ActionSubCommandEnum.export,
-			description: 'Exports actions to a PasteBin url.',
+			description: 'Exports actions to PasteBin or as JSON.',
 			type: ApplicationCommandOptionType.Subcommand,
 			deferType: CommandDeferType.NONE,
-			options: {},
+			options: {
+				[OptionEnum.exportJson]: withOrder(actionCommandOptions[OptionEnum.exportJson], 1),
+			},
 		},
 	},
 } satisfies CommandDefinition<ActionSubCommandEnum>;
