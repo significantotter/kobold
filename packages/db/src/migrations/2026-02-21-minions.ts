@@ -99,6 +99,18 @@ export async function up(db: Kysely<any>): Promise<void> {
 		.on('character')
 		.column('user_id')
 		.execute();
+
+	// Add indexes on sheet_record_id for efficient lookups during data migration
+	await db.schema
+		.createIndex('idx_character_sheet_record_id')
+		.on('character')
+		.column('sheet_record_id')
+		.execute();
+	await db.schema
+		.createIndex('idx_initiative_actor_sheet_record_id')
+		.on('initiative_actor')
+		.column('sheet_record_id')
+		.execute();
 	await db.schema
 		.createIndex('idx_initiative_gm_user_id')
 		.on('initiative')
@@ -352,6 +364,8 @@ export async function down(db: Kysely<any>): Promise<void> {
 	await db.schema.dropIndex('idx_minion_user_id').execute();
 	await db.schema.dropIndex('idx_game_gm_user_id').execute();
 	await db.schema.dropIndex('idx_character_user_id').execute();
+	await db.schema.dropIndex('idx_character_sheet_record_id').execute();
+	await db.schema.dropIndex('idx_initiative_actor_sheet_record_id').execute();
 	await db.schema.dropIndex('idx_initiative_gm_user_id').execute();
 	await db.schema.dropIndex('idx_initiative_actor_group_user_id').execute();
 	await db.schema.dropIndex('idx_initiative_actor_user_id').execute();
