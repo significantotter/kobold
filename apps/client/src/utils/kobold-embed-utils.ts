@@ -179,38 +179,84 @@ export class KoboldEmbed extends EmbedBuilder {
 
 		const splitLines = field.value.split('\n');
 
+		// Track if we're inside a code block (```) to maintain formatting across splits
+		let inCodeBlock = false;
+		let codeBlockLang = '';
+
 		let newField: APIEmbedField = {
 			name: field.name,
 			value: '',
 		};
 
 		for (const line of splitLines) {
+			// Check if this line toggles code block state
+			const codeBlockMatch = line.match(/^```(\w*)$/);
+			if (codeBlockMatch) {
+				if (!inCodeBlock) {
+					inCodeBlock = true;
+					codeBlockLang = codeBlockMatch[1] || '';
+				} else {
+					inCodeBlock = false;
+					codeBlockLang = '';
+				}
+			}
+
+			// Use current field's name length for accurate calculations
+			const currentNameLength = newField.name.length;
+
 			if (
-				newField.value.length + field.name.length > 800 &&
-				newField.value.length + field.name.length + line.length > 1024
+				newField.value.length + currentNameLength > 800 &&
+				newField.value.length + currentNameLength + line.length + 1 > 1024
 			) {
-				// just start a new field
+				// Close code block if we're in one before starting new field
+				if (
+					inCodeBlock &&
+					!newField.value.endsWith('```\n') &&
+					!newField.value.endsWith('```')
+				) {
+					newField.value += '\n```';
+				}
 				splitFields.push(newField);
 				newField = {
 					name: '\u200b',
 					value: '',
 				};
+				// Re-open code block in new field if we were in one
+				if (inCodeBlock) {
+					newField.value = '```' + codeBlockLang + '\n';
+				}
 			}
-			if (newField.value.length + field.name.length + line.length > 1024) {
+
+			// Recalculate after potential field change
+			const newNameLength = newField.name.length;
+
+			if (newField.value.length + newNameLength + line.length + 1 > 1024) {
 				// Line itself is too long - split by words only (not sentences/periods
 				// since that breaks formatting like `. status` bullet points)
 				const splitWords = line.split(' ');
 				for (const word of splitWords) {
-					if (newField.value.length + field.name.length + word.length + 1 > 1024) {
+					if (newField.value.length + newField.name.length + word.length + 1 > 1024) {
+						// Close code block before split if needed
+						if (
+							inCodeBlock &&
+							!newField.value.endsWith('```\n') &&
+							!newField.value.endsWith('```')
+						) {
+							newField.value = newField.value.trim() + '\n```';
+						}
 						newField.value = newField.value.trim();
 						splitFields.push(newField);
 						newField = {
 							name: '\u200b',
-							value: word,
+							value: inCodeBlock ? '```' + codeBlockLang + '\n' + word : word,
 						};
 					} else {
 						newField.value += newField.value ? ` ${word}` : word;
 					}
+				}
+				// Add newline after processing word-split line so next line starts fresh
+				if (newField.value.length > 0 && !newField.value.endsWith('\n')) {
+					newField.value += '\n';
 				}
 			} else {
 				newField.value += newField.value.length > 0 ? `\n${line}` : line;
