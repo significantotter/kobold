@@ -130,8 +130,8 @@ export async function up(db: Kysely<any>): Promise<void> {
 			action->>'actionCost' as action_cost,
 			COALESCE((action->>'autoHeighten')::boolean, false) as auto_heighten,
 			COALESCE(
-				(SELECT c.user_id FROM character c WHERE c.sheet_record_id = sheet_record.id),
-				(SELECT ia.user_id FROM initiative_actor ia WHERE ia.sheet_record_id = sheet_record.id)
+				(SELECT c.user_id FROM character c WHERE c.sheet_record_id = sheet_record.id LIMIT 1),
+				(SELECT ia.user_id FROM initiative_actor ia WHERE ia.sheet_record_id = sheet_record.id LIMIT 1)
 			) as user_id
 		FROM sheet_record,
 		jsonb_array_elements(actions) as action
@@ -154,8 +154,8 @@ export async function up(db: Kysely<any>): Promise<void> {
 			modifier->>'rollTargetTags' as "roll_target_tags",
 			COALESCE(modifier->'sheetAdjustments', '[]'::jsonb) as "sheet_adjustments",
 			COALESCE(
-				(SELECT c.user_id FROM character c WHERE c.sheet_record_id = sheet_record.id),
-				(SELECT ia.user_id FROM initiative_actor ia WHERE ia.sheet_record_id = sheet_record.id)
+				(SELECT c.user_id FROM character c WHERE c.sheet_record_id = sheet_record.id LIMIT 1),
+				(SELECT ia.user_id FROM initiative_actor ia WHERE ia.sheet_record_id = sheet_record.id LIMIT 1)
 			) as user_id
 		FROM sheet_record,
 		jsonb_array_elements(modifiers) as modifier
@@ -171,8 +171,8 @@ export async function up(db: Kysely<any>): Promise<void> {
 			roll_macro->>'name' as name,
 			roll_macro->>'macro' as macro,
 			COALESCE(
-				(SELECT c.user_id FROM character c WHERE c.sheet_record_id = sheet_record.id),
-				(SELECT ia.user_id FROM initiative_actor ia WHERE ia.sheet_record_id = sheet_record.id)
+				(SELECT c.user_id FROM character c WHERE c.sheet_record_id = sheet_record.id LIMIT 1),
+				(SELECT ia.user_id FROM initiative_actor ia WHERE ia.sheet_record_id = sheet_record.id LIMIT 1)
 			) as user_id
 		FROM sheet_record,
 		jsonb_array_elements(roll_macros) as roll_macro

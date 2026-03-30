@@ -1,4 +1,5 @@
 import type { CommandDocumentation } from '../helpers/commands.types.js';
+import { CommandResponseTypeEnum } from '../helpers/enums.js';
 import { minionCommandDefinition, MinionSubCommandEnum } from './minion.command-definition.js';
 
 export const minionCommandDocumentation: CommandDocumentation<typeof minionCommandDefinition> = {
@@ -19,9 +20,39 @@ export const minionCommandDocumentation: CommandDocumentation<typeof minionComma
 		},
 		[MinionSubCommandEnum.assign]: {
 			name: MinionSubCommandEnum.assign,
-			description: 'Assign a minion to a different character',
+			description:
+				'Assign a minion to a character, unassign it, or copy it to another player.',
 			usage: null,
-			examples: [],
+			examples: [
+				{
+					title: 'Assign to own character',
+					type: CommandResponseTypeEnum.success,
+					message: 'Yip! I assigned the minion Fluffy to Ashara Keenclaw.',
+					options: {
+						minion: 'Fluffy',
+						character: 'Ashara Keenclaw',
+					},
+				},
+				{
+					title: 'Unassign minion',
+					type: CommandResponseTypeEnum.success,
+					message:
+						'Yip! I unassigned the minion Fluffy. It can now be assigned to any character.',
+					options: {
+						minion: 'Fluffy',
+					},
+				},
+				{
+					title: 'Copy to another player',
+					type: CommandResponseTypeEnum.success,
+					message: 'Yip! I copied the minion Fluffy to Lilac Sootsnout.',
+					options: {
+						minion: 'Fluffy',
+						character: 'game:Lilac Sootsnout',
+						copy: true,
+					},
+				},
+			],
 		},
 		[MinionSubCommandEnum.sheet]: {
 			name: MinionSubCommandEnum.sheet,
