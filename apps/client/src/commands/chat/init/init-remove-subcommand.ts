@@ -132,9 +132,8 @@ export class InitRemoveSubCommand extends BaseCommandClass(
 				await InitiativeBuilderUtils.sendNewRoundMessage(intr, initBuilder);
 			}
 
-			await InteractionUtils.send(intr, {
-				content: activeGroup ? `<@!${activeGroup.userId}>` : undefined,
-				embeds: [currentTurnEmbed],
+			await currentTurnEmbed.sendBatches(intr, {
+				contentOutsideEmbed: activeGroup ? `<@!${activeGroup.userId}>` : undefined,
 			});
 			if (_.some(initBuilder.activeActors, actor => actor.hideStats)) {
 				await KoboldEmbed.dmInitiativeWithHiddenStats({

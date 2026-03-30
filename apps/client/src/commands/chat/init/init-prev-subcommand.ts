@@ -3,7 +3,6 @@ import { InitiativeBuilder } from '../../../utils/initiative-builder.js';
 
 import _ from 'lodash';
 import { Kobold } from '@kobold/db';
-import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Command } from '../../index.js';
@@ -46,9 +45,8 @@ export class InitPrevSubCommand extends BaseCommandClass(
 		const currentTurnEmbed = await KoboldEmbed.turnFromInitiativeBuilder(initBuilder);
 		const activeGroup = initBuilder.activeGroup;
 
-		await InteractionUtils.send(intr, {
-			content: activeGroup ? `<@!${activeGroup.userId}>` : undefined,
-			embeds: [currentTurnEmbed],
+		await currentTurnEmbed.sendBatches(intr, {
+			contentOutsideEmbed: activeGroup ? `<@!${activeGroup.userId}>` : undefined,
 		});
 		if (_.some(initBuilder.activeActors, actor => actor.hideStats)) {
 			await KoboldEmbed.dmInitiativeWithHiddenStats({
