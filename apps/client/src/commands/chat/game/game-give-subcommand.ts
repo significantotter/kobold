@@ -58,7 +58,7 @@ export class GameGiveSubCommand extends BaseCommandClass(
 		const value = `+${unparsedValue.trim()}`.replaceAll('++', '+').replaceAll('+-', '-');
 
 		const koboldUtils = new KoboldUtils(kobold);
-		const { gameplayUtils } = koboldUtils;
+		const { gameplayUtils, gameUtils } = koboldUtils;
 		const { activeGame } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
 			activeGame: true,
 		});
@@ -71,17 +71,16 @@ export class GameGiveSubCommand extends BaseCommandClass(
 			return;
 		}
 
-		const embeds: KoboldEmbed[] = [];
-		for (const character of _.uniqBy(activeGame.characters, 'id')) {
-			if (
-				targetCharacterName !== 'All Players' &&
-				targetCharacterName.toLocaleLowerCase().trim().length > 0 &&
-				targetCharacterName.toLocaleLowerCase().trim() !==
-					character.name.toLocaleLowerCase().trim()
-			) {
-				continue;
-			}
+		// Resolve targets (can be characters, minions, or both for "All Players")
+		const { characters, minions } = await gameUtils.getGameTargets(
+			targetCharacterName,
+			activeGame
+		);
 
+		const embeds: KoboldEmbed[] = [];
+
+		// Process characters
+		for (const character of _.uniqBy(characters, 'id')) {
 			const creature = Creature.fromSheetRecord(character, undefined, intr);
 
 			const { initialValue, updatedValue } = await gameplayUtils.setGameplayStats(
@@ -97,6 +96,7 @@ export class GameGiveSubCommand extends BaseCommandClass(
 						description: `Yip! Something went wrong! I couldn't update the property ${option} to ${value} for ${character.name}.`,
 					})
 				);
+				continue;
 			}
 			let optionText = _.kebabCase(option).replaceAll('-', ' ');
 			if (optionText.charAt(optionText.length - 1) === 's')
@@ -109,6 +109,43 @@ export class GameGiveSubCommand extends BaseCommandClass(
 
 			embeds.push(new KoboldEmbed({ description: message }));
 		}
+
+		// Process minions
+		for (const minion of _.uniqBy(minions, 'id')) {
+			const creature = Creature.fromSheetRecord(minion, minion.name, intr);
+
+			const { initialValue, updatedValue } = await gameplayUtils.setGameplayStats(
+				intr,
+				minion.sheetRecord,
+				creature,
+				option,
+				value
+			);
+			if (initialValue == null || updatedValue == null) {
+				embeds.push(
+					new KoboldEmbed({
+						description: `Yip! Something went wrong! I couldn't update the property ${option} to ${value} for ${minion.name}.`,
+					})
+				);
+				continue;
+			}
+			let optionText = _.kebabCase(option).replaceAll('-', ' ');
+			if (optionText.charAt(optionText.length - 1) === 's')
+				optionText = optionText.slice(0, -1) + '(s)';
+			let message = `Yip! I gave ${updatedValue! - initialValue!} ${optionText} to ${
+				minion.name
+			}! New total: ${updatedValue}`;
+			let maxValue = creature.sheet.baseCounters[option].max;
+			if (maxValue) message += `/${maxValue}`;
+
+			embeds.push(new KoboldEmbed({ description: message }));
+		}
+
+		if (embeds.length === 0) {
+			await InteractionUtils.send(intr, 'Yip! No targets found matching that selection.');
+			return;
+		}
+
 		await InteractionUtils.send(intr, { embeds });
 	}
 }

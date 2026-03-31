@@ -70,21 +70,103 @@ export class GameUtils {
 				},
 			];
 
-		const matches: Character[] = [];
+		const result: { name: string; value: string }[] = [];
+
+		// Add matching characters
 		for (const character of activeGame.characters) {
 			if (
 				targetCharacterName === '' ||
 				character.name.toLowerCase().includes(targetCharacterName.toLowerCase())
 			) {
-				matches.push(character);
+				result.push({
+					name: character.name,
+					value: character.name,
+				});
 			}
 		}
-		const result = matches.map(character => ({
-			name: character.name,
-			value: character.name,
-		}));
+
+		// Fetch minions for all characters in the game
+		const characterIds = activeGame.characters.map(c => c.id);
+		if (characterIds.length > 0) {
+			const minions = await this.kobold.minion.readManyByCharacterIds({ characterIds });
+
+			// Add matching minions
+			for (const minion of minions) {
+				const parentCharacter = activeGame.characters.find(
+					c => c.id === minion.characterId
+				);
+				const displayName = parentCharacter
+					? `${minion.name} (${parentCharacter.name}'s minion)`
+					: minion.name;
+
+				if (
+					targetCharacterName === '' ||
+					minion.name.toLowerCase().includes(targetCharacterName.toLowerCase()) ||
+					displayName.toLowerCase().includes(targetCharacterName.toLowerCase())
+				) {
+					result.push({
+						name: displayName,
+						value: `minion:${minion.id}`,
+					});
+				}
+			}
+		}
+
 		result.unshift({ name: 'All Players', value: 'All Players' });
 		return result;
+	}
+
+	/**
+	 * Resolves the target selection from autocompleteGameCharacter to actual entities.
+	 * Returns characters and their minions for "All Players", a single minion for "minion:id",
+	 * or a single character matched by name.
+	 */
+	public async getGameTargets(
+		targetValue: string,
+		activeGame: GameWithRelations
+	): Promise<{
+		characters: CharacterWithRelations[];
+		minions: MinionWithRelations[];
+	}> {
+		// Handle "All Players" - return all characters and their minions
+		if (targetValue === 'All Players') {
+			const characterIds = activeGame.characters.map(c => c.id);
+			const minions =
+				characterIds.length > 0
+					? await this.kobold.minion.readManyByCharacterIds({ characterIds })
+					: [];
+			return {
+				characters: activeGame.characters,
+				minions,
+			};
+		}
+
+		// Handle minion target (format: "minion:id")
+		if (targetValue.startsWith('minion:')) {
+			const minionId = parseInt(targetValue.slice('minion:'.length), 10);
+			const minion = await this.kobold.minion.read({ id: minionId });
+			if (minion) {
+				return {
+					characters: [],
+					minions: [minion],
+				};
+			}
+			return { characters: [], minions: [] };
+		}
+
+		// Handle character target (matched by name)
+		const matchedCharacter = activeGame.characters.find(
+			character => character.name.toLowerCase().trim() === targetValue.toLowerCase().trim()
+		);
+
+		if (matchedCharacter) {
+			return {
+				characters: [matchedCharacter],
+				minions: [],
+			};
+		}
+
+		return { characters: [], minions: [] };
 	}
 
 	public async getAllTargetableOptions(intr: BaseInteraction<CacheType>) {

@@ -51,6 +51,7 @@ export class GamePartyStatusSubCommand extends BaseCommandClass(
 			true
 		);
 		const koboldUtils = new KoboldUtils(kobold);
+		const { gameUtils } = koboldUtils;
 		const { activeGame } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
 			activeGame: true,
 		});
@@ -63,45 +64,58 @@ export class GamePartyStatusSubCommand extends BaseCommandClass(
 			return;
 		}
 
-		// Get all minions for the characters in the game
-		const characterIds = activeGame.characters.map(c => c.id);
-		const allMinions = await kobold.minion.readManyByCharacterIds({
-			characterIds,
-		});
+		// Resolve targets (can be characters, minions, or both for "All Players")
+		const { characters, minions } = await gameUtils.getGameTargets(
+			targetCharacterName,
+			activeGame
+		);
+
+		// For "All Players", get all minions for the characters in the game
+		const characterIds = characters.map(c => c.id);
+		const characterMinions =
+			targetCharacterName === 'All Players' && characterIds.length > 0
+				? await kobold.minion.readManyByCharacterIds({ characterIds })
+				: [];
 
 		const embeds: KoboldEmbed[] = [];
-		for (const character of _.uniqBy(activeGame.characters, 'id')) {
-			if (
-				targetCharacterName !== 'All Players' &&
-				targetCharacterName.toLocaleLowerCase().trim().length > 0 &&
-				targetCharacterName.toLocaleLowerCase().trim() !==
-					character.name.toLocaleLowerCase().trim()
-			) {
-				continue;
-			}
 
+		// Process characters and their minions
+		for (const character of _.uniqBy(characters, 'id')) {
 			const creature = Creature.fromSheetRecord(character, undefined, intr);
 			embeds.push(creature.compileEmbed('Sheet', sheetStyle));
 
-			// Add minion statblocks after the character
-			const characterMinions = allMinions.filter(
-				(m: MinionWithRelations) => m.characterId === character.id
-			);
-			for (const minion of characterMinions) {
-				const minionCreature = new Creature(
-					{
-						sheet: minion.sheetRecord.sheet,
-						actions: minion.actions ?? [],
-						rollMacros: minion.rollMacros ?? [],
-						modifiers: minion.modifiers ?? [],
-						conditions: minion.sheetRecord.conditions ?? [],
-					},
-					`${minion.name} (${character.name}'s minion)`,
-					intr
+			// Add minion statblocks after the character (for "All Players")
+			if (targetCharacterName === 'All Players') {
+				const minionsForChar = characterMinions.filter(
+					(m: MinionWithRelations) => m.characterId === character.id
 				);
-				embeds.push(minionCreature.compileEmbed('Sheet', sheetStyle));
+				for (const minion of minionsForChar) {
+					const minionCreature = Creature.fromSheetRecord(
+						minion,
+						`${minion.name} (${character.name}'s minion)`,
+						intr
+					);
+					embeds.push(minionCreature.compileEmbed('Sheet', sheetStyle));
+				}
 			}
 		}
+
+		// Process directly targeted minions
+		for (const minion of _.uniqBy(minions, 'id')) {
+			const parentCharacter = activeGame.characters.find(c => c.id === minion.characterId);
+			const displayName = parentCharacter
+				? `${minion.name} (${parentCharacter.name}'s minion)`
+				: minion.name;
+
+			const minionCreature = Creature.fromSheetRecord(minion, displayName, intr);
+			embeds.push(minionCreature.compileEmbed('Sheet', sheetStyle));
+		}
+
+		if (embeds.length === 0) {
+			await InteractionUtils.send(intr, 'Yip! No targets found matching that selection.');
+			return;
+		}
+
 		await InteractionUtils.send(intr, { embeds });
 	}
 }

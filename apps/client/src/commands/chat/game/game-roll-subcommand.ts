@@ -147,111 +147,159 @@ export class GameRollSubCommand extends BaseCommandClass(
 			return;
 		}
 
-		for (const character of _.uniqBy(activeGame.characters, 'id')) {
-			if (
-				targetCharacterName !== 'All Players' &&
-				targetCharacterName.toLocaleLowerCase().trim().length > 0 &&
-				targetCharacterName.toLocaleLowerCase().trim() !==
-					character.name.toLocaleLowerCase().trim()
-			) {
-				continue;
-			}
+		// Resolve targets (can be characters, minions, or both for "All Players")
+		const { characters, minions } = await gameUtils.getGameTargets(
+			targetCharacterName,
+			activeGame
+		);
 
+		// Process characters
+		for (const character of _.uniqBy(characters, 'id')) {
 			const creature = Creature.fromSheetRecord(character, undefined, intr);
-			const rollOptions = {
-				...creature.rolls,
-				...creature.attackRolls,
-			};
-			const targetAction = creature.actions.find(action => {
-				return (
-					action.name.toLocaleLowerCase().trim() === rollType.toLocaleLowerCase().trim()
-				);
-			});
-			if (targetAction) {
-				const actionRoller = new ActionRoller(
-					userSettings,
-					targetAction,
-					creature,
-					targetCreature
-				);
-
-				const builtRoll = actionRoller.buildRoll('', targetAction.description ?? '', {
-					attackModifierExpression: diceExpression,
-					damageModifierExpression: '',
-					title: `${getEmoji(intr, targetAction.actionCost)} ${
-						creature.sheet.staticInfo.name
-					} used ${targetAction.name}!`,
-				});
-
-				let embed = builtRoll.compileEmbed({ forceFields: true, showTags: false });
-
-				embed = EmbedUtils.describeActionResult({
-					embed,
-					action: targetAction,
-				});
-
-				if (targetSheetRecord && targetCreature && actionRoller.shouldDisplayDamageText()) {
-					await creatureUtils.saveSheet(intr, targetSheetRecord);
-
-					const damageField = await EmbedUtils.getOrSendActionDamageField({
-						intr,
-						actionRoller,
-						hideStats: hideStats,
-						targetNameOverwrite: targetSheetName!,
-					});
-					embed.addFields(damageField);
-				}
-				embeds.push(embed);
-			} else if (rollOptions[rollType.trim().toLocaleLowerCase()]) {
-				const rollResult = await ActionRoller.fromCreatureRoll(creature, rollType, intr, {
-					modifierExpression: diceExpression,
-					targetCreature,
-					hideStats: hideStats ?? false,
-				});
-				let embed: KoboldEmbed;
-
-				if (_.isString(rollResult.message)) {
-					embed = new KoboldEmbed().setDescription(rollResult.message);
-				} else {
-					embed = rollResult.message;
-				}
-
-				if (
-					targetSheetRecord &&
-					targetCreature &&
-					rollResult.actionRoller &&
-					rollResult.actionRoller.shouldDisplayDamageText()
-				) {
-					await creatureUtils.saveSheet(intr, targetSheetRecord);
-
-					const damageField = await EmbedUtils.getOrSendActionDamageField({
-						intr,
-						actionRoller: rollResult.actionRoller,
-						hideStats: hideStats,
-						targetNameOverwrite: targetSheetName!,
-					});
-
-					embed.addFields(damageField);
-				}
-				embeds.push(embed);
-			} else if (rollType.toLocaleLowerCase() === 'dice') {
-				const rollBuilder = new RollBuilder({
-					creature: creature,
-					actorName: intr.user.username,
-					rollDescription: GameDefinition.strings.roll.rolledDice,
-					userSettings,
-				});
-				rollBuilder.addRoll({ rollExpression: diceExpression });
-				embeds.push(rollBuilder.compileEmbed());
-			} else {
-				const noRollFoundEmbed = new KoboldEmbed();
-				noRollFoundEmbed.setCharacter(character);
-				noRollFoundEmbed.setTitle(
-					`Yip! ${character.name} doesn't have a roll named ${rollType}.`
-				);
-				embeds.push(noRollFoundEmbed);
-			}
+			const rollResult = await this.processCreatureRoll(
+				intr,
+				creature,
+				rollType,
+				diceExpression,
+				userSettings,
+				targetCreature,
+				targetSheetRecord,
+				targetSheetName,
+				hideStats,
+				creatureUtils
+			);
+			embeds.push(...rollResult);
 		}
+
+		// Process minions
+		for (const minion of _.uniqBy(minions, 'id')) {
+			const creature = Creature.fromSheetRecord(minion, minion.name, intr);
+			const rollResult = await this.processCreatureRoll(
+				intr,
+				creature,
+				rollType,
+				diceExpression,
+				userSettings,
+				targetCreature,
+				targetSheetRecord,
+				targetSheetName,
+				hideStats,
+				creatureUtils
+			);
+			embeds.push(...rollResult);
+		}
+
+		if (embeds.length === 0) {
+			await InteractionUtils.send(intr, 'Yip! No targets found matching that selection.');
+			return;
+		}
+
 		await EmbedUtils.dispatchEmbeds(intr, embeds, secretRoll, activeGame.gmUserId);
+	}
+
+	private async processCreatureRoll(
+		intr: ChatInputCommandInteraction,
+		creature: Creature,
+		rollType: string,
+		diceExpression: string,
+		userSettings: any,
+		targetCreature: Creature | null,
+		targetSheetRecord: SheetRecord | null,
+		targetSheetName: string | null,
+		hideStats: boolean,
+		creatureUtils: any
+	): Promise<KoboldEmbed[]> {
+		const embeds: KoboldEmbed[] = [];
+		const rollOptions = {
+			...creature.rolls,
+			...creature.attackRolls,
+		};
+		const targetAction = creature.actions.find(action => {
+			return action.name.toLocaleLowerCase().trim() === rollType.toLocaleLowerCase().trim();
+		});
+		if (targetAction) {
+			const actionRoller = new ActionRoller(
+				userSettings,
+				targetAction,
+				creature,
+				targetCreature
+			);
+
+			const builtRoll = actionRoller.buildRoll('', targetAction.description ?? '', {
+				attackModifierExpression: diceExpression,
+				damageModifierExpression: '',
+				title: `${getEmoji(intr, targetAction.actionCost)} ${
+					creature.sheet.staticInfo.name
+				} used ${targetAction.name}!`,
+			});
+
+			let embed = builtRoll.compileEmbed({ forceFields: true, showTags: false });
+
+			embed = EmbedUtils.describeActionResult({
+				embed,
+				action: targetAction,
+			});
+
+			if (targetSheetRecord && targetCreature && actionRoller.shouldDisplayDamageText()) {
+				await creatureUtils.saveSheet(intr, targetSheetRecord);
+
+				const damageField = await EmbedUtils.getOrSendActionDamageField({
+					intr,
+					actionRoller,
+					hideStats: hideStats,
+					targetNameOverwrite: targetSheetName!,
+				});
+				embed.addFields(damageField);
+			}
+			embeds.push(embed);
+		} else if (rollOptions[rollType.trim().toLocaleLowerCase()]) {
+			const rollResult = await ActionRoller.fromCreatureRoll(creature, rollType, intr, {
+				modifierExpression: diceExpression,
+				targetCreature,
+				hideStats: hideStats ?? false,
+			});
+			let embed: KoboldEmbed;
+
+			if (_.isString(rollResult.message)) {
+				embed = new KoboldEmbed().setDescription(rollResult.message);
+			} else {
+				embed = rollResult.message;
+			}
+
+			if (
+				targetSheetRecord &&
+				targetCreature &&
+				rollResult.actionRoller &&
+				rollResult.actionRoller.shouldDisplayDamageText()
+			) {
+				await creatureUtils.saveSheet(intr, targetSheetRecord);
+
+				const damageField = await EmbedUtils.getOrSendActionDamageField({
+					intr,
+					actionRoller: rollResult.actionRoller,
+					hideStats: hideStats,
+					targetNameOverwrite: targetSheetName!,
+				});
+
+				embed.addFields(damageField);
+			}
+			embeds.push(embed);
+		} else if (rollType.toLocaleLowerCase() === 'dice') {
+			const rollBuilder = new RollBuilder({
+				creature: creature,
+				actorName: intr.user.username,
+				rollDescription: GameDefinition.strings.roll.rolledDice,
+				userSettings,
+			});
+			rollBuilder.addRoll({ rollExpression: diceExpression });
+			embeds.push(rollBuilder.compileEmbed());
+		} else {
+			const noRollFoundEmbed = new KoboldEmbed();
+			noRollFoundEmbed.setTitle(
+				`Yip! ${creature.name} doesn't have a roll named ${rollType}.`
+			);
+			embeds.push(noRollFoundEmbed);
+		}
+		return embeds;
 	}
 }
