@@ -100,15 +100,19 @@ export class GamePartyStatusSubCommand extends BaseCommandClass(
 			}
 		}
 
-		// Process directly targeted minions
-		for (const minion of _.uniqBy(minions, 'id')) {
-			const parentCharacter = activeGame.characters.find(c => c.id === minion.characterId);
-			const displayName = parentCharacter
-				? `${minion.name} (${parentCharacter.name}'s minion)`
-				: minion.name;
+		// Process directly targeted minions (skip for "All Players" since they're already grouped with characters above)
+		if (targetCharacterName !== 'All Players') {
+			for (const minion of _.uniqBy(minions, 'id')) {
+				const parentCharacter = activeGame.characters.find(
+					c => c.id === minion.characterId
+				);
+				const displayName = parentCharacter
+					? `${minion.name} (${parentCharacter.name}'s minion)`
+					: minion.name;
 
-			const minionCreature = Creature.fromSheetRecord(minion, displayName, intr);
-			embeds.push(minionCreature.compileEmbed('Sheet', sheetStyle));
+				const minionCreature = Creature.fromSheetRecord(minion, displayName, intr);
+				embeds.push(minionCreature.compileEmbed('Sheet', sheetStyle));
+			}
 		}
 
 		if (embeds.length === 0) {

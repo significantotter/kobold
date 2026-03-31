@@ -60,8 +60,11 @@ export class GameUtils {
 
 	public async autocompleteGameCharacter(
 		targetCharacterName: string,
-		activeGame?: GameWithRelations | null
+		activeGame?: GameWithRelations | null,
+		options: { includeMinions?: boolean } = {}
 	): Promise<{ name: string; value: string }[]> {
+		const { includeMinions = true } = options;
+
 		if (!activeGame?.characters)
 			return [
 				{
@@ -86,28 +89,30 @@ export class GameUtils {
 		}
 
 		// Fetch minions for all characters in the game
-		const characterIds = activeGame.characters.map(c => c.id);
-		if (characterIds.length > 0) {
-			const minions = await this.kobold.minion.readManyByCharacterIds({ characterIds });
+		if (includeMinions) {
+			const characterIds = activeGame.characters.map(c => c.id);
+			if (characterIds.length > 0) {
+				const minions = await this.kobold.minion.readManyByCharacterIds({ characterIds });
 
-			// Add matching minions
-			for (const minion of minions) {
-				const parentCharacter = activeGame.characters.find(
-					c => c.id === minion.characterId
-				);
-				const displayName = parentCharacter
-					? `${minion.name} (${parentCharacter.name}'s minion)`
-					: minion.name;
+				// Add matching minions
+				for (const minion of minions) {
+					const parentCharacter = activeGame.characters.find(
+						c => c.id === minion.characterId
+					);
+					const displayName = parentCharacter
+						? `${minion.name} (${parentCharacter.name}'s minion)`
+						: minion.name;
 
-				if (
-					targetCharacterName === '' ||
-					minion.name.toLowerCase().includes(targetCharacterName.toLowerCase()) ||
-					displayName.toLowerCase().includes(targetCharacterName.toLowerCase())
-				) {
-					result.push({
-						name: displayName,
-						value: `minion:${minion.id}`,
-					});
+					if (
+						targetCharacterName === '' ||
+						minion.name.toLowerCase().includes(targetCharacterName.toLowerCase()) ||
+						displayName.toLowerCase().includes(targetCharacterName.toLowerCase())
+					) {
+						result.push({
+							name: displayName,
+							value: `minion:${minion.id}`,
+						});
+					}
 				}
 			}
 		}

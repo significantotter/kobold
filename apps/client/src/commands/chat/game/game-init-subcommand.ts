@@ -38,7 +38,10 @@ export class GameInitSubCommand extends BaseCommandClass(
 
 			const { gameUtils } = new KoboldUtils(kobold);
 			const activeGame = await gameUtils.getActiveGame(intr.user.id, intr.guildId ?? '');
-			return gameUtils.autocompleteGameCharacter(targetCharacter, activeGame);
+			// Exclude minions - they auto-join with their parent character
+			return gameUtils.autocompleteGameCharacter(targetCharacter, activeGame, {
+				includeMinions: false,
+			});
 		} else if (option.name === commandOptions[commandOptionsEnum.skillChoice].name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
 			const match =
