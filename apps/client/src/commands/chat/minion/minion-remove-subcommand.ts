@@ -164,10 +164,8 @@ export class MinionRemoveSubCommand extends BaseCommandClass(
 				}
 			}
 
-			// Delete the associated sheetRecord (this cascades to actions, modifiers, rollMacros)
+			// Delete the associated sheetRecord (this cascades to actions, modifiers, rollMacros, and the minion itself)
 			await kobold.sheetRecord.delete({ id: targetMinion.sheetRecordId });
-
-			await kobold.minion.delete({ id: targetMinion.id });
 
 			const removedFromInit =
 				initiativeActors.length > 0
