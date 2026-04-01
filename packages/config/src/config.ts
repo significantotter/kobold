@@ -29,6 +29,11 @@ interface config {
 	api: {
 		port: number;
 		secret: string;
+		baseUrl: string;
+	};
+	discordOAuth: {
+		clientId: string;
+		clientSecret: string;
 	};
 	pastebin: {
 		apiKey: string;
@@ -188,6 +193,11 @@ export const Config: config = Object.freeze({
 	api: {
 		port: parseEnvNumber(env.API_PORT ?? '') ?? 8080,
 		secret: env.API_SECRET ?? '',
+		baseUrl: env.API_BASE_URL ?? 'http://localhost:3000',
+	},
+	discordOAuth: {
+		clientId: env.DISCORD_OAUTH_CLIENT_ID ?? env.CLIENT_ID ?? '',
+		clientSecret: env.DISCORD_OAUTH_CLIENT_SECRET ?? '',
 	},
 	pastebin: {
 		apiKey: env.PASTEBIN_API_KEY ?? '',
