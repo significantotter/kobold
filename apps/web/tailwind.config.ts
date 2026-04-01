@@ -3,9 +3,7 @@ import tailwindcssPrimeui from 'tailwindcss-primeui';
 import tailwindcssTypography from '@tailwindcss/typography';
 
 export default {
-	content: [
-		'./presets/**/*.{js,vue,ts}',
-		// other paths
-	],
+	darkMode: 'class',
+	content: ['./index.html', './client/**/*.{vue,js,ts,jsx,tsx}', './presets/**/*.{js,vue,ts}'],
 	plugins: [tailwindcssPrimeui, tailwindcssTypography],
 };
