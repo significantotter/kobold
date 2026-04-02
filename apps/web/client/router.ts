@@ -33,6 +33,21 @@ const router = createRouter({
 			name: 'login-error',
 			component: () => import('./pages/login-error.vue'),
 		},
+		{
+			path: '/wg/oauth-request',
+			name: 'wg-oauth-request',
+			component: () => import('./pages/wg/oauth-request.vue'),
+		},
+		{
+			path: '/wg/oauth-authorized',
+			name: 'wg-oauth-authorized',
+			component: () => import('./pages/wg/oauth-authorized.vue'),
+		},
+		{
+			path: '/wg/oauth-error',
+			name: 'wg-oauth-error',
+			component: () => import('./pages/wg/oauth-error.vue'),
+		},
 	],
 });
 

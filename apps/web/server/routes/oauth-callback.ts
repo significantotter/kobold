@@ -90,7 +90,6 @@ function createSessionToken(user: DiscordUser): string {
  */
 oauthCallbackRoute.get('/callback', async c => {
 	const code = c.req.query('code');
-	const state = c.req.query('state');
 	const error = c.req.query('error');
 
 	// Handle OAuth errors

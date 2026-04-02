@@ -1,13 +1,14 @@
 {
 	"extends": "../../tsconfig.base.json",
 	"compilerOptions": {
+		"composite": true,
 		"target": "ESNext",
 		"module": "ESNext",
 		"moduleResolution": "bundler",
 		"strict": true,
 		"esModuleInterop": true,
 		"skipLibCheck": true,
-		"types": [],
+		"types": ["@types/node"],
 		"outDir": "dist/server",
 		"rootDir": "server",
 		"declaration": true,
