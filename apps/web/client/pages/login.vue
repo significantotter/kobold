@@ -19,7 +19,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import PeridotImage from '@/components/PeridotImage.vue';
-import { api } from '@/utils/api-client';
+import { api } from '@/api/api-client';
 
 const loading = ref(false);
 

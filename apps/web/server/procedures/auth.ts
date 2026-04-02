@@ -9,7 +9,6 @@ const orpc = os.$context<AppContext>();
 const FRONTEND_URL = process.env.FRONTEND_BASE_URL || 'http://localhost:5173';
 
 // Discord OAuth2 configuration
-const DISCORD_API_BASE = 'https://discord.com/api/v10';
 const DISCORD_OAUTH_SCOPES = ['identify'].join(' ');
 
 /**
@@ -38,7 +37,7 @@ export const authRouter = orpc.router({
 	getAuthUrl: orpc
 		.input(z.object({}).optional())
 		.output(z.object({ url: z.string(), state: z.string() }))
-		.handler(async ({ context }) => {
+		.handler(async () => {
 			// Generate a random state for CSRF protection
 			const state = crypto.randomUUID();
 

@@ -25,6 +25,7 @@ export default defineConfig({
 		proxy: {
 			'/api': 'http://localhost:3000',
 			'/oauth': 'http://localhost:3000',
+			'/wg-oauth': 'http://localhost:3000',
 			'/health': 'http://localhost:3000',
 		},
 	},

@@ -16,7 +16,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { api } from '../utils/api-client';
+import { api } from '../api/api-client';
 
 interface User {
 	id: string;
