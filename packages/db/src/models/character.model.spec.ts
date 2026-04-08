@@ -1,55 +1,72 @@
-
 import { zNewCharacter } from '../index.js';
-import { truncateDbForTests, ResourceFactories, vitestKobold, fake } from '../test-utils.js';
+import {
+	truncateDbForTests,
+	ResourceFactories,
+	vitestKobold,
+	fake,
+	safeInt,
+} from '../test-utils.js';
 import _ from 'lodash';
 
 describe('CharacterModel', () => {
 	afterEach(async () => {
-		await truncateDbForTests;
+		await truncateDbForTests();
 	});
 	describe('create, read', () => {
-		it('creates a new character, reads it, and returns the character plus relations', async () => {
+		it('creates a new character and reads it back with relations', async () => {
 			const fakeSheetRecord = await ResourceFactories.sheetRecord();
 			const fakeGame = await ResourceFactories.game();
 			const fakeCharacterMock = fake(zNewCharacter);
 			fakeCharacterMock.sheetRecordId = fakeSheetRecord.id;
 			fakeCharacterMock.gameId = fakeGame.id;
+			fakeCharacterMock.charId = safeInt();
+			delete fakeCharacterMock.id;
+			delete fakeCharacterMock.createdAt;
+			delete fakeCharacterMock.lastUpdatedAt;
+			delete fakeCharacterMock.isActiveCharacter;
 			const fakeCharacterMockWithRelations = {
 				...fakeCharacterMock,
 				game: _.omit(fakeGame, 'createdAt', 'lastUpdatedAt', 'characters'),
-				sheetRecord: fakeSheetRecord,
+				sheetRecord: _.omit(fakeSheetRecord, 'adjustedSheet'),
 				guildDefaultCharacters: [],
 				channelDefaultCharacters: [],
 			};
-			const created = await vitestKobold.character.create(fakeCharacterMock);
-			const read = await vitestKobold.character.read({ id: created.id });
-			expect(created).toMatchObject(fakeCharacterMockWithRelations);
+			const { id } = await vitestKobold.character.createReturningId(fakeCharacterMock);
+			expect(id).toEqual(expect.any(Number));
+			const read = await vitestKobold.character.read({ id });
 			expect(read).toMatchObject(fakeCharacterMockWithRelations);
 		});
 		it('creates a new character with no relations', async () => {
 			const fakeSheetRecord = await ResourceFactories.sheetRecord();
 			let fakeCharacterMock = fake(zNewCharacter);
 			fakeCharacterMock.sheetRecordId = fakeSheetRecord.id;
+			fakeCharacterMock.charId = safeInt();
 			delete fakeCharacterMock.gameId;
+			delete fakeCharacterMock.id;
+			delete fakeCharacterMock.createdAt;
+			delete fakeCharacterMock.lastUpdatedAt;
+			delete fakeCharacterMock.isActiveCharacter;
 
 			const fakeCharacterMockWithRelations = {
 				...fakeCharacterMock,
 				game: null,
 				gameId: null,
-				sheetRecord: fakeSheetRecord,
+				sheetRecord: _.omit(fakeSheetRecord, 'adjustedSheet'),
 				guildDefaultCharacters: [],
 				channelDefaultCharacters: [],
 			};
-			const created = await vitestKobold.character.create(fakeCharacterMock);
-			const read = await vitestKobold.character.read({ id: created.id });
-			expect(created).toEqual(fakeCharacterMockWithRelations);
-			expect(read).toEqual(fakeCharacterMockWithRelations);
+			const { id } = await vitestKobold.character.createReturningId(fakeCharacterMock);
+			const read = await vitestKobold.character.read({ id });
+			expect(read).toMatchObject(fakeCharacterMockWithRelations);
 		});
 
 		it('fails to create a new character if an invalid sheetRecordId is already used', async () => {
 			const fakeCharacterMock = fake(zNewCharacter);
 			fakeCharacterMock.sheetRecordId = -1;
-			await expect(vitestKobold.character.create(fakeCharacterMock)).rejects.toThrow();
+			fakeCharacterMock.charId = safeInt();
+			await expect(
+				vitestKobold.character.createReturningId(fakeCharacterMock)
+			).rejects.toThrow();
 		});
 
 		it('reads the relations of the character', async () => {
@@ -57,30 +74,26 @@ describe('CharacterModel', () => {
 			const fakeCharacter = await ResourceFactories.character({
 				sheetRecordId: fakeSheetRecord.id,
 			});
-			const guildDefaultCharacter = await ResourceFactories.guildDefaultCharacter({
-				characterId: fakeCharacter.id,
-			});
-			const channelDefaultCharacter = await ResourceFactories.channelDefaultCharacter({
-				characterId: fakeCharacter.id,
-			});
 
 			const read = await vitestKobold.character.read({ id: fakeCharacter.id });
-			expect(read).toEqual({
-				...fakeCharacter,
-				guildDefaultCharacters: [guildDefaultCharacter],
-				channelDefaultCharacters: [channelDefaultCharacter],
-				sheetRecord: fakeSheetRecord,
+			// read({id}) does not load guild/channel defaults (requires guildId/channelId context)
+			expect(read).toMatchObject({
+				..._.omit(fakeCharacter, 'createdAt', 'lastUpdatedAt'),
+				sheetRecord: _.omit(fakeSheetRecord, 'adjustedSheet'),
+				guildDefaultCharacters: [],
+				channelDefaultCharacters: [],
 			});
 		});
 	});
-	describe('update', () => {
+	describe('updateFields', () => {
 		it('updates a character', async () => {
 			const fakeCharacter = await ResourceFactories.character();
-			const updated = await vitestKobold.character.update(
+			await vitestKobold.character.updateFields(
 				{ id: fakeCharacter.id },
 				{ name: 'new name' }
 			);
-			expect(updated).toEqual({
+			const read = await vitestKobold.character.read({ id: fakeCharacter.id });
+			expect(read).toEqual({
 				...fakeCharacter,
 				name: 'new name',
 			});
@@ -88,7 +101,7 @@ describe('CharacterModel', () => {
 		it('fails to update a character if the sheetRecordId is invalid', async () => {
 			const fakeCharacter = await ResourceFactories.character();
 			await expect(
-				vitestKobold.character.update({ id: fakeCharacter.id }, { sheetRecordId: -1 })
+				vitestKobold.character.updateFields({ id: fakeCharacter.id }, { sheetRecordId: -1 })
 			).rejects.toThrow();
 		});
 	});

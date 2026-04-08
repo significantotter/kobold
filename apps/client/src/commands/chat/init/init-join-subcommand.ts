@@ -114,7 +114,7 @@ export class InitJoinSubCommand extends BaseCommandClass(
 		});
 
 		// Add character's minions that have auto-join enabled to the same turn
-		const minions = await kobold.minion.readMany({
+		const minions = await kobold.minion.readManyLite({
 			characterId: activeCharacter.id,
 		});
 		const autoJoinMinions = minions.filter(minion => minion.autoJoinInitiative);

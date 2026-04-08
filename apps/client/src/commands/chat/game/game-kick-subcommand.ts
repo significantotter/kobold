@@ -32,7 +32,7 @@ export class GameKickSubCommand extends BaseCommandClass(
 			if (!intr.guildId) return [];
 
 			// Get games the user owns in this guild
-			const targetGames = await kobold.game.readMany({
+			const targetGames = await kobold.game.readManyLite({
 				gmUserId: intr.user.id,
 				guildId: intr.guildId,
 			});
@@ -52,7 +52,7 @@ export class GameKickSubCommand extends BaseCommandClass(
 				intr.options.getString(commandOptions[commandOptionsEnum.targetGame].name) ?? '';
 
 			// Get the selected game
-			const targetGames = await kobold.game.readMany({
+			const targetGames = await kobold.game.readManyLite({
 				gmUserId: intr.user.id,
 				guildId: intr.guildId,
 				name: selectedGameName,
@@ -89,7 +89,7 @@ export class GameKickSubCommand extends BaseCommandClass(
 			throw new KoboldError('You can only kick characters from games in a server!');
 		}
 
-		const targetGames = await kobold.game.readMany({
+		const targetGames = await kobold.game.readManyLite({
 			guildId: intr.guildId,
 			gmUserId: intr.user.id,
 			name: gameName,
@@ -119,7 +119,7 @@ export class GameKickSubCommand extends BaseCommandClass(
 		}
 
 		// Remove character from game
-		await kobold.character.update({ id: targetCharacter.id }, { gameId: null });
+		await kobold.character.updateFields({ id: targetCharacter.id }, { gameId: null });
 
 		await InteractionUtils.send(
 			intr,

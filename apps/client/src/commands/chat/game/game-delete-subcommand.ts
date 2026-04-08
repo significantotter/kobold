@@ -31,7 +31,7 @@ export class GameDeleteSubCommand extends BaseCommandClass(
 			const value = (option.value as string).trim().toLowerCase();
 
 			// Get games the user owns in this guild
-			const targetGames = await kobold.game.readMany({
+			const targetGames = await kobold.game.readManyLite({
 				gmUserId: intr.user.id,
 				guildId: intr.guildId,
 			});
@@ -58,8 +58,9 @@ export class GameDeleteSubCommand extends BaseCommandClass(
 			throw new KoboldError('You can only delete games in a server!');
 		}
 
-		const targetGames = await kobold.game.readMany({
+		const targetGames = await kobold.game.readManyLite({
 			guildId: intr.guildId,
+			gmUserId: intr.user.id,
 			name: gameName,
 		});
 		const targetGame = targetGames.length ? targetGames[0] : null;

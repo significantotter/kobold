@@ -69,7 +69,7 @@ describe('InitAddSubCommand', () => {
 		const existingInit = createMockInitiative();
 		const { fetchNonNullableDataMock } = setupKoboldUtilsMocks();
 		fetchNonNullableDataMock.mockResolvedValue({
-			currentInitiative: existingInit,
+			currentInitiativeLite: existingInit,
 			userSettings: {},
 		});
 

@@ -32,7 +32,7 @@ export class GameCreateSubCommand extends BaseCommandClass(
 		}
 
 		// Check if a game with this name already exists
-		const existingGames = await kobold.game.readMany({
+		const existingGames = await kobold.game.readManyLite({
 			guildId: intr.guildId,
 			name: gameName,
 		});

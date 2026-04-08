@@ -40,7 +40,7 @@ describe('InitJumpToSubCommand', () => {
 		existingInit.currentTurnGroupId = existingInit.actorGroups[0].id;
 		const { fetchNonNullableDataMock } = setupKoboldUtilsMocks();
 		fetchNonNullableDataMock.mockResolvedValue({
-			currentInitiative: existingInit,
+			currentInitiativeLite: existingInit,
 			userSettings: {},
 		});
 		kobold.initiative.update.mockResolvedValue({

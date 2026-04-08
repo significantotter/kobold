@@ -21,6 +21,8 @@ export class SheetRecordModel extends Model<Database['sheetRecord']> {
 			.values({
 				...args,
 				conditions: args.conditions !== undefined ? sqlJSON(args.conditions) : undefined,
+				adjustedSheet:
+					args.adjustedSheet !== undefined ? sqlJSON(args.adjustedSheet) : undefined,
 			})
 			.returningAll()
 			.execute();
@@ -30,10 +32,18 @@ export class SheetRecordModel extends Model<Database['sheetRecord']> {
 	public async read({ id }: { id: SheetRecordId }): Promise<SheetRecord | null> {
 		const result = await this.db
 			.selectFrom('sheetRecord')
-			.selectAll()
+			.select([
+				'sheetRecord.id',
+				'sheetRecord.sheet',
+				'sheetRecord.conditions',
+				'sheetRecord.trackerMode',
+				'sheetRecord.trackerChannelId',
+				'sheetRecord.trackerGuildId',
+				'sheetRecord.trackerMessageId',
+			])
 			.where('sheetRecord.id', '=', id)
 			.execute();
-		return result[0] ?? null;
+		return (result[0] as SheetRecord) ?? null;
 	}
 
 	public async update(
@@ -45,6 +55,8 @@ export class SheetRecordModel extends Model<Database['sheetRecord']> {
 			.set({
 				...args,
 				conditions: args.conditions !== undefined ? sqlJSON(args.conditions) : undefined,
+				adjustedSheet:
+					args.adjustedSheet !== undefined ? sqlJSON(args.adjustedSheet) : undefined,
 			})
 			.where('sheetRecord.id', '=', id)
 			.returningAll()

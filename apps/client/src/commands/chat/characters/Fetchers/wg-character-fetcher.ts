@@ -1,5 +1,5 @@
 import { Config } from '@kobold/config';
-import { SheetRecord, Character, CharacterWithRelations, ImportSourceEnum } from '@kobold/db';
+import { CharacterBasic, CharacterWithRelations, ImportSourceEnum } from '@kobold/db';
 import { WanderersGuide } from '../../../../services/wanderers-guide/index.js';
 import { WG } from '../../../../services/wanderers-guide/wanderers-guide.js';
 import { KoboldError } from '../../../../utils/KoboldError.js';
@@ -21,15 +21,15 @@ export class WgCharacterFetcher extends CharacterFetcher<
 	public async fetchDuplicateCharacter(
 		args: { charId: number },
 		conversionResult: SheetConversionResult
-	): Promise<Character | null> {
+	): Promise<CharacterBasic | null> {
 		// we can't use a character that shares a charId OR shares a name
 		const results = await Promise.all([
-			this.kobold.character.read({
+			this.kobold.character.readLite({
 				charId: args.charId,
 				userId: this.userId,
 			}),
-			this.kobold.character.read({
-				name: conversionResult.sheetRecord.sheet.staticInfo.name,
+			this.kobold.character.readLite({
+				exactName: conversionResult.sheetRecord.sheet.staticInfo.name,
 				userId: this.userId,
 			}),
 		]);

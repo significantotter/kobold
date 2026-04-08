@@ -20,6 +20,7 @@ import {
 	type MockCreature,
 } from '../../../test-utils/index.js';
 import { InputParseUtils } from '../../../utils/input-parse-utils.js';
+import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 
 vi.mock('../../../utils/kobold-service-utils/kobold-utils.js');
 vi.mock('../../../utils/kobold-helpers/finder-helpers.js');
@@ -95,7 +96,12 @@ describe('ConditionSetSubCommand', () => {
 				conditions: [existingCondition],
 				targetName: 'Test Character',
 			});
-			setupConditionFinderHelpersMocks(existingCondition);
+			// Mock getConditionByName to return the condition for the initial lookup
+			// but return undefined for the duplicate name check with the new name
+			vi.mocked(FinderHelpers.getConditionByName).mockImplementation((_sheetRecord, name) => {
+				if (name.toLowerCase() === 'old name') return existingCondition;
+				return undefined; // "New Name" not found — no duplicate
+			});
 			const { updateMock } = setupSheetRecordUpdateMock(kobold);
 
 			// Act
@@ -104,7 +110,7 @@ describe('ConditionSetSubCommand', () => {
 				subcommand: 'set',
 				options: {
 					'gameplay-target-character': 'Test Character',
-					name: 'Old Name',
+					'condition-name': 'Old Name',
 					option: 'name',
 					value: 'New Name',
 				},

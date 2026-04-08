@@ -40,8 +40,8 @@ describe('GameKickSubCommand', () => {
 			name: 'Strict Game',
 			characters: [kickedCharacter],
 		});
-		kobold.game.readMany.mockResolvedValue([targetGame]);
-		kobold.character.update.mockResolvedValue(kickedCharacter);
+		kobold.game.readManyLite.mockResolvedValue([targetGame]);
+		kobold.character.updateFields.mockResolvedValue(undefined);
 
 		// Act
 		const result = await harness.executeCommand({
@@ -63,12 +63,12 @@ describe('GameKickSubCommand', () => {
 				gameName: 'Strict Game',
 			})
 		);
-		expect(kobold.character.update).toHaveBeenCalledWith({ id: 20 }, { gameId: null });
+		expect(kobold.character.updateFields).toHaveBeenCalledWith({ id: 20 }, { gameId: null });
 	});
 
 	it('should error when game not found for kick', async () => {
 		// Arrange
-		kobold.game.readMany.mockResolvedValue([]);
+		kobold.game.readManyLite.mockResolvedValue([]);
 
 		// Act
 		const result = await harness.executeCommand({
@@ -93,7 +93,7 @@ describe('GameKickSubCommand', () => {
 			name: 'Empty Kick Game',
 			characters: [],
 		});
-		kobold.game.readMany.mockResolvedValue([targetGame]);
+		kobold.game.readManyLite.mockResolvedValue([targetGame]);
 
 		// Act
 		const result = await harness.executeCommand({

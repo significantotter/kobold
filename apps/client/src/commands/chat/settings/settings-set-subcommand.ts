@@ -77,13 +77,11 @@ export class SettingsSetSubCommand extends BaseCommandClass(
 
 		// validate
 		let trimmedOptionName = _.camelCase(option.trim());
-		let settingDbName: keyof UserSettings;
 		let parsedValue = value.replaceAll(' ', '_');
 
 		const updates: Partial<UserSettings> = {};
 
 		if (trimmedOptionName === 'initiativeTrackerNotifications') {
-			settingDbName = 'initStatsNotification';
 			if (!isInitStatsNotificationEnum(parsedValue)) {
 				throw new KoboldError(
 					'Yip! The value for "initiative-tracker-notifications" must be one of "never", ' +
@@ -92,7 +90,6 @@ export class SettingsSetSubCommand extends BaseCommandClass(
 			}
 			updates.initStatsNotification = parsedValue;
 		} else if (trimmedOptionName === 'inlineRollsDisplay') {
-			settingDbName = 'inlineRollsDisplay';
 			if (!isInlineRollsDisplayEnum(parsedValue)) {
 				throw new KoboldError(
 					'Yip! The value for "inline-rolls-display" must be one of "compact", or "detailed".'
@@ -100,10 +97,9 @@ export class SettingsSetSubCommand extends BaseCommandClass(
 			}
 			updates.inlineRollsDisplay = parsedValue;
 		} else if (trimmedOptionName === 'defaultCompendium') {
-			settingDbName = 'defaultCompendium';
 			if (!isDefaultCompendiumEnum(parsedValue)) {
 				throw new KoboldError(
-					'Yip! The value for "inline-rolls-display" must be one of "compact", or "detailed".'
+					'Yip! The value for "default-compendium" must be one of "nethys", or "pf2etools".'
 				);
 			}
 			updates.defaultCompendium = parsedValue;
@@ -113,7 +109,7 @@ export class SettingsSetSubCommand extends BaseCommandClass(
 
 		// fetch the value to determine whether to insert or update
 
-		await kobold.userSettings.upsert({ ...userSettings, ...updates });
+		await kobold.userSettings.upsert({ ...userSettings, userId: intr.user.id, ...updates });
 
 		await InteractionUtils.send(intr, `Yip! "${option}" has been set to "${value}".`);
 	}

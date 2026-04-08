@@ -1,4 +1,4 @@
-import { ButtonStyle, ChatInputCommandInteraction, ComponentType, MessageFlags } from 'discord.js';
+import { ButtonStyle, ChatInputCommandInteraction, ComponentType } from 'discord.js';
 
 import { Kobold } from '@kobold/db';
 import { CollectorUtils } from '../../../utils/collector-utils.js';
@@ -16,11 +16,12 @@ export class InitEndSubCommand extends BaseCommandClass(
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const koboldUtils = new KoboldUtils(kobold);
-		const { currentInitiative } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
-			currentInitiative: true,
-		});
+		const { currentInitiativeLite: currentInitiative } =
+			await koboldUtils.fetchNonNullableDataForCommand(intr, {
+				currentInitiativeLite: true,
+			});
 
-		const response = await intr.reply({
+		const prompt = await intr.editReply({
 			content: InitDefinition.strings.end.confirmation.text,
 			components: [
 				{
@@ -41,10 +42,7 @@ export class InitEndSubCommand extends BaseCommandClass(
 					],
 				},
 			],
-			flags: [MessageFlags.Ephemeral],
-			withResponse: true,
 		});
-		const prompt = response.resource!.message!;
 		let timedOut = false;
 		let result = await CollectorUtils.collectByButton(
 			prompt,

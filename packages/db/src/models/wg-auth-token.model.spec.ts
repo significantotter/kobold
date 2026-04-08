@@ -1,6 +1,14 @@
 import { zNewWgAuthToken } from '../index.js';
 import _ from 'lodash';
-import { truncateDbForTests, vitestKobold, ResourceFactories, fake } from '../test-utils.js';
+import { faker } from '@faker-js/faker';
+import {
+	truncateDbForTests,
+	vitestKobold,
+	ResourceFactories,
+	fake,
+	stripUndefined,
+	safeInt,
+} from '../test-utils.js';
 
 describe('WgAuthTokenModel', () => {
 	afterEach(async () => {
@@ -8,7 +16,10 @@ describe('WgAuthTokenModel', () => {
 	});
 	describe('create, read', () => {
 		it('creates a new wgAuthToken, reads it, and returns the wgAuthToken plus relations', async () => {
-			const fakeWgAuthTokenMock = fake(zNewWgAuthToken);
+			const fakeWgAuthTokenMock = stripUndefined(fake(zNewWgAuthToken));
+			fakeWgAuthTokenMock.charId = safeInt();
+			fakeWgAuthTokenMock.expiresAt = faker.date.future();
+			delete fakeWgAuthTokenMock.id;
 
 			const created = await vitestKobold.wgAuthToken.create(fakeWgAuthTokenMock);
 			const read = await vitestKobold.wgAuthToken.read({ id: created.id });

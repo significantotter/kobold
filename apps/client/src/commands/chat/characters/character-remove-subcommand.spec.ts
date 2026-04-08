@@ -134,7 +134,7 @@ describe('CharacterRemoveSubCommand', () => {
 			});
 
 			kobold.character.delete.mockResolvedValue(undefined);
-			kobold.character.read.mockResolvedValue(newCharacter as any);
+			kobold.character.readLite.mockResolvedValue(newCharacter as any);
 			const setIsActiveMock = kobold.character.setIsActive.mockResolvedValue(
 				newCharacter as any
 			);

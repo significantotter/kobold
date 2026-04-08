@@ -107,7 +107,7 @@ export const characterStrings = {
 		confirmation: {
 			text: msg(
 				(p: { actionsCount: number; modifiersCount: number; rollMacrosCount: number }) =>
-					`This will promote ${p.actionsCount} actions, ${p.modifiersCount} modifiers, and ${p.rollMacrosCount} roll macros from character-specific to user scope. User-scoped items will be available to all your characters and minions. Continue?`
+					`This will promote ${p.actionsCount} actions, ${p.modifiersCount} modifiers, and ${p.rollMacrosCount} roll macros from character-specific to user scope. User-scoped actions and roll macros will be available to all your characters and minions. User-scoped modifiers will be unassigned and won't apply until reassigned. Continue?`
 			),
 			migrateButton: 'MIGRATE',
 			cancelButton: 'CANCEL',

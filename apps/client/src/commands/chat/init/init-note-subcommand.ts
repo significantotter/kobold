@@ -55,12 +55,13 @@ export class InitNoteSubCommand extends BaseCommandClass(
 		}
 
 		// remove disallowed characters
-		note.replaceAll('`', "'").replaceAll('\\', '\\\\').replaceAll('\\\\n', '\n');
+		note = note.replaceAll('`', "'").replaceAll('\\', '\\\\').replaceAll('\\\\n', '\n');
 
 		const koboldUtils = new KoboldUtils(kobold);
-		const { currentInitiative } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
-			currentInitiative: true,
-		});
+		const { currentInitiativeLite: currentInitiative } =
+			await koboldUtils.fetchNonNullableDataForCommand(intr, {
+				currentInitiativeLite: true,
+			});
 
 		const actor = StringUtils.nameMatchGeneric<InitiativeActorWithRelations>(
 			currentInitiative.actors,

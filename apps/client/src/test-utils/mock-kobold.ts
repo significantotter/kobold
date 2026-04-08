@@ -30,6 +30,16 @@ interface MockModel {
 interface MockCharacterModel extends MockModel {
 	setIsActive: MockFn;
 	readActive: MockFn;
+	readLite: MockFn;
+	readManyLite: MockFn;
+	readManyWithModifiers: MockFn;
+	createReturningId: MockFn;
+	updateFields: MockFn;
+}
+
+/** Type for mock Game model with additional methods */
+interface MockGameModel extends MockModel {
+	readManyLite: MockFn;
 }
 
 /** Type for mock Initiative model with additional methods */
@@ -61,6 +71,15 @@ interface MockActionModel extends MockModel {
 /** Type for mock Minion model with additional methods */
 interface MockMinionModel extends MockModel {
 	readManyByCharacterIds: MockFn;
+	readManyLite: MockFn;
+	readManyByCharacterIdsLite: MockFn;
+	readManyByUserIdLite: MockFn;
+}
+
+/** Type for mock InitiativeActor model with additional methods */
+interface MockInitiativeActorModel extends MockModel {
+	readManyByMinionIdLite: MockFn;
+	readManyByGroupIdLite: MockFn;
 }
 
 /**
@@ -90,6 +109,11 @@ function createMockCharacterModel(): MockCharacterModel {
 		...createMockModel(),
 		setIsActive: vi.fn(),
 		readActive: vi.fn(),
+		readLite: vi.fn(),
+		readManyLite: vi.fn(),
+		readManyWithModifiers: vi.fn(),
+		createReturningId: vi.fn(),
+		updateFields: vi.fn(),
 	};
 }
 
@@ -100,6 +124,16 @@ function createMockInitiativeModel(): MockInitiativeModel {
 	return {
 		...createMockModel(),
 		readActive: vi.fn(),
+	};
+}
+
+/**
+ * Creates a mock Game model with additional game-specific methods.
+ */
+function createMockGameModel(): MockGameModel {
+	return {
+		...createMockModel(),
+		readManyLite: vi.fn(),
 	};
 }
 
@@ -146,6 +180,20 @@ function createMockMinionModel(): MockMinionModel {
 	return {
 		...createMockModel(),
 		readManyByCharacterIds: vi.fn(),
+		readManyLite: vi.fn(),
+		readManyByCharacterIdsLite: vi.fn(),
+		readManyByUserIdLite: vi.fn(),
+	};
+}
+
+/**
+ * Creates a mock InitiativeActor model with additional initiative-actor-specific methods.
+ */
+function createMockInitiativeActorModel(): MockInitiativeActorModel {
+	return {
+		...createMockModel(),
+		readManyByMinionIdLite: vi.fn(),
+		readManyByGroupIdLite: vi.fn(),
 	};
 }
 
@@ -160,15 +208,16 @@ function createMockMinionModel(): MockMinionModel {
  * ```
  */
 export function createMockKobold() {
-	return {
+	const mock = {
 		db: {} as any,
+		transaction: vi.fn(),
 		action: createMockActionModel(),
 		channelDefaultCharacter: createMockModel(),
 		character: createMockCharacterModel(),
-		game: createMockModel(),
+		game: createMockGameModel(),
 		guildDefaultCharacter: createMockModel(),
 		initiative: createMockInitiativeModel(),
-		initiativeActor: createMockModel(),
+		initiativeActor: createMockInitiativeActorModel(),
 		initiativeActorGroup: createMockModel(),
 		minion: createMockMinionModel(),
 		modifier: createMockModifierModel(),
@@ -177,6 +226,9 @@ export function createMockKobold() {
 		userSettings: createMockModel(),
 		wgAuthToken: createMockModel(),
 	} as unknown as MockKobold;
+	// By default, transaction executes the callback with the same mock instance
+	(mock.transaction as MockFn).mockImplementation(async (fn: any) => fn(mock));
+	return mock;
 }
 
 /**
@@ -185,13 +237,14 @@ export function createMockKobold() {
  */
 export type MockKobold = {
 	db: any;
+	transaction: MockFn;
 	action: MockActionModel;
 	channelDefaultCharacter: MockModel;
 	character: MockCharacterModel;
-	game: MockModel;
+	game: MockGameModel;
 	guildDefaultCharacter: MockModel;
 	initiative: MockInitiativeModel;
-	initiativeActor: MockModel;
+	initiativeActor: MockInitiativeActorModel;
 	initiativeActorGroup: MockModel;
 	minion: MockMinionModel;
 	modifier: MockModifierModel;

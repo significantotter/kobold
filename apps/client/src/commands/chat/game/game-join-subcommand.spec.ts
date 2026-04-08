@@ -40,8 +40,8 @@ describe('GameJoinSubCommand', () => {
 			characterOverrides: { id: 10, name: 'Hero' },
 		});
 		const targetGame = createMockGame({ id: 5, name: 'Adventure', characters: [] });
-		kobold.game.readMany.mockResolvedValue([targetGame]);
-		kobold.character.update.mockResolvedValue(mockCharacter);
+		kobold.game.readManyLite.mockResolvedValue([targetGame]);
+		kobold.character.updateFields.mockResolvedValue(undefined);
 
 		const { fetchNonNullableDataMock } = setupKoboldUtilsMocks();
 		fetchNonNullableDataMock.mockResolvedValue({ activeCharacter: mockCharacter });
@@ -62,12 +62,12 @@ describe('GameJoinSubCommand', () => {
 		expect(result.getResponseContent()).toContain(
 			strings.join.success({ characterName: 'Hero', gameName: 'Adventure' })
 		);
-		expect(kobold.character.update).toHaveBeenCalledWith({ id: 10 }, { gameId: 5 });
+		expect(kobold.character.updateFields).toHaveBeenCalledWith({ id: 10 }, { gameId: 5 });
 	});
 
 	it('should error when game not found', async () => {
 		// Arrange
-		kobold.game.readMany.mockResolvedValue([]);
+		kobold.game.readManyLite.mockResolvedValue([]);
 
 		// Act
 		const result = await harness.executeCommand({
@@ -97,7 +97,7 @@ describe('GameJoinSubCommand', () => {
 			name: 'Adventure',
 			characters: [mockCharacter],
 		});
-		kobold.game.readMany.mockResolvedValue([targetGame]);
+		kobold.game.readManyLite.mockResolvedValue([targetGame]);
 
 		const { fetchNonNullableDataMock } = setupKoboldUtilsMocks();
 		fetchNonNullableDataMock.mockResolvedValue({ activeCharacter: mockCharacter });

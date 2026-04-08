@@ -1,7 +1,13 @@
-
 import { zNewInitiativeActorGroup } from '../index.js';
 import _ from 'lodash';
-import { truncateDbForTests, ResourceFactories, vitestKobold, fake } from '../test-utils.js';
+import {
+	truncateDbForTests,
+	ResourceFactories,
+	vitestKobold,
+	fake,
+	stripUndefined,
+	safeInt,
+} from '../test-utils.js';
 
 describe('InitiativeActorGroupModel', () => {
 	afterEach(async () => {
@@ -10,8 +16,12 @@ describe('InitiativeActorGroupModel', () => {
 	describe('create, read', () => {
 		it('creates a new initiativeActorGroup, reads it, and returns the initiativeActorGroup plus relations', async () => {
 			const initiative = await ResourceFactories.initiative();
-			const fakeInitiativeActorGroupMock = fake(zNewInitiativeActorGroup);
+			const fakeInitiativeActorGroupMock = stripUndefined(fake(zNewInitiativeActorGroup));
 			fakeInitiativeActorGroupMock.initiativeId = initiative.id;
+			delete fakeInitiativeActorGroupMock.id;
+			delete fakeInitiativeActorGroupMock.createdAt;
+			delete fakeInitiativeActorGroupMock.lastUpdatedAt;
+			fakeInitiativeActorGroupMock.initiativeResult = safeInt(1, 30);
 
 			const created = await vitestKobold.initiativeActorGroup.create(
 				fakeInitiativeActorGroupMock

@@ -107,7 +107,7 @@ export class CounterPrepareSubCommand extends BaseCommandClass(
 			);
 		}
 
-		if (counter.active.length <= Number(slotIndexString)) {
+		if (Number(slotIndexString) < 0 || counter.active.length <= Number(slotIndexString)) {
 			throw new KoboldError("Yip! I couldn't find that slot!");
 		}
 
@@ -119,6 +119,8 @@ export class CounterPrepareSubCommand extends BaseCommandClass(
 				sheet: activeCharacter.sheetRecord.sheet,
 			}
 		);
+		// Trigger adjusted_sheet recomputation
+		koboldUtils.adjustedSheetService.triggerRecompute(activeCharacter.sheetRecord.id);
 		const embed = new KoboldEmbed().setTitle(
 			CounterDefinition.strings.prepared({
 				counterName: counter.name,

@@ -82,7 +82,7 @@ describe('WgCharacterFetcher', () => {
 
 	describe('fetchDuplicateCharacter', () => {
 		it('should return null when no duplicate exists', async () => {
-			(mockKobold.character.read as Mock).mockResolvedValue(null);
+			(mockKobold.character.readLite as Mock).mockResolvedValue(null);
 
 			const result = await fetcher.fetchDuplicateCharacter({ charId: 123 }, {
 				sheetRecord: { sheet: { staticInfo: { name: 'Test Character' } } },
@@ -93,7 +93,7 @@ describe('WgCharacterFetcher', () => {
 
 		it('should return character when duplicate by charId exists', async () => {
 			const existingCharacter = { id: 'existing-id', charId: 123 };
-			(mockKobold.character.read as Mock)
+			(mockKobold.character.readLite as Mock)
 				.mockResolvedValueOnce(existingCharacter) // by charId
 				.mockResolvedValueOnce(null); // by name
 
@@ -106,7 +106,7 @@ describe('WgCharacterFetcher', () => {
 
 		it('should return character when duplicate by name exists', async () => {
 			const existingCharacter = { id: 'existing-id', name: 'Test Character' };
-			(mockKobold.character.read as Mock)
+			(mockKobold.character.readLite as Mock)
 				.mockResolvedValueOnce(null) // by charId
 				.mockResolvedValueOnce(existingCharacter); // by name
 

@@ -52,10 +52,10 @@ export class InitRemoveSubCommand extends BaseCommandClass(
 			.trim();
 
 		const koboldUtils = new KoboldUtils(kobold);
-		const { currentInitiative, userSettings } =
+		const { currentInitiativeLite: currentInitiative, userSettings } =
 			await koboldUtils.fetchNonNullableDataForCommand(intr, {
 				userSettings: true,
-				currentInitiative: true,
+				currentInitiativeLite: true,
 			});
 
 		let actorResponse = InitiativeBuilderUtils.getNameMatchActorFromInitiative(
@@ -98,6 +98,7 @@ export class InitRemoveSubCommand extends BaseCommandClass(
 			const initBuilder = new InitiativeBuilder({
 				initiative: currentInitiative,
 				userSettings,
+				useCachedSheets: true,
 			});
 			let currentTurn = initBuilder.getCurrentTurnInfo();
 			let updatedTurn: TurnData;
@@ -114,8 +115,10 @@ export class InitRemoveSubCommand extends BaseCommandClass(
 				}
 			}
 
-			const updatedInitiative = await kobold.initiative.read({ id: currentInitiative.id });
-			updatedInitiative!.currentTurnGroupId = updatedTurn.currentTurnGroupId;
+			const updatedInitiative = await kobold.initiative.update(
+				{ id: currentInitiative.id },
+				{ currentTurnGroupId: updatedTurn.currentTurnGroupId }
+			);
 
 			if (!updatedInitiative)
 				throw new Error('Initiative was already deleted while trying to remove an actor');
@@ -148,6 +151,7 @@ export class InitRemoveSubCommand extends BaseCommandClass(
 			const initBuilder = new InitiativeBuilder({
 				initiative: currentInitiative,
 				userSettings,
+				useCachedSheets: true,
 			});
 			initBuilder.removeActor(actor);
 			if (currentInitiative.currentRound === 0) {

@@ -68,7 +68,7 @@ export class RollActionSubCommand extends BaseCommandClass(
 
 	public async execute(
 		intr: ChatInputCommandInteraction,
-		{ kobold }: { kobold: any }
+		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const targetActionName = intr.options.getString(
 			commandOptions[commandOptionsEnum.targetAction].name,

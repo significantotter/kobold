@@ -104,6 +104,8 @@ export class MinionSetSubCommand extends BaseCommandClass(
 
 		// Update the sheetRecord
 		await kobold.sheetRecord.update({ id: targetMinion.sheetRecordId }, { sheet });
+		// Trigger adjusted_sheet recomputation
+		koboldUtils.adjustedSheetService.triggerRecompute(targetMinion.sheetRecordId);
 
 		// Build a user-friendly response
 		let message = `Yip! I updated ${targetMinion.name}'s ${option} from ${initialValue} to ${updatedValue}.`;

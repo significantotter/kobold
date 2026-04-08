@@ -94,8 +94,6 @@ export class ModifierCreateSubCommand extends BaseCommandClass(
 			const minion = minions.find(m => m.sheetRecordId === sheetRecordId);
 			if (char) {
 				targetName = char.name;
-				// Use this character for validation
-				validationCharacter = char;
 			} else if (minion) {
 				targetName = minion.name;
 			} else {
@@ -258,6 +256,13 @@ export class ModifierCreateSubCommand extends BaseCommandClass(
 		}
 
 		await kobold.modifier.create(newModifier);
+
+		// Trigger adjusted_sheet recomputation
+		if (sheetRecordId !== null) {
+			koboldUtils.adjustedSheetService.triggerRecompute(sheetRecordId);
+		} else {
+			koboldUtils.adjustedSheetService.triggerRecomputeAllForUser(intr.user.id);
+		}
 
 		//send a response
 		await InteractionUtils.send(

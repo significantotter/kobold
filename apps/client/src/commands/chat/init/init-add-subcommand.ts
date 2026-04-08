@@ -255,14 +255,14 @@ export class InitAddSubCommand extends BaseCommandClass(
 		const newActorGroup = await kobold.initiativeActorGroup.create({
 			initiativeId: currentInitiative.id,
 			userId: intr.user.id,
-			name: actorName,
+			name: finalName,
 			initiativeResult: finalInitiative,
 		});
 
 		const newActor = await kobold.initiativeActor.create({
 			initiativeId: currentInitiative.id,
 			sheetRecordId: sheetRecord.id,
-			name: actorName,
+			name: finalName,
 			userId: intr.user.id,
 			referenceNpcName,
 			hideStats,

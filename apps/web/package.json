@@ -17,6 +17,8 @@
 		"@kobold/config": "workspace:*",
 		"@kobold/db": "workspace:*",
 		"@kobold/documentation": "workspace:*",
+		"@kobold/schema": "workspace:*",
+		"@kobold/sheet": "workspace:*",
 		"@orpc/client": "^1.13.13",
 		"@orpc/server": "^1.0.0",
 		"@primevue/themes": "^4.5.4",

@@ -2,7 +2,7 @@ import { Sheet, ProficiencyStat, AbilityEnum } from '@kobold/db';
 import _ from 'lodash';
 import { WG } from '../../services/wanderers-guide/wanderers-guide.js';
 import { SheetProperties, SheetStatProperties } from './sheet-properties.js';
-import { applyValuesToStatInPlace, scoreToBonus } from './sheet-import-utils.js';
+import { applyValuesToStatInPlace, scoreToBonus } from '@kobold/sheet';
 
 export function convertWanderersGuideCharToSheet(
 	calculatedStats: WG.CharacterCalculatedStatsApiResponse,

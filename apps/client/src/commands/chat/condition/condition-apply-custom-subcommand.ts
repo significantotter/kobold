@@ -189,6 +189,9 @@ export class ConditionApplyCustomSubCommand extends BaseCommandClass(
 			}
 		);
 
+		// Trigger adjusted_sheet recomputation
+		koboldUtils.adjustedSheetService.triggerRecompute(targetSheetRecord.id);
+
 		//send a response
 		await InteractionUtils.send(
 			intr,

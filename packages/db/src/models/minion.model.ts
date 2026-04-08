@@ -3,6 +3,7 @@ import { sheetRelationsForMinion } from '../lib/shared-relation-builders.js';
 import {
 	CharacterId,
 	Database,
+	MinionBasic,
 	MinionId,
 	MinionUpdate,
 	MinionWithRelations,
@@ -72,6 +73,44 @@ export class MinionModel extends Model<Database['minion']> {
 			.where('minion.userId', '=', userId)
 			.execute();
 		return result;
+	}
+
+	// ========================================================================
+	// Lite variants — no sheet relations, just base minion columns.
+	// Use for autocomplete, name lookups, existence checks, and filtering.
+	// ========================================================================
+
+	public async readManyLite({
+		characterId,
+	}: {
+		characterId: CharacterId;
+	}): Promise<MinionBasic[]> {
+		return await this.db
+			.selectFrom('minion')
+			.selectAll()
+			.where('minion.characterId', '=', characterId)
+			.execute();
+	}
+
+	public async readManyByCharacterIdsLite({
+		characterIds,
+	}: {
+		characterIds: CharacterId[];
+	}): Promise<MinionBasic[]> {
+		if (characterIds.length === 0) return [];
+		return await this.db
+			.selectFrom('minion')
+			.selectAll()
+			.where('minion.characterId', 'in', characterIds)
+			.execute();
+	}
+
+	public async readManyByUserIdLite({ userId }: { userId: string }): Promise<MinionBasic[]> {
+		return await this.db
+			.selectFrom('minion')
+			.selectAll()
+			.where('minion.userId', '=', userId)
+			.execute();
 	}
 
 	public async update(

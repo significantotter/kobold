@@ -32,7 +32,7 @@ export class CharacterSetDefaultSubCommand extends BaseCommandClass(
 				intr.options.getString(commandOptions[commandOptionsEnum.name].name) ?? '';
 
 			const { characterUtils } = new KoboldUtils(kobold);
-			const matchedCharacters = await characterUtils.findOwnedCharacterByName(
+			const matchedCharacters = await characterUtils.findOwnedCharacterByNameLite(
 				match,
 				intr.user.id
 			);
@@ -70,7 +70,7 @@ export class CharacterSetDefaultSubCommand extends BaseCommandClass(
 
 		// try and find that character
 		const targetCharacter = (
-			await characterUtils.findOwnedCharacterByName(charName, intr.user.id)
+			await characterUtils.findOwnedCharacterByNameLite(charName, intr.user.id)
 		)[0];
 
 		if (targetCharacter) {
@@ -154,7 +154,7 @@ export class CharacterSetDefaultSubCommand extends BaseCommandClass(
 					}
 
 					try {
-						await await kobold.guildDefaultCharacter.delete({
+						await kobold.guildDefaultCharacter.delete({
 							userId: intr.user.id,
 							guildId: currentGuildId,
 						});

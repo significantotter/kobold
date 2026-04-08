@@ -4,6 +4,7 @@ import {
 	ApplicationCommandType,
 } from 'discord-api-types/v10';
 import type { CommandDefinition } from '../helpers/commands.types.js';
+import { CommandDeferType } from '../helpers.js';
 import { ModifierCommandOptionEnum, modifierCommandOptions } from './modifier.command-options.js';
 import { anyUsageContext } from '../helpers/defaults.js';
 import { withOrder } from '../helpers/common.js';
@@ -185,6 +186,7 @@ export const modifierCommandDefinition = {
 			name: ModifierSubCommandEnum.remove,
 			description: 'Removes a modifier for the active character.',
 			type: ApplicationCommandOptionType.Subcommand,
+			deferType: CommandDeferType.HIDDEN,
 			options: {
 				[ModifierCommandOptionEnum.name]: withOrder(
 					{

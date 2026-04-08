@@ -236,7 +236,7 @@ export class ActionStageSetSubCommand extends BaseCommandClass(
 					'criticalSuccessText',
 					'criticalFailureText',
 					'allowRollModifiers',
-					'extraTags',
+					'textExtraTags',
 				].includes(fieldToUpdate)
 			) {
 				invalid = true;
@@ -288,7 +288,7 @@ export class ActionStageSetSubCommand extends BaseCommandClass(
 		}
 
 		// boolean values
-		else if (['allowRollModifiers'].includes(fieldToUpdate)) {
+		else if (['allowRollModifiers', 'healInsteadOfDamage'].includes(fieldToUpdate)) {
 			finalValue = ['true', 'yes', '1', 'ok', 'okay'].includes(
 				newValue.toLocaleLowerCase().trim()
 			);
@@ -299,8 +299,10 @@ export class ActionStageSetSubCommand extends BaseCommandClass(
 			await InteractionUtils.send(intr, ActionStageDefinition.strings.set.unknownField);
 			return;
 		}
+		// Map fieldToUpdate to the actual schema field name
+		const fieldName = fieldToUpdate === 'textExtraTags' ? 'extraTags' : fieldToUpdate;
 		// Create updated roll
-		const updatedRoll = { ...roll, [fieldToUpdate]: finalValue };
+		const updatedRoll = { ...roll, [fieldName]: finalValue };
 
 		// Create updated rolls array with the modified roll
 		let updatedRolls = matchedAction.rolls.map((r, idx) =>

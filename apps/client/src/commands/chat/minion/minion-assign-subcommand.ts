@@ -5,7 +5,7 @@ import {
 	CacheType,
 	ChatInputCommandInteraction,
 } from 'discord.js';
-import { Kobold, MinionWithRelations } from '@kobold/db';
+import { Kobold, MinionBasic, MinionWithRelations } from '@kobold/db';
 import { MinionDefinition, sharedStrings } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
 import { InteractionUtils } from '../../../utils/index.js';
@@ -32,15 +32,15 @@ export class MinionAssignSubCommand extends BaseCommandClass(
 			const match = intr.options.getString(commandOptions[commandOptionsEnum.minion].name);
 
 			// Get all user's minions, not just the active character's
-			const minions = await kobold.minion.readManyByUserId({
+			const minions = await kobold.minion.readManyByUserIdLite({
 				userId: intr.user.id,
 			});
 
 			return minions
-				.filter((m: MinionWithRelations) =>
+				.filter((m: MinionBasic) =>
 					m.name.toLowerCase().includes((match ?? '').toLowerCase())
 				)
-				.map((m: MinionWithRelations) => ({
+				.map((m: MinionBasic) => ({
 					name: m.name,
 					value: m.name,
 				}));
@@ -145,7 +145,7 @@ export class MinionAssignSubCommand extends BaseCommandClass(
 			}
 		} else {
 			// Look for character in user's own characters
-			const characters = await kobold.character.readMany({
+			const characters = await kobold.character.readManyLite({
 				userId: intr.user.id,
 			});
 			targetCharacter = characters.find(
@@ -168,7 +168,7 @@ export class MinionAssignSubCommand extends BaseCommandClass(
 		}
 
 		// Check if the target character already has a minion with this name
-		const targetMinions = await kobold.minion.readMany({
+		const targetMinions = await kobold.minion.readManyLite({
 			characterId: targetCharacter.id,
 		});
 		const existingMinion = targetMinions.find(
@@ -192,8 +192,9 @@ export class MinionAssignSubCommand extends BaseCommandClass(
 			});
 
 			// 2. Copy all actions tied to this minion's sheetRecordId
-			const actions = await kobold.action.readManyForCharacter({
-				userId: intr.user.id,
+			// Use readMany (not readManyForCharacter) to only get minion-specific
+			// actions, excluding user-wide actions (sheetRecordId IS NULL).
+			const actions = await kobold.action.readMany({
 				sheetRecordId: matchedMinion.sheetRecordId,
 			});
 			for (const action of actions) {
@@ -220,8 +221,9 @@ export class MinionAssignSubCommand extends BaseCommandClass(
 			}
 
 			// 4. Copy all rollMacros tied to this minion's sheetRecordId
-			const rollMacros = await kobold.rollMacro.readManyForCharacter({
-				userId: intr.user.id,
+			// Use readMany (not readManyForCharacter) to only get minion-specific
+			// rollMacros, excluding user-wide rollMacros (sheetRecordId IS NULL).
+			const rollMacros = await kobold.rollMacro.readMany({
 				sheetRecordId: matchedMinion.sheetRecordId,
 			});
 			for (const rollMacro of rollMacros) {
@@ -241,6 +243,8 @@ export class MinionAssignSubCommand extends BaseCommandClass(
 				sheetRecordId: newSheetRecord.id,
 				autoJoinInitiative: matchedMinion.autoJoinInitiative,
 			});
+			// Trigger adjusted_sheet recomputation for the new sheet record
+			koboldUtils.adjustedSheetService.triggerRecompute(newSheetRecord.id);
 
 			await InteractionUtils.send(
 				intr,

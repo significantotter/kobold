@@ -1,4 +1,4 @@
-import { ButtonStyle, ChatInputCommandInteraction, ComponentType, MessageFlags } from 'discord.js';
+import { ButtonStyle, ChatInputCommandInteraction, ComponentType } from 'discord.js';
 
 import { Kobold } from '@kobold/db';
 
@@ -18,11 +18,12 @@ export class CharacterRemoveSubCommand extends BaseCommandClass(
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const koboldUtils = new KoboldUtils(kobold);
-		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
-			activeCharacter: true,
-		});
+		const { activeCharacterLite: activeCharacter } =
+			await koboldUtils.fetchNonNullableDataForCommand(intr, {
+				activeCharacterLite: true,
+			});
 
-		const response = await intr.reply({
+		const prompt = await intr.editReply({
 			content: CharacterDefinition.strings.remove.confirmation.text({
 				characterName: activeCharacter.name,
 			}),
@@ -45,10 +46,7 @@ export class CharacterRemoveSubCommand extends BaseCommandClass(
 					],
 				},
 			],
-			flags: [MessageFlags.Ephemeral],
-			withResponse: true,
 		});
-		const prompt = response.resource!.message!;
 		let timedOut = false;
 		let result = await CollectorUtils.collectByButton(
 			prompt,
@@ -92,7 +90,7 @@ export class CharacterRemoveSubCommand extends BaseCommandClass(
 
 			await kobold.character.delete({ id: activeCharacter.id });
 			await kobold.sheetRecord.deleteOrphaned();
-			const newActiveCharacter = await kobold.character.read({ userId: intr.user.id });
+			const newActiveCharacter = await kobold.character.readLite({ userId: intr.user.id });
 			if (newActiveCharacter) {
 				await kobold.character.setIsActive({
 					id: newActiveCharacter.id,

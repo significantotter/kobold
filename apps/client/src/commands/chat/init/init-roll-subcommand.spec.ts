@@ -36,7 +36,7 @@ describe('InitRollSubCommand Integration', () => {
 		const existingInit = createMockInitiativeWithActors(2, { currentRound: 1 });
 		const { fetchDataMock } = setupKoboldUtilsMocks();
 		fetchDataMock.mockResolvedValue({
-			currentInitiative: existingInit,
+			currentInitiativeLite: existingInit,
 			userSettings: {},
 		});
 

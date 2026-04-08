@@ -1,5 +1,7 @@
 import type { Context as HonoContext } from 'hono';
 import { getCookie } from 'hono/cookie';
+import type { Kobold } from '@kobold/db';
+import { kobold } from './services.js';
 
 export interface SessionUser {
 	userId: string;
@@ -15,6 +17,8 @@ export interface AppContext {
 	user: SessionUser | null;
 	/** The raw Hono context for accessing cookies, headers, etc. */
 	honoContext: HonoContext;
+	/** Shared Kobold database service */
+	kobold: Kobold;
 }
 
 /**
@@ -49,6 +53,7 @@ export function createContext(c: HonoContext): AppContext {
 		userId,
 		user,
 		honoContext: c,
+		kobold,
 	};
 }
 

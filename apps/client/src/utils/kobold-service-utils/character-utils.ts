@@ -1,5 +1,5 @@
 import { BaseInteraction, CacheType, CommandInteraction, Interaction } from 'discord.js';
-import { Character, CharacterWithRelations, Kobold } from '@kobold/db';
+import { Character, CharacterBasic, CharacterWithRelations, Kobold } from '@kobold/db';
 import { StringUtils } from '@kobold/base-utils';
 import type { KoboldUtils } from './kobold-utils.js';
 
@@ -10,10 +10,8 @@ export class CharacterUtils {
 	}
 
 	/**
-	 * Given a string, finds all skills containing that string on a given character
-	 * @param targetCharacter the character to check for matching skills
-	 * @param skillText the text to match to skills
-	 * @returns all skills that contain the given skillText
+	 * Finds owned characters by name with full relations (sheet, actions, modifiers, etc.).
+	 * Use findOwnedCharacterByNameLite when you only need basic info (name, id).
 	 */
 	public async findOwnedCharacterByName(
 		nameText: string,
@@ -21,6 +19,22 @@ export class CharacterUtils {
 	): Promise<CharacterWithRelations[]> {
 		const results = await this.kobold.character.readMany({ userId, name: nameText });
 		const closestByName = StringUtils.generateSorterByWordDistance<Character>(
+			nameText,
+			character => character.name
+		);
+		return results.sort(closestByName);
+	}
+
+	/**
+	 * Finds owned characters by name without loading relations.
+	 * Use when you only need basic character info (name, id, sheetRecordId).
+	 */
+	public async findOwnedCharacterByNameLite(
+		nameText: string,
+		userId: string
+	): Promise<CharacterBasic[]> {
+		const results = await this.kobold.character.readManyLite({ userId, name: nameText });
+		const closestByName = StringUtils.generateSorterByWordDistance<CharacterBasic>(
 			nameText,
 			character => character.name
 		);

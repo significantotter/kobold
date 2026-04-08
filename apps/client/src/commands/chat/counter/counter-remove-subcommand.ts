@@ -6,7 +6,6 @@ import {
 	CacheType,
 	ChatInputCommandInteraction,
 	ComponentType,
-	MessageFlags,
 } from 'discord.js';
 
 import _ from 'lodash';
@@ -63,7 +62,7 @@ export class CounterRemoveSubCommand extends BaseCommandClass(
 			throw new KoboldError(CounterDefinition.strings.notFound({ counterName: name }));
 		}
 
-		const response = await intr.reply({
+		const prompt = await intr.editReply({
 			content: CounterDefinition.strings.removeConfirmation.text({
 				counterName: counter.name,
 			}),
@@ -86,10 +85,7 @@ export class CounterRemoveSubCommand extends BaseCommandClass(
 					],
 				},
 			],
-			flags: [MessageFlags.Ephemeral],
-			withResponse: true,
 		});
-		const prompt = response.resource!.message!;
 		let timedOut = false;
 		let result = await CollectorUtils.collectByButton(
 			prompt,
@@ -145,6 +141,8 @@ export class CounterRemoveSubCommand extends BaseCommandClass(
 					sheet: activeCharacter.sheetRecord.sheet,
 				}
 			);
+			// Trigger adjusted_sheet recomputation
+			koboldUtils.adjustedSheetService.triggerRecompute(activeCharacter.sheetRecord.id);
 			await InteractionUtils.send(
 				intr,
 				CounterDefinition.strings.removed({

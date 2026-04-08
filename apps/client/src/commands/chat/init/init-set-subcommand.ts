@@ -61,9 +61,10 @@ export class InitSetSubCommand extends BaseCommandClass(
 			return;
 		}
 		const koboldUtils = new KoboldUtils(kobold);
-		let { currentInitiative } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
-			currentInitiative: true,
-		});
+		let { currentInitiativeLite: currentInitiative } =
+			await koboldUtils.fetchNonNullableDataForCommand(intr, {
+				currentInitiativeLite: true,
+			});
 
 		const actor = await InitiativeBuilderUtils.getNameMatchActorFromInitiative(
 			intr.user.id,
@@ -140,13 +141,22 @@ export class InitSetSubCommand extends BaseCommandClass(
 				// if this is NOT a character's sheet, we should update
 				// the name on the sheet as well.
 				if (!actor.characterId) {
-					actor.sheetRecord.sheet.staticInfo.name = finalValue;
-					await kobold.sheetRecord.update(
-						{ id: actor.sheetRecordId },
-						{
-							sheet: actor.sheetRecord.sheet,
-						}
-					);
+					// Read the base sheet record (lite initiative only has
+					// the cached/adjusted sheet, not the raw base sheet)
+					const baseSheetRecord = await kobold.sheetRecord.read({
+						id: actor.sheetRecordId,
+					});
+					if (baseSheetRecord) {
+						baseSheetRecord.sheet.staticInfo.name = finalValue;
+						await kobold.sheetRecord.update(
+							{ id: actor.sheetRecordId },
+							{
+								sheet: baseSheetRecord.sheet,
+							}
+						);
+					}
+					// Trigger adjusted_sheet recomputation
+					koboldUtils.adjustedSheetService.triggerRecompute(actor.sheetRecordId);
 				}
 			}
 		} else if (fieldToChange === 'hide-stats') {
@@ -158,9 +168,10 @@ export class InitSetSubCommand extends BaseCommandClass(
 			);
 		}
 
-		({ currentInitiative } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
-			currentInitiative: true,
-		}));
+		({ currentInitiativeLite: currentInitiative } =
+			await koboldUtils.fetchNonNullableDataForCommand(intr, {
+				currentInitiativeLite: true,
+			}));
 
 		const updateEmbed = new KoboldEmbed();
 		updateEmbed.setTitle(
@@ -175,6 +186,7 @@ export class InitSetSubCommand extends BaseCommandClass(
 
 		const initBuilder = new InitiativeBuilder({
 			initiative: currentInitiative,
+			useCachedSheets: true,
 		});
 		if (currentInitiative.currentRound === 0) {
 			await InitiativeBuilderUtils.sendNewRoundMessage(intr, initBuilder);

@@ -19,6 +19,9 @@ export class HelpCommandsSubCommand extends BaseCommandClass(
 		const embed = new KoboldEmbed();
 		embed.setThumbnail(helpLinks.thumbnail);
 		embed.setTitle(helpContent.commands.title);
+		if (helpContent.commands.description) {
+			embed.setDescription(helpContent.commands.description);
+		}
 
 		// Build fields for each command and its subcommands from documentation
 		const fields: { name: string; value: string }[] = [];

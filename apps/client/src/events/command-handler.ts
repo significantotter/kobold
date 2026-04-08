@@ -141,12 +141,12 @@ export class CommandHandler implements EventHandler {
 				intr.channel instanceof TextChannel ||
 					intr.channel instanceof NewsChannel ||
 					intr.channel instanceof ThreadChannel
-					? `[${intr.id}] An error occurred while executing the '${commandName}' autocomplete` +
-							` on the '${commandName}' command for user '${intr.user.tag}' (${intr.user.id}) ` +
+					? `[${intr.id}] An error occurred while executing` +
+							` the '${commandName}' command for user '${intr.user.tag}' (${intr.user.id}) ` +
 							`in channel '${intr.channel.name}' (${intr.channel.id}) in guild` +
 							` '${intr.guild?.name ?? ''}' (${intr.guild?.id ?? ''}).`
-					: `[${intr.id}] An error occurred while executing the ` +
-							`'${commandName}' autocomplete on the '${commandName}' command ` +
+					: `[${intr.id}] An error occurred while executing ` +
+							`the '${commandName}' command ` +
 							`for user '${intr.user.tag}' (${intr.user.id}).`,
 				error
 			);

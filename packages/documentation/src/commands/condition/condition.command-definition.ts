@@ -1,5 +1,6 @@
 import { ApplicationCommandOptionType, ApplicationCommandType } from 'discord-api-types/v10';
 import type { CommandDefinition } from '../helpers/commands.types.js';
+import { CommandDeferType } from '../helpers.js';
 import {
 	ConditionCommandOptionEnum,
 	conditionCommandOptions,
@@ -121,6 +122,7 @@ export const conditionCommandDefinition = {
 			name: ConditionSubCommandEnum.remove,
 			description: 'Removes a condition from a target',
 			type: ApplicationCommandOptionType.Subcommand,
+			deferType: CommandDeferType.HIDDEN,
 			options: {
 				[ConditionCommandOptionEnum.targetCharacter]: withOrder(
 					conditionCommandOptions[ConditionCommandOptionEnum.targetCharacter],

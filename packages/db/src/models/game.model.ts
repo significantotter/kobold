@@ -1,11 +1,21 @@
 import { ExpressionBuilder, Kysely, OperandExpression, SqlBool } from 'kysely';
 import { jsonArrayFrom } from 'kysely/helpers/postgres';
 import {
+	actionsForCharacter,
 	channelDefaultCharacterForCharacter,
 	guildDefaultCharacterForCharacter,
+	modifiersForCharacter,
+	rollMacrosForCharacter,
 	sheetRecordForCharacter,
 } from '../lib/shared-relation-builders.js';
-import { Database, GameId, GameUpdate, GameWithRelations, NewGame } from '../schemas/index.js';
+import {
+	Database,
+	GameId,
+	GameUpdate,
+	GameWithCharactersLite,
+	GameWithRelations,
+	NewGame,
+} from '../schemas/index.js';
 import { Model } from './model.js';
 
 export function charactersForGame(
@@ -20,6 +30,39 @@ export function charactersForGame(
 				channelDefaultCharacterForCharacter(ebCharacter, { userId }),
 				guildDefaultCharacterForCharacter(ebCharacter, { guildId, userId }),
 				sheetRecordForCharacter(ebCharacter),
+				actionsForCharacter(ebCharacter),
+				modifiersForCharacter(ebCharacter),
+				rollMacrosForCharacter(ebCharacter),
+			])
+			.whereRef('character.gameId', '=', 'game.id')
+	).as('characters');
+}
+
+/**
+ * Lightweight variant — selects only identity/status columns per character,
+ * plus channelDefaultCharacters and guildDefaultCharacters.
+ * Drops sheetRecord, actions, modifiers, and rollMacros (~80 % size reduction).
+ */
+export function charactersForGameLite(
+	eb: ExpressionBuilder<Database, 'game'>,
+	{ guildId, userId }: { guildId?: string; userId?: string } = {}
+) {
+	return jsonArrayFrom(
+		eb
+			.selectFrom('character')
+			.select([
+				'character.id',
+				'character.name',
+				'character.userId',
+				'character.sheetRecordId',
+				'character.isActiveCharacter',
+				'character.charId',
+				'character.importSource',
+				'character.gameId',
+			])
+			.select(ebCharacter => [
+				channelDefaultCharacterForCharacter(ebCharacter, { userId }),
+				guildDefaultCharacterForCharacter(ebCharacter, { guildId, userId }),
 			])
 			.whereRef('character.gameId', '=', 'game.id')
 	).as('characters');
@@ -79,6 +122,47 @@ export class GameModel extends Model<Database['game']> {
 		return (await query.execute()) as unknown as GameWithRelations[];
 	}
 
+	/**
+	 * Lightweight readMany — same filters as readMany but characters only include
+	 * identity/status columns plus channel/guild defaults. No sheetRecord,
+	 * actions, modifiers, or rollMacros are loaded.
+	 */
+	public async readManyLite({
+		guildId,
+		userId,
+		gmUserId,
+		name,
+	}: {
+		guildId?: string;
+		userId?: string;
+		gmUserId?: string;
+		name?: string;
+	}): Promise<GameWithCharactersLite[]> {
+		let query = this.db
+			.selectFrom('game')
+			.selectAll('game')
+			.select(eb => [charactersForGameLite(eb, { guildId, userId })])
+			.where(({ eb, or, and }) => {
+				const ors: OperandExpression<SqlBool>[] = [];
+				const ands: OperandExpression<SqlBool>[] = [];
+				if (gmUserId !== undefined) {
+					ors.push(eb(`gmUserId`, '=', gmUserId));
+				}
+				if (name !== undefined) {
+					ands.push(eb(`name`, 'ilike', name));
+				}
+				if (guildId !== undefined) {
+					ands.push(eb(`guildId`, '=', guildId));
+				}
+				if (ors.length) {
+					ands.push(or(ors));
+				}
+				return and(ands);
+			});
+
+		return (await query.execute()) as unknown as GameWithCharactersLite[];
+	}
+
 	public async read({ id }: { id: GameId }): Promise<GameWithRelations | null> {
 		const game = await this.db
 			.selectFrom('game')
@@ -114,22 +198,17 @@ export class GameModel extends Model<Database['game']> {
 		},
 		args: GameUpdate
 	): Promise<GameWithRelations[]> {
-		const result = await this.db
-			.updateTable('game')
-			.set(args)
-			.where(({ eb, or }) => {
-				const ebs = [];
-				if (guildId !== undefined) {
-					ebs.push(eb(`guildId`, '=', guildId));
-				}
-				if (gmUserId !== undefined) {
-					ebs.push(eb(`gmUserId`, '=', gmUserId));
-				}
-				if (name !== undefined) {
-					ebs.push(eb(`name`, 'ilike', name));
-				}
-				return or(ebs);
-			})
+		let query = this.db.updateTable('game').set(args);
+		if (guildId !== undefined) {
+			query = query.where('guildId', '=', guildId);
+		}
+		if (gmUserId !== undefined) {
+			query = query.where('gmUserId', '=', gmUserId);
+		}
+		if (name !== undefined) {
+			query = query.where('name', 'ilike', name);
+		}
+		const result = await query
 			.returningAll()
 			.returning(eb => [charactersForGame(eb, { guildId })])
 			.execute();

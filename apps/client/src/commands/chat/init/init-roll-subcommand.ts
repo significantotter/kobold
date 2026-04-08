@@ -194,7 +194,7 @@ export class InitRollSubCommand extends BaseCommandClass(
 				embed.addFields(damageField);
 			}
 		} else if (['check', 'skill', 'ability', 'save', 'spell'].includes(targetRoll.type)) {
-			const response = await RollBuilder.fromSimpleCreatureRoll({
+			const response = RollBuilder.fromSimpleCreatureRoll({
 				userName: intr.user.username,
 				actorName: actor.name,
 				creature,

@@ -6,7 +6,6 @@ import {
 	CacheType,
 	ChatInputCommandInteraction,
 	ComponentType,
-	MessageFlags,
 } from 'discord.js';
 
 import _ from 'lodash';
@@ -76,7 +75,7 @@ export class ModifierRemoveSubCommand extends BaseCommandClass(
 		if (targetModifier) {
 			// ask for confirmation
 
-			const response = await intr.reply({
+			const prompt = await intr.editReply({
 				content: ModifierDefinition.strings.remove.confirmation.text({
 					modifierName: targetModifier.name,
 				}),
@@ -99,10 +98,7 @@ export class ModifierRemoveSubCommand extends BaseCommandClass(
 						],
 					},
 				],
-				flags: [MessageFlags.Ephemeral],
-				withResponse: true,
 			});
-			const prompt = response.resource!.message!;
 			let timedOut = false;
 			let result = await CollectorUtils.collectByButton(
 				prompt,
@@ -144,6 +140,13 @@ export class ModifierRemoveSubCommand extends BaseCommandClass(
 			// remove the modifier
 			if (result && result.value === 'remove') {
 				await kobold.modifier.delete({ id: targetModifier.id });
+
+				// Trigger adjusted_sheet recomputation
+				if (targetModifier.sheetRecordId !== null) {
+					koboldUtils.adjustedSheetService.triggerRecompute(targetModifier.sheetRecordId);
+				} else {
+					koboldUtils.adjustedSheetService.triggerRecomputeAllForUser(intr.user.id);
+				}
 
 				await InteractionUtils.send(
 					intr,

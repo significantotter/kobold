@@ -79,7 +79,11 @@ export class PasteBinCharacterFetcher extends CharacterFetcher<
 		},
 		activeCharacter?: CharacterWithRelations
 	): SheetConversionResult {
-		const finalActions: Action[] = activeCharacter?.actions ?? [];
+		// Filter to character-specific items only (sheetRecordId is not null)
+		// to avoid duplicating user-wide items during the update flow
+		const finalActions: Action[] = (activeCharacter?.actions ?? []).filter(
+			a => a.sheetRecordId != null
+		);
 		for (const action of sourceData.actions) {
 			const existingAction = finalActions.findIndex(a => a.name === action.name);
 			if (existingAction > -1) {
@@ -88,7 +92,9 @@ export class PasteBinCharacterFetcher extends CharacterFetcher<
 				finalActions.push(action);
 			}
 		}
-		const finalModifiers: Modifier[] = activeCharacter?.modifiers ?? [];
+		const finalModifiers: Modifier[] = (activeCharacter?.modifiers ?? []).filter(
+			m => m.sheetRecordId != null
+		);
 		for (const modifier of sourceData.modifiers) {
 			const existingModifier = finalModifiers.findIndex(a => a.name === modifier.name);
 			if (existingModifier > -1) {
@@ -97,7 +103,9 @@ export class PasteBinCharacterFetcher extends CharacterFetcher<
 				finalModifiers.push(modifier);
 			}
 		}
-		const finalRollMacros: RollMacro[] = activeCharacter?.rollMacros ?? [];
+		const finalRollMacros: RollMacro[] = (activeCharacter?.rollMacros ?? []).filter(
+			rm => rm.sheetRecordId != null
+		);
 		for (const rollMacro of sourceData.rollMacros) {
 			const existingRollMacro = finalRollMacros.findIndex(a => a.name === rollMacro.name);
 			if (existingRollMacro > -1) {

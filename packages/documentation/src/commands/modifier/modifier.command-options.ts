@@ -173,7 +173,7 @@ export const modifierCommandOptions = {
 	},
 	[ModifierCommandOptionEnum.createFor]: {
 		name: ModifierCommandOptionEnum.createFor,
-		description: 'Create for a specific character/minion, or "Me" for user-wide (default: Me)',
+		description: 'Create for a specific character/minion, or "Me" for unassigned (default: Me)',
 		required: false,
 		autocomplete: true,
 		type: ApplicationCommandOptionType.String,
@@ -187,7 +187,7 @@ export const modifierCommandOptions = {
 	},
 	[ModifierCommandOptionEnum.assignTo]: {
 		name: ModifierCommandOptionEnum.assignTo,
-		description: 'The character or minion to assign the modifier to, or "Me" for user-wide.',
+		description: 'The character or minion to assign the modifier to, or "Me" for unassigned.',
 		required: true,
 		autocomplete: true,
 		type: ApplicationCommandOptionType.String,

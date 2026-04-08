@@ -1,6 +1,12 @@
 import { zNewSheetRecord } from '../index.js';
 import _ from 'lodash';
-import { truncateDbForTests, vitestKobold, ResourceFactories, fake } from '../test-utils.js';
+import {
+	truncateDbForTests,
+	vitestKobold,
+	ResourceFactories,
+	fake,
+	stripUndefined,
+} from '../test-utils.js';
 
 describe('SheetRecordModel', () => {
 	afterEach(async () => {
@@ -8,7 +14,8 @@ describe('SheetRecordModel', () => {
 	});
 	describe('create, read', () => {
 		it('creates a new sheetRecord, reads it, and returns the sheetRecord plus relations', async () => {
-			const fakeSheetRecordMock = fake(zNewSheetRecord);
+			const fakeSheetRecordMock = stripUndefined(fake(zNewSheetRecord));
+			delete fakeSheetRecordMock.id;
 
 			const created = await vitestKobold.sheetRecord.create(fakeSheetRecordMock);
 			const read = await vitestKobold.sheetRecord.read({ id: created.id });

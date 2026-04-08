@@ -86,6 +86,12 @@ export class CompendiumSearchSubCommand extends BaseCommandClass(
 
 		const bestResult = searchResults.sort(closestMatchSorter)[0];
 
+		if (!bestResult) {
+			throw new KoboldError(
+				"Yip! I couldn't find any results for that search in the compendium."
+			);
+		}
+
 		let parsedMarkdownResult = await new NethysParser().parseCompendiumEntry(bestResult.data);
 		parsedMarkdownResult = parsedMarkdownResult
 			.replaceAll(NethysEmoji.oneAction, getEmoji(intr, ActionCostEnum.oneAction))

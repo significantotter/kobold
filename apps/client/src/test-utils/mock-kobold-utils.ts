@@ -260,6 +260,10 @@ export function setupKoboldUtilsMocks(options: MockCharacterOptions = {}): Kobol
 		this.autocompleteUtils = {
 			getUserCharactersAndMinions: getUserCharactersAndMinionsMock,
 		};
+		this.adjustedSheetService = {
+			triggerRecompute: vi.fn(),
+			triggerRecomputeAllForUser: vi.fn(),
+		};
 		return this;
 	} as MockReturnValue);
 
@@ -573,6 +577,7 @@ export function setupCharacterUtilsMocks(
 	vi.mocked(KoboldUtils).mockImplementation(function (this: any) {
 		this.characterUtils = {
 			findOwnedCharacterByName: findOwnedCharacterMock,
+			findOwnedCharacterByNameLite: findOwnedCharacterMock,
 		};
 		return this;
 	} as MockReturnValue);
@@ -692,7 +697,7 @@ export interface GameUtilsMockSetup {
  */
 export function setupGameUtilsMocks(options: GameUtilsMockOptions = {}): GameUtilsMockSetup {
 	const {
-		targetSheetRecord = fake(zSheetRecord),
+		targetSheetRecord = { ...fake(zSheetRecord), adjustedSheet: null },
 		targetName = 'Test Character',
 		hideStats = false,
 		targetNotFound = false,
@@ -787,6 +792,7 @@ export function setupConditionMocks(options: ConditionMockOptions = {}): Conditi
 	const baseSheetRecord = gameUtilsOptions.targetSheetRecord ?? fake(zSheetRecord);
 	const sheetRecordWithConditions: SheetRecord = {
 		...baseSheetRecord,
+		adjustedSheet: null,
 		conditions,
 	};
 
@@ -818,6 +824,7 @@ export function setupConditionAutocompleteMocks(
 	const baseSheetRecord = gameUtilsOptions.targetSheetRecord ?? fake(zSheetRecord);
 	const sheetRecordWithConditions: SheetRecord = {
 		...baseSheetRecord,
+		adjustedSheet: null,
 		conditions,
 	};
 
@@ -912,6 +919,7 @@ export function createMockSheetRecord(overrides: Partial<SheetRecord> = {}): She
 		trackerMessageId: null,
 		trackerChannelId: null,
 		trackerGuildId: null,
+		adjustedSheet: null,
 		...overrides,
 	};
 }

@@ -1,0 +1,20 @@
+{
+	"name": "@kobold/end-to-end-tests",
+	"version": "1.0.0",
+	"description": "Playwright end-to-end tests for the Kobold Discord bot",
+	"license": "MIT",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"test": "playwright test",
+		"test:headed": "playwright test --headed",
+		"test:debug": "playwright test --debug",
+		"codegen": "playwright codegen https://discord.com",
+		"install-browsers": "playwright install chromium"
+	},
+	"devDependencies": {
+		"@playwright/test": "^1.52.0",
+		"dotenv": "^17.2.3",
+		"typescript": "^5.9.3"
+	}
+}

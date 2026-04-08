@@ -3,9 +3,35 @@ import pg from 'pg';
 import _ from 'lodash';
 import { Config } from '@kobold/config';
 import { fake } from 'zod-schema-faker/v4';
+import { faker } from '@faker-js/faker';
 
 // Re-export fake for use in tests (setFaker is called in vitest.setup.ts)
 export { fake };
+
+/** Generate a PostgreSQL-safe integer (fits in int4 column) */
+export function safeInt(min = 1, max = 2147483647): number {
+	return faker.number.int({ min, max });
+}
+
+/** Recursively strip undefined values from objects (prevents toMatchObject false negatives with DB defaults) */
+export function stripUndefined<T extends Record<string, any>>(obj: T): Partial<T> {
+	const result: Record<string, any> = {};
+	for (const [key, value] of Object.entries(obj)) {
+		if (value === undefined) continue;
+		if (Array.isArray(value)) {
+			result[key] = value.map(item =>
+				item !== null && typeof item === 'object' && !Array.isArray(item)
+					? stripUndefined(item)
+					: item
+			);
+		} else if (value !== null && typeof value === 'object' && !(value instanceof Date)) {
+			result[key] = stripUndefined(value);
+		} else {
+			result[key] = value;
+		}
+	}
+	return result as Partial<T>;
+}
 
 import {
 	ChannelDefaultCharacter,
@@ -80,13 +106,17 @@ export class ResourceFactories {
 		delete fakeCharacterMock.id;
 		delete fakeCharacterMock.createdAt;
 		delete fakeCharacterMock.lastUpdatedAt;
-		return await vitestKobold.character.create({
+		const { id } = await vitestKobold.character.createReturningId({
 			...fakeCharacterMock,
 			...partialCharacter,
 			sheetRecordId,
 			gameId,
+			charId: partialCharacter?.charId ?? safeInt(),
 			importSource: (partialCharacter?.importSource ?? 'pathbuilder') as ImportSourceEnum,
 		});
+		const character = await vitestKobold.character.read({ id });
+		if (!character) throw new Error(`Failed to read back created character ${id}`);
+		return character;
 	}
 	public static async channelDefaultCharacter(
 		partialChannelDefaultCharacter?: Partial<ChannelDefaultCharacter>
@@ -127,10 +157,13 @@ export class ResourceFactories {
 		const fakeInitiativeMock = fake(zNewInitiative);
 		const currentTurnGroupId = partialInitiative?.currentTurnGroupId ?? null;
 		delete fakeInitiativeMock.id;
+		delete fakeInitiativeMock.createdAt;
+		delete fakeInitiativeMock.lastUpdatedAt;
 		return await vitestKobold.initiative.create({
 			...fakeInitiativeMock,
 			...partialInitiative,
 			currentTurnGroupId,
+			currentRound: partialInitiative?.currentRound ?? 1,
 		});
 	}
 
@@ -146,6 +179,9 @@ export class ResourceFactories {
 			partialInitiativeActor?.sheetRecordId ?? (await ResourceFactories.sheetRecord()).id;
 		const fakeInitiativeActorMock = fake(zNewInitiativeActor);
 		delete fakeInitiativeActorMock.id;
+		delete fakeInitiativeActorMock.createdAt;
+		delete fakeInitiativeActorMock.lastUpdatedAt;
+		delete fakeInitiativeActorMock.minionId;
 		return await vitestKobold.initiativeActor.create({
 			...fakeInitiativeActorMock,
 			...partialInitiativeActor,
@@ -164,10 +200,13 @@ export class ResourceFactories {
 			partialInitiativeActorGroup?.initiativeId ?? (await ResourceFactories.initiative()).id;
 		const fakeInitiativeActorGroupMock = fake(zNewInitiativeActorGroup);
 		delete fakeInitiativeActorGroupMock.id;
+		delete fakeInitiativeActorGroupMock.createdAt;
+		delete fakeInitiativeActorGroupMock.lastUpdatedAt;
 		return await vitestKobold.initiativeActorGroup.create({
 			...fakeInitiativeActorGroupMock,
 			...partialInitiativeActorGroup,
 			initiativeId,
+			initiativeResult: partialInitiativeActorGroup?.initiativeResult ?? safeInt(1, 30),
 		});
 	}
 	public static async userSettings(partialUserSettings?: Partial<UserSettings>) {
@@ -186,9 +225,12 @@ export class ResourceFactories {
 	}
 	public static async wgAuthToken(partialWgAuthToken?: Partial<WgAuthToken>) {
 		const fakeWgAuthTokenMock = fake(zNewWgAuthToken);
+		delete fakeWgAuthTokenMock.id;
 		return await vitestKobold.wgAuthToken.create({
 			...fakeWgAuthTokenMock,
 			...partialWgAuthToken,
+			charId: partialWgAuthToken?.charId ?? safeInt(),
+			expiresAt: partialWgAuthToken?.expiresAt ?? faker.date.future(),
 		});
 	}
 }

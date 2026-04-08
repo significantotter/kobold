@@ -37,7 +37,7 @@ export class GameplayTrackerSubCommand extends BaseCommandClass(
 
 			//get the character matches
 			const { characterUtils } = new KoboldUtils(kobold);
-			const options = await characterUtils.findOwnedCharacterByName(match, intr.user.id);
+			const options = await characterUtils.findOwnedCharacterByNameLite(match, intr.user.id);
 
 			//return the matched characters
 			return options.map(character => ({

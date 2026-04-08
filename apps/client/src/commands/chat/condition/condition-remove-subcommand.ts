@@ -6,7 +6,6 @@ import {
 	CacheType,
 	ChatInputCommandInteraction,
 	ComponentType,
-	MessageFlags,
 } from 'discord.js';
 
 import _ from 'lodash';
@@ -67,8 +66,8 @@ export class ConditionRemoveSubCommand extends BaseCommandClass(
 			commandOptions[commandOptionsEnum.targetCharacter].name,
 			true
 		);
-		const { gameUtils } = new KoboldUtils(kobold);
-		const { targetSheetRecord } = await gameUtils.getCharacterOrInitActorTarget(
+		const koboldUtils = new KoboldUtils(kobold);
+		const { targetSheetRecord } = await koboldUtils.gameUtils.getCharacterOrInitActorTarget(
 			intr,
 			targetCharacterName
 		);
@@ -79,7 +78,7 @@ export class ConditionRemoveSubCommand extends BaseCommandClass(
 		if (targetCondition) {
 			// ask for confirmation
 
-			const response = await intr.reply({
+			const prompt = await intr.editReply({
 				content: ConditionDefinition.strings.remove.confirmation.text({
 					conditionName: targetCondition.name,
 				}),
@@ -102,10 +101,7 @@ export class ConditionRemoveSubCommand extends BaseCommandClass(
 						],
 					},
 				],
-				flags: [MessageFlags.Ephemeral],
-				withResponse: true,
 			});
-			const prompt = response.resource!.message!;
 			let timedOut = false;
 			let result = await CollectorUtils.collectByButton(
 				prompt,
@@ -157,6 +153,9 @@ export class ConditionRemoveSubCommand extends BaseCommandClass(
 						conditions: conditionsWithoutRemoved,
 					}
 				);
+
+				// Trigger adjusted_sheet recomputation
+				koboldUtils.adjustedSheetService.triggerRecompute(targetSheetRecord.id);
 
 				await InteractionUtils.send(
 					intr,

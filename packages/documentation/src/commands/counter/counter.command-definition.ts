@@ -1,5 +1,6 @@
 import { APIApplicationCommandOption, ApplicationCommandType } from 'discord-api-types/v10';
 import type { CommandDefinition } from '../helpers/commands.types.js';
+import { CommandDeferType } from '../helpers.js';
 import { CounterCommandOptionEnum, counterCommandOptions } from './counter.command-options.js';
 import { anyUsageContext } from '../helpers/defaults.js';
 import { withOrder } from '../helpers/common.js';
@@ -202,6 +203,7 @@ export const counterCommandDefinition = {
 			name: CounterSubCommandEnum.remove,
 			description: 'Removes a counter for the active character.',
 			type: ApplicationCommandType.ChatInput,
+			deferType: CommandDeferType.HIDDEN,
 			options: {
 				[CounterCommandOptionEnum.counterName]: withOrder(
 					counterCommandOptions[
