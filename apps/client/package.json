@@ -49,6 +49,7 @@
 		"@kobold/config": "workspace:*",
 		"@kobold/db": "workspace:*",
 		"@kobold/documentation": "workspace:*",
+		"@kobold/sheet": "workspace:*",
 		"@kobold/nethys": "workspace:*",
 		"@traversable/zod": "^0.0.57",
 		"axios": "^1.13.2",

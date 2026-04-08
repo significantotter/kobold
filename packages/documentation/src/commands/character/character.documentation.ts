@@ -19,10 +19,13 @@ export const characterCommandDocumentation: CommandDocumentation<
 				{
 					title: 'Success',
 					type: CommandResponseTypeEnum.success,
-					message: 'Character imported successfully.',
-					options: {
-						['wg-url']: 'https://www.wanderersguide.app/characters/1234567890',
-					},
+					message:
+						`Yip! Wanderer's Guide imports use the Kobold web app.\n\n` +
+						`**How to import:**\n` +
+						`1. Export your character from [Wanderer's Guide](https://wanderersguide.app) as JSON\n` +
+						`2. Visit **https://kobold.tools/import-character?source=wanderers-guide** and log in with Discord\n` +
+						`3. Upload the JSON file on the Import page`,
+					options: {},
 				},
 			],
 		},

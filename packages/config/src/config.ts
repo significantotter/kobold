@@ -15,6 +15,9 @@ interface config {
 		caches: { [k: string]: number };
 		inviteUrl: string;
 	};
+	web: {
+		frontendBaseUrl: string;
+	};
 	wanderersGuide: {
 		apiKey: string;
 		oauthBaseUrl: string;
@@ -178,6 +181,9 @@ export const Config: config = Object.freeze({
 			VoiceStateManager: 0,
 		},
 		inviteUrl: env.CLIENT_INVITE_URL ?? '',
+	},
+	web: {
+		frontendBaseUrl: env.FRONTEND_BASE_URL ?? 'http://localhost:5173',
 	},
 	wanderersGuide: {
 		apiKey: env.WANDERERS_GUIDE_API_KEY ?? '',

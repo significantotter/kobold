@@ -36,7 +36,7 @@ describe('InitStatBlockSubCommand Integration', () => {
 		const existingInit = createMockInitiativeWithActors(2);
 		const { fetchNonNullableDataMock } = setupKoboldUtilsMocks();
 		fetchNonNullableDataMock.mockResolvedValue({
-			currentInitiative: existingInit,
+			currentInitiativeLite: existingInit,
 			userSettings: {},
 		});
 

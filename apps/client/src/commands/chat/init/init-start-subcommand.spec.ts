@@ -31,7 +31,7 @@ describe('InitStartSubCommand Integration', () => {
 		const existingInit = createMockInitiative();
 		const { fetchDataMock } = setupKoboldUtilsMocks();
 		fetchDataMock.mockResolvedValue({
-			currentInitiative: existingInit,
+			currentInitiativeLite: existingInit,
 			userSettings: {},
 		});
 

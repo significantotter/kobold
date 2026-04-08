@@ -98,7 +98,10 @@ export class ActionStageAddAdvancedDamageSubCommand extends BaseCommandClass(
 			!criticalFailureDiceRoll &&
 			!failureDiceRoll
 		) {
-			await InteractionUtils.send(intr, ActionStageDefinition.strings.rollAlreadyExists);
+			await InteractionUtils.send(
+				intr,
+				'Yip! You must provide at least one dice roll for an advanced damage stage!'
+			);
 			return;
 		}
 

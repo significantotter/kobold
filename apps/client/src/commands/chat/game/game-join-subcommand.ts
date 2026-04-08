@@ -61,7 +61,7 @@ export class GameJoinSubCommand extends BaseCommandClass(
 
 		const koboldUtils = new KoboldUtils(kobold);
 
-		const targetGames = await kobold.game.readMany({
+		const targetGames = await kobold.game.readManyLite({
 			guildId: intr.guildId,
 			name: gameName,
 		});
@@ -89,7 +89,7 @@ export class GameJoinSubCommand extends BaseCommandClass(
 		}
 
 		// Add character to game
-		await kobold.character.update({ id: activeCharacter.id }, { gameId: targetGame.id });
+		await kobold.character.updateFields({ id: activeCharacter.id }, { gameId: targetGame.id });
 
 		await InteractionUtils.send(
 			intr,

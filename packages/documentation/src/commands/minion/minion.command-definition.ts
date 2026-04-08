@@ -1,5 +1,6 @@
 import { ApplicationCommandOptionType, ApplicationCommandType } from 'discord-api-types/v10';
 import type { CommandDefinition } from '../helpers/commands.types.js';
+import { CommandDeferType } from '../helpers.js';
 import { anyUsageContext } from '../helpers/defaults.js';
 import { MinionCommandOptionEnum, minionCommandOptions } from './minion.command-options.js';
 import { withOrder } from '../helpers/common.js';
@@ -130,6 +131,7 @@ export const minionCommandDefinition = {
 			name: MinionSubCommandEnum.remove,
 			description: 'Remove a minion',
 			type: ApplicationCommandOptionType.Subcommand,
+			deferType: CommandDeferType.HIDDEN,
 			options: {
 				[MinionCommandOptionEnum.minion]: withOrder(
 					minionCommandOptions[MinionCommandOptionEnum.minion],

@@ -4,7 +4,7 @@ import { RPCLink } from '@orpc/client/fetch';
 import type { AppRouter } from '../../server/router.js';
 
 const link = new RPCLink({
-	url: '/api',
+	url: () => new URL('/api', window.location.origin).href,
 	fetch: (input, init) => globalThis.fetch(input, { ...init, credentials: 'include' }),
 });
 

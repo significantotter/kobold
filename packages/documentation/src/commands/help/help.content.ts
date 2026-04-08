@@ -98,7 +98,7 @@ export const helpContent = {
 				value:
 					"Import characters from Wanderer's Guide\n\n" +
 					"Roll dice for your character's stats\n\n" +
-					'Track characters and NPCs through rounds of initiative' +
+					'Track characters and NPCs through rounds of initiative\n\n' +
 					'Create custom, configurable, rollable actions\n\n' +
 					'Use flexible modifiers to track bonuses and penalties to dice roll\n\n',
 			},
@@ -165,7 +165,7 @@ export const helpContent = {
 			'Conditions are temporary modifiers that you apply to targets and later ' +
 			'Remove. They operate very similarly to modifiers, and you can use ' +
 			'modifiers from your own characters as templates to apply conditions ' +
-			'(using the `/condition apply-modifier` command). You can also make them' +
+			'(using the `/condition apply-modifier` command). You can also make them ' +
 			'from scratch using the `/condition apply-custom` command. ' +
 			'Just like modifiers, conditions have severity values.',
 	} satisfies HelpEmbedContent,
@@ -174,8 +174,8 @@ export const helpContent = {
 		title: '/modifier Commands',
 		description:
 			'Modifiers are ways of applying bonuses or penalties to your sheet or rolls or just ' +
-			'straight up changing values on your sheet itself.' +
-			'All modifiers can be toggled, and roll modifiers can be conditional based on the type of the roll.' +
+			'straight up changing values on your sheet itself. ' +
+			'All modifiers can be toggled, and roll modifiers can be conditional based on the type of the roll. ' +
 			'Sheet modifiers and Roll modifiers are typed (or untyped), but ' +
 			'these types DO NOT interact with each other. A +1 circumstance sheet modifier to ' +
 			'athletics will stack with a +1 circumstance roll modifier to athletics. Be careful mixing them!',

@@ -1,0 +1,15 @@
+{
+	"extends": "../../tsconfig.base.json",
+	"compilerOptions": {
+		"lib": ["es2023"],
+		"target": "ESNext",
+		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
+		"sourceMap": true,
+		"rootDir": ".",
+		"outDir": "dist",
+		"types": []
+	},
+	"include": ["tests/**/*", "playwright.config.ts"],
+	"exclude": ["dist", "node_modules"]
+}

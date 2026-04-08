@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { Config } from '@kobold/config';
-import { Kobold, getDialect } from '@kobold/db';
+import { kobold } from '../services.js';
 
 const FRONTEND_URL = process.env.FRONTEND_BASE_URL || 'http://localhost:5173';
 const WG_BASE = 'https://legacy.wanderersguide.app/api';
@@ -83,8 +83,6 @@ wgOauthRoute.get('/callback', async c => {
 		}
 
 		// Store the token in the database
-		const dialect = getDialect(Config.database.url);
-		const kobold = new Kobold(dialect);
 		await kobold.wgAuthToken.create({
 			charId: tokenData.char_id,
 			accessToken: tokenData.access_token,

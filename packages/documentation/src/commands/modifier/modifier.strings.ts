@@ -38,7 +38,7 @@ export const modifierStrings = {
 		),
 		createdUserWide: msg(
 			(p: { modifierName: string }) =>
-				`Yip! I created the modifier ${p.modifierName} for all your characters.`
+				`Yip! I created the modifier ${p.modifierName} as an unassigned modifier. Assign it to a character or minion to use it.`
 		),
 	},
 
@@ -50,7 +50,7 @@ export const modifierStrings = {
 		),
 		successUserWide: msg(
 			(p: { modifierName: string }) =>
-				`Yip! I made the modifier ${p.modifierName} available to all your characters.`
+				`Yip! I unassigned the modifier ${p.modifierName}. It won't apply to any character until reassigned.`
 		),
 		copied: msg(
 			(p: { modifierName: string; targetName: string }) =>
@@ -58,7 +58,7 @@ export const modifierStrings = {
 		),
 		copiedUserWide: msg(
 			(p: { modifierName: string }) =>
-				`Yip! I copied the modifier ${p.modifierName} for all your characters.`
+				`Yip! I copied the modifier ${p.modifierName} as an unassigned modifier. Assign it to a character or minion to use it.`
 		),
 		alreadyExists: msg(
 			(p: { modifierName: string; targetName: string }) =>

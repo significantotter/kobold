@@ -4,6 +4,7 @@ import {
 	actionsForActor,
 	modifiersForActor,
 	rollMacrosForActor,
+	sheetRecordCachedForActor,
 	sheetRecordForActor,
 } from '../lib/shared-relation-builders.js';
 import {
@@ -44,6 +45,21 @@ export function actorsForInitiative(eb: ExpressionBuilder<Database, 'initiative'
 				modifiersForActor(eb),
 				rollMacrosForActor(eb),
 			])
+			.whereRef('initiative.id', '=', 'initiativeActor.initiativeId')
+	).as('actors');
+}
+
+/**
+ * Lite variant of actorsForInitiative — fetches actors with COALESCE'd
+ * adjusted sheet (no raw sheet or adjusted_sheet), plus modifiers for note
+ * display. Suitable for display/turn management paths.
+ */
+export function actorsLiteForInitiative(eb: ExpressionBuilder<Database, 'initiative'>) {
+	return jsonArrayFrom(
+		eb
+			.selectFrom('initiativeActor')
+			.selectAll('initiativeActor')
+			.select(eb => [sheetRecordCachedForActor(eb), modifiersForActor(eb)])
 			.whereRef('initiative.id', '=', 'initiativeActor.initiativeId')
 	).as('actors');
 }
@@ -133,6 +149,29 @@ export class InitiativeModel extends Model<Database['initiative']> {
 			.select(eb => [
 				currentTurnGroupForInitiative(eb),
 				actorsForInitiative(eb),
+				actorGroupsForInitiative(eb),
+			])
+			.where('initiative.channelId', '=', channelId)
+			.execute();
+		return buildRelationFromQuery(result as unknown as InitiativeGraphQueryOutput[]);
+	}
+
+	/**
+	 * Lite variant — skips actions and rollMacros for each actor.
+	 * Use for display, turn management, and other paths that don't need
+	 * full mechanical data.
+	 */
+	public async readManyLite({
+		channelId,
+	}: {
+		channelId: string;
+	}): Promise<InitiativeWithRelations[]> {
+		const result = await this.db
+			.selectFrom('initiative')
+			.selectAll()
+			.select(eb => [
+				currentTurnGroupForInitiative(eb),
+				actorsLiteForInitiative(eb),
 				actorGroupsForInitiative(eb),
 			])
 			.where('initiative.channelId', '=', channelId)

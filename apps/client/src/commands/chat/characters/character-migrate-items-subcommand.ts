@@ -1,4 +1,4 @@
-import { ButtonStyle, ChatInputCommandInteraction, ComponentType, MessageFlags } from 'discord.js';
+import { ButtonStyle, ChatInputCommandInteraction, ComponentType } from 'discord.js';
 
 import { Kobold } from '@kobold/db';
 
@@ -51,7 +51,7 @@ export class CharacterMigrateItemsSubCommand extends BaseCommandClass(
 		}
 
 		// Show confirmation dialog
-		const response = await intr.reply({
+		const prompt = await intr.editReply({
 			content: CharacterDefinition.strings.migrateItems.confirmation.text({
 				actionsCount: actionsToMigrate.length,
 				modifiersCount: modifiersToMigrate.length,
@@ -78,10 +78,7 @@ export class CharacterMigrateItemsSubCommand extends BaseCommandClass(
 					],
 				},
 			],
-			flags: [MessageFlags.Ephemeral],
-			withResponse: true,
 		});
-		const prompt = response.resource!.message!;
 		let timedOut = false;
 		let result = await CollectorUtils.collectByButton(
 			prompt,

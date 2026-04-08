@@ -7,7 +7,7 @@ import {
 } from 'discord.js';
 import {
 	NewSheetRecord,
-	Character,
+	CharacterBasic,
 	CharacterWithRelations,
 	NewAction,
 	NewModifier,
@@ -45,9 +45,9 @@ export abstract class CharacterFetcher<SourceData, FetchArgs> {
 	public fetchDuplicateCharacter(
 		args: FetchArgs,
 		conversionResult: SheetConversionResult
-	): Promise<Character | null> {
-		return this.kobold.character.read({
-			name: conversionResult.sheetRecord.sheet.staticInfo.name,
+	): Promise<CharacterBasic | null> {
+		return this.kobold.character.readLite({
+			exactName: conversionResult.sheetRecord.sheet.staticInfo.name,
 			userId: this.userId,
 		});
 	}
@@ -57,7 +57,7 @@ export abstract class CharacterFetcher<SourceData, FetchArgs> {
 	): SheetConversionResult;
 	public abstract getCharId(args: FetchArgs): number;
 
-	public async create(args: FetchArgs): Promise<Character> {
+	public async create(args: FetchArgs): Promise<{ id: number; name: string }> {
 		const sourceData = await this.fetchSourceData(args);
 		const conversionResult = this.convertSheetRecord(sourceData);
 		const existingCharacter = await this.fetchDuplicateCharacter(args, conversionResult);
@@ -66,42 +66,53 @@ export abstract class CharacterFetcher<SourceData, FetchArgs> {
 				`Yip! You already have a character with the name "${existingCharacter.name}"!`
 			);
 		}
-		const createdSheetRecord = await this.kobold.sheetRecord.create(
-			conversionResult.sheetRecord
+
+		const { characterId, characterName, sheetRecordId } = await this.kobold.transaction(
+			async trx => {
+				const createdSheetRecord = await trx.sheetRecord.create(
+					conversionResult.sheetRecord
+				);
+
+				for (const action of conversionResult.actions) {
+					await trx.action.create({
+						...action,
+						sheetRecordId: createdSheetRecord.id,
+						userId: this.userId,
+					});
+				}
+				for (const modifier of conversionResult.modifiers) {
+					await trx.modifier.create({
+						...modifier,
+						sheetRecordId: createdSheetRecord.id,
+						userId: this.userId,
+					});
+				}
+				for (const rollMacro of conversionResult.rollMacros) {
+					await trx.rollMacro.create({
+						...rollMacro,
+						sheetRecordId: createdSheetRecord.id,
+						userId: this.userId,
+					});
+				}
+
+				const characterName = createdSheetRecord.sheet.staticInfo.name;
+				const { id: characterId } = await trx.character.createReturningId({
+					name: characterName,
+					userId: this.userId,
+					sheetRecordId: createdSheetRecord.id,
+					importSource: this.importSource,
+					charId: this.getCharId(args),
+				});
+				await trx.character.setIsActive({ id: characterId, userId: this.userId });
+				return { characterId, characterName, sheetRecordId: createdSheetRecord.id };
+			}
 		);
 
-		// Create the related entities with the sheetRecordId and userId
-		for (const action of conversionResult.actions) {
-			await this.kobold.action.create({
-				...action,
-				sheetRecordId: createdSheetRecord.id,
-				userId: this.userId,
-			});
-		}
-		for (const modifier of conversionResult.modifiers) {
-			await this.kobold.modifier.create({
-				...modifier,
-				sheetRecordId: createdSheetRecord.id,
-				userId: this.userId,
-			});
-		}
-		for (const rollMacro of conversionResult.rollMacros) {
-			await this.kobold.rollMacro.create({
-				...rollMacro,
-				sheetRecordId: createdSheetRecord.id,
-				userId: this.userId,
-			});
-		}
+		// Trigger adjusted_sheet recomputation after transaction commits
+		const koboldUtils = new KoboldUtils(this.kobold);
+		koboldUtils.adjustedSheetService.triggerRecompute(sheetRecordId);
 
-		const createdCharacter = await this.kobold.character.create({
-			name: createdSheetRecord.sheet.staticInfo.name,
-			userId: this.userId,
-			sheetRecordId: createdSheetRecord.id,
-			importSource: this.importSource,
-			charId: this.getCharId(args),
-		});
-		await this.kobold.character.setIsActive({ id: createdCharacter.id, userId: this.userId });
-		return createdCharacter;
+		return { id: characterId, name: characterName };
 	}
 	public async confirmUpdateName(oldName: string, newName: string) {
 		// confirm the update
@@ -191,7 +202,7 @@ export abstract class CharacterFetcher<SourceData, FetchArgs> {
 			});
 		}
 	}
-	public async update(args: FetchArgs): Promise<Character> {
+	public async update(args: FetchArgs): Promise<{ name: string }> {
 		const koboldUtils: KoboldUtils = new KoboldUtils(this.kobold);
 		const activeCharacter = await koboldUtils.characterUtils.getActiveCharacter(this.intr);
 		koboldUtils.assertActiveCharacterNotNull(activeCharacter);
@@ -212,42 +223,53 @@ export abstract class CharacterFetcher<SourceData, FetchArgs> {
 			activeCharacter.sheetRecord.sheet
 		);
 
-		const updatedSheetRecord = await this.kobold.sheetRecord.update(
-			{ id: activeCharacter.sheetRecordId },
-			conversionResult.sheetRecord
-		);
+		const { updatedName, sheetRecordId } = await this.kobold.transaction(async trx => {
+			const updatedSheetRecord = await trx.sheetRecord.update(
+				{ id: activeCharacter.sheetRecordId },
+				conversionResult.sheetRecord
+			);
 
-		// Delete existing related entities and recreate them
-		// This handles updates where actions/modifiers/rollMacros may have changed
-		await this.kobold.action.deleteBySheetRecordId({ sheetRecordId: updatedSheetRecord.id });
-		await this.kobold.modifier.deleteBySheetRecordId({ sheetRecordId: updatedSheetRecord.id });
-		await this.kobold.rollMacro.deleteBySheetRecordId({ sheetRecordId: updatedSheetRecord.id });
+			// Delete existing related entities and recreate them
+			// This handles updates where actions/modifiers/rollMacros may have changed
+			await trx.action.deleteBySheetRecordId({ sheetRecordId: updatedSheetRecord.id });
+			await trx.modifier.deleteBySheetRecordId({ sheetRecordId: updatedSheetRecord.id });
+			await trx.rollMacro.deleteBySheetRecordId({
+				sheetRecordId: updatedSheetRecord.id,
+			});
 
-		for (const action of conversionResult.actions) {
-			await this.kobold.action.create({
-				...action,
-				sheetRecordId: updatedSheetRecord.id,
-				userId: this.userId,
-			});
-		}
-		for (const modifier of conversionResult.modifiers) {
-			await this.kobold.modifier.create({
-				...modifier,
-				sheetRecordId: updatedSheetRecord.id,
-				userId: this.userId,
-			});
-		}
-		for (const rollMacro of conversionResult.rollMacros) {
-			await this.kobold.rollMacro.create({
-				...rollMacro,
-				sheetRecordId: updatedSheetRecord.id,
-				userId: this.userId,
-			});
-		}
+			for (const action of conversionResult.actions) {
+				await trx.action.create({
+					...action,
+					sheetRecordId: updatedSheetRecord.id,
+					userId: this.userId,
+				});
+			}
+			for (const modifier of conversionResult.modifiers) {
+				await trx.modifier.create({
+					...modifier,
+					sheetRecordId: updatedSheetRecord.id,
+					userId: this.userId,
+				});
+			}
+			for (const rollMacro of conversionResult.rollMacros) {
+				await trx.rollMacro.create({
+					...rollMacro,
+					sheetRecordId: updatedSheetRecord.id,
+					userId: this.userId,
+				});
+			}
 
-		return await this.kobold.character.update(
-			{ id: activeCharacter.id },
-			{ name: updatedSheetRecord.sheet.staticInfo.name, charId: this.getCharId(args) }
-		);
+			const newName = updatedSheetRecord.sheet.staticInfo.name;
+			await trx.character.updateFields(
+				{ id: activeCharacter.id },
+				{ name: newName, charId: this.getCharId(args) }
+			);
+			return { updatedName: newName, sheetRecordId: updatedSheetRecord.id };
+		});
+
+		// Trigger adjusted_sheet recomputation after transaction commits
+		koboldUtils.adjustedSheetService.triggerRecompute(sheetRecordId);
+
+		return { name: updatedName };
 	}
 }

@@ -65,8 +65,8 @@ export class ConditionSeveritySubCommand extends BaseCommandClass(
 			commandOptions[commandOptionsEnum.targetCharacter].name,
 			true
 		);
-		const { gameUtils } = new KoboldUtils(kobold);
-		const targetCharacter = await gameUtils.getCharacterOrInitActorTarget(
+		const koboldUtils = new KoboldUtils(kobold);
+		const targetCharacter = await koboldUtils.gameUtils.getCharacterOrInitActorTarget(
 			intr,
 			targetCharacterName
 		);
@@ -90,6 +90,9 @@ export class ConditionSeveritySubCommand extends BaseCommandClass(
 				conditions: targetCharacter.targetSheetRecord.conditions,
 			}
 		);
+
+		// Trigger adjusted_sheet recomputation
+		koboldUtils.adjustedSheetService.triggerRecompute(targetCharacter.targetSheetRecord.id);
 
 		if (targetCondition.severity === null) {
 			await InteractionUtils.send(

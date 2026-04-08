@@ -58,6 +58,8 @@ export class CreatureUtils {
 	public async saveSheet(intr: ChatInputCommandInteraction, target: SheetRecord) {
 		const sheet = target.sheet;
 		await this.kobold.sheetRecord.update({ id: target.id }, { sheet });
+		// Trigger adjusted_sheet recomputation
+		this.koboldUtils.adjustedSheetService.triggerRecompute(target.id);
 		if (target.trackerMessageId) {
 			await this.updateSheetTracker(intr, target);
 		}

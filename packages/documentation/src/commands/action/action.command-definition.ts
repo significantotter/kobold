@@ -89,7 +89,7 @@ export const actionCommandDefinition = {
 			name: ActionSubCommandEnum.remove,
 			description: 'Removes an action',
 			type: ApplicationCommandOptionType.Subcommand,
-			deferType: CommandDeferType.NONE,
+			deferType: CommandDeferType.HIDDEN,
 			options: {
 				[OptionEnum.targetAction]: withOrder(
 					{

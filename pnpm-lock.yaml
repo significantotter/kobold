@@ -44,6 +44,9 @@ importers:
       '@kobold/nethys':
         specifier: workspace:*
         version: link:../../packages/nethys
+      '@kobold/sheet':
+        specifier: workspace:*
+        version: link:../../packages/sheet
       '@traversable/zod':
         specifier: ^0.0.57
         version: 0.0.57(zod@4.2.1)
@@ -184,6 +187,18 @@ importers:
         specifier: ^2.0.2
         version: 2.0.2(zod@4.2.1)
 
+  apps/end-to-end-tests:
+    devDependencies:
+      '@playwright/test':
+        specifier: ^1.52.0
+        version: 1.59.1
+      dotenv:
+        specifier: ^17.2.3
+        version: 17.2.3
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+
   apps/web:
     dependencies:
       '@hono/node-server':
@@ -198,6 +213,12 @@ importers:
       '@kobold/documentation':
         specifier: workspace:*
         version: link:../../packages/documentation
+      '@kobold/schema':
+        specifier: workspace:*
+        version: link:../../packages/schema
+      '@kobold/sheet':
+        specifier: workspace:*
+        version: link:../../packages/sheet
       '@orpc/client':
         specifier: ^1.13.13
         version: 1.13.13(@opentelemetry/api@1.9.0)
@@ -354,6 +375,9 @@ importers:
       '@kobold/documentation':
         specifier: workspace:*
         version: link:../documentation
+      '@kobold/schema':
+        specifier: workspace:*
+        version: link:../schema
       date-fns:
         specifier: ^4.1.0
         version: 4.1.0
@@ -540,6 +564,62 @@ importers:
       quicktype-core:
         specifier: ^23.2.6
         version: 23.2.6(encoding@0.1.13)
+      ts-node:
+        specifier: ^10.9.2
+        version: 10.9.2(@swc/core@1.15.7(@swc/helpers@0.5.17))(@types/node@25.0.3)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^4.0.16
+        version: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@25.0.3)(jiti@2.6.1)(jsdom@24.1.1)(sass-embedded@1.97.1)(sass@1.97.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+
+  packages/schema:
+    dependencies:
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
+      zod:
+        specifier: ^4.2.1
+        version: 4.2.1
+    devDependencies:
+      '@types/lodash':
+        specifier: ^4.17.21
+        version: 4.17.21
+      '@types/node':
+        specifier: ^25.0.3
+        version: 25.0.3
+      eslint:
+        specifier: ^9.39.2
+        version: 9.39.2(jiti@2.6.1)
+      ts-node:
+        specifier: ^10.9.2
+        version: 10.9.2(@swc/core@1.15.7(@swc/helpers@0.5.17))(@types/node@25.0.3)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^4.0.16
+        version: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@25.0.3)(jiti@2.6.1)(jsdom@24.1.1)(sass-embedded@1.97.1)(sass@1.97.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+
+  packages/sheet:
+    dependencies:
+      '@kobold/schema':
+        specifier: workspace:*
+        version: link:../schema
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
+    devDependencies:
+      '@types/lodash':
+        specifier: ^4.17.21
+        version: 4.17.21
+      '@types/node':
+        specifier: ^25.0.3
+        version: 25.0.3
+      eslint:
+        specifier: ^9.39.2
+        version: 9.39.2(jiti@2.6.1)
       ts-node:
         specifier: ^10.9.2
         version: 10.9.2(@swc/core@1.15.7(@swc/helpers@0.5.17))(@types/node@25.0.3)(typescript@5.9.3)
@@ -1660,6 +1740,11 @@ packages:
 
   '@pinojs/redact@0.4.0':
     resolution: {integrity: sha512-k2ENnmBugE/rzQfEcdWHcCY+/FM3VLzH9cYEsbdsoqrvzAKRhUZeRNhAZvB8OitQJ1TBed3yqWtdjzS6wJKBwg==}
+
+  '@playwright/test@1.59.1':
+    resolution: {integrity: sha512-PG6q63nQg5c9rIi4/Z5lR5IVF7yU5MqmKaPOe0HSc0O2cX1fPi96sUQu5j7eo4gKCkB2AnNGoWt7y4/Xx3Kcqg==}
+    engines: {node: '>=18'}
+    hasBin: true
 
   '@pm2/agent@2.1.1':
     resolution: {integrity: sha512-0V9ckHWd/HSC8BgAbZSoq8KXUG81X97nSkAxmhKDhmF8vanyaoc1YXwc2KVkbWz82Rg4gjd2n9qiT3i7bdvGrQ==}
@@ -3734,6 +3819,11 @@ packages:
   fs.realpath@1.0.0:
     resolution: {integrity: sha512-OO0pH2lK6a0hZnAdau5ItzHPI6pUlvI7jMVnxUQRtw4owF2wk8lOSabtGDCTP4Ggrg2MbGnWO9X8K1t4+fGMDw==}
 
+  fsevents@2.3.2:
+    resolution: {integrity: sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==}
+    engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
+    os: [darwin]
+
   fsevents@2.3.3:
     resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
@@ -5007,6 +5097,16 @@ packages:
 
   piscina@4.9.2:
     resolution: {integrity: sha512-Fq0FERJWFEUpB4eSY59wSNwXD4RYqR+nR/WiEVcZW8IWfVBxJJafcgTEZDQo8k3w0sUarJ8RyVbbUF4GQ2LGbQ==}
+
+  playwright-core@1.59.1:
+    resolution: {integrity: sha512-HBV/RJg81z5BiiZ9yPzIiClYV/QMsDCKUyogwH9p3MCP6IYjUFu/MActgYAvK0oWyV9NlwM3GLBjADyWgydVyg==}
+    engines: {node: '>=18'}
+    hasBin: true
+
+  playwright@1.59.1:
+    resolution: {integrity: sha512-C8oWjPR3F81yljW9o5OxcWzfh6avkVwDD2VYdwIGqTkl+OGFISgypqzfu7dOe4QNLL2aqcWBmI3PMtLIK233lw==}
+    engines: {node: '>=18'}
+    hasBin: true
 
   pluralize@8.0.0:
     resolution: {integrity: sha512-Nc3IT5yHzflTfbjgqWcCPpo7DaKy4FnpB0l/zCAW0Tc7jxAiuqSxHasntB3D7887LSrA93kDJ9IXovxJYxyLCA==}
@@ -7442,6 +7542,10 @@ snapshots:
 
   '@pinojs/redact@0.4.0': {}
 
+  '@playwright/test@1.59.1':
+    dependencies:
+      playwright: 1.59.1
+
   '@pm2/agent@2.1.1':
     dependencies:
       async: 3.2.6
@@ -9749,6 +9853,9 @@ snapshots:
 
   fs.realpath@1.0.0: {}
 
+  fsevents@2.3.2:
+    optional: true
+
   fsevents@2.3.3:
     optional: true
 
@@ -11242,6 +11349,14 @@ snapshots:
   piscina@4.9.2:
     optionalDependencies:
       '@napi-rs/nice': 1.1.1
+
+  playwright-core@1.59.1: {}
+
+  playwright@1.59.1:
+    dependencies:
+      playwright-core: 1.59.1
+    optionalDependencies:
+      fsevents: 2.3.2
 
   pluralize@8.0.0: {}
 

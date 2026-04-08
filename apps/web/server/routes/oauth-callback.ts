@@ -129,8 +129,25 @@ oauthCallbackRoute.get('/callback', async c => {
 			path: '/',
 		});
 
-		// Redirect to home page
-		return c.redirect('/');
+		// Redirect to returnTo path from state, or home page
+		let redirectTo = '/';
+		try {
+			const stateParam = c.req.query('state');
+			if (stateParam) {
+				const statePayload = JSON.parse(
+					Buffer.from(stateParam, 'base64').toString('utf-8')
+				);
+				if (
+					typeof statePayload.returnTo === 'string' &&
+					statePayload.returnTo.startsWith('/')
+				) {
+					redirectTo = statePayload.returnTo;
+				}
+			}
+		} catch {
+			// Invalid state — fall through to default redirect
+		}
+		return c.redirect(redirectTo);
 	} catch (err) {
 		console.error('OAuth callback error:', err);
 		const errorMessage = err instanceof Error ? err.message : 'unknown_error';

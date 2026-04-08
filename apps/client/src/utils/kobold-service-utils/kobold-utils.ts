@@ -2,13 +2,15 @@ import { Interaction } from 'discord.js';
 import _ from 'lodash';
 import { SetNonNullable } from 'type-fest';
 import {
+	CharacterBasic,
 	CharacterWithRelations,
-	GameWithRelations,
+	GameWithCharactersLite,
 	InitiativeWithRelations,
 	Kobold,
 	UserSettings,
 } from '@kobold/db';
 import { KoboldError } from '../KoboldError.js';
+import { AdjustedSheetService } from './adjusted-sheet-service.js';
 import { AutocompleteUtils } from './autocomplete-utils.js';
 import { CharacterUtils } from './character-utils.js';
 import { CreatureUtils } from './creature-utils.js';
@@ -21,10 +23,12 @@ import { UserSettingsUtils } from './user-settings-utils.js';
 
 export interface InjectedData {
 	activeCharacter: CharacterWithRelations | null;
+	activeCharacterLite: CharacterBasic | null;
 	ownedCharacters: CharacterWithRelations[];
 	userSettings: UserSettings;
-	activeGame: GameWithRelations | null;
+	activeGame: GameWithCharactersLite | null;
 	currentInitiative: InitiativeWithRelations | null;
+	currentInitiativeLite: InitiativeWithRelations | null;
 }
 
 export type InjectableCommandData = { [K in keyof InjectedData]?: boolean };
@@ -39,6 +43,7 @@ export class KoboldUtils {
 	public autocompleteUtils: AutocompleteUtils;
 	public gameplayUtils: GameplayUtils;
 	public creatureUtils: CreatureUtils;
+	public adjustedSheetService: AdjustedSheetService;
 	constructor(public kobold: Kobold) {
 		this.characterUtils = new CharacterUtils(this);
 		this.gameUtils = new GameUtils(this);
@@ -49,6 +54,7 @@ export class KoboldUtils {
 		this.autocompleteUtils = new AutocompleteUtils(this);
 		this.gameplayUtils = new GameplayUtils(this);
 		this.creatureUtils = new CreatureUtils(this);
+		this.adjustedSheetService = new AdjustedSheetService(kobold);
 	}
 
 	public async fetchDataForCommand<T extends InjectableCommandData>(
@@ -57,6 +63,14 @@ export class KoboldUtils {
 	): Promise<{ [k in keyof T]: k extends keyof InjectedData ? InjectedData[k] : never }> {
 		let activeCharacterPromise = usesData.activeCharacter
 			? this.kobold.character.readActive({
+					userId: intr.user.id,
+					guildId: intr.guild?.id,
+					channelId: intr.channel?.id,
+				})
+			: Promise.resolve(undefined);
+
+		let activeCharacterLitePromise = usesData.activeCharacterLite
+			? this.kobold.character.readActiveLite({
 					userId: intr.user.id,
 					guildId: intr.guild?.id,
 					channelId: intr.channel?.id,
@@ -80,22 +94,37 @@ export class KoboldUtils {
 			? this.initiativeUtils.getInitiativeForChannelOrNull(intr.channel)
 			: Promise.resolve(undefined);
 
-		let [activeCharacter, ownedCharacters, userSettings, activeGame, currentInitiative] =
-			await Promise.all([
-				activeCharacterPromise,
-				ownedCharactersPromise,
-				userSettingsPromise,
-				activeGamePromise,
-				currentInitiativePromise,
-			]);
+		let currentInitiativeLitePromise = usesData.currentInitiativeLite
+			? this.initiativeUtils.getInitiativeForChannelOrNullLite(intr.channel)
+			: Promise.resolve(undefined);
+
+		let [
+			activeCharacter,
+			activeCharacterLite,
+			ownedCharacters,
+			userSettings,
+			activeGame,
+			currentInitiative,
+			currentInitiativeLite,
+		] = await Promise.all([
+			activeCharacterPromise,
+			activeCharacterLitePromise,
+			ownedCharactersPromise,
+			userSettingsPromise,
+			activeGamePromise,
+			currentInitiativePromise,
+			currentInitiativeLitePromise,
+		]);
 
 		return _.pickBy(
 			{
 				activeCharacter,
+				activeCharacterLite,
 				ownedCharacters,
 				userSettings,
 				activeGame,
 				currentInitiative,
+				currentInitiativeLite,
 			},
 			val => val !== undefined
 		) as { [k in keyof T]: k extends keyof InjectedData ? InjectedData[k] : never };
@@ -115,9 +144,13 @@ export class KoboldUtils {
 	): asserts data is SetNonNullable<T> {
 		if (data.activeCharacter !== undefined)
 			this.assertActiveCharacterNotNull(data.activeCharacter);
+		if (data.activeCharacterLite !== undefined)
+			this.assertActiveCharacterLiteNotNull(data.activeCharacterLite);
 		if (data.activeGame !== undefined) this.assertActiveGameNotNull(data.activeGame);
 		if (data.currentInitiative !== undefined)
 			this.assertCurrentInitiativeNotNull(data.currentInitiative);
+		if (data.currentInitiativeLite !== undefined)
+			this.assertCurrentInitiativeNotNull(data.currentInitiativeLite);
 		if (data.ownedCharacters !== undefined)
 			this.assertOwnedCharactersNotEmpty(data.ownedCharacters);
 	}
@@ -125,6 +158,13 @@ export class KoboldUtils {
 	public assertActiveCharacterNotNull(
 		data: InjectedData['activeCharacter'] | null
 	): asserts data is NonNullable<InjectedData['activeCharacter']> {
+		if (data == null)
+			throw new KoboldError("Yip! You don't have any characters! Use /import to import one.");
+	}
+
+	public assertActiveCharacterLiteNotNull(
+		data: InjectedData['activeCharacterLite'] | null
+	): asserts data is NonNullable<InjectedData['activeCharacterLite']> {
 		if (data == null)
 			throw new KoboldError("Yip! You don't have any characters! Use /import to import one.");
 	}

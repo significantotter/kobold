@@ -73,8 +73,9 @@ export class RollSkillSubCommand extends BaseCommandClass(
 			RollDefinition.optionChoices.rollSecret.public;
 
 		const koboldUtils: KoboldUtils = new KoboldUtils(kobold);
-		const { activeCharacter } = await koboldUtils.fetchDataForCommand(intr, {
+		const { activeCharacter, userSettings } = await koboldUtils.fetchDataForCommand(intr, {
 			activeCharacter: true,
+			userSettings: true,
 		});
 		koboldUtils.assertActiveCharacterNotNull(activeCharacter);
 
@@ -82,12 +83,13 @@ export class RollSkillSubCommand extends BaseCommandClass(
 
 		const targetRoll = StringUtils.findBestValueByKeyMatch(skillChoice, creature.skillRolls);
 
-		const rollResult = await RollBuilder.fromSimpleCreatureRoll({
+		const rollResult = RollBuilder.fromSimpleCreatureRoll({
 			actorName: creature.sheet.staticInfo.name,
 			creature,
 			attributeName: targetRoll.name,
 			rollNote: rollNote ?? '',
 			modifierExpression: modifierExpression ?? '',
+			userSettings,
 		});
 
 		const embed = rollResult.compileEmbed();

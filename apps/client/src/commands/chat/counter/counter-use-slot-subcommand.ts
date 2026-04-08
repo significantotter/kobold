@@ -95,15 +95,6 @@ export class CounterUseSlotSubCommand extends BaseCommandClass(
 			targetCounterName
 		);
 
-		if (counter?.style !== CounterStyleEnum.prepared) {
-			throw new KoboldError(
-				CounterDefinition.strings.notPrepared({
-					counterName: targetCounterName,
-				})
-			);
-		}
-		counter.active[slotIndex] = (resetSlot ?? false) ? true : false;
-
 		if (!counter) {
 			throw new KoboldError(
 				CounterDefinition.strings.notFound({
@@ -112,12 +103,26 @@ export class CounterUseSlotSubCommand extends BaseCommandClass(
 			);
 		}
 
+		if (counter.style !== CounterStyleEnum.prepared) {
+			throw new KoboldError(
+				CounterDefinition.strings.notPrepared({
+					counterName: targetCounterName,
+				})
+			);
+		}
+		if (slotIndex < 0 || slotIndex >= counter.active.length) {
+			throw new KoboldError("Yip! I couldn't find that slot!");
+		}
+		counter.active[slotIndex] = (resetSlot ?? false) ? true : false;
+
 		await kobold.sheetRecord.update(
 			{ id: activeCharacter.sheetRecord.id },
 			{
 				sheet: activeCharacter.sheetRecord.sheet,
 			}
 		);
+		// Trigger adjusted_sheet recomputation
+		koboldUtils.adjustedSheetService.triggerRecompute(activeCharacter.sheetRecord.id);
 		const embed = new KoboldEmbed().setTitle(
 			CounterDefinition.strings.usedSlot({
 				counterName: group ? `${group.name}: ${counter.name}` : counter.name,

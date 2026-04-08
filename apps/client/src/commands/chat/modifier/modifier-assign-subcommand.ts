@@ -145,11 +145,19 @@ export class ModifierAssignSubCommand extends BaseCommandClass(
 		if (copyOption || assignToResult.isOtherPlayersCharacter) {
 			// Create a copy instead of moving
 			const { id, ...modifierWithoutId } = matchedModifier;
+			const targetUserId = assignToResult.targetUserId ?? intr.user.id;
 			await kobold.modifier.create({
 				...modifierWithoutId,
 				sheetRecordId: assignToResult.sheetRecordId,
-				userId: assignToResult.targetUserId ?? intr.user.id,
+				userId: targetUserId,
 			});
+
+			// Trigger adjusted_sheet recomputation
+			if (assignToResult.sheetRecordId !== null) {
+				koboldUtils.adjustedSheetService.triggerRecompute(assignToResult.sheetRecordId);
+			} else {
+				koboldUtils.adjustedSheetService.triggerRecomputeAllForUser(targetUserId);
+			}
 
 			await InteractionUtils.send(
 				intr,
@@ -159,11 +167,25 @@ export class ModifierAssignSubCommand extends BaseCommandClass(
 				})
 			);
 		} else {
-			// Move the modifier
+			// Move the modifier — recompute old and new targets
+			const oldSheetRecordId = matchedModifier.sheetRecordId;
 			await kobold.modifier.update(
 				{ id: matchedModifier.id },
 				{ sheetRecordId: assignToResult.sheetRecordId }
 			);
+
+			// Trigger adjusted_sheet recomputation for old location
+			if (oldSheetRecordId !== null) {
+				koboldUtils.adjustedSheetService.triggerRecompute(oldSheetRecordId);
+			}
+			// Trigger adjusted_sheet recomputation for new location
+			if (assignToResult.sheetRecordId !== null) {
+				koboldUtils.adjustedSheetService.triggerRecompute(assignToResult.sheetRecordId);
+			} else {
+				koboldUtils.adjustedSheetService.triggerRecomputeAllForUser(
+					assignToResult.targetUserId ?? intr.user.id
+				);
+			}
 
 			await InteractionUtils.send(
 				intr,

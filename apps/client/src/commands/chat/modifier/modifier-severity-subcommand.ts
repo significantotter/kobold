@@ -83,6 +83,13 @@ export class ModifierSeveritySubCommand extends BaseCommandClass(
 
 		await kobold.modifier.update({ id: targetModifier.id }, { severity: newSeverityValue });
 
+		// Trigger adjusted_sheet recomputation
+		if (targetModifier.sheetRecordId !== null) {
+			koboldUtils.adjustedSheetService.triggerRecompute(targetModifier.sheetRecordId);
+		} else {
+			koboldUtils.adjustedSheetService.triggerRecomputeAllForUser(intr.user.id);
+		}
+
 		if (newSeverityValue === null) {
 			await InteractionUtils.send(
 				intr,

@@ -4,6 +4,7 @@ import {
 	CharacterWithRelations,
 	InitiativeWithRelations,
 	Kobold,
+	MinionBasic,
 	MinionWithRelations,
 	Sheet,
 } from '@kobold/db';
@@ -38,6 +39,33 @@ export class InitiativeUtils {
 	public async getInitiativeForChannelOrNull(channel: TextBasedChannel | null) {
 		try {
 			return await this.getInitiativeForChannel(channel);
+		} catch (err) {
+			return null;
+		}
+	}
+
+	/**
+	 * Lite variant — skips actions and rollMacros for actors.
+	 * Use for display, turn management, and other non-mechanical paths.
+	 */
+	public async getInitiativeForChannelLite(
+		channel: TextBasedChannel | null
+	): Promise<InitiativeWithRelations | null> {
+		if (!channel || !channel.id) {
+			throw new KoboldError(utilStrings.initiative.initOutsideServerChannelError);
+		}
+		const currentInitOptions = await this.kobold.initiative.readManyLite({
+			channelId: channel.id,
+		});
+		if (currentInitOptions.length === 0) {
+			throw new KoboldError(utilStrings.initiative.noActiveInitError);
+		}
+		return currentInitOptions[0];
+	}
+
+	public async getInitiativeForChannelOrNullLite(channel: TextBasedChannel | null) {
+		try {
+			return await this.getInitiativeForChannelLite(channel);
 		} catch (err) {
 			return null;
 		}
@@ -142,7 +170,7 @@ export class InitiativeUtils {
 		name,
 	}: {
 		initiativeId: number;
-		minion: MinionWithRelations;
+		minion: MinionBasic;
 		/** Parent character's actor group ID. Required if separateTurn=false */
 		characterActorGroupId?: number;
 		/** Initiative roll result. Required if separateTurn=true */

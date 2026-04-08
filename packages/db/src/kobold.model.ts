@@ -33,11 +33,15 @@ export class Kobold {
 	public userSettings: UserSettingsModel;
 	public wgAuthToken: WgAuthTokenModel;
 
-	constructor(dialect: PostgresDialect) {
-		this.db = new Kysely<Database>({
-			dialect,
-			plugins: [new ParseJSONResultsPlugin(), new CamelCasePlugin()],
-		});
+	constructor(dialectOrDb: PostgresDialect | Kysely<Database>) {
+		if (dialectOrDb instanceof Kysely) {
+			this.db = dialectOrDb;
+		} else {
+			this.db = new Kysely<Database>({
+				dialect: dialectOrDb,
+				plugins: [new ParseJSONResultsPlugin(), new CamelCasePlugin()],
+			});
+		}
 		this.action = new ActionModel(this.db);
 		this.channelDefaultCharacter = new ChannelDefaultCharacterModel(this.db);
 		this.character = new CharacterModel(this.db);
@@ -52,5 +56,16 @@ export class Kobold {
 		this.sheetRecord = new SheetRecordModel(this.db);
 		this.userSettings = new UserSettingsModel(this.db);
 		this.wgAuthToken = new WgAuthTokenModel(this.db);
+	}
+
+	/**
+	 * Executes a callback inside a database transaction.
+	 * A transaction-scoped Kobold instance is passed to the callback,
+	 * ensuring all DB operations within are atomic.
+	 */
+	async transaction<T>(fn: (kobold: Kobold) => Promise<T>): Promise<T> {
+		return this.db.transaction().execute(async trx => {
+			return fn(new Kobold(trx));
+		});
 	}
 }

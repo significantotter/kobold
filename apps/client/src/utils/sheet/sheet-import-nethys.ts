@@ -499,7 +499,7 @@ export class NethysSheetImporter {
 		this.applySpellcastingStats();
 		return this.sheet;
 	}
-	public async buildActions(userId: string) {
+	public async buildActions(userId: string): Promise<NewAction[]> {
 		await this.applyAttacks(userId);
 		await this.applyCreatureActions(userId);
 		return this.actions;

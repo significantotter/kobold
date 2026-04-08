@@ -32,7 +32,7 @@ describe('GameDeleteSubCommand', () => {
 	it('should delete a game', async () => {
 		// Arrange
 		const targetGame = createMockGame({ id: 3, name: 'Doomed Game' });
-		kobold.game.readMany.mockResolvedValue([targetGame]);
+		kobold.game.readManyLite.mockResolvedValue([targetGame]);
 		kobold.game.delete.mockResolvedValue(targetGame);
 
 		// Act
@@ -56,7 +56,7 @@ describe('GameDeleteSubCommand', () => {
 
 	it('should error when deleting nonexistent game', async () => {
 		// Arrange
-		kobold.game.readMany.mockResolvedValue([]);
+		kobold.game.readManyLite.mockResolvedValue([]);
 
 		// Act
 		const result = await harness.executeCommand({

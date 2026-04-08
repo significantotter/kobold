@@ -39,7 +39,7 @@ describe('InitNoteSubCommand', () => {
 		const existingInit = createMockInitiativeWithActors(2);
 		const { fetchNonNullableDataMock } = setupKoboldUtilsMocks();
 		fetchNonNullableDataMock.mockResolvedValue({
-			currentInitiative: existingInit,
+			currentInitiativeLite: existingInit,
 			userSettings: {},
 		});
 		kobold.initiativeActor.update.mockResolvedValue({
@@ -74,7 +74,7 @@ describe('InitNoteSubCommand', () => {
 		existingInit.actors[0].note = 'Existing note';
 		const { fetchNonNullableDataMock } = setupKoboldUtilsMocks();
 		fetchNonNullableDataMock.mockResolvedValue({
-			currentInitiative: existingInit,
+			currentInitiativeLite: existingInit,
 			userSettings: {},
 		});
 		kobold.initiativeActor.update.mockResolvedValue({

@@ -125,6 +125,8 @@ export class MinionUpdateSubCommand extends BaseCommandClass(
 		// Update the sheetRecord if sheet was changed
 		if (statsInput) {
 			await kobold.sheetRecord.update({ id: targetMinion.sheetRecordId }, { sheet });
+			// Trigger adjusted_sheet recomputation
+			koboldUtils.adjustedSheetService.triggerRecompute(targetMinion.sheetRecordId);
 		}
 
 		const updates: string[] = [];

@@ -34,23 +34,15 @@ export class CounterGroupCreateSubCommand extends BaseCommandClass(
 		if (!InputParseUtils.isValidString(name, { maxLength: 50 })) {
 			throw new KoboldError(`Yip! The counter group name must be less than 50 characters!`);
 		}
-		const { counter } = FinderHelpers.getCounterByName(activeCharacter.sheetRecord.sheet, name);
-		if (counter) {
-			throw new KoboldError(
-				CounterGroupDefinition.strings.alreadyExists({
-					groupName: name,
-					characterName: activeCharacter.name,
-				})
-			);
-		}
 		if (description && !InputParseUtils.isValidString(description, { maxLength: 300 })) {
 			throw new KoboldError(
 				`Yip! The counter group description must be less than 300 characters!`
 			);
 		}
 		if (
-			activeCharacter.sheetRecord.sheet.counterGroups.find(
-				group => group.name.toLowerCase() === name.toLowerCase()
+			FinderHelpers.getCounterGroupByName(
+				activeCharacter.sheetRecord.sheet.counterGroups,
+				name
 			)
 		) {
 			throw new KoboldError(
@@ -78,6 +70,8 @@ export class CounterGroupCreateSubCommand extends BaseCommandClass(
 				},
 			}
 		);
+		// Trigger adjusted_sheet recomputation
+		koboldUtils.adjustedSheetService.triggerRecompute(activeCharacter.sheetRecord.id);
 
 		//send a response
 		await InteractionUtils.send(

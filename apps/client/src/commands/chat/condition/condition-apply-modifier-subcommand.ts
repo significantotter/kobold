@@ -40,7 +40,9 @@ export class ConditionApplyModifierSubCommand extends BaseCommandClass(
 				intr.options.getString(commandOptions[commandOptionsEnum.modifierName].name) ?? '';
 
 			//get the active character
-			const allCharacters = await kobold.character.readMany({ userId: intr.user.id });
+			const allCharacters = await kobold.character.readManyWithModifiers({
+				userId: intr.user.id,
+			});
 			if (!allCharacters.length) {
 				//no choices if we don't have a character to match against
 				return [];
@@ -129,6 +131,9 @@ export class ConditionApplyModifierSubCommand extends BaseCommandClass(
 				conditions: [...targetSheetRecord.conditions, newCondition],
 			}
 		);
+
+		// Trigger adjusted_sheet recomputation
+		koboldUtils.adjustedSheetService.triggerRecompute(targetSheetRecord.id);
 
 		//send a response
 		await InteractionUtils.send(

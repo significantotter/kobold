@@ -1,12 +1,14 @@
 import { AutocompleteInteraction, CacheType, TextBasedChannel } from 'discord.js';
 import _ from 'lodash';
 import {
+	CharacterBasic,
 	CharacterWithRelations,
 	CounterStyleEnum,
-	GameWithRelations,
+	GameCharacterLite,
 	InitiativeActor,
 	InitiativeActorWithRelations,
 	Kobold,
+	MinionBasic,
 	MinionWithRelations,
 } from '@kobold/db';
 import { Creature } from '../creature.js';
@@ -39,8 +41,8 @@ export const OwnedByFilters = {
  */
 export function parseCreateForValue(
 	value: string | null,
-	characters: CharacterWithRelations[],
-	minions: MinionWithRelations[]
+	characters: Pick<CharacterBasic, 'sheetRecordId'>[],
+	minions: Pick<MinionWithRelations, 'sheetRecordId'>[]
 ): number | null {
 	if (!value || value === CreateForTargets.USER) {
 		return null; // User-wide scope
@@ -80,11 +82,11 @@ export interface AssignToResult {
 export function parseAssignToValue(
 	value: string | null,
 	userId: string,
-	characters: CharacterWithRelations[],
-	minions: MinionWithRelations[],
-	gameCharacters: CharacterWithRelations[] = [],
-	gameMinions: MinionWithRelations[] = [],
-	initActors: InitiativeActorWithRelations[] = []
+	characters: Pick<CharacterBasic, 'sheetRecordId' | 'name'>[],
+	minions: Pick<MinionWithRelations, 'sheetRecordId' | 'name'>[],
+	gameCharacters: Pick<CharacterWithRelations, 'sheetRecordId' | 'name' | 'userId' | 'id'>[] = [],
+	gameMinions: Pick<MinionWithRelations, 'sheetRecordId' | 'name' | 'characterId'>[] = [],
+	initActors: Pick<InitiativeActorWithRelations, 'sheetRecordId' | 'name' | 'userId'>[] = []
 ): AssignToResult {
 	if (!value || value === CreateForTargets.USER) {
 		return {
@@ -379,9 +381,8 @@ export class AutocompleteUtils {
 		intr: AutocompleteInteraction<CacheType>,
 		matchText?: string | null
 	) {
-		const currentInit = await this.koboldUtils.initiativeUtils.getInitiativeForChannelOrNull(
-			intr.channel
-		);
+		const currentInit =
+			await this.koboldUtils.initiativeUtils.getInitiativeForChannelOrNullLite(intr.channel);
 		if (!currentInit) return [];
 		//get the character matches
 
@@ -396,9 +397,8 @@ export class AutocompleteUtils {
 		intr: AutocompleteInteraction<CacheType>,
 		matchText?: string | null
 	) {
-		const currentInit = await this.koboldUtils.initiativeUtils.getInitiativeForChannelOrNull(
-			intr.channel
-		);
+		const currentInit =
+			await this.koboldUtils.initiativeUtils.getInitiativeForChannelOrNullLite(intr.channel);
 		if (!currentInit) return [];
 		//get the character matches
 		let actorOptions = InitiativeBuilderUtils.getControllableInitiativeActors(
@@ -421,9 +421,8 @@ export class AutocompleteUtils {
 		matchText: string,
 		includeNone: boolean = true
 	) {
-		const currentInit = await this.koboldUtils.initiativeUtils.getInitiativeForChannelOrNull(
-			intr.channel
-		);
+		const currentInit =
+			await this.koboldUtils.initiativeUtils.getInitiativeForChannelOrNullLite(intr.channel);
 		if (!currentInit) return [];
 
 		const actorOptions = currentInit.actors.filter(actor =>
@@ -476,14 +475,15 @@ export class AutocompleteUtils {
 	}
 
 	public async getAllTargetOptions(intr: AutocompleteInteraction<CacheType>, matchText: string) {
-		const { characterOptions, actorOptions, minionOptions } =
+		const { gameCharacterOptions, ownedCharacterOptions, actorOptions, minionOptions } =
 			await this.koboldUtils.gameUtils.getAllTargetableOptions(intr);
 
 		const allOptions = [
 			{ name: '(None)', value: '__NONE__' },
 			...actorOptions.map(c => ({ name: c.name, value: c.name })),
 			...minionOptions.map(m => ({ name: m.name, value: m.name })),
-			...characterOptions.map(c => ({ name: c.name, value: c.name })),
+			...ownedCharacterOptions.map(c => ({ name: c.name, value: c.name })),
+			...gameCharacterOptions.map(c => ({ name: c.name, value: c.name })),
 		];
 
 		//return the matched actors, removing any duplicates
@@ -494,26 +494,6 @@ export class AutocompleteUtils {
 				option.name.toLowerCase().includes(matchText.toLowerCase())
 			);
 		return result;
-	}
-
-	public async getAllModifiersForAllCharacters(
-		intr: AutocompleteInteraction<CacheType>,
-		matchText: string
-	) {
-		const characters = await this.kobold.character.readMany({ userId: intr.user.id });
-		const modifiersWithCharacterName: string[] = [];
-		for (const character of characters) {
-			const modifiers = character.modifiers;
-			for (const modifier of modifiers) {
-				modifiersWithCharacterName.push(`${character.name} - ${modifier.name}`);
-			}
-		}
-		return modifiersWithCharacterName
-			.filter(modifier => modifier.toLowerCase().includes(matchText.toLowerCase()))
-			.map(modifier => ({
-				name: modifier,
-				value: modifier,
-			}));
 	}
 
 	public async getConditionsOnTarget(
@@ -550,8 +530,8 @@ export class AutocompleteUtils {
 			{ name: '👤 Me (All Characters)', value: CreateForTargets.USER },
 		];
 
-		// Add user's characters
-		const characters = await this.kobold.character.readMany({ userId: intr.user.id });
+		// Add user's characters (lite query — no sheet/relations)
+		const characters = await this.kobold.character.readManyLite({ userId: intr.user.id });
 		for (const char of characters) {
 			choices.push({
 				name: `🎭 ${char.name}`,
@@ -562,7 +542,7 @@ export class AutocompleteUtils {
 		// Add user's minions
 		const charIds = characters.map(c => c.id);
 		if (charIds.length > 0) {
-			const minions = await this.kobold.minion.readManyByCharacterIds({
+			const minions = await this.kobold.minion.readManyByCharacterIdsLite({
 				characterIds: charIds,
 			});
 			for (const minion of minions) {
@@ -595,8 +575,8 @@ export class AutocompleteUtils {
 			{ name: '👤 Me (All Characters)', value: OwnedByFilters.USER },
 		];
 
-		// Add user's characters
-		const characters = await this.kobold.character.readMany({ userId: intr.user.id });
+		// Add user's characters (lite query — no sheet/relations)
+		const characters = await this.kobold.character.readManyLite({ userId: intr.user.id });
 		for (const char of characters) {
 			choices.push({
 				name: `🎭 ${char.name}`,
@@ -607,7 +587,7 @@ export class AutocompleteUtils {
 		// Add user's minions
 		const charIds = characters.map(c => c.id);
 		if (charIds.length > 0) {
-			const minions = await this.kobold.minion.readManyByCharacterIds({
+			const minions = await this.kobold.minion.readManyByCharacterIdsLite({
 				characterIds: charIds,
 			});
 			for (const minion of minions) {
@@ -650,8 +630,8 @@ export class AutocompleteUtils {
 			{ name: '👤 Me (All Characters)', value: CreateForTargets.USER },
 		];
 
-		// Add user's own characters
-		const characters = await this.kobold.character.readMany({ userId: intr.user.id });
+		// Add user's own characters (lite query — no sheet/relations)
+		const characters = await this.kobold.character.readManyLite({ userId: intr.user.id });
 		for (const char of characters) {
 			choices.push({
 				name: `🎭 ${char.name}`,
@@ -662,7 +642,7 @@ export class AutocompleteUtils {
 		// Add user's own minions
 		const charIds = characters.map(c => c.id);
 		if (charIds.length > 0) {
-			const minions = await this.kobold.minion.readManyByCharacterIds({
+			const minions = await this.kobold.minion.readManyByCharacterIdsLite({
 				characterIds: charIds,
 			});
 			for (const minion of minions) {
@@ -694,7 +674,7 @@ export class AutocompleteUtils {
 
 					// Add minions for this game character
 					const minionCharIds = [gameChar.id];
-					const gameMinions = await this.kobold.minion.readManyByCharacterIds({
+					const gameMinions = await this.kobold.minion.readManyByCharacterIdsLite({
 						characterIds: minionCharIds,
 					});
 					for (const minion of gameMinions) {
@@ -755,8 +735,8 @@ export class AutocompleteUtils {
 	): Promise<{ name: string; value: string }[]> {
 		const choices: { name: string; value: string }[] = [];
 
-		// Get all user's characters
-		const characters = await this.kobold.character.readMany({ userId: intr.user.id });
+		// Get all user's characters (lite query — no sheet/relations)
+		const characters = await this.kobold.character.readManyLite({ userId: intr.user.id });
 		for (const char of characters) {
 			choices.push({
 				name: char.name,
@@ -799,10 +779,10 @@ export class AutocompleteUtils {
 	public async getUserCharactersAndMinions(
 		intr: AutocompleteInteraction<CacheType> | { user: { id: string } }
 	): Promise<{
-		characters: CharacterWithRelations[];
+		characters: CharacterBasic[];
 		minions: MinionWithRelations[];
 	}> {
-		const characters = await this.kobold.character.readMany({ userId: intr.user.id });
+		const characters = await this.kobold.character.readManyLite({ userId: intr.user.id });
 		const charIds = characters.map(c => c.id);
 		const minions =
 			charIds.length > 0
@@ -820,7 +800,7 @@ export class AutocompleteUtils {
 			| AutocompleteInteraction<CacheType>
 			| { user: { id: string }; guildId: string | null; channelId: string | null }
 	): Promise<{
-		gameCharacters: CharacterWithRelations[];
+		gameCharacters: GameCharacterLite[];
 		gameMinions: MinionWithRelations[];
 	}> {
 		if (!intr.guildId) {
@@ -880,19 +860,18 @@ export class AutocompleteUtils {
 		if (!activeCharacter) return [];
 
 		// Get all user's minions and filter to active character's minions + unassigned
-		const allMinions = await this.kobold.minion.readManyByUserId({
+		const allMinions = await this.kobold.minion.readManyByUserIdLite({
 			userId: intr.user.id,
 		});
 		const minions = allMinions.filter(
-			(m: MinionWithRelations) =>
-				m.characterId === activeCharacter.id || m.characterId === null
+			(m: MinionBasic) => m.characterId === activeCharacter.id || m.characterId === null
 		);
 
 		return minions
-			.filter((m: MinionWithRelations) =>
+			.filter((m: MinionBasic) =>
 				m.name.toLowerCase().includes((matchText ?? '').toLowerCase())
 			)
-			.map((m: MinionWithRelations) => ({
+			.map((m: MinionBasic) => ({
 				name: m.characterId === null ? `${m.name} (unassigned)` : m.name,
 				value: m.name,
 			}));

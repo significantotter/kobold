@@ -6,7 +6,6 @@ import {
 	CacheType,
 	ChatInputCommandInteraction,
 	ComponentType,
-	MessageFlags,
 } from 'discord.js';
 import { Kobold } from '@kobold/db';
 
@@ -74,7 +73,7 @@ export class ActionRemoveSubCommand extends BaseCommandClass(
 		if (targetAction) {
 			// ask for confirmation
 
-			const response = await intr.reply({
+			const prompt = await intr.editReply({
 				content: ActionDefinition.strings.remove.confirmation.text({
 					actionName: targetAction.name,
 				}),
@@ -97,10 +96,7 @@ export class ActionRemoveSubCommand extends BaseCommandClass(
 						],
 					},
 				],
-				flags: [MessageFlags.Ephemeral],
-				withResponse: true,
 			});
-			const prompt = response.resource!.message!;
 			let timedOut = false;
 			let result = await CollectorUtils.collectByButton(
 				prompt,

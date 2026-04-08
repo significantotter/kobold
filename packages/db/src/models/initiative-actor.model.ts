@@ -9,6 +9,7 @@ import {
 	Database,
 	Game,
 	Initiative,
+	InitiativeActor,
 	InitiativeActorGroup,
 	InitiativeActorId,
 	InitiativeActorUpdate,
@@ -170,5 +171,34 @@ export class InitiativeActorModel extends Model<Database['initiativeActor']> {
 			.where('initiativeActor.initiativeActorGroupId', '=', groupId)
 			.execute();
 		return result;
+	}
+
+	// ========================================================================
+	// Lite variants — just base columns, no sheet or parent relations.
+	// Use for existence checks, counting, and ID lookups.
+	// ========================================================================
+
+	public async readManyByMinionIdLite({
+		minionId,
+	}: {
+		minionId: number;
+	}): Promise<InitiativeActor[]> {
+		return await this.db
+			.selectFrom('initiativeActor')
+			.selectAll()
+			.where('initiativeActor.minionId', '=', minionId)
+			.execute();
+	}
+
+	public async readManyByGroupIdLite({
+		groupId,
+	}: {
+		groupId: number;
+	}): Promise<InitiativeActor[]> {
+		return await this.db
+			.selectFrom('initiativeActor')
+			.selectAll()
+			.where('initiativeActor.initiativeActorGroupId', '=', groupId)
+			.execute();
 	}
 }

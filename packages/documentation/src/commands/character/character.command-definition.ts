@@ -34,12 +34,7 @@ export const characterCommandDefinition = {
 			name: CharacterSubCommandEnum.importWanderersGuide,
 			description: "Imports character data from Wanderer's Guide.",
 			type: ApplicationCommandOptionType.Subcommand,
-			options: {
-				[CharacterCommandOptionEnum.wgUrl]: withOrder(
-					characterCommandOptions[CharacterCommandOptionEnum.wgUrl],
-					1
-				),
-			},
+			options: {},
 		},
 		[CharacterSubCommandEnum.importPathbuilder]: {
 			name: CharacterSubCommandEnum.importPathbuilder,
@@ -78,12 +73,14 @@ export const characterCommandDefinition = {
 			description:
 				'Migrate character-specific actions, modifiers, and roll macros to user scope.',
 			type: ApplicationCommandOptionType.Subcommand,
+			deferType: CommandDeferType.HIDDEN,
 			options: {},
 		},
 		[CharacterSubCommandEnum.remove]: {
 			name: CharacterSubCommandEnum.remove,
 			description: 'Removes a character.',
 			type: ApplicationCommandOptionType.Subcommand,
+			deferType: CommandDeferType.HIDDEN,
 			options: {},
 		},
 		[CharacterSubCommandEnum.setActive]: {

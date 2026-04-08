@@ -15,31 +15,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
-import { api } from '../api/api-client';
+import { computed, onMounted, ref } from 'vue';
+import { useAuthStore } from '@/stores/auth';
+import { api } from '@/api/api-client';
 
-interface User {
-	id: string;
-	username: string;
-	discriminator: string;
-	avatar: string | null;
-}
-
-const user = ref<User | null>(null);
+const auth = useAuthStore();
 const isLoading = ref(false);
+
+const user = computed(() => auth.user);
 
 const avatarUrl = computed(() => {
 	if (!user.value?.avatar) return null;
 	return `https://cdn.discordapp.com/avatars/${user.value.id}/${user.value.avatar}.png?size=32`;
 });
-
-async function fetchUser() {
-	try {
-		user.value = await api.auth.getUser();
-	} catch {
-		user.value = null;
-	}
-}
 
 async function login() {
 	isLoading.value = true;
@@ -52,15 +40,12 @@ async function login() {
 }
 
 async function logout() {
-	try {
-		await api.auth.logout();
-		user.value = null;
-	} catch {
-		// ignore
-	}
+	await auth.logout();
 }
 
-onMounted(fetchUser);
+onMounted(() => {
+	if (!auth.loaded) auth.fetchUser();
+});
 </script>
 
 <style lang="scss" scoped>

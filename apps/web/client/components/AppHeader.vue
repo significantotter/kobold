@@ -39,6 +39,11 @@ const items = [
 		icon: 'pi pi-fw pi-book',
 		route: '/commands',
 	},
+	{
+		label: 'Import',
+		icon: 'pi pi-fw pi-upload',
+		route: '/import',
+	},
 ];
 </script>
 

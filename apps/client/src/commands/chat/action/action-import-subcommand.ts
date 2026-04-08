@@ -88,7 +88,11 @@ export class ActionImportSubCommand extends BaseCommandClass(
 			await InteractionUtils.send(intr, ActionDefinition.strings.import.failedParsing);
 			return;
 		}
-		const currentActions = activeCharacter.actions;
+		// Filter to only character-specific actions; user-wide actions (sheetRecordId === null)
+		// are loaded into activeCharacter.actions but should not be touched by import
+		const currentActions = activeCharacter.actions.filter(
+			a => a.sheetRecordId === activeCharacter.sheetRecordId
+		);
 
 		let finalActions: Action[] = [];
 

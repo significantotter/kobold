@@ -23,9 +23,12 @@ export class InitStartSubCommand extends BaseCommandClass(
 			return;
 		}
 		const koboldUtils = new KoboldUtils(kobold);
-		const { currentInitiative } = await koboldUtils.fetchDataForCommand(intr, {
-			currentInitiative: true,
-		});
+		const { currentInitiativeLite: currentInitiative } = await koboldUtils.fetchDataForCommand(
+			intr,
+			{
+				currentInitiativeLite: true,
+			}
+		);
 		if (currentInitiative) {
 			throw new KoboldError(InitDefinition.strings.start.initExistsError);
 		}

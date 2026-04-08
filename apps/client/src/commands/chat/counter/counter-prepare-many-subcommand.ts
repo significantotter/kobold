@@ -117,6 +117,8 @@ export class CounterPrepareManySubCommand extends BaseCommandClass(
 				sheet: activeCharacter.sheetRecord.sheet,
 			}
 		);
+		// Trigger adjusted_sheet recomputation
+		koboldUtils.adjustedSheetService.triggerRecompute(activeCharacter.sheetRecord.id);
 
 		const embed = await new KoboldEmbed();
 		embed.setCharacter(activeCharacter);

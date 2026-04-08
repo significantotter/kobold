@@ -1,13 +1,13 @@
 import { ChatInputCommandInteraction } from 'discord.js';
 
 import { Kobold } from '@kobold/db';
+import { Config } from '@kobold/config';
 
 import { KoboldError } from '../../../utils/KoboldError.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Command } from '../../index.js';
 import { PathbuilderCharacterFetcher } from './Fetchers/pathbuilder-character-fetcher.js';
-import { WgCharacterFetcher } from './Fetchers/wg-character-fetcher.js';
 import { TextParseHelpers } from '../../../utils/kobold-helpers/text-parse-helpers.js';
 import { PasteBinCharacterFetcher } from './Fetchers/pastebin-character-fetcher.js';
 import { CharacterDefinition } from '@kobold/documentation';
@@ -105,15 +105,15 @@ export class CharacterUpdateSubCommand extends BaseCommandClass(
 		}
 		//otherwise wanderer's guide
 		else {
-			//check for token access
-			const fetcher = new WgCharacterFetcher(intr, kobold, intr.user.id);
-			const newCharacter = await fetcher.update({ charId: activeCharacter.charId });
-
+			const updateUrl = `${Config.api.baseUrl}/import?characterId=${activeCharacter.id}`;
 			await InteractionUtils.send(
 				intr,
-				CharacterDefinition.strings.update.success({
-					characterName: newCharacter.name,
-				})
+				`Yip! Wanderer's Guide character updates use the Kobold web app.\n\n` +
+					`**How to update:**\n` +
+					`1. Export your character from [Wanderer's Guide](https://wanderersguide.app) as JSON\n` +
+					`2. Visit **${updateUrl}** and log in with Discord\n` +
+					`3. Upload the new JSON file to update **${activeCharacter.name}**\n\n` +
+					`Your tracker values (HP, focus points, hero points, etc.) will be preserved.`
 			);
 		}
 	}

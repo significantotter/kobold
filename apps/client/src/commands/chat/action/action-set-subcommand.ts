@@ -95,18 +95,16 @@ export class ActionSetSubCommand extends BaseCommandClass(
 		if (['name', 'description'].includes(fieldToUpdate)) {
 			if (
 				fieldToUpdate === 'name' &&
-				!InputParseUtils.isValidString(fieldToUpdate, { maxLength: 50 })
+				!InputParseUtils.isValidString(newValue, { maxLength: 50 })
 			) {
-				throw new KoboldError(
-					`Yip! The counter group name must be less than 50 characters!`
-				);
+				throw new KoboldError(`Yip! The action name must be less than 50 characters!`);
 			}
 			if (
 				fieldToUpdate === 'description' &&
-				!InputParseUtils.isValidString(fieldToUpdate, { maxLength: 300 })
+				!InputParseUtils.isValidString(newValue, { maxLength: 300 })
 			) {
 				throw new KoboldError(
-					`Yip! The counter group description must be less than 300 characters!`
+					`Yip! The action description must be less than 300 characters!`
 				);
 			}
 			updateData[fieldToUpdate as 'name' | 'description'] = newValue.trim();
