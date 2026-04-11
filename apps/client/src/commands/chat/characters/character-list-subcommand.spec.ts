@@ -13,8 +13,6 @@ import {
 	CommandTestHarness,
 } from '../../../test-utils/index.js';
 
-vi.mock('../../../utils/kobold-service-utils/kobold-utils.js');
-
 describe('CharacterListSubCommand Integration', () => {
 	let harness: CommandTestHarness;
 
@@ -22,12 +20,11 @@ describe('CharacterListSubCommand Integration', () => {
 		harness = createTestHarness([new CharacterCommand([new CharacterListSubCommand()])]);
 	});
 
-
 	describe('successful character listing', () => {
 		it('should list all owned characters', async () => {
 			// Arrange
 			const mockCharacter = createMockCharacter();
-			const { fetchDataMock } = setupListDataMocks([mockCharacter]);
+			const { readManyForListMock } = setupListDataMocks([mockCharacter]);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -40,7 +37,7 @@ describe('CharacterListSubCommand Integration', () => {
 
 			// Assert
 			expect(result.didRespond()).toBe(true);
-			expect(fetchDataMock).toHaveBeenCalled();
+			expect(readManyForListMock).toHaveBeenCalled();
 		});
 
 		it('should handle user with no characters', async () => {

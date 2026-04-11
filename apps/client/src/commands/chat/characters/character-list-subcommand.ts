@@ -5,7 +5,6 @@ import { CharacterDefinition } from '@kobold/documentation';
 
 import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
-import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Command } from '../../index.js';
 import { BaseCommandClass } from '../../command.js';
 
@@ -17,11 +16,8 @@ export class CharacterListSubCommand extends BaseCommandClass(
 		intr: ChatInputCommandInteraction,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
-		const koboldUtils = new KoboldUtils(kobold);
-
-		// try and find that character
-		const { ownedCharacters } = await koboldUtils.fetchDataForCommand(intr, {
-			ownedCharacters: true,
+		const ownedCharacters = await kobold.character.readManyForList({
+			userId: intr.user.id,
 		});
 
 		const serverDefault = ownedCharacters.find(character =>
@@ -43,10 +39,10 @@ export class CharacterListSubCommand extends BaseCommandClass(
 			const characterFields = [];
 
 			for (const character of ownedCharacters) {
-				const level = character.sheetRecord.sheet.staticInfo.level;
-				const heritage = character.sheetRecord.sheet.info.heritage;
-				const ancestry = character.sheetRecord.sheet.info.ancestry;
-				const classes = character.sheetRecord.sheet.info.class;
+				const level = character.sheetInfo.level;
+				const heritage = character.sheetInfo.heritage;
+				const ancestry = character.sheetInfo.ancestry;
+				const classes = character.sheetInfo.class;
 				const isServerDefault = serverDefault?.id == character.id;
 				characterFields.push({
 					name: CharacterDefinition.strings.list.characterListEmbed.characterFieldName({

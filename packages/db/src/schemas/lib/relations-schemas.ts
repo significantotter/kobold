@@ -93,6 +93,21 @@ export type GameCharacterLite = Pick<
 	guildDefaultCharacters: GuildDefaultCharacter[];
 };
 
+/** Lightweight character summary for the /character list command. */
+export type CharacterListItem = Pick<
+	Character,
+	'id' | 'name' | 'userId' | 'sheetRecordId' | 'isActiveCharacter' | 'importSource' | 'charId'
+> & {
+	channelDefaultCharacters: ChannelDefaultCharacter[];
+	guildDefaultCharacters: GuildDefaultCharacter[];
+	sheetInfo: {
+		level: number | null;
+		heritage: string | null;
+		ancestry: string | null;
+		class: string | null;
+	};
+};
+
 export type GameWithCharactersLite = Game & {
 	characters: GameCharacterLite[];
 };

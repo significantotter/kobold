@@ -75,7 +75,7 @@ describe('CharacterFetcher', () => {
 			} as any);
 
 			expect(mockKobold.character.readLite).toHaveBeenCalledWith({
-				name: 'Test Character',
+				exactName: 'Test Character',
 				userId: 'test-user-id',
 			});
 			expect(result).toBeNull();

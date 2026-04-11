@@ -21,7 +21,8 @@ import {
 	createMockCounterGroup,
 	createMockPreparedCounter,
 	getMockKobold,
-	resetMockKobold,} from '../../../test-utils/index.js';
+	resetMockKobold,
+} from '../../../test-utils/index.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import type { NumericCounter, PreparedCounter, CounterGroup } from '@kobold/db';
 
@@ -130,9 +131,8 @@ describe('CounterResetSubCommand', () => {
 			// Assert
 			expect(result.didRespond()).toBe(true);
 			expect(updateMock).toHaveBeenCalled();
-			// Note: Due to implementation, recoverTo = -2 sets current to -2
-			// (the second assignment in reset code overwrites half-max calculation)
-			expect(counter.current).toBe(-2);
+			// recoverTo = -2 means reset to half max: Math.floor(10 / 2) = 5
+			expect(counter.current).toBe(5);
 		});
 
 		it('should reset counter within group and display group info', async () => {

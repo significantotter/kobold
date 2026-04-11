@@ -55,9 +55,10 @@ describe('CharacterRemoveSubCommand', () => {
 
 		it('should remove character when user confirms', async () => {
 			// Arrange
-			const { mockCharacter } = setupKoboldUtilsMocks();
+			const { mockCharacter, fetchNonNullableDataMock } = setupKoboldUtilsMocks();
+			fetchNonNullableDataMock.mockResolvedValue({ activeCharacterLite: mockCharacter });
 			const deleteMock = kobold.character.delete.mockResolvedValue(undefined);
-			kobold.character.read.mockResolvedValue(null);
+			kobold.character.readLite.mockResolvedValue(null);
 
 			// Mock button collector to simulate user confirming removal
 			vi.mocked(CollectorUtils.collectByButton).mockResolvedValue({
@@ -128,7 +129,8 @@ describe('CharacterRemoveSubCommand', () => {
 
 		it('should set a new active character after removal', async () => {
 			// Arrange
-			setupKoboldUtilsMocks();
+			const { mockCharacter, fetchNonNullableDataMock } = setupKoboldUtilsMocks();
+			fetchNonNullableDataMock.mockResolvedValue({ activeCharacterLite: mockCharacter });
 			const newCharacter = createMockCharacter({
 				characterOverrides: { name: 'New Active', id: 123456 },
 			});
