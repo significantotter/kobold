@@ -19,7 +19,8 @@ import {
 	CommandTestHarness,
 	createMockCounterGroup,
 	getMockKobold,
-	resetMockKobold,} from '../../../test-utils/index.js';
+	resetMockKobold,
+} from '../../../test-utils/index.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import type { CounterGroup } from '@kobold/db';
@@ -199,12 +200,13 @@ describe('CounterGroupCreateSubCommand', () => {
 			expect(result.getResponseContent()).toContain('less than 300 characters');
 		});
 
-		it('should reject if counter with same name exists', async () => {
+		it('should reject if counter group with same name exists', async () => {
 			// Arrange
 			setupKoboldUtilsMocks();
-			vi.mocked(FinderHelpers.getCounterByName).mockReturnValue({
-				counter: { name: 'Existing Counter' } as any,
-				group: null,
+			vi.mocked(FinderHelpers.getCounterGroupByName).mockReturnValue({
+				name: 'Existing Counter',
+				description: null,
+				counters: [],
 			});
 
 			// Act
@@ -223,21 +225,11 @@ describe('CounterGroupCreateSubCommand', () => {
 			expect(result.getResponseContent()).toContain('already exists');
 		});
 
-		it('should reject if counter group with same name exists', async () => {
+		it('should reject if counter group with same name exists via data', async () => {
 			// Arrange
 			const existingGroup = createMockCounterGroup({ name: 'Spell Slots' });
-			const { mockCharacter, fetchDataMock } = setupKoboldUtilsMocks();
-			mockCharacter.sheetRecord.sheet.counterGroups = [existingGroup];
-
-			// Re-mock with the updated character
-			fetchDataMock.mockResolvedValue({
-				activeCharacter: mockCharacter,
-			});
-
-			vi.mocked(FinderHelpers.getCounterByName).mockReturnValue({
-				counter: null,
-				group: null,
-			});
+			setupKoboldUtilsMocks();
+			vi.mocked(FinderHelpers.getCounterGroupByName).mockReturnValue(existingGroup);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -258,18 +250,8 @@ describe('CounterGroupCreateSubCommand', () => {
 		it('should reject case-insensitive duplicate names', async () => {
 			// Arrange
 			const existingGroup = createMockCounterGroup({ name: 'SPELL SLOTS' });
-			const { mockCharacter, fetchDataMock } = setupKoboldUtilsMocks();
-			mockCharacter.sheetRecord.sheet.counterGroups = [existingGroup];
-
-			// Re-mock with the updated character
-			fetchDataMock.mockResolvedValue({
-				activeCharacter: mockCharacter,
-			});
-
-			vi.mocked(FinderHelpers.getCounterByName).mockReturnValue({
-				counter: null,
-				group: null,
-			});
+			setupKoboldUtilsMocks();
+			vi.mocked(FinderHelpers.getCounterGroupByName).mockReturnValue(existingGroup);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -292,10 +274,7 @@ describe('CounterGroupCreateSubCommand', () => {
 		it('should include character name in success message', async () => {
 			// Arrange
 			setupKoboldUtilsMocks({ characterOverrides: { name: 'Testy McTestface' } });
-			vi.mocked(FinderHelpers.getCounterByName).mockReturnValue({
-				counter: null,
-				group: null,
-			});
+			vi.mocked(FinderHelpers.getCounterGroupByName).mockReturnValue(undefined);
 			setupSheetRecordUpdateMock(kobold);
 
 			// Act
@@ -319,10 +298,7 @@ describe('CounterGroupCreateSubCommand', () => {
 		it('should use documentation strings for response', async () => {
 			// Arrange
 			setupKoboldUtilsMocks({ characterOverrides: { name: 'Otter' } });
-			vi.mocked(FinderHelpers.getCounterByName).mockReturnValue({
-				counter: null,
-				group: null,
-			});
+			vi.mocked(FinderHelpers.getCounterGroupByName).mockReturnValue(undefined);
 			setupSheetRecordUpdateMock(kobold);
 
 			// Act

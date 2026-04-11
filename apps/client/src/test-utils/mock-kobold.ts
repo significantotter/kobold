@@ -32,6 +32,7 @@ interface MockCharacterModel extends MockModel {
 	readActive: MockFn;
 	readLite: MockFn;
 	readManyLite: MockFn;
+	readManyForList: MockFn;
 	readManyWithModifiers: MockFn;
 	createReturningId: MockFn;
 	updateFields: MockFn;
@@ -111,6 +112,7 @@ function createMockCharacterModel(): MockCharacterModel {
 		readActive: vi.fn(),
 		readLite: vi.fn(),
 		readManyLite: vi.fn(),
+		readManyForList: vi.fn(),
 		readManyWithModifiers: vi.fn(),
 		createReturningId: vi.fn(),
 		updateFields: vi.fn(),

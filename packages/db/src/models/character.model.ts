@@ -9,6 +9,7 @@ import {
 	ChannelDefaultCharacter,
 	CharacterBasic,
 	CharacterId,
+	CharacterListItem,
 	CharacterUpdate,
 	CharacterWithRelations,
 	Database,
@@ -59,14 +60,11 @@ export class CharacterModel extends Model<Database['character']> {
 		guildId?: string;
 		channelId?: string;
 	}): Promise<CharacterWithRelations | null> {
-		const result = await this._readManyParallel({ userId, guildId, channelId });
-		const channelDefault = result.filter(c => c.channelDefaultCharacters.length);
-		if (channelDefault.length) return channelDefault[0];
-		const guildDefault = result.filter(c => c.guildDefaultCharacters.length);
-		if (guildDefault.length) return guildDefault[0];
-		const active = result.filter(c => c.isActiveCharacter);
-		if (active.length) return active[0];
-		return null;
+		// Identify the single active character with a lightweight query first,
+		// then load full relations only for that one character.
+		const lite = await this.readActiveLite({ userId, guildId, channelId });
+		if (!lite) return null;
+		return this._readManyParallel({ id: lite.id }).then(r => r[0] ?? null);
 	}
 
 	/**
@@ -112,20 +110,22 @@ export class CharacterModel extends Model<Database['character']> {
 			.where(eb =>
 				eb.or([
 					...(channelId
-						? [sql<boolean>`"channelDefaultCharacter"."characterId" IS NOT NULL`]
+						? [sql<boolean>`"channel_default_character"."character_id" IS NOT NULL`]
 						: []),
 					...(guildId
-						? [sql<boolean>`"guildDefaultCharacter"."characterId" IS NOT NULL`]
+						? [sql<boolean>`"guild_default_character"."character_id" IS NOT NULL`]
 						: []),
 					eb('character.isActiveCharacter', '=', true),
 				])
 			)
 			.orderBy(
-				sql`CASE
-					${channelId ? sql`WHEN "channelDefaultCharacter"."characterId" IS NOT NULL THEN 0` : sql``}
-					${guildId ? sql`WHEN "guildDefaultCharacter"."characterId" IS NOT NULL THEN 1` : sql``}
-					ELSE 2
-				END`,
+				channelId || guildId
+					? sql`CASE
+						${channelId ? sql`WHEN "channel_default_character"."character_id" IS NOT NULL THEN 0` : sql``}
+						${guildId ? sql`WHEN "guild_default_character"."character_id" IS NOT NULL THEN 1` : sql``}
+						ELSE 2
+					END`
+					: sql`"character"."id"`,
 				'asc'
 			)
 			.limit(1);
@@ -193,6 +193,86 @@ export class CharacterModel extends Model<Database['character']> {
 				)
 			);
 		return query.execute();
+	}
+
+	/**
+	 * Reads characters with channel/guild defaults and only the 4 sheet fields
+	 * needed for the /character list embed (level, heritage, ancestry, class).
+	 * Uses JSON operators to avoid fetching the full sheet blob.
+	 */
+	public async readManyForList({ userId }: { userId: string }): Promise<CharacterListItem[]> {
+		// 1. Fetch base character columns + extracted sheet fields in one query
+		const rows = await this.db
+			.selectFrom('character')
+			.innerJoin('sheetRecord', 'sheetRecord.id', 'character.sheetRecordId')
+			.select([
+				'character.id',
+				'character.name',
+				'character.userId',
+				'character.sheetRecordId',
+				'character.isActiveCharacter',
+				'character.importSource',
+				'character.charId',
+				sql<number | null>`("sheet_record"."sheet"->'staticInfo'->>'level')::int`.as(
+					'level'
+				),
+				sql<string | null>`"sheet_record"."sheet"->'info'->>'heritage'`.as('heritage'),
+				sql<string | null>`"sheet_record"."sheet"->'info'->>'ancestry'`.as('ancestry'),
+				sql<string | null>`"sheet_record"."sheet"->'info'->>'class'`.as('class'),
+			])
+			.where('character.userId', '=', userId)
+			.execute();
+
+		if (rows.length === 0) return [];
+
+		const characterIds = rows.map(c => c.id);
+
+		// 2. Fetch channel and guild defaults in parallel
+		const [channelDefaults, guildDefaults] = await Promise.all([
+			this.db
+				.selectFrom('channelDefaultCharacter')
+				.selectAll('channelDefaultCharacter')
+				.where('channelDefaultCharacter.characterId', 'in', characterIds)
+				.execute() as Promise<ChannelDefaultCharacter[]>,
+			this.db
+				.selectFrom('guildDefaultCharacter')
+				.selectAll('guildDefaultCharacter')
+				.where('guildDefaultCharacter.characterId', 'in', characterIds)
+				.execute() as Promise<GuildDefaultCharacter[]>,
+		]);
+
+		// 3. Index defaults
+		const channelDefaultMap = new Map<number, ChannelDefaultCharacter[]>();
+		for (const cd of channelDefaults) {
+			const arr = channelDefaultMap.get(cd.characterId) ?? [];
+			arr.push(cd);
+			channelDefaultMap.set(cd.characterId, arr);
+		}
+		const guildDefaultMap = new Map<number, GuildDefaultCharacter[]>();
+		for (const gd of guildDefaults) {
+			const arr = guildDefaultMap.get(gd.characterId) ?? [];
+			arr.push(gd);
+			guildDefaultMap.set(gd.characterId, arr);
+		}
+
+		// 4. Assemble results
+		return rows.map(c => ({
+			id: c.id,
+			name: c.name,
+			userId: c.userId,
+			sheetRecordId: c.sheetRecordId,
+			isActiveCharacter: c.isActiveCharacter,
+			importSource: c.importSource,
+			charId: c.charId,
+			channelDefaultCharacters: channelDefaultMap.get(c.id) ?? [],
+			guildDefaultCharacters: guildDefaultMap.get(c.id) ?? [],
+			sheetInfo: {
+				level: c.level,
+				heritage: c.heritage,
+				ancestry: c.ancestry,
+				class: c.class,
+			},
+		}));
 	}
 
 	/**

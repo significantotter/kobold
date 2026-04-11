@@ -24,7 +24,6 @@ import { UserSettingsUtils } from './user-settings-utils.js';
 export interface InjectedData {
 	activeCharacter: CharacterWithRelations | null;
 	activeCharacterLite: CharacterBasic | null;
-	ownedCharacters: CharacterWithRelations[];
 	userSettings: UserSettings;
 	activeGame: GameWithCharactersLite | null;
 	currentInitiative: InitiativeWithRelations | null;
@@ -77,10 +76,6 @@ export class KoboldUtils {
 				})
 			: Promise.resolve(undefined);
 
-		let ownedCharactersPromise = usesData.ownedCharacters
-			? this.kobold.character.readMany({ userId: intr.user.id })
-			: Promise.resolve(undefined);
-
 		let userSettingsPromise = usesData.userSettings
 			? this.userSettingsUtils.getSettingsForUser(intr)
 			: Promise.resolve(undefined);
@@ -101,7 +96,6 @@ export class KoboldUtils {
 		let [
 			activeCharacter,
 			activeCharacterLite,
-			ownedCharacters,
 			userSettings,
 			activeGame,
 			currentInitiative,
@@ -109,7 +103,6 @@ export class KoboldUtils {
 		] = await Promise.all([
 			activeCharacterPromise,
 			activeCharacterLitePromise,
-			ownedCharactersPromise,
 			userSettingsPromise,
 			activeGamePromise,
 			currentInitiativePromise,
@@ -120,7 +113,6 @@ export class KoboldUtils {
 			{
 				activeCharacter,
 				activeCharacterLite,
-				ownedCharacters,
 				userSettings,
 				activeGame,
 				currentInitiative,
@@ -151,8 +143,6 @@ export class KoboldUtils {
 			this.assertCurrentInitiativeNotNull(data.currentInitiative);
 		if (data.currentInitiativeLite !== undefined)
 			this.assertCurrentInitiativeNotNull(data.currentInitiativeLite);
-		if (data.ownedCharacters !== undefined)
-			this.assertOwnedCharactersNotEmpty(data.ownedCharacters);
 	}
 
 	public assertActiveCharacterNotNull(
@@ -181,10 +171,5 @@ export class KoboldUtils {
 	): asserts data is NonNullable<InjectedData['currentInitiative']> {
 		if (data == null)
 			throw new KoboldError('Yip! You must be in an initiative to use this command.');
-	}
-
-	public assertOwnedCharactersNotEmpty(data: InjectedData['ownedCharacters'] | null) {
-		if (data == null)
-			throw new KoboldError("Yip! You don't have any characters! Use /import to import one.");
 	}
 }

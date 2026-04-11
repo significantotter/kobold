@@ -1,6 +1,7 @@
 import { BaseInteraction, CacheType } from 'discord.js';
 import { utilStrings } from '@kobold/documentation';
 import {
+	CharacterBasic,
 	CharacterWithRelations,
 	GameCharacterLite,
 	GameWithCharactersLite,
@@ -186,36 +187,30 @@ export class GameUtils {
 	}
 
 	public async getAllTargetableOptions(intr: BaseInteraction<CacheType>) {
-		let [currentInit, targetGames, ownedCharacters] = await Promise.all([
-			this.koboldUtils.initiativeUtils.getInitiativeForChannelOrNull(intr.channel),
-			this.koboldUtils.gameUtils.getWhereUserHasCharacter(intr.user.id, intr.guildId),
-			this.koboldUtils.kobold.character.readMany({ userId: intr.user.id }),
-		]);
+		let [currentInit, targetGames, ownedCharacters, channelDefaults, guildDefaults] =
+			await Promise.all([
+				this.koboldUtils.initiativeUtils.getInitiativeForChannelOrNull(intr.channel),
+				this.koboldUtils.gameUtils.getWhereUserHasCharacter(intr.user.id, intr.guildId),
+				this.koboldUtils.kobold.character.readManyLite({ userId: intr.user.id }),
+				intr.channelId
+					? this.kobold.character.readManyLite({
+							userId: intr.user.id,
+							channelId: intr.channelId,
+						})
+					: Promise.resolve([] as CharacterBasic[]),
+				intr.guildId
+					? this.kobold.character.readManyLite({
+							userId: intr.user.id,
+							guildId: intr.guildId,
+						})
+					: Promise.resolve([] as CharacterBasic[]),
+			]);
 
-		let channelDefaultCharacter: CharacterWithRelations | undefined = undefined;
-		let guildDefaultCharacter: CharacterWithRelations | undefined = undefined;
-		let currentActiveCharacter: CharacterWithRelations | undefined = undefined;
-		for (const character of ownedCharacters) {
-			if (intr.channelId && character.channelDefaultCharacters.length) {
-				channelDefaultCharacter = character.channelDefaultCharacters.find(
-					c => c.channelId === intr.channelId
-				)
-					? character
-					: undefined;
-			}
-			if (intr.guildId && character.guildDefaultCharacters.length) {
-				guildDefaultCharacter = character.guildDefaultCharacters.find(
-					c => c.guildId === intr.guildId
-				)
-					? character
-					: undefined;
-			}
-			if (character.isActiveCharacter) {
-				currentActiveCharacter = character;
-			}
-		}
+		// Resolve the effective character: channel default > guild default > active.
 		const activeCharacter =
-			channelDefaultCharacter ?? guildDefaultCharacter ?? currentActiveCharacter;
+			channelDefaults[0] ??
+			guildDefaults[0] ??
+			ownedCharacters.find(c => c.isActiveCharacter);
 
 		// only take the games that we're GM'ing in, or that our active character is in
 		targetGames = targetGames.filter(
@@ -229,7 +224,6 @@ export class GameUtils {
 			.flatMap(game => game.characters)
 			.filter(result => !!result);
 
-		// Owned characters have full relations
 		const ownedCharacterOptions = activeCharacter ? ownedCharacters : [];
 
 		const actorOptions = currentInit?.actors ?? [];
@@ -281,7 +275,7 @@ export class GameUtils {
 			minion => minion.name.trim().toLowerCase() === normalizedTarget
 		);
 
-		// find a match from the user's own characters (already full relations)
+		// find a match from the user's own characters (lite — will lazy-load if used)
 		let matchedOwnedCharacter = ownedCharacterOptions.find(
 			character => character.name.trim().toLowerCase() === normalizedTarget
 		);
@@ -307,9 +301,15 @@ export class GameUtils {
 			targetEntity = matchedMinion;
 			actualTargetName = matchedMinion.name;
 		} else if (matchedOwnedCharacter) {
-			targetSheetRecord = matchedOwnedCharacter.sheetRecord;
-			targetEntity = matchedOwnedCharacter;
-			actualTargetName = matchedOwnedCharacter.name;
+			// Lazy-load full character relations for owned character
+			const fullCharacter = await this.kobold.character.read({
+				id: matchedOwnedCharacter.id,
+			});
+			if (fullCharacter) {
+				targetSheetRecord = fullCharacter.sheetRecord;
+				targetEntity = fullCharacter;
+				actualTargetName = fullCharacter.name;
+			}
 		} else if (matchedGameCharacter) {
 			// Lazy-load full character relations for game character
 			const fullCharacter = await this.kobold.character.read({ id: matchedGameCharacter.id });

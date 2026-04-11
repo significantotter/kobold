@@ -1,4 +1,4 @@
-import { CamelCasePlugin, Kysely, ParseJSONResultsPlugin, PostgresDialect } from 'kysely';
+import { CamelCasePlugin, Kysely, LogEvent, ParseJSONResultsPlugin, PostgresDialect } from 'kysely';
 import {
 	ChannelDefaultCharacterModel,
 	CharacterModel,
@@ -14,6 +14,11 @@ import {
 	WgAuthTokenModel,
 } from './models/index.js';
 import { ActionModel, Database, RollMacroModel } from './index.js';
+
+export interface KoboldOptions {
+	/** Optional callback invoked for every executed query (useful for slow-query logging). */
+	onQuery?: (event: LogEvent) => void;
+}
 
 export class Kobold {
 	public db: Kysely<Database>;
@@ -33,13 +38,14 @@ export class Kobold {
 	public userSettings: UserSettingsModel;
 	public wgAuthToken: WgAuthTokenModel;
 
-	constructor(dialectOrDb: PostgresDialect | Kysely<Database>) {
+	constructor(dialectOrDb: PostgresDialect | Kysely<Database>, options?: KoboldOptions) {
 		if (dialectOrDb instanceof Kysely) {
 			this.db = dialectOrDb;
 		} else {
 			this.db = new Kysely<Database>({
 				dialect: dialectOrDb,
 				plugins: [new ParseJSONResultsPlugin(), new CamelCasePlugin()],
+				log: options?.onQuery,
 			});
 		}
 		this.action = new ActionModel(this.db);

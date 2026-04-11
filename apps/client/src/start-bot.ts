@@ -19,7 +19,7 @@ import { Bot } from './models/bot.js';
 import { Reaction } from './reactions/index.js';
 import { CommandRegistrationService, JobService, Logger } from './services/index.js';
 import { Job } from './services/job-service.js';
-import { Kobold, getDialect } from '@kobold/db';
+import { Kobold, getDialectWithPool } from '@kobold/db';
 import { Trigger } from './triggers/index.js';
 import { NethysDb } from '@kobold/nethys';
 
@@ -28,9 +28,35 @@ import { NethysDb } from '@kobold/nethys';
 disableValidators();
 
 async function start(): Promise<void> {
-	const PostgresDialect = getDialect(Config.database.url);
+	const { dialect: PostgresDialect, pool } = getDialectWithPool(Config.database.url);
 	const nethysCompendium = new NethysDb(Config.database.url);
-	const kobold = new Kobold(PostgresDialect);
+
+	const SLOW_QUERY_MS = 1_000;
+	const kobold = new Kobold(PostgresDialect, {
+		onQuery(event) {
+			if (event.level === 'error') {
+				Logger.error('db query error', {
+					durationMs: event.queryDurationMillis,
+					sql: event.query.sql,
+				});
+			} else if (event.queryDurationMillis >= SLOW_QUERY_MS) {
+				Logger.warn(
+					`slow query (${Math.round(event.queryDurationMillis)}ms): ${event.query.sql.slice(0, 200)}`
+				);
+			}
+		},
+	});
+
+	// Pool observability
+	pool.on('error', err => Logger.error('pg pool: idle client error', err));
+	pool.on('connect', () => {
+		if (pool.waitingCount > 0) {
+			Logger.warn(
+				`pg pool: new connection while ${pool.waitingCount} queries waiting ` +
+					`(total=${pool.totalCount} idle=${pool.idleCount})`
+			);
+		}
+	});
 
 	// Client
 	let client = new CustomClient({

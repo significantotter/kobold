@@ -104,6 +104,15 @@ interface config {
 		authorization: string;
 		body: string;
 	}[];
+	e2e?: {
+		discordEmail: string;
+		discordPassword: string;
+		guildId: string;
+		channelId: string;
+		userId: string;
+		botDisplayName: string;
+		pathbuilderTestCharacterId: string;
+	};
 }
 
 function parseEnvArray(envVariable: string) {
@@ -273,4 +282,15 @@ export const Config: config = Object.freeze({
 			authorization: 'string',
 			body: 'string',
 		}) as config['botSites']) ?? [],
+	e2e: env.DISCORD_TEST_GUILD_ID
+		? {
+				discordEmail: env.DISCORD_EMAIL ?? '',
+				discordPassword: env.DISCORD_PASSWORD ?? '',
+				guildId: env.DISCORD_TEST_GUILD_ID ?? '',
+				channelId: env.DISCORD_TEST_CHANNEL_ID ?? '',
+				userId: env.DISCORD_TEST_USER_ID ?? '',
+				botDisplayName: env.BOT_DISPLAY_NAME ?? 'Kobold',
+				pathbuilderTestCharacterId: env.PATHBUILDER_TEST_CHARACTER_ID ?? '',
+			}
+		: undefined,
 });

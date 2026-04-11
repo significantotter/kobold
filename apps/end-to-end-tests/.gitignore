@@ -3,3 +3,4 @@ auth/
 test-results/
 playwright-report/
 dist/
+.browser-ws-endpoint
