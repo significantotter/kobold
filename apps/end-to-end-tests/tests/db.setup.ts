@@ -64,8 +64,16 @@ setup('clean test user data', async () => {
 			await trx.deleteFrom('modifier').where('userId', '=', USER_ID).execute();
 			await trx.deleteFrom('rollMacro').where('userId', '=', USER_ID).execute();
 
-			// Characters owned by this user
+			// Characters owned by this user (remove game association first)
+			await trx
+				.updateTable('character')
+				.set({ gameId: null })
+				.where('userId', '=', USER_ID)
+				.execute();
 			await trx.deleteFrom('character').where('userId', '=', USER_ID).execute();
+
+			// Games owned by this user
+			await trx.deleteFrom('game').where('gmUserId', '=', USER_ID).execute();
 
 			// Clean up orphaned sheet records (no character or minion references them)
 			await sql`
