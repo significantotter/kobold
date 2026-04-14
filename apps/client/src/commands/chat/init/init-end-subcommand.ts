@@ -91,8 +91,8 @@ export class InitEndSubCommand extends BaseCommandClass(
 			});
 			try {
 				await kobold.initiative.delete({ id: currentInitiative.id });
-				await InteractionUtils.send(intr, InitDefinition.strings.end.success);
 				await kobold.sheetRecord.deleteOrphaned();
+				await InteractionUtils.send(intr, InitDefinition.strings.end.success);
 				return;
 			} catch (err) {
 				await InteractionUtils.send(intr, InitDefinition.strings.end.error);

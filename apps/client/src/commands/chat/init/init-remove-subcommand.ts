@@ -74,6 +74,7 @@ export class InitRemoveSubCommand extends BaseCommandClass(
 		if (actorsInGroup.length === 1) {
 			await kobold.initiativeActorGroup.delete({ id: actor.initiativeActorGroupId });
 		}
+		await kobold.sheetRecord.deleteOrphaned();
 
 		const deletedEmbed = new KoboldEmbed();
 		deletedEmbed.setTitle(

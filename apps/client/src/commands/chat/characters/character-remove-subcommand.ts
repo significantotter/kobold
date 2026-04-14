@@ -91,6 +91,7 @@ export class CharacterRemoveSubCommand extends BaseCommandClass(
 			//delete the character
 
 			await kobold.character.delete({ id: activeCharacter.id });
+			await kobold.sheetRecord.deleteOrphaned();
 			const newActiveCharacter = await kobold.character.read({ userId: intr.user.id });
 			if (newActiveCharacter) {
 				await kobold.character.setIsActive({
