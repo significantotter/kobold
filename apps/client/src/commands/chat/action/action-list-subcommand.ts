@@ -47,13 +47,32 @@ export class ActionListSubCommand extends BaseCommandClass(
 		const ownedByValue = intr.options.getString(
 			commandOptions[commandOptionsEnum.ownedBy].name
 		);
-		const filter = parseOwnedByFilter(ownedByValue);
 
-		// Get actions based on filter
-		const actions = await kobold.action.readManyByUser({
-			userId: intr.user.id,
-			filter,
-		});
+		let actions: Awaited<ReturnType<typeof kobold.action.readManyByUser>>;
+
+		if (ownedByValue) {
+			// Explicit filter provided — use it as-is
+			const filter = parseOwnedByFilter(ownedByValue);
+			actions = await kobold.action.readManyByUser({
+				userId: intr.user.id,
+				filter,
+			});
+		} else {
+			// Default: active character actions + user-wide (unset) actions
+			const activeCharacter = await koboldUtils.characterUtils.getActiveCharacter(intr);
+
+			const [characterActions, userWideActions] = await Promise.all([
+				activeCharacter
+					? kobold.action.readManyForCharacter({
+							userId: intr.user.id,
+							sheetRecordId: activeCharacter.sheetRecordId,
+						})
+					: Promise.resolve([]),
+				kobold.action.readManyUserWide({ userId: intr.user.id }),
+			]);
+
+			actions = [...characterActions, ...userWideActions];
+		}
 
 		// Get character and minion names for display
 		const { characters, minions } =

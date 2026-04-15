@@ -47,13 +47,32 @@ export class RollMacroListSubCommand extends BaseCommandClass(
 		const ownedByValue = intr.options.getString(
 			commandOptions[commandOptionsEnum.ownedBy].name
 		);
-		const filter = parseOwnedByFilter(ownedByValue);
 
-		// Get roll macros based on filter
-		const rollMacros = await kobold.rollMacro.readManyByUser({
-			userId: intr.user.id,
-			filter,
-		});
+		let rollMacros: Awaited<ReturnType<typeof kobold.rollMacro.readManyByUser>>;
+
+		if (ownedByValue) {
+			// Explicit filter provided — use it as-is
+			const filter = parseOwnedByFilter(ownedByValue);
+			rollMacros = await kobold.rollMacro.readManyByUser({
+				userId: intr.user.id,
+				filter,
+			});
+		} else {
+			// Default: active character roll macros + user-wide (unset) roll macros
+			const activeCharacter = await koboldUtils.characterUtils.getActiveCharacter(intr);
+
+			const [characterRollMacros, userWideRollMacros] = await Promise.all([
+				activeCharacter
+					? kobold.rollMacro.readManyForCharacter({
+							userId: intr.user.id,
+							sheetRecordId: activeCharacter.sheetRecordId,
+						})
+					: Promise.resolve([]),
+				kobold.rollMacro.readManyUserWide({ userId: intr.user.id }),
+			]);
+
+			rollMacros = [...characterRollMacros, ...userWideRollMacros];
+		}
 
 		// Get character and minion names for display
 		const { characters, minions } =

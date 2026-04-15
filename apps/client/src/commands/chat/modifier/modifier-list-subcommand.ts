@@ -49,13 +49,32 @@ export class ModifierListSubCommand extends BaseCommandClass(
 		const ownedByValue = intr.options.getString(
 			commandOptions[commandOptionsEnum.ownedBy].name
 		);
-		const filter = parseOwnedByFilter(ownedByValue);
 
-		// Get modifiers based on filter
-		const modifiers = await kobold.modifier.readManyByUser({
-			userId: intr.user.id,
-			filter,
-		});
+		let modifiers: Awaited<ReturnType<typeof kobold.modifier.readManyByUser>>;
+
+		if (ownedByValue) {
+			// Explicit filter provided — use it as-is
+			const filter = parseOwnedByFilter(ownedByValue);
+			modifiers = await kobold.modifier.readManyByUser({
+				userId: intr.user.id,
+				filter,
+			});
+		} else {
+			// Default: active character modifiers + user-wide (unset) modifiers
+			const activeCharacter = await koboldUtils.characterUtils.getActiveCharacter(intr);
+
+			const [characterModifiers, userWideModifiers] = await Promise.all([
+				activeCharacter
+					? kobold.modifier.readManyForCharacter({
+							userId: intr.user.id,
+							sheetRecordId: activeCharacter.sheetRecordId,
+						})
+					: Promise.resolve([]),
+				kobold.modifier.readManyUserWide({ userId: intr.user.id }),
+			]);
+
+			modifiers = [...characterModifiers, ...userWideModifiers];
+		}
 
 		// Get character and minion names for display
 		const { characters, minions } =
