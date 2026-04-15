@@ -37,13 +37,23 @@ export const authRouter = orpc.router({
 	getAuthUrl: orpc
 		.input(z.object({ returnTo: z.string().optional() }).optional())
 		.output(z.object({ url: z.string(), state: z.string() }))
-		.handler(async ({ input }) => {
+		.handler(async ({ input, context }) => {
 			// Generate a random state for CSRF protection, embed returnTo for post-login redirect
+			const csrf = crypto.randomUUID();
 			const statePayload = {
-				csrf: crypto.randomUUID(),
+				csrf,
 				returnTo: input?.returnTo || '/',
 			};
 			const state = Buffer.from(JSON.stringify(statePayload)).toString('base64');
+
+			// Store the CSRF token in an httpOnly cookie so the callback can verify it
+			setCookie(context.honoContext, 'oauth_csrf', csrf, {
+				httpOnly: true,
+				secure: process.env.NODE_ENV === 'production',
+				sameSite: 'Lax',
+				maxAge: 10 * 60, // 10 minutes
+				path: '/',
+			});
 
 			const url = buildDiscordAuthUrl(state);
 

@@ -91,10 +91,8 @@ export const characterRouter = orpc.router({
 				.nullable()
 		)
 		.handler(async ({ input, context }) => {
-			const t0 = performance.now();
 			requireAuth(context.userId);
 
-			const t1 = performance.now();
 			const character = await context.kobold.character.readLite({
 				id: input.characterId,
 				userId: context.userId,
@@ -104,10 +102,6 @@ export const characterRouter = orpc.router({
 			const sheetRecord = await context.kobold.sheetRecord.read({
 				id: character.sheetRecordId,
 			});
-			const t2 = performance.now();
-			console.log(
-				`[getCharacter] auth: ${(t1 - t0).toFixed(0)}ms, db.read: ${(t2 - t1).toFixed(0)}ms, total: ${(t2 - t0).toFixed(0)}ms`
-			);
 
 			return {
 				id: character.id,

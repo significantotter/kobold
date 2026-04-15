@@ -19,13 +19,15 @@ const app = new Hono();
 
 // Middleware
 app.use('*', logger());
-app.use(
-	'*',
-	cors({
-		origin: Config.api.baseUrl || 'http://localhost:5173',
-		credentials: true,
-	})
-);
+if (process.env.NODE_ENV !== 'production') {
+	app.use(
+		'*',
+		cors({
+			origin: 'http://localhost:5173',
+			credentials: true,
+		})
+	);
+}
 
 // Health check
 app.get('/health', c => c.json({ status: 'ok', timestamp: new Date().toISOString() }));

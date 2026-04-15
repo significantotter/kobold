@@ -2,6 +2,7 @@ import type { Context as HonoContext } from 'hono';
 import { getCookie } from 'hono/cookie';
 import type { Kobold } from '@kobold/db';
 import { kobold } from './services.js';
+import { verifySessionToken } from './session.js';
 
 export interface SessionUser {
 	userId: string;
@@ -33,19 +34,15 @@ export function createContext(c: HonoContext): AppContext {
 	let user: SessionUser | null = null;
 
 	if (sessionToken) {
-		try {
-			const payload = JSON.parse(Buffer.from(sessionToken, 'base64').toString('utf-8'));
-			if (payload.exp && payload.exp > Date.now() && payload.userId) {
-				userId = payload.userId;
-				user = {
-					userId: payload.userId,
-					username: payload.username ?? 'Unknown',
-					discriminator: payload.discriminator ?? '0',
-					avatar: payload.avatar ?? null,
-				};
-			}
-		} catch {
-			// Invalid session token — treat as unauthenticated
+		const payload = verifySessionToken(sessionToken);
+		if (payload) {
+			userId = payload.userId;
+			user = {
+				userId: payload.userId,
+				username: payload.username ?? 'Unknown',
+				discriminator: payload.discriminator ?? '0',
+				avatar: payload.avatar ?? null,
+			};
 		}
 	}
 

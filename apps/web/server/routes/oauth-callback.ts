@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
-import { setCookie } from 'hono/cookie';
+import { setCookie, getCookie } from 'hono/cookie';
 import { Config } from '@kobold/config';
+import { createSessionToken } from '../session.js';
 
 const FRONTEND_URL = process.env.FRONTEND_BASE_URL || 'http://localhost:5173';
 
@@ -69,19 +70,11 @@ async function fetchDiscordUser(accessToken: string): Promise<DiscordUser> {
 }
 
 /**
- * Create a session token for the user
- * TODO: Implement proper JWT or session management
+ * Returns true when `path` is a safe same-origin relative path.
+ * Rejects protocol-relative URLs (//evil.com), absolute URLs, and other schemes.
  */
-function createSessionToken(user: DiscordUser): string {
-	// Simple base64 encoding for now - REPLACE with proper JWT in production
-	const payload = {
-		userId: user.id,
-		username: user.username,
-		discriminator: user.discriminator,
-		avatar: user.avatar,
-		exp: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days
-	};
-	return Buffer.from(JSON.stringify(payload)).toString('base64');
+function isSafeRedirectPath(path: string): boolean {
+	return path.startsWith('/') && !path.startsWith('//');
 }
 
 /**
@@ -103,10 +96,27 @@ oauthCallbackRoute.get('/callback', async c => {
 		return c.redirect('/login-error?error=missing_code');
 	}
 
-	// TODO: Validate state parameter against stored state
-	// if (!validateState(state)) {
-	//   return c.redirect('/login-error?error=invalid_state');
-	// }
+	// Validate CSRF state matches the cookie set during getAuthUrl
+	const stateParam = c.req.query('state');
+	const storedCsrf = getCookie(c, 'oauth_csrf');
+
+	if (!stateParam || !storedCsrf) {
+		return c.redirect('/login-error?error=missing_state');
+	}
+
+	let statePayload: { csrf?: string; returnTo?: string };
+	try {
+		statePayload = JSON.parse(Buffer.from(stateParam, 'base64').toString('utf-8'));
+	} catch {
+		return c.redirect('/login-error?error=invalid_state');
+	}
+
+	if (!statePayload.csrf || statePayload.csrf !== storedCsrf) {
+		return c.redirect('/login-error?error=invalid_state');
+	}
+
+	// Clear the one-time CSRF cookie
+	setCookie(c, 'oauth_csrf', '', { httpOnly: true, maxAge: 0, path: '/' });
 
 	try {
 		// Exchange code for access token
@@ -115,9 +125,9 @@ oauthCallbackRoute.get('/callback', async c => {
 		// Fetch user info
 		const user = await fetchDiscordUser(tokenResponse.access_token);
 
-		console.log(`User authenticated: ${user.username} (${user.id})`);
+		console.log(`User authenticated: ${user.id}`);
 
-		// Create session token
+		// Create HMAC-signed session token
 		const sessionToken = createSessionToken(user);
 
 		// Set session cookie
@@ -131,21 +141,11 @@ oauthCallbackRoute.get('/callback', async c => {
 
 		// Redirect to returnTo path from state, or home page
 		let redirectTo = '/';
-		try {
-			const stateParam = c.req.query('state');
-			if (stateParam) {
-				const statePayload = JSON.parse(
-					Buffer.from(stateParam, 'base64').toString('utf-8')
-				);
-				if (
-					typeof statePayload.returnTo === 'string' &&
-					statePayload.returnTo.startsWith('/')
-				) {
-					redirectTo = statePayload.returnTo;
-				}
-			}
-		} catch {
-			// Invalid state — fall through to default redirect
+		if (
+			typeof statePayload.returnTo === 'string' &&
+			isSafeRedirectPath(statePayload.returnTo)
+		) {
+			redirectTo = statePayload.returnTo;
 		}
 		return c.redirect(redirectTo);
 	} catch (err) {

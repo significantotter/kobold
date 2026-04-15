@@ -108,12 +108,17 @@ describe('CharacterModel', () => {
 	describe('delete', () => {
 		it('deletes a character', async () => {
 			const fakeCharacter = await ResourceFactories.character();
-			await vitestKobold.character.delete({ id: fakeCharacter.id });
+			await vitestKobold.character.delete({
+				id: fakeCharacter.id,
+				userId: fakeCharacter.userId,
+			});
 			const read = await vitestKobold.character.read({ id: fakeCharacter.id });
 			expect(read).toEqual(null);
 		});
 		it('fails to delete a character if the character does not exist', async () => {
-			await expect(vitestKobold.character.delete({ id: -1 })).rejects.toThrow();
+			await expect(
+				vitestKobold.character.delete({ id: -1, userId: 'nonexistent' })
+			).rejects.toThrow();
 		});
 	});
 	describe('setIsActive, readActive', () => {

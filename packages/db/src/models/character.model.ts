@@ -592,7 +592,7 @@ export class CharacterModel extends Model<Database['character']> {
 			exactName?: string;
 			charId?: number;
 			importSource?: ImportSourceEnum;
-		} & ({ id: CharacterId; userId?: string } | { userId: string })
+		} & ({ id: CharacterId; userId: string } | { userId: string })
 	): Promise<CharacterBasic | null> {
 		let query = this.db
 			.selectFrom('character')
@@ -625,10 +625,11 @@ export class CharacterModel extends Model<Database['character']> {
 		return (await query.orderBy('character.id', 'asc').executeTakeFirst()) ?? null;
 	}
 
-	public async delete({ id }: { id: CharacterId }): Promise<void> {
+	public async delete({ id, userId }: { id: CharacterId; userId: string }): Promise<void> {
 		const result = await this.db
 			.deleteFrom('character')
 			.where('character.id', '=', id)
+			.where('character.userId', '=', userId)
 			.execute();
 		if (Number(result[0].numDeletedRows) == 0) throw new Error('No rows deleted');
 	}

@@ -77,7 +77,7 @@ describe('CharacterRemoveSubCommand', () => {
 
 			// Assert
 			expect(result.didRespond()).toBe(true);
-			expect(deleteMock).toHaveBeenCalledWith({ id: mockCharacter.id });
+			expect(deleteMock).toHaveBeenCalledWith({ id: mockCharacter.id, userId: TEST_USER_ID });
 		});
 
 		it('should not delete when user cancels', async () => {
