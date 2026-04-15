@@ -155,6 +155,7 @@ export const characterRouter = orpc.router({
 		)
 		.handler(async ({ input, context }) => {
 			requireAuth(context.userId);
+			const userId = context.userId;
 
 			const { exportData } = input;
 
@@ -169,7 +170,7 @@ export const characterRouter = orpc.router({
 			// Check for duplicate character
 			const existing = await context.kobold.character.readLite({
 				exactName: sheet.staticInfo.name,
-				userId: context.userId,
+				userId: userId,
 			});
 			if (existing) {
 				throw new Error(
@@ -185,7 +186,7 @@ export const characterRouter = orpc.router({
 
 				const { id: characterId } = await trx.character.createReturningId({
 					name: characterName,
-					userId: context.userId,
+					userId: userId,
 					sheetRecordId: sheetRecord.id,
 					importSource: ImportSourceEnum.wg,
 					charId: exportData.character.id ?? -1,
@@ -193,7 +194,7 @@ export const characterRouter = orpc.router({
 
 				await trx.character.setIsActive({
 					id: characterId,
-					userId: context.userId,
+					userId: userId,
 				});
 
 				return { characterId };
