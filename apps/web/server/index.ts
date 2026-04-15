@@ -9,7 +9,6 @@ import { onError } from '@orpc/server';
 import { router } from './router.js';
 import { createContext } from './context.js';
 import { oauthCallbackRoute } from './routes/oauth-callback.js';
-import { wgOauthRoute } from './routes/wg-oauth.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -34,9 +33,6 @@ app.get('/health', c => c.json({ status: 'ok', timestamp: new Date().toISOString
 
 // OAuth callback route (needs HTTP redirect, not RPC)
 app.route('/oauth', oauthCallbackRoute);
-
-// Wanderer's Guide OAuth routes
-app.route('/wg-oauth', wgOauthRoute);
 
 // oRPC API handler (official Hono adapter pattern)
 const handler = new RPCHandler(router, {
