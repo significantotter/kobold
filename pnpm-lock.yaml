@@ -74,7 +74,7 @@ importers:
         version: 1.3.2(discord.js@14.25.1)
       drizzle-orm:
         specifier: ^0.33.0
-        version: 0.33.0(@electric-sql/pglite@0.3.7)(@libsql/client@0.14.0)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@11.10.0)(knex@3.1.0(better-sqlite3@11.10.0))(kysely@0.28.9)(pg@8.16.3)(postgres@3.4.7)
+        version: 0.33.0(@electric-sql/pglite@0.3.7)(@libsql/client@0.14.0)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@11.10.0)(knex@3.1.0(better-sqlite3@11.10.0)(pg@8.16.3))(kysely@0.28.9)(pg@8.16.3)(postgres@3.4.7)
       express:
         specifier: 4.22.1
         version: 4.22.1
@@ -219,7 +219,7 @@ importers:
         version: link:../../packages/config
       '@kobold/db':
         specifier: workspace:*
-        version: file:packages/db(@electric-sql/pglite@0.3.7)(@libsql/client@0.14.0)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@11.10.0)(knex@3.1.0(better-sqlite3@11.10.0))(postgres@3.4.7)
+        version: link:../../packages/db
       '@kobold/documentation':
         specifier: workspace:*
         version: link:../../packages/documentation
@@ -393,7 +393,7 @@ importers:
         version: 4.1.0
       drizzle-orm:
         specifier: ^0.33.0
-        version: 0.33.0(@electric-sql/pglite@0.3.7)(@libsql/client@0.14.0)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@11.10.0)(knex@3.1.0(better-sqlite3@11.10.0))(kysely@0.28.9)(pg@8.16.3)(postgres@3.4.7)
+        version: 0.33.0(@electric-sql/pglite@0.3.7)(@libsql/client@0.14.0)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@11.10.0)(knex@3.1.0(better-sqlite3@11.10.0)(pg@8.16.3))(kysely@0.28.9)(pg@8.16.3)(postgres@3.4.7)
       kysely:
         specifier: ^0.28.9
         version: 0.28.9
@@ -497,7 +497,7 @@ importers:
         version: 14.25.1
       drizzle-orm:
         specifier: ^0.33.0
-        version: 0.33.0(@electric-sql/pglite@0.3.7)(@libsql/client@0.14.0)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@11.10.0)(knex@3.1.0(better-sqlite3@11.10.0))(kysely@0.28.9)(pg@8.16.3)(postgres@3.4.7)
+        version: 0.33.0(@electric-sql/pglite@0.3.7)(@libsql/client@0.14.0)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@11.10.0)(knex@3.1.0(better-sqlite3@11.10.0)(pg@8.16.3))(kysely@0.28.9)(pg@8.16.3)(postgres@3.4.7)
       hast-util-from-text:
         specifier: ^3.0.0
         version: 3.0.0
@@ -1309,18 +1309,6 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.9':
     resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
-
-  '@kobold/config@file:packages/config':
-    resolution: {directory: packages/config, type: directory}
-
-  '@kobold/db@file:packages/db':
-    resolution: {directory: packages/db, type: directory}
-
-  '@kobold/documentation@file:packages/documentation':
-    resolution: {directory: packages/documentation, type: directory}
-
-  '@kobold/schema@file:packages/schema':
-    resolution: {directory: packages/schema, type: directory}
 
   '@kristiandupont/recase@1.4.1':
     resolution: {integrity: sha512-e5t4YqhnRGbS9sU4N52cQgTn37qKwTsxDDcIuIkgPvX0UmnL+7eoOR6oFXeCib5zYuw03vYKpR55NBq+W43j1A==}
@@ -7192,61 +7180,6 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@kobold/config@file:packages/config':
-    dependencies:
-      dotenv: 17.2.3
-      lodash: 4.17.21
-
-  '@kobold/db@file:packages/db(@electric-sql/pglite@0.3.7)(@libsql/client@0.14.0)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@11.10.0)(knex@3.1.0(better-sqlite3@11.10.0))(postgres@3.4.7)':
-    dependencies:
-      '@kobold/config': file:packages/config
-      '@kobold/documentation': file:packages/documentation
-      '@kobold/schema': file:packages/schema
-      date-fns: 4.1.0
-      drizzle-orm: 0.33.0(@electric-sql/pglite@0.3.7)(@libsql/client@0.14.0)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@11.10.0)(knex@3.1.0(better-sqlite3@11.10.0))(kysely@0.28.9)(pg@8.16.3)(postgres@3.4.7)
-      kysely: 0.28.9
-      lodash: 4.17.21
-      pg: 8.16.3
-      zod: 4.2.1
-    transitivePeerDependencies:
-      - '@aws-sdk/client-rds-data'
-      - '@cloudflare/workers-types'
-      - '@electric-sql/pglite'
-      - '@libsql/client'
-      - '@neondatabase/serverless'
-      - '@op-engineering/op-sqlite'
-      - '@opentelemetry/api'
-      - '@planetscale/database'
-      - '@prisma/client'
-      - '@tidbcloud/serverless'
-      - '@types/better-sqlite3'
-      - '@types/pg'
-      - '@types/react'
-      - '@types/sql.js'
-      - '@vercel/postgres'
-      - '@xata.io/client'
-      - better-sqlite3
-      - bun-types
-      - expo-sqlite
-      - knex
-      - mysql2
-      - pg-native
-      - postgres
-      - prisma
-      - react
-      - sql.js
-      - sqlite3
-
-  '@kobold/documentation@file:packages/documentation':
-    dependencies:
-      discord-api-types: 0.38.37
-      lodash: 4.17.21
-
-  '@kobold/schema@file:packages/schema':
-    dependencies:
-      lodash: 4.17.21
-      zod: 4.2.1
-
   '@kristiandupont/recase@1.4.1':
     dependencies:
       ramda: 0.30.1
@@ -9301,7 +9234,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  drizzle-orm@0.33.0(@electric-sql/pglite@0.3.7)(@libsql/client@0.14.0)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@11.10.0)(knex@3.1.0(better-sqlite3@11.10.0))(kysely@0.28.9)(pg@8.16.3)(postgres@3.4.7):
+  drizzle-orm@0.33.0(@electric-sql/pglite@0.3.7)(@libsql/client@0.14.0)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@11.10.0)(knex@3.1.0(better-sqlite3@11.10.0)(pg@8.16.3))(kysely@0.28.9)(pg@8.16.3)(postgres@3.4.7):
     optionalDependencies:
       '@electric-sql/pglite': 0.3.7
       '@libsql/client': 0.14.0
