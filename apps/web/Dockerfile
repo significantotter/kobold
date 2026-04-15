@@ -1,54 +1,32 @@
 # Build stage
-FROM node:22-alpine AS builder
+FROM node:22-alpine AS base
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
 
-# Install pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
-
-WORKDIR /app
-
-# Copy workspace root files
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
-COPY tsconfig.base.json ./
-
-# Copy all packages (needed for workspace dependencies)
-COPY packages ./packages
-COPY apps/web ./apps/web
-
-# Install dependencies
-RUN pnpm install --frozen-lockfile
-
-# Build the web app (client + server)
-RUN pnpm --filter @kobold/web build
+FROM base AS build
+COPY . /usr/src/app
+WORKDIR /usr/src/app
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+RUN pnpm run -r build
+RUN pnpm deploy --filter=@kobold/web --prod /prod/web
 
 # Production stage
-FROM node:22-alpine AS production
+FROM base AS production
 
-WORKDIR /app
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nodejs
+USER nodejs
 
-# Install pnpm for running production
-RUN corepack enable && corepack prepare pnpm@latest --activate
+COPY --from=build --chown=nodejs:nodejs /prod/web /prod/web
+WORKDIR /prod/web
 
-# Copy package files for production install
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY packages/config/package.json ./packages/config/
-COPY packages/config/dist ./packages/config/dist
-COPY packages/db/package.json ./packages/db/
-COPY packages/db/dist ./packages/db/dist
-COPY packages/documentation/package.json ./packages/documentation/
-COPY packages/documentation/dist ./packages/documentation/dist
-COPY apps/web/package.json ./apps/web/
-
-# Copy built application
-COPY --from=builder /app/apps/web/dist ./apps/web/dist
-
-# Install production dependencies only
-RUN pnpm install --frozen-lockfile --prod
+# Copy built application from build stage
+COPY --from=build --chown=nodejs:nodejs /usr/src/app/apps/web/dist ./dist
 
 # Set environment
 ENV NODE_ENV=production
 ENV PORT=3000
-
-WORKDIR /app/apps/web
 
 EXPOSE 3000
 
