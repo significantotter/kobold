@@ -14,7 +14,6 @@ import {
 	type MockCharacterFetcher,
 } from '../../../test-utils/index.js';
 import { PathbuilderCharacterFetcher } from './Fetchers/pathbuilder-character-fetcher.js';
-import { WgCharacterFetcher } from './Fetchers/wg-character-fetcher.js';
 import { PasteBinCharacterFetcher } from './Fetchers/pastebin-character-fetcher.js';
 import { ImportSourceEnum } from '@kobold/db';
 

@@ -17,6 +17,11 @@ services:
             - traefik.http.routers.kobold-web.entrypoints=websecure
             - traefik.http.routers.kobold-web.tls.certresolver=letsencrypt
             - traefik.http.services.kobold-web.loadbalancer.server.port=3000
+            - traefik.http.routers.kobold-web.middlewares=kobold-ratelimit
+            # Rate limiting: 100 req/s average, burst of 50
+            - traefik.http.middlewares.kobold-ratelimit.ratelimit.average=100
+            - traefik.http.middlewares.kobold-ratelimit.ratelimit.burst=50
+            - traefik.http.middlewares.kobold-ratelimit.ratelimit.period=1s
             # Also match www subdomain and redirect to apex
             - traefik.http.routers.kobold-web-www.rule=Host(`www.${DOMAIN}`)
             - traefik.http.routers.kobold-web-www.entrypoints=websecure

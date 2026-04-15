@@ -18,10 +18,6 @@ interface config {
 	web: {
 		frontendBaseUrl: string;
 	};
-	wanderersGuide: {
-		apiKey: string;
-		oauthBaseUrl: string;
-	};
 	nethys: {
 		baseUrl: string;
 	};
@@ -193,10 +189,6 @@ export const Config: config = Object.freeze({
 	},
 	web: {
 		frontendBaseUrl: env.FRONTEND_BASE_URL ?? 'http://localhost:5173',
-	},
-	wanderersGuide: {
-		apiKey: env.WANDERERS_GUIDE_API_KEY ?? '',
-		oauthBaseUrl: env.WANDERERS_GUIDE_OAUTH_BASE_URL ?? '',
 	},
 	nethys: {
 		baseUrl: env.NETHYS_BASE_URL ?? 'https://2e.aonprd.com/',
