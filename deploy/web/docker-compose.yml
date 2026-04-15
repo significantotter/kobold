@@ -1,0 +1,47 @@
+services:
+    kobold-web:
+        image: significantotter/kobold-web:latest
+        container_name: kobold-web
+        restart: unless-stopped
+        expose:
+            - '3000'
+        env_file:
+            - stack.env
+        environment:
+            - NODE_ENV=production
+            - API_PORT=3000
+        labels:
+            - traefik.enable=true
+            # HTTPS router
+            - traefik.http.routers.kobold-web.rule=Host(`${DOMAIN}`)
+            - traefik.http.routers.kobold-web.entrypoints=websecure
+            - traefik.http.routers.kobold-web.tls.certresolver=letsencrypt
+            - traefik.http.services.kobold-web.loadbalancer.server.port=3000
+            # Also match www subdomain and redirect to apex
+            - traefik.http.routers.kobold-web-www.rule=Host(`www.${DOMAIN}`)
+            - traefik.http.routers.kobold-web-www.entrypoints=websecure
+            - traefik.http.routers.kobold-web-www.tls.certresolver=letsencrypt
+            - traefik.http.routers.kobold-web-www.middlewares=www-to-apex
+            - traefik.http.middlewares.www-to-apex.redirectregex.regex=^https://www\.(.*)
+            - traefik.http.middlewares.www-to-apex.redirectregex.replacement=https://$${1}
+            - traefik.http.middlewares.www-to-apex.redirectregex.permanent=true
+        healthcheck:
+            test:
+                [
+                    'CMD',
+                    'wget',
+                    '--no-verbose',
+                    '--tries=1',
+                    '--spider',
+                    'http://localhost:3000/health',
+                ]
+            interval: 30s
+            timeout: 5s
+            retries: 3
+            start_period: 10s
+        networks:
+            - proxy
+
+networks:
+    proxy:
+        external: true
