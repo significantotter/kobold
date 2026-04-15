@@ -32,7 +32,7 @@ describe('GameSetActiveSubCommand', () => {
 	it('should set a game as active', async () => {
 		// Arrange
 		const targetGame = createMockGame({ id: 5, name: 'Target Game', isActive: false });
-		kobold.game.readMany.mockResolvedValue([targetGame]);
+		kobold.game.readManyLite.mockResolvedValue([targetGame]);
 		kobold.game.updateMany.mockResolvedValue([]);
 		kobold.game.update.mockResolvedValue({ ...targetGame, isActive: true });
 
@@ -57,7 +57,7 @@ describe('GameSetActiveSubCommand', () => {
 
 	it('should error when game not found', async () => {
 		// Arrange
-		kobold.game.readMany.mockResolvedValue([]);
+		kobold.game.readManyLite.mockResolvedValue([]);
 
 		// Act
 		const result = await harness.executeCommand({
@@ -78,7 +78,7 @@ describe('GameSetActiveSubCommand', () => {
 	it('should deactivate other games when setting one active', async () => {
 		// Arrange
 		const targetGame = createMockGame({ id: 5, name: 'Target Game', isActive: false });
-		kobold.game.readMany.mockResolvedValue([targetGame]);
+		kobold.game.readManyLite.mockResolvedValue([targetGame]);
 		kobold.game.updateMany.mockResolvedValue([]);
 		kobold.game.update.mockResolvedValue({ ...targetGame, isActive: true });
 

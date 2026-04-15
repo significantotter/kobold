@@ -157,7 +157,7 @@ export class CounterCreateSubCommand extends BaseCommandClass(
 				max,
 				current: max ?? 0,
 				recoverable,
-				recoverTo: (recoverTo ?? max != null) ? -1 : 0,
+				recoverTo: recoverTo ?? (max != null ? -1 : 0),
 				text,
 			};
 		}
@@ -193,6 +193,8 @@ export class CounterCreateSubCommand extends BaseCommandClass(
 				sheet: sheetToUpload,
 			}
 		);
+		// Trigger adjusted_sheet recomputation
+		koboldUtils.adjustedSheetService.triggerRecompute(activeCharacter.sheetRecord.id);
 
 		//send a response
 		await InteractionUtils.send(

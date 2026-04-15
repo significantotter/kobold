@@ -6,7 +6,6 @@ import {
 	CacheType,
 	ChatInputCommandInteraction,
 	ComponentType,
-	MessageFlags,
 } from 'discord.js';
 
 import _ from 'lodash';
@@ -64,7 +63,7 @@ export class RollMacroRemoveSubCommand extends BaseCommandClass(
 		if (targetRollMacro) {
 			// ask for confirmation
 
-			const response = await intr.reply({
+			const prompt = await intr.editReply({
 				content: RollMacroDefinition.strings.remove.removeConfirmationText({
 					macroName: targetRollMacro.name,
 				}),
@@ -87,10 +86,7 @@ export class RollMacroRemoveSubCommand extends BaseCommandClass(
 						],
 					},
 				],
-				flags: [MessageFlags.Ephemeral],
-				withResponse: true,
 			});
-			const prompt = response.resource!.message!;
 			let timedOut = false;
 			let result = await CollectorUtils.collectByButton(
 				prompt,

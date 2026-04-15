@@ -58,40 +58,34 @@ export class RollMacroCreateSubCommand extends BaseCommandClass(
 		);
 		const sheetRecordId = parseCreateForValue(createForValue, characters, minions);
 
-		// Determine target name and validation character based on create-for value
+		// Determine target name based on create-for value
 		let targetName: string = 'User';
-		let validationCharacter:
-			| Awaited<
-					ReturnType<typeof koboldUtils.fetchNonNullableDataForCommand>
-			  >['activeCharacter']
-			| null = null;
 
-		if (sheetRecordId === null) {
-			// User-wide roll macro
-			targetName = 'User';
-			// We need a character for validation - use active character if available
-			try {
-				const data = await koboldUtils.fetchNonNullableDataForCommand(intr, {
-					activeCharacter: true,
-				});
-				validationCharacter = data.activeCharacter;
-			} catch {
-				// No active character - that's okay for user-wide
-			}
-		} else {
-			// Specific character or minion
-			// Look up the name
+		if (sheetRecordId !== null) {
 			const char = characters.find(c => c.sheetRecordId === sheetRecordId);
 			const minion = minions.find(m => m.sheetRecordId === sheetRecordId);
 			if (char) {
 				targetName = char.name;
-				// Use this character for validation
-				validationCharacter = char;
 			} else if (minion) {
 				targetName = minion.name;
 			} else {
 				throw new KoboldError(`Yip! Could not find a character or minion with that ID.`);
 			}
+		}
+
+		// Try to get active character for roll expression validation
+		let validationCharacter:
+			| Awaited<
+					ReturnType<typeof koboldUtils.fetchNonNullableDataForCommand>
+			  >['activeCharacter']
+			| null = null;
+		try {
+			const data = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+				activeCharacter: true,
+			});
+			validationCharacter = data.activeCharacter;
+		} catch {
+			// No active character - skip roll expression validation
 		}
 
 		let name = intr.options
@@ -115,8 +109,13 @@ export class RollMacroCreateSubCommand extends BaseCommandClass(
 				);
 				return;
 			}
-		} else if (validationCharacter) {
-			if (FinderHelpers.getRollMacroByName(validationCharacter.rollMacros, name)) {
+		} else {
+			// Check character/minion-specific macros (includes user-wide to prevent conflicts)
+			const existingMacros = await kobold.rollMacro.readManyForCharacter({
+				userId: intr.user.id,
+				sheetRecordId,
+			});
+			if (FinderHelpers.getRollMacroByName(existingMacros, name)) {
 				await InteractionUtils.send(
 					intr,
 					RollMacroDefinition.strings.create.alreadyExists({

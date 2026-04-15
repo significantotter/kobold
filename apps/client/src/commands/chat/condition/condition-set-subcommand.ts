@@ -75,9 +75,9 @@ export class ConditionSetSubCommand extends BaseCommandClass(
 			.trim();
 
 		//check if we have an active character
-		const { gameUtils } = new KoboldUtils(kobold);
+		const koboldUtils = new KoboldUtils(kobold);
 		const { targetSheetRecord, targetEntity, targetName } =
-			await gameUtils.getCharacterOrInitActorTarget(intr, targetCharacterName);
+			await koboldUtils.gameUtils.getCharacterOrInitActorTarget(intr, targetCharacterName);
 
 		const targetCondition = FinderHelpers.getConditionByName(targetSheetRecord, conditionName);
 		if (!targetCondition) {
@@ -86,9 +86,12 @@ export class ConditionSetSubCommand extends BaseCommandClass(
 			return;
 		}
 
+		// capture original name before potential mutation
+		const nameBeforeUpdate = targetCondition.name;
+
 		// validate the updates
 		if (fieldToChange === ConditionDefinition.optionChoices.setOption.name) {
-			if (FinderHelpers.getModifierByName(targetEntity.modifiers, newFieldValue)) {
+			if (FinderHelpers.getConditionByName(targetSheetRecord, newFieldValue)) {
 				throw new KoboldError(ConditionDefinition.strings.set.nameExistsError);
 			} else {
 				targetCondition.name = InputParseUtils.parseAsString(newFieldValue, {
@@ -134,8 +137,6 @@ export class ConditionSetSubCommand extends BaseCommandClass(
 				inputName: fieldToChange,
 				maxLength: 300,
 			});
-			if (!newFieldValue) targetCondition.description = null;
-			else targetCondition.description = newFieldValue;
 		} else if (fieldToChange === 'initiative-note') {
 			if (!newFieldValue) targetCondition.note = null;
 			else
@@ -156,15 +157,15 @@ export class ConditionSetSubCommand extends BaseCommandClass(
 			await InteractionUtils.send(intr, ConditionDefinition.strings.set.invalidOptionError);
 			return;
 		}
-		// just in case the update is for the name
-		const nameBeforeUpdate = targetCondition.name;
-
 		await kobold.sheetRecord.update(
 			{ id: targetSheetRecord.id },
 			{
 				conditions: targetSheetRecord.conditions,
 			}
 		);
+
+		// Trigger adjusted_sheet recomputation
+		koboldUtils.adjustedSheetService.triggerRecompute(targetSheetRecord.id);
 
 		const updateEmbed = new KoboldEmbed();
 		updateEmbed.setTitle(

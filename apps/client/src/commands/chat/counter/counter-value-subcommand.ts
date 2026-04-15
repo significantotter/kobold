@@ -91,7 +91,7 @@ export class CounterValueSubCommand extends BaseCommandClass(
 			counter.current = valueNumber;
 		}
 		if (counter.current < 0) counter.current = 0;
-		if (counter.max && counter.current > counter.max) counter.current = counter.max;
+		if (counter.max != null && counter.current > counter.max) counter.current = counter.max;
 
 		await kobold.sheetRecord.update(
 			{ id: activeCharacter.sheetRecord.id },
@@ -99,6 +99,8 @@ export class CounterValueSubCommand extends BaseCommandClass(
 				sheet: activeCharacter.sheetRecord.sheet,
 			}
 		);
+		// Trigger adjusted_sheet recomputation
+		koboldUtils.adjustedSheetService.triggerRecompute(activeCharacter.sheetRecord.id);
 
 		let updateText = '';
 		if (adjustExistingValue) {

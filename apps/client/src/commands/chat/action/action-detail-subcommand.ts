@@ -85,7 +85,7 @@ export class ActionDetailSubCommand extends BaseCommandClass(
 				targetAction.autoHeighten ? '(Auto-Heightens)' : ''
 			}\n`;
 		}
-		description = `${targetAction.description}`;
+		description += `${targetAction.description}`;
 		if (description !== '') actionDetailEmbed.setDescription(description);
 
 		for (const roll of targetAction.rolls) {

@@ -134,7 +134,7 @@ export class CounterSetSubCommand extends BaseCommandClass(
 			if (newMax < -1) {
 				throw new KoboldError(CounterDefinition.strings.maxTooSmall);
 			}
-			targetCounter.max = newMax === -1 ? Infinity : newMax;
+			targetCounter.max = newMax === -1 ? null : newMax;
 
 			if (targetCounter.style === CounterStyleEnum.prepared) {
 				targetCounter.active = targetCounter.active.slice(0, newMax);
@@ -173,15 +173,24 @@ export class CounterSetSubCommand extends BaseCommandClass(
 			) {
 				if (newCounterValue === CounterStyleEnum.dots) {
 					targetCounter.style = CounterStyleEnum.dots;
-					targetCounter.max = Math.max(targetCounter.max ?? 20, 20);
+					targetCounter.max = Math.min(targetCounter.max ?? 20, 20);
 					targetCounter.current = Math.min(targetCounter.current ?? 0, 20);
 				} else if (newCounterValue === CounterStyleEnum.default) {
 					targetCounter.style = CounterStyleEnum.default;
 				} else {
+					const maxSlots = Math.min(targetCounter.max ?? 0, 20);
 					(targetCounter as Counter as PreparedCounter).style = CounterStyleEnum.prepared;
-					(targetCounter as Counter as PreparedCounter).active = [];
-					(targetCounter as Counter as PreparedCounter).prepared = [];
+					(targetCounter as Counter as PreparedCounter).max = maxSlots;
+					(targetCounter as Counter as PreparedCounter).active = Array.from(
+						{ length: maxSlots },
+						() => true
+					);
+					(targetCounter as Counter as PreparedCounter).prepared = Array.from(
+						{ length: maxSlots },
+						() => null
+					);
 					delete (targetCounter as any).current;
+					delete (targetCounter as any).recoverTo;
 				}
 			} else {
 				if (newCounterValue === CounterStyleEnum.dots) {
@@ -189,7 +198,7 @@ export class CounterSetSubCommand extends BaseCommandClass(
 					(targetCounter as Counter as DotsCounter).current =
 						targetCounter.prepared.length;
 					(targetCounter as Counter as DotsCounter).recoverTo = -1;
-					(targetCounter as Counter as DotsCounter).max = Math.max(
+					(targetCounter as Counter as DotsCounter).max = Math.min(
 						targetCounter.max ?? 20,
 						20
 					);
@@ -216,6 +225,8 @@ export class CounterSetSubCommand extends BaseCommandClass(
 				sheet: activeCharacter.sheetRecord.sheet,
 			}
 		);
+		// Trigger adjusted_sheet recomputation
+		koboldUtils.adjustedSheetService.triggerRecompute(activeCharacter.sheetRecord.id);
 
 		const updateEmbed = new KoboldEmbed();
 		updateEmbed.setTitle(

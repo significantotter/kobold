@@ -88,7 +88,7 @@ export class RollMacroListSubCommand extends BaseCommandClass(
 			});
 		}
 
-		const embed = await new KoboldEmbed();
+		const embed = new KoboldEmbed();
 		embed.setTitle(`Your Roll Macros`);
 
 		if (fields.length === 0) {

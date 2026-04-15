@@ -174,10 +174,10 @@ describe('CounterGroupRemoveSubCommand', () => {
 				guildId: TEST_GUILD_ID,
 			});
 
-			// Assert - interaction.reply was called with confirmation prompt
-			expect(result.interaction.reply).toHaveBeenCalled();
-			const replyCall = result.interaction.reply.mock.calls[0][0];
-			expect(replyCall.content).toBe(
+			// Assert - interaction.editReply was called with confirmation prompt
+			expect(result.interaction.editReply).toHaveBeenCalled();
+			const editReplyCall = result.interaction.editReply.mock.calls[0][0];
+			expect(editReplyCall.content).toBe(
 				strings.removeConfirmation.text({ groupName: 'Spell Slots' })
 			);
 		});

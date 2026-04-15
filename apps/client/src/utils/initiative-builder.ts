@@ -31,19 +31,23 @@ export class InitiativeBuilder {
 	public actorsByGroup: { [key: number]: InitiativeActorWithRelations[] };
 	public groups: InitiativeActorGroup[];
 	public userSettings: UserSettings;
+	private _useCachedSheets: boolean;
 
 	constructor({
 		initiative,
 		actors,
 		groups,
 		userSettings,
+		useCachedSheets = false,
 	}: {
 		initiative: InitiativeWithRelations;
 		actors?: InitiativeActorWithRelations[];
 		groups?: InitiativeActorGroup[];
 		userSettings?: UserSettings;
+		useCachedSheets?: boolean;
 	}) {
 		this.init = initiative;
+		this._useCachedSheets = useCachedSheets;
 		if (initiative && !actors) actors = initiative.actors;
 		if (initiative && !groups) groups = initiative.actorGroups;
 		this.actorsByGroup = _.groupBy(actors || [], actor => actor.initiativeActorGroupId);
@@ -97,6 +101,8 @@ export class InitiativeBuilder {
 		actors?: InitiativeActorWithRelations[];
 		groups?: InitiativeActorGroup[];
 	}) {
+		// After set(), data is from full queries — disable cached sheet usage
+		this._useCachedSheets = false;
 		if (initiative) {
 			this.init = initiative;
 		}
@@ -256,7 +262,9 @@ export class InitiativeBuilder {
 		// prepare our roll builder for if we need to parse inline rolls in notes
 		const rollBuilder = new RollBuilder({
 			actorName: actor.name,
-			creature: Creature.fromSheetRecord(actor, actor.name),
+			creature: this._useCachedSheets
+				? Creature.fromCachedSheetRecord(actor, actor.name)
+				: Creature.fromSheetRecord(actor, actor.name),
 			userSettings: {
 				initStatsNotification: InitStatsNotificationEnum.never,
 				rollCompactMode: RollCompactModeEnum.compact,
@@ -395,7 +403,9 @@ export class InitiativeBuilder {
 	): string {
 		let turnText = '';
 		// Use the adjusted sheet to include modifier effects on HP max, etc.
-		const creature = Creature.fromSheetRecord(actor);
+		const creature = this._useCachedSheets
+			? Creature.fromCachedSheetRecord(actor)
+			: Creature.fromSheetRecord(actor);
 		const sheet = creature.sheet;
 		// use a second line for an actor with a too-long name
 		if (actor.name.length > 40) {

@@ -46,15 +46,16 @@ export class InitJumpToSubCommand extends BaseCommandClass(
 			true
 		);
 		const koboldUtils = new KoboldUtils(kobold);
-		const { currentInitiative, userSettings } =
+		const { currentInitiativeLite: currentInitiative, userSettings } =
 			await koboldUtils.fetchNonNullableDataForCommand(intr, {
-				currentInitiative: true,
+				currentInitiativeLite: true,
 				userSettings: true,
 			});
 
 		const initBuilder = new InitiativeBuilder({
 			initiative: currentInitiative,
 			userSettings,
+			useCachedSheets: true,
 		});
 		const currentTurn = initBuilder.getCurrentTurnInfo();
 		const targetTurn = initBuilder.getJumpToTurnChanges(targetCharacterName);

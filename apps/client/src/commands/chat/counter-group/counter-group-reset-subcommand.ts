@@ -74,6 +74,8 @@ export class CounterGroupResetSubCommand extends BaseCommandClass(
 				sheet: activeCharacter.sheetRecord.sheet,
 			}
 		);
+		// Trigger adjusted_sheet recomputation
+		koboldUtils.adjustedSheetService.triggerRecompute(activeCharacter.sheetRecord.id);
 
 		const embed = new KoboldEmbed().setTitle(
 			CounterGroupDefinition.strings.reset({

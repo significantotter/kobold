@@ -51,6 +51,7 @@ describe('GameInitSubCommand', () => {
 				userSettings: {},
 			});
 			kobold.initiative.create.mockResolvedValue(mockInitiative);
+			kobold.game.read.mockResolvedValue(mockGame);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -81,6 +82,7 @@ describe('GameInitSubCommand', () => {
 				userSettings: {},
 			});
 			kobold.initiative.create.mockResolvedValue(mockInitiative);
+			kobold.game.read.mockResolvedValue(mockGame);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -141,6 +143,7 @@ describe('GameInitSubCommand', () => {
 				currentInitiative: existingInit,
 				userSettings: {},
 			});
+			kobold.game.read.mockResolvedValue(mockGame);
 
 			// Act
 			const result = await harness.executeCommand({

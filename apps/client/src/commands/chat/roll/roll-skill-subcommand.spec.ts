@@ -60,8 +60,8 @@ describe('RollSkillSubCommand Integration', () => {
 			stealth: { name: 'Stealth', bonus: 12, type: 'skill', tags: [] },
 		});
 
-		// Mock RollBuilder.fromSimpleCreatureRoll
-		vi.mocked(RollBuilder.fromSimpleCreatureRoll).mockResolvedValue({
+		// Mock RollBuilder.fromSimpleCreatureRoll (synchronous method)
+		vi.mocked(RollBuilder.fromSimpleCreatureRoll).mockReturnValue({
 			compileEmbed: vi.fn(() => ({ data: { description: 'Skill roll result' } })),
 		} as any);
 

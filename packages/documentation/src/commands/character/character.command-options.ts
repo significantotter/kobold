@@ -4,7 +4,6 @@ import { sharedStrings } from '../../lib/strings/shared-strings.js';
 
 export enum CharacterCommandOptionEnum {
 	setDefaultScope = 'default-for',
-	wgUrl = 'wg-url',
 	pathbuilderJsonId = 'pb-json-id',
 	pastebinUrl = 'pastebin-url',
 	useStamina = 'use-stamina',
@@ -28,12 +27,6 @@ export const characterCommandOptions = {
 			name: scope,
 			value: scope,
 		})),
-	},
-	[CharacterCommandOptionEnum.wgUrl]: {
-		name: 'wg-url',
-		description: "The URL for importing character data from Wanderer's Guide.",
-		required: true,
-		type: ApplicationCommandOptionType.String,
 	},
 	[CharacterCommandOptionEnum.pathbuilderJsonId]: {
 		name: 'pb-json-id',

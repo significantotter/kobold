@@ -13,7 +13,9 @@ ARG PROJECT
 COPY . /usr/src/app
 WORKDIR /usr/src/app
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
-RUN pnpm run -r build
+RUN pnpm run -r --filter='./packages/*' build
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+RUN pnpm run -r --filter='./apps/*' build
 RUN pnpm deploy --filter=@kobold/client --prod /prod/client
 
 # Final image

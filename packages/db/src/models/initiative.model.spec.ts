@@ -1,6 +1,13 @@
 import { Initiative, zNewInitiative } from '../index.js';
 import _ from 'lodash';
-import { truncateDbForTests, vitestKobold, ResourceFactories, fake } from '../test-utils.js';
+import {
+	truncateDbForTests,
+	vitestKobold,
+	ResourceFactories,
+	fake,
+	stripUndefined,
+	safeInt,
+} from '../test-utils.js';
 
 describe('InitiativeModel', () => {
 	afterEach(async () => {
@@ -8,7 +15,12 @@ describe('InitiativeModel', () => {
 	});
 	describe('create, read', () => {
 		it('creates a new initiative, reads it, and returns the initiative plus relations', async () => {
-			const fakeInitiativeMock = fake(zNewInitiative);
+			const fakeInitiativeMock = stripUndefined(fake(zNewInitiative));
+			delete fakeInitiativeMock.id;
+			delete fakeInitiativeMock.createdAt;
+			delete fakeInitiativeMock.lastUpdatedAt;
+			fakeInitiativeMock.currentTurnGroupId = null;
+			fakeInitiativeMock.currentRound = safeInt(1, 100);
 
 			const created = await vitestKobold.initiative.create(fakeInitiativeMock);
 			const read = await vitestKobold.initiative.read({ id: created.id });

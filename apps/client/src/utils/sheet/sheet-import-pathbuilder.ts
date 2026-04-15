@@ -9,7 +9,7 @@ import {
 } from '@kobold/db';
 import _ from 'lodash';
 import { PathBuilder } from '../../services/pathbuilder/pathbuilder.js';
-import { scoreToBonus, applyValuesToStatInPlace } from './sheet-import-utils.js';
+import { scoreToBonus, applyValuesToStatInPlace } from '@kobold/sheet';
 import { SheetProperties } from './sheet-properties.js';
 
 /**

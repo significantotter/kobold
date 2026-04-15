@@ -45,8 +45,12 @@ export class GameRollSubCommand extends BaseCommandClass(
 				intr.options.getString(commandOptions[commandOptionsEnum.rollType].name) ?? '';
 
 			const { gameUtils } = new KoboldUtils(kobold);
-			const activeGame = await gameUtils.getActiveGame(intr.user.id, intr.guildId ?? '');
+			const activeGameLite = await gameUtils.getActiveGame(intr.user.id, intr.guildId ?? '');
 
+			if (!activeGameLite) return [];
+
+			// Need full character data for roll enumeration
+			const activeGame = await kobold.game.read({ id: activeGameLite.id });
 			if (!activeGame) return [];
 
 			const choices: Set<string> = new Set();

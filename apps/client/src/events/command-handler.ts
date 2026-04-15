@@ -2,6 +2,7 @@ import {
 	AutocompleteInteraction,
 	ChatInputCommandInteraction,
 	CommandInteraction,
+	CommandInteractionOption,
 	NewsChannel,
 	TextChannel,
 	ThreadChannel,
@@ -31,6 +32,24 @@ export class CommandHandler implements EventHandler {
 		public injectedServices: Required<InjectedServices>
 	) {}
 
+	protected formatArgs(options: readonly CommandInteractionOption[]): string {
+		return options
+			.filter(opt => opt.type !== 1 && opt.type !== 2) // skip subcommand/group
+			.map(opt => `${opt.name}=${JSON.stringify(opt.value)}`)
+			.join(', ');
+	}
+
+	protected getChannelName(intr: CommandInteraction | AutocompleteInteraction): string {
+		if (
+			intr.channel instanceof TextChannel ||
+			intr.channel instanceof NewsChannel ||
+			intr.channel instanceof ThreadChannel
+		) {
+			return intr.channel.name;
+		}
+		return 'DM';
+	}
+
 	public async process(intr: CommandInteraction | AutocompleteInteraction): Promise<void> {
 		// Don't respond to self, or other bots
 		if (intr.user.id === intr.client.user?.id || intr.user.bot) {
@@ -59,30 +78,31 @@ export class CommandHandler implements EventHandler {
 		if (intr instanceof AutocompleteInteraction) {
 			if (!command.autocomplete) {
 				Logger.error(
-					`[{INTERACTION_ID}] An autocomplete method for the '${intr.id}' option on the '${commandName}' command could not be found.`
+					`[${intr.id}] An autocomplete method for the '${commandName}' command could not be found.`
 				);
 				return;
 			}
 
 			try {
 				let option = intr.options.getFocused(true);
+				const acStart = Date.now();
 				let choices = await command.autocomplete(intr, option, this.injectedServices);
+				const acDuration = Date.now() - acStart;
 				await InteractionUtils.respond(
 					intr,
 					choices?.slice(0, DiscordLimits.CHOICES_PER_AUTOCOMPLETE)
 				);
+				if (acDuration > 5000) {
+					Logger.info(
+						`[${intr.id}] Slow autocomplete for '${commandName}' ` +
+							`option '${option.name}' by user '${intr.user.tag}' ` +
+							`in channel '${this.getChannelName(intr)}' took ${acDuration}ms`
+					);
+				}
 			} catch (error) {
 				Logger.error(
-					intr.channel instanceof TextChannel ||
-						intr.channel instanceof NewsChannel ||
-						intr.channel instanceof ThreadChannel
-						? `[${intr.id}] An error occurred while executing the '${commandName}' autocomplete` +
-								` on the '${commandName}' command for user '${intr.user.tag}' (${intr.user.id}) ` +
-								`in channel '${intr.channel.name}' (${intr.channel.id}) in guild` +
-								` '${intr.guild?.name ?? ''}' (${intr.guild?.id ?? ''}).`
-						: `[${intr.id}] An error occurred while executing the ` +
-								`'${commandName}' autocomplete on the '${commandName}' command ` +
-								`for user '${intr.user.tag}' (${intr.user.id}).`,
+					`[${intr.id}] An error occurred while executing the '${commandName}' autocomplete` +
+						` for user '${intr.user.tag}' in channel '${this.getChannelName(intr)}'.`,
 					error
 				);
 			}
@@ -120,6 +140,13 @@ export class CommandHandler implements EventHandler {
 			return;
 		}
 
+		const allOptions =
+			intr instanceof ChatInputCommandInteraction
+				? this.formatArgs(intr.options.data.flatMap(o => o.options ?? [o]))
+				: '';
+		const channelName = this.getChannelName(intr);
+		const cmdStart = Date.now();
+
 		try {
 			// Check if interaction passes command checks
 			let passesChecks = await CommandUtils.runChecks(command, intr);
@@ -127,6 +154,13 @@ export class CommandHandler implements EventHandler {
 				// Execute the command
 				await command.execute(intr, this.injectedServices);
 			}
+
+			const duration = Date.now() - cmdStart;
+			Logger.info(
+				`[${intr.id}] '/${commandName}' by '${intr.user.tag}' ` +
+					`in '${channelName}' completed in ${duration}ms` +
+					(allOptions ? ` | args: ${allOptions}` : '')
+			);
 		} catch (error) {
 			// Kobold Errors are expected error messages encountered through regular use of the bot
 			// These result in a simple response message and no error logging
@@ -136,18 +170,12 @@ export class CommandHandler implements EventHandler {
 			}
 			await this.sendError(intr);
 
+			const duration = Date.now() - cmdStart;
 			// Log command error
 			Logger.error(
-				intr.channel instanceof TextChannel ||
-					intr.channel instanceof NewsChannel ||
-					intr.channel instanceof ThreadChannel
-					? `[${intr.id}] An error occurred while executing the '${commandName}' autocomplete` +
-							` on the '${commandName}' command for user '${intr.user.tag}' (${intr.user.id}) ` +
-							`in channel '${intr.channel.name}' (${intr.channel.id}) in guild` +
-							` '${intr.guild?.name ?? ''}' (${intr.guild?.id ?? ''}).`
-					: `[${intr.id}] An error occurred while executing the ` +
-							`'${commandName}' autocomplete on the '${commandName}' command ` +
-							`for user '${intr.user.tag}' (${intr.user.id}).`,
+				`[${intr.id}] Error executing '/${commandName}' by '${intr.user.tag}' ` +
+					`in '${channelName}' after ${duration}ms` +
+					(allOptions ? ` | args: ${allOptions}` : ''),
 				error
 			);
 		}

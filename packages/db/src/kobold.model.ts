@@ -1,4 +1,4 @@
-import { CamelCasePlugin, Kysely, ParseJSONResultsPlugin, PostgresDialect } from 'kysely';
+import { CamelCasePlugin, Kysely, LogEvent, ParseJSONResultsPlugin, PostgresDialect } from 'kysely';
 import {
 	ChannelDefaultCharacterModel,
 	CharacterModel,
@@ -14,6 +14,11 @@ import {
 	WgAuthTokenModel,
 } from './models/index.js';
 import { ActionModel, Database, RollMacroModel } from './index.js';
+
+export interface KoboldOptions {
+	/** Optional callback invoked for every executed query (useful for slow-query logging). */
+	onQuery?: (event: LogEvent) => void;
+}
 
 export class Kobold {
 	public db: Kysely<Database>;
@@ -33,11 +38,16 @@ export class Kobold {
 	public userSettings: UserSettingsModel;
 	public wgAuthToken: WgAuthTokenModel;
 
-	constructor(dialect: PostgresDialect) {
-		this.db = new Kysely<Database>({
-			dialect,
-			plugins: [new ParseJSONResultsPlugin(), new CamelCasePlugin()],
-		});
+	constructor(dialectOrDb: PostgresDialect | Kysely<Database>, options?: KoboldOptions) {
+		if (dialectOrDb instanceof Kysely) {
+			this.db = dialectOrDb;
+		} else {
+			this.db = new Kysely<Database>({
+				dialect: dialectOrDb,
+				plugins: [new ParseJSONResultsPlugin(), new CamelCasePlugin()],
+				log: options?.onQuery,
+			});
+		}
 		this.action = new ActionModel(this.db);
 		this.channelDefaultCharacter = new ChannelDefaultCharacterModel(this.db);
 		this.character = new CharacterModel(this.db);
@@ -52,5 +62,16 @@ export class Kobold {
 		this.sheetRecord = new SheetRecordModel(this.db);
 		this.userSettings = new UserSettingsModel(this.db);
 		this.wgAuthToken = new WgAuthTokenModel(this.db);
+	}
+
+	/**
+	 * Executes a callback inside a database transaction.
+	 * A transaction-scoped Kobold instance is passed to the callback,
+	 * ensuring all DB operations within are atomic.
+	 */
+	async transaction<T>(fn: (kobold: Kobold) => Promise<T>): Promise<T> {
+		return this.db.transaction().execute(async trx => {
+			return fn(new Kobold(trx));
+		});
 	}
 }

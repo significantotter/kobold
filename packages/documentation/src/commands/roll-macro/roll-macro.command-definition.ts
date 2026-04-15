@@ -4,6 +4,7 @@ import {
 	ApplicationCommandType,
 } from 'discord-api-types/v10';
 import type { CommandDefinition } from '../helpers/commands.types.js';
+import { CommandDeferType } from '../helpers.js';
 import {
 	RollMacroCommandOptionEnum,
 	rollMacroCommandOptions,
@@ -81,6 +82,7 @@ export const rollMacroCommandDefinition = {
 			name: rollMacroSubCommandEnum.remove,
 			description: 'Removes a roll macro for the active character.',
 			type: ApplicationCommandOptionType.Subcommand,
+			deferType: CommandDeferType.HIDDEN,
 			options: {
 				[RollMacroCommandOptionEnum.name]: withOrder(
 					{

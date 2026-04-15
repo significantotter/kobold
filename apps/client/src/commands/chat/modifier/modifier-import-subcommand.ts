@@ -120,6 +120,9 @@ export class ModifierImportSubCommand extends BaseCommandClass(
 			await kobold.modifier.create(newModifier);
 		}
 
+		// Trigger adjusted_sheet recomputation after bulk import
+		koboldUtils.adjustedSheetService.triggerRecompute(activeCharacter.sheetRecordId);
+
 		await InteractionUtils.send(
 			intr,
 			ModifierDefinition.strings.import.imported({

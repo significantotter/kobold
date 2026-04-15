@@ -152,15 +152,6 @@ describe('CharacterUpdateSubCommand Integration', () => {
 			});
 			setupKoboldUtilsMocks({ characterOverrides: mockCharacter });
 
-			const updatedCharacter = createMockCharacter({
-				characterOverrides: { name: 'Updated WG Character' },
-			});
-			const updateMock = vi.fn(async () => updatedCharacter);
-			vi.mocked(WgCharacterFetcher).mockImplementation(function (this: MockCharacterFetcher) {
-				this.update = updateMock;
-				return this;
-			} as unknown as () => WgCharacterFetcher);
-
 			// Act
 			const result = await harness.executeCommand({
 				commandName: 'character',
@@ -172,7 +163,9 @@ describe('CharacterUpdateSubCommand Integration', () => {
 
 			// Assert
 			expect(result.didRespond()).toBe(true);
-			expect(updateMock).toHaveBeenCalledWith({ charId: 54321 });
+			const response = result.getResponseContent();
+			expect(response).toContain('Kobold web app');
+			expect(response).toContain('/import');
 		});
 	});
 

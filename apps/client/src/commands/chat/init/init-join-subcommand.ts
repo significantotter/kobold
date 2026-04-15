@@ -58,12 +58,15 @@ export class InitJoinSubCommand extends BaseCommandClass(
 	): Promise<void> {
 		const koboldUtils: KoboldUtils = new KoboldUtils(kobold);
 		const { initiativeUtils } = koboldUtils;
-		const { currentInitiative, activeCharacter, userSettings } =
-			await koboldUtils.fetchNonNullableDataForCommand(intr, {
-				currentInitiative: true,
-				activeCharacter: true,
-				userSettings: true,
-			});
+		const {
+			currentInitiativeLite: currentInitiative,
+			activeCharacter,
+			userSettings,
+		} = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+			currentInitiativeLite: true,
+			activeCharacter: true,
+			userSettings: true,
+		});
 
 		if (
 			currentInitiative &&
@@ -114,7 +117,7 @@ export class InitJoinSubCommand extends BaseCommandClass(
 		});
 
 		// Add character's minions that have auto-join enabled to the same turn
-		const minions = await kobold.minion.readMany({
+		const minions = await kobold.minion.readManyLite({
 			characterId: activeCharacter.id,
 		});
 		const autoJoinMinions = minions.filter(minion => minion.autoJoinInitiative);

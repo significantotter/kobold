@@ -34,7 +34,7 @@ describe('GameListSubCommand', () => {
 	describe('listing games', () => {
 		it('should show message when user has no games', async () => {
 			// Arrange
-			kobold.game.readMany.mockResolvedValue([]);
+			kobold.game.readManyLite.mockResolvedValue([]);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -53,7 +53,7 @@ describe('GameListSubCommand', () => {
 		it('should list a single game', async () => {
 			// Arrange
 			const game = createMockGame({ name: 'My Campaign' });
-			kobold.game.readMany.mockResolvedValue([game]);
+			kobold.game.readManyLite.mockResolvedValue([game]);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -77,7 +77,7 @@ describe('GameListSubCommand', () => {
 				createMockGame({ id: 2, name: 'Campaign B' }),
 				createMockGame({ id: 3, name: 'Campaign C' }),
 			];
-			kobold.game.readMany.mockResolvedValue(games);
+			kobold.game.readManyLite.mockResolvedValue(games);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -102,7 +102,7 @@ describe('GameListSubCommand', () => {
 				createMockGame({ id: 1, name: 'Active Game', isActive: true }),
 				createMockGame({ id: 2, name: 'Inactive Game', isActive: false }),
 			];
-			kobold.game.readMany.mockResolvedValue(games);
+			kobold.game.readManyLite.mockResolvedValue(games);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -125,7 +125,7 @@ describe('GameListSubCommand', () => {
 			const char1 = createMockCharacter({ characterOverrides: { name: 'Aragorn' } });
 			const char2 = createMockCharacter({ characterOverrides: { name: 'Legolas' } });
 			const game = createMockGame({ name: 'Fellowship', characters: [char1, char2] });
-			kobold.game.readMany.mockResolvedValue([game]);
+			kobold.game.readManyLite.mockResolvedValue([game]);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -146,7 +146,7 @@ describe('GameListSubCommand', () => {
 		it('should show "No characters added" for empty game', async () => {
 			// Arrange
 			const game = createMockGame({ name: 'Empty Game', characters: [] });
-			kobold.game.readMany.mockResolvedValue([game]);
+			kobold.game.readManyLite.mockResolvedValue([game]);
 
 			// Act
 			const result = await harness.executeCommand({
@@ -165,7 +165,7 @@ describe('GameListSubCommand', () => {
 
 		it('should query games with correct user ID', async () => {
 			// Arrange
-			kobold.game.readMany.mockResolvedValue([]);
+			kobold.game.readManyLite.mockResolvedValue([]);
 
 			// Act
 			await harness.executeCommand({
@@ -178,8 +178,8 @@ describe('GameListSubCommand', () => {
 
 			// Assert - verify the user ID is passed correctly
 			// Note: guild.id may be undefined in mock interactions
-			expect(kobold.game.readMany).toHaveBeenCalled();
-			const callArgs = kobold.game.readMany.mock.calls[0][0] as any;
+			expect(kobold.game.readManyLite).toHaveBeenCalled();
+			const callArgs = kobold.game.readManyLite.mock.calls[0][0] as any;
 			expect(callArgs.gmUserId).toBe(TEST_USER_ID);
 		});
 	});

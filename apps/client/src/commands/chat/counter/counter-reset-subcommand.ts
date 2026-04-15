@@ -75,10 +75,6 @@ export class CounterResetSubCommand extends BaseCommandClass(
 			} else {
 				counter.current = counter.recoverTo ?? counter.current;
 			}
-			counter.current =
-				counter.recoverTo === -1
-					? (counter.max ?? 0)
-					: (counter.recoverTo ?? counter.current);
 		}
 
 		await kobold.sheetRecord.update(
@@ -87,6 +83,8 @@ export class CounterResetSubCommand extends BaseCommandClass(
 				sheet: activeCharacter.sheetRecord.sheet,
 			}
 		);
+		// Trigger adjusted_sheet recomputation
+		koboldUtils.adjustedSheetService.triggerRecompute(activeCharacter.sheetRecord.id);
 
 		const embed = new KoboldEmbed().setTitle(
 			CounterDefinition.strings.reset({

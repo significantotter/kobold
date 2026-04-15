@@ -61,6 +61,12 @@ export type MinionWithRelations = Minion & {
 	rollMacros: RollMacro[];
 };
 
+/**
+ * Lightweight minion type — just the base table columns, no sheet relations.
+ * Use for autocomplete, name lookups, and existence checks.
+ */
+export type MinionBasic = Minion;
+
 export type InitiativeActorGroupWithRelations = InitiativeActorGroup & {
 	initiative?: Initiative | null;
 	actors: InitiativeActorWithRelations[];
@@ -70,6 +76,40 @@ export type InitiativeWithRelations = Initiative & {
 	currentTurnGroup: InitiativeActorGroup | null;
 	actorGroups: InitiativeActorGroupWithRelations[];
 	actors: InitiativeActorWithRelations[];
+};
+
+export type GameCharacterLite = Pick<
+	Character,
+	| 'id'
+	| 'name'
+	| 'userId'
+	| 'sheetRecordId'
+	| 'isActiveCharacter'
+	| 'charId'
+	| 'importSource'
+	| 'gameId'
+> & {
+	channelDefaultCharacters: ChannelDefaultCharacter[];
+	guildDefaultCharacters: GuildDefaultCharacter[];
+};
+
+/** Lightweight character summary for the /character list command. */
+export type CharacterListItem = Pick<
+	Character,
+	'id' | 'name' | 'userId' | 'sheetRecordId' | 'isActiveCharacter' | 'importSource' | 'charId'
+> & {
+	channelDefaultCharacters: ChannelDefaultCharacter[];
+	guildDefaultCharacters: GuildDefaultCharacter[];
+	sheetInfo: {
+		level: number | null;
+		heritage: string | null;
+		ancestry: string | null;
+		class: string | null;
+	};
+};
+
+export type GameWithCharactersLite = Game & {
+	characters: GameCharacterLite[];
 };
 
 export type GameWithRelations = Game & {

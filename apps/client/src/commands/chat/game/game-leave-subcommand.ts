@@ -61,7 +61,7 @@ export class GameLeaveSubCommand extends BaseCommandClass(
 
 		const koboldUtils = new KoboldUtils(kobold);
 
-		const targetGames = await kobold.game.readMany({
+		const targetGames = await kobold.game.readManyLite({
 			guildId: intr.guildId,
 			name: gameName,
 		});
@@ -93,7 +93,7 @@ export class GameLeaveSubCommand extends BaseCommandClass(
 		}
 
 		// Remove character from game
-		await kobold.character.update({ id: activeCharacter.id }, { gameId: null });
+		await kobold.character.updateFields({ id: activeCharacter.id }, { gameId: null });
 
 		await InteractionUtils.send(
 			intr,

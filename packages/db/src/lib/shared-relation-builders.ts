@@ -1,4 +1,4 @@
-import { ExpressionBuilder } from 'kysely';
+import { ExpressionBuilder, RawBuilder, sql } from 'kysely';
 import { jsonArrayFrom, jsonObjectFrom } from 'kysely/helpers/postgres';
 import {
 	Action,
@@ -14,11 +14,23 @@ import {
 // Sheet Record Relations for Character
 // ============================================================================
 
+/**
+ * Fetches all sheet_record columns EXCEPT adjusted_sheet (base sheet only).
+ * Use for write paths where the command modifies and saves the base sheet.
+ */
 export function sheetRecordForCharacter(eb: ExpressionBuilder<Database, 'character'>) {
 	return jsonObjectFrom(
 		eb
 			.selectFrom('sheetRecord')
-			.selectAll('sheetRecord')
+			.select([
+				'sheetRecord.id',
+				'sheetRecord.sheet',
+				'sheetRecord.conditions',
+				'sheetRecord.trackerMode',
+				'sheetRecord.trackerChannelId',
+				'sheetRecord.trackerGuildId',
+				'sheetRecord.trackerMessageId',
+			])
 			.whereRef('sheetRecord.id', '=', 'character.sheetRecordId')
 	)
 		.$castTo<SheetRecord>()
@@ -50,24 +62,16 @@ export function actionsForCharacter(eb: ExpressionBuilder<Database, 'character'>
 }
 
 /**
- * Fetches modifiers for a character including:
- * - Character-specific modifiers (sheetRecordId matches character's sheetRecordId)
- * - User-wide modifiers (sheetRecordId is null) where userId matches character's userId
+ * Fetches modifiers for a character.
+ * Only includes character-specific modifiers (sheetRecordId matches character's sheetRecordId).
+ * Unassigned (user-wide) modifiers are not included.
  */
 export function modifiersForCharacter(eb: ExpressionBuilder<Database, 'character'>) {
 	return jsonArrayFrom(
 		eb
 			.selectFrom('modifier')
 			.selectAll('modifier')
-			.where(eb2 =>
-				eb2.or([
-					eb2.and([
-						eb2('modifier.sheetRecordId', 'is', null),
-						eb2.eb('modifier.userId', '=', eb2.ref('character.userId')),
-					]),
-					eb2.eb('modifier.sheetRecordId', '=', eb2.ref('character.sheetRecordId')),
-				])
-			)
+			.whereRef('modifier.sheetRecordId', '=', 'character.sheetRecordId')
 	)
 		.$castTo<Modifier[]>()
 		.as('modifiers');
@@ -111,14 +115,91 @@ export function sheetRelationsForCharacter(eb: ExpressionBuilder<Database, 'char
 }
 
 // ============================================================================
+// Selective / Lightweight Relation Builders for Character
+// ============================================================================
+
+/**
+ * Fetches only lightweight sheet_record fields (id, conditions, trackerMode) — no full sheet JSON.
+ */
+export function sheetRecordLiteForCharacter(eb: ExpressionBuilder<Database, 'character'>) {
+	return jsonObjectFrom(
+		eb
+			.selectFrom('sheetRecord')
+			.select(['sheetRecord.id', 'sheetRecord.conditions', 'sheetRecord.trackerMode'])
+			.whereRef('sheetRecord.id', '=', 'character.sheetRecordId')
+	)
+		.$castTo<Pick<SheetRecord, 'id' | 'conditions' | 'trackerMode'>>()
+		.as('sheetRecord');
+}
+
+/**
+ * Fetches a specific top-level JSON field from the sheet_record's sheet column.
+ * Uses Postgres JSONB path extraction.
+ */
+export function sheetRecordFieldForCharacter<T = unknown>(
+	eb: ExpressionBuilder<Database, 'character'>,
+	jsonPath: string,
+	alias: string
+) {
+	return jsonObjectFrom(
+		eb
+			.selectFrom('sheetRecord')
+			.select(sql`"sheet_record"."sheet" -> ${sql.raw(`'${jsonPath}'`)}` as any)
+			.whereRef('sheetRecord.id', '=', 'character.sheetRecordId')
+	)
+		.$castTo<T>()
+		.as(alias);
+}
+
+/**
+ * Returns only the modifiers relation for a character (no sheetRecord, actions, or rollMacros).
+ */
+export function modifiersOnlyForCharacter(eb: ExpressionBuilder<Database, 'character'>) {
+	return [modifiersForCharacter(eb)] as const;
+}
+
+// ============================================================================
 // Sheet Record Relations for Initiative Actor
 // ============================================================================
 
+/**
+ * Fetches all sheet_record columns EXCEPT adjusted_sheet (base sheet only).
+ * Use for write paths where the command modifies and saves the base sheet.
+ */
 export function sheetRecordForActor(eb: ExpressionBuilder<Database, 'initiativeActor'>) {
 	return jsonObjectFrom(
 		eb
 			.selectFrom('sheetRecord')
-			.selectAll('sheetRecord')
+			.select([
+				'sheetRecord.id',
+				'sheetRecord.sheet',
+				'sheetRecord.conditions',
+				'sheetRecord.trackerMode',
+				'sheetRecord.trackerChannelId',
+				'sheetRecord.trackerGuildId',
+				'sheetRecord.trackerMessageId',
+			])
+			.whereRef('sheetRecord.id', '=', 'initiativeActor.sheetRecordId')
+	)
+		.$castTo<SheetRecord>()
+		.as('sheetRecord');
+}
+
+/**
+ * Fetches COALESCE(adjusted_sheet, sheet) as sheet — no raw sheet or adjusted_sheet.
+ * Use for display-only paths where the pre-computed adjusted values are sufficient.
+ * Saves ~40KB per row by reading only one JSONB blob.
+ */
+export function sheetRecordCachedForActor(eb: ExpressionBuilder<Database, 'initiativeActor'>) {
+	return jsonObjectFrom(
+		eb
+			.selectFrom('sheetRecord')
+			.select(['sheetRecord.id', 'sheetRecord.conditions', 'sheetRecord.trackerMode'])
+			.select(
+				sql<
+					SheetRecord['sheet']
+				>`COALESCE("sheet_record"."adjusted_sheet", "sheet_record"."sheet")`.as('sheet')
+			)
 			.whereRef('sheetRecord.id', '=', 'initiativeActor.sheetRecordId')
 	)
 		.$castTo<SheetRecord>()
@@ -150,24 +231,16 @@ export function actionsForActor(eb: ExpressionBuilder<Database, 'initiativeActor
 }
 
 /**
- * Fetches modifiers for an initiative actor including:
- * - Actor-specific modifiers (sheetRecordId matches actor's sheetRecordId)
- * - User-wide modifiers (sheetRecordId is null) where userId matches actor's userId
+ * Fetches modifiers for an initiative actor.
+ * Only includes actor-specific modifiers (sheetRecordId matches actor's sheetRecordId).
+ * Unassigned (user-wide) modifiers are not included.
  */
 export function modifiersForActor(eb: ExpressionBuilder<Database, 'initiativeActor'>) {
 	return jsonArrayFrom(
 		eb
 			.selectFrom('modifier')
 			.selectAll('modifier')
-			.where(eb2 =>
-				eb2.or([
-					eb2.and([
-						eb2('modifier.sheetRecordId', 'is', null),
-						eb2.eb('modifier.userId', '=', eb2.ref('initiativeActor.userId')),
-					]),
-					eb2.eb('modifier.sheetRecordId', '=', eb2.ref('initiativeActor.sheetRecordId')),
-				])
-			)
+			.whereRef('modifier.sheetRecordId', '=', 'initiativeActor.sheetRecordId')
 	)
 		.$castTo<Modifier[]>()
 		.as('modifiers');
@@ -230,11 +303,23 @@ export function sheetRelationsForActor(eb: ExpressionBuilder<Database, 'initiati
 // Sheet Record Relations for Minion
 // ============================================================================
 
+/**
+ * Fetches all sheet_record columns EXCEPT adjusted_sheet (base sheet only).
+ * Use for write paths where the command modifies and saves the base sheet.
+ */
 export function sheetRecordForMinion(eb: ExpressionBuilder<Database, 'minion'>) {
 	return jsonObjectFrom(
 		eb
 			.selectFrom('sheetRecord')
-			.selectAll('sheetRecord')
+			.select([
+				'sheetRecord.id',
+				'sheetRecord.sheet',
+				'sheetRecord.conditions',
+				'sheetRecord.trackerMode',
+				'sheetRecord.trackerChannelId',
+				'sheetRecord.trackerGuildId',
+				'sheetRecord.trackerMessageId',
+			])
 			.whereRef('sheetRecord.id', '=', 'minion.sheetRecordId')
 	)
 		.$castTo<SheetRecord>()
@@ -266,24 +351,16 @@ export function actionsForMinion(eb: ExpressionBuilder<Database, 'minion'>) {
 }
 
 /**
- * Fetches modifiers for a minion including:
- * - Minion-specific modifiers (sheetRecordId matches minion's sheetRecordId)
- * - User-wide modifiers (sheetRecordId is null) where userId matches minion's userId
+ * Fetches modifiers for a minion.
+ * Only includes minion-specific modifiers (sheetRecordId matches minion's sheetRecordId).
+ * Unassigned (user-wide) modifiers are not included.
  */
 export function modifiersForMinion(eb: ExpressionBuilder<Database, 'minion'>) {
 	return jsonArrayFrom(
 		eb
 			.selectFrom('modifier')
 			.selectAll('modifier')
-			.where(eb2 =>
-				eb2.or([
-					eb2.and([
-						eb2('modifier.sheetRecordId', 'is', null),
-						eb2.eb('modifier.userId', '=', eb2.ref('minion.userId')),
-					]),
-					eb2.eb('modifier.sheetRecordId', '=', eb2.ref('minion.sheetRecordId')),
-				])
-			)
+			.whereRef('modifier.sheetRecordId', '=', 'minion.sheetRecordId')
 	)
 		.$castTo<Modifier[]>()
 		.as('modifiers');

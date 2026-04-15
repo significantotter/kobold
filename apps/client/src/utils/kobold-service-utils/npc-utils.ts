@@ -23,20 +23,23 @@ export class NpcUtils {
 			(c: { [k: string]: any; search: string }) => c.search
 		);
 
-		const bestResult = searchResults.sort(closestMatchSorter)[0].data;
+		const bestMatch = searchResults.sort(closestMatchSorter)[0];
+		if (!bestMatch) {
+			throw new Error(`No bestiary results found for "${search}".`);
+		}
+		const bestResult = bestMatch.data;
 		let creatureFamily: CompendiumEntry | undefined;
-		if (bestResult) {
-			if (bestResult.creature_family) {
-				const creatureFamilyResults = await nethysCompendium.search(
-					bestResult.creature_family,
-					{
-						limit: 1,
-						searchTermOnly: false,
-						bestiary: false,
-					}
-				);
-				creatureFamily = creatureFamilyResults.sort(closestMatchSorter)[0].data;
-			}
+		if (bestResult.creature_family) {
+			const creatureFamilyResults = await nethysCompendium.search(
+				bestResult.creature_family,
+				{
+					limit: 1,
+					searchTermOnly: false,
+					bestiary: false,
+				}
+			);
+			const familyMatch = creatureFamilyResults.sort(closestMatchSorter)[0];
+			creatureFamily = familyMatch?.data;
 		}
 		return { bestiaryCreature: bestResult, bestiaryCreatureFamily: creatureFamily };
 	}

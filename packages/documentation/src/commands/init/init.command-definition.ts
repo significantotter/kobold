@@ -1,5 +1,6 @@
 import { ApplicationCommandOptionType, ApplicationCommandType } from 'discord-api-types/v10';
 import type { CommandDefinition } from '../helpers/commands.types.js';
+import { CommandDeferType } from '../helpers.js';
 import { InitCommandOptionEnum, initCommandOptions } from './init.command-options.js';
 import { anyUsageContext } from '../helpers/defaults.js';
 import { withOrder } from '../helpers/common.js';
@@ -268,6 +269,7 @@ export const initCommandDefinition = {
 			name: InitSubCommandEnum.end,
 			description: `Ends the current initiative`,
 			type: ApplicationCommandOptionType.Subcommand,
+			deferType: CommandDeferType.HIDDEN,
 		},
 	},
 } satisfies CommandDefinition<InitSubCommandEnum>;

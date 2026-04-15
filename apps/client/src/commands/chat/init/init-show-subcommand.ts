@@ -17,11 +17,15 @@ export class InitShowSubCommand extends BaseCommandClass(
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
 		const koboldUtils = new KoboldUtils(kobold);
-		const { currentInitiative } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
-			currentInitiative: true,
-		});
+		const { currentInitiativeLite: currentInitiative } =
+			await koboldUtils.fetchNonNullableDataForCommand(intr, {
+				currentInitiativeLite: true,
+			});
 
-		const initBuilder = new InitiativeBuilder({ initiative: currentInitiative });
+		const initBuilder = new InitiativeBuilder({
+			initiative: currentInitiative,
+			useCachedSheets: true,
+		});
 		await KoboldEmbed.sendInitiative(intr, initBuilder, {
 			dmIfHiddenCreatures: initBuilder.init.gmUserId === intr.user.id,
 		});

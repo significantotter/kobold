@@ -1,6 +1,12 @@
 import { zNewGame } from '../index.js';
 import _ from 'lodash';
-import { truncateDbForTests, vitestKobold, ResourceFactories, fake } from '../test-utils.js';
+import {
+	truncateDbForTests,
+	vitestKobold,
+	ResourceFactories,
+	fake,
+	stripUndefined,
+} from '../test-utils.js';
 
 describe('GameModel', () => {
 	afterEach(async () => {
@@ -8,7 +14,10 @@ describe('GameModel', () => {
 	});
 	describe('create, read', () => {
 		it('creates a new game, reads it, and returns the game plus relations', async () => {
-			const fakeGameMock = fake(zNewGame);
+			const fakeGameMock = stripUndefined(fake(zNewGame));
+			delete fakeGameMock.id;
+			delete fakeGameMock.createdAt;
+			delete fakeGameMock.lastUpdatedAt;
 
 			const created = await vitestKobold.game.create(fakeGameMock);
 			const read = await vitestKobold.game.read({ id: created.id });

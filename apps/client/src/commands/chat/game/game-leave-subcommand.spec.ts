@@ -44,8 +44,8 @@ describe('GameLeaveSubCommand', () => {
 			name: 'Adventure',
 			characters: [mockCharacter],
 		});
-		kobold.game.readMany.mockResolvedValue([targetGame]);
-		kobold.character.update.mockResolvedValue(mockCharacter);
+		kobold.game.readManyLite.mockResolvedValue([targetGame]);
+		kobold.character.updateFields.mockResolvedValue(undefined);
 
 		const { fetchNonNullableDataMock } = setupKoboldUtilsMocks();
 		fetchNonNullableDataMock.mockResolvedValue({ activeCharacter: mockCharacter });
@@ -66,12 +66,12 @@ describe('GameLeaveSubCommand', () => {
 		expect(result.getResponseContent()).toContain(
 			strings.leave.success({ characterName: 'Hero', gameName: 'Adventure' })
 		);
-		expect(kobold.character.update).toHaveBeenCalledWith({ id: 10 }, { gameId: null });
+		expect(kobold.character.updateFields).toHaveBeenCalledWith({ id: 10 }, { gameId: null });
 	});
 
 	it('should error when game not found', async () => {
 		// Arrange
-		kobold.game.readMany.mockResolvedValue([]);
+		kobold.game.readManyLite.mockResolvedValue([]);
 
 		// Act
 		const result = await harness.executeCommand({
@@ -101,7 +101,7 @@ describe('GameLeaveSubCommand', () => {
 			name: 'Adventure',
 			characters: [], // Character not in game
 		});
-		kobold.game.readMany.mockResolvedValue([targetGame]);
+		kobold.game.readManyLite.mockResolvedValue([targetGame]);
 
 		const { fetchNonNullableDataMock } = setupKoboldUtilsMocks();
 		fetchNonNullableDataMock.mockResolvedValue({ activeCharacter: mockCharacter });

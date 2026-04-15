@@ -88,6 +88,8 @@ export class ModifierSetSubCommand extends BaseCommandClass(
 		}
 
 		const setOpts = ModifierDefinition.optionChoices.setOption;
+		// Capture the original name before any mutations
+		const nameBeforeUpdate = targetModifier.name;
 		if (fieldToChange === setOpts.name) {
 			if (FinderHelpers.getModifierByName(activeCharacter.modifiers, newFieldValue)) {
 				throw new KoboldError(ModifierDefinition.strings.set.nameExistsError);
@@ -159,9 +161,6 @@ export class ModifierSetSubCommand extends BaseCommandClass(
 			await InteractionUtils.send(intr, ModifierDefinition.strings.set.invalidOptionError);
 			return;
 		}
-		// just in case the update is for the name
-		const nameBeforeUpdate = targetModifier.name;
-
 		await kobold.modifier.update(
 			{ id: targetModifier.id },
 			{
@@ -175,6 +174,13 @@ export class ModifierSetSubCommand extends BaseCommandClass(
 				sheetAdjustments: targetModifier.sheetAdjustments,
 			}
 		);
+
+		// Trigger adjusted_sheet recomputation
+		if (targetModifier.sheetRecordId !== null) {
+			koboldUtils.adjustedSheetService.triggerRecompute(targetModifier.sheetRecordId);
+		} else {
+			koboldUtils.adjustedSheetService.triggerRecomputeAllForUser(intr.user.id);
+		}
 
 		const updateEmbed = new KoboldEmbed();
 		updateEmbed.setTitle(

@@ -1,8 +1,6 @@
 import type { Insertable, Selectable, Updateable } from 'kysely';
 import type { Database } from './supabase.kysely.types.js';
 
-export type { Sheet } from './shared/sheet.zod.js';
-
 // Action
 type ActionTable = Database['action'];
 export type Action = Selectable<ActionTable>;
@@ -16,6 +14,12 @@ export type Character = Selectable<CharacterTable>;
 export type NewCharacter = Insertable<CharacterTable>;
 export type CharacterUpdate = Updateable<CharacterTable>;
 export type CharacterId = Character['id'];
+
+/** Lightweight character type for autocomplete and listing — no sheet/relations loaded */
+export type CharacterBasic = Pick<
+	Character,
+	'id' | 'name' | 'userId' | 'sheetRecordId' | 'isActiveCharacter' | 'importSource' | 'charId'
+>;
 
 // ChannelDefaultCharacter
 type ChannelDefaultCharacterTable = Database['channelDefaultCharacter'];

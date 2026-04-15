@@ -8,6 +8,7 @@ import { vi, type MockInstance } from 'vitest';
 import { fake } from 'zod-schema-faker/v4';
 
 import {
+	CharacterListItem,
 	CharacterWithRelations,
 	zCharacterWithRelations,
 	zSheetRecord,
@@ -259,6 +260,10 @@ export function setupKoboldUtilsMocks(options: MockCharacterOptions = {}): Kobol
 		};
 		this.autocompleteUtils = {
 			getUserCharactersAndMinions: getUserCharactersAndMinionsMock,
+		};
+		this.adjustedSheetService = {
+			triggerRecompute: vi.fn(),
+			triggerRecomputeAllForUser: vi.fn(),
 		};
 		return this;
 	} as MockReturnValue);
@@ -573,6 +578,7 @@ export function setupCharacterUtilsMocks(
 	vi.mocked(KoboldUtils).mockImplementation(function (this: any) {
 		this.characterUtils = {
 			findOwnedCharacterByName: findOwnedCharacterMock,
+			findOwnedCharacterByNameLite: findOwnedCharacterMock,
 		};
 		return this;
 	} as MockReturnValue);
@@ -587,44 +593,57 @@ export function setupCharacterUtilsMocks(
  * Result from setting up list data mocks
  */
 export interface ListDataMockSetup {
-	/** Mock for fetchDataForCommand */
-	fetchDataMock: MockInstance;
+	/** Mock for kobold.character.readManyForList */
+	readManyForListMock: MockInstance;
 	/** The mock characters being returned */
-	mockCharacters: CharacterWithRelations[];
+	mockCharacters: CharacterListItem[];
 }
 
 /**
- * Sets up KoboldUtils mocks for commands that use fetchDataForCommand
- * with ownedCharacters (like character list).
+ * Sets up mock for kobold.character.readManyForList (used by character list).
  *
- * Uses vi.mocked(KoboldUtils).mockImplementation() for consistency with other mock setup functions.
- *
- * @param characters - Characters to return as ownedCharacters
+ * @param characters - Characters to return from readManyForList.
+ *   Accepts CharacterWithRelations for convenience (will be mapped to CharacterListItem).
  *
  * @example
  * ```typescript
- * const { fetchDataMock } = setupListDataMocks([
+ * const { readManyForListMock } = setupListDataMocks([
  *   createMockCharacter({ characterOverrides: { name: 'Character 1' } }),
  *   createMockCharacter({ characterOverrides: { name: 'Character 2' } }),
  * ]);
  * ```
  */
-export function setupListDataMocks(characters: CharacterWithRelations[] = []): ListDataMockSetup {
-	const fetchDataMock = vi.fn(
-		async () =>
-			({
-				ownedCharacters: characters,
-			}) as MockReturnValue
-	);
+export function setupListDataMocks(
+	characters: (CharacterWithRelations | CharacterListItem)[] = []
+): ListDataMockSetup {
+	// Convert CharacterWithRelations to CharacterListItem if needed
+	const listItems: CharacterListItem[] = characters.map(c => {
+		if ('sheetInfo' in c) return c;
+		return {
+			id: c.id,
+			name: c.name,
+			userId: c.userId,
+			sheetRecordId: c.sheetRecordId,
+			isActiveCharacter: c.isActiveCharacter,
+			importSource: c.importSource,
+			charId: c.charId,
+			channelDefaultCharacters: c.channelDefaultCharacters,
+			guildDefaultCharacters: c.guildDefaultCharacters,
+			sheetInfo: {
+				level: c.sheetRecord.sheet.staticInfo.level,
+				heritage: c.sheetRecord.sheet.info.heritage,
+				ancestry: c.sheetRecord.sheet.info.ancestry,
+				class: c.sheetRecord.sheet.info.class,
+			},
+		};
+	});
 
-	vi.mocked(KoboldUtils).mockImplementation(function (this: any) {
-		this.fetchDataForCommand = fetchDataMock;
-		return this;
-	} as MockReturnValue);
+	const { mockKobold } = require('./mock-kobold.js');
+	const readManyForListMock = mockKobold.character.readManyForList.mockResolvedValue(listItems);
 
 	return {
-		fetchDataMock,
-		mockCharacters: characters,
+		readManyForListMock,
+		mockCharacters: listItems,
 	};
 }
 
@@ -692,7 +711,7 @@ export interface GameUtilsMockSetup {
  */
 export function setupGameUtilsMocks(options: GameUtilsMockOptions = {}): GameUtilsMockSetup {
 	const {
-		targetSheetRecord = fake(zSheetRecord),
+		targetSheetRecord = { ...fake(zSheetRecord), adjustedSheet: null },
 		targetName = 'Test Character',
 		hideStats = false,
 		targetNotFound = false,
@@ -787,6 +806,7 @@ export function setupConditionMocks(options: ConditionMockOptions = {}): Conditi
 	const baseSheetRecord = gameUtilsOptions.targetSheetRecord ?? fake(zSheetRecord);
 	const sheetRecordWithConditions: SheetRecord = {
 		...baseSheetRecord,
+		adjustedSheet: null,
 		conditions,
 	};
 
@@ -818,6 +838,7 @@ export function setupConditionAutocompleteMocks(
 	const baseSheetRecord = gameUtilsOptions.targetSheetRecord ?? fake(zSheetRecord);
 	const sheetRecordWithConditions: SheetRecord = {
 		...baseSheetRecord,
+		adjustedSheet: null,
 		conditions,
 	};
 
@@ -912,6 +933,7 @@ export function createMockSheetRecord(overrides: Partial<SheetRecord> = {}): She
 		trackerMessageId: null,
 		trackerChannelId: null,
 		trackerGuildId: null,
+		adjustedSheet: null,
 		...overrides,
 	};
 }

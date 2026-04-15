@@ -91,7 +91,7 @@ export class ActionStageAddSaveSubCommand extends BaseCommandClass(
 			) || matchedActions[0];
 
 		if (action.rolls.find(roll => roll.name === rollName)) {
-			await InteractionUtils.send(intr, ActionStageDefinition.strings.addSave.requireText);
+			await InteractionUtils.send(intr, ActionStageDefinition.strings.rollAlreadyExists);
 			return;
 		}
 

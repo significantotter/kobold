@@ -81,8 +81,8 @@ export class ModifierModel extends Model<Database['modifier']> {
 	}
 
 	/**
-	 * Reads modifiers for a user that are either user-wide (null sheetRecordId)
-	 * or belong to a specific sheet record. Used when rolling for a character.
+	 * Reads modifiers that belong to a specific sheet record.
+	 * Unassigned (user-wide) modifiers are not included.
 	 */
 	public async readManyForCharacter({
 		userId,
@@ -95,12 +95,22 @@ export class ModifierModel extends Model<Database['modifier']> {
 			.selectFrom('modifier')
 			.selectAll()
 			.where('modifier.userId', '=', userId)
-			.where(eb =>
-				eb.or([
-					eb('modifier.sheetRecordId', 'is', null),
-					eb('modifier.sheetRecordId', '=', sheetRecordId),
-				])
-			)
+			.where('modifier.sheetRecordId', '=', sheetRecordId)
+			.execute();
+	}
+
+	/**
+	 * Reads all modifiers assigned to a specific sheetRecordId (regardless of userId).
+	 */
+	public async readManyBySheetRecordId({
+		sheetRecordId,
+	}: {
+		sheetRecordId: SheetRecordId;
+	}): Promise<Modifier[]> {
+		return this.db
+			.selectFrom('modifier')
+			.selectAll()
+			.where('modifier.sheetRecordId', '=', sheetRecordId)
 			.execute();
 	}
 

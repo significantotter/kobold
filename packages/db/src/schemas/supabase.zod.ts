@@ -250,6 +250,7 @@ export const zSheetRecord = zSheetRecordRow
 		sheet: zSheet,
 		conditions: z.array(zCondition),
 		trackerMode: zTrackerModeEnum.nullable(),
+		adjustedSheet: zSheet.nullable(),
 	});
 
 export const zNewSheetRecord = zNewSheetRecordRow
@@ -258,6 +259,7 @@ export const zNewSheetRecord = zNewSheetRecordRow
 		sheet: zSheet,
 		conditions: z.array(zCondition).optional(),
 		trackerMode: zTrackerModeEnum.nullable().optional(),
+		adjustedSheet: zSheet.nullable().optional(),
 	});
 
 export const zSheetRecordUpdate = zSheetRecordUpdateRow
@@ -266,6 +268,7 @@ export const zSheetRecordUpdate = zSheetRecordUpdateRow
 		sheet: zSheet.optional(),
 		conditions: z.array(zCondition).optional(),
 		trackerMode: zTrackerModeEnum.nullable().optional(),
+		adjustedSheet: zSheet.nullable().optional(),
 	});
 
 // ============================================================================

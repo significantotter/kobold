@@ -33,7 +33,7 @@ describe('InitShowSubCommand Integration', () => {
 		const existingInit = createMockInitiativeWithActors(2, { currentRound: 1 });
 		const { fetchNonNullableDataMock } = setupKoboldUtilsMocks();
 		fetchNonNullableDataMock.mockResolvedValue({
-			currentInitiative: existingInit,
+			currentInitiativeLite: existingInit,
 			userSettings: {},
 		});
 

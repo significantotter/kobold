@@ -1,0 +1,15 @@
+{
+	"extends": "../../tsconfig.base.json",
+	"compilerOptions": {
+		"lib": ["es2023", "dom", "dom.iterable"],
+		"target": "ESNext",
+		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
+		"sourceMap": true,
+		"rootDir": ".",
+		"outDir": "dist",
+		"types": ["node"]
+	},
+	"include": ["tests/**/*", "playwright.config.ts", "global-setup.ts", "global-teardown.ts"],
+	"exclude": ["dist", "node_modules"]
+}

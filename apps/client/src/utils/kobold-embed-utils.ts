@@ -294,7 +294,10 @@ export class KoboldEmbed extends EmbedBuilder {
 		let length = cloneOfThis.determineEmbedMetaTextLength();
 		let fieldLength = cloneOfThis.determineEmbedFieldTextLength();
 
-		if (length + fieldLength < DiscordLimits.EMBED_COMBINED_LENGTH) {
+		if (
+			length + fieldLength < DiscordLimits.EMBED_COMBINED_LENGTH &&
+			(cloneOfThis.data?.fields ?? []).length <= DiscordLimits.FIELDS_PER_EMBED
+		) {
 			//we're within normal embed size, so we can just return ourselves.
 			return [cloneOfThis];
 		} else if (length > DiscordLimits.EMBED_COMBINED_LENGTH) {
@@ -339,15 +342,13 @@ export class KoboldEmbed extends EmbedBuilder {
 		}
 
 		if (extraEmbeds.length >= 9) {
-			// What the heck are they doing asking for 30,000 characters of embed text?
-			let errorEmbed = new KoboldEmbed();
-			errorEmbed.setTitle("Error! Holy heck that's a lot of stuff!");
-			errorEmbed.setDescription(
-				"Yip! That command would have returned 10 whole heckin' messages at their limit of 6000 characters or 25 fields each! You need to" +
-					" learn some moderation there, buddy! Or contact my author for help if you think this is a legit use of me! I'm just " +
-					"a little kobold! I can't handle all that!"
-			);
-			return [errorEmbed];
+			// Too many embeds — truncate to a reasonable number and add a message
+			extraEmbeds = extraEmbeds.slice(0, 8);
+			const lastEmbed = extraEmbeds[extraEmbeds.length - 1];
+			lastEmbed.addFields({
+				name: '\u200b',
+				value: 'Yip! There are too many to list!',
+			});
 		}
 		return [cloneOfThis, ...extraEmbeds];
 	}

@@ -1,7 +1,12 @@
-
 import { zNewInitiativeActor } from '../index.js';
 import _ from 'lodash';
-import { truncateDbForTests, ResourceFactories, vitestKobold, fake } from '../test-utils.js';
+import {
+	truncateDbForTests,
+	ResourceFactories,
+	vitestKobold,
+	fake,
+	stripUndefined,
+} from '../test-utils.js';
 
 describe('InitiativeActorModel', () => {
 	afterEach(async () => {
@@ -16,13 +21,17 @@ describe('InitiativeActorModel', () => {
 			});
 			const sheetRecord = await ResourceFactories.sheetRecord();
 			const character = await ResourceFactories.character({ sheetRecordId: sheetRecord.id });
-			const fakeInitiativeActorMock = fake(zNewInitiativeActor);
+			const fakeInitiativeActorMock = stripUndefined(fake(zNewInitiativeActor));
 
 			fakeInitiativeActorMock.gameId = game.id;
 			fakeInitiativeActorMock.initiativeId = initiative.id;
 			fakeInitiativeActorMock.initiativeActorGroupId = initiativeActorGroup.id;
 			fakeInitiativeActorMock.characterId = character.id;
 			fakeInitiativeActorMock.sheetRecordId = sheetRecord.id;
+			delete fakeInitiativeActorMock.id;
+			delete fakeInitiativeActorMock.createdAt;
+			delete fakeInitiativeActorMock.lastUpdatedAt;
+			delete fakeInitiativeActorMock.minionId;
 
 			const created = await vitestKobold.initiativeActor.create(fakeInitiativeActorMock);
 			const read = await vitestKobold.initiativeActor.read({ id: created.id });

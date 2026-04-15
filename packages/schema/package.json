@@ -1,0 +1,38 @@
+{
+	"name": "@kobold/schema",
+	"version": "1.0.0",
+	"author": "Significantotter",
+	"description": "Shared Zod schemas, types, and enums for Kobold. Browser-safe — no Node.js dependencies.",
+	"license": "MIT",
+	"private": true,
+	"type": "module",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"default": "./dist/index.js",
+			"types": "./dist/index.d.ts"
+		},
+		"./db": {
+			"default": "./dist/db/index.js",
+			"types": "./dist/db/index.d.ts"
+		}
+	},
+	"scripts": {
+		"build": "pnpm run compile",
+		"compile": "tsc -p tsconfig.build.json",
+		"test": "vitest"
+	},
+	"dependencies": {
+		"lodash": "^4.17.21",
+		"zod": "^4.2.1"
+	},
+	"devDependencies": {
+		"@types/lodash": "^4.17.21",
+		"@types/node": "^25.0.3",
+		"eslint": "^9.39.2",
+		"ts-node": "^10.9.2",
+		"typescript": "^5.9.3",
+		"vitest": "^4.0.16"
+	}
+}

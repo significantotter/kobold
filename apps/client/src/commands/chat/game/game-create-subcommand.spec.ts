@@ -30,7 +30,7 @@ describe('GameCreateSubCommand', () => {
 
 	it('should create a new game', async () => {
 		// Arrange
-		kobold.game.readMany.mockResolvedValue([]);
+		kobold.game.readManyLite.mockResolvedValue([]);
 		kobold.game.updateMany.mockResolvedValue([]);
 		const newGame = createMockGame({ name: 'New Campaign', isActive: true });
 		kobold.game.create.mockResolvedValue(newGame);
@@ -64,7 +64,7 @@ describe('GameCreateSubCommand', () => {
 	it('should error when game name already exists', async () => {
 		// Arrange
 		const existingGame = createMockGame({ name: 'Existing Game' });
-		kobold.game.readMany.mockResolvedValue([existingGame]);
+		kobold.game.readManyLite.mockResolvedValue([existingGame]);
 
 		// Act
 		const result = await harness.executeCommand({
@@ -85,7 +85,7 @@ describe('GameCreateSubCommand', () => {
 
 	it('should error when game name is too short', async () => {
 		// Arrange
-		kobold.game.readMany.mockResolvedValue([]);
+		kobold.game.readManyLite.mockResolvedValue([]);
 
 		// Act
 		const result = await harness.executeCommand({
@@ -105,7 +105,7 @@ describe('GameCreateSubCommand', () => {
 
 	it('should deactivate existing games when creating a new one', async () => {
 		// Arrange
-		kobold.game.readMany.mockResolvedValue([]);
+		kobold.game.readManyLite.mockResolvedValue([]);
 		kobold.game.updateMany.mockResolvedValue([]);
 		const newGame = createMockGame({ name: 'New Game', isActive: true });
 		kobold.game.create.mockResolvedValue(newGame);

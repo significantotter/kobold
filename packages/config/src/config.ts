@@ -15,6 +15,9 @@ interface config {
 		caches: { [k: string]: number };
 		inviteUrl: string;
 	};
+	web: {
+		frontendBaseUrl: string;
+	};
 	wanderersGuide: {
 		apiKey: string;
 		oauthBaseUrl: string;
@@ -29,6 +32,11 @@ interface config {
 	api: {
 		port: number;
 		secret: string;
+		baseUrl: string;
+	};
+	discordOAuth: {
+		clientId: string;
+		clientSecret: string;
 	};
 	pastebin: {
 		apiKey: string;
@@ -96,6 +104,15 @@ interface config {
 		authorization: string;
 		body: string;
 	}[];
+	e2e?: {
+		discordEmail: string;
+		discordPassword: string;
+		guildId: string;
+		channelId: string;
+		userId: string;
+		botDisplayName: string;
+		pathbuilderTestCharacterId: string;
+	};
 }
 
 function parseEnvArray(envVariable: string) {
@@ -174,6 +191,9 @@ export const Config: config = Object.freeze({
 		},
 		inviteUrl: env.CLIENT_INVITE_URL ?? '',
 	},
+	web: {
+		frontendBaseUrl: env.FRONTEND_BASE_URL ?? 'http://localhost:5173',
+	},
 	wanderersGuide: {
 		apiKey: env.WANDERERS_GUIDE_API_KEY ?? '',
 		oauthBaseUrl: env.WANDERERS_GUIDE_OAUTH_BASE_URL ?? '',
@@ -188,6 +208,11 @@ export const Config: config = Object.freeze({
 	api: {
 		port: parseEnvNumber(env.API_PORT ?? '') ?? 8080,
 		secret: env.API_SECRET ?? '',
+		baseUrl: env.API_BASE_URL ?? 'http://localhost:3000',
+	},
+	discordOAuth: {
+		clientId: env.DISCORD_OAUTH_CLIENT_ID ?? env.CLIENT_ID ?? '',
+		clientSecret: env.DISCORD_OAUTH_CLIENT_SECRET ?? '',
 	},
 	pastebin: {
 		apiKey: env.PASTEBIN_API_KEY ?? '',
@@ -257,4 +282,15 @@ export const Config: config = Object.freeze({
 			authorization: 'string',
 			body: 'string',
 		}) as config['botSites']) ?? [],
+	e2e: env.DISCORD_TEST_GUILD_ID
+		? {
+				discordEmail: env.DISCORD_EMAIL ?? '',
+				discordPassword: env.DISCORD_PASSWORD ?? '',
+				guildId: env.DISCORD_TEST_GUILD_ID ?? '',
+				channelId: env.DISCORD_TEST_CHANNEL_ID ?? '',
+				userId: env.DISCORD_TEST_USER_ID ?? '',
+				botDisplayName: env.BOT_DISPLAY_NAME ?? 'Kobold',
+				pathbuilderTestCharacterId: env.PATHBUILDER_TEST_CHARACTER_ID ?? '',
+			}
+		: undefined,
 });

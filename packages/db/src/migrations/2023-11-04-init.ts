@@ -47,19 +47,6 @@ export async function up(db: Kysely<any>): Promise<void> {
 		.execute();
 
 	await db.schema
-		.createTable('characters_in_games')
-		.addColumn('game_id', 'integer', col =>
-			col.notNull().references('game.id').onDelete('cascade')
-		)
-		.addColumn('character_id', 'integer', col =>
-			col.notNull().references('character.id').onDelete('cascade')
-		)
-		.addColumn('created_at', 'timestamptz', col => col.defaultTo(sql`CURRENT_TIMESTAMP`))
-		.addColumn('last_updated_at', 'timestamptz', col => col.defaultTo(sql`CURRENT_TIMESTAMP`))
-		.addPrimaryKeyConstraint('characters_in_games_pkey', ['game_id', 'character_id'])
-		.execute();
-
-	await db.schema
 		.createTable('character')
 		.addColumn('id', 'serial', col => col.primaryKey().notNull())
 		.addColumn('user_id', 'text')
@@ -82,6 +69,19 @@ export async function up(db: Kysely<any>): Promise<void> {
 		.addColumn('attributes', 'jsonb', col => col.defaultTo(sql`'[]'::jsonb`).notNull())
 		.addColumn('custom_attributes', 'jsonb', col => col.defaultTo(sql`'[]'::jsonb`).notNull())
 		.addColumn('custom_actions', 'jsonb', col => col.defaultTo(sql`'[]'::jsonb`).notNull())
+		.execute();
+
+	await db.schema
+		.createTable('characters_in_games')
+		.addColumn('game_id', 'integer', col =>
+			col.notNull().references('game.id').onDelete('cascade')
+		)
+		.addColumn('character_id', 'integer', col =>
+			col.notNull().references('character.id').onDelete('cascade')
+		)
+		.addColumn('created_at', 'timestamptz', col => col.defaultTo(sql`CURRENT_TIMESTAMP`))
+		.addColumn('last_updated_at', 'timestamptz', col => col.defaultTo(sql`CURRENT_TIMESTAMP`))
+		.addPrimaryKeyConstraint('characters_in_games_pkey', ['game_id', 'character_id'])
 		.execute();
 
 	await db.schema

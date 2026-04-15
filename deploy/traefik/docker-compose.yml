@@ -1,0 +1,51 @@
+services:
+    traefik:
+        image: traefik:latest
+        container_name: traefik
+        restart: unless-stopped
+        security_opt:
+            - no-new-privileges:true
+        ports:
+            - '80:80'
+            - '443:443'
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock:ro
+            - traefik-certs:/letsencrypt
+        command:
+            # API / Dashboard
+            - --api.dashboard=true
+            # Docker provider
+            - --providers.docker=true
+            - --providers.docker.exposedbydefault=false
+            # Entrypoints
+            - --entrypoints.web.address=:80
+            - --entrypoints.websecure.address=:443
+            # Redirect all HTTP → HTTPS
+            - --entrypoints.web.http.redirections.entrypoint.to=websecure
+            - --entrypoints.web.http.redirections.entrypoint.scheme=https
+            # Let's Encrypt TLS
+            - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
+            - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web
+            - --certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL}
+            - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
+            # Logging
+            - --log.level=INFO
+        labels:
+            # Enable Traefik dashboard on traefik.kobold.tools (optional)
+            - traefik.enable=true
+            - traefik.http.routers.traefik-dashboard.rule=Host(`traefik.${DOMAIN}`)
+            - traefik.http.routers.traefik-dashboard.entrypoints=websecure
+            - traefik.http.routers.traefik-dashboard.tls.certresolver=letsencrypt
+            - traefik.http.routers.traefik-dashboard.service=api@internal
+            - traefik.http.routers.traefik-dashboard.middlewares=traefik-auth
+            # Basic auth for dashboard (generate with: htpasswd -nB admin)
+            - traefik.http.middlewares.traefik-auth.basicauth.users=${TRAEFIK_DASHBOARD_AUTH}
+        networks:
+            - proxy
+
+networks:
+    proxy:
+        external: true
+
+volumes:
+    traefik-certs:

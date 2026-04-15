@@ -143,7 +143,7 @@ export class MinionCreateSubCommand extends BaseCommandClass(
 		}
 
 		// Check if a minion with this name already exists for this character
-		const existingMinions = await kobold.minion.readMany({
+		const existingMinions = await kobold.minion.readManyLite({
 			characterId: activeCharacter.id,
 		});
 		const existingMinion = existingMinions.find(

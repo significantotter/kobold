@@ -6,10 +6,9 @@ import {
 	CacheType,
 	ChatInputCommandInteraction,
 	ComponentType,
-	MessageFlags,
 } from 'discord.js';
 import _ from 'lodash';
-import { Kobold, MinionWithRelations } from '@kobold/db';
+import { Kobold, MinionBasic } from '@kobold/db';
 import { MinionDefinition, sharedStrings } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
 import { CollectorUtils } from '../../../utils/collector-utils.js';
@@ -57,15 +56,14 @@ export class MinionRemoveSubCommand extends BaseCommandClass(
 			.trim();
 
 		// Find the minion (active character's minions + unassigned)
-		const allMinions = await kobold.minion.readManyByUserId({
+		const allMinions = await kobold.minion.readManyByUserIdLite({
 			userId: intr.user.id,
 		});
 		const minions = allMinions.filter(
-			(m: MinionWithRelations) =>
-				m.characterId === activeCharacter.id || m.characterId === null
+			(m: MinionBasic) => m.characterId === activeCharacter.id || m.characterId === null
 		);
 		const targetMinion = minions.find(
-			(m: MinionWithRelations) => m.name.toLowerCase() === minionName.toLowerCase()
+			(m: MinionBasic) => m.name.toLowerCase() === minionName.toLowerCase()
 		);
 
 		if (!targetMinion) {
@@ -75,7 +73,7 @@ export class MinionRemoveSubCommand extends BaseCommandClass(
 		}
 
 		// Ask for confirmation
-		const response = await intr.reply({
+		const prompt = await intr.editReply({
 			content: `Are you sure you want to remove the minion "${targetMinion.name}"? This action cannot be undone.`,
 			components: [
 				{
@@ -96,10 +94,7 @@ export class MinionRemoveSubCommand extends BaseCommandClass(
 					],
 				},
 			],
-			flags: [MessageFlags.Ephemeral],
-			withResponse: true,
 		});
-		const prompt = response.resource!.message!;
 		let timedOut = false;
 		let result = await CollectorUtils.collectByButton(
 			prompt,
@@ -143,13 +138,13 @@ export class MinionRemoveSubCommand extends BaseCommandClass(
 		// Remove the minion
 		if (result && result.value === 'remove') {
 			// Find and remove any initiative actors for this minion
-			const initiativeActors = await kobold.initiativeActor.readManyByMinionId({
+			const initiativeActors = await kobold.initiativeActor.readManyByMinionIdLite({
 				minionId: targetMinion.id,
 			});
 
 			for (const actor of initiativeActors) {
 				// Check if this actor is the only one in its group
-				const actorsInGroup = await kobold.initiativeActor.readManyByGroupId({
+				const actorsInGroup = await kobold.initiativeActor.readManyByGroupIdLite({
 					groupId: actor.initiativeActorGroupId,
 				});
 

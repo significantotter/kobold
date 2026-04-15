@@ -111,12 +111,14 @@ export class Creature {
 			rollMacros = [],
 			modifiers = [],
 			conditions = [],
+			adjustedSheet,
 		}: {
 			sheet: Sheet;
 			actions: Action[];
 			rollMacros: RollMacro[];
 			modifiers: Modifier[];
 			conditions: Condition[];
+			adjustedSheet?: Sheet | null;
 		},
 		public _name?: string,
 		public intr?: Interaction
@@ -129,10 +131,12 @@ export class Creature {
 		this._sheet = sheet;
 		if (!this._name) this._name = sheet.staticInfo.name;
 		this._sheet = _.defaultsDeep(this._sheet, sheetDefaults);
-		this._adjustedSheet = SheetUtils.adjustSheetWithModifiers(this._sheet, [
-			...this.modifiers,
-			...this.conditions,
-		]);
+		this._adjustedSheet =
+			adjustedSheet ??
+			SheetUtils.adjustSheetWithModifiers(this._sheet, [
+				...this.modifiers,
+				...this.conditions,
+			]);
 	}
 
 	public get sheet(): Sheet {
@@ -1003,7 +1007,7 @@ export class Creature {
 		return Object.values(this.sheet.baseCounters);
 	}
 
-	public get keyedActions() {
+	public get keyedActions(): Record<string, Action> {
 		return _.keyBy(this.actions, action => action.name);
 	}
 
@@ -1096,6 +1100,7 @@ export class Creature {
 	/**
 	 * Creates a Creature from an entity that has sheet data and related collections.
 	 * Use this for CharacterWithRelations, InitiativeActorWithRelations, MinionWithRelations.
+	 * The entity's sheetRecord.sheet must be the BASE sheet (not pre-adjusted).
 	 */
 	public static fromSheetRecord(
 		entity: EntityWithSheetData,
@@ -1109,6 +1114,30 @@ export class Creature {
 				modifiers: entity.modifiers,
 				rollMacros: entity.rollMacros,
 				conditions: entity.sheetRecord.conditions ?? [],
+			},
+			name,
+			intr
+		);
+	}
+
+	/**
+	 * Creates a Creature from an entity whose sheetRecord.sheet is already the
+	 * adjusted (COALESCE'd) value. Skips re-computation of adjustments.
+	 * Use for display-only paths with lite/cached data.
+	 */
+	public static fromCachedSheetRecord(
+		entity: EntityWithSheetData,
+		name?: string,
+		intr?: Interaction
+	): Creature {
+		return new Creature(
+			{
+				sheet: entity.sheetRecord.sheet,
+				actions: entity.actions ?? [],
+				modifiers: entity.modifiers ?? [],
+				rollMacros: entity.rollMacros ?? [],
+				conditions: entity.sheetRecord.conditions ?? [],
+				adjustedSheet: entity.sheetRecord.sheet,
 			},
 			name,
 			intr

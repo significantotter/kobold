@@ -33,7 +33,7 @@ export class CharacterSetActiveSubCommand extends BaseCommandClass(
 
 			const { characterUtils } = new KoboldUtils(kobold);
 			//get the character matches
-			const options = await characterUtils.findOwnedCharacterByName(match, intr.user.id);
+			const options = await characterUtils.findOwnedCharacterByNameLite(match, intr.user.id);
 
 			//return the matched characters
 			return options.map(character => ({
@@ -53,7 +53,7 @@ export class CharacterSetActiveSubCommand extends BaseCommandClass(
 
 		// try and find that charcter
 		const targetCharacter = (
-			await characterUtils.findOwnedCharacterByName(charName, intr.user.id)
+			await characterUtils.findOwnedCharacterByNameLite(charName, intr.user.id)
 		)[0];
 
 		if (targetCharacter) {

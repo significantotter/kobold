@@ -1,0 +1,818 @@
+{
+	"info": {
+		"age": "Not set",
+		"url": null,
+		"size": "medium",
+		"class": "Fighter",
+		"deity": "Arshea (statblock: Green Faith)",
+		"gender": "Not set",
+		"ancestry": "Catfolk",
+		"heritage": "Aiuvarin",
+		"imageURL": null,
+		"alignment": "N",
+		"background": "Martial Disciple (Acrobatics)",
+		"description": null
+	},
+	"stats": {
+		"will": {
+			"dc": 29,
+			"name": "Will",
+			"note": null,
+			"bonus": 19,
+			"ability": "wisdom",
+			"proficiency": 4
+		},
+		"class": {
+			"dc": 27,
+			"name": "Class",
+			"note": null,
+			"bonus": 17,
+			"ability": "dexterity",
+			"proficiency": 2
+		},
+		"arcana": {
+			"dc": 22,
+			"name": "Arcana",
+			"note": null,
+			"bonus": 12,
+			"ability": "intelligence",
+			"proficiency": 2
+		},
+		"arcane": {
+			"dc": 22,
+			"name": "Arcane",
+			"note": null,
+			"bonus": 12,
+			"ability": "charisma",
+			"proficiency": 2
+		},
+		"divine": {
+			"dc": 26,
+			"name": "Divine",
+			"note": null,
+			"bonus": 16,
+			"ability": "wisdom",
+			"proficiency": 2
+		},
+		"nature": {
+			"dc": 26,
+			"name": "Nature",
+			"note": null,
+			"bonus": 16,
+			"ability": "wisdom",
+			"proficiency": 2
+		},
+		"occult": {
+			"dc": 10,
+			"name": "Occult",
+			"note": null,
+			"bonus": 0,
+			"ability": null,
+			"proficiency": 0
+		},
+		"primal": {
+			"dc": 10,
+			"name": "Primal",
+			"note": null,
+			"bonus": 0,
+			"ability": null,
+			"proficiency": 0
+		},
+		"reflex": {
+			"dc": 30,
+			"name": "Reflex",
+			"note": null,
+			"bonus": 20,
+			"ability": "dexterity",
+			"proficiency": 4
+		},
+		"society": {
+			"dc": 22,
+			"name": "Society",
+			"note": null,
+			"bonus": 12,
+			"ability": "intelligence",
+			"proficiency": 2
+		},
+		"stealth": {
+			"dc": 27,
+			"name": "Stealth",
+			"note": null,
+			"bonus": 17,
+			"ability": "dexterity",
+			"proficiency": 2
+		},
+		"crafting": {
+			"dc": 10,
+			"name": "Crafting",
+			"note": null,
+			"bonus": 0,
+			"ability": "intelligence",
+			"proficiency": 0
+		},
+		"medicine": {
+			"dc": 28,
+			"name": "Medicine",
+			"note": null,
+			"bonus": 18,
+			"ability": "wisdom",
+			"proficiency": 4
+		},
+		"religion": {
+			"dc": 30,
+			"name": "Religion",
+			"note": null,
+			"bonus": 20,
+			"ability": "wisdom",
+			"proficiency": 6
+		},
+		"survival": {
+			"dc": 26,
+			"name": "Survival",
+			"note": null,
+			"bonus": 16,
+			"ability": "wisdom",
+			"proficiency": 2
+		},
+		"thievery": {
+			"dc": 27,
+			"name": "Thievery",
+			"note": null,
+			"bonus": 17,
+			"ability": "dexterity",
+			"proficiency": 2
+		},
+		"athletics": {
+			"dc": 25,
+			"name": "Athletics",
+			"note": null,
+			"bonus": 15,
+			"ability": "strength",
+			"proficiency": 2
+		},
+		"deception": {
+			"dc": 10,
+			"name": "Deception",
+			"note": null,
+			"bonus": 0,
+			"ability": "charisma",
+			"proficiency": 0
+		},
+		"diplomacy": {
+			"dc": 10,
+			"name": "Diplomacy",
+			"note": null,
+			"bonus": 0,
+			"ability": "charisma",
+			"proficiency": 0
+		},
+		"fortitude": {
+			"dc": 31,
+			"name": "Fortitude",
+			"note": null,
+			"bonus": 21,
+			"ability": "constitution",
+			"proficiency": 6
+		},
+		"occultism": {
+			"dc": 10,
+			"name": "Occultism",
+			"note": null,
+			"bonus": 0,
+			"ability": "intelligence",
+			"proficiency": 0
+		},
+		"acrobatics": {
+			"dc": 31,
+			"name": "Acrobatics",
+			"note": null,
+			"bonus": 21,
+			"ability": "dexterity",
+			"proficiency": 6
+		},
+		"perception": {
+			"dc": 30,
+			"name": "Perception",
+			"note": null,
+			"bonus": 20,
+			"ability": "wisdom",
+			"proficiency": 6
+		},
+		"performance": {
+			"dc": 10,
+			"name": "Performance",
+			"note": null,
+			"bonus": 0,
+			"ability": "charisma",
+			"proficiency": 0
+		},
+		"intimidation": {
+			"dc": 10,
+			"name": "Intimidation",
+			"note": null,
+			"bonus": 0,
+			"ability": "charisma",
+			"proficiency": 0
+		}
+	},
+	"attacks": [
+		{
+			"name": "Gauntlet Bow",
+			"notes": null,
+			"range": null,
+			"toHit": 19,
+			"damage": [{ "dice": "1d4+ 2", "type": "P" }],
+			"traits": [],
+			"effects": []
+		},
+		{
+			"name": "Gakgung",
+			"notes": null,
+			"range": null,
+			"toHit": 23,
+			"damage": [
+				{ "dice": "3d6+ 4", "type": "P" },
+				{ "dice": "1d6", "type": "Fire" },
+				{ "dice": "1d6", "type": "Electricity" }
+			],
+			"traits": [],
+			"effects": []
+		}
+	],
+	"infoLists": { "senses": [], "traits": [], "languages": ["None selected"], "immunities": [] },
+	"sourceData": {
+		"xp": 0,
+		"age": "Not set",
+		"mods": {
+			"Will": { "Item Bonus": 1 },
+			"Reflex": { "Item Bonus": 1 },
+			"Fortitude": { "Item Bonus": 1 }
+		},
+		"name": "Ren",
+		"pets": [],
+		"size": 2,
+		"armor": [
+			{
+				"mat": null,
+				"pot": 1,
+				"qty": 1,
+				"res": "resilient",
+				"name": "Splint Mail",
+				"prof": "heavy",
+				"worn": true,
+				"grade": "",
+				"runes": [],
+				"display": "+1 Armor Resilient Splint Mail"
+			}
+		],
+		"class": "Fighter",
+		"deity": "Arshea (statblock: Green Faith)",
+		"feats": [
+			["Shield Block", null, "Awarded Feat", 1],
+			["Cat Fall", null, "Awarded Feat", 1],
+			["Aiuvarin", null, "Heritage", 1, "Heritage Feat", "standardChoice", null],
+			["Point Blank Stance", null, "Class Feat", 1, "Fighter Feat 1", "standardChoice", null],
+			["Cat's Luck", null, "Ancestry Feat", 1, "Catfolk Feat 1", "standardChoice", null],
+			["Elf Atavism", null, "Ancestry Feat", 1, "Ancestry Paragon 1", "parentChoice", null],
+			[
+				"Desert Elf",
+				null,
+				"Elf Heritage",
+				1,
+				"Ancestry Paragon 1heritage choice",
+				"childChoice",
+				"Ancestry Paragon 1"
+			],
+			["Trick Magic Item", null, "Skill Feat", 2, "Skill Feat 2", "standardChoice", null],
+			[
+				"Gunslinger Dedication",
+				null,
+				"Class Feat",
+				2,
+				"Fighter Feat 2",
+				"standardChoice",
+				null
+			],
+			[
+				"Guild Agent Dedication",
+				null,
+				"Archetype Feat",
+				2,
+				"Free Archetype 2",
+				"standardChoice",
+				null
+			],
+			[
+				"Adopted Ancestry",
+				"Human",
+				"General Feat",
+				3,
+				"General Feat 3",
+				"standardChoice",
+				null
+			],
+			["Elven Verve", null, "Ancestry Feat", 3, "Ancestry Paragon 3", "standardChoice", null],
+			["Thorough Reports", null, "Skill Feat", 4, "Skill Feat 4", "standardChoice", null],
+			["Basic Shooting", null, "Class Feat", 4, "Fighter Feat 4", "parentChoice", null],
+			[
+				"Fake Out",
+				null,
+				"Gunslinger Feat",
+				4,
+				"Basic ShootingFighter Feat 4",
+				"childChoice",
+				"Fighter Feat 4"
+			],
+			[
+				"Deft Cooperation",
+				null,
+				"Archetype Feat",
+				4,
+				"Free Archetype 4",
+				"standardChoice",
+				null
+			],
+			["Lucky Break", null, "Ancestry Feat", 5, "Catfolk Feat 5", "standardChoice", null],
+			["Robust Recovery", null, "Skill Feat", 6, "Skill Feat 6", "standardChoice", null],
+			["Cleric Dedication", null, "Class Feat", 6, "Fighter Feat 6", "standardChoice", null],
+			["Basic Dogma", null, "Archetype Feat", 6, "Free Archetype 6", "parentChoice", null],
+			[
+				"Domain Initiate",
+				null,
+				"Cleric Feat",
+				6,
+				"Basic DogmaFree Archetype 6",
+				"childChoice",
+				"Free Archetype 6"
+			],
+			["Robust Health", null, "General Feat", 7, "General Feat 7", "standardChoice", null],
+			["Forlorn", null, "Ancestry Feat", 7, "Ancestry Paragon 7", "standardChoice", null],
+			["Kip Up", null, "Skill Feat", 8, "Skill Feat 8", "standardChoice", null],
+			["Advanced Dogma", null, "Class Feat", 8, "Fighter Feat 8", "parentChoice", null],
+			[
+				"Domain Initiate",
+				null,
+				"Cleric Feat",
+				8,
+				"Advanced DogmaFighter Feat 8",
+				"childChoice",
+				"Fighter Feat 8"
+			],
+			[
+				"Eldritch Archer Dedication",
+				null,
+				"Archetype Feat",
+				8,
+				"Free Archetype 8",
+				"standardChoice",
+				null
+			],
+			["Double Shot", null, "Fighter Feat", 9, "Combat Flexibility", "standardChoice", null],
+			["Multitalented", null, "Ancestry Feat", 9, "Catfolk Feat 9", "parentChoice", null],
+			[
+				"Investigator Dedication",
+				null,
+				"Archetype Feat",
+				9,
+				"Catfolk Feat 9Multitalented",
+				"childChoice",
+				"Catfolk Feat 9"
+			],
+			["Sacred Defense", null, "Skill Feat", 10, "Skill Feat 10", "standardChoice", null],
+			["Advanced Dogma", null, "Class Feat", 10, "Fighter Feat 10", "parentChoice", null],
+			[
+				"Domain Initiate",
+				null,
+				"Cleric Feat",
+				10,
+				"Advanced DogmaFighter Feat 10",
+				"childChoice",
+				"Fighter Feat 10"
+			],
+			[
+				"Investigator's Stratagem",
+				null,
+				"Archetype Feat",
+				10,
+				"Free Archetype 10",
+				"standardChoice",
+				null
+			]
+		],
+		"focus": {
+			"divine": {
+				"wis": {
+					"itemBonus": 0,
+					"focusSpells": ["Fire Ray", "Winter Bolt", "Withering Grasp"],
+					"proficiency": 2,
+					"abilityBonus": 4,
+					"focusCantrips": []
+				}
+			}
+		},
+		"level": 10,
+		"lores": [
+			["Warfare", 2],
+			["Guild Lore", 2]
+		],
+		"money": { "cp": 0, "gp": 41, "pp": 0, "sp": 5 },
+		"gender": "Not set",
+		"acTotal": {
+			"acTotal": 29,
+			"acItemBonus": 6,
+			"acProfBonus": 12,
+			"shieldBonus": null,
+			"acAbilityBonus": 1
+		},
+		"formula": [],
+		"rituals": [],
+		"weapons": [
+			{
+				"die": "d4",
+				"mat": null,
+				"pot": 0,
+				"qty": 1,
+				"str": "",
+				"name": "Gauntlet Bow",
+				"prof": "simple",
+				"grade": "",
+				"runes": [],
+				"attack": 19,
+				"display": "Gauntlet Bow",
+				"damageType": "P",
+				"isInventor": false,
+				"damageBonus": 2,
+				"extraDamage": [],
+				"increasedDice": false
+			},
+			{
+				"die": "d6",
+				"mat": null,
+				"pot": 2,
+				"qty": 1,
+				"str": "greaterStriking",
+				"name": "Gakgung",
+				"prof": "martial",
+				"grade": "",
+				"runes": ["Flaming", "Shock"],
+				"attack": 23,
+				"display": "+2 Striking (Greater) Flaming Shock Gakgung",
+				"damageType": "P",
+				"isInventor": false,
+				"damageBonus": 4,
+				"extraDamage": ["1d6 Fire", "1d6 Electricity"],
+				"increasedDice": false
+			}
+		],
+		"ancestry": "Catfolk",
+		"heritage": "Aiuvarin",
+		"sizeName": "Medium",
+		"specials": [
+			"Reactive Strike",
+			"Low-Light Vision",
+			"Land on Your Feet",
+			"Low-Light Vision",
+			"Way of the Sniper",
+			"Medicine",
+			"Bravery",
+			"Bow",
+			"Domain: Fire",
+			"Battlefield Surveyor",
+			"Weapon Specialization",
+			"Domain: Cold",
+			"Eldritch Shot",
+			"Arcane",
+			"Combat Flexibility",
+			"Battle Hardened",
+			"Clue In",
+			"On the Case",
+			"Pursue a Lead",
+			"Devise a Stratagem",
+			"Domain: Decay",
+			"Aiuvarin"
+		],
+		"abilities": {
+			"cha": 10,
+			"con": 18,
+			"dex": 20,
+			"int": 10,
+			"str": 16,
+			"wis": 18,
+			"breakdown": {
+				"classBoosts": ["Dex"],
+				"ancestryFree": ["Dex", "Wis"],
+				"ancestryFlaws": [],
+				"ancestryBoosts": [],
+				"backgroundBoosts": ["Dex", "Con"],
+				"mapLevelledBoosts": {
+					"1": ["Dex", "Str", "Wis", "Con"],
+					"2": ["Str"],
+					"3": ["Wis"],
+					"4": ["Con"],
+					"5": ["Dex"],
+					"7": ["Dex"],
+					"8": ["Str"],
+					"9": ["Con"],
+					"10": ["Wis"]
+				}
+			}
+		},
+		"alignment": "N",
+		"dualClass": null,
+		"equipment": [
+			["Echo Receptors", 1, "Invested"],
+			["Collar Of The Shifting Spider", 1, "Invested"],
+			["Ancestral Geometry", 1, "Invested"],
+			["Wand of Heroism", 1, "Invested"],
+			["Silver Chunk", 1, "Invested"],
+			["Eye Slash (Greater)", 1, "Invested"],
+			["Wand of Tailwind (2nd Rank)", 1, "Invested"],
+			["Cold Iron Chunk", 1, "Invested"],
+			["Clay Sphere", 1, "Invested"]
+		],
+		"familiars": [],
+		"languages": ["None selected"],
+		"attributes": {
+			"speed": 25,
+			"bonushp": 0,
+			"classhp": 10,
+			"ancestryhp": 8,
+			"speedBonus": -5,
+			"bonushpPerLevel": 0
+		},
+		"background": "Martial Disciple (Acrobatics)",
+		"keyability": "dex",
+		"focusPoints": 3,
+		"resistances": ["fire 5"],
+		"inventorMods": [],
+		"spellCasters": [
+			{
+				"name": "Archetype Cleric",
+				"innate": false,
+				"perDay": [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+				"spells": [{ "list": ["Divine Lance", "Needle Darts"], "spellLevel": 0 }],
+				"ability": "wis",
+				"prepared": [],
+				"focusPoints": 0,
+				"proficiency": 2,
+				"blendedSpells": [],
+				"magicTradition": "divine",
+				"spellcastingType": "prepared"
+			},
+			{
+				"name": "Eldritch Archer",
+				"innate": false,
+				"perDay": [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+				"spells": [{ "list": ["Live Wire"], "spellLevel": 0 }],
+				"ability": "cha",
+				"prepared": [],
+				"focusPoints": 0,
+				"proficiency": 2,
+				"blendedSpells": [],
+				"magicTradition": "arcane",
+				"spellcastingType": "spontaneous"
+			}
+		],
+		"proficiencies": {
+			"will": 4,
+			"heavy": 2,
+			"light": 2,
+			"arcana": 2,
+			"medium": 2,
+			"nature": 2,
+			"reflex": 4,
+			"simple": 4,
+			"classDC": 2,
+			"martial": 4,
+			"society": 2,
+			"stealth": 2,
+			"unarmed": 4,
+			"advanced": 2,
+			"crafting": 0,
+			"medicine": 4,
+			"piloting": 0,
+			"religion": 6,
+			"survival": 2,
+			"thievery": 2,
+			"athletics": 2,
+			"computers": 0,
+			"deception": 0,
+			"diplomacy": 0,
+			"fortitude": 6,
+			"occultism": 0,
+			"unarmored": 2,
+			"acrobatics": 6,
+			"perception": 6,
+			"performance": 0,
+			"intimidation": 0,
+			"castingArcane": 2,
+			"castingDivine": 2,
+			"castingOccult": 0,
+			"castingPrimal": 0
+		},
+		"equipmentContainers": {},
+		"specificProficiencies": {
+			"expert": [],
+			"master": ["Gakgung"],
+			"trained": [],
+			"legendary": []
+		}
+	},
+	"staticInfo": { "name": "Ren", "level": 10, "keyAbility": "dexterity", "usesStamina": false },
+	"baseCounters": {
+		"hp": {
+			"max": 148,
+			"name": "HP",
+			"text": "",
+			"style": "default",
+			"current": 148,
+			"recoverTo": -1,
+			"description": null,
+			"recoverable": true
+		},
+		"tempHp": {
+			"max": null,
+			"name": "Temp HP",
+			"text": "",
+			"style": "default",
+			"current": 0,
+			"recoverTo": 0,
+			"description": null,
+			"recoverable": true
+		},
+		"resolve": {
+			"max": null,
+			"name": "Resolve",
+			"text": "",
+			"style": "default",
+			"current": 0,
+			"recoverTo": -1,
+			"description": null,
+			"recoverable": true
+		},
+		"stamina": {
+			"max": null,
+			"name": "Stamina",
+			"text": "",
+			"style": "default",
+			"current": 0,
+			"recoverTo": -1,
+			"description": null,
+			"recoverable": true
+		},
+		"heroPoints": {
+			"max": 3,
+			"name": "Hero Points",
+			"text": "",
+			"style": "default",
+			"current": 3,
+			"recoverTo": 1,
+			"description": null,
+			"recoverable": false
+		},
+		"focusPoints": {
+			"max": 3,
+			"name": "Focus Points",
+			"text": "",
+			"style": "default",
+			"current": 1,
+			"recoverTo": -1,
+			"description": null,
+			"recoverable": false
+		}
+	},
+	"counterGroups": [
+		{
+			"name": "Per Day",
+			"counters": [
+				{
+					"max": 1,
+					"name": "Wand of Heroism",
+					"text": "",
+					"style": "dots",
+					"current": 1,
+					"recoverTo": -1,
+					"description": "",
+					"recoverable": true
+				},
+				{
+					"max": 1,
+					"name": "Wand of Tailwind 2nd Rank",
+					"text": "",
+					"style": "dots",
+					"current": 0,
+					"recoverTo": -1,
+					"description": "",
+					"recoverable": true
+				},
+				{
+					"max": 1,
+					"name": "Cat's Luck",
+					"text": "",
+					"style": "dots",
+					"current": 1,
+					"recoverTo": -1,
+					"description": "",
+					"recoverable": true
+				},
+				{
+					"max": 1,
+					"name": "Ancestral Geometry",
+					"text": "",
+					"style": "prepared",
+					"active": [true],
+					"prepared": ["Fortitude 7"],
+					"description": "",
+					"recoverable": false
+				}
+			],
+			"description": null
+		},
+		{
+			"name": "Per Hour",
+			"counters": [
+				{
+					"max": 1,
+					"name": "Sacred Defense",
+					"text": "",
+					"style": "dots",
+					"current": 1,
+					"recoverTo": -1,
+					"description": "",
+					"recoverable": true
+				}
+			],
+			"description": null
+		}
+	],
+	"intProperties": {
+		"ac": 29,
+		"wisdom": 4,
+		"charisma": 0,
+		"flySpeed": null,
+		"strength": 3,
+		"dexterity": 5,
+		"swimSpeed": null,
+		"walkSpeed": 20,
+		"climbSpeed": null,
+		"burrowSpeed": null,
+		"constitution": 4,
+		"intelligence": 0,
+		"dimensionalSpeed": null,
+		"heavyProficiency": 2,
+		"lightProficiency": 2,
+		"mediumProficiency": 2,
+		"simpleProficiency": 4,
+		"martialProficiency": 4,
+		"unarmedProficiency": 4,
+		"advancedProficiency": 2,
+		"unarmoredProficiency": 2
+	},
+	"additionalSkills": [
+		{
+			"dc": 10,
+			"name": "piloting",
+			"note": null,
+			"bonus": 0,
+			"ability": "intelligence",
+			"proficiency": 0
+		},
+		{
+			"dc": 10,
+			"name": "computers",
+			"note": null,
+			"bonus": 0,
+			"ability": "intelligence",
+			"proficiency": 0
+		},
+		{
+			"dc": 22,
+			"name": "Warfare Lore",
+			"note": null,
+			"bonus": 12,
+			"ability": "intelligence",
+			"proficiency": 2
+		},
+		{
+			"dc": 22,
+			"name": "Guild Lore Lore",
+			"note": null,
+			"bonus": 12,
+			"ability": "intelligence",
+			"proficiency": 2
+		}
+	],
+	"countersOutsideGroups": [
+		{
+			"max": 1,
+			"name": "Collar of the Shifting Spider",
+			"text": "",
+			"style": "prepared",
+			"active": [true],
+			"prepared": [null],
+			"description": "",
+			"recoverable": false
+		}
+	],
+	"weaknessesResistances": { "weaknesses": [], "resistances": [] }
+}

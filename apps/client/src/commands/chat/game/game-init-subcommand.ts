@@ -48,12 +48,15 @@ export class GameInitSubCommand extends BaseCommandClass(
 				intr.options.getString(commandOptions[commandOptionsEnum.skillChoice].name) ?? '';
 
 			const { gameUtils } = new KoboldUtils(kobold);
-			//get the active game
-			const game = await gameUtils.getActiveGame(intr.user.id, intr.guildId ?? '');
-			if (!game) {
+			//get the active game (lite)
+			const gameLite = await gameUtils.getActiveGame(intr.user.id, intr.guildId ?? '');
+			if (!gameLite) {
 				//no choices if we don't have a character to match against
 				return [];
 			}
+			// Need full character data for skill matching
+			const game = await kobold.game.read({ id: gameLite.id });
+			if (!game) return [];
 			const choices: Set<string> = new Set();
 			for (const character of game.characters || []) {
 				const matchedSkills = FinderHelpers.matchAllSkills(
@@ -93,6 +96,18 @@ export class GameInitSubCommand extends BaseCommandClass(
 		);
 		koboldUtils.assertActiveGameNotNull(activeGame);
 
+		if (activeGame.characters.length === 0) {
+			await InteractionUtils.send(
+				intr,
+				`You have no characters in this game. Have players join using \`/game manage manage-option:join manage-value:${activeGame.name}\`.`
+			);
+			return;
+		}
+
+		// Load full game with character relations for initiative rolling
+		const fullGame = await kobold.game.read({ id: activeGame.id });
+		if (!fullGame) return;
+
 		const initiativeValue = intr.options.getNumber(
 			commandOptions[commandOptionsEnum.initValue].name
 		);
@@ -106,14 +121,6 @@ export class GameInitSubCommand extends BaseCommandClass(
 			commandOptions[commandOptionsEnum.targetCharacter].name,
 			true
 		);
-
-		if (activeGame.characters.length === 0) {
-			await InteractionUtils.send(
-				intr,
-				`You have no characters in this game. Have players join using \`/game manage manage-option:join manage-value:${activeGame.name}\`.`
-			);
-			return;
-		}
 
 		const embeds: KoboldEmbed[] = [];
 
@@ -133,7 +140,7 @@ export class GameInitSubCommand extends BaseCommandClass(
 			});
 		}
 
-		for (const character of _.uniqBy(activeGame.characters, 'id')) {
+		for (const character of _.uniqBy(fullGame.characters, 'id')) {
 			if (
 				targetCharacter !== 'All Players' && // the character is already in the init
 				(currentInitiative.actors.find(actor => actor.characterId === character.id) ||
@@ -171,7 +178,7 @@ export class GameInitSubCommand extends BaseCommandClass(
 			});
 
 			// Add character's minions to the same turn
-			const minions = await kobold.minion.readMany({
+			const minions = await kobold.minion.readManyLite({
 				characterId: character.id,
 			});
 			const addedMinionNames: string[] = [];
