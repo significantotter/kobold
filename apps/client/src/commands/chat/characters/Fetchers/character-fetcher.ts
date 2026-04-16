@@ -103,7 +103,7 @@ export abstract class CharacterFetcher<SourceData, FetchArgs> {
 					importSource: this.importSource,
 					charId: this.getCharId(args),
 				});
-				await trx.character.setIsActive({ id: characterId, userId: this.userId });
+				await trx.character.setIsActive({ id: characterId, userId: this.userId }, trx.db);
 				return { characterId, characterName, sheetRecordId: createdSheetRecord.id };
 			}
 		);

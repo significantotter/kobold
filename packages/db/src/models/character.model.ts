@@ -549,20 +549,29 @@ export class CharacterModel extends Model<Database['character']> {
 		return result[0] ?? null;
 	}
 
-	public async setIsActive({ id, userId }: { id: CharacterId; userId: string }): Promise<void> {
-		await this.db.transaction().execute(async trx => {
-			await trx
+	public async setIsActive(
+		{ id, userId }: { id: CharacterId; userId: string },
+		trx?: Kysely<Database>
+	): Promise<void> {
+		const run = async (db: Kysely<Database>) => {
+			await db
 				.updateTable('character')
 				.set({ isActiveCharacter: false })
 				.where('character.userId', '=', userId)
 				.execute();
 
-			await trx
+			await db
 				.updateTable('character')
 				.set({ isActiveCharacter: true })
 				.where('character.id', '=', id)
 				.execute();
-		});
+		};
+
+		if (trx) {
+			await run(trx);
+		} else {
+			await this.db.transaction().execute(t => run(t));
+		}
 	}
 
 	/**
