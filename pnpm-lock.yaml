@@ -489,6 +489,9 @@ importers:
 
   packages/nethys:
     dependencies:
+      '@elastic/elasticsearch':
+        specifier: ^8
+        version: 8.19.1
       '@kobold/config':
         specifier: workspace:*
         version: link:../config
@@ -544,9 +547,6 @@ importers:
         specifier: ^4.2.1
         version: 4.2.1
     devDependencies:
-      '@elastic/elasticsearch':
-        specifier: ^8
-        version: 8.19.1
       '@types/hast':
         specifier: ^3.0.4
         version: 3.0.4

@@ -59,6 +59,11 @@ interface config {
 			runOnce: boolean;
 			initialDelaySecs: number;
 		};
+		nethysImport: {
+			schedule: string;
+			log: boolean;
+			runOnStart: boolean;
+		};
 	};
 	rateLimiting: {
 		commands: {
@@ -232,6 +237,11 @@ export const Config: config = Object.freeze({
 			runOnce: parseEnvBoolean(env.JOBS_UPDATE_SERVER_COUNT_RUN_ONCE ?? '') ?? false,
 			initialDelaySecs:
 				parseEnvNumber(env.JOBS_UPDATE_SERVER_COUNT_RUN_INITIAL_DELAY_SECS ?? '') ?? 0,
+		},
+		nethysImport: {
+			schedule: env.JOBS_NETHYS_IMPORT_SCHEDULE ?? '0 0 3 1 * *',
+			log: parseEnvBoolean(env.JOBS_NETHYS_IMPORT_LOG ?? '') ?? true,
+			runOnStart: parseEnvBoolean(env.JOBS_NETHYS_IMPORT_RUN_ON_START ?? '') ?? false,
 		},
 	},
 	rateLimiting: {
