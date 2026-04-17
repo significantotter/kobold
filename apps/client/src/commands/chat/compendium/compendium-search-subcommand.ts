@@ -12,12 +12,14 @@ import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { Command } from '../../index.js';
 
 import _ from 'lodash';
-import { ActionCostEnum, Kobold } from '@kobold/db';
+import { ActionCostEnum, GameSystemEnum, Kobold, isGameSystemEnum } from '@kobold/db';
 import { KoboldError } from '../../../utils/KoboldError.js';
 import { StringUtils } from '@kobold/base-utils';
 import { NethysDb, NethysEmoji, NethysParser } from '@kobold/nethys';
 import { CompendiumDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
+import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
+import { Config } from '@kobold/config';
 const commandOptions = CompendiumDefinition.options;
 const commandOptionsEnum = CompendiumDefinition.commandOptionsEnum;
 
@@ -40,6 +42,15 @@ export class CompendiumSearchSubCommand extends BaseCommandClass(
 		if (option.name === commandOptions[commandOptionsEnum.search].name) {
 			const search =
 				intr.options.getString(commandOptions[commandOptionsEnum.search].name, true) ?? '';
+			const gameSystemOverride = intr.options.getString(
+				commandOptions[commandOptionsEnum.gameSystem].name
+			);
+			const koboldUtils = new KoboldUtils(kobold);
+			const userSettings = await koboldUtils.userSettingsUtils.getSettingsForUser(intr);
+			const gameSystem =
+				(isGameSystemEnum(gameSystemOverride) ? gameSystemOverride : null) ??
+				userSettings.gameSystem ??
+				GameSystemEnum.pf2e;
 			let searchResults: { name: string; value: string }[] = [];
 
 			searchResults = (
@@ -48,6 +59,7 @@ export class CompendiumSearchSubCommand extends BaseCommandClass(
 					bestiary: false,
 					randomOrder: true,
 					limit: 50,
+					gameSystem,
 				})
 			).map(result => ({ name: result.search, value: result.search }));
 
@@ -72,12 +84,25 @@ export class CompendiumSearchSubCommand extends BaseCommandClass(
 			.getString(commandOptions[commandOptionsEnum.search].name, true)
 			.trim();
 
+		const koboldUtils = new KoboldUtils(kobold);
+		const userSettings = await koboldUtils.userSettingsUtils.getSettingsForUser(intr);
+		const gameSystemOverride = intr.options.getString(
+			commandOptions[commandOptionsEnum.gameSystem].name
+		);
+		const gameSystem =
+			(isGameSystemEnum(gameSystemOverride) ? gameSystemOverride : null) ??
+			userSettings.gameSystem ??
+			GameSystemEnum.pf2e;
+		const baseUrl =
+			gameSystem === GameSystemEnum.sf2e ? Config.nethys.sf2eBaseUrl : Config.nethys.baseUrl;
+
 		let result: APIEmbed | EmbedData | undefined = undefined;
 
 		const searchResults = await nethysCompendium.search(search, {
 			limit: 50,
 			searchTermOnly: false,
 			bestiary: false,
+			gameSystem,
 		});
 		const closestMatchSorter = StringUtils.generateSorterByWordDistance(
 			search,
@@ -92,7 +117,10 @@ export class CompendiumSearchSubCommand extends BaseCommandClass(
 			);
 		}
 
-		let parsedMarkdownResult = await new NethysParser().parseCompendiumEntry(bestResult.data);
+		let parsedMarkdownResult = await new NethysParser().parseCompendiumEntry(
+			bestResult.data,
+			baseUrl
+		);
 		parsedMarkdownResult = parsedMarkdownResult
 			.replaceAll(NethysEmoji.oneAction, getEmoji(intr, ActionCostEnum.oneAction))
 			.replaceAll(NethysEmoji.twoActions, getEmoji(intr, ActionCostEnum.twoActions))

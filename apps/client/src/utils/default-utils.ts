@@ -1,5 +1,6 @@
 import {
 	DefaultCompendiumEnum,
+	GameSystemEnum,
 	InitStatsNotificationEnum,
 	InlineRollsDisplayEnum,
 	RollCompactModeEnum,
@@ -14,6 +15,7 @@ export class DefaultUtils {
 			rollCompactMode: RollCompactModeEnum.normal,
 			initStatsNotification: InitStatsNotificationEnum.every_round,
 			defaultCompendium: DefaultCompendiumEnum.nethys,
+			gameSystem: GameSystemEnum.pf2e,
 		};
 	}
 }

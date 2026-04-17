@@ -4,6 +4,7 @@ import { utilStrings } from '@kobold/documentation';
 import {
 	CharacterWithRelations,
 	DefaultCompendiumEnum,
+	GameSystemEnum,
 	InitStatsNotificationEnum,
 	InitiativeActor,
 	InitiativeActorGroup,
@@ -270,6 +271,7 @@ export class InitiativeBuilder {
 				rollCompactMode: RollCompactModeEnum.compact,
 				inlineRollsDisplay: InlineRollsDisplayEnum.compact,
 				defaultCompendium: DefaultCompendiumEnum.nethys,
+				gameSystem: GameSystemEnum.pf2e,
 				userId: '',
 			},
 		});

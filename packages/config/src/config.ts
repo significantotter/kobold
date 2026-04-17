@@ -20,6 +20,7 @@ interface config {
 	};
 	nethys: {
 		baseUrl: string;
+		sf2eBaseUrl: string;
 	};
 	database: {
 		url: string;
@@ -192,6 +193,7 @@ export const Config: config = Object.freeze({
 	},
 	nethys: {
 		baseUrl: env.NETHYS_BASE_URL ?? 'https://2e.aonprd.com/',
+		sf2eBaseUrl: env.NETHYS_SF2E_BASE_URL ?? 'https://2e.aonsrd.com/',
 	},
 	database: {
 		url: env.DATABASE_URL ?? '',

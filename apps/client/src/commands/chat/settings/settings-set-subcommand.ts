@@ -8,9 +8,11 @@ import {
 import _ from 'lodash';
 import {
 	DefaultCompendiumEnum,
+	GameSystemEnum,
 	Kobold,
 	UserSettings,
 	isDefaultCompendiumEnum,
+	isGameSystemEnum,
 	isInitStatsNotificationEnum,
 	isInlineRollsDisplayEnum,
 } from '@kobold/db';
@@ -60,6 +62,14 @@ export class SettingsSetSubCommand extends BaseCommandClass(
 				name: choice,
 				value: choice,
 			}));
+		} else if (
+			option.name === commandOptions[commandOptionsEnum.value].name &&
+			intr.options.getString(commandOptions[commandOptionsEnum.set].name) === 'game-system'
+		) {
+			return [GameSystemEnum.pf2e, GameSystemEnum.sf2e].map(choice => ({
+				name: choice,
+				value: choice,
+			}));
 		}
 	}
 
@@ -103,6 +113,13 @@ export class SettingsSetSubCommand extends BaseCommandClass(
 				);
 			}
 			updates.defaultCompendium = parsedValue;
+		} else if (trimmedOptionName === 'gameSystem') {
+			if (!isGameSystemEnum(parsedValue)) {
+				throw new KoboldError(
+					'Yip! The value for "game-system" must be one of "pf2e", or "sf2e".'
+				);
+			}
+			updates.gameSystem = parsedValue;
 		} else {
 			throw new KoboldError(`Yip! "${option}" is not a valid option.`);
 		}

@@ -66,6 +66,7 @@ export {
 	zRollCompactModeEnum,
 	zInlineRollsDisplayEnum,
 	zDefaultCompendiumEnum,
+	zGameSystemEnum,
 } from './lib/database-enums.js';
 
 import {
@@ -75,6 +76,7 @@ import {
 	zRollCompactModeEnum,
 	zInlineRollsDisplayEnum,
 	zDefaultCompendiumEnum,
+	zGameSystemEnum,
 } from './lib/database-enums.js';
 
 // Re-export unchanged schemas
@@ -304,12 +306,14 @@ export const zCharacterUpdate = zCharacterUpdateRow
 export const zUserSettings = zUserSettingsRow
 	.omit({
 		defaultCompendium: true,
+		gameSystem: true,
 		initStatsNotification: true,
 		inlineRollsDisplay: true,
 		rollCompactMode: true,
 	})
 	.extend({
 		defaultCompendium: zDefaultCompendiumEnum,
+		gameSystem: zGameSystemEnum,
 		initStatsNotification: zInitStatsNotificationEnum,
 		inlineRollsDisplay: zInlineRollsDisplayEnum,
 		rollCompactMode: zRollCompactModeEnum,
@@ -318,12 +322,14 @@ export const zUserSettings = zUserSettingsRow
 export const zNewUserSettings = zNewUserSettingsRow
 	.omit({
 		defaultCompendium: true,
+		gameSystem: true,
 		initStatsNotification: true,
 		inlineRollsDisplay: true,
 		rollCompactMode: true,
 	})
 	.extend({
 		defaultCompendium: zDefaultCompendiumEnum.optional(),
+		gameSystem: zGameSystemEnum.optional(),
 		initStatsNotification: zInitStatsNotificationEnum.optional(),
 		inlineRollsDisplay: zInlineRollsDisplayEnum.optional(),
 		rollCompactMode: zRollCompactModeEnum.optional(),
@@ -332,12 +338,14 @@ export const zNewUserSettings = zNewUserSettingsRow
 export const zUserSettingsUpdate = zUserSettingsUpdateRow
 	.omit({
 		defaultCompendium: true,
+		gameSystem: true,
 		initStatsNotification: true,
 		inlineRollsDisplay: true,
 		rollCompactMode: true,
 	})
 	.extend({
 		defaultCompendium: zDefaultCompendiumEnum.optional(),
+		gameSystem: zGameSystemEnum.optional(),
 		initStatsNotification: zInitStatsNotificationEnum.optional(),
 		inlineRollsDisplay: zInlineRollsDisplayEnum.optional(),
 		rollCompactMode: zRollCompactModeEnum.optional(),

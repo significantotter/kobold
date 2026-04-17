@@ -81,6 +81,10 @@ export const minionCommandDefinition = {
 					minionCommandOptions[MinionCommandOptionEnum.autoJoinInitiative],
 					5
 				),
+				[MinionCommandOptionEnum.gameSystem]: withOrder(
+					minionCommandOptions[MinionCommandOptionEnum.gameSystem],
+					6
+				),
 			},
 		},
 		[MinionSubCommandEnum.assign]: {

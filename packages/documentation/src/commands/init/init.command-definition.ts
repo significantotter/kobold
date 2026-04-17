@@ -137,6 +137,10 @@ export const initCommandDefinition = {
 					initCommandOptions[InitCommandOptionEnum.template],
 					7
 				),
+				[InitCommandOptionEnum.gameSystem]: withOrder(
+					initCommandOptions[InitCommandOptionEnum.gameSystem],
+					8
+				),
 			},
 		},
 		[InitSubCommandEnum.note]: {

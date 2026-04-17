@@ -13,6 +13,7 @@ import type {
 	RollCompactModeEnum,
 	InlineRollsDisplayEnum,
 	DefaultCompendiumEnum,
+	GameSystemEnum,
 	TrackerModeEnum,
 	ImportSourceEnum,
 } from './lib/database-enums.js';
@@ -200,18 +201,21 @@ type SnakeCaseDatabase = KyselifyDatabase<
 					user_settings: {
 						Row: {
 							default_compendium: DefaultCompendiumEnum;
+							game_system: GameSystemEnum;
 							init_stats_notification: InitStatsNotificationEnum;
 							inline_rolls_display: InlineRollsDisplayEnum;
 							roll_compact_mode: RollCompactModeEnum;
 						};
 						Insert: {
 							default_compendium?: DefaultCompendiumEnum;
+							game_system?: GameSystemEnum;
 							init_stats_notification?: InitStatsNotificationEnum;
 							inline_rolls_display?: InlineRollsDisplayEnum;
 							roll_compact_mode?: RollCompactModeEnum;
 						};
 						Update: {
 							default_compendium?: DefaultCompendiumEnum;
+							game_system?: GameSystemEnum;
 							init_stats_notification?: InitStatsNotificationEnum;
 							inline_rolls_display?: InlineRollsDisplayEnum;
 							roll_compact_mode?: RollCompactModeEnum;

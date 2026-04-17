@@ -1,7 +1,7 @@
 import { db, postgresClient } from '../nethys.db.js';
 import { compendium, bestiary } from '../nethys.schema.js';
 import { Client, estypes } from '@elastic/elasticsearch';
-import { sql } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { CompendiumEntry } from '../schemas/index.js';
 export function valueAsJsonb(input: unknown) {
 	return sql.raw(`'${JSON.stringify(input).replaceAll("'", "''")}'::jsonb`);
@@ -9,12 +9,16 @@ export function valueAsJsonb(input: unknown) {
 
 export class NethysLoader {
 	protected client: Client;
-	constructor(
-		{ url = 'https://elasticsearch.aonprd.com' }: { url: string } = {
-			url: 'https://elasticsearch.aonprd.com',
-		}
-	) {
+	protected gameSystem: string;
+	protected indexName: string;
+	constructor({
+		url = 'https://elasticsearch.aonprd.com',
+		gameSystem = 'pf2e',
+		indexName = 'aon',
+	}: { url?: string; gameSystem?: string; indexName?: string } = {}) {
 		this.client = new Client({ node: url });
+		this.gameSystem = gameSystem;
+		this.indexName = indexName;
 	}
 	protected pageSize = 1000;
 
@@ -26,7 +30,7 @@ export class NethysLoader {
 			query: {
 				match_all: {},
 			},
-			index: 'aon',
+			index: this.indexName,
 		};
 		let response = await this.client.search(params);
 
@@ -53,11 +57,12 @@ export class NethysLoader {
 	public async ingestPageToDb(page: estypes.SearchHit<unknown>[]) {
 		const values = page.map(hit => {
 			const data = hit._source as CompendiumEntry;
-			const index = parseInt(hit._index.replace('aon', ''));
+			const index = parseInt(hit._index.replace(/\D+/g, ''));
 			return {
 				name: 'name' in data ? data.name : hit._id,
 				category: 'type' in data ? data.type : 'unknown',
 				level: 'level' in data ? data.level : null,
+				gameSystem: this.gameSystem,
 				elasticIndex: index,
 				elasticId: hit._id,
 				nethysId: data.id,
@@ -78,7 +83,7 @@ export class NethysLoader {
 				.insert(compendium)
 				.values(batch)
 				.onConflictDoUpdate({
-					target: compendium.elasticId,
+					target: [compendium.gameSystem, compendium.elasticId],
 					set: { data: sql`EXCLUDED.data`, elasticIndex: sql`EXCLUDED.elastic_index` },
 					setWhere: sql`EXCLUDED.elastic_index > nethys_compendium.elastic_index`,
 				});
@@ -89,7 +94,7 @@ export class NethysLoader {
 					.insert(bestiary)
 					.values(creatureBatch as any)
 					.onConflictDoUpdate({
-						target: bestiary.elasticId,
+						target: [bestiary.gameSystem, bestiary.elasticId],
 						set: {
 							data: sql`EXCLUDED.data`,
 							elasticIndex: sql`EXCLUDED.elastic_index`,
@@ -101,17 +106,17 @@ export class NethysLoader {
 		}
 	}
 	public async clearDb() {
-		await db.delete(compendium).execute();
-		await db.delete(bestiary).execute();
+		await db.delete(compendium).where(eq(compendium.gameSystem, this.gameSystem)).execute();
+		await db.delete(bestiary).where(eq(bestiary.gameSystem, this.gameSystem)).execute();
 	}
 	public getTotalFromPage(page: estypes.SearchResponse): number {
 		if (page.hits.total === undefined) throw new Error("Couldn't get the total from the page!");
 		return typeof page.hits.total === 'number' ? page.hits.total : page.hits.total.value;
 	}
 	public async load() {
-		// delete the current schema
+		// delete the current data for this game system
 		await this.clearDb();
-		console.info('Wiped the current data.');
+		console.info(`Wiped the current ${this.gameSystem} data.`);
 
 		// ingest the rest of the pages
 		let countIngested = 0;
@@ -120,13 +125,16 @@ export class NethysLoader {
 			// ingest the page
 			await this.ingestPageToDb(page);
 			countIngested += page.length;
-			console.info(`${countIngested} records ingested.`);
+			console.info(`${countIngested} ${this.gameSystem} records ingested.`);
 		}
-		console.info('Done ingesting data. Shutting down');
+		console.info(`Done ingesting ${this.gameSystem} data. Shutting down`);
 		this.client.close();
 		postgresClient.end();
 	}
 }
 
-const loader = new NethysLoader();
+const gameSystem = process.env.GAME_SYSTEM ?? 'pf2e';
+const indexName = gameSystem === 'sf2e' ? 'aonsf' : 'aon';
+console.info(`Importing ${gameSystem} data from index "${indexName}"...`);
+const loader = new NethysLoader({ gameSystem, indexName });
 await loader.load();

@@ -108,6 +108,7 @@ export {
 	RollCompactModeEnum,
 	InlineRollsDisplayEnum,
 	DefaultCompendiumEnum,
+	GameSystemEnum,
 } from './database-enums.js';
 
 import {
@@ -115,6 +116,7 @@ import {
 	RollCompactModeEnum,
 	InlineRollsDisplayEnum,
 	DefaultCompendiumEnum,
+	GameSystemEnum,
 } from './database-enums.js';
 
 const initStatsNotificationValueMap = _.keyBy(Object.values(InitStatsNotificationEnum), _.identity);
@@ -135,4 +137,9 @@ export function isDefaultCompendiumEnum(value: any): value is DefaultCompendiumE
 const inlineRollsDisplayValueMap = _.keyBy(Object.values(InlineRollsDisplayEnum), _.identity);
 export function isInlineRollsDisplayEnum(value: any): value is InlineRollsDisplayEnum {
 	return inlineRollsDisplayValueMap[value] !== undefined;
+}
+
+const gameSystemValueMap = _.keyBy(Object.values(GameSystemEnum), _.identity);
+export function isGameSystemEnum(value: any): value is GameSystemEnum {
+	return gameSystemValueMap[value] !== undefined;
 }
