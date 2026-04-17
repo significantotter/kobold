@@ -62,3 +62,12 @@ export enum DefaultCompendiumEnum {
 	pf2etools = 'pf2etools',
 }
 export const zDefaultCompendiumEnum = z.nativeEnum(DefaultCompendiumEnum);
+
+// ============================================================================
+// Game System Enum
+// ============================================================================
+export enum GameSystemEnum {
+	pf2e = 'pf2e',
+	sf2e = 'sf2e',
+}
+export const zGameSystemEnum = z.nativeEnum(GameSystemEnum);

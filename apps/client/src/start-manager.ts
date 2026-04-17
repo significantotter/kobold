@@ -2,7 +2,7 @@ import { ShardingManager } from 'discord.js';
 import 'reflect-metadata';
 import { Config } from '@kobold/config';
 import { GuildsController, RootController, ShardsController } from './controllers/index.js';
-import { UpdateServerCountJob } from './jobs/index.js';
+import { NethysImportJob, UpdateServerCountJob } from './jobs/index.js';
 import { Api } from './models/api.js';
 import { Manager } from './models/manager.js';
 import { HttpService, JobService, Logger, MasterApiService } from './services/index.js';
@@ -82,7 +82,7 @@ async function start(): Promise<void> {
 	// Jobs
 	let jobs: Job[] = [
 		Config.clustering.enabled ? undefined : new UpdateServerCountJob(shardManager, httpService),
-		// TODO: Add new jobs here
+		new NethysImportJob(),
 	].filter(filterNotNullOrUndefined);
 
 	let manager = new Manager(shardManager, new JobService(jobs));

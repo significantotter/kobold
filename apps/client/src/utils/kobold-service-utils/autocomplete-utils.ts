@@ -262,12 +262,17 @@ export class AutocompleteUtils {
 			);
 	}
 
-	public async getNethysBestiaryCreatures(nethysCompendium: NethysDb, matchText: string) {
+	public async getNethysBestiaryCreatures(
+		nethysCompendium: NethysDb,
+		matchText: string,
+		gameSystem = 'pf2e'
+	) {
 		const searchResults = await nethysCompendium.searchTerm(matchText, {
 			searchTermOnly: true,
 			randomOrder: true,
 			limit: 50,
 			bestiary: true,
+			gameSystem,
 		});
 		return searchResults.map(result => ({ name: result.search, value: result.search }));
 	}

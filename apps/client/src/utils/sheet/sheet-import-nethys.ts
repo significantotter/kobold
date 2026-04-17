@@ -35,6 +35,7 @@ export class NethysSheetImporter {
 			template?: string;
 			customName?: string;
 			emojiConverter?: (emoji: string) => string;
+			baseUrl?: string;
 		} = {}
 	) {
 		this.nethysParser = new NethysParser();
@@ -252,12 +253,13 @@ export class NethysSheetImporter {
 
 	protected applyDetails() {
 		this.sheet.info.description = this.bestiaryEntry.summary ?? null;
+		const baseUrl = this.options.baseUrl ?? Config.nethys.baseUrl;
 		// Remove leading slash from URL if baseUrl ends with slash to avoid double slashes
 		const urlPath =
-			this.bestiaryEntry.url.startsWith('/') && Config.nethys.baseUrl.endsWith('/')
+			this.bestiaryEntry.url.startsWith('/') && baseUrl.endsWith('/')
 				? this.bestiaryEntry.url.slice(1)
 				: this.bestiaryEntry.url;
-		this.sheet.info.url = `${Config.nethys.baseUrl}${urlPath}`;
+		this.sheet.info.url = `${baseUrl}${urlPath}`;
 		this.sheet.info.alignment = this.bestiaryEntry.alignment ?? null;
 		const imageOptions = [...(this.bestiaryEntry.image ?? [])];
 		if (this.options.creatureFamilyEntry) {
@@ -271,7 +273,7 @@ export class NethysSheetImporter {
 			urlSuffix && urlSuffix.startsWith('/') && Config.nethys.baseUrl.endsWith('/')
 				? urlSuffix.slice(1)
 				: urlSuffix;
-		this.sheet.info.imageURL = imagePath ? `${Config.nethys.baseUrl}${imagePath}` : null;
+		this.sheet.info.imageURL = imagePath ? `${baseUrl}${imagePath}` : null;
 
 		this.sheet.info.size = this.bestiaryEntry.size[0] ?? null;
 

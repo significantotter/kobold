@@ -698,6 +698,7 @@ export const zSheetRecordUpdate = z.object({
 
 export const zUserSettings = z.object({
 	defaultCompendium: z.string(),
+	gameSystem: z.string(),
 	initStatsNotification: z.string(),
 	inlineRollsDisplay: z.string(),
 	rollCompactMode: z.string(),
@@ -706,6 +707,7 @@ export const zUserSettings = z.object({
 
 export const zNewUserSettings = z.object({
 	defaultCompendium: z.string().optional(),
+	gameSystem: z.string().optional(),
 	initStatsNotification: z.string().optional(),
 	inlineRollsDisplay: z.string().optional(),
 	rollCompactMode: z.string().optional(),
@@ -714,6 +716,7 @@ export const zNewUserSettings = z.object({
 
 export const zUserSettingsUpdate = z.object({
 	defaultCompendium: z.string().optional(),
+	gameSystem: z.string().optional(),
 	initStatsNotification: z.string().optional(),
 	inlineRollsDisplay: z.string().optional(),
 	rollCompactMode: z.string().optional(),

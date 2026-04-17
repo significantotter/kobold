@@ -20,6 +20,7 @@ interface config {
 	};
 	nethys: {
 		baseUrl: string;
+		sf2eBaseUrl: string;
 	};
 	database: {
 		url: string;
@@ -57,6 +58,11 @@ interface config {
 			log: boolean;
 			runOnce: boolean;
 			initialDelaySecs: number;
+		};
+		nethysImport: {
+			schedule: string;
+			log: boolean;
+			runOnStart: boolean;
 		};
 	};
 	rateLimiting: {
@@ -192,6 +198,7 @@ export const Config: config = Object.freeze({
 	},
 	nethys: {
 		baseUrl: env.NETHYS_BASE_URL ?? 'https://2e.aonprd.com/',
+		sf2eBaseUrl: env.NETHYS_SF2E_BASE_URL ?? 'https://2e.aonsrd.com/',
 	},
 	database: {
 		url: env.DATABASE_URL ?? '',
@@ -230,6 +237,11 @@ export const Config: config = Object.freeze({
 			runOnce: parseEnvBoolean(env.JOBS_UPDATE_SERVER_COUNT_RUN_ONCE ?? '') ?? false,
 			initialDelaySecs:
 				parseEnvNumber(env.JOBS_UPDATE_SERVER_COUNT_RUN_INITIAL_DELAY_SECS ?? '') ?? 0,
+		},
+		nethysImport: {
+			schedule: env.JOBS_NETHYS_IMPORT_SCHEDULE ?? '0 0 3 1 * *',
+			log: parseEnvBoolean(env.JOBS_NETHYS_IMPORT_LOG ?? '') ?? true,
+			runOnStart: parseEnvBoolean(env.JOBS_NETHYS_IMPORT_RUN_ON_START ?? '') ?? false,
 		},
 	},
 	rateLimiting: {

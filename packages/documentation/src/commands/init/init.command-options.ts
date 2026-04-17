@@ -24,6 +24,7 @@ export enum InitCommandOptionEnum {
 	rollOverwriteAttack = 'overwrite-attack',
 	rollOverwriteSave = 'overwrite-save',
 	rollOverwriteDamage = 'overwrite-damage',
+	gameSystem = 'game-system',
 }
 
 /**
@@ -204,5 +205,22 @@ export const initCommandOptions = {
 		description: 'An alternate damage roll replacing the FIRST damage roll.',
 		required: false,
 		type: ApplicationCommandOptionType.String,
+	},
+	[InitCommandOptionEnum.gameSystem]: {
+		name: InitCommandOptionEnum.gameSystem,
+		description:
+			'Override the game system for this creature lookup (defaults to your setting).',
+		required: false,
+		type: ApplicationCommandOptionType.String,
+		choices: [
+			{
+				name: 'Pathfinder 2E',
+				value: 'pf2e',
+			},
+			{
+				name: 'Starfinder 2E',
+				value: 'sf2e',
+			},
+		],
 	},
 } satisfies SpecificCommandOptions<InitCommandOptionEnum>;

@@ -691,6 +691,7 @@ export type Database = {
 			user_settings: {
 				Row: {
 					default_compendium: string;
+					game_system: string;
 					init_stats_notification: string;
 					inline_rolls_display: string;
 					roll_compact_mode: string;
@@ -698,6 +699,7 @@ export type Database = {
 				};
 				Insert: {
 					default_compendium?: string;
+					game_system?: string;
 					init_stats_notification?: string;
 					inline_rolls_display?: string;
 					roll_compact_mode?: string;
@@ -705,6 +707,7 @@ export type Database = {
 				};
 				Update: {
 					default_compendium?: string;
+					game_system?: string;
 					init_stats_notification?: string;
 					inline_rolls_display?: string;
 					roll_compact_mode?: string;

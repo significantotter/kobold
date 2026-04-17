@@ -10,7 +10,14 @@ import { DiceUtils } from '../../../utils/dice-utils.js';
 import { RollBuilder } from '../../../utils/roll-builder.js';
 
 import _ from 'lodash';
-import { NewAction, Kobold, SheetAdjustmentTypeEnum, Action } from '@kobold/db';
+import {
+	NewAction,
+	Kobold,
+	SheetAdjustmentTypeEnum,
+	Action,
+	GameSystemEnum,
+	isGameSystemEnum,
+} from '@kobold/db';
 import { Creature } from '../../../utils/creature.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { InitiativeBuilder, InitiativeBuilderUtils } from '../../../utils/initiative-builder.js';
@@ -26,6 +33,7 @@ import { NethysDb } from '@kobold/nethys';
 import { NethysSheetImporter } from '../../../utils/sheet/sheet-import-nethys.js';
 import { InitDefinition, RollDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
+import { Config } from '@kobold/config';
 const commandOptions = InitDefinition.options;
 const commandOptionsEnum = InitDefinition.commandOptionsEnum;
 
@@ -49,12 +57,22 @@ export class InitAddSubCommand extends BaseCommandClass(
 			const match = intr.options.getString(
 				commandOptions[commandOptionsEnum.initCreature].name
 			);
-			const { autocompleteUtils } = new KoboldUtils(kobold);
+			const gameSystemOverride = intr.options.getString(
+				commandOptions[commandOptionsEnum.gameSystem].name
+			);
+			const koboldUtils = new KoboldUtils(kobold);
+			const userSettings = await koboldUtils.userSettingsUtils.getSettingsForUser(intr);
+			const gameSystem =
+				(isGameSystemEnum(gameSystemOverride) ? gameSystemOverride : null) ??
+				userSettings.gameSystem ??
+				GameSystemEnum.pf2e;
+			const { autocompleteUtils } = koboldUtils;
 			let searchResults: { name: string; value: string }[] = [];
 
 			searchResults = await autocompleteUtils.getNethysBestiaryCreatures(
 				nethysCompendium,
-				match ?? ''
+				match ?? '',
+				gameSystem
 			);
 			if (searchResults.length > 20) {
 				searchResults.unshift({ name: 'Custom NPC', value: 'Custom NPC' });
@@ -87,6 +105,14 @@ export class InitAddSubCommand extends BaseCommandClass(
 				currentInitiative: true,
 				userSettings: true,
 			});
+
+		const gameSystemOverride = intr.options.getString(
+			commandOptions[commandOptionsEnum.gameSystem].name
+		);
+		const gameSystem =
+			(isGameSystemEnum(gameSystemOverride) ? gameSystemOverride : null) ??
+			userSettings.gameSystem ??
+			GameSystemEnum.pf2e;
 
 		let actorName = intr.options.getString(commandOptions[commandOptionsEnum.initActor].name);
 		const targetCreature = intr.options.getString(
@@ -126,13 +152,22 @@ export class InitAddSubCommand extends BaseCommandClass(
 			}
 
 			const { bestiaryCreature, bestiaryCreatureFamily } =
-				await NpcUtils.fetchNethysCompendiumCreatureData(nethysCompendium, name);
+				await NpcUtils.fetchNethysCompendiumCreatureData(
+					nethysCompendium,
+					name,
+					gameSystem
+				);
 
+			const baseUrl =
+				gameSystem === GameSystemEnum.sf2e
+					? Config.nethys.sf2eBaseUrl
+					: Config.nethys.baseUrl;
 			const nethysSheetImporter = new NethysSheetImporter(bestiaryCreature, {
 				creatureFamilyEntry: bestiaryCreatureFamily,
 				template,
 				customName: actorName || undefined,
 				emojiConverter: emojiData => getEmoji(intr, emojiData),
+				baseUrl,
 			});
 			sheet = await nethysSheetImporter.buildSheet();
 			const newActions = await nethysSheetImporter.buildActions(intr.user.id);

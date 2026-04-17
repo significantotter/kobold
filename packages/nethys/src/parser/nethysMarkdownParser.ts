@@ -228,8 +228,12 @@ export async function nethysMarkdownToHtml(nethysMarkdown: string): Promise<stri
 		.then(file => String(file));
 }
 
-export async function nethysMarkdownToDiscordMarkdown(nethysMarkdown: string): Promise<string> {
+export async function nethysMarkdownToDiscordMarkdown(
+	nethysMarkdown: string,
+	baseUrl = 'https://2e.aonprd.com'
+): Promise<string> {
 	// This function will convert the markdown from nethys tagged markdown to generic markdown
+	const base = baseUrl.replace(/\/$/, '');
 
 	return await pipelineMdToHtml()
 		.use(rehypeRemark)
@@ -256,9 +260,7 @@ export async function nethysMarkdownToDiscordMarkdown(nethysMarkdown: string): P
 					if (p2.startsWith('http')) {
 						return match;
 					}
-					return `[${p1}](<${
-						p2.startsWith('/') ? 'https://2e.aonprd.com' : 'https://2e.aonprd.com/'
-					}${p2}>)`;
+					return `[${p1}](<${p2.startsWith('/') ? base : base + '/'}${p2}>)`;
 				})
 		);
 }

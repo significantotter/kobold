@@ -4,6 +4,7 @@ import type { CommandOptions, SpecificCommandOptions } from '../helpers/commands
 export enum CompendiumCommandOptionEnum {
 	search = 'search',
 	choice = 'compendium-choice',
+	gameSystem = 'game-system',
 }
 
 export const compendiumCommandOptions = {
@@ -27,6 +28,22 @@ export const compendiumCommandOptions = {
 			{
 				name: 'pf2eTools',
 				value: 'pf2eTools',
+			},
+		],
+	},
+	[CompendiumCommandOptionEnum.gameSystem]: {
+		name: CompendiumCommandOptionEnum.gameSystem,
+		description: 'Override the game system for this search (defaults to your setting).',
+		required: false,
+		type: ApplicationCommandOptionType.String,
+		choices: [
+			{
+				name: 'Pathfinder 2E',
+				value: 'pf2e',
+			},
+			{
+				name: 'Starfinder 2E',
+				value: 'sf2e',
 			},
 		],
 	},

@@ -25,6 +25,7 @@ export enum MinionCommandOptionEnum {
 	template = 'template',
 	// Assign command option
 	copy = 'copy',
+	gameSystem = 'game-system',
 }
 
 export const minionCommandOptions = {
@@ -197,5 +198,22 @@ export const minionCommandOptions = {
 		description: 'If true, copy the minion instead of moving it.',
 		required: false,
 		type: ApplicationCommandOptionType.Boolean,
+	},
+	[MinionCommandOptionEnum.gameSystem]: {
+		name: MinionCommandOptionEnum.gameSystem,
+		description:
+			'Override the game system for this creature lookup (defaults to your setting).',
+		required: false,
+		type: ApplicationCommandOptionType.String,
+		choices: [
+			{
+				name: 'Pathfinder 2E',
+				value: 'pf2e',
+			},
+			{
+				name: 'Starfinder 2E',
+				value: 'sf2e',
+			},
+		],
 	},
 } satisfies SpecificCommandOptions<MinionCommandOptionEnum>;

@@ -6,6 +6,7 @@ export interface Job {
 	name: string;
 	log: boolean;
 	schedule: string;
+	runOnStart?: boolean;
 	run(): Promise<void>;
 }
 
@@ -30,6 +31,22 @@ export class JobService {
 				}
 			});
 			Logger.info(`Scheduled job '${job.name}' for '${job.schedule}'.`);
+
+			if (job.runOnStart) {
+				Logger.info(`Running job '${job.name}' on start.`);
+				job.run()
+					.then(() => {
+						if (job.log) {
+							Logger.info(`Job '${job.name}' initial run completed.`);
+						}
+					})
+					.catch(error => {
+						Logger.error(
+							`An error occurred during initial run of '${job.name}'.`,
+							error
+						);
+					});
+			}
 		}
 	}
 }

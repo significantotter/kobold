@@ -28,6 +28,10 @@ export const compendiumCommandDefinition = {
 					compendiumCommandOptions[CompendiumCommandOptionEnum.search],
 					1
 				),
+				[CompendiumCommandOptionEnum.gameSystem]: withOrder(
+					compendiumCommandOptions[CompendiumCommandOptionEnum.gameSystem],
+					2
+				),
 			},
 		},
 	},

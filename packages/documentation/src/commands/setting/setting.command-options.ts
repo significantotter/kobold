@@ -25,6 +25,10 @@ export const settingCommandOptions = {
 				name: 'default-compendium',
 				value: 'default-compendium',
 			},
+			{
+				name: 'game-system',
+				value: 'game-system',
+			},
 		],
 	},
 	[SettingCommandOptionEnum.value]: {

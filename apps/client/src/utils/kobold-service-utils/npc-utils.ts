@@ -11,12 +11,14 @@ export class NpcUtils {
 	}
 	public static async fetchNethysCompendiumCreatureData(
 		nethysCompendium: NethysDb,
-		search: string
+		search: string,
+		gameSystem = 'pf2e'
 	): Promise<{ bestiaryCreature: BestiaryEntry; bestiaryCreatureFamily?: CompendiumEntry }> {
 		const searchResults = await nethysCompendium.search(search, {
 			limit: 50,
 			searchTermOnly: false,
 			bestiary: true,
+			gameSystem,
 		});
 		const closestMatchSorter = StringUtils.generateSorterByWordDistance(
 			search,
@@ -36,6 +38,7 @@ export class NpcUtils {
 					limit: 1,
 					searchTermOnly: false,
 					bestiary: false,
+					gameSystem,
 				}
 			);
 			const familyMatch = creatureFamilyResults.sort(closestMatchSorter)[0];

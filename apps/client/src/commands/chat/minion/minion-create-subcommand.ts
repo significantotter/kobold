@@ -6,7 +6,14 @@ import {
 	ChatInputCommandInteraction,
 } from 'discord.js';
 import _ from 'lodash';
-import { Action, Kobold, NewAction, SheetAdjustmentTypeEnum } from '@kobold/db';
+import {
+	Action,
+	Kobold,
+	NewAction,
+	SheetAdjustmentTypeEnum,
+	GameSystemEnum,
+	isGameSystemEnum,
+} from '@kobold/db';
 import { MinionDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
 import { InteractionUtils } from '../../../utils/index.js';
@@ -20,6 +27,7 @@ import { NpcUtils } from '../../../utils/kobold-service-utils/npc-utils.js';
 import { NethysSheetImporter } from '../../../utils/sheet/sheet-import-nethys.js';
 import { getEmoji } from '../../../constants/emoji.js';
 import { StringUtils } from '@kobold/base-utils';
+import { Config } from '@kobold/config';
 
 const commandOptions = MinionDefinition.options;
 const commandOptionsEnum = MinionDefinition.commandOptionsEnum;
@@ -43,12 +51,22 @@ export class MinionCreateSubCommand extends BaseCommandClass(
 
 		if (option.name === commandOptions[commandOptionsEnum.creature].name) {
 			const match = intr.options.getString(commandOptions[commandOptionsEnum.creature].name);
-			const { autocompleteUtils } = new KoboldUtils(kobold);
+			const gameSystemOverride = intr.options.getString(
+				commandOptions[commandOptionsEnum.gameSystem].name
+			);
+			const koboldUtils = new KoboldUtils(kobold);
+			const userSettings = await koboldUtils.userSettingsUtils.getSettingsForUser(intr);
+			const gameSystem =
+				(isGameSystemEnum(gameSystemOverride) ? gameSystemOverride : null) ??
+				userSettings.gameSystem ??
+				GameSystemEnum.pf2e;
+			const { autocompleteUtils } = koboldUtils;
 			let searchResults: { name: string; value: string }[] = [];
 
 			searchResults = await autocompleteUtils.getNethysBestiaryCreatures(
 				nethysCompendium,
-				match ?? ''
+				match ?? '',
+				gameSystem
 			);
 
 			const sorter = StringUtils.generateSorterByWordDistance<{
@@ -72,9 +90,20 @@ export class MinionCreateSubCommand extends BaseCommandClass(
 		}
 	): Promise<void> {
 		const koboldUtils = new KoboldUtils(kobold);
-		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
-			activeCharacter: true,
-		});
+		const { activeCharacter, userSettings } = await koboldUtils.fetchNonNullableDataForCommand(
+			intr,
+			{
+				activeCharacter: true,
+				userSettings: true,
+			}
+		);
+		const gameSystemOverride = intr.options.getString(
+			commandOptions[commandOptionsEnum.gameSystem].name
+		);
+		const gameSystem =
+			(isGameSystemEnum(gameSystemOverride) ? gameSystemOverride : null) ??
+			userSettings.gameSystem ??
+			GameSystemEnum.pf2e;
 
 		const minionName = intr.options
 			.getString(commandOptions[commandOptionsEnum.name].name)
@@ -116,13 +145,22 @@ export class MinionCreateSubCommand extends BaseCommandClass(
 			}
 
 			const { bestiaryCreature, bestiaryCreatureFamily } =
-				await NpcUtils.fetchNethysCompendiumCreatureData(nethysCompendium, name);
+				await NpcUtils.fetchNethysCompendiumCreatureData(
+					nethysCompendium,
+					name,
+					gameSystem
+				);
 
+			const baseUrl =
+				gameSystem === GameSystemEnum.sf2e
+					? Config.nethys.sf2eBaseUrl
+					: Config.nethys.baseUrl;
 			const nethysSheetImporter = new NethysSheetImporter(bestiaryCreature, {
 				creatureFamilyEntry: bestiaryCreatureFamily,
 				template,
 				customName: minionName || undefined,
 				emojiConverter: emojiData => getEmoji(intr, emojiData),
+				baseUrl,
 			});
 			sheet = await nethysSheetImporter.buildSheet();
 			const newActions = await nethysSheetImporter.buildActions(intr.user.id);
