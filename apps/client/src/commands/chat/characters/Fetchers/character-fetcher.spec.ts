@@ -130,10 +130,13 @@ describe('CharacterFetcher', () => {
 				importSource: 'pastebin',
 				charId: 123,
 			});
-			expect(mockKobold.character.setIsActive).toHaveBeenCalledWith({
-				id: 'char-1',
-				userId: 'test-user-id',
-			});
+			expect(mockKobold.character.setIsActive).toHaveBeenCalledWith(
+				{
+					id: 'char-1',
+					userId: 'test-user-id',
+				},
+				mockKobold.db
+			);
 			expect(result).toEqual({ id: 'char-1', name: 'New Character' });
 		});
 

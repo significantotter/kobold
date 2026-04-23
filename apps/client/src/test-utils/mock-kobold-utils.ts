@@ -42,6 +42,7 @@ import {
 import { SheetProperties } from '../utils/sheet/sheet-properties.js';
 import { KoboldUtils, InjectedData } from '../utils/kobold-service-utils/kobold-utils.js';
 import { FinderHelpers } from '../utils/kobold-helpers/finder-helpers.js';
+import { mockKobold } from './mock-kobold.js';
 
 /**
  * Deep partial type utility for creating mock objects with only the needed properties.
@@ -638,7 +639,6 @@ export function setupListDataMocks(
 		};
 	});
 
-	const { mockKobold } = require('./mock-kobold.js');
 	const readManyForListMock = mockKobold.character.readManyForList.mockResolvedValue(listItems);
 
 	return {

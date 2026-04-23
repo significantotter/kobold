@@ -1,4 +1,4 @@
-import { zNewSheetRecord } from '../index.js';
+import { NewSheetRecord, zNewSheetRecord } from '../index.js';
 import _ from 'lodash';
 import {
 	truncateDbForTests,
@@ -14,7 +14,7 @@ describe('SheetRecordModel', () => {
 	});
 	describe('create, read', () => {
 		it('creates a new sheetRecord, reads it, and returns the sheetRecord plus relations', async () => {
-			const fakeSheetRecordMock = stripUndefined(fake(zNewSheetRecord));
+			const fakeSheetRecordMock = stripUndefined(fake(zNewSheetRecord)) as NewSheetRecord;
 			delete fakeSheetRecordMock.id;
 
 			const created = await vitestKobold.sheetRecord.create(fakeSheetRecordMock);
@@ -55,12 +55,14 @@ describe('SheetRecordModel', () => {
 	describe('deleteOrphaned', () => {
 		it('deletes orphaned sheetRecords', async () => {
 			const initActor2 = await ResourceFactories.initiativeActor();
-			const [orphanedSheetRecord, character, initActor, character2] = await Promise.all([
-				ResourceFactories.sheetRecord(),
-				ResourceFactories.character(),
-				ResourceFactories.initiativeActor(),
-				ResourceFactories.character({ sheetRecordId: initActor2.sheetRecordId }),
-			]);
+			const [orphanedSheetRecord, character, initActor, character2, minion] =
+				await Promise.all([
+					ResourceFactories.sheetRecord(),
+					ResourceFactories.character(),
+					ResourceFactories.initiativeActor(),
+					ResourceFactories.character({ sheetRecordId: initActor2.sheetRecordId }),
+					ResourceFactories.minion(),
+				]);
 
 			const result = await vitestKobold.sheetRecord.deleteOrphaned();
 			expect(result.numDeletedRows).toEqual(BigInt(1));
@@ -74,6 +76,7 @@ describe('SheetRecordModel', () => {
 			// Note: You'll need to replace this with actual code to check the records
 			expect(allIds).not.toContain(orphanedSheetRecord.id);
 			expect(allIds).toContain(character.sheetRecordId);
+			expect(allIds).toContain(minion.sheetRecordId);
 			expect(allIds).toContain(initActor.sheetRecordId);
 			expect(allIds).toContain(character2.sheetRecordId);
 			expect(allIds).toContain(initActor2.sheetRecordId);

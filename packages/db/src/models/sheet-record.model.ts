@@ -82,6 +82,12 @@ export class SheetRecordModel extends Model<Database['sheetRecord']> {
 						.selectAll()
 						.whereRef('character.sheetRecordId', '=', 'sheetRecord.id')
 				);
+				const minionExists = eb.exists(ebInner =>
+					ebInner
+						.selectFrom('minion')
+						.selectAll()
+						.whereRef('minion.sheetRecordId', '=', 'sheetRecord.id')
+				);
 				const initActorExists = eb.exists(ebInner =>
 					ebInner
 						.selectFrom('initiativeActor')
@@ -89,7 +95,7 @@ export class SheetRecordModel extends Model<Database['sheetRecord']> {
 						.whereRef('initiativeActor.sheetRecordId', '=', 'sheetRecord.id')
 				);
 
-				return eb.not(eb.or([characterExists, initActorExists]));
+				return eb.not(eb.or([characterExists, minionExists, initActorExists]));
 			})
 			.execute();
 		return result[0];

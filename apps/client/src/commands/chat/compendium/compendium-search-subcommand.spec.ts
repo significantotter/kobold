@@ -118,11 +118,15 @@ describe('CompendiumSearchSubCommand Integration', () => {
 
 			// Assert
 			expect(mockNethysDb.search).toHaveBeenCalledWith('Fireball', {
+				gameSystem: 'pf2e',
 				limit: 50,
 				searchTermOnly: false,
 				bestiary: false,
 			});
-			expect(parseCompendiumEntryMock).toHaveBeenCalledWith(sampleCompendiumEntry);
+			expect(parseCompendiumEntryMock).toHaveBeenCalledWith(
+				sampleCompendiumEntry,
+				'https://2e.aonprd.com/'
+			);
 			expect(sendBatchesMock).toHaveBeenCalled();
 		});
 
@@ -222,6 +226,7 @@ describe('CompendiumSearchSubCommand Integration', () => {
 
 			// Assert - The search was called, even if response failed due to empty results
 			expect(mockNethysDb.search).toHaveBeenCalledWith('NonexistentItem12345', {
+				gameSystem: 'pf2e',
 				limit: 50,
 				searchTermOnly: false,
 				bestiary: false,
@@ -273,6 +278,7 @@ describe('CompendiumSearchSubCommand Integration', () => {
 				bestiary: false,
 				randomOrder: true,
 				limit: 50,
+				gameSystem: 'pf2e',
 			});
 			const choices = result.getChoices();
 			expect(choices.length).toBeGreaterThan(0);

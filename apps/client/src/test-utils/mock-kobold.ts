@@ -22,6 +22,7 @@ interface MockModel {
 	updateMany: MockFn;
 	delete: MockFn;
 	deleteMany: MockFn;
+	deleteOrphaned: MockFn;
 	deleteIfExists: MockFn;
 	upsert: MockFn;
 }
@@ -97,6 +98,7 @@ function createMockModel(): MockModel {
 		updateMany: vi.fn(),
 		delete: vi.fn(),
 		deleteMany: vi.fn(),
+		deleteOrphaned: vi.fn(),
 		deleteIfExists: vi.fn(),
 		upsert: vi.fn(),
 	};

@@ -42,6 +42,7 @@ import {
 	InitiativeActor,
 	InitiativeActorGroup,
 	Kobold,
+	Minion,
 	SheetRecord,
 	UserSettings,
 	WgAuthToken,
@@ -52,6 +53,7 @@ import {
 	zNewInitiativeActorGroup,
 	zNewInitiativeActor,
 	zNewInitiative,
+	zNewMinion,
 	zNewSheetRecord,
 	zNewUserSettings,
 	zNewWgAuthToken,
@@ -117,6 +119,24 @@ export class ResourceFactories {
 		const character = await vitestKobold.character.read({ id });
 		if (!character) throw new Error(`Failed to read back created character ${id}`);
 		return character;
+	}
+	public static async minion(partialMinion?: Partial<Minion>) {
+		const characterId = partialMinion?.characterId ?? (await ResourceFactories.character()).id;
+		const character =
+			characterId != null ? await vitestKobold.character.read({ id: characterId }) : null;
+		const sheetRecordId =
+			partialMinion?.sheetRecordId ?? (await ResourceFactories.sheetRecord()).id;
+		const fakeMinionMock = fake(zNewMinion);
+		delete fakeMinionMock.id;
+
+		return await vitestKobold.minion.create({
+			...fakeMinionMock,
+			...partialMinion,
+			characterId,
+			sheetRecordId,
+			userId: partialMinion?.userId ?? character?.userId ?? fakeMinionMock.userId,
+			autoJoinInitiative: partialMinion?.autoJoinInitiative ?? false,
+		});
 	}
 	public static async channelDefaultCharacter(
 		partialChannelDefaultCharacter?: Partial<ChannelDefaultCharacter>
@@ -246,6 +266,7 @@ export function truncateDbForTests() {
 			TRUNCATE "initiative_actor_group" CASCADE;
 			TRUNCATE "initiative_actor" CASCADE;
 			TRUNCATE "initiative" CASCADE;
+			TRUNCATE "minion" CASCADE;
 			TRUNCATE "sheet_record" CASCADE;
 			TRUNCATE "user_settings" CASCADE;
 			TRUNCATE "wg_auth_token" CASCADE;
