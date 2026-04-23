@@ -6,7 +6,7 @@ import {
 	ChatInputCommandInteraction,
 } from 'discord.js';
 import { Kobold, SheetAdjustmentTypeEnum } from '@kobold/db';
-import { KoboldError } from '../../../utils/KoboldError.js';
+import { KoboldError } from '@kobold/util';
 import { Creature } from '../../../utils/creature.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
@@ -15,7 +15,7 @@ import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js
 import { Command } from '../../index.js';
 import _ from 'lodash';
 import { InputParseUtils } from '../../../utils/input-parse-utils.js';
-import { StringUtils } from '@kobold/base-utils';
+import { StringUtils } from '@kobold/util';
 import { ModifierDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
 const commandOptions = ModifierDefinition.options;

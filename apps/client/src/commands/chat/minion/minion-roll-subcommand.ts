@@ -8,7 +8,7 @@ import {
 import _ from 'lodash';
 import { getEmoji } from '../../../constants/emoji.js';
 import { Kobold, MinionWithRelations, SheetRecord } from '@kobold/db';
-import { KoboldError } from '../../../utils/KoboldError.js';
+import { KoboldError } from '@kobold/util';
 import { ActionRoller } from '../../../utils/action-roller.js';
 import { Creature } from '../../../utils/creature.js';
 import { EmbedUtils, KoboldEmbed } from '../../../utils/kobold-embed-utils.js';

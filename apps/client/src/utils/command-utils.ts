@@ -5,7 +5,7 @@ import { refs } from '../constants/common-text.js';
 import { FormatUtils } from './format-utils.js';
 import { InteractionUtils } from './interaction-utils.js';
 import { KoboldEmbed } from './kobold-embed-utils.js';
-import { StringUtils } from '@kobold/base-utils';
+import { StringUtils } from '@kobold/util';
 
 export class CommandUtils {
 	public static getSubCommandByName(commands: Command[], input: string): Command | undefined {

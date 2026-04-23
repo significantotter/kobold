@@ -40,6 +40,16 @@ const items = [
 		route: '/commands',
 	},
 	{
+		label: 'My Characters',
+		icon: 'pi pi-fw pi-users',
+		route: '/characters',
+	},
+	{
+		label: 'Library',
+		icon: 'pi pi-fw pi-warehouse',
+		route: '/library',
+	},
+	{
 		label: 'Import',
 		icon: 'pi pi-fw pi-upload',
 		route: '/import',

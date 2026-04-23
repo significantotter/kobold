@@ -8,7 +8,7 @@ import {
 
 import { getEmoji } from '../../../constants/emoji.js';
 import { Kobold, SheetRecord } from '@kobold/db';
-import { KoboldError } from '../../../utils/KoboldError.js';
+import { KoboldError } from '@kobold/util';
 import { ActionRoller } from '../../../utils/action-roller.js';
 import { Creature } from '../../../utils/creature.js';
 import { InteractionUtils } from '../../../utils/index.js';

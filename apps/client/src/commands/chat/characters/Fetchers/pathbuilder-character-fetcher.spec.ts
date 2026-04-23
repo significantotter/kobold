@@ -4,15 +4,14 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { CommandInteraction, CacheType } from 'discord.js';
 import { PathbuilderCharacterFetcher } from './pathbuilder-character-fetcher.js';
-import { PathBuilder } from '../../../../services/pathbuilder/index.js';
+import { PathBuilder, zPathBuilderCharacterSchema } from '@kobold/schema';
 import { Creature } from '../../../../utils/creature.js';
-import { zPathBuilderCharacterSchema } from '../../../../services/pathbuilder/pathbuilder.zod.js';
 import { fake } from 'zod-schema-faker/v4';
 import { type MockPathBuilder } from '../../../../test-utils/mock-types.js';
 import { getMockKobold, resetMockKobold } from '../../../../test-utils/index.js';
 import type { Kobold } from '@kobold/db';
 
-vi.mock('../../../../services/pathbuilder/index.js');
+vi.mock('@kobold/schema');
 vi.mock('../../../../utils/creature.js');
 
 const createMockPathbuilderCharacter = () => fake(zPathBuilderCharacterSchema);

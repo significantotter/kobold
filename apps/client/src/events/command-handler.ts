@@ -17,7 +17,7 @@ import { EventHandler } from './event-handler.js';
 import { Config } from '@kobold/config';
 import { KoboldEmbed } from '../utils/kobold-embed-utils.js';
 import { refs } from '../constants/common-text.js';
-import { KoboldError } from '../utils/KoboldError.js';
+import { KoboldError } from '@kobold/util';
 import { filterNotNullOrUndefined } from '../utils/type-guards.js';
 import { InjectedServices } from '../commands/command.js';
 

@@ -1,5 +1,5 @@
 import { Kobold } from '@kobold/db';
-import { SheetUtils } from '../sheet/sheet-utils.js';
+import { SheetUtils } from '@kobold/sheet';
 
 /**
  * Service that recomputes the `adjusted_sheet` JSONB column on sheet_record.

@@ -14,13 +14,13 @@ import {
 	RollCompactModeEnum,
 	UserSettings,
 } from '@kobold/db';
-import { KoboldError } from './KoboldError.js';
+import { KoboldError } from '@kobold/util';
 import { Creature } from './creature.js';
 import { DefaultUtils } from './default-utils.js';
 import { InteractionUtils } from './interaction-utils.js';
 import { KoboldEmbed } from './kobold-embed-utils.js';
 import { RollBuilder } from './roll-builder.js';
-import { StringUtils } from '@kobold/base-utils';
+import { StringUtils } from '@kobold/util';
 
 export type TurnData = {
 	currentRound: number;

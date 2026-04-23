@@ -18,15 +18,13 @@ import { MinionDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { KoboldError } from '../../../utils/KoboldError.js';
-import { SheetProperties } from '../../../utils/sheet/sheet-properties.js';
-import { SheetUtils } from '../../../utils/sheet/sheet-utils.js';
+import { KoboldError } from '@kobold/util';
+import { SheetProperties, SheetUtils, NethysSheetImporter } from '@kobold/sheet';
 import { Creature } from '../../../utils/creature.js';
 import { NethysDb } from '@kobold/nethys';
 import { NpcUtils } from '../../../utils/kobold-service-utils/npc-utils.js';
-import { NethysSheetImporter } from '../../../utils/sheet/sheet-import-nethys.js';
 import { getEmoji } from '../../../constants/emoji.js';
-import { StringUtils } from '@kobold/base-utils';
+import { StringUtils } from '@kobold/util';
 import { Config } from '@kobold/config';
 
 const commandOptions = MinionDefinition.options;
@@ -164,7 +162,7 @@ export class MinionCreateSubCommand extends BaseCommandClass(
 			});
 			sheet = await nethysSheetImporter.buildSheet();
 			const newActions = await nethysSheetImporter.buildActions(intr.user.id);
-			actions.push(...newActions);
+			actions.push(...(newActions as NewAction[]));
 
 			if (!minionName) {
 				finalName = (template ? `${_.capitalize(template)} ` : '') + bestiaryCreature.name;

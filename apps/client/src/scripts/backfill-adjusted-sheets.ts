@@ -8,7 +8,7 @@
  */
 import { Kobold, getDialect } from '@kobold/db';
 import { Config } from '@kobold/config';
-import { SheetUtils } from '../utils/sheet/sheet-utils.js';
+import { SheetUtils } from '@kobold/sheet';
 import { sqlJSON } from '@kobold/db';
 
 const BATCH_SIZE = 50;

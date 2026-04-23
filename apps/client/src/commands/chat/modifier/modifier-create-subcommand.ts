@@ -14,11 +14,11 @@ import {
 	SheetAdjustmentTypeEnum,
 	isSheetAdjustmentTypeEnum,
 } from '@kobold/db';
-import { KoboldError } from '../../../utils/KoboldError.js';
+import { KoboldError } from '@kobold/util';
 import { InteractionUtils } from '../../../utils/index.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { SheetUtils } from '../../../utils/sheet/sheet-utils.js';
+import { SheetUtils } from '@kobold/sheet';
 import { Command } from '../../index.js';
 import { Creature } from '../../../utils/creature.js';
 import { InputParseUtils } from '../../../utils/input-parse-utils.js';

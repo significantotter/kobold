@@ -3,7 +3,7 @@ import { Attribute, CharacterWithRelations, ImportSourceEnum } from '@kobold/db'
 import { Creature } from './creature.js';
 import { DiceUtils } from './dice-utils.js';
 import { RollBuilder } from './roll-builder.js';
-import { SheetProperties } from './sheet/sheet-properties.js';
+import { SheetProperties } from '@kobold/sheet';
 import { TEST_USER_ID } from '../test-utils/index.js';
 
 const mocks = {

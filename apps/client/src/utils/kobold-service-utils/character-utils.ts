@@ -1,6 +1,6 @@
 import { BaseInteraction, CacheType, CommandInteraction, Interaction } from 'discord.js';
 import { Character, CharacterBasic, CharacterWithRelations, Kobold } from '@kobold/db';
-import { StringUtils } from '@kobold/base-utils';
+import { StringUtils } from '@kobold/util';
 import type { KoboldUtils } from './kobold-utils.js';
 
 export class CharacterUtils {

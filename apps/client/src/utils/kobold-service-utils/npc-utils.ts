@@ -1,8 +1,9 @@
 import _ from 'lodash';
 import { Kobold } from '@kobold/db';
-import { StringUtils } from '@kobold/base-utils';
+import { StringUtils } from '@kobold/util';
 import type { KoboldUtils } from './kobold-utils.js';
-import { BestiaryEntry, CompendiumEntry, NethysDb } from '@kobold/nethys';
+import { NethysDb } from '@kobold/nethys';
+import { BestiaryEntry, CompendiumEntry } from '@kobold/schema';
 
 export class NpcUtils {
 	private kobold: Kobold;

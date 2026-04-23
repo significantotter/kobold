@@ -9,7 +9,7 @@ import {
 	Kobold,
 	UserSettings,
 } from '@kobold/db';
-import { KoboldError } from '../KoboldError.js';
+import { KoboldError } from '@kobold/util';
 import { AdjustedSheetService } from './adjusted-sheet-service.js';
 import { AutocompleteUtils } from './autocomplete-utils.js';
 import { CharacterUtils } from './character-utils.js';

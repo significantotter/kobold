@@ -30,9 +30,6 @@ importers:
 
   apps/client:
     dependencies:
-      '@kobold/base-utils':
-        specifier: workspace:*
-        version: link:../../packages/base-utils
       '@kobold/config':
         specifier: workspace:*
         version: link:../../packages/config
@@ -45,9 +42,15 @@ importers:
       '@kobold/nethys':
         specifier: workspace:*
         version: link:../../packages/nethys
+      '@kobold/schema':
+        specifier: workspace:*
+        version: link:../../packages/schema
       '@kobold/sheet':
         specifier: workspace:*
         version: link:../../packages/sheet
+      '@kobold/util':
+        specifier: workspace:*
+        version: link:../../packages/util
       '@traversable/zod':
         specifier: ^0.0.57
         version: 0.0.57(zod@4.2.1)
@@ -228,7 +231,7 @@ importers:
         version: link:../../packages/schema
       '@kobold/sheet':
         specifier: workspace:*
-        version: link:../../packages/sheet
+        version: file:packages/sheet(@electric-sql/pglite@0.3.7)(@libsql/client@0.14.0)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@11.10.0)(knex@3.1.0(better-sqlite3@11.10.0)(pg@8.16.3))(kysely@0.28.9)(pg@8.16.3)(postgres@3.4.7)
       '@orpc/client':
         specifier: ^1.13.13
         version: 1.13.13(@opentelemetry/api@1.9.0)
@@ -323,31 +326,6 @@ importers:
       vue-tsc:
         specifier: ^3.2.0
         version: 3.2.0(typescript@5.9.3)
-
-  packages/base-utils:
-    dependencies:
-      lodash:
-        specifier: ^4.17.21
-        version: 4.17.21
-    devDependencies:
-      '@types/lodash':
-        specifier: ^4.17.21
-        version: 4.17.21
-      '@types/node':
-        specifier: ^25.0.3
-        version: 25.0.3
-      eslint:
-        specifier: ^9.39.2
-        version: 9.39.2(jiti@2.6.1)
-      ts-node:
-        specifier: ^10.9.2
-        version: 10.9.2(@swc/core@1.15.7(@swc/helpers@0.5.17))(@types/node@25.0.3)(typescript@5.9.3)
-      typescript:
-        specifier: ^5.9.3
-        version: 5.9.3
-      vitest:
-        specifier: ^4.0.16
-        version: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@25.0.3)(jiti@2.6.1)(jsdom@24.1.1)(sass-embedded@1.97.1)(sass@1.97.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/config:
     dependencies:
@@ -495,6 +473,9 @@ importers:
       '@kobold/config':
         specifier: workspace:*
         version: link:../config
+      '@kobold/schema':
+        specifier: workspace:*
+        version: link:../schema
       discord.js:
         specifier: ^14.25.1
         version: 14.25.1
@@ -614,9 +595,52 @@ importers:
 
   packages/sheet:
     dependencies:
+      '@kobold/config':
+        specifier: workspace:*
+        version: link:../config
+      '@kobold/db':
+        specifier: workspace:*
+        version: link:../db
+      '@kobold/nethys':
+        specifier: workspace:*
+        version: link:../nethys
       '@kobold/schema':
         specifier: workspace:*
         version: link:../schema
+      '@kobold/util':
+        specifier: workspace:*
+        version: link:../util
+      dice-typescript:
+        specifier: ^1.0.9
+        version: 1.6.1
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
+      zod:
+        specifier: ^4.2.1
+        version: 4.2.1
+    devDependencies:
+      '@types/lodash':
+        specifier: ^4.17.21
+        version: 4.17.21
+      '@types/node':
+        specifier: ^25.0.3
+        version: 25.0.3
+      eslint:
+        specifier: ^9.39.2
+        version: 9.39.2(jiti@2.6.1)
+      ts-node:
+        specifier: ^10.9.2
+        version: 10.9.2(@swc/core@1.15.7(@swc/helpers@0.5.17))(@types/node@25.0.3)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^4.0.16
+        version: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@25.0.3)(jiti@2.6.1)(jsdom@24.1.1)(sass-embedded@1.97.1)(sass@1.97.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+
+  packages/util:
+    dependencies:
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
@@ -1309,6 +1333,27 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.9':
     resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
+
+  '@kobold/config@file:packages/config':
+    resolution: {directory: packages/config, type: directory}
+
+  '@kobold/db@file:packages/db':
+    resolution: {directory: packages/db, type: directory}
+
+  '@kobold/documentation@file:packages/documentation':
+    resolution: {directory: packages/documentation, type: directory}
+
+  '@kobold/nethys@file:packages/nethys':
+    resolution: {directory: packages/nethys, type: directory}
+
+  '@kobold/schema@file:packages/schema':
+    resolution: {directory: packages/schema, type: directory}
+
+  '@kobold/sheet@file:packages/sheet':
+    resolution: {directory: packages/sheet, type: directory}
+
+  '@kobold/util@file:packages/util':
+    resolution: {directory: packages/util, type: directory}
 
   '@kristiandupont/recase@1.4.1':
     resolution: {integrity: sha512-e5t4YqhnRGbS9sU4N52cQgTn37qKwTsxDDcIuIkgPvX0UmnL+7eoOR6oFXeCib5zYuw03vYKpR55NBq+W43j1A==}
@@ -7179,6 +7224,165 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
+
+  '@kobold/config@file:packages/config':
+    dependencies:
+      dotenv: 17.2.3
+      lodash: 4.17.21
+
+  '@kobold/db@file:packages/db(@electric-sql/pglite@0.3.7)(@libsql/client@0.14.0)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@11.10.0)(knex@3.1.0(better-sqlite3@11.10.0)(pg@8.16.3))(postgres@3.4.7)':
+    dependencies:
+      '@kobold/config': file:packages/config
+      '@kobold/documentation': file:packages/documentation
+      '@kobold/schema': file:packages/schema
+      date-fns: 4.1.0
+      drizzle-orm: 0.33.0(@electric-sql/pglite@0.3.7)(@libsql/client@0.14.0)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@11.10.0)(knex@3.1.0(better-sqlite3@11.10.0)(pg@8.16.3))(kysely@0.28.9)(pg@8.16.3)(postgres@3.4.7)
+      kysely: 0.28.9
+      lodash: 4.17.21
+      pg: 8.16.3
+      zod: 4.2.1
+    transitivePeerDependencies:
+      - '@aws-sdk/client-rds-data'
+      - '@cloudflare/workers-types'
+      - '@electric-sql/pglite'
+      - '@libsql/client'
+      - '@neondatabase/serverless'
+      - '@op-engineering/op-sqlite'
+      - '@opentelemetry/api'
+      - '@planetscale/database'
+      - '@prisma/client'
+      - '@tidbcloud/serverless'
+      - '@types/better-sqlite3'
+      - '@types/pg'
+      - '@types/react'
+      - '@types/sql.js'
+      - '@vercel/postgres'
+      - '@xata.io/client'
+      - better-sqlite3
+      - bun-types
+      - expo-sqlite
+      - knex
+      - mysql2
+      - pg-native
+      - postgres
+      - prisma
+      - react
+      - sql.js
+      - sqlite3
+
+  '@kobold/documentation@file:packages/documentation':
+    dependencies:
+      discord-api-types: 0.38.37
+      lodash: 4.17.21
+
+  '@kobold/nethys@file:packages/nethys(@electric-sql/pglite@0.3.7)(@libsql/client@0.14.0)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@11.10.0)(knex@3.1.0(better-sqlite3@11.10.0)(pg@8.16.3))(kysely@0.28.9)(pg@8.16.3)':
+    dependencies:
+      '@elastic/elasticsearch': 8.19.1
+      '@kobold/config': file:packages/config
+      '@kobold/schema': file:packages/schema
+      discord.js: 14.25.1
+      drizzle-orm: 0.33.0(@electric-sql/pglite@0.3.7)(@libsql/client@0.14.0)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@11.10.0)(knex@3.1.0(better-sqlite3@11.10.0)(pg@8.16.3))(kysely@0.28.9)(pg@8.16.3)(postgres@3.4.7)
+      hast-util-from-text: 3.0.0
+      hast-util-to-html: 9.0.5
+      hast-util-to-string: 3.0.1
+      lodash: 4.17.21
+      postgres: 3.4.7
+      rehype-raw: 7.0.0
+      rehype-remark: 10.0.1
+      rehype-rewrite: 4.0.4
+      rehype-stringify: 10.0.1
+      remark: 15.0.1
+      remark-parse: 11.0.0
+      remark-rehype: 11.1.2
+      remark-stringify: 11.0.0
+      unified: 11.0.5
+      zod: 4.2.1
+    transitivePeerDependencies:
+      - '@75lb/nature'
+      - '@aws-sdk/client-rds-data'
+      - '@cloudflare/workers-types'
+      - '@electric-sql/pglite'
+      - '@libsql/client'
+      - '@neondatabase/serverless'
+      - '@op-engineering/op-sqlite'
+      - '@opentelemetry/api'
+      - '@planetscale/database'
+      - '@prisma/client'
+      - '@tidbcloud/serverless'
+      - '@types/better-sqlite3'
+      - '@types/pg'
+      - '@types/react'
+      - '@types/sql.js'
+      - '@vercel/postgres'
+      - '@xata.io/client'
+      - better-sqlite3
+      - bufferutil
+      - bun-types
+      - expo-sqlite
+      - knex
+      - kysely
+      - mysql2
+      - pg
+      - prisma
+      - react
+      - sql.js
+      - sqlite3
+      - supports-color
+      - utf-8-validate
+
+  '@kobold/schema@file:packages/schema':
+    dependencies:
+      lodash: 4.17.21
+      zod: 4.2.1
+
+  '@kobold/sheet@file:packages/sheet(@electric-sql/pglite@0.3.7)(@libsql/client@0.14.0)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@11.10.0)(knex@3.1.0(better-sqlite3@11.10.0)(pg@8.16.3))(kysely@0.28.9)(pg@8.16.3)(postgres@3.4.7)':
+    dependencies:
+      '@kobold/config': file:packages/config
+      '@kobold/db': file:packages/db(@electric-sql/pglite@0.3.7)(@libsql/client@0.14.0)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@11.10.0)(knex@3.1.0(better-sqlite3@11.10.0)(pg@8.16.3))(postgres@3.4.7)
+      '@kobold/nethys': file:packages/nethys(@electric-sql/pglite@0.3.7)(@libsql/client@0.14.0)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@11.10.0)(knex@3.1.0(better-sqlite3@11.10.0)(pg@8.16.3))(kysely@0.28.9)(pg@8.16.3)
+      '@kobold/schema': file:packages/schema
+      '@kobold/util': file:packages/util
+      dice-typescript: 1.6.1
+      lodash: 4.17.21
+      zod: 4.2.1
+    transitivePeerDependencies:
+      - '@75lb/nature'
+      - '@aws-sdk/client-rds-data'
+      - '@cloudflare/workers-types'
+      - '@electric-sql/pglite'
+      - '@libsql/client'
+      - '@neondatabase/serverless'
+      - '@op-engineering/op-sqlite'
+      - '@opentelemetry/api'
+      - '@planetscale/database'
+      - '@prisma/client'
+      - '@tidbcloud/serverless'
+      - '@types/better-sqlite3'
+      - '@types/pg'
+      - '@types/react'
+      - '@types/sql.js'
+      - '@vercel/postgres'
+      - '@xata.io/client'
+      - better-sqlite3
+      - bufferutil
+      - bun-types
+      - expo-sqlite
+      - knex
+      - kysely
+      - mysql2
+      - pg
+      - pg-native
+      - postgres
+      - prisma
+      - react
+      - sql.js
+      - sqlite3
+      - supports-color
+      - utf-8-validate
+
+  '@kobold/util@file:packages/util':
+    dependencies:
+      lodash: 4.17.21
 
   '@kristiandupont/recase@1.4.1':
     dependencies:

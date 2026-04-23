@@ -18,7 +18,7 @@ import {
 	TextRoll,
 	UserSettings,
 } from '@kobold/db';
-import { KoboldError } from './KoboldError.js';
+import { KoboldError, StringUtils } from '@kobold/util';
 import { Creature } from './creature.js';
 import {
 	DiceRollError,
@@ -30,7 +30,6 @@ import {
 } from './dice-utils.js';
 import { EmbedUtils, KoboldEmbed } from './kobold-embed-utils.js';
 import { RollBuilder } from './roll-builder.js';
-import { StringUtils } from '@kobold/base-utils';
 import { DefaultUtils } from './default-utils.js';
 
 type ContestedRollTypes = 'attack' | 'skill-challenge' | 'save' | 'none';

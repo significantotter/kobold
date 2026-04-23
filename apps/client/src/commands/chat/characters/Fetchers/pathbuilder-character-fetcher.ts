@@ -1,10 +1,10 @@
 import { refs } from '../../../../constants/common-text.js';
 import { CharacterWithRelations, Kobold, ImportSourceEnum } from '@kobold/db';
-import { PathBuilder } from '../../../../services/pathbuilder/index.js';
-import { KoboldError } from '../../../../utils/KoboldError.js';
+import { PathBuilder } from '@kobold/schema';
+import { KoboldError } from '@kobold/util';
 import { Creature } from '../../../../utils/creature.js';
 import { CharacterFetcher, SheetConversionResult } from './character-fetcher.js';
-import type { PathBuilder as PB } from '../../../../services/pathbuilder/pathbuilder.js';
+import type { PathBuilder as PB } from '@kobold/schema';
 import { CommandInteraction, CacheType } from 'discord.js';
 import { CharacterDefinition as CharacterCommand } from '@kobold/documentation';
 

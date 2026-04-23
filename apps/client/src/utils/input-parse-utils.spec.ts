@@ -1,4 +1,4 @@
-import { KoboldError } from './KoboldError.js';
+import { KoboldError } from '@kobold/util';
 import { InputParseUtils } from './input-parse-utils.js';
 
 describe('InputParseUtils', () => {

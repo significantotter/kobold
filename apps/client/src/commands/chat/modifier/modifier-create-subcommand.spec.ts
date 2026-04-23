@@ -19,7 +19,7 @@ import {
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { InputParseUtils } from '../../../utils/input-parse-utils.js';
-import { SheetUtils } from '../../../utils/sheet/sheet-utils.js';
+import { SheetUtils } from '@kobold/sheet';
 
 vi.mock('../../../utils/kobold-service-utils/kobold-utils.js');
 vi.mock('../../../utils/kobold-helpers/finder-helpers.js');

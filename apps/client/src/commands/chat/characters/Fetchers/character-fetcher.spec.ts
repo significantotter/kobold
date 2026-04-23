@@ -5,7 +5,7 @@ import { describe, it, expect, beforeEach, vi, type Mock } from 'vitest';
 import { CommandInteraction, CacheType, ComponentType, MessageFlags } from 'discord.js';
 import { CharacterFetcher } from './character-fetcher.js';
 import { Creature } from '../../../../utils/creature.js';
-import { KoboldError } from '../../../../utils/KoboldError.js';
+import { KoboldError } from '@kobold/util';
 import { getMockKobold, resetMockKobold } from '../../../../test-utils/index.js';
 import { CollectorUtils } from '../../../../utils/collector-utils.js';
 import { type Kobold, ImportSourceEnum } from '@kobold/db';

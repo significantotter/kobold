@@ -7,7 +7,12 @@
 			<div v-if="isUpdateMode && existingCharacter" class="mb-4 p-3 bg-gray-800 rounded-lg">
 				<p class="text-sm text-gray-300 m-0">
 					Updating: <strong>{{ existingCharacter.name }}</strong> (Level
-					{{ existingCharacter.level }})
+					{{ existingCharacter.level }}) via
+					{{
+						existingCharacter.importSource === 'pathbuilder'
+							? 'Pathbuilder'
+							: "Wanderer's Guide"
+					}}
 				</p>
 			</div>
 
@@ -34,59 +39,104 @@
 				</button>
 			</div>
 			<template v-else>
+				<div v-if="!isUpdateMode" class="not-prose mb-6 flex flex-wrap gap-3">
+					<button
+						class="px-4 py-2 rounded-full border font-semibold transition-colors"
+						:class="
+							selectedImportSource === 'wg'
+								? 'bg-indigo-600 border-indigo-500 text-white'
+								: 'bg-gray-800 border-gray-600 text-gray-300 hover:border-gray-500'
+						"
+						@click="setImportSource('wg')"
+					>
+						Wanderer's Guide
+					</button>
+					<button
+						class="px-4 py-2 rounded-full border font-semibold transition-colors"
+						:class="
+							selectedImportSource === 'pathbuilder'
+								? 'bg-emerald-700 border-emerald-600 text-white'
+								: 'bg-gray-800 border-gray-600 text-gray-300 hover:border-gray-500'
+						"
+						@click="setImportSource('pathbuilder')"
+					>
+						Pathbuilder
+					</button>
+				</div>
+
 				<!-- Import UI: instructions + upload side-by-side -->
 				<div class="not-prose flex flex-col md:flex-row gap-8 mb-6">
 					<!-- Left column: instructions -->
 					<div class="flex-1 min-w-0">
-						<p v-if="!isUpdateMode" class="text-gray-300 mb-4">
-							Import a character from
-							<a
-								href="https://wanderersguide.app"
-								target="_blank"
-								rel="noopener"
-								class="text-indigo-400 hover:text-indigo-300 underline"
-								>Wanderer's Guide</a
-							>
-							by uploading your exported JSON file.
-						</p>
-						<p v-else class="text-gray-300 mb-4">
-							Upload a new
-							<a
-								href="https://wanderersguide.app"
-								target="_blank"
-								rel="noopener"
-								class="text-indigo-400 hover:text-indigo-300 underline"
-								>Wanderer's Guide</a
-							>
-							export to update your character's sheet. Tracker values (HP, focus, hero
-							points, custom counters) will be preserved.
-						</p>
-
-						<h3 class="text-lg font-semibold text-gray-200 mb-3">
-							How to export from Wanderer's Guide
-						</h3>
-						<ol class="list-decimal list-inside text-gray-300 space-y-1">
-							<li>
-								Open your character on
+						<template v-if="effectiveImportSource === 'wg'">
+							<p v-if="!isUpdateMode" class="text-gray-300 mb-4">
+								Import a character from
 								<a
 									href="https://wanderersguide.app"
 									target="_blank"
 									rel="noopener"
 									class="text-indigo-400 hover:text-indigo-300 underline"
-									>wanderersguide.app</a
+									>Wanderer's Guide</a
 								>
-							</li>
-							<li>
-								Click the <strong>Export</strong> button (or menu) and choose
-								<strong>Export to JSON</strong>
-							</li>
-							<li>
-								Save the
-								<code class="bg-gray-700 px-1 rounded text-sm">.json</code>
-								file to your computer
-							</li>
-							<li>Upload it using the box on the right</li>
-						</ol>
+								by uploading your exported JSON file.
+							</p>
+							<p v-else class="text-gray-300 mb-4">
+								Upload a new
+								<a
+									href="https://wanderersguide.app"
+									target="_blank"
+									rel="noopener"
+									class="text-indigo-400 hover:text-indigo-300 underline"
+									>Wanderer's Guide</a
+								>
+								export to update your character's sheet. Tracker values (HP, focus,
+								hero points, custom counters) will be preserved.
+							</p>
+
+							<h3 class="text-lg font-semibold text-gray-200 mb-3">
+								How to export from Wanderer's Guide
+							</h3>
+							<ol class="list-decimal list-inside text-gray-300 space-y-1">
+								<li>
+									Open your character on
+									<a
+										href="https://wanderersguide.app"
+										target="_blank"
+										rel="noopener"
+										class="text-indigo-400 hover:text-indigo-300 underline"
+										>wanderersguide.app</a
+									>
+								</li>
+								<li>
+									Click the <strong>Export</strong> button (or menu) and choose
+									<strong>Export to JSON</strong>
+								</li>
+								<li>
+									Save the
+									<code class="bg-gray-700 px-1 rounded text-sm">.json</code>
+									file to your computer
+								</li>
+								<li>Upload it using the box on the right</li>
+							</ol>
+						</template>
+						<template v-else>
+							<p class="text-gray-300 mb-4">
+								{{
+									isUpdateMode
+										? 'Update your existing Pathbuilder character by entering the exported JSON ID again. Tracker values stay intact while the sheet refreshes from Pathbuilder.'
+										: 'Import a Pathbuilder character by entering its JSON ID. This keeps Pathbuilder as the source of truth while landing you in the same management hub.'
+								}}
+							</p>
+							<h3 class="text-lg font-semibold text-gray-200 mb-3">
+								How to import from Pathbuilder
+							</h3>
+							<ol class="list-decimal list-inside text-gray-300 space-y-1">
+								<li>Open your character in Pathbuilder 2E.</li>
+								<li>Use the share or export option to generate a JSON ID.</li>
+								<li>Paste that JSON ID into the form on the right.</li>
+								<li>Optionally enable stamina before importing.</li>
+							</ol>
+						</template>
 					</div>
 
 					<!-- Right column: upload box, confirmation, or success -->
@@ -120,11 +170,25 @@
 									<i class="pi pi-plus" />
 									<span>Import another character?</span>
 								</button>
+								<RouterLink
+									v-if="successCharacterId !== null"
+									:to="`/characters/${successCharacterId}`"
+									class="ml-3 bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded inline-flex items-center gap-2 no-underline"
+								>
+									<i class="pi pi-arrow-right" />
+									<span>Open workspace</span>
+								</RouterLink>
+								<RouterLink
+									to="/characters"
+									class="ml-3 text-gray-300 hover:text-white text-sm underline"
+								>
+									Go to My Characters
+								</RouterLink>
 							</div>
 						</template>
 
-						<!-- Confirmation widget after file parsed -->
-						<template v-else-if="exportData">
+						<!-- WG confirmation widget after file parsed -->
+						<template v-else-if="effectiveImportSource === 'wg' && exportData">
 							<div class="p-4 bg-gray-800 border border-gray-600 rounded-lg">
 								<div class="flex items-center gap-3 mb-3">
 									<img
@@ -158,7 +222,7 @@
 									<button
 										class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-5 rounded inline-flex items-center gap-2"
 										:disabled="importing"
-										@click="submitCharacter"
+										@click="submitWgCharacter"
 									>
 										<i v-if="importing" class="pi pi-spin pi-spinner" />
 										<i v-else class="pi pi-check" />
@@ -183,8 +247,8 @@
 							</div>
 						</template>
 
-						<!-- Drag-and-drop upload -->
-						<template v-else>
+						<!-- WG drag-and-drop upload -->
+						<template v-else-if="effectiveImportSource === 'wg'">
 							<label
 								class="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-lg cursor-pointer transition-colors"
 								:class="
@@ -215,6 +279,72 @@
 							</label>
 						</template>
 
+						<!-- Pathbuilder form -->
+						<template v-else>
+							<div
+								class="p-4 bg-gray-800 border border-gray-600 rounded-lg flex flex-col gap-4"
+							>
+								<div>
+									<label
+										class="block text-sm font-medium text-gray-200 mb-2"
+										for="pathbuilder-json-id"
+									>
+										Pathbuilder JSON ID
+									</label>
+									<input
+										id="pathbuilder-json-id"
+										v-model="pathbuilderJsonId"
+										type="number"
+										min="1"
+										inputmode="numeric"
+										class="w-full rounded-lg border border-gray-600 bg-gray-900 px-3 py-2 text-white"
+										placeholder="123456"
+									/>
+								</div>
+								<label class="inline-flex items-center gap-3 text-sm text-gray-300">
+									<input
+										v-model="pathbuilderUseStamina"
+										type="checkbox"
+										class="rounded border-gray-600 bg-gray-900 text-emerald-500"
+									/>
+									<span>Use stamina variant on import</span>
+								</label>
+								<p class="m-0 text-xs text-gray-500">
+									Pathbuilder imports pull the live JSON export by ID instead of
+									uploading a file.
+								</p>
+								<div class="flex items-center justify-between gap-3">
+									<button
+										class="bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-2 px-5 rounded inline-flex items-center gap-2"
+										:disabled="importing"
+										@click="submitPathbuilderCharacter"
+									>
+										<i v-if="importing" class="pi pi-spin pi-spinner" />
+										<i v-else class="pi pi-download" />
+										<span>
+											{{
+												importing
+													? isUpdateMode
+														? 'Updating...'
+														: 'Importing...'
+													: isUpdateMode
+														? 'Update Character'
+														: 'Import Character'
+											}}
+										</span>
+									</button>
+									<button
+										v-if="!isUpdateMode"
+										class="text-gray-400 hover:text-white text-sm underline"
+										:disabled="importing"
+										@click="clearPathbuilderState"
+									>
+										Clear form
+									</button>
+								</div>
+							</div>
+						</template>
+
 						<div
 							v-if="error"
 							class="p-3 bg-red-900/30 border border-red-700 rounded-lg"
@@ -236,12 +366,21 @@ import { api } from '@/api/api-client';
 import { useAuthStore } from '@/stores/auth';
 import type { WgV4Export } from '@kobold/sheet';
 
+type CharacterImportSource = 'wg' | 'pathbuilder';
+
 const route = useRoute();
 const auth = useAuthStore();
 
-const existingCharacter = ref<{ id: number; name: string; level: number | null } | null>(null);
+const existingCharacter = ref<{
+	id: number;
+	name: string;
+	level: number | null;
+	importSource: CharacterImportSource;
+	charId: number;
+} | null>(null);
 const loadingCharacter = ref(false);
 const characterLoadError = ref('');
+const selectedImportSource = ref<CharacterImportSource>('wg');
 const fileName = ref('');
 const parsedName = ref('');
 const parsedLevel = ref(0);
@@ -251,8 +390,11 @@ const matchedExisting = ref<{ id: number; name: string } | null>(null);
 const error = ref('');
 const success = ref('');
 const successWasUpdate = ref(false);
+const successCharacterId = ref<number | null>(null);
 const importing = ref(false);
 const dragOver = ref(false);
+const pathbuilderJsonId = ref('');
+const pathbuilderUseStamina = ref(false);
 
 const characterId = computed(() => {
 	const id = route.query.characterId;
@@ -260,6 +402,11 @@ const characterId = computed(() => {
 });
 
 const isUpdateMode = computed(() => characterId.value !== null || matchedExisting.value !== null);
+
+const effectiveImportSource = computed<CharacterImportSource>(() => {
+	if (!isUpdateMode.value) return selectedImportSource.value;
+	return existingCharacter.value?.importSource === 'pathbuilder' ? 'pathbuilder' : 'wg';
+});
 
 const effectiveCharacterId = computed(() => {
 	return characterId.value ?? matchedExisting.value?.id ?? null;
@@ -280,6 +427,11 @@ onMounted(async () => {
 					'Character not found. It may have been deleted, or you may not have access to it.';
 			} else {
 				existingCharacter.value = character;
+				selectedImportSource.value =
+					character.importSource === 'pathbuilder' ? 'pathbuilder' : 'wg';
+				if (character.importSource === 'pathbuilder' && character.charId > 0) {
+					pathbuilderJsonId.value = String(character.charId);
+				}
 			}
 		} catch (err: unknown) {
 			characterLoadError.value =
@@ -289,6 +441,17 @@ onMounted(async () => {
 		}
 	}
 });
+
+function setImportSource(source: CharacterImportSource) {
+	selectedImportSource.value = source;
+	error.value = '';
+	success.value = '';
+	if (source === 'wg') {
+		clearPathbuilderState();
+	} else {
+		clearFile();
+	}
+}
 
 async function loginAndReturn() {
 	try {
@@ -311,10 +474,23 @@ function clearFile() {
 	success.value = '';
 }
 
+function clearPathbuilderState() {
+	pathbuilderJsonId.value =
+		isUpdateMode.value && existingCharacter.value?.importSource === 'pathbuilder'
+			? String(existingCharacter.value.charId)
+			: '';
+	pathbuilderUseStamina.value = false;
+	error.value = '';
+	success.value = '';
+}
+
 function resetForNewImport() {
 	clearFile();
+	clearPathbuilderState();
 	success.value = '';
 	successWasUpdate.value = false;
+	successCharacterId.value = null;
+	selectedImportSource.value = 'wg';
 }
 
 function handleDrop(e: DragEvent) {
@@ -331,6 +507,7 @@ function handleFileSelect(e: Event) {
 }
 
 function processFile(file: File) {
+	if (effectiveImportSource.value !== 'wg') return;
 	clearFile();
 	fileName.value = file.name;
 
@@ -380,7 +557,7 @@ function processFile(file: File) {
 	reader.readAsText(file);
 }
 
-async function submitCharacter() {
+async function submitWgCharacter() {
 	if (!exportData.value) return;
 	error.value = '';
 	success.value = '';
@@ -395,16 +572,58 @@ async function submitCharacter() {
 			});
 			success.value = result.name;
 			successWasUpdate.value = true;
+			successCharacterId.value = result.characterId;
 		} else {
 			const result = await api.character.importWgCharacter({
 				exportData: exportData.value,
 			});
 			success.value = result.name;
+			successCharacterId.value = result.characterId;
 		}
 		exportData.value = null;
 		fileName.value = '';
 		parsedName.value = '';
 		parsedLevel.value = 0;
+	} catch (err: unknown) {
+		error.value =
+			err instanceof Error
+				? err.message
+				: `An error occurred while ${isUpdateMode.value ? 'updating' : 'importing'} the character.`;
+	} finally {
+		importing.value = false;
+	}
+}
+
+async function submitPathbuilderCharacter() {
+	const jsonId = Number(pathbuilderJsonId.value);
+	if (!Number.isInteger(jsonId) || jsonId <= 0) {
+		error.value = 'Enter a valid positive Pathbuilder JSON ID.';
+		return;
+	}
+
+	error.value = '';
+	success.value = '';
+	successWasUpdate.value = false;
+	importing.value = true;
+
+	try {
+		if (isUpdateMode.value && effectiveCharacterId.value !== null) {
+			const result = await api.character.updatePathbuilderCharacter({
+				characterId: effectiveCharacterId.value,
+				jsonId,
+				useStamina: pathbuilderUseStamina.value,
+			});
+			success.value = result.name;
+			successWasUpdate.value = true;
+			successCharacterId.value = result.characterId;
+		} else {
+			const result = await api.character.importPathbuilderCharacter({
+				jsonId,
+				useStamina: pathbuilderUseStamina.value,
+			});
+			success.value = result.name;
+			successCharacterId.value = result.characterId;
+		}
 	} catch (err: unknown) {
 		error.value =
 			err instanceof Error

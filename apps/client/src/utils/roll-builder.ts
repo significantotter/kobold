@@ -1,7 +1,7 @@
 import { APIEmbedField } from 'discord.js';
 import _ from 'lodash';
 import { Attribute, CharacterWithRelations, UserSettings } from '@kobold/db';
-import { KoboldError } from './KoboldError.js';
+import { KoboldError } from '@kobold/util';
 import { Creature } from './creature.js';
 import {
 	DiceRollError,

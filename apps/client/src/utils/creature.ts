@@ -50,9 +50,8 @@ import {
 	SheetBaseCounterKeys,
 	SheetStatKeys,
 } from '@kobold/db';
-import { PathBuilder } from '../services/pathbuilder/pathbuilder.js';
-import { WG } from '../services/wanderers-guide/wanderers-guide.js';
-import { KoboldError } from './KoboldError.js';
+import { PathBuilder } from '@kobold/schema';
+import { KoboldError } from '@kobold/util';
 import { AttributeUtils } from './attribute-utils.js';
 import { KoboldEmbed } from './kobold-embed-utils.js';
 import { ModifierUtils } from './kobold-service-utils/modifier-utils.js';
@@ -62,11 +61,10 @@ import {
 	SheetProperties,
 	SheetStatProperties,
 	StatGroupEnum,
-} from './sheet/sheet-properties.js';
-import { SheetUtils } from './sheet/sheet-utils.js';
-import { StringUtils } from '@kobold/base-utils';
-import { convertWanderersGuideCharToSheet } from './sheet/sheet-import-wg.js';
-import { convertPathBuilderToSheet } from './sheet/sheet-import-pathbuilder.js';
+	convertPathBuilderToSheet,
+	SheetUtils,
+} from '@kobold/sheet';
+import { StringUtils } from '@kobold/util';
 import { getEmoji } from '../constants/emoji.js';
 
 const damageTypeShorthands: { [shorthand: string]: string } = {
@@ -1142,22 +1140,6 @@ export class Creature {
 			name,
 			intr
 		);
-	}
-
-	public static fromWandererersGuide(
-		calculatedStats: WG.CharacterCalculatedStatsApiResponse,
-		characterData: WG.CharacterApiResponse,
-		updateFrom?: PartialEntityWithSheetData
-	): Creature {
-		let sheet = convertWanderersGuideCharToSheet(calculatedStats, characterData);
-		sheet = Creature.preserveSheetTrackerValues(sheet, updateFrom?.sheetRecord?.sheet);
-		return new Creature({
-			sheet,
-			actions: updateFrom?.actions ?? [],
-			modifiers: updateFrom?.modifiers ?? [],
-			rollMacros: updateFrom?.rollMacros ?? [],
-			conditions: [],
-		});
 	}
 
 	public static fromPathBuilder(

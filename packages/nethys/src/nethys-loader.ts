@@ -1,7 +1,6 @@
 import { Client, estypes } from '@elastic/elasticsearch';
-import { sql } from 'drizzle-orm';
 import postgres from 'postgres';
-import { CompendiumEntry } from './schemas/index.js';
+import { CompendiumEntry } from '@kobold/schema';
 
 export function valueAsJsonb(input: unknown) {
 	return JSON.stringify(input).replaceAll("'", "''");
