@@ -11,10 +11,39 @@ import { createContext } from './context.js';
 import { oauthCallbackRoute } from './routes/oauth-callback.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { inspect } from 'util';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = new Hono();
+
+function getErrorProperty(error: unknown, property: string): unknown {
+	if (error && typeof error === 'object' && property in error) {
+		return (error as Record<string, unknown>)[property];
+	}
+	return undefined;
+}
+
+function formatOrpcError(error: unknown): string {
+	const cause = getErrorProperty(error, 'cause');
+	const validationIssues =
+		getErrorProperty(cause, 'issues') ?? getErrorProperty(error, 'issues');
+	const validationData = getErrorProperty(cause, 'data') ?? getErrorProperty(error, 'data');
+
+	return inspect(
+		{
+			error,
+			validationIssues,
+			validationData,
+		},
+		{
+			depth: null,
+			colors: process.stderr.isTTY,
+			maxArrayLength: null,
+			maxStringLength: null,
+		}
+	);
+}
 
 // Middleware
 app.use('*', logger());
@@ -38,7 +67,7 @@ app.route('/oauth', oauthCallbackRoute);
 const handler = new RPCHandler(router, {
 	interceptors: [
 		onError(error => {
-			console.error('oRPC error:', error);
+			console.error('oRPC error:', formatOrpcError(error));
 		}),
 	],
 });

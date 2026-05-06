@@ -1,5 +1,5 @@
 import { authRouter } from './procedures/auth.js';
-import { characterRouter } from './procedures/character.js';
+import { characterRouter } from './procedures/character/index.js';
 import { libraryRouter } from './procedures/library.js';
 
 // Main app router - plain object per oRPC best practices

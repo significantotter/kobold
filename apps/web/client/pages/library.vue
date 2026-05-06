@@ -1,18 +1,18 @@
 <template>
 	<div class="library-page overflow-auto px-4 py-8">
 		<main class="mx-auto max-w-6xl">
-			<section v-if="flashMessage" class="banner banner-success">{{ flashMessage }}</section>
-			<section v-if="error" class="banner banner-error">{{ error }}</section>
+			<PeridotImage v-if="!auth.isLoggedIn" class="page-portrait" />
+			<PageBanner :message="flashMessage" tone="success" />
+			<PageBanner :message="error" tone="error" />
 
 			<section v-if="loading" class="panel state-panel">
 				<p><i class="pi pi-spin pi-spinner" /> Loading library...</p>
 			</section>
 
-			<section v-else-if="!auth.isLoggedIn" class="panel state-panel">
-				<h1>Sign in to manage Library</h1>
-				<p>Library is a first-class reusable resource hub, not a synthetic character.</p>
-				<button class="primary-button" @click="loginAndReturn">Login with Discord</button>
-			</section>
+			<LoginRequiredCard
+				v-else-if="!auth.isLoggedIn"
+				message="You must be logged in to manage your library."
+			/>
 
 			<template v-else>
 				<section class="panel hero-panel">
@@ -66,7 +66,7 @@
 				<section class="panel section-panel">
 					<h2>Shared Actions</h2>
 					<p v-if="!workspace || workspace.sharedActions.length === 0" class="empty-copy">
-						No shared actions yet. This section stays inspect-first in the MVP.
+						Yip! You don't have any actions in your library yet.
 					</p>
 					<div v-else class="resource-list">
 						<article
@@ -90,28 +90,11 @@
 
 				<section class="panel section-panel">
 					<h2>Shared Roll Macros</h2>
-					<form class="editor-card" @submit.prevent="createLibraryRollMacro">
-						<label>
-							<span>Name</span>
-							<input v-model="newRollMacro.name" class="text-input" maxlength="100" />
-						</label>
-						<label>
-							<span>Macro</span>
-							<textarea
-								v-model="newRollMacro.macro"
-								class="text-area"
-								rows="3"
-								maxlength="500"
-							/>
-						</label>
-						<button class="primary-button" type="submit">Create roll macro</button>
-					</form>
 					<p
 						v-if="!workspace || workspace.sharedRollMacros.length === 0"
 						class="empty-copy"
 					>
-						No shared roll macros yet. Create one here to make it available across
-						characters and minions.
+						Yip! You don't have any roll macros in your library yet.
 					</p>
 					<div v-else class="resource-list">
 						<article
@@ -122,7 +105,7 @@
 							<div class="resource-head">
 								<div class="badge-row">
 									<strong>{{ rollMacro.payload.name }}</strong>
-									<span class="scope-badge scope-library">Library</span>
+									<ScopeBadge variant="scope-library">Library</ScopeBadge>
 								</div>
 								<div class="card-actions">
 									<button
@@ -184,8 +167,7 @@
 						v-if="!workspace || workspace.unassignedModifiers.length === 0"
 						class="empty-copy"
 					>
-						No unassigned modifiers yet. They will appear here as inventory until
-						assignment flows land.
+						Yip! You don't have any modifiers in your library yet.
 					</p>
 					<div v-else class="resource-list">
 						<article
@@ -213,8 +195,7 @@
 						v-if="!workspace || workspace.unassignedMinions.length === 0"
 						class="empty-copy"
 					>
-						No unassigned minions yet. Create one elsewhere or unassign a minion from a
-						character later.
+						Yip! You don't have any minions in your library yet.
 					</p>
 					<div v-else class="resource-list">
 						<article
@@ -252,7 +233,7 @@
 										<strong>{{ minion.payload.name }}</strong>
 									</template>
 									<div class="badge-row mt-2">
-										<span class="scope-badge scope-library">Library</span>
+										<ScopeBadge variant="scope-library">Library</ScopeBadge>
 										<span
 											v-if="minion.summary.autoJoinInitiative"
 											class="scope-badge scope-library"
@@ -332,15 +313,17 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import { useRoute } from 'vue-router';
 import { api } from '@/api/api-client';
+import LoginRequiredCard from '@/components/LoginRequiredCard.vue';
+import PeridotImage from '@/components/PeridotImage.vue';
+import PageBanner from '@/components/PageBanner.vue';
+import ScopeBadge from '@/components/ScopeBadge.vue';
 import { useAuthStore } from '@/stores/auth';
 
 type LibraryWorkspace = Awaited<ReturnType<typeof api.library.getLibraryWorkspace>>;
 type CharacterListItem = Awaited<ReturnType<typeof api.character.listMyCharacters>>[number];
 
 const auth = useAuthStore();
-const route = useRoute();
 
 const workspace = ref<LibraryWorkspace | null>(null);
 const loading = ref(true);
@@ -364,11 +347,6 @@ onMounted(async () => {
 		loading.value = false;
 	}
 });
-
-async function loginAndReturn() {
-	const { url } = await api.auth.getAuthUrl({ returnTo: route.fullPath });
-	window.location.href = url;
-}
 
 async function loadLibrary() {
 	loading.value = true;
@@ -395,6 +373,7 @@ async function loadLibrary() {
 	}
 }
 
+// Unused for now. Leaving create out of scope
 async function createLibraryRollMacro() {
 	if (!newRollMacro.value.name.trim() || !newRollMacro.value.macro.trim()) {
 		error.value = 'Provide both a roll macro name and macro value.';
@@ -555,6 +534,10 @@ async function deleteMinion(minionId: number) {
 		radial-gradient(circle at 80% 0%, rgba(245, 158, 11, 0.12), transparent 20%),
 		linear-gradient(180deg, rgba(24, 24, 27, 0.99), rgba(9, 9, 11, 1));
 	min-height: 100%;
+}
+
+.page-portrait {
+	margin-bottom: 1rem;
 }
 
 .panel,

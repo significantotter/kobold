@@ -69,6 +69,34 @@ describe('CharacterModel', () => {
 			).rejects.toThrow();
 		});
 
+		it('enforces case-insensitive character name uniqueness per user', async () => {
+			const firstSheetRecord = await ResourceFactories.sheetRecord();
+			const secondSheetRecord = await ResourceFactories.sheetRecord();
+			const otherUserSheetRecord = await ResourceFactories.sheetRecord();
+
+			await ResourceFactories.character({
+				sheetRecordId: firstSheetRecord.id,
+				userId: 'same-user',
+				name: 'Valeros',
+			});
+
+			await expect(
+				ResourceFactories.character({
+					sheetRecordId: secondSheetRecord.id,
+					userId: 'same-user',
+					name: 'valeros',
+				})
+			).rejects.toThrow();
+
+			await expect(
+				ResourceFactories.character({
+					sheetRecordId: otherUserSheetRecord.id,
+					userId: 'other-user',
+					name: 'Valeros',
+				})
+			).resolves.toEqual(expect.objectContaining({ name: 'Valeros' }));
+		});
+
 		it('reads the relations of the character', async () => {
 			const fakeSheetRecord = await ResourceFactories.sheetRecord();
 			const fakeCharacter = await ResourceFactories.character({

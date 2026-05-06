@@ -1,7 +1,8 @@
 <template>
 	<div class="management-page overflow-auto px-4 py-8">
 		<main class="mx-auto max-w-6xl">
-			<section class="hero-panel">
+			<PeridotImage v-if="!auth.isLoggedIn" class="page-portrait" />
+			<section v-if="auth.isLoggedIn" class="hero-panel">
 				<div>
 					<p class="eyebrow">Management Hub</p>
 					<h1>My Characters</h1>
@@ -16,20 +17,17 @@
 				</div>
 			</section>
 
-			<section v-if="flashMessage" class="banner banner-success">{{ flashMessage }}</section>
-			<section v-if="error" class="banner banner-error">{{ error }}</section>
+			<PageBanner :message="flashMessage" tone="success" />
+			<PageBanner :message="error" tone="error" />
 
 			<section v-if="loading" class="state-panel">
 				<p><i class="pi pi-spin pi-spinner" /> Loading characters...</p>
 			</section>
 
-			<section v-else-if="!auth.isLoggedIn" class="state-panel state-auth">
-				<h2>Sign in to manage your characters</h2>
-				<p>
-					Character management stays page-local and uses the same cookie auth as import.
-				</p>
-				<button class="primary-button" @click="loginAndReturn">Login with Discord</button>
-			</section>
+			<LoginRequiredCard
+				v-else-if="!auth.isLoggedIn"
+				message="You must be logged in to manage your characters."
+			/>
 
 			<section v-else-if="characters.length === 0" class="empty-state">
 				<h2>No characters yet</h2>
@@ -50,19 +48,18 @@
 					<div class="card-header">
 						<div>
 							<div class="badge-row">
-								<span
-									class="scope-badge"
-									:class="
+								<ScopeBadge
+									:variant="
 										character.isActiveCharacter
 											? 'scope-active'
 											: 'scope-library'
 									"
 								>
 									{{ character.isActiveCharacter ? 'Active' : 'Owned' }}
-								</span>
-								<span class="scope-badge scope-character">
+								</ScopeBadge>
+								<ScopeBadge variant="scope-character">
 									{{ importSourceLabel(character.importSource) }}
-								</span>
+								</ScopeBadge>
 							</div>
 							<template v-if="editingCharacterId === character.id">
 								<div class="inline-form">
@@ -166,14 +163,17 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRouter } from 'vue-router';
 import { api } from '@/api/api-client';
+import LoginRequiredCard from '@/components/LoginRequiredCard.vue';
+import PeridotImage from '@/components/PeridotImage.vue';
+import PageBanner from '@/components/PageBanner.vue';
+import ScopeBadge from '@/components/ScopeBadge.vue';
 import { useAuthStore } from '@/stores/auth';
 
 type CharacterListItem = Awaited<ReturnType<typeof api.character.listMyCharacters>>[number];
 
 const auth = useAuthStore();
-const route = useRoute();
 const router = useRouter();
 
 const characters = ref<CharacterListItem[]>([]);
@@ -205,11 +205,6 @@ async function loadCharacters() {
 	} finally {
 		loading.value = false;
 	}
-}
-
-async function loginAndReturn() {
-	const { url } = await api.auth.getAuthUrl({ returnTo: route.fullPath });
-	window.location.href = url;
 }
 
 function importSourceLabel(importSource: string) {
@@ -297,6 +292,10 @@ async function deleteCharacter(character: CharacterListItem) {
 		radial-gradient(circle at top right, rgba(34, 197, 94, 0.12), transparent 24%),
 		linear-gradient(180deg, rgba(24, 24, 27, 0.98), rgba(9, 9, 11, 1));
 	min-height: 100%;
+}
+
+.page-portrait {
+	margin-bottom: 1rem;
 }
 
 .hero-panel,

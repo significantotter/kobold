@@ -43,7 +43,7 @@ export class ModifierSetSubCommand extends BaseCommandClass(
 				//no choices if we don't have a character to match against
 				return [];
 			}
-			//find a save on the character matching the autocomplete string
+			//find a modifier on the character matching the autocomplete string
 			const matchedModifiers = FinderHelpers.matchAllModifiers(
 				activeCharacter.modifiers,
 				match

@@ -1,18 +1,17 @@
 <template>
 	<div class="workspace-page overflow-auto px-4 py-8">
 		<main class="mx-auto max-w-6xl">
-			<section v-if="flashMessage" class="banner banner-success">{{ flashMessage }}</section>
-			<section v-if="error" class="banner banner-error">{{ error }}</section>
+			<PageBanner :message="flashMessage" tone="success" />
+			<PageBanner :message="error" tone="error" />
 
 			<section v-if="loading" class="panel state-panel">
 				<p><i class="pi pi-spin pi-spinner" /> Loading workspace...</p>
 			</section>
 
-			<section v-else-if="!auth.isLoggedIn" class="panel state-panel">
-				<h1>Sign in to open this workspace</h1>
-				<p>This route uses the same cookie auth as the existing import flow.</p>
-				<button class="primary-button" @click="loginAndReturn">Login with Discord</button>
-			</section>
+			<LoginRequiredCard
+				v-else-if="!auth.isLoggedIn"
+				message="You must be logged in to open this workspace."
+			/>
 
 			<section v-else-if="!workspace" class="panel state-panel">
 				<h1>Workspace not found</h1>
@@ -27,12 +26,12 @@
 							<RouterLink class="crumb-link" to="/characters"
 								>My Characters</RouterLink
 							>
-							<span class="scope-badge scope-character">
+							<ScopeBadge variant="scope-character">
 								{{ workspace.character.isActiveCharacter ? 'Active' : 'Character' }}
-							</span>
-							<span class="scope-badge scope-library">
+							</ScopeBadge>
+							<ScopeBadge variant="scope-library">
 								{{ importSourceLabel(workspace.character.importSource) }}
-							</span>
+							</ScopeBadge>
 						</div>
 						<div v-if="isRenamingCharacter" class="rename-row">
 							<input
@@ -149,8 +148,9 @@
 						<div class="stat-card stat-card-wide">
 							<p class="stat-label">Conditions</p>
 							<p class="stat-value">
-								{{ workspace.conditions.items.length }} tracked condition{ {
-								workspace.conditions.items.length === 1 ? '' : 's' } }
+								{{ workspace.conditions.items.length }} tracked condition{{
+									workspace.conditions.items.length === 1 ? '' : 's'
+								}}
 							</p>
 							<p class="stat-copy">
 								This summary answers what affects the character right now without
@@ -624,6 +624,9 @@
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { api } from '@/api/api-client';
+import LoginRequiredCard from '@/components/LoginRequiredCard.vue';
+import PageBanner from '@/components/PageBanner.vue';
+import ScopeBadge from '@/components/ScopeBadge.vue';
 import { useAuthStore } from '@/stores/auth';
 
 type CharacterWorkspace = NonNullable<
@@ -696,11 +699,6 @@ function importSourceLabel(importSource: string) {
 	if (importSource === 'pathbuilder') return 'Pathbuilder';
 	if (importSource === 'wg') return "Wanderer's Guide";
 	return importSource;
-}
-
-async function loginAndReturn() {
-	const { url } = await api.auth.getAuthUrl({ returnTo: route.fullPath });
-	window.location.href = url;
 }
 
 function seedWorkspaceState() {

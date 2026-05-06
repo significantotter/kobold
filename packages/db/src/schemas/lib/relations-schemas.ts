@@ -33,10 +33,12 @@ import {
 // TypeScript Types for Relations
 // ============================================================================
 
+export type SheetRecordWithoutAdjustedSheet = Omit<SheetRecord, 'adjustedSheet'>;
+
 export type CharacterWithRelations = Character & {
 	channelDefaultCharacters: ChannelDefaultCharacter[];
 	guildDefaultCharacters: GuildDefaultCharacter[];
-	sheetRecord: SheetRecord;
+	sheetRecord: SheetRecordWithoutAdjustedSheet;
 	game?: Game | null;
 	actions: Action[];
 	modifiers: Modifier[];
@@ -46,7 +48,7 @@ export type CharacterWithRelations = Character & {
 export type InitiativeActorWithRelations = InitiativeActor & {
 	initiative?: Initiative | null;
 	actorGroup: InitiativeActorGroup;
-	sheetRecord: SheetRecord;
+	sheetRecord: SheetRecordWithoutAdjustedSheet;
 	game?: Game | null;
 	minion?: Minion | null;
 	actions: Action[];
@@ -55,7 +57,7 @@ export type InitiativeActorWithRelations = InitiativeActor & {
 };
 
 export type MinionWithRelations = Minion & {
-	sheetRecord: SheetRecord;
+	sheetRecord: SheetRecordWithoutAdjustedSheet;
 	actions: Action[];
 	modifiers: Modifier[];
 	rollMacros: RollMacro[];
@@ -120,10 +122,14 @@ export type GameWithRelations = Game & {
 // Zod Schemas for Relations (for test data generation with zod-schema-faker)
 // ============================================================================
 
+export const zSheetRecordWithoutAdjustedSheet = zSheetRecord.omit({
+	adjustedSheet: true,
+});
+
 export const zCharacterWithRelations = zCharacter.extend({
 	channelDefaultCharacters: z.array(zChannelDefaultCharacter),
 	guildDefaultCharacters: z.array(zGuildDefaultCharacter),
-	sheetRecord: zSheetRecord,
+	sheetRecord: zSheetRecordWithoutAdjustedSheet,
 	game: zGame.nullable().optional(),
 	actions: z.array(zAction),
 	modifiers: z.array(zModifier),
@@ -134,7 +140,7 @@ export const zInitiativeActorWithRelations: z.ZodType<InitiativeActorWithRelatio
 	zInitiativeActor.extend({
 		initiative: zInitiative.nullable().optional(),
 		actorGroup: zInitiativeActorGroup,
-		sheetRecord: zSheetRecord,
+		sheetRecord: zSheetRecordWithoutAdjustedSheet,
 		game: zGame.nullable().optional(),
 		minion: zMinion.nullable().optional(),
 		actions: z.array(zAction),
@@ -144,7 +150,7 @@ export const zInitiativeActorWithRelations: z.ZodType<InitiativeActorWithRelatio
 );
 
 export const zMinionWithRelations = zMinion.extend({
-	sheetRecord: zSheetRecord,
+	sheetRecord: zSheetRecordWithoutAdjustedSheet,
 	actions: z.array(zAction),
 	modifiers: z.array(zModifier),
 	rollMacros: z.array(zRollMacro),

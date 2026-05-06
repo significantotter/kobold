@@ -37,21 +37,23 @@ export class ModifierAssignSubCommand extends BaseCommandClass(
 			const match =
 				intr.options.getString(commandOptions[commandOptionsEnum.targetModifier].name) ??
 				'';
+			const [modifiers, activeOrDefaultCharacter] = await Promise.all([
+				kobold.modifier.readManyByUser({
+					userId: intr.user.id,
+				}),
+				kobold.character.readActiveLite({
+					userId: intr.user.id,
+					channelId: intr.channelId,
+					guildId: intr.guildId ?? undefined,
+				}),
+			]);
 
-			// Get all user's modifiers for autocomplete
-			const modifiers = await kobold.modifier.readManyByUser({
-				userId: intr.user.id,
-				filter: 'all',
-			});
-
-			const matchedModifiers = FinderHelpers.matchAllModifiers(modifiers, match).map(
-				modifier => ({
-					name: modifier.name,
-					value: modifier.name,
-				})
+			return koboldUtils.autocompleteUtils.getAssignableModifiersForActiveOrDefaultCharacter(
+				intr,
+				modifiers,
+				activeOrDefaultCharacter,
+				match
 			);
-
-			return matchedModifiers;
 		}
 
 		if (option.name === commandOptions[commandOptionsEnum.assignTo].name) {

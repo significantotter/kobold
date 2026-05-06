@@ -30,7 +30,7 @@ export const minionCommandDocumentation: CommandDocumentation<typeof minionComma
 					message: 'Yip! I assigned the minion Fluffy to Ashara Keenclaw.',
 					options: {
 						minion: 'Fluffy',
-						character: 'Ashara Keenclaw',
+						'assign-to': 'Ashara Keenclaw',
 					},
 				},
 				{
@@ -40,6 +40,7 @@ export const minionCommandDocumentation: CommandDocumentation<typeof minionComma
 						'Yip! I unassigned the minion Fluffy. It can now be assigned to any character.',
 					options: {
 						minion: 'Fluffy',
+						'assign-to': 'Me',
 					},
 				},
 				{
@@ -48,7 +49,7 @@ export const minionCommandDocumentation: CommandDocumentation<typeof minionComma
 					message: 'Yip! I copied the minion Fluffy to Lilac Sootsnout.',
 					options: {
 						minion: 'Fluffy',
-						character: 'game:Lilac Sootsnout',
+						'assign-to': 'Lilac Sootsnout',
 						copy: true,
 					},
 				},

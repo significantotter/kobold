@@ -36,19 +36,23 @@ export class ActionAssignSubCommand extends BaseCommandClass(
 		if (option.name === commandOptions[commandOptionsEnum.targetAction].name) {
 			const match =
 				intr.options.getString(commandOptions[commandOptionsEnum.targetAction].name) ?? '';
+			const [actions, activeOrDefaultCharacter] = await Promise.all([
+				kobold.action.readManyByUser({
+					userId: intr.user.id,
+				}),
+				kobold.character.readActiveLite({
+					userId: intr.user.id,
+					channelId: intr.channelId,
+					guildId: intr.guildId ?? undefined,
+				}),
+			]);
 
-			// Get all user's actions for autocomplete
-			const actions = await kobold.action.readManyByUser({
-				userId: intr.user.id,
-				filter: 'all',
-			});
-
-			const matchedActions = FinderHelpers.matchAllActions(actions, match).map(action => ({
-				name: action.name,
-				value: action.name,
-			}));
-
-			return matchedActions;
+			return koboldUtils.autocompleteUtils.getAssignableActionsForActiveOrDefaultCharacter(
+				intr,
+				actions,
+				activeOrDefaultCharacter,
+				match
+			);
 		}
 
 		if (option.name === commandOptions[commandOptionsEnum.assignTo].name) {

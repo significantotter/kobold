@@ -1,10 +1,19 @@
 <template>
-	<div class="overflow-auto px-4 pt-10">
-		<main class="prose dark:prose-invert max-w-5xl mx-auto">
-			<PeridotImage />
-			<h1>{{ isUpdateMode ? 'Update Character' : 'Import Character' }}</h1>
+	<div class="import-page overflow-auto px-4 py-8">
+		<main class="mx-auto max-w-6xl">
+			<PeridotImage class="page-portrait" />
+			<section class="hero-panel">
+				<div>
+					<p class="eyebrow">Character Tools</p>
+					<h1>{{ isUpdateMode ? 'Update Character' : 'Import Character' }}</h1>
+					<p class="lede">
+						Bring a Pathfinder 2E character into Kobold from Wanderer's Guide or
+						Pathbuilder, then manage it from your workspace.
+					</p>
+				</div>
+			</section>
 
-			<div v-if="isUpdateMode && existingCharacter" class="mb-4 p-3 bg-gray-800 rounded-lg">
+			<div v-if="isUpdateMode && existingCharacter" class="panel update-panel">
 				<p class="text-sm text-gray-300 m-0">
 					Updating: <strong>{{ existingCharacter.name }}</strong> (Level
 					{{ existingCharacter.level }}) via
@@ -16,29 +25,21 @@
 				</p>
 			</div>
 
-			<div v-if="loadingCharacter" class="mb-6">
+			<section v-if="loadingCharacter" class="panel state-panel">
 				<p class="text-gray-400">
 					<i class="pi pi-spin pi-spinner" /> Loading character...
 				</p>
-			</div>
-			<div v-else-if="characterLoadError" class="mb-6">
+			</section>
+			<section v-else-if="characterLoadError" class="panel state-panel">
 				<div class="p-3 bg-red-900/30 border border-red-700 rounded-lg">
 					<p class="text-red-400 text-sm m-0">{{ characterLoadError }}</p>
 				</div>
-			</div>
-			<div v-else-if="!auth.isLoggedIn" class="mb-6">
-				<p class="text-yellow-500">
-					You must be logged in to {{ isUpdateMode ? 'update' : 'import' }} a character.
-				</p>
-				<button
-					class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded inline-flex items-center gap-2"
-					@click="loginAndReturn"
-				>
-					<i class="pi pi-discord" />
-					<span>Sign in with Discord</span>
-				</button>
-			</div>
-			<template v-else>
+			</section>
+			<LoginRequiredCard
+				v-else-if="!auth.isLoggedIn"
+				:message="`You must be logged in to ${isUpdateMode ? 'update' : 'import'} a character.`"
+			/>
+			<section v-else class="panel section-panel">
 				<div v-if="!isUpdateMode" class="not-prose mb-6 flex flex-wrap gap-3">
 					<button
 						class="px-4 py-2 rounded-full border font-semibold transition-colors"
@@ -353,7 +354,7 @@
 						</div>
 					</div>
 				</div>
-			</template>
+			</section>
 		</main>
 	</div>
 </template>
@@ -361,6 +362,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
+import LoginRequiredCard from '@/components/LoginRequiredCard.vue';
 import PeridotImage from '@/components/PeridotImage.vue';
 import { api } from '@/api/api-client';
 import { useAuthStore } from '@/stores/auth';
@@ -450,16 +452,6 @@ function setImportSource(source: CharacterImportSource) {
 		clearPathbuilderState();
 	} else {
 		clearFile();
-	}
-}
-
-async function loginAndReturn() {
-	try {
-		const returnTo = route.fullPath;
-		const { url } = await api.auth.getAuthUrl({ returnTo });
-		window.location.href = url;
-	} catch (err) {
-		console.error('Failed to get auth URL:', err);
 	}
 }
 
@@ -634,3 +626,78 @@ async function submitPathbuilderCharacter() {
 	}
 }
 </script>
+
+<style scoped>
+.import-page {
+	background:
+		radial-gradient(circle at top left, rgba(96, 165, 250, 0.18), transparent 28%),
+		radial-gradient(circle at top right, rgba(34, 197, 94, 0.12), transparent 24%),
+		linear-gradient(180deg, rgba(24, 24, 27, 0.98), rgba(9, 9, 11, 1));
+	min-height: 100%;
+}
+
+.panel,
+.hero-panel {
+	border: 1px solid rgba(63, 63, 70, 0.9);
+	background: rgba(24, 24, 27, 0.82);
+	backdrop-filter: blur(10px);
+	border-radius: 1rem;
+	box-shadow: 0 22px 45px rgba(0, 0, 0, 0.22);
+}
+
+.page-portrait {
+	margin-bottom: 1rem;
+}
+
+.page-portrait :deep(img) {
+	width: 200px;
+	height: 200px;
+	object-fit: contain;
+}
+
+.hero-panel {
+	display: flex;
+	justify-content: space-between;
+	gap: 1.5rem;
+	padding: 1.5rem;
+	margin-bottom: 1rem;
+	align-items: center;
+	flex-wrap: wrap;
+}
+
+.section-panel,
+.state-panel,
+.update-panel {
+	padding: 1.4rem;
+	margin-bottom: 1rem;
+}
+
+.eyebrow {
+	text-transform: uppercase;
+	letter-spacing: 0.16em;
+	font-size: 0.72rem;
+	color: #93c5fd;
+	margin: 0 0 0.5rem;
+}
+
+h1,
+h2,
+h3,
+strong {
+	color: #fafafa;
+}
+
+h1 {
+	margin: 0;
+}
+
+.lede {
+	color: #d4d4d8;
+	max-width: 48rem;
+	line-height: 1.65;
+}
+
+.state-panel p {
+	margin: 0;
+}
+</style>

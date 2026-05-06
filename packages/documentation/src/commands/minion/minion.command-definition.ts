@@ -96,12 +96,8 @@ export const minionCommandDefinition = {
 					minionCommandOptions[MinionCommandOptionEnum.minion],
 					1
 				),
-				[MinionCommandOptionEnum.targetCharacter]: withOrder(
-					{
-						...minionCommandOptions[MinionCommandOptionEnum.targetCharacter],
-						required: false,
-						description: 'The target character. Leave empty to unassign the minion.',
-					},
+				[MinionCommandOptionEnum.assignTo]: withOrder(
+					minionCommandOptions[MinionCommandOptionEnum.assignTo],
 					2
 				),
 				[MinionCommandOptionEnum.copy]: withOrder(
