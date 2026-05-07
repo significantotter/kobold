@@ -667,6 +667,7 @@ export const zRollMacroRelationships = z.tuple([
 ]);
 
 export const zSheetRecord = z.object({
+	adjustedSheet: jsonSchema,
 	conditions: jsonSchema,
 	id: z.number(),
 	sheet: jsonSchema,
@@ -677,6 +678,7 @@ export const zSheetRecord = z.object({
 });
 
 export const zNewSheetRecord = z.object({
+	adjustedSheet: jsonSchema.optional(),
 	conditions: jsonSchema.optional(),
 	id: z.number().optional(),
 	sheet: jsonSchema,
@@ -687,6 +689,7 @@ export const zNewSheetRecord = z.object({
 });
 
 export const zSheetRecordUpdate = z.object({
+	adjustedSheet: jsonSchema.optional(),
 	conditions: jsonSchema.optional(),
 	id: z.number().optional(),
 	sheet: jsonSchema.optional(),

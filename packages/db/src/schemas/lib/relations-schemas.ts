@@ -33,22 +33,31 @@ import {
 // TypeScript Types for Relations
 // ============================================================================
 
-export type SheetRecordWithoutAdjustedSheet = Omit<SheetRecord, 'adjustedSheet'>;
+export type SheetRecordBase = Omit<SheetRecord, 'adjustedSheet'>;
+export type SheetRecordAdjustedAsSheet = SheetRecordBase;
+export type SheetRecordLite = Omit<SheetRecordBase, 'sheet'>;
+
+/** @deprecated Use SheetRecordBase for base-sheet write/read paths. */
+export type SheetRecordWithoutAdjustedSheet = SheetRecordBase;
 
 export type CharacterWithRelations = Character & {
 	channelDefaultCharacters: ChannelDefaultCharacter[];
 	guildDefaultCharacters: GuildDefaultCharacter[];
-	sheetRecord: SheetRecordWithoutAdjustedSheet;
+	sheetRecord: SheetRecordBase;
 	game?: Game | null;
 	actions: Action[];
 	modifiers: Modifier[];
 	rollMacros: RollMacro[];
 };
 
+export type CharacterWithAdjustedSheet = Omit<CharacterWithRelations, 'sheetRecord'> & {
+	sheetRecord: SheetRecordAdjustedAsSheet;
+};
+
 export type InitiativeActorWithRelations = InitiativeActor & {
 	initiative?: Initiative | null;
 	actorGroup: InitiativeActorGroup;
-	sheetRecord: SheetRecordWithoutAdjustedSheet;
+	sheetRecord: SheetRecordBase;
 	game?: Game | null;
 	minion?: Minion | null;
 	actions: Action[];
@@ -56,11 +65,19 @@ export type InitiativeActorWithRelations = InitiativeActor & {
 	rollMacros: RollMacro[];
 };
 
+export type InitiativeActorWithAdjustedSheet = Omit<InitiativeActorWithRelations, 'sheetRecord'> & {
+	sheetRecord: SheetRecordAdjustedAsSheet;
+};
+
 export type MinionWithRelations = Minion & {
-	sheetRecord: SheetRecordWithoutAdjustedSheet;
+	sheetRecord: SheetRecordBase;
 	actions: Action[];
 	modifiers: Modifier[];
 	rollMacros: RollMacro[];
+};
+
+export type MinionWithAdjustedSheet = Omit<MinionWithRelations, 'sheetRecord'> & {
+	sheetRecord: SheetRecordAdjustedAsSheet;
 };
 
 /**
@@ -74,10 +91,25 @@ export type InitiativeActorGroupWithRelations = InitiativeActorGroup & {
 	actors: InitiativeActorWithRelations[];
 };
 
+export type InitiativeActorGroupWithAdjustedSheet = Omit<
+	InitiativeActorGroupWithRelations,
+	'actors'
+> & {
+	actors: InitiativeActorWithAdjustedSheet[];
+};
+
 export type InitiativeWithRelations = Initiative & {
 	currentTurnGroup: InitiativeActorGroup | null;
 	actorGroups: InitiativeActorGroupWithRelations[];
 	actors: InitiativeActorWithRelations[];
+};
+
+export type InitiativeWithAdjustedSheets = Omit<
+	InitiativeWithRelations,
+	'actorGroups' | 'actors'
+> & {
+	actorGroups: InitiativeActorGroupWithAdjustedSheet[];
+	actors: InitiativeActorWithAdjustedSheet[];
 };
 
 export type GameCharacterLite = Pick<
@@ -122,25 +154,34 @@ export type GameWithRelations = Game & {
 // Zod Schemas for Relations (for test data generation with zod-schema-faker)
 // ============================================================================
 
-export const zSheetRecordWithoutAdjustedSheet = zSheetRecord.omit({
+export const zSheetRecordBase = zSheetRecord.omit({
 	adjustedSheet: true,
 });
+export const zSheetRecordAdjustedAsSheet = zSheetRecordBase;
+export const zSheetRecordLite = zSheetRecordBase.omit({ sheet: true });
+
+/** @deprecated Use zSheetRecordBase for base-sheet write/read paths. */
+export const zSheetRecordWithoutAdjustedSheet = zSheetRecordBase;
 
 export const zCharacterWithRelations = zCharacter.extend({
 	channelDefaultCharacters: z.array(zChannelDefaultCharacter),
 	guildDefaultCharacters: z.array(zGuildDefaultCharacter),
-	sheetRecord: zSheetRecordWithoutAdjustedSheet,
+	sheetRecord: zSheetRecordBase,
 	game: zGame.nullable().optional(),
 	actions: z.array(zAction),
 	modifiers: z.array(zModifier),
 	rollMacros: z.array(zRollMacro),
 });
 
+export const zCharacterWithAdjustedSheet = zCharacterWithRelations.extend({
+	sheetRecord: zSheetRecordAdjustedAsSheet,
+});
+
 export const zInitiativeActorWithRelations: z.ZodType<InitiativeActorWithRelations> = z.lazy(() =>
 	zInitiativeActor.extend({
 		initiative: zInitiative.nullable().optional(),
 		actorGroup: zInitiativeActorGroup,
-		sheetRecord: zSheetRecordWithoutAdjustedSheet,
+		sheetRecord: zSheetRecordBase,
 		game: zGame.nullable().optional(),
 		minion: zMinion.nullable().optional(),
 		actions: z.array(zAction),
@@ -149,11 +190,29 @@ export const zInitiativeActorWithRelations: z.ZodType<InitiativeActorWithRelatio
 	})
 );
 
+export const zInitiativeActorWithAdjustedSheet: z.ZodType<InitiativeActorWithAdjustedSheet> =
+	z.lazy(() =>
+		zInitiativeActor.extend({
+			initiative: zInitiative.nullable().optional(),
+			actorGroup: zInitiativeActorGroup,
+			sheetRecord: zSheetRecordAdjustedAsSheet,
+			game: zGame.nullable().optional(),
+			minion: zMinion.nullable().optional(),
+			actions: z.array(zAction),
+			modifiers: z.array(zModifier),
+			rollMacros: z.array(zRollMacro),
+		})
+	);
+
 export const zMinionWithRelations = zMinion.extend({
-	sheetRecord: zSheetRecordWithoutAdjustedSheet,
+	sheetRecord: zSheetRecordBase,
 	actions: z.array(zAction),
 	modifiers: z.array(zModifier),
 	rollMacros: z.array(zRollMacro),
+});
+
+export const zMinionWithAdjustedSheet = zMinionWithRelations.extend({
+	sheetRecord: zSheetRecordAdjustedAsSheet,
 });
 
 export const zInitiativeActorGroupWithRelations: z.ZodType<InitiativeActorGroupWithRelations> =
@@ -164,11 +223,27 @@ export const zInitiativeActorGroupWithRelations: z.ZodType<InitiativeActorGroupW
 		})
 	);
 
+export const zInitiativeActorGroupWithAdjustedSheet: z.ZodType<InitiativeActorGroupWithAdjustedSheet> =
+	z.lazy(() =>
+		zInitiativeActorGroup.extend({
+			initiative: zInitiative.nullable().optional(),
+			actors: z.array(zInitiativeActorWithAdjustedSheet),
+		})
+	);
+
 export const zInitiativeWithRelations: z.ZodType<InitiativeWithRelations> = z.lazy(() =>
 	zInitiative.extend({
 		currentTurnGroup: zInitiativeActorGroup.nullable(),
 		actorGroups: z.array(zInitiativeActorGroupWithRelations),
 		actors: z.array(zInitiativeActorWithRelations),
+	})
+);
+
+export const zInitiativeWithAdjustedSheets: z.ZodType<InitiativeWithAdjustedSheets> = z.lazy(() =>
+	zInitiative.extend({
+		currentTurnGroup: zInitiativeActorGroup.nullable(),
+		actorGroups: z.array(zInitiativeActorGroupWithAdjustedSheet),
+		actors: z.array(zInitiativeActorWithAdjustedSheet),
 	})
 );
 

@@ -6,7 +6,7 @@ import {
 	ChatInputCommandInteraction,
 } from 'discord.js';
 
-import { Kobold, SheetRecord } from '@kobold/db';
+import { Kobold, SheetRecordBase } from '@kobold/db';
 import { ActionRoller } from '../../../utils/action-roller.js';
 import { Creature, EntityWithSheetData } from '../../../utils/creature.js';
 import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
@@ -108,7 +108,7 @@ export class RollAttackSubCommand extends BaseCommandClass(
 
 		const creature = Creature.fromSheetRecord(activeCharacter, undefined, intr);
 
-		let targetSheetRecord: SheetRecord | null = null;
+		let targetSheetRecord: SheetRecordBase | null = null;
 		let targetEntity: EntityWithSheetData | null = null;
 		let targetCreature: Creature | null = null;
 		let hideStats = false;

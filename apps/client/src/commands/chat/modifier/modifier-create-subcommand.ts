@@ -9,7 +9,6 @@ import {
 import {
 	Kobold,
 	Modifier,
-	NewModifier,
 	SheetAdjustment,
 	SheetAdjustmentTypeEnum,
 	isSheetAdjustmentTypeEnum,
@@ -18,9 +17,7 @@ import { KoboldError } from '@kobold/util';
 import { InteractionUtils } from '../../../utils/index.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { SheetUtils } from '@kobold/sheet';
 import { Command } from '../../index.js';
-import { Creature } from '../../../utils/creature.js';
 import { InputParseUtils } from '../../../utils/input-parse-utils.js';
 import { ModifierDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
@@ -67,29 +64,12 @@ export class ModifierCreateSubCommand extends BaseCommandClass(
 		);
 		const sheetRecordId = parseCreateForValue(createForValue, characters, minions);
 
-		// Determine target name and validation character based on create-for value
+		// Determine target name based on create-for value.
 		let targetName: string = 'User';
-		let validationCharacter:
-			| Awaited<
-					ReturnType<typeof koboldUtils.fetchNonNullableDataForCommand>
-			  >['activeCharacter']
-			| null = null;
 
 		if (sheetRecordId === null) {
-			// User-wide modifier
 			targetName = 'User';
-			// We need a character for validation - use active character if available
-			try {
-				const data = await koboldUtils.fetchNonNullableDataForCommand(intr, {
-					activeCharacter: true,
-				});
-				validationCharacter = data.activeCharacter;
-			} catch {
-				// No active character - that's okay for user-wide
-			}
 		} else {
-			// Specific character or minion
-			// Look up the name
 			const char = characters.find(c => c.sheetRecordId === sheetRecordId);
 			const minion = minions.find(m => m.sheetRecordId === sheetRecordId);
 			if (char) {
@@ -167,34 +147,18 @@ export class ModifierCreateSubCommand extends BaseCommandClass(
 			if (!InputParseUtils.isValidRollTargetTags(rollTargetTags)) {
 				throw new KoboldError(ModifierDefinition.strings.createModifier.invalidTags);
 			}
-			// Only validate dice expression if we have a validation character
-			if (validationCharacter) {
-				if (
-					!InputParseUtils.isValidDiceExpression(
-						rollAdjustment,
-						Creature.fromSheetRecord(validationCharacter, undefined, intr)
-					)
-				) {
-					throw new KoboldError(
-						ModifierDefinition.strings.createModifier.doesntEvaluateError
-					);
-				}
+			if (!InputParseUtils.isValidDiceExpression(rollAdjustment)) {
+				throw new KoboldError(
+					ModifierDefinition.strings.createModifier.doesntEvaluateError
+				);
 			}
 		}
 
 		let parsedSheetAdjustments: SheetAdjustment[] = [];
-		if (modifierSheetValues && validationCharacter) {
+		if (modifierSheetValues) {
 			parsedSheetAdjustments = InputParseUtils.parseAsSheetAdjustments(
 				modifierSheetValues,
-				modifierType,
-				validationCharacter.sheetRecord.sheet
-			);
-		} else if (modifierSheetValues && !validationCharacter) {
-			// Parse without sheet validation for user-wide modifiers
-			parsedSheetAdjustments = InputParseUtils.parseAsSheetAdjustments(
-				modifierSheetValues,
-				modifierType,
-				null as any // Skip sheet validation
+				modifierType
 			);
 		}
 
@@ -214,8 +178,11 @@ export class ModifierCreateSubCommand extends BaseCommandClass(
 				);
 				return;
 			}
-		} else if (validationCharacter) {
-			if (FinderHelpers.getModifierByName(validationCharacter.modifiers, name)) {
+		} else {
+			const existingModifiers = await kobold.modifier.readManyBySheetRecordId({
+				sheetRecordId,
+			});
+			if (FinderHelpers.getModifierByName(existingModifiers, name)) {
 				await InteractionUtils.send(
 					intr,
 					ModifierDefinition.strings.createModifier.alreadyExists({
@@ -248,20 +215,10 @@ export class ModifierCreateSubCommand extends BaseCommandClass(
 			userId: intr.user.id,
 		};
 
-		// make sure that the adjustments are valid and can be applied to a sheet
-		if (validationCharacter) {
-			SheetUtils.adjustSheetWithModifiers(validationCharacter.sheetRecord.sheet, [
-				newModifier,
-			]);
-		}
-
 		await kobold.modifier.create(newModifier);
 
-		// Trigger adjusted_sheet recomputation
 		if (sheetRecordId !== null) {
 			koboldUtils.adjustedSheetService.triggerRecompute(sheetRecordId);
-		} else {
-			koboldUtils.adjustedSheetService.triggerRecomputeAllForUser(intr.user.id);
 		}
 
 		//send a response

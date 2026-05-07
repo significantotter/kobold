@@ -31,16 +31,19 @@ export class RollPerceptionSubCommand extends BaseCommandClass(
 			RollDefinition.optionChoices.rollSecret.public;
 
 		const koboldUtils: KoboldUtils = new KoboldUtils(kobold);
-		const { activeCharacter, userSettings } = await koboldUtils.fetchDataForCommand(intr, {
-			activeCharacter: true,
-			userSettings: true,
-		});
-		koboldUtils.assertActiveCharacterNotNull(activeCharacter);
+		const { activeCharacterAdjusted, userSettings } = await koboldUtils.fetchDataForCommand(
+			intr,
+			{
+				activeCharacterAdjusted: true,
+				userSettings: true,
+			}
+		);
+		koboldUtils.assertActiveCharacterNotNull(activeCharacterAdjusted);
 
-		const creature = Creature.fromSheetRecord(activeCharacter, undefined, intr);
+		const creature = Creature.fromAdjustedSheetRecord(activeCharacterAdjusted, undefined, intr);
 
 		const rollBuilder = new RollBuilder({
-			character: activeCharacter,
+			character: activeCharacterAdjusted,
 			rollNote,
 			rollDescription: RollDefinition.strings.perception.rolledPerception,
 			userSettings,
@@ -60,7 +63,7 @@ export class RollPerceptionSubCommand extends BaseCommandClass(
 			intr,
 			[response],
 			secretRoll,
-			activeCharacter?.game?.gmUserId
+			activeCharacterAdjusted?.game?.gmUserId
 		);
 	}
 }

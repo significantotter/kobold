@@ -81,7 +81,7 @@ describe('CharacterSheetSubCommand Integration', () => {
 			await harness.executeCommand({
 				commandName: 'character',
 				subcommand: 'sheet',
-				options: { 'game-sheet-style': sharedStrings.options.sheetStyles.countersOnly },
+				options: { 'sheet-style': sharedStrings.options.sheetStyles.countersOnly },
 				userId: TEST_USER_ID,
 				guildId: TEST_GUILD_ID,
 			});
@@ -130,7 +130,7 @@ describe('CharacterSheetSubCommand Integration', () => {
 				await harness.executeCommand({
 					commandName: 'character',
 					subcommand: 'sheet',
-					options: { 'game-sheet-style': style },
+					options: { 'sheet-style': style },
 					userId: TEST_USER_ID,
 					guildId: TEST_GUILD_ID,
 				});

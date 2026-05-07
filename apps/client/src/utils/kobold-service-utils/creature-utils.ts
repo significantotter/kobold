@@ -1,5 +1,5 @@
 import type { ChatInputCommandInteraction } from 'discord.js';
-import type { Kobold, SheetRecord } from '@kobold/db';
+import type { Kobold, SheetRecordBase } from '@kobold/db';
 import { Creature } from '../creature.js';
 import type { KoboldUtils } from './kobold-utils.js';
 
@@ -18,7 +18,7 @@ export class CreatureUtils {
 		this.kobold = koboldUtils.kobold;
 	}
 
-	public async updateSheetTracker(intr: ChatInputCommandInteraction, target: SheetRecord) {
+	public async updateSheetTracker(intr: ChatInputCommandInteraction, target: SheetRecordBase) {
 		// For tracker display, we don't need actions/modifiers/rollMacros since
 		// the tracker mode is typically 'counters_only' which only shows basic stats
 		const creature = new Creature({
@@ -55,11 +55,12 @@ export class CreatureUtils {
 		}
 	}
 
-	public async saveSheet(intr: ChatInputCommandInteraction, target: SheetRecord) {
+	public async saveSheet(intr: ChatInputCommandInteraction, target: SheetRecordBase) {
 		const sheet = target.sheet;
-		await this.kobold.sheetRecord.update({ id: target.id }, { sheet });
-		// Trigger adjusted_sheet recomputation
-		this.koboldUtils.adjustedSheetService.triggerRecompute(target.id);
+		await this.kobold.sheetRecord.updateSheetAndMirrorAdjustedCurrentValues(
+			{ id: target.id },
+			{ sheet }
+		);
 		if (target.trackerMessageId) {
 			await this.updateSheetTracker(intr, target);
 		}

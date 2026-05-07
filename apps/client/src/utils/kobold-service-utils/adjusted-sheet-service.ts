@@ -1,5 +1,7 @@
 import { Kobold } from '@kobold/db';
 import { SheetUtils } from '@kobold/sheet';
+import { CommandTimingContext } from '../../services/command-timing-context.js';
+import { Logger } from '../../services/logger.js';
 
 /**
  * Service that recomputes the `adjusted_sheet` JSONB column on sheet_record.
@@ -34,37 +36,22 @@ export class AdjustedSheetService {
 	}
 
 	/**
-	 * Recomputes adjusted sheets for ALL characters owned by a given user.
-	 * Use this when a user-wide modifier (sheetRecordId = null) is changed,
-	 * since it affects all the user's characters.
-	 */
-	async recomputeAllForUser({ userId }: { userId: string }): Promise<void> {
-		const characters = await this.kobold.character.readManyLite({ userId });
-		await Promise.all(
-			characters.map(c => this.recomputeAdjustedSheet({ sheetRecordId: c.sheetRecordId }))
-		);
-	}
-
-	/**
 	 * Fire-and-forget convenience — call after any write that changes
 	 * a sheet_record's sheet, conditions, or related modifiers.
 	 * Errors are logged but don't propagate.
 	 */
 	triggerRecompute(sheetRecordId: number): void {
-		void this.recomputeAdjustedSheet({ sheetRecordId }).catch(e => {
-			console.error('[AdjustedSheetService] Failed to recompute adjusted sheet:', e);
-		});
-	}
-
-	/**
-	 * Fire-and-forget convenience for user-wide modifier changes —
-	 * recomputes ALL characters for the user.
-	 */
-	triggerRecomputeAllForUser(userId: string): void {
-		void this.recomputeAllForUser({ userId }).catch(e => {
-			console.error(
-				'[AdjustedSheetService] Failed to recompute adjusted sheets for user:',
-				e
+		const start = Date.now();
+		void CommandTimingContext.runOutside(async () => {
+			await this.recomputeAdjustedSheet({ sheetRecordId });
+			Logger.info(
+				`adjusted_sheet recompute completed in ${Date.now() - start}ms`,
+				{ sheetRecordId }
+			);
+		}).catch(e => {
+			Logger.error(
+				`adjusted_sheet recompute failed after ${Date.now() - start}ms`,
+				{ sheetRecordId, error: e }
 			);
 		});
 	}

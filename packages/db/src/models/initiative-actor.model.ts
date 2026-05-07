@@ -3,6 +3,7 @@ import { jsonObjectFrom } from 'kysely/helpers/postgres';
 import {
 	channelDefaultCharacterForCharacter,
 	guildDefaultCharacterForCharacter,
+	adjustedSheetRelationsForActor,
 	sheetRelationsForActor,
 } from '../lib/shared-relation-builders.js';
 import {
@@ -13,6 +14,7 @@ import {
 	InitiativeActorGroup,
 	InitiativeActorId,
 	InitiativeActorUpdate,
+	InitiativeActorWithAdjustedSheet,
 	InitiativeActorWithRelations,
 	NewInitiativeActor,
 } from '../schemas/index.js';
@@ -102,6 +104,26 @@ export class InitiativeActorModel extends Model<Database['initiativeActor']> {
 		return result[0] ?? null;
 	}
 
+	public async readAdjusted({
+		id,
+	}: {
+		id: InitiativeActorId;
+	}): Promise<InitiativeActorWithAdjustedSheet | null> {
+		const result = await this.db
+			.selectFrom('initiativeActor')
+			.selectAll()
+			.select(eb => [
+				actorGroupForActor(eb),
+				initiativeForActor(eb),
+				characterForActor(eb),
+				gameForActor(eb),
+				...adjustedSheetRelationsForActor(eb),
+			])
+			.where('initiativeActor.id', '=', id)
+			.execute();
+		return result[0] ?? null;
+	}
+
 	public async update(
 		{ id, characterId }: { id?: InitiativeActorId; characterId?: number },
 		args: InitiativeActorUpdate
@@ -153,6 +175,26 @@ export class InitiativeActorModel extends Model<Database['initiativeActor']> {
 		return result;
 	}
 
+	public async readManyByMinionIdAdjusted({
+		minionId,
+	}: {
+		minionId: number;
+	}): Promise<InitiativeActorWithAdjustedSheet[]> {
+		const result = await this.db
+			.selectFrom('initiativeActor')
+			.selectAll()
+			.select(eb => [
+				actorGroupForActor(eb),
+				initiativeForActor(eb),
+				characterForActor(eb),
+				gameForActor(eb),
+				...adjustedSheetRelationsForActor(eb),
+			])
+			.where('initiativeActor.minionId', '=', minionId)
+			.execute();
+		return result;
+	}
+
 	public async readManyByGroupId({
 		groupId,
 	}: {
@@ -167,6 +209,26 @@ export class InitiativeActorModel extends Model<Database['initiativeActor']> {
 				characterForActor(eb),
 				gameForActor(eb),
 				...sheetRelationsForActor(eb),
+			])
+			.where('initiativeActor.initiativeActorGroupId', '=', groupId)
+			.execute();
+		return result;
+	}
+
+	public async readManyByGroupIdAdjusted({
+		groupId,
+	}: {
+		groupId: number;
+	}): Promise<InitiativeActorWithAdjustedSheet[]> {
+		const result = await this.db
+			.selectFrom('initiativeActor')
+			.selectAll()
+			.select(eb => [
+				actorGroupForActor(eb),
+				initiativeForActor(eb),
+				characterForActor(eb),
+				gameForActor(eb),
+				...adjustedSheetRelationsForActor(eb),
 			])
 			.where('initiativeActor.initiativeActorGroupId', '=', groupId)
 			.execute();

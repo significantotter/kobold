@@ -15,7 +15,8 @@ import type {
 	RollMacro,
 	SaveRoll,
 	Sheet,
-	SheetRecord,
+	SheetRecordAdjustedAsSheet,
+	SheetRecordBase,
 	TextRoll,
 } from '@kobold/db';
 
@@ -24,10 +25,17 @@ import type {
  * Used by the Creature class to accept different entity types.
  */
 export type EntityWithSheetData = {
-	sheetRecord: SheetRecord;
+	sheetRecord: SheetRecordBase;
 	actions: Action[];
 	modifiers: Modifier[];
 	rollMacros: RollMacro[];
+};
+
+export type EntityWithAdjustedSheetData = {
+	sheetRecord: SheetRecordAdjustedAsSheet;
+	actions?: Action[];
+	modifiers?: Modifier[];
+	rollMacros?: RollMacro[];
 };
 
 /**
@@ -36,7 +44,7 @@ export type EntityWithSheetData = {
  */
 export type PartialEntityWithSheetData =
 	| {
-			sheetRecord?: SheetRecord | null;
+			sheetRecord?: SheetRecordBase | null;
 			actions?: Action[];
 			modifiers?: Modifier[];
 			rollMacros?: RollMacro[];
@@ -1119,12 +1127,12 @@ export class Creature {
 	}
 
 	/**
-	 * Creates a Creature from an entity whose sheetRecord.sheet is already the
-	 * adjusted (COALESCE'd) value. Skips re-computation of adjustments.
-	 * Use for display-only paths with lite/cached data.
+	 * Creates a Creature from an entity whose sheetRecord.sheet is already
+	 * adjusted_sheet. Skips re-computation of adjustments.
+	 * Use for display-only/read-only paths with cached data.
 	 */
-	public static fromCachedSheetRecord(
-		entity: EntityWithSheetData,
+	public static fromAdjustedSheetRecord(
+		entity: EntityWithAdjustedSheetData,
 		name?: string,
 		intr?: Interaction
 	): Creature {

@@ -154,11 +154,8 @@ export class ModifierAssignSubCommand extends BaseCommandClass(
 				userId: targetUserId,
 			});
 
-			// Trigger adjusted_sheet recomputation
 			if (assignToResult.sheetRecordId !== null) {
 				koboldUtils.adjustedSheetService.triggerRecompute(assignToResult.sheetRecordId);
-			} else {
-				koboldUtils.adjustedSheetService.triggerRecomputeAllForUser(targetUserId);
 			}
 
 			await InteractionUtils.send(
@@ -183,10 +180,6 @@ export class ModifierAssignSubCommand extends BaseCommandClass(
 			// Trigger adjusted_sheet recomputation for new location
 			if (assignToResult.sheetRecordId !== null) {
 				koboldUtils.adjustedSheetService.triggerRecompute(assignToResult.sheetRecordId);
-			} else {
-				koboldUtils.adjustedSheetService.triggerRecomputeAllForUser(
-					assignToResult.targetUserId ?? intr.user.id
-				);
 			}
 
 			await InteractionUtils.send(

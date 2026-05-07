@@ -27,7 +27,7 @@ import {
 	type TextRoll,
 	type Modifier,
 	type RollMacro,
-	type SheetRecord,
+	type SheetRecordBase,
 	SheetAdjustmentTypeEnum,
 	UserSettings,
 	type InitiativeWithRelations,
@@ -264,7 +264,6 @@ export function setupKoboldUtilsMocks(options: MockCharacterOptions = {}): Kobol
 		};
 		this.adjustedSheetService = {
 			triggerRecompute: vi.fn(),
-			triggerRecomputeAllForUser: vi.fn(),
 		};
 		return this;
 	} as MockReturnValue);
@@ -673,7 +672,7 @@ export function createMockCondition(overrides: Partial<Modifier> = {}): Modifier
  */
 export interface GameUtilsMockOptions {
 	/** The mock sheet record to return */
-	targetSheetRecord?: SheetRecord;
+	targetSheetRecord?: SheetRecordBase;
 	/** The target name to return */
 	targetName?: string;
 	/** Whether to hide stats */
@@ -689,7 +688,7 @@ export interface GameUtilsMockSetup {
 	/** Mock for getCharacterOrInitActorTarget */
 	getCharacterOrInitActorTargetMock: MockInstance;
 	/** The mock sheet record */
-	mockSheetRecord: SheetRecord | null;
+	mockSheetRecord: SheetRecordBase | null;
 }
 
 /**
@@ -711,7 +710,7 @@ export interface GameUtilsMockSetup {
  */
 export function setupGameUtilsMocks(options: GameUtilsMockOptions = {}): GameUtilsMockSetup {
 	const {
-		targetSheetRecord = { ...fake(zSheetRecord), adjustedSheet: null },
+		targetSheetRecord = fake(zSheetRecord),
 		targetName = 'Test Character',
 		hideStats = false,
 		targetNotFound = false,
@@ -804,9 +803,8 @@ export function setupConditionMocks(options: ConditionMockOptions = {}): Conditi
 
 	// Create or update the sheet record with conditions
 	const baseSheetRecord = gameUtilsOptions.targetSheetRecord ?? fake(zSheetRecord);
-	const sheetRecordWithConditions: SheetRecord = {
+	const sheetRecordWithConditions: SheetRecordBase = {
 		...baseSheetRecord,
-		adjustedSheet: null,
 		conditions,
 	};
 
@@ -836,9 +834,8 @@ export function setupConditionAutocompleteMocks(
 	const { conditions = [], noActiveCharacter = false, ...gameUtilsOptions } = options;
 
 	const baseSheetRecord = gameUtilsOptions.targetSheetRecord ?? fake(zSheetRecord);
-	const sheetRecordWithConditions: SheetRecord = {
+	const sheetRecordWithConditions: SheetRecordBase = {
 		...baseSheetRecord,
-		adjustedSheet: null,
 		conditions,
 	};
 
@@ -917,7 +914,7 @@ export function createMockInitiative(
  * Creates a mock sheet record for an actor.
  * Note: actions, modifiers, and rollMacros are now separate entities and not part of SheetRecord.
  */
-export function createMockSheetRecord(overrides: Partial<SheetRecord> = {}): SheetRecord {
+export function createMockSheetRecord(overrides: Partial<SheetRecordBase> = {}): SheetRecordBase {
 	const id = nextSheetRecordId++;
 	return {
 		id,
@@ -933,7 +930,6 @@ export function createMockSheetRecord(overrides: Partial<SheetRecord> = {}): She
 		trackerMessageId: null,
 		trackerChannelId: null,
 		trackerGuildId: null,
-		adjustedSheet: null,
 		...overrides,
 	};
 }

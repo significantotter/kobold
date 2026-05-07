@@ -35,18 +35,18 @@ export class RollSkillSubCommand extends BaseCommandClass(
 				intr.options.getString(commandOptions[commandOptionsEnum.skillChoice].name) ?? '';
 
 			const koboldUtils: KoboldUtils = new KoboldUtils(kobold);
-			const { activeCharacter } = await koboldUtils.fetchDataForCommand(intr, {
-				activeCharacter: true,
+			const { activeCharacterAdjusted } = await koboldUtils.fetchDataForCommand(intr, {
+				activeCharacterAdjusted: true,
 			});
 
 			//get the active character
-			if (!activeCharacter) {
+			if (!activeCharacterAdjusted) {
 				//no choices if we don't have a character to match against
 				return [];
 			}
 			//find a skill on the character matching the autocomplete string
 			const matchedSkills = FinderHelpers.matchAllSkills(
-				Creature.fromSheetRecord(activeCharacter, undefined, intr),
+				Creature.fromAdjustedSheetRecord(activeCharacterAdjusted, undefined, intr),
 				match
 			).map(skill => ({ name: skill.name, value: skill.name }));
 			//return the matched skills
@@ -73,13 +73,16 @@ export class RollSkillSubCommand extends BaseCommandClass(
 			RollDefinition.optionChoices.rollSecret.public;
 
 		const koboldUtils: KoboldUtils = new KoboldUtils(kobold);
-		const { activeCharacter, userSettings } = await koboldUtils.fetchDataForCommand(intr, {
-			activeCharacter: true,
-			userSettings: true,
-		});
-		koboldUtils.assertActiveCharacterNotNull(activeCharacter);
+		const { activeCharacterAdjusted, userSettings } = await koboldUtils.fetchDataForCommand(
+			intr,
+			{
+				activeCharacterAdjusted: true,
+				userSettings: true,
+			}
+		);
+		koboldUtils.assertActiveCharacterNotNull(activeCharacterAdjusted);
 
-		const creature = Creature.fromSheetRecord(activeCharacter, undefined, intr);
+		const creature = Creature.fromAdjustedSheetRecord(activeCharacterAdjusted, undefined, intr);
 
 		const targetRoll = StringUtils.findBestValueByKeyMatch(skillChoice, creature.skillRolls);
 
@@ -94,6 +97,11 @@ export class RollSkillSubCommand extends BaseCommandClass(
 
 		const embed = rollResult.compileEmbed();
 
-		await EmbedUtils.dispatchEmbeds(intr, [embed], secretRoll, activeCharacter.game?.gmUserId);
+		await EmbedUtils.dispatchEmbeds(
+			intr,
+			[embed],
+			secretRoll,
+			activeCharacterAdjusted.game?.gmUserId
+		);
 	}
 }

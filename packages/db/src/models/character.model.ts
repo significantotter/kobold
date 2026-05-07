@@ -11,6 +11,7 @@ import {
 	CharacterId,
 	CharacterListItem,
 	CharacterUpdate,
+	CharacterWithAdjustedSheet,
 	CharacterWithRelations,
 	Database,
 	Game,
@@ -18,7 +19,8 @@ import {
 	Modifier,
 	NewCharacter,
 	RollMacro,
-	SheetRecord,
+	SheetRecordAdjustedAsSheet,
+	SheetRecordBase,
 } from '../schemas/index.js';
 import { Model } from './model.js';
 import { ImportSourceEnum } from '../schemas/lib/database-enums.js';
@@ -64,7 +66,25 @@ export class CharacterModel extends Model<Database['character']> {
 		// then load full relations only for that one character.
 		const lite = await this.readActiveLite({ userId, guildId, channelId });
 		if (!lite) return null;
-		return this._readManyParallel({ id: lite.id }).then(r => r[0] ?? null);
+		return this._readManyParallel({ id: lite.id }).then(
+			r => (r[0] as CharacterWithRelations | undefined) ?? null
+		);
+	}
+
+	public async readActiveAdjusted({
+		userId,
+		guildId,
+		channelId,
+	}: {
+		userId: string;
+		guildId?: string;
+		channelId?: string;
+	}): Promise<CharacterWithAdjustedSheet | null> {
+		const lite = await this.readActiveLite({ userId, guildId, channelId });
+		if (!lite) return null;
+		return this._readManyParallel({ id: lite.id, sheetMode: 'adjusted' }).then(
+			r => (r[0] as CharacterWithAdjustedSheet | undefined) ?? null
+		);
 	}
 
 	/**
@@ -320,7 +340,29 @@ export class CharacterModel extends Model<Database['character']> {
 		channelId?: string;
 		name?: string;
 	}): Promise<CharacterWithRelations[]> {
-		return this._readManyParallel({ userId, guildId, channelId, name });
+		return this._readManyParallel({ userId, guildId, channelId, name }) as Promise<
+			CharacterWithRelations[]
+		>;
+	}
+
+	public readManyAdjusted({
+		userId,
+		guildId,
+		channelId,
+		name,
+	}: {
+		userId?: string;
+		guildId?: string;
+		channelId?: string;
+		name?: string;
+	}): Promise<CharacterWithAdjustedSheet[]> {
+		return this._readManyParallel({
+			userId,
+			guildId,
+			channelId,
+			name,
+			sheetMode: 'adjusted',
+		}) as Promise<CharacterWithAdjustedSheet[]>;
 	}
 
 	/**
@@ -336,6 +378,7 @@ export class CharacterModel extends Model<Database['character']> {
 		name,
 		charId,
 		importSource,
+		sheetMode = 'base',
 	}: {
 		id?: CharacterId;
 		userId?: string;
@@ -344,7 +387,8 @@ export class CharacterModel extends Model<Database['character']> {
 		name?: string;
 		charId?: number;
 		importSource?: ImportSourceEnum;
-	}): Promise<CharacterWithRelations[]> {
+		sheetMode?: 'base' | 'adjusted';
+	}): Promise<(CharacterWithRelations | CharacterWithAdjustedSheet)[]> {
 		// 1. Fetch base character rows (lightweight, no relations)
 		let baseQuery = this.db.selectFrom('character').selectAll('character');
 		if (id !== undefined) baseQuery = baseQuery.where('character.id', '=', id);
@@ -362,6 +406,35 @@ export class CharacterModel extends Model<Database['character']> {
 		const userIds = [...new Set(characters.map(c => c.userId))];
 		const gameIds = [...new Set(characters.filter(c => c.gameId != null).map(c => c.gameId!))];
 
+		const sheetRecordsPromise =
+			sheetMode === 'adjusted'
+				? (this.db
+						.selectFrom('sheetRecord')
+						.select([
+							'sheetRecord.id',
+							'sheetRecord.conditions',
+							'sheetRecord.trackerMode',
+							'sheetRecord.trackerChannelId',
+							'sheetRecord.trackerGuildId',
+							'sheetRecord.trackerMessageId',
+						])
+						.select('sheetRecord.adjustedSheet as sheet')
+						.where('sheetRecord.id', 'in', sheetRecordIds)
+						.execute() as Promise<SheetRecordAdjustedAsSheet[]>)
+				: (this.db
+						.selectFrom('sheetRecord')
+						.select([
+							'sheetRecord.id',
+							'sheetRecord.sheet',
+							'sheetRecord.conditions',
+							'sheetRecord.trackerMode',
+							'sheetRecord.trackerChannelId',
+							'sheetRecord.trackerGuildId',
+							'sheetRecord.trackerMessageId',
+						])
+						.where('sheetRecord.id', 'in', sheetRecordIds)
+						.execute() as Promise<SheetRecordBase[]>);
+
 		// 2. Fire all relation queries in parallel
 		const [
 			sheetRecords,
@@ -372,20 +445,7 @@ export class CharacterModel extends Model<Database['character']> {
 			guildDefaults,
 			games,
 		] = await Promise.all([
-			// SheetRecord (excluding adjustedSheet for write-path consistency)
-			this.db
-				.selectFrom('sheetRecord')
-				.select([
-					'sheetRecord.id',
-					'sheetRecord.sheet',
-					'sheetRecord.conditions',
-					'sheetRecord.trackerMode',
-					'sheetRecord.trackerChannelId',
-					'sheetRecord.trackerGuildId',
-					'sheetRecord.trackerMessageId',
-				])
-				.where('sheetRecord.id', 'in', sheetRecordIds)
-				.execute() as Promise<SheetRecord[]>,
+			sheetRecordsPromise,
 
 			// Actions: character-specific OR user-wide (sheetRecordId IS NULL)
 			this.db
@@ -546,7 +606,32 @@ export class CharacterModel extends Model<Database['character']> {
 			charId: params.charId,
 			importSource: params.importSource,
 		});
-		return result[0] ?? null;
+		return (result[0] as CharacterWithRelations | undefined) ?? null;
+	}
+
+	public async readAdjusted(
+		params: {
+			name?: string;
+			charId?: number;
+			importSource?: ImportSourceEnum;
+		} & (
+			| {
+					id: CharacterId;
+			  }
+			| {
+					userId: string;
+			  }
+		)
+	): Promise<CharacterWithAdjustedSheet | null> {
+		const result = await this._readManyParallel({
+			id: 'id' in params ? params.id : undefined,
+			userId: 'userId' in params ? params.userId : undefined,
+			name: params.name,
+			charId: params.charId,
+			importSource: params.importSource,
+			sheetMode: 'adjusted',
+		});
+		return (result[0] as CharacterWithAdjustedSheet | undefined) ?? null;
 	}
 
 	public async setIsActive(

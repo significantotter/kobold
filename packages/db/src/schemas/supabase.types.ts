@@ -660,7 +660,7 @@ export type Database = {
 			};
 			sheet_record: {
 				Row: {
-					adjusted_sheet: Json | null;
+					adjusted_sheet: Json;
 					conditions: Json;
 					id: number;
 					sheet: Json;
@@ -670,7 +670,7 @@ export type Database = {
 					tracker_mode: string | null;
 				};
 				Insert: {
-					adjusted_sheet?: Json | null;
+					adjusted_sheet?: Json;
 					conditions?: Json;
 					id?: number;
 					sheet: Json;
@@ -680,7 +680,7 @@ export type Database = {
 					tracker_mode?: string | null;
 				};
 				Update: {
-					adjusted_sheet?: Json | null;
+					adjusted_sheet?: Json;
 					conditions?: Json;
 					id?: number;
 					sheet?: Json;

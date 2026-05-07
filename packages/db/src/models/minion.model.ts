@@ -1,11 +1,15 @@
 import { Kysely } from 'kysely';
-import { sheetRelationsForMinion } from '../lib/shared-relation-builders.js';
+import {
+	adjustedSheetRelationsForMinion,
+	sheetRelationsForMinion,
+} from '../lib/shared-relation-builders.js';
 import {
 	CharacterId,
 	Database,
 	MinionBasic,
 	MinionId,
 	MinionUpdate,
+	MinionWithAdjustedSheet,
 	MinionWithRelations,
 	NewMinion,
 } from '../schemas/index.js';
@@ -36,6 +40,16 @@ export class MinionModel extends Model<Database['minion']> {
 		return result[0] ?? null;
 	}
 
+	public async readAdjusted({ id }: { id: MinionId }): Promise<MinionWithAdjustedSheet | null> {
+		const result = await this.db
+			.selectFrom('minion')
+			.selectAll()
+			.select(eb => [...adjustedSheetRelationsForMinion(eb)])
+			.where('minion.id', '=', id)
+			.execute();
+		return result[0] ?? null;
+	}
+
 	public async readMany({
 		characterId,
 	}: {
@@ -45,6 +59,20 @@ export class MinionModel extends Model<Database['minion']> {
 			.selectFrom('minion')
 			.selectAll()
 			.select(eb => [...sheetRelationsForMinion(eb)])
+			.where('minion.characterId', '=', characterId)
+			.execute();
+		return result;
+	}
+
+	public async readManyAdjusted({
+		characterId,
+	}: {
+		characterId: CharacterId;
+	}): Promise<MinionWithAdjustedSheet[]> {
+		const result = await this.db
+			.selectFrom('minion')
+			.selectAll()
+			.select(eb => [...adjustedSheetRelationsForMinion(eb)])
 			.where('minion.characterId', '=', characterId)
 			.execute();
 		return result;

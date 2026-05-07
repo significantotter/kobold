@@ -2,9 +2,10 @@ import { ExpressionBuilder, Kysely } from 'kysely';
 import { jsonArrayFrom, jsonObjectFrom } from 'kysely/helpers/postgres';
 import {
 	actionsForActor,
+	adjustedSheetRelationsForActor,
 	modifiersForActor,
 	rollMacrosForActor,
-	sheetRecordCachedForActor,
+	sheetRecordAdjustedForActor,
 	sheetRecordForActor,
 } from '../lib/shared-relation-builders.js';
 import {
@@ -15,18 +16,19 @@ import {
 	InitiativeActorGroup,
 	InitiativeId,
 	InitiativeUpdate,
+	InitiativeWithAdjustedSheets,
 	InitiativeWithRelations,
 	Modifier,
 	NewInitiative,
 	RollMacro,
-	SheetRecord,
+	SheetRecordBase,
 } from '../schemas/index.js';
 import { Model } from './model.js';
 
 type InitiativeGraphQueryOutput = Initiative & {
 	currentTurnGroup: InitiativeActorGroup | null;
 	actors: (InitiativeActor & {
-		sheetRecord: SheetRecord;
+		sheetRecord: SheetRecordBase;
 		actions: Action[];
 		modifiers: Modifier[];
 		rollMacros: RollMacro[];
@@ -49,9 +51,19 @@ export function actorsForInitiative(eb: ExpressionBuilder<Database, 'initiative'
 	).as('actors');
 }
 
+export function actorsAdjustedForInitiative(eb: ExpressionBuilder<Database, 'initiative'>) {
+	return jsonArrayFrom(
+		eb
+			.selectFrom('initiativeActor')
+			.selectAll('initiativeActor')
+			.select(eb => [...adjustedSheetRelationsForActor(eb)])
+			.whereRef('initiative.id', '=', 'initiativeActor.initiativeId')
+	).as('actors');
+}
+
 /**
- * Lite variant of actorsForInitiative — fetches actors with COALESCE'd
- * adjusted sheet (no raw sheet or adjusted_sheet), plus modifiers for note
+ * Lite variant of actorsForInitiative — fetches actors with adjusted_sheet as
+ * sheet (no raw sheet or adjusted_sheet), plus modifiers for note
  * display. Suitable for display/turn management paths.
  */
 export function actorsLiteForInitiative(eb: ExpressionBuilder<Database, 'initiative'>) {
@@ -59,7 +71,7 @@ export function actorsLiteForInitiative(eb: ExpressionBuilder<Database, 'initiat
 		eb
 			.selectFrom('initiativeActor')
 			.selectAll('initiativeActor')
-			.select(eb => [sheetRecordCachedForActor(eb), modifiersForActor(eb)])
+			.select(eb => [sheetRecordAdjustedForActor(eb), modifiersForActor(eb)])
 			.whereRef('initiative.id', '=', 'initiativeActor.initiativeId')
 	).as('actors');
 }
@@ -177,6 +189,26 @@ export class InitiativeModel extends Model<Database['initiative']> {
 			.where('initiative.channelId', '=', channelId)
 			.execute();
 		return buildRelationFromQuery(result as unknown as InitiativeGraphQueryOutput[]);
+	}
+
+	public async readManyAdjusted({
+		channelId,
+	}: {
+		channelId: string;
+	}): Promise<InitiativeWithAdjustedSheets[]> {
+		const result = await this.db
+			.selectFrom('initiative')
+			.selectAll()
+			.select(eb => [
+				currentTurnGroupForInitiative(eb),
+				actorsAdjustedForInitiative(eb),
+				actorGroupsForInitiative(eb),
+			])
+			.where('initiative.channelId', '=', channelId)
+			.execute();
+		return buildRelationFromQuery(
+			result as unknown as InitiativeGraphQueryOutput[]
+		) as unknown as InitiativeWithAdjustedSheets[];
 	}
 
 	public async read({ id }: { id: InitiativeId }): Promise<InitiativeWithRelations | null> {

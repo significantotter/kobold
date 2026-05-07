@@ -175,11 +175,8 @@ export class ModifierSetSubCommand extends BaseCommandClass(
 			}
 		);
 
-		// Trigger adjusted_sheet recomputation
 		if (targetModifier.sheetRecordId !== null) {
 			koboldUtils.adjustedSheetService.triggerRecompute(targetModifier.sheetRecordId);
-		} else {
-			koboldUtils.adjustedSheetService.triggerRecomputeAllForUser(intr.user.id);
 		}
 
 		const updateEmbed = new KoboldEmbed();

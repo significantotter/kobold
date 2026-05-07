@@ -7,7 +7,7 @@ import {
 } from 'discord.js';
 import _ from 'lodash';
 import { getEmoji } from '../../../constants/emoji.js';
-import { Kobold, MinionWithRelations, SheetRecord } from '@kobold/db';
+import { Kobold, MinionWithRelations, SheetRecordBase } from '@kobold/db';
 import { KoboldError } from '@kobold/util';
 import { ActionRoller } from '../../../utils/action-roller.js';
 import { Creature } from '../../../utils/creature.js';
@@ -159,7 +159,7 @@ export class MinionRollSubCommand extends BaseCommandClass(
 		const { gameUtils, creatureUtils } = new KoboldUtils(kobold);
 
 		let targetCreature: Creature | null = null;
-		let targetSheetRecord: SheetRecord | null = null;
+		let targetSheetRecord: SheetRecordBase | null = null;
 		let hideStats = false;
 
 		if (

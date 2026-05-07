@@ -36,16 +36,16 @@ export class RollSaveSubCommand extends BaseCommandClass(
 
 			//get the active character
 			const koboldUtils: KoboldUtils = new KoboldUtils(kobold);
-			const { activeCharacter } = await koboldUtils.fetchDataForCommand(intr, {
-				activeCharacter: true,
+			const { activeCharacterAdjusted } = await koboldUtils.fetchDataForCommand(intr, {
+				activeCharacterAdjusted: true,
 			});
-			if (!activeCharacter) {
+			if (!activeCharacterAdjusted) {
 				//no choices if we don't have a character to match against
 				return [];
 			}
 			//find a save on the character matching the autocomplete string
 			const matchedSaves = FinderHelpers.matchAllSaves(
-				Creature.fromSheetRecord(activeCharacter, undefined, intr),
+				Creature.fromAdjustedSheetRecord(activeCharacterAdjusted, undefined, intr),
 				match
 			).map(save => ({
 				name: save.name,
@@ -75,13 +75,16 @@ export class RollSaveSubCommand extends BaseCommandClass(
 			RollDefinition.optionChoices.rollSecret.public;
 
 		const koboldUtils: KoboldUtils = new KoboldUtils(kobold);
-		const { activeCharacter, userSettings } = await koboldUtils.fetchDataForCommand(intr, {
-			activeCharacter: true,
-			userSettings: true,
-		});
-		koboldUtils.assertActiveCharacterNotNull(activeCharacter);
+		const { activeCharacterAdjusted, userSettings } = await koboldUtils.fetchDataForCommand(
+			intr,
+			{
+				activeCharacterAdjusted: true,
+				userSettings: true,
+			}
+		);
+		koboldUtils.assertActiveCharacterNotNull(activeCharacterAdjusted);
 
-		const creature = Creature.fromSheetRecord(activeCharacter, undefined, intr);
+		const creature = Creature.fromAdjustedSheetRecord(activeCharacterAdjusted, undefined, intr);
 
 		const targetRoll = StringUtils.findBestValueByKeyMatch(
 			saveChoice,
@@ -99,6 +102,11 @@ export class RollSaveSubCommand extends BaseCommandClass(
 
 		const embed = rollResult.compileEmbed();
 
-		await EmbedUtils.dispatchEmbeds(intr, [embed], secretRoll, activeCharacter.game?.gmUserId);
+		await EmbedUtils.dispatchEmbeds(
+			intr,
+			[embed],
+			secretRoll,
+			activeCharacterAdjusted.game?.gmUserId
+		);
 	}
 }

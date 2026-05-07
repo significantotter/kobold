@@ -141,11 +141,8 @@ export class ModifierRemoveSubCommand extends BaseCommandClass(
 			if (result && result.value === 'remove') {
 				await kobold.modifier.delete({ id: targetModifier.id });
 
-				// Trigger adjusted_sheet recomputation
 				if (targetModifier.sheetRecordId !== null) {
 					koboldUtils.adjustedSheetService.triggerRecompute(targetModifier.sheetRecordId);
-				} else {
-					koboldUtils.adjustedSheetService.triggerRecomputeAllForUser(intr.user.id);
 				}
 
 				await InteractionUtils.send(

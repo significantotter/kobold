@@ -29,7 +29,6 @@ const mocks = {
 				trackerMessageId: null,
 				trackerChannelId: null,
 				trackerGuildId: null,
-				adjustedSheet: null,
 			},
 			actions: [],
 			modifiers: [],

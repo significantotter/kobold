@@ -264,7 +264,7 @@ export class InitiativeBuilder {
 		const rollBuilder = new RollBuilder({
 			actorName: actor.name,
 			creature: this._useCachedSheets
-				? Creature.fromCachedSheetRecord(actor, actor.name)
+				? Creature.fromAdjustedSheetRecord(actor, actor.name)
 				: Creature.fromSheetRecord(actor, actor.name),
 			userSettings: {
 				initStatsNotification: InitStatsNotificationEnum.never,
@@ -406,7 +406,7 @@ export class InitiativeBuilder {
 		let turnText = '';
 		// Use the adjusted sheet to include modifier effects on HP max, etc.
 		const creature = this._useCachedSheets
-			? Creature.fromCachedSheetRecord(actor)
+			? Creature.fromAdjustedSheetRecord(actor)
 			: Creature.fromSheetRecord(actor);
 		const sheet = creature.sheet;
 		// use a second line for an actor with a too-long name
