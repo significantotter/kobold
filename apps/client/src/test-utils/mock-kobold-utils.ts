@@ -228,6 +228,43 @@ export interface KoboldUtilsMockSetup {
  */
 export function setupKoboldUtilsMocks(options: MockCharacterOptions = {}): KoboldUtilsMockSetup {
 	const mockCharacter = createMockCharacter(options);
+	const createDbSelectChain = (tableName: string) => {
+		const chain: Record<string, any> = {};
+		const passthrough = vi.fn(() => chain);
+		for (const methodName of [
+			'innerJoin',
+			'select',
+			'selectAll',
+			'where',
+			'whereRef',
+			'orderBy',
+			'limit',
+		]) {
+			chain[methodName] = passthrough;
+		}
+		chain.execute = vi.fn(async () => []);
+		chain.executeTakeFirst = vi.fn(async () => {
+			if (tableName !== 'sheetRecord') return undefined;
+			return new Proxy(
+				{},
+				{
+					get: (_target, property) =>
+						typeof property === 'string' && property.startsWith('rollattr')
+							? '1'
+							: undefined,
+				}
+			);
+		});
+		return chain;
+	};
+	mockKobold.db = {
+		selectFrom: vi.fn((tableName: string) => createDbSelectChain(tableName)),
+	};
+	mockKobold.character.readActiveLite.mockResolvedValue(mockCharacter);
+	mockKobold.userSettings.read.mockResolvedValue(undefined);
+	mockKobold.rollMacro.readManyForCharacter.mockResolvedValue(mockCharacter.rollMacros ?? []);
+	mockKobold.sheetRecord.read.mockResolvedValue(mockCharacter.sheetRecord);
+	(mockKobold.sheetRecord as any).readAdjusted = vi.fn(async () => mockCharacter.sheetRecord);
 
 	const fetchDataMock = vi.fn(
 		async () =>

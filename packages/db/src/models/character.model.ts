@@ -125,6 +125,7 @@ export class CharacterModel extends Model<Database['character']> {
 				'character.isActiveCharacter',
 				'character.importSource',
 				'character.charId',
+				'character.gameId',
 			])
 			.where('character.userId', '=', userId)
 			.where(eb =>
@@ -184,6 +185,7 @@ export class CharacterModel extends Model<Database['character']> {
 				'character.isActiveCharacter',
 				'character.importSource',
 				'character.charId',
+				'character.gameId',
 			]);
 		if (userId !== undefined) query = query.where('character.userId', '=', userId);
 		if (exactName !== undefined) query = query.where('character.name', 'ilike', exactName);
@@ -698,6 +700,7 @@ export class CharacterModel extends Model<Database['character']> {
 				'character.isActiveCharacter',
 				'character.importSource',
 				'character.charId',
+				'character.gameId',
 			]);
 		if ('id' in params && params.id !== undefined) {
 			query = query.where('character.id', '=', params.id);

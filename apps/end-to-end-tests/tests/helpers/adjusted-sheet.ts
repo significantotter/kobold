@@ -77,6 +77,17 @@ export async function cleanupModifiersByName(...names: string[]): Promise<void> 
 	await resetAdjustedSheetToBase(character.sheetRecordId);
 }
 
+export async function cleanupRollMacrosByName(...names: string[]): Promise<void> {
+	const normalizedNames = names.map(name => name.toLowerCase());
+	if (normalizedNames.length === 0) return;
+
+	await kobold.db
+		.deleteFrom('rollMacro')
+		.where('userId', '=', USER_ID)
+		.where('name', 'in', normalizedNames)
+		.execute();
+}
+
 export async function cleanupConditionsByName(...names: string[]): Promise<void> {
 	const normalizedNames = new Set(names.map(name => name.toLowerCase()));
 	if (normalizedNames.size === 0) return;

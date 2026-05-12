@@ -13,7 +13,7 @@ import { Command, CommandDeferType } from '../commands/index.js';
 import { DiscordLimits } from '../constants/index.js';
 import { Logger } from '../services/index.js';
 import { CommandTimingContext } from '../services/command-timing-context.js';
-import { CommandUtils, InteractionUtils } from '../utils/index.js';
+import { CommandUtils, FormatUtils, InteractionUtils } from '../utils/index.js';
 import { EventHandler } from './event-handler.js';
 import { Config } from '@kobold/config';
 import { KoboldEmbed } from '../utils/kobold-embed-utils.js';
@@ -113,6 +113,19 @@ export class CommandHandler implements EventHandler {
 		// Check if user is rate limited
 		let limited = this.rateLimiter.take(intr.user.id);
 		if (limited) {
+			await InteractionUtils.send(
+				intr,
+				new KoboldEmbed({
+					description: `You can only run ${Config.rateLimiting.commands.amount.toLocaleString()} command(s) every ${FormatUtils.duration(
+						Config.rateLimiting.commands.interval * 1000
+					)}. Please wait before attempting another command.`,
+				}),
+				true
+			);
+			Logger.info(
+				`[${intr.id}] '/${commandName}' by '${intr.user.tag}' ` +
+					`in '${this.getChannelName(intr)}' was rate limited`
+			);
 			return;
 		}
 

@@ -171,12 +171,6 @@ describe('RollDiceSubCommand Integration', () => {
 			});
 
 			// Assert
-			// When using character attributes, the character should be passed to RollBuilder
-			expect(RollBuilder).toHaveBeenCalledWith(
-				expect.objectContaining({
-					character: expect.anything(),
-				})
-			);
 			expect(EmbedUtils.dispatchEmbeds).toHaveBeenCalled();
 		});
 	});

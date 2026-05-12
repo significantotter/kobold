@@ -2,6 +2,7 @@ import { ChatInputCommandInteraction, TextBasedChannel } from 'discord.js';
 import { utilStrings } from '@kobold/documentation';
 import {
 	CharacterWithRelations,
+	CharacterBasic,
 	InitiativeWithRelations,
 	Kobold,
 	MinionBasic,
@@ -92,7 +93,7 @@ export class InitiativeUtils {
 		name,
 	}: {
 		initiativeId: number;
-		character: CharacterWithRelations;
+		character: CharacterWithRelations | CharacterBasic;
 		initiativeResult: number;
 		hideStats?: boolean;
 		name?: string;

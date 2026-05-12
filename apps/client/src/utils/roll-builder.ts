@@ -275,6 +275,26 @@ export class RollBuilder {
 		}
 	}
 
+	public addPreparedRollResult({
+		rollResult,
+		tags,
+		showTags = true,
+	}: {
+		rollResult: DiceRollResult | ErrorResult;
+		tags?: string[];
+		showTags?: boolean;
+	}) {
+		this.rollResults.push(rollResult);
+		if (tags?.length && showTags) {
+			const resultName = rollResult.type === 'error' ? '' : rollResult.name;
+			const rollTagsText = resultName ? `${resultName} tags` : 'tags';
+			this.footer = this.footer
+				? `${this.footer}\n${rollTagsText}: ${tags.join(', ')}`
+				: `${rollTagsText}: ${tags.join(', ')}`;
+		}
+		return rollResult;
+	}
+
 	public evaluateRollsInText({
 		text,
 		extraAttributes,

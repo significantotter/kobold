@@ -8,6 +8,8 @@ const BOT_DISPLAY_NAME = Config.e2e?.botDisplayName ?? 'Kobold';
 
 /** Timeout for waiting on bot responses (ms) */
 const BOT_RESPONSE_TIMEOUT = 15_000;
+const RATE_LIMIT_WAIT_MS = 31_000;
+const RATE_LIMIT_MAX_RETRIES = 3;
 
 const EMBED_SELECTOR = 'li[class*="messageListItem"] article[class*="embedFull"]';
 const EMBED_ARTICLE = 'article[class*="embedFull"]';
@@ -41,6 +43,12 @@ async function timed<T>(label: string, fn: () => Promise<T>): Promise<T> {
  * - Bot deferred replies edit existing elements in place rather than adding new ones
  */
 let _lastMessageItemId: string | null = null;
+const lastCommandByPage = new WeakMap<Page, () => Promise<void>>();
+
+function isRateLimitResponse(text: string | null | undefined): boolean {
+	const lower = (text ?? '').toLowerCase();
+	return lower.includes('you can only run') && lower.includes('please wait');
+}
 
 async function capturePreSendSnapshot(page: Page): Promise<void> {
 	const msgCount = await page.locator(MESSAGE_LIST_ITEM).count();
@@ -151,12 +159,16 @@ async function pressEnterUntilSent(page: Page): Promise<void> {
  * text and waiting for Discord to recognise it.
  */
 async function sendSlashCommand(page: Page, command: string): Promise<void> {
-	log(`Sending: ${command}`);
-	await capturePreSendSnapshot(page);
-	await pasteIntoChat(page, command);
-	await waitForCommandParsed(page);
-	await pressEnterUntilSent(page);
-	log(`Sent: ${command}`);
+	const send = async () => {
+		log(`Sending: ${command}`);
+		await capturePreSendSnapshot(page);
+		await pasteIntoChat(page, command);
+		await waitForCommandParsed(page);
+		await pressEnterUntilSent(page);
+		log(`Sent: ${command}`);
+	};
+	lastCommandByPage.set(page, send);
+	await send();
 }
 
 /**
@@ -175,12 +187,26 @@ async function sendSlashCommandWithArgs(
 	const argString = args.map(a => `${a.name}: ${a.value}`).join(' ');
 	const fullCommand = `${command} ${argString}`;
 
-	log(`Sending: ${fullCommand}`);
-	await capturePreSendSnapshot(page);
-	await pasteIntoChat(page, fullCommand);
-	await waitForCommandParsed(page);
-	await pressEnterUntilSent(page);
-	log(`Sent: ${fullCommand}`);
+	const send = async () => {
+		log(`Sending: ${fullCommand}`);
+		await capturePreSendSnapshot(page);
+		await pasteIntoChat(page, fullCommand);
+		await waitForCommandParsed(page);
+		await pressEnterUntilSent(page);
+		log(`Sent: ${fullCommand}`);
+	};
+	lastCommandByPage.set(page, send);
+	await send();
+}
+
+async function retryLastCommandAfterRateLimit(page: Page): Promise<void> {
+	const lastCommand = lastCommandByPage.get(page);
+	if (!lastCommand) {
+		throw new Error('Received a rate-limit response, but no command is available to retry.');
+	}
+	log(`Rate-limit response detected; retrying after ${RATE_LIMIT_WAIT_MS}ms`);
+	await page.waitForTimeout(RATE_LIMIT_WAIT_MS);
+	await lastCommand();
 }
 
 /**
@@ -190,33 +216,41 @@ async function sendSlashCommandWithArgs(
  * This is immune to Discord's message list virtualization.
  */
 async function waitForBotEmbed(page: Page): Promise<Locator> {
-	const snapshotId = _lastMessageItemId;
-	log(`Waiting for new embed (snapshot: ${snapshotId})`);
+	for (let attempt = 0; attempt <= RATE_LIMIT_MAX_RETRIES; attempt++) {
+		const snapshotId = _lastMessageItemId;
+		log(`Waiting for new embed (snapshot: ${snapshotId})`);
 
-	// Run inside the page context to find an embed in a <li> after the snapshot
-	await page.waitForFunction(
-		({ embedArticle, itemSel, sid }) => {
-			const items = document.querySelectorAll(itemSel);
-			let pastSnapshot = sid === null;
-			for (const item of items) {
-				if (!pastSnapshot) {
-					if (item.id === sid) pastSnapshot = true;
-					continue;
+		// Run inside the page context to find an embed in a <li> after the snapshot
+		await page.waitForFunction(
+			({ embedArticle, itemSel, sid }) => {
+				const items = document.querySelectorAll(itemSel);
+				let pastSnapshot = sid === null;
+				for (const item of items) {
+					if (!pastSnapshot) {
+						if (item.id === sid) pastSnapshot = true;
+						continue;
+					}
+					if (item.querySelector(embedArticle)) return true;
 				}
-				if (item.querySelector(embedArticle)) return true;
-			}
-			return false;
-		},
-		{ embedArticle: EMBED_ARTICLE, itemSel: MESSAGE_LIST_ITEM, sid: snapshotId },
-		{ timeout: BOT_RESPONSE_TIMEOUT }
-	);
+				return false;
+			},
+			{ embedArticle: EMBED_ARTICLE, itemSel: MESSAGE_LIST_ITEM, sid: snapshotId },
+			{ timeout: BOT_RESPONSE_TIMEOUT }
+		);
 
-	const lastEmbed = page.locator(EMBED_SELECTOR).last();
-	const parentLi = lastEmbed.locator('xpath=ancestor::li[contains(@class,"messageListItem")]');
-	_lastMessageItemId = await parentLi.getAttribute('id').catch(() => null);
-	log(`New embed found (parentId: ${_lastMessageItemId})`);
+		const lastEmbed = page.locator(EMBED_SELECTOR).last();
+		const parentLi = lastEmbed.locator('xpath=ancestor::li[contains(@class,"messageListItem")]');
+		_lastMessageItemId = await parentLi.getAttribute('id').catch(() => null);
+		log(`New embed found (parentId: ${_lastMessageItemId})`);
 
-	return lastEmbed;
+		const text = await lastEmbed.textContent();
+		if (!isRateLimitResponse(text)) return lastEmbed;
+		if (attempt === RATE_LIMIT_MAX_RETRIES) {
+			throw new Error(`Command remained rate-limited after ${RATE_LIMIT_MAX_RETRIES} retries.`);
+		}
+		await retryLastCommandAfterRateLimit(page);
+	}
+	throw new Error('Unexpected rate-limit retry state.');
 }
 
 /**
@@ -240,38 +274,46 @@ async function waitForBotEmbedContaining(page: Page, text: string): Promise<Loca
  * - Discord's message list virtualization
  */
 async function waitForBotMessage(page: Page): Promise<Locator> {
-	const snapshotId = _lastMessageItemId;
-	log(`Waiting for bot response (snapshot: ${snapshotId})`);
+	for (let attempt = 0; attempt <= RATE_LIMIT_MAX_RETRIES; attempt++) {
+		const snapshotId = _lastMessageItemId;
+		log(`Waiting for bot response (snapshot: ${snapshotId})`);
 
-	// Run inside the page to watch for real bot response content
-	await page.waitForFunction(
-		({ itemSel, sid }) => {
-			const items = document.querySelectorAll(itemSel);
-			let pastSnapshot = sid === null;
-			for (const item of items) {
-				if (!pastSnapshot) {
-					if (item.id === sid) pastSnapshot = true;
-					continue;
+		// Run inside the page to watch for real bot response content
+		await page.waitForFunction(
+			({ itemSel, sid }) => {
+				const items = document.querySelectorAll(itemSel);
+				let pastSnapshot = sid === null;
+				for (const item of items) {
+					if (!pastSnapshot) {
+						if (item.id === sid) pastSnapshot = true;
+						continue;
+					}
+					const text = (item.textContent ?? '').toLowerCase();
+					// Skip loading/interaction states that aren't real bot responses
+					if (text.includes('sending command')) continue;
+					if (text.includes('is thinking')) continue;
+					// Any non-empty content after the snapshot is a real response
+					if (text.trim().length > 0) return true;
 				}
-				const text = (item.textContent ?? '').toLowerCase();
-				// Skip loading/interaction states that aren't real bot responses
-				if (text.includes('sending command')) continue;
-				if (text.includes('is thinking')) continue;
-				// Any non-empty content after the snapshot is a real response
-				if (text.trim().length > 0) return true;
-			}
-			return false;
-		},
-		{ itemSel: MESSAGE_LIST_ITEM, sid: snapshotId },
-		{ timeout: BOT_RESPONSE_TIMEOUT }
-	);
+				return false;
+			},
+			{ itemSel: MESSAGE_LIST_ITEM, sid: snapshotId },
+			{ timeout: BOT_RESPONSE_TIMEOUT }
+		);
 
-	const allItems = page.locator(MESSAGE_LIST_ITEM);
-	const lastItem = allItems.last();
-	_lastMessageItemId = await lastItem.getAttribute('id').catch(() => null);
-	log(`New bot response found (id: ${_lastMessageItemId})`);
+		const allItems = page.locator(MESSAGE_LIST_ITEM);
+		const lastItem = allItems.last();
+		_lastMessageItemId = await lastItem.getAttribute('id').catch(() => null);
+		log(`New bot response found (id: ${_lastMessageItemId})`);
 
-	return lastItem;
+		const text = await lastItem.textContent();
+		if (!isRateLimitResponse(text)) return lastItem;
+		if (attempt === RATE_LIMIT_MAX_RETRIES) {
+			throw new Error(`Command remained rate-limited after ${RATE_LIMIT_MAX_RETRIES} retries.`);
+		}
+		await retryLastCommandAfterRateLimit(page);
+	}
+	throw new Error('Unexpected rate-limit retry state.');
 }
 
 /**
