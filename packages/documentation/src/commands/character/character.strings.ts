@@ -137,6 +137,26 @@ export const characterStrings = {
 		),
 	},
 
+	// ─── RENAME SUBCOMMAND ───────────────────────────────────────────────
+	rename: {
+		success: msg(
+			(p: { oldName: string; newName: string }) =>
+				`Yip! I've renamed ${p.oldName} to ${p.newName}.`
+		),
+		notFound:
+			"Yip! I couldn't find a character matching that name! " +
+			"Check what characters you've imported using /character list",
+		duplicate: msg(
+			(p: { characterName: string }) =>
+				`Yip! You already have a character named ${p.characterName}. Please choose a unique name.`
+		),
+		noChange: msg(
+			(p: { characterName: string }) =>
+				`Yip! That character is already named ${p.characterName}.`
+		),
+		invalidName: 'Yip! Character names must be between 1 and 100 characters.',
+	},
+
 	// ─── SET ACTIVE SUBCOMMAND ───────────────────────────────────────────
 	setActive: {
 		success: msg(

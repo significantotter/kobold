@@ -8,6 +8,7 @@ export enum CharacterCommandOptionEnum {
 	pastebinUrl = 'pastebin-url',
 	useStamina = 'use-stamina',
 	name = 'name',
+	newName = 'new-name',
 	id = 'id',
 	sheetStyle = 'sheet-style',
 }
@@ -52,6 +53,13 @@ export const characterCommandOptions = {
 		required: true,
 		autocomplete: true,
 		type: ApplicationCommandOptionType.String,
+	},
+	[CharacterCommandOptionEnum.newName]: {
+		name: 'new-name',
+		description: 'The new name for the character.',
+		required: true,
+		type: ApplicationCommandOptionType.String,
+		max_length: 100,
 	},
 	[CharacterCommandOptionEnum.id]: {
 		name: 'id',

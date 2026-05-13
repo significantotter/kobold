@@ -138,6 +138,30 @@ export const characterCommandDocumentation: CommandDocumentation<
 				},
 			],
 		},
+		[CharacterSubCommandEnum.rename]: {
+			name: CharacterSubCommandEnum.rename,
+			description: 'Renames a character.',
+			usage: null,
+			examples: [
+				{
+					title: 'Success',
+					type: CommandResponseTypeEnum.success,
+					message: "Yip! I've renamed Ashara Keenclaw to Ashara Starfall.",
+					options: {
+						['new-name']: 'Ashara Starfall',
+					},
+				},
+				{
+					title: 'Success',
+					type: CommandResponseTypeEnum.success,
+					message: "Yip! I've renamed Portia to Portia Bell.",
+					options: {
+						['name']: 'Portia',
+						['new-name']: 'Portia Bell',
+					},
+				},
+			],
+		},
 		[CharacterSubCommandEnum.setActive]: {
 			name: CharacterSubCommandEnum.setActive,
 			description: 'Sets the active character.',

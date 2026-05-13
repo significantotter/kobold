@@ -678,6 +678,53 @@ export class CharacterModel extends Model<Database['character']> {
 	}
 
 	/**
+	 * Renames a character and mirrors the name into its base and adjusted sheet payloads.
+	 */
+	public async updateName({
+		id,
+		userId,
+		name,
+	}: {
+		id: CharacterId;
+		userId: string;
+		name: string;
+	}): Promise<void> {
+		await this.db.transaction().execute(async trx => {
+			const characterUpdate = await sql<{ sheetRecordId: number }>`
+				UPDATE public."character"
+				SET "name" = ${name}
+				WHERE "id" = ${id}
+					AND "user_id" = ${userId}
+				RETURNING "sheet_record_id" AS "sheetRecordId"
+			`.execute(trx);
+
+			const sheetRecordId = characterUpdate.rows[0]?.sheetRecordId;
+			if (sheetRecordId === undefined) throw new Error('No rows updated');
+
+			await sql`
+				UPDATE public."sheet_record"
+				SET
+					"sheet" = jsonb_set(
+						"sheet",
+						'{staticInfo,name}',
+						to_jsonb(${name}::text),
+						true
+					),
+					"adjusted_sheet" = CASE
+						WHEN "adjusted_sheet" IS NULL THEN "adjusted_sheet"
+						ELSE jsonb_set(
+							"adjusted_sheet",
+							'{staticInfo,name}',
+							to_jsonb(${name}::text),
+							true
+						)
+					END
+				WHERE "id" = ${sheetRecordId}
+			`.execute(trx);
+		});
+	}
+
+	/**
 	 * Reads a single character without loading relations.
 	 * Accepts the same flexible filters as read() but returns only basic columns.
 	 * Much faster than read() when you only need basic character info.

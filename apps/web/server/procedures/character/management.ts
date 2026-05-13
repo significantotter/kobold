@@ -274,10 +274,11 @@ export const renameCharacter = orpc
 			excludeCharacterId: input.characterId,
 		});
 
-		await context.kobold.character.updateFields(
-			{ id: input.characterId },
-			{ name: input.name }
-		);
+		await context.kobold.character.updateName({
+			id: input.characterId,
+			userId: context.userId,
+			name: input.name,
+		});
 
 		return {
 			characterId: character.id,
@@ -317,4 +318,3 @@ export const deleteCharacter = orpc
 			deletedCharacterId: input.characterId,
 		};
 	});
-

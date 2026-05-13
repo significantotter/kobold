@@ -39,6 +39,7 @@ interface MockCharacterModel extends MockModel {
 	readManyWithModifiers: MockFn;
 	createReturningId: MockFn;
 	updateFields: MockFn;
+	updateName: MockFn;
 }
 
 /** Type for mock Game model with additional methods */
@@ -123,6 +124,7 @@ function createMockCharacterModel(): MockCharacterModel {
 		readManyWithModifiers: vi.fn(),
 		createReturningId: vi.fn(),
 		updateFields: vi.fn(),
+		updateName: vi.fn(),
 	};
 }
 

@@ -132,6 +132,24 @@ describe('CharacterModel', () => {
 				vitestKobold.character.updateFields({ id: fakeCharacter.id }, { sheetRecordId: -1 })
 			).rejects.toThrow();
 		});
+		it('updates the character name and sheet record names together', async () => {
+			const fakeCharacter = await ResourceFactories.character();
+
+			await vitestKobold.character.updateName({
+				id: fakeCharacter.id,
+				userId: fakeCharacter.userId,
+				name: 'Renamed Character',
+			});
+
+			const updatedCharacter = await vitestKobold.character.read({ id: fakeCharacter.id });
+			const updatedSheetRecord = await vitestKobold.sheetRecord.readFull({
+				id: fakeCharacter.sheetRecordId,
+			});
+
+			expect(updatedCharacter?.name).toEqual('Renamed Character');
+			expect(updatedSheetRecord?.sheet.staticInfo.name).toEqual('Renamed Character');
+			expect(updatedSheetRecord?.adjustedSheet.staticInfo.name).toEqual('Renamed Character');
+		});
 	});
 	describe('delete', () => {
 		it('deletes a character', async () => {
