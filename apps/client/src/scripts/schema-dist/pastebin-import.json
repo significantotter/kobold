@@ -238,47 +238,164 @@
               "items": {
                 "type": "string"
               }
-            },
-            "immunities": {
-              "default": [],
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
             }
           },
           "required": [
             "traits",
             "languages",
-            "senses",
-            "immunities"
+            "senses"
           ],
           "additionalProperties": false
         },
-        "weaknessesResistances": {
-          "description": "Weakness or resistance typed information.",
+        "defenses": {
           "type": "object",
           "properties": {
-            "resistances": {
+            "immunities": {
               "default": [],
               "type": "array",
               "items": {
                 "type": "object",
                 "properties": {
+                  "label": {
+                    "type": "string"
+                  },
+                  "raw": {
+                    "type": "string"
+                  },
                   "amount": {
-                    "description": "the amount of weakness/resistance for this type of damage",
                     "type": "integer",
                     "minimum": -9007199254740991,
                     "maximum": 9007199254740991
                   },
-                  "type": {
-                    "description": "the damage type",
-                    "type": "string"
+                  "appliesTo": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "damage",
+                        "effect",
+                        "condition",
+                        "critical-hit",
+                        "nonlethal"
+                      ]
+                    }
+                  },
+                  "match": {
+                    "type": "object",
+                    "properties": {
+                      "all": {
+                        "type": "boolean"
+                      },
+                      "damageTypes": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "damageGroups": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "const": "physical"
+                        }
+                      },
+                      "traits": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "materials": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "conditions": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "effectTypes": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "except": {
+                        "type": "object",
+                        "properties": {
+                          "all": {
+                            "type": "boolean"
+                          },
+                          "damageTypes": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "damageGroups": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "const": "physical"
+                            }
+                          },
+                          "traits": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "materials": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "conditions": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "effectTypes": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "additionalProperties": false
+                      }
+                    },
+                    "additionalProperties": false
+                  },
+                  "automation": {
+                    "type": "string",
+                    "enum": [
+                      "auto",
+                      "partial",
+                      "manual"
+                    ]
+                  },
+                  "source": {
+                    "type": "string",
+                    "enum": [
+                      "nethys",
+                      "pathbuilder",
+                      "wanderers-guide",
+                      "manual"
+                    ]
                   }
                 },
                 "required": [
-                  "amount",
-                  "type"
+                  "label",
+                  "raw",
+                  "appliesTo",
+                  "match",
+                  "automation"
                 ],
                 "additionalProperties": false
               }
@@ -289,28 +406,305 @@
               "items": {
                 "type": "object",
                 "properties": {
+                  "label": {
+                    "type": "string"
+                  },
+                  "raw": {
+                    "type": "string"
+                  },
                   "amount": {
-                    "description": "the amount of weakness/resistance for this type of damage",
                     "type": "integer",
                     "minimum": -9007199254740991,
                     "maximum": 9007199254740991
                   },
-                  "type": {
-                    "description": "the damage type",
-                    "type": "string"
+                  "appliesTo": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "damage",
+                        "effect",
+                        "condition",
+                        "critical-hit",
+                        "nonlethal"
+                      ]
+                    }
+                  },
+                  "match": {
+                    "type": "object",
+                    "properties": {
+                      "all": {
+                        "type": "boolean"
+                      },
+                      "damageTypes": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "damageGroups": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "const": "physical"
+                        }
+                      },
+                      "traits": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "materials": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "conditions": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "effectTypes": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "except": {
+                        "type": "object",
+                        "properties": {
+                          "all": {
+                            "type": "boolean"
+                          },
+                          "damageTypes": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "damageGroups": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "const": "physical"
+                            }
+                          },
+                          "traits": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "materials": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "conditions": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "effectTypes": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "additionalProperties": false
+                      }
+                    },
+                    "additionalProperties": false
+                  },
+                  "automation": {
+                    "type": "string",
+                    "enum": [
+                      "auto",
+                      "partial",
+                      "manual"
+                    ]
+                  },
+                  "source": {
+                    "type": "string",
+                    "enum": [
+                      "nethys",
+                      "pathbuilder",
+                      "wanderers-guide",
+                      "manual"
+                    ]
                   }
                 },
                 "required": [
-                  "amount",
-                  "type"
+                  "label",
+                  "raw",
+                  "appliesTo",
+                  "match",
+                  "automation"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "resistances": {
+              "default": [],
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "type": "string"
+                  },
+                  "raw": {
+                    "type": "string"
+                  },
+                  "amount": {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  },
+                  "appliesTo": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "damage",
+                        "effect",
+                        "condition",
+                        "critical-hit",
+                        "nonlethal"
+                      ]
+                    }
+                  },
+                  "match": {
+                    "type": "object",
+                    "properties": {
+                      "all": {
+                        "type": "boolean"
+                      },
+                      "damageTypes": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "damageGroups": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "const": "physical"
+                        }
+                      },
+                      "traits": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "materials": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "conditions": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "effectTypes": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "except": {
+                        "type": "object",
+                        "properties": {
+                          "all": {
+                            "type": "boolean"
+                          },
+                          "damageTypes": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "damageGroups": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "const": "physical"
+                            }
+                          },
+                          "traits": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "materials": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "conditions": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "effectTypes": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "additionalProperties": false
+                      }
+                    },
+                    "additionalProperties": false
+                  },
+                  "automation": {
+                    "type": "string",
+                    "enum": [
+                      "auto",
+                      "partial",
+                      "manual"
+                    ]
+                  },
+                  "source": {
+                    "type": "string",
+                    "enum": [
+                      "nethys",
+                      "pathbuilder",
+                      "wanderers-guide",
+                      "manual"
+                    ]
+                  }
+                },
+                "required": [
+                  "label",
+                  "raw",
+                  "appliesTo",
+                  "match",
+                  "automation"
                 ],
                 "additionalProperties": false
               }
             }
           },
           "required": [
-            "resistances",
-            "weaknesses"
+            "immunities",
+            "weaknesses",
+            "resistances"
           ],
           "additionalProperties": false
         },
@@ -3887,7 +4281,14 @@
                   "properties": {
                     "dice": {
                       "description": "The attack damage dice.",
-                      "type": "string"
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
                     },
                     "type": {
                       "description": "The attack damage type.",
@@ -3899,11 +4300,28 @@
                           "type": "null"
                         }
                       ]
+                    },
+                    "tags": {
+                      "default": [],
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "source": {
+                      "type": "string"
+                    },
+                    "persistent": {
+                      "type": "boolean"
+                    },
+                    "criticalOnly": {
+                      "type": "boolean"
                     }
                   },
                   "required": [
                     "dice",
-                    "type"
+                    "type",
+                    "tags"
                   ],
                   "additionalProperties": false
                 }
@@ -3966,7 +4384,7 @@
         "staticInfo",
         "info",
         "infoLists",
-        "weaknessesResistances",
+        "defenses",
         "intProperties",
         "stats",
         "baseCounters",
@@ -4305,6 +4723,87 @@
                     },
                     "type": {
                       "type": "string",
+                      "const": "damage-v2"
+                    },
+                    "healInsteadOfDamage": {
+                      "default": false,
+                      "type": "boolean"
+                    },
+                    "terms": {
+                      "default": [],
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "dice": {
+                            "description": "The attack damage dice.",
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "type": {
+                            "description": "The attack damage type.",
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "tags": {
+                            "default": [],
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "source": {
+                            "type": "string"
+                          },
+                          "persistent": {
+                            "type": "boolean"
+                          },
+                          "criticalOnly": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "dice",
+                          "type",
+                          "tags"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "allowRollModifiers",
+                    "type",
+                    "healInsteadOfDamage",
+                    "terms"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "allowRollModifiers": {
+                      "default": false,
+                      "type": "boolean"
+                    },
+                    "type": {
+                      "type": "string",
                       "const": "advanced-damage"
                     },
                     "damageType": {
@@ -4377,6 +4876,249 @@
                     "criticalFailureRoll",
                     "successRoll",
                     "failureRoll"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "allowRollModifiers": {
+                      "default": false,
+                      "type": "boolean"
+                    },
+                    "type": {
+                      "type": "string",
+                      "const": "advanced-damage-v2"
+                    },
+                    "healInsteadOfDamage": {
+                      "default": false,
+                      "type": "boolean"
+                    },
+                    "criticalSuccessTerms": {
+                      "default": [],
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "dice": {
+                            "description": "The attack damage dice.",
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "type": {
+                            "description": "The attack damage type.",
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "tags": {
+                            "default": [],
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "source": {
+                            "type": "string"
+                          },
+                          "persistent": {
+                            "type": "boolean"
+                          },
+                          "criticalOnly": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "dice",
+                          "type",
+                          "tags"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "successTerms": {
+                      "default": [],
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "dice": {
+                            "description": "The attack damage dice.",
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "type": {
+                            "description": "The attack damage type.",
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "tags": {
+                            "default": [],
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "source": {
+                            "type": "string"
+                          },
+                          "persistent": {
+                            "type": "boolean"
+                          },
+                          "criticalOnly": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "dice",
+                          "type",
+                          "tags"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "failureTerms": {
+                      "default": [],
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "dice": {
+                            "description": "The attack damage dice.",
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "type": {
+                            "description": "The attack damage type.",
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "tags": {
+                            "default": [],
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "source": {
+                            "type": "string"
+                          },
+                          "persistent": {
+                            "type": "boolean"
+                          },
+                          "criticalOnly": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "dice",
+                          "type",
+                          "tags"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "criticalFailureTerms": {
+                      "default": [],
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "dice": {
+                            "description": "The attack damage dice.",
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "type": {
+                            "description": "The attack damage type.",
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "tags": {
+                            "default": [],
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "source": {
+                            "type": "string"
+                          },
+                          "persistent": {
+                            "type": "boolean"
+                          },
+                          "criticalOnly": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "dice",
+                          "type",
+                          "tags"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "allowRollModifiers",
+                    "type",
+                    "healInsteadOfDamage",
+                    "criticalSuccessTerms",
+                    "successTerms",
+                    "failureTerms",
+                    "criticalFailureTerms"
                   ],
                   "additionalProperties": false
                 },

@@ -457,7 +457,9 @@ describe('buildAttacks', () => {
 		expect(attacks).toHaveLength(1);
 		expect(attacks[0].name).toBe('Longsword');
 		expect(attacks[0].toHit).toBe(15);
-		expect(attacks[0].damage).toEqual([{ dice: '1d8+3', type: 'slashing' }]);
+		expect(attacks[0].damage).toEqual([
+			{ dice: '1d8+3', type: 'slashing', tags: ['slashing'] },
+		]);
 		expect(attacks[0].range).toBe('5');
 	});
 
@@ -478,7 +480,9 @@ describe('buildAttacks', () => {
 		};
 
 		const attacks = buildAttacks([weapon]);
-		expect(attacks[0].damage).toEqual([{ dice: '1d4-1', type: 'bludgeoning' }]);
+		expect(attacks[0].damage).toEqual([
+			{ dice: '1d4-1', type: 'bludgeoning', tags: ['bludgeoning'] },
+		]);
 	});
 
 	it('converts a weapon with zero damage bonus', () => {
@@ -498,7 +502,9 @@ describe('buildAttacks', () => {
 		};
 
 		const attacks = buildAttacks([weapon]);
-		expect(attacks[0].damage).toEqual([{ dice: '1d4', type: 'piercing' }]);
+		expect(attacks[0].damage).toEqual([
+			{ dice: '1d4', type: 'piercing', tags: ['piercing'] },
+		]);
 	});
 
 	it('handles weapon with range', () => {
@@ -795,12 +801,12 @@ describe('convertWgV4ExportToSheet', () => {
 			})
 		);
 
-		expect(sheet.weaknessesResistances.resistances).toEqual([
-			{ type: 'Fire', amount: 5 },
-			{ type: 'Cold', amount: 3 },
+		expect(sheet.defenses.resistances).toMatchObject([
+			{ label: 'fire', amount: 5 },
+			{ label: 'cold', amount: 3 },
 		]);
-		expect(sheet.weaknessesResistances.weaknesses).toEqual([{ type: 'Lightning', amount: 10 }]);
-		expect(sheet.infoLists.immunities).toEqual(['Poison']);
+		expect(sheet.defenses.weaknesses).toMatchObject([{ label: 'lightning', amount: 10 }]);
+		expect(sheet.defenses.immunities.map(rule => rule.label)).toEqual(['poison']);
 	});
 
 	it('populates senses', () => {
@@ -993,7 +999,9 @@ describe('convertWgV4ExportToSheet', () => {
 		expect(sheet.attacks).toHaveLength(1);
 		expect(sheet.attacks[0].name).toBe('Longsword +1');
 		expect(sheet.attacks[0].toHit).toBe(22);
-		expect(sheet.attacks[0].damage).toEqual([{ dice: '2d8+4', type: 'slashing' }]);
+		expect(sheet.attacks[0].damage).toEqual([
+			{ dice: '2d8+4', type: 'slashing', tags: ['slashing'] },
+		]);
 
 		// Counters
 		expect(sheet.baseCounters.hp.max).toBe(100);
@@ -1007,6 +1015,6 @@ describe('convertWgV4ExportToSheet', () => {
 		// Lists
 		expect(sheet.infoLists.languages).toEqual(['Common', 'Draconic']);
 		expect(sheet.infoLists.traits).toEqual(['Human', 'Humanoid']);
-		expect(sheet.weaknessesResistances.resistances).toEqual([{ type: 'Fire', amount: 5 }]);
+		expect(sheet.defenses.resistances).toMatchObject([{ label: 'fire', amount: 5 }]);
 	});
 });

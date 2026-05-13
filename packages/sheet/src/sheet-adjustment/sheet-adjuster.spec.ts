@@ -1,6 +1,8 @@
 import {
 	AbilityEnum,
 	AdjustablePropertyEnum,
+	DefenseRuleAutomation,
+	DefenseRuleSource,
 	Sheet,
 	SheetAdjustment,
 	SheetAdjustmentOperationEnum,
@@ -423,7 +425,7 @@ describe('SheetAttackAdjuster', () => {
 		sheet.attacks = [
 			{
 				toHit: 10,
-				damage: [{ dice: '1d4', type: 'cold' }],
+				damage: [{ dice: '1d4', type: 'cold', tags: [] }],
 				name: 'Bar',
 				range: null,
 				traits: [],
@@ -480,7 +482,7 @@ describe('SheetAttackAdjuster', () => {
 		it('should replace any existing attacks with the same name when adding', () => {
 			sheet.attacks.push({
 				toHit: 14,
-				damage: [{ dice: '2d8', type: 'fire' }],
+				damage: [{ dice: '2d8', type: 'fire', tags: [] }],
 				name: 'Foo',
 				range: null,
 				traits: [],
@@ -510,7 +512,7 @@ describe('SheetAttackAdjuster', () => {
 		it('should remove any existing attacks with the same name with the - operator', () => {
 			sheet.attacks.push({
 				toHit: 14,
-				damage: [{ dice: '2d8', type: 'fire' }],
+				damage: [{ dice: '2d8', type: 'fire', tags: [] }],
 				name: 'Foo',
 				range: null,
 				traits: [],
@@ -662,21 +664,32 @@ describe('SheetWeaknessResistanceAdjuster', () => {
 
 	beforeEach(() => {
 		sheet = SheetProperties.defaultSheet;
-		sheet.weaknessesResistances = {
+		sheet.defenses = {
+			immunities: [],
 			weaknesses: [
 				{
-					type: 'Fire',
+					label: 'fire',
+					raw: 'Fire',
 					amount: 5,
+					appliesTo: ['damage'],
+					match: { damageTypes: ['fire'] },
+					automation: DefenseRuleAutomation.auto,
+					source: DefenseRuleSource.manual,
 				},
 			],
 			resistances: [
 				{
-					type: 'Fire',
+					label: 'fire',
+					raw: 'Fire',
 					amount: 3,
+					appliesTo: ['damage'],
+					match: { damageTypes: ['fire'] },
+					automation: DefenseRuleAutomation.auto,
+					source: DefenseRuleSource.manual,
 				},
 			],
 		};
-		adjuster = new SheetWeaknessResistanceAdjuster(sheet.weaknessesResistances);
+		adjuster = new SheetWeaknessResistanceAdjuster(sheet.defenses);
 	});
 
 	describe('adjust', () => {
@@ -689,7 +702,7 @@ describe('SheetWeaknessResistanceAdjuster', () => {
 				operation: SheetAdjustmentOperationEnum['+'],
 			};
 			adjuster.adjust(adjustment);
-			expect(sheet.weaknessesResistances.weaknesses[0].amount).toBe(7);
+			expect(sheet.defenses.weaknesses[0].amount).toBe(7);
 		});
 
 		it('should subtract from a weakness property', () => {
@@ -701,7 +714,7 @@ describe('SheetWeaknessResistanceAdjuster', () => {
 				operation: SheetAdjustmentOperationEnum['-'],
 			};
 			adjuster.adjust(adjustment);
-			expect(sheet.weaknessesResistances.weaknesses[0].amount).toBe(4);
+			expect(sheet.defenses.weaknesses[0].amount).toBe(4);
 		});
 
 		it('should set a weakness property', () => {
@@ -713,7 +726,7 @@ describe('SheetWeaknessResistanceAdjuster', () => {
 				operation: SheetAdjustmentOperationEnum['='],
 			};
 			adjuster.adjust(adjustment);
-			expect(sheet.weaknessesResistances.weaknesses[0].amount).toBe(6);
+			expect(sheet.defenses.weaknesses[0].amount).toBe(6);
 		});
 
 		it('should add to a resistance property', () => {
@@ -725,7 +738,7 @@ describe('SheetWeaknessResistanceAdjuster', () => {
 				operation: SheetAdjustmentOperationEnum['+'],
 			};
 			adjuster.adjust(adjustment);
-			expect(sheet.weaknessesResistances.resistances[0].amount).toBe(5);
+			expect(sheet.defenses.resistances[0].amount).toBe(5);
 		});
 
 		it('should subtract from a resistance property', () => {
@@ -737,7 +750,7 @@ describe('SheetWeaknessResistanceAdjuster', () => {
 				operation: SheetAdjustmentOperationEnum['-'],
 			};
 			adjuster.adjust(adjustment);
-			expect(sheet.weaknessesResistances.resistances[0].amount).toBe(2);
+			expect(sheet.defenses.resistances[0].amount).toBe(2);
 		});
 
 		it('should set a resistance property', () => {
@@ -749,7 +762,7 @@ describe('SheetWeaknessResistanceAdjuster', () => {
 				operation: SheetAdjustmentOperationEnum['='],
 			};
 			adjuster.adjust(adjustment);
-			expect(sheet.weaknessesResistances.resistances[0].amount).toBe(5);
+			expect(sheet.defenses.resistances[0].amount).toBe(5);
 		});
 
 		it('should throw an error for an invalid adjustment', () => {

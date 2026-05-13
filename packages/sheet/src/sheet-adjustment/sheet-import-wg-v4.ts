@@ -4,7 +4,10 @@ import {
 	SheetStatKeys,
 	ProficiencyStat,
 	CounterStyleEnum,
+	DefenseRuleAutomation,
+	DefenseRuleSource,
 } from '@kobold/schema';
+import { parsePf2eDefenses } from './pf2e-defense-parser.js';
 
 /**
  * Parses a resistance/weakness string like "Poison  3" into { type, amount }.
@@ -363,7 +366,9 @@ export function buildAttacks(weapons: WgV4Weapon[]): Sheet['attacks'] {
 		return {
 			name: w.item?.name ?? 'Unknown',
 			toHit: w.stats?.attack_bonus?.total?.[0] ?? null,
-			damage: damageStr ? [{ dice: damageStr, type: dmg?.damageType ?? null }] : [],
+			damage: damageStr
+				? [{ dice: damageStr, type: dmg?.damageType ?? null, tags: [dmg?.damageType ?? ''].filter(Boolean) }]
+				: [],
 			effects: [] as string[],
 			range: w.item?.meta_data?.range != null ? String(w.item.meta_data.range) : null,
 			traits: [] as string[],
@@ -489,14 +494,23 @@ export function convertWgV4ExportToSheet(exportData: WgV4Export): Sheet {
 	// ── Traits ──
 	const traits = (content.character_traits ?? []).map(t => t.name).filter(Boolean);
 
-	// ── Immunities ──
-	const immunities = (content.resist_weaks?.immunes ?? []).map(s =>
-		typeof s === 'string' ? s.trim() : String(s)
-	);
-
-	// ── Weaknesses & Resistances ──
-	const resistances = (content.resist_weaks?.resists ?? []).map(parseResistWeakString);
-	const weaknesses = (content.resist_weaks?.weaks ?? []).map(parseResistWeakString);
+	// ── Defenses ──
+	const defenses = parsePf2eDefenses({
+		immunityRaw: (content.resist_weaks?.immunes ?? [])
+			.map(s => (typeof s === 'string' ? s.trim() : String(s)))
+			.join(', '),
+		resistanceRaw: (content.resist_weaks?.resists ?? []).join(', '),
+		weaknessRaw: (content.resist_weaks?.weaks ?? []).join(', '),
+		source: DefenseRuleSource.wanderersGuide,
+	});
+	defenses.weaknesses = defenses.weaknesses.map(rule => ({
+		...rule,
+		automation: rule.amount ? rule.automation : DefenseRuleAutomation.manual,
+	}));
+	defenses.resistances = defenses.resistances.map(rule => ({
+		...rule,
+		automation: rule.amount ? rule.automation : DefenseRuleAutomation.manual,
+	}));
 
 	// ── Attacks ──
 	const attacks = buildAttacks(content.weapons ?? []);
@@ -531,12 +545,8 @@ export function convertWgV4ExportToSheet(exportData: WgV4Export): Sheet {
 			traits,
 			languages,
 			senses,
-			immunities,
 		},
-		weaknessesResistances: {
-			resistances,
-			weaknesses,
-		},
+		defenses,
 		intProperties: {
 			ac: content.ac ?? null,
 			strength: strMod,

@@ -17,6 +17,7 @@ import { SheetProperties } from './sheet-properties.js';
 import { NethysEmoji, NethysParser } from '@kobold/nethys';
 import { Config } from '@kobold/config';
 import z from 'zod/v4';
+import { parsePf2eDefenses } from './pf2e-defense-parser.js';
 
 type NewAction = z.infer<typeof zNewAction>;
 
@@ -237,23 +238,21 @@ export class NethysSheetImporter {
 			dc: willBonus + 10,
 		};
 
-		this.sheet.infoLists.immunities = this.bestiaryEntry.immunity ?? [];
-
-		this.sheet.weaknessesResistances.weaknesses = (
-			Object.entries(this.bestiaryEntry.weakness) as [string, number][]
-		).map(([type, amount]) => {
-			return {
-				type,
-				amount,
-			};
-		});
-		this.sheet.weaknessesResistances.resistances = (
-			Object.entries(this.bestiaryEntry.resistance) as [string, number][]
-		).map(([type, amount]) => {
-			return {
-				type,
-				amount,
-			};
+		this.sheet.defenses = parsePf2eDefenses({
+			markdown: this.bestiaryEntry.markdown,
+			immunityMarkdown: this.bestiaryEntry.immunity_markdown,
+			resistanceMarkdown: this.bestiaryEntry.resistance_markdown,
+			weaknessMarkdown: this.bestiaryEntry.weakness_markdown,
+			resistanceRaw:
+				this.bestiaryEntry.resistance_raw ??
+				Object.entries(this.bestiaryEntry.resistance ?? {})
+					.map(([type, amount]) => `${type} ${amount}`)
+					.join(', '),
+			weaknessRaw:
+				this.bestiaryEntry.weakness_raw ??
+				Object.entries(this.bestiaryEntry.weakness ?? {})
+					.map(([type, amount]) => `${type} ${amount}`)
+					.join(', '),
 		});
 	}
 

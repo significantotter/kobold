@@ -10,7 +10,6 @@ import {
 	SheetIntegers,
 	SheetStatKeys,
 	SheetStats,
-	SheetWeaknessesResistances,
 	StatSubGroupEnum,
 	getDefaultSheet,
 } from '@kobold/db';
@@ -62,7 +61,6 @@ export class SheetInfoListProperties {
 		traits: { aliases: ['trait'] },
 		languages: { aliases: ['language'] },
 		senses: { aliases: ['sense'] },
-		immunities: { aliases: ['immune'] },
 	};
 
 	public static get _aliases(): { [k: string]: undefined | keyof SheetInfoLists } {
@@ -1090,7 +1088,7 @@ export class SheetAdditionalSkillProperties {
 }
 
 export class SheetWeaknessResistanceProperties {
-	constructor(protected sheetInfo: SheetWeaknessesResistances['resistances']) {}
+	constructor(protected sheetInfo: Sheet['defenses']['resistances']) {}
 	public static isWeakness = (property: string) => property.toLowerCase().includes('weak');
 	public static propertyNameRegex = /(.+) (?:(?:resist(?:ance)?)|(?:weak(?:nesse?)?))(?:s)?/i;
 }

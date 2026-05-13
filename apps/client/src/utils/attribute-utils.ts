@@ -250,11 +250,11 @@ export class AttributeUtils {
 		const weakResMatch = SheetWeaknessResistanceProperties.propertyNameRegex.exec(
 			standardizedCustomPropName
 		);
-		const weakness = sheet.weaknessesResistances.weaknesses.find(
-			w => w.type === weakResMatch?.[1]
+		const weakness = sheet.defenses.weaknesses.find(
+			w => w.label === weakResMatch?.[1] && w.amount != null
 		);
-		const resistance = sheet.weaknessesResistances.resistances.find(
-			r => r.type === weakResMatch?.[1]
+		const resistance = sheet.defenses.resistances.find(
+			r => r.label === weakResMatch?.[1] && r.amount != null
 		);
 		const weaknessResistance = weakness ?? resistance;
 		if (weaknessResistance) {
@@ -262,8 +262,8 @@ export class AttributeUtils {
 			return {
 				aliases: [],
 				type: type,
-				value: weaknessResistance.amount,
-				name: weaknessResistance.type + ' ' + type,
+				value: weaknessResistance.amount ?? 0,
+				name: weaknessResistance.label + ' ' + type,
 				tags: [],
 			};
 		}
@@ -369,22 +369,24 @@ export class AttributeUtils {
 			});
 		}
 
-		for (const weakness of creature.sheet.weaknessesResistances.weaknesses) {
+		for (const weakness of creature.sheet.defenses.weaknesses) {
+			if (weakness.amount == null) continue;
 			attributes.push({
 				aliases: [],
 				type: 'weakness',
 				value: weakness.amount,
-				name: weakness.type + ' weakness',
+				name: weakness.label + ' weakness',
 				tags: [],
 			});
 		}
 
-		for (const resistance of creature.sheet.weaknessesResistances.resistances) {
+		for (const resistance of creature.sheet.defenses.resistances) {
+			if (resistance.amount == null) continue;
 			attributes.push({
 				aliases: [],
 				type: 'resistance',
 				value: resistance.amount,
-				name: resistance.type + ' resistance',
+				name: resistance.label + ' resistance',
 				tags: [],
 			});
 		}

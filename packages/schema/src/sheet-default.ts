@@ -27,11 +27,11 @@ export function getDefaultSheet(): Sheet {
 			traits: [],
 			senses: [],
 			languages: [],
-			immunities: [],
 		},
-		weaknessesResistances: {
-			resistances: [],
+		defenses: {
+			immunities: [],
 			weaknesses: [],
+			resistances: [],
 		},
 		intProperties: {
 			ac: null,

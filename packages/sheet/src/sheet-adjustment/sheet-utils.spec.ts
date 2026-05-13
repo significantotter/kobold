@@ -309,14 +309,14 @@ describe('SheetUtils', () => {
 				sheet,
 				resistAndWeaknessAdjustments
 			);
-			expect(adjustedSheet.weaknessesResistances.resistances.length).toEqual(1);
-			expect(adjustedSheet.weaknessesResistances.weaknesses.length).toEqual(1);
-			expect(adjustedSheet.weaknessesResistances.weaknesses[0].type).toEqual(
+			expect(adjustedSheet.defenses.resistances.length).toEqual(1);
+			expect(adjustedSheet.defenses.weaknesses.length).toEqual(1);
+			expect(adjustedSheet.defenses.weaknesses[0].label).toEqual(
 				'multi word cold'
 			);
-			expect(adjustedSheet.weaknessesResistances.weaknesses[0].amount).toEqual(2);
-			expect(adjustedSheet.weaknessesResistances.resistances[0].type).toEqual('fire');
-			expect(adjustedSheet.weaknessesResistances.resistances[0].amount).toEqual(4);
+			expect(adjustedSheet.defenses.weaknesses[0].amount).toEqual(2);
+			expect(adjustedSheet.defenses.resistances[0].label).toEqual('fire');
+			expect(adjustedSheet.defenses.resistances[0].amount).toEqual(4);
 		});
 
 		it('allows a user to update stats', () => {

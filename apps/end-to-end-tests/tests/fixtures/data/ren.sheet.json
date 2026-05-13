@@ -239,7 +239,7 @@
 			"effects": []
 		}
 	],
-	"infoLists": { "senses": [], "traits": [], "languages": ["None selected"], "immunities": [] },
+	"infoLists": { "senses": [], "traits": [], "languages": ["None selected"] },
 	"sourceData": {
 		"xp": 0,
 		"age": "Not set",
@@ -814,5 +814,5 @@
 			"recoverable": false
 		}
 	],
-	"weaknessesResistances": { "weaknesses": [], "resistances": [] }
+	"defenses": { "immunities": [], "weaknesses": [], "resistances": [] }
 }

@@ -114,12 +114,19 @@ export enum SheetInfoListKeys {
 	traits = 'traits',
 	languages = 'languages',
 	senses = 'senses',
-	immunities = 'immunities',
 }
 
-export enum SheetWeaknessesResistancesKeys {
-	resistances = 'resistances',
-	weaknesses = 'weaknesses',
+export enum DefenseRuleAutomation {
+	auto = 'auto',
+	partial = 'partial',
+	manual = 'manual',
+}
+
+export enum DefenseRuleSource {
+	nethys = 'nethys',
+	pathbuilder = 'pathbuilder',
+	wanderersGuide = 'wanderers-guide',
+	manual = 'manual',
 }
 
 export const zAbilityEnum = z.nativeEnum(AbilityEnum);
@@ -134,18 +141,68 @@ export const zProficiencyStat = z.strictObject({
 	note: z.string().nullable().default(null),
 });
 
-export type WeaknessOrResistance = z.infer<typeof zWeakOrResist>;
-export const zWeakOrResist = z.strictObject({
-	amount: z.number().int().describe('the amount of weakness/resistance for this type of damage'),
-	type: z.string().describe('the damage type'),
+export const zDefenseAppliesTo = z.enum([
+	'damage',
+	'effect',
+	'condition',
+	'critical-hit',
+	'nonlethal',
+]);
+
+export type DefenseMatcher = {
+	all?: boolean;
+	damageTypes?: string[];
+	damageGroups?: Array<'physical'>;
+	traits?: string[];
+	materials?: string[];
+	conditions?: string[];
+	effectTypes?: string[];
+	except?: Omit<DefenseMatcher, 'except'>;
+};
+const zDefenseMatcherBase = z.strictObject({
+	all: z.boolean().optional(),
+	damageTypes: z.array(z.string()).optional(),
+	damageGroups: z.array(z.literal('physical')).optional(),
+	traits: z.array(z.string()).optional(),
+	materials: z.array(z.string()).optional(),
+	conditions: z.array(z.string()).optional(),
+	effectTypes: z.array(z.string()).optional(),
+});
+export const zDefenseMatcher: z.ZodType<DefenseMatcher> = zDefenseMatcherBase.extend({
+	except: zDefenseMatcherBase.optional(),
+});
+
+export type DefenseRule = z.infer<typeof zDefenseRule>;
+export const zDefenseRule = z.strictObject({
+	label: z.string(),
+	raw: z.string(),
+	amount: z.number().int().optional(),
+	appliesTo: z.array(zDefenseAppliesTo),
+	match: zDefenseMatcher,
+	automation: z.nativeEnum(DefenseRuleAutomation),
+	source: z.nativeEnum(DefenseRuleSource).optional(),
+});
+
+export type SheetDefenses = z.infer<typeof zSheetDefenses>;
+export const zSheetDefenses = z.strictObject({
+	immunities: z.array(zDefenseRule).default([]),
+	weaknesses: z.array(zDefenseRule).default([]),
+	resistances: z.array(zDefenseRule).default([]),
+});
+
+export type DamageTerm = z.infer<typeof zDamageTerm>;
+export const zDamageTerm = z.strictObject({
+	dice: z.string().nullable().describe('The attack damage dice.'),
+	type: z.string().nullable().describe('The attack damage type.'),
+	tags: z.array(z.string()).default([]),
+	source: z.string().optional(),
+	persistent: z.boolean().optional(),
+	criticalOnly: z.boolean().optional(),
 });
 
 export type Damage = z.infer<typeof zDamage>;
 export const zDamage = z
-	.strictObject({
-		dice: z.string().describe('The attack damage dice.'),
-		type: z.string().nullable().describe('The attack damage type.'),
-	})
+	.strictObject(zDamageTerm.shape)
 	.describe('A damage roll');
 
 export type SheetAttack = z.infer<typeof zSheetAttack>;
@@ -221,19 +278,13 @@ export const zSheetInfoLists = zRecordOf(
 	z.array(z.string()).default([])
 ).describe('Sheet information as arrays of strings.');
 
-export type SheetWeaknessesResistances = z.infer<typeof zSheetWeaknessesResistances>;
-export const zSheetWeaknessesResistances = zRecordOf(
-	SheetWeaknessesResistancesKeys,
-	z.array(zWeakOrResist).default([])
-).describe('Weakness or resistance typed information.');
-
 export type Sheet = z.infer<typeof zSheet>;
 export const zSheet = z
 	.strictObject({
 		staticInfo: zSheetStaticInfo,
 		info: zSheetInfo,
 		infoLists: zSheetInfoLists,
-		weaknessesResistances: zSheetWeaknessesResistances,
+		defenses: zSheetDefenses,
 		intProperties: zSheetIntegers,
 		stats: zSheetStats,
 		baseCounters: zSheetBaseCounters,

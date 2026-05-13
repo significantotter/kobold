@@ -232,12 +232,16 @@ describe('sheet-import-nethys', () => {
 		expect(sheetStats.fortitude).toMatchObject({ bonus: 25, dc: 35 });
 		expect(sheetStats.reflex).toMatchObject({ bonus: 22, dc: 32 });
 		expect(sheetStats.will).toMatchObject({ bonus: 27, dc: 37 });
-		expect(importer.sheet.infoLists.immunities).toStrictEqual(['paralyzed', 'poison', 'sleep']);
-		expect(importer.sheet.weaknessesResistances.weaknesses).toStrictEqual([
-			{ type: 'fire', amount: 10 },
+		expect(importer.sheet.defenses.immunities.map(rule => rule.label)).toStrictEqual([
+			'paralyzed',
+			'poison',
+			'sleep',
 		]);
-		expect(importer.sheet.weaknessesResistances.resistances).toStrictEqual([
-			{ type: 'fire', amount: 5 },
+		expect(importer.sheet.defenses.weaknesses).toMatchObject([
+			{ label: 'fire', amount: 10 },
+		]);
+		expect(importer.sheet.defenses.resistances).toMatchObject([
+			{ label: 'fire', amount: 5 },
 		]);
 	});
 	test('applySkills()', () => {

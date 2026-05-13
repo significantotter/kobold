@@ -47,7 +47,7 @@ describe('RollAttackSubCommand Integration', () => {
 			{
 				name: 'Longsword',
 				toHit: 12,
-				damage: [{ dice: '1d8+4', type: 'slashing' }],
+					damage: [{ dice: '1d8+4', type: 'slashing', tags: [] }],
 				effects: [],
 				range: null,
 				traits: [],
@@ -56,7 +56,7 @@ describe('RollAttackSubCommand Integration', () => {
 			{
 				name: 'Shortbow',
 				toHit: 10,
-				damage: [{ dice: '1d6+2', type: 'piercing' }],
+					damage: [{ dice: '1d6+2', type: 'piercing', tags: [] }],
 				effects: [],
 				range: '60 feet',
 				traits: [],

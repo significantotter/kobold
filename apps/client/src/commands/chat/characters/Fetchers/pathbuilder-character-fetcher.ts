@@ -1,6 +1,7 @@
 import { refs } from '../../../../constants/common-text.js';
 import { CharacterWithRelations, Kobold, ImportSourceEnum } from '@kobold/db';
 import { PathBuilder } from '@kobold/schema';
+import { fetchNethysItemMetadataForPathbuilder } from '@kobold/sheet';
 import { KoboldError } from '@kobold/util';
 import { Creature } from '../../../../utils/creature.js';
 import { CharacterFetcher, SheetConversionResult } from './character-fetcher.js';
@@ -21,6 +22,7 @@ export class PathbuilderCharacterFetcher extends CharacterFetcher<
 		super(intr, kobold, userId);
 	}
 	public importSource = ImportSourceEnum.pathbuilder;
+	protected nethysCompendiumEntries: unknown[] = [];
 	public async fetchSourceData(args: { jsonId: number }): Promise<PB.Character> {
 		const pathBuilderChar = await new PathBuilder().get({ characterJsonId: args.jsonId });
 
@@ -31,6 +33,9 @@ export class PathbuilderCharacterFetcher extends CharacterFetcher<
 				})
 			);
 		}
+		this.nethysCompendiumEntries = await fetchNethysItemMetadataForPathbuilder(
+			pathBuilderChar.build
+		);
 		return pathBuilderChar.build;
 	}
 	public convertSheetRecord(
@@ -39,6 +44,7 @@ export class PathbuilderCharacterFetcher extends CharacterFetcher<
 	): SheetConversionResult {
 		const creature = Creature.fromPathBuilder(sourceData, activeCharacter, {
 			useStamina: this.options.useStamina,
+			nethysCompendiumEntries: this.nethysCompendiumEntries,
 		});
 		return {
 			sheetRecord: {

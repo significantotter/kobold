@@ -1,10 +1,13 @@
 import { z } from 'zod';
+import { zDamageTerm } from './sheet.zod.js';
 
 export enum RollTypeEnum {
 	attack = 'attack',
 	skillChallenge = 'skill-challenge',
 	damage = 'damage',
+	damageV2 = 'damage-v2',
 	advancedDamage = 'advanced-damage',
+	advancedDamageV2 = 'advanced-damage-v2',
 	save = 'save',
 	text = 'text',
 }
@@ -27,6 +30,12 @@ export const zDamageRoll = zBaseRoll.extend({
 	healInsteadOfDamage: z.boolean().default(false),
 	roll: z.string().nullable().default(null),
 });
+export type DamageRollV2 = z.infer<typeof zDamageRollV2>;
+export const zDamageRollV2 = zBaseRoll.extend({
+	type: z.literal(RollTypeEnum.damageV2),
+	healInsteadOfDamage: z.boolean().default(false),
+	terms: z.array(zDamageTerm).default([]),
+});
 export type AdvancedDamageRoll = z.infer<typeof zAdvancedDamageRoll>;
 export const zAdvancedDamageRoll = zBaseRoll.extend({
 	type: z.literal(RollTypeEnum.advancedDamage),
@@ -36,6 +45,15 @@ export const zAdvancedDamageRoll = zBaseRoll.extend({
 	criticalFailureRoll: z.string().nullable().default(null),
 	successRoll: z.string().nullable().default(null),
 	failureRoll: z.string().nullable().default(null),
+});
+export type AdvancedDamageRollV2 = z.infer<typeof zAdvancedDamageRollV2>;
+export const zAdvancedDamageRollV2 = zBaseRoll.extend({
+	type: z.literal(RollTypeEnum.advancedDamageV2),
+	healInsteadOfDamage: z.boolean().default(false),
+	criticalSuccessTerms: z.array(zDamageTerm).default([]),
+	successTerms: z.array(zDamageTerm).default([]),
+	failureTerms: z.array(zDamageTerm).default([]),
+	criticalFailureTerms: z.array(zDamageTerm).default([]),
 });
 export type SaveRoll = z.infer<typeof zSaveRoll>;
 export const zSaveRoll = zBaseRoll.extend({
@@ -57,7 +75,9 @@ export type Roll = z.infer<typeof zRoll>;
 export const zRoll = z.discriminatedUnion('type', [
 	zAttackOrSkillRoll,
 	zDamageRoll,
+	zDamageRollV2,
 	zAdvancedDamageRoll,
+	zAdvancedDamageRollV2,
 	zSaveRoll,
 	zTextRoll,
 ]);

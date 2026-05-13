@@ -7,14 +7,15 @@ import {
 	ActionCostEnum,
 	ActionTypeEnum,
 	AdvancedDamageRoll,
+	AdvancedDamageRollV2,
 	AttackOrSkillRoll,
+	DefenseRule,
 	Attribute,
 	DamageRoll,
+	DamageRollV2,
 	Roll,
 	RollTypeEnum,
 	SaveRoll,
-	SheetInfoLists,
-	SheetWeaknessesResistances,
 	TextRoll,
 	UserSettings,
 } from '@kobold/db';
@@ -31,10 +32,14 @@ import {
 import { EmbedUtils, KoboldEmbed } from './kobold-embed-utils.js';
 import { RollBuilder } from './roll-builder.js';
 import { DefaultUtils } from './default-utils.js';
-import type { DamagePacket, PreparedDamageLine } from './damage-resolver.js';
+import {
+	hasCriticalHitImmunity,
+	type DamagePacket,
+	type PreparedDamageLine,
+} from './damage-resolver.js';
 
 type ContestedRollTypes = 'attack' | 'skill-challenge' | 'save' | 'none';
-type ResultRollTypes = 'damage' | 'advanced-damage' | 'text';
+type ResultRollTypes = 'damage' | 'damage-v2' | 'advanced-damage' | 'advanced-damage-v2' | 'text';
 
 type BuildRollOptions = {
 	heightenLevel?: number;
@@ -59,9 +64,9 @@ export class ActionRoller {
 	public tags: string[];
 	public totalDamageDealt = 0;
 	public totalHealingDone = 0;
-	public triggeredWeaknesses: SheetWeaknessesResistances['weaknesses'] = [];
-	public triggeredResistances: SheetWeaknessesResistances['resistances'] = [];
-	public triggeredImmunities: SheetInfoLists['immunities'] = [];
+	public triggeredWeaknesses: DefenseRule[] = [];
+	public triggeredResistances: DefenseRule[] = [];
+	public triggeredImmunities: DefenseRule[] = [];
 	public preparedDamageLines: PreparedDamageLine[] = [];
 	protected damageHasResolved = false;
 	protected damageRollOverwriteIfUnused: string | null = null;
@@ -420,7 +425,8 @@ export class ActionRoller {
 				lastTargetingResult === 'critical success') ||
 			(lastTargetingActionType === 'save' && lastTargetingResult === 'critical failure')
 		) {
-			multiplier = 2;
+			multiplier =
+				this.targetCreature && hasCriticalHitImmunity(this.targetCreature.sheet) ? 1 : 2;
 		}
 		// half damage cases: Last action was a save that succeeded
 		else if (lastTargetingActionType === 'save' && lastTargetingResult === 'success') {
@@ -795,15 +801,22 @@ export class ActionRoller {
 		return results;
 	}
 
-	public prepareDamage(roll: DamageRoll | AdvancedDamageRoll, damage: number) {
+	public prepareDamage(
+		roll: DamageRoll | AdvancedDamageRoll | DamageRollV2 | AdvancedDamageRollV2,
+		damage: number,
+		tags: string[] = [],
+		damageTypeOverride?: string | null
+	) {
 		this.damageHasResolved = false;
-		const damageType = roll.damageType ?? 'untyped';
+		const damageType =
+			damageTypeOverride ?? ('damageType' in roll ? roll.damageType : null) ?? 'untyped';
 		this.preparedDamageLines.push({
 			amount: damage,
 			damageType,
 			sourceName: roll.name,
 			tags: _.uniq([
 				...this.tags,
+				...tags,
 				'damage',
 				damageType,
 				...damageType.split(/\W+/).filter(Boolean),
@@ -811,8 +824,13 @@ export class ActionRoller {
 		});
 	}
 
-	public applyDamage(roll: DamageRoll | AdvancedDamageRoll, damage: number) {
-		this.prepareDamage(roll, damage);
+	public applyDamage(
+		roll: DamageRoll | AdvancedDamageRoll | DamageRollV2 | AdvancedDamageRollV2,
+		damage: number,
+		tags: string[] = [],
+		damageTypeOverride?: string | null
+	) {
+		this.prepareDamage(roll, damage, tags, damageTypeOverride);
 	}
 
 	public buildDamagePacket(): DamagePacket {
@@ -1075,6 +1093,43 @@ export class ActionRoller {
 					else if (result?.results?.total && roll.healInsteadOfDamage)
 						this.applyHealing(roll, result.results.total);
 				}
+			} else if (rollType === 'damage-v2') {
+				for (let termIndex = 0; termIndex < roll.terms.length; termIndex++) {
+					const term = roll.terms[termIndex];
+					const termRoll: DamageRoll = {
+						type: RollTypeEnum.damage,
+						name:
+							roll.terms.length === 1
+								? roll.name
+								: `${roll.name} ${termIndex + 1}`,
+						roll: term.dice,
+						damageType: term.type,
+						healInsteadOfDamage: roll.healInsteadOfDamage,
+						allowRollModifiers:
+							termIndex === 0 ? roll.allowRollModifiers : false,
+					};
+					const result = this.rollBasicDamage(
+						rollBuilder,
+						termRoll,
+						options,
+						extraAttributes,
+						rollCounter,
+						lastTargetingResult,
+						lastTargetingActionType
+					);
+					if (result && result.type === 'dice') {
+						if (result?.results?.total && !roll.healInsteadOfDamage) {
+							this.prepareDamage(
+								roll,
+								result.results.total,
+								term.tags,
+								term.type
+							);
+						} else if (result?.results?.total && roll.healInsteadOfDamage) {
+							this.applyHealing(roll, result.results.total);
+						}
+					}
+				}
 			} else if (rollType === 'advanced-damage') {
 				const result = this.rollAdvancedDamage(
 					rollBuilder,
@@ -1090,6 +1145,59 @@ export class ActionRoller {
 						this.prepareDamage(roll, result?.appliedDamage);
 					else if (result?.appliedDamage && roll.healInsteadOfDamage)
 						this.applyHealing(roll, result?.appliedDamage);
+				}
+			} else if (rollType === 'advanced-damage-v2') {
+				const criticalImmune =
+					this.targetCreature && hasCriticalHitImmunity(this.targetCreature.sheet);
+				const effectiveResult =
+					criticalImmune &&
+					lastTargetingActionType === 'attack' &&
+					lastTargetingResult === 'critical success'
+						? 'success'
+						: lastTargetingResult;
+				const terms =
+					effectiveResult === 'critical success'
+						? roll.criticalSuccessTerms
+						: effectiveResult === 'failure'
+							? roll.failureTerms
+							: effectiveResult === 'critical failure'
+								? roll.criticalFailureTerms
+								: roll.successTerms;
+				for (let termIndex = 0; termIndex < terms.length; termIndex++) {
+					const term = terms[termIndex];
+					const termRoll: DamageRoll = {
+						type: RollTypeEnum.damage,
+						name:
+							terms.length === 1
+								? roll.name
+								: `${roll.name} ${termIndex + 1}`,
+						roll: term.dice,
+						damageType: term.type,
+						healInsteadOfDamage: roll.healInsteadOfDamage,
+						allowRollModifiers:
+							termIndex === 0 ? roll.allowRollModifiers : false,
+					};
+					const result = this.rollBasicDamage(
+						rollBuilder,
+						termRoll,
+						options,
+						extraAttributes,
+						rollCounter,
+						null,
+						'none'
+					);
+					if (result && result.type === 'dice') {
+						if (result?.results?.total && !roll.healInsteadOfDamage) {
+							this.prepareDamage(
+								roll,
+								result.results.total,
+								term.tags,
+								term.type
+							);
+						} else if (result?.results?.total && roll.healInsteadOfDamage) {
+							this.applyHealing(roll, result.results.total);
+						}
+					}
 				}
 			}
 		}
@@ -1161,26 +1269,29 @@ export class ActionRoller {
 		// add the first damage roll with damage modifiers
 		if (targetAttack.damage[0]) {
 			action.rolls.push({
-				type: RollTypeEnum.damage,
+				type: RollTypeEnum.damageV2,
 				name: 'Damage',
-				roll:
-					DiceUtils.buildDiceExpression(
-						targetAttack.damage[0].dice,
-						null,
-						damageModifierExpression
-					) || null,
 				healInsteadOfDamage: false,
-				damageType: targetAttack.damage[0].type,
+				terms: [
+					{
+						...targetAttack.damage[0],
+						dice:
+							DiceUtils.buildDiceExpression(
+								targetAttack.damage[0].dice ?? '',
+								null,
+								damageModifierExpression
+							) || null,
+					},
+				],
 				allowRollModifiers: true,
 			});
 		}
 		for (let i = 1; i < targetAttack.damage.length; i++) {
 			action.rolls.push({
-				type: RollTypeEnum.damage,
+				type: RollTypeEnum.damageV2,
 				name: 'Damage',
-				roll: targetAttack.damage[i].dice,
 				healInsteadOfDamage: false,
-				damageType: targetAttack.damage[i].type,
+				terms: [targetAttack.damage[i]],
 				allowRollModifiers: false,
 			});
 		}

@@ -11,7 +11,6 @@ import {
 	SheetInfoListKeys,
 	SheetIntegerKeys,
 	SheetStatKeys,
-	SheetWeaknessesResistancesKeys,
 	StatSubGroupEnum,
 } from '../index.js';
 import {
@@ -31,7 +30,6 @@ import {
 	isSheetInfoListKeys,
 	isSheetIntegerKeys,
 	isSheetStatKeys,
-	isSheetWeaknessesResistancesKeys,
 	isStatSubGroupEnum,
 	isInitStatsNotificationEnum,
 	InitStatsNotificationEnum,
@@ -168,7 +166,6 @@ describe('Enum Helpers', () => {
 
 	describe('isSheetInfoListKeys', () => {
 		it('should return true for valid SheetInfoListKeys values', () => {
-			expect(isSheetInfoListKeys(SheetInfoListKeys.immunities)).toBe(true);
 			expect(isSheetInfoListKeys(SheetInfoListKeys.languages)).toBe(true);
 			expect(isSheetInfoListKeys(SheetInfoListKeys.senses)).toBe(true);
 			expect(isSheetInfoListKeys(SheetInfoListKeys.traits)).toBe(true);
@@ -191,21 +188,6 @@ describe('Enum Helpers', () => {
 
 		it('should return false for invalid SheetBaseCounterKeys values', () => {
 			expect(isSheetBaseCounterKeys('invalid_value')).toBe(false);
-		});
-	});
-
-	describe('isSheetWeaknessesResistancesKeys', () => {
-		it('should return true for valid SheetWeaknessesResistancesKeys values', () => {
-			expect(
-				isSheetWeaknessesResistancesKeys(SheetWeaknessesResistancesKeys.resistances)
-			).toBe(true);
-			expect(
-				isSheetWeaknessesResistancesKeys(SheetWeaknessesResistancesKeys.weaknesses)
-			).toBe(true);
-		});
-
-		it('should return false for invalid SheetWeaknessesResistancesKeys values', () => {
-			expect(isSheetWeaknessesResistancesKeys('invalid_value')).toBe(false);
 		});
 	});
 

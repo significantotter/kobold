@@ -5,11 +5,15 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { CommandInteraction, CacheType } from 'discord.js';
 import { PathbuilderCharacterFetcher } from './pathbuilder-character-fetcher.js';
 import { PathBuilder } from '@kobold/schema';
+import { fetchNethysItemMetadataForPathbuilder } from '@kobold/sheet';
 import { Creature } from '../../../../utils/creature.js';
 import { getMockKobold, resetMockKobold } from '../../../../test-utils/index.js';
 import type { Kobold } from '@kobold/db';
 
 vi.mock('../../../../utils/creature.js');
+vi.mock('@kobold/sheet', () => ({
+	fetchNethysItemMetadataForPathbuilder: vi.fn().mockResolvedValue([]),
+}));
 
 const createMockPathbuilderCharacter = (): PathBuilder.Character => ({
 	name: 'Test Character',
@@ -95,6 +99,7 @@ describe('PathbuilderCharacterFetcher', () => {
 	let mockIntr: CommandInteraction<CacheType>;
 
 	beforeEach(() => {
+		vi.clearAllMocks();
 		resetMockKobold(mockKobold);
 		mockIntr = createMockInteraction();
 		fetcher = new PathbuilderCharacterFetcher(
@@ -135,6 +140,7 @@ describe('PathbuilderCharacterFetcher', () => {
 			const result = await fetcher.fetchSourceData({ jsonId: 12345 });
 
 			expect(result).toEqual(mockBuild);
+			expect(fetchNethysItemMetadataForPathbuilder).toHaveBeenCalledWith(mockBuild);
 		});
 
 		it('should throw KoboldError when PathBuilder request fails', async () => {
@@ -196,6 +202,7 @@ describe('PathbuilderCharacterFetcher', () => {
 			});
 			expect(Creature.fromPathBuilder).toHaveBeenCalledWith(mockSourceData, undefined, {
 				useStamina: false,
+				nethysCompendiumEntries: [],
 			});
 		});
 
@@ -219,6 +226,7 @@ describe('PathbuilderCharacterFetcher', () => {
 
 			expect(Creature.fromPathBuilder).toHaveBeenCalledWith(mockSourceData, undefined, {
 				useStamina: true,
+				nethysCompendiumEntries: [],
 			});
 		});
 
@@ -243,7 +251,7 @@ describe('PathbuilderCharacterFetcher', () => {
 			expect(Creature.fromPathBuilder).toHaveBeenCalledWith(
 				mockSourceData,
 				mockActiveCharacter,
-				{ useStamina: false }
+				{ useStamina: false, nethysCompendiumEntries: [] }
 			);
 		});
 	});

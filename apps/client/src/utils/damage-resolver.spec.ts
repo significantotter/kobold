@@ -3,6 +3,9 @@ import { describe, expect, it } from 'vitest';
 import {
 	ActionCostEnum,
 	ActionTypeEnum,
+	DefenseRule,
+	DefenseRuleAutomation,
+	DefenseRuleSource,
 	RollTypeEnum,
 	type Action,
 	type DamageRoll,
@@ -23,9 +26,29 @@ function sheetWithIwr({
 	weaknesses?: { type: string; amount: number }[];
 }): Sheet {
 	const sheet = _.cloneDeep(SheetProperties.defaultSheet);
-	sheet.infoLists.immunities = immunities;
-	sheet.weaknessesResistances.resistances = resistances;
-	sheet.weaknessesResistances.weaknesses = weaknesses;
+	const rule = (type: string, amount?: number): DefenseRule => ({
+		label: type,
+		raw: type,
+		amount,
+		appliesTo: ['damage'],
+		match:
+			type === 'all damage'
+				? { all: true }
+				: type === 'physical'
+					? { damageGroups: ['physical'] }
+					: ['cold iron', 'silver', 'adamantine'].includes(type)
+						? { materials: [type] }
+						: { damageTypes: [type], traits: [type] },
+		automation: DefenseRuleAutomation.auto,
+		source: DefenseRuleSource.manual,
+	});
+	sheet.defenses.immunities = immunities.map(immunity => rule(immunity));
+	sheet.defenses.resistances = resistances.map(resistance =>
+		rule(resistance.type, resistance.amount)
+	);
+	sheet.defenses.weaknesses = weaknesses.map(weakness =>
+		rule(weakness.type, weakness.amount)
+	);
 	sheet.baseCounters.hp.current = 100;
 	sheet.baseCounters.hp.max = 100;
 	return sheet;
@@ -46,7 +69,7 @@ describe('resolveDamagePacket', () => {
 
 		expect(result.totalBeforeIwr).toBe(7);
 		expect(result.totalAfterIwr).toBe(12);
-		expect(result.appliedWeaknesses.map(weakness => weakness.type)).toEqual(['fire']);
+		expect(result.appliedWeaknesses.map(weakness => weakness.label)).toEqual(['fire']);
 	});
 
 	it('can trigger multiple different weaknesses once in a single effect', () => {
@@ -65,7 +88,7 @@ describe('resolveDamagePacket', () => {
 		});
 
 		expect(result.totalAfterIwr).toBe(16);
-		expect(result.appliedWeaknesses.map(weakness => weakness.type)).toEqual([
+		expect(result.appliedWeaknesses.map(weakness => weakness.label)).toEqual([
 			'fire',
 			'cold',
 		]);
@@ -85,7 +108,7 @@ describe('resolveDamagePacket', () => {
 		});
 
 		expect(result.totalAfterIwr).toBe(10);
-		expect(result.appliedResistances.map(resistance => resistance.type)).toEqual([
+		expect(result.appliedResistances.map(resistance => resistance.label)).toEqual([
 			'cold iron',
 		]);
 	});
@@ -118,7 +141,7 @@ describe('resolveDamagePacket', () => {
 		});
 
 		expect(result.totalAfterIwr).toBe(0);
-		expect(result.appliedImmunities).toEqual(['fire']);
+		expect(result.appliedImmunities.map(immunity => immunity.label)).toEqual(['fire']);
 		expect(result.appliedWeaknesses).toEqual([]);
 		expect(result.appliedResistances).toEqual([]);
 	});
@@ -137,7 +160,7 @@ describe('resolveDamagePacket', () => {
 		});
 
 		expect(result.totalAfterIwr).toBe(16);
-		expect(result.appliedWeaknesses.map(weakness => weakness.type)).toEqual(['spell']);
+		expect(result.appliedWeaknesses.map(weakness => weakness.label)).toEqual(['spell']);
 	});
 
 	it('preserves the old Creature.applyDamage behavior as a one-line packet', () => {
@@ -212,7 +235,7 @@ describe('resolveDamagePacket', () => {
 		actionRoller.resolveDamage({ apply: true });
 
 		expect(actionRoller.totalDamageDealt).toBe(12);
-		expect(actionRoller.triggeredWeaknesses.map(weakness => weakness.type)).toEqual(['fire']);
+		expect(actionRoller.triggeredWeaknesses.map(weakness => weakness.label)).toEqual(['fire']);
 		expect(target.sheet.baseCounters.hp.current).toBe(88);
 	});
 });

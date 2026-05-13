@@ -1657,7 +1657,7 @@ describe('AttackBucket', () => {
 				parsed: {
 					name: 'claw',
 					toHit: 5,
-					damage: [{ dice: '1d4+2', type: 'slashing' }],
+					damage: [{ dice: '1d4+2', type: 'slashing', tags: [] }],
 					effects: ['grab', 'spiny eurypterid venom'],
 					range: '10 ft',
 					traits: ['agile', 'finesse'],
@@ -1689,7 +1689,7 @@ describe('AttackBucket', () => {
 				parsed: {
 					name: 'claw',
 					toHit: 5,
-					damage: [{ dice: '1d4+2', type: 'slashing' }],
+					damage: [{ dice: '1d4+2', type: 'slashing', tags: [] }],
 					effects: ['grab', 'spiny eurypterid venom'],
 					range: '10 ft',
 					traits: ['agile', 'finesse'],
@@ -1709,7 +1709,7 @@ describe('AttackBucket', () => {
 				parsed: {
 					name: 'claw',
 					toHit: 5,
-					damage: [{ dice: '1d4+2', type: 'slashing' }],
+						damage: [{ dice: '1d4+2', type: 'slashing', tags: [] }],
 					effects: [],
 					range: '10 ft',
 					traits: ['agile', 'finesse'],
@@ -1724,7 +1724,7 @@ describe('AttackBucket', () => {
 				parsed: {
 					name: 'claw',
 					toHit: 10,
-					damage: [{ dice: '1d6+3', type: 'slashing' }],
+					damage: [{ dice: '1d6+3', type: 'slashing', tags: [] }],
 					effects: [],
 					range: '5 ft',
 					traits: ['agile'],

@@ -1,4 +1,4 @@
-import { AbilityEnum } from '@kobold/db';
+import { AbilityEnum, DefenseRuleAutomation, DefenseRuleSource } from '@kobold/db';
 import { AttributeUtils } from './attribute-utils.js';
 import { Creature } from './creature.js';
 import { SheetProperties } from '@kobold/sheet';
@@ -37,8 +37,24 @@ sheet.additionalSkills.push({
 	note: null,
 });
 sheet.staticInfo.level = 2;
-sheet.weaknessesResistances.resistances.push({ type: 'fire', amount: 5 });
-sheet.weaknessesResistances.weaknesses.push({ type: 'cold', amount: 5 });
+sheet.defenses.resistances.push({
+	label: 'fire',
+	raw: 'fire',
+	amount: 5,
+	appliesTo: ['damage'],
+	match: { damageTypes: ['fire'] },
+	automation: DefenseRuleAutomation.auto,
+	source: DefenseRuleSource.manual,
+});
+sheet.defenses.weaknesses.push({
+	label: 'cold',
+	raw: 'cold',
+	amount: 5,
+	appliesTo: ['damage'],
+	match: { damageTypes: ['cold'] },
+	automation: DefenseRuleAutomation.auto,
+	source: DefenseRuleSource.manual,
+});
 const creature = new Creature({
 	sheet,
 	actions: [],
