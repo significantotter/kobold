@@ -13,6 +13,7 @@ import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js
 import { Command } from '../../index.js';
 import { GameplayDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
+import { KoboldError } from '@kobold/util';
 const commandOptions = GameplayDefinition.options;
 const commandOptionsEnum = GameplayDefinition.commandOptionsEnum;
 
@@ -38,13 +39,19 @@ export class GameplayRecoverSubCommand extends BaseCommandClass(
 	): Promise<void> {
 		const targetCharacter = intr.options.getString(
 			commandOptions[commandOptionsEnum.targetCharacter].name,
-			true
+			false
 		);
 
-		const { gameUtils, gameplayUtils } = new KoboldUtils(kobold);
+		const { gameUtils, gameplayUtils, characterUtils } = new KoboldUtils(kobold);
 
+		const effectiveTargetCharacter =
+			targetCharacter || (await characterUtils.getActiveCharacter(intr))?.name;
+		if (!effectiveTargetCharacter) {
+			throw new KoboldError(GameplayDefinition.strings.shared.errors.noActiveCharacter);
+		}
 		const { targetSheetRecord, targetEntity, hideStats, targetName } =
-			await gameUtils.getCharacterOrInitActorTarget(intr, targetCharacter);
+			await gameUtils.getCharacterOrInitActorTarget(intr, effectiveTargetCharacter);
+
 		const targetCreature = Creature.fromSheetRecord(targetEntity, targetName, intr);
 
 		const recoverValues = await gameplayUtils.recoverGameplayStats(

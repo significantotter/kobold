@@ -18,7 +18,6 @@ import {
 	TEST_GUILD_ID,
 	CommandTestHarness,
 } from '../../../test-utils/index.js';
-import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 
 vi.mock('../../../utils/kobold-service-utils/kobold-utils.js');
 
