@@ -1,5 +1,13 @@
 import _ from 'lodash';
-import { Action, Condition, Counter, Modifier, RollMacro, Sheet, SheetRecord } from '@kobold/db';
+import {
+	Action,
+	Condition,
+	Counter,
+	Modifier,
+	RollMacro,
+	Sheet,
+	SheetRecordBase,
+} from '@kobold/db';
 import { Creature, roll, rollable } from '../creature.js';
 
 export class FinderHelpers {
@@ -46,9 +54,9 @@ export class FinderHelpers {
 	 * @returns the counter group
 	 */
 	public static getCounterGroupByName(
-		counterGroups: SheetRecord['sheet']['counterGroups'],
+		counterGroups: SheetRecordBase['sheet']['counterGroups'],
 		name: string
-	): SheetRecord['sheet']['counterGroups'][0] | undefined {
+	): SheetRecordBase['sheet']['counterGroups'][0] | undefined {
 		return counterGroups.find(
 			counterGroup =>
 				counterGroup.name.toLocaleLowerCase().trim() === name.toLocaleLowerCase().trim()
@@ -94,7 +102,7 @@ export class FinderHelpers {
 	 * @returns the condition
 	 */
 	public static getConditionByName(
-		sheetRecord: SheetRecord,
+		sheetRecord: SheetRecordBase,
 		name: string
 	): Condition | undefined {
 		return sheetRecord.conditions.find(
@@ -180,7 +188,7 @@ export class FinderHelpers {
 	 * @returns all conditions that contain the given conditionText
 	 */
 	public static matchAllConditions(
-		targetSheetRecord: SheetRecord,
+		targetSheetRecord: SheetRecordBase,
 		conditionText: string
 	): Condition[] {
 		const matchedConditions = [];

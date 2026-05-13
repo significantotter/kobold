@@ -18,6 +18,7 @@ import { CustomClient } from './extensions/index.js';
 import { Bot } from './models/bot.js';
 import { Reaction } from './reactions/index.js';
 import { CommandRegistrationService, JobService, Logger } from './services/index.js';
+import { CommandTimingContext } from './services/command-timing-context.js';
 import { Job } from './services/job-service.js';
 import { Kobold, getDialectWithPool } from '@kobold/db';
 import { Trigger } from './triggers/index.js';
@@ -34,6 +35,7 @@ async function start(): Promise<void> {
 	const SLOW_QUERY_MS = 1_000;
 	const kobold = new Kobold(PostgresDialect, {
 		onQuery(event) {
+			CommandTimingContext.recordDbQuery(event.queryDurationMillis, event.query.sql);
 			if (event.level === 'error') {
 				Logger.error('db query error', {
 					durationMs: event.queryDurationMillis,

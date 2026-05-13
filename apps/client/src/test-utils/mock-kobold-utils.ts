@@ -27,7 +27,7 @@ import {
 	type TextRoll,
 	type Modifier,
 	type RollMacro,
-	type SheetRecord,
+	type SheetRecordBase,
 	SheetAdjustmentTypeEnum,
 	UserSettings,
 	type InitiativeWithRelations,
@@ -39,7 +39,7 @@ import {
 	type PreparedCounter,
 	CounterStyleEnum,
 } from '@kobold/db';
-import { SheetProperties } from '../utils/sheet/sheet-properties.js';
+import { SheetProperties } from '@kobold/sheet';
 import { KoboldUtils, InjectedData } from '../utils/kobold-service-utils/kobold-utils.js';
 import { FinderHelpers } from '../utils/kobold-helpers/finder-helpers.js';
 import { mockKobold } from './mock-kobold.js';
@@ -228,18 +228,62 @@ export interface KoboldUtilsMockSetup {
  */
 export function setupKoboldUtilsMocks(options: MockCharacterOptions = {}): KoboldUtilsMockSetup {
 	const mockCharacter = createMockCharacter(options);
+	const createDbSelectChain = (tableName: string) => {
+		const chain: Record<string, any> = {};
+		const passthrough = vi.fn(() => chain);
+		for (const methodName of [
+			'innerJoin',
+			'select',
+			'selectAll',
+			'where',
+			'whereRef',
+			'orderBy',
+			'limit',
+		]) {
+			chain[methodName] = passthrough;
+		}
+		chain.execute = vi.fn(async () => []);
+		chain.executeTakeFirst = vi.fn(async () => {
+			if (tableName !== 'sheetRecord') return undefined;
+			return new Proxy(
+				{},
+				{
+					get: (_target, property) =>
+						typeof property === 'string' && property.startsWith('rollattr')
+							? '1'
+							: undefined,
+				}
+			);
+		});
+		return chain;
+	};
+	mockKobold.db = {
+		selectFrom: vi.fn((tableName: string) => createDbSelectChain(tableName)),
+	};
+	mockKobold.character.readActiveLite.mockResolvedValue(mockCharacter);
+	mockKobold.character.readActiveAdjusted.mockResolvedValue(mockCharacter);
+	mockKobold.userSettings.read.mockResolvedValue(undefined);
+	mockKobold.rollMacro.readManyForCharacter.mockResolvedValue(mockCharacter.rollMacros ?? []);
+	mockKobold.sheetRecord.read.mockResolvedValue(mockCharacter.sheetRecord);
+	(mockKobold.sheetRecord as any).readAdjusted = vi.fn(async () => mockCharacter.sheetRecord);
 
 	const fetchDataMock = vi.fn(
-		async () =>
+		async (_intr, usesData?: PartialInjectedData) =>
 			({
 				activeCharacter: mockCharacter,
+				...(usesData?.activeCharacterAdjusted
+					? { activeCharacterAdjusted: mockCharacter }
+					: {}),
 			}) as MockReturnValue
 	);
 
 	const fetchNonNullableDataMock = vi.fn(
-		async () =>
+		async (_intr, usesData?: PartialInjectedData) =>
 			({
 				activeCharacter: mockCharacter,
+				...(usesData?.activeCharacterAdjusted
+					? { activeCharacterAdjusted: mockCharacter }
+					: {}),
 				userSettings: undefined,
 			}) as MockReturnValue
 	);
@@ -264,7 +308,6 @@ export function setupKoboldUtilsMocks(options: MockCharacterOptions = {}): Kobol
 		};
 		this.adjustedSheetService = {
 			triggerRecompute: vi.fn(),
-			triggerRecomputeAllForUser: vi.fn(),
 		};
 		return this;
 	} as MockReturnValue);
@@ -673,7 +716,7 @@ export function createMockCondition(overrides: Partial<Modifier> = {}): Modifier
  */
 export interface GameUtilsMockOptions {
 	/** The mock sheet record to return */
-	targetSheetRecord?: SheetRecord;
+	targetSheetRecord?: SheetRecordBase;
 	/** The target name to return */
 	targetName?: string;
 	/** Whether to hide stats */
@@ -689,7 +732,7 @@ export interface GameUtilsMockSetup {
 	/** Mock for getCharacterOrInitActorTarget */
 	getCharacterOrInitActorTargetMock: MockInstance;
 	/** The mock sheet record */
-	mockSheetRecord: SheetRecord | null;
+	mockSheetRecord: SheetRecordBase | null;
 }
 
 /**
@@ -711,7 +754,7 @@ export interface GameUtilsMockSetup {
  */
 export function setupGameUtilsMocks(options: GameUtilsMockOptions = {}): GameUtilsMockSetup {
 	const {
-		targetSheetRecord = { ...fake(zSheetRecord), adjustedSheet: null },
+		targetSheetRecord = fake(zSheetRecord),
 		targetName = 'Test Character',
 		hideStats = false,
 		targetNotFound = false,
@@ -804,9 +847,8 @@ export function setupConditionMocks(options: ConditionMockOptions = {}): Conditi
 
 	// Create or update the sheet record with conditions
 	const baseSheetRecord = gameUtilsOptions.targetSheetRecord ?? fake(zSheetRecord);
-	const sheetRecordWithConditions: SheetRecord = {
+	const sheetRecordWithConditions: SheetRecordBase = {
 		...baseSheetRecord,
-		adjustedSheet: null,
 		conditions,
 	};
 
@@ -836,9 +878,8 @@ export function setupConditionAutocompleteMocks(
 	const { conditions = [], noActiveCharacter = false, ...gameUtilsOptions } = options;
 
 	const baseSheetRecord = gameUtilsOptions.targetSheetRecord ?? fake(zSheetRecord);
-	const sheetRecordWithConditions: SheetRecord = {
+	const sheetRecordWithConditions: SheetRecordBase = {
 		...baseSheetRecord,
-		adjustedSheet: null,
 		conditions,
 	};
 
@@ -917,7 +958,7 @@ export function createMockInitiative(
  * Creates a mock sheet record for an actor.
  * Note: actions, modifiers, and rollMacros are now separate entities and not part of SheetRecord.
  */
-export function createMockSheetRecord(overrides: Partial<SheetRecord> = {}): SheetRecord {
+export function createMockSheetRecord(overrides: Partial<SheetRecordBase> = {}): SheetRecordBase {
 	const id = nextSheetRecordId++;
 	return {
 		id,
@@ -933,7 +974,6 @@ export function createMockSheetRecord(overrides: Partial<SheetRecord> = {}): She
 		trackerMessageId: null,
 		trackerChannelId: null,
 		trackerGuildId: null,
-		adjustedSheet: null,
 		...overrides,
 	};
 }

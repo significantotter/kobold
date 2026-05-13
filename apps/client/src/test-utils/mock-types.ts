@@ -31,6 +31,7 @@ export interface MockKoboldEmbed {
  */
 export interface MockRollBuilder {
 	addRoll: MockFn;
+	addPreparedRollResult: MockFn;
 	rollDice: MockFn;
 	compileEmbed: MockFn;
 }

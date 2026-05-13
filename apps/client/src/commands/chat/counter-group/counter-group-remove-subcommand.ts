@@ -14,7 +14,7 @@ import { CollectorUtils } from '../../../utils/collector-utils.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { Command } from '../../index.js';
-import { KoboldError } from '../../../utils/KoboldError.js';
+import { KoboldError } from '@kobold/util';
 import { CounterGroupDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
 const commandOptions = CounterGroupDefinition.options;

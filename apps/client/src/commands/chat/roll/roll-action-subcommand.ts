@@ -6,8 +6,8 @@ import {
 	ChatInputCommandInteraction,
 } from 'discord.js';
 import { getEmoji } from '../../../constants/emoji.js';
-import { Kobold, SheetRecord } from '@kobold/db';
-import { KoboldError } from '../../../utils/KoboldError.js';
+import { Kobold, SheetRecordBase } from '@kobold/db';
+import { KoboldError } from '@kobold/util';
 import { ActionRoller } from '../../../utils/action-roller.js';
 import { Creature, EntityWithSheetData } from '../../../utils/creature.js';
 import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
@@ -122,7 +122,7 @@ export class RollActionSubCommand extends BaseCommandClass(
 			action => action.name.toLocaleLowerCase() === targetActionName.toLocaleLowerCase()
 		);
 
-		let targetSheetRecord: SheetRecord | null = null;
+		let targetSheetRecord: SheetRecordBase | null = null;
 		let targetEntity: EntityWithSheetData | null = null;
 		let targetCreature: Creature | null = null;
 		let hideStats = false;

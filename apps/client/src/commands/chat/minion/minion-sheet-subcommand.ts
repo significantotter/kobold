@@ -9,7 +9,7 @@ import { Kobold, MinionWithRelations, Sheet, getDefaultSheet } from '@kobold/db'
 import { MinionDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { KoboldError } from '../../../utils/KoboldError.js';
+import { KoboldError } from '@kobold/util';
 import { Creature } from '../../../utils/creature.js';
 import { InteractionUtils } from '../../../utils/index.js';
 

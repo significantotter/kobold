@@ -15,7 +15,8 @@ import type {
 	RollMacro,
 	SaveRoll,
 	Sheet,
-	SheetRecord,
+	SheetRecordAdjustedAsSheet,
+	SheetRecordBase,
 	TextRoll,
 } from '@kobold/db';
 
@@ -24,10 +25,17 @@ import type {
  * Used by the Creature class to accept different entity types.
  */
 export type EntityWithSheetData = {
-	sheetRecord: SheetRecord;
+	sheetRecord: SheetRecordBase;
 	actions: Action[];
 	modifiers: Modifier[];
 	rollMacros: RollMacro[];
+};
+
+export type EntityWithAdjustedSheetData = {
+	sheetRecord: SheetRecordAdjustedAsSheet;
+	actions?: Action[];
+	modifiers?: Modifier[];
+	rollMacros?: RollMacro[];
 };
 
 /**
@@ -36,7 +44,7 @@ export type EntityWithSheetData = {
  */
 export type PartialEntityWithSheetData =
 	| {
-			sheetRecord?: SheetRecord | null;
+			sheetRecord?: SheetRecordBase | null;
 			actions?: Action[];
 			modifiers?: Modifier[];
 			rollMacros?: RollMacro[];
@@ -50,9 +58,8 @@ import {
 	SheetBaseCounterKeys,
 	SheetStatKeys,
 } from '@kobold/db';
-import { PathBuilder } from '../services/pathbuilder/pathbuilder.js';
-import { WG } from '../services/wanderers-guide/wanderers-guide.js';
-import { KoboldError } from './KoboldError.js';
+import { PathBuilder } from '@kobold/schema';
+import { KoboldError } from '@kobold/util';
 import { AttributeUtils } from './attribute-utils.js';
 import { KoboldEmbed } from './kobold-embed-utils.js';
 import { ModifierUtils } from './kobold-service-utils/modifier-utils.js';
@@ -62,12 +69,12 @@ import {
 	SheetProperties,
 	SheetStatProperties,
 	StatGroupEnum,
-} from './sheet/sheet-properties.js';
-import { SheetUtils } from './sheet/sheet-utils.js';
-import { StringUtils } from '@kobold/base-utils';
-import { convertWanderersGuideCharToSheet } from './sheet/sheet-import-wg.js';
-import { convertPathBuilderToSheet } from './sheet/sheet-import-pathbuilder.js';
+	convertPathBuilderToSheet,
+	SheetUtils,
+} from '@kobold/sheet';
+import { StringUtils } from '@kobold/util';
 import { getEmoji } from '../constants/emoji.js';
+import { type DamagePacket, resolveDamagePacket } from './damage-resolver.js';
 
 const damageTypeShorthands: { [shorthand: string]: string } = {
 	piercing: 'p',
@@ -710,48 +717,8 @@ export class Creature {
 		return { totalHealed: this.sheet.baseCounters.hp.current - currentHp };
 	}
 
-	/**
-	 * Takes typed damage, applies any weaknesses or resistances, alters the sheet, and returns the actual damage taken
-	 */
-	public applyDamage(damage: number, damageType?: string) {
-		let finalDamage = damage;
-		let appliedWeakness;
-		let appliedResistance;
-		let appliedImmunity;
-		if (damageType) {
-			// we import damage types that end up containing effects sentences, so split
-			// up the sentences into word tokens, then check each word against our weaknesses/resistances
-			const damageTypeWords = damageType.split(/\W+/);
-			const weakness = _.maxBy(
-				damageTypeWords
-					.map(word => this.matchingWeakness(word))
-					.filter(weakness => weakness != null),
-				weakness => weakness?.amount ?? 0
-			);
-			const resistance = _.maxBy(
-				damageTypeWords
-					.map(word => this.matchingResistance(word))
-					.filter(resistance => resistance != null),
-				resistances => resistances?.amount ?? 0
-			);
-			const immunities = damageTypeWords
-				.map(word => this.matchingImmunities(word))
-				.filter(immunity => !!immunity)
-				.flat();
-
-			if (weakness?.type) {
-				finalDamage = finalDamage + (weakness?.amount ?? 0);
-				appliedWeakness = weakness;
-			}
-			if (resistance?.type) {
-				finalDamage = Math.max(0, finalDamage - (resistance?.amount ?? 0));
-				appliedResistance = resistance;
-			}
-			if (immunities.length) {
-				finalDamage = 0;
-				appliedImmunity = immunities[0];
-			}
-		}
+	protected applyResolvedDamage(finalDamage: number, options?: { apply?: boolean }) {
+		const shouldApply = options?.apply ?? true;
 		let initialTempHp = this.sheet.baseCounters.tempHp.current ?? 0;
 		let initialStamina = this.sheet.baseCounters.stamina.current ?? 0;
 		let initialHp = this.sheet.baseCounters.hp.current ?? 0;
@@ -759,31 +726,71 @@ export class Creature {
 
 		// apply damage to temp hp first, then stamina, then hp
 		if (initialTempHp > 0) {
-			this.sheet.baseCounters.tempHp.current = Math.max(0, initialTempHp - unappliedDamage);
-			this._sheet.baseCounters.tempHp.current = Math.max(0, initialTempHp - unappliedDamage);
+			const updatedTempHp = Math.max(0, initialTempHp - unappliedDamage);
+			if (shouldApply) {
+				this.sheet.baseCounters.tempHp.current = updatedTempHp;
+				this._sheet.baseCounters.tempHp.current = updatedTempHp;
+			}
 			unappliedDamage -= Math.min(initialTempHp, unappliedDamage);
 		}
 		if (unappliedDamage > 0 && this.sheet.staticInfo.usesStamina && initialStamina > 0) {
-			this.sheet.baseCounters.stamina.current = Math.max(0, initialStamina - unappliedDamage);
-			this._sheet.baseCounters.stamina.current = Math.max(
-				0,
-				initialStamina - unappliedDamage
-			);
+			const updatedStamina = Math.max(0, initialStamina - unappliedDamage);
+			if (shouldApply) {
+				this.sheet.baseCounters.stamina.current = updatedStamina;
+				this._sheet.baseCounters.stamina.current = updatedStamina;
+			}
 			unappliedDamage -= Math.min(initialStamina, unappliedDamage);
 		}
 		if (unappliedDamage > 0 && initialHp > 0) {
-			this.sheet.baseCounters.hp.current = Math.max(0, initialHp - unappliedDamage);
-			this._sheet.baseCounters.hp.current = Math.max(0, initialHp - unappliedDamage);
+			const updatedHp = Math.max(0, initialHp - unappliedDamage);
+			if (shouldApply) {
+				this.sheet.baseCounters.hp.current = updatedHp;
+				this._sheet.baseCounters.hp.current = updatedHp;
+			}
 			unappliedDamage -= Math.min(initialHp, unappliedDamage);
 		}
 
 		return {
-			totalDamage: finalDamage,
-			appliedWeakness,
-			appliedResistance,
-			appliedImmunity,
 			appliedDamage: finalDamage - unappliedDamage,
 		};
+	}
+
+	public resolveDamagePacket(packet: DamagePacket, options?: { apply?: boolean }) {
+		const resolution = resolveDamagePacket(this.sheet, packet);
+		const appliedDamageResult = this.applyResolvedDamage(resolution.totalAfterIwr, {
+			apply: options?.apply ?? false,
+		});
+
+		return {
+			totalDamage: resolution.totalAfterIwr,
+			appliedWeakness: resolution.appliedWeaknesses[0],
+			appliedResistance: resolution.appliedResistances[0],
+			appliedImmunity: resolution.appliedImmunities[0],
+			appliedWeaknesses: resolution.appliedWeaknesses,
+			appliedResistances: resolution.appliedResistances,
+			appliedImmunities: resolution.appliedImmunities,
+			appliedDamage: appliedDamageResult.appliedDamage,
+			resolution,
+		};
+	}
+
+	/**
+	 * Takes typed damage, applies any weaknesses or resistances, alters the sheet, and returns the actual damage taken
+	 */
+	public applyDamage(damage: number, damageType?: string) {
+		return this.resolveDamagePacket(
+			{
+				tags: [],
+				lines: [
+					{
+						amount: damage,
+						damageType: damageType ?? 'untyped',
+						tags: [],
+					},
+				],
+			},
+			{ apply: true }
+		);
 	}
 
 	getDC(dcName: string): number | null {
@@ -1121,12 +1128,12 @@ export class Creature {
 	}
 
 	/**
-	 * Creates a Creature from an entity whose sheetRecord.sheet is already the
-	 * adjusted (COALESCE'd) value. Skips re-computation of adjustments.
-	 * Use for display-only paths with lite/cached data.
+	 * Creates a Creature from an entity whose sheetRecord.sheet is already
+	 * adjusted_sheet. Skips re-computation of adjustments.
+	 * Use for display-only/read-only paths with cached data.
 	 */
-	public static fromCachedSheetRecord(
-		entity: EntityWithSheetData,
+	public static fromAdjustedSheetRecord(
+		entity: EntityWithAdjustedSheetData,
 		name?: string,
 		intr?: Interaction
 	): Creature {
@@ -1142,22 +1149,6 @@ export class Creature {
 			name,
 			intr
 		);
-	}
-
-	public static fromWandererersGuide(
-		calculatedStats: WG.CharacterCalculatedStatsApiResponse,
-		characterData: WG.CharacterApiResponse,
-		updateFrom?: PartialEntityWithSheetData
-	): Creature {
-		let sheet = convertWanderersGuideCharToSheet(calculatedStats, characterData);
-		sheet = Creature.preserveSheetTrackerValues(sheet, updateFrom?.sheetRecord?.sheet);
-		return new Creature({
-			sheet,
-			actions: updateFrom?.actions ?? [],
-			modifiers: updateFrom?.modifiers ?? [],
-			rollMacros: updateFrom?.rollMacros ?? [],
-			conditions: [],
-		});
 	}
 
 	public static fromPathBuilder(

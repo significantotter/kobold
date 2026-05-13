@@ -8,6 +8,8 @@ import {
 	Modifier,
 	RollMacro,
 	SheetRecord,
+	SheetRecordAdjustedAsSheet,
+	SheetRecordBase,
 } from '../schemas/index.js';
 
 // ============================================================================
@@ -33,7 +35,30 @@ export function sheetRecordForCharacter(eb: ExpressionBuilder<Database, 'charact
 			])
 			.whereRef('sheetRecord.id', '=', 'character.sheetRecordId')
 	)
-		.$castTo<SheetRecord>()
+		.$castTo<SheetRecordBase>()
+		.as('sheetRecord');
+}
+
+/**
+ * Fetches adjusted_sheet as sheet — no raw base sheet or adjusted_sheet field.
+ * Use for read-only paths where cached adjusted values are the desired view.
+ */
+export function sheetRecordAdjustedForCharacter(eb: ExpressionBuilder<Database, 'character'>) {
+	return jsonObjectFrom(
+		eb
+			.selectFrom('sheetRecord')
+			.select([
+				'sheetRecord.id',
+				'sheetRecord.conditions',
+				'sheetRecord.trackerMode',
+				'sheetRecord.trackerChannelId',
+				'sheetRecord.trackerGuildId',
+				'sheetRecord.trackerMessageId',
+			])
+			.select(sql<SheetRecord['sheet']>`"sheet_record"."adjusted_sheet"`.as('sheet'))
+			.whereRef('sheetRecord.id', '=', 'character.sheetRecordId')
+	)
+		.$castTo<SheetRecordAdjustedAsSheet>()
 		.as('sheetRecord');
 }
 
@@ -114,6 +139,18 @@ export function sheetRelationsForCharacter(eb: ExpressionBuilder<Database, 'char
 	] as const;
 }
 
+/**
+ * Returns all sheet-related relations for a character, using adjusted_sheet as sheet.
+ */
+export function adjustedSheetRelationsForCharacter(eb: ExpressionBuilder<Database, 'character'>) {
+	return [
+		sheetRecordAdjustedForCharacter(eb),
+		actionsForCharacter(eb),
+		modifiersForCharacter(eb),
+		rollMacrosForCharacter(eb),
+	] as const;
+}
+
 // ============================================================================
 // Selective / Lightweight Relation Builders for Character
 // ============================================================================
@@ -128,7 +165,7 @@ export function sheetRecordLiteForCharacter(eb: ExpressionBuilder<Database, 'cha
 			.select(['sheetRecord.id', 'sheetRecord.conditions', 'sheetRecord.trackerMode'])
 			.whereRef('sheetRecord.id', '=', 'character.sheetRecordId')
 	)
-		.$castTo<Pick<SheetRecord, 'id' | 'conditions' | 'trackerMode'>>()
+		.$castTo<Pick<SheetRecordBase, 'id' | 'conditions' | 'trackerMode'>>()
 		.as('sheetRecord');
 }
 
@@ -181,28 +218,24 @@ export function sheetRecordForActor(eb: ExpressionBuilder<Database, 'initiativeA
 			])
 			.whereRef('sheetRecord.id', '=', 'initiativeActor.sheetRecordId')
 	)
-		.$castTo<SheetRecord>()
+		.$castTo<SheetRecordBase>()
 		.as('sheetRecord');
 }
 
 /**
- * Fetches COALESCE(adjusted_sheet, sheet) as sheet — no raw sheet or adjusted_sheet.
+ * Fetches adjusted_sheet as sheet — no raw sheet or adjusted_sheet field.
  * Use for display-only paths where the pre-computed adjusted values are sufficient.
  * Saves ~40KB per row by reading only one JSONB blob.
  */
-export function sheetRecordCachedForActor(eb: ExpressionBuilder<Database, 'initiativeActor'>) {
+export function sheetRecordAdjustedForActor(eb: ExpressionBuilder<Database, 'initiativeActor'>) {
 	return jsonObjectFrom(
 		eb
 			.selectFrom('sheetRecord')
 			.select(['sheetRecord.id', 'sheetRecord.conditions', 'sheetRecord.trackerMode'])
-			.select(
-				sql<
-					SheetRecord['sheet']
-				>`COALESCE("sheet_record"."adjusted_sheet", "sheet_record"."sheet")`.as('sheet')
-			)
+			.select(sql<SheetRecord['sheet']>`"sheet_record"."adjusted_sheet"`.as('sheet'))
 			.whereRef('sheetRecord.id', '=', 'initiativeActor.sheetRecordId')
 	)
-		.$castTo<SheetRecord>()
+		.$castTo<SheetRecordAdjustedAsSheet>()
 		.as('sheetRecord');
 }
 
@@ -299,6 +332,19 @@ export function sheetRelationsForActor(eb: ExpressionBuilder<Database, 'initiati
 	] as const;
 }
 
+/**
+ * Returns all sheet-related relations for an initiative actor, using adjusted_sheet as sheet.
+ */
+export function adjustedSheetRelationsForActor(eb: ExpressionBuilder<Database, 'initiativeActor'>) {
+	return [
+		sheetRecordAdjustedForActor(eb),
+		actionsForActor(eb),
+		modifiersForActor(eb),
+		rollMacrosForActor(eb),
+		minionForActor(eb),
+	] as const;
+}
+
 // ============================================================================
 // Sheet Record Relations for Minion
 // ============================================================================
@@ -322,7 +368,29 @@ export function sheetRecordForMinion(eb: ExpressionBuilder<Database, 'minion'>) 
 			])
 			.whereRef('sheetRecord.id', '=', 'minion.sheetRecordId')
 	)
-		.$castTo<SheetRecord>()
+		.$castTo<SheetRecordBase>()
+		.as('sheetRecord');
+}
+
+/**
+ * Fetches adjusted_sheet as sheet — no raw base sheet or adjusted_sheet field.
+ */
+export function sheetRecordAdjustedForMinion(eb: ExpressionBuilder<Database, 'minion'>) {
+	return jsonObjectFrom(
+		eb
+			.selectFrom('sheetRecord')
+			.select([
+				'sheetRecord.id',
+				'sheetRecord.conditions',
+				'sheetRecord.trackerMode',
+				'sheetRecord.trackerChannelId',
+				'sheetRecord.trackerGuildId',
+				'sheetRecord.trackerMessageId',
+			])
+			.select(sql<SheetRecord['sheet']>`"sheet_record"."adjusted_sheet"`.as('sheet'))
+			.whereRef('sheetRecord.id', '=', 'minion.sheetRecordId')
+	)
+		.$castTo<SheetRecordAdjustedAsSheet>()
 		.as('sheetRecord');
 }
 
@@ -397,6 +465,18 @@ export function rollMacrosForMinion(eb: ExpressionBuilder<Database, 'minion'>) {
 export function sheetRelationsForMinion(eb: ExpressionBuilder<Database, 'minion'>) {
 	return [
 		sheetRecordForMinion(eb),
+		actionsForMinion(eb),
+		modifiersForMinion(eb),
+		rollMacrosForMinion(eb),
+	] as const;
+}
+
+/**
+ * Returns all sheet-related relations for a minion, using adjusted_sheet as sheet.
+ */
+export function adjustedSheetRelationsForMinion(eb: ExpressionBuilder<Database, 'minion'>) {
+	return [
+		sheetRecordAdjustedForMinion(eb),
 		actionsForMinion(eb),
 		modifiersForMinion(eb),
 		rollMacrosForMinion(eb),

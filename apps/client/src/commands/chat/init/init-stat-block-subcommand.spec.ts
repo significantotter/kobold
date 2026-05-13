@@ -18,7 +18,7 @@ import {
 	CommandTestHarness,
 } from '../../../test-utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { KoboldError } from '../../../utils/KoboldError.js';
+import { KoboldError } from '@kobold/util';
 
 vi.mock('../../../utils/kobold-service-utils/kobold-utils.js');
 
@@ -29,7 +29,6 @@ describe('InitStatBlockSubCommand Integration', () => {
 		resetInitTestIds();
 		harness = createTestHarness([new InitCommand([new InitStatBlockSubCommand()])]);
 	});
-
 
 	it('should display stat block for an actor', async () => {
 		// Arrange

@@ -9,6 +9,7 @@ export enum MinionCommandOptionEnum {
 	value = 'value',
 	rollType = 'roll-type',
 	targetCharacter = 'character',
+	assignTo = 'assign-to',
 	diceRollOrModifier = 'dice-roll-or-modifier',
 	skillChoice = 'skill',
 	rollExpression = 'dice',
@@ -96,6 +97,13 @@ export const minionCommandOptions = {
 	[MinionCommandOptionEnum.targetCharacter]: {
 		name: MinionCommandOptionEnum.targetCharacter,
 		description: 'The target character',
+		required: true,
+		autocomplete: true,
+		type: ApplicationCommandOptionType.String,
+	},
+	[MinionCommandOptionEnum.assignTo]: {
+		name: MinionCommandOptionEnum.assignTo,
+		description: 'The character to assign the minion to, or "Me" to unassign.',
 		required: true,
 		autocomplete: true,
 		type: ApplicationCommandOptionType.String,

@@ -8,7 +8,7 @@ import {
 
 import _ from 'lodash';
 import { getEmoji } from '../../../constants/emoji.js';
-import { Kobold, SheetRecord } from '@kobold/db';
+import { Kobold, SheetRecordBase } from '@kobold/db';
 import { ActionRoller } from '../../../utils/action-roller.js';
 import { Creature } from '../../../utils/creature.js';
 import { InteractionUtils } from '../../../utils/index.js';
@@ -127,7 +127,7 @@ export class GameRollSubCommand extends BaseCommandClass(
 		const embeds: KoboldEmbed[] = [];
 
 		let targetCreature: Creature | null = null;
-		let targetSheetRecord: SheetRecord | null = null;
+		let targetSheetRecord: SheetRecordBase | null = null;
 		let targetName: string | null = targetSheetName;
 		let hideStats = false;
 
@@ -208,7 +208,7 @@ export class GameRollSubCommand extends BaseCommandClass(
 		diceExpression: string,
 		userSettings: any,
 		targetCreature: Creature | null,
-		targetSheetRecord: SheetRecord | null,
+		targetSheetRecord: SheetRecordBase | null,
 		targetSheetName: string | null,
 		hideStats: boolean,
 		creatureUtils: any

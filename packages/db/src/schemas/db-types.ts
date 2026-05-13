@@ -18,7 +18,14 @@ export type CharacterId = Character['id'];
 /** Lightweight character type for autocomplete and listing — no sheet/relations loaded */
 export type CharacterBasic = Pick<
 	Character,
-	'id' | 'name' | 'userId' | 'sheetRecordId' | 'isActiveCharacter' | 'importSource' | 'charId'
+	| 'id'
+	| 'name'
+	| 'userId'
+	| 'sheetRecordId'
+	| 'isActiveCharacter'
+	| 'importSource'
+	| 'charId'
+	| 'gameId'
 >;
 
 // ChannelDefaultCharacter

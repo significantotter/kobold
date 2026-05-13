@@ -1,7 +1,7 @@
 import { AbilityEnum } from '@kobold/db';
 import { AttributeUtils } from './attribute-utils.js';
 import { Creature } from './creature.js';
-import { SheetProperties } from './sheet/sheet-properties.js';
+import { SheetProperties } from '@kobold/sheet';
 
 const sheet = SheetProperties.defaultSheet;
 sheet.stats.acrobatics = { ...sheet.stats.acrobatics, bonus: 9, dc: 19, proficiency: 2 };

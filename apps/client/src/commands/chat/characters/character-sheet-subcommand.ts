@@ -22,11 +22,11 @@ export class CharacterSheetSubCommand extends BaseCommandClass(
 		const sheetStyle =
 			intr.options.getString(commandOptions[commandOptionsEnum.sheetStyle].name) ??
 			sheetStyleEnum.fullSheet;
-		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
-			activeCharacter: true,
+		const { activeCharacterAdjusted } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
+			activeCharacterAdjusted: true,
 		});
 
-		const creature = Creature.fromSheetRecord(activeCharacter, undefined, intr);
+		const creature = Creature.fromAdjustedSheetRecord(activeCharacterAdjusted, undefined, intr);
 		const embed = creature.compileEmbed('Sheet', sheetStyle);
 
 		await embed.sendBatches(intr);

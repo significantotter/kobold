@@ -23,6 +23,7 @@
 		"test": "vitest"
 	},
 	"dependencies": {
+		"@kobold/schema": "workspace:*",
 		"@elastic/elasticsearch": "^8",
 		"@kobold/config": "workspace:*",
 		"discord.js": "^14.25.1",

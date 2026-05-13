@@ -75,6 +75,57 @@ describe('GameplaySetSubCommand Integration', () => {
 			// Assert
 			expect(result.didRespond()).toBe(true);
 		});
+
+		it('should default to the default or active character when target is omitted', async () => {
+			// Arrange
+			const mockCharacter = createMockCharacter({
+				characterOverrides: { name: 'DefaultHero' },
+			});
+			const getActiveCharacterMock = vi.fn(async () => mockCharacter);
+			const getCharacterOrInitActorTargetMock = vi.fn(async () => ({
+				targetSheetRecord: mockCharacter.sheetRecord,
+				targetEntity: mockCharacter,
+				targetName: mockCharacter.name,
+				hideStats: false,
+			}));
+			const setGameplayStatsMock = vi.fn(async () => ({
+				initialValue: 5,
+				updatedValue: 10,
+			}));
+
+			vi.mocked(KoboldUtils).mockImplementation(function (this: any) {
+				this.characterUtils = {
+					getActiveCharacter: getActiveCharacterMock,
+				};
+				this.gameUtils = {
+					getCharacterOrInitActorTarget: getCharacterOrInitActorTargetMock,
+				};
+				this.gameplayUtils = {
+					setGameplayStats: setGameplayStatsMock,
+				};
+				return this;
+			} as any);
+
+			// Act
+			const result = await harness.executeCommand({
+				commandName: 'gameplay',
+				subcommand: 'set',
+				options: {
+					[opts.setOption]: 'hp',
+					[opts.setValue]: 10,
+				},
+				userId: TEST_USER_ID,
+				guildId: TEST_GUILD_ID,
+			});
+
+			// Assert
+			expect(result.didRespond()).toBe(true);
+			expect(getActiveCharacterMock).toHaveBeenCalled();
+			expect(getCharacterOrInitActorTargetMock).toHaveBeenCalledWith(
+				expect.anything(),
+				'DefaultHero'
+			);
+		});
 	});
 
 	describe('Setting Temporary HP', () => {

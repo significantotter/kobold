@@ -6,21 +6,17 @@
 			<button class="logout-btn" @click="logout">Logout</button>
 		</template>
 		<template v-else>
-			<button class="login-btn" @click="login" :disabled="isLoading">
-				<i class="pi pi-discord" />
-				Login with Discord
-			</button>
+			<DiscordSignInButton size="header" />
 		</template>
 	</div>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted } from 'vue';
 import { useAuthStore } from '@/stores/auth';
-import { api } from '@/api/api-client';
+import DiscordSignInButton from '@/components/DiscordSignInButton.vue';
 
 const auth = useAuthStore();
-const isLoading = ref(false);
 
 const user = computed(() => auth.user);
 
@@ -28,16 +24,6 @@ const avatarUrl = computed(() => {
 	if (!user.value?.avatar) return null;
 	return `https://cdn.discordapp.com/avatars/${user.value.id}/${user.value.avatar}.png?size=32`;
 });
-
-async function login() {
-	isLoading.value = true;
-	try {
-		const { url } = await api.auth.getAuthUrl();
-		window.location.href = url;
-	} catch {
-		isLoading.value = false;
-	}
-}
 
 async function logout() {
 	await auth.logout();
@@ -67,7 +53,6 @@ onMounted(() => {
 	color: var(--p-text-color);
 }
 
-.login-btn,
 .logout-btn {
 	display: flex;
 	align-items: center;
@@ -88,16 +73,6 @@ onMounted(() => {
 	&:disabled {
 		opacity: 0.5;
 		cursor: not-allowed;
-	}
-}
-
-.login-btn {
-	background: #5865f2;
-	border-color: #5865f2;
-	color: #fff;
-
-	&:hover {
-		background: #4752c4;
 	}
 }
 </style>

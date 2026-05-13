@@ -14,7 +14,7 @@ import {
 } from '../../../test-utils/index.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { NethysDb, NethysParser } from '@kobold/nethys';
-import type { CompendiumEntry } from '@kobold/nethys';
+import type { CompendiumEntry } from '@kobold/schema';
 
 // Mock type that relaxes the complex generic signatures for testing
 type MockNethysDb = {

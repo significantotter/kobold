@@ -1,4 +1,4 @@
-import type { BestiaryEntry, CompendiumEntry } from '../schemas/index.js';
+import type { BestiaryEntry, CompendiumEntry } from '@kobold/schema';
 import { nethysMarkdownToDiscordMarkdown } from './nethysMarkdownParser.js';
 export { NethysEmoji } from './nethysMarkdownParser.js';
 export class NethysParser {

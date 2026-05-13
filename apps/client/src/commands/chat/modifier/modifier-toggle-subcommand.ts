@@ -79,11 +79,8 @@ export class ModifierToggleSubCommand extends BaseCommandClass(
 
 		await kobold.modifier.update({ id: modifier.id }, { isActive: newIsActive });
 
-		// Trigger adjusted_sheet recomputation
 		if (modifier.sheetRecordId !== null) {
 			koboldUtils.adjustedSheetService.triggerRecompute(modifier.sheetRecordId);
-		} else {
-			koboldUtils.adjustedSheetService.triggerRecomputeAllForUser(intr.user.id);
 		}
 
 		const activeText = newIsActive

@@ -8,9 +8,9 @@ import {
 	InitiativeActorWithRelations,
 	Kobold,
 	MinionWithRelations,
-	SheetRecord,
+	SheetRecordBase,
 } from '@kobold/db';
-import { KoboldError } from '../KoboldError.js';
+import { KoboldError } from '@kobold/util';
 import type { KoboldUtils } from './kobold-utils.js';
 import _ from 'lodash';
 import { EntityWithSheetData } from '../creature.js';
@@ -255,7 +255,7 @@ export class GameUtils {
 		intr: BaseInteraction<CacheType>,
 		targetName: string
 	): Promise<{
-		targetSheetRecord: SheetRecord;
+		targetSheetRecord: SheetRecordBase;
 		targetEntity: EntityWithSheetData;
 		hideStats: boolean;
 		targetName: string;
@@ -286,7 +286,7 @@ export class GameUtils {
 		);
 
 		// Determine the target (priority: init actor > minion > owned character > game character)
-		let targetSheetRecord: SheetRecord | null = null;
+		let targetSheetRecord: SheetRecordBase | null = null;
 		let targetEntity: EntityWithSheetData | null = null;
 		let hideStats = false;
 		let actualTargetName: string | undefined;

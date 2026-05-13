@@ -9,7 +9,7 @@ import {
 } from 'discord.js';
 
 import { CharacterWithRelations, Kobold, TrackerModeEnum } from '@kobold/db';
-import { KoboldError } from '../../../utils/KoboldError.js';
+import { KoboldError } from '@kobold/util';
 import { Creature } from '../../../utils/creature.js';
 import { InteractionUtils } from '../../../utils/interaction-utils.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';

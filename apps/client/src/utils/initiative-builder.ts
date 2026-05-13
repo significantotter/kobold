@@ -14,13 +14,13 @@ import {
 	RollCompactModeEnum,
 	UserSettings,
 } from '@kobold/db';
-import { KoboldError } from './KoboldError.js';
+import { KoboldError } from '@kobold/util';
 import { Creature } from './creature.js';
 import { DefaultUtils } from './default-utils.js';
 import { InteractionUtils } from './interaction-utils.js';
 import { KoboldEmbed } from './kobold-embed-utils.js';
 import { RollBuilder } from './roll-builder.js';
-import { StringUtils } from '@kobold/base-utils';
+import { StringUtils } from '@kobold/util';
 
 export type TurnData = {
 	currentRound: number;
@@ -264,7 +264,7 @@ export class InitiativeBuilder {
 		const rollBuilder = new RollBuilder({
 			actorName: actor.name,
 			creature: this._useCachedSheets
-				? Creature.fromCachedSheetRecord(actor, actor.name)
+				? Creature.fromAdjustedSheetRecord(actor, actor.name)
 				: Creature.fromSheetRecord(actor, actor.name),
 			userSettings: {
 				initStatsNotification: InitStatsNotificationEnum.never,
@@ -406,7 +406,7 @@ export class InitiativeBuilder {
 		let turnText = '';
 		// Use the adjusted sheet to include modifier effects on HP max, etc.
 		const creature = this._useCachedSheets
-			? Creature.fromCachedSheetRecord(actor)
+			? Creature.fromAdjustedSheetRecord(actor)
 			: Creature.fromSheetRecord(actor);
 		const sheet = creature.sheet;
 		// use a second line for an actor with a too-long name

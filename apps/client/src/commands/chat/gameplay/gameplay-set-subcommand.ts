@@ -8,7 +8,7 @@ import {
 
 import _ from 'lodash';
 import { Kobold, SheetBaseCounterKeys } from '@kobold/db';
-import { KoboldError } from '../../../utils/KoboldError.js';
+import { KoboldError } from '@kobold/util';
 import { Creature } from '../../../utils/creature.js';
 import { InteractionUtils } from '../../../utils/interaction-utils.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
@@ -40,7 +40,7 @@ export class GameplaySetSubCommand extends BaseCommandClass(
 	): Promise<void> {
 		const targetCharacter = intr.options.getString(
 			commandOptions[commandOptionsEnum.targetCharacter].name,
-			true
+			false
 		);
 		const option = _.camelCase(
 			intr.options.getString(commandOptions[commandOptionsEnum.setOption].name, true)
@@ -51,10 +51,16 @@ export class GameplaySetSubCommand extends BaseCommandClass(
 			true
 		);
 
-		const { gameUtils, gameplayUtils } = new KoboldUtils(kobold);
+		const { characterUtils, gameUtils, gameplayUtils } = new KoboldUtils(kobold);
+
+		const effectiveTargetCharacter =
+			targetCharacter || (await characterUtils.getActiveCharacter(intr))?.name;
+		if (!effectiveTargetCharacter) {
+			throw new KoboldError(GameplayDefinition.strings.shared.errors.noActiveCharacter);
+		}
 
 		const { targetSheetRecord, targetEntity, hideStats, targetName } =
-			await gameUtils.getCharacterOrInitActorTarget(intr, targetCharacter);
+			await gameUtils.getCharacterOrInitActorTarget(intr, effectiveTargetCharacter);
 
 		const creature = Creature.fromSheetRecord(targetEntity, targetName, intr);
 

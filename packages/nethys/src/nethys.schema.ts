@@ -1,5 +1,5 @@
 import { integer, text, jsonb, serial, pgTableCreator, boolean, unique } from 'drizzle-orm/pg-core';
-import { BestiaryEntry, CompendiumEntry } from './schemas/index.js';
+import { BestiaryEntry, CompendiumEntry } from '@kobold/schema';
 const pgTable = pgTableCreator(name => `nethys_${name}`);
 const standardFields = {
 	id: serial('id').primaryKey().notNull(),

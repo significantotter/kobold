@@ -1,5 +1,5 @@
 import type { ChatInputCommandInteraction } from 'discord.js';
-import type { Kobold, SheetBaseCounterKeys, SheetRecord } from '@kobold/db';
+import type { Kobold, SheetBaseCounterKeys, SheetRecordBase } from '@kobold/db';
 import { Creature } from '../creature.js';
 import type { KoboldUtils } from './kobold-utils.js';
 
@@ -11,7 +11,7 @@ export class GameplayUtils {
 
 	public async recoverGameplayStats(
 		intr: ChatInputCommandInteraction,
-		sheetRecord: SheetRecord,
+		sheetRecord: SheetRecordBase,
 		creature: Creature
 	) {
 		let recoverValues = creature.recover();
@@ -23,7 +23,7 @@ export class GameplayUtils {
 	}
 	public async setGameplayStats(
 		intr: ChatInputCommandInteraction,
-		sheetRecord: SheetRecord,
+		sheetRecord: SheetRecordBase,
 		creature: Creature,
 		option: SheetBaseCounterKeys,
 		value: string

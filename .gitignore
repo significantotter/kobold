@@ -8,6 +8,10 @@
 **/*.csv
 .vitest-reports/
 apps/web/docs/
+apps/web/.nuxt/
+apps/web/dist/
+apps/web/.turbo/
+apps/web/node_modules/
 
 /trace
 

@@ -19,7 +19,7 @@ import {
 	resetMockKobold,
 } from '../../../test-utils/index.js';
 import { InputParseUtils } from '../../../utils/input-parse-utils.js';
-import { SheetUtils } from '../../../utils/sheet/sheet-utils.js';
+import { SheetUtils } from '@kobold/sheet';
 import { Creature } from '../../../utils/creature.js';
 
 vi.mock('../../../utils/kobold-service-utils/kobold-utils.js');

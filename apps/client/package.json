@@ -45,12 +45,13 @@
 		"start:manager": "node dist/start-manager.js"
 	},
 	"dependencies": {
-		"@kobold/base-utils": "workspace:*",
 		"@kobold/config": "workspace:*",
 		"@kobold/db": "workspace:*",
 		"@kobold/documentation": "workspace:*",
+		"@kobold/schema": "workspace:*",
 		"@kobold/sheet": "workspace:*",
 		"@kobold/nethys": "workspace:*",
+		"@kobold/util": "workspace:*",
 		"@traversable/zod": "^0.0.57",
 		"axios": "^1.13.2",
 		"class-transformer": "0.5.1",

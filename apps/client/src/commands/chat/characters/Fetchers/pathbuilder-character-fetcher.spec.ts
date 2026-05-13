@@ -4,18 +4,82 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { CommandInteraction, CacheType } from 'discord.js';
 import { PathbuilderCharacterFetcher } from './pathbuilder-character-fetcher.js';
-import { PathBuilder } from '../../../../services/pathbuilder/index.js';
+import { PathBuilder } from '@kobold/schema';
 import { Creature } from '../../../../utils/creature.js';
-import { zPathBuilderCharacterSchema } from '../../../../services/pathbuilder/pathbuilder.zod.js';
-import { fake } from 'zod-schema-faker/v4';
-import { type MockPathBuilder } from '../../../../test-utils/mock-types.js';
 import { getMockKobold, resetMockKobold } from '../../../../test-utils/index.js';
 import type { Kobold } from '@kobold/db';
 
-vi.mock('../../../../services/pathbuilder/index.js');
 vi.mock('../../../../utils/creature.js');
 
-const createMockPathbuilderCharacter = () => fake(zPathBuilderCharacterSchema);
+const createMockPathbuilderCharacter = (): PathBuilder.Character => ({
+	name: 'Test Character',
+	class: 'Fighter',
+	level: 1,
+	ancestry: 'Human',
+	heritage: 'Skilled Human',
+	background: 'Warrior',
+	size: 2,
+	keyability: 'str',
+	languages: ['Common'],
+	attributes: {
+		ancestryhp: 8,
+		classhp: 10,
+		bonushp: 0,
+		bonushpPerLevel: 0,
+		speed: 25,
+		speedBonus: 0,
+	},
+	abilities: {
+		str: 18,
+		dex: 12,
+		con: 14,
+		int: 10,
+		wis: 10,
+		cha: 10,
+		breakdown: {
+			ancestryFree: [],
+			ancestryBoosts: ['Str', 'Con'],
+			ancestryFlaws: [],
+			backgroundBoosts: ['Str', 'Dex'],
+			classBoosts: ['Str'],
+			mapLevelledBoosts: {},
+		},
+	},
+	proficiencies: {
+		classDC: 2,
+		perception: 2,
+		fortitude: 4,
+		reflex: 2,
+		will: 2,
+		unarmored: 2,
+		simple: 2,
+		martial: 2,
+		unarmed: 2,
+		athletics: 2,
+	},
+	mods: {},
+	specificProficiencies: {
+		trained: [],
+		expert: [],
+		master: [],
+		legendary: [],
+	},
+	weapons: [],
+	money: {},
+	armor: [],
+	focusPoints: 0,
+	focus: {},
+	spellCasters: [],
+	formula: [],
+	pets: [],
+	acTotal: {
+		acProfBonus: 2,
+		acAbilityBonus: 1,
+		acItemBonus: 0,
+		acTotal: 13,
+		shieldBonus: null,
+	},
+});
 
 const createMockInteraction = () =>
 	({
@@ -63,12 +127,10 @@ describe('PathbuilderCharacterFetcher', () => {
 	describe('fetchSourceData', () => {
 		it('should fetch and return character data from PathBuilder', async () => {
 			const mockBuild = createMockPathbuilderCharacter();
-			vi.mocked(PathBuilder).mockImplementation(function (this: MockPathBuilder) {
-				(this as MockPathBuilder & { get: ReturnType<typeof vi.fn> }).get = vi
-					.fn()
-					.mockResolvedValue({ success: true, build: mockBuild });
-				return this;
-			} as unknown as () => PathBuilder);
+			vi.spyOn(PathBuilder.prototype, 'get').mockResolvedValue({
+				success: true,
+				build: mockBuild,
+			});
 
 			const result = await fetcher.fetchSourceData({ jsonId: 12345 });
 
@@ -76,12 +138,9 @@ describe('PathbuilderCharacterFetcher', () => {
 		});
 
 		it('should throw KoboldError when PathBuilder request fails', async () => {
-			vi.mocked(PathBuilder).mockImplementation(function (this: MockPathBuilder) {
-				(this as MockPathBuilder & { get: ReturnType<typeof vi.fn> }).get = vi
-					.fn()
-					.mockResolvedValue({ success: false });
-				return this;
-			} as unknown as () => PathBuilder);
+			vi.spyOn(PathBuilder.prototype, 'get').mockResolvedValue({
+				success: false,
+			} as Awaited<ReturnType<PathBuilder['get']>>);
 
 			await expect(fetcher.fetchSourceData({ jsonId: 12345 })).rejects.toThrow();
 		});

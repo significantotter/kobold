@@ -15,7 +15,7 @@ import {
 	ImportSourceEnum,
 } from '@kobold/db';
 import { Kobold } from '@kobold/db';
-import { KoboldError } from '../../../../utils/KoboldError.js';
+import { KoboldError } from '@kobold/util';
 import { CollectorUtils } from '../../../../utils/collector-utils.js';
 import { Creature } from '../../../../utils/creature.js';
 import { InteractionUtils } from '../../../../utils/interaction-utils.js';

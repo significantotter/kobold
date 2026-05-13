@@ -69,6 +69,34 @@ describe('CharacterModel', () => {
 			).rejects.toThrow();
 		});
 
+		it('enforces case-insensitive character name uniqueness per user', async () => {
+			const firstSheetRecord = await ResourceFactories.sheetRecord();
+			const secondSheetRecord = await ResourceFactories.sheetRecord();
+			const otherUserSheetRecord = await ResourceFactories.sheetRecord();
+
+			await ResourceFactories.character({
+				sheetRecordId: firstSheetRecord.id,
+				userId: 'same-user',
+				name: 'Valeros',
+			});
+
+			await expect(
+				ResourceFactories.character({
+					sheetRecordId: secondSheetRecord.id,
+					userId: 'same-user',
+					name: 'valeros',
+				})
+			).rejects.toThrow();
+
+			await expect(
+				ResourceFactories.character({
+					sheetRecordId: otherUserSheetRecord.id,
+					userId: 'other-user',
+					name: 'Valeros',
+				})
+			).resolves.toEqual(expect.objectContaining({ name: 'Valeros' }));
+		});
+
 		it('reads the relations of the character', async () => {
 			const fakeSheetRecord = await ResourceFactories.sheetRecord();
 			const fakeCharacter = await ResourceFactories.character({
@@ -103,6 +131,24 @@ describe('CharacterModel', () => {
 			await expect(
 				vitestKobold.character.updateFields({ id: fakeCharacter.id }, { sheetRecordId: -1 })
 			).rejects.toThrow();
+		});
+		it('updates the character name and sheet record names together', async () => {
+			const fakeCharacter = await ResourceFactories.character();
+
+			await vitestKobold.character.updateName({
+				id: fakeCharacter.id,
+				userId: fakeCharacter.userId,
+				name: 'Renamed Character',
+			});
+
+			const updatedCharacter = await vitestKobold.character.read({ id: fakeCharacter.id });
+			const updatedSheetRecord = await vitestKobold.sheetRecord.readFull({
+				id: fakeCharacter.sheetRecordId,
+			});
+
+			expect(updatedCharacter?.name).toEqual('Renamed Character');
+			expect(updatedSheetRecord?.sheet.staticInfo.name).toEqual('Renamed Character');
+			expect(updatedSheetRecord?.adjustedSheet.staticInfo.name).toEqual('Renamed Character');
 		});
 	});
 	describe('delete', () => {

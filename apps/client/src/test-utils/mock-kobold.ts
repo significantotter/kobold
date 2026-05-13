@@ -31,12 +31,15 @@ interface MockModel {
 interface MockCharacterModel extends MockModel {
 	setIsActive: MockFn;
 	readActive: MockFn;
+	readActiveAdjusted: MockFn;
+	readActiveLite: MockFn;
 	readLite: MockFn;
 	readManyLite: MockFn;
 	readManyForList: MockFn;
 	readManyWithModifiers: MockFn;
 	createReturningId: MockFn;
 	updateFields: MockFn;
+	updateName: MockFn;
 }
 
 /** Type for mock Game model with additional methods */
@@ -59,6 +62,7 @@ interface MockModifierModel extends MockModel {
 /** Type for mock RollMacro model with additional methods */
 interface MockRollMacroModel extends MockModel {
 	deleteBySheetRecordId: MockFn;
+	readManyForCharacter: MockFn;
 	readManyByUser: MockFn;
 	readManyUserWide: MockFn;
 }
@@ -112,12 +116,15 @@ function createMockCharacterModel(): MockCharacterModel {
 		...createMockModel(),
 		setIsActive: vi.fn(),
 		readActive: vi.fn(),
+		readActiveAdjusted: vi.fn(),
+		readActiveLite: vi.fn(),
 		readLite: vi.fn(),
 		readManyLite: vi.fn(),
 		readManyForList: vi.fn(),
 		readManyWithModifiers: vi.fn(),
 		createReturningId: vi.fn(),
 		updateFields: vi.fn(),
+		updateName: vi.fn(),
 	};
 }
 
@@ -160,6 +167,7 @@ function createMockRollMacroModel(): MockRollMacroModel {
 	return {
 		...createMockModel(),
 		deleteBySheetRecordId: vi.fn(),
+		readManyForCharacter: vi.fn(),
 		readManyByUser: vi.fn(),
 		readManyUserWide: vi.fn(),
 	};

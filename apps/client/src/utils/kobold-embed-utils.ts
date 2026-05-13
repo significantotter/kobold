@@ -14,10 +14,10 @@ import {
 	CharacterWithRelations,
 	Sheet,
 	SheetInfoLists,
-	SheetRecord,
+	SheetRecordBase,
 	SheetWeaknessesResistances,
 } from '@kobold/db';
-import { KoboldError } from './KoboldError.js';
+import { KoboldError } from '@kobold/util';
 import type { ActionRoller } from './action-roller.js';
 import type { InitiativeBuilder, TurnData } from './initiative-builder.js';
 import { InteractionUtils } from './interaction-utils.js';
@@ -32,7 +32,7 @@ export class KoboldEmbed extends EmbedBuilder {
 	 * Sets character specific attributes for the embed: currently just the thumbnail
 	 * @param character The character to set the attributes for
 	 */
-	public setSheetRecord(sheetRecord: SheetRecord) {
+	public setSheetRecord(sheetRecord: SheetRecordBase) {
 		if (sheetRecord.sheet.info.imageURL) {
 			this.setThumbnail(sheetRecord.sheet.info.imageURL);
 		}

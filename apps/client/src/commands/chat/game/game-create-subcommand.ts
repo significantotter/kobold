@@ -1,7 +1,7 @@
 import { ChatInputCommandInteraction } from 'discord.js';
 
 import { Kobold } from '@kobold/db';
-import { KoboldError } from '../../../utils/KoboldError.js';
+import { KoboldError } from '@kobold/util';
 import { InteractionUtils } from '../../../utils/interaction-utils.js';
 import { GameDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';

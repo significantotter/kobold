@@ -17,13 +17,11 @@ import {
 import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
 import { RollBuilder } from '../../../utils/roll-builder.js';
 import { Creature } from '../../../utils/creature.js';
-import { DiceUtils } from '../../../utils/dice-utils.js';
 
 vi.mock('../../../utils/kobold-service-utils/kobold-utils.js');
 vi.mock('../../../utils/kobold-embed-utils.js');
 vi.mock('../../../utils/roll-builder.js');
 vi.mock('../../../utils/creature.js');
-vi.mock('../../../utils/dice-utils.js');
 
 describe('RollPerceptionSubCommand Integration', () => {
 	let harness: CommandTestHarness;
@@ -54,14 +52,13 @@ describe('RollPerceptionSubCommand Integration', () => {
 			perception: 15,
 		} as any);
 
-		// Mock DiceUtils.buildDiceExpression
-		vi.mocked(DiceUtils.buildDiceExpression).mockReturnValue('1d20+15');
-
 		// Mock RollBuilder
 		const mockAddRoll = vi.fn(() => {});
+		const mockAddPreparedRollResult = vi.fn(() => {});
 		const mockCompileEmbed = vi.fn(() => ({ data: { description: 'Perception roll result' } }));
 		vi.mocked(RollBuilder).mockImplementation(function (this: MockRollBuilder) {
 			this.addRoll = mockAddRoll;
+			this.addPreparedRollResult = mockAddPreparedRollResult;
 			this.compileEmbed = mockCompileEmbed;
 			(this as MockRollBuilder & { rollResults: unknown[] }).rollResults = [
 				{ results: { errors: [] } },
@@ -110,11 +107,7 @@ describe('RollPerceptionSubCommand Integration', () => {
 			});
 
 			// Assert
-			expect(DiceUtils.buildDiceExpression).toHaveBeenCalledWith(
-				'd20',
-				expect.any(String),
-				'+2'
-			);
+			expect(RollBuilder).toHaveBeenCalled();
 			expect(EmbedUtils.dispatchEmbeds).toHaveBeenCalled();
 		});
 
@@ -209,11 +202,6 @@ describe('RollPerceptionSubCommand Integration', () => {
 			});
 
 			// Assert
-			expect(DiceUtils.buildDiceExpression).toHaveBeenCalledWith(
-				'd20',
-				expect.any(String),
-				'+4'
-			);
 			expect(RollBuilder).toHaveBeenCalledWith(
 				expect.objectContaining({
 					rollNote: 'Heightened awareness',

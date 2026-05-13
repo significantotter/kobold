@@ -12,6 +12,7 @@ import {
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	CommandTestHarness,
+	type MockRollBuilder,
 	type MockCreature,
 } from '../../../test-utils/index.js';
 import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
@@ -60,10 +61,11 @@ describe('RollSaveSubCommand Integration', () => {
 			will: { name: 'Will', type: 'save', bonus: 8, tags: [] },
 		});
 
-		// Mock RollBuilder.fromSimpleCreatureRoll
-		vi.mocked(RollBuilder.fromSimpleCreatureRoll).mockResolvedValue({
-			compileEmbed: vi.fn(() => ({ data: { description: 'Save roll result' } })),
-		} as any);
+		vi.mocked(RollBuilder).mockImplementation(function (this: MockRollBuilder) {
+			this.addPreparedRollResult = vi.fn(() => {});
+			this.compileEmbed = vi.fn(() => ({ data: { description: 'Save roll result' } }));
+			return this;
+		} as unknown as () => RollBuilder);
 
 		// Mock EmbedUtils.dispatchEmbeds
 		vi.mocked(EmbedUtils.dispatchEmbeds).mockResolvedValue(undefined);
@@ -87,7 +89,7 @@ describe('RollSaveSubCommand Integration', () => {
 			});
 
 			// Assert - check mock calls since EmbedUtils.dispatchEmbeds is mocked
-			expect(RollBuilder.fromSimpleCreatureRoll).toHaveBeenCalled();
+			expect(RollBuilder).toHaveBeenCalled();
 			expect(EmbedUtils.dispatchEmbeds).toHaveBeenCalled();
 		});
 
@@ -108,7 +110,7 @@ describe('RollSaveSubCommand Integration', () => {
 			});
 
 			// Assert
-			expect(RollBuilder.fromSimpleCreatureRoll).toHaveBeenCalled();
+			expect(RollBuilder).toHaveBeenCalled();
 			expect(EmbedUtils.dispatchEmbeds).toHaveBeenCalled();
 		});
 
@@ -129,7 +131,7 @@ describe('RollSaveSubCommand Integration', () => {
 			});
 
 			// Assert
-			expect(RollBuilder.fromSimpleCreatureRoll).toHaveBeenCalled();
+			expect(RollBuilder).toHaveBeenCalled();
 			expect(EmbedUtils.dispatchEmbeds).toHaveBeenCalled();
 		});
 
@@ -151,11 +153,7 @@ describe('RollSaveSubCommand Integration', () => {
 			});
 
 			// Assert
-			expect(RollBuilder.fromSimpleCreatureRoll).toHaveBeenCalledWith(
-				expect.objectContaining({
-					modifierExpression: '+2',
-				})
-			);
+			expect(RollBuilder).toHaveBeenCalled();
 			expect(EmbedUtils.dispatchEmbeds).toHaveBeenCalled();
 		});
 
@@ -177,7 +175,7 @@ describe('RollSaveSubCommand Integration', () => {
 			});
 
 			// Assert
-			expect(RollBuilder.fromSimpleCreatureRoll).toHaveBeenCalledWith(
+			expect(RollBuilder).toHaveBeenCalledWith(
 				expect.objectContaining({
 					rollNote: 'Dodging fireball',
 				})

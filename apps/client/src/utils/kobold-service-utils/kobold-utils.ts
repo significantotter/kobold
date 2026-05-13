@@ -3,13 +3,14 @@ import _ from 'lodash';
 import { SetNonNullable } from 'type-fest';
 import {
 	CharacterBasic,
+	CharacterWithAdjustedSheet,
 	CharacterWithRelations,
 	GameWithCharactersLite,
 	InitiativeWithRelations,
 	Kobold,
 	UserSettings,
 } from '@kobold/db';
-import { KoboldError } from '../KoboldError.js';
+import { KoboldError } from '@kobold/util';
 import { AdjustedSheetService } from './adjusted-sheet-service.js';
 import { AutocompleteUtils } from './autocomplete-utils.js';
 import { CharacterUtils } from './character-utils.js';
@@ -23,6 +24,7 @@ import { UserSettingsUtils } from './user-settings-utils.js';
 
 export interface InjectedData {
 	activeCharacter: CharacterWithRelations | null;
+	activeCharacterAdjusted: CharacterWithAdjustedSheet | null;
 	activeCharacterLite: CharacterBasic | null;
 	userSettings: UserSettings;
 	activeGame: GameWithCharactersLite | null;
@@ -68,6 +70,14 @@ export class KoboldUtils {
 				})
 			: Promise.resolve(undefined);
 
+		let activeCharacterAdjustedPromise = usesData.activeCharacterAdjusted
+			? this.kobold.character.readActiveAdjusted({
+					userId: intr.user.id,
+					guildId: intr.guild?.id,
+					channelId: intr.channel?.id,
+				})
+			: Promise.resolve(undefined);
+
 		let activeCharacterLitePromise = usesData.activeCharacterLite
 			? this.kobold.character.readActiveLite({
 					userId: intr.user.id,
@@ -95,6 +105,7 @@ export class KoboldUtils {
 
 		let [
 			activeCharacter,
+			activeCharacterAdjusted,
 			activeCharacterLite,
 			userSettings,
 			activeGame,
@@ -102,6 +113,7 @@ export class KoboldUtils {
 			currentInitiativeLite,
 		] = await Promise.all([
 			activeCharacterPromise,
+			activeCharacterAdjustedPromise,
 			activeCharacterLitePromise,
 			userSettingsPromise,
 			activeGamePromise,
@@ -112,6 +124,7 @@ export class KoboldUtils {
 		return _.pickBy(
 			{
 				activeCharacter,
+				activeCharacterAdjusted,
 				activeCharacterLite,
 				userSettings,
 				activeGame,
@@ -136,6 +149,8 @@ export class KoboldUtils {
 	): asserts data is SetNonNullable<T> {
 		if (data.activeCharacter !== undefined)
 			this.assertActiveCharacterNotNull(data.activeCharacter);
+		if (data.activeCharacterAdjusted !== undefined)
+			this.assertActiveCharacterNotNull(data.activeCharacterAdjusted);
 		if (data.activeCharacterLite !== undefined)
 			this.assertActiveCharacterLiteNotNull(data.activeCharacterLite);
 		if (data.activeGame !== undefined) this.assertActiveGameNotNull(data.activeGame);

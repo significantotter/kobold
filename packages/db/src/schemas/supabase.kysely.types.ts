@@ -180,19 +180,19 @@ type SnakeCaseDatabase = KyselifyDatabase<
 					};
 					sheet_record: {
 						Row: {
-							adjusted_sheet: Sheet | null;
+							adjusted_sheet: Sheet;
 							conditions: Condition[];
 							sheet: Sheet;
 							tracker_mode: TrackerModeEnum | null;
 						};
 						Insert: {
-							adjusted_sheet?: Sheet | null;
+							adjusted_sheet?: Sheet;
 							conditions?: Condition[];
 							sheet: Sheet;
 							tracker_mode?: TrackerModeEnum | null;
 						};
 						Update: {
-							adjusted_sheet?: Sheet | null;
+							adjusted_sheet?: Sheet;
 							conditions?: Condition[];
 							sheet?: Sheet;
 							tracker_mode?: TrackerModeEnum | null;

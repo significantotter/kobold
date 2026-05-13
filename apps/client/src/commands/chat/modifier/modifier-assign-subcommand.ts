@@ -8,7 +8,7 @@ import {
 
 import { Modifier, Kobold } from '@kobold/db';
 
-import { KoboldError } from '../../../utils/KoboldError.js';
+import { KoboldError } from '@kobold/util';
 import { InteractionUtils } from '../../../utils/index.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
@@ -37,21 +37,23 @@ export class ModifierAssignSubCommand extends BaseCommandClass(
 			const match =
 				intr.options.getString(commandOptions[commandOptionsEnum.targetModifier].name) ??
 				'';
+			const [modifiers, activeOrDefaultCharacter] = await Promise.all([
+				kobold.modifier.readManyByUser({
+					userId: intr.user.id,
+				}),
+				kobold.character.readActiveLite({
+					userId: intr.user.id,
+					channelId: intr.channelId,
+					guildId: intr.guildId ?? undefined,
+				}),
+			]);
 
-			// Get all user's modifiers for autocomplete
-			const modifiers = await kobold.modifier.readManyByUser({
-				userId: intr.user.id,
-				filter: 'all',
-			});
-
-			const matchedModifiers = FinderHelpers.matchAllModifiers(modifiers, match).map(
-				modifier => ({
-					name: modifier.name,
-					value: modifier.name,
-				})
+			return koboldUtils.autocompleteUtils.getAssignableModifiersForActiveOrDefaultCharacter(
+				intr,
+				modifiers,
+				activeOrDefaultCharacter,
+				match
 			);
-
-			return matchedModifiers;
 		}
 
 		if (option.name === commandOptions[commandOptionsEnum.assignTo].name) {
@@ -152,11 +154,8 @@ export class ModifierAssignSubCommand extends BaseCommandClass(
 				userId: targetUserId,
 			});
 
-			// Trigger adjusted_sheet recomputation
 			if (assignToResult.sheetRecordId !== null) {
 				koboldUtils.adjustedSheetService.triggerRecompute(assignToResult.sheetRecordId);
-			} else {
-				koboldUtils.adjustedSheetService.triggerRecomputeAllForUser(targetUserId);
 			}
 
 			await InteractionUtils.send(
@@ -181,10 +180,6 @@ export class ModifierAssignSubCommand extends BaseCommandClass(
 			// Trigger adjusted_sheet recomputation for new location
 			if (assignToResult.sheetRecordId !== null) {
 				koboldUtils.adjustedSheetService.triggerRecompute(assignToResult.sheetRecordId);
-			} else {
-				koboldUtils.adjustedSheetService.triggerRecomputeAllForUser(
-					assignToResult.targetUserId ?? intr.user.id
-				);
 			}
 
 			await InteractionUtils.send(

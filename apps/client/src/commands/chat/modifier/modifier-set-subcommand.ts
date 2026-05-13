@@ -6,7 +6,7 @@ import {
 	ChatInputCommandInteraction,
 } from 'discord.js';
 import { Kobold, SheetAdjustmentTypeEnum } from '@kobold/db';
-import { KoboldError } from '../../../utils/KoboldError.js';
+import { KoboldError } from '@kobold/util';
 import { Creature } from '../../../utils/creature.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
@@ -15,7 +15,7 @@ import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js
 import { Command } from '../../index.js';
 import _ from 'lodash';
 import { InputParseUtils } from '../../../utils/input-parse-utils.js';
-import { StringUtils } from '@kobold/base-utils';
+import { StringUtils } from '@kobold/util';
 import { ModifierDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
 const commandOptions = ModifierDefinition.options;
@@ -43,7 +43,7 @@ export class ModifierSetSubCommand extends BaseCommandClass(
 				//no choices if we don't have a character to match against
 				return [];
 			}
-			//find a save on the character matching the autocomplete string
+			//find a modifier on the character matching the autocomplete string
 			const matchedModifiers = FinderHelpers.matchAllModifiers(
 				activeCharacter.modifiers,
 				match
@@ -175,11 +175,8 @@ export class ModifierSetSubCommand extends BaseCommandClass(
 			}
 		);
 
-		// Trigger adjusted_sheet recomputation
 		if (targetModifier.sheetRecordId !== null) {
 			koboldUtils.adjustedSheetService.triggerRecompute(targetModifier.sheetRecordId);
-		} else {
-			koboldUtils.adjustedSheetService.triggerRecomputeAllForUser(intr.user.id);
 		}
 
 		const updateEmbed = new KoboldEmbed();

@@ -9,14 +9,17 @@ import {
 import _ from 'lodash';
 import { Kobold } from '@kobold/db';
 import { Creature } from '../../../utils/creature.js';
+import { DiceUtils } from '../../../utils/dice-utils.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { InitiativeBuilder, InitiativeBuilderUtils } from '../../../utils/initiative-builder.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { KoboldError } from '../../../utils/KoboldError.js';
-import { InitDefinition, RollDefinition } from '@kobold/documentation';
+import { KoboldError } from '@kobold/util';
+import { InitDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
+import { RollContextService, RollEngine, RollSubjectContext } from '../../../utils/roll-engine.js';
+import { RollBuilder } from '../../../utils/roll-builder.js';
 const commandOptions = InitDefinition.options;
 const commandOptionsEnum = InitDefinition.commandOptionsEnum;
 
@@ -60,12 +63,10 @@ export class InitJoinSubCommand extends BaseCommandClass(
 		const { initiativeUtils } = koboldUtils;
 		const {
 			currentInitiativeLite: currentInitiative,
-			activeCharacter,
-			userSettings,
+			activeCharacterLite: activeCharacter,
 		} = await koboldUtils.fetchNonNullableDataForCommand(intr, {
 			currentInitiativeLite: true,
-			activeCharacter: true,
-			userSettings: true,
+			activeCharacterLite: true,
 		});
 
 		if (
@@ -92,13 +93,51 @@ export class InitJoinSubCommand extends BaseCommandClass(
 		const hideStats =
 			intr.options.getBoolean(commandOptions[commandOptionsEnum.initHideStats].name) ?? false;
 
-		const rollResult = await InitiativeBuilderUtils.rollNewInitiative({
-			character: activeCharacter,
-			skillChoice,
-			diceExpression,
-			initiativeValue,
-			userSettings,
+		const subject: RollSubjectContext = { character: activeCharacter };
+		const contextService = new RollContextService(kobold);
+		const context = await contextService.getExpansionContextForSubject({
+			userId: intr.user.id,
+			subject,
 		});
+
+		let rollResult: RollBuilder | number;
+		if (initiativeValue !== null) {
+			rollResult = initiativeValue;
+		} else {
+			const rollName = RollEngine.getStructuredRollName(skillChoice ?? 'perception', 'skill');
+			const rollExpression = skillChoice
+				? DiceUtils.buildDiceExpression(
+						'd20',
+						`[${RollEngine.structuredAttributeName(rollName)}]`,
+						diceExpression
+				  )
+				: diceExpression ?? DiceUtils.buildDiceExpression('d20', '[perceptionBonus]');
+			const baseTags = skillChoice
+				? RollEngine.structuredTags({
+						rollName,
+						rollKind: 'skill',
+						extraTags: ['initiative'],
+				  })
+				: diceExpression
+				? ['initiative']
+				: RollEngine.structuredTags({
+						rollName: 'perception',
+						rollKind: 'perception',
+						extraTags: ['initiative'],
+				  });
+			const { builder } = await RollEngine.rollWithContext({
+				context,
+				attributeContextService: contextService,
+				options: {
+					rollExpression,
+					rollTitle: 'Initiative',
+					actorName: activeCharacter.name,
+					rollDescription: InitDefinition.strings.join.joinedEmbed.rollDescription,
+					baseTags,
+				},
+			});
+			rollResult = builder;
+		}
 		const initiativeResult = _.isNumber(rollResult)
 			? rollResult
 			: (rollResult.getRollTotalArray()[0] ?? 0);

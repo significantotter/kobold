@@ -1,14 +1,13 @@
 import { ChatInputCommandInteraction } from 'discord.js';
 
 import { Kobold } from '@kobold/db';
-import { Creature } from '../../../utils/creature.js';
 import { DiceUtils } from '../../../utils/dice-utils.js';
 import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
-import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { RollBuilder } from '../../../utils/roll-builder.js';
 import { Command } from '../../index.js';
 import { RollDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
+import { RollContextService, RollEngine } from '../../../utils/roll-engine.js';
+import { KoboldError } from '@kobold/util';
 const commandOptions = RollDefinition.options;
 const commandOptionsEnum = RollDefinition.commandOptionsEnum;
 
@@ -30,37 +29,41 @@ export class RollPerceptionSubCommand extends BaseCommandClass(
 			intr.options.getString(commandOptions[commandOptionsEnum.rollSecret].name) ??
 			RollDefinition.optionChoices.rollSecret.public;
 
-		const koboldUtils: KoboldUtils = new KoboldUtils(kobold);
-		const { activeCharacter, userSettings } = await koboldUtils.fetchDataForCommand(intr, {
-			activeCharacter: true,
-			userSettings: true,
+		const contextService = new RollContextService(kobold);
+		const context = await contextService.getExpansionContext({
+			userId: intr.user.id,
+			guildId: intr.guildId ?? undefined,
+			channelId: intr.channelId ?? undefined,
+			includeGmUserId: RollEngine.secretRequiresGm(secretRoll),
 		});
-		koboldUtils.assertActiveCharacterNotNull(activeCharacter);
+		if (!context.subject) {
+			throw new KoboldError("Yip! You don't have any characters! Use /import to import one.");
+		}
 
-		const creature = Creature.fromSheetRecord(activeCharacter, undefined, intr);
-
-		const rollBuilder = new RollBuilder({
-			character: activeCharacter,
-			rollNote,
-			rollDescription: RollDefinition.strings.perception.rolledPerception,
-			userSettings,
+		const rollName = 'perception';
+		const attributeName = RollEngine.structuredAttributeName(rollName);
+		const { builder } = await RollEngine.rollWithContext({
+			context,
+			attributeContextService: contextService,
+			options: {
+				rollExpression: DiceUtils.buildDiceExpression(
+					'd20',
+					`[${attributeName}]`,
+					modifierExpression
+				),
+				rollTitle: '',
+				actorName: context.subject.character.name,
+				rollDescription: RollDefinition.strings.perception.rolledPerception,
+				rollNote,
+				baseTags: RollEngine.structuredTags({ rollName, rollKind: 'perception' }),
+			},
 		});
-		rollBuilder.addRoll({
-			rollExpression: DiceUtils.buildDiceExpression(
-				'd20',
-				String(creature.statBonuses.perception),
-				modifierExpression
-			),
-			rollTitle: '',
-			tags: ['skill', 'perception'],
-		});
-		const response = rollBuilder.compileEmbed();
 
 		await EmbedUtils.dispatchEmbeds(
 			intr,
-			[response],
+			[builder.compileEmbed()],
 			secretRoll,
-			activeCharacter?.game?.gmUserId
+			context.subject.gmUserId
 		);
 	}
 }

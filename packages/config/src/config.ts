@@ -1,6 +1,12 @@
 import dotenv from 'dotenv';
 import _ from 'lodash';
-dotenv.config({ path: './../../.env', quiet: true });
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const configFilePath = fileURLToPath(import.meta.url);
+const repoRoot = resolve(dirname(configFilePath), '../../..');
+
+dotenv.config({ path: resolve(repoRoot, '.env'), quiet: true });
 
 const env = process.env;
 

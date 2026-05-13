@@ -17,7 +17,7 @@ import {
 	SheetStatProperties,
 	SheetStatPropertyKey,
 	SheetWeaknessResistanceProperties,
-} from './sheet/sheet-properties.js';
+} from '@kobold/sheet';
 import { staticAttributes, attributeShorthands } from '../constants/attributes.js';
 
 export class AttributeUtils {

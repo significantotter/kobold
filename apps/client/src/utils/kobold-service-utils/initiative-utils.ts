@@ -2,13 +2,14 @@ import { ChatInputCommandInteraction, TextBasedChannel } from 'discord.js';
 import { utilStrings } from '@kobold/documentation';
 import {
 	CharacterWithRelations,
+	CharacterBasic,
 	InitiativeWithRelations,
 	Kobold,
 	MinionBasic,
 	MinionWithRelations,
 	Sheet,
 } from '@kobold/db';
-import { KoboldError } from '../KoboldError.js';
+import { KoboldError } from '@kobold/util';
 import { InitiativeBuilderUtils } from '../initiative-builder.js';
 import type { KoboldUtils } from './kobold-utils.js';
 
@@ -92,7 +93,7 @@ export class InitiativeUtils {
 		name,
 	}: {
 		initiativeId: number;
-		character: CharacterWithRelations;
+		character: CharacterWithRelations | CharacterBasic;
 		initiativeResult: number;
 		hideStats?: boolean;
 		name?: string;

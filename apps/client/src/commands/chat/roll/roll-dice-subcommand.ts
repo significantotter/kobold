@@ -2,11 +2,10 @@ import { ChatInputCommandInteraction } from 'discord.js';
 
 import { Kobold } from '@kobold/db';
 import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
-import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { RollBuilder } from '../../../utils/roll-builder.js';
 import { Command } from '../../index.js';
 import { RollDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
+import { RollContextService, RollEngine } from '../../../utils/roll-engine.js';
 const commandOptions = RollDefinition.options;
 const commandOptionsEnum = RollDefinition.commandOptionsEnum;
 
@@ -31,34 +30,45 @@ export class RollDiceSubCommand extends BaseCommandClass(
 		const rollNote =
 			intr.options.getString(commandOptions[commandOptionsEnum.rollNote].name) ?? '';
 
-		const koboldUtils: KoboldUtils = new KoboldUtils(kobold);
-		let { activeCharacter, userSettings } = await koboldUtils.fetchDataForCommand(intr, {
-			activeCharacter: true,
-			userSettings: true,
-		});
-
-		// only use the active character in the roll if the roll uses character attributes
-		// however, use a different variable so we don't break send-to-gm
-		let characterForRoll = activeCharacter;
-		if (!/(\[[\w \-_\.]{2,}\])/g.test(diceExpression)) {
-			characterForRoll = null;
+		const contextService = new RollContextService(kobold);
+		if (
+			RollEngine.isPureDiceExpression(diceExpression) &&
+			!RollEngine.secretRequiresGm(secretRoll)
+		) {
+			const { builder } = RollEngine.rollPure({
+				rollExpression: diceExpression,
+				rollTitle: '',
+				actorName: intr.user.username,
+				rollDescription: RollDefinition.strings.dice.rolledDice,
+				rollNote,
+			});
+			await EmbedUtils.dispatchEmbeds(intr, [builder.compileEmbed()], secretRoll, undefined);
+			return;
 		}
 
-		const rollBuilder = new RollBuilder({
-			character: characterForRoll ?? null,
-			actorName: intr.user.username,
-			rollDescription: RollDefinition.strings.dice.rolledDice,
-			rollNote,
-			userSettings,
+		const context = await contextService.getExpansionContext({
+			userId: intr.user.id,
+			guildId: intr.guildId ?? undefined,
+			channelId: intr.channelId ?? undefined,
+			includeGmUserId: RollEngine.secretRequiresGm(secretRoll),
 		});
-		rollBuilder.addRoll({ rollExpression: diceExpression, rollTitle: '' });
-		const response = rollBuilder.compileEmbed();
+		const { builder } = await RollEngine.rollWithContext({
+			context,
+			attributeContextService: contextService,
+			options: {
+				rollExpression: diceExpression,
+				rollTitle: '',
+				actorName: context.subject?.character.name ?? intr.user.username,
+				rollDescription: RollDefinition.strings.dice.rolledDice,
+				rollNote,
+			},
+		});
 
 		await EmbedUtils.dispatchEmbeds(
 			intr,
-			[response],
+			[builder.compileEmbed()],
 			secretRoll,
-			activeCharacter?.game?.gmUserId
+			context.subject?.gmUserId
 		);
 	}
 }

@@ -49,6 +49,7 @@ export interface ErrorResult {
 export type ResultField = DiceRollResult | MultiRollResult | TextResult | ErrorResult;
 
 const attributeRegex = /(\[[\w \-_\.]{2,}\])/g;
+const attributeTokenRegex = /^\[[\w \-_\.]{2,}\]$/;
 
 const damageTypeMatch = / [A-Za-z \-_,\/]+$/;
 export class DiceUtils {
@@ -131,10 +132,10 @@ export class DiceUtils {
 
 		if (attribute?.value !== undefined) {
 			return [attribute.value, attribute.tags];
-		} else if (staticAttribute?.value !== undefined) {
-			return [staticAttribute.value, []];
 		} else if (extraAttribute && extraAttribute?.value !== undefined) {
 			return [extraAttribute.value, extraAttribute?.tags || []];
+		} else if (staticAttribute?.value !== undefined) {
+			return [staticAttribute.value, []];
 		} else {
 			return [0, []];
 		}
@@ -149,7 +150,7 @@ export class DiceUtils {
 		const newTags = [];
 		let finalExpression = '';
 		for (const token of splitExpression) {
-			if (attributeRegex.test(token)) {
+			if (attributeTokenRegex.test(token)) {
 				const [resultValue, resultTags] = DiceUtils.parseAttribute(
 					token,
 					creature,

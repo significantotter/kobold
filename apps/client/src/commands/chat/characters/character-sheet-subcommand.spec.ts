@@ -46,8 +46,8 @@ describe('CharacterSheetSubCommand Integration', () => {
 			return this;
 		} as unknown as () => Creature);
 
-		// Mock Creature.fromSheetRecord static method
-		vi.mocked(Creature.fromSheetRecord).mockReturnValue(mockCreatureInstance);
+		// Mock Creature.fromAdjustedSheetRecord static method
+		vi.mocked(Creature.fromAdjustedSheetRecord).mockReturnValue(mockCreatureInstance);
 	});
 
 	describe('displaying character sheet', () => {
@@ -65,7 +65,7 @@ describe('CharacterSheetSubCommand Integration', () => {
 			});
 
 			// Assert
-			expect(Creature.fromSheetRecord).toHaveBeenCalledWith(
+			expect(Creature.fromAdjustedSheetRecord).toHaveBeenCalledWith(
 				mockCharacter,
 				undefined,
 				expect.anything()
@@ -81,7 +81,7 @@ describe('CharacterSheetSubCommand Integration', () => {
 			await harness.executeCommand({
 				commandName: 'character',
 				subcommand: 'sheet',
-				options: { 'game-sheet-style': sharedStrings.options.sheetStyles.countersOnly },
+				options: { 'sheet-style': sharedStrings.options.sheetStyles.countersOnly },
 				userId: TEST_USER_ID,
 				guildId: TEST_GUILD_ID,
 			});
@@ -121,8 +121,8 @@ describe('CharacterSheetSubCommand Integration', () => {
 					return this;
 				} as unknown as () => Creature);
 
-				// Re-mock Creature.fromSheetRecord
-				vi.mocked(Creature.fromSheetRecord).mockReturnValue(mockCreatureInstance);
+				// Re-mock Creature.fromAdjustedSheetRecord
+				vi.mocked(Creature.fromAdjustedSheetRecord).mockReturnValue(mockCreatureInstance);
 
 				setupKoboldUtilsMocks();
 
@@ -130,7 +130,7 @@ describe('CharacterSheetSubCommand Integration', () => {
 				await harness.executeCommand({
 					commandName: 'character',
 					subcommand: 'sheet',
-					options: { 'game-sheet-style': style },
+					options: { 'sheet-style': style },
 					userId: TEST_USER_ID,
 					guildId: TEST_GUILD_ID,
 				});

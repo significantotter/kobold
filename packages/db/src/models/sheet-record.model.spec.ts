@@ -19,8 +19,26 @@ describe('SheetRecordModel', () => {
 
 			const created = await vitestKobold.sheetRecord.create(fakeSheetRecordMock);
 			const read = await vitestKobold.sheetRecord.read({ id: created.id });
-			expect(created).toMatchObject(fakeSheetRecordMock);
-			expect(read).toMatchObject(fakeSheetRecordMock);
+			expect(created).toMatchObject({
+				...fakeSheetRecordMock,
+				adjustedSheet: fakeSheetRecordMock.adjustedSheet ?? fakeSheetRecordMock.sheet,
+			});
+			expect(read).toMatchObject(_.omit(fakeSheetRecordMock, 'adjustedSheet'));
+			expect(read).not.toHaveProperty('adjustedSheet');
+		});
+		it('reads adjusted_sheet as sheet for adjusted read paths', async () => {
+			const fakeSheetRecordMock = stripUndefined(fake(zNewSheetRecord)) as NewSheetRecord;
+			delete fakeSheetRecordMock.id;
+			const adjustedSheet = _.cloneDeep(fakeSheetRecordMock.sheet);
+			adjustedSheet.staticInfo.name = 'Adjusted Name';
+
+			const created = await vitestKobold.sheetRecord.create({
+				...fakeSheetRecordMock,
+				adjustedSheet,
+			});
+			const read = await vitestKobold.sheetRecord.readAdjusted({ id: created.id });
+			expect(read?.sheet.staticInfo.name).toEqual('Adjusted Name');
+			expect(read).not.toHaveProperty('adjustedSheet');
 		});
 	});
 	describe('update', () => {
@@ -31,7 +49,7 @@ describe('SheetRecordModel', () => {
 				{ trackerMessageId: 'foo' }
 			);
 			expect(updated).toEqual({
-				...fakeSheetRecord,
+				..._.omit(fakeSheetRecord, 'adjustedSheet'),
 				trackerMessageId: 'foo',
 			});
 		});

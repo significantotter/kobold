@@ -20,7 +20,7 @@ import {
 	resetMockKobold,
 } from '../../../test-utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { KoboldError } from '../../../utils/KoboldError.js';
+import { KoboldError } from '@kobold/util';
 
 vi.mock('../../../utils/kobold-service-utils/kobold-utils.js');
 

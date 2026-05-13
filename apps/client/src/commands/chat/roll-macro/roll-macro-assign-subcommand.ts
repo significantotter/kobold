@@ -8,7 +8,7 @@ import {
 
 import { RollMacro, Kobold } from '@kobold/db';
 
-import { KoboldError } from '../../../utils/KoboldError.js';
+import { KoboldError } from '@kobold/util';
 import { InteractionUtils } from '../../../utils/index.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
@@ -36,21 +36,23 @@ export class RollMacroAssignSubCommand extends BaseCommandClass(
 		if (option.name === commandOptions[commandOptionsEnum.targetMacro].name) {
 			const match =
 				intr.options.getString(commandOptions[commandOptionsEnum.targetMacro].name) ?? '';
+			const [rollMacros, activeOrDefaultCharacter] = await Promise.all([
+				kobold.rollMacro.readManyByUser({
+					userId: intr.user.id,
+				}),
+				kobold.character.readActiveLite({
+					userId: intr.user.id,
+					channelId: intr.channelId,
+					guildId: intr.guildId ?? undefined,
+				}),
+			]);
 
-			// Get all user's roll macros for autocomplete
-			const rollMacros = await kobold.rollMacro.readManyByUser({
-				userId: intr.user.id,
-				filter: 'all',
-			});
-
-			const matchedMacros = FinderHelpers.matchAllRollMacros(rollMacros, match).map(
-				macro => ({
-					name: macro.name,
-					value: macro.name,
-				})
+			return koboldUtils.autocompleteUtils.getAssignableRollMacrosForActiveOrDefaultCharacter(
+				intr,
+				rollMacros,
+				activeOrDefaultCharacter,
+				match
 			);
-
-			return matchedMacros;
 		}
 
 		if (option.name === commandOptions[commandOptionsEnum.assignTo].name) {

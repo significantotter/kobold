@@ -15,6 +15,7 @@ export enum CharacterSubCommandEnum {
 	list = 'list',
 	migrateItems = 'migrate-items',
 	remove = 'remove',
+	rename = 'rename',
 	setActive = 'set-active',
 	setDefault = 'set-default',
 	sheet = 'sheet',
@@ -82,6 +83,26 @@ export const characterCommandDefinition = {
 			type: ApplicationCommandOptionType.Subcommand,
 			deferType: CommandDeferType.HIDDEN,
 			options: {},
+		},
+		[CharacterSubCommandEnum.rename]: {
+			name: CharacterSubCommandEnum.rename,
+			description: 'Renames a character.',
+			type: ApplicationCommandOptionType.Subcommand,
+			options: {
+				[CharacterCommandOptionEnum.newName]: withOrder(
+					characterCommandOptions[CharacterCommandOptionEnum.newName],
+					1
+				),
+				[CharacterCommandOptionEnum.name]: withOrder(
+					{
+						...characterCommandOptions[CharacterCommandOptionEnum.name],
+						description:
+							'The character to rename. Defaults to your active character.',
+						required: false,
+					},
+					2
+				),
+			},
 		},
 		[CharacterSubCommandEnum.setActive]: {
 			name: CharacterSubCommandEnum.setActive,

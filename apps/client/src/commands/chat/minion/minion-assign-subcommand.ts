@@ -10,7 +10,8 @@ import { MinionDefinition, sharedStrings } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
 import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { KoboldError } from '../../../utils/KoboldError.js';
+import { KoboldError } from '@kobold/util';
+import { CreateForTargets } from '../../../utils/kobold-service-utils/autocomplete-utils.js';
 
 const commandOptions = MinionDefinition.options;
 const commandOptionsEnum = MinionDefinition.commandOptionsEnum;
@@ -31,12 +32,23 @@ export class MinionAssignSubCommand extends BaseCommandClass(
 		if (option.name === commandOptions[commandOptionsEnum.minion].name) {
 			const match = intr.options.getString(commandOptions[commandOptionsEnum.minion].name);
 
-			// Get all user's minions, not just the active character's
-			const minions = await kobold.minion.readManyByUserIdLite({
-				userId: intr.user.id,
-			});
+			// Get the active character's minions and library minions
+			const [minions, activeOrDefaultCharacter] = await Promise.all([
+				kobold.minion.readManyByUserIdLite({
+					userId: intr.user.id,
+				}),
+				kobold.character.readActiveLite({
+					userId: intr.user.id,
+					channelId: intr.channelId,
+					guildId: intr.guildId ?? undefined,
+				}),
+			]);
 
-			return minions
+			const assignableMinions = minions.filter(
+				minion => minion.characterId === activeOrDefaultCharacter?.id || !minion.characterId
+			);
+
+			return assignableMinions
 				.filter((m: MinionBasic) =>
 					m.name.toLowerCase().includes((match ?? '').toLowerCase())
 				)
@@ -46,11 +58,9 @@ export class MinionAssignSubCommand extends BaseCommandClass(
 				}));
 		}
 
-		if (option.name === commandOptions[commandOptionsEnum.targetCharacter].name) {
-			const match = intr.options.getString(
-				commandOptions[commandOptionsEnum.targetCharacter].name
-			);
-			return koboldUtils.autocompleteUtils.getTargetCharacterOptionsWithGame(
+		if (option.name === commandOptions[commandOptionsEnum.assignTo].name) {
+			const match = intr.options.getString(commandOptions[commandOptionsEnum.assignTo].name);
+			return koboldUtils.autocompleteUtils.getMinionAssignToOptionsWithGame(
 				intr,
 				match ?? ''
 			);
@@ -67,9 +77,9 @@ export class MinionAssignSubCommand extends BaseCommandClass(
 			commandOptions[commandOptionsEnum.minion].name,
 			true
 		);
-		const targetCharacterName = intr.options.getString(
-			commandOptions[commandOptionsEnum.targetCharacter].name,
-			false
+		const assignToValue = intr.options.getString(
+			commandOptions[commandOptionsEnum.assignTo].name,
+			true
 		);
 		const copyOption = intr.options.getBoolean(commandOptions[commandOptionsEnum.copy].name);
 
@@ -84,8 +94,8 @@ export class MinionAssignSubCommand extends BaseCommandClass(
 			throw new KoboldError(MinionDefinition.strings.notFound);
 		}
 
-		// If no target character provided, unassign the minion
-		if (!targetCharacterName) {
+		// Assigning to the player's account means the minion is unassigned from any character.
+		if (assignToValue === CreateForTargets.USER) {
 			// Copy doesn't make sense when unassigning
 			if (copyOption) {
 				throw new KoboldError(
@@ -116,18 +126,16 @@ export class MinionAssignSubCommand extends BaseCommandClass(
 			return;
 		}
 
-		// Determine if this is a game character (from another player)
-		const isGameCharacter = targetCharacterName.startsWith('game:');
-		const actualCharacterName = isGameCharacter
-			? targetCharacterName.slice('game:'.length)
-			: targetCharacterName;
-
 		// Find the target character
 		let targetCharacter;
 		let isOtherPlayersCharacter = false;
 		let targetUserId = intr.user.id;
 
-		if (isGameCharacter && intr.guildId) {
+		if (assignToValue.startsWith(CreateForTargets.GAME_CHARACTER_PREFIX) && intr.guildId) {
+			const targetSheetRecordId = parseInt(
+				assignToValue.slice(CreateForTargets.GAME_CHARACTER_PREFIX.length),
+				10
+			);
 			// Look for character in the active game
 			const activeGame = await koboldUtils.gameUtils.getActiveGame(
 				intr.user.id,
@@ -136,21 +144,23 @@ export class MinionAssignSubCommand extends BaseCommandClass(
 			);
 			if (activeGame?.characters) {
 				targetCharacter = activeGame.characters.find(
-					c => c.name.toLowerCase() === actualCharacterName.toLowerCase()
+					c => c.sheetRecordId === targetSheetRecordId
 				);
 				if (targetCharacter && targetCharacter.userId !== intr.user.id) {
 					isOtherPlayersCharacter = true;
 					targetUserId = targetCharacter.userId;
 				}
 			}
-		} else {
+		} else if (assignToValue.startsWith(CreateForTargets.CHARACTER_PREFIX)) {
+			const targetSheetRecordId = parseInt(
+				assignToValue.slice(CreateForTargets.CHARACTER_PREFIX.length),
+				10
+			);
 			// Look for character in user's own characters
 			const characters = await kobold.character.readManyLite({
 				userId: intr.user.id,
 			});
-			targetCharacter = characters.find(
-				c => c.name.toLowerCase() === actualCharacterName.toLowerCase()
-			);
+			targetCharacter = characters.find(c => c.sheetRecordId === targetSheetRecordId);
 		}
 
 		if (!targetCharacter) {

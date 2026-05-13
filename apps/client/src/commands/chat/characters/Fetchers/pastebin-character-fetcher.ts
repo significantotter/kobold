@@ -12,9 +12,9 @@ import {
 	ImportSourceEnum,
 } from '@kobold/db';
 import { PasteBin } from '../../../../services/pastebin/index.js';
-import { KoboldError } from '../../../../utils/KoboldError.js';
+import { KoboldError } from '@kobold/util';
 import { Creature } from '../../../../utils/creature.js';
-import { SheetProperties } from '../../../../utils/sheet/sheet-properties.js';
+import { SheetProperties } from '@kobold/sheet';
 import { CharacterFetcher, SheetConversionResult } from './character-fetcher.js';
 
 export const zPasteBinImport = z.object({

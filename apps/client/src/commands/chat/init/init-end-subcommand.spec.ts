@@ -15,7 +15,7 @@ import {
 	CommandTestHarness,
 } from '../../../test-utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { KoboldError } from '../../../utils/KoboldError.js';
+import { KoboldError } from '@kobold/util';
 
 vi.mock('../../../utils/kobold-service-utils/kobold-utils.js');
 
@@ -26,7 +26,6 @@ describe('InitEndSubCommand Integration', () => {
 		resetInitTestIds();
 		harness = createTestHarness([new InitCommand([new InitEndSubCommand()])]);
 	});
-
 
 	it('should error when no initiative exists', async () => {
 		// Arrange

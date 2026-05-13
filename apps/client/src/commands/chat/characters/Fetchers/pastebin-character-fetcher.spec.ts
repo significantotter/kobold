@@ -5,7 +5,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { CommandInteraction, CacheType } from 'discord.js';
 import { PasteBinCharacterFetcher } from './pastebin-character-fetcher.js';
 import { PasteBin } from '../../../../services/pastebin/index.js';
-import { SheetProperties } from '../../../../utils/sheet/sheet-properties.js';
+import { SheetProperties } from '@kobold/sheet';
 import { type MockPasteBin } from '../../../../test-utils/mock-types.js';
 import { getMockKobold, resetMockKobold } from '../../../../test-utils/index.js';
 import type { Kobold } from '@kobold/db';

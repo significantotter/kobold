@@ -6,16 +6,18 @@ import {
 	ChatInputCommandInteraction,
 } from 'discord.js';
 
+import _ from 'lodash';
 import { Kobold } from '@kobold/db';
 import { Creature } from '../../../utils/creature.js';
+import { DiceUtils } from '../../../utils/dice-utils.js';
 import { EmbedUtils } from '../../../utils/kobold-embed-utils.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { RollBuilder } from '../../../utils/roll-builder.js';
 import { Command } from '../../index.js';
-import { StringUtils } from '@kobold/base-utils';
+import { KoboldError } from '@kobold/util';
 import { RollDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
+import { RollContextService, RollEngine } from '../../../utils/roll-engine.js';
 const commandOptions = RollDefinition.options;
 const commandOptionsEnum = RollDefinition.commandOptionsEnum;
 
@@ -36,16 +38,16 @@ export class RollSaveSubCommand extends BaseCommandClass(
 
 			//get the active character
 			const koboldUtils: KoboldUtils = new KoboldUtils(kobold);
-			const { activeCharacter } = await koboldUtils.fetchDataForCommand(intr, {
-				activeCharacter: true,
+			const { activeCharacterAdjusted } = await koboldUtils.fetchDataForCommand(intr, {
+				activeCharacterAdjusted: true,
 			});
-			if (!activeCharacter) {
+			if (!activeCharacterAdjusted) {
 				//no choices if we don't have a character to match against
 				return [];
 			}
 			//find a save on the character matching the autocomplete string
 			const matchedSaves = FinderHelpers.matchAllSaves(
-				Creature.fromSheetRecord(activeCharacter, undefined, intr),
+				Creature.fromAdjustedSheetRecord(activeCharacterAdjusted, undefined, intr),
 				match
 			).map(save => ({
 				name: save.name,
@@ -74,31 +76,37 @@ export class RollSaveSubCommand extends BaseCommandClass(
 			intr.options.getString(commandOptions[commandOptionsEnum.rollSecret].name) ??
 			RollDefinition.optionChoices.rollSecret.public;
 
-		const koboldUtils: KoboldUtils = new KoboldUtils(kobold);
-		const { activeCharacter, userSettings } = await koboldUtils.fetchDataForCommand(intr, {
-			activeCharacter: true,
-			userSettings: true,
+		const contextService = new RollContextService(kobold);
+		const context = await contextService.getExpansionContext({
+			userId: intr.user.id,
+			guildId: intr.guildId ?? undefined,
+			channelId: intr.channelId ?? undefined,
+			includeGmUserId: RollEngine.secretRequiresGm(secretRoll),
 		});
-		koboldUtils.assertActiveCharacterNotNull(activeCharacter);
+		if (!context.subject) {
+			throw new KoboldError("Yip! You don't have any characters! Use /import to import one.");
+		}
 
-		const creature = Creature.fromSheetRecord(activeCharacter, undefined, intr);
+		const rollName = RollEngine.getStructuredRollName(saveChoice, 'save');
+		const attributeName = RollEngine.structuredAttributeName(rollName);
+		const { builder } = await RollEngine.rollWithContext({
+			context,
+			attributeContextService: contextService,
+			options: {
+				rollExpression: DiceUtils.buildDiceExpression('d20', `[${attributeName}]`, modifierExpression),
+				rollTitle: _.startCase(rollName),
+				actorName: context.subject.character.name,
+				rollDescription: `rolled ${_.startCase(rollName)}`,
+				rollNote,
+				baseTags: RollEngine.structuredTags({ rollName, rollKind: 'save' }),
+			},
+		});
 
-		const targetRoll = StringUtils.findBestValueByKeyMatch(
-			saveChoice,
-			creature.savingThrowRolls
+		await EmbedUtils.dispatchEmbeds(
+			intr,
+			[builder.compileEmbed()],
+			secretRoll,
+			context.subject.gmUserId
 		);
-
-		const rollResult = await RollBuilder.fromSimpleCreatureRoll({
-			actorName: creature.sheet.staticInfo.name,
-			creature,
-			attributeName: targetRoll.name,
-			rollNote,
-			modifierExpression,
-			userSettings,
-		});
-
-		const embed = rollResult.compileEmbed();
-
-		await EmbedUtils.dispatchEmbeds(intr, [embed], secretRoll, activeCharacter.game?.gmUserId);
 	}
 }

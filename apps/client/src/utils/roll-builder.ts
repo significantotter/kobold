@@ -1,7 +1,7 @@
 import { APIEmbedField } from 'discord.js';
 import _ from 'lodash';
 import { Attribute, CharacterWithRelations, UserSettings } from '@kobold/db';
-import { KoboldError } from './KoboldError.js';
+import { KoboldError } from '@kobold/util';
 import { Creature } from './creature.js';
 import {
 	DiceRollError,
@@ -273,6 +273,26 @@ export class RollBuilder {
 			this.rollResults.push(errorRoll);
 			return errorRoll;
 		}
+	}
+
+	public addPreparedRollResult({
+		rollResult,
+		tags,
+		showTags = true,
+	}: {
+		rollResult: DiceRollResult | ErrorResult;
+		tags?: string[];
+		showTags?: boolean;
+	}) {
+		this.rollResults.push(rollResult);
+		if (tags?.length && showTags) {
+			const resultName = rollResult.type === 'error' ? '' : rollResult.name;
+			const rollTagsText = resultName ? `${resultName} tags` : 'tags';
+			this.footer = this.footer
+				? `${this.footer}\n${rollTagsText}: ${tags.join(', ')}`
+				: `${rollTagsText}: ${tags.join(', ')}`;
+		}
+		return rollResult;
 	}
 
 	public evaluateRollsInText({

@@ -20,8 +20,14 @@
 		"test": "vitest"
 	},
 	"dependencies": {
+		"@kobold/config": "workspace:*",
+		"@kobold/db": "workspace:*",
+		"@kobold/nethys": "workspace:*",
 		"@kobold/schema": "workspace:*",
-		"lodash": "^4.17.21"
+		"@kobold/util": "workspace:*",
+		"dice-typescript": "^1.0.9",
+		"lodash": "^4.17.21",
+		"zod": "^4.2.1"
 	},
 	"devDependencies": {
 		"@types/lodash": "^4.17.21",

@@ -6,6 +6,7 @@ import { CharacterImportWanderersGuideSubCommand } from './character-import-wand
 import { CharacterListSubCommand } from './character-list-subcommand.js';
 import { CharacterMigrateItemsSubCommand } from './character-migrate-items-subcommand.js';
 import { CharacterRemoveSubCommand } from './character-remove-subcommand.js';
+import { CharacterRenameSubCommand } from './character-rename-subcommand.js';
 import { CharacterSetActiveSubCommand } from './character-set-active-subcommand.js';
 import { CharacterSetDefaultSubCommand } from './character-set-default.subcommand.js';
 import { CharacterSheetSubCommand } from './character-sheet-subcommand.js';
@@ -20,6 +21,7 @@ export const CharactersCommandExport: CommandExport = {
 		CharacterListSubCommand,
 		CharacterMigrateItemsSubCommand,
 		CharacterRemoveSubCommand,
+		CharacterRenameSubCommand,
 		CharacterSetActiveSubCommand,
 		CharacterSetDefaultSubCommand,
 		CharacterSheetSubCommand,

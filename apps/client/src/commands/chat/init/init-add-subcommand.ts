@@ -24,13 +24,11 @@ import { InitiativeBuilder, InitiativeBuilderUtils } from '../../../utils/initia
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import { NpcUtils } from '../../../utils/kobold-service-utils/npc-utils.js';
-import { SheetProperties } from '../../../utils/sheet/sheet-properties.js';
 import { Command } from '../../index.js';
-import { SheetUtils } from '../../../utils/sheet/sheet-utils.js';
+import { SheetUtils, SheetProperties, NethysSheetImporter } from '@kobold/sheet';
 import { getEmoji } from '../../../constants/emoji.js';
-import { StringUtils } from '@kobold/base-utils';
+import { StringUtils } from '@kobold/util';
 import { NethysDb } from '@kobold/nethys';
-import { NethysSheetImporter } from '../../../utils/sheet/sheet-import-nethys.js';
 import { InitDefinition, RollDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
 import { Config } from '@kobold/config';
@@ -171,7 +169,7 @@ export class InitAddSubCommand extends BaseCommandClass(
 			});
 			sheet = await nethysSheetImporter.buildSheet();
 			const newActions = await nethysSheetImporter.buildActions(intr.user.id);
-			actions.push(...newActions);
+			actions.push(...(newActions as NewAction[]));
 			referenceNpcName = bestiaryCreature.name;
 			if (!actorName) {
 				actorName = (template ? `${_.capitalize(template)} ` : '') + bestiaryCreature.name;

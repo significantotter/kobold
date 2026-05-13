@@ -13,8 +13,8 @@ import { Command } from '../../index.js';
 
 import _ from 'lodash';
 import { ActionCostEnum, GameSystemEnum, Kobold, isGameSystemEnum } from '@kobold/db';
-import { KoboldError } from '../../../utils/KoboldError.js';
-import { StringUtils } from '@kobold/base-utils';
+import { KoboldError } from '@kobold/util';
+import { StringUtils } from '@kobold/util';
 import { NethysDb, NethysEmoji, NethysParser } from '@kobold/nethys';
 import { CompendiumDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';

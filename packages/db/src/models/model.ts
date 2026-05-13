@@ -11,11 +11,11 @@ export abstract class Model<T extends ValueOf<Database>> {
 	/**
 	 * Reads a row from the table.
 	 */
-	abstract read(target: any): Promise<Selectable<T> | null>;
+	abstract read(target: any): Promise<any | null>;
 	/**
 	 * Updates a row in the table.
 	 */
-	abstract update(target: any, args: Updateable<T>): Promise<Selectable<T>>;
+	abstract update(target: any, args: Updateable<T>): Promise<any>;
 	/**
 	 * Deletes a row from the table.
 	 */

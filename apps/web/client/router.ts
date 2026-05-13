@@ -34,6 +34,21 @@ const router = createRouter({
 			component: () => import('./pages/import-character.vue'),
 		},
 		{
+			path: '/characters',
+			name: 'my-characters',
+			component: () => import('./pages/characters.vue'),
+		},
+		{
+			path: '/characters/:characterId',
+			name: 'character-workspace',
+			component: () => import('./pages/character-workspace.vue'),
+		},
+		{
+			path: '/library',
+			name: 'library-workspace',
+			component: () => import('./pages/library.vue'),
+		},
+		{
 			path: '/login-error',
 			name: 'login-error',
 			component: () => import('./pages/login-error.vue'),
