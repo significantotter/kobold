@@ -31,6 +31,7 @@ import {
 import { EmbedUtils, KoboldEmbed } from './kobold-embed-utils.js';
 import { RollBuilder } from './roll-builder.js';
 import { DefaultUtils } from './default-utils.js';
+import type { DamagePacket, PreparedDamageLine } from './damage-resolver.js';
 
 type ContestedRollTypes = 'attack' | 'skill-challenge' | 'save' | 'none';
 type ResultRollTypes = 'damage' | 'advanced-damage' | 'text';
@@ -61,6 +62,8 @@ export class ActionRoller {
 	public triggeredWeaknesses: SheetWeaknessesResistances['weaknesses'] = [];
 	public triggeredResistances: SheetWeaknessesResistances['resistances'] = [];
 	public triggeredImmunities: SheetInfoLists['immunities'] = [];
+	public preparedDamageLines: PreparedDamageLine[] = [];
+	protected damageHasResolved = false;
 	protected damageRollOverwriteIfUnused: string | null = null;
 	constructor(
 		public userSettings: UserSettings | null,
@@ -70,6 +73,7 @@ export class ActionRoller {
 		public options?: {
 			heightenLevel?: number;
 			attackRollOverwrite?: string;
+			autoApplyDamage?: boolean;
 			damageRollOverwrite?: string;
 			saveRollOverwrite?: string;
 		}
@@ -89,6 +93,7 @@ export class ActionRoller {
 		return (
 			this.totalDamageDealt > 0 ||
 			this.totalHealingDone > 0 ||
+			this.triggeredWeaknesses.length > 0 ||
 			this.triggeredResistances.length > 0 ||
 			this.triggeredImmunities.length > 0
 		);
@@ -790,26 +795,67 @@ export class ActionRoller {
 		return results;
 	}
 
+	public prepareDamage(roll: DamageRoll | AdvancedDamageRoll, damage: number) {
+		this.damageHasResolved = false;
+		const damageType = roll.damageType ?? 'untyped';
+		this.preparedDamageLines.push({
+			amount: damage,
+			damageType,
+			sourceName: roll.name,
+			tags: _.uniq([
+				...this.tags,
+				'damage',
+				damageType,
+				...damageType.split(/\W+/).filter(Boolean),
+			]),
+		});
+	}
+
 	public applyDamage(roll: DamageRoll | AdvancedDamageRoll, damage: number) {
+		this.prepareDamage(roll, damage);
+	}
+
+	public buildDamagePacket(): DamagePacket {
+		return {
+			actionName: this.action?.name,
+			tags: this.tags,
+			lines: this.preparedDamageLines,
+		};
+	}
+
+	public resolveDamage(options?: { apply?: boolean }) {
 		if (this.targetCreature) {
+			if (this.damageHasResolved && options?.apply !== false) return null;
+			if (!this.preparedDamageLines.length) return null;
+
 			const {
 				appliedDamage,
-				totalDamage,
-				appliedResistance,
-				appliedWeakness,
-				appliedImmunity,
-			} = this.targetCreature.applyDamage(damage, roll.damageType ?? undefined);
-			this.totalDamageDealt += appliedDamage;
-			if (appliedImmunity)
-				this.triggeredImmunities = _.uniq([...this.triggeredImmunities, appliedImmunity]);
-			if (appliedResistance)
+				appliedResistances,
+				appliedWeaknesses,
+				appliedImmunities,
+				resolution,
+			} = this.targetCreature.resolveDamagePacket(this.buildDamagePacket(), {
+				apply: options?.apply ?? true,
+			});
+			if (options?.apply !== false) {
+				this.damageHasResolved = true;
+				this.totalDamageDealt += appliedDamage;
+				this.triggeredImmunities = _.uniq([
+					...this.triggeredImmunities,
+					...appliedImmunities,
+				]);
 				this.triggeredResistances = _.uniq([
 					...this.triggeredResistances,
-					appliedResistance,
+					...appliedResistances,
 				]);
-			if (appliedWeakness)
-				this.triggeredWeaknesses = _.uniq([...this.triggeredWeaknesses, appliedWeakness]);
+				this.triggeredWeaknesses = _.uniq([
+					...this.triggeredWeaknesses,
+					...appliedWeaknesses,
+				]);
+			}
+			return resolution;
 		}
+		return null;
 	}
 
 	public applyHealing(roll: Roll, healing: number) {
@@ -1025,7 +1071,7 @@ export class ActionRoller {
 				);
 				if (result && result.type === 'dice') {
 					if (result?.results?.total && !roll.healInsteadOfDamage)
-						this.applyDamage(roll, result.results.total);
+						this.prepareDamage(roll, result.results.total);
 					else if (result?.results?.total && roll.healInsteadOfDamage)
 						this.applyHealing(roll, result.results.total);
 				}
@@ -1041,12 +1087,13 @@ export class ActionRoller {
 				);
 				if (result) {
 					if (result?.appliedDamage && !roll.healInsteadOfDamage)
-						this.applyDamage(roll, result?.appliedDamage);
+						this.prepareDamage(roll, result?.appliedDamage);
 					else if (result?.appliedDamage && roll.healInsteadOfDamage)
 						this.applyHealing(roll, result?.appliedDamage);
 				}
 			}
 		}
+		if (this.options?.autoApplyDamage !== false) this.resolveDamage({ apply: true });
 
 		return rollBuilder;
 	}
@@ -1093,7 +1140,7 @@ export class ActionRoller {
 			autoHeighten: false,
 			type: ActionTypeEnum.attack,
 			actionCost: ActionCostEnum.oneAction,
-			tags: [],
+			tags: targetAttack.traits,
 			rolls: [],
 		};
 		// add the attack roll

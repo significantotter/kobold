@@ -31,6 +31,7 @@ interface MockModel {
 interface MockCharacterModel extends MockModel {
 	setIsActive: MockFn;
 	readActive: MockFn;
+	readActiveAdjusted: MockFn;
 	readActiveLite: MockFn;
 	readLite: MockFn;
 	readManyLite: MockFn;
@@ -114,6 +115,7 @@ function createMockCharacterModel(): MockCharacterModel {
 		...createMockModel(),
 		setIsActive: vi.fn(),
 		readActive: vi.fn(),
+		readActiveAdjusted: vi.fn(),
 		readActiveLite: vi.fn(),
 		readLite: vi.fn(),
 		readManyLite: vi.fn(),

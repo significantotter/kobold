@@ -261,22 +261,29 @@ export function setupKoboldUtilsMocks(options: MockCharacterOptions = {}): Kobol
 		selectFrom: vi.fn((tableName: string) => createDbSelectChain(tableName)),
 	};
 	mockKobold.character.readActiveLite.mockResolvedValue(mockCharacter);
+	mockKobold.character.readActiveAdjusted.mockResolvedValue(mockCharacter);
 	mockKobold.userSettings.read.mockResolvedValue(undefined);
 	mockKobold.rollMacro.readManyForCharacter.mockResolvedValue(mockCharacter.rollMacros ?? []);
 	mockKobold.sheetRecord.read.mockResolvedValue(mockCharacter.sheetRecord);
 	(mockKobold.sheetRecord as any).readAdjusted = vi.fn(async () => mockCharacter.sheetRecord);
 
 	const fetchDataMock = vi.fn(
-		async () =>
+		async (_intr, usesData?: PartialInjectedData) =>
 			({
 				activeCharacter: mockCharacter,
+				...(usesData?.activeCharacterAdjusted
+					? { activeCharacterAdjusted: mockCharacter }
+					: {}),
 			}) as MockReturnValue
 	);
 
 	const fetchNonNullableDataMock = vi.fn(
-		async () =>
+		async (_intr, usesData?: PartialInjectedData) =>
 			({
 				activeCharacter: mockCharacter,
+				...(usesData?.activeCharacterAdjusted
+					? { activeCharacterAdjusted: mockCharacter }
+					: {}),
 				userSettings: undefined,
 			}) as MockReturnValue
 	);

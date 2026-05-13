@@ -46,6 +46,7 @@
 import Menubar from 'primevue/menubar';
 import { useRoute } from 'vue-router';
 import UserProfile from './UserProfile.vue';
+import { MenuItem } from 'primevue/menuitem';
 
 type HeaderMenuItem = {
 	label?: string;
@@ -59,7 +60,7 @@ type HeaderMenuItem = {
 
 const route = useRoute();
 
-const items = [
+const items: HeaderMenuItem[] = [
 	{
 		label: 'Home',
 		icon: 'pi pi-fw pi-home',
@@ -75,16 +76,16 @@ const items = [
 		icon: 'pi pi-fw pi-book',
 		route: '/commands',
 	},
-	{
-		label: 'My Characters',
-		icon: 'pi pi-fw pi-users',
-		route: '/characters',
-	},
-	{
-		label: 'Library',
-		icon: 'pi pi-fw pi-warehouse',
-		route: '/library',
-	},
+	// {
+	// 	label: 'My Characters',
+	// 	icon: 'pi pi-fw pi-users',
+	// 	route: '/characters',
+	// },
+	// {
+	// 	label: 'Library',
+	// 	icon: 'pi pi-fw pi-warehouse',
+	// 	route: '/library',
+	// },
 	{
 		label: 'Import',
 		icon: 'pi pi-fw pi-upload',
@@ -94,9 +95,9 @@ const items = [
 		auth: true,
 		class: 'auth-menu-item',
 	},
-] satisfies HeaderMenuItem[];
+];
 
-function isRouteSectionActive(item: HeaderMenuItem) {
+function isRouteSectionActive(item: MenuItem) {
 	if (!item.route) return false;
 	if (item.route === '/') return false;
 	return route.path === item.route || route.path.startsWith(`${item.route}/`);
