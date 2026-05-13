@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import axios from 'axios';
 
 export const abilitySchema = z.union([
 	z.literal('str'),
@@ -287,16 +288,26 @@ export class PathBuilder {
 	}: {
 		characterJsonId: number;
 	}): Promise<PathBuilder.JsonExport> {
-		const response = await fetch(`https://pathbuilder2e.com/json.php?id=${characterJsonId}`, {
-			headers: {
-				'User-Agent': PATHBUILDER_USER_AGENT,
-			},
-		});
+		console.log();
 
-		if (!response.ok) {
-			throw new Error(`Pathbuilder request failed with status ${response.status}`);
-		}
+		return (
+			await axios.get('https://pathbuilder2e.com/json.php?id=' + characterJsonId, {
+				headers: {
+					'User-Agent':
+						'Mozilla/5.0 (compatible; KoboldBot/1.0; +https://github.com/significantotter/kobold)',
+				},
+			})
+		).data as PathBuilder.JsonExport;
+		// const response = await fetch(`https://pathbuilder2e.com/json.php?id=${characterJsonId}`, {
+		// 	headers: {
+		// 		'User-Agent': PATHBUILDER_USER_AGENT,
+		// 	},
+		// });
 
-		return zPathBuilderJsonExportSchema.parse(await response.json());
+		// if (!response.ok) {
+		// 	throw new Error(`Pathbuilder request failed with status ${response.status}`);
+		// }
+
+		// return zPathBuilderJsonExportSchema.parse(await response.json());
 	}
 }
