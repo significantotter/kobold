@@ -198,7 +198,7 @@ importers:
         version: link:../../packages/config
       '@kobold/db':
         specifier: workspace:*
-        version: link:../../packages/db
+        version: file:packages/db(@electric-sql/pglite@0.3.7)(@libsql/client@0.14.0)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@11.10.0)(knex@3.1.0(better-sqlite3@11.10.0))(postgres@3.4.7)
       '@playwright/test':
         specifier: ^1.52.0
         version: 1.59.1
@@ -222,7 +222,7 @@ importers:
         version: link:../../packages/config
       '@kobold/db':
         specifier: workspace:*
-        version: link:../../packages/db
+        version: file:packages/db(@electric-sql/pglite@0.3.7)(@libsql/client@0.14.0)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@11.10.0)(knex@3.1.0(better-sqlite3@11.10.0))(postgres@3.4.7)
       '@kobold/documentation':
         specifier: workspace:*
         version: link:../../packages/documentation
@@ -231,7 +231,7 @@ importers:
         version: link:../../packages/schema
       '@kobold/sheet':
         specifier: workspace:*
-        version: file:packages/sheet(@electric-sql/pglite@0.3.7)(@libsql/client@0.14.0)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@11.10.0)(knex@3.1.0(better-sqlite3@11.10.0)(pg@8.16.3))(kysely@0.28.9)(pg@8.16.3)(postgres@3.4.7)
+        version: file:packages/sheet(@electric-sql/pglite@0.3.7)(@libsql/client@0.14.0)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@11.10.0)(knex@3.1.0(better-sqlite3@11.10.0))(postgres@3.4.7)
       '@orpc/client':
         specifier: ^1.13.13
         version: 1.13.13(@opentelemetry/api@1.9.0)
@@ -7230,13 +7230,13 @@ snapshots:
       dotenv: 17.2.3
       lodash: 4.17.21
 
-  '@kobold/db@file:packages/db(@electric-sql/pglite@0.3.7)(@libsql/client@0.14.0)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@11.10.0)(knex@3.1.0(better-sqlite3@11.10.0)(pg@8.16.3))(postgres@3.4.7)':
+  '@kobold/db@file:packages/db(@electric-sql/pglite@0.3.7)(@libsql/client@0.14.0)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@11.10.0)(knex@3.1.0(better-sqlite3@11.10.0))(postgres@3.4.7)':
     dependencies:
       '@kobold/config': file:packages/config
       '@kobold/documentation': file:packages/documentation
       '@kobold/schema': file:packages/schema
       date-fns: 4.1.0
-      drizzle-orm: 0.33.0(@electric-sql/pglite@0.3.7)(@libsql/client@0.14.0)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@11.10.0)(knex@3.1.0(better-sqlite3@11.10.0)(pg@8.16.3))(kysely@0.28.9)(pg@8.16.3)(postgres@3.4.7)
+      drizzle-orm: 0.33.0(@electric-sql/pglite@0.3.7)(@libsql/client@0.14.0)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@11.10.0)(knex@3.1.0(better-sqlite3@11.10.0))(kysely@0.28.9)(pg@8.16.3)(postgres@3.4.7)
       kysely: 0.28.9
       lodash: 4.17.21
       pg: 8.16.3
@@ -7275,13 +7275,13 @@ snapshots:
       discord-api-types: 0.38.37
       lodash: 4.17.21
 
-  '@kobold/nethys@file:packages/nethys(@electric-sql/pglite@0.3.7)(@libsql/client@0.14.0)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@11.10.0)(knex@3.1.0(better-sqlite3@11.10.0)(pg@8.16.3))(kysely@0.28.9)(pg@8.16.3)':
+  '@kobold/nethys@file:packages/nethys(@electric-sql/pglite@0.3.7)(@libsql/client@0.14.0)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@11.10.0)(knex@3.1.0(better-sqlite3@11.10.0))':
     dependencies:
       '@elastic/elasticsearch': 8.19.1
       '@kobold/config': file:packages/config
       '@kobold/schema': file:packages/schema
       discord.js: 14.25.1
-      drizzle-orm: 0.33.0(@electric-sql/pglite@0.3.7)(@libsql/client@0.14.0)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@11.10.0)(knex@3.1.0(better-sqlite3@11.10.0)(pg@8.16.3))(kysely@0.28.9)(pg@8.16.3)(postgres@3.4.7)
+      drizzle-orm: 0.33.0(@electric-sql/pglite@0.3.7)(@libsql/client@0.14.0)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@11.10.0)(knex@3.1.0(better-sqlite3@11.10.0))(kysely@0.28.9)(pg@8.16.3)(postgres@3.4.7)
       hast-util-from-text: 3.0.0
       hast-util-to-html: 9.0.5
       hast-util-to-string: 3.0.1
@@ -7335,11 +7335,11 @@ snapshots:
       lodash: 4.17.21
       zod: 4.2.1
 
-  '@kobold/sheet@file:packages/sheet(@electric-sql/pglite@0.3.7)(@libsql/client@0.14.0)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@11.10.0)(knex@3.1.0(better-sqlite3@11.10.0)(pg@8.16.3))(kysely@0.28.9)(pg@8.16.3)(postgres@3.4.7)':
+  '@kobold/sheet@file:packages/sheet(@electric-sql/pglite@0.3.7)(@libsql/client@0.14.0)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@11.10.0)(knex@3.1.0(better-sqlite3@11.10.0))(postgres@3.4.7)':
     dependencies:
       '@kobold/config': file:packages/config
-      '@kobold/db': file:packages/db(@electric-sql/pglite@0.3.7)(@libsql/client@0.14.0)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@11.10.0)(knex@3.1.0(better-sqlite3@11.10.0)(pg@8.16.3))(postgres@3.4.7)
-      '@kobold/nethys': file:packages/nethys(@electric-sql/pglite@0.3.7)(@libsql/client@0.14.0)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@11.10.0)(knex@3.1.0(better-sqlite3@11.10.0)(pg@8.16.3))(kysely@0.28.9)(pg@8.16.3)
+      '@kobold/db': file:packages/db(@electric-sql/pglite@0.3.7)(@libsql/client@0.14.0)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@11.10.0)(knex@3.1.0(better-sqlite3@11.10.0))(postgres@3.4.7)
+      '@kobold/nethys': file:packages/nethys(@electric-sql/pglite@0.3.7)(@libsql/client@0.14.0)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@11.10.0)(knex@3.1.0(better-sqlite3@11.10.0))
       '@kobold/schema': file:packages/schema
       '@kobold/util': file:packages/util
       dice-typescript: 1.6.1
@@ -9439,6 +9439,19 @@ snapshots:
       - supports-color
 
   drizzle-orm@0.33.0(@electric-sql/pglite@0.3.7)(@libsql/client@0.14.0)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@11.10.0)(knex@3.1.0(better-sqlite3@11.10.0)(pg@8.16.3))(kysely@0.28.9)(pg@8.16.3)(postgres@3.4.7):
+    optionalDependencies:
+      '@electric-sql/pglite': 0.3.7
+      '@libsql/client': 0.14.0
+      '@opentelemetry/api': 1.9.0
+      '@types/better-sqlite3': 7.6.13
+      '@types/pg': 8.16.0
+      better-sqlite3: 11.10.0
+      knex: 3.1.0(better-sqlite3@11.10.0)(pg@8.16.3)
+      kysely: 0.28.9
+      pg: 8.16.3
+      postgres: 3.4.7
+
+  drizzle-orm@0.33.0(@electric-sql/pglite@0.3.7)(@libsql/client@0.14.0)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@11.10.0)(knex@3.1.0(better-sqlite3@11.10.0))(kysely@0.28.9)(pg@8.16.3)(postgres@3.4.7):
     optionalDependencies:
       '@electric-sql/pglite': 0.3.7
       '@libsql/client': 0.14.0
