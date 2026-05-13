@@ -73,9 +73,19 @@ const handler = new RPCHandler(router, {
 });
 
 app.use('/api/*', async (c, next) => {
+	const start = Date.now();
 	const { matched, response } = await handler.handle(c.req.raw, {
 		prefix: '/api',
 		context: createContext(c),
+	});
+	const durationMs = Date.now() - start;
+
+	console.info('[web-api timing]', {
+		method: c.req.method,
+		path: new URL(c.req.url).pathname,
+		matched,
+		status: response?.status ?? null,
+		durationMs,
 	});
 
 	if (matched) {

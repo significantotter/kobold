@@ -147,19 +147,50 @@ export async function recomputeAdjustedSheetForSheetRecord({
 	context: AppContext;
 	sheetRecordId: number;
 }): Promise<void> {
+	const totalStart = Date.now();
+	const readStart = Date.now();
 	const sheetRecord = await context.kobold.sheetRecord.read({ id: sheetRecordId });
 	if (!sheetRecord) return;
+	console.info('[character import timing]', {
+		event: 'recompute read sheet record',
+		sheetRecordId,
+		durationMs: Date.now() - readStart,
+	});
 
+	const modifiersStart = Date.now();
 	const modifiers = await context.kobold.modifier.readManyBySheetRecordId({
 		sheetRecordId,
 	});
+	console.info('[character import timing]', {
+		event: 'recompute read modifiers',
+		sheetRecordId,
+		modifierCount: modifiers.length,
+		durationMs: Date.now() - modifiersStart,
+	});
 
+	const adjustStart = Date.now();
 	const adjustedSheet = SheetUtils.adjustSheetWithModifiers(sheetRecord.sheet, [
 		...(sheetRecord.conditions ?? []),
 		...modifiers,
 	]);
+	console.info('[character import timing]', {
+		event: 'recompute adjusted sheet in memory',
+		sheetRecordId,
+		durationMs: Date.now() - adjustStart,
+	});
 
+	const updateStart = Date.now();
 	await context.kobold.sheetRecord.update({ id: sheetRecordId }, { adjustedSheet });
+	console.info('[character import timing]', {
+		event: 'recompute update adjusted sheet',
+		sheetRecordId,
+		durationMs: Date.now() - updateStart,
+	});
+	console.info('[character import timing]', {
+		event: 'recompute complete',
+		sheetRecordId,
+		durationMs: Date.now() - totalStart,
+	});
 }
 
 export async function recomputeAdjustedSheetsForUser({

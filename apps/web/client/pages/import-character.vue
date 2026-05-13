@@ -179,12 +179,12 @@
 									<i class="pi pi-arrow-right" />
 									<span>Open workspace</span>
 								</RouterLink>
-								<RouterLink
+								<!-- <RouterLink
 									to="/characters"
 									class="ml-3 text-gray-300 hover:text-white text-sm underline"
 								>
 									Go to My Characters
-								</RouterLink>
+								</RouterLink> -->
 							</div>
 						</template>
 
@@ -502,6 +502,7 @@ function processFile(file: File) {
 	if (effectiveImportSource.value !== 'wg') return;
 	clearFile();
 	fileName.value = file.name;
+	const processStart = performance.now();
 
 	if (!file.name.endsWith('.json') && file.type !== 'application/json') {
 		error.value = 'Please select a JSON file.';
@@ -511,7 +512,15 @@ function processFile(file: File) {
 	const reader = new FileReader();
 	reader.onload = async () => {
 		try {
+			const parseStart = performance.now();
 			const data = JSON.parse(reader.result as string);
+			console.info('[wg import timing]', {
+				event: 'file parsed',
+				fileName: file.name,
+				fileBytes: file.size,
+				readAndParseMs: Math.round(performance.now() - processStart),
+				parseMs: Math.round(performance.now() - parseStart),
+			});
 
 			if (!data.version || !data.character || !data.content) {
 				error.value =
@@ -532,8 +541,14 @@ function processFile(file: File) {
 			// Check if a WG character with this name already exists
 			if (!characterId.value && parsedName.value) {
 				try {
+					const duplicateStart = performance.now();
 					matchedExisting.value = await api.character.findWgCharacterByName({
 						name: parsedName.value,
+					});
+					console.info('[wg import timing]', {
+						event: 'duplicate lookup complete',
+						durationMs: Math.round(performance.now() - duplicateStart),
+						foundExisting: !!matchedExisting.value,
 					});
 				} catch {
 					matchedExisting.value = null;
@@ -557,10 +572,15 @@ async function submitWgCharacter() {
 	importing.value = true;
 
 	try {
+		const rpcStart = performance.now();
 		if (isUpdateMode.value && effectiveCharacterId.value !== null) {
 			const result = await api.character.updateWgCharacter({
 				characterId: effectiveCharacterId.value,
 				exportData: exportData.value,
+			});
+			console.info('[wg import timing]', {
+				event: 'update rpc complete',
+				durationMs: Math.round(performance.now() - rpcStart),
 			});
 			success.value = result.name;
 			successWasUpdate.value = true;
@@ -568,6 +588,10 @@ async function submitWgCharacter() {
 		} else {
 			const result = await api.character.importWgCharacter({
 				exportData: exportData.value,
+			});
+			console.info('[wg import timing]', {
+				event: 'import rpc complete',
+				durationMs: Math.round(performance.now() - rpcStart),
 			});
 			success.value = result.name;
 			successCharacterId.value = result.characterId;
