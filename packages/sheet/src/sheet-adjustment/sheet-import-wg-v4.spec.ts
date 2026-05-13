@@ -889,15 +889,6 @@ describe('convertWgV4ExportToSheet', () => {
 		expect(sheet.staticInfo.name).toBe('Unnamed Character');
 	});
 
-	it('stores sourceData as a deep copy of the export', () => {
-		const exp = minimalExport();
-		const sheet = convertWgV4ExportToSheet(exp);
-
-		expect(sheet.sourceData).toEqual(exp);
-		// Verify it's a deep copy, not a reference
-		expect(sheet.sourceData).not.toBe(exp);
-	});
-
 	it('handles max_hp', () => {
 		const sheet = convertWgV4ExportToSheet(minimalExport({ content: { max_hp: 56 } }));
 		expect(sheet.baseCounters.hp.max).toBe(56);

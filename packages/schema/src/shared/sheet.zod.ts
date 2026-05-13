@@ -244,10 +244,6 @@ export const zSheet = z
 			.default([])
 			.describe("The creature's lore/additional skills."),
 		attacks: z.array(zSheetAttack).describe("The creature's attacks."),
-		sourceData: z
-			.record(z.string(), z.any())
-			.default({})
-			.describe('The source data the sheet was parsed from'),
 	})
 	.describe("A creature's sheet.");
 

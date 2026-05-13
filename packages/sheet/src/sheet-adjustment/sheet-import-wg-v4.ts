@@ -566,7 +566,6 @@ export function convertWgV4ExportToSheet(exportData: WgV4Export): Sheet {
 		countersOutsideGroups: [],
 		additionalSkills,
 		attacks,
-		sourceData: JSON.parse(JSON.stringify(exportData)) as Record<string, any>,
 	};
 
 	return sheet;

@@ -436,6 +436,5 @@ export function convertPathBuilderToSheet(
 				notes: null,
 			} satisfies SheetAttack;
 		}),
-		sourceData: pathBuilderSheet,
 	};
 }

@@ -3960,15 +3960,6 @@
             ],
             "additionalProperties": false
           }
-        },
-        "sourceData": {
-          "description": "The source data the sheet was parsed from",
-          "default": {},
-          "type": "object",
-          "propertyNames": {
-            "type": "string"
-          },
-          "additionalProperties": {}
         }
       },
       "required": [
@@ -3982,26 +3973,16 @@
         "counterGroups",
         "countersOutsideGroups",
         "additionalSkills",
-        "attacks",
-        "sourceData"
+        "attacks"
       ],
       "additionalProperties": false
     },
     "modifiers": {
       "type": "array",
       "items": {
-        "description": "A modifier is a bonus or penalty that can be applied to rolls or sheet properties.",
         "type": "object",
         "properties": {
-          "name": {
-            "type": "string"
-          },
-          "isActive": {
-            "default": false,
-            "type": "boolean"
-          },
           "description": {
-            "default": null,
             "anyOf": [
               {
                 "type": "string"
@@ -4011,18 +3992,46 @@
               }
             ]
           },
-          "type": {
-            "default": "untyped",
-            "type": "string",
-            "enum": [
-              "untyped",
-              "status",
-              "circumstance",
-              "item"
+          "id": {
+            "type": "number"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "rollAdjustment": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "rollTargetTags": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
             ]
           },
           "severity": {
-            "default": null,
             "anyOf": [
               {
                 "type": "number"
@@ -4032,8 +4041,29 @@
               }
             ]
           },
+          "sheetRecordId": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "untyped",
+              "status",
+              "circumstance",
+              "item"
+            ]
+          },
+          "userId": {
+            "type": "string"
+          },
           "sheetAdjustments": {
-            "default": [],
             "type": "array",
             "items": {
               "type": "object",
@@ -4087,51 +4117,21 @@
               ],
               "additionalProperties": false
             }
-          },
-          "rollAdjustment": {
-            "default": null,
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "rollTargetTags": {
-            "default": null,
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "note": {
-            "default": null,
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
           }
         },
         "required": [
-          "name",
-          "isActive",
           "description",
-          "type",
-          "severity",
-          "sheetAdjustments",
+          "id",
+          "isActive",
+          "name",
+          "note",
           "rollAdjustment",
           "rollTargetTags",
-          "note"
+          "severity",
+          "sheetRecordId",
+          "type",
+          "userId",
+          "sheetAdjustments"
         ],
         "additionalProperties": false
       }
@@ -4139,14 +4139,9 @@
     "actions": {
       "type": "array",
       "items": {
-        "description": "A custom sheet action",
         "type": "object",
         "properties": {
-          "name": {
-            "type": "string"
-          },
-          "description": {
-            "default": null,
+          "actionCost": {
             "anyOf": [
               {
                 "type": "string"
@@ -4156,52 +4151,52 @@
               }
             ]
           },
-          "type": {
-            "type": "string",
-            "enum": [
-              "attack",
-              "spell",
-              "other"
-            ]
-          },
-          "actionCost": {
-            "type": "string",
-            "enum": [
-              "oneAction",
-              "twoActions",
-              "threeActions",
-              "freeAction",
-              "variableActions",
-              "reaction",
-              "none"
-            ]
+          "autoHeighten": {
+            "type": "boolean"
           },
           "baseLevel": {
-            "default": null,
             "anyOf": [
               {
-                "type": "integer",
-                "minimum": -9007199254740991,
-                "maximum": 9007199254740991
+                "type": "number"
               },
               {
                 "type": "null"
               }
             ]
           },
-          "autoHeighten": {
-            "default": false,
-            "type": "boolean"
+          "description": {
+            "type": "string"
           },
-          "tags": {
-            "default": [],
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "sheetRecordId": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "userId": {
+            "type": "string"
           },
           "rolls": {
-            "default": [],
             "type": "array",
             "items": {
               "oneOf": [
@@ -4523,17 +4518,26 @@
                 }
               ]
             }
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "required": [
-          "name",
-          "description",
-          "type",
           "actionCost",
-          "baseLevel",
           "autoHeighten",
-          "tags",
-          "rolls"
+          "baseLevel",
+          "description",
+          "id",
+          "name",
+          "sheetRecordId",
+          "type",
+          "userId",
+          "rolls",
+          "tags"
         ],
         "additionalProperties": false
       }
@@ -4543,16 +4547,35 @@
       "items": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "number"
+          },
+          "macro": {
+            "type": "string"
+          },
           "name": {
             "type": "string"
           },
-          "macro": {
+          "sheetRecordId": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "userId": {
             "type": "string"
           }
         },
         "required": [
+          "id",
+          "macro",
           "name",
-          "macro"
+          "sheetRecordId",
+          "userId"
         ],
         "additionalProperties": false
       }

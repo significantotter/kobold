@@ -49,6 +49,13 @@ export class PasteBinCharacterFetcher extends CharacterFetcher<
 		let actions: Action[];
 		let rollMacros: RollMacro[];
 
+		if (characterJSON && typeof characterJSON === 'object' && 'sheet' in characterJSON) {
+			const sheet = (characterJSON as { sheet?: unknown }).sheet;
+			if (sheet && typeof sheet === 'object') {
+				delete (sheet as { sourceData?: unknown }).sourceData;
+			}
+		}
+
 		const parseResult = zPasteBinImport.safeParse(characterJSON);
 		if (parseResult.success) {
 			sheet = parseResult.data.sheet || SheetProperties.defaultSheet;

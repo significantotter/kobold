@@ -334,7 +334,6 @@ export function getDefaultSheet(): Sheet {
 			},
 			additionalSkills: [],
 			attacks: [],
-			sourceData: {},
 		};
 	}
 }
