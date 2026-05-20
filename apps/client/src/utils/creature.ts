@@ -399,8 +399,12 @@ export class Creature {
 				if (damageRolls.length) {
 					damageRollText = damageRolls
 						.map(roll => {
-							return `${roll.roll} ${roll.damageType ?? ''}`;
+							return roll.terms
+								.map(term => `${term.dice ?? ''} ${term.type ?? ''}`.trim())
+								.filter(Boolean)
+								.join(', ');
 						})
+						.filter(Boolean)
 						.join(', ');
 				}
 				if (textRolls.length) {
@@ -830,7 +834,7 @@ export class Creature {
 				effects: [],
 				range: null,
 				notes: null,
-				traits: ['attack', 'spell', 'arcane'],
+				traits: ['spell', 'arcane'],
 			});
 		}
 
@@ -842,7 +846,7 @@ export class Creature {
 				effects: [],
 				range: null,
 				notes: null,
-				traits: ['attack', 'spell', 'divine'],
+				traits: ['spell', 'divine'],
 			});
 		}
 
@@ -854,7 +858,7 @@ export class Creature {
 				effects: [],
 				range: null,
 				notes: null,
-				traits: ['attack', 'spell', 'occult'],
+				traits: ['spell', 'occult'],
 			});
 		}
 
@@ -866,7 +870,7 @@ export class Creature {
 				effects: [],
 				range: null,
 				notes: null,
-				traits: ['attack', 'spell', 'primal'],
+				traits: ['spell', 'primal'],
 			});
 		}
 
@@ -878,7 +882,7 @@ export class Creature {
 				effects: [],
 				range: null,
 				notes: null,
-				traits: ['attack', 'class'],
+				traits: ['class'],
 			});
 		}
 
@@ -897,7 +901,7 @@ export class Creature {
 				effects: [],
 				range: 'melee',
 				notes: null,
-				traits: ['attack', 'strength', 'melee'],
+				traits: ['strength', 'melee'],
 			});
 			bonusAttacks.push({
 				name: 'Ranged/Finesse (dexterity, best proficiency)',
@@ -906,7 +910,7 @@ export class Creature {
 				effects: [],
 				range: 'melee',
 				notes: null,
-				traits: ['attack', 'dexterity', 'ranged'],
+				traits: ['dexterity', 'ranged'],
 			});
 		}
 

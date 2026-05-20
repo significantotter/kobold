@@ -206,7 +206,7 @@ describe('Enum Helpers', () => {
 
 	describe('isRollTypeEnum', () => {
 		it('should return true for valid RollTypeEnum values', () => {
-			expect(isRollTypeEnum(RollTypeEnum.advancedDamage)).toBe(true);
+			expect(isRollTypeEnum(RollTypeEnum.AdvancedDamage)).toBe(true);
 			expect(isRollTypeEnum(RollTypeEnum.attack)).toBe(true);
 			expect(isRollTypeEnum(RollTypeEnum.damage)).toBe(true);
 			expect(isRollTypeEnum(RollTypeEnum.save)).toBe(true);

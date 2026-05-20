@@ -17,7 +17,7 @@ import { SheetProperties } from './sheet-properties.js';
 import { NethysEmoji, NethysParser } from '@kobold/nethys';
 import { Config } from '@kobold/config';
 import z from 'zod/v4';
-import { parsePf2eDefenses } from './pf2e-defense-parser.js';
+import { parsePathfinderDefenses } from './pf2e-defense-parser.js';
 
 type NewAction = z.infer<typeof zNewAction>;
 
@@ -238,7 +238,7 @@ export class NethysSheetImporter {
 			dc: willBonus + 10,
 		};
 
-		this.sheet.defenses = parsePf2eDefenses({
+		this.sheet.defenses = parsePathfinderDefenses({
 			markdown: this.bestiaryEntry.markdown,
 			immunityMarkdown: this.bestiaryEntry.immunity_markdown,
 			resistanceMarkdown: this.bestiaryEntry.resistance_markdown,
@@ -463,9 +463,15 @@ export class NethysSheetImporter {
 					rolls.push({
 						name: `Damage${damageClauses.length === 1 ? '' : ' ' + i}`,
 						type: RollTypeEnum.damage,
-						damageType: damageResult.type ?? null,
-						roll: damage,
-						healInsteadOfDamage: false,
+						terms: [
+							{
+								dice: damage,
+								type: damageResult.type ?? null,
+								tags: [],
+								mode: 'damage',
+								persistent: false,
+							},
+						],
 						allowRollModifiers: true,
 					});
 				} else if (damageResult.rollType === 'effect') {

@@ -5,6 +5,11 @@ import type { KoboldUtils } from './kobold-utils.js';
 import { NethysDb } from '@kobold/nethys';
 import { BestiaryEntry, CompendiumEntry } from '@kobold/schema';
 
+function parseNethysData<T>(data: T | string): T {
+	if (typeof data !== 'string') return data;
+	return JSON.parse(data) as T;
+}
+
 export class NpcUtils {
 	private kobold: Kobold;
 	constructor(private koboldUtils: KoboldUtils) {
@@ -30,7 +35,7 @@ export class NpcUtils {
 		if (!bestMatch) {
 			throw new Error(`No bestiary results found for "${search}".`);
 		}
-		const bestResult = bestMatch.data;
+		const bestResult = parseNethysData<BestiaryEntry>(bestMatch.data);
 		let creatureFamily: CompendiumEntry | undefined;
 		if (bestResult.creature_family) {
 			const creatureFamilyResults = await nethysCompendium.search(
@@ -43,7 +48,9 @@ export class NpcUtils {
 				}
 			);
 			const familyMatch = creatureFamilyResults.sort(closestMatchSorter)[0];
-			creatureFamily = familyMatch?.data;
+			creatureFamily = familyMatch?.data
+				? parseNethysData<CompendiumEntry>(familyMatch.data)
+				: undefined;
 		}
 		return { bestiaryCreature: bestResult, bestiaryCreatureFamily: creatureFamily };
 	}

@@ -221,7 +221,9 @@
 			"notes": null,
 			"range": null,
 			"toHit": 19,
-			"damage": [{ "dice": "1d4+ 2", "type": "P" }],
+			"damage": [
+				{ "dice": "1d4+ 2", "type": "P", "tags": [], "mode": "damage", "persistent": false }
+			],
 			"traits": [],
 			"effects": []
 		},
@@ -231,9 +233,27 @@
 			"range": null,
 			"toHit": 23,
 			"damage": [
-				{ "dice": "3d6+ 4", "type": "P" },
-				{ "dice": "1d6", "type": "Fire" },
-				{ "dice": "1d6", "type": "Electricity" }
+				{
+					"dice": "3d6+ 4",
+					"type": "P",
+					"tags": [],
+					"mode": "damage",
+					"persistent": false
+				},
+				{
+					"dice": "1d6",
+					"type": "Fire",
+					"tags": [],
+					"mode": "damage",
+					"persistent": false
+				},
+				{
+					"dice": "1d6",
+					"type": "Electricity",
+					"tags": [],
+					"mode": "damage",
+					"persistent": false
+				}
 			],
 			"traits": [],
 			"effects": []

@@ -49,6 +49,73 @@ describe('parsePf2eDefenses', () => {
 		]);
 	});
 
+	it('parses amount-first resistance and ignores semicolon-only clauses', () => {
+		const defenses = parsePf2eDefenses({
+			resistanceRaw: '10 physical (except adamantine), ; double resistance vs. non-magical)',
+		});
+
+		expect(defenses.resistances).toMatchObject([
+			{
+				label: 'physical',
+				amount: 10,
+				automation: 'auto',
+				match: {
+					damageGroups: ['physical'],
+					except: { materials: ['adamantine'] },
+				},
+			},
+		]);
+	});
+
+	it('keeps targetless amount rules partial instead of manual', () => {
+		const defenses = parsePf2eDefenses({
+			resistanceRaw: '10 (except adamantine)',
+		});
+
+		expect(defenses.resistances).toMatchObject([
+			{
+				label: 'unspecified',
+				amount: 10,
+				automation: 'partial',
+				match: {
+					except: { materials: ['adamantine'] },
+				},
+			},
+		]);
+	});
+
+	it('allows new numeric damage types without parser code changes', () => {
+		const defenses = parsePf2eDefenses({
+			weaknessRaw: 'plasma 5',
+		});
+
+		expect(defenses.weaknesses).toMatchObject([
+			{
+				label: 'plasma',
+				amount: 5,
+				automation: 'auto',
+				match: { damageTypes: ['plasma'] },
+			},
+		]);
+	});
+
+	it('expands grouped defenses with a shared amount', () => {
+		const defenses = parsePf2eDefenses({
+			resistanceRaw: 'acid, electricity, or sonic 1 (chosen randomly each day)',
+		});
+
+		expect(defenses.resistances).toMatchObject([
+			{ label: 'acid', amount: 1, automation: 'auto', match: { damageTypes: ['acid'] } },
+			{
+				label: 'electricity',
+				amount: 1,
+				automation: 'auto',
+				match: { damageTypes: ['electricity'] },
+			},
+			{ label: 'sonic', amount: 1, automation: 'auto', match: { damageTypes: ['sonic'] } },
+		]);
+	});
+
 	it('parses special immunities', () => {
 		const defenses = parsePf2eDefenses({
 			immunityRaw: 'critical hits, precision, nonlethal attacks',

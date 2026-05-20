@@ -1,5 +1,7 @@
 import type { DefenseMatcher, DefenseRule, Sheet } from '@kobold/db';
 
+export type DamageOutcome = 'critical success' | 'success' | 'failure' | 'critical failure';
+
 const damageTypeAliases: Record<string, string> = {
 	b: 'bludgeoning',
 	electric: 'electricity',
@@ -17,6 +19,9 @@ export type PreparedDamageLine = {
 	damageType?: string | null;
 	tags?: string[];
 	sourceName?: string;
+	actualOutcome?: DamageOutcome | null;
+	damageOutcome?: DamageOutcome | null;
+	outcomeAdjustedBy?: DefenseRule[];
 };
 
 export type DamagePacket = {
@@ -126,7 +131,10 @@ function matchingImmunities(immunities: DefenseRule[], bucket: DamageBucket): De
 	return automaticRules(immunities).filter(rule => matcherMatches(rule.match, bucket));
 }
 
-function highestResistance(resistances: DefenseRule[], bucket: DamageBucket): DefenseRule | undefined {
+function highestResistance(
+	resistances: DefenseRule[],
+	bucket: DamageBucket
+): DefenseRule | undefined {
 	return automaticRules(resistances)
 		.filter(rule => rule.amount != null && matcherMatches(rule.match, bucket))
 		.sort((a, b) => (b.amount ?? 0) - (a.amount ?? 0))[0];
@@ -140,7 +148,11 @@ function matchingWeaknesses(
 	const matchingByLabel = new Map<string, DefenseRule>();
 	for (const weakness of automaticRules(weaknesses)) {
 		const key = normalizeTerm(weakness.label || weakness.raw);
-		if (alreadyApplied.has(key) || weakness.amount == null || !matcherMatches(weakness.match, bucket)) {
+		if (
+			alreadyApplied.has(key) ||
+			weakness.amount == null ||
+			!matcherMatches(weakness.match, bucket)
+		) {
 			continue;
 		}
 		const currentWeakness = matchingByLabel.get(key);
@@ -163,7 +175,11 @@ function nonlethalImmune(sheet: Sheet, packet: DamagePacket): DefenseRule[] {
 }
 
 export function hasCriticalHitImmunity(sheet: Sheet): boolean {
-	return automaticRules(sheet.defenses.immunities).some(rule =>
+	return getCriticalHitImmunities(sheet).length > 0;
+}
+
+export function getCriticalHitImmunities(sheet: Sheet): DefenseRule[] {
+	return automaticRules(sheet.defenses.immunities).filter(rule =>
 		rule.appliesTo.includes('critical-hit')
 	);
 }
@@ -206,11 +222,7 @@ export function resolveDamagePacket(sheet: Sheet, packet: DamagePacket): Resolve
 				resolvedAmount = Math.max(0, resolvedAmount - resistance.amount);
 			}
 
-			weaknesses = matchingWeaknesses(
-				sheet.defenses.weaknesses,
-				bucket,
-				appliedWeaknessKeys
-			);
+			weaknesses = matchingWeaknesses(sheet.defenses.weaknesses, bucket, appliedWeaknessKeys);
 			for (const weakness of weaknesses) {
 				appliedWeaknessKeys.add(normalizeTerm(weakness.label || weakness.raw));
 				resolvedAmount += weakness.amount ?? 0;

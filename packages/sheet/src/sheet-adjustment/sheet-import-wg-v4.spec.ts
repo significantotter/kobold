@@ -458,7 +458,13 @@ describe('buildAttacks', () => {
 		expect(attacks[0].name).toBe('Longsword');
 		expect(attacks[0].toHit).toBe(15);
 		expect(attacks[0].damage).toEqual([
-			{ dice: '1d8+3', type: 'slashing', tags: ['slashing'] },
+			{
+				dice: '1d8+3',
+				type: 'slashing',
+				tags: ['slashing'],
+				mode: 'damage',
+				persistent: false,
+			},
 		]);
 		expect(attacks[0].range).toBe('5');
 	});
@@ -481,7 +487,13 @@ describe('buildAttacks', () => {
 
 		const attacks = buildAttacks([weapon]);
 		expect(attacks[0].damage).toEqual([
-			{ dice: '1d4-1', type: 'bludgeoning', tags: ['bludgeoning'] },
+			{
+				dice: '1d4-1',
+				type: 'bludgeoning',
+				tags: ['bludgeoning'],
+				mode: 'damage',
+				persistent: false,
+			},
 		]);
 	});
 
@@ -503,7 +515,13 @@ describe('buildAttacks', () => {
 
 		const attacks = buildAttacks([weapon]);
 		expect(attacks[0].damage).toEqual([
-			{ dice: '1d4', type: 'piercing', tags: ['piercing'] },
+			{
+				dice: '1d4',
+				type: 'piercing',
+				tags: ['piercing'],
+				mode: 'damage',
+				persistent: false,
+			},
 		]);
 	});
 
@@ -1000,7 +1018,13 @@ describe('convertWgV4ExportToSheet', () => {
 		expect(sheet.attacks[0].name).toBe('Longsword +1');
 		expect(sheet.attacks[0].toHit).toBe(22);
 		expect(sheet.attacks[0].damage).toEqual([
-			{ dice: '2d8+4', type: 'slashing', tags: ['slashing'] },
+			{
+				dice: '2d8+4',
+				type: 'slashing',
+				tags: ['slashing'],
+				mode: 'damage',
+				persistent: false,
+			},
 		]);
 
 		// Counters

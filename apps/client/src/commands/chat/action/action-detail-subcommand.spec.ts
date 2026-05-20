@@ -68,9 +68,15 @@ describe('ActionDetailSubCommand Integration', () => {
 					createAttackRoll({ name: 'Attack Roll', roll: '1d20+10', targetDC: 'AC' }),
 					createDamageRoll({
 						name: 'Damage',
-						roll: '2d6+4',
-						damageType: 'slashing',
-						healInsteadOfDamage: false,
+						terms: [
+							{
+								dice: '2d6+4',
+								type: 'slashing',
+								tags: [],
+								mode: 'damage',
+								persistent: false,
+							},
+						],
 					}),
 				],
 				tags: ['melee'],

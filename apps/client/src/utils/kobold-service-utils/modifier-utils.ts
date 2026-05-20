@@ -6,6 +6,32 @@ import type { KoboldUtils } from './kobold-utils.js';
 import _ from 'lodash';
 
 const severityRegex = /\[[^\w\-\[]*severity[^\w\-\]]*\]/gi;
+const toHitTagAliasRegex = /(^|[^A-Za-z0-9_])to_?hit(?=$|[^A-Za-z0-9_])/gi;
+const reservedTagExpressionWords = [
+	'and',
+	'or',
+	'not',
+	'in',
+	'abs',
+	'ceil',
+	'floor',
+	'log',
+	'max',
+	'min',
+	'random',
+	'round',
+	'sqrt',
+];
+
+function normalizeTagAlias(tag: string): string {
+	const normalized = tag.toLocaleLowerCase().trim();
+	return /^to_?hit$/.test(normalized) ? 'tohit' : normalized;
+}
+
+function normalizeTargetTagExpression(targetTags: string): string {
+	return targetTags.replace(toHitTagAliasRegex, (_match, prefix: string) => `${prefix}tohit`);
+}
+
 export class ModifierUtils {
 	private kobold: Kobold;
 	public static severityRegex = severityRegex;
@@ -25,7 +51,9 @@ export class ModifierUtils {
 	): boolean {
 		if (!modifier.rollTargetTags?.length) return false;
 
-		const possibleTags = (modifier.rollTargetTags ?? '').match(/([A-Za-z][A-Za-z_0-9]*)/g);
+		const normalizedTargetTags = normalizeTargetTagExpression(modifier.rollTargetTags ?? '');
+		const possibleTags = normalizedTargetTags.match(/([A-Za-z][A-Za-z_0-9]*)/g);
+		const normalizedTags = new Set(tags.map(normalizeTagAlias));
 
 		let tagTruthValues: { [k: string]: boolean | number } = {};
 
@@ -35,31 +63,17 @@ export class ModifierUtils {
 		for (const tag of possibleTags ?? []) {
 			if (
 				// exclude words used by the grammar
-				[
-					'and',
-					'or',
-					'not',
-					'in',
-					'abs',
-					'ceil',
-					'floor',
-					'log',
-					'max',
-					'min',
-					'random',
-					'round',
-					'sqrt',
-				].includes(tag)
+				reservedTagExpressionWords.includes(tag.toLocaleLowerCase())
 			)
 				continue;
 
-			tagTruthValues[tag] = tags.includes(tag.toLocaleLowerCase().trim());
+			tagTruthValues[tag] = normalizedTags.has(normalizeTagAlias(tag));
 		}
 
 		let modifierValidForTags;
 		try {
 			// compile the modifier's target tags
-			const tagExpression = compileExpression(modifier.rollTargetTags ?? '');
+			const tagExpression = compileExpression(normalizedTargetTags);
 			modifierValidForTags = tagExpression(tagTruthValues);
 		} catch (err) {
 			//an invalid tag expression sneaked in! Don't catastrophically fail, though

@@ -101,7 +101,63 @@ describe('ModifierUtils', () => {
 				[],
 				['attack', 'electricity']
 			);
+			expect(result).not.toBe(true);
+		});
+		test('treats to_hit aliases case-insensitively without general hyphen matching', () => {
+			for (const rollTargetTags of ['to_hit', 'TO_HIT', 'To_Hit', 'tohit']) {
+				const result = ModifierUtils.isModifierValidForTags(
+					{
+						name: 'test',
+						type: SheetAdjustmentTypeEnum.status,
+						rollAdjustment: '2',
+						rollTargetTags,
+						sheetAdjustments: [],
+						isActive: false,
+						note: null,
+						severity: null,
+						description: null,
+					},
+					[],
+					['tohit']
+				);
+				expect(result).toBe(true);
+			}
+		});
+		test('does not treat a leading hyphen as part of a tag', () => {
+			const result = ModifierUtils.isModifierValidForTags(
+				{
+					name: 'test',
+					type: SheetAdjustmentTypeEnum.status,
+					rollAdjustment: '2',
+					rollTargetTags: 'foo',
+					sheetAdjustments: [],
+					isActive: false,
+					note: null,
+					severity: null,
+					description: null,
+				},
+				[],
+				['-foo']
+			);
 			expect(result).toBe(false);
+		});
+		test('does not treat to-hit as a tag alias', () => {
+			const result = ModifierUtils.isModifierValidForTags(
+				{
+					name: 'test',
+					type: SheetAdjustmentTypeEnum.status,
+					rollAdjustment: '2',
+					rollTargetTags: 'to-hit',
+					sheetAdjustments: [],
+					isActive: false,
+					note: null,
+					severity: null,
+					description: null,
+				},
+				[],
+				['tohit']
+			);
+			expect(result).not.toBe(true);
 		});
 		test('certain keywords are usable for filtrex and not parsable as tags', () => {
 			const result = ModifierUtils.isModifierValidForTags(

@@ -165,6 +165,19 @@ describe('RollBuilder', function () {
 		expect(String(result.data.title).toLowerCase()).not.toContain('some actor');
 		expect(String(result.data.title).toLowerCase()).toBe(`an entirely different title`);
 	});
+	test('adds outcome title suffixes to matching targeted roll results', function () {
+		const rollBuilder = new RollBuilder({});
+		const result = rollBuilder.addRoll({
+			rollExpression: '30',
+			rollTitle: 'Attack',
+			targetDC: 20,
+			rollType: 'attack',
+			outcomeTitleSuffixes: { 'critical success': '(immune)' },
+		});
+		expect(result.type).toBe('dice');
+		if (result.type !== 'dice') throw new Error('Expected a dice result');
+		expect(result.name).toContain('Critical Hit! (immune)');
+	});
 	test('records errors if something causes a thrown error', function () {
 		const rollBuilder = new RollBuilder({});
 		rollBuilder.addRoll({ rollExpression: 'd10', rollTitle: 'testRoll' });

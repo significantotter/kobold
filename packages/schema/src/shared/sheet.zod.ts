@@ -195,15 +195,14 @@ export const zDamageTerm = z.strictObject({
 	dice: z.string().nullable().describe('The attack damage dice.'),
 	type: z.string().nullable().describe('The attack damage type.'),
 	tags: z.array(z.string()).default([]),
+	label: z.string().optional(),
 	source: z.string().optional(),
-	persistent: z.boolean().optional(),
-	criticalOnly: z.boolean().optional(),
+	mode: z.enum(['damage', 'healing']).default('damage'),
+	persistent: z.boolean().default(false),
 });
 
 export type Damage = z.infer<typeof zDamage>;
-export const zDamage = z
-	.strictObject(zDamageTerm.shape)
-	.describe('A damage roll');
+export const zDamage = z.strictObject(zDamageTerm.shape).describe('A damage roll');
 
 export type SheetAttack = z.infer<typeof zSheetAttack>;
 export const zSheetAttack = z.strictObject({

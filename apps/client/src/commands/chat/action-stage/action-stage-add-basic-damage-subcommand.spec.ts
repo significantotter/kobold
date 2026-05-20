@@ -16,7 +16,8 @@ import {
 	TEST_GUILD_ID,
 	CommandTestHarness,
 	getMockKobold,
-	resetMockKobold,} from '../../../test-utils/index.js';
+	resetMockKobold,
+} from '../../../test-utils/index.js';
 
 vi.mock('../../../utils/kobold-service-utils/kobold-utils.js');
 vi.mock('../../../utils/kobold-helpers/finder-helpers.js');
@@ -116,10 +117,16 @@ describe('ActionStageAddBasicDamageSubCommand', () => {
 					{
 						name: 'Damage',
 						type: RollTypeEnum.damage,
-						roll: '1d6',
 						allowRollModifiers: false,
-						damageType: null,
-						healInsteadOfDamage: false,
+						terms: [
+							{
+								dice: '1d6',
+								type: null,
+								tags: [],
+								mode: 'damage',
+								persistent: false,
+							},
+						],
 					},
 				],
 			});

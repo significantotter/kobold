@@ -127,8 +127,15 @@ name: 'Strike',
 rolls: [
 createDamageRoll({
 name: 'Damage',
-roll: '2d6+4',
-damageType: 'slashing',
+terms: [
+{
+dice: '2d6+4',
+type: 'slashing',
+tags: [],
+mode: 'damage',
+persistent: false,
+},
+],
 }),
 ],
 });
@@ -191,7 +198,18 @@ guildId: TEST_GUILD_ID,
 name: 'Strike',
 rolls: [
 createAttackRoll({ name: 'Attack', roll: '1d20+10' }),
-createDamageRoll({ name: 'Damage', roll: '2d6+4' }),
+createDamageRoll({
+name: 'Damage',
+terms: [
+{
+dice: '2d6+4',
+type: null,
+tags: [],
+mode: 'damage',
+persistent: false,
+},
+],
+}),
 ],
 });
 			setupKoboldUtilsMocks({ actions: [action] });
@@ -222,7 +240,18 @@ guildId: TEST_GUILD_ID,
 name: 'Strike',
 rolls: [
 createAttackRoll({ name: 'Attack', roll: '1d20+10' }),
-createDamageRoll({ name: 'Damage', roll: '2d6+4' }),
+createDamageRoll({
+name: 'Damage',
+terms: [
+{
+dice: '2d6+4',
+type: null,
+tags: [],
+mode: 'damage',
+persistent: false,
+},
+],
+}),
 ],
 });
 			setupKoboldUtilsMocks({ actions: [action] });
@@ -359,7 +388,18 @@ guildId: TEST_GUILD_ID,
 name: 'Strike',
 rolls: [
 createAttackRoll({ name: 'Attack', roll: '1d20+10' }),
-createDamageRoll({ name: 'Damage', roll: '2d6+4' }),
+createDamageRoll({
+name: 'Damage',
+terms: [
+{
+dice: '2d6+4',
+type: null,
+tags: [],
+mode: 'damage',
+persistent: false,
+},
+],
+}),
 ],
 });
 			setupAutocompleteKoboldMocks({ actions: [action] });

@@ -115,9 +115,27 @@ describe('convertPathBuilderToSheet nethys enrichment', () => {
 			traits: ['Deadly d8', 'Monk', 'Propulsive', 'Fire', 'Magical', 'Electricity'],
 		});
 		expect(sheet.attacks[0].damage).toMatchObject([
-			{ dice: '3d6+ 4', type: 'P' },
-			{ dice: '1d6', type: 'Fire' },
-			{ dice: '1d6', type: 'Electricity' },
+			{
+				dice: '3d6+ 4',
+				type: 'P',
+				tags: expect.any(Array),
+				mode: 'damage',
+				persistent: false,
+			},
+			{
+				dice: '1d6',
+				type: 'Fire',
+				tags: expect.any(Array),
+				mode: 'damage',
+				persistent: false,
+			},
+			{
+				dice: '1d6',
+				type: 'Electricity',
+				tags: expect.any(Array),
+				mode: 'damage',
+				persistent: false,
+			},
 		]);
 	});
 
@@ -146,7 +164,15 @@ describe('convertPathBuilderToSheet nethys enrichment', () => {
 			name: 'Mystery Stick',
 			range: null,
 			traits: [],
-			damage: [{ dice: '1d4+ 1', type: 'B' }],
+			damage: [
+				{
+					dice: '1d4+ 1',
+					type: 'B',
+					tags: expect.any(Array),
+					mode: 'damage',
+					persistent: false,
+				},
+			],
 		});
 	});
 });

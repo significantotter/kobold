@@ -298,16 +298,5 @@ export class PathBuilder {
 				},
 			})
 		).data as PathBuilder.JsonExport;
-		// const response = await fetch(`https://pathbuilder2e.com/json.php?id=${characterJsonId}`, {
-		// 	headers: {
-		// 		'User-Agent': PATHBUILDER_USER_AGENT,
-		// 	},
-		// });
-
-		// if (!response.ok) {
-		// 	throw new Error(`Pathbuilder request failed with status ${response.status}`);
-		// }
-
-		// return zPathBuilderJsonExportSchema.parse(await response.json());
 	}
 }

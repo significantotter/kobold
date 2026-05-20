@@ -435,6 +435,8 @@ export function convertPathBuilderToSheet(
 				dice: `${numDice}${weapon.die ?? ''}${damageBonus}`,
 				type: weapon.damageType,
 				tags: _.uniq([...attackTags, String(weapon.damageType).toLowerCase()]),
+				mode: 'damage' as const,
+				persistent: false,
 			};
 			const extraDamage = (weapon.extraDamage ?? []).map((damage: string) => {
 				const [dice, ...type] = damage.split(' ');
@@ -443,6 +445,8 @@ export function convertPathBuilderToSheet(
 					dice,
 					type: damageType,
 					tags: _.uniq([...attackTags, damageType.toLowerCase()]),
+					mode: 'damage' as const,
+					persistent: false,
 				};
 			});
 

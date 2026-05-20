@@ -42,7 +42,7 @@ describe('SheetAdjuster static', () => {
 		it('should return true if the property is valid for infoListProperties', () => {
 			expect(SheetAdjuster.validateSheetProperty('sense')).toBe(true);
 			expect(SheetAdjuster.validateSheetProperty('languages ')).toBe(true);
-			expect(SheetAdjuster.validateSheetProperty('iMMune')).toBe(true);
+			expect(SheetAdjuster.validateSheetProperty('iMMune')).toBe(false);
 		});
 		it('should return true if the property is valid for integerProperties', () => {
 			expect(SheetAdjuster.validateSheetProperty('ac')).toBe(true);
@@ -425,7 +425,9 @@ describe('SheetAttackAdjuster', () => {
 		sheet.attacks = [
 			{
 				toHit: 10,
-				damage: [{ dice: '1d4', type: 'cold', tags: [] }],
+				damage: [
+					{ dice: '1d4', type: 'cold', tags: [], mode: 'damage', persistent: false },
+				],
 				name: 'Bar',
 				range: null,
 				traits: [],
@@ -448,7 +450,15 @@ describe('SheetAttackAdjuster', () => {
 			sheetAttackAdjuster.adjust(adjustment);
 			expect(sheet.attacks).toContainEqual({
 				toHit: 5,
-				damage: [{ dice: '1d6', type: 'cold or fire' }],
+				damage: [
+					{
+						dice: '1d6',
+						type: 'cold or fire',
+						tags: ['cold or fire'],
+						mode: 'damage',
+						persistent: false,
+					},
+				],
 				effects: [],
 				name: 'Foo',
 				range: null,
@@ -469,7 +479,15 @@ describe('SheetAttackAdjuster', () => {
 			sheetAttackAdjuster.adjust(adjustment);
 			expect(sheet.attacks).toContainEqual({
 				toHit: 5,
-				damage: [{ dice: '1d6', type: 'cold or fire' }],
+				damage: [
+					{
+						dice: '1d6',
+						type: 'cold or fire',
+						tags: ['cold or fire'],
+						mode: 'damage',
+						persistent: false,
+					},
+				],
 				effects: [],
 				name: 'Foo',
 				range: null,
@@ -482,7 +500,9 @@ describe('SheetAttackAdjuster', () => {
 		it('should replace any existing attacks with the same name when adding', () => {
 			sheet.attacks.push({
 				toHit: 14,
-				damage: [{ dice: '2d8', type: 'fire', tags: [] }],
+				damage: [
+					{ dice: '2d8', type: 'fire', tags: [], mode: 'damage', persistent: false },
+				],
 				name: 'Foo',
 				range: null,
 				traits: [],
@@ -499,7 +519,15 @@ describe('SheetAttackAdjuster', () => {
 			sheetAttackAdjuster.adjust(adjustment);
 			expect(sheet.attacks).toContainEqual({
 				toHit: 5,
-				damage: [{ dice: '1d6', type: 'cold or fire' }],
+				damage: [
+					{
+						dice: '1d6',
+						type: 'cold or fire',
+						tags: ['cold or fire'],
+						mode: 'damage',
+						persistent: false,
+					},
+				],
 				effects: [],
 				name: 'Foo',
 				range: null,
@@ -512,7 +540,9 @@ describe('SheetAttackAdjuster', () => {
 		it('should remove any existing attacks with the same name with the - operator', () => {
 			sheet.attacks.push({
 				toHit: 14,
-				damage: [{ dice: '2d8', type: 'fire', tags: [] }],
+				damage: [
+					{ dice: '2d8', type: 'fire', tags: [], mode: 'damage', persistent: false },
+				],
 				name: 'Foo',
 				range: null,
 				traits: [],
@@ -530,7 +560,9 @@ describe('SheetAttackAdjuster', () => {
 			expect(sheet.attacks).toEqual([
 				{
 					toHit: 10,
-					damage: [{ dice: '1d4', type: 'cold' }],
+					damage: [
+						{ dice: '1d4', type: 'cold', tags: [], mode: 'damage', persistent: false },
+					],
 					effects: [],
 					name: 'Bar',
 					range: null,

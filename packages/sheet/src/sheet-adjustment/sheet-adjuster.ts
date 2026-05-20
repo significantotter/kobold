@@ -600,7 +600,13 @@ export class SheetAttackAdjuster implements SheetPropertyGroupAdjuster<Sheet['at
 						const typeMatch = damageTypeRegex.exec(damage);
 						const type = typeMatch ? typeMatch[1].trim() : '';
 						const dice = damage.replaceAll(damageTypeRegex, '').trim();
-						return { dice, type, tags: [type].filter(Boolean) };
+						return {
+							dice,
+							type,
+							tags: [type].filter(Boolean),
+							mode: 'damage' as const,
+							persistent: false,
+						};
 					});
 			}
 			let rangeMatch = rangeRegex.exec(value);

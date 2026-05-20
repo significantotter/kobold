@@ -36,6 +36,22 @@ sheet.additionalSkills.push({
 	ability: AbilityEnum.intelligence,
 	note: null,
 });
+sheet.additionalSkills.push({
+	name: 'Esoteric Lore',
+	bonus: 11,
+	dc: 21,
+	proficiency: 4,
+	ability: AbilityEnum.charisma,
+	note: null,
+});
+sheet.additionalSkills.push({
+	name: 'computers',
+	bonus: 7,
+	dc: 17,
+	proficiency: 2,
+	ability: AbilityEnum.intelligence,
+	note: null,
+});
 sheet.staticInfo.level = 2;
 sheet.defenses.resistances.push({
 	label: 'fire',
@@ -133,6 +149,26 @@ describe('getAttributeByName', () => {
 	it('should return the correct attribute when given a valid additionalSkill property', () => {
 		let result = AttributeUtils.getAttributeByName(creature, 'koboldLore');
 		expect(result).toMatchObject({ name: 'kobold lore', value: 8 });
+	});
+	it('should return title-cased additional skills from a standardized property name', () => {
+		let result = AttributeUtils.getAttributeByName(creature, 'esotericLore');
+		expect(result).toMatchObject({
+			name: 'Esoteric Lore',
+			value: 11,
+			tags: ['skill', 'charisma', 'esoteric lore', 'lore'],
+		});
+		result = AttributeUtils.getAttributeByName(creature, 'Esoteric_Lore');
+		expect(result).toMatchObject({ name: 'Esoteric Lore', value: 11 });
+		result = AttributeUtils.getAttributeByName(creature, 'Esoteric_Lore_Dc');
+		expect(result).toMatchObject({ name: 'Esoteric Lore', value: 21 });
+	});
+	it('should return custom non-lore additional skills from a standardized property name', () => {
+		let result = AttributeUtils.getAttributeByName(creature, 'computers');
+		expect(result).toMatchObject({
+			name: 'computers',
+			value: 7,
+			tags: ['skill', 'intelligence', 'computers'],
+		});
 	});
 	it('should return the correct attribute when given a valid resistance property', () => {
 		let result = AttributeUtils.getAttributeByName(creature, 'fireResistance');

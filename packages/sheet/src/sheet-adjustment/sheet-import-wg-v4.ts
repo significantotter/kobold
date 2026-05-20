@@ -367,7 +367,15 @@ export function buildAttacks(weapons: WgV4Weapon[]): Sheet['attacks'] {
 			name: w.item?.name ?? 'Unknown',
 			toHit: w.stats?.attack_bonus?.total?.[0] ?? null,
 			damage: damageStr
-				? [{ dice: damageStr, type: dmg?.damageType ?? null, tags: [dmg?.damageType ?? ''].filter(Boolean) }]
+				? [
+						{
+							dice: damageStr,
+							type: dmg?.damageType ?? null,
+							tags: [dmg?.damageType ?? ''].filter(Boolean),
+							mode: 'damage',
+							persistent: false,
+						},
+					]
 				: [],
 			effects: [] as string[],
 			range: w.item?.meta_data?.range != null ? String(w.item.meta_data.range) : null,

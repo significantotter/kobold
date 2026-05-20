@@ -43,7 +43,7 @@ export class ActionStageAddAdvancedDamageSubCommand extends BaseCommandClass(
 			commandOptions[commandOptionsEnum.actionTarget].name,
 			true
 		);
-		const rollType = RollTypeEnum.advancedDamage;
+		const rollType = RollTypeEnum.AdvancedDamage;
 		const rollName = intr.options.getString(
 			commandOptions[commandOptionsEnum.rollName].name,
 			true
@@ -106,15 +106,25 @@ export class ActionStageAddAdvancedDamageSubCommand extends BaseCommandClass(
 		}
 
 		// create the roll
+		const makeTerm = (dice: string | null) =>
+			dice
+				? [
+						{
+							dice,
+							type: damageType,
+							tags: [],
+							mode: healInsteadOfDamage ? ('healing' as const) : ('damage' as const),
+							persistent: false,
+						},
+					]
+				: [];
 		const newRoll: Roll = {
 			name: rollName,
 			type: rollType,
-			damageType,
-			healInsteadOfDamage,
-			successRoll: successDiceRoll,
-			criticalSuccessRoll: criticalSuccessDiceRoll,
-			criticalFailureRoll: criticalFailureDiceRoll,
-			failureRoll: failureDiceRoll,
+			successTerms: makeTerm(successDiceRoll),
+			criticalSuccessTerms: makeTerm(criticalSuccessDiceRoll),
+			criticalFailureTerms: makeTerm(criticalFailureDiceRoll),
+			failureTerms: makeTerm(failureDiceRoll),
 			allowRollModifiers,
 		};
 		const updatedRolls: Roll[] = [...action.rolls, newRoll];

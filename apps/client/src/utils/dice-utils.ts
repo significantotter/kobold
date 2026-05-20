@@ -124,8 +124,12 @@ export class DiceUtils {
 			undefined;
 		if (extraAttributes) {
 			const potentialExtraAttribute = extraAttributes.find(
-				attributeObject =>
-					attributeObject.name.replace(trimRegex, '').toLowerCase() === attributeName
+				attributeObject => {
+					const names = [attributeObject.name, ...(attributeObject.aliases ?? [])];
+					return names.some(
+						name => name.replace(trimRegex, '').toLowerCase() === attributeName
+					);
+				}
 			);
 			if (potentialExtraAttribute) extraAttribute = potentialExtraAttribute;
 		}

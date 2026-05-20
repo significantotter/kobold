@@ -128,10 +128,16 @@ export function createDamageRoll(overrides: Partial<DamageRoll> = {}): DamageRol
 	return {
 		name: 'Damage',
 		type: RollTypeEnum.damage,
-		roll: '2d6+4',
 		allowRollModifiers: false,
-		damageType: null,
-		healInsteadOfDamage: false,
+		terms: [
+			{
+				dice: '2d6+4',
+				type: null,
+				tags: [],
+				mode: 'damage',
+				persistent: false,
+			},
+		],
 		...overrides,
 	};
 }
@@ -141,14 +147,12 @@ export function createAdvancedDamageRoll(
 ): AdvancedDamageRoll {
 	return {
 		name: 'Advanced Damage',
-		type: RollTypeEnum.advancedDamage,
+		type: RollTypeEnum.AdvancedDamage,
 		allowRollModifiers: false,
-		damageType: null,
-		healInsteadOfDamage: false,
-		criticalSuccessRoll: null,
-		criticalFailureRoll: null,
-		successRoll: null,
-		failureRoll: null,
+		criticalSuccessTerms: [],
+		criticalFailureTerms: [],
+		successTerms: [],
+		failureTerms: [],
 		...overrides,
 	};
 }

@@ -107,21 +107,27 @@ export class ActionDetailSubCommand extends BaseCommandClass(
 				actionDetailEmbed.addFields([field]);
 			} else if (roll.type === 'damage') {
 				let description = ``;
-				description += `\ndamage: ${roll.roll} ${roll.damageType ?? ''}`;
-				if (roll.healInsteadOfDamage) description += `\n(heals instead of damaging)`;
-				const field = { name: roll.name, value: description };
+				for (const term of roll.terms) {
+					const modeText = term.mode === 'healing' ? 'healing' : 'damage';
+					description += `\n${modeText}: ${term.dice ?? 'none'} ${term.type ?? ''}`;
+				}
+				const field = { name: roll.name, value: description || 'damage: none' };
 				actionDetailEmbed.addFields([field]);
 			} else if (roll.type === 'advanced-damage') {
+				const describeTerms = (terms: typeof roll.successTerms) =>
+					terms.length
+						? terms
+								.map(term => {
+									const modeText = term.mode === 'healing' ? 'healing' : 'damage';
+									return `${term.dice ?? 'none'} ${term.type ?? ''} (${modeText})`;
+								})
+								.join(', ')
+						: 'none';
 				let description = ``;
-				description += `\nCritical Success: ${roll.criticalSuccessRoll ?? 'none'} ${
-					roll.damageType ?? ''
-				}`;
-				description += `\nSuccess: ${roll.successRoll ?? 'none'} ${roll.damageType ?? ''}`;
-				description += `\nFailure: ${roll.failureRoll ?? 'none'} ${roll.damageType ?? ''}`;
-				description += `\nCritical Failure: ${roll.criticalFailureRoll ?? 'none'} ${
-					roll.damageType ?? ''
-				}`;
-				if (roll.healInsteadOfDamage) description += `\n(heals instead of damaging)`;
+				description += `\nCritical Success: ${describeTerms(roll.criticalSuccessTerms)}`;
+				description += `\nSuccess: ${describeTerms(roll.successTerms)}`;
+				description += `\nFailure: ${describeTerms(roll.failureTerms)}`;
+				description += `\nCritical Failure: ${describeTerms(roll.criticalFailureTerms)}`;
 				const field = { name: roll.name, value: description };
 				actionDetailEmbed.addFields([field]);
 			} else if (roll.type === 'text') {
