@@ -21,7 +21,28 @@ const termArrayExpression = (terms: unknown, fallbackMode: unknown = sql`'damage
 
 const oneTermArrayExpression = (dice: unknown, damageType: unknown, fallbackMode: unknown) => sql`
 	CASE
-		WHEN ${dice} IS NULL AND ${damageType} IS NULL THEN '[]'::jsonb
+		WHEN (${dice} IS NULL OR ${dice} = 'null'::jsonb)
+			AND (${damageType} IS NULL OR ${damageType} = 'null'::jsonb)
+		THEN '[]'::jsonb
+		ELSE jsonb_build_array(
+			jsonb_build_object(
+				'dice', ${dice},
+				'type', ${damageType},
+				'tags', '[]'::jsonb,
+				'mode', ${fallbackMode},
+				'persistent', false
+			)
+		)
+	END
+`;
+
+const oneRequiredDiceTermArrayExpression = (
+	dice: unknown,
+	damageType: unknown,
+	fallbackMode: unknown
+) => sql`
+	CASE
+		WHEN ${dice} IS NULL OR ${dice} = 'null'::jsonb THEN '[]'::jsonb
 		ELSE jsonb_build_array(
 			jsonb_build_object(
 				'dice', ${dice},
@@ -76,32 +97,32 @@ const migrateRollExpression = (roll: unknown) => sql`
 			|| jsonb_build_object(
 				'type', 'advanced-damage',
 				'criticalSuccessTerms',
-				${oneTermArrayExpression(
+				${oneRequiredDiceTermArrayExpression(
 					sql`${roll}->'criticalSuccessRoll'`,
 					sql`${roll}->'damageType'`,
 					sql`CASE WHEN COALESCE((${roll}->>'healInsteadOfDamage')::boolean, false) THEN 'healing' ELSE 'damage' END`
 				)},
 				'successTerms',
-				${oneTermArrayExpression(
+				${oneRequiredDiceTermArrayExpression(
 					sql`${roll}->'successRoll'`,
 					sql`${roll}->'damageType'`,
 					sql`CASE WHEN COALESCE((${roll}->>'healInsteadOfDamage')::boolean, false) THEN 'healing' ELSE 'damage' END`
 				)},
 				'failureTerms',
-				${oneTermArrayExpression(
+				${oneRequiredDiceTermArrayExpression(
 					sql`${roll}->'failureRoll'`,
 					sql`${roll}->'damageType'`,
 					sql`CASE WHEN COALESCE((${roll}->>'healInsteadOfDamage')::boolean, false) THEN 'healing' ELSE 'damage' END`
 				)},
 				'criticalFailureTerms',
-				${oneTermArrayExpression(
+				${oneRequiredDiceTermArrayExpression(
 					sql`${roll}->'criticalFailureRoll'`,
 					sql`${roll}->'damageType'`,
 					sql`CASE WHEN COALESCE((${roll}->>'healInsteadOfDamage')::boolean, false) THEN 'healing' ELSE 'damage' END`
 				)}
 			)
 		WHEN ${roll}->>'type' = 'damage' THEN
-			(${roll} - 'healInsteadOfDamage')
+			(${roll} - 'roll' - 'damageType' - 'healInsteadOfDamage')
 			|| jsonb_build_object(
 				'terms',
 				${termArrayExpression(
@@ -110,7 +131,15 @@ const migrateRollExpression = (roll: unknown) => sql`
 				)}
 			)
 		WHEN ${roll}->>'type' = 'advanced-damage' THEN
-			(${roll} - 'healInsteadOfDamage')
+			(
+				${roll}
+				- 'damageType'
+				- 'healInsteadOfDamage'
+				- 'criticalSuccessRoll'
+				- 'successRoll'
+				- 'failureRoll'
+				- 'criticalFailureRoll'
+			)
 			|| jsonb_build_object(
 				'criticalSuccessTerms',
 				${termArrayExpression(
