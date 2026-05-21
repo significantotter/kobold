@@ -172,6 +172,11 @@ export interface WgV4Weapon {
 	stats: WgV4WeaponStats;
 }
 
+export interface WgV4Trait {
+	id: number;
+	name: string;
+}
+
 export interface WgV4SpellSource {
 	source: {
 		name: string;
@@ -193,6 +198,7 @@ export interface WgV4Content {
 	proficiencies?: Record<string, WgV4Proficiency>;
 	speeds?: Array<{ name: string; value: { total: number } }>;
 	weapons?: WgV4Weapon[];
+	all_traits?: WgV4Trait[];
 	languages?: string[];
 	character_traits?: Array<{ name: string }>;
 	senses?: {
@@ -351,7 +357,12 @@ export function buildSenses(sensesData: WgV4Content['senses']): string[] {
 /**
  * Converts WG weapon data into Kobold attack objects.
  */
-export function buildAttacks(weapons: WgV4Weapon[]): Sheet['attacks'] {
+export function buildAttacks(
+	weapons: WgV4Weapon[],
+	allTraits: WgV4Trait[] = []
+): Sheet['attacks'] {
+	const traitsById = new Map(allTraits.map(trait => [trait.id, trait.name]));
+
 	return weapons.map(w => {
 		const dmg = w.stats?.damage;
 		const diceStr = dmg ? `${dmg.dice}${dmg.die}` : '';
@@ -379,7 +390,9 @@ export function buildAttacks(weapons: WgV4Weapon[]): Sheet['attacks'] {
 				: [],
 			effects: [] as string[],
 			range: w.item?.meta_data?.range != null ? String(w.item.meta_data.range) : null,
-			traits: [] as string[],
+			traits: (w.item?.traits ?? [])
+				.map(traitId => traitsById.get(traitId))
+				.filter((trait): trait is string => Boolean(trait)),
 			notes: null as string | null,
 		};
 	});
@@ -521,7 +534,7 @@ export function convertWgV4ExportToSheet(exportData: WgV4Export): Sheet {
 	}));
 
 	// ── Attacks ──
-	const attacks = buildAttacks(content.weapons ?? []);
+	const attacks = buildAttacks(content.weapons ?? [], content.all_traits ?? []);
 
 	// ── Base Counters ──
 	const maxHp = content.max_hp ?? 0;

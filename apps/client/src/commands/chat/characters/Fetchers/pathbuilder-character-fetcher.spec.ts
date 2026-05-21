@@ -5,13 +5,17 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { CommandInteraction, CacheType } from 'discord.js';
 import { PathbuilderCharacterFetcher } from './pathbuilder-character-fetcher.js';
 import { PathBuilder } from '@kobold/schema';
-import { fetchNethysItemMetadataForPathbuilder } from '@kobold/sheet';
+import {
+	buildTwoHandRollMacrosForAttacks,
+	fetchNethysItemMetadataForPathbuilder,
+} from '@kobold/sheet';
 import { Creature } from '../../../../utils/creature.js';
 import { getMockKobold, resetMockKobold } from '../../../../test-utils/index.js';
 import type { Kobold } from '@kobold/db';
 
 vi.mock('../../../../utils/creature.js');
 vi.mock('@kobold/sheet', () => ({
+	buildTwoHandRollMacrosForAttacks: vi.fn(() => []),
 	fetchNethysItemMetadataForPathbuilder: vi.fn().mockResolvedValue([]),
 }));
 
@@ -101,6 +105,7 @@ describe('PathbuilderCharacterFetcher', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		resetMockKobold(mockKobold);
+		vi.mocked(buildTwoHandRollMacrosForAttacks).mockReturnValue([]);
 		mockIntr = createMockInteraction();
 		fetcher = new PathbuilderCharacterFetcher(
 			mockIntr,
@@ -253,6 +258,34 @@ describe('PathbuilderCharacterFetcher', () => {
 				mockActiveCharacter,
 				{ useStamina: false, nethysCompendiumEntries: [] }
 			);
+		});
+
+		it('should add and update generated two-hand roll macros', () => {
+			const mockSourceData = createMockPathbuilderCharacter();
+			const mockSheet = { staticInfo: { name: mockSourceData.name }, attacks: [] };
+			const mockRollMacros = [
+				{ name: 'bastard-sword-two-hand', macro: '2d8+4' },
+				{ name: 'Custom Macro', macro: '1d6' },
+			];
+
+			vi.mocked(Creature.fromPathBuilder).mockReturnValue({
+				_sheet: mockSheet,
+				actions: [],
+				modifiers: [],
+				rollMacros: mockRollMacros,
+			} as unknown as Creature);
+			vi.mocked(buildTwoHandRollMacrosForAttacks).mockReturnValue([
+				{ name: 'bastard-sword-two-hand', macro: '2d12+4' },
+				{ name: 'dwarven-waraxe-two-hand', macro: '1d12+3' },
+			]);
+
+			const result = fetcher.convertSheetRecord(mockSourceData);
+
+			expect(result.rollMacros).toEqual([
+				{ name: 'bastard-sword-two-hand', macro: '2d12+4' },
+				{ name: 'Custom Macro', macro: '1d6' },
+				{ name: 'dwarven-waraxe-two-hand', macro: '1d12+3' },
+			]);
 		});
 	});
 

@@ -1,7 +1,10 @@
 import { refs } from '../../../../constants/common-text.js';
 import { CharacterWithRelations, Kobold, ImportSourceEnum } from '@kobold/db';
 import { PathBuilder } from '@kobold/schema';
-import { fetchNethysItemMetadataForPathbuilder } from '@kobold/sheet';
+import {
+	buildTwoHandRollMacrosForAttacks,
+	fetchNethysItemMetadataForPathbuilder,
+} from '@kobold/sheet';
 import { KoboldError } from '@kobold/util';
 import { Creature } from '../../../../utils/creature.js';
 import { CharacterFetcher, SheetConversionResult } from './character-fetcher.js';
@@ -46,6 +49,21 @@ export class PathbuilderCharacterFetcher extends CharacterFetcher<
 			useStamina: this.options.useStamina,
 			nethysCompendiumEntries: this.nethysCompendiumEntries,
 		});
+		const twoHandRollMacros = buildTwoHandRollMacrosForAttacks(creature._sheet.attacks);
+		const rollMacros = [...creature.rollMacros];
+		for (const twoHandRollMacro of twoHandRollMacros) {
+			const existingIndex = rollMacros.findIndex(
+				rollMacro => rollMacro.name.toLowerCase() === twoHandRollMacro.name.toLowerCase()
+			);
+			if (existingIndex >= 0) {
+				rollMacros[existingIndex] = {
+					...rollMacros[existingIndex],
+					macro: twoHandRollMacro.macro,
+				};
+			} else {
+				rollMacros.push(twoHandRollMacro as (typeof rollMacros)[number]);
+			}
+		}
 		return {
 			sheetRecord: {
 				sheet: creature._sheet,
@@ -71,7 +89,7 @@ export class PathbuilderCharacterFetcher extends CharacterFetcher<
 				severity: modifier.severity,
 				sheetAdjustments: modifier.sheetAdjustments,
 			})),
-			rollMacros: creature.rollMacros.map(macro => ({
+			rollMacros: rollMacros.map(macro => ({
 				name: macro.name,
 				macro: macro.macro,
 			})),

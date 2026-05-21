@@ -32,6 +32,15 @@ export const actionStrings = {
 		),
 	},
 
+	// ─── COPY IMPORTED ATTACK SUBCOMMAND ────────────────────────────────
+	copyImportedAttack: {
+		success: msg(
+			(p: { newActionName: string; attackName: string }) =>
+				`Created custom action "${p.newActionName}" from imported attack "${p.attackName}". Future imports will update the imported ${p.attackName} action, but not this custom copy.`
+		),
+		notFound: "Yip! I couldn't find an imported attack with that name.",
+	},
+
 	// ─── ASSIGN SUBCOMMAND ───────────────────────────────────────────────
 	assign: {
 		success: msg(

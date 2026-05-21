@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { AbilityEnum, SheetStatKeys, CounterStyleEnum } from '@kobold/schema';
+import { readFileSync } from 'node:fs';
 import {
 	parseResistWeakString,
 	titleCase,
@@ -24,6 +25,11 @@ import {
 	type WgV4Character,
 	type WgV4Content,
 } from './sheet-import-wg-v4.js';
+
+const skitterFixtureUrl = new URL(
+	'../../../../apps/end-to-end-tests/tests/fixtures/data/skitter.wg.sheet.json',
+	import.meta.url
+);
 
 // ── Helpers ──
 
@@ -916,6 +922,38 @@ describe('convertWgV4ExportToSheet', () => {
 	it('handles max_hp', () => {
 		const sheet = convertWgV4ExportToSheet(minimalExport({ content: { max_hp: 56 } }));
 		expect(sheet.baseCounters.hp.max).toBe(56);
+	});
+
+	it('parses Skitter fixture weapon attacks with WG trait lookup data', () => {
+		const skitterFixture = JSON.parse(readFileSync(skitterFixtureUrl, 'utf8')) as WgV4Export;
+		const sheet = convertWgV4ExportToSheet(skitterFixture);
+
+		const fangwire = sheet.attacks.find(attack => attack.name === 'Fangwire');
+		const rapierPistol = sheet.attacks.find(attack => attack.name === 'Rapier Pistol');
+		const rangedRapierPistol = sheet.attacks.find(
+			attack => attack.name === 'Rapier Pistol (Ranged)'
+		);
+		const reinforcedStock = sheet.attacks.find(
+			attack => attack.name === 'Reinforced Stock'
+		);
+
+		expect(fangwire).toMatchObject({
+			damage: [expect.objectContaining({ dice: '2d4+6', type: 'S' })],
+			traits: expect.arrayContaining(['Deadly d8', 'Finesse']),
+		});
+		expect(rapierPistol).toMatchObject({
+			damage: [expect.objectContaining({ dice: '1d4+6', type: 'P' })],
+			traits: expect.arrayContaining(['Deadly d8']),
+		});
+		expect(rangedRapierPistol).toMatchObject({
+			damage: [expect.objectContaining({ dice: '1d4+2', type: 'P' })],
+			range: '30',
+			traits: expect.arrayContaining(['Fatal d8']),
+		});
+		expect(reinforcedStock).toMatchObject({
+			damage: [expect.objectContaining({ dice: '1d4+6', type: 'B' })],
+			traits: expect.arrayContaining(['Two-Hand d8']),
+		});
 	});
 
 	it('handles a full export with all sections populated', () => {

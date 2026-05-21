@@ -16,6 +16,7 @@ export enum ActionSubCommandEnum {
 	set = 'set',
 	import = 'import',
 	export = 'export',
+	copyImportedAttack = 'copy-imported-attack',
 }
 
 export const actionCommandDefinition = {
@@ -134,6 +135,22 @@ export const actionCommandDefinition = {
 			deferType: CommandDeferType.NONE,
 			options: {
 				[OptionEnum.exportJson]: withOrder(actionCommandOptions[OptionEnum.exportJson], 1),
+			},
+		},
+		[ActionSubCommandEnum.copyImportedAttack]: {
+			name: ActionSubCommandEnum.copyImportedAttack,
+			description: 'Copies an imported sheet attack into a custom action.',
+			type: ApplicationCommandOptionType.Subcommand,
+			deferType: CommandDeferType.NONE,
+			options: {
+				[OptionEnum.attack]: withOrder(actionCommandOptions[OptionEnum.attack], 1),
+				[OptionEnum.name]: withOrder(
+					{
+						...actionCommandOptions[OptionEnum.name],
+						required: false,
+					},
+					2
+				),
 			},
 		},
 	},

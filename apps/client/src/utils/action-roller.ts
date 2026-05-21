@@ -4,20 +4,17 @@ import { getEmoji } from '../constants/emoji.js';
 import { utilStrings } from '@kobold/documentation';
 import {
 	Action,
-	ActionCostEnum,
-	ActionTypeEnum,
 	AdvancedDamageRoll,
 	AttackOrSkillRoll,
 	DefenseRule,
 	Attribute,
 	DamageRoll,
 	Roll,
-	RollTypeEnum,
 	SaveRoll,
 	TextRoll,
 	UserSettings,
 } from '@kobold/db';
-import { KoboldError, StringUtils } from '@kobold/util';
+import { KoboldError } from '@kobold/util';
 import { Creature } from './creature.js';
 import {
 	DiceRollError,
@@ -37,6 +34,7 @@ import {
 	type DamagePacket,
 	type PreparedDamageLine,
 } from './damage-resolver.js';
+import { buildImportedAttackAction } from './imported-attack-action-builder.js';
 
 type ContestedRollTypes = 'attack' | 'skill-challenge' | 'save' | 'none';
 type ResultRollTypes = 'damage' | 'advanced-damage' | 'text';
@@ -925,85 +923,11 @@ export class ActionRoller {
 				`Yip! I couldn\'t find an attack called "${attackName.toLowerCase()}"`
 			);
 
-		// build a little action from the attack!
-		// Note: id and sheetRecordId are set to placeholder values since this action
-		// is only used temporarily and not saved to the database
-		const action: Action = {
-			userId: '-1',
-			id: -1,
-			sheetRecordId: null,
-			name: targetAttack.name,
-			description: '',
-			baseLevel: 0,
-			autoHeighten: false,
-			type: ActionTypeEnum.attack,
-			actionCost: ActionCostEnum.oneAction,
-			tags: targetAttack.traits,
-			rolls: [],
-		};
-		// add the attack roll
-		if (targetAttack.toHit != null) {
-			action.rolls.push({
-				type: RollTypeEnum.attack,
-				name: 'To Hit',
-				roll: DiceUtils.buildDiceExpression(
-					'd20',
-					String(targetAttack.toHit),
-					attackModifierExpression
-				),
-				targetDC: 'AC',
-				allowRollModifiers: true,
-			});
-		}
-
-		// add the first damage roll with damage modifiers
-		if (targetAttack.damage[0]) {
-			action.rolls.push({
-				type: RollTypeEnum.damage,
-				name: 'Damage',
-				terms: [
-					{
-						...targetAttack.damage[0],
-						dice:
-							DiceUtils.buildDiceExpression(
-								targetAttack.damage[0].dice ?? '',
-								null,
-								damageModifierExpression
-							) || null,
-						mode: targetAttack.damage[0].mode ?? 'damage',
-						persistent: targetAttack.damage[0].persistent ?? false,
-					},
-				],
-				allowRollModifiers: true,
-			});
-		}
-		for (let i = 1; i < targetAttack.damage.length; i++) {
-			action.rolls.push({
-				type: RollTypeEnum.damage,
-				name: 'Damage',
-				terms: [
-					{
-						...targetAttack.damage[i],
-						mode: targetAttack.damage[i].mode ?? 'damage',
-						persistent: targetAttack.damage[i].persistent ?? false,
-					},
-				],
-				allowRollModifiers: false,
-			});
-		}
-		if (targetAttack.effects.length) {
-			action.rolls.push({
-				type: RollTypeEnum.text,
-				name: 'Effects',
-				criticalSuccessText: null,
-				successText: StringUtils.oxfordListJoin(targetAttack.effects),
-				failureText: null,
-				criticalFailureText: null,
-				allowRollModifiers: false,
-				defaultText: null,
-				extraTags: [],
-			});
-		}
+		const action = buildImportedAttackAction({
+			attack: targetAttack,
+			attackModifierExpression,
+			damageModifierExpression,
+		});
 
 		const actionRoller = new ActionRoller(
 			userSettings ?? null,

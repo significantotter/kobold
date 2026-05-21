@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { AbilityEnum, type Kobold } from '@kobold/db';
+import { AbilityEnum, SheetAdjustmentTypeEnum, type Kobold } from '@kobold/db';
 import { SheetProperties } from '@kobold/sheet';
 import { DiceUtils } from './dice-utils.js';
 import { DefaultUtils } from './default-utils.js';
@@ -46,12 +46,12 @@ describe('RollEngine', () => {
 
 		expect(attributes.map(attr => [attr.name, attr.value])).toEqual(
 			expect.arrayContaining([
-			['strength', 4],
-			['dexterity', 4],
-			['constitution', 2],
-			['intelligence', 4],
-			['wisdom', 2],
-			['charisma', -1],
+				['strength', 4],
+				['dexterity', 4],
+				['constitution', 2],
+				['intelligence', 4],
+				['wisdom', 2],
+				['charisma', -1],
 				['trained', 16],
 			])
 		);
@@ -141,7 +141,9 @@ describe('RollEngine', () => {
 		);
 
 		expect(expression).toBe('1d20+11+11+21+4');
-		expect(tags).toEqual(expect.arrayContaining(['skill', 'charisma', 'esoteric lore', 'lore']));
+		expect(tags).toEqual(
+			expect.arrayContaining(['skill', 'charisma', 'esoteric lore', 'lore'])
+		);
 		expect(kobold.sheetRecord.readAdjusted).toHaveBeenCalledOnce();
 	});
 
@@ -174,7 +176,7 @@ describe('RollEngine', () => {
 						rollAdjustment: '+2',
 						rollTargetTags: 'lore',
 						severity: null,
-						type: 'untyped',
+						type: SheetAdjustmentTypeEnum.untyped,
 						sheetAdjustments: [],
 					},
 				],
@@ -211,7 +213,13 @@ describe('DiceUtils.parseAttributes', () => {
 			undefined,
 			[
 				{ name: 'strength', aliases: ['str'], type: 'attr', value: 4, tags: ['strength'] },
-				{ name: 'dexterity', aliases: ['dex'], type: 'attr', value: 4, tags: ['dexterity'] },
+				{
+					name: 'dexterity',
+					aliases: ['dex'],
+					type: 'attr',
+					value: 4,
+					tags: ['dexterity'],
+				},
 				{
 					name: 'constitution',
 					aliases: ['con'],
