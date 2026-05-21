@@ -4,5 +4,7 @@ export * from './sheet-import-nethys.js';
 export * from './sheet-import-pathbuilder.js';
 export * from './sheet-import-utils.js';
 export * from './sheet-import-wg-v4.js';
+export * from './pf2e-defense-parser.js';
+export * from './nethys-item-metadata.js';
 export * from './sheet-properties.js';
 export * from './sheet-utils.js';

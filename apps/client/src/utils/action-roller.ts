@@ -4,34 +4,36 @@ import { getEmoji } from '../constants/emoji.js';
 import { utilStrings } from '@kobold/documentation';
 import {
 	Action,
-	ActionCostEnum,
-	ActionTypeEnum,
 	AdvancedDamageRoll,
 	AttackOrSkillRoll,
+	DefenseRule,
 	Attribute,
 	DamageRoll,
 	Roll,
-	RollTypeEnum,
 	SaveRoll,
-	SheetInfoLists,
-	SheetWeaknessesResistances,
 	TextRoll,
 	UserSettings,
 } from '@kobold/db';
-import { KoboldError, StringUtils } from '@kobold/util';
+import { KoboldError } from '@kobold/util';
 import { Creature } from './creature.js';
 import {
 	DiceRollError,
 	DiceRollResult,
 	DiceUtils,
 	ErrorResult,
-	MultiRollResult,
 	TextResult,
 } from './dice-utils.js';
 import { EmbedUtils, KoboldEmbed } from './kobold-embed-utils.js';
 import { RollBuilder } from './roll-builder.js';
 import { DefaultUtils } from './default-utils.js';
-import type { DamagePacket, PreparedDamageLine } from './damage-resolver.js';
+import {
+	getCriticalHitImmunities,
+	hasCriticalHitImmunity,
+	type DamageOutcome,
+	type DamagePacket,
+	type PreparedDamageLine,
+} from './damage-resolver.js';
+import { buildImportedAttackAction } from './imported-attack-action-builder.js';
 
 type ContestedRollTypes = 'attack' | 'skill-challenge' | 'save' | 'none';
 type ResultRollTypes = 'damage' | 'advanced-damage' | 'text';
@@ -53,15 +55,32 @@ type TargetingResult =
 	| null
 	| undefined;
 
-type MultiRollResultItem = MultiRollResult['results'][0] | null;
+type DamageMode = 'damage' | 'healing';
+type BasicDamageRollInput = {
+	name: string;
+	allowRollModifiers: boolean;
+	roll: string | null;
+	damageType: string | null;
+};
+type AdvancedDamageTermGroup = {
+	outcome: DamageOutcome;
+	terms: AdvancedDamageRoll['successTerms'];
+};
+
+const damageOutcomeLabels: Record<DamageOutcome, string> = {
+	'critical success': 'critical success',
+	success: 'success',
+	failure: 'failure',
+	'critical failure': 'critical failure',
+};
 
 export class ActionRoller {
 	public tags: string[];
 	public totalDamageDealt = 0;
 	public totalHealingDone = 0;
-	public triggeredWeaknesses: SheetWeaknessesResistances['weaknesses'] = [];
-	public triggeredResistances: SheetWeaknessesResistances['resistances'] = [];
-	public triggeredImmunities: SheetInfoLists['immunities'] = [];
+	public triggeredWeaknesses: DefenseRule[] = [];
+	public triggeredResistances: DefenseRule[] = [];
+	public triggeredImmunities: DefenseRule[] = [];
 	public preparedDamageLines: PreparedDamageLine[] = [];
 	protected damageHasResolved = false;
 	protected damageRollOverwriteIfUnused: string | null = null;
@@ -82,6 +101,7 @@ export class ActionRoller {
 		this.action = action;
 		this.tags = _.uniq([...(action?.tags ?? [])]);
 		if (this.action?.type === 'spell') this.tags.push('spell');
+		if (this.action?.type === 'attack') this.tags.push('attack_action');
 		this.options = options;
 
 		if (!userSettings) {
@@ -97,6 +117,76 @@ export class ActionRoller {
 			this.triggeredResistances.length > 0 ||
 			this.triggeredImmunities.length > 0
 		);
+	}
+
+	private getDamageOutcome(
+		actualOutcome: TargetingResult,
+		lastTargetingActionType: ContestedRollTypes
+	): {
+		damageOutcome: TargetingResult;
+		outcomeAdjustedBy: DefenseRule[];
+	} {
+		const outcomeAdjustedBy =
+			this.targetCreature &&
+			lastTargetingActionType === 'attack' &&
+			actualOutcome === 'critical success'
+				? getCriticalHitImmunities(this.targetCreature.sheet)
+				: [];
+		return {
+			damageOutcome: outcomeAdjustedBy.length ? 'success' : actualOutcome,
+			outcomeAdjustedBy,
+		};
+	}
+
+	private termMode(term: { mode?: DamageMode }, fallback: DamageMode = 'damage'): DamageMode {
+		return term.mode ?? fallback;
+	}
+
+	private getAdvancedDamageTermGroups(
+		roll: AdvancedDamageRoll,
+		effectiveResult: TargetingResult
+	): AdvancedDamageTermGroup[] {
+		const groups: AdvancedDamageTermGroup[] = [
+			{ outcome: 'critical success', terms: roll.criticalSuccessTerms },
+			{ outcome: 'success', terms: roll.successTerms },
+			{ outcome: 'failure', terms: roll.failureTerms },
+			{ outcome: 'critical failure', terms: roll.criticalFailureTerms },
+		];
+
+		if (!effectiveResult) return groups.filter(group => group.terms.length > 0);
+		if (effectiveResult === 'critical success') {
+			return [roll.criticalSuccessTerms.length ? groups[0] : groups[1]].filter(
+				group => group.terms.length > 0
+			);
+		}
+		if (effectiveResult === 'critical failure') {
+			return [roll.criticalFailureTerms.length ? groups[3] : groups[2]].filter(
+				group => group.terms.length > 0
+			);
+		}
+
+		return groups.filter(
+			group => group.outcome === effectiveResult && group.terms.length > 0
+		);
+	}
+
+	private buildAdvancedDamageTermName({
+		rollName,
+		outcome,
+		termIndex,
+		termCount,
+		includeOutcome,
+	}: {
+		rollName: string;
+		outcome: DamageOutcome;
+		termIndex: number;
+		termCount: number;
+		includeOutcome: boolean;
+	}) {
+		const baseName = rollName || 'damage';
+		const outcomePrefix = includeOutcome ? `${damageOutcomeLabels[outcome]} ` : '';
+		const indexSuffix = termCount > 1 ? ` ${termIndex + 1}` : '';
+		return `${outcomePrefix}${baseName}${indexSuffix}`;
 	}
 
 	public buildResultText() {
@@ -116,8 +206,7 @@ export class ActionRoller {
 		rollBuilder: RollBuilder,
 		roll: AttackOrSkillRoll,
 		options: BuildRollOptions,
-		extraAttributes: { [k: string]: Attribute },
-		rollCounter: number
+		extraAttributes: { [k: string]: Attribute }
 	) {
 		const rollName = roll.name;
 		let rollExpression = this.options?.attackRollOverwrite ?? roll.roll;
@@ -142,34 +231,6 @@ export class ActionRoller {
 			rollType: 'skill-challenge',
 			skipModifiers,
 		});
-		if (result.type !== 'error') {
-			// update the extra attributes for the next roll
-			['challengeResult', 'challenge', 'hit'].forEach(
-				name =>
-					(extraAttributes[name] = {
-						name,
-						aliases: [name.toLowerCase()],
-						value: result.results.total,
-						type: 'rollResult',
-						tags: [],
-					})
-			);
-			extraAttributes[`roll${rollCounter}`] = {
-				name: `roll${rollCounter}`,
-				aliases: [`roll${rollCounter}`.toLowerCase()],
-				value: result.results.total,
-				type: 'rollResult',
-				tags: [],
-			};
-			extraAttributes[`roll${rollCounter}Attack`] = {
-				name: `roll${rollCounter}Attack`,
-				aliases: [`roll${rollCounter}Attack`.toLowerCase()],
-				value: result.results.total,
-				type: 'rollResult',
-				tags: [],
-			};
-		}
-
 		return result;
 	}
 
@@ -177,8 +238,7 @@ export class ActionRoller {
 		rollBuilder: RollBuilder,
 		roll: AttackOrSkillRoll,
 		options: BuildRollOptions,
-		extraAttributes: { [k: string]: Attribute },
-		rollCounter: number
+		extraAttributes: { [k: string]: Attribute }
 	) {
 		const rollName = roll.name;
 		let rollExpression = this.options?.attackRollOverwrite ?? roll.roll;
@@ -187,7 +247,9 @@ export class ActionRoller {
 		let currentExtraAttributes = _.values(extraAttributes);
 		let tags = [...this.tags];
 
-		if ((roll.targetDC ?? '').toLowerCase() === 'ac') tags = _.uniq([...tags, 'attack']);
+		if ((roll.targetDC ?? '').toLowerCase() === 'ac') {
+			tags = _.uniq([...tags, 'attack', 'tohit', 'to_hit', 'attack_roll']);
+		}
 
 		if (!skipModifiers && options.attackModifierExpression) {
 			// add the attack modifier expression
@@ -203,44 +265,18 @@ export class ActionRoller {
 			showTags: false,
 			rollType: 'attack',
 			skipModifiers,
+			outcomeTitleSuffixes:
+				this.targetCreature && hasCriticalHitImmunity(this.targetCreature.sheet)
+					? { 'critical success': '(immune)' }
+					: undefined,
 		});
-		if (result.type !== 'error' && result.results.total) {
-			// update the extra attributes for the next roll
-			['attackResult', 'attack', 'hit'].forEach(
-				name =>
-					(extraAttributes[name] = {
-						name,
-						aliases: [name.toLowerCase()],
-						value: result.results.total,
-						type: 'rollResult',
-						tags: [],
-					})
-			);
-			extraAttributes[`roll${rollCounter}`] = {
-				name: `roll${rollCounter}`,
-				aliases: [`roll${rollCounter}`.toLowerCase()],
-				value: result.results.total,
-
-				type: 'rollResult',
-				tags: [],
-			};
-			extraAttributes[`roll${rollCounter}Attack`] = {
-				name: `roll${rollCounter}Attack`,
-				aliases: [`roll${rollCounter}Attack`.toLowerCase()],
-				value: result.results.total,
-				type: 'rollResult',
-				tags: [],
-			};
-		}
-
 		return result;
 	}
 	rollSave(
 		rollBuilder: RollBuilder,
 		roll: SaveRoll,
 		options: BuildRollOptions,
-		extraAttributes: { [k: string]: Attribute },
-		rollCounter: number
+		extraAttributes: { [k: string]: Attribute }
 	) {
 		const tags = [...this.tags, 'save'];
 		let targetDcClause = '';
@@ -264,54 +300,11 @@ export class ActionRoller {
 				rollFromTarget: true,
 				skipModifiers,
 			});
-			if (result.type !== 'error') {
-				// Just record text that there should be a save here
-				// update the extra attributes for the next roll
-				['SaveResult', 'Save', 'savingThrow'].forEach(
-					name =>
-						(extraAttributes[name] = {
-							name,
-							aliases: [name.toLowerCase()],
-							value: result.results?.total,
-							type: 'rollResult',
-							tags: [],
-						})
-				);
-				extraAttributes[`roll${rollCounter}`] = {
-					name: `roll${rollCounter}`,
-					aliases: [`roll${rollCounter}`.toLowerCase()],
-					value: result.results?.total,
-					type: 'rollResult',
-					tags: [],
-				};
-				extraAttributes[`roll${rollCounter}Save`] = {
-					name: `roll${rollCounter}Save`,
-					aliases: [`roll${rollCounter}Save`.toLowerCase()],
-					value: result.results?.total,
-					type: 'rollResult',
-					tags: [],
-				};
-			}
 			return result;
 		} else {
 			const title = roll.name || 'Save';
 			const text = `The target makes a ${targetDcClause}${roll.saveRollType} check VS. ${this.creature.name}'s ${roll.saveTargetDC}`;
 			rollBuilder.addText({ title, text, extraAttributes: currentExtraAttributes, tags });
-
-			extraAttributes[`roll${rollCounter}`] = {
-				name: `roll${rollCounter}`,
-				aliases: [`roll${rollCounter}`.toLowerCase()],
-				value: 0,
-				type: 'rollResult',
-				tags: [],
-			};
-			extraAttributes[`roll${rollCounter}Save`] = {
-				name: `roll${rollCounter}Save`,
-				aliases: [`roll${rollCounter}Save`.toLowerCase()],
-				value: 0,
-				type: 'rollResult',
-				tags: [],
-			};
 
 			return null;
 		}
@@ -322,7 +315,6 @@ export class ActionRoller {
 		roll: TextRoll,
 		options: BuildRollOptions,
 		extraAttributes: { [k: string]: Attribute },
-		rollCounter: number,
 		lastTargetingResult: TargetingResult,
 		lastTargetingActionType: ContestedRollTypes
 	) {
@@ -378,10 +370,9 @@ export class ActionRoller {
 
 	public rollBasicDamage(
 		rollBuilder: RollBuilder,
-		roll: DamageRoll,
+		roll: BasicDamageRollInput,
 		options: BuildRollOptions,
 		extraAttributes: { [k: string]: Attribute },
-		rollCounter: number,
 		lastTargetingResult: TargetingResult,
 		lastTargetingActionType: ContestedRollTypes,
 		healInstead: boolean = false
@@ -420,7 +411,8 @@ export class ActionRoller {
 				lastTargetingResult === 'critical success') ||
 			(lastTargetingActionType === 'save' && lastTargetingResult === 'critical failure')
 		) {
-			multiplier = 2;
+			multiplier =
+				this.targetCreature && hasCriticalHitImmunity(this.targetCreature.sheet) ? 1 : 2;
 		}
 		// half damage cases: Last action was a save that succeeded
 		else if (lastTargetingActionType === 'save' && lastTargetingResult === 'success') {
@@ -455,355 +447,32 @@ export class ActionRoller {
 			} satisfies ErrorResult;
 		}
 
-		if (result.type === 'dice') {
-			extraAttributes[`roll${rollCounter}`] = {
-				name: `roll${rollCounter}`,
-				aliases: [`roll${rollCounter}`.toLowerCase()],
-				value: result.results.total,
-				type: 'rollResult',
-				tags: [],
-			};
-			extraAttributes[`roll${rollCounter}${_.capitalize(effectTerm)}`] = {
-				name: `roll${rollCounter}${_.capitalize(effectTerm)}`,
-				aliases: [`roll${rollCounter}${effectTerm}`.toLowerCase()],
-				value: result.results.total,
-				type: 'rollResult',
-				tags: [],
-			};
-			extraAttributes[`roll${rollCounter}Applied${_.capitalize(effectTerm)}`] = {
-				name: `roll${rollCounter}Applied${_.capitalize(effectTerm)}`,
-				aliases: [`roll${rollCounter}Applied${effectTerm}`.toLowerCase()],
-				value: result.results.total,
-				type: 'rollResult',
-				tags: [],
-			};
-		}
-
 		return result;
 	}
 
-	public rollAdvancedDamage(
-		rollBuilder: RollBuilder,
-		roll: AdvancedDamageRoll,
-		options: BuildRollOptions,
-		extraAttributes: { [k: string]: Attribute },
-		rollCounter: number,
-		lastTargetingResult: TargetingResult,
-		lastTargetingActionType: ContestedRollTypes,
-		healInstead: boolean = false
+	public prepareDamage(
+		roll: DamageRoll | AdvancedDamageRoll,
+		damage: number,
+		tags: string[] = [],
+		damageTypeOverride?: string | null,
+		outcomes: {
+			actualOutcome?: DamageOutcome | null;
+			damageOutcome?: DamageOutcome | null;
+			outcomeAdjustedBy?: DefenseRule[];
+		} = {}
 	) {
-		const effectTerm = healInstead ? 'healing' : 'damage';
-		const tags = [...this.tags, effectTerm];
-		let currentExtraAttributes = _.values(extraAttributes);
-		const skipModifiers =
-			!!this.damageRollOverwriteIfUnused || !(roll.allowRollModifiers ?? true);
-
-		const rollExpressions: {
-			name: string;
-			damageType: string | null;
-			rollExpression: string;
-			tags: string[];
-			extraAttributes: {
-				name: string;
-				type: string;
-				value: number;
-				aliases: string[];
-				tags: string[];
-			}[];
-			modifierMultiplier: number;
-		}[] = [];
-
-		let rollCritSuccessExpression =
-			this.damageRollOverwriteIfUnused ?? roll.criticalSuccessRoll;
-		let rollSuccessExpression = this.damageRollOverwriteIfUnused ?? roll.successRoll;
-		let rollCritFailureExpression =
-			this.damageRollOverwriteIfUnused ?? roll.criticalFailureRoll;
-		let rollFailureExpression = this.damageRollOverwriteIfUnused ?? roll.failureRoll;
-
-		let rolledSuccessDamage = false;
-		let rolledFailureDamage = false;
-		let rolledCritSuccessDamage = false;
-		let rolledCritFailureDamage = false;
-
-		this.damageRollOverwriteIfUnused = null;
-
-		// if we have a previous attack result that was a crit success or we're rolling after an attack with no knowledge of success, we roll crit damage
-		if (
-			// if the crit success expression is defined
-			rollCritSuccessExpression &&
-			// AND
-			// the last attack was a crit success
-			(lastTargetingResult === 'critical success' ||
-				// or we don't have a previous attack result
-				lastTargetingActionType === 'none' ||
-				!lastTargetingResult)
-		) {
-			rolledCritSuccessDamage = true;
-
-			if (!skipModifiers && options.damageModifierExpression) {
-				// add the doubled damage modifier expression
-				rollCritSuccessExpression = `${rollCritSuccessExpression}+2*(${options.damageModifierExpression})`;
-			}
-			let modifierMultiplier = lastTargetingActionType === 'save' ? 0 : 2;
-
-			if (rollCritSuccessExpression) {
-				rollExpressions.push({
-					name: `critical success ${effectTerm}`,
-					damageType: roll.damageType,
-					rollExpression: rollCritSuccessExpression,
-					tags,
-					extraAttributes: currentExtraAttributes,
-					modifierMultiplier,
-				});
-			}
-		}
-
-		// if we don't have a previous attack result, or we're rolling after an attack with no knowledge of success, we roll damage
-		if (
-			// if the success expression is defined
-			rollSuccessExpression &&
-			// AND
-			// the last attack was a success
-			(lastTargetingResult === 'success' ||
-				// or the last attack was a crit success, but we don't have a crit success expression
-				(lastTargetingResult === 'critical success' && !rollCritSuccessExpression) ||
-				// or we don't have a previous attack result
-				lastTargetingActionType === 'none' ||
-				!lastTargetingResult)
-		) {
-			// without a previous attack result, roll both damage and crit damage
-			rolledSuccessDamage = true;
-
-			if (!skipModifiers && options.damageModifierExpression) {
-				// add the damage modifier expression
-				rollSuccessExpression = `${rollSuccessExpression}+(${options.damageModifierExpression})`;
-			}
-
-			let modifierMultiplier = lastTargetingActionType === 'save' ? 0.5 : 1;
-
-			rollExpressions.push({
-				name: `success ${effectTerm}`,
-				damageType: roll.damageType,
-				rollExpression: rollSuccessExpression,
-				tags,
-				extraAttributes: currentExtraAttributes,
-				modifierMultiplier,
-			});
-		}
-
-		// Roll failure damage if we have any
-		if (
-			// if the failure expression is defined
-			rollFailureExpression &&
-			// AND
-			// the last attack was a failure
-			(lastTargetingResult === 'failure' ||
-				// or the last attack was a crit failure, but we don't have a crit failure expression
-				(lastTargetingResult === 'critical failure' && !rollCritFailureExpression) ||
-				// or we don't have a previous attack result
-				lastTargetingActionType === 'none' ||
-				!lastTargetingResult)
-		) {
-			// without a previous attack result, roll both damage and crit damage
-			rolledFailureDamage = true;
-
-			if (!skipModifiers && options.damageModifierExpression) {
-				// add the damage modifier expression
-				rollFailureExpression = `${rollFailureExpression}+(${options.damageModifierExpression})`;
-			}
-
-			let modifierMultiplier = lastTargetingActionType === 'save' ? 1 : 0.5;
-
-			rollExpressions.push({
-				name: `failure ${effectTerm}`,
-				damageType: roll.damageType,
-				rollExpression: rollFailureExpression,
-				tags,
-				extraAttributes: currentExtraAttributes,
-				modifierMultiplier,
-			});
-		}
-
-		// Roll crit failure damage if we have any
-		if (
-			// if the crit failure expression is defined
-			rollCritFailureExpression &&
-			// AND
-			// the last attack was a crit failure
-			(lastTargetingResult === 'critical failure' ||
-				// or we don't have a previous attack result
-				lastTargetingActionType === 'none' ||
-				!lastTargetingResult)
-		) {
-			// without a previous attack result, roll both damage and crit damage
-			rolledCritFailureDamage = true;
-
-			if (!skipModifiers && options.damageModifierExpression) {
-				// add the damage modifier expression
-				rollCritFailureExpression = `${rollCritFailureExpression}+(${options.damageModifierExpression})`;
-			}
-
-			let modifierMultiplier = lastTargetingActionType === 'save' ? 2 : 0;
-
-			rollExpressions.push({
-				name: `critical failure ${effectTerm}`,
-				damageType: roll.damageType,
-				rollExpression: rollCritFailureExpression,
-				tags,
-				extraAttributes: currentExtraAttributes,
-				modifierMultiplier,
-			});
-		}
-
-		// if we haven't added any rollExpressions, we skip rolling damage and move on
-		if (rollExpressions.length === 0) {
-			//update the counters and attributes and continue
-			[
-				`roll${rollCounter}`,
-				`roll${rollCounter}${_.capitalize(effectTerm)}`,
-				`roll${rollCounter}Critical${_.capitalize(effectTerm)}`,
-				`roll${rollCounter}Applied${_.capitalize(effectTerm)}`,
-			].forEach(
-				name =>
-					(extraAttributes[name] = {
-						name,
-						aliases: [name.toLowerCase()],
-						value: 0,
-						type: 'rollResult',
-						tags: [],
-					})
-			);
-			return null;
-		}
-
-		const results = rollBuilder.addMultiRoll({
-			skipModifiers,
-			rollTitle: roll.name,
-			rollExpressions: rollExpressions,
-		});
-
-		// sort the results into variables
-		let damageResult: MultiRollResultItem = null;
-		let critSuccessDamageResult: MultiRollResultItem = null;
-		let critFailureDamageResult: MultiRollResultItem = null;
-		let failureDamageResult: MultiRollResultItem = null;
-
-		// we use the booleans for whether we rolled to determine the index of the result.
-		// we know the order the rolls would be in, so if we did roll the value, it's true or 1
-		// if we didn't roll the value, it's false or 0
-		if (rolledCritSuccessDamage) {
-			critSuccessDamageResult = results.results[0];
-		}
-		if (rolledSuccessDamage) {
-			damageResult = results.results[Number(rolledCritSuccessDamage)];
-		}
-		if (rolledFailureDamage) {
-			failureDamageResult =
-				results.results[Number(rolledCritSuccessDamage) + Number(rolledSuccessDamage)];
-		}
-		if (rolledCritFailureDamage) {
-			critFailureDamageResult =
-				results.results[
-					Number(rolledCritSuccessDamage) +
-						Number(rolledSuccessDamage) +
-						Number(rolledFailureDamage)
-				];
-		}
-
-		// Determine if there's applied damage
-		let appliedDamage = 0;
-		// If we have a prior action result, we apply the damage based on the result
-		if (lastTargetingActionType !== 'none') {
-			if (lastTargetingResult === 'critical success') {
-				appliedDamage = critSuccessDamageResult?.results?.total || 0;
-			}
-			if (
-				lastTargetingResult === 'success' ||
-				(lastTargetingResult === 'critical success' && !rollCritSuccessExpression)
-			) {
-				appliedDamage = damageResult?.results?.total || 0;
-			}
-			if (
-				lastTargetingResult === 'failure' ||
-				(lastTargetingResult === 'critical failure' && !rollCritFailureExpression)
-			) {
-				appliedDamage = failureDamageResult?.results?.total || 0;
-			}
-			if (lastTargetingResult === 'critical failure') {
-				appliedDamage = critFailureDamageResult?.results?.total || 0;
-			}
-		} else {
-			//Otherwise just use all of the results
-			appliedDamage =
-				(critSuccessDamageResult?.results?.total || 0) +
-				(damageResult?.results?.total || 0) +
-				(appliedDamage = failureDamageResult?.results?.total || 0) +
-				(appliedDamage = critFailureDamageResult?.results?.total || 0);
-		}
-		// update the extra attributes for the next roll
-		extraAttributes[`roll${rollCounter}`] = {
-			name: `roll${rollCounter}`,
-			aliases: [`roll${rollCounter}`.toLowerCase()],
-			value: appliedDamage,
-			type: 'rollResult',
-			tags: [],
-		};
-		extraAttributes[`roll${rollCounter}${_.capitalize(effectTerm)}`] = {
-			name: `roll${rollCounter}${_.capitalize(effectTerm)}`,
-			aliases: [`roll${rollCounter}${effectTerm}`.toLowerCase()],
-			value: appliedDamage,
-			type: 'rollResult',
-			tags: [],
-		};
-		extraAttributes[`roll${rollCounter}Applied${_.capitalize(effectTerm)}`] = {
-			name: `roll${rollCounter}Applied${_.capitalize(effectTerm)}`,
-			aliases: [`roll${rollCounter}Applied${effectTerm}`.toLowerCase()],
-			value: appliedDamage,
-			type: 'rollResult',
-			tags: [],
-		};
-		extraAttributes[`roll${rollCounter}CriticalSuccess${_.capitalize(effectTerm)}`] = {
-			name: `roll${rollCounter}CriticalSuccess${_.capitalize(effectTerm)}`,
-			aliases: [`roll${rollCounter}CriticalSuccess${effectTerm}`.toLowerCase()],
-			value: critSuccessDamageResult?.results?.total || 0,
-			type: 'rollResult',
-			tags: [],
-		};
-		extraAttributes[`roll${rollCounter}Success${_.capitalize(effectTerm)}`] = {
-			name: `roll${rollCounter}Success${_.capitalize(effectTerm)}`,
-			aliases: [`roll${rollCounter}Success${effectTerm}`.toLowerCase()],
-			value: damageResult?.results?.total || 0,
-			type: 'rollResult',
-			tags: [],
-		};
-		extraAttributes[`roll${rollCounter}Failure${_.capitalize(effectTerm)}`] = {
-			name: `roll${rollCounter}Failure${_.capitalize(effectTerm)}`,
-			aliases: [`roll${rollCounter}Failure${effectTerm}`.toLowerCase()],
-			value: failureDamageResult?.results?.total || 0,
-			type: 'rollResult',
-			tags: [],
-		};
-		extraAttributes[`roll${rollCounter}CriticalFailure${_.capitalize(effectTerm)}`] = {
-			name: `roll${rollCounter}CriticalFailure${_.capitalize(effectTerm)}`,
-			aliases: [`roll${rollCounter}CriticalFailure${effectTerm}`.toLowerCase()],
-			value: critFailureDamageResult?.results?.total || 0,
-			type: 'rollResult',
-			tags: [],
-		};
-		results.appliedDamage = appliedDamage;
-
-		return results;
-	}
-
-	public prepareDamage(roll: DamageRoll | AdvancedDamageRoll, damage: number) {
 		this.damageHasResolved = false;
-		const damageType = roll.damageType ?? 'untyped';
+		const damageType = damageTypeOverride ?? 'untyped';
 		this.preparedDamageLines.push({
 			amount: damage,
 			damageType,
 			sourceName: roll.name,
+			actualOutcome: outcomes.actualOutcome,
+			damageOutcome: outcomes.damageOutcome,
+			outcomeAdjustedBy: outcomes.outcomeAdjustedBy,
 			tags: _.uniq([
 				...this.tags,
+				...tags,
 				'damage',
 				damageType,
 				...damageType.split(/\W+/).filter(Boolean),
@@ -811,8 +480,13 @@ export class ActionRoller {
 		});
 	}
 
-	public applyDamage(roll: DamageRoll | AdvancedDamageRoll, damage: number) {
-		this.prepareDamage(roll, damage);
+	public applyDamage(
+		roll: DamageRoll | AdvancedDamageRoll,
+		damage: number,
+		tags: string[] = [],
+		damageTypeOverride?: string | null
+	) {
+		this.prepareDamage(roll, damage, tags, damageTypeOverride);
 	}
 
 	public buildDamagePacket(): DamagePacket {
@@ -933,12 +607,10 @@ export class ActionRoller {
 
 		let lastTargetingResult: TargetingResult;
 		let lastTargetingActionType: ContestedRollTypes = 'none';
-		let rollCounter = 0;
 
 		for (const roll of this.action.rolls) {
 			// main fields
 			const rollType = roll.type;
-			rollCounter += 1;
 
 			// time for our state machine!
 			if (rollType === 'attack') {
@@ -971,8 +643,7 @@ export class ActionRoller {
 					rollBuilder,
 					roll,
 					{ ...options, targetDC: rollTargetValue },
-					extraAttributes,
-					rollCounter
+					extraAttributes
 				);
 				// note the current success status for future damage rolls
 				if (attackResult.type != 'error') {
@@ -1010,8 +681,7 @@ export class ActionRoller {
 					rollBuilder,
 					roll,
 					{ ...options, targetDC: rollTargetValue },
-					extraAttributes,
-					rollCounter
+					extraAttributes
 				);
 				// note the current success status for future damage rolls
 				if (skillChallengeResult.type !== 'error') {
@@ -1038,8 +708,7 @@ export class ActionRoller {
 					rollBuilder,
 					roll,
 					{ ...options, targetDC: rollTargetValue, saveDiceRoll: saveRoll },
-					extraAttributes,
-					rollCounter
+					extraAttributes
 				);
 				if (saveResult?.type === 'dice') {
 					// note the current success status for future damage rolls
@@ -1055,41 +724,90 @@ export class ActionRoller {
 					roll,
 					options,
 					extraAttributes,
-					rollCounter,
 					lastTargetingResult,
 					lastTargetingActionType
 				);
 			} else if (rollType === 'damage') {
-				const result = this.rollBasicDamage(
-					rollBuilder,
-					roll,
-					options,
-					extraAttributes,
-					rollCounter,
+				const damageOutcome = this.getDamageOutcome(
 					lastTargetingResult,
 					lastTargetingActionType
 				);
-				if (result && result.type === 'dice') {
-					if (result?.results?.total && !roll.healInsteadOfDamage)
-						this.prepareDamage(roll, result.results.total);
-					else if (result?.results?.total && roll.healInsteadOfDamage)
-						this.applyHealing(roll, result.results.total);
+				for (let termIndex = 0; termIndex < roll.terms.length; termIndex++) {
+					const term = roll.terms[termIndex];
+					const mode = this.termMode(term);
+					const termRoll: BasicDamageRollInput = {
+						name: roll.terms.length === 1 ? roll.name : `${roll.name} ${termIndex + 1}`,
+						roll: term.dice,
+						damageType: term.type,
+						allowRollModifiers: termIndex === 0 ? roll.allowRollModifiers : false,
+					};
+					const result = this.rollBasicDamage(
+						rollBuilder,
+						termRoll,
+						options,
+						extraAttributes,
+						lastTargetingResult,
+						lastTargetingActionType,
+						mode === 'healing'
+					);
+					if (result && result.type === 'dice') {
+						if (result?.results?.total && mode === 'damage') {
+							this.prepareDamage(roll, result.results.total, term.tags, term.type, {
+								actualOutcome: lastTargetingResult ?? null,
+								damageOutcome: damageOutcome.damageOutcome ?? null,
+								outcomeAdjustedBy: damageOutcome.outcomeAdjustedBy,
+							});
+						} else if (result?.results?.total && mode === 'healing') {
+							this.applyHealing(roll, result.results.total);
+						}
+					}
 				}
 			} else if (rollType === 'advanced-damage') {
-				const result = this.rollAdvancedDamage(
-					rollBuilder,
-					roll,
-					options,
-					extraAttributes,
-					rollCounter,
+				const damageOutcome = this.getDamageOutcome(
 					lastTargetingResult,
 					lastTargetingActionType
 				);
-				if (result) {
-					if (result?.appliedDamage && !roll.healInsteadOfDamage)
-						this.prepareDamage(roll, result?.appliedDamage);
-					else if (result?.appliedDamage && roll.healInsteadOfDamage)
-						this.applyHealing(roll, result?.appliedDamage);
+				const effectiveResult = damageOutcome.damageOutcome;
+				const groups = this.getAdvancedDamageTermGroups(roll, effectiveResult);
+				const includeOutcomeInTitle = !effectiveResult || groups.length > 1;
+
+				for (const group of groups) {
+					for (let termIndex = 0; termIndex < group.terms.length; termIndex++) {
+						const term = group.terms[termIndex];
+						const mode = this.termMode(term);
+						const termRoll: BasicDamageRollInput = {
+							name: this.buildAdvancedDamageTermName({
+								rollName: roll.name,
+								outcome: group.outcome,
+								termIndex,
+								termCount: group.terms.length,
+								includeOutcome: includeOutcomeInTitle,
+							}),
+							roll: term.dice,
+							damageType: term.type,
+							allowRollModifiers: termIndex === 0 ? roll.allowRollModifiers : false,
+						};
+						const result = this.rollBasicDamage(
+							rollBuilder,
+							termRoll,
+							options,
+							extraAttributes,
+							null,
+							'none',
+							mode === 'healing'
+						);
+						if (result && result.type === 'dice') {
+							if (result?.results?.total && mode === 'damage') {
+								this.prepareDamage(roll, result.results.total, term.tags, term.type, {
+									actualOutcome: lastTargetingResult ?? null,
+									damageOutcome: group.outcome,
+									outcomeAdjustedBy: damageOutcome.outcomeAdjustedBy,
+								});
+							} else if (result?.results?.total && mode === 'healing') {
+								this.applyHealing(roll, result.results.total);
+							}
+						}
+					}
 				}
 			}
 		}
@@ -1127,76 +845,11 @@ export class ActionRoller {
 				`Yip! I couldn\'t find an attack called "${attackName.toLowerCase()}"`
 			);
 
-		// build a little action from the attack!
-		// Note: id and sheetRecordId are set to placeholder values since this action
-		// is only used temporarily and not saved to the database
-		const action: Action = {
-			userId: '-1',
-			id: -1,
-			sheetRecordId: null,
-			name: targetAttack.name,
-			description: '',
-			baseLevel: 0,
-			autoHeighten: false,
-			type: ActionTypeEnum.attack,
-			actionCost: ActionCostEnum.oneAction,
-			tags: targetAttack.traits,
-			rolls: [],
-		};
-		// add the attack roll
-		if (targetAttack.toHit != null) {
-			action.rolls.push({
-				type: RollTypeEnum.attack,
-				name: 'To Hit',
-				roll: DiceUtils.buildDiceExpression(
-					'd20',
-					String(targetAttack.toHit),
-					attackModifierExpression
-				),
-				targetDC: 'AC',
-				allowRollModifiers: true,
-			});
-		}
-
-		// add the first damage roll with damage modifiers
-		if (targetAttack.damage[0]) {
-			action.rolls.push({
-				type: RollTypeEnum.damage,
-				name: 'Damage',
-				roll:
-					DiceUtils.buildDiceExpression(
-						targetAttack.damage[0].dice,
-						null,
-						damageModifierExpression
-					) || null,
-				healInsteadOfDamage: false,
-				damageType: targetAttack.damage[0].type,
-				allowRollModifiers: true,
-			});
-		}
-		for (let i = 1; i < targetAttack.damage.length; i++) {
-			action.rolls.push({
-				type: RollTypeEnum.damage,
-				name: 'Damage',
-				roll: targetAttack.damage[i].dice,
-				healInsteadOfDamage: false,
-				damageType: targetAttack.damage[i].type,
-				allowRollModifiers: false,
-			});
-		}
-		if (targetAttack.effects.length) {
-			action.rolls.push({
-				type: RollTypeEnum.text,
-				name: 'Effects',
-				criticalSuccessText: null,
-				successText: StringUtils.oxfordListJoin(targetAttack.effects),
-				failureText: null,
-				criticalFailureText: null,
-				allowRollModifiers: false,
-				defaultText: null,
-				extraTags: [],
-			});
-		}
+		const action = buildImportedAttackAction({
+			attack: targetAttack,
+			attackModifierExpression,
+			damageModifierExpression,
+		});
 
 		const actionRoller = new ActionRoller(
 			userSettings ?? null,

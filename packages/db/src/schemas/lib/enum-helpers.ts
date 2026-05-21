@@ -13,7 +13,6 @@ import {
 	SheetInfoListKeys,
 	SheetIntegerKeys,
 	SheetStatKeys,
-	SheetWeaknessesResistancesKeys,
 	StatSubGroupEnum,
 } from '../shared/sheet.zod.js';
 import { CounterStyleEnum } from '../shared/counter.zod.js';
@@ -73,16 +72,6 @@ export function isSheetInfoListKeys(value: any): value is SheetInfoListKeys {
 const sheetBaseCounterKeysValueMap = _.keyBy(Object.values(SheetBaseCounterKeys), _.identity);
 export function isSheetBaseCounterKeys(value: any): value is SheetBaseCounterKeys {
 	return sheetBaseCounterKeysValueMap[value] !== undefined;
-}
-
-const sheetWeaknessesResistancesKeysValueMap = _.keyBy(
-	Object.values(SheetWeaknessesResistancesKeys),
-	_.identity
-);
-export function isSheetWeaknessesResistancesKeys(
-	value: any
-): value is SheetWeaknessesResistancesKeys {
-	return sheetWeaknessesResistancesKeysValueMap[value] !== undefined;
 }
 
 const statSubGroupValueMap = _.keyBy(Object.values(StatSubGroupEnum), _.identity);

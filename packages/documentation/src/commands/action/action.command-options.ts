@@ -2,6 +2,7 @@ import { ApplicationCommandOptionType } from 'discord-api-types/v10';
 import type { CommandOptions } from '../helpers/commands.types.js';
 
 export enum ActionCommandOptionEnum {
+	attack = 'attack',
 	name = 'name',
 	description = 'description',
 	type = 'action-type',
@@ -55,6 +56,13 @@ export const ActionImportModeChoices = {
 } as const;
 
 export const actionCommandOptions = {
+	[ActionCommandOptionEnum.attack]: {
+		name: ActionCommandOptionEnum.attack,
+		description: 'The imported attack to copy.',
+		required: true,
+		autocomplete: true,
+		type: ApplicationCommandOptionType.String,
+	},
 	[ActionCommandOptionEnum.name]: {
 		name: ActionCommandOptionEnum.name,
 		description: 'The name of the action.',

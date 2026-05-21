@@ -221,7 +221,9 @@
 			"notes": null,
 			"range": null,
 			"toHit": 19,
-			"damage": [{ "dice": "1d4+ 2", "type": "P" }],
+			"damage": [
+				{ "dice": "1d4+ 2", "type": "P", "tags": [], "mode": "damage", "persistent": false }
+			],
 			"traits": [],
 			"effects": []
 		},
@@ -231,15 +233,33 @@
 			"range": null,
 			"toHit": 23,
 			"damage": [
-				{ "dice": "3d6+ 4", "type": "P" },
-				{ "dice": "1d6", "type": "Fire" },
-				{ "dice": "1d6", "type": "Electricity" }
+				{
+					"dice": "3d6+ 4",
+					"type": "P",
+					"tags": [],
+					"mode": "damage",
+					"persistent": false
+				},
+				{
+					"dice": "1d6",
+					"type": "Fire",
+					"tags": [],
+					"mode": "damage",
+					"persistent": false
+				},
+				{
+					"dice": "1d6",
+					"type": "Electricity",
+					"tags": [],
+					"mode": "damage",
+					"persistent": false
+				}
 			],
 			"traits": [],
 			"effects": []
 		}
 	],
-	"infoLists": { "senses": [], "traits": [], "languages": ["None selected"], "immunities": [] },
+	"infoLists": { "senses": [], "traits": [], "languages": ["None selected"] },
 	"sourceData": {
 		"xp": 0,
 		"age": "Not set",
@@ -462,6 +482,42 @@
 				"damageBonus": 4,
 				"extraDamage": ["1d6 Fire", "1d6 Electricity"],
 				"increasedDice": false
+			},
+			{
+				"name": "Katana",
+				"qty": 1,
+				"prof": "martial",
+				"die": "d6",
+				"pot": 1,
+				"str": "striking",
+				"mat": "Silver (High-Grade)",
+				"display": "+1 Striking Silver (High-Grade) Katana",
+				"runes": [],
+				"damageType": "S",
+				"attack": 18,
+				"damageBonus": 5,
+				"extraDamage": [],
+				"increasedDice": false,
+				"isInventor": false,
+				"grade": ""
+			},
+			{
+				"name": "Leiomano",
+				"qty": 1,
+				"prof": "martial",
+				"die": "d6",
+				"pot": 2,
+				"str": "majorStriking",
+				"mat": null,
+				"display": "+2 Striking (Major) Leiomano",
+				"runes": [],
+				"damageType": "B",
+				"attack": 19,
+				"damageBonus": 5,
+				"extraDamage": [],
+				"increasedDice": false,
+				"isInventor": false,
+				"grade": ""
 			}
 		],
 		"ancestry": "Catfolk",
@@ -814,5 +870,5 @@
 			"recoverable": false
 		}
 	],
-	"weaknessesResistances": { "weaknesses": [], "resistances": [] }
+	"defenses": { "immunities": [], "weaknesses": [], "resistances": [] }
 }

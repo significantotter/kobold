@@ -58,6 +58,23 @@ export const actionCommandDocumentation: CommandDocumentation<typeof actionComma
 				},
 			],
 		},
+		[ActionSubCommandEnum.copyImportedAttack]: {
+			name: ActionSubCommandEnum.copyImportedAttack,
+			description: 'Copies an imported sheet attack into a custom action.',
+			usage: null,
+			examples: [
+				{
+					title: 'Copied',
+					type: CommandResponseTypeEnum.success,
+					message:
+						'Created custom action "My Rapier" from imported attack "Rapier". Future imports will update the imported Rapier action, but not this custom copy.',
+					options: {
+						attack: 'Rapier',
+						name: 'My Rapier',
+					},
+				},
+			],
+		},
 		[ActionSubCommandEnum.remove]: {
 			name: ActionSubCommandEnum.remove,
 			description: 'Removes an action.',

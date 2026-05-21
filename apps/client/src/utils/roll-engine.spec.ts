@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import type { Kobold } from '@kobold/db';
+import { AbilityEnum, SheetAdjustmentTypeEnum, type Kobold } from '@kobold/db';
+import { SheetProperties } from '@kobold/sheet';
 import { DiceUtils } from './dice-utils.js';
+import { DefaultUtils } from './default-utils.js';
 import { RollContextService, RollEngine } from './roll-engine.js';
 
 function createAttributeQueryMock(row: Record<string, string>) {
@@ -44,12 +46,12 @@ describe('RollEngine', () => {
 
 		expect(attributes.map(attr => [attr.name, attr.value])).toEqual(
 			expect.arrayContaining([
-			['strength', 4],
-			['dexterity', 4],
-			['constitution', 2],
-			['intelligence', 4],
-			['wisdom', 2],
-			['charisma', -1],
+				['strength', 4],
+				['dexterity', 4],
+				['constitution', 2],
+				['intelligence', 4],
+				['wisdom', 2],
+				['charisma', -1],
 				['trained', 16],
 			])
 		);
@@ -105,6 +107,103 @@ describe('RollEngine', () => {
 		);
 		expect(kobold.sheetRecord.readAdjusted).not.toHaveBeenCalled();
 	});
+
+	it('resolves lore attributes in custom rolls through the full-sheet fallback', async () => {
+		const sheet = JSON.parse(JSON.stringify(SheetProperties.defaultSheet));
+		sheet.additionalSkills = [
+			{
+				name: 'Esoteric Lore',
+				bonus: 11,
+				dc: 21,
+				proficiency: 4,
+				ability: AbilityEnum.charisma,
+				note: null,
+			},
+		];
+		const kobold = {
+			sheetRecord: { readAdjusted: vi.fn(async () => ({ sheet })) },
+		} as unknown as Kobold;
+		const service = new RollContextService(kobold);
+
+		const attributes = await service.getAttributes({
+			sheetRecordId: 1,
+			attributeRefs: [
+				'Esoteric Lore',
+				'Esoteric_Lore_Bonus',
+				'esotericLoreDc',
+				'esoteric lore prof',
+			],
+		});
+		const [expression, tags] = DiceUtils.parseAttributes(
+			'1d20+[Esoteric Lore]+[Esoteric_Lore_Bonus]+[esotericLoreDc]+[esoteric lore prof]',
+			undefined,
+			attributes
+		);
+
+		expect(expression).toBe('1d20+11+11+21+4');
+		expect(tags).toEqual(
+			expect.arrayContaining(['skill', 'charisma', 'esoteric lore', 'lore'])
+		);
+		expect(kobold.sheetRecord.readAdjusted).toHaveBeenCalledOnce();
+	});
+
+	it('applies lore-targeted modifiers to custom rolls using lore attributes', async () => {
+		const sheet = JSON.parse(JSON.stringify(SheetProperties.defaultSheet));
+		sheet.additionalSkills = [
+			{
+				name: 'Esoteric Lore',
+				bonus: 11,
+				dc: 21,
+				proficiency: 4,
+				ability: AbilityEnum.charisma,
+				note: null,
+			},
+		];
+		const kobold = {
+			sheetRecord: { readAdjusted: vi.fn(async () => ({ sheet })) },
+		} as unknown as Kobold;
+		const service = new RollContextService(kobold);
+
+		const { total } = await RollEngine.rollWithContext({
+			context: {
+				subject: { character: { name: 'Miro', sheetRecordId: 1 } as any },
+				userSettings: DefaultUtils.userSettings,
+				rollMacros: [],
+				rollModifiers: [
+					{
+						isActive: true,
+						name: 'Lore Aura',
+						rollAdjustment: '+2',
+						rollTargetTags: 'lore',
+						severity: null,
+						type: SheetAdjustmentTypeEnum.untyped,
+						sheetAdjustments: [],
+					},
+				],
+			},
+			attributeContextService: service,
+			options: {
+				rollExpression: '1d1+[Esoteric_Lore]',
+				rollTitle: '',
+				actorName: 'Miro',
+				rollDescription: 'rolled dice',
+			},
+		});
+
+		expect(total).toBe(14);
+	});
+
+	it('keeps custom skill names instead of coercing them to standard PF2e skills', () => {
+		expect(RollEngine.getStructuredRollName('esoteric lore', 'skill')).toBe('esoteric lore');
+		expect(RollEngine.getStructuredRollName('computers', 'skill')).toBe('computers');
+		expect(RollEngine.getStructuredRollName('piloting', 'skill')).toBe('piloting');
+	});
+
+	it('still normalizes exact, prefix, and near-typo structured roll names', () => {
+		expect(RollEngine.getStructuredRollName('Stealth', 'skill')).toBe('stealth');
+		expect(RollEngine.getStructuredRollName('medcine', 'skill')).toBe('medicine');
+		expect(RollEngine.getStructuredRollName('fort', 'save')).toBe('fortitude');
+	});
 });
 
 describe('DiceUtils.parseAttributes', () => {
@@ -114,7 +213,13 @@ describe('DiceUtils.parseAttributes', () => {
 			undefined,
 			[
 				{ name: 'strength', aliases: ['str'], type: 'attr', value: 4, tags: ['strength'] },
-				{ name: 'dexterity', aliases: ['dex'], type: 'attr', value: 4, tags: ['dexterity'] },
+				{
+					name: 'dexterity',
+					aliases: ['dex'],
+					type: 'attr',
+					value: 4,
+					tags: ['dexterity'],
+				},
 				{
 					name: 'constitution',
 					aliases: ['con'],

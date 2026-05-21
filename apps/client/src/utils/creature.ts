@@ -233,20 +233,22 @@ export class Creature {
 
 	public sheetDefensiveStatText(): string {
 		let basicStatsLines = [];
-		if (this.sheet.weaknessesResistances.resistances.length)
+		if (this.sheet.defenses.resistances.length)
 			basicStatsLines.push(
-				`Resistances: ${this.sheet.weaknessesResistances.resistances
-					.map(r => `${r.type} ${r.amount}`)
+				`Resistances: ${this.sheet.defenses.resistances
+					.map(r => (r.amount == null ? r.label : `${r.label} ${r.amount}`))
 					.join(', ')}`
 			);
-		if (this.sheet.weaknessesResistances.weaknesses.length)
+		if (this.sheet.defenses.weaknesses.length)
 			basicStatsLines.push(
-				`Weaknesses: ${this.sheet.weaknessesResistances.weaknesses
-					.map(w => `${w.type} ${w.amount}`)
+				`Weaknesses: ${this.sheet.defenses.weaknesses
+					.map(w => (w.amount == null ? w.label : `${w.label} ${w.amount}`))
 					.join(', ')}`
 			);
-		if (this.sheet.infoLists.immunities?.length)
-			basicStatsLines.push(`Immunities: ${this.sheet.infoLists.immunities.join(', ')}`);
+		if (this.sheet.defenses.immunities.length)
+			basicStatsLines.push(
+				`Immunities: ${this.sheet.defenses.immunities.map(i => i.label).join(', ')}`
+			);
 		const DCs = [];
 		if (this.sheet.intProperties.ac != null) DCs.push(`AC \`${this.sheet.intProperties.ac}\``);
 		if (this.sheet.stats.class.dc != null)
@@ -397,8 +399,12 @@ export class Creature {
 				if (damageRolls.length) {
 					damageRollText = damageRolls
 						.map(roll => {
-							return `${roll.roll} ${roll.damageType ?? ''}`;
+							return roll.terms
+								.map(term => `${term.dice ?? ''} ${term.type ?? ''}`.trim())
+								.filter(Boolean)
+								.join(', ');
 						})
+						.filter(Boolean)
 						.join(', ');
 				}
 				if (textRolls.length) {
@@ -665,11 +671,11 @@ export class Creature {
 	public matchingWeakness(damageType: string) {
 		const shorthandDamageType = damageTypeShorthands[damageType];
 		if (!damageType) return null;
-		for (const weakness of this.sheet.weaknessesResistances.weaknesses) {
-			const shorthandWeaknessType = damageTypeShorthands[weakness.type];
+		for (const weakness of this.sheet.defenses.weaknesses) {
+			const shorthandWeaknessType = damageTypeShorthands[weakness.label];
 			if (
-				weakness.type.toLowerCase() === damageType.toLowerCase() ||
-				(shorthandDamageType && shorthandDamageType === weakness.type.toLowerCase()) ||
+				weakness.label.toLowerCase() === damageType.toLowerCase() ||
+				(shorthandDamageType && shorthandDamageType === weakness.label.toLowerCase()) ||
 				(shorthandWeaknessType && shorthandWeaknessType === damageType.toLowerCase())
 			)
 				return weakness;
@@ -679,11 +685,11 @@ export class Creature {
 	public matchingResistance(damageType: string) {
 		const shorthandDamageType = damageTypeShorthands[damageType];
 		if (!damageType) return null;
-		for (const resistance of this.sheet.weaknessesResistances.resistances) {
-			const shorthandResistanceType = damageTypeShorthands[resistance.type];
+		for (const resistance of this.sheet.defenses.resistances) {
+			const shorthandResistanceType = damageTypeShorthands[resistance.label];
 			if (
-				resistance.type.toLowerCase() === damageType.toLowerCase() ||
-				(shorthandDamageType && shorthandDamageType === resistance.type.toLowerCase()) ||
+				resistance.label.toLowerCase() === damageType.toLowerCase() ||
+				(shorthandDamageType && shorthandDamageType === resistance.label.toLowerCase()) ||
 				(shorthandResistanceType && shorthandResistanceType === damageType.toLowerCase())
 			)
 				return resistance;
@@ -693,11 +699,11 @@ export class Creature {
 	public matchingImmunities(damageType: string) {
 		const shorthandDamageType = damageTypeShorthands[damageType];
 		if (!damageType) return [];
-		for (const immunity of this.sheet.infoLists.immunities) {
-			const shorthandImmunityType = damageTypeShorthands[immunity];
+		for (const immunity of this.sheet.defenses.immunities) {
+			const shorthandImmunityType = damageTypeShorthands[immunity.label];
 			if (
-				immunity.toLowerCase() === damageType.toLowerCase() ||
-				(shorthandDamageType && shorthandDamageType === immunity.toLowerCase()) ||
+				immunity.label.toLowerCase() === damageType.toLowerCase() ||
+				(shorthandDamageType && shorthandDamageType === immunity.label.toLowerCase()) ||
 				(shorthandImmunityType && shorthandImmunityType === damageType.toLowerCase())
 			)
 				return [immunity];
@@ -828,7 +834,7 @@ export class Creature {
 				effects: [],
 				range: null,
 				notes: null,
-				traits: ['attack', 'spell', 'arcane'],
+				traits: ['spell', 'arcane'],
 			});
 		}
 
@@ -840,7 +846,7 @@ export class Creature {
 				effects: [],
 				range: null,
 				notes: null,
-				traits: ['attack', 'spell', 'divine'],
+				traits: ['spell', 'divine'],
 			});
 		}
 
@@ -852,7 +858,7 @@ export class Creature {
 				effects: [],
 				range: null,
 				notes: null,
-				traits: ['attack', 'spell', 'occult'],
+				traits: ['spell', 'occult'],
 			});
 		}
 
@@ -864,7 +870,7 @@ export class Creature {
 				effects: [],
 				range: null,
 				notes: null,
-				traits: ['attack', 'spell', 'primal'],
+				traits: ['spell', 'primal'],
 			});
 		}
 
@@ -876,7 +882,7 @@ export class Creature {
 				effects: [],
 				range: null,
 				notes: null,
-				traits: ['attack', 'class'],
+				traits: ['class'],
 			});
 		}
 
@@ -895,7 +901,7 @@ export class Creature {
 				effects: [],
 				range: 'melee',
 				notes: null,
-				traits: ['attack', 'strength', 'melee'],
+				traits: ['strength', 'melee'],
 			});
 			bonusAttacks.push({
 				name: 'Ranged/Finesse (dexterity, best proficiency)',
@@ -904,7 +910,7 @@ export class Creature {
 				effects: [],
 				range: 'melee',
 				notes: null,
-				traits: ['attack', 'dexterity', 'ranged'],
+				traits: ['dexterity', 'ranged'],
 			});
 		}
 
@@ -1156,6 +1162,7 @@ export class Creature {
 		updateFrom?: PartialEntityWithSheetData,
 		options: {
 			useStamina: boolean;
+			nethysCompendiumEntries?: unknown[];
 		} = { useStamina: false }
 	): Creature {
 		let sheet = convertPathBuilderToSheet(pathBuilderSheet, options);

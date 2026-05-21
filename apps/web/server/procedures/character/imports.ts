@@ -1,7 +1,22 @@
 import { ImportSourceEnum } from '@kobold/db';
+import type { Sheet } from '@kobold/schema';
 import { z } from 'zod';
-import { convertWgV4ExportToSheet, type WgV4Export } from '@kobold/sheet';
-import { orpc, requireAuth, preserveSheetTrackerValues, fetchPathbuilderSheet, assertUniqueCharacterName, recomputeAdjustedSheetForSheetRecord, zWgV4Import, zPathbuilderImport } from './shared.js';
+import {
+	buildTwoHandRollMacrosForAttacks,
+	convertWgV4ExportToSheet,
+	type WgV4Export,
+} from '@kobold/sheet';
+import {
+	orpc,
+	requireAuth,
+	preserveSheetTrackerValues,
+	fetchPathbuilderSheet,
+	assertUniqueCharacterName,
+	recomputeAdjustedSheetForSheetRecord,
+	zWgV4Import,
+	zPathbuilderImport,
+} from './shared.js';
+import type { AppContext } from '../../context.js';
 
 function jsonByteLength(value: unknown): number {
 	return Buffer.byteLength(JSON.stringify(value));
@@ -12,6 +27,38 @@ function logCharacterImportTiming(
 	data: Record<string, unknown>
 ): void {
 	console.info('[character import timing]', { event, ...data });
+}
+
+export async function upsertTwoHandRollMacros({
+	kobold,
+	userId,
+	sheetRecordId,
+	sheet,
+}: {
+	kobold: AppContext['kobold'];
+	userId: string;
+	sheetRecordId: number;
+	sheet: Sheet;
+}): Promise<void> {
+	const twoHandRollMacros = buildTwoHandRollMacrosForAttacks(sheet.attacks);
+	if (!twoHandRollMacros.length) return;
+
+	const existingRollMacros = await kobold.rollMacro.readMany({ sheetRecordId });
+	for (const rollMacro of twoHandRollMacros) {
+		const existing = existingRollMacros.find(
+			macro => macro.name.toLowerCase() === rollMacro.name.toLowerCase()
+		);
+		if (existing) {
+			await kobold.rollMacro.update({ id: existing.id }, { macro: rollMacro.macro });
+		} else {
+			await kobold.rollMacro.create({
+				userId,
+				sheetRecordId,
+				name: rollMacro.name,
+				macro: rollMacro.macro,
+			});
+		}
+	}
 }
 
 export const getCharacterLite = orpc
@@ -168,6 +215,12 @@ export const importWgCharacter = orpc
 				sheetRecordId: sheetRecord.id,
 				durationMs: Date.now() - sheetRecordStart,
 			});
+			await upsertTwoHandRollMacros({
+				kobold: trx,
+				userId,
+				sheetRecordId: sheetRecord.id,
+				sheet,
+			});
 
 			const characterStart = Date.now();
 			const { id: createdCharacterId } = await trx.character.createReturningId({
@@ -283,6 +336,12 @@ export const updateWgCharacter = orpc
 
 		const updateSheetStart = Date.now();
 		await context.kobold.sheetRecord.update({ id: existing.sheetRecordId }, { sheet });
+		await upsertTwoHandRollMacros({
+			kobold: context.kobold,
+			userId: context.userId,
+			sheetRecordId: existing.sheetRecordId,
+			sheet,
+		});
 		logCharacterImportTiming('wg update sheet record', {
 			characterId: exportData.character?.id,
 			targetCharacterId: characterId,
@@ -351,6 +410,12 @@ export const importPathbuilderCharacter = orpc
 		const characterName = sheet.staticInfo.name;
 		const { characterId } = await context.kobold.transaction(async trx => {
 			const sheetRecord = await trx.sheetRecord.create({ sheet });
+			await upsertTwoHandRollMacros({
+				kobold: trx,
+				userId,
+				sheetRecordId: sheetRecord.id,
+				sheet,
+			});
 
 			const { id: createdCharacterId } = await trx.character.createReturningId({
 				name: characterName,
@@ -421,6 +486,12 @@ export const updatePathbuilderCharacter = orpc
 		});
 
 		await context.kobold.sheetRecord.update({ id: existing.sheetRecordId }, { sheet });
+		await upsertTwoHandRollMacros({
+			kobold: context.kobold,
+			userId: context.userId,
+			sheetRecordId: existing.sheetRecordId,
+			sheet,
+		});
 		await recomputeAdjustedSheetForSheetRecord({
 			context,
 			sheetRecordId: existing.sheetRecordId,

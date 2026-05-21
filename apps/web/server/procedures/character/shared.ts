@@ -6,7 +6,11 @@ import {
 	type MinionWithRelations,
 	type RollMacro,
 } from '@kobold/db';
-import { SheetUtils, convertPathBuilderToSheet } from '@kobold/sheet';
+import {
+	SheetUtils,
+	convertPathBuilderToSheet,
+	fetchNethysItemMetadataForPathbuilder,
+} from '@kobold/sheet';
 import { PathBuilder } from '@kobold/schema';
 import type { Sheet, SheetBaseCounterKeys } from '@kobold/schema';
 import type { AppContext } from '../../context.js';
@@ -137,7 +141,8 @@ export async function fetchPathbuilderSheet({
 		);
 	}
 
-	return convertPathBuilderToSheet(exportData.build, { useStamina });
+	const nethysCompendiumEntries = await fetchNethysItemMetadataForPathbuilder(exportData.build);
+	return convertPathBuilderToSheet(exportData.build, { useStamina, nethysCompendiumEntries });
 }
 
 export async function recomputeAdjustedSheetForSheetRecord({

@@ -11,7 +11,6 @@ import {
 	SheetInfoListKeys,
 	SheetIntegerKeys,
 	SheetStatKeys,
-	SheetWeaknessesResistancesKeys,
 	StatSubGroupEnum,
 } from '../index.js';
 import {
@@ -31,7 +30,6 @@ import {
 	isSheetInfoListKeys,
 	isSheetIntegerKeys,
 	isSheetStatKeys,
-	isSheetWeaknessesResistancesKeys,
 	isStatSubGroupEnum,
 	isInitStatsNotificationEnum,
 	InitStatsNotificationEnum,
@@ -168,7 +166,6 @@ describe('Enum Helpers', () => {
 
 	describe('isSheetInfoListKeys', () => {
 		it('should return true for valid SheetInfoListKeys values', () => {
-			expect(isSheetInfoListKeys(SheetInfoListKeys.immunities)).toBe(true);
 			expect(isSheetInfoListKeys(SheetInfoListKeys.languages)).toBe(true);
 			expect(isSheetInfoListKeys(SheetInfoListKeys.senses)).toBe(true);
 			expect(isSheetInfoListKeys(SheetInfoListKeys.traits)).toBe(true);
@@ -194,21 +191,6 @@ describe('Enum Helpers', () => {
 		});
 	});
 
-	describe('isSheetWeaknessesResistancesKeys', () => {
-		it('should return true for valid SheetWeaknessesResistancesKeys values', () => {
-			expect(
-				isSheetWeaknessesResistancesKeys(SheetWeaknessesResistancesKeys.resistances)
-			).toBe(true);
-			expect(
-				isSheetWeaknessesResistancesKeys(SheetWeaknessesResistancesKeys.weaknesses)
-			).toBe(true);
-		});
-
-		it('should return false for invalid SheetWeaknessesResistancesKeys values', () => {
-			expect(isSheetWeaknessesResistancesKeys('invalid_value')).toBe(false);
-		});
-	});
-
 	describe('isStatSubGroupEnum', () => {
 		it('should return true for valid StatSubGroupEnum values', () => {
 			expect(isStatSubGroupEnum(StatSubGroupEnum.ability)).toBe(true);
@@ -224,7 +206,7 @@ describe('Enum Helpers', () => {
 
 	describe('isRollTypeEnum', () => {
 		it('should return true for valid RollTypeEnum values', () => {
-			expect(isRollTypeEnum(RollTypeEnum.advancedDamage)).toBe(true);
+			expect(isRollTypeEnum(RollTypeEnum.AdvancedDamage)).toBe(true);
 			expect(isRollTypeEnum(RollTypeEnum.attack)).toBe(true);
 			expect(isRollTypeEnum(RollTypeEnum.damage)).toBe(true);
 			expect(isRollTypeEnum(RollTypeEnum.save)).toBe(true);

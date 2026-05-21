@@ -11,6 +11,7 @@ import {
 	type ProficiencyStat,
 } from '@kobold/schema';
 import { applyValuesToStatInPlace, scoreToBonus } from './sheet-import-utils.js';
+import { createNethysItemMetadataIndex } from './nethys-item-metadata.js';
 
 type PathbuilderPropertyTarget =
 	| { kind: 'stat'; key: SheetStatKeys }
@@ -138,6 +139,7 @@ export function convertPathBuilderToSheet(
 	pathBuilderSheet: PathBuilder.Character,
 	options: {
 		useStamina: boolean;
+		nethysCompendiumEntries?: unknown[];
 	}
 ): Sheet {
 	let maxStamina = null;
@@ -161,6 +163,7 @@ export function convertPathBuilderToSheet(
 	const mods = (key: string) => modsFixed[key.toLowerCase()] ?? 0;
 
 	const baseSheet = getDefaultSheet();
+	const nethysItems = createNethysItemMetadataIndex(options.nethysCompendiumEntries ?? []);
 	baseSheet.staticInfo.level = pathBuilderSheet.level;
 	baseSheet.stats.class.ability = keyAbility;
 
@@ -396,13 +399,27 @@ export function convertPathBuilderToSheet(
 		},
 		counterGroups: baseSheet.counterGroups,
 		countersOutsideGroups: baseSheet.countersOutsideGroups,
-		weaknessesResistances: {
-			resistances: [],
+		defenses: {
+			immunities: [],
 			weaknesses: [],
+			resistances: [],
 		},
 		stats: baseSheet.stats,
 		additionalSkills: baseSheet.additionalSkills,
 		attacks: pathBuilderSheet.weapons.map((weapon: PathBuilder.Weapon) => {
+			const baseWeapon = nethysItems.findBaseWeapon(String(weapon.name ?? ''));
+			const runeMetadata = (weapon.runes ?? [])
+				.map(rune => nethysItems.findWeaponRune(String(rune)))
+				.filter(Boolean);
+			const material = nethysItems.findMaterial(
+				weapon.mat == null ? null : String(weapon.mat)
+			);
+			const attackTraits = _.uniq([
+				...(baseWeapon?.traits ?? []),
+				...runeMetadata.flatMap(rune => rune?.traits ?? []),
+				...(material ? [material.name] : []),
+			]);
+			const attackTags = attackTraits.map(trait => trait.toLowerCase());
 			let numDice = 1;
 			if (String(weapon.str).toLowerCase() === 'striking') {
 				numDice = 2;
@@ -417,12 +434,19 @@ export function convertPathBuilderToSheet(
 			const mainDamage = {
 				dice: `${numDice}${weapon.die ?? ''}${damageBonus}`,
 				type: weapon.damageType,
+				tags: _.uniq([...attackTags, String(weapon.damageType).toLowerCase()]),
+				mode: 'damage' as const,
+				persistent: false,
 			};
 			const extraDamage = (weapon.extraDamage ?? []).map((damage: string) => {
 				const [dice, ...type] = damage.split(' ');
+				const damageType = type.join(' ');
 				return {
 					dice,
-					type: type.join(' '),
+					type: damageType,
+					tags: _.uniq([...attackTags, damageType.toLowerCase()]),
+					mode: 'damage' as const,
+					persistent: false,
 				};
 			});
 
@@ -431,8 +455,8 @@ export function convertPathBuilderToSheet(
 				toHit: weapon.attack,
 				damage: [mainDamage, ...extraDamage],
 				effects: [],
-				range: null,
-				traits: [],
+				range: baseWeapon?.range ?? null,
+				traits: attackTraits,
 				notes: null,
 			} satisfies SheetAttack;
 		}),

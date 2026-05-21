@@ -109,8 +109,8 @@ export class NethysLoader {
 			search: `(${data.category}${
 				'level' in data && data.level != null ? ' ' + data.level : ''
 			}) ${data.name}${'remaster_id' in data ? ' (legacy)' : ''}`,
-			tags: JSON.stringify(data.trait ?? []),
-			data: JSON.stringify(data),
+			tags: this.pgClient.json(data.trait ?? []),
+			data: this.pgClient.json(data),
 		};
 	}
 

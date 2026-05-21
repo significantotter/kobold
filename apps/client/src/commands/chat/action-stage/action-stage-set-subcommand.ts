@@ -5,7 +5,7 @@ import {
 	CacheType,
 	ChatInputCommandInteraction,
 } from 'discord.js';
-import { Kobold, Roll } from '@kobold/db';
+import { Kobold, Roll, type DamageTerm } from '@kobold/db';
 
 import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
@@ -14,6 +14,32 @@ import { BaseCommandClass } from '../../command.js';
 import { ActionStageDefinition } from '@kobold/documentation';
 const commandOptions = ActionStageDefinition.options;
 const commandOptionsEnum = ActionStageDefinition.commandOptionsEnum;
+
+function oneTerm(terms: DamageTerm[], updates: Partial<DamageTerm> = {}): DamageTerm[] {
+	const existing = terms[0] ?? {
+		dice: null,
+		type: null,
+		tags: [],
+		mode: 'damage' as const,
+		persistent: false,
+	};
+	return [{ ...existing, ...updates }];
+}
+
+function updateTermsMode(terms: DamageTerm[], healInsteadOfDamage: boolean): DamageTerm[] {
+	const mode = healInsteadOfDamage ? 'healing' : 'damage';
+	if (!terms.length) return oneTerm([], { mode });
+	return terms.map(term => ({ ...term, mode }));
+}
+
+function setOutcomeTerm(
+	terms: DamageTerm[],
+	dice: string | undefined,
+	damageType: string | null | undefined
+): DamageTerm[] {
+	if (dice == null) return [];
+	return oneTerm(terms, { dice, type: damageType ?? terms[0]?.type ?? null });
+}
 
 export class ActionStageSetSubCommand extends BaseCommandClass(
 	ActionStageDefinition,
@@ -301,8 +327,106 @@ export class ActionStageSetSubCommand extends BaseCommandClass(
 		}
 		// Map fieldToUpdate to the actual schema field name
 		const fieldName = fieldToUpdate === 'textExtraTags' ? 'extraTags' : fieldToUpdate;
+		const finalStringValue =
+			typeof finalValue === 'string' || finalValue === undefined || finalValue === null
+				? finalValue
+				: undefined;
 		// Create updated roll
-		const updatedRoll = { ...roll, [fieldName]: finalValue };
+		let updatedRoll: Roll = { ...roll, [fieldName]: finalValue };
+		if (roll.type === 'damage') {
+			if (fieldToUpdate === 'roll') {
+				updatedRoll = {
+					...roll,
+					terms: oneTerm(roll.terms, { dice: finalStringValue ?? null }),
+				};
+			} else if (fieldToUpdate === 'damageType') {
+				updatedRoll = {
+					...roll,
+					terms: oneTerm(roll.terms, { type: finalStringValue ?? null }),
+				};
+			} else if (fieldToUpdate === 'healInsteadOfDamage') {
+				updatedRoll = {
+					...roll,
+					terms: updateTermsMode(roll.terms, Boolean(finalValue)),
+				};
+			} else if (fieldToUpdate === 'name' || fieldToUpdate === 'allowRollModifiers') {
+				updatedRoll = { ...roll, [fieldName]: finalValue };
+			}
+		} else if (roll.type === 'advanced-damage') {
+			if (fieldToUpdate === 'damageType') {
+				updatedRoll = {
+					...roll,
+					successTerms: roll.successTerms.map(term => ({
+						...term,
+						type: finalStringValue ?? null,
+					})),
+					criticalSuccessTerms: roll.criticalSuccessTerms.map(term => ({
+						...term,
+						type: finalStringValue ?? null,
+					})),
+					failureTerms: roll.failureTerms.map(term => ({
+						...term,
+						type: finalStringValue ?? null,
+					})),
+					criticalFailureTerms: roll.criticalFailureTerms.map(term => ({
+						...term,
+						type: finalStringValue ?? null,
+					})),
+				};
+			} else if (fieldToUpdate === 'successRoll') {
+				updatedRoll = {
+					...roll,
+					successTerms: setOutcomeTerm(
+						roll.successTerms,
+						finalStringValue,
+						roll.successTerms[0]?.type
+					),
+				};
+			} else if (fieldToUpdate === 'failureRoll') {
+				updatedRoll = {
+					...roll,
+					failureTerms: setOutcomeTerm(
+						roll.failureTerms,
+						finalStringValue,
+						roll.failureTerms[0]?.type
+					),
+				};
+			} else if (fieldToUpdate === 'criticalSuccessRoll') {
+				updatedRoll = {
+					...roll,
+					criticalSuccessTerms: setOutcomeTerm(
+						roll.criticalSuccessTerms,
+						finalStringValue,
+						roll.criticalSuccessTerms[0]?.type
+					),
+				};
+			} else if (fieldToUpdate === 'criticalFailureRoll') {
+				updatedRoll = {
+					...roll,
+					criticalFailureTerms: setOutcomeTerm(
+						roll.criticalFailureTerms,
+						finalStringValue,
+						roll.criticalFailureTerms[0]?.type
+					),
+				};
+			} else if (fieldToUpdate === 'healInsteadOfDamage') {
+				updatedRoll = {
+					...roll,
+					successTerms: updateTermsMode(roll.successTerms, Boolean(finalValue)),
+					criticalSuccessTerms: updateTermsMode(
+						roll.criticalSuccessTerms,
+						Boolean(finalValue)
+					),
+					failureTerms: updateTermsMode(roll.failureTerms, Boolean(finalValue)),
+					criticalFailureTerms: updateTermsMode(
+						roll.criticalFailureTerms,
+						Boolean(finalValue)
+					),
+				};
+			} else if (fieldToUpdate === 'name' || fieldToUpdate === 'allowRollModifiers') {
+				updatedRoll = { ...roll, [fieldName]: finalValue };
+			}
+		}
 
 		// Create updated rolls array with the modified roll
 		let updatedRolls = matchedAction.rolls.map((r, idx) =>

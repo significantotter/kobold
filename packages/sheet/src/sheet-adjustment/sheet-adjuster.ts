@@ -3,6 +3,8 @@ import {
 	AbilityEnum,
 	AdjustablePropertyEnum,
 	Damage,
+	DefenseRuleAutomation,
+	DefenseRuleSource,
 	Sheet,
 	SheetAdjustment,
 	SheetAdjustmentOperationEnum,
@@ -51,9 +53,7 @@ export class SheetAdjuster {
 		this.intPropertyAdjuster = new SheetIntegerAdjuster(sheet.intProperties);
 		this.baseCounterAdjuster = new SheetBaseCounterAdjuster(sheet.baseCounters);
 		this.statAdjuster = new SheetStatAdjuster(sheet.stats);
-		this.weaknessResistanceAdjuster = new SheetWeaknessResistanceAdjuster(
-			sheet.weaknessesResistances
-		);
+		this.weaknessResistanceAdjuster = new SheetWeaknessResistanceAdjuster(sheet.defenses);
 		this.extraSkillAdjuster = new SheetAdditionalSkillAdjuster(sheet.additionalSkills);
 		this.attackAdjuster = new SheetAttackAdjuster(sheet.attacks);
 	}
@@ -600,7 +600,13 @@ export class SheetAttackAdjuster implements SheetPropertyGroupAdjuster<Sheet['at
 						const typeMatch = damageTypeRegex.exec(damage);
 						const type = typeMatch ? typeMatch[1].trim() : '';
 						const dice = damage.replaceAll(damageTypeRegex, '').trim();
-						return { dice, type };
+						return {
+							dice,
+							type,
+							tags: [type].filter(Boolean),
+							mode: 'damage' as const,
+							persistent: false,
+						};
 					});
 			}
 			let rangeMatch = rangeRegex.exec(value);
@@ -827,9 +833,9 @@ export class SheetAdditionalSkillAdjuster implements SheetPropertyGroupAdjuster<
 }
 
 export class SheetWeaknessResistanceAdjuster implements SheetPropertyGroupAdjuster<
-	Sheet['weaknessesResistances']
+	Sheet['defenses']
 > {
-	constructor(protected sheetWeaknessResistance: Sheet['weaknessesResistances']) {}
+	constructor(protected defenses: Sheet['defenses']) {}
 	public static serializeAdjustment = SheetIntegerAdjuster.serializeAdjustment;
 	public static deserializeAdjustment = SheetIntegerAdjuster.deserializeAdjustment;
 	public adjust(adjustment: SheetAdjustment): void {
@@ -847,28 +853,31 @@ export class SheetWeaknessResistanceAdjuster implements SheetPropertyGroupAdjust
 		weaknessResistanceName = SheetProperties.standardizeCustomPropName(weaknessResistanceName);
 
 		const isWeakness = SheetWeaknessResistanceProperties.isWeakness(adjustment.property);
-		const targetList = isWeakness
-			? this.sheetWeaknessResistance.weaknesses
-			: this.sheetWeaknessResistance.resistances;
+		const targetList = isWeakness ? this.defenses.weaknesses : this.defenses.resistances;
 
 		const currentValue = targetList.find(
 			entry =>
-				SheetProperties.standardizeCustomPropName(entry.type) === weaknessResistanceName
+				SheetProperties.standardizeCustomPropName(entry.label) === weaknessResistanceName
 		) ?? {
-			type: weaknessResistanceName,
+			label: weaknessResistanceName,
+			raw: weaknessResistanceName,
 			amount: 0,
+			appliesTo: ['damage' as const],
+			match: { damageTypes: [weaknessResistanceName] },
+			automation: DefenseRuleAutomation.auto,
+			source: DefenseRuleSource.manual,
 		};
 		_.remove(
 			targetList,
 			entry =>
-				SheetProperties.standardizeCustomPropName(entry.type) === weaknessResistanceName
+				SheetProperties.standardizeCustomPropName(entry.label) === weaknessResistanceName
 		);
 		switch (adjustment.operation) {
 			case SheetAdjustmentOperationEnum['+']:
-				currentValue.amount += sheetIntegerAdjustment.parsed;
+				currentValue.amount = (currentValue.amount ?? 0) + sheetIntegerAdjustment.parsed;
 				break;
 			case SheetAdjustmentOperationEnum['-']:
-				currentValue.amount -= sheetIntegerAdjustment.parsed;
+				currentValue.amount = (currentValue.amount ?? 0) - sheetIntegerAdjustment.parsed;
 				break;
 			case SheetAdjustmentOperationEnum['=']:
 				currentValue.amount = sheetIntegerAdjustment.parsed;

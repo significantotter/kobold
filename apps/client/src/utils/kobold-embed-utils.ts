@@ -12,10 +12,9 @@ import { utilStrings } from '@kobold/documentation';
 import {
 	Action,
 	CharacterWithRelations,
+	DefenseRule,
 	Sheet,
-	SheetInfoLists,
 	SheetRecordBase,
-	SheetWeaknessesResistances,
 } from '@kobold/db';
 import { KoboldError } from '@kobold/util';
 import type { ActionRoller } from './action-roller.js';
@@ -637,9 +636,9 @@ export class EmbedUtils {
 		totalDamageDealt: number;
 		targetCreatureSheet: Sheet;
 		actionName?: string;
-		triggeredWeaknesses?: SheetWeaknessesResistances['weaknesses'];
-		triggeredResistances?: SheetWeaknessesResistances['resistances'];
-		triggeredImmunities?: SheetInfoLists['immunities'];
+		triggeredWeaknesses?: DefenseRule[];
+		triggeredResistances?: DefenseRule[];
+		triggeredImmunities?: DefenseRule[];
 	}) {
 		let message = `${targetCreatureName} ${totalDamageDealt < 0 ? 'healed' : 'took'} ${Math.abs(
 			totalDamageDealt
@@ -662,8 +661,8 @@ export class EmbedUtils {
 				message += " They're down!";
 			}
 			if (triggeredWeaknesses && triggeredWeaknesses?.length > 0) {
-				let weaknessesMessage = triggeredWeaknesses[0].type;
-				let mappedWeaknesses = triggeredWeaknesses.map(resistance => resistance.type);
+				let weaknessesMessage = triggeredWeaknesses[0].label;
+				let mappedWeaknesses = triggeredWeaknesses.map(resistance => resistance.label);
 				if (triggeredWeaknesses.length > 1) {
 					const lastResistance = mappedWeaknesses.pop();
 					const joinedWeaknesses = mappedWeaknesses.join(', ');
@@ -672,8 +671,8 @@ export class EmbedUtils {
 				message += `\nThey took extra damage from ${weaknessesMessage}!`;
 			}
 			if (triggeredResistances && triggeredResistances.length > 0) {
-				let resistancesMessage = triggeredResistances[0].type;
-				let mappedResistances = triggeredResistances.map(resistance => resistance.type);
+				let resistancesMessage = triggeredResistances[0].label;
+				let mappedResistances = triggeredResistances.map(resistance => resistance.label);
 				if (triggeredResistances.length > 1) {
 					const lastResistance = mappedResistances.pop();
 					const joinedResistances = mappedResistances.join(', ');
@@ -682,12 +681,14 @@ export class EmbedUtils {
 				message += `\nThey took less damage from ${resistancesMessage}!`;
 			}
 			if (triggeredImmunities && triggeredImmunities.length > 0) {
-				let immunitiesMessage = triggeredImmunities[0];
+				let immunitiesMessage = triggeredImmunities[0].label;
 				if (triggeredImmunities.length > 1) {
 					const lastImmunity = triggeredImmunities.pop();
-					const joinedImmunities = triggeredImmunities.join(', ');
+					const joinedImmunities = triggeredImmunities
+						.map(immunity => immunity.label)
+						.join(', ');
 					if (lastImmunity) {
-						immunitiesMessage = joinedImmunities + ', and' + lastImmunity;
+						immunitiesMessage = joinedImmunities + ', and' + lastImmunity.label;
 						triggeredImmunities.push(lastImmunity);
 					}
 				}

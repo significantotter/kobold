@@ -38,7 +38,18 @@ describe('ActionStageRemoveSubCommand', () => {
 				name: 'Strike',
 				rolls: [
 					createAttackRoll({ name: 'Attack', roll: '1d20+10' }),
-					createDamageRoll({ name: 'Damage', roll: '2d6+4' }),
+					createDamageRoll({
+						name: 'Damage',
+						terms: [
+							{
+								dice: '2d6+4',
+								type: null,
+								tags: [],
+								mode: 'damage',
+								persistent: false,
+							},
+						],
+					}),
 				],
 			});
 			setupKoboldUtilsMocks({ actions: [action] });
@@ -110,7 +121,18 @@ describe('ActionStageRemoveSubCommand', () => {
 				name: 'Strike',
 				rolls: [
 					createAttackRoll({ name: 'Attack', roll: '1d20+10' }),
-					createDamageRoll({ name: 'Damage', roll: '2d6+4' }),
+					createDamageRoll({
+						name: 'Damage',
+						terms: [
+							{
+								dice: '2d6+4',
+								type: null,
+								tags: [],
+								mode: 'damage',
+								persistent: false,
+							},
+						],
+					}),
 				],
 			});
 			setupAutocompleteKoboldMocks({ actions: [action] });

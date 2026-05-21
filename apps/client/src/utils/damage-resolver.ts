@@ -1,9 +1,6 @@
-import type {
-	Sheet,
-	SheetInfoLists,
-	SheetWeaknessesResistances,
-	WeaknessOrResistance,
-} from '@kobold/db';
+import type { DefenseMatcher, DefenseRule, Sheet } from '@kobold/db';
+
+export type DamageOutcome = 'critical success' | 'success' | 'failure' | 'critical failure';
 
 const damageTypeAliases: Record<string, string> = {
 	b: 'bludgeoning',
@@ -15,42 +12,16 @@ const damageTypeAliases: Record<string, string> = {
 };
 
 const physicalDamageTypes = new Set(['bludgeoning', 'piercing', 'slashing']);
-const energyDamageTypes = new Set([
-	'acid',
-	'cold',
-	'electricity',
-	'fire',
-	'force',
-	'sonic',
-]);
-const knownDamageTypes = new Set([
-	...physicalDamageTypes,
-	...energyDamageTypes,
-	'bleed',
-	'mental',
-	'poison',
-	'precision',
-	'spirit',
-	'vitality',
-	'void',
-	'untyped',
-]);
-const knownPhrases = [
-	'adamantine',
-	'cold iron',
-	'energy',
-	'magical',
-	'mithral',
-	'non magical',
-	'physical',
-	'silver',
-];
+const energyDamageTypes = new Set(['acid', 'cold', 'electricity', 'fire', 'force', 'sonic']);
 
 export type PreparedDamageLine = {
 	amount: number;
 	damageType?: string | null;
 	tags?: string[];
 	sourceName?: string;
+	actualOutcome?: DamageOutcome | null;
+	damageOutcome?: DamageOutcome | null;
+	outcomeAdjustedBy?: DefenseRule[];
 };
 
 export type DamagePacket = {
@@ -63,17 +34,17 @@ export type DamageTypeResolution = {
 	damageType: string;
 	amountBeforeIwr: number;
 	amountAfterIwr: number;
-	appliedWeaknesses: WeaknessOrResistance[];
-	appliedResistance?: WeaknessOrResistance;
-	appliedImmunities: string[];
+	appliedWeaknesses: DefenseRule[];
+	appliedResistance?: DefenseRule;
+	appliedImmunities: DefenseRule[];
 };
 
 export type ResolvedDamage = {
 	totalBeforeIwr: number;
 	totalAfterIwr: number;
-	appliedWeaknesses: SheetWeaknessesResistances['weaknesses'];
-	appliedResistances: SheetWeaknessesResistances['resistances'];
-	appliedImmunities: SheetInfoLists['immunities'];
+	appliedWeaknesses: DefenseRule[];
+	appliedResistances: DefenseRule[];
+	appliedImmunities: DefenseRule[];
 	byType: DamageTypeResolution[];
 };
 
@@ -97,81 +68,13 @@ function canonicalDamageType(damageType: string | null | undefined): string {
 	return damageTypeAliases[normalized] ?? normalized;
 }
 
-function splitTerms(value: string): string[] {
-	const normalized = normalizeTerm(value).replace(/\bdamage\b/g, '').trim();
-	if (!normalized || normalized === 'all') return [];
-
-	let remaining = normalized;
-	const terms: string[] = [];
-	for (const phrase of knownPhrases.sort((a, b) => b.length - a.length)) {
-		if (remaining.includes(phrase)) {
-			terms.push(phrase);
-			remaining = remaining.replaceAll(phrase, ' ');
-		}
-	}
-	for (const word of remaining.split(/\s+/).filter(Boolean)) {
-		terms.push(canonicalDamageType(word));
-	}
-	return [...new Set(terms)];
-}
-
-function parseRuleText(value: string): {
-	appliesToAllDamage: boolean;
-	exceptions: string[];
-	requirements: string[];
-} {
-	const normalized = normalizeTerm(value).replace(/[()]/g, ' ');
-	const [rawRequirement, rawException] = normalized.split(/\bexcept\b/, 2);
-	const requirement = rawRequirement.replace(/\bdamage\b/g, '').trim();
-	return {
-		appliesToAllDamage: requirement === 'all' || requirement === 'all damage',
-		exceptions: splitTerms(rawException ?? ''),
-		requirements: splitTerms(rawRequirement),
-	};
-}
-
 function addContextTags(tags: Set<string>, damageType: string) {
 	tags.add(damageType);
 	tags.add('damage');
 	if (physicalDamageTypes.has(damageType)) tags.add('physical');
 	if (energyDamageTypes.has(damageType)) tags.add('energy');
-
 	if (tags.has('spell') || tags.has('magical')) tags.add('magical');
 	else tags.add('non magical');
-}
-
-function buildBucketContext(bucket: DamageBucket): Set<string> {
-	const context = new Set<string>();
-	for (const tag of bucket.tags) {
-		const normalizedTag = normalizeTerm(tag);
-		if (normalizedTag) context.add(canonicalDamageType(normalizedTag));
-	}
-	addContextTags(context, bucket.damageType);
-	return context;
-}
-
-function termMatches(term: string, bucket: DamageBucket, context: Set<string>): boolean {
-	if (term === 'physical') return physicalDamageTypes.has(bucket.damageType);
-	if (term === 'energy') return energyDamageTypes.has(bucket.damageType);
-	if (term === 'magical') return context.has('magical') || context.has('spell');
-	if (term === 'non magical') return !context.has('magical') && !context.has('spell');
-	if (knownDamageTypes.has(term)) return bucket.damageType === term || context.has(term);
-	return context.has(term);
-}
-
-function ruleMatches(value: string, bucket: DamageBucket): boolean {
-	const parsed = parseRuleText(value);
-	const context = buildBucketContext(bucket);
-
-	if (parsed.exceptions.some(exception => termMatches(exception, bucket, context))) {
-		return false;
-	}
-	if (parsed.appliesToAllDamage) return true;
-	if (!parsed.requirements.length) return false;
-
-	return parsed.requirements.every(requirement =>
-		termMatches(requirement, bucket, context)
-	);
 }
 
 function bucketDamage(packet: DamagePacket): DamageBucket[] {
@@ -197,62 +100,134 @@ function bucketDamage(packet: DamagePacket): DamageBucket[] {
 	return [...buckets.values()];
 }
 
-function highestResistance(
-	resistances: WeaknessOrResistance[],
-	bucket: DamageBucket
-): WeaknessOrResistance | undefined {
-	return resistances
-		.filter(resistance => ruleMatches(resistance.type, bucket))
-		.sort((a, b) => b.amount - a.amount)[0];
+function matcherTermsMatch(values: string[] | undefined, bucket: DamageBucket): boolean {
+	if (!values?.length) return false;
+	for (const value of values) {
+		const term = canonicalDamageType(value);
+		if (bucket.damageType === term || bucket.tags.has(term)) return true;
+	}
+	return false;
 }
 
-function matchingImmunities(immunities: string[], bucket: DamageBucket): string[] {
-	return immunities.filter(immunity => ruleMatches(immunity, bucket));
+function matcherMatches(matcher: DefenseMatcher, bucket: DamageBucket): boolean {
+	if (matcher.except && matcherMatches(matcher.except, bucket)) return false;
+	if (matcher.allOf?.length) {
+		return matcher.allOf.every(childMatcher => matcherMatches(childMatcher, bucket));
+	}
+	if (matcher.all) return true;
+	if (matcher.damageGroups?.includes('physical') && physicalDamageTypes.has(bucket.damageType)) {
+		return true;
+	}
+	if (matcherTermsMatch(matcher.damageTypes, bucket)) return true;
+	if (matcherTermsMatch(matcher.materials, bucket)) return true;
+	if (matcherTermsMatch(matcher.traits, bucket)) return true;
+	if (matcherTermsMatch(matcher.effectTypes, bucket)) return true;
+	if (matcherTermsMatch(matcher.conditions, bucket)) return true;
+	return false;
+}
+
+function automaticRules(rules: DefenseRule[] | undefined): DefenseRule[] {
+	return (rules ?? []).filter(rule => rule.automation !== 'manual');
+}
+
+function matchingImmunities(immunities: DefenseRule[], bucket: DamageBucket): DefenseRule[] {
+	return automaticRules(immunities).filter(rule => matcherMatches(rule.match, bucket));
+}
+
+function highestResistance(
+	resistances: DefenseRule[],
+	bucket: DamageBucket
+): DefenseRule | undefined {
+	return automaticRules(resistances)
+		.filter(rule => rule.amount != null && matcherMatches(rule.match, bucket))
+		.sort((a, b) => (b.amount ?? 0) - (a.amount ?? 0))[0];
 }
 
 function matchingWeaknesses(
-	weaknesses: WeaknessOrResistance[],
+	weaknesses: DefenseRule[],
 	bucket: DamageBucket,
 	alreadyApplied: Set<string>
-): WeaknessOrResistance[] {
-	const matchingByType = new Map<string, WeaknessOrResistance>();
-	for (const weakness of weaknesses) {
-		const key = normalizeTerm(weakness.type);
-		if (alreadyApplied.has(key) || !ruleMatches(weakness.type, bucket)) continue;
-		const currentWeakness = matchingByType.get(key);
-		if (!currentWeakness || weakness.amount > currentWeakness.amount) {
-			matchingByType.set(key, weakness);
+): DefenseRule[] {
+	const matchingByLabel = new Map<string, DefenseRule>();
+	for (const weakness of automaticRules(weaknesses)) {
+		const key = normalizeTerm(weakness.label || weakness.raw);
+		if (
+			alreadyApplied.has(key) ||
+			weakness.amount == null ||
+			!matcherMatches(weakness.match, bucket)
+		) {
+			continue;
+		}
+		const currentWeakness = matchingByLabel.get(key);
+		if (!currentWeakness || (weakness.amount ?? 0) > (currentWeakness.amount ?? 0)) {
+			matchingByLabel.set(key, weakness);
 		}
 	}
-	return [...matchingByType.values()];
+	return [...matchingByLabel.values()];
+}
+
+function nonlethalImmune(sheet: Sheet, packet: DamagePacket): DefenseRule[] {
+	const packetTags = new Set((packet.tags ?? []).map(normalizeTerm));
+	for (const line of packet.lines) {
+		for (const tag of line.tags ?? []) packetTags.add(normalizeTerm(tag));
+	}
+	if (!packetTags.has('nonlethal')) return [];
+	return automaticRules(sheet.defenses.immunities).filter(rule =>
+		rule.appliesTo.includes('nonlethal')
+	);
+}
+
+export function hasCriticalHitImmunity(sheet: Sheet): boolean {
+	return getCriticalHitImmunities(sheet).length > 0;
+}
+
+export function getCriticalHitImmunities(sheet: Sheet): DefenseRule[] {
+	return automaticRules(sheet.defenses.immunities).filter(rule =>
+		rule.appliesTo.includes('critical-hit')
+	);
 }
 
 export function resolveDamagePacket(sheet: Sheet, packet: DamagePacket): ResolvedDamage {
+	const packetImmunities = nonlethalImmune(sheet, packet);
+	if (packetImmunities.length) {
+		const buckets = bucketDamage(packet);
+		return {
+			totalBeforeIwr: buckets.reduce((total, bucket) => total + bucket.amount, 0),
+			totalAfterIwr: 0,
+			appliedWeaknesses: [],
+			appliedResistances: [],
+			appliedImmunities: packetImmunities,
+			byType: buckets.map(bucket => ({
+				damageType: bucket.damageType,
+				amountBeforeIwr: bucket.amount,
+				amountAfterIwr: 0,
+				appliedWeaknesses: [],
+				appliedImmunities: packetImmunities,
+			})),
+		};
+	}
+
 	const buckets = bucketDamage(packet);
 	const appliedWeaknessKeys = new Set<string>();
 	const byType: DamageTypeResolution[] = [];
 
 	for (const bucket of buckets) {
-		const immunities = matchingImmunities(sheet.infoLists.immunities, bucket);
+		const immunities = matchingImmunities(sheet.defenses.immunities, bucket);
 		let resolvedAmount = bucket.amount;
-		let weaknesses: WeaknessOrResistance[] = [];
-		let resistance: WeaknessOrResistance | undefined;
+		let weaknesses: DefenseRule[] = [];
+		let resistance: DefenseRule | undefined;
 
 		if (immunities.length) {
 			resolvedAmount = 0;
 		} else {
-			weaknesses = matchingWeaknesses(
-				sheet.weaknessesResistances.weaknesses,
-				bucket,
-				appliedWeaknessKeys
-			);
+			weaknesses = matchingWeaknesses(sheet.defenses.weaknesses, bucket, appliedWeaknessKeys);
 			for (const weakness of weaknesses) {
-				appliedWeaknessKeys.add(normalizeTerm(weakness.type));
-				resolvedAmount += weakness.amount;
+				appliedWeaknessKeys.add(normalizeTerm(weakness.label || weakness.raw));
+				resolvedAmount += weakness.amount ?? 0;
 			}
 
-			resistance = highestResistance(sheet.weaknessesResistances.resistances, bucket);
-			if (resistance) {
+			resistance = highestResistance(sheet.defenses.resistances, bucket);
+			if (resistance?.amount != null) {
 				resolvedAmount = Math.max(0, resolvedAmount - resistance.amount);
 			}
 		}
@@ -273,8 +248,14 @@ export function resolveDamagePacket(sheet: Sheet, packet: DamagePacket): Resolve
 		appliedWeaknesses: byType.flatMap(bucket => bucket.appliedWeaknesses),
 		appliedResistances: byType
 			.map(bucket => bucket.appliedResistance)
-			.filter((resistance): resistance is WeaknessOrResistance => !!resistance),
-		appliedImmunities: [...new Set(byType.flatMap(bucket => bucket.appliedImmunities))],
+			.filter((resistance): resistance is DefenseRule => !!resistance),
+		appliedImmunities: [
+			...new Map(
+				byType
+					.flatMap(bucket => bucket.appliedImmunities)
+					.map(rule => [normalizeTerm(rule.label || rule.raw), rule])
+			).values(),
+		],
 		byType,
 	};
 }

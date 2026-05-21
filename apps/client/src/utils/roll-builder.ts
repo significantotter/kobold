@@ -15,6 +15,8 @@ import {
 import { KoboldEmbed } from './kobold-embed-utils.js';
 import { DefaultUtils } from './default-utils.js';
 
+type RollOutcome = 'critical success' | 'success' | 'failure' | 'critical failure';
+
 export class RollBuilder {
 	protected userSettings: UserSettings | null;
 	protected creature: Creature | null;
@@ -158,6 +160,7 @@ export class RollBuilder {
 		rollType,
 		rollFromTarget = false,
 		skipModifiers = false,
+		outcomeTitleSuffixes,
 	}: {
 		rollExpression: string;
 		rollTitle?: string;
@@ -170,6 +173,7 @@ export class RollBuilder {
 		rollType?: 'attack' | 'skill-challenge' | 'damage' | 'save';
 		rollFromTarget?: boolean;
 		skipModifiers?: boolean;
+		outcomeTitleSuffixes?: Partial<Record<RollOutcome, string>>;
 	}): DiceRollResult | ErrorResult {
 		try {
 			const rollField = DiceUtils.parseAndEvaluateDiceExpression({
@@ -215,7 +219,7 @@ export class RollBuilder {
 					console.warn(err);
 				}
 
-				let result: 'critical success' | 'success' | 'failure' | 'critical failure';
+				let result: RollOutcome;
 				let numericResult;
 
 				if (rollResult.results.total >= targetDC + 10) {
@@ -244,6 +248,8 @@ export class RollBuilder {
 				else if (rollType === 'skill-challenge')
 					titleAdditionText += skillChallengeTitleAdditionText[result];
 				else if (rollType === 'save') titleAdditionText += saveTitleAdditionText[result];
+				if (outcomeTitleSuffixes?.[result])
+					titleAdditionText += ` ${outcomeTitleSuffixes[result]}`;
 
 				rollResult.targetDC = targetDC;
 				rollResult.success = result ?? undefined;

@@ -88,9 +88,15 @@ export class ActionStageAddBasicDamageSubCommand extends BaseCommandClass(
 		const newRoll: Roll = {
 			name: rollName,
 			type: rollType,
-			healInsteadOfDamage,
-			roll: diceRoll,
-			damageType: damageType,
+			terms: [
+				{
+					dice: diceRoll,
+					type: damageType,
+					tags: [],
+					mode: healInsteadOfDamage ? 'healing' : 'damage',
+					persistent: false,
+				},
+			],
 			allowRollModifiers,
 		};
 		const updatedRolls: Roll[] = [...action.rolls, newRoll];

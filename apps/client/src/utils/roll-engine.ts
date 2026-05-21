@@ -641,7 +641,13 @@ export class RollEngine {
 			context.rollMacros
 		);
 		const baseAttributeRefs = uniqueNormalizedRefs(collectBracketRefs(expandedBase));
-		const baseAttributeTags = RollAttributeRegistry.tagsForRefs(baseAttributeRefs);
+		const baseAttributePlans = baseAttributeRefs.map(ref =>
+			RollAttributeRegistry.planAttribute(ref)
+		);
+		const hasUnknownBaseAttributeRef = baseAttributePlans.some(attr => !attr.plan);
+		const baseAttributeTags = _.uniq(
+			baseAttributePlans.flatMap(attr => attr.plan?.tags ?? []).filter(Boolean)
+		);
 		const baseTags = _.uniq([...(options.baseTags ?? []), ...baseAttributeTags]);
 
 		const candidateModifiers = options.skipModifiers
@@ -649,6 +655,7 @@ export class RollEngine {
 			: context.rollModifiers.filter(modifier => {
 					const tagAttributeRefs = collectTagAttributeRefs(modifier.rollTargetTags);
 					if (tagAttributeRefs.length > 0) return true;
+					if (hasUnknownBaseAttributeRef) return true;
 					return ModifierUtils.isModifierValidForTags(modifier, [], baseTags);
 			  });
 
@@ -763,6 +770,7 @@ export class RollEngine {
 		rollKind: 'skill' | 'save' | 'perception'
 	): string {
 		if (rollKind === 'perception') return 'perception';
+		const normalizedChoice = SheetProperties.standardizeCustomPropName(choice);
 		const statNames =
 			rollKind === 'skill'
 				? [
@@ -784,8 +792,16 @@ export class RollEngine {
 						'thievery',
 				  ]
 				: ['fortitude', 'reflex', 'will'];
-		const result = StringUtils.findClosestWord(choice, statNames);
-		return result ?? choice;
+		const exactResult = statNames.find(statName => statName === normalizedChoice);
+		if (exactResult) return exactResult;
+
+		const prefixResults = statNames.filter(statName => statName.startsWith(normalizedChoice));
+		if (prefixResults.length === 1) return prefixResults[0];
+
+		const result = StringUtils.findClosestWord(normalizedChoice, statNames);
+		if (!result) return choice;
+		const distance = StringUtils.levenshteinDistance(normalizedChoice, result);
+		return distance <= 2 ? result : choice;
 	}
 
 	public static structuredAttributeName(rollName: string): string {

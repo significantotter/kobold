@@ -4,7 +4,10 @@ import {
 	SheetStatKeys,
 	ProficiencyStat,
 	CounterStyleEnum,
+	DefenseRuleAutomation,
+	DefenseRuleSource,
 } from '@kobold/schema';
+import { parsePf2eDefenses } from './pf2e-defense-parser.js';
 
 /**
  * Parses a resistance/weakness string like "Poison  3" into { type, amount }.
@@ -169,6 +172,11 @@ export interface WgV4Weapon {
 	stats: WgV4WeaponStats;
 }
 
+export interface WgV4Trait {
+	id: number;
+	name: string;
+}
+
 export interface WgV4SpellSource {
 	source: {
 		name: string;
@@ -190,6 +198,7 @@ export interface WgV4Content {
 	proficiencies?: Record<string, WgV4Proficiency>;
 	speeds?: Array<{ name: string; value: { total: number } }>;
 	weapons?: WgV4Weapon[];
+	all_traits?: WgV4Trait[];
 	languages?: string[];
 	character_traits?: Array<{ name: string }>;
 	senses?: {
@@ -348,7 +357,12 @@ export function buildSenses(sensesData: WgV4Content['senses']): string[] {
 /**
  * Converts WG weapon data into Kobold attack objects.
  */
-export function buildAttacks(weapons: WgV4Weapon[]): Sheet['attacks'] {
+export function buildAttacks(
+	weapons: WgV4Weapon[],
+	allTraits: WgV4Trait[] = []
+): Sheet['attacks'] {
+	const traitsById = new Map(allTraits.map(trait => [trait.id, trait.name]));
+
 	return weapons.map(w => {
 		const dmg = w.stats?.damage;
 		const diceStr = dmg ? `${dmg.dice}${dmg.die}` : '';
@@ -363,10 +377,22 @@ export function buildAttacks(weapons: WgV4Weapon[]): Sheet['attacks'] {
 		return {
 			name: w.item?.name ?? 'Unknown',
 			toHit: w.stats?.attack_bonus?.total?.[0] ?? null,
-			damage: damageStr ? [{ dice: damageStr, type: dmg?.damageType ?? null }] : [],
+			damage: damageStr
+				? [
+						{
+							dice: damageStr,
+							type: dmg?.damageType ?? null,
+							tags: [dmg?.damageType ?? ''].filter(Boolean),
+							mode: 'damage',
+							persistent: false,
+						},
+					]
+				: [],
 			effects: [] as string[],
 			range: w.item?.meta_data?.range != null ? String(w.item.meta_data.range) : null,
-			traits: [] as string[],
+			traits: (w.item?.traits ?? [])
+				.map(traitId => traitsById.get(traitId))
+				.filter((trait): trait is string => Boolean(trait)),
 			notes: null as string | null,
 		};
 	});
@@ -489,17 +515,26 @@ export function convertWgV4ExportToSheet(exportData: WgV4Export): Sheet {
 	// ── Traits ──
 	const traits = (content.character_traits ?? []).map(t => t.name).filter(Boolean);
 
-	// ── Immunities ──
-	const immunities = (content.resist_weaks?.immunes ?? []).map(s =>
-		typeof s === 'string' ? s.trim() : String(s)
-	);
-
-	// ── Weaknesses & Resistances ──
-	const resistances = (content.resist_weaks?.resists ?? []).map(parseResistWeakString);
-	const weaknesses = (content.resist_weaks?.weaks ?? []).map(parseResistWeakString);
+	// ── Defenses ──
+	const defenses = parsePf2eDefenses({
+		immunityRaw: (content.resist_weaks?.immunes ?? [])
+			.map(s => (typeof s === 'string' ? s.trim() : String(s)))
+			.join(', '),
+		resistanceRaw: (content.resist_weaks?.resists ?? []).join(', '),
+		weaknessRaw: (content.resist_weaks?.weaks ?? []).join(', '),
+		source: DefenseRuleSource.wanderersGuide,
+	});
+	defenses.weaknesses = defenses.weaknesses.map(rule => ({
+		...rule,
+		automation: rule.amount ? rule.automation : DefenseRuleAutomation.manual,
+	}));
+	defenses.resistances = defenses.resistances.map(rule => ({
+		...rule,
+		automation: rule.amount ? rule.automation : DefenseRuleAutomation.manual,
+	}));
 
 	// ── Attacks ──
-	const attacks = buildAttacks(content.weapons ?? []);
+	const attacks = buildAttacks(content.weapons ?? [], content.all_traits ?? []);
 
 	// ── Base Counters ──
 	const maxHp = content.max_hp ?? 0;
@@ -531,12 +566,8 @@ export function convertWgV4ExportToSheet(exportData: WgV4Export): Sheet {
 			traits,
 			languages,
 			senses,
-			immunities,
 		},
-		weaknessesResistances: {
-			resistances,
-			weaknesses,
-		},
+		defenses,
 		intProperties: {
 			ac: content.ac ?? null,
 			strength: strMod,

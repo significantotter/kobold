@@ -184,11 +184,11 @@ export class SheetUtils {
 		const weakResMatch = SheetWeaknessResistanceProperties.propertyNameRegex.exec(
 			standardizedCustomPropName
 		);
-		const weakness = sheet.weaknessesResistances.weaknesses.find(
-			w => w.type === weakResMatch?.[1]
+		const weakness = sheet.defenses.weaknesses.find(
+			w => w.label === weakResMatch?.[1] && w.amount != null
 		);
-		const resistance = sheet.weaknessesResistances.resistances.find(
-			r => r.type === weakResMatch?.[1]
+		const resistance = sheet.defenses.resistances.find(
+			r => r.label === weakResMatch?.[1] && r.amount != null
 		);
 		return weakness?.amount ?? resistance?.amount ?? null;
 	}

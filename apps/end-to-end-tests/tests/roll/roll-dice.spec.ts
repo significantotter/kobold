@@ -4,6 +4,7 @@ import {
 	sendSlashCommandWithArgs,
 	waitForBotEmbed,
 } from '../fixtures/discord.fixture.js';
+import { getE2ECharacter, getFullSheetRecord, signed } from '../helpers/adjusted-sheet.js';
 
 test.describe('/roll dice', () => {
 	test('should roll a simple dice expression', async ({ discordChannel }) => {
@@ -27,5 +28,22 @@ test.describe('/roll dice', () => {
 
 		const description = embed.locator('[class*="embedDescription"]');
 		await expect(description).toContainText('2d6');
+	});
+
+	test('should roll a lore used as an attribute', async ({ discordChannel }) => {
+		const character = await getE2ECharacter();
+		const sheetRecord = await getFullSheetRecord(character.sheetRecordId);
+		const lore = sheetRecord.adjustedSheet.additionalSkills.find(
+			skill => skill.name === 'Warfare Lore'
+		);
+		expect(lore).toBeDefined();
+
+		await sendSlashCommandWithArgs(discordChannel, '/roll dice', [
+			{ name: 'dice', value: '1d20+[Warfare_Lore]' },
+		]);
+
+		const embed = await waitForBotEmbed(discordChannel);
+		const embedText = await embed.textContent();
+		expect(embedText).toContain(signed(lore?.bonus));
 	});
 });

@@ -21,6 +21,99 @@ import {
 import { staticAttributes, attributeShorthands } from '../constants/attributes.js';
 
 export class AttributeUtils {
+	private static additionalSkillSubKey(rawSubKey: string | undefined): StatSubGroupEnum | null {
+		switch (rawSubKey) {
+			case undefined:
+			case '':
+			case 'attack':
+			case 'bonus':
+			case 'total':
+				return StatSubGroupEnum.bonus;
+			case 'dc':
+				return StatSubGroupEnum.dc;
+			case 'prof':
+			case 'proficiency':
+				return StatSubGroupEnum.proficiency;
+			case 'ability':
+				return StatSubGroupEnum.ability;
+			default:
+				return null;
+		}
+	}
+
+	private static additionalSkillTags(skill: Sheet['additionalSkills'][number]): string[] {
+		const skillName = SheetProperties.standardizeCustomPropName(skill.name);
+		return _.uniq(
+			[
+				'skill',
+				skill.ability ?? 'intelligence',
+				skillName,
+				skillName.endsWith(' lore') ? 'lore' : '',
+			].filter(_.identity)
+		);
+	}
+
+	private static additionalSkillAliases(
+		skill: Sheet['additionalSkills'][number],
+		subKey: StatSubGroupEnum
+	): string[] {
+		switch (subKey) {
+			case StatSubGroupEnum.bonus:
+				return [
+					skill.name,
+					`${skill.name} bonus`,
+					`${skill.name} attack`,
+					`${skill.name} total`,
+				];
+			case StatSubGroupEnum.dc:
+				return [`${skill.name} dc`];
+			case StatSubGroupEnum.proficiency:
+				return [`${skill.name} proficiency`, `${skill.name} prof`];
+			default:
+				return [];
+		}
+	}
+
+	private static getAdditionalSkillAttributeFromSheet(
+		sheet: Sheet,
+		standardizedCustomPropName: string
+	): Attribute | null {
+		const compactPropName = standardizedCustomPropName.replaceAll(' ', '');
+		const matchedSkill = sheet.additionalSkills
+			.map(skill => ({
+				skill,
+				name: SheetProperties.standardizeCustomPropName(skill.name),
+			}))
+			.map(match => ({ ...match, compactName: match.name.replaceAll(' ', '') }))
+			.sort((left, right) => right.name.length - left.name.length)
+			.find(
+				({ name, compactName }) =>
+					standardizedCustomPropName === name ||
+					standardizedCustomPropName.startsWith(`${name} `) ||
+					compactPropName === compactName ||
+					compactPropName.startsWith(compactName)
+			);
+
+		if (!matchedSkill) return null;
+
+		const rawSubKey =
+			standardizedCustomPropName === matchedSkill.name
+				? undefined
+				: standardizedCustomPropName.startsWith(`${matchedSkill.name} `)
+					? standardizedCustomPropName.slice(matchedSkill.name.length).trim()
+					: compactPropName.slice(matchedSkill.compactName.length).trim();
+		const subKey = this.additionalSkillSubKey(rawSubKey);
+		if (!subKey || subKey === StatSubGroupEnum.ability) return null;
+
+		return {
+			aliases: this.additionalSkillAliases(matchedSkill.skill, subKey),
+			type: 'skill',
+			value: matchedSkill.skill[subKey] ?? 0,
+			name: matchedSkill.skill.name,
+			tags: this.additionalSkillTags(matchedSkill.skill),
+		};
+	}
+
 	/**
 	 * Gets computed sheet properties (proficiencies with level) from a Sheet.
 	 * This is the core logic that works with just Sheet data.
@@ -227,12 +320,19 @@ export class AttributeUtils {
 			};
 		}
 
-		// Check additional skills (lores)
+		// Check additional skills (custom skills/lores)
+		const additionalSkillAttribute = this.getAdditionalSkillAttributeFromSheet(
+			sheet,
+			standardizedCustomPropName
+		);
+		if (additionalSkillAttribute) return additionalSkillAttribute;
+
+		// Check legacy additional skill lore-shaped properties
 		const propertyMatch = SheetAdditionalSkillProperties.propertyNameRegex.exec(
 			standardizedCustomPropName
 		);
 		const additionalSkill = sheet.additionalSkills.find(
-			skill => skill.name === propertyMatch?.[1]
+			skill => SheetProperties.standardizeCustomPropName(skill.name) === propertyMatch?.[1]
 		);
 		const additionalSkillSubKey = propertyMatch?.[2] ?? 'bonus';
 		if (additionalSkill && isStatSubGroupEnum(additionalSkillSubKey)) {
@@ -250,11 +350,11 @@ export class AttributeUtils {
 		const weakResMatch = SheetWeaknessResistanceProperties.propertyNameRegex.exec(
 			standardizedCustomPropName
 		);
-		const weakness = sheet.weaknessesResistances.weaknesses.find(
-			w => w.type === weakResMatch?.[1]
+		const weakness = sheet.defenses.weaknesses.find(
+			w => w.label === weakResMatch?.[1] && w.amount != null
 		);
-		const resistance = sheet.weaknessesResistances.resistances.find(
-			r => r.type === weakResMatch?.[1]
+		const resistance = sheet.defenses.resistances.find(
+			r => r.label === weakResMatch?.[1] && r.amount != null
 		);
 		const weaknessResistance = weakness ?? resistance;
 		if (weaknessResistance) {
@@ -262,8 +362,8 @@ export class AttributeUtils {
 			return {
 				aliases: [],
 				type: type,
-				value: weaknessResistance.amount,
-				name: weaknessResistance.type + ' ' + type,
+				value: weaknessResistance.amount ?? 0,
+				name: weaknessResistance.label + ' ' + type,
 				tags: [],
 			};
 		}
@@ -347,44 +447,46 @@ export class AttributeUtils {
 
 		for (const skill of creature.sheet.additionalSkills) {
 			attributes.push({
-				aliases: [skill.name + ' attack', skill.name],
+				aliases: this.additionalSkillAliases(skill, StatSubGroupEnum.bonus),
 				type: 'skill',
 				value: skill.bonus ?? 0,
 				name: skill.name + 'bonus',
-				tags: ['skill', 'intelligence', 'lore'],
+				tags: this.additionalSkillTags(skill),
 			});
 			attributes.push({
-				aliases: [],
+				aliases: this.additionalSkillAliases(skill, StatSubGroupEnum.dc),
 				type: 'skill',
 				value: skill.dc ?? 0,
 				name: skill.name + ' dc',
-				tags: ['skill', 'intelligence', 'lore'],
+				tags: this.additionalSkillTags(skill),
 			});
 			attributes.push({
-				aliases: [],
+				aliases: this.additionalSkillAliases(skill, StatSubGroupEnum.proficiency),
 				type: 'skill',
 				value: skill.proficiency ?? 0,
 				name: skill.name + ' proficiency',
-				tags: ['skill', 'intelligence', 'lore'],
+				tags: this.additionalSkillTags(skill),
 			});
 		}
 
-		for (const weakness of creature.sheet.weaknessesResistances.weaknesses) {
+		for (const weakness of creature.sheet.defenses.weaknesses) {
+			if (weakness.amount == null) continue;
 			attributes.push({
 				aliases: [],
 				type: 'weakness',
 				value: weakness.amount,
-				name: weakness.type + ' weakness',
+				name: weakness.label + ' weakness',
 				tags: [],
 			});
 		}
 
-		for (const resistance of creature.sheet.weaknessesResistances.resistances) {
+		for (const resistance of creature.sheet.defenses.resistances) {
+			if (resistance.amount == null) continue;
 			attributes.push({
 				aliases: [],
 				type: 'resistance',
 				value: resistance.amount,
-				name: resistance.type + ' resistance',
+				name: resistance.label + ' resistance',
 				tags: [],
 			});
 		}

@@ -113,7 +113,20 @@ describe('ActionStageAddAdvancedDamageSubCommand', () => {
 			// Arrange
 			const action = createMockAction({
 				name: 'Fireball',
-				rolls: [createAdvancedDamageRoll({ name: 'Fire Damage', successRoll: '3d6' })],
+				rolls: [
+					createAdvancedDamageRoll({
+						name: 'Fire Damage',
+						successTerms: [
+							{
+								dice: '3d6',
+								type: null,
+								tags: [],
+								mode: 'damage',
+								persistent: false,
+							},
+						],
+					}),
+				],
 			});
 			setupKoboldUtilsMocks({ actions: [action] });
 			setupFinderHelpersMocks(action, [action]);

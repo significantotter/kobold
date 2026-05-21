@@ -5,11 +5,19 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { CommandInteraction, CacheType } from 'discord.js';
 import { PathbuilderCharacterFetcher } from './pathbuilder-character-fetcher.js';
 import { PathBuilder } from '@kobold/schema';
+import {
+	buildTwoHandRollMacrosForAttacks,
+	fetchNethysItemMetadataForPathbuilder,
+} from '@kobold/sheet';
 import { Creature } from '../../../../utils/creature.js';
 import { getMockKobold, resetMockKobold } from '../../../../test-utils/index.js';
 import type { Kobold } from '@kobold/db';
 
 vi.mock('../../../../utils/creature.js');
+vi.mock('@kobold/sheet', () => ({
+	buildTwoHandRollMacrosForAttacks: vi.fn(() => []),
+	fetchNethysItemMetadataForPathbuilder: vi.fn().mockResolvedValue([]),
+}));
 
 const createMockPathbuilderCharacter = (): PathBuilder.Character => ({
 	name: 'Test Character',
@@ -95,7 +103,9 @@ describe('PathbuilderCharacterFetcher', () => {
 	let mockIntr: CommandInteraction<CacheType>;
 
 	beforeEach(() => {
+		vi.clearAllMocks();
 		resetMockKobold(mockKobold);
+		vi.mocked(buildTwoHandRollMacrosForAttacks).mockReturnValue([]);
 		mockIntr = createMockInteraction();
 		fetcher = new PathbuilderCharacterFetcher(
 			mockIntr,
@@ -135,6 +145,7 @@ describe('PathbuilderCharacterFetcher', () => {
 			const result = await fetcher.fetchSourceData({ jsonId: 12345 });
 
 			expect(result).toEqual(mockBuild);
+			expect(fetchNethysItemMetadataForPathbuilder).toHaveBeenCalledWith(mockBuild);
 		});
 
 		it('should throw KoboldError when PathBuilder request fails', async () => {
@@ -196,6 +207,7 @@ describe('PathbuilderCharacterFetcher', () => {
 			});
 			expect(Creature.fromPathBuilder).toHaveBeenCalledWith(mockSourceData, undefined, {
 				useStamina: false,
+				nethysCompendiumEntries: [],
 			});
 		});
 
@@ -219,6 +231,7 @@ describe('PathbuilderCharacterFetcher', () => {
 
 			expect(Creature.fromPathBuilder).toHaveBeenCalledWith(mockSourceData, undefined, {
 				useStamina: true,
+				nethysCompendiumEntries: [],
 			});
 		});
 
@@ -243,8 +256,36 @@ describe('PathbuilderCharacterFetcher', () => {
 			expect(Creature.fromPathBuilder).toHaveBeenCalledWith(
 				mockSourceData,
 				mockActiveCharacter,
-				{ useStamina: false }
+				{ useStamina: false, nethysCompendiumEntries: [] }
 			);
+		});
+
+		it('should add and update generated two-hand roll macros', () => {
+			const mockSourceData = createMockPathbuilderCharacter();
+			const mockSheet = { staticInfo: { name: mockSourceData.name }, attacks: [] };
+			const mockRollMacros = [
+				{ name: 'bastard-sword-two-hand', macro: '2d8+4' },
+				{ name: 'Custom Macro', macro: '1d6' },
+			];
+
+			vi.mocked(Creature.fromPathBuilder).mockReturnValue({
+				_sheet: mockSheet,
+				actions: [],
+				modifiers: [],
+				rollMacros: mockRollMacros,
+			} as unknown as Creature);
+			vi.mocked(buildTwoHandRollMacrosForAttacks).mockReturnValue([
+				{ name: 'bastard-sword-two-hand', macro: '2d12+4' },
+				{ name: 'dwarven-waraxe-two-hand', macro: '1d12+3' },
+			]);
+
+			const result = fetcher.convertSheetRecord(mockSourceData);
+
+			expect(result.rollMacros).toEqual([
+				{ name: 'bastard-sword-two-hand', macro: '2d12+4' },
+				{ name: 'Custom Macro', macro: '1d6' },
+				{ name: 'dwarven-waraxe-two-hand', macro: '1d12+3' },
+			]);
 		});
 	});
 
