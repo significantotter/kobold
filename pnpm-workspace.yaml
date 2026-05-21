@@ -1,7 +1,27 @@
 packages:
-    - 'apps/**'
-    - 'packages/**'
+  - 'apps/**'
+  - 'packages/**'
 syncInjectedDepsAfterScripts:
-    - build
+  - build
 
 injectWorkspacePackages: true
+
+allowBuilds:
+  '@swc/core': true
+  esbuild: true
+  supabase: false
+
+overrides:
+  prettier: ^3.6.2
+  discord.js: ^14.25.1
+  dotenv: ^17.2.3
+  drizzle-orm: ^0.33.0
+  kysely: ^0.28.9
+  lodash: ^4.17.21
+  pm2: ^6.0.14
+  tsx: ^4.1.2
+  typescript: ^5.9.3
+  type-fest: ^5.3.1
+  vitest: ^4.0.16
+  zod: ^4.2.1
+  ts-node: ^10.9.2
