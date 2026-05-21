@@ -135,6 +135,52 @@ describe('resolveDamagePacket', () => {
 		expect(result.byType.map(bucket => bucket.amountAfterIwr)).toEqual([2, 0]);
 	});
 
+	it('applies weakness before resistance so low damage does not become free weakness damage', () => {
+		const sheet = sheetWithIwr({
+			weaknesses: [{ type: 'fire', amount: 5 }],
+			resistances: [{ type: 'fire', amount: 5 }],
+		});
+
+		const result = resolveDamagePacket(sheet, {
+			lines: [{ amount: 2, damageType: 'fire' }],
+		});
+
+		expect(result.totalAfterIwr).toBe(2);
+	});
+
+	it('supports allOf matchers for conditional doubled resistances', () => {
+		const sheet = sheetWithIwr({});
+		sheet.defenses.resistances = [
+			{
+				label: 'all',
+				raw: 'all damage 10; double resistance vs. non-magical',
+				amount: 10,
+				appliesTo: ['damage'],
+				match: { all: true },
+				automation: DefenseRuleAutomation.auto,
+				source: DefenseRuleSource.manual,
+			},
+			{
+				label: 'all vs non magical',
+				raw: 'all damage 10; double resistance vs. non-magical',
+				amount: 20,
+				appliesTo: ['damage'],
+				match: { allOf: [{ all: true }, { traits: ['non magical'] }] },
+				automation: DefenseRuleAutomation.auto,
+				source: DefenseRuleSource.manual,
+			},
+		];
+
+		const result = resolveDamagePacket(sheet, {
+			lines: [{ amount: 25, damageType: 'fire' }],
+		});
+
+		expect(result.totalAfterIwr).toBe(5);
+		expect(result.appliedResistances.map(resistance => resistance.label)).toEqual([
+			'all vs non magical',
+		]);
+	});
+
 	it('applies immunity before weakness and resistance', () => {
 		const sheet = sheetWithIwr({
 			immunities: ['fire'],
@@ -348,5 +394,79 @@ describe('resolveDamagePacket', () => {
 					result.value.includes('Critical Success: critical rider still applies')
 			)
 		).toBe(true);
+	});
+
+	it('rolls all populated advanced damage outcomes when there is no targeting result', () => {
+		const source = new Creature({
+			sheet: sheetWithIwr({}),
+			actions: [],
+			rollMacros: [],
+			modifiers: [],
+			conditions: [],
+		});
+		const action: Action = {
+			actionCost: ActionCostEnum.oneAction,
+			autoHeighten: false,
+			baseLevel: null,
+			description: '',
+			id: -1,
+			name: 'Outcome Preview',
+			rolls: [
+				{
+					allowRollModifiers: false,
+					criticalFailureTerms: [],
+					criticalSuccessTerms: [
+						{
+							dice: '40',
+							type: 'slashing',
+							tags: [],
+							mode: 'damage',
+							persistent: false,
+						},
+					],
+					failureTerms: [
+						{
+							dice: '2',
+							type: 'slashing',
+							tags: [],
+							mode: 'damage',
+							persistent: false,
+						},
+					],
+					name: 'Damage',
+					successTerms: [
+						{
+							dice: '10',
+							type: 'slashing',
+							tags: [],
+							mode: 'damage',
+							persistent: false,
+						},
+					],
+					type: RollTypeEnum.AdvancedDamage,
+				},
+			],
+			sheetRecordId: null,
+			tags: [],
+			type: ActionTypeEnum.attack,
+			userId: '-1',
+		};
+
+		const actionRoller = new ActionRoller(null, action, source, null, {
+			autoApplyDamage: false,
+		});
+		const rollBuilder = actionRoller.buildRoll('', '', {});
+
+		expect(
+			rollBuilder.rollResults
+				.filter(result => result.type === 'dice')
+				.map(result => result.name)
+		).toEqual(['critical success Damage', 'success Damage', 'failure Damage']);
+		expect(actionRoller.preparedDamageLines.map(line => line.amount)).toEqual([40, 10, 2]);
+		expect(actionRoller.preparedDamageLines.map(line => line.damageOutcome)).toEqual([
+			'critical success',
+			'success',
+			'failure',
+		]);
 	});
 });

@@ -111,6 +111,9 @@ function matcherTermsMatch(values: string[] | undefined, bucket: DamageBucket): 
 
 function matcherMatches(matcher: DefenseMatcher, bucket: DamageBucket): boolean {
 	if (matcher.except && matcherMatches(matcher.except, bucket)) return false;
+	if (matcher.allOf?.length) {
+		return matcher.allOf.every(childMatcher => matcherMatches(childMatcher, bucket));
+	}
 	if (matcher.all) return true;
 	if (matcher.damageGroups?.includes('physical') && physicalDamageTypes.has(bucket.damageType)) {
 		return true;
@@ -217,15 +220,15 @@ export function resolveDamagePacket(sheet: Sheet, packet: DamagePacket): Resolve
 		if (immunities.length) {
 			resolvedAmount = 0;
 		} else {
-			resistance = highestResistance(sheet.defenses.resistances, bucket);
-			if (resistance?.amount != null) {
-				resolvedAmount = Math.max(0, resolvedAmount - resistance.amount);
-			}
-
 			weaknesses = matchingWeaknesses(sheet.defenses.weaknesses, bucket, appliedWeaknessKeys);
 			for (const weakness of weaknesses) {
 				appliedWeaknessKeys.add(normalizeTerm(weakness.label || weakness.raw));
 				resolvedAmount += weakness.amount ?? 0;
+			}
+
+			resistance = highestResistance(sheet.defenses.resistances, bucket);
+			if (resistance?.amount != null) {
+				resolvedAmount = Math.max(0, resolvedAmount - resistance.amount);
 			}
 		}
 

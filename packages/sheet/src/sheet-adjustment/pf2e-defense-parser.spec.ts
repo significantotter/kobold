@@ -25,17 +25,35 @@ describe('parsePf2eDefenses', () => {
 				'all damage 10 (except force, ghost touch, spirit, or vitality; double resistance vs. non-magical)',
 		});
 
-		expect(defenses.resistances[0]).toMatchObject({
-			label: 'all',
-			amount: 10,
-			match: {
-				all: true,
-				except: {
-					damageTypes: ['force', 'spirit', 'vitality'],
-					traits: ['ghost touch'],
+		expect(defenses.resistances).toMatchObject([
+			{
+				label: 'all',
+				amount: 10,
+				match: {
+					all: true,
+					except: {
+						damageTypes: ['force', 'spirit', 'vitality'],
+						traits: ['ghost touch'],
+					},
 				},
 			},
-		});
+			{
+				label: 'all vs non magical',
+				amount: 20,
+				match: {
+					allOf: [
+						{
+							all: true,
+							except: {
+								damageTypes: ['force', 'spirit', 'vitality'],
+								traits: ['ghost touch'],
+							},
+						},
+						{ traits: ['non magical'] },
+					],
+				},
+			},
+		]);
 	});
 
 	it('parses area and splash weaknesses independently', () => {
@@ -62,6 +80,36 @@ describe('parsePf2eDefenses', () => {
 				match: {
 					damageGroups: ['physical'],
 					except: { materials: ['adamantine'] },
+				},
+			},
+		]);
+	});
+
+	it('parses amount-first doubled resistance with a conjunctive matcher', () => {
+		const defenses = parsePf2eDefenses({
+			resistanceRaw: '10 physical (except adamantine; double resistance vs. non-magical)',
+		});
+
+		expect(defenses.resistances).toMatchObject([
+			{
+				label: 'physical',
+				amount: 10,
+				match: {
+					damageGroups: ['physical'],
+					except: { materials: ['adamantine'] },
+				},
+			},
+			{
+				label: 'physical vs non magical',
+				amount: 20,
+				match: {
+					allOf: [
+						{
+							damageGroups: ['physical'],
+							except: { materials: ['adamantine'] },
+						},
+						{ traits: ['non magical'] },
+					],
 				},
 			},
 		]);

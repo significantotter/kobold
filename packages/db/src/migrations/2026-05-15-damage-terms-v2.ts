@@ -36,7 +36,10 @@ const oneTermArrayExpression = (dice: unknown, damageType: unknown, fallbackMode
 
 const migrateRollExpression = (roll: unknown) => sql`
 	CASE
-		WHEN ${roll}->>'type' = 'damage' THEN
+		WHEN ${roll}->>'type' = 'damage'
+			AND NOT (${roll} ? 'terms')
+			AND (${roll} ? 'roll' OR ${roll} ? 'damageType')
+		THEN
 			(${roll} - 'roll' - 'damageType' - 'healInsteadOfDamage')
 			|| jsonb_build_object(
 				'type', 'damage',
@@ -47,7 +50,20 @@ const migrateRollExpression = (roll: unknown) => sql`
 					sql`CASE WHEN COALESCE((${roll}->>'healInsteadOfDamage')::boolean, false) THEN 'healing' ELSE 'damage' END`
 				)}
 			)
-		WHEN ${roll}->>'type' = 'advanced-damage' THEN
+		WHEN ${roll}->>'type' = 'advanced-damage'
+			AND NOT (
+				${roll} ? 'criticalSuccessTerms'
+				OR ${roll} ? 'successTerms'
+				OR ${roll} ? 'failureTerms'
+				OR ${roll} ? 'criticalFailureTerms'
+			)
+			AND (
+				${roll} ? 'criticalSuccessRoll'
+				OR ${roll} ? 'successRoll'
+				OR ${roll} ? 'failureRoll'
+				OR ${roll} ? 'criticalFailureRoll'
+			)
+		THEN
 			(
 				${roll}
 				- 'damageType'
@@ -146,6 +162,36 @@ const migrateSheetExpression = (column: string) => sql`
 	)
 `;
 
+const downMigrateSheetExpression = (column: string) => sql`
+	${sql.ref(column)}
+	|| jsonb_build_object(
+		'attacks',
+		COALESCE(
+			(
+				SELECT jsonb_agg(
+					attack || jsonb_build_object(
+						'damage',
+						COALESCE(
+							(
+								SELECT jsonb_agg(
+									jsonb_build_object(
+										'dice', COALESCE(damage_term->'dice', '""'::jsonb),
+										'type', damage_term->'type'
+									)
+								)
+								FROM jsonb_array_elements(COALESCE(attack->'damage', '[]'::jsonb)) AS damage_term
+							),
+							'[]'::jsonb
+						)
+					)
+				)
+				FROM jsonb_array_elements(COALESCE(${sql.ref(column)}->'attacks', '[]'::jsonb)) AS attack
+			),
+			'[]'::jsonb
+		)
+	)
+`;
+
 export async function up(db: Kysely<any>): Promise<void> {
 	await sql`
 		UPDATE action
@@ -218,6 +264,16 @@ export async function down(db: Kysely<any>): Promise<void> {
 				FROM jsonb_array_elements(COALESCE(rolls, '[]'::jsonb)) AS roll
 			),
 			'[]'::jsonb
-		)
+			)
+	`.execute(db);
+
+	await sql`
+		UPDATE sheet_record
+		SET
+			sheet = ${downMigrateSheetExpression('sheet')},
+			adjusted_sheet = CASE
+				WHEN adjusted_sheet IS NULL THEN NULL
+				ELSE ${downMigrateSheetExpression('adjusted_sheet')}
+			END
 	`.execute(db);
 }

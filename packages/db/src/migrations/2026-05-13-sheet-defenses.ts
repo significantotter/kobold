@@ -67,6 +67,51 @@ const migrateExpression = (column: string) => sql`
 	)
 `;
 
+const legacyImmunitiesExpression = (column: string) => sql`
+	COALESCE(
+		(
+			SELECT jsonb_agg(COALESCE(rule->>'raw', rule->>'label'))
+			FROM jsonb_array_elements(COALESCE(${sql.ref(column)}#>'{defenses,immunities}', '[]'::jsonb)) AS rule
+		),
+		'[]'::jsonb
+	)
+`;
+
+const legacyWeaknessResistanceArrayExpression = (
+	column: string,
+	key: 'weaknesses' | 'resistances'
+) => sql`
+	COALESCE(
+		(
+			SELECT jsonb_agg(
+				jsonb_build_object(
+					'type', COALESCE(rule->>'raw', rule->>'label'),
+					'amount', (rule->>'amount')::int
+				)
+			)
+			FROM jsonb_array_elements(COALESCE(${sql.ref(column)}#>'{defenses,${sql.raw(key)}}', '[]'::jsonb)) AS rule
+			WHERE rule ? 'amount' AND rule->>'amount' IS NOT NULL
+		),
+		'[]'::jsonb
+	)
+`;
+
+const downMigrateExpression = (column: string) => sql`
+	jsonb_strip_nulls(
+		(${sql.ref(column)} - 'defenses')
+		|| jsonb_build_object(
+			'infoLists',
+			COALESCE(${sql.ref(column)}->'infoLists', '{}'::jsonb)
+			|| jsonb_build_object('immunities', ${legacyImmunitiesExpression(column)}),
+			'weaknessesResistances',
+			jsonb_build_object(
+				'weaknesses', ${legacyWeaknessResistanceArrayExpression(column, 'weaknesses')},
+				'resistances', ${legacyWeaknessResistanceArrayExpression(column, 'resistances')}
+			)
+		)
+	)
+`;
+
 export async function up(db: Kysely<any>): Promise<void> {
 	await sql`
 		UPDATE sheet_record
@@ -83,10 +128,10 @@ export async function down(db: Kysely<any>): Promise<void> {
 	await sql`
 		UPDATE sheet_record
 		SET
-			sheet = sheet - 'defenses',
+			sheet = ${downMigrateExpression('sheet')},
 			adjusted_sheet = CASE
 				WHEN adjusted_sheet IS NULL THEN NULL
-				ELSE adjusted_sheet - 'defenses'
+				ELSE ${downMigrateExpression('adjusted_sheet')}
 			END
 	`.execute(db);
 }

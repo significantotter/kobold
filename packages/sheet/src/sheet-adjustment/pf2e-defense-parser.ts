@@ -221,17 +221,65 @@ function parseException(value: string): DefenseRule['match'] | undefined {
 	return matcherForTerms(exceptionMatch[1], { unknownAs: 'damageType' });
 }
 
+function parseDoubleResistance(value: string): DefenseRule['match'] | undefined {
+	const doubleMatch = value.match(
+		/\bdouble\s+resistance\s+(?:vs\.?|versus|against|to)\s+([^;)]+)/i
+	);
+	if (!doubleMatch?.[1]) return undefined;
+	return matcherForTerms(doubleMatch[1], { unknownAs: 'trait' });
+}
+
+function doubleResistanceLabel(match: DefenseRule['match']): string {
+	const terms = [
+		...(match.damageTypes ?? []),
+		...(match.damageGroups ?? []),
+		...(match.materials ?? []),
+		...(match.traits ?? []),
+		...(match.conditions ?? []),
+		...(match.effectTypes ?? []),
+	];
+	return terms.length ? terms.join(', ') : 'special';
+}
+
+function withDoubleResistanceRule(
+	baseRule: DefenseRule,
+	kind: 'weakness' | 'resistance',
+	doubleMatch: DefenseRule['match'] | undefined
+): DefenseRule[] {
+	if (
+		kind !== 'resistance' ||
+		!doubleMatch ||
+		baseRule.amount == null ||
+		baseRule.automation !== DefenseRuleAutomation.auto
+	) {
+		return [baseRule];
+	}
+
+	return [
+		baseRule,
+		{
+			...baseRule,
+			label: `${baseRule.label} vs ${doubleResistanceLabel(doubleMatch)}`,
+			amount: baseRule.amount * 2,
+			match: {
+				allOf: [baseRule.match, doubleMatch],
+			},
+		},
+	];
+}
+
 function parseAmountRule(
 	rawEntry: string,
 	source: DefenseRuleSource,
 	kind: 'weakness' | 'resistance'
-): DefenseRule | null {
+): DefenseRule[] {
 	const cleaned = stripMarkdown(rawEntry);
-	if (!cleaned || isIgnorableDefenseEntry(cleaned)) return null;
+	if (!cleaned || isIgnorableDefenseEntry(cleaned)) return [];
 
 	const amountMatch = cleaned.match(/^(.+?)\s+(\d+)(?:\s|\(|$)/);
 	const amountFirstMatch = cleaned.match(/^(\d+)\s+([^()]+?)(?:\s|\(|$)/);
 	const amountOnlyMatch = cleaned.match(/^(\d+)(?:\s|\(|$)/);
+	const doubleMatch = parseDoubleResistance(cleaned);
 
 	if (!amountMatch) {
 		if (amountFirstMatch) {
@@ -242,15 +290,19 @@ function parseAmountRule(
 			const except = parseException(cleaned);
 			if (except) match.except = except;
 
-			return {
-				label,
-				raw: cleaned,
-				amount,
-				appliesTo: ['damage'],
-				match,
-				automation: DefenseRuleAutomation.auto,
-				source,
-			};
+			return withDoubleResistanceRule(
+				{
+					label,
+					raw: cleaned,
+					amount,
+					appliesTo: ['damage'],
+					match,
+					automation: DefenseRuleAutomation.auto,
+					source,
+				},
+				kind,
+				doubleMatch
+			);
 		}
 
 		if (amountOnlyMatch) {
@@ -258,25 +310,29 @@ function parseAmountRule(
 			const match: DefenseRule['match'] = {};
 			const except = parseException(cleaned);
 			if (except) match.except = except;
-			return {
-				label: 'unspecified',
-				raw: cleaned,
-				amount,
-				appliesTo: ['damage'],
-				match,
-				automation: DefenseRuleAutomation.partial,
-				source,
-			};
+			return [
+				{
+					label: 'unspecified',
+					raw: cleaned,
+					amount,
+					appliesTo: ['damage'],
+					match,
+					automation: DefenseRuleAutomation.partial,
+					source,
+				},
+			];
 		}
 
-		return {
-			label: cleaned,
-			raw: cleaned,
-			appliesTo: ['damage'],
-			match: matcherForTerms(cleaned, { unknownAs: 'trait' }),
-			automation: DefenseRuleAutomation.manual,
-			source,
-		};
+		return [
+			{
+				label: cleaned,
+				raw: cleaned,
+				appliesTo: ['damage'],
+				match: matcherForTerms(cleaned, { unknownAs: 'trait' }),
+				automation: DefenseRuleAutomation.manual,
+				source,
+			},
+		];
 	}
 
 	const label = canonicalTerm(amountMatch[1]).replace(/^all physical$/, 'physical');
@@ -291,18 +347,24 @@ function parseAmountRule(
 			match.damageTypes?.length ||
 			match.damageGroups?.length ||
 			match.materials?.length ||
-			match.traits?.length
-		);
+		match.traits?.length
+	);
 
-	return {
-		label,
-		raw: cleaned,
-		amount,
-		appliesTo: ['damage'],
-		match,
-		automation: hasUnknownMatcher ? DefenseRuleAutomation.manual : DefenseRuleAutomation.auto,
-		source,
-	};
+	return withDoubleResistanceRule(
+		{
+			label,
+			raw: cleaned,
+			amount,
+			appliesTo: ['damage'],
+			match,
+			automation: hasUnknownMatcher
+				? DefenseRuleAutomation.manual
+				: DefenseRuleAutomation.auto,
+			source,
+		},
+		kind,
+		doubleMatch
+	);
 }
 
 function parseImmunityRule(rawEntry: string, source: DefenseRuleSource): DefenseRule {
@@ -363,13 +425,11 @@ export function parsePf2eDefenses(input: {
 		immunities: immunityText ? splitList(immunityText).map(entry => parseImmunityRule(entry, source)) : [],
 		resistances: resistanceText
 			? expandSharedAmountEntries(splitList(resistanceText))
-					.map(entry => parseAmountRule(entry, source, 'resistance'))
-					.filter((rule): rule is DefenseRule => rule != null)
+					.flatMap(entry => parseAmountRule(entry, source, 'resistance'))
 			: [],
 		weaknesses: weaknessText
 			? expandSharedAmountEntries(splitList(weaknessText))
-					.map(entry => parseAmountRule(entry, source, 'weakness'))
-					.filter((rule): rule is DefenseRule => rule != null)
+					.flatMap(entry => parseAmountRule(entry, source, 'weakness'))
 			: [],
 	};
 }

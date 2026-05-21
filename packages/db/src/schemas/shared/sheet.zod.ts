@@ -151,13 +151,14 @@ export const zDefenseAppliesTo = z.enum([
 
 export type DefenseMatcher = {
 	all?: boolean;
+	allOf?: DefenseMatcher[];
 	damageTypes?: string[];
 	damageGroups?: Array<'physical'>;
 	traits?: string[];
 	materials?: string[];
 	conditions?: string[];
 	effectTypes?: string[];
-	except?: Omit<DefenseMatcher, 'except'>;
+	except?: DefenseMatcher;
 };
 const zDefenseMatcherBase = z.strictObject({
 	all: z.boolean().optional(),
@@ -168,9 +169,12 @@ const zDefenseMatcherBase = z.strictObject({
 	conditions: z.array(z.string()).optional(),
 	effectTypes: z.array(z.string()).optional(),
 });
-export const zDefenseMatcher: z.ZodType<DefenseMatcher> = zDefenseMatcherBase.extend({
-	except: zDefenseMatcherBase.optional(),
-});
+export const zDefenseMatcher: z.ZodType<DefenseMatcher> = z.lazy(() =>
+	zDefenseMatcherBase.extend({
+		allOf: z.array(zDefenseMatcher).optional(),
+		except: zDefenseMatcher.optional(),
+	})
+);
 
 export type DefenseRule = z.infer<typeof zDefenseRule>;
 export const zDefenseRule = z.strictObject({
