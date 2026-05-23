@@ -44,7 +44,7 @@ describe('buildImportedAttackAction', () => {
 			},
 			{
 				type: RollTypeEnum.damage,
-				name: 'Damage',
+				name: 'Weapon Damage',
 				terms: [
 					{
 						dice: '1d8+4',
@@ -66,10 +66,11 @@ describe('buildImportedAttackAction', () => {
 
 		expect(action.rolls[1]).toMatchObject({
 			type: RollTypeEnum.AdvancedDamage,
+			name: 'Weapon Damage',
 			successTerms: [expect.objectContaining({ dice: '1d8+4' })],
 			criticalSuccessTerms: [
-				expect.objectContaining({ dice: '2d8+8' }),
-				expect.objectContaining({ dice: '1d10', source: 'deadly' }),
+				expect.objectContaining({ dice: '(1d8+4)*2' }),
+				expect.objectContaining({ dice: '1d10', source: 'deadly', label: 'Deadly' }),
 			],
 		});
 	});
@@ -81,12 +82,162 @@ describe('buildImportedAttackAction', () => {
 
 		expect(action.rolls[1]).toMatchObject({
 			type: RollTypeEnum.AdvancedDamage,
+			name: 'Weapon Damage',
 			successTerms: [expect.objectContaining({ dice: '1d8+4' })],
 			criticalSuccessTerms: [
-				expect.objectContaining({ dice: '2d12+8' }),
-				expect.objectContaining({ dice: '1d12', source: 'fatal' }),
+				expect.objectContaining({ dice: '(1d12+4)*2' }),
+				expect.objectContaining({ dice: '1d12', source: 'fatal', label: 'Fatal' }),
 			],
 		});
+	});
+
+	it('pairs each imported damage effect with its own critical damage', () => {
+		const action = buildImportedAttackAction({
+			attack: attack({
+				traits: ['deadly d8'],
+				damage: [
+					{
+						dice: '3d6+4',
+						type: 'P',
+						tags: [],
+						mode: 'damage',
+						persistent: false,
+					},
+					{
+						dice: '1d6',
+						type: 'Fire',
+						tags: [],
+						mode: 'damage',
+						persistent: false,
+					},
+					{
+						dice: '1d6',
+						type: 'Electricity',
+						tags: [],
+						mode: 'damage',
+						persistent: false,
+					},
+				],
+			}),
+		});
+
+		expect(action.rolls.slice(1)).toMatchObject([
+			{
+				type: RollTypeEnum.AdvancedDamage,
+				name: 'Weapon Damage',
+				allowRollModifiers: true,
+				successTerms: [expect.objectContaining({ dice: '3d6+4', type: 'P' })],
+				criticalSuccessTerms: [
+					expect.objectContaining({ dice: '(3d6+4)*2', type: 'P' }),
+					expect.objectContaining({
+						dice: '2d8',
+						type: 'P',
+						source: 'deadly',
+						label: 'Deadly',
+					}),
+				],
+			},
+			{
+				type: RollTypeEnum.AdvancedDamage,
+				name: 'Fire Damage',
+				allowRollModifiers: false,
+				successTerms: [expect.objectContaining({ dice: '1d6', type: 'Fire' })],
+				criticalSuccessTerms: [
+					expect.objectContaining({ dice: '(1d6)*2', type: 'Fire' }),
+				],
+			},
+			{
+				type: RollTypeEnum.AdvancedDamage,
+				name: 'Electricity Damage',
+				allowRollModifiers: false,
+				successTerms: [expect.objectContaining({ dice: '1d6', type: 'Electricity' })],
+				criticalSuccessTerms: [
+					expect.objectContaining({ dice: '(1d6)*2', type: 'Electricity' }),
+				],
+			},
+		]);
+	});
+
+	it('uses imported source labels for damage roll names', () => {
+		const action = buildImportedAttackAction({
+			attack: attack({
+				traits: ['deadly d8'],
+				damage: [
+					{
+						dice: '3d6+4',
+						type: 'P',
+						tags: [],
+						mode: 'damage',
+						persistent: false,
+					},
+					{
+						dice: '1d6',
+						type: 'Fire',
+						tags: [],
+						label: 'Flaming Rune',
+						source: 'Flaming Rune',
+						mode: 'damage',
+						persistent: false,
+					},
+					{
+						dice: '1d6',
+						type: 'Electricity',
+						tags: [],
+						label: 'Shock Rune',
+						source: 'Shock Rune',
+						mode: 'damage',
+						persistent: false,
+					},
+				],
+			}),
+		});
+
+		expect(action.rolls.slice(1).map(roll => roll.name)).toEqual([
+			'Weapon Damage',
+			'Flaming Rune Damage',
+			'Shock Rune Damage',
+		]);
+	});
+
+	it('deduplicates repeated source-based damage roll names', () => {
+		const action = buildImportedAttackAction({
+			attack: attack({
+				traits: ['deadly d8'],
+				damage: [
+					{
+						dice: '1d6',
+						type: 'P',
+						tags: [],
+						mode: 'damage',
+						persistent: false,
+					},
+					{
+						dice: '1d6',
+						type: 'Fire',
+						tags: [],
+						label: 'Flaming Rune',
+						source: 'Flaming Rune',
+						mode: 'damage',
+						persistent: false,
+					},
+					{
+						dice: '1d6',
+						type: 'Fire',
+						tags: [],
+						label: 'Flaming Rune',
+						source: 'Flaming Rune',
+						mode: 'damage',
+						persistent: false,
+					},
+				],
+			}),
+		});
+
+		expect(action.rolls.slice(1).map(roll => roll.name)).toEqual([
+			'Weapon Damage',
+			'Flaming Rune Damage',
+			'Flaming Rune Damage 2',
+		]);
 	});
 
 	it('does not change the action structure for two-hand', () => {
@@ -97,6 +248,7 @@ describe('buildImportedAttackAction', () => {
 		expect(action.rolls).toHaveLength(2);
 		expect(action.rolls[1]).toMatchObject({
 			type: RollTypeEnum.damage,
+			name: 'Weapon Damage',
 			terms: [expect.objectContaining({ dice: '1d8+4' })],
 		});
 	});
@@ -141,18 +293,20 @@ describe('buildImportedAttackAction', () => {
 
 		expect(katanaAction.rolls[1]).toMatchObject({
 			type: RollTypeEnum.AdvancedDamage,
+			name: 'Weapon Damage',
 			successTerms: [expect.objectContaining({ dice: '2d6+ 5' })],
 			criticalSuccessTerms: [
-				expect.objectContaining({ dice: '4d6+10' }),
-				expect.objectContaining({ dice: '1d8', source: 'deadly' }),
+				expect.objectContaining({ dice: '(2d6+ 5)*2' }),
+				expect.objectContaining({ dice: '1d8', source: 'deadly', label: 'Deadly' }),
 			],
 		});
 		expect(leiomanoAction.rolls[1]).toMatchObject({
 			type: RollTypeEnum.AdvancedDamage,
+			name: 'Weapon Damage',
 			successTerms: [expect.objectContaining({ dice: '4d6+ 5' })],
 			criticalSuccessTerms: [
-				expect.objectContaining({ dice: '8d6+10' }),
-				expect.objectContaining({ dice: '3d10', source: 'deadly' }),
+				expect.objectContaining({ dice: '(4d6+ 5)*2' }),
+				expect.objectContaining({ dice: '3d10', source: 'deadly', label: 'Deadly' }),
 			],
 		});
 		expect(buildTwoHandRollMacrosForAttacks(sheet.attacks)).toContainEqual({

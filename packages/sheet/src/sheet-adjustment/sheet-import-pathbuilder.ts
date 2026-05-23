@@ -11,7 +11,10 @@ import {
 	type ProficiencyStat,
 } from '@kobold/schema';
 import { applyValuesToStatInPlace, scoreToBonus } from './sheet-import-utils.js';
-import { createNethysItemMetadataIndex } from './nethys-item-metadata.js';
+import {
+	createNethysItemMetadataIndex,
+	type NethysItemMetadata,
+} from './nethys-item-metadata.js';
 
 type PathbuilderPropertyTarget =
 	| { kind: 'stat'; key: SheetStatKeys }
@@ -31,6 +34,30 @@ const ABILITY_FROM_ALIAS: Record<string, AbilityEnum> = {
 	[AbilityEnum.wisdom]: AbilityEnum.wisdom,
 	[AbilityEnum.charisma]: AbilityEnum.charisma,
 };
+
+const damageTypeAliases: Record<string, string> = {
+	b: 'bludgeoning',
+	electric: 'electricity',
+	p: 'piercing',
+	s: 'slashing',
+};
+
+function normalizeDamageType(value: string | null | undefined): string {
+	const normalized = (value ?? '')
+		.toLowerCase()
+		.replace(/[-_]/g, ' ')
+		.replace(/\s+/g, ' ')
+		.trim();
+	return damageTypeAliases[normalized] ?? normalized;
+}
+
+function runeMatchesDamageType(rune: NethysItemMetadata, damageType: string): boolean {
+	const normalizedDamageType = normalizeDamageType(damageType);
+	return (
+		normalizeDamageType(rune.damageType) === normalizedDamageType ||
+		rune.traits.some(trait => normalizeDamageType(trait) === normalizedDamageType)
+	);
+}
 
 const PATHBUILDER_PROFICIENCY_MAP: Record<string, PathbuilderPropertyTarget> = {
 	perception: { kind: 'stat', key: SheetStatKeys.perception },
@@ -438,13 +465,30 @@ export function convertPathBuilderToSheet(
 				mode: 'damage' as const,
 				persistent: false,
 			};
+			const matchedRuneIndexes = new Set<number>();
 			const extraDamage = (weapon.extraDamage ?? []).map((damage: string) => {
 				const [dice, ...type] = damage.split(' ');
 				const damageType = type.join(' ');
+				const runeIndex = runeMetadata.findIndex(
+					(rune, index) =>
+						!matchedRuneIndexes.has(index) &&
+						rune != null &&
+						runeMatchesDamageType(rune, damageType)
+				);
+				const rune = runeIndex >= 0 ? runeMetadata[runeIndex] : null;
+				if (runeIndex >= 0) matchedRuneIndexes.add(runeIndex);
 				return {
 					dice,
 					type: damageType,
-					tags: _.uniq([...attackTags, damageType.toLowerCase()]),
+					tags: _.uniq([
+						...attackTags,
+						damageType.toLowerCase(),
+						...(rune
+							? [rune.name.toLowerCase(), `${rune.name.toLowerCase()} rune`]
+							: []),
+					]),
+					label: rune ? `${rune.name} Rune` : undefined,
+					source: rune ? `${rune.name} Rune` : undefined,
 					mode: 'damage' as const,
 					persistent: false,
 				};

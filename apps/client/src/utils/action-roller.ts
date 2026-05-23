@@ -173,19 +173,24 @@ export class ActionRoller {
 	private buildAdvancedDamageTermName({
 		rollName,
 		outcome,
+		term,
 		termIndex,
 		termCount,
 		includeOutcome,
 	}: {
 		rollName: string;
 		outcome: DamageOutcome;
+		term?: AdvancedDamageRoll['successTerms'][number];
 		termIndex: number;
 		termCount: number;
 		includeOutcome: boolean;
 	}) {
 		const baseName = rollName || 'damage';
 		const outcomePrefix = includeOutcome ? `${damageOutcomeLabels[outcome]} ` : '';
-		const indexSuffix = termCount > 1 ? ` ${termIndex + 1}` : '';
+		const termLabel = term?.label ?? (term?.source ? _.startCase(term.source) : null);
+		if (termLabel && termIndex > 0) return `${outcomePrefix}${baseName} (${termLabel})`;
+
+		const indexSuffix = termCount > 1 && termIndex > 0 ? ` ${termIndex + 1}` : '';
 		return `${outcomePrefix}${baseName}${indexSuffix}`;
 	}
 
@@ -779,6 +784,7 @@ export class ActionRoller {
 							name: this.buildAdvancedDamageTermName({
 								rollName: roll.name,
 								outcome: group.outcome,
+								term,
 								termIndex,
 								termCount: group.terms.length,
 								includeOutcome: includeOutcomeInTitle,

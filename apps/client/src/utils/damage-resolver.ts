@@ -13,6 +13,17 @@ const damageTypeAliases: Record<string, string> = {
 
 const physicalDamageTypes = new Set(['bludgeoning', 'piercing', 'slashing']);
 const energyDamageTypes = new Set(['acid', 'cold', 'electricity', 'fire', 'force', 'sonic']);
+const knownDamageTypes = new Set([
+	...physicalDamageTypes,
+	...energyDamageTypes,
+	'bleed',
+	'mental',
+	'poison',
+	'precision',
+	'spirit',
+	'vitality',
+	'void',
+]);
 
 export type PreparedDamageLine = {
 	amount: number;
@@ -109,6 +120,21 @@ function matcherTermsMatch(values: string[] | undefined, bucket: DamageBucket): 
 	return false;
 }
 
+function matcherDamageTypesMatch(values: string[] | undefined, bucket: DamageBucket): boolean {
+	if (!values?.length) return false;
+	return values.some(value => bucket.damageType === canonicalDamageType(value));
+}
+
+function matcherTraitsMatch(values: string[] | undefined, bucket: DamageBucket): boolean {
+	if (!values?.length) return false;
+	for (const value of values) {
+		const term = canonicalDamageType(value);
+		if (knownDamageTypes.has(term)) continue;
+		if (bucket.tags.has(term)) return true;
+	}
+	return false;
+}
+
 function matcherMatches(matcher: DefenseMatcher, bucket: DamageBucket): boolean {
 	if (matcher.except && matcherMatches(matcher.except, bucket)) return false;
 	if (matcher.allOf?.length) {
@@ -118,9 +144,9 @@ function matcherMatches(matcher: DefenseMatcher, bucket: DamageBucket): boolean 
 	if (matcher.damageGroups?.includes('physical') && physicalDamageTypes.has(bucket.damageType)) {
 		return true;
 	}
-	if (matcherTermsMatch(matcher.damageTypes, bucket)) return true;
+	if (matcherDamageTypesMatch(matcher.damageTypes, bucket)) return true;
 	if (matcherTermsMatch(matcher.materials, bucket)) return true;
-	if (matcherTermsMatch(matcher.traits, bucket)) return true;
+	if (matcherTraitsMatch(matcher.traits, bucket)) return true;
 	if (matcherTermsMatch(matcher.effectTypes, bucket)) return true;
 	if (matcherTermsMatch(matcher.conditions, bucket)) return true;
 	return false;

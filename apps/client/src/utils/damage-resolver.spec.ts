@@ -198,6 +198,33 @@ describe('resolveDamagePacket', () => {
 		expect(result.appliedResistances).toEqual([]);
 	});
 
+	it('only applies damage type immunity to matching damage buckets', () => {
+		const sheet = sheetWithIwr({
+			immunities: ['fire'],
+		});
+
+		const result = resolveDamagePacket(sheet, {
+			tags: ['fire'],
+			lines: [
+				{ amount: 13, damageType: 'piercing', tags: ['fire'] },
+				{ amount: 5, damageType: 'fire', tags: ['fire'] },
+				{ amount: 5, damageType: 'electricity', tags: ['fire'] },
+			],
+		});
+
+		expect(result.totalAfterIwr).toBe(18);
+		expect(result.byType).toMatchObject([
+			{ damageType: 'piercing', amountAfterIwr: 13, appliedImmunities: [] },
+			{
+				damageType: 'fire',
+				amountAfterIwr: 0,
+				appliedImmunities: [expect.objectContaining({ label: 'fire' })],
+			},
+			{ damageType: 'electricity', amountAfterIwr: 5, appliedImmunities: [] },
+		]);
+		expect(result.appliedImmunities.map(immunity => immunity.label)).toEqual(['fire']);
+	});
+
 	it('can match action tags and only trigger that weakness once', () => {
 		const sheet = sheetWithIwr({
 			weaknesses: [{ type: 'spell', amount: 4 }],
@@ -467,6 +494,79 @@ describe('resolveDamagePacket', () => {
 			'critical success',
 			'success',
 			'failure',
+		]);
+	});
+
+	it('uses labeled critical terms for advanced damage display names', () => {
+		const source = new Creature({
+			sheet: sheetWithIwr({}),
+			actions: [],
+			rollMacros: [],
+			modifiers: [],
+			conditions: [],
+		});
+		const action: Action = {
+			actionCost: ActionCostEnum.oneAction,
+			autoHeighten: false,
+			baseLevel: null,
+			description: '',
+			id: -1,
+			name: 'Deadly Preview',
+			rolls: [
+				{
+					allowRollModifiers: false,
+					criticalFailureTerms: [],
+					criticalSuccessTerms: [
+						{
+							dice: '40',
+							type: 'piercing',
+							tags: [],
+							mode: 'damage',
+							persistent: false,
+						},
+						{
+							dice: '4',
+							type: 'piercing',
+							tags: [],
+							mode: 'damage',
+							persistent: false,
+							source: 'deadly',
+							label: 'Deadly',
+						},
+					],
+					failureTerms: [],
+					name: 'Damage 1',
+					successTerms: [
+						{
+							dice: '10',
+							type: 'piercing',
+							tags: [],
+							mode: 'damage',
+							persistent: false,
+						},
+					],
+					type: RollTypeEnum.AdvancedDamage,
+				},
+			],
+			sheetRecordId: null,
+			tags: [],
+			type: ActionTypeEnum.attack,
+			userId: '-1',
+		};
+
+		const actionRoller = new ActionRoller(null, action, source, null, {
+			autoApplyDamage: false,
+		});
+		const rollBuilder = actionRoller.buildRoll('', '', {});
+
+		expect(
+			rollBuilder.rollResults
+				.filter(result => result.type === 'dice')
+				.map(result => result.name)
+		).toEqual([
+			'critical success Damage 1',
+			'critical success Damage 1 (Deadly)',
+			'success Damage 1',
 		]);
 	});
 });
