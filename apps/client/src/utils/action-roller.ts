@@ -4,11 +4,14 @@ import { getEmoji } from '../constants/emoji.js';
 import { utilStrings } from '@kobold/documentation';
 import {
 	Action,
+	ActionEffectTriggerEnum,
 	AdvancedDamageRoll,
 	AttackOrSkillRoll,
+	Condition,
 	DefenseRule,
 	Attribute,
 	DamageRoll,
+	EffectRoll,
 	Roll,
 	SaveRoll,
 	TextRoll,
@@ -37,6 +40,10 @@ import { buildImportedAttackAction } from './imported-attack-action-builder.js';
 
 type ContestedRollTypes = 'attack' | 'skill-challenge' | 'save' | 'none';
 type ResultRollTypes = 'damage' | 'advanced-damage' | 'text';
+type EffectResult = {
+	condition: Condition;
+	status: 'applied' | 'already-active' | 'no-target';
+};
 
 type BuildRollOptions = {
 	heightenLevel?: number;
@@ -82,8 +89,10 @@ export class ActionRoller {
 	public triggeredResistances: DefenseRule[] = [];
 	public triggeredImmunities: DefenseRule[] = [];
 	public preparedDamageLines: PreparedDamageLine[] = [];
+	public conditionEffects: EffectResult[] = [];
 	protected damageHasResolved = false;
 	protected damageRollOverwriteIfUnused: string | null = null;
+	protected conditionEffectsChanged = false;
 	constructor(
 		public userSettings: UserSettings | null,
 		public action: Action,
@@ -117,6 +126,67 @@ export class ActionRoller {
 			this.triggeredResistances.length > 0 ||
 			this.triggeredImmunities.length > 0
 		);
+	}
+
+	public shouldPersistConditionEffects() {
+		return this.conditionEffectsChanged;
+	}
+
+	public shouldDisplayEffectText() {
+		return this.conditionEffects.length > 0;
+	}
+
+	private formatConditionName(condition: Condition): string {
+		const severityText =
+			condition.severity === null || condition.severity === undefined
+				? ''
+				: ` ${condition.severity}`;
+		return `${condition.name}${severityText}`;
+	}
+
+	public buildEffectResultText() {
+		const applied = this.conditionEffects
+			.filter(effect => effect.status === 'applied')
+			.map(effect => this.formatConditionName(effect.condition));
+		const alreadyActive = this.conditionEffects
+			.filter(effect => effect.status === 'already-active')
+			.map(effect => this.formatConditionName(effect.condition));
+		const noTarget = this.conditionEffects
+			.filter(effect => effect.status === 'no-target')
+			.map(effect => this.formatConditionName(effect.condition));
+
+		const lines = [];
+		if (applied.length) lines.push(`Applied: ${applied.join(', ')}`);
+		if (alreadyActive.length) lines.push(`Already active: ${alreadyActive.join(', ')}`);
+		if (noTarget.length) lines.push(`No target: ${noTarget.join(', ')}`);
+		return lines.join('\n');
+	}
+
+	private conditionNamesMatch(a: string, b: string) {
+		return a.toLocaleLowerCase().trim() === b.toLocaleLowerCase().trim();
+	}
+
+	private doesEffectTriggerMatch(
+		trigger: ActionEffectTriggerEnum,
+		lastTargetingResult: TargetingResult,
+		lastTargetingActionType: ContestedRollTypes
+	) {
+		if (trigger === ActionEffectTriggerEnum.any) return true;
+		if (lastTargetingActionType === 'none' || !lastTargetingResult) return false;
+		if (trigger === lastTargetingResult) return true;
+		if (trigger === ActionEffectTriggerEnum.successOrBetter) {
+			return (
+				lastTargetingResult === ActionEffectTriggerEnum.success ||
+				lastTargetingResult === ActionEffectTriggerEnum.criticalSuccess
+			);
+		}
+		if (trigger === ActionEffectTriggerEnum.failureOrWorse) {
+			return (
+				lastTargetingResult === ActionEffectTriggerEnum.failure ||
+				lastTargetingResult === ActionEffectTriggerEnum.criticalFailure
+			);
+		}
+		return false;
 	}
 
 	private getDamageOutcome(
@@ -371,6 +441,50 @@ export class ActionRoller {
 			text += `\nCritical Failure: ${roll.criticalFailureText}`;
 		}
 		rollBuilder.addText({ title, text, extraAttributes: _.values(extraAttributes), tags });
+	}
+
+	public applyEffect(
+		roll: EffectRoll,
+		lastTargetingResult: TargetingResult,
+		lastTargetingActionType: ContestedRollTypes
+	) {
+		if (
+			!this.doesEffectTriggerMatch(
+				roll.trigger,
+				lastTargetingResult,
+				lastTargetingActionType
+			)
+		) {
+			return;
+		}
+
+		if (!this.targetCreature) {
+			this.conditionEffects.push({
+				condition: roll.condition,
+				status: 'no-target',
+			});
+			return;
+		}
+
+		const existingCondition = this.targetCreature.conditions.find(condition =>
+			this.conditionNamesMatch(condition.name, roll.condition.name)
+		);
+		if (existingCondition) {
+			this.conditionEffects.push({
+				condition: existingCondition,
+				status: 'already-active',
+			});
+			return;
+		}
+
+		const condition = _.cloneDeep(roll.condition);
+		condition.isActive = true;
+		this.targetCreature.conditions.push(condition);
+		this.conditionEffectsChanged = true;
+		this.conditionEffects.push({
+			condition,
+			status: 'applied',
+		});
 	}
 
 	public rollBasicDamage(
@@ -732,6 +846,8 @@ export class ActionRoller {
 					lastTargetingResult,
 					lastTargetingActionType
 				);
+			} else if (rollType === 'effect') {
+				this.applyEffect(roll, lastTargetingResult, lastTargetingActionType);
 			} else if (rollType === 'damage') {
 				const damageOutcome = this.getDamageOutcome(
 					lastTargetingResult,

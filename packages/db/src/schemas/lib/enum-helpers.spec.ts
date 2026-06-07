@@ -209,6 +209,7 @@ describe('Enum Helpers', () => {
 			expect(isRollTypeEnum(RollTypeEnum.AdvancedDamage)).toBe(true);
 			expect(isRollTypeEnum(RollTypeEnum.attack)).toBe(true);
 			expect(isRollTypeEnum(RollTypeEnum.damage)).toBe(true);
+			expect(isRollTypeEnum(RollTypeEnum.effect)).toBe(true);
 			expect(isRollTypeEnum(RollTypeEnum.save)).toBe(true);
 			expect(isRollTypeEnum(RollTypeEnum.skillChallenge)).toBe(true);
 			expect(isRollTypeEnum(RollTypeEnum.text)).toBe(true);

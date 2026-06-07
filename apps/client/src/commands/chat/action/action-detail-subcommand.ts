@@ -145,6 +145,15 @@ export class ActionDetailSubCommand extends BaseCommandClass(
 				description += `\nVs your: ${roll.saveTargetDC}`;
 				const field = { name: roll.name, value: description };
 				actionDetailEmbed.addFields([field]);
+			} else if (roll.type === 'effect') {
+				let description = ``;
+				description += `\nTrigger: ${roll.trigger}`;
+				description += `\nCondition: ${roll.condition.name}`;
+				if (roll.condition.severity !== null && roll.condition.severity !== undefined) {
+					description += ` ${roll.condition.severity}`;
+				}
+				const field = { name: roll.name, value: description };
+				actionDetailEmbed.addFields([field]);
 			}
 		}
 

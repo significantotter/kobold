@@ -176,11 +176,19 @@ export class RollActionSubCommand extends BaseCommandClass(
 			targetDC,
 		});
 
+		if (actionRoller.shouldDisplayEffectText()) {
+			embed.addFields({
+				name: 'Effects',
+				value: actionRoller.buildEffectResultText(),
+			});
+		}
+
 		if (targetCreature && targetSheetRecord && actionRoller.shouldDisplayDamageText()) {
 			// apply any effects from the action to the creature
 			await creatureUtils.saveSheet(intr, {
 				...targetSheetRecord,
 				sheet: targetCreature._sheet,
+				conditions: targetCreature.conditions,
 			});
 
 			const damageField = await EmbedUtils.getOrSendActionDamageField({
@@ -191,6 +199,21 @@ export class RollActionSubCommand extends BaseCommandClass(
 			});
 
 			embed.addFields(damageField);
+		}
+		if (targetCreature && targetSheetRecord && actionRoller.shouldPersistConditionEffects()) {
+			await kobold.sheetRecord.update(
+				{ id: targetSheetRecord.id },
+				{
+					conditions: targetCreature.conditions,
+				}
+			);
+			koboldUtils.adjustedSheetService.triggerRecompute(targetSheetRecord.id);
+			if (!actionRoller.shouldDisplayDamageText() && targetSheetRecord.trackerMessageId) {
+				await creatureUtils.updateSheetTracker(intr, {
+					...targetSheetRecord,
+					conditions: targetCreature.conditions,
+				});
+			}
 		}
 		await EmbedUtils.dispatchEmbeds(
 			intr,

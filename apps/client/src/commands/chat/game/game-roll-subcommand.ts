@@ -170,7 +170,8 @@ export class GameRollSubCommand extends BaseCommandClass(
 				targetSheetRecord,
 				targetSheetName,
 				hideStats,
-				creatureUtils
+				creatureUtils,
+				koboldUtils
 			);
 			embeds.push(...rollResult);
 		}
@@ -188,7 +189,8 @@ export class GameRollSubCommand extends BaseCommandClass(
 				targetSheetRecord,
 				targetSheetName,
 				hideStats,
-				creatureUtils
+				creatureUtils,
+				koboldUtils
 			);
 			embeds.push(...rollResult);
 		}
@@ -211,7 +213,8 @@ export class GameRollSubCommand extends BaseCommandClass(
 		targetSheetRecord: SheetRecordBase | null,
 		targetSheetName: string | null,
 		hideStats: boolean,
-		creatureUtils: any
+		creatureUtils: any,
+		koboldUtils: KoboldUtils
 	): Promise<KoboldEmbed[]> {
 		const embeds: KoboldEmbed[] = [];
 		const rollOptions = {
@@ -244,8 +247,19 @@ export class GameRollSubCommand extends BaseCommandClass(
 				action: targetAction,
 			});
 
+			if (actionRoller.shouldDisplayEffectText()) {
+				embed.addFields({
+					name: 'Effects',
+					value: actionRoller.buildEffectResultText(),
+				});
+			}
+
 			if (targetSheetRecord && targetCreature && actionRoller.shouldDisplayDamageText()) {
-				await creatureUtils.saveSheet(intr, targetSheetRecord);
+				await creatureUtils.saveSheet(intr, {
+					...targetSheetRecord,
+					sheet: targetCreature._sheet,
+					conditions: targetCreature.conditions,
+				});
 
 				const damageField = await EmbedUtils.getOrSendActionDamageField({
 					intr,
@@ -254,6 +268,23 @@ export class GameRollSubCommand extends BaseCommandClass(
 					targetNameOverwrite: targetSheetName!,
 				});
 				embed.addFields(damageField);
+			}
+			if (
+				targetSheetRecord &&
+				targetCreature &&
+				actionRoller.shouldPersistConditionEffects()
+			) {
+				await koboldUtils.kobold.sheetRecord.update(
+					{ id: targetSheetRecord.id },
+					{ conditions: targetCreature.conditions }
+				);
+				koboldUtils.adjustedSheetService.triggerRecompute(targetSheetRecord.id);
+				if (!actionRoller.shouldDisplayDamageText() && targetSheetRecord.trackerMessageId) {
+					await creatureUtils.updateSheetTracker(intr, {
+						...targetSheetRecord,
+						conditions: targetCreature.conditions,
+					});
+				}
 			}
 			embeds.push(embed);
 		} else if (rollOptions[rollType.trim().toLocaleLowerCase()]) {
@@ -270,13 +301,24 @@ export class GameRollSubCommand extends BaseCommandClass(
 				embed = rollResult.message;
 			}
 
+			if (rollResult.actionRoller?.shouldDisplayEffectText()) {
+				embed.addFields({
+					name: 'Effects',
+					value: rollResult.actionRoller.buildEffectResultText(),
+				});
+			}
+
 			if (
 				targetSheetRecord &&
 				targetCreature &&
 				rollResult.actionRoller &&
 				rollResult.actionRoller.shouldDisplayDamageText()
 			) {
-				await creatureUtils.saveSheet(intr, targetSheetRecord);
+				await creatureUtils.saveSheet(intr, {
+					...targetSheetRecord,
+					sheet: targetCreature._sheet,
+					conditions: targetCreature.conditions,
+				});
 
 				const damageField = await EmbedUtils.getOrSendActionDamageField({
 					intr,
@@ -286,6 +328,26 @@ export class GameRollSubCommand extends BaseCommandClass(
 				});
 
 				embed.addFields(damageField);
+			}
+			if (
+				targetSheetRecord &&
+				targetCreature &&
+				rollResult.actionRoller?.shouldPersistConditionEffects()
+			) {
+				await koboldUtils.kobold.sheetRecord.update(
+					{ id: targetSheetRecord.id },
+					{ conditions: targetCreature.conditions }
+				);
+				koboldUtils.adjustedSheetService.triggerRecompute(targetSheetRecord.id);
+				if (
+					!rollResult.actionRoller.shouldDisplayDamageText() &&
+					targetSheetRecord.trackerMessageId
+				) {
+					await creatureUtils.updateSheetTracker(intr, {
+						...targetSheetRecord,
+						conditions: targetCreature.conditions,
+					});
+				}
 			}
 			embeds.push(embed);
 		} else if (rollType.toLocaleLowerCase() === 'dice') {

@@ -11,6 +11,7 @@ export enum ActionStageSubCommandEnum {
 	addAdvancedDamage = 'add-advanced-damage',
 	addAttack = 'add-attack',
 	addBasicDamage = 'add-basic-damage',
+	addEffect = 'add-effect',
 	addSave = 'add-save',
 	addSkillChallenge = 'add-skill-challenge',
 	addText = 'add-text',
@@ -196,6 +197,61 @@ export const actionStageCommandDefinition = {
 				[ActionStageCommandOptionEnum.extraTags]: withOrder(
 					actionStageCommandOptions[ActionStageCommandOptionEnum.extraTags],
 					8
+				),
+			},
+		},
+		[ActionStageSubCommandEnum.addEffect]: {
+			name: ActionStageSubCommandEnum.addEffect,
+			description: 'Adds a condition effect to apply based on the previous roll result.',
+			type: ApplicationCommandOptionType.Subcommand,
+			options: {
+				[ActionStageCommandOptionEnum.actionTarget]: withOrder(
+					actionStageCommandOptions[ActionStageCommandOptionEnum.actionTarget],
+					1
+				),
+				[ActionStageCommandOptionEnum.rollName]: withOrder(
+					actionStageCommandOptions[ActionStageCommandOptionEnum.rollName],
+					2
+				),
+				[ActionStageCommandOptionEnum.effectTrigger]: withOrder(
+					actionStageCommandOptions[ActionStageCommandOptionEnum.effectTrigger],
+					3
+				),
+				[ActionStageCommandOptionEnum.effectConditionName]: withOrder(
+					actionStageCommandOptions[ActionStageCommandOptionEnum.effectConditionName],
+					4
+				),
+				[ActionStageCommandOptionEnum.effectConditionType]: withOrder(
+					actionStageCommandOptions[ActionStageCommandOptionEnum.effectConditionType],
+					5
+				),
+				[ActionStageCommandOptionEnum.effectConditionSeverity]: withOrder(
+					actionStageCommandOptions[ActionStageCommandOptionEnum.effectConditionSeverity],
+					6
+				),
+				[ActionStageCommandOptionEnum.effectConditionRollAdjustment]: withOrder(
+					actionStageCommandOptions[
+						ActionStageCommandOptionEnum.effectConditionRollAdjustment
+					],
+					7
+				),
+				[ActionStageCommandOptionEnum.effectConditionTargetTags]: withOrder(
+					actionStageCommandOptions[ActionStageCommandOptionEnum.effectConditionTargetTags],
+					8
+				),
+				[ActionStageCommandOptionEnum.effectConditionSheetValues]: withOrder(
+					actionStageCommandOptions[ActionStageCommandOptionEnum.effectConditionSheetValues],
+					9
+				),
+				[ActionStageCommandOptionEnum.effectConditionDescription]: withOrder(
+					actionStageCommandOptions[ActionStageCommandOptionEnum.effectConditionDescription],
+					10
+				),
+				[ActionStageCommandOptionEnum.effectConditionInitiativeNote]: withOrder(
+					actionStageCommandOptions[
+						ActionStageCommandOptionEnum.effectConditionInitiativeNote
+					],
+					11
 				),
 			},
 		},
