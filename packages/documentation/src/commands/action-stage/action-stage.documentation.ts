@@ -92,6 +92,28 @@ export const actionStageCommandDocumentation: CommandDocumentation<
 				},
 			],
 		},
+		[ActionStageSubCommandEnum.addEffect]: {
+			name: ActionStageSubCommandEnum.addEffect,
+			description: 'Adds a condition effect to an action based on a roll result.',
+			usage: null,
+			examples: [
+				{
+					title: 'Success',
+					type: CommandResponseTypeEnum.success,
+					message: 'Yip! I added an effect roll to the action {actionName:Demoralize}.',
+					options: {
+						[ActionStageCommandOptionEnum.actionTarget]: 'Demoralize',
+						[ActionStageCommandOptionEnum.rollName]: 'Frightened',
+						[ActionStageCommandOptionEnum.effectTrigger]: 'success or better',
+						[ActionStageCommandOptionEnum.effectConditionName]: 'frightened',
+						[ActionStageCommandOptionEnum.effectConditionSeverity]: '1',
+						[ActionStageCommandOptionEnum.effectConditionType]: 'status',
+						[ActionStageCommandOptionEnum.effectConditionSheetValues]:
+							'ac-[severity];fortitude-[severity];reflex-[severity];will-[severity]',
+					},
+				},
+			],
+		},
 		[ActionStageSubCommandEnum.addSave]: {
 			name: ActionStageSubCommandEnum.addSave,
 			description: 'Adds a save roll to an action. This is a roll against a DC.',

@@ -175,7 +175,7 @@ export class ConditionApplyCustomSubCommand extends BaseCommandClass(
 			rollAdjustment,
 			note: InputParseUtils.parseAsNullableString(note, {
 				inputName: 'initiative-note',
-				maxLength: 40,
+				maxLength: InputParseUtils.INITIATIVE_NOTE_MAX_LENGTH,
 			}),
 		};
 

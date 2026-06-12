@@ -48,6 +48,7 @@
 		"@kobold/config": "workspace:*",
 		"@kobold/db": "workspace:*",
 		"@kobold/documentation": "workspace:*",
+		"@kobold/logger": "workspace:*",
 		"@kobold/schema": "workspace:*",
 		"@kobold/sheet": "workspace:*",
 		"@kobold/nethys": "workspace:*",
@@ -71,8 +72,6 @@
 		"lodash": "^4.17.21",
 		"node-fetch": "3.3.2",
 		"node-schedule": "2.1.1",
-		"pino": "10.1.0",
-		"pino-pretty": "13.1.3",
 		"pm2": "^6.0.14",
 		"reflect-metadata": "^0.2.2",
 		"zod": "^4.2.1"

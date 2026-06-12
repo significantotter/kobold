@@ -142,7 +142,7 @@ export class ConditionSetSubCommand extends BaseCommandClass(
 			else
 				targetCondition.note = InputParseUtils.parseAsNullableString(newFieldValue, {
 					inputName: fieldToChange,
-					maxLength: 40,
+					maxLength: InputParseUtils.INITIATIVE_NOTE_MAX_LENGTH,
 				});
 		} else if (fieldToChange === 'severity') {
 			if (newFieldValue == null) targetCondition.severity = null;

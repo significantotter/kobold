@@ -5,13 +5,21 @@ import {
 	CacheType,
 	ChatInputCommandInteraction,
 } from 'discord.js';
-import { Kobold, Roll, type DamageTerm } from '@kobold/db';
+import {
+	ActionEffectTriggerEnum,
+	Kobold,
+	Roll,
+	SheetAdjustmentTypeEnum,
+	isSheetAdjustmentTypeEnum,
+	type DamageTerm,
+} from '@kobold/db';
 
 import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
 import _ from 'lodash';
 import { BaseCommandClass } from '../../command.js';
 import { ActionStageDefinition } from '@kobold/documentation';
+import { InputParseUtils } from '../../../utils/input-parse-utils.js';
 const commandOptions = ActionStageDefinition.options;
 const commandOptionsEnum = ActionStageDefinition.commandOptionsEnum;
 
@@ -154,6 +162,19 @@ export class ActionStageSetSubCommand extends BaseCommandClass(
 					'allowRollModifiers',
 					'textExtraTags',
 				];
+			} else if (roll.type === 'effect') {
+				validUpdateOptions = [
+					'name',
+					'effectTrigger',
+					'effectConditionName',
+					'effectConditionType',
+					'effectConditionSeverity',
+					'effectConditionDescription',
+					'effectConditionInitiativeNote',
+					'effectConditionSheetValues',
+					'effectConditionRollAdjustment',
+					'effectConditionTargetTags',
+				];
 			} else {
 				return allChoices;
 			}
@@ -267,6 +288,23 @@ export class ActionStageSetSubCommand extends BaseCommandClass(
 			) {
 				invalid = true;
 			}
+		} else if (roll.type === 'effect') {
+			if (
+				![
+					'name',
+					'trigger',
+					'conditionName',
+					'conditionType',
+					'conditionSeverity',
+					'conditionDescription',
+					'conditionInitiativeNote',
+					'conditionSheetValues',
+					'conditionRollAdjustment',
+					'conditionRollTargetTags',
+				].includes(fieldToUpdate)
+			) {
+				invalid = true;
+			}
 		} else {
 			invalid = true;
 		}
@@ -302,11 +340,20 @@ export class ActionStageSetSubCommand extends BaseCommandClass(
 				'successText',
 				'failureText',
 				'criticalSuccessText',
-				'criticalFailureText',
-				'saveRollType',
-				'saveTargetDC',
-			].includes(fieldToUpdate)
-		) {
+					'criticalFailureText',
+					'saveRollType',
+					'saveTargetDC',
+					'trigger',
+					'conditionName',
+					'conditionType',
+					'conditionSeverity',
+					'conditionDescription',
+					'conditionInitiativeNote',
+					'conditionSheetValues',
+					'conditionRollAdjustment',
+					'conditionRollTargetTags',
+				].includes(fieldToUpdate)
+			) {
 			finalValue = newValue.trim();
 			if (['none', 'null', 'nil', 'undefined', ''].includes(finalValue.toLocaleLowerCase())) {
 				finalValue = undefined;
@@ -425,6 +472,119 @@ export class ActionStageSetSubCommand extends BaseCommandClass(
 				};
 			} else if (fieldToUpdate === 'name' || fieldToUpdate === 'allowRollModifiers') {
 				updatedRoll = { ...roll, [fieldName]: finalValue };
+			}
+		} else if (roll.type === 'effect') {
+			if (fieldToUpdate === 'name') {
+				updatedRoll = { ...roll, name: finalStringValue ?? roll.name };
+			} else if (fieldToUpdate === 'trigger') {
+				if (!Object.values(ActionEffectTriggerEnum).includes(finalStringValue as any)) {
+					await InteractionUtils.send(
+						intr,
+						ActionStageDefinition.strings.set.invalidField({
+							stageType: roll.type,
+						})
+					);
+					return;
+				}
+				updatedRoll = {
+					...roll,
+					trigger: finalStringValue as ActionEffectTriggerEnum,
+				};
+			} else if (fieldToUpdate === 'conditionName') {
+				updatedRoll = {
+					...roll,
+					condition: {
+						...roll.condition,
+						name: InputParseUtils.parseAsString(finalStringValue ?? roll.condition.name, {
+							inputName: 'condition-name',
+							minLength: 3,
+							maxLength: 20,
+						}),
+					},
+				};
+			} else if (fieldToUpdate === 'conditionType') {
+				const conditionType = finalStringValue ?? SheetAdjustmentTypeEnum.untyped;
+				if (!isSheetAdjustmentTypeEnum(conditionType)) {
+					await InteractionUtils.send(
+						intr,
+						ActionStageDefinition.strings.set.invalidField({
+							stageType: roll.type,
+						})
+					);
+					return;
+				}
+				updatedRoll = {
+					...roll,
+					condition: { ...roll.condition, type: conditionType },
+				};
+			} else if (fieldToUpdate === 'conditionSeverity') {
+				updatedRoll = {
+					...roll,
+					condition: {
+						...roll.condition,
+						severity: InputParseUtils.parseAsNullableNumber(finalStringValue ?? null),
+					},
+				};
+			} else if (fieldToUpdate === 'conditionDescription') {
+				updatedRoll = {
+					...roll,
+					condition: {
+						...roll.condition,
+						description: InputParseUtils.parseAsNullableString(finalStringValue ?? null, {
+							inputName: 'condition-description',
+							maxLength: 300,
+						}),
+					},
+				};
+			} else if (fieldToUpdate === 'conditionInitiativeNote') {
+				updatedRoll = {
+					...roll,
+					condition: {
+						...roll.condition,
+						note: InputParseUtils.parseAsNullableString(finalStringValue ?? null, {
+							inputName: 'condition-initiative-note',
+							maxLength: InputParseUtils.INITIATIVE_NOTE_MAX_LENGTH,
+						}),
+					},
+				};
+			} else if (fieldToUpdate === 'conditionSheetValues') {
+				updatedRoll = {
+					...roll,
+					condition: {
+						...roll.condition,
+						sheetAdjustments: finalStringValue
+							? InputParseUtils.parseAsSheetAdjustments(
+									finalStringValue,
+									roll.condition.type
+								)
+							: [],
+					},
+				};
+			} else if (fieldToUpdate === 'conditionRollAdjustment') {
+				updatedRoll = {
+					...roll,
+					condition: {
+						...roll.condition,
+						rollAdjustment: finalStringValue ?? null,
+					},
+				};
+			} else if (fieldToUpdate === 'conditionRollTargetTags') {
+				if (finalStringValue && !InputParseUtils.isValidRollTargetTags(finalStringValue)) {
+					await InteractionUtils.send(
+						intr,
+						ActionStageDefinition.strings.set.invalidField({
+							stageType: roll.type,
+						})
+					);
+					return;
+				}
+				updatedRoll = {
+					...roll,
+					condition: {
+						...roll.condition,
+						rollTargetTags: finalStringValue ?? null,
+					},
+				};
 			}
 		}
 

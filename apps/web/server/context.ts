@@ -3,12 +3,14 @@ import { getCookie } from 'hono/cookie';
 import type { Kobold } from '@kobold/db';
 import { kobold } from './services.js';
 import { verifySessionToken } from './session.js';
+import { getRequestIdentity, type WebEnv } from './request-identity.js';
 
 export interface SessionUser {
 	userId: string;
 	username: string;
 	discriminator: string;
 	avatar: string | null;
+	displayName: string;
 }
 
 export interface AppContext {
@@ -16,6 +18,8 @@ export interface AppContext {
 	userId: string | null;
 	/** Decoded session user data, if authenticated */
 	user: SessionUser | null;
+	/** Stable anonymous session ID used to correlate logs. */
+	sessionId: string;
 	/** The raw Hono context for accessing cookies, headers, etc. */
 	honoContext: HonoContext;
 	/** Shared Kobold database service */
@@ -26,7 +30,7 @@ export interface AppContext {
  * Creates the request context for oRPC procedures.
  * Extracts user session from cookies/headers.
  */
-export function createContext(c: HonoContext): AppContext {
+export function createContext(c: HonoContext<WebEnv>): AppContext {
 	// Get session token from cookie
 	const sessionToken = getCookie(c, 'session');
 
@@ -42,6 +46,7 @@ export function createContext(c: HonoContext): AppContext {
 				username: payload.username ?? 'Unknown',
 				discriminator: payload.discriminator ?? '0',
 				avatar: payload.avatar ?? null,
+				displayName: payload.displayName ?? payload.username ?? 'Unknown',
 			};
 		}
 	}
@@ -49,6 +54,7 @@ export function createContext(c: HonoContext): AppContext {
 	return {
 		userId,
 		user,
+		sessionId: getRequestIdentity(c).sessionId,
 		honoContext: c,
 		kobold,
 	};

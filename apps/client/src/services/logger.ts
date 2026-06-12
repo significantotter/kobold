@@ -1,27 +1,14 @@
 import { DiscordAPIError } from 'discord.js';
 import { Response } from 'node-fetch';
-import pino from 'pino';
 import { Config } from '@kobold/config';
+import { createLogger } from '@kobold/logger';
 
-let logger = pino(
-	{
-		formatters: {
-			level: (label: string) => {
-				return { level: label };
-			},
-		},
-	},
-	Config.logging.pretty
-		? pino.transport({
-				target: 'pino-pretty',
-				options: {
-					colorize: true,
-					ignore: 'pid,hostname',
-					translateTime: 'yyyy-mm-dd HH:MM:ss.l',
-				},
-		  })
-		: undefined
-);
+const environment = process.env.NODE_ENV ?? 'development';
+let logger = createLogger({
+	service: 'bot',
+	environment,
+	pretty: environment !== 'production' && Config.logging.pretty,
+});
 
 export class Logger {
 	protected static shardId: number;

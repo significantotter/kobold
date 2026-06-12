@@ -4,13 +4,15 @@ import { Config } from '@kobold/config';
 interface SessionUser {
 	id: string;
 	username: string;
+	global_name?: string | null;
 	discriminator: string;
 	avatar: string | null;
 }
 
-interface SessionPayload {
+export interface SessionPayload {
 	userId: string;
 	username: string;
+	displayName?: string;
 	discriminator: string;
 	avatar: string | null;
 	exp: number;
@@ -36,6 +38,7 @@ export function createSessionToken(user: SessionUser): string {
 	const payload: SessionPayload = {
 		userId: user.id,
 		username: user.username,
+		displayName: user.global_name ?? user.username,
 		discriminator: user.discriminator,
 		avatar: user.avatar,
 		exp: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days

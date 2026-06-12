@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import { installPageViewLogging } from './logging/page-views';
 
 const router = createRouter({
 	history: createWebHistory(),
@@ -70,5 +71,7 @@ const router = createRouter({
 		},
 	],
 });
+
+installPageViewLogging(router);
 
 export default router;

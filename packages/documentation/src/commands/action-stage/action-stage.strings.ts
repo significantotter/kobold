@@ -31,6 +31,16 @@ export const actionStageStrings = {
 		requireText: 'Yip! You must provide at least one save result to add a save to an action!',
 	},
 
+	// ─── ADD-EFFECT SUBCOMMAND ───────────────────────────────────────────
+	addEffect: {
+		requireEffect:
+			'Yip! You need to provide a roll adjustment, sheet adjustment, or initiative note for the effect condition!',
+		requireRollAdjustment:
+			'Yip! You need to provide a roll adjustment if you want to use target tags!',
+		requireTargetTags:
+			'Yip! You need to provide target tags if you want to use a roll adjustment!',
+	},
+
 	// ─── SET SUBCOMMAND ──────────────────────────────────────────────────
 	set: {
 		success: msg(
