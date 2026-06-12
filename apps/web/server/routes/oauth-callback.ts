@@ -2,10 +2,12 @@ import { Hono } from 'hono';
 import { setCookie, getCookie } from 'hono/cookie';
 import { Config } from '@kobold/config';
 import { createSessionToken } from '../session.js';
+import { logger } from '../logging.js';
+import { getRequestIdentity, type WebEnv } from '../request-identity.js';
 
 const FRONTEND_URL = process.env.FRONTEND_BASE_URL || 'http://localhost:5173';
 
-export const oauthCallbackRoute = new Hono();
+export const oauthCallbackRoute = new Hono<WebEnv>();
 
 const DISCORD_API_BASE = 'https://discord.com/api/v10';
 
@@ -87,7 +89,9 @@ oauthCallbackRoute.get('/callback', async c => {
 
 	// Handle OAuth errors
 	if (error) {
-		console.error('OAuth error:', error);
+		logger.error(`OAuth authorization failed: ${error}`, undefined, {
+			oauthError: error,
+		});
 		return c.redirect('/login-error?error=' + encodeURIComponent(error));
 	}
 
@@ -125,7 +129,15 @@ oauthCallbackRoute.get('/callback', async c => {
 		// Fetch user info
 		const user = await fetchDiscordUser(tokenResponse.access_token);
 
-		console.log(`User authenticated: ${user.id}`);
+		const sessionId = getRequestIdentity(c).sessionId;
+		const discordName = user.global_name ?? user.username;
+		logger.info(`session ${sessionId} -> ${discordName}`, {
+			event: 'session_authenticated',
+			sessionId,
+			actor: discordName,
+			discordName,
+			userId: user.id,
+		});
 
 		// Create HMAC-signed session token
 		const sessionToken = createSessionToken(user);
@@ -149,7 +161,7 @@ oauthCallbackRoute.get('/callback', async c => {
 		}
 		return c.redirect(redirectTo);
 	} catch (err) {
-		console.error('OAuth callback error:', err);
+		logger.error('OAuth callback failed', err);
 		const errorMessage = err instanceof Error ? err.message : 'unknown_error';
 		return c.redirect('/login-error?error=' + encodeURIComponent(errorMessage));
 	}

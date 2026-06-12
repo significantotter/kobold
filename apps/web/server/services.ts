@@ -1,21 +1,26 @@
 import { Config } from '@kobold/config';
 import { Kobold, getDialectWithPool } from '@kobold/db';
+import { logger } from './logging.js';
 
 const { dialect, pool } = getDialectWithPool(Config.database.url);
 
 export const kobold = new Kobold(dialect, {
 	onQuery(event) {
 		if (event.level === 'error') {
-			console.error('[web db query error]', {
-				durationMs: event.queryDurationMillis,
-				sql: event.query.sql,
-				parameters: event.query.parameters,
-			});
+			logger.error(
+				`database query failed (${event.queryDurationMillis}ms)`,
+				undefined,
+				{
+					durationMs: event.queryDurationMillis,
+					sql: event.query.sql,
+					parameters: event.query.parameters,
+				}
+			);
 			return;
 		}
 
 		if (event.queryDurationMillis >= 1_000) {
-			console.warn('[web db slow query]', {
+			logger.warn(`slow database query (${event.queryDurationMillis}ms)`, {
 				durationMs: event.queryDurationMillis,
 				sql: event.query.sql,
 				parameters: event.query.parameters,
@@ -29,13 +34,15 @@ export const kobold = new Kobold(dialect, {
 	},
 });
 
-pool.on('error', err => console.error('[web pg pool idle client error]', err));
+pool.on('error', err => logger.error('Postgres idle client error', err));
 pool.on('connect', () => {
 	if (pool.waitingCount > 0) {
-		console.warn('[web pg pool connect while queries waiting]', {
-			total: pool.totalCount,
-			idle: pool.idleCount,
-			waiting: pool.waitingCount,
+		logger.warn('Postgres connected while queries were waiting', {
+			pool: {
+				total: pool.totalCount,
+				idle: pool.idleCount,
+				waiting: pool.waitingCount,
+			},
 		});
 	}
 });

@@ -14,6 +14,7 @@ import {
 import { PathBuilder } from '@kobold/schema';
 import type { Sheet, SheetBaseCounterKeys } from '@kobold/schema';
 import type { AppContext } from '../../context.js';
+import { logger } from '../../logging.js';
 
 export const orpc = os.$context<AppContext>();
 
@@ -156,21 +157,23 @@ export async function recomputeAdjustedSheetForSheetRecord({
 	const readStart = Date.now();
 	const sheetRecord = await context.kobold.sheetRecord.read({ id: sheetRecordId });
 	if (!sheetRecord) return;
-	console.info('[character import timing]', {
+	const readDurationMs = Date.now() - readStart;
+	logger.info(`character import: recompute read sheet record (${readDurationMs}ms)`, {
 		event: 'recompute read sheet record',
 		sheetRecordId,
-		durationMs: Date.now() - readStart,
+		durationMs: readDurationMs,
 	});
 
 	const modifiersStart = Date.now();
 	const modifiers = await context.kobold.modifier.readManyBySheetRecordId({
 		sheetRecordId,
 	});
-	console.info('[character import timing]', {
+	const modifiersDurationMs = Date.now() - modifiersStart;
+	logger.info(`character import: recompute read modifiers (${modifiersDurationMs}ms)`, {
 		event: 'recompute read modifiers',
 		sheetRecordId,
 		modifierCount: modifiers.length,
-		durationMs: Date.now() - modifiersStart,
+		durationMs: modifiersDurationMs,
 	});
 
 	const adjustStart = Date.now();
@@ -178,23 +181,32 @@ export async function recomputeAdjustedSheetForSheetRecord({
 		...(sheetRecord.conditions ?? []),
 		...modifiers,
 	]);
-	console.info('[character import timing]', {
-		event: 'recompute adjusted sheet in memory',
-		sheetRecordId,
-		durationMs: Date.now() - adjustStart,
-	});
+	const adjustDurationMs = Date.now() - adjustStart;
+	logger.info(
+		`character import: recompute adjusted sheet in memory (${adjustDurationMs}ms)`,
+		{
+			event: 'recompute adjusted sheet in memory',
+			sheetRecordId,
+			durationMs: adjustDurationMs,
+		}
+	);
 
 	const updateStart = Date.now();
 	await context.kobold.sheetRecord.update({ id: sheetRecordId }, { adjustedSheet });
-	console.info('[character import timing]', {
-		event: 'recompute update adjusted sheet',
-		sheetRecordId,
-		durationMs: Date.now() - updateStart,
-	});
-	console.info('[character import timing]', {
+	const updateDurationMs = Date.now() - updateStart;
+	logger.info(
+		`character import: recompute update adjusted sheet (${updateDurationMs}ms)`,
+		{
+			event: 'recompute update adjusted sheet',
+			sheetRecordId,
+			durationMs: updateDurationMs,
+		}
+	);
+	const totalDurationMs = Date.now() - totalStart;
+	logger.info(`character import: recompute complete (${totalDurationMs}ms)`, {
 		event: 'recompute complete',
 		sheetRecordId,
-		durationMs: Date.now() - totalStart,
+		durationMs: totalDurationMs,
 	});
 }
 

@@ -17,6 +17,7 @@ import {
 	zPathbuilderImport,
 } from './shared.js';
 import type { AppContext } from '../../context.js';
+import { logger } from '../../logging.js';
 
 function jsonByteLength(value: unknown): number {
 	return Buffer.byteLength(JSON.stringify(value));
@@ -26,7 +27,9 @@ function logCharacterImportTiming(
 	event: string,
 	data: Record<string, unknown>
 ): void {
-	console.info('[character import timing]', { event, ...data });
+	const duration =
+		typeof data.durationMs === 'number' ? ` (${data.durationMs}ms)` : '';
+	logger.info(`character import: ${event}${duration}`, { event, ...data });
 }
 
 export async function upsertTwoHandRollMacros({

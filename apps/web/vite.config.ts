@@ -27,6 +27,7 @@ export default defineConfig({
 			'/oauth': 'http://localhost:3000',
 			'/wg-oauth': 'http://localhost:3000',
 			'/health': 'http://localhost:3000',
+			'/telemetry': 'http://localhost:3000',
 		},
 	},
 	resolve: {

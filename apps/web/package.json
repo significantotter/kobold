@@ -18,6 +18,7 @@
 		"@kobold/config": "workspace:*",
 		"@kobold/db": "workspace:*",
 		"@kobold/documentation": "workspace:*",
+		"@kobold/logger": "workspace:*",
 		"@kobold/schema": "workspace:*",
 		"@kobold/sheet": "workspace:*",
 		"@orpc/client": "^1.13.13",
