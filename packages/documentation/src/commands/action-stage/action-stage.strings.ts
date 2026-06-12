@@ -34,7 +34,7 @@ export const actionStageStrings = {
 	// ─── ADD-EFFECT SUBCOMMAND ───────────────────────────────────────────
 	addEffect: {
 		requireEffect:
-			'Yip! You need to provide either a roll adjustment or a sheet adjustment for the effect condition!',
+			'Yip! You need to provide a roll adjustment, sheet adjustment, or initiative note for the effect condition!',
 		requireRollAdjustment:
 			'Yip! You need to provide a roll adjustment if you want to use target tags!',
 		requireTargetTags:

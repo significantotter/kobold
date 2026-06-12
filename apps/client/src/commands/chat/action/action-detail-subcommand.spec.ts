@@ -2,7 +2,13 @@
  * Integration tests for ActionDetailSubCommand
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { ActionTypeEnum, ActionCostEnum } from '@kobold/db';
+import {
+	ActionTypeEnum,
+	ActionCostEnum,
+	ActionEffectTriggerEnum,
+	RollTypeEnum,
+	SheetAdjustmentTypeEnum,
+} from '@kobold/db';
 import { ActionCommand } from './action-command.js';
 import { ActionDetailSubCommand } from './action-detail-subcommand.js';
 import {
@@ -16,6 +22,7 @@ import {
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	CommandTestHarness,
+	getFullEmbedContent,
 } from '../../../test-utils/index.js';
 
 vi.mock('../../../utils/kobold-service-utils/kobold-utils.js');
@@ -96,6 +103,44 @@ describe('ActionDetailSubCommand Integration', () => {
 
 			// Assert
 			expect(result.didRespond()).toBe(true);
+		});
+
+		it('should display an effect stage initiative note', async () => {
+			const action = createMockAction({
+				name: 'Longbow Strike',
+				rolls: [
+					{
+						name: 'Bow Critical Specialization',
+						type: RollTypeEnum.effect,
+						allowRollModifiers: false,
+						trigger: ActionEffectTriggerEnum.criticalSuccess,
+						condition: {
+							name: 'bow crit spec',
+							isActive: true,
+							note: 'Target is moved 5 feet away from you',
+							rollAdjustment: null,
+							rollTargetTags: null,
+							severity: null,
+							sheetAdjustments: [],
+							type: SheetAdjustmentTypeEnum.untyped,
+						},
+					},
+				],
+			});
+
+			setupKoboldUtilsMocks({ actions: [action] });
+			setupFinderHelpersMocks(action);
+
+			const result = await harness.executeCommand({
+				commandName: 'action',
+				subcommand: 'detail',
+				options: { action: 'Longbow Strike' },
+				userId: TEST_USER_ID,
+				guildId: TEST_GUILD_ID,
+			});
+
+			const content = getFullEmbedContent(result.interaction as any);
+			expect(content).toContain('Initiative Note: Target is moved 5 feet away from you');
 		});
 	});
 

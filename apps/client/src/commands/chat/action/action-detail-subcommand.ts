@@ -152,6 +152,9 @@ export class ActionDetailSubCommand extends BaseCommandClass(
 				if (roll.condition.severity !== null && roll.condition.severity !== undefined) {
 					description += ` ${roll.condition.severity}`;
 				}
+				if (roll.condition.note) {
+					description += `\nInitiative Note: ${roll.condition.note}`;
+				}
 				const field = { name: roll.name, value: description };
 				actionDetailEmbed.addFields([field]);
 			}

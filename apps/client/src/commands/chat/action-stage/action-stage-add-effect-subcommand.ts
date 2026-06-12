@@ -91,6 +91,10 @@ export class ActionStageAddEffectSubCommand extends BaseCommandClass(
 		const note = intr.options.getString(
 			commandOptions[commandOptionsEnum.effectConditionInitiativeNote].name
 		);
+		const parsedNote = InputParseUtils.parseAsNullableString(note, {
+			inputName: 'condition-initiative-note',
+			maxLength: InputParseUtils.INITIATIVE_NOTE_MAX_LENGTH,
+		});
 		const conditionSheetValues = intr.options.getString(
 			commandOptions[commandOptionsEnum.effectConditionSheetValues].name
 		);
@@ -117,7 +121,7 @@ export class ActionStageAddEffectSubCommand extends BaseCommandClass(
 			);
 			return;
 		}
-		if (!rollAdjustment && !conditionSheetValues) {
+		if (!rollAdjustment && !conditionSheetValues && !parsedNote) {
 			await InteractionUtils.send(intr, ActionStageDefinition.strings.addEffect.requireEffect);
 			return;
 		}
@@ -181,10 +185,7 @@ export class ActionStageAddEffectSubCommand extends BaseCommandClass(
 			sheetAdjustments: parsedSheetAdjustments,
 			rollTargetTags,
 			rollAdjustment,
-			note: InputParseUtils.parseAsNullableString(note, {
-				inputName: 'condition-initiative-note',
-				maxLength: 40,
-			}),
+			note: parsedNote,
 		};
 
 		SheetUtils.adjustSheetWithModifiers(activeCharacter.sheetRecord.sheet, [condition]);

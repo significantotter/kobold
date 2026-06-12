@@ -543,7 +543,7 @@ export class ActionStageSetSubCommand extends BaseCommandClass(
 						...roll.condition,
 						note: InputParseUtils.parseAsNullableString(finalStringValue ?? null, {
 							inputName: 'condition-initiative-note',
-							maxLength: 40,
+							maxLength: InputParseUtils.INITIATIVE_NOTE_MAX_LENGTH,
 						}),
 					},
 				};

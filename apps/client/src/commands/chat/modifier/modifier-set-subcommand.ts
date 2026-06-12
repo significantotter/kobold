@@ -147,7 +147,7 @@ export class ModifierSetSubCommand extends BaseCommandClass(
 			else
 				targetModifier.note = InputParseUtils.parseAsNullableString(newFieldValue, {
 					inputName: fieldToChange,
-					maxLength: 40,
+					maxLength: InputParseUtils.INITIATIVE_NOTE_MAX_LENGTH,
 				});
 		} else if (fieldToChange === 'severity') {
 			targetModifier.severity = InputParseUtils.parseAsNullableNumber(newFieldValue);

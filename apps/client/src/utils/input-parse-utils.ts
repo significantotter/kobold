@@ -7,6 +7,8 @@ import { DiceUtils } from './dice-utils.js';
 import _ from 'lodash';
 
 export class InputParseUtils {
+	static readonly INITIATIVE_NOTE_MAX_LENGTH = 80;
+
 	/**
 	 * Convert the input into a valid boolean
 	 */

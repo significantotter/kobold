@@ -139,4 +139,35 @@ describe('ActionRoller condition effects', () => {
 			'Applied: frightened 1\nAlready active: frightened 1'
 		);
 	});
+
+	it('applies an initiative-note-only effect', () => {
+		const target = creatureWithConditions();
+		const noteOnlyCondition = condition({
+			name: 'bow crit spec',
+			note: 'Off-guard until your next turn starts.',
+			severity: null,
+			rollAdjustment: null,
+			rollTargetTags: null,
+			sheetAdjustments: [],
+		});
+		const actionRoller = new ActionRoller(
+			null,
+			action(ActionEffectTriggerEnum.criticalSuccess, [noteOnlyCondition]),
+			creatureWithConditions(),
+			target,
+			{ attackRollOverwrite: '20' }
+		);
+
+		actionRoller.buildRoll('', '', { targetDC: 10 });
+
+		expect(target.conditions).toHaveLength(1);
+		expect(target.conditions[0]).toMatchObject({
+			name: 'bow crit spec',
+			note: 'Off-guard until your next turn starts.',
+			rollAdjustment: null,
+			sheetAdjustments: [],
+		});
+		expect(actionRoller.shouldPersistConditionEffects()).toBe(true);
+		expect(actionRoller.buildEffectResultText()).toBe('Applied: bow crit spec');
+	});
 });

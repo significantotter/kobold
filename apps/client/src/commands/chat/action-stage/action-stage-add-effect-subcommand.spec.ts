@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ActionEffectTriggerEnum, RollTypeEnum, SheetAdjustmentTypeEnum } from '@kobold/db';
 import { ActionStageCommand } from './action-stage-command.js';
 import { ActionStageAddEffectSubCommand } from './action-stage-add-effect-subcommand.js';
+import { InputParseUtils } from '../../../utils/input-parse-utils.js';
 import {
 	CommandTestHarness,
 	TEST_GUILD_ID,
@@ -93,5 +94,47 @@ describe('ActionStageAddEffectSubCommand', () => {
 
 		expect(result.didRespond()).toBe(true);
 		expect(updateMock).not.toHaveBeenCalled();
+	});
+
+	it('adds an effect stage with only an initiative note', async () => {
+		const action = createMockAction({ name: 'Longbow Strike', rolls: [] });
+		const initiativeNote = 'x'.repeat(InputParseUtils.INITIATIVE_NOTE_MAX_LENGTH);
+		setupKoboldUtilsMocks({ actions: [action] });
+		setupFinderHelpersMocks(action, [action]);
+		const { updateMock } = setupActionModelMock(kobold);
+
+		const result = await harness.executeCommand({
+			commandName: 'action-stage',
+			subcommand: 'add-effect',
+			options: {
+				action: 'Longbow Strike',
+				'roll-name': 'Bow Critical Specialization',
+				trigger: 'critical success',
+				'condition-name': 'bow crit spec',
+				'condition-initiative-note': initiativeNote,
+			},
+			userId: TEST_USER_ID,
+			guildId: TEST_GUILD_ID,
+		});
+
+		expect(result.didRespond()).toBe(true);
+		expect(updateMock).toHaveBeenCalledWith(
+			{ id: action.id },
+			{
+				rolls: [
+					expect.objectContaining({
+						name: 'Bow Critical Specialization',
+						type: RollTypeEnum.effect,
+						trigger: ActionEffectTriggerEnum.criticalSuccess,
+						condition: expect.objectContaining({
+							name: 'bow crit spec',
+							note: initiativeNote,
+							rollAdjustment: null,
+							sheetAdjustments: [],
+						}),
+					}),
+				],
+			}
+		);
 	});
 });
