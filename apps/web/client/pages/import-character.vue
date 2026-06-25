@@ -171,20 +171,20 @@
 									<i class="pi pi-plus" />
 									<span>Import another character?</span>
 								</button>
-								<!-- <RouterLink
+								<RouterLink
 									v-if="successCharacterId !== null"
 									:to="`/characters/${successCharacterId}`"
 									class="ml-3 bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded inline-flex items-center gap-2 no-underline"
 								>
 									<i class="pi pi-arrow-right" />
 									<span>Open workspace</span>
-								</RouterLink> -->
-								<!-- <RouterLink
+								</RouterLink>
+								<RouterLink
 									to="/characters"
 									class="ml-3 text-gray-300 hover:text-white text-sm underline"
 								>
 									Go to My Characters
-								</RouterLink> -->
+								</RouterLink>
 							</div>
 						</template>
 

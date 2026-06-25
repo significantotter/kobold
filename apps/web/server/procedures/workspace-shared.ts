@@ -5,11 +5,13 @@ import {
 	zMinionWithRelations,
 	zModifier,
 	zRollMacro,
+	zSheet,
 	type Action,
 	type Condition,
 	type MinionWithRelations,
 	type Modifier,
 	type RollMacro,
+	type Sheet,
 } from '@kobold/db';
 import { z } from 'zod';
 
@@ -63,10 +65,27 @@ export type ModifierWorkspaceItem = {
 	payload: Modifier;
 };
 
-export type MinionWorkspaceSummary = {
+export type SheetPreviewSummary = {
 	level: number | null;
+	heritage: string | null;
 	ancestry: string | null;
 	class: string | null;
+	imageUrl: string | null;
+	hp: {
+		current: number;
+		max: number | null;
+	} | null;
+	ac: number | null;
+	perception: number | null;
+	saves: {
+		fortitude: number | null;
+		reflex: number | null;
+		will: number | null;
+	};
+	speed: number | null;
+};
+
+export type MinionWorkspaceSummary = SheetPreviewSummary & {
 	characterId: number | null;
 	autoJoinInitiative: boolean;
 };
@@ -77,13 +96,7 @@ export type MinionWorkspaceItem = {
 	payload: MinionWithRelations;
 };
 
-export type CharacterSheetSummary = {
-	level: number | null;
-	heritage: string | null;
-	ancestry: string | null;
-	class: string | null;
-	imageUrl: string | null;
-};
+export type CharacterSheetSummary = SheetPreviewSummary;
 
 export type CharacterManagementListItem = {
 	id: number;
@@ -91,7 +104,7 @@ export type CharacterManagementListItem = {
 	importSource: ImportSource;
 	charId: number;
 	isActiveCharacter: boolean;
-	summary: Omit<CharacterSheetSummary, 'imageUrl'>;
+	summary: CharacterSheetSummary;
 	counts: {
 		modifiers: number;
 		visibleActions: number;
@@ -109,6 +122,7 @@ export type CharacterWorkspace = {
 		isActiveCharacter: boolean;
 		sheetRecordId: number;
 		summary: CharacterSheetSummary;
+		sheet: Sheet;
 	};
 	overview: {
 		source: ImportSource;
@@ -192,27 +206,37 @@ export const zModifierWorkspaceItem: z.ZodType<ModifierWorkspaceItem> = z.object
 	payload: zModifier,
 });
 
-export const zMinionWorkspaceSummary: z.ZodType<MinionWorkspaceSummary> = z.object({
-	level: z.number().nullable(),
-	ancestry: z.string().nullable(),
-	class: z.string().nullable(),
-	characterId: z.number().nullable(),
-	autoJoinInitiative: z.boolean(),
-});
-
-export const zMinionWorkspaceItem: z.ZodType<MinionWorkspaceItem> = z.object({
-	meta: zResourceMeta,
-	summary: zMinionWorkspaceSummary,
-	payload: zMinionWithRelations,
-});
-
-export const zCharacterSheetSummary: z.ZodType<CharacterSheetSummary> = z.object({
+const zSheetPreviewSummaryBase = z.object({
 	level: z.number().nullable(),
 	heritage: z.string().nullable(),
 	ancestry: z.string().nullable(),
 	class: z.string().nullable(),
 	imageUrl: z.string().nullable(),
+	hp: z
+		.object({
+			current: z.number(),
+			max: z.number().nullable(),
+		})
+		.nullable(),
+	ac: z.number().nullable(),
+	perception: z.number().nullable(),
+	saves: z.object({
+		fortitude: z.number().nullable(),
+		reflex: z.number().nullable(),
+		will: z.number().nullable(),
+	}),
+	speed: z.number().nullable(),
 });
+
+export const zSheetPreviewSummary: z.ZodType<SheetPreviewSummary> = zSheetPreviewSummaryBase;
+
+export const zMinionWorkspaceSummary: z.ZodType<MinionWorkspaceSummary> =
+	zSheetPreviewSummaryBase.extend({
+		characterId: z.number().nullable(),
+		autoJoinInitiative: z.boolean(),
+	});
+
+export const zCharacterSheetSummary: z.ZodType<CharacterSheetSummary> = zSheetPreviewSummary;
 
 export const zCharacterManagementListItem: z.ZodType<CharacterManagementListItem> = z.object({
 	id: z.number(),
@@ -220,18 +244,19 @@ export const zCharacterManagementListItem: z.ZodType<CharacterManagementListItem
 	importSource: zImportSourceEnum,
 	charId: z.number(),
 	isActiveCharacter: z.boolean(),
-	summary: z.object({
-		level: z.number().nullable(),
-		heritage: z.string().nullable(),
-		ancestry: z.string().nullable(),
-		class: z.string().nullable(),
-	}),
+	summary: zCharacterSheetSummary,
 	counts: z.object({
 		modifiers: z.number(),
 		visibleActions: z.number(),
 		visibleRollMacros: z.number(),
 		assignedMinions: z.number(),
 	}),
+});
+
+export const zMinionWorkspaceItem: z.ZodType<MinionWorkspaceItem> = z.object({
+	meta: zResourceMeta,
+	summary: zMinionWorkspaceSummary,
+	payload: zMinionWithRelations,
 });
 
 export const zCharacterWorkspace: z.ZodType<CharacterWorkspace> = z.object({
@@ -243,6 +268,7 @@ export const zCharacterWorkspace: z.ZodType<CharacterWorkspace> = z.object({
 		isActiveCharacter: z.boolean(),
 		sheetRecordId: z.number(),
 		summary: zCharacterSheetSummary,
+		sheet: zSheet,
 	}),
 	overview: z.object({
 		source: zImportSourceEnum,
@@ -352,22 +378,32 @@ function buildResourceMeta({
 	};
 }
 
-export function getCharacterSheetSummary(sheet: {
-	staticInfo: { level: number | null };
-	info: {
-		heritage: string | null;
-		ancestry: string | null;
-		class: string | null;
-		imageURL?: string | null;
-	};
-}): CharacterSheetSummary {
+export function getSheetPreviewSummary(sheet: Sheet): SheetPreviewSummary {
+	const hp = sheet.baseCounters.hp;
 	return {
 		level: sheet.staticInfo.level ?? null,
 		heritage: sheet.info.heritage ?? null,
 		ancestry: sheet.info.ancestry ?? null,
 		class: sheet.info.class ?? null,
 		imageUrl: sheet.info.imageURL ?? null,
+		hp: hp ? { current: hp.current, max: hp.max } : null,
+		ac: sheet.intProperties.ac ?? null,
+		perception: sheet.stats.perception?.bonus ?? null,
+		saves: {
+			fortitude: sheet.stats.fortitude?.bonus ?? null,
+			reflex: sheet.stats.reflex?.bonus ?? null,
+			will: sheet.stats.will?.bonus ?? null,
+		},
+		speed: sheet.intProperties.walkSpeed ?? null,
 	};
+}
+
+export function getCharacterSheetSummary(sheet: Sheet): CharacterSheetSummary {
+	return getSheetPreviewSummary(sheet);
+}
+
+export function makeSheetPreviewSummary(input: CharacterSheetSummary): CharacterSheetSummary {
+	return zSheetPreviewSummary.parse(input);
 }
 
 export function toActionWorkspaceItem(
@@ -445,6 +481,7 @@ export function toMinionWorkspaceItem(
 		capabilities?: Partial<ResourceCapabilities>;
 	}
 ): MinionWorkspaceItem {
+	const summary = getSheetPreviewSummary(minion.sheetRecord.sheet);
 	return {
 		meta: buildResourceMeta({
 			id: minion.id,
@@ -455,9 +492,7 @@ export function toMinionWorkspaceItem(
 			capabilities: options.capabilities,
 		}),
 		summary: {
-			level: minion.sheetRecord.sheet.staticInfo.level ?? null,
-			ancestry: minion.sheetRecord.sheet.info.ancestry ?? null,
-			class: minion.sheetRecord.sheet.info.class ?? null,
+			...summary,
 			characterId: minion.characterId ?? null,
 			autoJoinInitiative: minion.autoJoinInitiative,
 		},

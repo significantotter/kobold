@@ -25,12 +25,6 @@
 							attachment.
 						</p>
 					</div>
-					<div class="hero-actions">
-						<RouterLink class="secondary-link" to="/characters"
-							>My Characters</RouterLink
-						>
-						<RouterLink class="primary-link" to="/import">Import Character</RouterLink>
-					</div>
 				</section>
 
 				<section class="panel section-panel">
@@ -69,22 +63,12 @@
 						Yip! You don't have any actions in your library yet.
 					</p>
 					<div v-else class="resource-list">
-						<article
+						<ActionCard
 							v-for="action in workspace.sharedActions"
 							:key="action.meta.id"
-							class="resource-card"
-						>
-							<div class="resource-head">
-								<strong>{{ action.payload.name }}</strong>
-								<span class="scope-badge scope-library">Library</span>
-							</div>
-							<p class="resource-copy">
-								{{
-									action.payload.description ||
-									'Shared across your characters and minions.'
-								}}
-							</p>
-						</article>
+							:action="action"
+							library
+						/>
 					</div>
 				</section>
 
@@ -97,67 +81,15 @@
 						Yip! You don't have any roll macros in your library yet.
 					</p>
 					<div v-else class="resource-list">
-						<article
+						<RollMacroCard
 							v-for="rollMacro in workspace.sharedRollMacros"
 							:key="rollMacro.meta.id"
-							class="resource-card"
-						>
-							<div class="resource-head">
-								<div class="badge-row">
-									<strong>{{ rollMacro.payload.name }}</strong>
-									<ScopeBadge variant="scope-library">Library</ScopeBadge>
-								</div>
-								<div class="card-actions">
-									<button
-										class="ghost-button"
-										@click="
-											startRollMacroEdit(
-												rollMacro.payload.id,
-												rollMacro.payload.name,
-												rollMacro.payload.macro
-											)
-										"
-									>
-										Edit
-									</button>
-									<button
-										class="danger-button"
-										@click="deleteLibraryRollMacro(rollMacro.payload.id)"
-									>
-										Delete
-									</button>
-								</div>
-							</div>
-							<template v-if="editingRollMacroId === rollMacro.payload.id">
-								<div class="editor-card compact-editor">
-									<input
-										v-model="rollMacroDraft.name"
-										class="text-input"
-										maxlength="100"
-									/>
-									<textarea
-										v-model="rollMacroDraft.macro"
-										class="text-area"
-										rows="3"
-										maxlength="500"
-									/>
-									<div class="card-actions">
-										<button
-											class="primary-button"
-											@click="saveLibraryRollMacro(rollMacro.payload.id)"
-										>
-											Save
-										</button>
-										<button class="ghost-button" @click="cancelRollMacroEdit">
-											Cancel
-										</button>
-									</div>
-								</div>
-							</template>
-							<template v-else>
-								<p class="macro-preview">{{ rollMacro.payload.macro }}</p>
-							</template>
-						</article>
+							:roll-macro="rollMacro"
+							:menu-open="openRollMacroActionMenuId === rollMacro.meta.id"
+							library
+							@toggle-menu="toggleRollMacroActionMenu(rollMacro.meta.id)"
+							@delete="deleteLibraryRollMacro"
+						/>
 					</div>
 				</section>
 
@@ -170,22 +102,15 @@
 						Yip! You don't have any modifiers in your library yet.
 					</p>
 					<div v-else class="resource-list">
-						<article
+						<ModifierCard
 							v-for="modifier in workspace.unassignedModifiers"
 							:key="modifier.meta.id"
-							class="resource-card resource-card-muted"
-						>
-							<div class="resource-head">
-								<strong>{{ modifier.payload.name }}</strong>
-								<span class="scope-badge scope-library">Unassigned</span>
-							</div>
-							<p class="resource-copy">
-								{{
-									modifier.payload.description ||
-									'Stored once in Library and inactive until assigned.'
-								}}
-							</p>
-						</article>
+							:item="modifier"
+							muted
+							library
+							unassigned
+							:show-state="false"
+						/>
 					</div>
 				</section>
 
@@ -201,88 +126,56 @@
 						<article
 							v-for="minion in workspace.unassignedMinions"
 							:key="minion.meta.id"
-							class="resource-card resource-card-muted"
+							class="resource-card resource-card-muted minion-card"
+							:class="{
+								'minion-card-menu-open': openMinionActionMenuId === minion.meta.id,
+							}"
 						>
-							<div class="resource-head">
-								<div>
-									<div
-										v-if="editingMinionId === minion.meta.id"
-										class="editor-card compact-editor"
-									>
-										<input
-											v-model="minionRenameDraft"
-											class="text-input"
-											maxlength="100"
-										/>
-										<div class="card-actions">
-											<button
-												class="primary-button"
-												@click="saveMinionRename(minion.meta.id)"
-											>
-												Save
-											</button>
-											<button
-												class="ghost-button"
-												@click="cancelMinionRename"
-											>
-												Cancel
-											</button>
-										</div>
-									</div>
-									<template v-else>
-										<strong>{{ minion.payload.name }}</strong>
-									</template>
-									<div class="badge-row mt-2">
-										<ScopeBadge variant="scope-library">Library</ScopeBadge>
-										<span
-											v-if="minion.summary.autoJoinInitiative"
-											class="scope-badge scope-library"
-										>
-											Auto-Join
-										</span>
-									</div>
-								</div>
-								<div class="card-actions">
-									<button
-										v-if="editingMinionId !== minion.meta.id"
-										class="ghost-button"
-										@click="
+							<div v-if="editingMinionId === minion.meta.id" class="rename-row">
+								<input
+									v-model="minionRenameDraft"
+									class="text-input"
+									maxlength="100"
+								/>
+								<button
+									class="primary-button"
+									@click="saveMinionRename(minion.meta.id)"
+								>
+									Save
+								</button>
+								<button class="ghost-button" @click="cancelMinionRename">
+									Cancel
+								</button>
+							</div>
+							<SheetMiniPreview
+								v-else
+								:name="minion.payload.name"
+								:summary="minion.summary"
+								compact
+							>
+								<template #actions>
+									<MinionCardActions
+										:minion="minion"
+										:menu-open="openMinionActionMenuId === minion.meta.id"
+										library
+										library-manage
+										:show-sheet-button="false"
+										@toggle-menu="toggleMinionActionMenu(minion.meta.id)"
+										@start-rename="
 											startMinionRename(minion.meta.id, minion.payload.name)
 										"
-									>
-										Rename
-									</button>
-									<button
-										class="secondary-link"
-										@click="
+										@toggle-auto-join="
 											toggleMinionAutoJoin(
 												minion.meta.id,
 												minion.summary.autoJoinInitiative,
 												minion.payload.name
 											)
 										"
-									>
-										{{
-											minion.summary.autoJoinInitiative
-												? 'Disable Auto-Join'
-												: 'Enable Auto-Join'
-										}}
-									</button>
-									<button
-										class="danger-button"
-										@click="deleteMinion(minion.meta.id)"
-									>
-										Delete
-									</button>
-								</div>
-							</div>
-							<p class="resource-copy">
-								Level {{ minion.summary.level ?? 'Unknown' }}
-								<span v-if="minion.summary.autoJoinInitiative">
-									· Auto-Join enabled</span
-								>
-							</p>
-							<div class="card-actions">
+										@delete="deleteMinion(minion.meta.id)"
+									/>
+								</template>
+							</SheetMiniPreview>
+							<div class="library-assignment-row">
 								<select
 									v-model="minionAssignmentTargets[minion.meta.id]"
 									class="text-input"
@@ -314,10 +207,14 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { api } from '@/api/api-client';
+import ActionCard from '@/components/character-workspace/ActionCard.vue';
+import MinionCardActions from '@/components/character-workspace/MinionCardActions.vue';
+import ModifierCard from '@/components/character-workspace/ModifierCard.vue';
+import RollMacroCard from '@/components/character-workspace/RollMacroCard.vue';
 import LoginRequiredCard from '@/components/LoginRequiredCard.vue';
 import PeridotImage from '@/components/PeridotImage.vue';
 import PageBanner from '@/components/PageBanner.vue';
-import ScopeBadge from '@/components/ScopeBadge.vue';
+import SheetMiniPreview from '@/components/SheetMiniPreview.vue';
 import { useAuthStore } from '@/stores/auth';
 
 type LibraryWorkspace = Awaited<ReturnType<typeof api.library.getLibraryWorkspace>>;
@@ -330,9 +227,8 @@ const loading = ref(true);
 const error = ref('');
 const flashMessage = ref('');
 const characters = ref<CharacterListItem[]>([]);
-const newRollMacro = ref({ name: '', macro: '' });
-const editingRollMacroId = ref<number | null>(null);
-const rollMacroDraft = ref({ name: '', macro: '' });
+const openRollMacroActionMenuId = ref<number | null>(null);
+const openMinionActionMenuId = ref<number | null>(null);
 const editingMinionId = ref<number | null>(null);
 const minionRenameDraft = ref('');
 const minionAssignmentTargets = ref<Record<number, string>>({});
@@ -358,9 +254,8 @@ async function loadLibrary() {
 		]);
 		workspace.value = libraryWorkspace;
 		characters.value = ownedCharacters;
-		editingRollMacroId.value = null;
-		rollMacroDraft.value = { name: '', macro: '' };
-		newRollMacro.value = { name: '', macro: '' };
+		openRollMacroActionMenuId.value = null;
+		openMinionActionMenuId.value = null;
 		editingMinionId.value = null;
 		minionRenameDraft.value = '';
 		minionAssignmentTargets.value = Object.fromEntries(
@@ -373,65 +268,13 @@ async function loadLibrary() {
 	}
 }
 
-// Unused for now. Leaving create out of scope
-async function createLibraryRollMacro() {
-	if (!newRollMacro.value.name.trim() || !newRollMacro.value.macro.trim()) {
-		error.value = 'Provide both a roll macro name and macro value.';
-		return;
-	}
-	error.value = '';
-	try {
-		await api.character.createRollMacro({
-			characterId: null,
-			name: newRollMacro.value.name.trim(),
-			macro: newRollMacro.value.macro.trim(),
-		});
-		flashMessage.value = `Created ${newRollMacro.value.name.trim()} in Library.`;
-		await loadLibrary();
-	} catch (err: unknown) {
-		error.value = err instanceof Error ? err.message : 'Failed to create roll macro.';
-	}
-}
-
-function startRollMacroEdit(id: number, name: string, macro: string) {
-	editingRollMacroId.value = id;
-	rollMacroDraft.value = { name, macro };
-}
-
-function cancelRollMacroEdit() {
-	editingRollMacroId.value = null;
-	rollMacroDraft.value = { name: '', macro: '' };
-}
-
-async function saveLibraryRollMacro(rollMacroId: number) {
-	if (!rollMacroDraft.value.name.trim() || !rollMacroDraft.value.macro.trim()) {
-		error.value = 'Provide both a roll macro name and macro value.';
-		return;
-	}
-	error.value = '';
-	try {
-		await api.character.updateRollMacro({
-			rollMacroId,
-			name: rollMacroDraft.value.name.trim(),
-			macro: rollMacroDraft.value.macro.trim(),
-		});
-		flashMessage.value = `Updated ${rollMacroDraft.value.name.trim()}.`;
-		cancelRollMacroEdit();
-		await loadLibrary();
-	} catch (err: unknown) {
-		error.value = err instanceof Error ? err.message : 'Failed to update roll macro.';
-	}
-}
-
 async function deleteLibraryRollMacro(rollMacroId: number) {
+	closeRollMacroActionMenu();
 	if (!window.confirm('Delete this shared roll macro?')) return;
 	error.value = '';
 	try {
 		await api.character.deleteRollMacro({ rollMacroId });
 		flashMessage.value = 'Roll macro deleted from Library.';
-		if (editingRollMacroId.value === rollMacroId) {
-			cancelRollMacroEdit();
-		}
 		await loadLibrary();
 	} catch (err: unknown) {
 		error.value = err instanceof Error ? err.message : 'Failed to delete roll macro.';
@@ -439,6 +282,7 @@ async function deleteLibraryRollMacro(rollMacroId: number) {
 }
 
 function startMinionRename(minionId: number, name: string) {
+	closeMinionActionMenu();
 	editingMinionId.value = minionId;
 	minionRenameDraft.value = name;
 }
@@ -466,6 +310,7 @@ async function saveMinionRename(minionId: number) {
 }
 
 async function assignMinion(minionId: number) {
+	closeMinionActionMenu();
 	const selectedCharacterId = Number(minionAssignmentTargets.value[minionId]);
 	if (!Number.isInteger(selectedCharacterId) || selectedCharacterId <= 0) {
 		error.value = 'Choose a destination character first.';
@@ -492,6 +337,7 @@ async function toggleMinionAutoJoin(
 	autoJoinInitiative: boolean,
 	minionName: string
 ) {
+	closeMinionActionMenu();
 	error.value = '';
 	try {
 		await api.character.updateMinionAutoJoinInitiative({
@@ -506,6 +352,7 @@ async function toggleMinionAutoJoin(
 }
 
 async function deleteMinion(minionId: number) {
+	closeMinionActionMenu();
 	if (
 		!window.confirm(
 			'Delete this minion? This removes its sheet and related initiative entries.'
@@ -525,7 +372,28 @@ async function deleteMinion(minionId: number) {
 		error.value = err instanceof Error ? err.message : 'Failed to delete minion.';
 	}
 }
+
+function toggleRollMacroActionMenu(rollMacroId: number) {
+	closeMinionActionMenu();
+	openRollMacroActionMenuId.value =
+		openRollMacroActionMenuId.value === rollMacroId ? null : rollMacroId;
+}
+
+function closeRollMacroActionMenu() {
+	openRollMacroActionMenuId.value = null;
+}
+
+function toggleMinionActionMenu(minionId: number) {
+	closeRollMacroActionMenu();
+	openMinionActionMenuId.value = openMinionActionMenuId.value === minionId ? null : minionId;
+}
+
+function closeMinionActionMenu() {
+	openMinionActionMenuId.value = null;
+}
 </script>
+
+<style src="../components/character-workspace/resource-section.css"></style>
 
 <style scoped>
 .library-page {
@@ -540,58 +408,21 @@ async function deleteMinion(minionId: number) {
 	margin-bottom: 1rem;
 }
 
-.panel,
-.banner,
-.resource-card,
-.editor-card,
-.stat-card {
-	border: 1px solid rgba(63, 63, 70, 0.88);
-	background: rgba(24, 24, 27, 0.84);
-	backdrop-filter: blur(10px);
-	border-radius: 1rem;
-	box-shadow: 0 22px 45px rgba(0, 0, 0, 0.24);
-}
-
-.banner {
-	padding: 0.9rem 1rem;
-	margin-bottom: 1rem;
-}
-
-.banner-success {
-	color: #bbf7d0;
-	border-color: rgba(22, 163, 74, 0.55);
-}
-
-.banner-error {
-	color: #fecaca;
-	border-color: rgba(220, 38, 38, 0.55);
-}
-
 .hero-panel,
-.section-panel,
 .state-panel {
 	padding: 1.4rem;
 	margin-bottom: 1rem;
 }
 
-.hero-panel,
-.hero-actions,
-.resource-head,
-.badge-row,
-.card-actions,
-.overview-grid,
-.resource-list {
-	display: grid;
-	gap: 0.85rem;
-}
-
 .hero-panel {
+	display: grid;
 	grid-template-columns: minmax(0, 1fr) auto;
 	align-items: end;
 	gap: 1rem;
 }
 
 .hero-actions {
+	display: grid;
 	grid-auto-flow: column;
 	align-content: end;
 	justify-content: end;
@@ -607,95 +438,22 @@ async function deleteMinion(minionId: number) {
 }
 
 h1,
-h2,
-strong {
+h2 {
 	margin: 0;
 	color: #fafafa;
 }
 
 .lede,
-.resource-copy,
-.empty-copy,
-.macro-preview,
 .state-panel p {
 	color: #d4d4d8;
 }
 
-.overview-grid {
-	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-	margin-top: 1rem;
-}
-
-.stat-card,
-.resource-card,
-.editor-card {
-	padding: 1rem;
-}
-
-.resource-card-muted {
-	background: rgba(39, 39, 42, 0.66);
-}
-
 .stat-label {
-	margin: 0 0 0.35rem;
-	font-size: 0.82rem;
-	text-transform: uppercase;
-	letter-spacing: 0.12em;
 	color: #99f6e4;
 }
 
 .stat-value {
-	margin: 0;
 	font-size: 1.2rem;
-	font-weight: 700;
-	color: #fafafa;
-}
-
-.resource-head {
-	grid-template-columns: minmax(0, 1fr) auto;
-	align-items: start;
-	margin-bottom: 0.6rem;
-}
-
-.badge-row,
-.card-actions {
-	display: flex;
-	gap: 0.65rem;
-	align-items: center;
-	flex-wrap: wrap;
-}
-
-.scope-badge {
-	display: inline-flex;
-	align-items: center;
-	padding: 0.25rem 0.55rem;
-	border-radius: 999px;
-	font-size: 0.72rem;
-	font-weight: 700;
-	letter-spacing: 0.04em;
-	text-transform: uppercase;
-}
-
-.scope-library {
-	background: rgba(20, 184, 166, 0.18);
-	color: #ccfbf1;
-}
-
-.primary-link,
-.secondary-link,
-.primary-button,
-.ghost-button,
-.danger-button {
-	border-radius: 999px;
-	padding: 0.7rem 1rem;
-	border: 1px solid transparent;
-	font-weight: 600;
-	cursor: pointer;
-	transition:
-		background 0.16s ease,
-		border-color 0.16s ease,
-		color 0.16s ease;
-	text-decoration: none;
 }
 
 .primary-link,
@@ -705,60 +463,12 @@ strong {
 	border-color: #0f766e;
 }
 
-.secondary-link,
-.ghost-button {
-	background: rgba(39, 39, 42, 0.88);
-	color: #f4f4f5;
-	border-color: rgba(82, 82, 91, 1);
-}
-
-.danger-button {
-	background: rgba(127, 29, 29, 0.4);
-	color: #fca5a5;
-	border-color: rgba(185, 28, 28, 0.65);
-}
-
-.editor-card {
+.library-assignment-row {
 	display: grid;
-	gap: 0.75rem;
-	margin-bottom: 1rem;
-}
-
-.compact-editor {
-	margin-top: 0.75rem;
-	margin-bottom: 0;
-}
-
-label {
-	display: grid;
-	gap: 0.35rem;
-	color: #e4e4e7;
-}
-
-.text-input,
-.text-area {
-	background: rgba(9, 9, 11, 0.92);
-	border: 1px solid rgba(82, 82, 91, 1);
-	border-radius: 0.8rem;
-	padding: 0.75rem 0.85rem;
-	color: #fafafa;
-	font: inherit;
-	width: 100%;
-	box-sizing: border-box;
-}
-
-.text-area {
-	resize: vertical;
-}
-
-.macro-preview {
-	margin: 0;
-	padding: 0.85rem;
-	border-radius: 0.85rem;
-	background: rgba(9, 9, 11, 0.72);
-	font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-	white-space: pre-wrap;
-	word-break: break-word;
+	grid-template-columns: minmax(0, 1fr) auto;
+	align-items: center;
+	gap: 0.65rem;
+	margin-top: 0.85rem;
 }
 
 @media (max-width: 720px) {
@@ -769,6 +479,11 @@ label {
 	.hero-actions {
 		grid-auto-flow: row;
 		justify-content: stretch;
+	}
+
+	.library-assignment-row {
+		grid-template-columns: 1fr;
+		align-items: stretch;
 	}
 }
 </style>

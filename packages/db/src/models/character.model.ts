@@ -241,6 +241,31 @@ export class CharacterModel extends Model<Database['character']> {
 				sql<string | null>`"sheet_record"."sheet"->'info'->>'heritage'`.as('heritage'),
 				sql<string | null>`"sheet_record"."sheet"->'info'->>'ancestry'`.as('ancestry'),
 				sql<string | null>`"sheet_record"."sheet"->'info'->>'class'`.as('class'),
+				sql<string | null>`"sheet_record"."sheet"->'info'->>'imageURL'`.as('imageUrl'),
+				sql<number | null>`NULLIF("sheet_record"."sheet"->'baseCounters'->'hp'->>'current', '')::int`.as(
+					'hpCurrent'
+				),
+				sql<number | null>`NULLIF("sheet_record"."sheet"->'baseCounters'->'hp'->>'max', '')::int`.as(
+					'hpMax'
+				),
+				sql<number | null>`NULLIF("sheet_record"."sheet"->'intProperties'->>'ac', '')::int`.as(
+					'ac'
+				),
+				sql<number | null>`NULLIF("sheet_record"."sheet"->'stats'->'perception'->>'bonus', '')::int`.as(
+					'perception'
+				),
+				sql<number | null>`NULLIF("sheet_record"."sheet"->'stats'->'fortitude'->>'bonus', '')::int`.as(
+					'fortitude'
+				),
+				sql<number | null>`NULLIF("sheet_record"."sheet"->'stats'->'reflex'->>'bonus', '')::int`.as(
+					'reflex'
+				),
+				sql<number | null>`NULLIF("sheet_record"."sheet"->'stats'->'will'->>'bonus', '')::int`.as(
+					'will'
+				),
+				sql<number | null>`NULLIF("sheet_record"."sheet"->'intProperties'->>'walkSpeed', '')::int`.as(
+					'speed'
+				),
 			])
 			.where('character.userId', '=', userId)
 			.execute();
@@ -293,6 +318,15 @@ export class CharacterModel extends Model<Database['character']> {
 				heritage: c.heritage,
 				ancestry: c.ancestry,
 				class: c.class,
+				imageUrl: c.imageUrl,
+				hpCurrent: c.hpCurrent,
+				hpMax: c.hpMax,
+				ac: c.ac,
+				perception: c.perception,
+				fortitude: c.fortitude,
+				reflex: c.reflex,
+				will: c.will,
+				speed: c.speed,
 			},
 		}));
 	}

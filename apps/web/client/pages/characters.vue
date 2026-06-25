@@ -13,7 +13,6 @@
 				</div>
 				<div class="hero-actions">
 					<RouterLink class="primary-link" to="/import">Import Character</RouterLink>
-					<RouterLink class="secondary-link" to="/library">Open Library</RouterLink>
 				</div>
 			</section>
 
@@ -44,76 +43,113 @@
 			</section>
 
 			<section v-else class="character-grid">
-				<article v-for="character in characters" :key="character.id" class="character-card">
-					<div class="card-header">
-						<div>
-							<div class="badge-row">
-								<ScopeBadge
-									:variant="
-										character.isActiveCharacter
-											? 'scope-active'
-											: 'scope-library'
-									"
+				<article
+					v-for="character in sortedCharacters"
+					:key="character.id"
+					class="character-card"
+				>
+					<div class="sheet-block">
+						<div v-if="editingCharacterId === character.id" class="inline-form">
+							<input v-model="renameDraft" class="text-input" maxlength="100" />
+							<div class="inline-actions">
+								<button
+									class="primary-button"
+									:disabled="busyCharacterId === character.id"
+									@click="saveRename(character)"
 								>
-									{{ character.isActiveCharacter ? 'Active' : 'Owned' }}
-								</ScopeBadge>
-								<ScopeBadge variant="scope-character">
-									{{ importSourceLabel(character.importSource) }}
-								</ScopeBadge>
+									Save
+								</button>
+								<button class="ghost-button" @click="cancelRename">Cancel</button>
 							</div>
-							<template v-if="editingCharacterId === character.id">
-								<div class="inline-form">
-									<input
-										v-model="renameDraft"
-										class="text-input"
-										maxlength="100"
-									/>
-									<div class="inline-actions">
-										<button
-											class="primary-button"
-											:disabled="busyCharacterId === character.id"
-											@click="saveRename(character)"
+						</div>
+						<SheetMiniPreview
+							:name="editingCharacterId === character.id ? undefined : character.name"
+							:summary="character.summary"
+						>
+							<template #actions>
+								<div class="card-header-actions">
+									<div class="card-action-buttons">
+										<RouterLink
+											class="open-link"
+											:to="`/characters/${character.id}`"
+											aria-label="Open workspace"
+											title="Open workspace"
 										>
-											Save
-										</button>
-										<button class="ghost-button" @click="cancelRename">
-											Cancel
-										</button>
+											<i class="pi pi-arrow-up-right" aria-hidden="true" />
+										</RouterLink>
+										<div class="character-menu-shell">
+											<button
+												class="menu-button"
+												type="button"
+												:aria-expanded="
+													openActionMenuCharacterId === character.id
+												"
+												:aria-label="`More actions for ${character.name}`"
+												@click="toggleActionMenu(character.id)"
+											>
+												<span aria-hidden="true">&hellip;</span>
+											</button>
+											<div
+												v-if="openActionMenuCharacterId === character.id"
+												class="character-menu"
+											>
+												<button
+													class="character-menu-item"
+													:disabled="
+														busyCharacterId === character.id ||
+														character.isActiveCharacter
+													"
+													@click="setActive(character)"
+												>
+													Set Active
+												</button>
+												<button
+													v-if="editingCharacterId !== character.id"
+													class="character-menu-item"
+													:disabled="busyCharacterId === character.id"
+													@click="startRename(character)"
+												>
+													Rename
+												</button>
+												<button
+													class="character-menu-item"
+													:disabled="busyCharacterId === character.id"
+													@click="updateImport(character.id)"
+												>
+													Update Import
+												</button>
+												<button
+													class="character-menu-item character-menu-item-danger"
+													:disabled="busyCharacterId === character.id"
+													@click="deleteCharacter(character)"
+												>
+													Delete
+												</button>
+											</div>
+										</div>
 									</div>
+									<span
+										v-if="character.isActiveCharacter"
+										class="active-character-chip"
+									>
+										Active
+									</span>
 								</div>
 							</template>
-							<template v-else>
-								<h2>{{ character.name }}</h2>
-							</template>
-							<p class="summary-line">
-								Level {{ character.summary.level ?? 'Unknown' }}
-								<span v-if="character.summary.ancestry">
-									· {{ character.summary.ancestry }}</span
-								>
-								<span v-if="character.summary.class">
-									· {{ character.summary.class }}</span
-								>
-							</p>
-							<p v-if="character.summary.heritage" class="summary-line subtle">
-								{{ character.summary.heritage }}
-							</p>
-						</div>
-						<RouterLink class="open-link" :to="`/characters/${character.id}`">
-							Open Workspace
-						</RouterLink>
+						</SheetMiniPreview>
 					</div>
 
-					<dl class="count-grid">
+					<dl class="resource-strip">
+						<div>
+							<dt>Actions</dt>
+							<dd>{{ character.counts.visibleActions }}</dd>
+						</div>
 						<div>
 							<dt>Modifiers</dt>
 							<dd>{{ character.counts.modifiers }}</dd>
 						</div>
 						<div>
-							<dt>Visible actions</dt>
-							<dd>{{ character.counts.visibleActions }}</dd>
-						</div>
-						<div>
-							<dt>Roll macros</dt>
+							<dt>Macros</dt>
 							<dd>{{ character.counts.visibleRollMacros }}</dd>
 						</div>
 						<div>
@@ -121,40 +157,6 @@
 							<dd>{{ character.counts.assignedMinions }}</dd>
 						</div>
 					</dl>
-
-					<div class="card-actions">
-						<button
-							class="secondary-button"
-							:disabled="
-								busyCharacterId === character.id || character.isActiveCharacter
-							"
-							@click="setActive(character)"
-						>
-							Set Active
-						</button>
-						<button
-							v-if="editingCharacterId !== character.id"
-							class="ghost-button"
-							:disabled="busyCharacterId === character.id"
-							@click="startRename(character)"
-						>
-							Rename
-						</button>
-						<button
-							class="ghost-button"
-							:disabled="busyCharacterId === character.id"
-							@click="updateImport(character.id)"
-						>
-							Update Import
-						</button>
-						<button
-							class="danger-button"
-							:disabled="busyCharacterId === character.id"
-							@click="deleteCharacter(character)"
-						>
-							Delete
-						</button>
-					</div>
 				</article>
 			</section>
 		</main>
@@ -162,13 +164,13 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { api } from '@/api/api-client';
 import LoginRequiredCard from '@/components/LoginRequiredCard.vue';
 import PeridotImage from '@/components/PeridotImage.vue';
 import PageBanner from '@/components/PageBanner.vue';
-import ScopeBadge from '@/components/ScopeBadge.vue';
+import SheetMiniPreview from '@/components/SheetMiniPreview.vue';
 import { useAuthStore } from '@/stores/auth';
 
 type CharacterListItem = Awaited<ReturnType<typeof api.character.listMyCharacters>>[number];
@@ -182,7 +184,11 @@ const error = ref('');
 const flashMessage = ref('');
 const editingCharacterId = ref<number | null>(null);
 const busyCharacterId = ref<number | null>(null);
+const openActionMenuCharacterId = ref<number | null>(null);
 const renameDraft = ref('');
+const sortedCharacters = computed(() =>
+	[...characters.value].sort((a, b) => Number(b.isActiveCharacter) - Number(a.isActiveCharacter))
+);
 
 onMounted(async () => {
 	if (!auth.loaded) {
@@ -207,13 +213,8 @@ async function loadCharacters() {
 	}
 }
 
-function importSourceLabel(importSource: string) {
-	if (importSource === 'pathbuilder') return 'Pathbuilder';
-	if (importSource === 'wg') return "Wanderer's Guide";
-	return importSource;
-}
-
 function startRename(character: CharacterListItem) {
+	closeActionMenu();
 	editingCharacterId.value = character.id;
 	renameDraft.value = character.name;
 }
@@ -247,6 +248,7 @@ async function saveRename(character: CharacterListItem) {
 }
 
 async function setActive(character: CharacterListItem) {
+	closeActionMenu();
 	busyCharacterId.value = character.id;
 	error.value = '';
 	try {
@@ -261,10 +263,12 @@ async function setActive(character: CharacterListItem) {
 }
 
 function updateImport(characterId: number) {
+	closeActionMenu();
 	router.push({ name: 'import-character', query: { characterId: String(characterId) } });
 }
 
 async function deleteCharacter(character: CharacterListItem) {
+	closeActionMenu();
 	if (!window.confirm(`Delete ${character.name}? This removes the character workspace.`)) {
 		return;
 	}
@@ -282,6 +286,15 @@ async function deleteCharacter(character: CharacterListItem) {
 	} finally {
 		busyCharacterId.value = null;
 	}
+}
+
+function toggleActionMenu(characterId: number) {
+	openActionMenuCharacterId.value =
+		openActionMenuCharacterId.value === characterId ? null : characterId;
+}
+
+function closeActionMenu() {
+	openActionMenuCharacterId.value = null;
 }
 </script>
 
@@ -343,8 +356,7 @@ h2 {
 
 .hero-actions,
 .card-actions,
-.inline-actions,
-.badge-row {
+.inline-actions {
 	display: flex;
 	gap: 0.65rem;
 	flex-wrap: wrap;
@@ -357,7 +369,9 @@ h2 {
 .secondary-button,
 .ghost-button,
 .danger-button,
-.open-link {
+.open-link,
+.menu-button,
+.character-menu-item {
 	border-radius: 999px;
 	padding: 0.7rem 1rem;
 	border: 1px solid transparent;
@@ -371,11 +385,23 @@ h2 {
 }
 
 .primary-link,
-.primary-button,
-.open-link {
+.primary-button {
 	background: #2563eb;
 	color: white;
 	border-color: #2563eb;
+}
+
+.open-link {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 2.45rem;
+	height: 2.25rem;
+	padding: 0;
+	border-radius: 0.7rem;
+	background: rgba(59, 130, 246, 0.1);
+	color: #b8cff0;
+	border-color: rgba(96, 165, 250, 0.2);
 }
 
 .secondary-link,
@@ -448,67 +474,153 @@ h2 {
 	padding: 1.2rem;
 	display: flex;
 	flex-direction: column;
-	gap: 1rem;
+	gap: 0.85rem;
 }
 
-.card-header {
+.card-header-actions {
 	display: flex;
-	justify-content: space-between;
-	gap: 1rem;
-	align-items: start;
+	flex-direction: column;
+	gap: 0.45rem;
+	align-items: flex-end;
+	margin-left: auto;
 }
 
-.count-grid {
-	display: grid;
-	grid-template-columns: repeat(2, minmax(0, 1fr));
-	gap: 0.75rem;
-	margin: 0;
+.card-action-buttons {
+	display: flex;
+	gap: 0.35rem;
+	align-items: center;
+	justify-content: flex-end;
 }
 
-.count-grid div {
-	padding: 0.8rem;
-	border-radius: 0.8rem;
-	background: rgba(39, 39, 42, 0.75);
-	border: 1px solid rgba(63, 63, 70, 0.8);
+.open-link:hover {
+	background: rgba(59, 130, 246, 0.16);
+	border-color: rgba(96, 165, 250, 0.34);
+	color: #dbeafe;
+	filter: none;
 }
 
-.count-grid dt {
-	font-size: 0.8rem;
-	color: #a1a1aa;
-	margin-bottom: 0.2rem;
+.character-menu-shell {
+	position: relative;
 }
 
-.count-grid dd {
-	margin: 0;
-	font-size: 1.35rem;
-	font-weight: 700;
-	color: #fafafa;
-}
-
-.scope-badge {
+.menu-button {
 	display: inline-flex;
 	align-items: center;
-	padding: 0.25rem 0.55rem;
+	justify-content: center;
+	width: 2.45rem;
+	height: 2.25rem;
+	padding: 0;
+	border-radius: 0.7rem;
+	background: rgba(39, 39, 42, 0.58);
+	color: #d4d4d8;
+	border-color: rgba(82, 82, 91, 0.78);
+	font-size: 1.2rem;
+	line-height: 1;
+}
+
+.menu-button:hover,
+.menu-button[aria-expanded='true'] {
+	background: rgba(63, 63, 70, 0.82);
+	border-color: rgba(113, 113, 122, 0.95);
+}
+
+.character-menu {
+	position: absolute;
+	z-index: 10;
+	top: calc(100% + 0.35rem);
+	right: 0;
+	display: grid;
+	gap: 0.2rem;
+	min-width: 11rem;
+	padding: 0.35rem;
+	border: 1px solid rgba(63, 63, 70, 0.95);
+	border-radius: 0.75rem;
+	background: rgba(24, 24, 27, 0.98);
+	box-shadow: 0 18px 35px rgba(0, 0, 0, 0.32);
+}
+
+.character-menu-item {
+	width: 100%;
+	padding: 0.55rem 0.65rem;
+	border-radius: 0.5rem;
+	background: transparent;
+	color: #e4e4e7;
+	text-align: left;
+}
+
+.character-menu-item:hover:not(:disabled) {
+	background: rgba(63, 63, 70, 0.7);
+}
+
+.character-menu-item:disabled {
+	opacity: 0.45;
+	cursor: not-allowed;
+}
+
+.character-menu-item-danger {
+	color: #fca5a5;
+}
+
+.character-menu-item-danger:hover:not(:disabled) {
+	background: rgba(127, 29, 29, 0.34);
+}
+
+.active-character-chip {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	padding: 0.22rem 0.55rem;
 	border-radius: 999px;
-	font-size: 0.72rem;
+	background: rgba(37, 99, 235, 0.18);
+	color: #bfdbfe;
+	font-size: 0.7rem;
 	font-weight: 700;
-	letter-spacing: 0.04em;
+	letter-spacing: 0.07em;
 	text-transform: uppercase;
 }
 
-.scope-active {
-	background: rgba(37, 99, 235, 0.2);
-	color: #bfdbfe;
+.sheet-block {
+	display: grid;
+	gap: 0.65rem;
+	min-width: 0;
 }
 
-.scope-library {
-	background: rgba(82, 82, 91, 0.4);
+.resource-strip {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 0;
+	margin: 0;
+	padding: 0.45rem 0.25rem;
+	border: 1px solid rgba(63, 63, 70, 0.46);
+	border-radius: 0.75rem;
+	background: rgba(24, 24, 27, 0.38);
+}
+
+.resource-strip div {
+	display: grid;
+	gap: 0.1rem;
+	justify-items: center;
+	padding: 0.05rem 0.45rem;
+	text-align: center;
+}
+
+.resource-strip div + div {
+	border-left: 1px solid rgba(63, 63, 70, 0.45);
+}
+
+.resource-strip dt {
+	font-size: 0.68rem;
+	color: #a1a1aa;
+	line-height: 1.1;
+}
+
+.resource-strip dd {
+	margin: 0;
+	font-size: 0.95rem;
+	font-weight: 700;
 	color: #e4e4e7;
-}
-
-.scope-character {
-	background: rgba(22, 163, 74, 0.18);
-	color: #bbf7d0;
+	line-height: 1.1;
 }
 
 .inline-form {
@@ -532,8 +644,18 @@ h2 {
 }
 
 @media (max-width: 720px) {
-	.card-header {
-		flex-direction: column;
+	.card-header-actions {
+		align-items: flex-start;
+		margin-left: 0;
+	}
+
+	.resource-strip {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 0.35rem 0;
+	}
+
+	.resource-strip div:nth-child(odd) {
+		border-left: 0;
 	}
 
 	.hero-panel {

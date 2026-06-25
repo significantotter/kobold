@@ -1,6 +1,23 @@
 import { z } from 'zod';
-import { zCharacterManagementListItem, zCharacterWorkspace, getCharacterSheetSummary, toActionWorkspaceItem, toMinionWorkspaceItem, toModifierWorkspaceItem, toRollMacroWorkspaceItem } from '../workspace-shared.js';
-import { orpc, requireAuth, getOwnedCharacterOrThrow, assertUniqueCharacterName, deleteOwnedCharacter, zRenameCharacterInput, zCharacterMutationResult } from './shared.js';
+import {
+	zCharacterManagementListItem,
+	zCharacterWorkspace,
+	getCharacterSheetSummary,
+	makeSheetPreviewSummary,
+	toActionWorkspaceItem,
+	toMinionWorkspaceItem,
+	toModifierWorkspaceItem,
+	toRollMacroWorkspaceItem,
+} from '../workspace-shared.js';
+import {
+	orpc,
+	requireAuth,
+	getOwnedCharacterOrThrow,
+	assertUniqueCharacterName,
+	deleteOwnedCharacter,
+	zRenameCharacterInput,
+	zCharacterMutationResult,
+} from './shared.js';
 
 export const listMyCharacters = orpc
 	.input(z.object({}).optional())
@@ -61,12 +78,28 @@ export const listMyCharacters = orpc
 			importSource: character.importSource,
 			charId: character.charId,
 			isActiveCharacter: character.isActiveCharacter,
-			summary: {
+			summary: makeSheetPreviewSummary({
 				level: character.sheetInfo.level,
 				heritage: character.sheetInfo.heritage,
 				ancestry: character.sheetInfo.ancestry,
 				class: character.sheetInfo.class,
-			},
+				imageUrl: character.sheetInfo.imageUrl,
+				hp:
+					character.sheetInfo.hpCurrent === null
+						? null
+						: {
+								current: character.sheetInfo.hpCurrent,
+								max: character.sheetInfo.hpMax,
+							},
+				ac: character.sheetInfo.ac,
+				perception: character.sheetInfo.perception,
+				saves: {
+					fortitude: character.sheetInfo.fortitude,
+					reflex: character.sheetInfo.reflex,
+					will: character.sheetInfo.will,
+				},
+				speed: character.sheetInfo.speed,
+			}),
 			counts: {
 				modifiers: modifierCounts.get(character.sheetRecordId) ?? 0,
 				visibleActions:
@@ -134,6 +167,7 @@ export const getCharacterWorkspace = orpc
 				isActiveCharacter: character.isActiveCharacter,
 				sheetRecordId: character.sheetRecordId,
 				summary: characterSummary,
+				sheet: character.sheetRecord.sheet,
 			},
 			overview: {
 				source: character.importSource,

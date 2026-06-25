@@ -139,6 +139,15 @@ export type CharacterListItem = Pick<
 		heritage: string | null;
 		ancestry: string | null;
 		class: string | null;
+		imageUrl: string | null;
+		hpCurrent: number | null;
+		hpMax: number | null;
+		ac: number | null;
+		perception: number | null;
+		fortitude: number | null;
+		reflex: number | null;
+		will: number | null;
+		speed: number | null;
 	};
 };
 

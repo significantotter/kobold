@@ -26,12 +26,6 @@
 							<RouterLink class="crumb-link" to="/characters"
 								>My Characters</RouterLink
 							>
-							<ScopeBadge variant="scope-character">
-								{{ workspace.character.isActiveCharacter ? 'Active' : 'Character' }}
-							</ScopeBadge>
-							<ScopeBadge variant="scope-library">
-								{{ importSourceLabel(workspace.character.importSource) }}
-							</ScopeBadge>
 						</div>
 						<div v-if="isRenamingCharacter" class="rename-row">
 							<input
@@ -50,54 +44,117 @@
 								Cancel
 							</button>
 						</div>
-						<template v-else>
-							<h1>{{ workspace.character.name }}</h1>
-						</template>
-						<p class="lede">
-							Level {{ workspace.character.summary.level ?? 'Unknown' }}
-							<span v-if="workspace.character.summary.ancestry">
-								· {{ workspace.character.summary.ancestry }}
-							</span>
-							<span v-if="workspace.character.summary.class">
-								· {{ workspace.character.summary.class }}
-							</span>
-						</p>
-						<p class="subtle-copy">
-							Overview is scoped for quick upkeep. Actions remain inspect-first;
-							modifiers, roll macros, and imports are the first editable MVP surfaces.
-						</p>
-					</div>
-					<div class="hero-actions">
-						<button
-							class="secondary-button"
-							:disabled="savingHeader || workspace.character.isActiveCharacter"
-							@click="setCharacterActive"
+						<SheetMiniPreview
+							class="hero-sheet-preview"
+							:name="isRenamingCharacter ? undefined : workspace.character.name"
+							:summary="workspace.character.summary"
 						>
-							Set Active
-						</button>
-						<button
-							v-if="!isRenamingCharacter"
-							class="ghost-button"
-							:disabled="savingHeader"
-							@click="startRenameCharacter"
-						>
-							Rename
-						</button>
-						<button
-							class="ghost-button"
-							:disabled="savingHeader"
-							@click="goToImportUpdate"
-						>
-							Update Import
-						</button>
-						<RouterLink class="secondary-link" to="/library">Open Library</RouterLink>
-						<button
-							class="danger-button"
-							:disabled="savingHeader"
-							@click="deleteCharacterWorkspace"
-						>
-							Delete
-						</button>
+							<template #actions>
+								<div class="workspace-card-actions">
+									<div class="workspace-action-buttons">
+										<button
+											class="icon-action-button icon-action-button-sheet"
+											type="button"
+											:aria-label="`View sheet for ${workspace.character.name}`"
+											@click="openCharacterSheet"
+										>
+											<i class="pi pi-id-card" aria-hidden="true" />
+										</button>
+										<div class="minion-menu-shell">
+											<button
+												class="icon-action-button"
+												type="button"
+												:aria-expanded="openCharacterActionMenu"
+												:aria-label="`More actions for ${workspace.character.name}`"
+												@click="toggleCharacterActionMenu"
+											>
+												<span aria-hidden="true">&hellip;</span>
+											</button>
+											<div
+												v-if="openCharacterActionMenu"
+												class="minion-action-menu"
+											>
+												<button
+													class="minion-action-menu-item"
+													:disabled="
+														savingHeader ||
+														workspace.character.isActiveCharacter
+													"
+													@click="setCharacterActive"
+												>
+													Set Active
+												</button>
+												<button
+													v-if="!isRenamingCharacter"
+													class="minion-action-menu-item"
+													:disabled="savingHeader"
+													@click="startRenameCharacter"
+												>
+													Rename
+												</button>
+												<button
+													class="minion-action-menu-item"
+													:disabled="savingHeader"
+													@click="goToImportUpdate"
+												>
+													Update Import
+												</button>
+												<button
+													class="minion-action-menu-item minion-action-menu-item-danger"
+													:disabled="savingHeader"
+													@click="deleteCharacterWorkspace"
+												>
+													Delete
+												</button>
+											</div>
+										</div>
+									</div>
+									<span
+										v-if="workspace.character.isActiveCharacter"
+										class="workspace-status-chip"
+									>
+										Active
+									</span>
+								</div>
+							</template>
+						</SheetMiniPreview>
+						<dl class="workspace-resource-strip">
+							<div>
+								<dt>Actions</dt>
+								<dd>
+									{{
+										workspace.overview.counts.localActions +
+										workspace.overview.counts.inheritedActions
+									}}
+								</dd>
+							</div>
+							<div>
+								<dt>Modifiers</dt>
+								<dd>
+									{{
+										workspace.overview.counts.assignedActiveModifiers +
+										workspace.overview.counts.assignedInactiveModifiers
+									}}
+								</dd>
+							</div>
+							<div>
+								<dt>Macros</dt>
+								<dd>
+									{{
+										workspace.overview.counts.localRollMacros +
+										workspace.overview.counts.inheritedRollMacros
+									}}
+								</dd>
+							</div>
+							<div>
+								<dt>Minions</dt>
+								<dd>{{ workspace.overview.counts.assignedMinions }}</dd>
+							</div>
+							<div>
+								<dt>Conditions</dt>
+								<dd>{{ workspace.conditions.items.length }}</dd>
+							</div>
+						</dl>
 					</div>
 				</section>
 
@@ -115,506 +172,89 @@
 
 				<section v-if="activeSection === 'overview'" class="panel section-panel">
 					<h2>Overview</h2>
-					<div class="overview-grid">
-						<div class="stat-card">
-							<p class="stat-label">Attached modifiers</p>
-							<p class="stat-value">
-								{{ workspace.overview.counts.assignedActiveModifiers }} active ·
-								{{ workspace.overview.counts.assignedInactiveModifiers }} inactive
-							</p>
-						</div>
-						<div class="stat-card">
-							<p class="stat-label">Visible actions</p>
-							<p class="stat-value">
-								{{ workspace.overview.counts.localActions }} local ·
-								{{ workspace.overview.counts.inheritedActions }} inherited
-							</p>
-						</div>
-						<div class="stat-card">
-							<p class="stat-label">Roll macros</p>
-							<p class="stat-value">
-								{{ workspace.overview.counts.localRollMacros }} local ·
-								{{ workspace.overview.counts.inheritedRollMacros }} inherited
-							</p>
-						</div>
-						<div class="stat-card">
-							<p class="stat-label">Minions</p>
-							<p class="stat-value">
-								{{ workspace.overview.counts.assignedMinions }} assigned ·
-								{{ workspace.overview.counts.availableLibraryMinions }} available in
-								library
-							</p>
-						</div>
-						<div class="stat-card stat-card-wide">
+					<div class="overview-pulse-grid">
+						<div class="stat-card stat-card-emphasis">
 							<p class="stat-label">Conditions</p>
 							<p class="stat-value">
 								{{ workspace.conditions.items.length }} tracked condition{{
 									workspace.conditions.items.length === 1 ? '' : 's'
 								}}
 							</p>
-							<p class="stat-copy">
-								This summary answers what affects the character right now without
-								opening a full sheet editor.
+							<p class="stat-copy">Current effects that may change play decisions.</p>
+						</div>
+						<div class="stat-card">
+							<p class="stat-label">Modifier state</p>
+							<p class="stat-value">
+								{{ workspace.overview.counts.assignedActiveModifiers }} active ·
+								{{ workspace.overview.counts.assignedInactiveModifiers }} inactive
+							</p>
+						</div>
+						<div class="stat-card">
+							<p class="stat-label">Inherited tools</p>
+							<p class="stat-value">
+								{{ workspace.overview.counts.inheritedActions }} actions ·
+								{{ workspace.overview.counts.inheritedRollMacros }} macros
+							</p>
+						</div>
+						<div class="stat-card">
+							<p class="stat-label">Available in Library</p>
+							<p class="stat-value">
+								{{ workspace.overview.counts.availableLibraryModifiers }} modifiers
+								· {{ workspace.overview.counts.availableLibraryMinions }} minions
 							</p>
 						</div>
 					</div>
 				</section>
 
-				<section v-else-if="activeSection === 'actions'" class="panel section-panel">
-					<h2>Actions</h2>
-					<div class="split-sections">
-						<div>
-							<h3>Local to this character</h3>
-							<p v-if="workspace.actions.local.length === 0" class="empty-copy">
-								No local actions surfaced here yet.
-							</p>
-							<div v-else class="resource-list">
-								<article
-									v-for="action in workspace.actions.local"
-									:key="action.meta.id"
-									class="resource-card"
-								>
-									<div class="resource-head">
-										<strong>{{ action.payload.name }}</strong>
-										<span class="scope-badge scope-character">Character</span>
-									</div>
-									<p class="resource-copy">
-										{{ action.payload.description || 'No description.' }}
-									</p>
-								</article>
-							</div>
-						</div>
-						<div>
-							<h3>Inherited from Library</h3>
-							<p v-if="workspace.actions.inherited.length === 0" class="empty-copy">
-								No library actions are inherited here yet.
-							</p>
-							<div v-else class="resource-list">
-								<article
-									v-for="action in workspace.actions.inherited"
-									:key="action.meta.id"
-									class="resource-card resource-card-muted"
-								>
-									<div class="resource-head">
-										<strong>{{ action.payload.name }}</strong>
-										<RouterLink
-											class="scope-badge scope-library scope-badge-link"
-											to="/library"
-										>
-											Inherited
-										</RouterLink>
-									</div>
-									<p class="resource-copy">
-										{{ action.payload.description || 'Shared from Library.' }}
-									</p>
-								</article>
-							</div>
-						</div>
-					</div>
-				</section>
+				<ActionsSection
+					v-else-if="activeSection === 'actions'"
+					:local-actions="workspace.actions.local"
+					:inherited-actions="workspace.actions.inherited"
+				/>
 
-				<section v-else-if="activeSection === 'modifiers'" class="panel section-panel">
-					<h2>Modifiers</h2>
-					<div class="split-sections">
-						<div>
-							<h3>Assigned to this character</h3>
-							<p v-if="assignedModifiers.length === 0" class="empty-copy">
-								No assigned modifiers on this character.
-							</p>
-							<div v-else class="resource-list">
-								<article
-									v-for="modifier in assignedModifiers"
-									:key="modifier.meta.id"
-									class="resource-card"
-								>
-									<div class="resource-head resource-head-stacked">
-										<div>
-											<strong>{{ modifier.payload.name }}</strong>
-											<div class="badge-row">
-												<span class="scope-badge scope-character"
-													>Character</span
-												>
-												<span
-													class="scope-badge"
-													:class="
-														modifier.payload.isActive
-															? 'scope-active'
-															: 'scope-library'
-													"
-												>
-													{{
-														modifier.payload.isActive
-															? 'Active'
-															: 'Inactive'
-													}}
-												</span>
-											</div>
-										</div>
-										<div class="modifier-actions">
-											<button
-												class="secondary-button"
-												@click="toggleModifier(modifier)"
-											>
-												{{
-													modifier.payload.isActive
-														? 'Deactivate'
-														: 'Activate'
-												}}
-											</button>
-										</div>
-									</div>
-									<p class="resource-copy">
-										{{
-											modifier.payload.description ||
-											modifier.payload.note ||
-											'No description.'
-										}}
-									</p>
-									<div class="severity-row">
-										<label :for="`severity-${modifier.meta.id}`"
-											>Severity</label
-										>
-										<input
-											:id="`severity-${modifier.meta.id}`"
-											v-model="severityDrafts[modifier.meta.id]"
-											type="number"
-											class="text-input severity-input"
-										/>
-										<button
-											class="ghost-button"
-											@click="saveModifierSeverity(modifier)"
-										>
-											Save severity
-										</button>
-									</div>
-								</article>
-							</div>
-						</div>
-						<div>
-							<h3>Available from Library</h3>
-							<p
-								v-if="workspace.modifiers.availableFromLibrary.length === 0"
-								class="empty-copy"
-							>
-								No unassigned library modifiers are available.
-							</p>
-							<div v-else class="resource-list">
-								<article
-									v-for="modifier in workspace.modifiers.availableFromLibrary"
-									:key="modifier.meta.id"
-									class="resource-card resource-card-muted"
-								>
-									<div class="resource-head">
-										<strong>{{ modifier.payload.name }}</strong>
-										<RouterLink
-											class="scope-badge scope-library scope-badge-link"
-											to="/library"
-										>
-											Unassigned
-										</RouterLink>
-									</div>
-									<p class="resource-copy">
-										{{
-											modifier.payload.description ||
-											'Stored in Library and inactive until assignment.'
-										}}
-									</p>
-								</article>
-							</div>
-						</div>
-					</div>
-				</section>
+				<ModifiersSection
+					v-else-if="activeSection === 'modifiers'"
+					:assigned-modifiers="assignedModifiers"
+					:library-modifiers="workspace.modifiers.availableFromLibrary"
+					:open-action-menu-id="openModifierActionMenuId"
+					@toggle-menu="toggleModifierActionMenu"
+					@toggle-modifier="toggleModifier"
+				/>
 
-				<section v-else-if="activeSection === 'rollMacros'" class="panel section-panel">
-					<h2>Roll Macros</h2>
-					<div class="split-sections">
-						<div>
-							<h3>Local to this character</h3>
-							<form class="editor-card" @submit.prevent="createCharacterRollMacro">
-								<label>
-									<span>Name</span>
-									<input
-										v-model="newRollMacro.name"
-										class="text-input"
-										maxlength="100"
-									/>
-								</label>
-								<label>
-									<span>Macro</span>
-									<textarea
-										v-model="newRollMacro.macro"
-										class="text-area"
-										rows="3"
-										maxlength="500"
-									/>
-								</label>
-								<button class="primary-button" type="submit">
-									Create roll macro
-								</button>
-							</form>
-							<p v-if="workspace.rollMacros.local.length === 0" class="empty-copy">
-								No local roll macros yet.
-							</p>
-							<div v-else class="resource-list">
-								<article
-									v-for="rollMacro in workspace.rollMacros.local"
-									:key="rollMacro.meta.id"
-									class="resource-card"
-								>
-									<div class="resource-head resource-head-stacked">
-										<div class="badge-row">
-											<strong>{{ rollMacro.payload.name }}</strong>
-											<span class="scope-badge scope-character"
-												>Character</span
-											>
-										</div>
-										<div class="card-actions">
-											<button
-												class="ghost-button"
-												@click="startRollMacroEdit(rollMacro)"
-											>
-												Edit
-											</button>
-											<button
-												class="danger-button"
-												@click="deleteRollMacro(rollMacro.meta.id)"
-											>
-												Delete
-											</button>
-										</div>
-									</div>
-									<template v-if="editingRollMacroId === rollMacro.meta.id">
-										<div class="editor-card compact-editor">
-											<input
-												v-model="rollMacroDraft.name"
-												class="text-input"
-												maxlength="100"
-											/>
-											<textarea
-												v-model="rollMacroDraft.macro"
-												class="text-area"
-												rows="3"
-												maxlength="500"
-											/>
-											<div class="card-actions">
-												<button
-													class="primary-button"
-													@click="saveRollMacroEdit(rollMacro.meta.id)"
-												>
-													Save
-												</button>
-												<button
-													class="ghost-button"
-													@click="cancelRollMacroEdit"
-												>
-													Cancel
-												</button>
-											</div>
-										</div>
-									</template>
-									<template v-else>
-										<p class="macro-preview">{{ rollMacro.payload.macro }}</p>
-									</template>
-								</article>
-							</div>
-						</div>
-						<div>
-							<h3>Inherited from Library</h3>
-							<p
-								v-if="workspace.rollMacros.inherited.length === 0"
-								class="empty-copy"
-							>
-								No shared roll macros are inherited here yet.
-							</p>
-							<div v-else class="resource-list">
-								<article
-									v-for="rollMacro in workspace.rollMacros.inherited"
-									:key="rollMacro.meta.id"
-									class="resource-card resource-card-muted"
-								>
-									<div class="resource-head">
-										<strong>{{ rollMacro.payload.name }}</strong>
-										<RouterLink
-											class="scope-badge scope-library scope-badge-link"
-											to="/library"
-										>
-											Inherited
-										</RouterLink>
-									</div>
-									<p class="macro-preview">{{ rollMacro.payload.macro }}</p>
-								</article>
-							</div>
-						</div>
-					</div>
-				</section>
+				<RollMacrosSection
+					v-else-if="activeSection === 'rollMacros'"
+					:local-roll-macros="workspace.rollMacros.local"
+					:inherited-roll-macros="workspace.rollMacros.inherited"
+					:open-action-menu-id="openRollMacroActionMenuId"
+					@toggle-menu="toggleRollMacroActionMenu"
+					@delete="deleteRollMacro"
+				/>
 
-				<section v-else-if="activeSection === 'minions'" class="panel section-panel">
-					<h2>Minions</h2>
-					<div class="split-sections">
-						<div>
-							<h3>Assigned to this character</h3>
-							<p v-if="workspace.minions.assigned.length === 0" class="empty-copy">
-								No minions are assigned here.
-							</p>
-							<div v-else class="resource-list">
-								<article
-									v-for="minion in workspace.minions.assigned"
-									:key="minion.meta.id"
-									class="resource-card"
-								>
-									<div class="resource-head">
-										<div>
-											<div
-												v-if="editingMinionId === minion.meta.id"
-												class="rename-row"
-											>
-												<input
-													v-model="minionRenameDraft"
-													class="text-input"
-													maxlength="100"
-												/>
-												<button
-													class="primary-button"
-													@click="saveMinionRename(minion.meta.id)"
-												>
-													Save
-												</button>
-												<button
-													class="ghost-button"
-													@click="cancelMinionRename"
-												>
-													Cancel
-												</button>
-											</div>
-											<template v-else>
-												<strong>{{ minion.payload.name }}</strong>
-											</template>
-											<div class="badge-row mt-2">
-												<span class="scope-badge scope-character"
-													>Assigned</span
-												>
-												<span
-													v-if="minion.summary.autoJoinInitiative"
-													class="scope-badge scope-active"
-												>
-													Auto-Join
-												</span>
-											</div>
-										</div>
-										<div class="card-actions">
-											<button
-												v-if="editingMinionId !== minion.meta.id"
-												class="ghost-button"
-												@click="startMinionRename(minion)"
-											>
-												Rename
-											</button>
-											<button
-												class="secondary-button"
-												@click="toggleMinionAutoJoin(minion)"
-											>
-												{{
-													minion.summary.autoJoinInitiative
-														? 'Disable Auto-Join'
-														: 'Enable Auto-Join'
-												}}
-											</button>
-											<button
-												class="ghost-button"
-												@click="unassignMinion(minion.meta.id)"
-											>
-												Unassign
-											</button>
-											<button
-												class="danger-button"
-												@click="deleteMinion(minion.meta.id)"
-											>
-												Delete
-											</button>
-										</div>
-									</div>
-									<p class="resource-copy">
-										Level {{ minion.summary.level ?? 'Unknown' }}
-										<span v-if="minion.summary.ancestry">
-											· {{ minion.summary.ancestry }}</span
-										>
-										<span v-if="minion.summary.class">
-											· {{ minion.summary.class }}</span
-										>
-									</p>
-								</article>
-							</div>
-						</div>
-						<div>
-							<h3>Available from Library</h3>
-							<p
-								v-if="workspace.minions.availableFromLibrary.length === 0"
-								class="empty-copy"
-							>
-								No unassigned minions are available.
-							</p>
-							<div v-else class="resource-list">
-								<article
-									v-for="minion in workspace.minions.availableFromLibrary"
-									:key="minion.meta.id"
-									class="resource-card resource-card-muted"
-								>
-									<div class="resource-head">
-										<div>
-											<strong>{{ minion.payload.name }}</strong>
-											<div class="badge-row mt-2">
-												<RouterLink
-													class="scope-badge scope-library scope-badge-link"
-													to="/library"
-												>
-													Library
-												</RouterLink>
-												<span
-													v-if="minion.summary.autoJoinInitiative"
-													class="scope-badge scope-active"
-												>
-													Auto-Join
-												</span>
-											</div>
-										</div>
-										<button
-											class="primary-button"
-											@click="assignMinionToCurrentCharacter(minion.meta.id)"
-										>
-											Assign here
-										</button>
-									</div>
-									<p class="resource-copy">
-										Move this minion out of Library and attach it to this
-										character.
-									</p>
-								</article>
-							</div>
-						</div>
-					</div>
-				</section>
+				<MinionsSection
+					v-else-if="activeSection === 'minions'"
+					v-model:minion-rename-draft="minionRenameDraft"
+					:assigned-minions="workspace.minions.assigned"
+					:available-minions="workspace.minions.availableFromLibrary"
+					:open-action-menu-id="openMinionActionMenuId"
+					:editing-minion-id="editingMinionId"
+					@open-sheet="openMinionSheet"
+					@toggle-menu="toggleMinionActionMenu"
+					@start-rename="startMinionRename"
+					@save-rename="saveMinionRename"
+					@cancel-rename="cancelMinionRename"
+					@toggle-auto-join="toggleMinionAutoJoin"
+					@unassign="unassignMinion"
+					@delete="deleteMinion"
+					@assign="assignMinionToCurrentCharacter"
+				/>
 
-				<section v-else class="panel section-panel">
-					<h2>Conditions</h2>
-					<p v-if="workspace.conditions.items.length === 0" class="empty-copy">
-						No active conditions recorded on this sheet.
-					</p>
-					<div v-else class="resource-list">
-						<article
-							v-for="(condition, index) in workspace.conditions.items"
-							:key="`${condition.name}-${index}`"
-							class="resource-card"
-						>
-							<div class="resource-head">
-								<strong>{{ condition.name }}</strong>
-								<span class="scope-badge scope-character">Condition</span>
-							</div>
-							<p class="resource-copy">
-								{{ condition.description || 'No description.' }}
-							</p>
-						</article>
-					</div>
-				</section>
+				<ConditionsSection v-else :conditions="workspace.conditions.items" />
+
+				<SheetTray
+					v-if="activeSheetDisplay"
+					:display="activeSheetDisplay"
+					@close="closeSheetTray"
+				/>
 			</template>
 		</main>
 	</div>
@@ -624,17 +264,23 @@
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { api } from '@/api/api-client';
+import ActionsSection from '@/components/character-workspace/ActionsSection.vue';
+import ConditionsSection from '@/components/character-workspace/ConditionsSection.vue';
+import MinionsSection from '@/components/character-workspace/MinionsSection.vue';
+import ModifiersSection from '@/components/character-workspace/ModifiersSection.vue';
+import RollMacrosSection from '@/components/character-workspace/RollMacrosSection.vue';
+import SheetTray from '@/components/character-workspace/SheetTray.vue';
+import type {
+	ActiveSheetDisplay,
+	CharacterWorkspace,
+	MinionItem,
+	ModifierAssignedItem,
+	Sheet,
+} from '@/components/character-workspace/types';
 import LoginRequiredCard from '@/components/LoginRequiredCard.vue';
 import PageBanner from '@/components/PageBanner.vue';
-import ScopeBadge from '@/components/ScopeBadge.vue';
+import SheetMiniPreview from '@/components/SheetMiniPreview.vue';
 import { useAuthStore } from '@/stores/auth';
-
-type CharacterWorkspace = NonNullable<
-	Awaited<ReturnType<typeof api.character.getCharacterWorkspace>>
->;
-type ModifierItem = CharacterWorkspace['modifiers']['assignedActive'][number];
-type RollMacroItem = CharacterWorkspace['rollMacros']['local'][number];
-type MinionItem = CharacterWorkspace['minions']['assigned'][number];
 
 const auth = useAuthStore();
 const route = useRoute();
@@ -650,11 +296,13 @@ const activeSection = ref<
 const isRenamingCharacter = ref(false);
 const renameDraft = ref('');
 const savingHeader = ref(false);
-const severityDrafts = ref<Record<number, string>>({});
-const newRollMacro = ref({ name: '', macro: '' });
-const editingRollMacroId = ref<number | null>(null);
-const rollMacroDraft = ref({ name: '', macro: '' });
 const editingMinionId = ref<number | null>(null);
+const openCharacterActionMenu = ref(false);
+const openRollMacroActionMenuId = ref<number | null>(null);
+const openModifierActionMenuId = ref<number | null>(null);
+const openMinionActionMenuId = ref<number | null>(null);
+const selectedCharacterSheet = ref(false);
+const selectedMinion = ref<MinionItem | null>(null);
 const minionRenameDraft = ref('');
 
 const sections = [
@@ -673,6 +321,49 @@ const assignedModifiers = computed(() => {
 		...workspace.value.modifiers.assignedActive,
 		...workspace.value.modifiers.assignedInactive,
 	];
+});
+
+const activeSheetDisplay = computed<ActiveSheetDisplay | null>(() => {
+	if (selectedCharacterSheet.value && workspace.value) {
+		const sheet = workspace.value.character.sheet;
+		return {
+			id: `character-${workspace.value.character.id}`,
+			titleId: `character-sheet-title-${workspace.value.character.id}`,
+			eyebrow: 'Character Sheet',
+			name: workspace.value.character.name,
+			identityLine: sheetIdentityLine(sheet),
+			summary: workspace.value.character.summary,
+			sheet,
+			resourceCounts: {
+				actions:
+					workspace.value.overview.counts.localActions +
+					workspace.value.overview.counts.inheritedActions,
+				modifiers:
+					workspace.value.overview.counts.assignedActiveModifiers +
+					workspace.value.overview.counts.assignedInactiveModifiers,
+				macros:
+					workspace.value.overview.counts.localRollMacros +
+					workspace.value.overview.counts.inheritedRollMacros,
+			},
+		};
+	}
+	if (!selectedMinion.value) return null;
+	const minion = selectedMinion.value;
+	const sheet: Sheet = minion.payload.sheetRecord.sheet;
+	return {
+		id: `minion-${minion.meta.id}`,
+		titleId: `minion-sheet-title-${minion.meta.id}`,
+		eyebrow: 'Minion Sheet',
+		name: minion.payload.name,
+		identityLine: sheetIdentityLine(sheet),
+		summary: minion.summary,
+		sheet,
+		resourceCounts: {
+			actions: minion.payload.actions.length,
+			modifiers: minion.payload.modifiers.length,
+			macros: minion.payload.rollMacros.length,
+		},
+	};
 });
 
 onMounted(async () => {
@@ -695,25 +386,16 @@ watch(
 	}
 );
 
-function importSourceLabel(importSource: string) {
-	if (importSource === 'pathbuilder') return 'Pathbuilder';
-	if (importSource === 'wg') return "Wanderer's Guide";
-	return importSource;
-}
-
 function seedWorkspaceState() {
 	if (!workspace.value) return;
 	renameDraft.value = workspace.value.character.name;
-	severityDrafts.value = Object.fromEntries(
-		assignedModifiers.value.map(modifier => [
-			modifier.meta.id,
-			modifier.payload.severity === null ? '' : String(modifier.payload.severity),
-		])
-	);
-	editingRollMacroId.value = null;
-	rollMacroDraft.value = { name: '', macro: '' };
-	newRollMacro.value = { name: '', macro: '' };
 	editingMinionId.value = null;
+	openCharacterActionMenu.value = false;
+	openRollMacroActionMenuId.value = null;
+	openModifierActionMenuId.value = null;
+	openMinionActionMenuId.value = null;
+	selectedCharacterSheet.value = false;
+	selectedMinion.value = null;
 	minionRenameDraft.value = '';
 	if (!sections.some(section => section.key === activeSection.value)) {
 		activeSection.value = 'overview';
@@ -738,6 +420,7 @@ async function loadWorkspace() {
 }
 
 function startRenameCharacter() {
+	closeCharacterActionMenu();
 	isRenamingCharacter.value = true;
 	renameDraft.value = workspace.value?.character.name ?? '';
 }
@@ -770,6 +453,7 @@ async function saveCharacterName() {
 
 async function setCharacterActive() {
 	if (!workspace.value) return;
+	closeCharacterActionMenu();
 	savingHeader.value = true;
 	error.value = '';
 	try {
@@ -784,11 +468,13 @@ async function setCharacterActive() {
 }
 
 function goToImportUpdate() {
+	closeCharacterActionMenu();
 	router.push({ name: 'import-character', query: { characterId: String(characterId.value) } });
 }
 
 async function deleteCharacterWorkspace() {
 	if (!workspace.value) return;
+	closeCharacterActionMenu();
 	if (
 		!window.confirm(
 			`Delete ${workspace.value.character.name}? This removes the workspace and related sheet.`
@@ -808,7 +494,8 @@ async function deleteCharacterWorkspace() {
 	}
 }
 
-async function toggleModifier(modifier: ModifierItem) {
+async function toggleModifier(modifier: ModifierAssignedItem) {
+	closeModifierActionMenu();
 	error.value = '';
 	try {
 		await api.character.updateModifierState({
@@ -822,95 +509,22 @@ async function toggleModifier(modifier: ModifierItem) {
 	}
 }
 
-async function saveModifierSeverity(modifier: ModifierItem) {
-	const raw = severityDrafts.value[modifier.meta.id] ?? '';
-	const severity = raw === '' ? null : Number(raw);
-	if (severity !== null && Number.isNaN(severity)) {
-		error.value = 'Severity must be a number or blank.';
-		return;
-	}
-	error.value = '';
-	try {
-		await api.character.updateModifierState({
-			modifierId: modifier.meta.id,
-			severity,
-		});
-		flashMessage.value = `${modifier.payload.name} severity updated.`;
-		await loadWorkspace();
-	} catch (err: unknown) {
-		error.value = err instanceof Error ? err.message : 'Failed to update modifier severity.';
-	}
-}
-
-async function createCharacterRollMacro() {
-	if (!workspace.value) return;
-	if (!newRollMacro.value.name.trim() || !newRollMacro.value.macro.trim()) {
-		error.value = 'Provide both a roll macro name and macro value.';
-		return;
-	}
-	error.value = '';
-	try {
-		await api.character.createRollMacro({
-			characterId: workspace.value.character.id,
-			name: newRollMacro.value.name.trim(),
-			macro: newRollMacro.value.macro.trim(),
-		});
-		flashMessage.value = `Created ${newRollMacro.value.name.trim()}.`;
-		await loadWorkspace();
-	} catch (err: unknown) {
-		error.value = err instanceof Error ? err.message : 'Failed to create roll macro.';
-	}
-}
-
-function startRollMacroEdit(rollMacro: RollMacroItem) {
-	editingRollMacroId.value = rollMacro.meta.id;
-	rollMacroDraft.value = {
-		name: rollMacro.payload.name,
-		macro: rollMacro.payload.macro,
-	};
-}
-
-function cancelRollMacroEdit() {
-	editingRollMacroId.value = null;
-	rollMacroDraft.value = { name: '', macro: '' };
-}
-
-async function saveRollMacroEdit(rollMacroId: number) {
-	if (!rollMacroDraft.value.name.trim() || !rollMacroDraft.value.macro.trim()) {
-		error.value = 'Provide both a roll macro name and macro value.';
-		return;
-	}
-	error.value = '';
-	try {
-		await api.character.updateRollMacro({
-			rollMacroId,
-			name: rollMacroDraft.value.name.trim(),
-			macro: rollMacroDraft.value.macro.trim(),
-		});
-		flashMessage.value = `Updated ${rollMacroDraft.value.name.trim()}.`;
-		cancelRollMacroEdit();
-		await loadWorkspace();
-	} catch (err: unknown) {
-		error.value = err instanceof Error ? err.message : 'Failed to update roll macro.';
-	}
-}
-
 async function deleteRollMacro(rollMacroId: number) {
+	closeRollMacroActionMenu();
 	if (!window.confirm('Delete this roll macro?')) return;
 	error.value = '';
 	try {
 		await api.character.deleteRollMacro({ rollMacroId });
 		flashMessage.value = 'Roll macro deleted.';
-		if (editingRollMacroId.value === rollMacroId) {
-			cancelRollMacroEdit();
-		}
 		await loadWorkspace();
 	} catch (err: unknown) {
 		error.value = err instanceof Error ? err.message : 'Failed to delete roll macro.';
 	}
 }
 
-function startMinionRename(minion: MinionItem) {
+function startMinionRename(input: unknown) {
+	const minion = input as MinionItem;
+	closeMinionActionMenu();
 	editingMinionId.value = minion.meta.id;
 	minionRenameDraft.value = minion.payload.name;
 }
@@ -939,6 +553,7 @@ async function saveMinionRename(minionId: number) {
 
 async function assignMinionToCurrentCharacter(minionId: number) {
 	if (!workspace.value) return;
+	closeMinionActionMenu();
 	error.value = '';
 	try {
 		await api.character.assignMinion({
@@ -953,6 +568,7 @@ async function assignMinionToCurrentCharacter(minionId: number) {
 }
 
 async function unassignMinion(minionId: number) {
+	closeMinionActionMenu();
 	if (!window.confirm('Return this minion to Library?')) return;
 	error.value = '';
 	try {
@@ -964,7 +580,9 @@ async function unassignMinion(minionId: number) {
 	}
 }
 
-async function toggleMinionAutoJoin(minion: MinionItem) {
+async function toggleMinionAutoJoin(input: unknown) {
+	const minion = input as MinionItem;
+	closeMinionActionMenu();
 	error.value = '';
 	try {
 		await api.character.updateMinionAutoJoinInitiative({
@@ -979,6 +597,7 @@ async function toggleMinionAutoJoin(minion: MinionItem) {
 }
 
 async function deleteMinion(minionId: number) {
+	closeMinionActionMenu();
 	if (
 		!window.confirm(
 			'Delete this minion? This removes its sheet and related initiative entries.'
@@ -998,7 +617,86 @@ async function deleteMinion(minionId: number) {
 		error.value = err instanceof Error ? err.message : 'Failed to delete minion.';
 	}
 }
+
+function openMinionSheet(input: unknown) {
+	const minion = input as MinionItem;
+	closeCharacterActionMenu();
+	closeRollMacroActionMenu();
+	closeModifierActionMenu();
+	closeMinionActionMenu();
+	selectedCharacterSheet.value = false;
+	selectedMinion.value = minion;
+}
+
+function openCharacterSheet() {
+	closeCharacterActionMenu();
+	closeRollMacroActionMenu();
+	closeModifierActionMenu();
+	closeMinionActionMenu();
+	selectedMinion.value = null;
+	selectedCharacterSheet.value = true;
+}
+
+function closeSheetTray() {
+	selectedCharacterSheet.value = false;
+	selectedMinion.value = null;
+}
+
+function toggleCharacterActionMenu() {
+	closeRollMacroActionMenu();
+	closeModifierActionMenu();
+	closeMinionActionMenu();
+	openCharacterActionMenu.value = !openCharacterActionMenu.value;
+}
+
+function closeCharacterActionMenu() {
+	openCharacterActionMenu.value = false;
+}
+
+function toggleRollMacroActionMenu(rollMacroId: number) {
+	closeCharacterActionMenu();
+	closeModifierActionMenu();
+	closeMinionActionMenu();
+	openRollMacroActionMenuId.value =
+		openRollMacroActionMenuId.value === rollMacroId ? null : rollMacroId;
+}
+
+function closeRollMacroActionMenu() {
+	openRollMacroActionMenuId.value = null;
+}
+
+function toggleModifierActionMenu(modifierId: number) {
+	closeCharacterActionMenu();
+	closeRollMacroActionMenu();
+	closeMinionActionMenu();
+	openModifierActionMenuId.value =
+		openModifierActionMenuId.value === modifierId ? null : modifierId;
+}
+
+function closeModifierActionMenu() {
+	openModifierActionMenuId.value = null;
+}
+
+function toggleMinionActionMenu(minionId: number) {
+	closeCharacterActionMenu();
+	closeRollMacroActionMenu();
+	closeModifierActionMenu();
+	openMinionActionMenuId.value = openMinionActionMenuId.value === minionId ? null : minionId;
+}
+
+function closeMinionActionMenu() {
+	openMinionActionMenuId.value = null;
+}
+
+function sheetIdentityLine(sheet: Sheet) {
+	const parts = [`Level ${sheet.staticInfo.level ?? 'Unknown'}`];
+	if (sheet.info.class) parts.push(sheet.info.class);
+	if (sheet.info.ancestry) parts.push(sheet.info.ancestry);
+	return parts.join(' · ');
+}
 </script>
+
+<style src="../components/character-workspace/resource-section.css"></style>
 
 <style scoped>
 .workspace-page {
@@ -1009,66 +707,38 @@ async function deleteMinion(minionId: number) {
 	min-height: 100%;
 }
 
-.panel,
-.banner,
-.resource-card,
-.editor-card,
-.stat-card {
-	border: 1px solid rgba(63, 63, 70, 0.88);
-	background: rgba(24, 24, 27, 0.82);
-	backdrop-filter: blur(10px);
-	border-radius: 1rem;
-	box-shadow: 0 22px 45px rgba(0, 0, 0, 0.24);
-}
-
-.banner {
-	padding: 0.9rem 1rem;
-	margin-bottom: 1rem;
-}
-
-.banner-success {
-	color: #bbf7d0;
-	border-color: rgba(22, 163, 74, 0.55);
-}
-
-.banner-error {
-	color: #fecaca;
-	border-color: rgba(220, 38, 38, 0.55);
-}
-
 .hero-panel,
-.section-panel,
 .state-panel {
 	padding: 1.4rem;
 	margin-bottom: 1rem;
 }
 
 .hero-panel {
-	display: flex;
-	justify-content: space-between;
-	gap: 1rem;
-	flex-wrap: wrap;
+	position: relative;
+	display: grid;
+	gap: 0.9rem;
 }
 
 .hero-main {
-	flex: 1;
-	min-width: 260px;
+	display: grid;
+	gap: 0.75rem;
+	min-width: 0;
 }
 
 .hero-topline,
-.hero-actions,
-.section-nav,
-.badge-row,
-.card-actions,
-.resource-head,
-.modifier-actions,
-.severity-row,
-.split-sections,
-.rename-row {
+.section-nav {
 	display: flex;
 	gap: 0.75rem;
 	flex-wrap: wrap;
 	align-items: center;
+}
+
+.hero-topline {
+	justify-content: space-between;
+}
+
+.crumb-link {
+	text-decoration: none;
 }
 
 .section-nav {
@@ -1093,96 +763,8 @@ async function deleteMinion(minionId: number) {
 	color: white;
 }
 
-.crumb-link,
-.primary-link,
-.secondary-link,
-.scope-badge-link {
-	text-decoration: none;
-}
-
-.primary-link,
-.secondary-link,
-.primary-button,
-.secondary-button,
-.ghost-button,
-.danger-button {
-	border-radius: 999px;
-	padding: 0.7rem 1rem;
-	border: 1px solid transparent;
-	font-weight: 600;
-	cursor: pointer;
-	transition:
-		background 0.16s ease,
-		border-color 0.16s ease,
-		color 0.16s ease;
-}
-
-.primary-link,
-.primary-button {
-	background: #2563eb;
-	color: white;
-	border-color: #2563eb;
-}
-
-.secondary-link,
-.secondary-button {
-	background: rgba(39, 39, 42, 0.88);
-	color: #f4f4f5;
-	border-color: rgba(82, 82, 91, 1);
-}
-
-.ghost-button {
-	background: transparent;
-	color: #d4d4d8;
-	border-color: rgba(82, 82, 91, 1);
-}
-
-.danger-button {
-	background: rgba(127, 29, 29, 0.4);
-	color: #fca5a5;
-	border-color: rgba(185, 28, 28, 0.65);
-}
-
-.scope-badge {
-	display: inline-flex;
-	align-items: center;
-	padding: 0.25rem 0.55rem;
-	border-radius: 999px;
-	font-size: 0.72rem;
-	font-weight: 700;
-	letter-spacing: 0.04em;
-	text-transform: uppercase;
-}
-
-.scope-character {
-	background: rgba(37, 99, 235, 0.2);
-	color: #bfdbfe;
-}
-
-.scope-library {
-	background: rgba(82, 82, 91, 0.4);
-	color: #e4e4e7;
-}
-
-.scope-active {
-	background: rgba(22, 163, 74, 0.22);
-	color: #bbf7d0;
-}
-
 h1,
-h2,
-h3,
-strong {
-	color: #fafafa;
-	margin: 0;
-}
-
-.lede,
 .subtle-copy,
-.resource-copy,
-.empty-copy,
-.stat-copy,
-.macro-preview,
 .state-panel p {
 	color: #d4d4d8;
 }
@@ -1193,134 +775,87 @@ strong {
 	line-height: 1.5;
 }
 
-.overview-grid,
-.resource-list {
-	display: grid;
-	gap: 0.85rem;
+.stat-card-emphasis {
+	border-color: rgba(96, 165, 250, 0.38);
+	background:
+		radial-gradient(circle at top left, rgba(37, 99, 235, 0.14), transparent 44%),
+		rgba(24, 24, 27, 0.82);
 }
 
-.overview-grid {
-	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-	margin-top: 1rem;
+.workspace-card-actions {
+	display: flex;
+	flex-direction: column;
+	gap: 0.45rem;
+	align-items: flex-end;
 }
 
-.stat-card {
-	padding: 1rem;
-}
-
-.stat-card-wide {
-	grid-column: 1 / -1;
-}
-
-.stat-label {
-	margin: 0 0 0.35rem;
-	font-size: 0.82rem;
-	text-transform: uppercase;
-	letter-spacing: 0.12em;
-	color: #93c5fd;
-}
-
-.stat-value {
-	margin: 0;
-	font-size: 1.1rem;
-	font-weight: 700;
-}
-
-.split-sections {
-	align-items: stretch;
-	gap: 1rem;
-}
-
-.split-sections > div {
-	flex: 1 1 280px;
-	min-width: 0;
-}
-
-.resource-card,
-.editor-card {
-	padding: 1rem;
-}
-
-.resource-card-muted {
-	background: rgba(39, 39, 42, 0.66);
-}
-
-.resource-head {
-	justify-content: space-between;
-	align-items: start;
-	margin-bottom: 0.6rem;
-}
-
-.resource-head-stacked {
-	align-items: start;
-}
-
-.editor-card {
-	display: grid;
-	gap: 0.75rem;
-	margin-bottom: 1rem;
-}
-
-.compact-editor {
-	margin-top: 0.75rem;
-	margin-bottom: 0;
-}
-
-label {
-	display: grid;
+.workspace-action-buttons {
+	display: flex;
 	gap: 0.35rem;
-	color: #e4e4e7;
-	font-size: 0.92rem;
+	align-items: center;
+	justify-content: flex-end;
 }
 
-.text-input,
-.text-area {
-	background: rgba(9, 9, 11, 0.92);
-	border: 1px solid rgba(82, 82, 91, 1);
-	border-radius: 0.8rem;
-	padding: 0.75rem 0.85rem;
-	color: #fafafa;
-	font: inherit;
+.workspace-status-chip {
+	display: flex;
+	align-items: center;
+	justify-content: center;
 	width: 100%;
-	box-sizing: border-box;
+	padding: 0.22rem 0.55rem;
+	border-radius: 999px;
+	background: rgba(37, 99, 235, 0.18);
+	color: #bfdbfe;
+	font-size: 0.7rem;
+	font-weight: 700;
+	letter-spacing: 0.07em;
+	text-transform: uppercase;
+	white-space: nowrap;
+}
+
+.workspace-resource-strip {
+	display: grid;
+	grid-template-columns: repeat(5, minmax(0, 1fr));
+	margin: 0;
+	padding: 0.45rem 0.25rem;
+	border: 1px solid rgba(63, 63, 70, 0.46);
+	border-radius: 0.75rem;
+	background: rgba(24, 24, 27, 0.38);
+}
+
+.workspace-resource-strip div {
+	display: grid;
+	gap: 0.1rem;
+	justify-items: center;
+	padding: 0.05rem 0.45rem;
+	text-align: center;
+}
+
+.workspace-resource-strip div + div {
+	border-left: 1px solid rgba(63, 63, 70, 0.45);
+}
+
+.workspace-resource-strip dt {
+	color: #a1a1aa;
+	font-size: 0.68rem;
+	line-height: 1.1;
+}
+
+.workspace-resource-strip dd {
+	margin: 0;
+	color: #e4e4e7;
+	font-size: 0.95rem;
+	font-weight: 700;
+	line-height: 1.1;
 }
 
 .text-input-wide {
 	max-width: 28rem;
 }
 
-.text-area {
-	resize: vertical;
-}
-
-.macro-preview {
-	margin: 0;
-	padding: 0.85rem;
-	border-radius: 0.85rem;
-	background: rgba(9, 9, 11, 0.72);
-	font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-	white-space: pre-wrap;
-	word-break: break-word;
-}
-
-.severity-row {
-	margin-top: 0.75rem;
-	align-items: end;
-}
-
-.severity-input {
-	max-width: 7rem;
-}
-
 @media (max-width: 720px) {
 	.hero-panel,
-	.section-panel,
 	.state-panel {
 		padding: 1.1rem;
-	}
-
-	.hero-panel {
-		flex-direction: column;
 	}
 
 	.section-nav {
@@ -1329,10 +864,6 @@ label {
 
 	.section-pill {
 		white-space: nowrap;
-	}
-
-	.split-sections {
-		flex-direction: column;
 	}
 }
 </style>

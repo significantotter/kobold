@@ -130,6 +130,10 @@ export enum DefenseRuleSource {
 }
 
 export const zAbilityEnum = z.nativeEnum(AbilityEnum);
+export const zNullableAbilityEnum = z.preprocess(value => {
+	if (value === null || value === undefined) return null;
+	return value;
+}, zAbilityEnum.nullable());
 
 export type ProficiencyStat = z.infer<typeof zProficiencyStat>;
 export const zProficiencyStat = z.strictObject({
@@ -237,7 +241,7 @@ export const zSheetStaticInfo = z
 	.strictObject({
 		name: z.string().describe("The creature's name."),
 		level: zNullableInteger.describe("The creature's level."),
-		keyAbility: zAbilityEnum.nullable().describe("The creature's key ability."),
+		keyAbility: zNullableAbilityEnum.describe("The creature's key ability."),
 		usesStamina: z
 			.boolean()
 			.default(false)
