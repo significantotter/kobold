@@ -1,6 +1,14 @@
 import { BestiaryEntry, CompendiumEntry } from '@kobold/schema';
 import { NethysSheetImporter } from './sheet-import-nethys.js';
-import { AbilityEnum, TextRoll } from '@kobold/schema';
+import {
+	AbilityEnum,
+	ActionCostEnum,
+	ActionTypeEnum,
+	AttackOrSkillRoll,
+	DamageRoll,
+	RollTypeEnum,
+	TextRoll,
+} from '@kobold/schema';
 
 const forestDragonStats: BestiaryEntry = {
 	ac: 36,
@@ -291,7 +299,82 @@ describe('sheet-import-nethys', () => {
 		expect(sheetStats.occult.bonus).toBe(null);
 		expect(sheetStats.occult.dc).toBe(null);
 	});
-	test('applyAttacks()', () => {});
+	test('applyAttacks()', async () => {
+		await importer.applyAttacks('1');
+
+		const jaws = importer.actions.find(a => a.name === 'jaws');
+		const claw = importer.actions.find(a => a.name === 'claw');
+		const jawsToHit = jaws?.rolls.find(r => r.name === 'To Hit') as
+			| AttackOrSkillRoll
+			| undefined;
+		const jawsDamage = jaws?.rolls.find(r => r.type === RollTypeEnum.damage) as
+			| DamageRoll
+			| undefined;
+		const clawEffect = claw?.rolls.find(r => r.type === RollTypeEnum.text) as
+			| TextRoll
+			| undefined;
+
+		expect(importer.actions.filter(a => a.type === ActionTypeEnum.attack)).toHaveLength(3);
+		expect(jaws?.actionCost).toBe(ActionCostEnum.oneAction);
+		expect(jaws?.tags).toStrictEqual(['Magical', 'reach 15 feet']);
+		expect(jawsToHit?.roll).toBe('1d20+29');
+		expect(jawsDamage?.terms[0]).toMatchObject({
+			dice: '3d10+13',
+			type: 'piercing',
+		});
+		expect(clawEffect?.defaultText).toBe('Grab');
+	});
+	test('applyAttacks() handles SF2e unsigned attack and damage bonuses', async () => {
+		const sf2eStats: BestiaryEntry = {
+			...forestDragonStats,
+			markdown:
+				'**Speed** 60 feet, fly 140 feet\r\n\r\n' +
+				'**Melee**\r\n<actions string="Single Action" />\r\njaws 27,\r\n3d1214 piercing plus cosmic attunement\r\n\r\n' +
+				'**Melee**\r\n<actions string="Single Action" />\r\nclaw 27,\r\n3d814 slashing plus cosmic attunement\r\n\r\n' +
+				'**Melee**\r\n<actions string="Single Action" />\r\ntail 25,\r\n3d1014 bludgeoning plus cosmic attunement\r\n\r\n' +
+				'**Ranged**\r\n<actions string="Single Action" />\r\ncosmic blast 25,\r\n4d69 bludgeoning or fire (see cosmic attunement)\r\n\r\n' +
+				'**Divine Innate Spells** DC 31',
+		};
+		const sf2eImporter = new TestNethysSheetImporter(sf2eStats, {});
+
+		await sf2eImporter.applyAttacks('1');
+
+		const jaws = sf2eImporter.actions.find(a => a.name === 'jaws');
+		const cosmicBlast = sf2eImporter.actions.find(a => a.name === 'cosmic blast');
+		const jawsToHit = jaws?.rolls.find(r => r.name === 'To Hit') as
+			| AttackOrSkillRoll
+			| undefined;
+		const jawsDamage = jaws?.rolls.find(r => r.type === RollTypeEnum.damage) as
+			| DamageRoll
+			| undefined;
+		const jawsEffect = jaws?.rolls.find(r => r.type === RollTypeEnum.text) as
+			| TextRoll
+			| undefined;
+		const blastToHit = cosmicBlast?.rolls.find(r => r.name === 'To Hit') as
+			| AttackOrSkillRoll
+			| undefined;
+		const blastDamage = cosmicBlast?.rolls.find(r => r.type === RollTypeEnum.damage) as
+			| DamageRoll
+			| undefined;
+
+		expect(sf2eImporter.actions.map(a => a.name)).toStrictEqual([
+			'jaws',
+			'claw',
+			'tail',
+			'cosmic blast',
+		]);
+		expect(jawsToHit?.roll).toBe('1d20+27');
+		expect(jawsDamage?.terms[0]).toMatchObject({
+			dice: '3d12+14',
+			type: 'piercing',
+		});
+		expect(jawsEffect?.defaultText).toBe('cosmic attunement');
+		expect(blastToHit?.roll).toBe('1d20+25');
+		expect(blastDamage?.terms[0]).toMatchObject({
+			dice: '4d6+9',
+			type: 'bludgeoning or fire (see cosmic attunement)',
+		});
+	});
 	test('applyCreatureActions()', async () => {
 		await importer.applyCreatureActions('1');
 		const counteredByMetal = importer.actions.find(a => a.name === 'Countered by Metal');

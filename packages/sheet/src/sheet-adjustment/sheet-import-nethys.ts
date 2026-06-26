@@ -319,22 +319,49 @@ export class NethysSheetImporter {
 	}
 
 	protected parseDamageEffectClause(damageClause: string) {
-		const match = damageClause
-			.trim()
-			.match(/(\d+\W*d?\W*\d*\W*\+?\W*\d*)?(?:\s*([a-zA-Z\s\.]+))?/);
+		const trimmedClause = damageClause.trim();
+		const match = trimmedClause.match(
+			/^(\d+\s*d\s*\d+(?:\s*[+-]\s*\d+)?|\d+)(?:\s+(.+))?$/i
+		);
 		if (match) {
 			const [, dice, type] = match;
 			return {
 				rollType: 'damage',
 				type: type ? type.trim() : null,
-				dice: dice ? dice.trim() : null,
+				dice: dice ? this.normalizeDamageDice(dice.trim()) : null,
 			};
 		} else {
 			return {
 				rollType: 'effect',
-				effect: damageClause,
+				effect: trimmedClause,
 			};
 		}
+	}
+
+	protected normalizeDamageDice(dice: string) {
+		const compactDice = dice.replace(/\s+/g, '');
+		const omittedPlusMatch = compactDice.match(/^(\d+)d(4|6|8|10|12|20|100)(\d+)$/i);
+		if (!omittedPlusMatch) return dice;
+		return `${omittedPlusMatch[1]}d${omittedPlusMatch[2]}+${omittedPlusMatch[3]}`;
+	}
+
+	protected parseAttackRemainder(postBonusClause: string) {
+		let remainder = postBonusClause.trim();
+		const traitsMatch = remainder.match(/^\(([^<>()]+)\)/);
+		const traits = traitsMatch?.[1]?.split(', ') ?? [];
+		if (traitsMatch) remainder = remainder.slice(traitsMatch[0].length).trim();
+
+		remainder = remainder.replace(/^,\s*/, '').trim();
+		const labeledDamageMatch = remainder.match(
+			/^(?:\*\*)?(?:Damage|Effect)(?:\*\*)?\s*(.*)$/is
+		);
+		const damageText = labeledDamageMatch?.[1]?.trim() ?? remainder;
+		const hasDamageText = labeledDamageMatch || /^\d+\s*d\s*\d+/i.test(damageText);
+
+		return {
+			traits,
+			damageText: hasDamageText ? damageText : null,
+		};
 	}
 
 	protected async applyCreatureSpells(userId: string) {
@@ -423,23 +450,23 @@ export class NethysSheetImporter {
 		for (const attackMatch of attackMatches) {
 			const parsedMatch = await this.nethysParser.parseNethysMarkdown(attackMatch[0]!);
 			const parsedMatchWithoutLinks = this.nethysParser.stripMarkdownLinks(parsedMatch);
-			const nameBonusClause = /[\_\*]?([\w \(\)]+)[\_\*]? ([+-][0-9]+)/gi;
-			const traitsClause = /\(([^<>\(\)]+)\)/gi;
-			const damageClause = /(?<=,\W*Damage\*\*|,\W*Effect\*\*)(.*)/gi;
+			const nameBonusClause =
+				/[\_\*]?([A-Za-z][\w '\-\(\)]*?)[\_\*]?\s+([+-]?[0-9]+)/gi;
 			const nameBonusResults = Array.from(
 				parsedMatchWithoutLinks.matchAll(nameBonusClause)
 			)[0];
-			const traitsResults = Array.from(parsedMatchWithoutLinks.matchAll(traitsClause))[0];
-			const damageResults = Array.from(parsedMatchWithoutLinks.matchAll(damageClause))[0];
 
 			if (!nameBonusResults) continue;
 			const actionCost = this.parseActionCost(parsedMatchWithoutLinks);
+			const postBonusClause = parsedMatchWithoutLinks.slice(
+				(nameBonusResults.index ?? 0) + nameBonusResults[0].length
+			);
+			const { traits, damageText } = this.parseAttackRemainder(postBonusClause);
 
 			const attackName = nameBonusResults?.[1]?.toString()?.trim();
 			const attackBonus =
 				parseInt(nameBonusResults?.[2]?.toString()?.trim()) + this.rollAdjustment;
-			const traits = traitsResults?.[1]?.toString().split(', ') ?? [];
-			const damageClauses = damageResults?.[1]?.toString().split(/ plus | and /) ?? [];
+			const damageClauses = damageText?.split(/ plus | and /) ?? [];
 			const rolls: Roll[] = [];
 
 			rolls.push({
@@ -457,7 +484,9 @@ export class NethysSheetImporter {
 					if (i === 0) {
 						damage = damageResult.dice
 							? damageResult.dice +
-								`${this.rollAdjustment >= 0 ? '+' : ''}${this.rollAdjustment}`
+								(this.rollAdjustment === 0
+									? ''
+									: `${this.rollAdjustment >= 0 ? '+' : ''}${this.rollAdjustment}`)
 							: null;
 					}
 					rolls.push({
