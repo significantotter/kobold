@@ -682,6 +682,15 @@ export function setupListDataMocks(
 				heritage: c.sheetRecord.sheet.info.heritage,
 				ancestry: c.sheetRecord.sheet.info.ancestry,
 				class: c.sheetRecord.sheet.info.class,
+				imageUrl: c.sheetRecord.sheet.info.imageURL,
+				hpCurrent: c.sheetRecord.sheet.baseCounters.hp.current,
+				hpMax: c.sheetRecord.sheet.baseCounters.hp.max,
+				ac: c.sheetRecord.sheet.intProperties.ac,
+				perception: c.sheetRecord.sheet.stats.perception.bonus,
+				fortitude: c.sheetRecord.sheet.stats.fortitude.bonus,
+				reflex: c.sheetRecord.sheet.stats.reflex.bonus,
+				will: c.sheetRecord.sheet.stats.will.bonus,
+				speed: c.sheetRecord.sheet.intProperties.walkSpeed,
 			},
 		};
 	});
