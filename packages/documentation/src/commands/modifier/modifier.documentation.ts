@@ -108,7 +108,7 @@ export const modifierCommandDocumentation: CommandDocumentation<typeof modifierC
 			[ModifierSubCommandEnum.toggle]: {
 				name: ModifierSubCommandEnum.toggle,
 				description:
-					'Toggles whether a modifier is currently applying to your active character.',
+					'Toggles a modifier for your active character or one of their minions.',
 				usage: null,
 				examples: [
 					{
@@ -117,6 +117,16 @@ export const modifierCommandDocumentation: CommandDocumentation<typeof modifierC
 						options: { name: 'Off Guard' },
 						message:
 							'Yip! Lilac Sootsnout had their modifier "Off Guard" set to active.',
+					},
+					{
+						title: 'Minion Success',
+						type: CommandResponseTypeEnum.success,
+						options: {
+							name: 'Off Guard',
+							[ModifierCommandOptionEnum.toggleFor]: '🐕 Ember',
+						},
+						message:
+							'Yip! Ember had their modifier "Off Guard" set to inactive.',
 					},
 				],
 			},

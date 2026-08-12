@@ -20,6 +20,7 @@ export enum ModifierCommandOptionEnum {
 	assignTo = 'assign-to',
 	copy = 'copy',
 	targetModifier = 'modifier',
+	toggleFor = 'toggle-for',
 }
 
 /**
@@ -202,6 +203,13 @@ export const modifierCommandOptions = {
 		name: ModifierCommandOptionEnum.targetModifier,
 		description: 'The target modifier.',
 		required: true,
+		autocomplete: true,
+		type: ApplicationCommandOptionType.String,
+	},
+	[ModifierCommandOptionEnum.toggleFor]: {
+		name: ModifierCommandOptionEnum.toggleFor,
+		description: 'Toggle for this character or minion (default: active character).',
+		required: false,
 		autocomplete: true,
 		type: ApplicationCommandOptionType.String,
 	},

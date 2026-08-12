@@ -6,49 +6,113 @@ import {
 	ChatInputCommandInteraction,
 } from 'discord.js';
 
-import _ from 'lodash';
-import { Kobold } from '@kobold/db';
+import { CharacterWithRelations, Kobold, MinionWithRelations, Modifier } from '@kobold/db';
+import { KoboldError } from '@kobold/util';
 import { InteractionUtils } from '../../../utils/index.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { FinderHelpers } from '../../../utils/kobold-helpers/finder-helpers.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { Command } from '../../index.js';
 import { ModifierDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
+import { CreateForTargets } from '../../../utils/kobold-service-utils/autocomplete-utils.js';
 const commandOptions = ModifierDefinition.options;
 const commandOptionsEnum = ModifierDefinition.commandOptionsEnum;
+
+interface ModifierToggleTarget {
+	name: string;
+	sheetRecordId: number;
+	modifiers: Modifier[];
+}
 
 export class ModifierToggleSubCommand extends BaseCommandClass(
 	ModifierDefinition,
 	ModifierDefinition.subCommandEnum.toggle
 ) {
+	private async resolveTarget(
+		kobold: Kobold,
+		activeCharacter: CharacterWithRelations,
+		targetValue: string | null
+	): Promise<ModifierToggleTarget | null> {
+		const activeCharacterValue = `${CreateForTargets.CHARACTER_PREFIX}${activeCharacter.sheetRecordId}`;
+		if (!targetValue || targetValue === activeCharacterValue) {
+			return activeCharacter;
+		}
+
+		if (!targetValue.startsWith(CreateForTargets.MINION_PREFIX)) {
+			return null;
+		}
+
+		const idText = targetValue.slice(CreateForTargets.MINION_PREFIX.length);
+		if (!/^\d+$/.test(idText)) {
+			return null;
+		}
+
+		const sheetRecordId = Number(idText);
+		if (!Number.isSafeInteger(sheetRecordId)) {
+			return null;
+		}
+
+		const minions = await kobold.minion.readMany({ characterId: activeCharacter.id });
+		return (
+			minions.find(
+				(minion: MinionWithRelations) => minion.sheetRecordId === sheetRecordId
+			) ?? null
+		);
+	}
+
 	public async autocomplete(
 		intr: AutocompleteInteraction<CacheType>,
 		option: AutocompleteFocusedOption,
 		{ kobold }: { kobold: Kobold }
 	): Promise<ApplicationCommandOptionChoiceData[] | undefined> {
 		if (!intr.isAutocomplete()) return;
+
+		const koboldUtils = new KoboldUtils(kobold);
+		const activeCharacter = await koboldUtils.characterUtils.getActiveCharacter(intr);
+		if (!activeCharacter) {
+			return [];
+		}
+
+		if (option.name === commandOptions[commandOptionsEnum.toggleFor].name) {
+			const match =
+				intr.options.getString(commandOptions[commandOptionsEnum.toggleFor].name) ?? '';
+			const minions = await kobold.minion.readManyLite({
+				characterId: activeCharacter.id,
+			});
+			const choices = [
+				{
+					name: `🎭 ${activeCharacter.name} (active character)`,
+					value: `${CreateForTargets.CHARACTER_PREFIX}${activeCharacter.sheetRecordId}`,
+				},
+				...minions.map(minion => ({
+					name: `🐕 ${minion.name}`,
+					value: `${CreateForTargets.MINION_PREFIX}${minion.sheetRecordId}`,
+				})),
+			];
+
+			return choices.filter(choice =>
+				choice.name.toLowerCase().includes(match.toLowerCase())
+			);
+		}
+
 		if (option.name === commandOptions[commandOptionsEnum.name].name) {
-			//we don't need to autocomplete if we're just dealing with whitespace
 			const match =
 				intr.options.getString(commandOptions[commandOptionsEnum.name].name) ?? '';
-
-			//get the active character
-			const { characterUtils } = new KoboldUtils(kobold);
-			const activeCharacter = await characterUtils.getActiveCharacter(intr);
-			if (!activeCharacter) {
-				//no choices if we don't have a character to match against
+			const targetValue = intr.options.getString(
+				commandOptions[commandOptionsEnum.toggleFor].name
+			);
+			const target = await this.resolveTarget(kobold, activeCharacter, targetValue);
+			if (!target) {
 				return [];
 			}
-			//find a save on the character matching the autocomplete string
+
 			const matchedModifiers = FinderHelpers.matchAllModifiers(
-				activeCharacter.modifiers,
+				target.modifiers,
 				match
 			).map(modifier => ({
 				name: modifier.name,
 				value: modifier.name,
 			}));
-			//return the matched saves
 			return matchedModifiers;
 		}
 	}
@@ -57,17 +121,25 @@ export class ModifierToggleSubCommand extends BaseCommandClass(
 		intr: ChatInputCommandInteraction,
 		{ kobold }: { kobold: Kobold }
 	): Promise<void> {
-		let name = intr.options
+		const name = intr.options
 			.getString(commandOptions[commandOptionsEnum.name].name, true)
 			.trim()
 			.toLowerCase();
+		const targetValue = intr.options.getString(
+			commandOptions[commandOptionsEnum.toggleFor].name
+		);
 
 		const koboldUtils = new KoboldUtils(kobold);
 		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {
 			activeCharacter: true,
 		});
 
-		const modifier = FinderHelpers.getModifierByName(activeCharacter.modifiers, name);
+		const target = await this.resolveTarget(kobold, activeCharacter, targetValue);
+		if (!target) {
+			throw new KoboldError(ModifierDefinition.strings.toggle.targetNotFound);
+		}
+
+		const modifier = FinderHelpers.getModifierByName(target.modifiers, name);
 
 		if (!modifier) {
 			// no matching modifier found
@@ -79,9 +151,7 @@ export class ModifierToggleSubCommand extends BaseCommandClass(
 
 		await kobold.modifier.update({ id: modifier.id }, { isActive: newIsActive });
 
-		if (modifier.sheetRecordId !== null) {
-			koboldUtils.adjustedSheetService.triggerRecompute(modifier.sheetRecordId);
-		}
+		koboldUtils.adjustedSheetService.triggerRecompute(target.sheetRecordId);
 
 		const activeText = newIsActive
 			? ModifierDefinition.strings.toggle.active
@@ -90,7 +160,7 @@ export class ModifierToggleSubCommand extends BaseCommandClass(
 		const updateEmbed = new KoboldEmbed();
 		updateEmbed.setTitle(
 			ModifierDefinition.strings.toggle.success({
-				characterName: activeCharacter.name,
+				characterName: target.name,
 				modifierName: modifier.name,
 				toggledTo: activeText,
 			})
