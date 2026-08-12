@@ -14,6 +14,7 @@ import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js
 import { KoboldError } from '@kobold/util';
 import { SheetUtils } from '@kobold/sheet';
 import { Creature } from '../../../utils/creature.js';
+import { SheetStaticInfoUtils } from '../../../utils/sheet-static-info-utils.js';
 
 const commandOptions = MinionDefinition.options;
 const commandOptionsEnum = MinionDefinition.commandOptionsEnum;
@@ -57,6 +58,14 @@ export class MinionUpdateSubCommand extends BaseCommandClass(
 		const autoJoinInitiative = intr.options.getBoolean(
 			commandOptions[commandOptionsEnum.autoJoinInitiative].name
 		);
+		const level = intr.options.getInteger(commandOptions[commandOptionsEnum.level].name);
+		const keyAbilityInput = intr.options.getString(
+			commandOptions[commandOptionsEnum.keyAbility].name
+		);
+		const usesStamina = intr.options.getBoolean(
+			commandOptions[commandOptionsEnum.usesStamina].name
+		);
+		const keyAbility = SheetStaticInfoUtils.parseKeyAbility(keyAbilityInput);
 
 		// Find the minion (active character's minions + unassigned)
 		const allMinions = await kobold.minion.readManyByUserId({
@@ -77,14 +86,26 @@ export class MinionUpdateSubCommand extends BaseCommandClass(
 		}
 
 		// If nothing to update, error
-		if (!statsInput && autoJoinInitiative === null) {
+		if (
+			!statsInput &&
+			autoJoinInitiative === null &&
+			level === null &&
+			keyAbilityInput === null &&
+			usesStamina === null
+		) {
 			throw new KoboldError(
-				'Yip! You must provide stats or auto-join-initiative to update the minion!'
+				'Yip! You must provide at least one value to update the minion!'
 			);
 		}
 
 		// Get the current sheet and apply the stat adjustments
-		let sheet = targetMinion.sheetRecord.sheet;
+		let sheet = SheetUtils.withStaticInfo(targetMinion.sheetRecord.sheet, {
+			level: level ?? undefined,
+			keyAbility,
+			usesStamina: usesStamina ?? undefined,
+		});
+		const staticInfoChanged =
+			level !== null || keyAbilityInput !== null || usesStamina !== null;
 
 		if (statsInput) {
 			const adjustments = SheetUtils.stringToSheetAdjustments(
@@ -122,8 +143,9 @@ export class MinionUpdateSubCommand extends BaseCommandClass(
 			await kobold.minion.update({ id: targetMinion.id }, updateData);
 		}
 
-		// Update the sheetRecord if sheet was changed
-		if (statsInput) {
+		// Update the sheetRecord if base sheet data was changed
+		if (statsInput || staticInfoChanged) {
+			sheet = SheetUtils.withStaticInfo(sheet, { name: targetMinion.name });
 			await kobold.sheetRecord.update({ id: targetMinion.sheetRecordId }, { sheet });
 			// Trigger adjusted_sheet recomputation
 			koboldUtils.adjustedSheetService.triggerRecompute(targetMinion.sheetRecordId);
@@ -135,6 +157,15 @@ export class MinionUpdateSubCommand extends BaseCommandClass(
 		}
 		if (autoJoinInitiative !== null) {
 			updates.push(`auto-join-initiative: ${autoJoinInitiative}`);
+		}
+		if (level !== null) {
+			updates.push(`level: ${level}`);
+		}
+		if (keyAbilityInput !== null) {
+			updates.push(`key ability: ${keyAbilityInput}`);
+		}
+		if (usesStamina !== null) {
+			updates.push(`uses stamina: ${usesStamina}`);
 		}
 
 		await InteractionUtils.send(

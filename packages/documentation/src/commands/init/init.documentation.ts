@@ -306,6 +306,26 @@ export const initCommandDocumentation: CommandDocumentation<typeof initCommandDe
 				},
 			],
 		},
+		[InitSubCommandEnum.npcUpdate]: {
+			name: InitSubCommandEnum.npcUpdate,
+			description: "Updates an NPC's sheet in the current initiative",
+			usage: null,
+			examples: [
+				{
+					title: 'Success',
+					type: CommandResponseTypeEnum.success,
+					options: {
+						[InitCommandOptionEnum.initNpc]: 'Kobold Cavern Mage',
+						[InitCommandOptionEnum.npcStats]: 'hp=[level]*10;ac=22',
+						[InitCommandOptionEnum.level]: 6,
+						[InitCommandOptionEnum.keyAbility]: 'dexterity',
+						[InitCommandOptionEnum.usesStamina]: false,
+					},
+					message:
+						'Yip! I\'ve updated the NPC "Kobold Cavern Mage" (stats, level: 6, key ability: dexterity, uses stamina: false)!',
+				},
+			],
+		},
 		[InitSubCommandEnum.show]: {
 			name: InitSubCommandEnum.show,
 			description: 'Displays the current initiative order',

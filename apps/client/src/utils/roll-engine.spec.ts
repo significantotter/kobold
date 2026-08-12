@@ -207,6 +207,12 @@ describe('RollEngine', () => {
 });
 
 describe('DiceUtils.parseAttributes', () => {
+	it('continues to replace unknown roll references with zero', () => {
+		const [expression] = DiceUtils.parseAttributes('2+[unknownRollValue]');
+
+		expect(expression).toBe('2+0');
+	});
+
 	it('resolves every bracket token in a multi-attribute expression', () => {
 		const [expression] = DiceUtils.parseAttributes(
 			'[str] + [dex] + [con] + [int] + [wis] + [cha]',

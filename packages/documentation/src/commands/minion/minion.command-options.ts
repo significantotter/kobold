@@ -21,6 +21,9 @@ export enum MinionCommandOptionEnum {
 	hideStats = 'hide-stats',
 	// Update command options
 	autoJoinInitiative = 'auto-join-initiative',
+	level = 'level',
+	keyAbility = 'key-ability',
+	usesStamina = 'uses-stamina',
 	// Create from bestiary option
 	creature = 'creature',
 	template = 'template',
@@ -45,7 +48,7 @@ export const minionCommandOptions = {
 	},
 	[MinionCommandOptionEnum.stats]: {
 		name: MinionCommandOptionEnum.stats,
-		description: 'Custom stats to set (e.g., "hp=10; ac=15; athletics=+5")',
+		description: 'Mutable stats to set (e.g., "hp=10; ac=15; athletics=+5")',
 		type: ApplicationCommandOptionType.String,
 		required: true,
 	},
@@ -180,6 +183,33 @@ export const minionCommandOptions = {
 		name: MinionCommandOptionEnum.autoJoinInitiative,
 		description:
 			'If true, minion auto-joins initiative when its character joins. Default: true.',
+		required: false,
+		type: ApplicationCommandOptionType.Boolean,
+	},
+	[MinionCommandOptionEnum.level]: {
+		name: MinionCommandOptionEnum.level,
+		description: "The minion's level.",
+		required: false,
+		type: ApplicationCommandOptionType.Integer,
+	},
+	[MinionCommandOptionEnum.keyAbility]: {
+		name: MinionCommandOptionEnum.keyAbility,
+		description: "The minion's key ability, or None to clear it.",
+		required: false,
+		type: ApplicationCommandOptionType.String,
+		choices: [
+			{ name: 'None', value: 'none' },
+			{ name: 'Strength', value: 'strength' },
+			{ name: 'Dexterity', value: 'dexterity' },
+			{ name: 'Constitution', value: 'constitution' },
+			{ name: 'Intelligence', value: 'intelligence' },
+			{ name: 'Wisdom', value: 'wisdom' },
+			{ name: 'Charisma', value: 'charisma' },
+		],
+	},
+	[MinionCommandOptionEnum.usesStamina]: {
+		name: MinionCommandOptionEnum.usesStamina,
+		description: 'Whether the minion uses the alternate stamina rules.',
 		required: false,
 		type: ApplicationCommandOptionType.Boolean,
 	},

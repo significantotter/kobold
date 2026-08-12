@@ -15,6 +15,7 @@ export enum InitSubCommandEnum {
 	add = 'add',
 	note = 'note',
 	set = 'set',
+	npcUpdate = 'npc-update',
 	remove = 'remove',
 	statBlock = 'stat-block',
 	roll = 'roll',
@@ -141,6 +142,18 @@ export const initCommandDefinition = {
 					initCommandOptions[InitCommandOptionEnum.gameSystem],
 					8
 				),
+				[InitCommandOptionEnum.level]: withOrder(
+					initCommandOptions[InitCommandOptionEnum.level],
+					9
+				),
+				[InitCommandOptionEnum.keyAbility]: withOrder(
+					initCommandOptions[InitCommandOptionEnum.keyAbility],
+					10
+				),
+				[InitCommandOptionEnum.usesStamina]: withOrder(
+					initCommandOptions[InitCommandOptionEnum.usesStamina],
+					11
+				),
 			},
 		},
 		[InitSubCommandEnum.note]: {
@@ -177,6 +190,33 @@ export const initCommandDefinition = {
 				[InitCommandOptionEnum.initSetValue]: withOrder(
 					initCommandOptions[InitCommandOptionEnum.initSetValue],
 					3
+				),
+			},
+		},
+		[InitSubCommandEnum.npcUpdate]: {
+			name: InitSubCommandEnum.npcUpdate,
+			description: `Updates an NPC's sheet in the current initiative`,
+			type: ApplicationCommandOptionType.Subcommand,
+			options: {
+				[InitCommandOptionEnum.initNpc]: withOrder(
+					initCommandOptions[InitCommandOptionEnum.initNpc],
+					1
+				),
+				[InitCommandOptionEnum.npcStats]: withOrder(
+					initCommandOptions[InitCommandOptionEnum.npcStats],
+					2
+				),
+				[InitCommandOptionEnum.level]: withOrder(
+					initCommandOptions[InitCommandOptionEnum.level],
+					3
+				),
+				[InitCommandOptionEnum.keyAbility]: withOrder(
+					initCommandOptions[InitCommandOptionEnum.keyAbility],
+					4
+				),
+				[InitCommandOptionEnum.usesStamina]: withOrder(
+					initCommandOptions[InitCommandOptionEnum.usesStamina],
+					5
 				),
 			},
 		},

@@ -6,6 +6,7 @@ import { InitJoinSubCommand } from './init-join-subcommand.js';
 import { InitJumpToSubCommand } from './init-jump-to-subcommand.js';
 import { InitNextSubCommand } from './init-next-subcommand.js';
 import { InitNoteSubCommand } from './init-note-subcommand.js';
+import { InitNpcUpdateSubCommand } from './init-npc-update-subcommand.js';
 import { InitPrevSubCommand } from './init-prev-subcommand.js';
 import { InitRemoveSubCommand } from './init-remove-subcommand.js';
 import { InitRollSubCommand } from './init-roll-subcommand.js';
@@ -23,6 +24,7 @@ export const InitCommandExport: CommandExport = {
 		InitJoinSubCommand,
 		InitJumpToSubCommand,
 		InitNextSubCommand,
+		InitNpcUpdateSubCommand,
 		InitPrevSubCommand,
 		InitRemoveSubCommand,
 		InitRollSubCommand,

@@ -12,7 +12,6 @@ const strings = InitDefinition.strings;
 
 import {
 	createTestHarness,
-	setupKoboldUtilsMocks,
 	TEST_USER_ID,
 	TEST_GUILD_ID,
 	TEST_CHANNEL_ID,
@@ -24,6 +23,16 @@ import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js
 import { KoboldError } from '@kobold/util';
 
 vi.mock('../../../utils/kobold-service-utils/kobold-utils.js');
+
+function setupInitKoboldUtilsMocks() {
+	const fetchNonNullableDataMock = vi.fn();
+	vi.mocked(KoboldUtils).mockImplementation(function (this: any) {
+		this.fetchNonNullableDataForCommand = fetchNonNullableDataMock;
+		this.adjustedSheetService = { triggerRecompute: vi.fn() };
+		return this;
+	} as any);
+	return { fetchNonNullableDataMock };
+}
 
 describe('InitSetSubCommand', () => {
 	const kobold = getMockKobold();
@@ -39,7 +48,7 @@ describe('InitSetSubCommand', () => {
 	it('should set initiative value for an actor', async () => {
 		// Arrange
 		const existingInit = createMockInitiativeWithActors(2);
-		const { fetchNonNullableDataMock } = setupKoboldUtilsMocks();
+		const { fetchNonNullableDataMock } = setupInitKoboldUtilsMocks();
 		fetchNonNullableDataMock.mockResolvedValue({
 			currentInitiativeLite: existingInit,
 			userSettings: {},
@@ -71,7 +80,7 @@ describe('InitSetSubCommand', () => {
 	it('should error with invalid set option', async () => {
 		// Arrange
 		const existingInit = createMockInitiativeWithActors(2);
-		const { fetchNonNullableDataMock } = setupKoboldUtilsMocks();
+		const { fetchNonNullableDataMock } = setupInitKoboldUtilsMocks();
 		fetchNonNullableDataMock.mockResolvedValue({
 			currentInitiativeLite: existingInit,
 			userSettings: {},
@@ -98,7 +107,7 @@ describe('InitSetSubCommand', () => {
 
 	it('should error when no initiative exists', async () => {
 		// Arrange
-		const { fetchNonNullableDataMock } = setupKoboldUtilsMocks();
+		const { fetchNonNullableDataMock } = setupInitKoboldUtilsMocks();
 		fetchNonNullableDataMock.mockRejectedValue(
 			new KoboldError('Yip! You must be in an initiative to use this command.')
 		);
@@ -121,4 +130,5 @@ describe('InitSetSubCommand', () => {
 		expect(result.didRespond()).toBe(true);
 		expect(result.getResponseContent()).toContain('You must be in an initiative');
 	});
+
 });

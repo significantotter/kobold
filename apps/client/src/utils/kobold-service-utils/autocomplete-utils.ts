@@ -540,6 +540,27 @@ export class AutocompleteUtils {
 		return results;
 	}
 
+	public async getInitNpcTargetOptions(
+		intr: AutocompleteInteraction<CacheType>,
+		matchText: string
+	) {
+		const currentInit =
+			await this.koboldUtils.initiativeUtils.getInitiativeForChannelOrNullLite(intr.channel);
+		if (!currentInit) return [];
+
+		return InitiativeBuilderUtils.getControllableInitiativeActors(
+			currentInit,
+			intr.user.id
+		)
+			.filter(
+				actor =>
+					actor.characterId === null &&
+					actor.minionId === null &&
+					actor.name.toLocaleLowerCase().includes(matchText.toLocaleLowerCase())
+			)
+			.map(actor => ({ name: actor.name, value: actor.name }));
+	}
+
 	public async getMatchingRollsForInitiativeSheet(
 		intr: AutocompleteInteraction<CacheType>,
 		matchText: string,

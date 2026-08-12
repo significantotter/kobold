@@ -26,6 +26,7 @@ import { NpcUtils } from '../../../utils/kobold-service-utils/npc-utils.js';
 import { getEmoji } from '../../../constants/emoji.js';
 import { StringUtils } from '@kobold/util';
 import { Config } from '@kobold/config';
+import { SheetStaticInfoUtils } from '../../../utils/sheet-static-info-utils.js';
 
 const commandOptions = MinionDefinition.options;
 const commandOptionsEnum = MinionDefinition.commandOptionsEnum;
@@ -118,6 +119,14 @@ export class MinionCreateSubCommand extends BaseCommandClass(
 		const autoJoinInitiative =
 			intr.options.getBoolean(commandOptions[commandOptionsEnum.autoJoinInitiative].name) ??
 			true;
+		const level = intr.options.getInteger(commandOptions[commandOptionsEnum.level].name);
+		const keyAbilityInput = intr.options.getString(
+			commandOptions[commandOptionsEnum.keyAbility].name
+		);
+		const usesStamina = intr.options.getBoolean(
+			commandOptions[commandOptionsEnum.usesStamina].name
+		);
+		const keyAbility = SheetStaticInfoUtils.parseKeyAbility(keyAbilityInput);
 
 		// Either name or creature must be provided
 		if (!minionName && !creatureInput) {
@@ -191,8 +200,14 @@ export class MinionCreateSubCommand extends BaseCommandClass(
 			);
 		}
 
-		// Set the minion name on the sheet
-		sheet = _.merge(sheet, { staticInfo: { name: finalName } });
+		// Static properties are creation inputs, not sheet adjustments. Apply them before
+		// custom stats so expressions such as hp=[level]*10 see the final base level.
+		sheet = SheetUtils.withStaticInfo(sheet, {
+			name: finalName,
+			level: level ?? undefined,
+			keyAbility,
+			usesStamina: usesStamina ?? undefined,
+		});
 
 		// If custom stats are provided, parse and apply them
 		if (statsInput) {

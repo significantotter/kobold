@@ -46,6 +46,18 @@ export const minionCommandDefinition = {
 					minionCommandOptions[MinionCommandOptionEnum.autoJoinInitiative],
 					3
 				),
+				[MinionCommandOptionEnum.level]: withOrder(
+					minionCommandOptions[MinionCommandOptionEnum.level],
+					4
+				),
+				[MinionCommandOptionEnum.keyAbility]: withOrder(
+					minionCommandOptions[MinionCommandOptionEnum.keyAbility],
+					5
+				),
+				[MinionCommandOptionEnum.usesStamina]: withOrder(
+					minionCommandOptions[MinionCommandOptionEnum.usesStamina],
+					6
+				),
 			},
 		},
 		[MinionSubCommandEnum.create]: {
@@ -84,6 +96,18 @@ export const minionCommandDefinition = {
 				[MinionCommandOptionEnum.gameSystem]: withOrder(
 					minionCommandOptions[MinionCommandOptionEnum.gameSystem],
 					6
+				),
+				[MinionCommandOptionEnum.level]: withOrder(
+					minionCommandOptions[MinionCommandOptionEnum.level],
+					7
+				),
+				[MinionCommandOptionEnum.keyAbility]: withOrder(
+					minionCommandOptions[MinionCommandOptionEnum.keyAbility],
+					8
+				),
+				[MinionCommandOptionEnum.usesStamina]: withOrder(
+					minionCommandOptions[MinionCommandOptionEnum.usesStamina],
+					9
 				),
 			},
 		},
