@@ -65,10 +65,9 @@ export class ActionStageAddTextSubCommand extends BaseCommandClass(
 			commandOptions[commandOptionsEnum.failureText].name
 		);
 		const extraTags = intr.options.getString(commandOptions[commandOptionsEnum.extraTags].name);
-		let allowRollModifiers = intr.options.getBoolean(
+		const allowRollModifiers = intr.options.getBoolean(
 			commandOptions[commandOptionsEnum.allowModifiers].name
-		);
-		if (allowRollModifiers === null) allowRollModifiers = true;
+		) ?? false;
 
 		const koboldUtils = new KoboldUtils(kobold);
 		const { activeCharacter } = await koboldUtils.fetchNonNullableDataForCommand(intr, {

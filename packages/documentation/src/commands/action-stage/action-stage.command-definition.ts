@@ -198,6 +198,10 @@ export const actionStageCommandDefinition = {
 					actionStageCommandOptions[ActionStageCommandOptionEnum.extraTags],
 					8
 				),
+				[ActionStageCommandOptionEnum.allowModifiers]: withOrder(
+					actionStageCommandOptions[ActionStageCommandOptionEnum.allowModifiers],
+					9
+				),
 			},
 		},
 		[ActionStageSubCommandEnum.addEffect]: {

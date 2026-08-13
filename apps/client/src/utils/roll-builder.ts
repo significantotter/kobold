@@ -360,14 +360,21 @@ export class RollBuilder {
 		title,
 		text,
 		extraAttributes,
+		skipModifiers = false,
 		tags,
 	}: {
 		title: string;
 		text: string;
 		extraAttributes?: Attribute[];
+		skipModifiers?: boolean;
 		tags?: string[];
 	}) {
-		const parsedString = this.evaluateRollsInText({ text, extraAttributes, tags });
+		const parsedString = this.evaluateRollsInText({
+			text,
+			extraAttributes,
+			skipModifiers,
+			tags,
+		});
 		const result: TextResult = { name: title, type: 'text', value: parsedString };
 
 		this.rollResults.push(result);
