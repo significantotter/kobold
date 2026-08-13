@@ -78,7 +78,6 @@ export class InitSetSubCommand extends BaseCommandClass(
 		);
 
 		let finalValue: any = newFieldValue;
-
 		// validate the updates
 		if (fieldToChange === 'name') {
 			//a name can't be an empty string

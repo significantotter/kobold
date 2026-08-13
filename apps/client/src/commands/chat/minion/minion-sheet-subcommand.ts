@@ -24,14 +24,6 @@ function sheetToAdjustmentString(sheet: Sheet): string {
 	const adjustments: string[] = [];
 	const defaultSheet = getDefaultSheet();
 
-	// Level
-	if (
-		sheet.staticInfo.level !== null &&
-		sheet.staticInfo.level !== defaultSheet.staticInfo.level
-	) {
-		adjustments.push(`level=${sheet.staticInfo.level}`);
-	}
-
 	// Integer properties (ac, abilities, speeds, proficiencies)
 	for (const [key, value] of Object.entries(sheet.intProperties)) {
 		const defaultValue =
@@ -129,10 +121,23 @@ export class MinionSheetSubCommand extends BaseCommandClass(
 		// If export format is requested, return the sheet as an adjustment string
 		if (exportFormat) {
 			const adjustmentString = sheetToAdjustmentString(targetMinion.sheetRecord.sheet);
-			const response =
-				adjustmentString.length > 0
-					? `**${targetMinion.name}** stats:\n\`\`\`\n${adjustmentString}\n\`\`\``
-					: `Yip! ${targetMinion.name} has no stats set.`;
+			const { level, keyAbility, usesStamina } = targetMinion.sheetRecord.sheet.staticInfo;
+			const creationOptions = [
+				level === null ? null : `level: ${level}`,
+				keyAbility === null ? null : `key-ability: ${keyAbility}`,
+				usesStamina ? 'uses-stamina: true' : null,
+			].filter((value): value is string => value !== null);
+			const exportedParts = [`**${targetMinion.name}** creation data:`];
+			if (creationOptions.length > 0) {
+				exportedParts.push(`Static options: ${creationOptions.join(', ')}`);
+			}
+			if (adjustmentString.length > 0) {
+				exportedParts.push(`Stats:\n\`\`\`\n${adjustmentString}\n\`\`\``);
+			}
+			if (creationOptions.length === 0 && adjustmentString.length === 0) {
+				exportedParts.push('No non-default sheet values are set.');
+			}
+			const response = exportedParts.join('\n');
 			await InteractionUtils.send(intr, response);
 			return;
 		}

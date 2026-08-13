@@ -55,7 +55,53 @@ describe('ActionStageAddTextSubCommand', () => {
 
 			// Assert
 			expect(result.didRespond()).toBe(true);
-			expect(updateMock).toHaveBeenCalled();
+			expect(updateMock).toHaveBeenCalledWith(
+				{ id: action.id },
+				{
+					rolls: [
+						expect.objectContaining({
+							allowRollModifiers: false,
+							type: RollTypeEnum.text,
+						}),
+					],
+				}
+			);
+		});
+
+		it('should allow explicitly enabling modifiers for a text stage', async () => {
+			// Arrange
+			const action = createMockAction({ name: 'Cast Spell', rolls: [] });
+			setupKoboldUtilsMocks({ actions: [action] });
+			setupFinderHelpersMocks(action, [action]);
+			const { updateMock } = setupActionModelMock(kobold);
+
+			// Act
+			const result = await harness.executeCommand({
+				commandName: 'action-stage',
+				subcommand: 'add-text',
+				options: {
+					action: 'Cast Spell',
+					'roll-name': 'Effect',
+					'default-text': 'The spell takes effect.',
+					'allow-modifiers': true,
+				},
+				userId: TEST_USER_ID,
+				guildId: TEST_GUILD_ID,
+			});
+
+			// Assert
+			expect(result.didRespond()).toBe(true);
+			expect(updateMock).toHaveBeenCalledWith(
+				{ id: action.id },
+				{
+					rolls: [
+						expect.objectContaining({
+							allowRollModifiers: true,
+							type: RollTypeEnum.text,
+						}),
+					],
+				}
+			);
 		});
 
 		it('should add text stage with degree-of-success variants', async () => {

@@ -32,6 +32,7 @@ import { NethysDb } from '@kobold/nethys';
 import { InitDefinition, RollDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
 import { Config } from '@kobold/config';
+import { SheetStaticInfoUtils } from '../../../utils/sheet-static-info-utils.js';
 const commandOptions = InitDefinition.options;
 const commandOptionsEnum = InitDefinition.commandOptionsEnum;
 
@@ -128,6 +129,14 @@ export class InitAddSubCommand extends BaseCommandClass(
 		);
 		const hideStats =
 			intr.options.getBoolean(commandOptions[commandOptionsEnum.initHideStats].name) ?? true;
+		const level = intr.options.getInteger(commandOptions[commandOptionsEnum.level].name);
+		const keyAbilityInput = intr.options.getString(
+			commandOptions[commandOptionsEnum.keyAbility].name
+		);
+		const usesStamina = intr.options.getBoolean(
+			commandOptions[commandOptionsEnum.usesStamina].name
+		);
+		const keyAbility = SheetStaticInfoUtils.parseKeyAbility(keyAbilityInput);
 		const template = (
 			intr.options.getString(commandOptions[commandOptionsEnum.template].name) ?? ''
 		)
@@ -177,7 +186,14 @@ export class InitAddSubCommand extends BaseCommandClass(
 		}
 
 		if (!actorName) actorName = 'unnamed enemy';
-		sheet = _.merge(sheet, { staticInfo: { name: actorName } });
+		// Static properties are creation inputs, not sheet adjustments. Apply them before
+		// custom stats so expressions such as hp=[level]*10 see the final base level.
+		sheet = SheetUtils.withStaticInfo(sheet, {
+			name: actorName,
+			level: level ?? undefined,
+			keyAbility,
+			usesStamina: usesStamina ?? undefined,
+		});
 
 		let finalName: string = actorName;
 

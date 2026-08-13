@@ -110,6 +110,8 @@ export const modifierStrings = {
 	toggle: {
 		active: 'active',
 		inactive: 'inactive',
+		targetNotFound:
+			"Yip! I couldn't find that character or minion for your active character!",
 		success: msg(
 			(p: { characterName: string; modifierName: string; toggledTo: string }) =>
 				`Yip! ${p.characterName} had their modifier "${p.modifierName}" set to ${p.toggledTo}!`

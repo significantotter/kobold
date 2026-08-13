@@ -80,6 +80,7 @@ interface MockMinionModel extends MockModel {
 	readManyLite: MockFn;
 	readManyByCharacterIdsLite: MockFn;
 	readManyByUserIdLite: MockFn;
+	readManyByUserId: MockFn;
 }
 
 /** Type for mock InitiativeActor model with additional methods */
@@ -195,6 +196,7 @@ function createMockMinionModel(): MockMinionModel {
 		readManyLite: vi.fn(),
 		readManyByCharacterIdsLite: vi.fn(),
 		readManyByUserIdLite: vi.fn(),
+		readManyByUserId: vi.fn(),
 	};
 }
 

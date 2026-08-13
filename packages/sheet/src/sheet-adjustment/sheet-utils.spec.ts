@@ -140,6 +140,61 @@ describe('SheetUtils', () => {
 			const adjustedSheet = SheetUtils.adjustSheetWithModifiers(sheet, modifiers);
 			expect(adjustedSheet.intProperties.strength).toEqual(2);
 		});
+
+		it('should resolve level and severity expressions before bucketing adjustments', () => {
+			const sheet: Sheet = sheetWithTestProperties();
+			sheet.staticInfo.level = 5;
+			sheet.staticInfo.keyAbility = AbilityEnum.strength;
+			sheet.staticInfo.usesStamina = true;
+			const modifiers: Condition[] = [
+				{
+					name: 'scaling hp',
+					description: '',
+					isActive: true,
+					severity: 3,
+					type: SheetAdjustmentTypeEnum.untyped,
+					sheetAdjustments: SheetUtils.stringToSheetAdjustments(
+						'hp=[level]*10+[severity];ac=10+[uses stamina];classAbility=[key ability];description=Level [level], severity [severity]',
+						SheetAdjustmentTypeEnum.untyped
+					),
+					rollAdjustment: null,
+					rollTargetTags: null,
+					note: null,
+				},
+			];
+
+			const adjustedSheet = SheetUtils.adjustSheetWithModifiers(sheet, modifiers);
+
+			expect(adjustedSheet.baseCounters.hp.max).toEqual(53);
+			expect(adjustedSheet.intProperties.ac).toEqual(11);
+			expect(adjustedSheet.stats.class.ability).toEqual(AbilityEnum.strength);
+			expect(adjustedSheet.info.description).toEqual('Level 5, severity 3');
+			expect(sheet.staticInfo.level).toEqual(5);
+		});
+
+		it('should reject unknown references in sheet modifiers', () => {
+			const sheet: Sheet = sheetWithTestProperties();
+			const modifiers: Condition[] = [
+				{
+					name: 'unknown reference',
+					description: '',
+					isActive: true,
+					severity: null,
+					type: SheetAdjustmentTypeEnum.untyped,
+					sheetAdjustments: SheetUtils.stringToSheetAdjustments(
+						'hp=[definitely unknown]',
+						SheetAdjustmentTypeEnum.untyped
+					),
+					rollAdjustment: null,
+					rollTargetTags: null,
+					note: null,
+				},
+			];
+
+			expect(() => SheetUtils.adjustSheetWithModifiers(sheet, modifiers)).toThrow(
+				KoboldError
+			);
+		});
 	});
 
 	describe('stringToSheetAdjustments', () => {

@@ -130,10 +130,7 @@ export enum DefenseRuleSource {
 }
 
 export const zAbilityEnum = z.nativeEnum(AbilityEnum);
-export const zNullableAbilityEnum = z.preprocess(value => {
-	if (value === null || value === undefined) return null;
-	return value;
-}, zAbilityEnum.nullable());
+export const zNullableAbilityEnum = zAbilityEnum.nullable().default(null);
 
 export type ProficiencyStat = z.infer<typeof zProficiencyStat>;
 export const zProficiencyStat = z.strictObject({

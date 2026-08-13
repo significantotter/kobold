@@ -25,7 +25,6 @@ import {
 
 // Regex to match bracket references like [level], [strength], etc.
 const attributeRegex = /(\[[\w \-_\.]{2,}\])/g;
-const severityRegex = /\[[^\w\-\[]*severity[^\w\-\]]*\]/gi;
 const attributeShorthands: Record<string, string> = {
 	str: 'strength',
 	dex: 'dexterity',
@@ -41,10 +40,21 @@ const attributeShorthands: Record<string, string> = {
 };
 
 export class SheetUtils {
-	private static getSeverityAppliedModifier(modifier: Condition): Condition {
-		return JSON.parse(
-			JSON.stringify(modifier).replaceAll(severityRegex, (modifier.severity ?? 0).toString())
-		);
+	/**
+	 * Returns a copy of a sheet with explicitly supplied static values replaced.
+	 * Static values are intentionally kept outside the sheet-adjustment system.
+	 */
+	public static withStaticInfo(
+		sheet: Sheet,
+		overrides: Partial<Sheet['staticInfo']>
+	): Sheet {
+		const updatedSheet = _.cloneDeep(sheet);
+		for (const [key, value] of Object.entries(overrides)) {
+			if (value !== undefined) {
+				Object.assign(updatedSheet.staticInfo, { [key]: value });
+			}
+		}
+		return updatedSheet;
 	}
 
 	private static getComputedSheetAttributeValue(
@@ -122,7 +132,7 @@ export class SheetUtils {
 		return null;
 	}
 
-	private static getAttributeValueFromSheet(sheet: Sheet, name: string): number | null {
+	private static getAttributeValueFromSheet(sheet: Sheet, name: string): number | undefined {
 		const trimRegex = /[\[\]\\_\-]/g;
 		const trimmedName = name.replace(trimRegex, '').trim().toLowerCase();
 		const attributeName = attributeShorthands[trimmedName] || trimmedName;
@@ -133,13 +143,15 @@ export class SheetUtils {
 
 		const staticAttributes: Record<string, number> = {
 			level: sheet.staticInfo.level ?? 0,
+			usesstamina: sheet.staticInfo.usesStamina ? 1 : 0,
+			'uses stamina': sheet.staticInfo.usesStamina ? 1 : 0,
 			untrained: sheet.staticInfo.level ?? 0,
 			trained: (sheet.staticInfo.level ?? 0) + 2,
 			expert: (sheet.staticInfo.level ?? 0) + 4,
 			master: (sheet.staticInfo.level ?? 0) + 6,
 			legendary: (sheet.staticInfo.level ?? 0) + 8,
 		};
-		if (staticAttributes[attributeName] !== undefined) {
+		if (Object.hasOwn(staticAttributes, attributeName)) {
 			return staticAttributes[attributeName];
 		}
 
@@ -151,13 +163,13 @@ export class SheetUtils {
 			return computedValue;
 		}
 
-		if (isSheetIntegerKeys(standardizedName) && sheet.intProperties[standardizedName] != null) {
+		if (isSheetIntegerKeys(standardizedName)) {
 			return sheet.intProperties[standardizedName] ?? 0;
 		}
 
 		if (SheetStatProperties.isSheetStatPropertyName(standardizedName)) {
 			const property = SheetStatProperties.properties[standardizedName];
-			if (property.subKey === StatSubGroupEnum.ability) return null;
+			if (property.subKey === StatSubGroupEnum.ability) return undefined;
 			return sheet.stats[property.baseKey][property.subKey] ?? 0;
 		}
 
@@ -177,7 +189,7 @@ export class SheetUtils {
 		);
 		const additionalSkillSubKey = propertyMatch?.[2] ?? 'bonus';
 		if (additionalSkill && isStatSubGroupEnum(additionalSkillSubKey)) {
-			if (additionalSkillSubKey === StatSubGroupEnum.ability) return null;
+			if (additionalSkillSubKey === StatSubGroupEnum.ability) return undefined;
 			return additionalSkill[additionalSkillSubKey] ?? 0;
 		}
 
@@ -190,30 +202,37 @@ export class SheetUtils {
 		const resistance = sheet.defenses.resistances.find(
 			r => r.label === weakResMatch?.[1] && r.amount != null
 		);
-		return weakness?.amount ?? resistance?.amount ?? null;
+		return weakness?.amount ?? resistance?.amount;
 	}
 
 	/**
 	 * Parses bracket references (like [level], [strength]) from a string value using sheet data.
 	 * Returns the expression with bracket references replaced by their numeric values.
 	 */
-	public static parseSheetReferences(value: string, sheet: Sheet): string {
+	public static parseSheetReferences(
+		value: string,
+		sheet: Sheet,
+		extraReferences: Readonly<Record<string, number>> = {}
+	): string {
 		const splitExpression = value.split(attributeRegex);
 		let finalExpression = '';
 
 		for (const token of splitExpression) {
-			if (attributeRegex.test(token)) {
+			if (/^\[[\w \-_\.]{2,}\]$/.test(token)) {
 				// Remove brackets to get the attribute name
 				const attributeName = token.replace(/[\[\]]/g, '').trim();
+				const normalizedAttributeName = attributeName.toLowerCase();
+				const attributeValue = Object.hasOwn(extraReferences, normalizedAttributeName)
+					? extraReferences[normalizedAttributeName]
+					: this.getAttributeValueFromSheet(sheet, attributeName);
 
-				const attributeValue = this.getAttributeValueFromSheet(sheet, attributeName);
-
-				if (attributeValue !== null) {
+				if (attributeValue !== undefined) {
 					// Wrap negative values in parentheses for proper math evaluation
 					finalExpression += attributeValue < 0 ? `(${attributeValue})` : attributeValue;
 				} else {
-					// If we couldn't resolve the reference, replace with 0
-					finalExpression += '0';
+					throw new KoboldError(
+						`Yip! I couldn't find a numeric sheet value named "[${attributeName}]".`
+					);
 				}
 			} else {
 				finalExpression += token;
@@ -221,6 +240,28 @@ export class SheetUtils {
 		}
 
 		return finalExpression;
+	}
+
+	private static parseSheetStringReferences(
+		value: string,
+		sheet: Sheet,
+		extraReferences: Readonly<Record<string, number>> = {}
+	): string {
+		return value.replace(/\[([^\[\]]+)\]/g, (_match, rawName: string) => {
+			const normalizedName = rawName.toLowerCase().replace(/[\s_\-]/g, '');
+			if (normalizedName === 'keyability') {
+				return sheet.staticInfo.keyAbility ?? '';
+			}
+			const trimmedName = rawName.trim();
+			const extraReferenceName = trimmedName.toLowerCase();
+			const numericValue = Object.hasOwn(extraReferences, extraReferenceName)
+				? extraReferences[extraReferenceName]
+				: this.getAttributeValueFromSheet(sheet, trimmedName);
+			if (numericValue !== undefined) return numericValue.toString();
+			throw new KoboldError(
+				`Yip! I couldn't find a sheet value named "[${trimmedName}]".`
+			);
+		});
 	}
 
 	/**
@@ -235,12 +276,13 @@ export class SheetUtils {
 			});
 			const result = dice.roll(expression);
 			if (result.errors?.length) {
-				return parseInt(expression) || 0;
+				throw new Error(result.errors.join('; '));
 			}
 			return Math.floor(result.total);
 		} catch {
-			// Fallback to parseInt if dice evaluation fails
-			return parseInt(expression) || 0;
+			throw new KoboldError(
+				`Yip! I couldn't evaluate the sheet adjustment value "${expression}".`
+			);
 		}
 	}
 
@@ -249,13 +291,14 @@ export class SheetUtils {
 			.filter((modifier): modifier is Condition => modifier.sheetAdjustments.length > 0)
 			.filter(modifier => modifier.isActive);
 
-		const severityAppliedActiveModifiers = activeSheetModifiers.map(
-			this.getSeverityAppliedModifier
+		const resolvedAdjustments = activeSheetModifiers.flatMap(modifier =>
+			modifier.sheetAdjustments.map(adjustment =>
+				this.resolveSheetAdjustment(sheet, adjustment, {
+					severity: modifier.severity ?? 0,
+				})
+			)
 		);
-		return this.adjustSheetWithSheetAdjustments(
-			sheet,
-			severityAppliedActiveModifiers.flatMap(modifier => modifier.sheetAdjustments)
-		);
+		return this.applyResolvedSheetAdjustments(sheet, resolvedAdjustments);
 	}
 	public static stringToSheetAdjustments(
 		input: string,
@@ -288,10 +331,17 @@ export class SheetUtils {
 			// Replace all bracket references (like [level], [strength], [severity]) with placeholder
 			// values for validation. The actual values will be resolved when the adjustment is applied.
 			const attributeRegex = /\[[^\[\]]+\]/g;
+			const isAbilityProperty =
+				(sheetAdjustment.propertyType === AdjustablePropertyEnum.stat ||
+					sheetAdjustment.propertyType === AdjustablePropertyEnum.extraSkill) &&
+				sheetAdjustment.property.toLowerCase().endsWith('ability');
 			if (
 				!SheetAdjuster.validateSheetAdjustment({
 					...sheetAdjustment,
-					value: sheetAdjustment.value.replaceAll(attributeRegex, '1'),
+					value: sheetAdjustment.value.replaceAll(
+						attributeRegex,
+						isAbilityProperty ? 'str' : '1'
+					),
 				})
 			) {
 				throw new KoboldError(`Yip! I couldn't understand the adjustment "${segment}".`);
@@ -303,6 +353,54 @@ export class SheetUtils {
 	}
 
 	public static adjustSheetWithSheetAdjustments(
+		sheet: Sheet,
+		sheetAdjustments: SheetAdjustment[]
+	) {
+		const resolvedAdjustments = sheetAdjustments.map(adjustment =>
+			this.resolveSheetAdjustment(sheet, adjustment)
+		);
+		return this.applyResolvedSheetAdjustments(sheet, resolvedAdjustments);
+	}
+
+	private static isNumericAdjustment(adjustment: SheetAdjustment): boolean {
+		const numericPropertyTypes = [
+			AdjustablePropertyEnum.intProperty,
+			AdjustablePropertyEnum.baseCounter,
+			AdjustablePropertyEnum.weaknessResistance,
+		];
+		if (numericPropertyTypes.includes(adjustment.propertyType)) return true;
+
+		return (
+			(adjustment.propertyType === AdjustablePropertyEnum.stat ||
+				adjustment.propertyType === AdjustablePropertyEnum.extraSkill) &&
+			!adjustment.property.toLowerCase().endsWith('ability')
+		);
+	}
+
+	private static resolveSheetAdjustment(
+		sheet: Sheet,
+		adjustment: SheetAdjustment,
+		extraReferences: Readonly<Record<string, number>> = {}
+	): SheetAdjustment {
+		if (!this.isNumericAdjustment(adjustment)) {
+			return {
+				...adjustment,
+				value: this.parseSheetStringReferences(adjustment.value, sheet, extraReferences),
+			};
+		}
+
+		const resolvedValue = this.parseSheetReferences(
+			adjustment.value,
+			sheet,
+			extraReferences
+		);
+		return {
+			...adjustment,
+			value: this.evaluateMathExpression(resolvedValue).toString(),
+		};
+	}
+
+	private static applyResolvedSheetAdjustments(
 		sheet: Sheet,
 		sheetAdjustments: SheetAdjustment[]
 	) {
@@ -338,47 +436,7 @@ export class SheetUtils {
 		const adjustedSheet = _.cloneDeep(sheet);
 		const adjuster = new SheetAdjuster(adjustedSheet);
 		for (const adjustment of simplifiedAdjustments) {
-			// Only resolve bracket references and evaluate math for numeric property types
-			const numericPropertyTypes = [
-				AdjustablePropertyEnum.intProperty,
-				AdjustablePropertyEnum.baseCounter,
-				AdjustablePropertyEnum.weaknessResistance,
-			];
-
-			// For stat, extraSkill, and attack adjustments, check if it's an ability property
-			// (which expects string values like "str", "con", etc.)
-			let isAbilityProperty = false;
-			if (
-				adjustment.propertyType === AdjustablePropertyEnum.stat ||
-				adjustment.propertyType === AdjustablePropertyEnum.extraSkill
-			) {
-				// Ability properties end with "ability" in their property name
-				isAbilityProperty = adjustment.property.toLowerCase().endsWith('ability');
-			}
-			// Attack adjustments always have string values (complex format), so don't evaluate
-			if (adjustment.propertyType === AdjustablePropertyEnum.attack) {
-				adjuster.adjust(adjustment);
-				continue;
-			}
-
-			if (
-				numericPropertyTypes.includes(adjustment.propertyType) ||
-				((adjustment.propertyType === AdjustablePropertyEnum.stat ||
-					adjustment.propertyType === AdjustablePropertyEnum.extraSkill) &&
-					!isAbilityProperty)
-			) {
-				// Resolve bracket references (like [level], [strength]) in the adjustment value
-				const resolvedValue = this.parseSheetReferences(adjustment.value, sheet);
-				// Evaluate math expressions in the resolved value
-				const evaluatedValue = this.evaluateMathExpression(resolvedValue);
-				adjuster.adjust({
-					...adjustment,
-					value: evaluatedValue.toString(),
-				});
-			} else {
-				// For non-numeric types (info, infoList) or ability properties, pass through unchanged
-				adjuster.adjust(adjustment);
-			}
+			adjuster.adjust(adjustment);
 		}
 		return adjustedSheet;
 	}

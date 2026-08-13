@@ -440,7 +440,13 @@ export class ActionRoller {
 		) {
 			text += `\nCritical Failure: ${roll.criticalFailureText}`;
 		}
-		rollBuilder.addText({ title, text, extraAttributes: _.values(extraAttributes), tags });
+		rollBuilder.addText({
+			title,
+			text,
+			extraAttributes: _.values(extraAttributes),
+			skipModifiers: roll.allowRollModifiers !== true,
+			tags,
+		});
 	}
 
 	public applyEffect(

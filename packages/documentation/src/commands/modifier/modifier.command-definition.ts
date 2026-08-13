@@ -123,8 +123,7 @@ export const modifierCommandDefinition = {
 		},
 		[ModifierSubCommandEnum.toggle]: {
 			name: ModifierSubCommandEnum.toggle,
-			description:
-				'Toggles whether a modifier is currently applying to your active character.',
+			description: 'Toggles a modifier for your active character or one of their minions.',
 			type: ApplicationCommandOptionType.Subcommand,
 			options: {
 				[ModifierCommandOptionEnum.name]: withOrder(
@@ -134,6 +133,10 @@ export const modifierCommandDefinition = {
 						choices: undefined,
 					} as APIApplicationCommandOption,
 					1
+				),
+				[ModifierCommandOptionEnum.toggleFor]: withOrder(
+					modifierCommandOptions[ModifierCommandOptionEnum.toggleFor],
+					2
 				),
 			},
 		},
