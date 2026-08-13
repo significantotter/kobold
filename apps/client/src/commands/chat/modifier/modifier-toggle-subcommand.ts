@@ -101,6 +101,24 @@ export class ModifierToggleSubCommand extends BaseCommandClass(
 			const targetValue = intr.options.getString(
 				commandOptions[commandOptionsEnum.toggleFor].name
 			);
+
+			// Discord presents required options before optional ones, so name autocomplete
+			// normally runs before the user has selected toggle-for. Include modifiers from
+			// the active character's minions in that initial list, then narrow to the chosen
+			// target once toggle-for is populated.
+			if (!targetValue) {
+				const modifiers = (
+					await kobold.modifier.readManyByUser({ userId: intr.user.id })
+				).filter(modifier => modifier.sheetRecordId !== null);
+
+				return koboldUtils.autocompleteUtils.getAssignableModifiersForActiveOrDefaultCharacter(
+					intr,
+					modifiers,
+					activeCharacter,
+					match
+				);
+			}
+
 			const target = await this.resolveTarget(kobold, activeCharacter, targetValue);
 			if (!target) {
 				return [];

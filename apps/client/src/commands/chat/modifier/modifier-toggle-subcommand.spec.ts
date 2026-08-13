@@ -74,10 +74,25 @@ describe('ModifierToggleSubCommand', () => {
 		triggerRecomputeMock = vi.fn();
 		const getActiveCharacterMock = vi.fn(async () => activeCharacter);
 		const fetchNonNullableDataMock = vi.fn(async () => ({ activeCharacter }));
+		const getAssignableModifiersMock = vi.fn(
+			async (
+				_intr: unknown,
+				modifiers: Modifier[],
+				_character: CharacterWithRelations,
+				match: string
+			) =>
+				modifiers
+					.filter(modifier => modifier.name.includes(match))
+					.map(modifier => ({ name: modifier.name, value: modifier.name }))
+		);
 
 		vi.mocked(KoboldUtils).mockImplementation(function (this: any) {
 			this.characterUtils = {
 				getActiveCharacter: getActiveCharacterMock,
+			};
+			this.autocompleteUtils = {
+				getAssignableModifiersForActiveOrDefaultCharacter:
+					getAssignableModifiersMock,
 			};
 			this.fetchNonNullableDataForCommand = fetchNonNullableDataMock;
 			this.adjustedSheetService = {
@@ -242,6 +257,7 @@ describe('ModifierToggleSubCommand', () => {
 		it('returns matching active-character modifiers when toggle-for is omitted', async () => {
 			const modifier = createModifier();
 			setupKoboldUtils(createCharacter([modifier]));
+			kobold.modifier.readManyByUser.mockResolvedValue([modifier]);
 
 			const result = await harness.executeAutocomplete({
 				commandName: 'modifier',
@@ -255,7 +271,37 @@ describe('ModifierToggleSubCommand', () => {
 			expect(result.getChoices()).toEqual([
 				{ name: modifier.name, value: modifier.name },
 			]);
+			expect(kobold.modifier.readManyByUser).toHaveBeenCalledWith({
+				userId: TEST_USER_ID,
+			});
 			expect(kobold.minion.readMany).not.toHaveBeenCalled();
+		});
+
+		it('includes assigned minion modifiers when toggle-for is not selected yet', async () => {
+			const characterModifier = createModifier({ name: 'inspire competence' });
+			const minionModifier = createModifier({
+				id: 2,
+				sheetRecordId: minionSheetRecordId,
+				name: 'inspire courage',
+			});
+			setupKoboldUtils(createCharacter([characterModifier]));
+			kobold.modifier.readManyByUser.mockResolvedValue([
+				characterModifier,
+				minionModifier,
+			]);
+
+			const result = await harness.executeAutocomplete({
+				commandName: 'modifier',
+				subcommand: 'toggle',
+				options: { name: 'courage' },
+				focusedOption: { name: 'name', value: 'courage' },
+				userId: TEST_USER_ID,
+				guildId: TEST_GUILD_ID,
+			});
+
+			expect(result.getChoices()).toEqual([
+				{ name: minionModifier.name, value: minionModifier.name },
+			]);
 		});
 
 		it('returns no choices when no character is active', async () => {
