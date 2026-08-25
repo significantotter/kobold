@@ -165,7 +165,7 @@ function highestResistance(
 	bucket: DamageBucket
 ): DefenseRule | undefined {
 	return automaticRules(resistances)
-		.filter(rule => rule.amount != null && matcherMatches(rule.match, bucket))
+		.filter(rule => rule.amount != null && rule.amount >= 0 && matcherMatches(rule.match, bucket))
 		.sort((a, b) => (b.amount ?? 0) - (a.amount ?? 0))[0];
 }
 
@@ -180,6 +180,7 @@ function matchingWeaknesses(
 		if (
 			alreadyApplied.has(key) ||
 			weakness.amount == null ||
+			weakness.amount < 0		||
 			!matcherMatches(weakness.match, bucket)
 		) {
 			continue;
@@ -253,7 +254,7 @@ export function resolveDamagePacket(sheet: Sheet, packet: DamagePacket): Resolve
 			}
 
 			resistance = highestResistance(sheet.defenses.resistances, bucket);
-			if (resistance?.amount != null) {
+			if (resistance?.amount != null && resistance?.amount > 0) {
 				resolvedAmount = Math.max(0, resolvedAmount - resistance.amount);
 			}
 		}
