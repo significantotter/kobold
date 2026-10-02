@@ -85,6 +85,43 @@ describe('parsePf2eDefenses', () => {
 		]);
 	});
 
+	it('excludes unparenthesized exceptions from amount-first targets', () => {
+		const defenses = parsePf2eDefenses({
+			resistanceRaw: '10 physical except adamantine',
+		});
+
+		expect(defenses.resistances).toMatchObject([
+			{
+				label: 'physical',
+				amount: 10,
+				automation: 'auto',
+				match: {
+					damageGroups: ['physical'],
+					except: { materials: ['adamantine'] },
+				},
+			},
+		]);
+	});
+
+	it('parses semicolon-delimited exceptions without including them in the target', () => {
+		const defenses = parsePf2eDefenses({
+			resistanceRaw: '10 physical; except adamantine',
+		});
+
+		expect(defenses.resistances).toHaveLength(1);
+		expect(defenses.resistances).toMatchObject([
+			{
+				label: 'physical',
+				amount: 10,
+				automation: 'auto',
+				match: {
+					damageGroups: ['physical'],
+					except: { materials: ['adamantine'] },
+				},
+			},
+		]);
+	});
+
 	it('preserves multi-word materials in amount-first weaknesses', () => {
 		const defenses = parsePf2eDefenses({
 			weaknessRaw: '5 cold iron',
@@ -138,6 +175,34 @@ describe('parsePf2eDefenses', () => {
 							damageGroups: ['physical'],
 							except: { materials: ['adamantine'] },
 						},
+						{ traits: ['non magical'] },
+					],
+				},
+			},
+		]);
+	});
+
+	it.each([
+		'10 physical; double resistance vs. non-magical',
+		'10 physical double resistance vs. non-magical',
+	])('parses non-parenthesized doubled resistance: %s', resistanceRaw => {
+		const defenses = parsePf2eDefenses({ resistanceRaw });
+
+		expect(defenses.resistances).toHaveLength(2);
+		expect(defenses.resistances).toMatchObject([
+			{
+				label: 'physical',
+				amount: 10,
+				automation: 'auto',
+				match: { damageGroups: ['physical'] },
+			},
+			{
+				label: 'physical vs non magical',
+				amount: 20,
+				automation: 'auto',
+				match: {
+					allOf: [
+						{ damageGroups: ['physical'] },
 						{ traits: ['non magical'] },
 					],
 				},

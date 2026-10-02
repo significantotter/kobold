@@ -133,7 +133,9 @@ function splitList(value: string): string[] {
 function hasAmount(entry: string): boolean {
 	return (
 		/^(.+?)(?:\s*:\s*|\s+)(\d+)(?:\s|\(|$)/.test(entry) ||
-		/^(\d+)\s+([^()]+?)(?=\s*(?:\(|$))/.test(entry) ||
+		/^(\d+)\s+(?!\(|;|\bexcept\b|\bdouble\s+resistance\b)(.+?)(?=\s*(?:\(|;|\bexcept\b|\bdouble\s+resistance\b|$))/i.test(
+			entry
+		) ||
 		/^(\d+)(?:\s|\(|$)/.test(entry)
 	);
 }
@@ -277,7 +279,9 @@ function parseAmountRule(
 	if (!cleaned || isIgnorableDefenseEntry(cleaned)) return [];
 
 	const amountMatch = cleaned.match(/^(.+?)(?:\s*:\s*|\s+)(\d+)(?:\s|\(|$)/);
-	const amountFirstMatch = cleaned.match(/^(\d+)\s+([^()]+?)(?=\s*(?:\(|$))/);
+	const amountFirstMatch = cleaned.match(
+		/^(\d+)\s+(?!\(|;|\bexcept\b|\bdouble\s+resistance\b)(.+?)(?=\s*(?:\(|;|\bexcept\b|\bdouble\s+resistance\b|$))/i
+	);
 	const amountOnlyMatch = cleaned.match(/^(\d+)(?:\s|\(|$)/);
 	const doubleMatch = parseDoubleResistance(cleaned);
 
