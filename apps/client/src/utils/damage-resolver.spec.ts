@@ -11,7 +11,7 @@ import {
 	type DamageRoll,
 	type Sheet,
 } from '@kobold/db';
-import { SheetProperties } from '@kobold/sheet';
+import { parsePf2eDefenses, SheetProperties } from '@kobold/sheet';
 import { resolveDamagePacket } from './damage-resolver.js';
 import { Creature } from './creature.js';
 import { ActionRoller } from './action-roller.js';
@@ -98,6 +98,18 @@ describe('resolveDamagePacket', () => {
 
 		expect(result.totalAfterIwr).toBe(16);
 		expect(result.appliedWeaknesses.map(weakness => weakness.label)).toEqual(['fire', 'cold']);
+	});
+
+	it('triggers an imported cold iron weakness when used as the damage type', () => {
+		const sheet = sheetWithIwr({});
+		sheet.defenses = parsePf2eDefenses({ weaknessRaw: '5 cold iron' });
+
+		const result = resolveDamagePacket(sheet, {
+			lines: [{ amount: 10, damageType: 'cold iron' }],
+		});
+
+		expect(result.totalAfterIwr).toBe(15);
+		expect(result.appliedWeaknesses.map(weakness => weakness.label)).toEqual(['cold iron']);
 	});
 
 	it('uses only the highest matching resistance for a damage type and source', () => {

@@ -85,6 +85,36 @@ describe('parsePf2eDefenses', () => {
 		]);
 	});
 
+	it('preserves multi-word materials in amount-first weaknesses', () => {
+		const defenses = parsePf2eDefenses({
+			weaknessRaw: '5 cold iron',
+		});
+
+		expect(defenses.weaknesses).toMatchObject([
+			{
+				label: 'cold iron',
+				amount: 5,
+				automation: 'auto',
+				match: { materials: ['cold iron'] },
+			},
+		]);
+	});
+
+	it('parses colon-delimited material weaknesses', () => {
+		const defenses = parsePf2eDefenses({
+			weaknessRaw: 'cold iron: 5',
+		});
+
+		expect(defenses.weaknesses).toMatchObject([
+			{
+				label: 'cold iron',
+				amount: 5,
+				automation: 'auto',
+				match: { materials: ['cold iron'] },
+			},
+		]);
+	});
+
 	it('parses amount-first doubled resistance with a conjunctive matcher', () => {
 		const defenses = parsePf2eDefenses({
 			resistanceRaw: '10 physical (except adamantine; double resistance vs. non-magical)',
