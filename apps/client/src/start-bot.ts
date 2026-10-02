@@ -34,7 +34,16 @@ import { NethysDb } from '@kobold/nethys';
 disableValidators();
 
 async function start(): Promise<void> {
-	const { dialect: PostgresDialect, pool } = getDialectWithPool(Config.database.url);
+	const { dialect: PostgresDialect, pool } = getDialectWithPool(Config.database.url, {
+		onConnectionEvent(event) {
+			const context = CommandTimingContext.metadata();
+			if (event.err)
+				return Logger.error('Postgres connection failed', { ...event, ...context });
+			if ((event.durationMs ?? 0) >= 1_000) {
+				Logger.warn('Slow Postgres connection acquisition', { ...event, ...context });
+			}
+		},
+	});
 	const nethysCompendium = new NethysDb(Config.database.url);
 
 	const SLOW_QUERY_MS = 1_000;
@@ -43,6 +52,8 @@ async function start(): Promise<void> {
 			CommandTimingContext.recordDbQuery(event.queryDurationMillis, event.query.sql);
 			if (event.level === 'error') {
 				Logger.error('db query error', {
+					err: event.error,
+					...CommandTimingContext.metadata(),
 					durationMs: event.queryDurationMillis,
 					sql: event.query.sql,
 				});
@@ -55,7 +66,6 @@ async function start(): Promise<void> {
 	});
 
 	// Pool observability
-	pool.on('error', err => Logger.error('pg pool: idle client error', err));
 	pool.on('connect', () => {
 		if (pool.waitingCount > 0) {
 			Logger.warn(

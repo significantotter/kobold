@@ -7,14 +7,22 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { Command, CommandDeferType, InjectedServices } from '../commands/command.js';
 import { Logger } from '../services/logger.js';
-import { createMockChatInputInteraction } from '../test-utils/mock-interactions.js';
+import {
+	createMockChatInputInteraction,
+	createMockAutocompleteInteraction,
+} from '../test-utils/mock-interactions.js';
 import { InteractionUtils } from '../utils/interaction-utils.js';
+import { CommandTimingContext } from '../services/command-timing-context.js';
 import { CommandHandler } from './command-handler.js';
 
 function createCommand(execute = vi.fn(async () => {})): Command {
 	return {
 		name: 'telemetry',
-		metadata: { name: 'telemetry', description: 'test', type: 1 } as RESTPostAPIApplicationCommandsJSONBody,
+		metadata: {
+			name: 'telemetry',
+			description: 'test',
+			type: 1,
+		} as RESTPostAPIApplicationCommandsJSONBody,
 		deferType: CommandDeferType.PUBLIC,
 		requireClientPerms: [],
 		commands: [],
@@ -37,11 +45,17 @@ describe('CommandHandler telemetry', () => {
 		expect(execute).toHaveBeenCalledOnce();
 		expect(infoSpy).toHaveBeenCalledWith(
 			expect.stringContaining('Interaction received'),
-			expect.objectContaining({ event: 'interaction_received', gatewayLagMs: expect.any(Number) })
+			expect.objectContaining({
+				event: 'interaction_received',
+				gatewayLagMs: expect.any(Number),
+			})
 		);
 		expect(infoSpy).toHaveBeenCalledWith(
 			expect.stringContaining('Interaction deferred'),
-			expect.objectContaining({ event: 'interaction_deferred', deferDurationMs: expect.any(Number) })
+			expect.objectContaining({
+				event: 'interaction_deferred',
+				deferDurationMs: expect.any(Number),
+			})
 		);
 		expect(infoSpy).toHaveBeenCalledWith(expect.stringContaining('total='));
 	});
@@ -89,4 +103,41 @@ describe('CommandHandler telemetry', () => {
 			})
 		);
 	});
+});
+
+describe('autocomplete database telemetry', () => {
+	it.each(['processing', 'response'])(
+		'identifies %s failures and preserves query timing',
+		async stage => {
+			const error = new Error('simulated failure');
+			const errorSpy = vi.spyOn(Logger, 'error').mockResolvedValue();
+			vi.spyOn(Logger, 'info').mockImplementation(() => {});
+			const interaction = createMockAutocompleteInteraction({ commandName: 'telemetry' });
+			const command = createCommand();
+			command.autocomplete = vi.fn(async () => {
+				expect(CommandTimingContext.metadata()).toEqual({
+					commandName: 'telemetry',
+					interactionId: interaction.id,
+				});
+				CommandTimingContext.recordDbQuery(12, 'select 1');
+				if (stage === 'processing') throw error;
+				return [];
+			});
+			vi.spyOn(InteractionUtils, 'respond').mockRejectedValue(error);
+			await new CommandHandler([command], {} as Required<InjectedServices>).process(
+				interaction
+			);
+			expect(errorSpy).toHaveBeenCalledWith(
+				expect.any(String),
+				expect.objectContaining({
+					err: error,
+					event: 'autocomplete_failed',
+					failureStage: stage,
+					dbDurationMs: 12,
+					dbQueryCount: 1,
+				})
+			);
+			expect(CommandTimingContext.metadata()).toBeUndefined();
+		}
+	);
 });

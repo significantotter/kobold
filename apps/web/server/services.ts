@@ -2,20 +2,23 @@ import { Config } from '@kobold/config';
 import { Kobold, getDialectWithPool } from '@kobold/db';
 import { logger } from './logging.js';
 
-const { dialect, pool } = getDialectWithPool(Config.database.url);
+const { dialect, pool } = getDialectWithPool(Config.database.url, {
+	onConnectionEvent(event) {
+		if (event.err) logger.error('Postgres connection failed', event.err, { ...event });
+		else if ((event.durationMs ?? 0) >= 1_000) {
+			logger.warn('Slow Postgres connection acquisition', { ...event });
+		}
+	},
+});
 
 export const kobold = new Kobold(dialect, {
 	onQuery(event) {
 		if (event.level === 'error') {
-			logger.error(
-				`database query failed (${event.queryDurationMillis}ms)`,
-				undefined,
-				{
-					durationMs: event.queryDurationMillis,
-					sql: event.query.sql,
-					parameters: event.query.parameters,
-				}
-			);
+			logger.error(`database query failed (${event.queryDurationMillis}ms)`, event.error, {
+				durationMs: event.queryDurationMillis,
+				sql: event.query.sql,
+				parameters: event.query.parameters,
+			});
 			return;
 		}
 
@@ -34,7 +37,6 @@ export const kobold = new Kobold(dialect, {
 	},
 });
 
-pool.on('error', err => logger.error('Postgres idle client error', err));
 pool.on('connect', () => {
 	if (pool.waitingCount > 0) {
 		logger.warn('Postgres connected while queries were waiting', {

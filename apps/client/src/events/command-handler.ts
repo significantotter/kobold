@@ -72,8 +72,7 @@ export class CommandHandler implements EventHandler {
 		Logger.info(`[${intr.id}] Interaction received for '${commandName}'.`, {
 			event: 'interaction_received',
 			interactionId: intr.id,
-			interactionType:
-				intr instanceof AutocompleteInteraction ? 'autocomplete' : 'command',
+			interactionType: intr instanceof AutocompleteInteraction ? 'autocomplete' : 'command',
 			commandName,
 			receivedAt: new Date(receivedAt).toISOString(),
 			createdAt: new Date(intr.createdTimestamp).toISOString(),
@@ -97,11 +96,23 @@ export class CommandHandler implements EventHandler {
 				return;
 			}
 
+			let failureStage = 'processing';
+			let autocompleteTiming = CommandTimingContext.snapshot();
 			try {
 				let option = intr.options.getFocused(true);
 				const acStart = Date.now();
-				let choices = await command.autocomplete(intr, option, this.injectedServices);
+				let choices = await CommandTimingContext.run(
+					{ commandName, interactionId: intr.id },
+					async () => {
+						try {
+							return await command.autocomplete!(intr, option, this.injectedServices);
+						} finally {
+							autocompleteTiming = CommandTimingContext.snapshot();
+						}
+					}
+				);
 				const acDuration = Date.now() - acStart;
+				failureStage = 'response';
 				const responseStart = Date.now();
 				await InteractionUtils.respond(
 					intr,
@@ -115,6 +126,8 @@ export class CommandHandler implements EventHandler {
 						` gateway=${gatewayLagMs}ms`,
 					{
 						event: 'autocomplete_completed',
+						dbDurationMs: autocompleteTiming.dbDurationMs,
+						dbQueryCount: autocompleteTiming.dbQueryCount,
 						interactionId: intr.id,
 						commandName,
 						optionName: option.name,
@@ -140,6 +153,9 @@ export class CommandHandler implements EventHandler {
 					{
 						err: error,
 						event: 'autocomplete_failed',
+						failureStage,
+						dbDurationMs: autocompleteTiming.dbDurationMs,
+						dbQueryCount: autocompleteTiming.dbQueryCount,
 						interactionId: intr.id,
 						commandName,
 						totalDurationMs: Date.now() - receivedAt,
