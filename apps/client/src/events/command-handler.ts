@@ -52,6 +52,9 @@ export class CommandHandler implements EventHandler {
 	}
 
 	public async process(intr: CommandInteraction | AutocompleteInteraction): Promise<void> {
+		const receivedAt = Date.now();
+		const gatewayLagMs = Math.max(0, receivedAt - intr.createdTimestamp);
+
 		// Don't respond to self, or other bots
 		if (intr.user.id === intr.client.user?.id || intr.user.bot) {
 			return;
@@ -66,6 +69,15 @@ export class CommandHandler implements EventHandler {
 					].filter(filterNotNullOrUndefined)
 				: [intr.commandName];
 		let commandName = commandParts.join(' ');
+		Logger.info(`[${intr.id}] Interaction received for '${commandName}'.`, {
+			event: 'interaction_received',
+			interactionId: intr.id,
+			interactionType: intr instanceof AutocompleteInteraction ? 'autocomplete' : 'command',
+			commandName,
+			receivedAt: new Date(receivedAt).toISOString(),
+			createdAt: new Date(intr.createdTimestamp).toISOString(),
+			gatewayLagMs,
+		});
 
 		// Try to find the command the user wants
 		let command = CommandUtils.findCommand(this.commands, commandParts);
@@ -84,14 +96,47 @@ export class CommandHandler implements EventHandler {
 				return;
 			}
 
+			let failureStage = 'processing';
+			let autocompleteTiming = CommandTimingContext.snapshot();
 			try {
 				let option = intr.options.getFocused(true);
 				const acStart = Date.now();
-				let choices = await command.autocomplete(intr, option, this.injectedServices);
+				let choices = await CommandTimingContext.run(
+					{ commandName, interactionId: intr.id },
+					async () => {
+						try {
+							return await command.autocomplete!(intr, option, this.injectedServices);
+						} finally {
+							autocompleteTiming = CommandTimingContext.snapshot();
+						}
+					}
+				);
 				const acDuration = Date.now() - acStart;
+				failureStage = 'response';
+				const responseStart = Date.now();
 				await InteractionUtils.respond(
 					intr,
 					choices?.slice(0, DiscordLimits.CHOICES_PER_AUTOCOMPLETE)
+				);
+				const responseDuration = Date.now() - responseStart;
+				const totalDuration = Date.now() - receivedAt;
+				Logger.info(
+					`[${intr.id}] Autocomplete '${commandName}' completed in ${totalDuration}ms` +
+						` | processing=${acDuration}ms response=${responseDuration}ms` +
+						` gateway=${gatewayLagMs}ms`,
+					{
+						event: 'autocomplete_completed',
+						dbDurationMs: autocompleteTiming.dbDurationMs,
+						dbQueryCount: autocompleteTiming.dbQueryCount,
+						interactionId: intr.id,
+						commandName,
+						optionName: option.name,
+						choiceCount: choices?.length ?? 0,
+						processingDurationMs: acDuration,
+						responseDurationMs: responseDuration,
+						totalDurationMs: totalDuration,
+						gatewayLagMs,
+					}
 				);
 				if (acDuration > 5000) {
 					Logger.info(
@@ -103,8 +148,19 @@ export class CommandHandler implements EventHandler {
 			} catch (error) {
 				Logger.error(
 					`[${intr.id}] An error occurred while executing the '${commandName}' autocomplete` +
-						` for user '${intr.user.tag}' in channel '${this.getChannelName(intr)}'.`,
-					error
+						` for user '${intr.user.tag}' in channel '${this.getChannelName(intr)}'` +
+						` after ${Date.now() - receivedAt}ms | gateway=${gatewayLagMs}ms.`,
+					{
+						err: error,
+						event: 'autocomplete_failed',
+						failureStage,
+						dbDurationMs: autocompleteTiming.dbDurationMs,
+						dbQueryCount: autocompleteTiming.dbQueryCount,
+						interactionId: intr.id,
+						commandName,
+						totalDurationMs: Date.now() - receivedAt,
+						gatewayLagMs,
+					}
 				);
 			}
 			return;
@@ -138,20 +194,70 @@ export class CommandHandler implements EventHandler {
 			if (subCommand && subCommand.deferType !== undefined) deferType = subCommand.deferType;
 		}
 
-		switch (deferType) {
-			case CommandDeferType.PUBLIC: {
-				await InteractionUtils.deferReply(intr, false);
-				break;
+		let deferDuration = 0;
+		if (deferType !== CommandDeferType.NONE) {
+			const deferStart = Date.now();
+			try {
+				switch (deferType) {
+					case CommandDeferType.PUBLIC: {
+						await InteractionUtils.deferReply(intr, false);
+						break;
+					}
+					case CommandDeferType.HIDDEN: {
+						await InteractionUtils.deferReply(intr, true);
+						break;
+					}
+				}
+			} catch (error) {
+				deferDuration = Date.now() - deferStart;
+				await Logger.error(
+					`[${intr.id}] Interaction defer failed after ${deferDuration}ms` +
+						` | gateway=${gatewayLagMs}ms total=${Date.now() - receivedAt}ms.`,
+					{
+						err: error,
+						event: 'interaction_defer_failed',
+						interactionId: intr.id,
+						commandName,
+						deferDurationMs: deferDuration,
+						gatewayLagMs,
+						totalDurationMs: Date.now() - receivedAt,
+					}
+				);
+				throw error;
 			}
-			case CommandDeferType.HIDDEN: {
-				await InteractionUtils.deferReply(intr, true);
-				break;
-			}
+			deferDuration = Date.now() - deferStart;
 		}
 
 		// Return if defer was unsuccessful
 		if (deferType !== CommandDeferType.NONE && !intr.deferred) {
+			Logger.warn(
+				`[${intr.id}] Interaction defer did not acknowledge the command` +
+					` after ${deferDuration}ms | gateway=${gatewayLagMs}ms` +
+					` total=${Date.now() - receivedAt}ms.`,
+				{
+					event: 'interaction_defer_unacknowledged',
+					interactionId: intr.id,
+					commandName,
+					deferDurationMs: deferDuration,
+					gatewayLagMs,
+					totalDurationMs: Date.now() - receivedAt,
+				}
+			);
 			return;
+		}
+		if (deferType !== CommandDeferType.NONE) {
+			Logger.info(
+				`[${intr.id}] Interaction deferred in ${deferDuration}ms` +
+					` | gateway=${gatewayLagMs}ms total=${Date.now() - receivedAt}ms.`,
+				{
+					event: 'interaction_deferred',
+					interactionId: intr.id,
+					commandName,
+					deferDurationMs: deferDuration,
+					gatewayLagMs,
+					totalDurationMs: Date.now() - receivedAt,
+				}
+			);
 		}
 
 		const allOptions =
@@ -183,6 +289,7 @@ export class CommandHandler implements EventHandler {
 			);
 
 			const duration = Date.now() - cmdStart;
+			const totalDuration = Date.now() - receivedAt;
 			const nonDbDuration = Math.max(0, duration - timing.dbDurationMs);
 			Logger.info(
 				`[${intr.id}] '/${commandName}' by '${intr.user.tag}' ` +
@@ -190,6 +297,7 @@ export class CommandHandler implements EventHandler {
 					` | db=${Math.round(timing.dbDurationMs)}ms` +
 					` queries=${timing.dbQueryCount}` +
 					` nonDb=${Math.round(nonDbDuration)}ms` +
+					` total=${totalDuration}ms gateway=${gatewayLagMs}ms defer=${deferDuration}ms` +
 					(allOptions ? ` | args: ${allOptions}` : '')
 			);
 		} catch (error) {
@@ -202,6 +310,7 @@ export class CommandHandler implements EventHandler {
 			await this.sendError(intr);
 
 			const duration = Date.now() - cmdStart;
+			const totalDuration = Date.now() - receivedAt;
 			// Log command error
 			const nonDbDuration = Math.max(0, duration - timing.dbDurationMs);
 			Logger.error(
@@ -210,6 +319,7 @@ export class CommandHandler implements EventHandler {
 					` | db=${Math.round(timing.dbDurationMs)}ms` +
 					` queries=${timing.dbQueryCount}` +
 					` nonDb=${Math.round(nonDbDuration)}ms` +
+					` total=${totalDuration}ms gateway=${gatewayLagMs}ms defer=${deferDuration}ms` +
 					(allOptions ? ` | args: ${allOptions}` : ''),
 				error
 			);

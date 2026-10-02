@@ -5,7 +5,13 @@ import { GuildsController, RootController, ShardsController } from './controller
 import { NethysImportJob, UpdateServerCountJob } from './jobs/index.js';
 import { Api } from './models/api.js';
 import { Manager } from './models/manager.js';
-import { HttpService, JobService, Logger, MasterApiService } from './services/index.js';
+import {
+	HttpService,
+	JobService,
+	Logger,
+	MasterApiService,
+	ProcessLifecycleService,
+} from './services/index.js';
 import { Job } from './services/job-service.js';
 import { MathUtils, ShardUtils } from './utils/index.js';
 import { filterNotNullOrUndefined } from './utils/type-guards.js';
@@ -101,10 +107,7 @@ async function start(): Promise<void> {
 	}
 }
 
-process.on('unhandledRejection', (reason, _promise) => {
-	Logger.error(`An unhandled promise rejection occurred.`, reason);
-});
-
+ProcessLifecycleService.register('manager');
 start().catch(error => {
 	Logger.error(`An unspecified error occurred.`, error);
 });

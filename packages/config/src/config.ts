@@ -91,6 +91,9 @@ interface config {
 	};
 	logging: {
 		pretty: boolean;
+		runtimeMetrics: {
+			intervalSecs: number;
+		};
 		rateLimit: {
 			minTimeout: number;
 		};
@@ -270,6 +273,10 @@ export const Config: config = Object.freeze({
 	},
 	logging: {
 		pretty: parseEnvBoolean(env.LOGGING_PRETTY ?? '') ?? true,
+		runtimeMetrics: {
+			intervalSecs:
+				parseEnvNumber(env.LOGGING_RUNTIME_METRICS_INTERVAL_SECS ?? '') ?? 60,
+		},
 		rateLimit: {
 			minTimeout: parseEnvNumber(env.LOGGING_RATE_LIMIT_MIN_TIMEOUT ?? '') ?? 30,
 		},

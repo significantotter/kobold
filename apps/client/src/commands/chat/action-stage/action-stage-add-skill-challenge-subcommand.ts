@@ -31,10 +31,10 @@ export class ActionStageAddSkillChallengeSubCommand extends BaseCommandClass(
 				intr.options.getString(commandOptions[commandOptionsEnum.actionTarget].name) ?? '';
 			const { autocompleteUtils } = new KoboldUtils(kobold);
 			return await autocompleteUtils.getTargetActionForActiveCharacter(intr, match);
-		} else if (option.name === commandOptions[commandOptionsEnum.abilityDc].name) {
+		} else if (option.name === commandOptions[commandOptionsEnum.defendingStat].name) {
 			//we don't need to autocomplete if we're just dealing with whitespace
 			const match =
-				intr.options.getString(commandOptions[commandOptionsEnum.abilityDc].name) ?? '';
+				intr.options.getString(commandOptions[commandOptionsEnum.defendingStat].name) ?? '';
 			const { autocompleteUtils } = new KoboldUtils(kobold);
 			return await autocompleteUtils.getAllMatchingStatRollsForActiveCharacter(intr, match, [
 				'AC',
@@ -61,7 +61,7 @@ export class ActionStageAddSkillChallengeSubCommand extends BaseCommandClass(
 		);
 
 		const rollTargetDC = intr.options.getString(
-			commandOptions[commandOptionsEnum.abilityDc].name
+			commandOptions[commandOptionsEnum.defendingStat].name
 		);
 		let allowRollModifiers = intr.options.getBoolean(
 			commandOptions[commandOptionsEnum.allowModifiers].name

@@ -16,8 +16,6 @@ import {
 } from '../../../utils/initiative-builder.js';
 import { KoboldEmbed } from '../../../utils/kobold-embed-utils.js';
 import { KoboldUtils } from '../../../utils/kobold-service-utils/kobold-utils.js';
-import { Command } from '../../index.js';
-import { KoboldError } from '@kobold/util';
 import { InitDefinition } from '@kobold/documentation';
 import { BaseCommandClass } from '../../command.js';
 const commandOptions = InitDefinition.options;
@@ -58,104 +56,118 @@ export class InitRemoveSubCommand extends BaseCommandClass(
 				currentInitiativeLite: true,
 			});
 
-		let actorResponse = InitiativeBuilderUtils.getNameMatchActorFromInitiative(
+		const actor = InitiativeBuilderUtils.getNameMatchActorFromInitiative(
 			intr.user.id,
 			currentInitiative,
 			targetActorName,
 			true
 		);
 
-		const actor = actorResponse;
-		const actorsInGroup = _.filter(
-			currentInitiative.actors,
-			possibleActor => possibleActor.initiativeActorGroupId === actor.initiativeActorGroupId
+		const initBuilder = new InitiativeBuilder({
+			initiative: currentInitiative,
+			userSettings,
+			useCachedSheets: true,
+		});
+		const currentTurn = initBuilder.getCurrentTurnInfo();
+		const removesGroup = initBuilder.actorsByGroup[actor.initiativeActorGroupId].length === 1;
+		const removesActiveGroup =
+			removesGroup && currentInitiative.currentTurnGroupId === actor.initiativeActorGroupId;
+		const remainingActors = currentInitiative.actors.filter(
+			candidate => candidate.id !== actor.id
 		);
-		await kobold.initiativeActor.delete({ id: actor.id });
-		if (actorsInGroup.length === 1) {
-			await kobold.initiativeActorGroup.delete({ id: actor.initiativeActorGroupId });
+		let updatedTurn: TurnData = {
+			currentRound: currentInitiative.currentRound,
+			currentTurnGroupId: currentInitiative.currentTurnGroupId,
+		};
+		if (!remainingActors.length) {
+			updatedTurn = { currentRound: 0, currentTurnGroupId: null };
+		} else if (removesActiveGroup) {
+			const activeIndex = initBuilder.groups.findIndex(
+				group => group.id === actor.initiativeActorGroupId
+			);
+			// There is no previous turn at the start of round one. Select the next
+			// surviving group instead; otherwise preserve the existing rewind behavior.
+			updatedTurn =
+				activeIndex === 0 && currentInitiative.currentRound <= 1
+					? {
+							currentRound: currentInitiative.currentRound,
+							currentTurnGroupId: initBuilder.groups[1].id,
+						}
+					: initBuilder.getPreviousTurnChanges();
 		}
-		await kobold.sheetRecord.deleteOrphaned();
 
-		const deletedEmbed = new KoboldEmbed();
-		deletedEmbed.setTitle(
-			InitDefinition.strings.remove.deletedEmbed.title({
-				actorName: actor.name,
-			})
+		// Prepare the display from the lite snapshot, avoiding another full sheet fetch.
+		const remainingGroups = currentInitiative.actorGroups
+			.filter(group => !removesGroup || group.id !== actor.initiativeActorGroupId)
+			.map(group => ({
+				...group,
+				actors: remainingActors.filter(
+					candidate => candidate.initiativeActorGroupId === group.id
+				),
+			}));
+		const updatedBuilder = new InitiativeBuilder({
+			initiative: {
+				...currentInitiative,
+				...updatedTurn,
+				actors: remainingActors,
+				actorGroups: remainingGroups,
+			},
+			userSettings,
+			useCachedSheets: true,
+		});
+		const deletedEmbed = new KoboldEmbed().setTitle(
+			InitDefinition.strings.remove.deletedEmbed.title({ actorName: actor.name })
 		);
 
-		await InteractionUtils.send(intr, deletedEmbed);
+		await kobold.transaction(async transaction => {
+			await transaction.initiativeActor.delete({ id: actor.id });
+			if (removesGroup) {
+				await transaction.initiativeActorGroup.delete({ id: actor.initiativeActorGroupId });
+			}
+			if (removesActiveGroup || !remainingActors.length) {
+				await transaction.initiative.update({ id: currentInitiative.id }, updatedTurn);
+			}
+			await transaction.sheetRecord.deleteOrphaned();
+		});
 
-		if (
-			//we removed the currently active group
-			currentInitiative.currentTurnGroupId === actor.initiativeActorGroupId &&
-			//the groups are not already empty somehow
-			currentInitiative.actorGroups?.length &&
-			//we haven't removed the last group
-			!(currentInitiative.actorGroups.length === 1 && actorsInGroup.length === 1)
-		) {
-			//we need to fix the initiative!
-
-			const initBuilder = new InitiativeBuilder({
-				initiative: currentInitiative,
-				userSettings,
-				useCachedSheets: true,
-			});
-			let currentTurn = initBuilder.getCurrentTurnInfo();
-			let updatedTurn: TurnData;
-			try {
-				updatedTurn = initBuilder.getPreviousTurnChanges();
-			} catch (e) {
-				console.warn('Error getting previous turn changes', e);
-				if (e instanceof KoboldError) {
-					// this is an edge case where we can't go to the previous turn on
-					// the first turn, but remove the first character from initiative
-					updatedTurn = initBuilder.getJumpToTurnChanges(initBuilder.groups[1].name);
-				} else {
-					throw e;
+		// Discord delivery cannot be rolled back with the database. A notification
+		// failure must not report that the already committed removal failed.
+		try {
+			await InteractionUtils.send(intr, deletedEmbed);
+			if (updatedTurn.currentRound === 0) {
+				await InitiativeBuilderUtils.sendNewRoundMessage(intr, updatedBuilder);
+			} else if (currentInitiative.currentTurnGroupId === actor.initiativeActorGroupId) {
+				const currentTurnEmbed = KoboldEmbed.turnFromInitiativeBuilder(updatedBuilder);
+				await currentTurnEmbed.sendBatches(intr, {
+					contentOutsideEmbed: updatedBuilder.activeGroup
+						? `<@!${updatedBuilder.activeGroup.userId}>`
+						: undefined,
+				});
+				if (_.some(updatedBuilder.activeActors, candidate => candidate.hideStats)) {
+					await KoboldEmbed.dmInitiativeWithHiddenStats({
+						intr,
+						currentTurn,
+						targetTurn: updatedTurn,
+						initBuilder: updatedBuilder,
+					});
 				}
 			}
-
-			const updatedInitiative = await kobold.initiative.update(
-				{ id: currentInitiative.id },
-				{ currentTurnGroupId: updatedTurn.currentTurnGroupId }
-			);
-
-			if (!updatedInitiative)
-				throw new Error('Initiative was already deleted while trying to remove an actor');
-
-			initBuilder.set({
-				initiative: updatedInitiative,
-				actors: updatedInitiative.actors,
-				groups: updatedInitiative.actorGroups,
+		} catch (error) {
+			console.warn('Initiative actor removed, but notification failed', {
+				initiativeId: currentInitiative.id,
+				actorId: actor.id,
+				error,
 			});
-
-			const currentTurnEmbed = await KoboldEmbed.turnFromInitiativeBuilder(initBuilder);
-			const activeGroup = initBuilder.activeGroup;
-
-			if (updatedInitiative.currentRound === 0) {
-				await InitiativeBuilderUtils.sendNewRoundMessage(intr, initBuilder);
-			}
-
-			await currentTurnEmbed.sendBatches(intr, {
-				contentOutsideEmbed: activeGroup ? `<@!${activeGroup.userId}>` : undefined,
-			});
-			if (_.some(initBuilder.activeActors, actor => actor.hideStats)) {
-				await KoboldEmbed.dmInitiativeWithHiddenStats({
+			try {
+				await InteractionUtils.send(
 					intr,
-					currentTurn,
-					targetTurn: updatedTurn,
-					initBuilder,
-				});
-			}
-		} else {
-			const initBuilder = new InitiativeBuilder({
-				initiative: currentInitiative,
-				userSettings,
-				useCachedSheets: true,
-			});
-			initBuilder.removeActor(actor);
-			if (currentInitiative.currentRound === 0) {
-				await InitiativeBuilderUtils.sendNewRoundMessage(intr, initBuilder);
+					'The actor was removed successfully, but an initiative notification could not be delivered.'
+				);
+			} catch (notificationError) {
+				console.warn(
+					'Unable to deliver initiative removal confirmation',
+					notificationError
+				);
 			}
 		}
 	}

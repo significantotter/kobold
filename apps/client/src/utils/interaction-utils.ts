@@ -15,6 +15,8 @@ import {
 	WebhookMessageEditOptions,
 } from 'discord.js';
 
+import { Logger } from '../services/logger.js';
+
 const IGNORED_ERRORS = [
 	DiscordApiErrors.UnknownMessage,
 	DiscordApiErrors.UnknownChannel,
@@ -78,6 +80,14 @@ export class InteractionUtils {
 				typeof error.code == 'number' &&
 				IGNORED_ERRORS.includes(error.code)
 			) {
+				Logger.warn(`[${intr.id}] Discord rejected the interaction defer.`, {
+					event: 'interaction_defer_discord_rejection',
+					interactionId: intr.id,
+					errorCode: error.code,
+					errorMessage: error.message,
+					isUnknownInteraction: error.code === DiscordApiErrors.UnknownInteraction,
+					interactionAgeMs: Math.max(0, Date.now() - intr.createdTimestamp),
+				});
 				return;
 			} else {
 				throw error;

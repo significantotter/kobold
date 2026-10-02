@@ -23,12 +23,13 @@ import {
 	MessageHandler,
 	ReactionHandler,
 } from '../events/index.js';
-import { JobService, Logger } from '../services/index.js';
+import { JobService, Logger, RuntimeMetricsService } from '../services/index.js';
 import { PartialUtils } from '../utils/index.js';
 import { Config } from '@kobold/config';
 
 export class Bot {
 	protected ready = false;
+	protected runtimeMetricsService: RuntimeMetricsService;
 
 	constructor(
 		protected token: string,
@@ -40,7 +41,12 @@ export class Bot {
 		protected buttonHandler: ButtonHandler,
 		protected reactionHandler: ReactionHandler,
 		protected jobService: JobService
-	) {}
+	) {
+		this.runtimeMetricsService = new RuntimeMetricsService(
+			client,
+			Config.logging.runtimeMetrics.intervalSecs
+		);
+	}
 
 	public async start(): Promise<void> {
 		this.registerListeners();
@@ -54,6 +60,15 @@ export class Bot {
 			(shardId: number, unavailableGuilds: Set<string> | undefined) =>
 				this.onShardReady(shardId, unavailableGuilds ?? new Set())
 		);
+		this.client.on(Events.ShardDisconnect, (event, shardId) =>
+			this.onShardDisconnect(event, shardId)
+		);
+		this.client.on(Events.ShardError, (error, shardId) => this.onShardError(error, shardId));
+		this.client.on(Events.ShardReconnecting, shardId => this.onShardReconnecting(shardId));
+		this.client.on(Events.ShardResume, (shardId, replayedEvents) =>
+			this.onShardResume(shardId, replayedEvents)
+		);
+		this.client.on(Events.Invalidated, () => this.onInvalidated());
 		this.client.on(Events.GuildCreate, (guild: Guild) => this.onGuildJoin(guild));
 		this.client.on(Events.GuildDelete, (guild: Guild) => this.onGuildLeave(guild));
 		this.client.on(Events.MessageCreate, (msg: Message) => this.onMessage(msg));
@@ -86,11 +101,59 @@ export class Bot {
 		}
 
 		this.ready = true;
+		this.runtimeMetricsService.start();
 		Logger.info(`Client is ready!`);
 	}
 
-	protected onShardReady(shardId: number, _unavailableGuilds: Set<string>): void {
+	protected onShardReady(shardId: number, unavailableGuilds: Set<string>): void {
 		Logger.setShardId(shardId);
+		Logger.info(`Discord shard ${shardId} is ready.`, {
+			event: 'discord_shard_ready',
+			shardId,
+			unavailableGuildCount: unavailableGuilds.size,
+		});
+	}
+
+	protected onShardDisconnect(
+		event: { code: number; reason: string; wasClean: boolean },
+		shardId: number
+	): void {
+		Logger.warn(`Discord shard ${shardId} disconnected.`, {
+			event: 'discord_shard_disconnect',
+			shardId,
+			closeCode: event.code,
+			reason: event.reason,
+			wasClean: event.wasClean,
+		});
+	}
+
+	protected onShardError(error: Error, shardId: number): void {
+		void Logger.error(`Discord shard ${shardId} encountered an error.`, {
+			err: error,
+			event: 'discord_shard_error',
+			shardId,
+		});
+	}
+
+	protected onShardReconnecting(shardId: number): void {
+		Logger.warn(`Discord shard ${shardId} is reconnecting.`, {
+			event: 'discord_shard_reconnecting',
+			shardId,
+		});
+	}
+
+	protected onShardResume(shardId: number, replayedEvents: number): void {
+		Logger.info(`Discord shard ${shardId} resumed.`, {
+			event: 'discord_shard_resume',
+			shardId,
+			replayedEvents,
+		});
+	}
+
+	protected onInvalidated(): void {
+		Logger.error('Discord session was invalidated.', {
+			event: 'discord_session_invalidated',
+		});
 	}
 
 	protected async onGuildJoin(guild: Guild): Promise<void> {
@@ -139,17 +202,31 @@ export class Bot {
 	}
 
 	protected async onInteraction(intr: Interaction): Promise<void> {
+		const isCommandInteraction =
+			intr instanceof CommandInteraction || intr instanceof AutocompleteInteraction;
 		if (
 			!this.ready ||
 			(Config.debug.dummyMode.enabled &&
 				!(Config.debug.dummyMode.whiteList ?? []).includes(intr.user.id))
 		) {
+			if (isCommandInteraction) {
+				Logger.warn(`[${intr.id}] Interaction was dropped before command processing.`, {
+					event: 'interaction_dropped',
+					interactionId: intr.id,
+					commandName: intr.commandName,
+					clientReady: this.ready,
+					dummyModeEnabled: Config.debug.dummyMode.enabled,
+					interactionAgeMs: Math.max(0, Date.now() - intr.createdTimestamp),
+				});
+			}
 			return;
 		}
 
-		if (intr instanceof CommandInteraction || intr instanceof AutocompleteInteraction) {
+		if (isCommandInteraction) {
 			try {
-				await this.commandHandler.process(intr);
+				await this.commandHandler.process(
+					intr as CommandInteraction | AutocompleteInteraction
+				);
 			} catch (error) {
 				Logger.error(`An error occurred while processing a command interaction.`, error);
 			}

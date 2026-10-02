@@ -50,7 +50,7 @@ describe('ActionStageAddSkillChallengeSubCommand', () => {
 					action: 'Demoralize',
 					'roll-name': 'Intimidation Check',
 					'dice-roll': '1d20+15',
-					'ability-dc': 'Will DC',
+					'defending-stat': '15',
 				},
 				userId: TEST_USER_ID,
 				guildId: TEST_GUILD_ID,
@@ -58,7 +58,20 @@ describe('ActionStageAddSkillChallengeSubCommand', () => {
 
 			// Assert
 			expect(result.didRespond()).toBe(true);
-			expect(updateMock).toHaveBeenCalled();
+			expect(updateMock).toHaveBeenCalledWith(
+				{ id: action.id },
+				{
+					rolls: [
+						expect.objectContaining({
+							name: 'Intimidation Check',
+							type: RollTypeEnum.skillChallenge,
+							roll: '1d20+15',
+							targetDC: '15',
+							allowRollModifiers: true,
+						}),
+					],
+				}
+			);
 		});
 
 		it('should fail when action is not found', async () => {
@@ -74,7 +87,7 @@ describe('ActionStageAddSkillChallengeSubCommand', () => {
 					action: 'Nonexistent',
 					'roll-name': 'Check',
 					'dice-roll': '1d20+10',
-					'ability-dc': 'AC',
+					'defending-stat': 'AC',
 				},
 				userId: TEST_USER_ID,
 				guildId: TEST_GUILD_ID,
@@ -106,7 +119,7 @@ describe('ActionStageAddSkillChallengeSubCommand', () => {
 					action: 'Demoralize',
 					'roll-name': 'Intimidation Check',
 					'dice-roll': '1d20+15',
-					'ability-dc': 'Will DC',
+					'defending-stat': 'Will DC',
 				},
 				userId: TEST_USER_ID,
 				guildId: TEST_GUILD_ID,
@@ -131,7 +144,7 @@ describe('ActionStageAddSkillChallengeSubCommand', () => {
 					action: 'Demoralize',
 					'roll-name': 'Intimidation Check',
 					'dice-roll': '1d20+15',
-					'ability-dc': 'Will DC',
+					'defending-stat': 'Will DC',
 					'allow-modifiers': false,
 				},
 				userId: TEST_USER_ID,
@@ -140,7 +153,17 @@ describe('ActionStageAddSkillChallengeSubCommand', () => {
 
 			// Assert
 			expect(result.didRespond()).toBe(true);
-			expect(updateMock).toHaveBeenCalled();
+			expect(updateMock).toHaveBeenCalledWith(
+				{ id: action.id },
+				{
+					rolls: [
+						expect.objectContaining({
+							targetDC: 'Will DC',
+							allowRollModifiers: false,
+						}),
+					],
+				}
+			);
 		});
 	});
 

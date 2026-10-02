@@ -25,10 +25,7 @@ export interface CommandTimingSnapshot {
 const commandTimingStorage = new AsyncLocalStorage<CommandTimingStore | undefined>();
 
 export class CommandTimingContext {
-	public static async run<T>(
-		metadata: CommandTimingMetadata,
-		fn: () => Promise<T>
-	): Promise<T> {
+	public static async run<T>(metadata: CommandTimingMetadata, fn: () => Promise<T>): Promise<T> {
 		return commandTimingStorage.run(
 			{
 				...metadata,
@@ -49,6 +46,13 @@ export class CommandTimingContext {
 		if (!context.slowestQuery || durationMs > context.slowestQuery.durationMs) {
 			context.slowestQuery = { durationMs, sql };
 		}
+	}
+
+	public static metadata(): CommandTimingMetadata | undefined {
+		const context = commandTimingStorage.getStore();
+		return context
+			? { commandName: context.commandName, interactionId: context.interactionId }
+			: undefined;
 	}
 
 	public static snapshot(): CommandTimingSnapshot {
